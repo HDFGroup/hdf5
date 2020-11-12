@@ -15,7 +15,7 @@
  *
  * Created:		H5Pmtpl.c
  *			November  1 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		File mount property list class routines
  *

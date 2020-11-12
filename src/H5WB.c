@@ -15,7 +15,7 @@
  *
  * Created:		H5WB.c
  *			Jun 26 2007
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implements the "wrapped buffer" code for wrapping
  *                      an existing [staticly sized] buffer, in order to
@@ -88,7 +88,6 @@ H5FL_BLK_DEFINE_STATIC(extra_buf);
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jun 26 2007
  *
  *-------------------------------------------------------------------------
@@ -141,7 +140,6 @@ done:
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jun 26 2007
  *
  *-------------------------------------------------------------------------
@@ -208,7 +206,6 @@ done:
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jun 26 2007
  *
  *-------------------------------------------------------------------------
@@ -245,7 +242,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jun 26 2007
  *
  *-------------------------------------------------------------------------

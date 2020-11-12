@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Thursday, February  3, 2005
  *
  * Purpose:	v2 B-tree testing functions.
@@ -110,9 +110,9 @@ H5FL_DEFINE_STATIC(H5B2_test_ctx_t);
 static void *
 H5B2_test_crt_context(void *_f)
 {
-    H5F_t *          f = (H5F_t *)_f; /* User data for building callback context */
-    H5B2_test_ctx_t *ctx;             /* Callback context structure */
-    void *           ret_value;       /* Return value */
+    H5F_t *          f = (H5F_t *)_f;  /* User data for building callback context */
+    H5B2_test_ctx_t *ctx;              /* Callback context structure */
+    void *           ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -358,12 +358,11 @@ H5B2_get_root_addr_test(H5B2_t *bt2, haddr_t *root_addr)
 } /* H5B2_get_root_addr_test() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_get_node_info_test
+ * Function:    H5B2_get_node_info_test
  *
- * Purpose:	Determine information about a node holding a record in the B-tree
+ * Purpose:     Determine information about a node holding a record in the B-tree
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Thursday, August 31, 2006
@@ -480,15 +479,16 @@ done:
 } /* H5B2_get_node_info_test() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_get_node_depth_test
+ * Function:    H5B2_get_node_depth_test
  *
- * Purpose:	Determine the depth of a node holding a record in the B-tree
+ * Purpose:     Determine the depth of a node holding a record in the B-tree
  *
- * Note:	Just a simple wrapper around the H5B2_get_node_info_test() routine
+ * Note:        Just a simple wrapper around the H5B2_get_node_info_test() routine
  *
- * Return:	Success:	non-negative depth of the node where the record
- *                              was found
- *		Failure:	negative
+ * Return:      Success:    Non-negative depth of the node where the record
+ *                          was found
+ *
+ *              Failure:    -1
  *
  * Programmer:	Quincey Koziol
  *              Saturday, August 26, 2006
@@ -498,17 +498,17 @@ done:
 int
 H5B2_get_node_depth_test(H5B2_t *bt2, hid_t dxpl_id, void *udata)
 {
-    H5B2_node_info_test_t ninfo;     /* Node information */
-    int                   ret_value; /* Return information */
+    H5B2_node_info_test_t ninfo;          /* Node information */
+    int                   ret_value = -1; /* Return information */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI((-1))
 
     /* Check arguments. */
     HDassert(bt2);
 
     /* Get information abou the node */
     if (H5B2_get_node_info_test(bt2, dxpl_id, udata, &ninfo) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "error looking up node info")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, (-1), "error looking up node info")
 
     /* Set return value */
     ret_value = ninfo.depth;

@@ -94,7 +94,7 @@ H5FL_DEFINE(H5G_copy_file_ud_t);
 static void *
 H5O_group_get_copy_file_udata(void)
 {
-    void *ret_value; /* Return value */
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -160,9 +160,9 @@ H5O_group_free_copy_file_udata(void *_udata)
 static htri_t
 H5O_group_isa(struct H5O_t *oh)
 {
-    htri_t stab_exists;  /* Whether the 'stab' message is in the object header */
-    htri_t linfo_exists; /* Whether the 'linfo' message is in the object header */
-    htri_t ret_value;    /* Return value */
+    htri_t stab_exists;      /* Whether the 'stab' message is in the object header */
+    htri_t linfo_exists;     /* Whether the 'linfo' message is in the object header */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -196,8 +196,8 @@ done:
 static hid_t
 H5O_group_open(const H5G_loc_t *obj_loc, hid_t H5_ATTR_UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
-    H5G_t *grp = NULL; /* Group opened */
-    hid_t  ret_value;  /* Return value */
+    H5G_t *grp       = NULL;            /* Group opened */
+    hid_t  ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -235,9 +235,9 @@ done:
 static void *
 H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
-    H5G_obj_create_t *crt_info = (H5G_obj_create_t *)_crt_info; /* Group creation parameters */
-    H5G_t *           grp      = NULL;                          /* New group created */
-    void *            ret_value;                                /* Return value */
+    H5G_obj_create_t *crt_info  = (H5G_obj_create_t *)_crt_info; /* Group creation parameters */
+    H5G_t *           grp       = NULL;                          /* New group created */
+    void *            ret_value = NULL;                          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -283,8 +283,8 @@ done:
 static H5O_loc_t *
 H5O_group_get_oloc(hid_t obj_id)
 {
-    H5G_t *    grp;       /* Group opened */
-    H5O_loc_t *ret_value; /* Return value */
+    H5G_t *    grp;              /* Group opened */
+    H5O_loc_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

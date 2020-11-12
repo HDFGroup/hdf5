@@ -48,10 +48,10 @@
 /* Define this to dump free space tracker contents after they've been modified */
 /* #define H5MF_ALLOC_DEBUG_DUMP */
 
-/* Free space section types for file */
+/* Free-space section types for file */
 /* (values stored in free space data structures in file) */
-#define H5MF_FSPACE_SECT_SIMPLE 0 /* Section is a range of actual bytes in file */
-
+/* Section is a range of actual bytes in file */
+#define H5MF_FSPACE_SECT_SIMPLE 0
 /****************************/
 /* Package Private Typedefs */
 /****************************/

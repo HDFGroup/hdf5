@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, August 27, 1999
  */
 
@@ -62,8 +62,6 @@ const H5Z_class2_t H5Z_DEFLATE[1] = {{
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -72,7 +70,7 @@ H5Z_filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 {
     void * outbuf = NULL; /* Pointer to new buffer */
     int    status;        /* Status from zlib operation */
-    size_t ret_value;     /* Return value */
+    size_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 

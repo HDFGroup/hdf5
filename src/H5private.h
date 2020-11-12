@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *    Friday, October 30, 1998
  *
  * Purpose:  This file is included by all HDF5 library source files to
@@ -839,7 +839,7 @@ typedef off_t       h5_stat_size_t;
 #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
 
 #ifndef HDftell
-#define HDftell(F) ftello(F)
+#define HDftell(F) ftell(F)
 #endif /* HDftell */
 #ifndef HDftruncate
 #define HDftruncate(F, L) ftruncate(F, L)
@@ -885,7 +885,7 @@ typedef off_t       h5_stat_size_t;
 #endif /* HDgetgroups */
 #ifndef HDgethostname
 #define HDgethostname(N, L) gethostname(N, L)
-#endif /* HDgetlogin */
+#endif /* HDgethostname */
 #ifndef HDgetlogin
 #define HDgetlogin() getlogin()
 #endif /* HDgetlogin */
@@ -910,6 +910,7 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDgets
 #define HDgets(S) gets(S)
 #endif /* HDgets */
+
 #ifndef HDgettimeofday
 #define HDgettimeofday(S, P) gettimeofday(S, P)
 #endif /* HDgettimeofday */
@@ -1104,13 +1105,23 @@ typedef off_t       h5_stat_size_t;
 #define HDrandom() HDrand()
 #endif /* HDrandom */
 H5_DLL int HDrand(void);
-#elif H5_HAVE_RANDOM
+#ifndef HDsrandom
+#define HDsrandom(S) HDsrand(S)
+#endif /* HDsrandom */
+H5_DLL void HDsrand(unsigned int seed);
+#elif defined(H5_HAVE_RANDOM)
 #ifndef HDrand
 #define HDrand() random()
 #endif /* HDrand */
 #ifndef HDrandom
 #define HDrandom() random()
 #endif /* HDrandom */
+#ifndef HDsrand
+#define HDsrand(S) srandom(S)
+#endif /* HDsrand */
+#ifndef HDsrandom
+#define HDsrandom(S) srandom(S)
+#endif /* HDsrandom */
 #else  /* H5_HAVE_RANDOM */
 #ifndef HDrand
 #define HDrand() rand()
@@ -1118,6 +1129,12 @@ H5_DLL int HDrand(void);
 #ifndef HDrandom
 #define HDrandom() rand()
 #endif /* HDrandom */
+#ifndef HDsrand
+#define HDsrand(S) srand(S)
+#endif /* HDsrand */
+#ifndef HDsrandom
+#define HDsrandom(S) srand(S)
+#endif /* HDsrandom */
 #endif /* H5_HAVE_RANDOM */
 
 #ifndef HDread
@@ -1238,26 +1255,6 @@ H5_DLL int HDrand(void);
 #ifndef HDsqrt
 #define HDsqrt(X) sqrt(X)
 #endif /* HDsqrt */
-#ifdef H5_HAVE_RAND_R
-H5_DLL void HDsrand(unsigned int seed);
-#ifndef HDsrandom
-#define HDsrandom(S) HDsrand(S)
-#endif /* HDsrandom */
-#elif H5_HAVE_RANDOM
-#ifndef HDsrand
-#define HDsrand(S) srandom(S)
-#endif /* HDsrand */
-#ifndef HDsrandom
-#define HDsrandom(S) srandom(S)
-#endif /* HDsrandom */
-#else  /* H5_HAVE_RAND_R */
-#ifndef HDsrand
-#define HDsrand(S) srand(S)
-#endif /* HDsrand */
-#ifndef HDsrandom
-#define HDsrandom(S) srand(S)
-#endif /* HDsrandom */
-#endif /* H5_HAVE_RAND_R */
 #ifndef HDsscanf
 #define HDsscanf(S, FMT, ...) sscanf(S, FMT, __VA_ARGS__)
 #endif /* HDsscanf */
@@ -1337,6 +1334,9 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDstrtoull
 #define HDstrtoull(S, R, N) strtoull(S, R, N)
 #endif /* HDstrtoul */
+#ifndef HDstrtoumax
+#define HDstrtoumax(S, R, N) strtoumax(S, R, N)
+#endif /* HDstrtoumax */
 #ifndef HDstrxfrm
 #define HDstrxfrm(X, Y, Z) strxfrm(X, Y, Z)
 #endif /* HDstrxfrm */
@@ -1823,11 +1823,10 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
 /* global library version information string */
 extern char H5_lib_vers_info_g[];
 
+#include "H5TSprivate.h"
+
 /* Lock headers */
 #ifdef H5_HAVE_THREADSAFE
-
-/* Include required thread-safety header */
-#include "H5TSprivate.h"
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {

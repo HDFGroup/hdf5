@@ -15,7 +15,7 @@
  *
  * Created:             H5Opublic.h
  *                      Aug  5 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Public declarations for the H5O (object header)
  *                      package.
@@ -83,10 +83,10 @@
 
 /* Types of objects in file */
 typedef enum H5O_type_t {
-    H5O_TYPE_UNKNOWN = -1,   /* Unknown object type		*/
-    H5O_TYPE_GROUP,          /* Object is a group		*/
-    H5O_TYPE_DATASET,        /* Object is a dataset		*/
-    H5O_TYPE_NAMED_DATATYPE, /* Object is a named data type	*/
+    H5O_TYPE_UNKNOWN = -1,   /* Unknown object type        */
+    H5O_TYPE_GROUP,          /* Object is a group        */
+    H5O_TYPE_DATASET,        /* Object is a dataset        */
+    H5O_TYPE_NAMED_DATATYPE, /* Object is a named data type    */
     H5O_TYPE_NTYPES          /* Number of different object types (must be last!) */
 } H5O_type_t;
 
@@ -111,13 +111,13 @@ typedef struct H5O_hdr_info_t {
 /* Information struct for object (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx) */
 typedef struct H5O_info_t {
     unsigned long  fileno;    /* File number that object is located in */
-    haddr_t        addr;      /* Object address in file	*/
+    haddr_t        addr;      /* Object address in file    */
     H5O_type_t     type;      /* Basic object type (group, dataset, etc.) */
     unsigned       rc;        /* Reference count of object    */
-    time_t         atime;     /* Access time			*/
-    time_t         mtime;     /* Modification time		*/
-    time_t         ctime;     /* Change time			*/
-    time_t         btime;     /* Birth time			*/
+    time_t         atime;     /* Access time            */
+    time_t         mtime;     /* Modification time        */
+    time_t         ctime;     /* Change time            */
+    time_t         btime;     /* Birth time            */
     hsize_t        num_attrs; /* # of attributes attached to object */
     H5O_hdr_info_t hdr;       /* Object header information */
     /* Extra metadata storage for obj & attributes */
@@ -148,13 +148,13 @@ typedef H5O_mcdt_search_ret_t (*H5O_mcdt_search_cb_t)(void *op_data);
 /* Public Variables */
 /********************/
 
+/*********************/
+/* Public Prototypes */
+/*********************/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*********************/
-/* Public Prototypes */
-/*********************/
 H5_DLL hid_t  H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL hid_t  H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
 H5_DLL hid_t  H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
@@ -190,7 +190,7 @@ H5_DLL herr_t H5Oclose(hid_t object_id);
 
 /* Typedefs */
 
-/* A struct that's part of the H5G_stat_t routine (deprecated) */
+/* A struct that's part of the H5G_stat_t structure (deprecated) */
 typedef struct H5O_stat_t {
     hsize_t  size;    /* Total size of object header in file */
     hsize_t  free;    /* Free space within object header */
@@ -199,7 +199,6 @@ typedef struct H5O_stat_t {
 } H5O_stat_t;
 
 /* Function prototypes */
-
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus

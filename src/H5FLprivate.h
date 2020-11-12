@@ -15,11 +15,9 @@
  *
  * Created:		H5FLprivate.h
  *			Mar 23 2000
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Private non-prototype header.
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -189,10 +187,10 @@ typedef struct H5FL_blk_head_t {
 /* Declare a static free list to manage objects of type 't' */
 #define H5FL_BLK_DEFINE_STATIC(t) static H5FL_BLK_DEFINE_COMMON(t)
 
-/* Allocate an block of type 't' */
+/* Allocate a block of type 't' */
 #define H5FL_BLK_MALLOC(t, size) (uint8_t *)H5FL_blk_malloc(&(H5FL_BLK_NAME(t)), size H5FL_TRACK_INFO)
 
-/* Allocate an block of type 't' and clear it to zeros */
+/* Allocate a block of type 't' and clear it to zeros */
 #define H5FL_BLK_CALLOC(t, size) (uint8_t *)H5FL_blk_calloc(&(H5FL_BLK_NAME(t)), size H5FL_TRACK_INFO)
 
 /* Free a block of type 't' */

@@ -91,7 +91,7 @@ extern "C" {
 #define H5_GCC_DIAG_ON(x)
 #endif
 
-/* Version numbers TAB char must surround the H5_VERS_xxx number */
+/* Version numbers */
 #define H5_VERS_MAJOR      1                               /* For major interface/format changes           */
 #define H5_VERS_MINOR      8                               /* For minor interface/format changes           */
 #define H5_VERS_RELEASE    22                              /* For tweaks, bug-fixes, or development     */

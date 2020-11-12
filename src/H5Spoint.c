@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
- * Purpose:	Point selection data space I/O functions.
+ * Purpose:     Point selection dataspace I/O functions.
  */
 
 #define H5S_PACKAGE /*suppress error about including H5Spkg	  */
@@ -103,16 +103,14 @@ H5FL_DEFINE_STATIC(H5S_pnt_node_t);
 H5FL_DEFINE_STATIC(H5S_pnt_list_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_iter_init
+ * Function:    H5S_point_iter_init
  *
- * Purpose:	Initializes iteration information for point selection.
+ * Purpose:     Initializes iteration information for point selection.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -138,17 +136,15 @@ H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
 } /* H5S_point_iter_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_iter_coords
+ * Function:    H5S_point_iter_coords
  *
- * Purpose:	Retrieve the current coordinates of iterator for current
+ * Purpose:     Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, April 22, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -168,17 +164,15 @@ H5S_point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 } /* H5S_point_iter_coords() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_iter_block
+ * Function:    H5S_point_iter_block
  *
- * Purpose:	Retrieve the current block of iterator for current
+ * Purpose:     Retrieve the current block of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, June 2, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -200,16 +194,14 @@ H5S_point_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 } /* H5S_point_iter_block() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_iter_nelmts
+ * Function:    H5S_point_iter_nelmts
  *
- * Purpose:	Return number of elements left to process in iterator
+ * Purpose:     Return number of elements left to process in iterator
  *
- * Return:	non-negative number of elements on success, zero on failure
+ * Return:      Non-negative number of elements on success, zero on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -535,7 +527,7 @@ H5S_point_release(H5S_t *space)
 herr_t
 H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *coord)
 {
-    herr_t ret_value = SUCCEED; /* return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -657,7 +649,7 @@ done:
     TRUE if the selection fits within the extent, FALSE if it does not and
         Negative on an error.
  DESCRIPTION
-    Determines if the current selection at the current offet fits within the
+    Determines if the current selection at the current offset fits within the
     extent for the dataspace.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -722,7 +714,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
     if (H5S_GET_SELECT_TYPE(space) != H5S_SEL_POINTS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an element selection")
 
@@ -1037,7 +1029,7 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoint
     if (NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer")
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
     if (H5S_GET_SELECT_TYPE(space) != H5S_SEL_POINTS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a point selection")
 
@@ -1203,7 +1195,7 @@ done:
 static htri_t
 H5S_point_is_contiguous(const H5S_t *space)
 {
-    htri_t ret_value; /* return value */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1240,7 +1232,7 @@ H5S_point_is_contiguous(const H5S_t *space)
 static htri_t
 H5S_point_is_single(const H5S_t *space)
 {
-    htri_t ret_value; /* return value */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1347,14 +1339,14 @@ H5S_point_adjust_u(H5S_t *space, const hsize_t *offset)
 } /* H5S_point_adjust_u() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_project_scalar
+ * Function:    H5S_point_project_scalar
  *
- * Purpose:	Projects a single element point selection into a scalar
+ * Purpose:     Projects a single element point selection into a scalar
  *              dataspace
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -1387,14 +1379,14 @@ done:
 } /* H5S_point_project_scalar() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_project_simple
+ * Function:    H5S_point_project_simple
  *
- * Purpose:	Projects a point selection onto/into a simple dataspace
+ * Purpose:     Projects a point selection onto/into a simple dataspace
  *              of a different rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------

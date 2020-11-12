@@ -15,7 +15,7 @@
  *
  * Created:             H5Oname.c
  *                      Aug 12 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Object name message.
  *
@@ -24,10 +24,10 @@
 
 #define H5O_PACKAGE /*suppress error about including H5Opkg	  */
 
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Opkg.h"      /* Object headers			*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Eprivate.h"  /* Error handling              */
+#include "H5MMprivate.h" /* Memory management            */
+#include "H5Opkg.h"      /* Object headers            */
 
 /* PRIVATE PROTOTYPES */
 static void * H5O_name_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
@@ -74,7 +74,6 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
  *
  *-------------------------------------------------------------------------
@@ -103,10 +102,9 @@ H5O_name_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_
     ret_value = mesg;
 
 done:
-    if (NULL == ret_value) {
+    if (NULL == ret_value)
         if (mesg)
             mesg = (H5O_name_t *)H5MM_xfree(mesg);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_name_decode() */
@@ -119,10 +117,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -155,19 +150,16 @@ H5O_name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, 
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static void *
 H5O_name_copy(const void *_mesg, void *_dest)
 {
-    const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
-    H5O_name_t *      dest = (H5O_name_t *)_dest;
-    void *            ret_value; /* Return value */
+    const H5O_name_t *mesg      = (const H5O_name_t *)_mesg;
+    H5O_name_t *      dest      = (H5O_name_t *)_dest;
+    void *            ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -206,18 +198,15 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static size_t
 H5O_name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
-    const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
-    size_t            ret_value;
+    const H5O_name_t *mesg      = (const H5O_name_t *)_mesg;
+    size_t            ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -239,10 +228,7 @@ H5O_name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -270,10 +256,7 @@ H5O_name_reset(void *_mesg)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

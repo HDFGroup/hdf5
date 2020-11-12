@@ -15,7 +15,7 @@
  *
  * Created:     H5MM.c
  *              Jul 10 1997
- *              Robb Matzke <matzke@llnl.gov>
+ *              Robb Matzke
  *
  * Purpose:     Memory management functions
  *
@@ -55,7 +55,7 @@
 void *
 H5MM_malloc(size_t size)
 {
-    void *ret_value;
+    void *ret_value = NULL;
 
     HDassert(size);
 
@@ -94,7 +94,7 @@ H5MM_malloc(size_t size)
 void *
 H5MM_calloc(size_t size)
 {
-    void *ret_value;
+    void *ret_value = NULL;
 
     HDassert(size);
 

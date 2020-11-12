@@ -15,7 +15,7 @@
  *
  * Created:		H5Bcache.c
  *			Oct 31 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Implement B-tree metadata cache methods.
  *

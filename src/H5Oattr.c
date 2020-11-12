@@ -244,7 +244,7 @@ done:
     if (NULL == ret_value)
         if (attr) {
             if (attr->shared) {
-                /* Free any dynamicly allocated items */
+                /* Free any dynamically allocated items */
                 if (H5A_free(attr) < 0)
                     HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't release attribute info")
 
@@ -384,7 +384,7 @@ done:
 static void *
 H5O_attr_copy(const void *_src, void *_dst)
 {
-    void *ret_value; /* Return value */
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -470,13 +470,6 @@ H5O_attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
  *
- * Modification:Raymond Lu
- *              25 June 2008
- *              Made this function empty.  The freeing action is actually
- *              done in H5O_attr_free (see H5O_msg_free_real).  But this
- *              empty reset function needs to be here.  Otherwise, the
- *              caller function H5O_msg_reset_real will zero-set the whole
- *              message.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -490,16 +483,12 @@ H5O_attr_reset(void H5_ATTR_UNUSED *_mesg)
 /*-------------------------------------------------------------------------
  * Function:	H5O_attr_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 18, 2004
- *
- * Modification:Raymond Lu
- *              4 June 2008
- *              Let this function call H5A_close in turn.
  *
  *-------------------------------------------------------------------------
  */

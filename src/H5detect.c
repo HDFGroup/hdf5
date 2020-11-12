@@ -220,25 +220,6 @@ precision(detected_t *d)
  *
  * Return:      void
  *
- * Modifications:
- *
- *    Robb Matzke, 4 Nov 1996
- *    The INFO.perm now contains `-1' for bytes that aren't used and
- *    are always zero.  This happens on the Cray for `short' where
- *    sizeof(short) is 8, but only the low-order 4 bytes are ever used.
- *
- *    Robb Matzke, 4 Nov 1996
- *    Added a `padding' field to indicate how many zero bytes appear to
- *    the left (N) or right (-N) of the value.
- *
- *    Robb Matzke, 5 Nov 1996
- *    Removed HFILE and CFILE arguments.
- *
- *      Neil Fortner, 6 Sep 2013
- *      Split macro into DETECT_I and DETECT_BYTE macros, extracted
- *      common code into DETECT_I_BYTE_CORE.  This was done to remove
- *      "will never be executed" warnings.
- *
  *-------------------------------------------------------------------------
  */
 #define DETECT_I_BYTE_CORE(TYPE, VAR, INFO, DETECT_TYPE)                                                     \
@@ -1652,12 +1633,6 @@ verify_signal_handlers(int signum, void (*handler)(int))
  * Purpose:     Main entry point.
  *
  * Return:      Success:    EXIT_SUCCESS
- *
- * Modifications:
- *    Some compilers, e.g., Intel C v7.0, took a long time to compile
- *      with optimization when a module routine contains many code lines.
- *      Divide up all those types detections macros into subroutines, both
- *      to avoid the compiler optimization error and cleaner codes.
  *
  *-------------------------------------------------------------------------
  */

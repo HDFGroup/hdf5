@@ -30,12 +30,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Apkg.h"      /* Attributes	  			*/
-#include "H5ACprivate.h" /* Metadata cache			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5SMprivate.h" /* Shared object header messages        */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Apkg.h"      /* Attributes                               */
+#include "H5ACprivate.h" /* Metadata cache                           */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5SMprivate.h" /* Shared object header messages            */
 
 /****************/
 /* Local Macros */
@@ -66,12 +66,11 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_is_shared_test
+ * Function:    H5A_is_shared_test
  *
  * Purpose:     Check if an attribute is shared
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      TRUE/FALSE/FAIL
  *
  * Programmer:	Quincey Koziol
  *	        Dec 19, 2006
@@ -98,12 +97,11 @@ done:
 } /* end H5A_is_shared_test() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_get_shared_rc_test
+ * Function:    H5A_get_shared_rc_test
  *
  * Purpose:     Retrieve the refcount for a shared attribute
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *	        Dec 19, 2006

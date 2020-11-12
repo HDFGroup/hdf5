@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, March 27, 1998
  *
  * Purpose:	Operations on the global heap.  The global heap is the set of
@@ -709,13 +709,6 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, March 30, 1998
  *
- * Modifications:
- *
- *		John Mainzer - 6/8/05
- *		Modified function to use the dirtied parameter of
- *		H5AC_unprotect() instead of modifying the is_dirty
- *		field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -795,11 +788,11 @@ done:
 } /* end H5HG_remove() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HG_free
+ * Function:    H5HG_free
  *
- * Purpose:	Destroys a global heap collection in memory
+ * Purpose:     Destroys a global heap collection in memory
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, January 15, 2003

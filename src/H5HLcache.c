@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5HLcache.c
- *			Feb  5 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5HLcache.c
+ *              Feb  5 2008
+ *              Quincey Koziol
  *
- * Purpose:		Implement local heap metadata cache methods.
+ * Purpose:     Implement local heap metadata cache methods.
  *
  *-------------------------------------------------------------------------
  */
@@ -31,11 +31,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5HLpkg.h"     /* Local Heaps				*/
-#include "H5MFprivate.h" /* File memory management		*/
-#include "H5WBprivate.h" /* Wrapped Buffers                      */
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Eprivate.h"  /* Error handling               */
+#include "H5HLpkg.h"     /* Local Heaps                  */
+#include "H5MFprivate.h" /* File memory management       */
+#include "H5WBprivate.h" /* Wrapped Buffers              */
 
 /****************/
 /* Local Macros */
@@ -43,10 +43,11 @@
 
 #define H5HL_VERSION 0 /* Local heap collection version    */
 
-/* Set the local heap size to speculatively read in */
-/* (needs to be more than the local heap prefix size to work at all and
+/* Set the local heap size to speculatively read in
+ *      (needs to be more than the local heap prefix size to work at all and
  *      should be larger than the default local heap size to save the
- *      extra I/O operations) */
+ *      extra I/O operations)
+ */
 #define H5HL_SPEC_READ_SIZE 512
 
 /******************/
@@ -114,7 +115,6 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -177,16 +177,14 @@ done:
 } /* end H5HL_fl_deserialize() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_fl_serialize
+ * Function:    H5HL_fl_serialize
  *
- * Purpose:	Serialize the free list for a heap data block
+ * Purpose:     Serialize the free list for a heap data block
  *
- * Return:	Success:	SUCCESS
- *		Failure:	FAIL
+ * Return:      Nothing (void)
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Oct 12 2008
+ * Programmer:  Quincey Koziol
+ *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -227,7 +225,6 @@ H5HL_fl_serialize(const H5HL_t *heap)
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -370,7 +367,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -473,7 +469,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Jan 15 2003
  *
  *-------------------------------------------------------------------------
@@ -528,7 +523,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 20 2003
  *
  *-------------------------------------------------------------------------
@@ -541,7 +535,7 @@ H5HL_prefix_clear(H5F_t H5_ATTR_UNUSED *f, void *thing, hbool_t destroy)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(prfx);
 
     /* Mark heap prefix as clean */
@@ -600,7 +594,6 @@ H5HL_prefix_size(const H5F_t H5_ATTR_UNUSED *f, const void *thing, size_t *size_
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  5 2010
  *
  *-------------------------------------------------------------------------
@@ -663,10 +656,10 @@ done:
  * Purpose:	Flushes a heap's data block from memory to disk if it's dirty.
  *              Optionally deletes the heap data block from memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -718,10 +711,10 @@ done:
  *
  * Purpose:	Destroys a local heap data block in memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Jan 15 2003
  *
  *-------------------------------------------------------------------------
@@ -768,10 +761,10 @@ done:
  *
  * Purpose:	Mark a local heap data block in memory as non-dirty.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 20 2003
  *
  *-------------------------------------------------------------------------

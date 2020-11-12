@@ -15,7 +15,7 @@
  *
  * Created:		H5MP.c
  *			May  2 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Implements memory pools.  (Similar to Apache's APR
  *                      memory pools)
@@ -73,7 +73,6 @@ H5FL_DEFINE(H5MP_pool_t);
  * Return:	Pointer to the memory pool "header" on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  2 2005
  *
  *-------------------------------------------------------------------------
@@ -81,8 +80,8 @@ H5FL_DEFINE(H5MP_pool_t);
 H5MP_pool_t *
 H5MP_create(size_t page_size, unsigned flags)
 {
-    H5MP_pool_t *mp = NULL; /* New memory pool header */
-    H5MP_pool_t *ret_value; /* Return value */
+    H5MP_pool_t *mp        = NULL; /* New memory pool header */
+    H5MP_pool_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -122,7 +121,6 @@ done:
  * Return:	Pointer to the page allocated on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  4 2005
  *
  *-------------------------------------------------------------------------
@@ -130,9 +128,9 @@ done:
 static H5MP_page_t *
 H5MP_new_page(H5MP_pool_t *mp, size_t page_size)
 {
-    H5MP_page_t *    new_page;  /* New page created */
-    H5MP_page_blk_t *first_blk; /* Pointer to first block in page */
-    H5MP_page_t *    ret_value; /* Return value */
+    H5MP_page_t *    new_page;         /* New page created */
+    H5MP_page_blk_t *first_blk;        /* Pointer to first block in page */
+    H5MP_page_t *    ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -153,9 +151,6 @@ H5MP_new_page(H5MP_pool_t *mp, size_t page_size)
         new_page->free_size = mp->max_size;
         new_page->fac_alloc = TRUE;
     } /* end else */
-#ifdef QAK
-    HDfprintf(stderr, "%s: Allocating new page = %p\n", FUNC, new_page);
-#endif /* QAK */
 
     /* Initialize page information */
     first_blk          = H5MP_PAGE_FIRST_BLOCK(new_page);
@@ -191,7 +186,6 @@ done:
  * Return:	Pointer to the space allocated on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  2 2005
  *
  *-------------------------------------------------------------------------
@@ -202,7 +196,7 @@ H5MP_malloc(H5MP_pool_t *mp, size_t request)
     H5MP_page_t *    alloc_page = NULL; /* Page to allocate space from */
     H5MP_page_blk_t *alloc_free;        /* Pointer to free space in page */
     size_t           needed;            /* Size requested, plus block header and alignment */
-    void *           ret_value;         /* Return value */
+    void *           ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -212,10 +206,6 @@ H5MP_malloc(H5MP_pool_t *mp, size_t request)
 
     /* Compute actual size needed */
     needed = H5MP_BLOCK_ALIGN(request) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t));
-#ifdef QAK
-    HDfprintf(stderr, "%s: sizeof(H5MP_page_blk_t) = %Zu\n", FUNC, sizeof(H5MP_page_blk_t));
-    HDfprintf(stderr, "%s: request = %Zu, needed = %Zu\n", FUNC, request, needed);
-#endif /* QAK */
 
     /* See if the request can be handled by existing free space */
     if (needed <= mp->free_size) {
@@ -312,9 +302,6 @@ found:
 
     /* Set new space pointer for the return value */
     ret_value = ((unsigned char *)alloc_free) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t));
-#ifdef QAK
-    HDfprintf(stderr, "%s: Allocating space from page, ret_value = %p\n", FUNC, ret_value);
-#endif /* QAK */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -328,7 +315,6 @@ done:
  * Return:	NULL on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  3 2005
  *
  * Note:        Should we release pages that have no used blocks?
@@ -357,9 +343,6 @@ H5MP_free(H5MP_pool_t *mp, void *spc)
 
     /* Add it's space to the amount of free space in the page & pool */
     spc_page = spc_blk->page;
-#ifdef QAK
-    HDfprintf(stderr, "%s: Freeing from page = %p\n", "H5MP_free", spc_page);
-#endif /* QAK */
     spc_page->free_size += spc_blk->size;
     mp->free_size += spc_blk->size;
 
@@ -416,7 +399,6 @@ H5MP_free(H5MP_pool_t *mp, void *spc)
  * Return:	Non-negative on success/negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  3 2005
  *
  *-------------------------------------------------------------------------

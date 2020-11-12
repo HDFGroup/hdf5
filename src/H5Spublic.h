@@ -32,8 +32,8 @@
 typedef enum H5S_class_t {
     H5S_NO_CLASS = -1, /*error                                      */
     H5S_SCALAR   = 0,  /*scalar variable                            */
-    H5S_SIMPLE   = 1,  /*simple data space                          */
-    H5S_NULL     = 2   /*null data space                            */
+    H5S_SIMPLE   = 1,  /*simple dataspace                           */
+    H5S_NULL     = 2   /*null dataspace                             */
 } H5S_class_t;
 
 /* Different ways of combining selections */
@@ -79,8 +79,8 @@ typedef enum H5S_seloper_t {
 typedef enum {
     H5S_SEL_ERROR      = -1, /* Error			*/
     H5S_SEL_NONE       = 0,  /* Nothing selected 		*/
-    H5S_SEL_POINTS     = 1,  /* Sequence of points selected	*/
-    H5S_SEL_HYPERSLABS = 2,  /* "New-style" hyperslab selection defined	*/
+    H5S_SEL_POINTS     = 1,  /* Points / elements selected	*/
+    H5S_SEL_HYPERSLABS = 2,  /* Hyperslab selected           */
     H5S_SEL_ALL        = 3,  /* Entire extent selected	*/
     H5S_SEL_N                /*THIS MUST BE LAST		*/
 } H5S_sel_type;

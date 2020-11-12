@@ -71,7 +71,7 @@ hbool_t H5_MPEinit_g = FALSE; /* MPE Library hasn't been initialized */
 
 char           H5_lib_vers_info_g[] = H5_VERS_INFO;
 static hbool_t H5_dont_atexit_g     = FALSE;
-H5_debug_t     H5_debug_g; /*debugging info	*/
+H5_debug_t     H5_debug_g; /* debugging info */
 
 /*******************/
 /* Local Variables */
@@ -223,11 +223,6 @@ done:
  *
  * Return:	void
  *
- * Programmer:	Robb Matzke
- *              Friday, November 20, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -264,6 +259,7 @@ H5_term_library(void)
 
     do {
         pending = 0;
+
         /* Try to organize these so the "higher" level components get shut
          * down before "lower" level components that they might rely on. -QAK
          */
@@ -739,7 +735,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
         HDsnprintf(lib_str, sizeof(lib_str), "HDF5 library version: %d.%d.%d", H5_VERS_MAJOR, H5_VERS_MINOR,
                    H5_VERS_RELEASE);
         if (*substr) {
-            HDstrncat(lib_str, "-", 1);
+            HDstrncat(lib_str, "-", (size_t)1);
             HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
         } /* end if */
         if (HDstrcmp(lib_str, H5_lib_vers_info_g)) {
@@ -782,6 +778,7 @@ H5open(void)
     FUNC_ENTER_API_NOCLEAR(FAIL)
     H5TRACE0("e", "");
     /* all work is done by FUNC_ENTER() */
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5open() */
@@ -953,6 +950,9 @@ H5is_library_threadsafe(hbool_t *is_ts)
  *
  *    NOTE:     The main purpose of this is for handling Win32 thread cleanup
  *              on thread/process detach.
+ *
+ *              Only enabled when the shared Windows library is built with
+ *              thread safety enabled.
  *
  * Return:      TRUE on success, FALSE on failure
  *

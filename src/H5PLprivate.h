@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Raymond Lu <songyulu@hdfgroup.org>
- *              13 February 2013
+/*
+ * This file contains private information about the H5PL module
  */
 
 #ifndef _H5PLprivate_H

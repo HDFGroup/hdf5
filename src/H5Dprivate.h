@@ -21,10 +21,10 @@
 #include "H5Dpublic.h"
 
 /* Private headers needed by this file */
-#include "H5FDprivate.h" /* File drivers				*/
-#include "H5Oprivate.h"  /* Object headers		  	*/
-#include "H5Sprivate.h"  /* Dataspaces 				*/
-#include "H5Zprivate.h"  /* Data filters				*/
+#include "H5FDprivate.h" /* File drivers                */
+#include "H5Oprivate.h"  /* Object headers              */
+#include "H5Sprivate.h"  /* Dataspaces                  */
+#include "H5Zprivate.h"  /* Data filters                */
 
 /**************************/
 /* Library Private Macros */
@@ -32,8 +32,8 @@
 
 /*
  * Feature: Define H5D_DEBUG on the compiler command line if you want to
- *	    debug dataset I/O. NDEBUG must not be defined in order for this
- *	    to have any effect.
+ *        debug dataset I/O. NDEBUG must not be defined in order for this
+ *        to have any effect.
  */
 #ifdef NDEBUG
 #undef H5D_DEBUG

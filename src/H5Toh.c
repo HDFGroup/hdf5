@@ -90,7 +90,7 @@ const H5O_obj_class_t H5O_OBJ_DATATYPE[1] = {{
 static htri_t
 H5O_dtype_isa(struct H5O_t *oh)
 {
-    htri_t ret_value; /* Return value */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -119,8 +119,8 @@ done:
 static hid_t
 H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t H5_ATTR_UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
-    H5T_t *type = NULL; /* Datatype opened */
-    hid_t  ret_value;   /* Return value */
+    H5T_t *type      = NULL;            /* Datatype opened */
+    hid_t  ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -158,8 +158,8 @@ done:
 static void *
 H5O_dtype_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
-    H5T_obj_create_t *crt_info = (H5T_obj_create_t *)_crt_info; /* Named datatype creation parameters */
-    void *            ret_value;                                /* Return value */
+    H5T_obj_create_t *crt_info  = (H5T_obj_create_t *)_crt_info; /* Named datatype creation parameters */
+    void *            ret_value = NULL;                          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -201,8 +201,8 @@ done:
 static H5O_loc_t *
 H5O_dtype_get_oloc(hid_t obj_id)
 {
-    H5T_t *    type;      /* Datatype opened */
-    H5O_loc_t *ret_value; /* Return value */
+    H5T_t *    type      = NULL; /* Datatype opened */
+    H5O_loc_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

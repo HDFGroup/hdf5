@@ -22,7 +22,7 @@
 #include "H5Fpublic.h"
 
 /* Public headers needed by this file */
-#include "H5FDpublic.h" /* File drivers                */
+#include "H5FDpublic.h" /* File drivers                 */
 
 /* Private headers needed by this file */
 

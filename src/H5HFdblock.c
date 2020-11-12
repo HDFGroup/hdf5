@@ -15,7 +15,7 @@
  *
  * Created:		H5HFdblock.c
  *			Apr 10 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Direct block routines for fractal heaps.
  *
@@ -77,7 +77,6 @@ H5FL_DEFINE(H5HF_direct_t);
  * Return:	Pointer to new direct block on success, NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
@@ -209,7 +208,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 17 2006
  *
  *-------------------------------------------------------------------------
@@ -321,7 +319,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 13 2006
  *
  *-------------------------------------------------------------------------
@@ -422,7 +419,6 @@ done:
  * Return:	Pointer to direct block on success, NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
@@ -431,9 +427,9 @@ H5HF_direct_t *
 H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr, size_t dblock_size,
                         H5HF_indirect_t *par_iblock, unsigned par_entry, H5AC_protect_t rw)
 {
-    H5HF_direct_t *        dblock;    /* Direct block from cache */
-    H5HF_dblock_cache_ud_t udata;     /* parent and other infor for deserializing direct block */
-    H5HF_direct_t *        ret_value; /* Return value */
+    H5HF_direct_t *        dblock;           /* Direct block from cache */
+    H5HF_dblock_cache_ud_t udata;            /* parent and other infor for deserializing direct block */
+    H5HF_direct_t *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -497,7 +493,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  8 2006
  *
  *-------------------------------------------------------------------------
@@ -603,7 +598,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  7 2006
  *
  *-------------------------------------------------------------------------
@@ -670,7 +664,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 27 2006
  *
  *-------------------------------------------------------------------------

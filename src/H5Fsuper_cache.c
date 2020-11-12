@@ -11,6 +11,17 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:		H5Fsuper_cache.c
+ *			Aug 15 2009
+ *			Quincey Koziol
+ *
+ * Purpose:		Implement file superblock & driver info metadata cache methods.
+ *
+ *-------------------------------------------------------------------------
+ */
+
 /****************/
 /* Module Setup */
 /****************/

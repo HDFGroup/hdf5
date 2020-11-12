@@ -11,38 +11,28 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Wednesday, July 9, 2003
  *
- * Purpose:	Local Heap object debugging functions.
+ * Purpose:     Local Heap object debugging functions.
  */
 #define H5HL_PACKAGE /* Suppress error about including H5HLpkg */
 
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		        */
-#include "H5HLpkg.h"     /* Local heaps				*/
-#include "H5Iprivate.h"  /* ID Functions		                */
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Eprivate.h"  /* Error handling               */
+#include "H5HLpkg.h"     /* Local heaps                  */
+#include "H5Iprivate.h"  /* ID Functions                 */
+#include "H5MMprivate.h" /* Memory management            */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_debug
+ * Function:    H5HL_debug
  *
- * Purpose:	Prints debugging information about a heap.
+ * Purpose:     Prints debugging information about a heap.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  1 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *              John Mainzer, 6/17/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
+ * Programmer:  Robb Matzke
+ *              Aug  1 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -74,10 +64,10 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Address of heap data:", h->dblk_addr);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Data bytes allocated for heap:", h->dblk_size);
 
-    /*
-     * Traverse the free list and check that all free blocks fall within
+    /* Traverse the free list and check that all free blocks fall within
      * the heap and that no two free blocks point to the same region of
-     * the heap.  */
+     * the heap.
+     */
     if (NULL == (marker = (uint8_t *)H5MM_calloc(h->dblk_size)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
@@ -103,16 +93,14 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
                 HDfprintf(stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS ONE!\n");
             else
                 amount_free += freelist->size;
-        } /* end for */
+        } /* end else */
     }     /* end for */
 
     if (h->dblk_size)
         HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of heap used:",
                   ((double)100.0f * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
 
-    /*
-     * Print the data in a VMS-style octal dump.
-     */
+    /* Print the data in a VMS-style octal dump */
     H5_buffer_dump(stream, indent, h->dblk_image, marker, (size_t)0, h->dblk_size);
 
 done:

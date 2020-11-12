@@ -14,6 +14,7 @@
 /* Generated automatically by bin/make_vers -- do not edit */
 /* Add new versioned symbols to H5vers.txt file */
 
+
 #ifndef _H5version_H
 #define _H5version_H
 
@@ -21,6 +22,7 @@
 #if defined(H5_USE_16_API) && defined(H5_NO_DEPRECATED_SYMBOLS)
 #error "Can't choose old API versions when deprecated APIs are disabled"
 #endif /* defined(H5_USE_16_API) && defined(H5_NO_DEPRECATED_SYMBOLS) */
+
 
 /* If a particular "global" version of the library's interfaces is chosen,
  *      set the versions for the API symbols affected.
@@ -136,6 +138,7 @@
 
 #endif /* H5_USE_16_API */
 
+
 /* Choose the correct version of each API symbol, defaulting to the latest
  *      version of each.  The "best" name for API parameters/data structures
  *      that have changed definitions is also set.  An error is issued for
@@ -161,10 +164,10 @@
 #ifndef H5Aiterate_vers
 #define H5Aiterate_vers 2
 #endif /* H5Aiterate_vers */
-#define H5Aiterate     H5Aiterate2
+#define H5Aiterate H5Aiterate2
 #define H5A_operator_t H5A_operator2_t
 #elif H5Aiterate_vers == 1
-#define H5Aiterate     H5Aiterate1
+#define H5Aiterate H5Aiterate1
 #define H5A_operator_t H5A_operator1_t
 #else /* H5Aiterate_vers */
 #error "H5Aiterate_vers set to invalid value"
@@ -251,13 +254,13 @@
 #ifndef H5Ewalk_vers
 #define H5Ewalk_vers 2
 #endif /* H5Ewalk_vers */
-#define H5Ewalk     H5Ewalk2
+#define H5Ewalk H5Ewalk2
 #define H5E_error_t H5E_error2_t
-#define H5E_walk_t  H5E_walk2_t
+#define H5E_walk_t H5E_walk2_t
 #elif H5Ewalk_vers == 1
-#define H5Ewalk     H5Ewalk1
+#define H5Ewalk H5Ewalk1
 #define H5E_error_t H5E_error1_t
-#define H5E_walk_t  H5E_walk1_t
+#define H5E_walk_t H5E_walk1_t
 #else /* H5Ewalk_vers */
 #error "H5Ewalk_vers set to invalid value"
 #endif /* H5Ewalk_vers */
@@ -398,6 +401,7 @@
 #error "H5E_auto_t_vers set to invalid value"
 #endif /* H5E_auto_t_vers */
 
+
 #if !defined(H5Z_class_t_vers) || H5Z_class_t_vers == 2
 #ifndef H5Z_class_t_vers
 #define H5Z_class_t_vers 2
@@ -410,3 +414,4 @@
 #endif /* H5Z_class_t_vers */
 
 #endif /* H5version_H */
+

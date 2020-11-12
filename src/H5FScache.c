@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FScache.c
- *			May  2 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Created:     H5FScache.c
+ *              May  2 2006
+ *              Quincey Koziol
  *
- * Purpose:		Implement file free space metadata cache methods.
+ * Purpose:     Implement file free space metadata cache methods.
  *
  *-------------------------------------------------------------------------
  */

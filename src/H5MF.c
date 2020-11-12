@@ -15,7 +15,7 @@
  *
  * Created:             H5MF.c
  *                      Jul 11 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             File memory management functions.
  *
@@ -209,7 +209,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
@@ -255,7 +254,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
@@ -307,7 +305,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
@@ -392,7 +389,6 @@ done:
  *              Failure:        HADDR_UNDEF
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 11 1997
  *
  *-------------------------------------------------------------------------
@@ -572,7 +568,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -787,7 +782,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5MF_get_freespace
  *
- * Purpose:     Retrieve the amount of free space in a file.
+ * Purpose:     Retrieve the amount of free space in the file
  *
  * Return:      Success:        Amount of free space in file
  *              Failure:        Negative
@@ -795,11 +790,6 @@ done:
  * Programmer:  Quincey Koziol
  *              Monday, October  6, 2003
  *
- * Modifications:
- *      Vailin Choi; July 2012
- *      As the default free-list mapping is changed to H5FD_FLMAP_DICHOTOMY,
- *      checks are added to account for the last section of each free-space manager
- *      and the remaining space in the two aggregators are at EOF.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -928,7 +918,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Feb 14 2008
  *
  *-------------------------------------------------------------------------

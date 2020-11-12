@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Plcpl.c
- *			May  8 2006
- *			Peter Cao <xcao@ncsa.uiuc.edu>
+ * Created:     H5Plcpl.c
  *
- * Purpose:		Link creation property list class routines
+ * Purpose:     Link creation property list class routines
  *
  *-------------------------------------------------------------------------
  */
@@ -30,11 +28,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Eprivate.h" /* Error handling		  	*/
-#include "H5Iprivate.h" /* IDs			  		*/
-#include "H5Lprivate.h" /* Links        		  	*/
-#include "H5Ppkg.h"     /* Property lists		  	*/
+#include "H5private.h"  /* Generic Functions                        */
+#include "H5Eprivate.h" /* Error handling                           */
+#include "H5Iprivate.h" /* IDs                                      */
+#include "H5Lprivate.h" /* Links                                    */
+#include "H5Ppkg.h"     /* Property lists                           */
 
 /****************/
 /* Local Macros */

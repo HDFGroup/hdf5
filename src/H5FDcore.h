@@ -12,15 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Monday, August  2, 1999
  *
  * Purpose:	The public header file for the core driver.
  */
 #ifndef H5FDcore_H
 #define H5FDcore_H
-
-#include "H5Ipublic.h"
 
 #define H5FD_CORE (H5FD_core_init())
 

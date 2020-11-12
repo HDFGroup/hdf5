@@ -15,7 +15,7 @@
  *
  * Created:	H5Gdeprec.c
  *		June 21 2006
- *		James Laird <jlaird@ncsa.uiuc.edu>
+ *		James Laird
  *
  * Purpose:	Deprecated functions from the H5G interface.  These
  *              functions are here for compatibility purposes and may be
@@ -151,7 +151,7 @@ H5G__term_deprec_interface(void)
 H5G_obj_t
 H5G_map_obj_type(H5O_type_t obj_type)
 {
-    H5G_obj_t ret_value; /* Return value */
+    H5G_obj_t ret_value = H5G_UNKNOWN; /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -311,10 +311,9 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
 done:
-    if (ret_value < 0) {
+    if (ret_value < 0)
         if (grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
-    } /* end if */
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen1() */
@@ -709,39 +708,36 @@ done:
 } /* end H5Gget_comment() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Giterate
+ * Function:    H5Giterate
  *
- * Purpose:	Iterates over the entries of a group.  The LOC_ID and NAME
- *		identify the group over which to iterate and IDX indicates
- *		where to start iterating (zero means at the beginning).	 The
- *		OPERATOR is called for each member and the iteration
- *		continues until the operator returns non-zero or all members
- *		are processed. The operator is passed a group ID for the
- *		group being iterated, a member name, and OP_DATA for each
- *		member.
+ * Purpose:     Iterates over the entries of a group.  The LOC_ID and NAME
+ *              identify the group over which to iterate and IDX indicates
+ *              where to start iterating (zero means at the beginning).	 The
+ *              OPERATOR is called for each member and the iteration
+ *              continues until the operator returns non-zero or all members
+ *              are processed. The operator is passed a group ID for the
+ *              group being iterated, a member name, and OP_DATA for each
+ *              member.
  *
- * Note:	Deprecated in favor of H5Literate
+ * NOTE:        Deprecated in favor of H5Literate
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
- *
- * Programmer:	Robb Matzke
- *		Monday, March 23, 1998
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *op_data)
 {
-    H5G_link_iterate_t lnk_op;   /* Link operator */
-    hsize_t            last_obj; /* Index of last object looked at */
-    hsize_t            idx;      /* Internal location to hold index */
-    herr_t             ret_value;
+    H5G_link_iterate_t lnk_op;    /* Link operator                    */
+    hsize_t            last_obj;  /* Index of last object looked at   */
+    hsize_t            idx;       /* Internal location to hold index  */
+    herr_t             ret_value; /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*s*Isx*x", loc_id, name, idx_p, op, op_data);
@@ -843,7 +839,7 @@ done:
 herr_t
 H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *statbuf /*out*/)
 {
-    H5G_loc_t loc;
+    H5G_loc_t loc;                 /* Group's location */
     herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -966,6 +962,7 @@ H5G_get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5G
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity checks */
     HDassert(loc);
     HDassert(name && *name);
 

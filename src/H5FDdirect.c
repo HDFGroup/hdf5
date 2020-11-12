@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <slu@hdfgroup.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
  * Purpose:  The Direct I/O file driver forces the data to be written to
@@ -27,15 +27,15 @@
  * this file. */
 /* #define _XOPEN_SOURCE 600 */
 
-#include "H5private.h"   /* Generic Functions      */
-#include "H5Eprivate.h"  /* Error handling        */
-#include "H5Fprivate.h"  /* File access        */
-#include "H5FDprivate.h" /* File drivers        */
-#include "H5FDdirect.h"  /* Direct file driver      */
-#include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs            */
-#include "H5MMprivate.h" /* Memory management      */
-#include "H5Pprivate.h"  /* Property lists      */
+#include "H5private.h"   /* Generic Functions        */
+#include "H5Eprivate.h"  /* Error handling           */
+#include "H5Fprivate.h"  /* File access              */
+#include "H5FDprivate.h" /* File drivers             */
+#include "H5FDdirect.h"  /* Direct file driver       */
+#include "H5FLprivate.h" /* Free Lists               */
+#include "H5Iprivate.h"  /* IDs                      */
+#include "H5MMprivate.h" /* Memory management        */
+#include "H5Pprivate.h"  /* Property lists           */
 
 #ifdef H5_HAVE_DIRECT
 
@@ -95,6 +95,7 @@ typedef struct H5FD_direct_t {
     DWORD fileindexlo;
     DWORD fileindexhi;
 #endif
+
 } H5FD_direct_t;
 
 /*
@@ -194,28 +195,25 @@ H5FD_direct_init_interface(void)
 } /* H5FD_direct_init_interface() */
 
 /*-------------------------------------------------------------------------
- * Function:  H5FD_direct_init
+ * Function:    H5FD_direct_init
  *
- * Purpose:  Initialize this driver by registering the driver with the
- *    library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:  Success:  The driver ID for the direct driver.
- *
- *    Failure:  Negative.
+ * Return:      Success:    The driver ID for the direct driver
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5FD_direct_init(void)
 {
-    hid_t ret_value; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g))
         H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g, sizeof(H5FD_class_t), FALSE);
@@ -225,7 +223,7 @@ H5FD_direct_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_direct_init() */
 
 /*---------------------------------------------------------------------------
  * Function:  H5FD_direct_term
@@ -236,8 +234,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
- *
- * Modification:
  *
  *---------------------------------------------------------------------------
  */
@@ -264,8 +260,6 @@ H5FD_direct_term(void)
  * Programmer:  Raymond Lu
  *    Wednesday, 20 September 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -281,6 +275,7 @@ H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbu
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
+    HDmemset(&fa, 0, sizeof(H5FD_direct_fapl_t));
     if (boundary != 0)
         fa.mboundary = boundary;
     else
@@ -320,17 +315,15 @@ done:
  * Programmer:  Raymond Lu
  *              Wednesday, October 18, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary /*out*/, size_t *block_size /*out*/,
                    size_t *cbuf_size /*out*/)
 {
-    H5FD_direct_fapl_t *fa;
-    H5P_genplist_t *    plist;               /* Property list pointer */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *          plist; /* Property list pointer */
+    const H5FD_direct_fapl_t *fa;
+    herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "ixxx", fapl_id, boundary, block_size, cbuf_size);
@@ -350,7 +343,7 @@ H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary /*out*/, size_t *block_size /
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_fapl_direct() */
 
 /*-------------------------------------------------------------------------
  * Function:  H5FD_direct_fapl_get
@@ -366,8 +359,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 18 October 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -397,8 +388,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 18 October 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -432,8 +421,6 @@ H5FD_direct_fapl_copy(const void *_old_fa)
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -449,8 +436,8 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
 #endif
     h5_stat_t       sb;
     H5P_genplist_t *plist; /* Property list */
-    int *           buf1, *buf2;
-    H5FD_t *        ret_value;
+    void *          buf1, *buf2;
+    H5FD_t *        ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -581,8 +568,6 @@ done:
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -615,8 +600,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Thursday, 21 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -681,8 +664,6 @@ done:
  * Programmer:  Raymond Lu
  *              Thursday, 21 September 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -716,11 +697,6 @@ H5FD_direct_query(const H5FD_t H5_ATTR_UNUSED *_f, unsigned long *flags /* out *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -746,11 +722,6 @@ H5FD_direct_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
- *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
@@ -782,8 +753,6 @@ H5FD_direct_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -805,8 +774,6 @@ H5FD_direct_get_eof(const H5FD_t *_file)
  *
  * Programmer:     Raymond Lu
  *                 21 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -840,8 +807,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Thursday, 21 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -985,6 +950,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         addr = (haddr_t)(((addr + size - 1) / _fbsize + 1) * _fbsize);
 
         if (copy_buf) {
+            /* Free with HDfree since it came from posix_memalign */
             HDfree(copy_buf);
             copy_buf = NULL;
         } /* end if */
@@ -996,6 +962,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
 
 done:
     if (ret_value < 0) {
+        /* Free with HDfree since it came from posix_memalign */
         if (copy_buf)
             HDfree(copy_buf);
 
@@ -1020,8 +987,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Thursday, 21 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1212,6 +1177,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
         buf  = (const char *)buf + size;
 
         if (copy_buf) {
+            /* Free with HDfree since it came from posix_memalign */
             HDfree(copy_buf);
             copy_buf = NULL;
         } /* end if */
@@ -1225,6 +1191,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
 
 done:
     if (ret_value < 0) {
+        /* Free with HDfree since it came from posix_memalign */
         if (copy_buf)
             HDfree(copy_buf);
 

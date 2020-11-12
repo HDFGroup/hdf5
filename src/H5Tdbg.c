@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Tdbg.c
- *			Jul 19 2007
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:         H5Tdbg.c
+ *                  Jul 19 2007
+ *                  Quincey Koziol
  *
- * Purpose:		Dump debugging information about a datatype
+ * Purpose:         Dump debugging information about a datatype
  *
  *-------------------------------------------------------------------------
  */
@@ -31,9 +31,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Eprivate.h" /* Error handling		  	*/
-#include "H5Tpkg.h"     /* Datatypes         			*/
+#include "H5private.h"  /* Generic Functions                        */
+#include "H5Eprivate.h" /* Error handling                           */
+#include "H5Tpkg.h"     /* Datatypes                                */
 
 /****************/
 /* Local Macros */
@@ -64,28 +64,21 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__print_stats
+ * Function:    H5T__print_stats
  *
- * Purpose:	Print statistics about a conversion path.  Statistics are
- *		printed only if all the following conditions are true:
+ * Purpose:     Print statistics about a conversion path.  Statistics are
+ *              printed only if all the following conditions are true:
  *
- * 		1. The library was compiled with H5T_DEBUG defined.
- *		2. Data type debugging is turned on at run time.
- *		3. The path was called at least one time.
+ *              1. The library was compiled with H5T_DEBUG defined.
+ *              2. Data type debugging is turned on at run time.
+ *              3. The path was called at least one time.
  *
- *		The optional NPRINT argument keeps track of the number of
- *		conversions paths for which statistics have been shown. If
- *		its value is zero then table headers are printed before the
- *		first line of output.
+ *              The optional NPRINT argument keeps track of the number of
+ *              conversions paths for which statistics have been shown. If
+ *              its value is zero then table headers are printed before the
+ *              first line of output.
  *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Monday, December 14, 1998
- *
- * Modifications:
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -107,7 +100,8 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
                       "User", "System", "Elapsed", "Bandwidth");
             HDfprintf(H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n", "----------", "-----", "-----",
                       "----", "------", "-------", "---------");
-        }
+        } /* end if */
+
         if (path->src && path->dst)
             nbytes = MAX(H5T_get_size(path->src), H5T_get_size(path->dst));
         else if (path->src)
@@ -116,6 +110,7 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
             nbytes = H5T_get_size(path->dst);
         else
             nbytes = 0;
+
         nbytes *= path->stats.nelmts;
         H5_bandwidth(bandwidth, (double)nbytes, path->stats.timer.etime);
         HDfprintf(H5DEBUG(T), "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n", path->name, path->stats.nelmts,
@@ -123,27 +118,24 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
                   path->stats.timer.etime, bandwidth);
     }
 #endif
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__print_stats() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_debug
+ * Function:    H5T_debug
  *
- * Purpose:	Prints information about a data type.
+ * Purpose:     Prints information about a data type.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
- * Modifications:
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T_debug(const H5T_t *dt, FILE *stream)
 {
-    const char *s1 = "", *s2 = "";
+    const char *s1 = "";
+    const char *s2 = "";
     unsigned    i;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -254,6 +246,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
             HDfprintf(stream, ", offset=%lu", (unsigned long)(dt->shared->u.atomic.offset));
         if (dt->shared->u.atomic.prec != 8 * dt->shared->size)
             HDfprintf(stream, ", prec=%lu", (unsigned long)(dt->shared->u.atomic.prec));
+
         switch (dt->shared->type) {
             case H5T_INTEGER:
                 switch (dt->shared->u.atomic.u.i.sign) {

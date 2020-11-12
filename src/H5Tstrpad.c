@@ -62,10 +62,6 @@ H5T_init_strpad_interface(void)
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
  *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived datatypes.
- *
  *-------------------------------------------------------------------------
  */
 H5T_str_t
@@ -117,10 +113,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
- *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived datatypes.
  *
  *-------------------------------------------------------------------------
  */

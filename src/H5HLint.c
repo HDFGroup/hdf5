@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5HLint.c
- *			Oct 12 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5HLint.c
+ *              Oct 12 2008
+ *              Quincey Koziol
  *
- * Purpose:		Local heap internal routines.
+ * Purpose:     Local heap internal routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -31,9 +31,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Eprivate.h" /* Error handling		  	*/
-#include "H5HLpkg.h"    /* Local Heaps				*/
+#include "H5private.h"  /* Generic Functions            */
+#include "H5Eprivate.h" /* Error handling               */
+#include "H5HLpkg.h"    /* Local Heaps                  */
 
 /****************/
 /* Local Macros */
@@ -73,16 +73,15 @@ H5FL_DEFINE_STATIC(H5HL_dblk_t);
 H5FL_DEFINE_STATIC(H5HL_prfx_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_new
+ * Function:    H5HL_new
  *
- * Purpose:	Create a new local heap object
+ * Purpose:     Create a new local heap object
  *
- * Return:	Success:	non-NULL pointer to new local heap
- *		Failure:	NULL
+ * Return:      Success:    non-NULL pointer to new local heap
+ *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jan  5 2010
+ * Programmer:  Quincey Koziol
+ *              Jan  5 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -118,14 +117,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5HL_inc_rc
  *
- * Purpose:	Increment ref. count on heap
+ * Purpose:     Increment ref. count on heap
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Oct 12 2008
+ * Programmer:  Quincey Koziol
+ *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -146,14 +143,12 @@ H5HL_inc_rc(H5HL_t *heap)
 /*-------------------------------------------------------------------------
  * Function:	H5HL_dec_rc
  *
- * Purpose:	Decrement ref. count on heap
+ * Purpose:     Decrement ref. count on heap
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Oct 12 2008
+ * Programmer:  Quincey Koziol
+ *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -176,15 +171,14 @@ H5HL_dec_rc(H5HL_t *heap)
 } /* end H5HL_dec_rc() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_dest
+ * Function:    H5HL_dest
  *
- * Purpose:	Destroys a heap in memory.
+ * Purpose:     Destroys a heap in memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan 15 2003
+ * Programmer:  Quincey Koziol
+ *              Jan 15 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -225,7 +219,6 @@ H5HL_dest(H5HL_t *heap)
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -269,7 +262,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -313,7 +305,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -357,7 +348,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 12 2008
  *
  *-------------------------------------------------------------------------

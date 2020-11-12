@@ -15,7 +15,7 @@
  *
  * Created:		H5Gcompact.c
  *			Sep  5 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for handling compact storage.
  *
@@ -64,15 +64,14 @@ static herr_t H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, cons
                                       H5_index_t idx_type, H5_iter_order_t order, H5G_link_table_t *ltable);
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compact_build_table_cb
+ * Function:    H5G_compact_build_table_cb
  *
- * Purpose:	Callback routine for searching 'link' messages for a particular
+ * Purpose:     Callback routine for searching 'link' messages for a particular
  *              name.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  5 2005
  *
  *-------------------------------------------------------------------------
@@ -173,7 +172,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  6 2005
  *
  *-------------------------------------------------------------------------
@@ -214,8 +212,8 @@ ssize_t
 H5G__compact_get_name_by_idx(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
                              H5_index_t idx_type, H5_iter_order_t order, hsize_t idx, char *name, size_t size)
 {
-    H5G_link_table_t ltable = {0, NULL}; /* Link table */
-    ssize_t          ret_value;          /* Return value */
+    H5G_link_table_t ltable    = {0, NULL}; /* Link table */
+    ssize_t          ret_value = -1;        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -257,7 +255,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  5 2005
  *
  *-------------------------------------------------------------------------
@@ -396,8 +393,8 @@ H5G__compact_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *li
                      H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk, H5G_lib_iterate_t op,
                      void *op_data)
 {
-    H5G_link_table_t ltable = {0, NULL}; /* Link table */
-    herr_t           ret_value;          /* Return value */
+    H5G_link_table_t ltable    = {0, NULL}; /* Link table */
+    herr_t           ret_value = FAIL;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -423,15 +420,14 @@ done:
 } /* end H5G__compact_iterate() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compact_lookup_cb
+ * Function:    H5G_compact_lookup_cb
  *
- * Purpose:	Callback routine for searching 'link' messages for a particular
+ * Purpose:     Callback routine for searching 'link' messages for a particular
  *              name & gettting object location for it
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -476,7 +472,6 @@ done:
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -484,9 +479,9 @@ done:
 htri_t
 H5G__compact_lookup(const H5O_loc_t *oloc, const char *name, H5O_link_t *lnk, hid_t dxpl_id)
 {
-    H5G_iter_lkp_t      udata;     /* User data for iteration callback */
-    H5O_mesg_operator_t op;        /* Message operator */
-    htri_t              ret_value; /* Return value */
+    H5G_iter_lkp_t      udata;            /* User data for iteration callback */
+    H5O_mesg_operator_t op;               /* Message operator */
+    htri_t              ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -521,7 +516,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  6 2006
  *
  *-------------------------------------------------------------------------
@@ -578,8 +572,8 @@ done:
 H5G_obj_t
 H5G__compact_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, hsize_t idx)
 {
-    H5G_link_table_t ltable = {0, NULL}; /* Link table */
-    H5G_obj_t        ret_value;          /* Return value */
+    H5G_link_table_t ltable    = {0, NULL};   /* Link table */
+    H5G_obj_t        ret_value = H5G_UNKNOWN; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

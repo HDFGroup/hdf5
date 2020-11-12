@@ -15,7 +15,7 @@
  *
  * Created:		H5HFiblock.c
  *			Apr 10 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Indirect block routines for fractal heaps.
  *
@@ -90,7 +90,6 @@ H5FL_SEQ_DEFINE(H5HF_indirect_ptr_t);
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 17 2006
  *
  *-------------------------------------------------------------------------
@@ -156,7 +155,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 17 2006
  *
  *-------------------------------------------------------------------------
@@ -222,7 +220,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
@@ -258,7 +255,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
@@ -336,7 +332,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
@@ -367,7 +362,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  2 2006
  *
  *-------------------------------------------------------------------------
@@ -508,7 +502,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
@@ -565,20 +558,10 @@ H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
 
     /* Check if the indirect block is NOT currently allocated in temp. file space */
     /* (temp. file space does not need to be freed) */
-    if (!H5F_IS_TMP_ADDR(hdr->f, iblock->addr)) {
-        /* Currently, the old block data is "thrown away" after the space is reallocated,
-         * to avoid data copy in H5MF_realloc() call by just free'ing the space and
-         * allocating new space.
-         *
-         * This also keeps the file smaller, by freeing the space and then
-         * allocating new space, instead of vice versa (in H5MF_realloc).
-         *
-         * QAK - 3/14/2006
-         */
+    if (!H5F_IS_TMP_ADDR(hdr->f, iblock->addr))
         /* Free previous indirect block disk space */
         if (H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, iblock->addr, (hsize_t)iblock->size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block file space")
-    } /* end if */
 
     /* Compute size of buffer needed for new indirect block */
     iblock->nrows   = new_nrows;
@@ -615,11 +598,10 @@ H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
         HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for direct entries")
 
     /* Check for skipping over rows and add free section for skipped rows */
-    if (skip_direct_rows) {
+    if (skip_direct_rows)
         /* Add skipped blocks to heap's free space */
         if (H5HF_hdr_skip_blocks(hdr, dxpl_id, iblock, next_entry, (new_next_entry - next_entry)) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't add skipped blocks to heap's free space")
-    } /* end if */
 
     /* Initialize new direct block entries in rows added */
     acc_dblock_free = 0;
@@ -703,7 +685,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Jun 12 2006
  *
  *-------------------------------------------------------------------------
@@ -736,20 +717,10 @@ H5HF_man_iblock_root_halve(H5HF_indirect_t *iblock, hid_t dxpl_id)
 
     /* Check if the indirect block is NOT currently allocated in temp. file space */
     /* (temp. file space does not need to be freed) */
-    if (!H5F_IS_TMP_ADDR(hdr->f, iblock->addr)) {
-        /* Currently, the old block data is "thrown away" after the space is reallocated,
-         * to avoid data copy in H5MF_realloc() call by just free'ing the space and
-         * allocating new space.
-         *
-         * This also keeps the file smaller, by freeing the space and then
-         * allocating new space, instead of vice versa (in H5MF_realloc).
-         *
-         * QAK - 6/12/2006
-         */
+    if (!H5F_IS_TMP_ADDR(hdr->f, iblock->addr))
         /* Free previous indirect block disk space */
         if (H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, iblock->addr, (hsize_t)iblock->size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block file space")
-    } /* end if */
 
     /* Compute free space in rows to delete */
     acc_dblock_free = 0;
@@ -849,7 +820,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
@@ -931,7 +901,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -996,7 +965,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  6 2006
  *
  *-------------------------------------------------------------------------
@@ -1138,7 +1106,6 @@ done:
  * Return:	Pointer to indirect block on success, NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
@@ -1151,7 +1118,7 @@ H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t iblock_addr, uns
     H5HF_parent_t    par_info;               /* Parent info for loading block */
     H5HF_indirect_t *iblock         = NULL;  /* Indirect block from cache */
     hbool_t          should_protect = FALSE; /* Whether we should protect the indirect block or not */
-    H5HF_indirect_t *ret_value;              /* Return value */
+    H5HF_indirect_t *ret_value      = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1264,7 +1231,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 17 2006
  *
  *-------------------------------------------------------------------------
@@ -1316,7 +1282,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 30 2006
  *
  *-------------------------------------------------------------------------
@@ -1380,7 +1345,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
@@ -1499,7 +1463,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 10 2006
  *
  *-------------------------------------------------------------------------
@@ -1533,7 +1496,6 @@ H5HF_man_iblock_entry_addr(H5HF_indirect_t *iblock, unsigned entry, haddr_t *chi
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  7 2006
  *
  *-------------------------------------------------------------------------
@@ -1713,7 +1675,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  6 2006
  *
  *-------------------------------------------------------------------------

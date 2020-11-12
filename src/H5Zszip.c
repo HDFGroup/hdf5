@@ -67,8 +67,6 @@ H5Z_class2_t H5Z_SZIP[1] = {{
  * Programmer:	Quincey Koziol
  *              Monday, April  7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -116,14 +114,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Monday, April  7, 2003
- *
- * Modifications: Used new logic to set the size of the scanline parameter.
- *                Now SZIP compression can be applied to the chunk
- *                of any shape and size with only one restriction: the number
- *                of elements in the chunk has to be not less than number
- *                of elements (pixels) in the block (cd_values[H5Z_SZIP_PARM_PPB]
- *                parameter).
- *                           Elena Pourmal, July 20, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -261,10 +251,6 @@ done:
  *
  * Programmer:	Kent Yang
  *              Tuesday, April 1, 2003
- *
- * Modifications:
- *              Quincey Koziol, April 2, 2003
- *              Cleaned up code.
  *
  *-------------------------------------------------------------------------
  */

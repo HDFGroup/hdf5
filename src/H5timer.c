@@ -12,12 +12,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
- *
  * Created:		H5timer.c
  *			Aug 21 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
- * Purpose:		Internal 'timer' routines & support routines.
+ * Purpose:             Internal, platform-independent 'timer' support routines.
  *
  *-------------------------------------------------------------------------
  */

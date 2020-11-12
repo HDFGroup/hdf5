@@ -23,10 +23,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Dpkg.h"     /* Datasets 				*/
-#include "H5Eprivate.h" /* Error handling		  	*/
-#include "H5Iprivate.h" /* IDs			  		*/
+#include "H5private.h"  /* Generic Functions                        */
+#include "H5Dpkg.h"     /* Datasets                                 */
+#include "H5Eprivate.h" /* Error handling                           */
+#include "H5Iprivate.h" /* IDs                                      */
 
 /****************/
 /* Local Macros */
@@ -73,17 +73,12 @@ H5D__init_dbg_interface(void)
 } /* H5D__init_dbg_interface() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ddebug
+ * Function:    H5Ddebug
  *
- * Purpose:	Prints various information about a dataset.  This function is
- *		not to be documented in the API at this time.
+ * Purpose:     Prints various information about a dataset.  This function is
+ *              not to be documented in the API at this time.
  *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, April 28, 1999
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */

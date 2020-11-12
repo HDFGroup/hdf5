@@ -15,7 +15,7 @@
  *
  * Created:             H5Defc.c
  *                      December 13, 2010
- *                      Neil Fortner <nfortne2@hdfgroup.org>
+ *                      Neil Fortner
  *
  * Purpose:             External file caching routines - implements a
  *                      cache of external files to minimize the number of
@@ -87,8 +87,8 @@ H5FL_DEFINE_STATIC(H5F_efc_t);
 H5F_efc_t *
 H5F_efc_create(unsigned max_nfiles)
 {
-    H5F_efc_t *efc = NULL; /* EFC object */
-    H5F_efc_t *ret_value;  /* Return value */
+    H5F_efc_t *efc       = NULL; /* EFC object */
+    H5F_efc_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

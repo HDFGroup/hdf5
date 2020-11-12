@@ -12,15 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Monday, April 17, 2000
  *
  * Purpose:	The public header file for the log driver.
  */
 #ifndef H5FDlog_H
 #define H5FDlog_H
-
-#include "H5Ipublic.h"
 
 #define H5FD_LOG (H5FD_log_init())
 

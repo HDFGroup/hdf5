@@ -15,7 +15,7 @@
  *
  * Created:		H5B2.c
  *			Jan 31 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Implements a B-tree, with several modifications from
  *                      the "standard" methods.
@@ -109,7 +109,6 @@ H5FL_DEFINE_STATIC(H5B2_t);
  *              filled in), negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Jan 31 2005
  *
  *-------------------------------------------------------------------------
@@ -185,7 +184,6 @@ done:
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 15 2009
  *
  *-------------------------------------------------------------------------
@@ -253,7 +251,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
  *
  *-------------------------------------------------------------------------
@@ -315,7 +312,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  5 2009
  *
  *-------------------------------------------------------------------------
@@ -349,7 +345,6 @@ H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr_p)
  * Return:	Value from callback: non-negative on success, negative on error
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 11 2005
  *
  *-------------------------------------------------------------------------
@@ -373,11 +368,10 @@ H5B2_iterate(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op, void *op_data)
     hdr = bt2->hdr;
 
     /* Iterate through records */
-    if (hdr->root.node_nrec > 0) {
+    if (hdr->root.node_nrec > 0)
         /* Iterate through nodes */
         if ((ret_value = H5B2_iterate_node(hdr, dxpl_id, hdr->depth, &hdr->root, op, op_data)) < 0)
             HERROR(H5E_BTREE, H5E_CANTLIST, "node iteration failed");
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_iterate() */
@@ -400,7 +394,6 @@ H5B2_iterate(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op, void *op_data)
  * Return:	Non-negative (TRUE/FALSE) on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 23 2005
  *
  *-------------------------------------------------------------------------
@@ -625,7 +618,6 @@ done:
  * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 23 2005
  *
  *-------------------------------------------------------------------------
@@ -787,7 +779,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 25 2005
  *
  *-------------------------------------------------------------------------
@@ -861,7 +852,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov 14 2006
  *
  *-------------------------------------------------------------------------
@@ -944,7 +934,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 25 2005
  *
  *-------------------------------------------------------------------------
@@ -984,7 +973,6 @@ H5B2_get_nrec(const H5B2_t *bt2, hsize_t *nrec)
  * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  8 2005
  *
  *-------------------------------------------------------------------------
@@ -1041,7 +1029,6 @@ done:
  * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 10 2005
  *
  *-------------------------------------------------------------------------
@@ -1257,7 +1244,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 15 2009
  *
  *-------------------------------------------------------------------------
@@ -1370,7 +1356,6 @@ done:
  * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
  *-------------------------------------------------------------------------

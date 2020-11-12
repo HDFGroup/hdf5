@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Wednesday, October 22, 1997
  *
  * Purpose: The C STDIO virtual file driver which only uses calls from stdio.h.
@@ -436,7 +436,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     file->inode  = sb.st_ino;
 #endif /* H5_HAVE_WIN32_API */
 
-    return (H5FD_t *)file;
+    return ((H5FD_t *)file);
 } /* end H5FD_stdio_open() */
 
 /*-------------------------------------------------------------------------

@@ -16,8 +16,6 @@
  *
  * Purpose:	Functions to read/write directly between app buffer and file.
  *
- * 		Beware of the ifdef'ed print statements.
- *		I didn't make them portable.
  */
 
 #define H5S_PACKAGE /*suppress error about including H5Spkg	  */
@@ -60,7 +58,7 @@ static herr_t H5S_obtain_datatype(const hsize_t down[], H5S_hyper_span_t *span, 
  *
  * Purpose:	Translate an HDF5 "all" selection into an MPI type.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*new_type	  the MPI type corresponding to the selection
  *		*count		  how many objects of the new_type in selection
@@ -106,7 +104,7 @@ done:
  *
  * Purpose:	Translate an HDF5 "none" selection into an MPI type.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*new_type	  the MPI type corresponding to the selection
  *		*count		  how many objects of the new_type in selection
@@ -135,7 +133,7 @@ H5S_mpio_none_type(MPI_Datatype *new_type, int *count, hbool_t *is_derived_type)
  *
  * Purpose:	Create a derived datatype for point selections.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*new_type	  the MPI type corresponding to the selection
  *
@@ -192,7 +190,7 @@ done:
  * Purpose:	Translate an HDF5 "point" selection into an MPI type.
  *              Create a permutation array to handle out-of-order point selections.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*new_type	  the MPI type corresponding to the selection
  *		*count		  how many objects of the new_type in selection
@@ -328,7 +326,7 @@ done:
  * Note:	This routine is called from H5S_mpio_space_type(), which is
  *              called first for the file dataspace and creates
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*new_type	  the MPI type corresponding to the selection
  *		*count		  how many objects of the new_type in selection
@@ -457,9 +455,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5S_mpio_hyper_type
  *
- * Purpose:	Translate an HDF5 hyperslab selection into an MPI type.
+ * Purpose:	Translate a regular HDF5 hyperslab selection into an MPI type.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*new_type	  the MPI type corresponding to the selection
  *		*count		  how many objects of the new_type in selection
@@ -512,7 +510,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
     diminfo = sel_iter.u.hyp.diminfo;
     HDassert(diminfo);
 
-    /* make a local copy of the dimension info so we can operate with them */
+    /* Make a local copy of the dimension info so we can operate with them */
 
     /* Check if this is a "flattened" regular hyperslab selection */
     if (sel_iter.u.hyp.iter_rank != 0 && sel_iter.u.hyp.iter_rank < space->extent.rank) {
@@ -530,6 +528,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
             d[u].block = diminfo[u].block;
             d[u].count = diminfo[u].count;
             d[u].xtent = sel_iter.u.hyp.size[u];
+
 #ifdef H5S_DEBUG
             if (H5DEBUG(S)) {
                 HDfprintf(H5DEBUG(S), "%s: start=%Hd  stride=%Hu  count=%Hu  block=%Hu  xtent=%Hu", FUNC,
@@ -565,6 +564,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
             d[u].block = diminfo[u].block;
             d[u].count = diminfo[u].count;
             d[u].xtent = space->extent.size[u];
+
 #ifdef H5S_DEBUG
             if (H5DEBUG(S)) {
                 HDfprintf(H5DEBUG(S), "%s: start=%Hd  stride=%Hu  count=%Hu  block=%Hu  xtent=%Hu", FUNC,
@@ -608,7 +608,8 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
     /*  Create a type covering the selected hyperslab.
      *  Multidimensional dataspaces are stored in row-major order.
      *  The type is built from the inside out, going from the
-     *  fastest-changing (i.e., inner) dimension * to the slowest (outer). */
+     *  fastest-changing (i.e., inner) dimension * to the slowest (outer).
+     */
 
 /*******************************************************
  *  Construct contig type for inner contig dims:
@@ -641,7 +642,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
             HDfprintf(H5DEBUG(S), "%s: i=%d  Making vector-type \n", FUNC, i);
 #endif
         /****************************************
-         *  Build vector type of the selection.
+         * Build vector type of the selection.
          ****************************************/
         mpi_code = MPI_Type_vector((int)(d[i].count), /* count */
                                    (int)(d[i].block), /* blocklength */
@@ -686,10 +687,9 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
         else
             inner_type = outer_type;
     } /* end for */
-      /***************************
-       *  End of loop, walking
-       *  thru dimensions.
-       ***************************/
+      /******************************************
+       *  End of loop, walking through dimensions.
+       *******************************************/
 
     /* At this point inner_type is actually the outermost type, even for 0-trip loop */
     *new_type = inner_type;
@@ -726,7 +726,7 @@ done:
  * Purpose:	Translate an HDF5 irregular hyperslab selection into an
                 MPI type.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*new_type	  the MPI type corresponding to the selection
  *		*count		  how many objects of the new_type in selection
@@ -792,7 +792,7 @@ done:
  * Purpose:	Obtain an MPI derived datatype based on span-tree
  *              implementation
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*span_type	 the MPI type corresponding to the selection
  *
@@ -804,8 +804,8 @@ static herr_t
 H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span, const MPI_Datatype *elmt_type,
                     MPI_Datatype *span_type, size_t elmt_size)
 {
-    size_t            alloc_count; /* Number of span tree nodes allocated at this level */
-    size_t            outercount;  /* Number of span tree nodes at this level */
+    size_t            alloc_count       = 0; /* Number of span tree nodes allocated at this level */
+    size_t            outercount        = 0; /* Number of span tree nodes at this level */
     MPI_Datatype *    inner_type        = NULL;
     hbool_t           inner_types_freed = FALSE; /* Whether the inner_type MPI datatypes have been freed */
     hbool_t           span_type_valid   = FALSE; /* Whether the span_type MPI datatypes is valid */
@@ -974,7 +974,7 @@ done:
  * Purpose:	Translate an HDF5 dataspace selection into an MPI type.
  *		Currently handle only hyperslab and "all" selections.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*new_type	  the MPI type corresponding to the selection
  *		*count		  how many objects of the new_type in selection
@@ -1087,4 +1087,5 @@ H5S_mpio_space_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_mpio_space_type() */
+
 #endif /* H5_HAVE_PARALLEL */

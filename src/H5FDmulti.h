@@ -12,17 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Monday, August  2, 1999
  *
  * Purpose:	The public header file for the "multi" driver.
  */
 #ifndef H5FDmulti_H
 #define H5FDmulti_H
-
-#include "H5Ipublic.h"
-#include "H5Ppublic.h" /* Property lists */
-#include "H5Fpublic.h"
 
 #define H5FD_MULTI (H5FD_multi_init())
 

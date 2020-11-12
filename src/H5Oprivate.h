@@ -15,7 +15,7 @@
  *
  * Created:		H5Oprivate.h
  *			Aug  5 1997
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		Object header private include file.
  *
@@ -105,6 +105,7 @@ typedef struct H5O_t           H5O_t;
 #define H5O_BOGUS_MSG_ID_SIZE sizeof(unsigned)
 
 #endif /* H5O_ENABLE_BOGUS */
+
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
 #define H5O_BAD_MESG_COUNT_NAME "bad message count" /* Flag setting bad message count */
 #define H5O_BAD_MESG_COUNT_SIZE sizeof(hbool_t)
@@ -210,7 +211,6 @@ typedef struct H5O_copy_t {
 #define H5O_REFCOUNT_ID    0x0016 /* Reference count message.  */
 #define H5O_UNKNOWN_ID     0x0017 /* Placeholder message ID for unknown message.  */
                                   /* (this should never exist in a file) */
-
 /*
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
  *      in H5O.c when creating a new message type.  Also bump the value of

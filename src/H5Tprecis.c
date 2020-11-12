@@ -66,10 +66,6 @@ H5T_init_precis_interface(void)
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived datatypes.
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -113,7 +109,7 @@ done:
 size_t
 H5T_get_precision(const H5T_t *dt)
 {
-    size_t ret_value;
+    size_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 
@@ -152,10 +148,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Moved real work to a private function.
  *
  *-------------------------------------------------------------------------
  */
@@ -212,10 +204,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived datatypes.
  *
  *-------------------------------------------------------------------------
  */

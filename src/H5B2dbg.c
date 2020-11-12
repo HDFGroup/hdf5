@@ -15,7 +15,7 @@
  *
  * Created:		H5B2dbg.c
  *			Feb  2 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Dump debugging information about a v2 B-tree.
  *
@@ -72,7 +72,6 @@
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
  *
  *-------------------------------------------------------------------------
@@ -169,7 +168,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  4 2005
  *
  *-------------------------------------------------------------------------
@@ -288,7 +286,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  7 2005
  *
  *-------------------------------------------------------------------------

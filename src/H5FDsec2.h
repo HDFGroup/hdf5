@@ -12,15 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Monday, August  2, 1999
  *
  * Purpose:	The public header file for the sec2 driver.
  */
 #ifndef H5FDsec2_H
 #define H5FDsec2_H
-
-#include "H5Ipublic.h"
 
 #define H5FD_SEC2 (H5FD_sec2_init())
 

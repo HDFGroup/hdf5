@@ -77,8 +77,8 @@
 
 /* The difference between a single file and a set of mounted files */
 typedef enum H5F_scope_t {
-    H5F_SCOPE_LOCAL  = 0, /*specified file handle only		*/
-    H5F_SCOPE_GLOBAL = 1  /*entire virtual file			*/
+    H5F_SCOPE_LOCAL  = 0, /*specified file handle only        */
+    H5F_SCOPE_GLOBAL = 1  /*entire virtual file            */
 } H5F_scope_t;
 
 /* Unlimited file size for H5Pset_external() */
@@ -88,9 +88,9 @@ typedef enum H5F_scope_t {
  * H5F_CLOSE_DEFAULT - Use the degree pre-defined by underlining VFL
  * H5F_CLOSE_WEAK    - file closes only after all opened objects are closed
  * H5F_CLOSE_SEMI    - if no opened objects, file is close; otherwise, file
-                       close fails
+            close fails
  * H5F_CLOSE_STRONG  - if there are opened objects, close them first, then
-                       close file
+            close file
  */
 typedef enum H5F_close_degree_t {
     H5F_CLOSE_DEFAULT = 0,

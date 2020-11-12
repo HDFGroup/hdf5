@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Oattribute.c
- *			Dec 11 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5Oattribute.c
  *
- * Purpose:		Object header attribute routines.
+ * Purpose:     Object header attribute routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -38,8 +36,8 @@
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object headers			*/
 #include "H5SMprivate.h" /* Shared Object Header Messages	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5Fprivate.h"  /* File 			        */
+#include "H5Iprivate.h"  /* IDs                                  */
+#include "H5Fprivate.h"  /* File                                 */
 
 /****************/
 /* Local Macros */
@@ -152,13 +150,8 @@ static htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, cons
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  4 2006
  *
- * Modifications:
- *      Vailin Choi; Sept 2011
- *      Indicate that the object header is modified and might possibly need
- *      to condense messages in the object header
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -403,13 +396,8 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
- * Modifications:
- *	Vailin Choi; September 2011
- *      Change oh_modified from boolean to unsigned
- *      (See H5Oprivate.h for possible flags)
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -455,11 +443,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, December 11, 2006
  *
- * Modification:Raymond Lu
- *              23 June 2008
- *              If the attribute is in dense storage and has already been
- *              opened, make a copy of already opened object to share some
- *              object information.
  *-------------------------------------------------------------------------
  */
 H5A_t *
@@ -558,7 +541,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2006
  *
  *-------------------------------------------------------------------------
@@ -594,11 +576,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, December 18, 2006
  *
- * Modification:Raymond Lu
- *              23 June 2008
- *              After opening the attribute, check whether it's in dense
- *              storage and has already been opened.  If it has, close the
- *              opened object and make a copy of already opened object.
  *-------------------------------------------------------------------------
  */
 H5A_t *
@@ -755,7 +732,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  2 2007
  *
  *-------------------------------------------------------------------------
@@ -830,18 +806,12 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  4 2006
  *
  * Modification:Raymond Lu
  *              4 June 2008
  *              Took out the data copying part because the attribute data
  *              is shared between attribute handle and object header.
- *
- * Modifications:
- *      Vailin Choi; Sept 2011
- *      Indicate that the object header is modified but does not need to
- *	condense messages in the object header
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -999,13 +969,8 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  5 2006
  *
- * Modifications:
- *      Vailin Choi; September 2011
- *      Change "oh_modified" from boolean to unsigned
- *      (See H5Oprivate.h for possible flags)
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1049,13 +1014,8 @@ H5O_attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/,
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  5 2006
  *
- * Modifications:
- *      Vailin Choi; Sept 2011
- *      Indicate that the object header is modified and might possibly need
- *      to condense messages in the object header
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1129,7 +1089,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_
                 mesg->native = NULL;
 
                 /* Delete old attribute */
-                /* (doesn't decrement the link count on shared components becuase
+                /* (doesn't decrement the link count on shared components because
                  *      the "native" pointer has been reset)
                  */
                 if (H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, FALSE) < 0)
@@ -1516,13 +1476,8 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
- * Modifications:
- *      Vailin Choi; Sept 2011
- *      Indicate that the object header is modified and might possibly need
- *      to condense messages in the object header
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1795,13 +1750,8 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
- * Modifications:
- *      Vailin Choi; September 2011
- *      Change "oh_modified" from boolean to unsigned
- *      (See H5Oprivate.h for possible flags)
  *-------------------------------------------------------------------------
  */
 static herr_t

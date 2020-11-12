@@ -15,7 +15,7 @@
  *
  * Created:		H5HFbtree2.c
  *			Aug  7 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		v2 B-tree callbacks for "huge" object tracker
  *
@@ -192,9 +192,9 @@ H5FL_DEFINE_STATIC(H5HF_huge_bt2_ctx_t);
 static void *
 H5HF_huge_bt2_crt_context(void *_f)
 {
-    H5F_t *              f = (H5F_t *)_f; /* User data for building callback context */
-    H5HF_huge_bt2_ctx_t *ctx;             /* Callback context structure */
-    void *               ret_value;       /* Return value */
+    H5F_t *              f = (H5F_t *)_f;  /* User data for building callback context */
+    H5HF_huge_bt2_ctx_t *ctx;              /* Callback context structure */
+    void *               ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -305,12 +305,6 @@ H5HF_huge_bt2_indir_found(const void *nrecord, void *op_data)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-#ifdef QAK
-    HDfprintf(stderr, "%s: nrecord = {%a, %Hu, %Hu}\n", "H5HF_huge_bt2_indir_found",
-              ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr,
-              ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len,
-              ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->id);
-#endif /* QAK */
     *(H5HF_huge_bt2_indir_rec_t *)op_data = *(const H5HF_huge_bt2_indir_rec_t *)nrecord;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -509,14 +503,6 @@ H5HF_huge_bt2_filt_indir_found(const void *nrecord, void *op_data)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-#ifdef QAK
-    HDfprintf(stderr, "%s: nrecord = {%a, %Hu, %x, %Hu, %Hu}\n", "H5HF_huge_bt2_filt_indir_found",
-              ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->addr,
-              ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->len,
-              ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->filter_mask,
-              ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->obj_size,
-              ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->id);
-#endif /* QAK */
     *(H5HF_huge_bt2_filt_indir_rec_t *)op_data = *(const H5HF_huge_bt2_filt_indir_rec_t *)nrecord;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -781,10 +767,6 @@ H5HF_huge_bt2_dir_compare(const void *_rec1, const void *_rec2, int *result)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-#ifdef QAK
-    HDfprintf(stderr, "%s: rec1 = {%a, %Hu}\n", "H5HF_huge_bt2_dir_compare", rec1->addr, rec1->len);
-    HDfprintf(stderr, "%s: rec2 = {%a, %Hu}\n", "H5HF_huge_bt2_dir_compare", rec2->addr, rec2->len);
-#endif /* QAK */
     if (rec1->addr < rec2->addr)
         *result = -1;
     else if (rec1->addr > rec2->addr)
@@ -906,13 +888,6 @@ H5HF_huge_bt2_filt_dir_found(const void *nrecord, void *op_data)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-#ifdef QAK
-    HDfprintf(stderr, "%s: nrecord = {%a, %Hu, %x, %Hu}\n", "H5HF_huge_bt2_filt_dir_found",
-              ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->addr,
-              ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->len,
-              ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->filter_mask,
-              ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->obj_size);
-#endif /* QAK */
     *(H5HF_huge_bt2_filt_dir_rec_t *)op_data = *(const H5HF_huge_bt2_filt_dir_rec_t *)nrecord;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -998,12 +973,6 @@ H5HF_huge_bt2_filt_dir_compare(const void *_rec1, const void *_rec2, int *result
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-#ifdef QAK
-    HDfprintf(stderr, "%s: rec1 = {%a, %Hu, %x, %Hu}\n", "H5HF_huge_bt2_filt_dir_compare", rec1->addr,
-              rec1->len, rec1->filter_mask, rec1->obj_size);
-    HDfprintf(stderr, "%s: rec2 = {%a, %Hu, %x, %Hu}\n", "H5HF_huge_bt2_filt_dir_compare", rec2->addr,
-              rec2->len, rec2->filter_mask, rec2->obj_size);
-#endif /* QAK */
     if (rec1->addr < rec2->addr)
         *result = -1;
     else if (rec1->addr > rec2->addr)

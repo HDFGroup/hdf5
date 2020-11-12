@@ -109,10 +109,6 @@ H5SM_compare_cb(const void *obj, size_t obj_len, void *_udata)
  * Programmer:	James Laird
  *              Wednesday, February 7, 2007
  *
- * Modifications:
- *      Vailin Choi; September 2011
- *      Change "oh_modified" from boolean to unsigned
- *      (See H5Oprivate.h for possible flags)
  *-------------------------------------------------------------------------
  */
 static herr_t

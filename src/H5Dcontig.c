@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: 	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer: 	Quincey Koziol
  *	       	Thursday, September 28, 2000
  *
  * Purpose:
@@ -30,17 +30,17 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Dpkg.h"      /* Dataset functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* Files				*/
-#include "H5FDprivate.h" /* File drivers				*/
-#include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MFprivate.h" /* File memory management		*/
-#include "H5Oprivate.h"  /* Object headers		  	*/
-#include "H5Pprivate.h"  /* Property lists			*/
-#include "H5VMprivate.h" /* Vector and array functions		*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Dpkg.h"      /* Dataset functions            */
+#include "H5Eprivate.h"  /* Error handling               */
+#include "H5Fprivate.h"  /* Files                        */
+#include "H5FDprivate.h" /* File drivers                 */
+#include "H5FLprivate.h" /* Free Lists                   */
+#include "H5Iprivate.h"  /* IDs                          */
+#include "H5MFprivate.h" /* File memory management       */
+#include "H5Oprivate.h"  /* Object headers               */
+#include "H5Pprivate.h"  /* Property lists               */
+#include "H5VMprivate.h" /* Vector and array functions   */
 
 /****************/
 /* Local Macros */
@@ -364,7 +364,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5D__contig_construct(H5F_t *f, H5D_t *dset)
 {
@@ -387,7 +386,7 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
 
     /*
      * The maximum size of the dataset cannot exceed the storage size.
-     * Also, only the slowest varying dimension of a simple data space
+     * Also, only the slowest varying dimension of a simple dataspace
      * can be extendible (currently only for external data storage).
      */
 
@@ -446,7 +445,7 @@ done:
 hbool_t
 H5D__contig_is_space_alloc(const H5O_storage_t *storage)
 {
-    hbool_t ret_value; /* Return value */
+    hbool_t ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -843,7 +842,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
                    size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                    size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    ssize_t ret_value; /* Return value */
+    ssize_t ret_value = -1; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1175,7 +1174,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
                     size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                     size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    ssize_t ret_value; /* Return value (Size of sequence in bytes) */
+    ssize_t ret_value = -1; /* Return value (Size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
 
@@ -1421,6 +1420,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for copy buffer")
     } /* end if */
 
+    /* Loop over copying data */
     addr_src = storage_src->addr;
     addr_dst = storage_dst->addr;
 

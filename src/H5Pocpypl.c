@@ -15,7 +15,7 @@
  *
  * Created:		H5Pocpypl.c
  *			Mar 13 2006
- *			Peter Cao <xcao@ncsa.uiuc.edu>
+ *			Peter Cao
  *
  * Purpose:		Object copying property list class routines
  *
@@ -170,6 +170,7 @@ done:
  *
  * Programmer:  Neil Fortner
  *              October 27, 2011
+ *
  *-------------------------------------------------------------------------
  */
 static H5O_copy_dtype_merge_list_t *
@@ -182,8 +183,10 @@ H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
     /* Free the list */
     while (dt_list) {
         tmp_node = dt_list->next;
+
         (void)H5MM_xfree(dt_list->path);
         (void)H5FL_FREE(H5O_copy_dtype_merge_list_t, dt_list);
+
         dt_list = tmp_node;
     } /* end while */
 
@@ -193,13 +196,13 @@ H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
 /*--------------------------------------------------------------------------
  * Function:	H5P__ocpy_merge_comm_dt_list_copy
  *
- * Purpose:	Copy the merge committed datatype list
+ * Purpose:	Copy a merge committed datatype list
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		Friday, August 31, 2012
+ *		Wednesday, September 2, 2015
  *
  *--------------------------------------------------------------------------
  */
@@ -215,6 +218,7 @@ H5P__ocpy_merge_comm_dt_list_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATT
 
     FUNC_ENTER_STATIC
 
+    /* Sanity check */
     HDassert(value);
 
     /* Make copy of merge committed dtype list */

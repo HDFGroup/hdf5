@@ -11,10 +11,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Module Info:	Operations on bit vectors.  A bit vector is an array of bytes
- *		with the least-significant bits in the first byte.  That is,
- *		the bytes are in little-endian order.
+/* Module Info: Operations on bit vectors.  A bit vector is an array of bytes
+ *              with the least-significant bits in the first byte.  That is,
+ *              the bytes are in little-endian order.
  */
 
 #define H5T_PACKAGE /*suppress error about including H5Tpkg	  */
@@ -26,14 +25,11 @@
 #include "H5WBprivate.h" /* Wrapped Buffers                      */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__bit_copy
+ * Function:    H5T__bit_copy
  *
- * Purpose:	Copies bits from one vector to another.
+ * Purpose:     Copies bits from one vector to another.
  *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Wednesday, June 10, 1998
+ * Return:      void
  *
  *-------------------------------------------------------------------------
  */
@@ -46,8 +42,7 @@ H5T__bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src, size_t src_of
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /*
-     * Normalize the offset to be a byte number and a bit offset within that
+    /* Normalize the offset to be a byte number and a bit offset within that
      * byte.
      */
     s_idx = src_offset / 8;
@@ -55,8 +50,7 @@ H5T__bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src, size_t src_of
     src_offset %= 8;
     dst_offset %= 8;
 
-    /*
-     * Get things rolling. This means copying bits until we're aligned on a
+    /* Get things rolling. This means copying bits until we're aligned on a
      * source byte.  This the following example, five bits are copied to the
      * destination.
      *
@@ -82,19 +76,18 @@ H5T__bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src, size_t src_of
         if (src_offset >= 8) {
             s_idx++;
             src_offset %= 8;
-        } /* end if */
+        }
 
         dst_offset += nbits;
         if (dst_offset >= 8) {
             d_idx++;
             dst_offset %= 8;
-        } /* end if */
+        }
 
         size -= nbits;
-    } /* end while */
+    }
 
-    /*
-     * The middle bits. We are aligned on a source byte which needs to be
+    /* The middle bits. We are aligned on a source byte which needs to be
      * copied to two (or one in the degenerate case) destination bytes.
      *
      * 		      src[s_idx]
@@ -124,10 +117,10 @@ H5T__bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src, size_t src_of
             dst[d_idx + 0] |= (uint8_t)((src[s_idx] & mask_lo) << shift);
             dst[d_idx + 1] &= (uint8_t)(~(mask_hi >> (8 - shift)));
             dst[d_idx + 1] |= (uint8_t)((src[s_idx] & mask_hi) >> (8 - shift));
-        } /* end if */
+        }
         else
             dst[d_idx] = src[s_idx];
-    } /* end for */
+    }
 
     /* Finish up */
     while (size > 0) {
@@ -141,24 +134,24 @@ H5T__bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src, size_t src_of
         if (src_offset >= 8) {
             s_idx++;
             src_offset %= 8;
-        } /* end if */
+        }
 
         dst_offset += nbits;
         if (dst_offset >= 8) {
             d_idx++;
             dst_offset %= 8;
-        } /* end if */
+        }
 
         size -= nbits;
-    } /* end while */
+    }
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5T__bit_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__bit_shift
+ * Function:    H5T__bit_shift
  *
- * Purpose:	Simulation of hardware shifting.  Shifts a bit vector
+ * Purpose:     Simulation of hardware shifting.  Shifts a bit vector
  *              in a way similar to shifting a variable value, like
  *              value <<= 3, or value >>= 16.  SHIFT_DIST is positive for
  *              left shift, negative for right shift.  The bit vector starts
@@ -168,10 +161,7 @@ H5T__bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src, size_t src_of
  *              For example, if we have a bit sequence 00011100, offset=2,
  *              size=3, shift_dist=2, the result will be 00010000.
  *
- * Return:	void
- *
- * Programmer:	Raymond Lu
- *              Monday, April 12, 2004
+ * Return:      void
  *
  *-------------------------------------------------------------------------
  */
@@ -215,14 +205,14 @@ H5T__bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size)
 
                 /* Zero-set the left part*/
                 H5T__bit_set(buf, offset, abs_shift_dist, 0);
-            }      /* end if */
+            }
             else { /* right shift */
                 H5T__bit_copy(shift_buf, (size_t)0, buf, offset + abs_shift_dist, size - abs_shift_dist);
                 H5T__bit_copy(buf, offset, shift_buf, (size_t)0, size - abs_shift_dist);
                 H5T__bit_set(buf, offset + size - abs_shift_dist, abs_shift_dist, 0);
-            } /* end else */
-        }     /* end else */
-    }         /* end if */
+            }
+        } /* end else */
+    }     /* end if */
 
 done:
     /* Release resources */
@@ -233,18 +223,15 @@ done:
 } /* end H5T__bit_shift() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__bit_get_d
+ * Function:    H5T__bit_get_d
  *
- * Purpose:	Return a small bit sequence as a number.  Bit vector starts
+ * Purpose:     Return a small bit sequence as a number.  Bit vector starts
  *              at OFFSET and is SIZE bits long.
  *
- * Return:	Success:	The bit sequence interpretted as an unsigned
- *				integer.
+ * Return:      Success:    The bit sequence interpretted as an unsigned
+ *                          integer.
  *
- *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *              Tuesday, June 23, 1998
+ *              Failure:    0
  *
  *-------------------------------------------------------------------------
  */
@@ -253,7 +240,7 @@ H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size)
 {
     uint64_t val = 0;
     size_t   i, hs;
-    uint64_t ret_value; /* Return value */
+    uint64_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -269,7 +256,7 @@ H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size)
                 uint8_t tmp                              = ((uint8_t *)&val)[i];
                 ((uint8_t *)&val)[i]                     = ((uint8_t *)&val)[sizeof(val) - (i + 1)];
                 ((uint8_t *)&val)[sizeof(val) - (i + 1)] = tmp;
-            } /* end for */
+            }
             break;
 
         case H5T_ORDER_ERROR:
@@ -279,7 +266,7 @@ H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size)
         default:
             /* Unknown endianness. Bail out. */
             HGOTO_DONE(UFAIL)
-    } /* end switch */
+    }
 
     /* Set return value */
     ret_value = val;
@@ -289,14 +276,11 @@ done:
 } /* end H5T__bit_get_d() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__bit_set_d
+ * Function:    H5T__bit_set_d
  *
- * Purpose:	Sets part of a bit vector to the specified unsigned value.
+ * Purpose:     Sets part of a bit vector to the specified unsigned value.
  *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Wednesday, June 24, 1998
+ * Return:      void
  *
  *-------------------------------------------------------------------------
  */
@@ -318,7 +302,7 @@ H5T__bit_set_d(uint8_t *buf, size_t offset, size_t size, uint64_t val)
                 uint8_t tmp                              = ((uint8_t *)&val)[i];
                 ((uint8_t *)&val)[i]                     = ((uint8_t *)&val)[sizeof(val) - (i + 1)];
                 ((uint8_t *)&val)[sizeof(val) - (i + 1)] = tmp;
-            } /* end for */
+            }
             break;
 
         case H5T_ORDER_ERROR:
@@ -327,7 +311,7 @@ H5T__bit_set_d(uint8_t *buf, size_t offset, size_t size, uint64_t val)
         case H5T_ORDER_MIXED:
         default:
             HDabort();
-    } /* end switch */
+    }
 
     H5T__bit_copy(buf, offset, (uint8_t *)&val, (size_t)0, size);
 
@@ -335,17 +319,12 @@ H5T__bit_set_d(uint8_t *buf, size_t offset, size_t size, uint64_t val)
 } /* end H5T__bit_set_d() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__bit_set
+ * Function:    H5T__bit_set
  *
- * Purpose:	Sets or clears bits in a contiguous region of a vector
- *		beginning at bit OFFSET and continuing for SIZE bits.
+ * Purpose:     Sets or clears bits in a contiguous region of a vector
+ *              beginning at bit OFFSET and continuing for SIZE bits.
  *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Wednesday, June 10, 1998
- *
- * Modifications:
+ * Return:      void
  *
  *-------------------------------------------------------------------------
  */
@@ -370,13 +349,13 @@ H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value)
         else
             buf[idx++] &= (uint8_t)(~(mask << offset));
         size -= nbits;
-    } /* end if */
+    }
 
     /* The middle bytes */
     while (size >= 8) {
         buf[idx++] = value ? 0xff : 0x00;
         size -= 8;
-    } /* end while */
+    }
 
     /* The last partial byte */
     if (size) {
@@ -384,28 +363,25 @@ H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value)
             buf[idx] |= (uint8_t)(((unsigned)1 << size) - 1);
         else
             buf[idx] &= (uint8_t)(~(((unsigned)1 << size) - 1));
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5T__bit_set() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__bit_find
+ * Function:    H5T__bit_find
  *
- * Purpose:	Finds the first bit with the specified VALUE within a region
- *		of a bit vector.  The region begins at OFFSET and continues
- *		for SIZE bits, but the region can be searched from the least
- *		significat end toward the most significant end(H5T_BIT_LSB
- *		as DIRECTION), or from the most significant end to the least
- *		significant end(H5T_BIT_MSB as DIRECTION).
+ * Purpose:     Finds the first bit with the specified VALUE within a region
+ *              of a bit vector.  The region begins at OFFSET and continues
+ *              for SIZE bits, but the region can be searched from the least
+ *              significat end toward the most significant end(H5T_BIT_LSB
+ *              as DIRECTION), or from the most significant end to the least
+ *              significant end(H5T_BIT_MSB as DIRECTION).
  *
- * Return:	Success:	The position of the bit found, relative to
- *				the offset.
+ * Return:      Success:    The position of the bit found, relative to
+ *                          the offset.
  *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Wednesday, June 10, 1998
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
@@ -487,7 +463,7 @@ H5T__bit_find(uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction, hb
                 for (iu = offset + size; iu > offset; --iu)
                     if (value == (hbool_t)((buf[idx] >> (iu - 1)) & 0x01))
                         HGOTO_DONE(8 * idx + (ssize_t)(iu - 1) - base);
-            } /* end if */
+            }
             break;
 
         default:
@@ -499,18 +475,12 @@ done:
 } /* end H5T__bit_find() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__bit_inc
+ * Function:    H5T__bit_inc
  *
- * Purpose:	Increment part of a bit field by adding 1.  The bit field
+ * Purpose:     Increment part of a bit field by adding 1.  The bit field
  *              starts with bit position START and is SIZE bits long.
  *
- * Return:	Success:        The carry-out value.  One if overflows,
- *                              zero otherwise.
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Friday, June 26, 1998
+ * Return:      The carry-out value.  TRUE if overflows, FALSE otherwise.
  *
  *-------------------------------------------------------------------------
  */
@@ -542,7 +512,7 @@ H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
         size -= MIN(size, 8 - start);
         start = 0;
         idx++;
-    } /* end if */
+    }
 
     /* The middle */
     while (carry && size >= 8) {
@@ -552,7 +522,7 @@ H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
         buf[idx] = acc & 0xff;
         idx++;
         size -= 8;
-    } /* end while */
+    }
 
     /* The last bits */
     if (carry && size > 0) {
@@ -562,24 +532,19 @@ H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
         carry = acc & ((unsigned)1 << size);
         buf[idx] &= (uint8_t)(~mask);
         buf[idx] |= (uint8_t)(acc & mask);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(carry ? TRUE : FALSE)
 } /* end H5T__bit_inc() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__bit_dec
+ * Function:    H5T__bit_dec
  *
- * Purpose:	decrement part of a bit field by substracting 1.  The bit
+ * Purpose:     Decrement part of a bit field by substracting 1.  The bit
  *              field starts with bit position START and is SIZE bits long.
  *
- * Return:	Success:        The "borrow-in" value. It's one if underflows,
- *                              zero otherwise.
- *
- *		Failure:	Negative
- *
- * Programmer:	Raymond Lu
- *              March 17, 2004
+ * Return:      The "borrow-in" value. It's TRUE if underflows, FALSE
+ *              otherwise.
  *
  *-------------------------------------------------------------------------
  */
@@ -618,7 +583,7 @@ H5T__bit_dec(uint8_t *buf, size_t start, size_t size)
 
             idx++;
             size -= 8;
-        } /* end while */
+        }
 
         /* The last partial byte */
         if (borrow && size > 0) {
@@ -627,9 +592,11 @@ H5T__bit_dec(uint8_t *buf, size_t start, size_t size)
             buf[idx]--;
             if ((buf[idx] >> size) != tmp >> size)
                 buf[idx] = (uint8_t)(buf[idx] + (1 << size));
-        }  /* end if */
-    }      /* end if */
-    else { /* bit sequence ends in the same byte as starts */
+        }
+    }
+    else {
+        /* The bit sequence ends in the same byte as starts */
+
         /* Example: a sequence like 11000100 and pos=3, size=3.  We substract 00001000
          * and get 10111100.  A bit is borrowed from 6th bit(buf[idx]>>6=00000010, tmp>>6=00000011,
          * not equal).  We need to put this bit back by increment 1000000.
@@ -639,22 +606,19 @@ H5T__bit_dec(uint8_t *buf, size_t start, size_t size)
         if ((buf[idx] >> (pos + size)) != tmp >> (pos + size)) {
             buf[idx] = (uint8_t)(buf[idx] + (1 << (pos + size)));
             borrow   = 1;
-        } /* end if */
-    }     /* end else */
+        }
+    }
 
     FUNC_LEAVE_NOAPI(borrow ? TRUE : FALSE)
 } /* end H5T__bit_dec() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__bit_neg
+ * Function:    H5T__bit_neg
  *
- * Purpose:	negate part of a bit sequence.  The bit
- *              field starts with bit position START and is SIZE bits long.
+ * Purpose:     Negate part of a bit sequence.  The bit field starts with
+ *              bit position START and is SIZE bits long.
  *
- * Return:	void
- *
- * Programmer:	Raymond Lu
- *              March 19, 2004
+ * Return:      void
  *
  *-------------------------------------------------------------------------
  */
@@ -685,17 +649,19 @@ H5T__bit_neg(uint8_t *buf, size_t start, size_t size)
             buf[idx] = (uint8_t) ~(buf[idx]);
             idx++;
             size -= 8;
-        } /* end while */
+        }
 
         /* The last partial byte */
         if (size > 0) {
             /* Similar to the first byte case, where sequence ends in the same byte as starts */
             tmp[0] = (uint8_t)~buf[idx];
             H5T__bit_copy(&(buf[idx]), (size_t)0, tmp, (size_t)0, size);
-        } /* end if */
-    }     /* end if */
-    else  /* bit sequence ends in the same byte as starts */
+        }
+    }
+    else {
+        /* bit sequence ends in the same byte as starts */
         H5T__bit_copy(&(buf[idx]), pos, tmp, pos, size);
+    }
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5T__bit_neg() */

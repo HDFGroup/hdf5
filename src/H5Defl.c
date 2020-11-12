@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer: Quincey Koziol
  *	       Thursday, September 30, 2004
  */
 
@@ -125,7 +125,7 @@ H5D__efl_construct(H5F_t *f, H5D_t *dset)
 
     /*
      * The maximum size of the dataset cannot exceed the storage size.
-     * Also, only the slowest varying dimension of a simple data space
+     * Also, only the slowest varying dimension of a simple dataspace
      * can be extendible (currently only for external data storage).
      */
 
@@ -315,9 +315,6 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, March  4, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -443,8 +440,8 @@ H5D__efl_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset
                 size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                 size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    H5D_efl_readvv_ud_t udata;     /* User data for H5VM_opvv() operator */
-    ssize_t             ret_value; /* Return value (Total size of sequence in bytes) */
+    H5D_efl_readvv_ud_t udata;          /* User data for H5VM_opvv() operator */
+    ssize_t             ret_value = -1; /* Return value (Total size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
 
@@ -524,8 +521,8 @@ H5D__efl_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dse
                  size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                  size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    H5D_efl_writevv_ud_t udata;     /* User data for H5VM_opvv() operator */
-    ssize_t              ret_value; /* Return value (Total size of sequence in bytes) */
+    H5D_efl_writevv_ud_t udata;          /* User data for H5VM_opvv() operator */
+    ssize_t              ret_value = -1; /* Return value (Total size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
 

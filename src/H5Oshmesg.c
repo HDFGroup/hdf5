@@ -150,9 +150,9 @@ H5O_shmesg_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
 static void *
 H5O_shmesg_copy(const void *_mesg, void *_dest)
 {
-    const H5O_shmesg_table_t *mesg = (const H5O_shmesg_table_t *)_mesg;
-    H5O_shmesg_table_t *      dest = (H5O_shmesg_table_t *)_dest;
-    void *                    ret_value;
+    const H5O_shmesg_table_t *mesg      = (const H5O_shmesg_table_t *)_mesg;
+    H5O_shmesg_table_t *      dest      = (H5O_shmesg_table_t *)_dest;
+    void *                    ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -190,7 +190,7 @@ done:
 static size_t
 H5O_shmesg_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
 {
-    size_t ret_value;
+    size_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

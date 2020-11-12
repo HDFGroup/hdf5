@@ -15,7 +15,7 @@
  *
  * Created:             H5MFdbg.c
  *                      Jan 31 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             File memory management debugging functions.
  *
@@ -84,7 +84,6 @@ typedef struct {
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		January 31 2008
  *
  *-------------------------------------------------------------------------
@@ -133,7 +132,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan 31 2008
  *
  *-------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  *
  * Created:		H5HFman.c
  *			Feb 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		"Managed" object routines for fractal heaps.
  *
@@ -89,7 +89,6 @@ static herr_t H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 13 2006
  *
  *-------------------------------------------------------------------------
@@ -218,7 +217,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 17 2006
  *
  *-------------------------------------------------------------------------
@@ -368,7 +366,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 17 2006
  *
  *-------------------------------------------------------------------------
@@ -403,7 +400,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2006
  *
  *-------------------------------------------------------------------------
@@ -439,7 +435,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sept 11 2006
  *
  *-------------------------------------------------------------------------
@@ -474,7 +469,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 15 2006
  *
  *-------------------------------------------------------------------------

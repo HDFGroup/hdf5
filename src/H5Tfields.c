@@ -63,9 +63,6 @@ H5T_init_fields_interface(void)
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
  *
- * Modifications:
- *	Robb Matzke, 22 Dec 1998
- *	Also works with enumeration datatypes.
  *-------------------------------------------------------------------------
  */
 int
@@ -104,14 +101,12 @@ done:
  * Programmer:  Raymond Lu
  *	        October 8, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
 H5T_get_nmembers(const H5T_t *dt)
 {
-    int ret_value;
+    int ret_value = -1; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -144,9 +139,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *	Robb Matzke, 22 Dec 1998
- *	Also works with enumeration datatypes.
  *-------------------------------------------------------------------------
  */
 char *
@@ -185,13 +177,12 @@ done:
  * Programmer:	Raymond Lu
  *              October 9, 2002
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 char *
 H5T__get_member_name(H5T_t const *dt, unsigned membno)
 {
-    char *ret_value;
+    char *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -242,8 +233,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Thursday, April 4, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -412,8 +401,6 @@ H5T__sort_value(const H5T_t *dt, int *map)
  *
  * Programmer:	Robb Matzke
  *              Monday, January  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

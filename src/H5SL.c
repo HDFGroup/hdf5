@@ -64,8 +64,8 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5SLprivate.h" /* Skip list routines			*/
 #include "H5MMprivate.h" /* Memory management                    */
+#include "H5SLprivate.h" /* Skip list routines			*/
 
 /* Local Macros */
 
@@ -640,7 +640,7 @@ H5SL_init_interface(void)
 static H5SL_node_t *
 H5SL_new_node(void *item, const void *key, uint32_t hashval)
 {
-    H5SL_node_t *ret_value; /* New skip list node */
+    H5SL_node_t *ret_value = NULL; /* New skip list node */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -926,7 +926,7 @@ H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
 {
     H5SL_t *     new_slist = NULL; /* Pointer to new skip list object created */
     H5SL_node_t *header;           /* Pointer to skip list header node */
-    H5SL_t *     ret_value;        /* Return value */
+    H5SL_t *     ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1082,7 +1082,7 @@ done:
 H5SL_node_t *
 H5SL_add(H5SL_t *slist, void *item, const void *key)
 {
-    H5SL_node_t *ret_value; /* Return value */
+    H5SL_node_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1408,9 +1408,9 @@ done:
 void *
 H5SL_less(H5SL_t *slist, const void *key)
 {
-    H5SL_node_t *x;           /* Current node to examine */
-    uint32_t     hashval = 0; /* Hash value for key */
-    void *       ret_value;   /* Return value */
+    H5SL_node_t *x;                /* Current node to examine */
+    uint32_t     hashval   = 0;    /* Hash value for key */
+    void *       ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1516,9 +1516,9 @@ done:
 void *
 H5SL_greater(H5SL_t *slist, const void *key)
 {
-    H5SL_node_t *x;           /* Current node to examine */
-    uint32_t     hashval = 0; /* Hash value for key */
-    void *       ret_value;   /* Return value */
+    H5SL_node_t *x;                /* Current node to examine */
+    uint32_t     hashval   = 0;    /* Hash value for key */
+    void *       ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1706,9 +1706,9 @@ done:
 H5SL_node_t *
 H5SL_below(H5SL_t *slist, const void *key)
 {
-    H5SL_node_t *x;           /* Current node to examine */
-    uint32_t     hashval = 0; /* Hash value for key */
-    H5SL_node_t *ret_value;   /* Return value */
+    H5SL_node_t *x;                /* Current node to examine */
+    uint32_t     hashval   = 0;    /* Hash value for key */
+    H5SL_node_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1811,9 +1811,9 @@ done:
 H5SL_node_t *
 H5SL_above(H5SL_t *slist, const void *key)
 {
-    H5SL_node_t *x;           /* Current node to examine */
-    uint32_t     hashval = 0; /* Hash value for key */
-    H5SL_node_t *ret_value;   /* Return value */
+    H5SL_node_t *x;                /* Current node to examine */
+    uint32_t     hashval   = 0;    /* Hash value for key */
+    H5SL_node_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

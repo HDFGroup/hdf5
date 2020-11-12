@@ -15,7 +15,7 @@
  *
  * Created:		H5Oalloc.c
  *			Nov 17 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Object header allocation routines.
  *
@@ -91,7 +91,6 @@ H5FL_EXTERN(H5O_cont_t);
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 17 2006
  *
  *-------------------------------------------------------------------------
@@ -217,7 +216,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 17 2006
  *
  *-------------------------------------------------------------------------
@@ -315,7 +313,6 @@ H5O_eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg, uint8_t *ga
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 22 2006
  *
  *-------------------------------------------------------------------------
@@ -425,7 +422,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Nov 21 2005
  *
  *-------------------------------------------------------------------------
@@ -500,7 +496,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno, siz
     uint8_t *          old_image;                 /* Old address of chunk's image in memory */
     size_t             old_size;                  /* Old size of chunk */
     htri_t             was_extended;              /* If chunk can be extended */
-    size_t             extend_msg;                /* Index of null message to extend */
+    size_t             extend_msg        = 0;     /* Index of null message to extend */
     hbool_t            extended_msg      = FALSE; /* Whether an existing message was extended */
     uint8_t            new_size_flags    = 0;     /* New chunk #0 size flags */
     hbool_t            adjust_size_flags = FALSE; /* Whether to adjust the chunk #0 size flags */
@@ -648,8 +644,8 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno, siz
             oh->mesg[u].raw = oh->chunk[chunkno].image + extra_prfx_size + (oh->mesg[u].raw - old_image);
 
         /* Find continuation message which points to this chunk and adjust chunk's size */
-        /* (Chunk 0 doesn't have a continuation message that points to it and
-         * it's size is directly encoded in the object header) */
+        /* (Chunk 0 doesn't have a continuation message that points to it,
+         * its size is directly encoded in the object header) */
         if (chunkno > 0 && (H5O_CONT_ID == oh->mesg[u].type->id) &&
             (((H5O_cont_t *)(oh->mesg[u].native))->chunkno == chunkno)) {
             H5O_chunk_proxy_t *chk_proxy2   = NULL;                /* Chunk that continuation message is in */
@@ -719,7 +715,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  7 1997
  *
  *-------------------------------------------------------------------------
@@ -878,7 +873,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
     /*
      * The total chunk size must include the requested space plus enough
      * for the message header.  This must be at least some minimum and
-     * aligned propertly.
+     * aligned properly.
      */
     size = MAX(H5O_MIN_SIZE, size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
     HDassert(size == H5O_ALIGN_OH(oh, size));
@@ -895,9 +890,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
     if (HADDR_UNDEF == new_chunk_addr)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate space for new chunk")
 
-    /*
-     * Create the new chunk giving it a file address.
-     */
+    /* Create the new chunk giving it a file address. */
     if (oh->nchunks >= oh->alloc_nchunks) {
         size_t       na = MAX(H5O_NCHUNKS, oh->alloc_nchunks * 2); /* Double # of chunks allocated */
         H5O_chunk_t *x;
@@ -1103,7 +1096,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -1187,7 +1179,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 22 2006
  *
  *-------------------------------------------------------------------------
@@ -1436,7 +1427,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct 17 2005
  *
  *-------------------------------------------------------------------------
@@ -1754,7 +1744,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct 10 2005
  *
  *-------------------------------------------------------------------------
@@ -1764,7 +1753,7 @@ H5O_merge_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     hbool_t merged_msg;          /* Flag to indicate that messages were merged */
     hbool_t did_merging = FALSE; /* Whether any messages were merged */
-    htri_t  ret_value;           /* Return value */
+    htri_t  ret_value   = FAIL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1895,7 +1884,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct 17 2005
  *
  *-------------------------------------------------------------------------
@@ -1905,7 +1893,7 @@ H5O_remove_empty_chunks(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     hbool_t deleted_chunk;        /* Whether to a chunk was deleted */
     hbool_t did_deleting = FALSE; /* Whether any chunks were deleted */
-    htri_t  ret_value;            /* Return value */
+    htri_t  ret_value    = FAIL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2084,13 +2072,7 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct  4 2005
- *
- * Modifications:
- *   Feb. 2009: Vailin Choi
- *      Add 2 more parameters to H5O_move_msgs_forward() for moving
- *	messages forward into "continuation" message
  *
  *-------------------------------------------------------------------------
  */
@@ -2149,7 +2131,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Neil Fortner
- *		nfortne2@hdfgroup.org
  *		Oct 20 2008
  *
  *-------------------------------------------------------------------------

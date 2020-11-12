@@ -26,9 +26,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Eprivate.h" /* Error handling		  	*/
-#include "H5FSpkg.h"    /* Free-space manager			*/
+#include "H5private.h"  /* Generic Functions                            */
+#include "H5Eprivate.h" /* Error handling                               */
+#include "H5FSpkg.h"    /* Free-space manager                           */
 
 /****************/
 /* Local Macros */
@@ -63,12 +63,10 @@
  *
  * Purpose:     Retrieve the parameters used to create the free-space manager
  *
- * Return:      Success:        non-negative
+ * Return:      SUCCEED/FAIL
  *
- *              Failure:        negative
- *
- * Programmer:  similar to H5HF_get_cparam_test()
- *		Vailin Choi; August 25th, 2008
+ * Programmer:  Vailin Choi
+ *              August 25th, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -95,18 +93,17 @@ H5FS_get_cparam_test(const H5FS_t *frsp, H5FS_create_t *cparam)
  *
  * Purpose:     Compare the parameters used to create the fractal heap
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      A value like strcmp()
  *
- * Programmer:  similar to H5HF_cmp_cparam_test()
- *		Vailin Choi; August 25th, 2008
+ * Programmer:  Vailin Choi
+ *              August 25th, 2008
  *
  *-------------------------------------------------------------------------
  */
 int
 H5FS_cmp_cparam_test(const H5FS_create_t *cparam1, const H5FS_create_t *cparam2)
 {
-    int ret_value = SUCCEED; /* Return value */
+    int ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

@@ -282,8 +282,8 @@ H5L_term_interface(void)
  *              group.  The original name SRC is unlinked from the group graph
  *              and then inserted with the new name DST (which can specify a
  *              new path for the object) as an atomic operation. The names
- *              are interpreted relative to SRC_LOC_ID and
- *              DST_LOC_ID, which are either file IDs or group ID.
+ *              are interpreted relative to SRC_LOC_ID and DST_LOC_ID,
+ *              which are either file IDs or group ID.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -548,7 +548,7 @@ done:
  *
  * Purpose:     Removes the specified NAME from the group graph and
  *              decrements the link count for the object to which NAME
- *              points.  If the link count reaches zero then all file-space
+ *              points. If the link count reaches zero then all file-space
  *              associated with the object will be reclaimed (but if the
  *              object is open, then the reclamation of the file space is
  *              delayed until all handles to the object are closed).
@@ -753,8 +753,7 @@ done:
  *
  * Purpose:     Checks if a link of a given name exists in a group
  *
- * Return:      Success:    TRUE/FALSE
- *              Failure:    Negative
+ * Return:      Success:    TRUE/FALSE/FAIL
  *
  * Programmer:  Quincey Koziol
  *              Friday, March 16, 2007
@@ -765,7 +764,7 @@ htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
     H5G_loc_t loc;
-    htri_t    ret_value;
+    htri_t    ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
@@ -773,8 +772,11 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
     /* Check arguments */
     if (H5G_loc(loc_id, &loc))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be an empty string")
+
     if (H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else if (TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
@@ -794,7 +796,6 @@ done:
  * Purpose:     Gets metadata for a link.
  *
  * Return:      Success:    Non-negative with information in LINFO
- *
  *              Failure:    Negative
  *
  * Programmer:  James Laird
@@ -806,7 +807,7 @@ herr_t
 H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/, hid_t lapl_id)
 {
     H5G_loc_t loc;
-    herr_t    ret_value = SUCCEED;
+    herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
@@ -816,6 +817,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/, hid_t lap
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+
     if (H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else if (TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
@@ -975,9 +977,9 @@ done:
  * Purpose:     Tests whether a user-defined link class has been registered
  *              or not.
  *
- * Return:      Positive if the link class has been registered
- *              Zero if it is unregistered
- *              Negative on error (if the class is not a valid UD class ID)
+ * Return:      TRUE if the link class has been registered
+ *              FALSE if it is unregistered
+ *              FAIL on error (if the class is not a valid UD class ID)
  *
  * Programmer:  James Laird
  *              Monday, July 10, 2006
@@ -1017,8 +1019,9 @@ done:
  *              Same pattern of behavior as H5Iget_name.
  *
  * Return:      Success:    Non-negative length of name, with information
- *              in NAME buffer
- *              Failure:    Negative
+ *                          in NAME buffer
+ *
+ *              Failure:    -1
  *
  * Programmer:  Quincey Koziol
  *              Saturday, November 11, 2006
@@ -1033,22 +1036,23 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     H5L_trav_gnbi_t udata;     /* User data for callback */
     ssize_t         ret_value; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API((-1))
     H5TRACE8("Zs", "i*sIiIohxzi", loc_id, group_name, idx_type, order, n, name, size, lapl_id);
 
     /* Check arguments */
     if (H5G_loc(loc_id, &loc))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if (!group_name || !*group_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "no name specified")
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid index type specified")
     if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid iteration order specified")
+
     if (H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else if (TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not link access property list ID")
 
     /* Set up user data for callback */
     udata.idx_type = idx_type;
@@ -1062,7 +1066,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     /* Traverse the group hierarchy to locate the link to get name of */
     if (H5G_traverse(&loc, group_name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L_get_name_by_idx_cb, &udata,
                      lapl_id, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, (-1), "name doesn't exist")
 
     /* Set the return value */
     ret_value = udata.name_len;
@@ -1080,16 +1084,12 @@ done:
  *              Same pattern of behavior as H5Giterate.
  *
  * Return:      Success:    The return value of the first operator that
- *              returns non-zero, or zero if all members were
- *              processed with no operator returning non-zero.
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
  *              Failure:    Negative if something goes wrong within the
- *              library, or the negative value returned by one
- *              of the operators.
- *
- *
- * Programmer:  Quincey Koziol
- *              Thursday, November 16, 2006
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */
@@ -1147,12 +1147,12 @@ done:
  *              Same pattern of behavior as H5Giterate.
  *
  * Return:      Success:    The return value of the first operator that
- *              returns non-zero, or zero if all members were
- *              processed with no operator returning non-zero.
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
  *              Failure:    Negative if something goes wrong within the
- *              library, or the negative value returned by one
- *              of the operators.
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *
  * Programmer:  Quincey Koziol
@@ -1173,8 +1173,10 @@ H5Literate_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     H5TRACE8("e", "i*sIiIo*hx*xi", loc_id, group_name, idx_type, order, idx_p, op, op_data, lapl_id);
 
     /* Check arguments */
-    if (!group_name || !*group_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if (!group_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be NULL")
+    if (!*group_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be an empty string")
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
@@ -1223,12 +1225,12 @@ done:
  *              _object_.
  *
  * Return:      Success:    The return value of the first operator that
- *              returns non-zero, or zero if all members were
- *              processed with no operator returning non-zero.
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
  *              Failure:    Negative if something goes wrong within the
- *              library, or the negative value returned by one
- *              of the operators.
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  * Programmer:  Quincey Koziol
  *              November 24 2007
@@ -1279,12 +1281,12 @@ done:
  *              _object_.
  *
  * Return:      Success:    The return value of the first operator that
- *              returns non-zero, or zero if all members were
- *              processed with no operator returning non-zero.
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
  *              Failure:    Negative if something goes wrong within the
- *              library, or the negative value returned by one
- *              of the operators.
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  * Programmer:  Quincey Koziol
  *              November 3 2007
@@ -1301,14 +1303,17 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_i
     H5TRACE7("e", "i*sIiIox*xi", loc_id, group_name, idx_type, order, op, op_data, lapl_id);
 
     /* Check args */
-    if (!group_name || !*group_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if (!group_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be NULL")
+    if (!*group_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be an empty string")
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if (!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
+
     if (H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else if (TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
@@ -1902,7 +1907,7 @@ done:
  *
  * Purpose:     Creates a soft link from LINK_NAME to TARGET_PATH.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
@@ -2351,11 +2356,10 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "an object with that name already exists")
 
     /* Check for crossing file boundaries with a new hard link */
-    if (udata->lnk->type == H5L_TYPE_HARD) {
+    if (udata->lnk->type == H5L_TYPE_HARD)
         /* Check that both objects are in same file */
         if (!H5F_SAME_SHARED(grp_loc->oloc->file, udata->file))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "moving a link across files is not allowed")
-    } /* end if */
 
     /* Give the object its new name */
     /* Casting away const okay -JML */
@@ -2737,7 +2741,7 @@ done:
  *
  * Purpose:     Returns metadata about a link.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  James Laird
  *              Monday, April 17 2006
@@ -2891,7 +2895,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Sep 29 2006
  *
  *-------------------------------------------------------------------------

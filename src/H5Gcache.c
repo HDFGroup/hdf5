@@ -15,7 +15,7 @@
  *
  * Created:		H5Gcache.c
  *			Feb  5 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implement group metadata cache methods.
  *
@@ -101,7 +101,6 @@ H5FL_SEQ_EXTERN(H5G_entry_t);
  *              Failure:    NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -192,7 +191,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -282,7 +280,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Jan 15 2003
  *
  *-------------------------------------------------------------------------
@@ -294,9 +291,7 @@ H5G_node_dest(H5F_t *f, H5G_node_t *sym)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /*
-     * Check arguments.
-     */
+    /* Sanity checks */
     HDassert(f);
     HDassert(sym);
 
@@ -330,7 +325,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 20 2003
  *
  *-------------------------------------------------------------------------
@@ -342,9 +336,7 @@ H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /*
-     * Check arguments.
-     */
+    /* Sanity checks */
     HDassert(sym);
 
     /* Reset the node's dirty flag */

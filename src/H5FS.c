@@ -12,12 +12,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, May  2, 2006
  *
- * Purpose:	Free space tracking functions.
+ * Purpose:     Free space tracking functions.
  *
- * Note:	(Used to be in the H5HFflist.c file, prior to the date above)
+ * Note:        (Used to be in the H5HFflist.c file, prior to the date above)
  *
  */
 
@@ -30,11 +30,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FSpkg.h"     /* File free space			*/
-#include "H5MFprivate.h" /* File memory management		*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata cache                           */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FSpkg.h"     /* File free space                          */
+#include "H5MFprivate.h" /* File memory management                   */
 
 /****************/
 /* Local Macros */
@@ -75,20 +75,15 @@ H5FL_DEFINE(H5FS_t);
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_create
+ * Function:    H5FS_create
  *
- * Purpose:	Allocate & initialize file free space info
+ * Purpose:     Allocate & initialize file free space info
  *
- * Return:	Success:	Pointer to free space structure
+ * Return:      Success:    Pointer to free space structure
+ *              Failure:    NULL
  *
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, March  7, 2006
- *
- * Modifications:
- *	Vailin Choi, July 29th, 2008
- *	  Add two more parameters for handling alignment: alignment & threshhold
  *
  *-------------------------------------------------------------------------
  */
@@ -96,8 +91,8 @@ H5FS_t *
 H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr, const H5FS_create_t *fs_create, size_t nclasses,
             const H5FS_section_class_t *classes[], void *cls_init_udata, hsize_t alignment, hsize_t threshold)
 {
-    H5FS_t *fspace = NULL; /* New free space structure */
-    H5FS_t *ret_value;     /* Return value */
+    H5FS_t *fspace    = NULL; /* New free space structure */
+    H5FS_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 #ifdef H5FS_DEBUG
@@ -162,21 +157,15 @@ done:
 } /* H5FS_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_open
+ * Function:    H5FS_open
  *
- * Purpose:	Open an existing file free space info structure on disk
+ * Purpose:     Open an existing file free space info structure on disk
  *
- * Return:	Success:	Pointer to free space structure
+ * Return:      Success:    Pointer to free space structure
+ *              Failure:    NULL
  *
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, May  2, 2006
- *
- * Modfications:
- *
- *	Vailin Choi, July 29th, 2008
- *	  Add two more parameters for handling alignment: alignment & threshhold
  *
  *-------------------------------------------------------------------------
  */
@@ -184,9 +173,9 @@ H5FS_t *
 H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, size_t nclasses, const H5FS_section_class_t *classes[],
           void *cls_init_udata, hsize_t alignment, hsize_t threshold)
 {
-    H5FS_t *            fspace = NULL; /* New free space structure */
-    H5FS_hdr_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
-    H5FS_t *            ret_value;     /* Return value */
+    H5FS_t *            fspace = NULL;    /* New free space structure */
+    H5FS_hdr_cache_ud_t cache_udata;      /* User-data for metadata cache callback */
+    H5FS_t *            ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 #ifdef H5FS_DEBUG
@@ -238,15 +227,13 @@ done:
 } /* H5FS_open() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_delete
+ * Function:    H5FS_delete
  *
- * Purpose:	Delete a free space manager on disk
+ * Purpose:     Delete a free space manager on disk
  *
- * Return:	Success:	non-negative
+ * Return:      SUCCEED/FAIL
  *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, May 30, 2006
  *
  *-------------------------------------------------------------------------
@@ -334,16 +321,14 @@ done:
 } /* H5FS_delete() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_close
+ * Function:    H5FS_close
  *
- * Purpose:	Destroy & deallocate free list structure, serializing sections
+ * Purpose:     Destroy & deallocate free list structure, serializing sections
  *              in the bins
  *
- * Return:	Success:	non-negative
+ * Return:      SUCCEED/FAIL
  *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, March  7, 2006
  *
  *-------------------------------------------------------------------------
@@ -512,14 +497,14 @@ done:
 } /* H5FS_close() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_new
+ * Function:	H5FS__new
  *
- * Purpose:	Create new free space manager structure
+ * Purpose:     Create new free space manager structure
  *
- * Return:	Success:	non-NULL, pointer to new free space manager struct
- *		Failure:	NULL
+ * Return:      Success:    non-NULL, pointer to new free space manager struct
+ *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, July 31, 2006
  *
  *-------------------------------------------------------------------------
@@ -527,9 +512,9 @@ done:
 H5FS_t *
 H5FS_new(const H5F_t *f, size_t nclasses, const H5FS_section_class_t *classes[], void *cls_init_udata)
 {
-    H5FS_t *fspace = NULL; /* Free space manager */
-    size_t  u;             /* Local index variable */
-    H5FS_t *ret_value;     /* Return value */
+    H5FS_t *fspace = NULL;    /* Free space manager */
+    size_t  u;                /* Local index variable */
+    H5FS_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -596,8 +581,7 @@ done:
  *
  * Purpose:     Collect meta storage info used by the free space manager
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      SUCCEED (Can't fail)
  *
  * Programmer:  Vailin Choi
  *              June 19, 2007
@@ -612,7 +596,6 @@ H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size)
     /*
      * Check arguments.
      */
-    HDassert(f);
     HDassert(fspace);
     HDassert(meta_size);
 
@@ -627,8 +610,7 @@ H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size)
  *
  * Purpose:     Increment reference count on free space header
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              February  7, 2008
@@ -667,8 +649,7 @@ done:
  *
  * Purpose:     Decrement reference count on free space header
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              February  7, 2008
@@ -710,15 +691,14 @@ done:
 } /* end H5FS_decr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_dirty
+ * Function:    H5FS_dirty
  *
- * Purpose:	Mark free space header as dirty
+ * Purpose:     Mark free space header as dirty
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Feb 14 2008
+ * Programmer:  Quincey Koziol
+ *              Feb 14 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -728,9 +708,6 @@ H5FS_dirty(H5FS_t *fspace)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-#ifdef QAK
-    HDfprintf(stderr, "%s: Marking free space header as dirty\n", FUNC);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(fspace);
@@ -746,15 +723,14 @@ done:
 } /* end H5FS_dirty() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_hdr_dest
+ * Function:    H5FS_hdr_dest
  *
- * Purpose:	Destroys a free space header in memory.
+ * Purpose:     Destroys a free space header in memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May  2 2006
+ * Programmer:  Quincey Koziol
+ *              May  2 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -791,14 +767,13 @@ done:
 } /* end H5FS_hdr_dest() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_sinfo_free_sect_cb
+ * Function:    H5FS_sinfo_free_sect_cb
  *
- * Purpose:	Free a size-tracking node for a bin
+ * Purpose:     Free a size-tracking node for a bin
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, March 11, 2006
  *
  *-------------------------------------------------------------------------
@@ -821,15 +796,13 @@ H5FS_sinfo_free_sect_cb(void *_sect, void H5_ATTR_UNUSED *key, void *op_data)
 } /* H5FS_sinfo_free_sect_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_sinfo_free_node_cb
+ * Function:    H5FS_sinfo_free_node_cb
  *
- * Purpose:	Free a size-tracking node for a bin
+ * Purpose:     Free a size-tracking node for a bin
  *
- * Return:	Success:	non-negative
+ * Return:      SUCCEED (Can't fail)
  *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, March 11, 2006
  *
  *-------------------------------------------------------------------------
@@ -854,15 +827,14 @@ H5FS_sinfo_free_node_cb(void *item, void H5_ATTR_UNUSED *key, void *op_data)
 } /* H5FS_sinfo_free_node_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_sinfo_dest
+ * Function:    H5FS_sinfo_dest
  *
- * Purpose:	Destroys a free space section info in memory.
+ * Purpose:     Destroys a free space section info in memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		July 31 2006
+ * Programmer:  Quincey Koziol
+ *              July 31 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -915,15 +887,14 @@ done:
 #ifdef H5FS_DEBUG_ASSERT
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_assert
+ * Function:    H5FS_assert
  *
- * Purpose:	Verify that the free space manager is mostly sane
+ * Purpose:     Verify that the free space manager is mostly sane
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jul 17 2006
+ * Programmer:  Quincey Koziol
+ *              Jul 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -931,9 +902,6 @@ herr_t
 H5FS_assert(const H5FS_t *fspace)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-#ifndef QAK
-    HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS_assert", fspace->tot_sect_count);
-#endif /* QAK */
 
     /* Checks for section info, if it's available */
     if (fspace->sinfo) {
@@ -949,9 +917,6 @@ H5FS_assert(const H5FS_t *fspace)
     HDassert(fspace->tot_sect_count >= fspace->serial_sect_count);
     HDassert(fspace->tot_sect_count >= fspace->ghost_sect_count);
     HDassert(fspace->tot_sect_count == (fspace->serial_sect_count + fspace->ghost_sect_count));
-#ifdef QAK
-    HDassert(fspace->serial_sect_count > 0 || fspace->ghost_sect_count == 0);
-#endif /* QAK */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS_assert() */

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This file contains public declarations for the H5S module.
+ * This file contains public declarations for the H5R module.
  */
 #ifndef _H5Rpublic_H
 #define _H5Rpublic_H
@@ -34,8 +34,8 @@ typedef enum {
 
 /* Note! Be careful with the sizes of the references because they should really
  * depend on the run-time values in the file.  Unfortunately, the arrays need
- * to be defined at compile-time, so we have to go with the worst case sizes for
- * them.  -QAK
+ * to be defined at compile-time, so we have to go with the worst case sizes
+ * for them.  -QAK
  */
 #define H5R_OBJ_REF_BUF_SIZE sizeof(haddr_t)
 /* Object reference structure for user's code */
@@ -70,10 +70,6 @@ H5_DLL ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *ref, c
  * Use of these symbols is deprecated.
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-
-/* Macros */
-
-/* Typedefs */
 
 /* Function prototypes */
 H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *_ref);

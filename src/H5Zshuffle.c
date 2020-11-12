@@ -53,11 +53,8 @@ const H5Z_class2_t H5Z_SHUFFLE[1] = {{
  * Programmer:	Quincey Koziol
  *              Monday, April  7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
@@ -112,10 +109,6 @@ done:
  * Programmer:	Kent Yang
  *              Wednesday, November 13, 2002
  *
- * Modifications:
- *              Quincey Koziol, November 13, 2002
- *              Cleaned up code.
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -129,10 +122,10 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     size_t         numofelements; /* Number of elements in buffer */
     size_t         i;             /* Local index variables */
 #ifdef NO_DUFFS_DEVICE
-    size_t j;         /* Local index variable */
-#endif                /* NO_DUFFS_DEVICE */
-    size_t leftover;  /* Extra bytes at end of buffer */
-    size_t ret_value; /* Return value */
+    size_t j;             /* Local index variable */
+#endif                    /* NO_DUFFS_DEVICE */
+    size_t leftover;      /* Extra bytes at end of buffer */
+    size_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 

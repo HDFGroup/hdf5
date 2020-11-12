@@ -15,7 +15,7 @@
  *
  * Created:	H5Ddeprec.c
  *		April 5 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5D interface.  These
  *              functions are here for compatibility purposes and may be
@@ -120,28 +120,28 @@ H5D__term_deprec_interface(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dcreate1
+ * Function:    H5Dcreate1
  *
- * Purpose:	Creates a new dataset named NAME at LOC_ID, opens the
- *		dataset for access, and associates with that dataset constant
- *		and initial persistent properties including the type of each
- *		datapoint as stored in the file (TYPE_ID), the size of the
- *		dataset (SPACE_ID), and other initial miscellaneous
- *		properties (DCPL_ID).
+ * Purpose:     Creates a new dataset named NAME at LOC_ID, opens the
+ *              dataset for access, and associates with that dataset constant
+ *              and initial persistent properties including the type of each
+ *              datapoint as stored in the file (TYPE_ID), the size of the
+ *              dataset (SPACE_ID), and other initial miscellaneous
+ *              properties (DCPL_ID).
  *
- *		All arguments are copied into the dataset, so the caller is
- *		allowed to derive new types, data spaces, and creation
- *		parameters from the old ones and reuse them in calls to
- *		create other datasets.
+ *              All arguments are copied into the dataset, so the caller is
+ *              allowed to derive new types, data spaces, and creation
+ *              parameters from the old ones and reuse them in calls to
+ *              create other datasets.
  *
- * Return:	Success:	The object ID of the new dataset.  At this
- *				point, the dataset is ready to receive its
- *				raw data.  Attempting to read raw data from
- *				the dataset will probably return the fill
- *				value.	The dataset should be closed when
- *				the caller is no longer interested in it.
+ * Return:      Success:    The object ID of the new dataset. At this
+ *                          point, the dataset is ready to receive its
+ *                          raw data. Attempting to read raw data from
+ *                          the dataset will probably return the fill
+ *                          value. The dataset should be closed when
+ *                          the caller is no longer interested in it.
  *
- *		Failure:	FAIL
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:	Robb Matzke
  *		Wednesday, December  3, 1997
@@ -151,56 +151,56 @@ H5D__term_deprec_interface(void)
 hid_t
 H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t dcpl_id)
 {
-    H5G_loc_t    loc;         /* Object location to insert dataset into */
-    H5D_t *      dset = NULL; /* New dataset's info */
-    const H5S_t *space;       /* Dataspace for dataset */
-    hid_t        ret_value;   /* Return value */
+    H5G_loc_t    loc;                         /* Object location to insert dataset into */
+    H5D_t *      dset = NULL;                 /* New dataset's info */
+    const H5S_t *space;                       /* Dataspace for dataset */
+    hid_t        ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, dcpl_id);
 
     /* Check arguments */
     if (H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a location ID")
     if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name")
     if (H5I_DATATYPE != H5I_get_type(type_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype ID")
     if (NULL == (space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace ID")
     if (H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     else if (TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not dataset create property list ID")
 
     /* Build and open the new dataset */
     if (NULL == (dset = H5D__create_named(&loc, name, type_id, space, H5P_LINK_CREATE_DEFAULT, dcpl_id,
                                           H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
     /* Register the new dataset to get an ID for it */
     if ((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
 done:
-    if (ret_value < 0)
+    if (H5I_INVALID_HID == ret_value)
         if (dset && H5D_close(dset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate1() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dopen1
+ * Function:    H5Dopen1
  *
- * Purpose:	Finds a dataset named NAME at LOC_ID, opens it, and returns
- *		its ID.	 The dataset should be close when the caller is no
- *		longer interested in it.
+ * Purpose:     Finds a dataset named NAME at LOC_ID, opens it, and returns
+ *              its ID. The dataset should be close when the caller is no
+ *              longer interested in it.
  *
- * Note:	Deprecated in favor of H5Dopen2
+ * Note:        Deprecated in favor of H5Dopen2
  *
- * Return:	Success:	A new dataset ID
- *		Failure:	FAIL
+ * Return:      Success:    A new dataset ID
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
@@ -219,16 +219,16 @@ H5Dopen1(hid_t loc_id, const char *name)
     hbool_t    loc_found = FALSE;                      /* Location at 'name' found */
     hid_t      dapl_id   = H5P_DATASET_ACCESS_DEFAULT; /* dapl to use to open dataset */
     hid_t      dxpl_id   = H5AC_ind_dxpl_id;           /* dxpl to use to open datset */
-    hid_t      ret_value;
+    hid_t      ret_value = H5I_INVALID_HID;            /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
     if (H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a location")
     if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name")
 
     /* Set up dataset location to fill in */
     dset_loc.oloc = &oloc;
@@ -237,32 +237,32 @@ H5Dopen1(hid_t loc_id, const char *name)
 
     /* Find the dataset object */
     if (H5G_loc_find(&loc, name, &dset_loc, H5P_DEFAULT, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
+        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, H5I_INVALID_HID, "not found")
     loc_found = TRUE;
 
     /* Check that the object found is the correct type */
     if (H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object type")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "can't get object type")
     if (obj_type != H5O_TYPE_DATASET)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, H5I_INVALID_HID, "not a dataset")
 
     /* Open the dataset */
     if (NULL == (dset = H5D_open(&dset_loc, dapl_id, dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "can't open dataset")
 
     /* Register an atom for the dataset */
     if ((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't register dataset atom")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset atom")
 
 done:
     if (ret_value < 0) {
         if (dset != NULL) {
             if (H5D_close(dset) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
         } /* end if */
         else {
             if (loc_found && H5G_loc_free(&dset_loc) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5I_INVALID_HID, "can't free location")
         } /* end else */
     }     /* end if */
 
@@ -270,15 +270,15 @@ done:
 } /* end H5Dopen1() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dextend
+ * Function:    H5Dextend
  *
- * Purpose:	This function makes sure that the dataset is at least of size
- *		SIZE. The dimensionality of SIZE is the same as the data
- *		space of the dataset being changed.
+ * Purpose:     This function makes sure that the dataset is at least of size
+ *              SIZE. The dimensionality of SIZE is the same as the data
+ *              space of the dataset being changed.
  *
- * Note:	Deprecated in favor of H5Dset_extent
+ * Note:        Deprecated in favor of H5Dset_extent
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, January 30, 1998
@@ -296,7 +296,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
 
     /* Check args */
     if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
     if (!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 

@@ -15,7 +15,7 @@
  *
  * Created:		H5HFdbg.c
  *			Feb 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Dump debugging information about a fractal heap
  *
@@ -97,7 +97,6 @@ static herr_t H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int i
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 28 2006
  *
  *-------------------------------------------------------------------------
@@ -155,7 +154,6 @@ H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwi
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb 23 2012
  *
  *-------------------------------------------------------------------------
@@ -249,7 +247,6 @@ H5HF_hdr_print(const H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t dump_internal, FILE
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 24 2006
  *
  *-------------------------------------------------------------------------
@@ -293,7 +290,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 13 2006
  *
  *-------------------------------------------------------------------------
@@ -376,7 +372,6 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 28 2006
  *
  *-------------------------------------------------------------------------
@@ -499,7 +494,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb 23 2012
  *
  *-------------------------------------------------------------------------
@@ -613,7 +607,6 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *st
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  7 2006
  *
  *-------------------------------------------------------------------------
@@ -671,7 +664,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 13 2006
  *
  *-------------------------------------------------------------------------
@@ -703,10 +695,6 @@ H5HF_sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
               "Section address:", sect->sect_info.addr);
     HDfprintf(udata->stream, "%*s%-*s %Hu\n", udata->indent, "", udata->fwidth,
               "Section size:", sect->sect_info.size);
-#ifdef QAK
-    HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
-              "Section state:", (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
-#endif /* QAK */
 
     /* Dump section-specific debugging information */
     if (H5FS_sect_debug(udata->fspace, _sect, udata->stream, udata->indent + 3, MAX(0, udata->fwidth - 3)) <
@@ -725,7 +713,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  9 2006
  *
  *-------------------------------------------------------------------------

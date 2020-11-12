@@ -15,7 +15,7 @@
  *
  * Created:             H5HFpublic.h
  *                      Feb 24 2006
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             Public declarations for the fractal heap package.
  *

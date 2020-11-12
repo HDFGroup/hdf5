@@ -103,8 +103,6 @@ H5T_init_compound_interface(void)
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -171,8 +169,6 @@ H5T_get_member_offset(const H5T_t *dt, unsigned membno)
  * Programmer:	Quincey Koziol
  *		Thursday, November  9, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 H5T_class_t
@@ -210,7 +206,7 @@ done:
  *				modifying the returned datatype does not
  *				modify the member type.
  *
- *		Failure:	Negative
+ *		Failure:	H5I_INVALID_HID
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -224,23 +220,27 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
     H5T_t *memb_dt = NULL; /* Member datatype */
     hid_t  ret_value;      /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "iIu", type_id, membno);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a compound datatype")
     if (membno >= dt->shared->u.compnd.nmembs)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid member number")
+
+    /* Retrieve the datatype for the member */
     if (NULL == (memb_dt = H5T_get_member_type(dt, membno, H5T_COPY_REOPEN)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to retrieve member type")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to retrieve member type")
+
+    /* Get an ID for the datatype */
     if ((ret_value = H5I_register(H5I_DATATYPE, memb_dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable register datatype atom")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable register datatype atom")
 
 done:
-    if (ret_value < 0)
+    if (H5I_INVALID_HID == ret_value)
         if (memb_dt && H5T_close(memb_dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close datatype")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_member_type() */
@@ -248,8 +248,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_member_type
  *
- * Purpose:	Private function for H5Tget_member_type.  Returns the data
- *              type of the specified member.
+ * Purpose:     Returns a copy of the data type of the specified member.
  *
  * Return:	Success:	A copy of the member datatype;
  *				modifying the returned datatype does not
@@ -265,10 +264,11 @@ done:
 H5T_t *
 H5T_get_member_type(const H5T_t *dt, unsigned membno, H5T_copy_t method)
 {
-    H5T_t *ret_value; /* Return value */
+    H5T_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
+    /* Sanity checks */
     HDassert(dt);
     HDassert(membno < dt->shared->u.compnd.nmembs);
 
@@ -324,8 +324,6 @@ H5T__get_member_size(const H5T_t *dt, unsigned membno)
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -369,8 +367,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -577,8 +573,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Thursday, September 11, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -595,9 +589,8 @@ H5T_is_packed(const H5T_t *dt)
         dt = dt->shared->parent;
 
     /* If this is a compound datatype, check if it is packed */
-    if (dt->shared->type == H5T_COMPOUND) {
+    if (dt->shared->type == H5T_COMPOUND)
         ret_value = (htri_t)(dt->shared->u.compnd.packed);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_packed() */
@@ -614,8 +607,6 @@ H5T_is_packed(const H5T_t *dt)
  *
  * Programmer:	Neil Fortner
  *		Monday, October 19, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

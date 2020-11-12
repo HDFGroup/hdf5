@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:        H5ACprivate.h
+ * Created:   H5ACprivate.h
  *            Jul  9 1997
- *            Robb Matzke <matzke@llnl.gov>
+ *            Robb Matzke
  *
- * Purpose:        Constants and typedefs available to the rest of the
+ * Purpose:   Constants and typedefs available to the rest of the
  *            library.
  *
  *-------------------------------------------------------------------------
@@ -196,27 +196,27 @@ extern hid_t           H5AC_ind_dxpl_id;
   /* hbool_t     evictions_enabled      = */ TRUE,                            \
   /* hbool_t     set_initial_size       = */ TRUE,                            \
   /* size_t      initial_size           = */ ( 2 * 1024 * 1024),              \
-  /* double      min_clean_fraction     = */ 0.3,                             \
+  /* double      min_clean_fraction     = */ 0.3f,                            \
   /* size_t      max_size               = */ (32 * 1024 * 1024),              \
   /* size_t      min_size               = */ (1 * 1024 * 1024),               \
   /* long int    epoch_length           = */ 50000,                           \
   /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,             \
-  /* double      lower_hr_threshold     = */ 0.9F,                            \
-  /* double      increment              = */ 2.0F,                            \
+  /* double      lower_hr_threshold     = */ 0.9f,                            \
+  /* double      increment              = */ 2.0f,                            \
   /* hbool_t     apply_max_increment    = */ TRUE,                            \
   /* size_t      max_increment          = */ (4 * 1024 * 1024),               \
   /* enum H5C_cache_flash_incr_mode       */                                  \
   /*                    flash_incr_mode = */ H5C_flash_incr__add_space,       \
-  /* double      flash_multiple         = */ 1.0F,                            \
-  /* double      flash_threshold        = */ 0.25F,                            \
+  /* double      flash_multiple         = */ 1.0f,                            \
+  /* double      flash_threshold        = */ 0.25f,                           \
   /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold, \
-  /* double      upper_hr_threshold     = */ H5_DOUBLE(0.999),                 \
-  /* double      decrement              = */ 0.9F,                            \
+  /* double      upper_hr_threshold     = */ 0.999f,                          \
+  /* double      decrement              = */ 0.9f,                            \
   /* hbool_t     apply_max_decrement    = */ TRUE,                            \
   /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
-  /* double      empty_reserve          = */ 0.1F,                            \
+  /* double      empty_reserve          = */ 0.1f,                            \
   /* int     dirty_bytes_threshold  = */ (256 * 1024),                    \
   /* int    metadata_write_strategy = */                                  \
                     H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
@@ -232,34 +232,33 @@ extern hid_t           H5AC_ind_dxpl_id;
   /* hbool_t     evictions_enabled      = */ TRUE,                            \
   /* hbool_t     set_initial_size       = */ TRUE,                            \
   /* size_t      initial_size           = */ ( 2 * 1024 * 1024),              \
-  /* double      min_clean_fraction     = */ 0.01F,                           \
+  /* double      min_clean_fraction     = */ 0.01f,                           \
   /* size_t      max_size               = */ (32 * 1024 * 1024),              \
   /* size_t      min_size               = */ ( 1 * 1024 * 1024),              \
   /* long int    epoch_length           = */ 50000,                           \
   /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,             \
-  /* double      lower_hr_threshold     = */ 0.9F,                            \
-  /* double      increment              = */ 2.0F,                            \
+  /* double      lower_hr_threshold     = */ 0.9f,                            \
+  /* double      increment              = */ 2.0f,                            \
   /* hbool_t     apply_max_increment    = */ TRUE,                            \
   /* size_t      max_increment          = */ (4 * 1024 * 1024),               \
   /* enum H5C_cache_flash_incr_mode       */                                  \
   /*                    flash_incr_mode = */ H5C_flash_incr__add_space,       \
-  /* double      flash_multiple         = */ 1.4F,                            \
-  /* double      flash_threshold        = */ 0.25F,                           \
+  /* double      flash_multiple         = */ 1.4f,                            \
+  /* double      flash_threshold        = */ 0.25f,                           \
   /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,\
-  /* double      upper_hr_threshold     = */ H5_DOUBLE(0.999),                \
-  /* double      decrement              = */ 0.9F,                            \
+  /* double      upper_hr_threshold     = */ 0.999f,                          \
+  /* double      decrement              = */ 0.9f,                            \
   /* hbool_t     apply_max_decrement    = */ TRUE,                            \
   /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
-  /* double      empty_reserve          = */ 0.1F,                            \
+  /* double      empty_reserve          = */ 0.1f,                            \
   /* int     dirty_bytes_threshold  = */ (256 * 1024),                    \
   /* int    metadata_write_strategy = */                                  \
                     H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
 }
 #endif /* H5_HAVE_PARALLEL */
 /* clang-format on */
-
 /*
  * Library prototypes.
  */
@@ -324,16 +323,11 @@ H5_DLL herr_t H5AC_stats(const H5F_t *f);
 H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
 
 H5_DLL herr_t H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr, H5AC_cache_config_t *config_ptr);
-
 H5_DLL herr_t H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
                                   size_t *cur_size_ptr, int32_t *cur_num_entries_ptr);
-
 H5_DLL herr_t H5AC_get_cache_hit_rate(H5AC_t *cache_ptr, double *hit_rate_ptr);
-
 H5_DLL herr_t H5AC_reset_cache_hit_rate_stats(H5AC_t *cache_ptr);
-
 H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config_ptr);
-
 H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC_close_trace_file(H5AC_t *cache_ptr);

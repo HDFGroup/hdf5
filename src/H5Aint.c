@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Aint.c
- *			Dec 18 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:        H5Aint.c
+ *                 Dec 18 2006
+ *                 Quincey Koziol
  *
- * Purpose:		Internal routines for managing attributes.
+ * Purpose:        Internal routines for managing attributes.
  *
  *-------------------------------------------------------------------------
  */
@@ -32,14 +32,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Apkg.h"      /* Attributes	  			*/
-#include "H5Dprivate.h"  /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Opkg.h"      /* Object headers			*/
-#include "H5SMprivate.h" /* Shared Object Header Messages	*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Apkg.h"      /* Attributes                               */
+#include "H5Dprivate.h"  /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Opkg.h"      /* Object headers                           */
+#include "H5SMprivate.h" /* Shared Object Header Messages            */
 
 /****************/
 /* Local Macros */
@@ -233,11 +233,10 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type, const H5S_
      * (to maintain ref. count incr/decr similarity with "shared message"
      *      type of datatype sharing)
      */
-    if (H5T_committed(attr->shared->dt)) {
+    if (H5T_committed(attr->shared->dt))
         /* Increment the reference count on the shared datatype */
         if (H5T_link(attr->shared->dt, 1, dxpl_id) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, NULL, "unable to adjust shared datatype link count")
-    } /* end if */
 
     /* Compute the size of pieces on disk.  This is either the size of the
      * datatype and dataspace messages themselves, or the size of the "shared"
@@ -268,6 +267,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type, const H5S_
     if (H5O_attr_create(&(attr->oloc), dxpl_id, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, NULL, "unable to create attribute in object header")
 
+    /* Set return value */
     ret_value = attr;
 
 done:
@@ -279,20 +279,19 @@ done:
 } /* H5A_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_open_common
+ * Function:    H5A_open_common
  *
- * Purpose:
- *      Finishes initializing an attributes the open
+ * Purpose:     Finishes initializing an attributes the open
  *
  * Usage:
  *  herr_t H5A_open_common(loc, name, dxpl_id)
  *      const H5G_loc_t *loc;   IN: Pointer to group location for object
  *      H5A_t *attr;            IN/OUT: Pointer to attribute to initialize
  *
- * Return: Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 18, 2006
+ * Programmer:  Quincey Koziol
+ *              December 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -337,9 +336,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_open_by_idx
  *
- * Purpose: 	Open an attribute according to its index order
+ * Purpose:     Open an attribute according to its index order
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		April 2, 1998
@@ -398,11 +397,11 @@ done:
 } /* H5A_open_by_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_open_by_name
+ * Function:    H5A_open_by_name
  *
  * Purpose:     Open an attribute in an object header, according to it's name
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		December 11, 2006
@@ -685,16 +684,13 @@ done:
 } /* H5A_read() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_get_space
+ * Function:    H5A_get_space
  *
- * Purpose:	Returns dataspace of the attribute.
+ * Purpose:     Returns dataspace of the attribute.
  *
- * Return:	Success:	dataspace
+ * Return:      Success:    A valid ID for the dataspace of an attribute
  *
- *		Failure:	NULL
- *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ *              Failure:    H5I_INVALID_ID
  *
  *-------------------------------------------------------------------------
  */
@@ -709,23 +705,19 @@ H5A_get_space(H5A_t *attr)
 
     /* Copy the attribute's dataspace */
     if (NULL == (ret_value = H5S_copy(attr->shared->ds, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to copy dataspace")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy dataspace")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_space() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_get_type
+ * Function:    H5A_get_type
  *
- * Purpose:	Returns datatype of the dataset.
+ * Purpose:     Returns datatype of an attribute
  *
- * Return:	Success:	datatype
- *
- *		Failure:	NULL
- *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ * Return:      Success:    A datatype of an attribute
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -743,8 +735,7 @@ H5A_get_type(H5A_t *attr)
     if (H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to patch datatype's file pointer")
 
-    /*
-     * Copy the attribute's datatype.  If the type is a named type then
+    /* Copy the attribute's datatype.  If the type is a named type then
      * reopen the type before returning it to the user. Make the type
      * read-only.
      */
@@ -895,12 +886,11 @@ H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo)
 } /* end H5A_get_info() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_copy
+ * Function:    H5A_copy
  *
  * Purpose:     Copies attribute OLD_ATTR.
  *
  * Return:      Success:    Pointer to a new copy of the OLD_ATTR argument.
- *
  *              Failure:    NULL
  *
  * Programmer:	Robb Matzke
@@ -957,17 +947,15 @@ done:
 } /* end H5A_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_free
+ * Function:    H5A_free
  *
  * Purpose:	Frees all memory associated with an attribute, but does not
  *              free the H5A_t structure (which should be done in H5T_close).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		Monday, November 15, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1003,11 +991,11 @@ done:
 } /* end H5A_free() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_close
+ * Function:    H5A_close
  *
  * Purpose:     Frees an attribute and all associated memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
@@ -1055,7 +1043,7 @@ done:
 } /* end H5A_close() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_oloc
+ * Function:    H5A_oloc
  *
  * Purpose:	Return the object location for an attribute.  It's the
  *		object location for the object to which the attribute
@@ -1085,7 +1073,7 @@ H5A_oloc(H5A_t *attr)
 } /* end H5A_oloc() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_nameof
+ * Function:    H5A_nameof
  *
  * Purpose:	Return the group hier. path for an attribute.  It's the
  *		group hier. path for the object to which the attribute
@@ -1143,12 +1131,11 @@ H5A_type(const H5A_t *attr)
 } /* end H5A_type() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_exists_by_name
+ * Function:    H5A_exists_by_name
  *
- * Purpose:	Private version of H5Aexists_by_name
+ * Purpose:     Private version of H5Aexists_by_name
  *
- * Return:	Success:	TRUE/FALSE
- * 		Failure:	Negative
+ * Return:      TRUE/FALSE/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 1, 2007
@@ -1197,7 +1184,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2006
  *
  * Modification:Raymond Lu
@@ -1249,7 +1235,7 @@ done:
 } /* end H5A__compact_build_table_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_compact_build_table
+ * Function:    H5A_compact_build_table
  *
  * Purpose:     Builds a table containing a sorted list of attributes for
  *              an object
@@ -1259,8 +1245,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Dec 18, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1317,11 +1303,9 @@ done:
  * Purpose:	Callback routine for building table of attributes from dense
  *              attribute storage.
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -1355,14 +1339,14 @@ done:
 } /* end H5A_dense_build_table_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_dense_build_table
+ * Function:    H5A_dense_build_table
  *
  * Purpose:     Builds a table containing a sorted list of attributes for
  *              an object
  *
- * Note:        Used for building table of attributes in non-native iteration
+ * Note:	Used for building table of attributes in non-native iteration
  *              order for an index.  Uses the "name" index to retrieve records,
- *              but the 'idx_type' index for sorting them.
+ *		but the 'idx_type' index for sorting them.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1439,19 +1423,18 @@ done:
 } /* end H5A_dense_build_table() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__attr_cmp_name_inc
+ * Function:    H5A__attr_cmp_name_inc
  *
- * Purpose:	Callback routine for comparing two attribute names, in
+ * Purpose:     Callback routine for comparing two attribute names, in
  *              increasing alphabetic order
  *
- * Return:	An integer less than, equal to, or greater than zero if the
+ * Return:      An integer less than, equal to, or greater than zero if the
  *              first argument is considered to be respectively less than,
  *              equal to, or greater than the second.  If two members compare
  *              as equal, their order in the sorted array is undefined.
  *              (i.e. same as strcmp())
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -1478,7 +1461,6 @@ H5A__attr_cmp_name_inc(const void *attr1, const void *attr2)
  *              (i.e. opposite of strcmp())
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb  8 2007
  *
  *-------------------------------------------------------------------------
@@ -1504,7 +1486,6 @@ H5A__attr_cmp_name_dec(const void *attr1, const void *attr2)
  *              as equal, their order in the sorted array is undefined.
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb  8 2007
  *
  *-------------------------------------------------------------------------
@@ -1528,19 +1509,18 @@ H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2)
 } /* end H5A__attr_cmp_corder_inc() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__attr_cmp_corder_dec
+ * Function:    H5A__attr_cmp_corder_dec
  *
- * Purpose:	Callback routine for comparing two attributes, in
+ * Purpose:     Callback routine for comparing two attributes, in
  *              decreasing creation order
  *
- * Return:	An integer less than, equal to, or greater than zero if the
+ * Return:      An integer less than, equal to, or greater than zero if the
  *              second argument is considered to be respectively less than,
  *              equal to, or greater than the first.  If two members compare
  *              as equal, their order in the sorted array is undefined.
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Feb  8 2007
+ * Programmer:  Quincey Koziol
+ *              Feb  8 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1563,15 +1543,14 @@ H5A__attr_cmp_corder_dec(const void *attr1, const void *attr2)
 } /* end H5A__attr_cmp_corder_dec() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__attr_sort_table
+ * Function:    H5A__attr_sort_table
  *
  * Purpose:     Sort table containing a list of attributes for an object
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Dec 11, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1606,16 +1585,15 @@ H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type, H5_iter_orde
 } /* end H5A__attr_sort_table() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_attr_iterate_table
+ * Function:    H5A_attr_iterate_table
  *
  * Purpose:     Iterate over table containing a list of attributes for an object,
  *              making appropriate callbacks
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Dec 18, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1686,15 +1664,14 @@ done:
 } /* end H5A_attr_iterate_table() */
 
 /*-------------------------------------------------------------------------
- * Function:	  H5A_attr_release_table
+ * Function:    H5A_attr_release_table
  *
  * Purpose:     Release table containing a list of attributes for an object
  *
- * Return:	  Success:        Non-negative
- *		  Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	  Quincey Koziol
- *	          Dec 11, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1732,11 +1709,9 @@ done:
  * Purpose:     Retrieves the "attribute info" message for an object.  Also
  *              sets the number of attributes correctly, if it isn't set up yet.
  *
- * Return:      Success:    TRUE/FALSE whether message was found & retrieved
- *              Failure:    FAIL if error occurred
+ * Return:      TRUE/FALSE/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 11 2007
  *
  *-------------------------------------------------------------------------
@@ -1796,11 +1771,9 @@ done:
  *              Chooses the oldest version possible, unless the "use the
  *              latest format" flag is set.
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Jul 17 2007
  *
  *-------------------------------------------------------------------------
@@ -2143,7 +2116,7 @@ done:
  *              an object may have a reference attribute that points to the
  *              object itself.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Peter Cao
  *              March 6, 2005
@@ -2243,7 +2216,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
  *              July 20, 2007
  *
  *-------------------------------------------------------------------------
@@ -2296,7 +2268,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
  *              July 20, 2007
  *
  *-------------------------------------------------------------------------
@@ -2336,14 +2307,13 @@ done:
 } /* end H5A_dense_post_copy_file_all */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_rename_by_name
+ * Function:    H5A_rename_by_name
  *
  * Purpose:     Private version of H5Arename_by_name
  *
- * Return:	Success:             Non-negative
- *		Failure:             Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              February 20, 2007
  *
  *-------------------------------------------------------------------------

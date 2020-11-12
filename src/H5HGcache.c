@@ -15,7 +15,7 @@
  *
  * Created:		H5HGcache.c
  *			Feb  5 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implement global heap metadata cache methods.
  *
@@ -210,16 +210,15 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
             heap->obj[idx].begin = begin;
 
             /*
-             * The total storage size includes the size of the object header
-             * and is zero padded so the next object header is properly
-             * aligned. The entire obj array was calloc'ed, so no need to zero
-             * the space here. The last bit of space is the free space object
-             * whose size is never padded and already includes the object
-             * header.
+             * The total storage size includes the size of the object
+             * header and is zero padded so the next object header is
+             * properly aligned. The entire obj array was calloc'ed,
+             * so no need to zero the space here. The last bit of space
+             * is the free space object whose size is never padded and
+             * already includes the object header.
              */
             if (idx > 0) {
                 need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(heap->obj[idx].size);
-
                 if (idx > max_idx)
                     max_idx = idx;
             } /* end if */
@@ -237,6 +236,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
     else
         heap->nused = 1;
 
+    /* Sanity check */
     HDassert(max_idx < heap->nused);
 
     /* Add the new heap to the CWFS list for the file */
@@ -259,7 +259,8 @@ done:
  * Purpose:	Flushes a global heap collection from memory to disk if it's
  *		dirty.  Optionally deletes teh heap from memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
  *
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
@@ -299,7 +300,8 @@ done:
  *
  * Purpose:	Destroys a global heap collection in memory
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, January 15, 2003
@@ -343,7 +345,8 @@ done:
  *
  * Purpose:	Mark a global heap in memory as non-dirty.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
  *
  * Programmer:	Quincey Koziol
  *              Thursday, March 20, 2003
@@ -378,7 +381,8 @@ done:
  *              H5HG_heap_t on disk, and return it in *len_ptr.  On failure,
  *              the value of *len_ptr is undefined.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
  *
  * Programmer:	John Mainzer
  *              5/13/04

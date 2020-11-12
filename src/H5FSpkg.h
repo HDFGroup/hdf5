@@ -12,12 +12,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		Tuesday, May  2, 2006
+ * Programmer:  Quincey Koziol
+ *              Tuesday, May  2, 2006
  *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5FS package.  Source files outside the H5FS package should
- *		include H5FSprivate.h instead.
+ * Purpose:     This file contains declarations which are visible only within
+ *              the H5FS package.  Source files outside the H5FS package should
+ *              include H5FSprivate.h instead.
  */
 #ifndef H5FS_PACKAGE
 #error "Do not include this file outside the H5FS package!"
@@ -39,8 +39,8 @@
 #include "H5FSprivate.h" /* File free space                      */
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h" /* Metadata cache			*/
-#include "H5SLprivate.h" /* Skip lists				*/
+#include "H5ACprivate.h" /* Metadata cache                       */
+#include "H5SLprivate.h" /* Skip lists                           */
 
 /**************************/
 /* Package Private Macros */
@@ -62,19 +62,19 @@
      H5FS_METADATA_PREFIX_SIZE                                                                               \
                                                                                                              \
      /* Free space header specific fields */                                                                 \
-     + 1                  /* Client ID */                                                                    \
-     + H5F_SIZEOF_SIZE(f) /* Total free space tracked */                                                     \
-     + H5F_SIZEOF_SIZE(f) /* Total # of sections tracked */                                                  \
-     + H5F_SIZEOF_SIZE(f) /* # of serializable sections tracked */                                           \
-     + H5F_SIZEOF_SIZE(f) /* # of ghost sections tracked */                                                  \
-     + 2                  /* Number of section classes */                                                    \
-     + 2                  /* Shrink percent */                                                               \
-     + 2                  /* Expand percent */                                                               \
-     + 2                  /* Size of address space for sections (log2 of value) */                           \
-     + H5F_SIZEOF_SIZE(f) /* Max. size of section to track */                                                \
-     + H5F_SIZEOF_ADDR(f) /* Address of serialized free space sections */                                    \
-     + H5F_SIZEOF_SIZE(f) /* Size of serialized free space sections used */                                  \
-     + H5F_SIZEOF_SIZE(f) /* Allocated size of serialized free space sections */                             \
+     + 1                            /* Client ID */                                                          \
+     + (unsigned)H5F_SIZEOF_SIZE(f) /* Total free space tracked */                                           \
+     + (unsigned)H5F_SIZEOF_SIZE(f) /* Total # of sections tracked */                                        \
+     + (unsigned)H5F_SIZEOF_SIZE(f) /* # of serializable sections tracked */                                 \
+     + (unsigned)H5F_SIZEOF_SIZE(f) /* # of ghost sections tracked */                                        \
+     + 2                            /* Number of section classes */                                          \
+     + 2                            /* Shrink percent */                                                     \
+     + 2                            /* Expand percent */                                                     \
+     + 2                            /* Size of address space for sections (log2 of value) */                 \
+     + (unsigned)H5F_SIZEOF_SIZE(f) /* Max. size of section to track */                                      \
+     + (unsigned)H5F_SIZEOF_ADDR(f) /* Address of serialized free space sections */                          \
+     + (unsigned)H5F_SIZEOF_SIZE(f) /* Size of serialized free space sections used */                        \
+     + (unsigned)H5F_SIZEOF_SIZE(f) /* Allocated size of serialized free space sections */                   \
     )
 
 /* Size of the free space serialized sections on disk */
@@ -83,7 +83,7 @@
      H5FS_METADATA_PREFIX_SIZE                                                                               \
                                                                                                              \
      /* Free space serialized sections specific fields */                                                    \
-     + H5F_SIZEOF_ADDR(f) /* Address of free space header for these sections */                              \
+     + (unsigned)H5F_SIZEOF_ADDR(f) /* Address of free space header for these sections */                    \
     )
 
 /****************************/

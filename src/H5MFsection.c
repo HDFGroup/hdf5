@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *              Tuesday, January  8, 2008
  *
  * Purpose:	Free space section callbacks for file.
@@ -109,7 +109,6 @@ H5FL_DEFINE(H5MF_free_section_t);
  * Return:	Pointer to new section on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		January  8 2008
  *
  *-------------------------------------------------------------------------
@@ -117,8 +116,8 @@ H5FL_DEFINE(H5MF_free_section_t);
 H5MF_free_section_t *
 H5MF_sect_simple_new(haddr_t sect_off, hsize_t sect_size)
 {
-    H5MF_free_section_t *sect = NULL; /* 'Simple' free space section to add */
-    H5MF_free_section_t *ret_value;   /* Return value */
+    H5MF_free_section_t *sect;             /* 'Simple' free space section to add */
+    H5MF_free_section_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -163,8 +162,8 @@ H5MF_sect_simple_deserialize(const H5FS_section_class_t H5_ATTR_UNUSED *cls, hid
                              const uint8_t H5_ATTR_UNUSED *buf, haddr_t sect_addr, hsize_t sect_size,
                              unsigned H5_ATTR_UNUSED *des_flags)
 {
-    H5MF_free_section_t *sect;      /* New section */
-    H5FS_section_info_t *ret_value; /* Return value */
+    H5MF_free_section_t *sect;             /* New section */
+    H5FS_section_info_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -202,9 +201,9 @@ static htri_t
 H5MF_sect_simple_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section_info_t *_sect2,
                            void H5_ATTR_UNUSED *_udata)
 {
-    const H5MF_free_section_t *sect1 = (const H5MF_free_section_t *)_sect1; /* File free section */
-    const H5MF_free_section_t *sect2 = (const H5MF_free_section_t *)_sect2; /* File free section */
-    htri_t                     ret_value;                                   /* Return value */
+    const H5MF_free_section_t *sect1     = (const H5MF_free_section_t *)_sect1; /* File free section */
+    const H5MF_free_section_t *sect2     = (const H5MF_free_section_t *)_sect2; /* File free section */
+    htri_t                     ret_value = FAIL;                                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -280,9 +279,9 @@ H5MF_sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 {
     const H5MF_free_section_t *sect  = (const H5MF_free_section_t *)_sect; /* File free section */
     H5MF_sect_ud_t *           udata = (H5MF_sect_ud_t *)_udata;           /* User data for callback */
-    haddr_t                    eoa;       /* End of address space in the file */
-    haddr_t                    end;       /* End of section to extend */
-    htri_t                     ret_value; /* Return value */
+    haddr_t                    eoa;              /* End of address space in the file */
+    haddr_t                    end;              /* End of section to extend */
+    htri_t                     ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

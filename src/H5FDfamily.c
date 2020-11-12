@@ -160,26 +160,23 @@ H5FD_family_init_interface(void)
 /*-------------------------------------------------------------------------
  * Function:    H5FD_family_init
  *
- * Purpose:    Initialize this driver by registering the driver with the
- *        library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:    Success:    The driver ID for the family driver.
+ * Return:      Success:    The driver ID for the family driver
+ *              Failure:    H5I_INVALID_HID
  *
- *        Failure:    Negative
- *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5FD_family_init(void)
 {
-    hid_t ret_value = H5FD_FAMILY_g; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if (H5I_VFL != H5I_get_type(H5FD_FAMILY_g))
         H5FD_FAMILY_g = H5FD_register(&H5FD_family_g, sizeof(H5FD_class_t), FALSE);
@@ -200,8 +197,6 @@ done:
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
- *
- * Modification:
  *
  *---------------------------------------------------------------------------
  */
@@ -227,17 +222,10 @@ H5FD_family_term(void)
  *
  * Return:    Success:    Non-negative
  *
- *        Failure:    Negative
+ *            Failure:    Negative
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
- *
- *        Raymond Lu
- *         Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
  *
  *-------------------------------------------------------------------------
  */
@@ -278,30 +266,23 @@ done:
  * Function:    H5Pget_fapl_family
  *
  * Purpose:    Returns information about the family file access property
- *        list though the function arguments.
+ *             list though the function arguments.
  *
  * Return:    Success:    Non-negative
  *
- *        Failure:    Negative
+ *            Failure:    Negative
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
- *
- *        Raymond Lu
- *         Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_fapl_family(hid_t fapl_id, hsize_t *msize /*out*/, hid_t *memb_fapl_id /*out*/)
 {
-    H5FD_family_fapl_t *fa;
-    H5P_genplist_t *    plist;               /* Property list pointer */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *          plist; /* Property list pointer */
+    const H5FD_family_fapl_t *fa;
+    herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, msize, memb_fapl_id);
@@ -332,12 +313,10 @@ done:
  *
  * Return:    Success:    Ptr to new file access property list.
  *
- *        Failure:    NULL
+ *            Failure:    NULL
  *
  * Programmer:    Robb Matzke
  *              Friday, August 13, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -346,8 +325,8 @@ H5FD_family_fapl_get(H5FD_t *_file)
 {
     H5FD_family_t *     file = (H5FD_family_t *)_file;
     H5FD_family_fapl_t *fa   = NULL;
-    H5P_genplist_t *    plist;     /* Property list pointer */
-    void *              ret_value; /* Return value */
+    H5P_genplist_t *    plist;            /* Property list pointer */
+    void *              ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -363,10 +342,10 @@ H5FD_family_fapl_get(H5FD_t *_file)
     ret_value = fa;
 
 done:
-    if (ret_value == NULL) {
+    if (ret_value == NULL)
         if (fa != NULL)
             H5MM_xfree(fa);
-    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -377,12 +356,10 @@ done:
  *
  * Return:    Success:    Ptr to a new property list
  *
- *        Failure:    NULL
+ *            Failure:    NULL
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -391,8 +368,8 @@ H5FD_family_fapl_copy(const void *_old_fa)
 {
     const H5FD_family_fapl_t *old_fa = (const H5FD_family_fapl_t *)_old_fa;
     H5FD_family_fapl_t *      new_fa = NULL;
-    H5P_genplist_t *          plist;     /* Property list pointer */
-    void *                    ret_value; /* Return value */
+    H5P_genplist_t *          plist;            /* Property list pointer */
+    void *                    ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -417,10 +394,10 @@ H5FD_family_fapl_copy(const void *_old_fa)
     ret_value = new_fa;
 
 done:
-    if (ret_value == NULL) {
+    if (ret_value == NULL)
         if (new_fa != NULL)
             H5MM_xfree(new_fa);
-    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -431,12 +408,10 @@ done:
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -464,12 +439,10 @@ done:
  *
  * Return:    Success:    The super block driver data size.
  *
- *        Failure:    never fails
+ *            Failure:    never fails
  *
  * Programmer:    Raymond Lu
  *              Tuesday, May 10, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -494,12 +467,10 @@ H5FD_family_sb_size(H5FD_t H5_ATTR_UNUSED *_file)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Raymond Lu
  *              Tuesday, May 10, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -530,7 +501,7 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*ou
 /*-------------------------------------------------------------------------
  * Function:    H5FD_family_sb_decode
  *
- * Purpose:    This function has 2 separate purpose.  One is to decodes the
+ * Purpose:     This function has 2 separate purpose.  One is to decodes the
  *              superblock information for this driver. The NAME argument is
  *              the eight-character (plus null termination) name stored in i
  *              the file.  The FILE argument is updated according to the
@@ -538,7 +509,7 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*ou
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Raymond Lu
  *              Tuesday, May 10, 2005
@@ -561,28 +532,23 @@ H5FD_family_sb_decode(H5FD_t *_file, const char H5_ATTR_UNUSED *name, const unsi
      * h5repart is being used to change member file size.  h5repart will open
      * files for read and write.  When the files are closed, metadata will be
      * flushed to the files and updated to this new size */
-    if (file->mem_newsize) {
+    if (file->mem_newsize)
         file->memb_size = file->pmem_size = file->mem_newsize;
-        HGOTO_DONE(ret_value)
-    } /* end if */
+    else {
+        /* Default - use the saved member size */
+        if (file->pmem_size == H5F_FAMILY_DEFAULT)
+            file->pmem_size = msize;
 
-    /* Default - use the saved member size */
-    if (file->pmem_size == H5F_FAMILY_DEFAULT)
-        file->pmem_size = msize;
+        /* Check if member size from file access property is correct */
+        if (msize != file->pmem_size)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                        "Family member size should be %lu.  But the size from file access property is %lu",
+                        (unsigned long)msize, (unsigned long)file->pmem_size)
 
-    /* Check if member size from file access property is correct */
-    if (msize != file->pmem_size) {
-        char err_msg[128];
-
-        HDsnprintf(err_msg, sizeof(err_msg),
-                   "Family member size should be %lu.  But the size from file access property is %lu",
-                   (unsigned long)msize, (unsigned long)file->pmem_size);
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
-    } /* end if */
-
-    /* Update member file size to the size saved in the superblock.
-     * That's the size intended to be. */
-    file->memb_size = msize;
+        /* Update member file size to the size saved in the superblock.
+         * That's the size intended to be. */
+        file->memb_size = msize;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -597,27 +563,10 @@ done:
  *                public fields will be initialized by the
  *                caller, which is always H5FD_open().
  *
- *        Failure:    NULL
+ *            Failure:    NULL
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              Thursday, November 18, 2004
- *              When file is re-opened, member size passed in from access property
- *              is checked to see if it's reasonable.  If there is only 1 member
- *              file, member size can't be smaller than current member size.
- *              If there are at least 2 member files, member size can only be equal
- *              the 1st member size.
- *
- *              Raymond Lu
- *              Tuesday, May 24, 2005
- *              The modification described above has been changed.  The major checking
- *              is done in H5F_read_superblock.  Member file size is saved in the
- *              superblock now.  H5F_read_superblock() reads this saved size and compare
- *              to the size passed in from file access property.  Wrong size will
- *              result in a failure.
  *
  *-------------------------------------------------------------------------
  */
@@ -657,8 +606,8 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
         file->mem_newsize = 0;                  /*New member size used by h5repart only       */
     }                                           /* end if */
     else {
-        H5P_genplist_t *    plist; /* Property list pointer */
-        H5FD_family_fapl_t *fa;
+        H5P_genplist_t *          plist; /* Property list pointer */
+        const H5FD_family_fapl_t *fa;
 
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
@@ -736,7 +685,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
         file->nmembs++;
     }
 
-    /* If the file is reopened and there's only one member file existing, this file maybe
+    /* If the file is reopened and there's only one member file existing, this file may be
      * smaller than the size specified through H5Pset_fapl_family().  Update the actual
      * member size.
      */
@@ -780,7 +729,7 @@ H5_GCC_DIAG_ON("format-nonliteral")
  *
  * Return:    Success:    Non-negative
  *
- *        Failure:    Negative with as many members closed as
+ *            Failure:    Negative with as many members closed as
  *                possible. The only subsequent operation
  *                permitted on the file is a close operation.
  *
@@ -832,13 +781,11 @@ H5FD_family_close(H5FD_t *_file)
  *
  * Return:    Success:    like strcmp()
  *
- *        Failure:    never fails (arguments were checked by the
+ *            Failure:    never fails (arguments were checked by the
  *                caller).
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -851,8 +798,8 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(f1->nmembs >= 1 && f1->memb[0]);
-    assert(f2->nmembs >= 1 && f2->memb[0]);
+    HDassert(f1->nmembs >= 1 && f1->memb[0]);
+    HDassert(f2->nmembs >= 1 && f2->memb[0]);
 
     ret_value = H5FDcmp(f1->memb[0], f2->memb[0]);
 
@@ -867,14 +814,13 @@ done:
  *              (listed in H5FDpublic.h)
  *
  * Return:    Success:    non-negative
- *        Failure:    negative
+ *            Failure:    negative
  *
  * Programmer:    Quincey Koziol
  *              Friday, August 25, 2000
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_family_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
@@ -908,15 +854,10 @@ H5FD_family_query(const H5FD_t *_file, unsigned long *flags /* out */)
  *
  * Return:    Success:    The end-of-address-marker
  *
- *        Failure:    HADDR_UNDEF
+ *            Failure:    HADDR_UNDEF
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
@@ -937,15 +878,10 @@ H5FD_family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
@@ -1028,12 +964,10 @@ H5_GCC_DIAG_ON("format-nonliteral")
  *                the end of the family of files or the current
  *                EOA, whichever is larger.
  *
- *        Failure:          HADDR_UNDEF
+ *            Failure:          HADDR_UNDEF
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1042,8 +976,8 @@ H5FD_family_get_eof(const H5FD_t *_file)
 {
     const H5FD_family_t *file = (const H5FD_family_t *)_file;
     haddr_t              eof  = 0;
-    int                  i;         /* Local index variable */
-    haddr_t              ret_value; /* Return value */
+    int                  i;                       /* Local index variable */
+    haddr_t              ret_value = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1085,8 +1019,6 @@ H5FD_family_get_eof(const H5FD_t *_file)
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1096,7 +1028,7 @@ H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
     H5P_genplist_t *plist;
     hsize_t         offset;
     int             memb;
-    herr_t          ret_value;
+    herr_t          ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1126,12 +1058,10 @@ done:
  * Return:    Success:    Zero. Result is stored in caller-supplied
  *                buffer BUF.
  *
- *        Failure:    -1, contents of buffer BUF are undefined.
+ *            Failure:    -1, contents of buffer BUF are undefined.
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1193,12 +1123,10 @@ done:
  *
  * Return:    Success:    Zero
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1257,7 +1185,7 @@ done:
  * Purpose:    Flushes all family members.
  *
  * Return:    Success:    0
- *        Failure:    -1, as many files flushed as possible.
+ *            Failure:    -1, as many files flushed as possible.
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1291,7 +1219,7 @@ done:
  *
  * Return:    Success:    0
  *
- *        Failure:    -1, as many files truncated as possible.
+ *            Failure:    -1, as many files truncated as possible.
  *
  * Programmer:    Quincey Koziol
  *              Saturday, February 23, 2008

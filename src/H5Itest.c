@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgoup.org>
+/* Programmer:  Quincey Koziol
  *              Tuesday, July 27, 2010
  *
  * Purpose:	ID testing functions.
@@ -27,11 +27,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Gprivate.h"  /* Groups				*/
-#include "H5Ipkg.h"      /* IDs			  		*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata cache                           */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Gprivate.h"  /* Groups                                   */
+#include "H5Ipkg.h"      /* IDs                                      */
 
 /****************/
 /* Local Macros */
@@ -54,14 +54,14 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function: H5I_get_name_test
+ * Function:    H5I_get_name_test
  *
- * Purpose: Testing version of H5Iget_name()
+ * Purpose:     Testing version of H5Iget_name()
  *
- * Return: Success: The length of name.
- *         Failure: -1
+ * Return:      Success: The length of name.
+ *              Failure: -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, July 27, 2010
  *
  *-------------------------------------------------------------------------
@@ -69,18 +69,18 @@
 ssize_t
 H5I_get_name_test(hid_t id, char *name /*out*/, size_t size, hbool_t *cached)
 {
-    H5G_loc_t loc;       /* Object location */
-    ssize_t   ret_value; /* Return value */
+    H5G_loc_t loc;            /* Object location */
+    ssize_t   ret_value = -1; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI((-1))
 
     /* Get object location */
     if (H5G_loc(id, &loc) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object location")
 
     /* Call internal group routine to retrieve object's name */
     if ((ret_value = H5G_get_name(&loc, name, size, cached, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

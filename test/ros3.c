@@ -20,7 +20,7 @@
  *
  *     Demonstrates basic use cases and fapl/dxpl interaction.
  *
- * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
+ * Programmer: Jacob Smith
  *             2017-10-11
  */
 
@@ -1415,15 +1415,9 @@ test_noops_and_autofails(void)
     /* no-op calls to `lock()` and `unlock()`
      */
     /*
-        JSVERIFY( SUCCEED,
-                  H5FDlock(file, TRUE),
-                  "lock always succeeds; has no effect" )
-        JSVERIFY( SUCCEED,
-                  H5FDlock(file, FALSE),
-                  NULL )
-        JSVERIFY( SUCCEED,
-                  H5FDunlock(file),
-                  NULL )
+    JSVERIFY(SUCCEED, H5FDlock(file, TRUE), "lock always succeeds; has no effect")
+    JSVERIFY(SUCCEED, H5FDlock(file, FALSE), NULL)
+    JSVERIFY(SUCCEED, H5FDunlock(file), NULL)
     */
     /* Lock/unlock with null file or similar error crashes tests.
      * HDassert in calling heirarchy, `H5FD[un]lock()` and `H5FD_[un]lock()`

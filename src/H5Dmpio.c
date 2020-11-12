@@ -133,7 +133,7 @@ static herr_t H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info, const H5D_ch
  * Purpose:     Checks if an direct I/O transfer is possible between memory and
  *                  the file.
  *
- * Return:      Sauccess:   Non-negative: TRUE or FALSE
+ * Return:      Success:   Non-negative: TRUE or FALSE
  *              Failure:    Negative
  *
  * Programmer:  Quincey Koziol
@@ -758,11 +758,6 @@ done:
  * Programmer:  Muqun Yang
  *              Monday, Feb. 13th, 2006
  *
- * Modification:
- *  - Set H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME and H5D_MPIO_ACTUAL_IO_MODE_NAME
- *    dxpl in this.
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1100,12 +1095,6 @@ done:
  *
  * Programmer:  Muqun Yang
  *              Monday, Feb. 13th, 2006
- *
- * Modification:
- *  - Set H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME dxpl in this to go along with
- *    setting H5D_MPIO_ACTUAL_IO_MODE_NAME dxpl at the bottom.
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
  *
  *-------------------------------------------------------------------------
  */
@@ -1473,7 +1462,7 @@ done:
 static int
 H5D__cmp_chunk_addr(const void *chunk_addr_info1, const void *chunk_addr_info2)
 {
-    haddr_t addr1, addr2;
+    haddr_t addr1 = HADDR_UNDEF, addr2 = HADDR_UNDEF;
 
     FUNC_ENTER_STATIC_NOERR
 

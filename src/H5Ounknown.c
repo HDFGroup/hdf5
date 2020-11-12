@@ -15,7 +15,7 @@
  *
  * Created:             H5Ounknown.c
  *                      Apr 19 2007
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             Handle unknown message classes in a minimal way.
  *
@@ -60,11 +60,11 @@ const H5O_msg_class_t H5O_MSG_UNKNOWN[1] = {{
 H5FL_DEFINE(H5O_unknown_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_unknown_free
+ * Function:    H5O_unknown_free
  *
- * Purpose:	Free's the message
+ * Purpose:     Frees the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, May 1, 2007

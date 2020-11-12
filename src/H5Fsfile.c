@@ -39,11 +39,11 @@ H5FL_DEFINE_STATIC(H5F_sfile_node_t);
 H5F_sfile_node_t *H5F_sfile_head_g = NULL;
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_assert_num
+ * Function:    H5F_sfile_assert_num
  *
- * Purpose:	Sanity checking that shared file list is empty
+ * Purpose:     Sanity checking that shared file list is empty
  *
- * Return:	none (void)
+ * Return:      void
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 25, 2005
@@ -82,16 +82,14 @@ H5F_sfile_assert_num(unsigned n)
 } /* H5F_sfile_assert_num() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_add
+ * Function:    H5F_sfile_add
  *
- * Purpose:	Add a "shared" file struct to the list of open files
+ * Purpose:     Add a "shared" file struct to the list of open files
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 18, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -122,17 +120,15 @@ done:
 } /* end H5F_sfile_add() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_search
+ * Function:    H5F_sfile_search
  *
- * Purpose:	Search for a "shared" file with low-level file info that
+ * Purpose:     Search for a "shared" file with low-level file info that
  *              matches
  *
- * Return:	Non-NULL on success / NULL on failure
+ * Return:      Non-NULL on success / NULL on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 18, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -163,16 +159,14 @@ done:
 } /* end H5F_sfile_search() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_remove
+ * Function:    H5F_sfile_remove
  *
- * Purpose:	Remove a "shared" file struct from the list of open files
+ * Purpose:     Remove a "shared" file struct from the list of open files
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 18, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

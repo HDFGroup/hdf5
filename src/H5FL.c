@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer: Quincey Koziol
  *	       Thursday, March 23, 2000
  *
  * Purpose: Manage priority queues of free-lists (of blocks of bytes).
@@ -180,14 +180,12 @@ H5FL_init_interface(void)
  * Programmer:	Quincey Koziol
  *              Tuesday, August 1, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
 H5FL_malloc(size_t mem_size)
 {
-    void *ret_value; /* return value*/
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -217,8 +215,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -262,13 +258,10 @@ done:
  *
  * Purpose:	Release an object & put on free list
  *
- * Return:	Success:	Non-negative
- * 		Failure:	Negative
+ * Return:	Always returns NULL
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -354,14 +347,12 @@ done:
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
 {
-    void *ret_value; /* Pointer to object to return */
+    void *ret_value = NULL; /* Pointer to object to return */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -430,14 +421,12 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, December 23, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_reg_calloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
 {
-    void *ret_value; /* Pointer to object to return */
+    void *ret_value = NULL; /* Pointer to object to return */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -466,8 +455,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, July 25, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -516,10 +503,6 @@ H5FL_reg_gc_list(H5FL_reg_head_t *head)
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
- *
- * Modifications:
- *  Broke into two parts, one for looping over all the free lists and
- *      another for freeing each list - QAK 7/25/00
  *
  *-------------------------------------------------------------------------
  */
@@ -636,14 +619,12 @@ H5FL_reg_term(void)
  * Programmer:	Quincey Koziol
  *		Thursday, March  23, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5FL_blk_node_t *
 H5FL_blk_find_list(H5FL_blk_node_t **head, size_t size)
 {
-    H5FL_blk_node_t *temp; /* Temp. pointer to node in the native list */
+    H5FL_blk_node_t *temp = NULL; /* Temp. pointer to node in the native list */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -696,15 +677,13 @@ H5FL_blk_find_list(H5FL_blk_node_t **head, size_t size)
  * Programmer:	Quincey Koziol
  *		Thursday, March  23, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5FL_blk_node_t *
 H5FL_blk_create_list(H5FL_blk_node_t **head, size_t size)
 {
-    H5FL_blk_node_t *temp; /* Temp. pointer to node in the list */
-    H5FL_blk_node_t *ret_value;
+    H5FL_blk_node_t *temp;             /* Temp. pointer to node in the list */
+    H5FL_blk_node_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -746,8 +725,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -788,15 +765,13 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, December 16, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5FL_blk_free_block_avail(H5FL_blk_head_t *head, size_t size)
 {
-    H5FL_blk_node_t *free_list; /* The free list of nodes of correct size */
-    htri_t           ret_value; /* Return value */
+    H5FL_blk_node_t *free_list;        /* The free list of nodes of correct size */
+    htri_t           ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -827,16 +802,14 @@ done:
  * Programmer:	Quincey Koziol
  *		Thursday, March  23, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
 {
-    H5FL_blk_node_t *free_list; /* The free list of nodes of correct size */
-    H5FL_blk_list_t *temp;      /* Temp. ptr to the new native list allocated */
-    void *           ret_value; /* Pointer to the block to return to the user */
+    H5FL_blk_node_t *free_list;        /* The free list of nodes of correct size */
+    H5FL_blk_list_t *temp;             /* Temp. ptr to the new native list allocated */
+    void *           ret_value = NULL; /* Pointer to the block to return to the user */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -862,7 +835,6 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
 
         /* Decrement the amount of global "block" free list memory in use */
         H5FL_blk_gc_head.mem_freed -= size;
-
     } /* end if */
     /* No free list available, or there are no nodes on the list, allocate a new node to give to the user */
     else {
@@ -918,14 +890,12 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, December 23, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
 {
-    void *ret_value; /* Pointer to the block to return to the user */
+    void *ret_value = NULL; /* Pointer to the block to return to the user */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -957,8 +927,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *		Thursday, March  23, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1015,7 +983,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     HDmemset(temp, 255, free_size + sizeof(H5FL_blk_list_t) + H5FL_TRACK_SIZE);
 #endif /* H5FL_DEBUG */
 
-    /* check if there is a free list for native blocks of this size */
+    /* Check if there is a free list for native blocks of this size */
     if ((free_list = H5FL_blk_find_list(&(head->head), free_size)) == NULL) {
         /* No free list available, create a new list node and insert it to the queue */
         free_list = H5FL_blk_create_list(&(head->head), free_size);
@@ -1062,8 +1030,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *		Thursday, March  23, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1137,8 +1103,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, March 23, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1199,8 +1163,6 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
  *
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1263,8 +1225,8 @@ H5FL_blk_term(void)
         tmp = H5FL_blk_gc_head.first->next;
 
 #ifdef H5FL_DEBUG
-        printf("H5FL_blk_term: head->name=%s, head->allocated=%d\n", H5FL_blk_gc_head.first->pq->name,
-               (int)H5FL_blk_gc_head.first->pq->allocated);
+        HDprintf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_blk_gc_head.first->pq->name,
+                 (int)H5FL_blk_gc_head.first->pq->allocated);
 #endif /* H5FL_DEBUG */
 
         /* Check if the list has allocations outstanding */
@@ -1302,8 +1264,6 @@ H5FL_blk_term(void)
  *
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1353,8 +1313,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1434,16 +1392,14 @@ done:
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem)
 {
-    H5FL_arr_list_t *new_obj;   /* Pointer to the new free list node allocated */
-    void *           ret_value; /* Pointer to object to return */
-    size_t           mem_size;  /* Size of memory block being recycled */
+    H5FL_arr_list_t *new_obj;          /* Pointer to the new free list node allocated */
+    size_t           mem_size;         /* Size of memory block being recycled */
+    void *           ret_value = NULL; /* Pointer to the block to return */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1508,14 +1464,12 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, December 23, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem)
 {
-    void *ret_value; /* Pointer to object to return */
+    void *ret_value = NULL; /* Pointer to the block to return */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1545,14 +1499,12 @@ done:
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem)
 {
-    void *ret_value; /* Pointer to object to return */
+    void *ret_value = NULL; /* Pointer to the block to return */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1606,8 +1558,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, July 25, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1667,8 +1617,6 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
  *
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1732,8 +1680,8 @@ H5FL_arr_term(void)
 
         /* Check if the list has allocations outstanding */
 #ifdef H5FL_DEBUG
-        printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.first->list->name,
-               (int)H5FL_arr_gc_head.first->list->allocated);
+        HDprintf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_arr_gc_head.first->list->name,
+                 (int)H5FL_arr_gc_head.first->list->allocated);
 #endif /* H5FL_DEBUG */
         if (H5FL_arr_gc_head.first->list->allocated > 0) {
             /* Add free list to the list of nodes with allocations open still */
@@ -1772,8 +1720,6 @@ H5FL_arr_term(void)
  * Programmer:	Quincey Koziol
  *              Saturday, April 3, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1807,14 +1753,12 @@ H5FL_seq_free(H5FL_seq_head_t *head, void *obj)
  * Programmer:	Quincey Koziol
  *              Saturday, April 3, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_seq_malloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS)
 {
-    void *ret_value; /* Pointer to object to return */
+    void *ret_value = NULL; /* Pointer to the block to return */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1840,14 +1784,12 @@ done:
  * Programmer:	Quincey Koziol
  *              Saturday, April 3, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_seq_calloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS)
 {
-    void *ret_value; /* Pointer to object to return */
+    void *ret_value = NULL; /* Pointer to the block to return */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1873,14 +1815,12 @@ done:
  * Programmer:	Quincey Koziol
  *              Saturday, April 3, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_seq_realloc(H5FL_seq_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PARAMS)
 {
-    void *ret_value; /* Pointer to object to return */
+    void *ret_value = NULL; /* Pointer to the block to return */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1906,19 +1846,14 @@ done:
  * Programmer:	Quincey Koziol
  *              Wednesday, February 2, 2005
  *
- * Modifications:
- *              Neil Fortner
- *              Friday, December 19, 2008
- *              Totally rewritten to support new factory implementation
- *
  *-------------------------------------------------------------------------
  */
 H5FL_fac_head_t *
 H5FL_fac_init(size_t size)
 {
-    H5FL_fac_gc_node_t *new_node = NULL; /* Pointer to the node for the new list to garbage collect */
-    H5FL_fac_head_t *   factory  = NULL; /* Pointer to new block factory */
-    H5FL_fac_head_t *   ret_value;       /* Return value */
+    H5FL_fac_gc_node_t *new_node  = NULL; /* Pointer to the node for the new list to garbage collect */
+    H5FL_fac_head_t *   factory   = NULL; /* Pointer to new block factory */
+    H5FL_fac_head_t *   ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1981,11 +1916,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, February 2, 2005
- *
- * Modifications:
- *              Neil Fortner
- *              Friday, December 19, 2008
- *              Totally rewritten to support new factory implementation
  *
  *-------------------------------------------------------------------------
  */
@@ -2070,11 +2000,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Wednesday, February 2, 2005
  *
- * Modifications:
- *              Neil Fortner
- *              Friday, December 19, 2008
- *              Totally rewritten to support new factory implementation
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -2146,17 +2071,12 @@ done:
  * Programmer:	Quincey Koziol
  *              Wednesday, February 2, 2005
  *
- * Modifications:
- *              Neil Fortner
- *              Friday, December 19, 2008
- *              Totally rewritten to support new factory implementation
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5FL_fac_calloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS)
 {
-    void *ret_value; /* Pointer to object to return */
+    void *ret_value = NULL; /* Pointer to the block to return */
 
     /* NOINIT OK here because this must be called after H5FL_fac_init -NAF */
     FUNC_ENTER_NOAPI_NOINIT
@@ -2186,8 +2106,6 @@ done:
  *
  * Programmer:	Neil Fortner
  *              Friday, December 19, 2008
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2237,8 +2155,6 @@ H5FL_fac_gc_list(H5FL_fac_head_t *head)
  * Programmer:	Neil Fortner
  *              Friday, December 19, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2277,11 +2193,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, February 2, 2005
- *
- * Modifications:
- *              Neil Fortner
- *              Friday, December 19, 2008
- *              Totally rewritten to support new factory implementation
  *
  *-------------------------------------------------------------------------
  */
@@ -2344,8 +2255,6 @@ done:
  * Programmer:	Neil Fortner
  *              Friday, December 19, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2389,8 +2298,6 @@ H5FL_fac_term_all(void)
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2445,10 +2352,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, August 2, 2000
- *
- * Modifications:   Neil Fortner
- *                  Wednesday, April 8, 2009
- *                  Added support for factory free lists
  *
  *-------------------------------------------------------------------------
  */

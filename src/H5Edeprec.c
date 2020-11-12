@@ -15,7 +15,7 @@
  *
  * Created:	H5Edeprec.c
  *		April 11 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5E interface.  These
  *              functions are here for compatibility purposes and may be
@@ -37,11 +37,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Iprivate.h"  /* IDs                                  */
-#include "H5Epkg.h"      /* Error handling		  	*/
-#include "H5FLprivate.h" /* Free lists                           */
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Epkg.h"      /* Error handling                           */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5FLprivate.h" /* Free lists                               */
+#include "H5MMprivate.h" /* Memory management                        */
 
 /****************/
 /* Local Macros */
@@ -117,12 +117,12 @@ H5E__term_deprec_interface(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
- * Function:	H5Eget_major
+ * Function:    H5Eget_major
  *
- * Purpose:	Retrieves a major error message.
+ * Purpose:     Retrieves a major error message.
  *
- * Return:      Returns message if succeeds.
- *              otherwise returns NULL.
+ * Return:      Success:    Pointer to the message
+ *              Failure:    NULL
  *
  * Programmer:	Raymond Lu
  *              Friday, July 14, 2003
@@ -169,12 +169,12 @@ done:
 } /* end H5Eget_major() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Eget_minor
+ * Function:    H5Eget_minor
  *
- * Purpose:	Retrieves a minor error message.
+ * Purpose:     Retrieves a minor error message.
  *
- * Return:      Returns message if succeeds.
- *              otherwise returns NULL.
+ * Return:      Success:    Pointer to the message
+ *              Failure:    NULL
  *
  * Programmer:	Raymond Lu
  *              Friday, July 14, 2003
@@ -221,19 +221,19 @@ done:
 } /* end H5Eget_minor() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Epush1
+ * Function:    H5Epush1
  *
- * Purpose:	This function definition is for backward compatibility only.
+ * Purpose:     This function definition is for backward compatibility only.
  *              It doesn't have error stack and error class as parameters.
  *              The old definition of major and minor is casted as HID_T
  *              in H5Epublic.h
  *
- * Notes: 	Basically a public API wrapper around the H5E_push2
+ * Notes:       Basically a public API wrapper around the H5E_push2
  *              function.  For backward compatibility, it maintains the
  *              same parameter as the old function, in contrary to
  *              H5Epush2.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *		Tuesday, Sep 16, 2003
@@ -258,12 +258,12 @@ done:
 } /* end H5Epush1() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Eclear1
+ * Function:    H5Eclear1
  *
- * Purpose:	This function is for backward compatibility.
+ * Purpose:     This function is for backward compatibility.
  *              Clears the error stack for the specified error stack.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Wednesday, July 16, 2003
@@ -288,15 +288,15 @@ done:
 } /* end H5Eclear1() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Eprint1
+ * Function:    H5Eprint1
  *
- * Purpose:	This function is for backward compatibility.
+ * Purpose:     This function is for backward compatibility.
  *              Prints the error stack in some default way.  This is just a
- *		convenience function for H5Ewalk() with a function that
- *		prints error messages.  Users are encouraged to write there
- *		own more specific error handlers.
+ *              convenience function for H5Ewalk() with a function that
+ *              prints error messages.  Users are encouraged to write there
+ *              own more specific error handlers.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Sep 16, 2003
@@ -326,13 +326,13 @@ done:
 } /* end H5Eprint1() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ewalk1
+ * Function:    H5Ewalk1
  *
- * Purpose:	This function is for backward compatibility.
+ * Purpose:     This function is for backward compatibility.
  *              Walks the error stack for the current thread and calls some
- *		function for each error along the way.
+ *              function for each error along the way.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Sep 16, 2003
@@ -365,24 +365,19 @@ done:
 } /* end H5Ewalk1() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Eget_auto1
+ * Function:    H5Eget_auto1
  *
- * Purpose:	This function is for backward compatibility.
+ * Purpose:     This function is for backward compatibility.
  *              Returns the current settings for the automatic error stack
- *		traversal function and its data for specific error stack.
- *		Either (or both) arguments may be null in which case the
- *		value is not returned.
+ *              traversal function and its data for specific error stack.
+ *              Either (or both) arguments may be null in which case the
+ *              value is not returned.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Sep 16, 2003
  *
- * Modification:Raymond Lu
- *              4 October 2010
- *              If the printing function isn't the default H5Eprint1 or 2,
- *              and H5Eset_auto2 has been called to set the new style
- *              printing function, a call to H5Eget_auto1 should fail.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -416,29 +411,26 @@ done:
 } /* end H5Eget_auto1() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Eset_auto1
+ * Function:    H5Eset_auto1
  *
- * Purpose:	This function is for backward compatibility.
+ * Purpose:     This function is for backward compatibility.
  *              Turns on or off automatic printing of errors for certain
  *              error stack.  When turned on (non-null FUNC pointer) any
  *              API function which returns an error indication will first
  *              call FUNC passing it CLIENT_DATA as an argument.
  *
- *		The default values before this function is called are
- *		H5Eprint1() with client data being the standard error stream,
- *		stderr.
+ *              The default values before this function is called are
+ *              H5Eprint1() with client data being the standard error stream,
+ *              stderr.
  *
- *		Automatic stack traversal is always in the H5E_WALK_DOWNWARD
- *		direction.
+ *              Automatic stack traversal is always in the H5E_WALK_DOWNWARD
+ *              direction.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Sep 16, 2003
  *
- * Modification:Raymond Lu
- *              4 October 2010
- *              If the FUNC is H5Eprint2, put the IS_DEFAULT flag on.
  *-------------------------------------------------------------------------
  */
 herr_t
