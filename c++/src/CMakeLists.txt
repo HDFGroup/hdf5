@@ -117,7 +117,7 @@ if (BUILD_SHARED_LIBS)
   target_link_libraries (${HDF5_CPP_LIBSH_TARGET}
       PUBLIC ${HDF5_LIBSH_TARGET}
   )
-  if (MINGW)
+  if (MINGW AND HDF5_MINGW_STATIC_GCC_LIBS)
     target_link_options (${HDF5_CPP_LIBSH_TARGET}
         PRIVATE -static-libgcc -static-libstdc++
     )
