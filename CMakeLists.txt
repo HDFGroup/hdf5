@@ -572,11 +572,14 @@ endif ()
 # Certain systems may add /Debug or /Release to output paths
 # and we need to call the executable from inside the CMake configuration
 #-----------------------------------------------------------------------------
-set (EXE_EXT "")
-if (WIN32 OR MINGW)
-  set (EXE_EXT ".exe")
-  add_compile_definitions (_BIND_TO_CURRENT_VCLIBS_VERSION=1 _CRT_SECURE_NO_WARNINGS _CONSOLE)
+if (WIN32)
+  add_compile_definitions (_CRT_SECURE_NO_WARNINGS)
+  if (MSVC)
+    add_compile_definitions (_BIND_TO_CURRENT_VCLIBS_VERSION=1 _CONSOLE)
+  endif ()
 endif ()
+
+option (HDF5_MINGW_STATIC_GCC_LIBS "Statically link libgcc/libstdc++" OFF)
 
 if (MSVC)
   set (CMAKE_MFC_FLAG 0)
@@ -766,7 +769,7 @@ endif ()
 option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
 if (HDF5_ENABLE_THREADSAFE)
   # check for unsupported options
-  if (WIN32 OR MINGW)
+  if (WIN32)
     message (STATUS " **** thread-safety option not supported with static library **** ")
     message (STATUS " **** thread-safety option will not be used building static library **** ")
   endif ()
