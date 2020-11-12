@@ -10,7 +10,7 @@ if (NOT ONLY_SHARED_LIBS)
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_main.c
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.h
   )
-  target_include_directories (h5diff PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5diff PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5diff PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   #target_compile_definitions (h5diff PRIVATE H5_TOOLS_DEBUG)
   TARGET_C_PROPERTIES (h5diff STATIC)
@@ -26,7 +26,7 @@ if (BUILD_SHARED_LIBS)
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_main.c
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.h
   )
-  target_include_directories (h5diff-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5diff-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5diff-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   #target_compile_definitions (h5diff-shared PRIVATE H5_TOOLS_DEBUG)
   TARGET_C_PROPERTIES (h5diff-shared SHARED)
@@ -54,7 +54,7 @@ if (H5_HAVE_PARALLEL)
         ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
         ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/ph5diff_main.c
     )
-    target_include_directories (ph5diff PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (ph5diff PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     target_compile_options(ph5diff PRIVATE "${HDF5_CMAKE_C_FLAGS}")
     TARGET_C_PROPERTIES (ph5diff STATIC)
     target_link_libraries (ph5diff PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
@@ -67,7 +67,7 @@ if (H5_HAVE_PARALLEL)
         ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
         ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/ph5diff_main.c
     )
-    target_include_directories (ph5diff-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (ph5diff-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     target_compile_options(ph5diff-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
     TARGET_C_PROPERTIES (ph5diff-shared SHARED)
     target_link_libraries (ph5diff-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
@@ -79,7 +79,7 @@ endif ()
 
 if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   add_executable (h5diffgentest ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
-  target_include_directories (h5diffgentest PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5diffgentest PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5diffgentest STATIC)
   target_link_libraries (h5diffgentest PRIVATE ${HDF5_LIB_TARGET})
   set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
@@ -103,7 +103,7 @@ if (BUILD_SHARED_LIBS)
   set (H5DIFF_TOOL_PLUGIN_LIB_TARGET           ${H5DIFF_TOOL_PLUGIN_LIB_CORENAME})
 
   add_library (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_diff.c)
-  target_include_directories (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} SHARED)
   target_link_libraries (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   H5_SET_LIB_OPTIONS (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} ${H5DIFF_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")

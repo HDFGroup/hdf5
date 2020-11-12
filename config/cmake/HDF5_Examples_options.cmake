@@ -17,6 +17,7 @@
 ####         HDF_BUILD_C:BOOL=ON                                                          ###
 ####         HDF_BUILD_CXX:BOOL=OFF                                                       ###
 ####         HDF_BUILD_FORTRAN:BOOL=OFF                                                   ###
+####         HDF_BUILD_FILTERS:BOOL=OFF                                                   ###
 ####         BUILD_TESTING:BOOL=OFF                                                       ###
 ####         HDF_ENABLE_PARALLEL:BOOL=OFF                                                 ###
 ####         HDF_ENABLE_THREADSAFE:BOOL=OFF                                               ###
