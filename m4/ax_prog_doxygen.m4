@@ -97,7 +97,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 24
+#serial 23
 
 ## ----------##
 ## Defaults. ##
@@ -164,7 +164,7 @@ AC_DEFUN([DX_TEST_FEATURE], [test "$DX_FLAG_$1" = 1])
 AC_DEFUN([DX_CHECK_DEPEND], [
 test "$DX_FLAG_$1" = "$2" \
 || AC_MSG_ERROR([doxygen-DX_CURRENT_FEATURE ifelse([$2], 1,
-                            requires, contradicts) doxygen-$1])
+                            requires, contradicts) doxygen-DX_CURRENT_FEATURE])
 ])
 
 # DX_CLEAR_DEPEND(FEATURE, REQUIRED_FEATURE, REQUIRED_STATE)
@@ -455,19 +455,19 @@ doxygen-ps: \$(DX_CLEAN_PS)
 
 ]m4_foreach([DX_i], [DX_loop],
 [[\$(DX_DOCDIR]DX_i[)/\$(PACKAGE).ps: \$(DX_DOCDIR]DX_i[)/\$(PACKAGE).tag
-    \$(DX_V_LATEX)cd \$(DX_DOCDIR]DX_i[)/latex; \\
-    rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \\
-    \$(DX_LATEX) refman.tex; \\
-    \$(DX_MAKEINDEX) refman.idx; \\
-    \$(DX_LATEX) refman.tex; \\
-    countdown=5; \\
-    while \$(DX_EGREP) 'Rerun (LaTeX|to get cross-references right)' \\
-                      refman.log > /dev/null 2>&1 \\
-       && test \$\$countdown -gt 0; do \\
-        \$(DX_LATEX) refman.tex; \\
+	\$(DX_V_LATEX)cd \$(DX_DOCDIR]DX_i[)/latex; \\
+	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \\
+	\$(DX_LATEX) refman.tex; \\
+	\$(DX_MAKEINDEX) refman.idx; \\
+	\$(DX_LATEX) refman.tex; \\
+	countdown=5; \\
+	while \$(DX_EGREP) 'Rerun (LaTeX|to get cross-references right)' \\
+	                  refman.log > /dev/null 2>&1 \\
+	   && test \$\$countdown -gt 0; do \\
+	    \$(DX_LATEX) refman.tex; \\
             countdown=\`expr \$\$countdown - 1\`; \\
-    done; \\
-    \$(DX_DVIPS) -o ../\$(PACKAGE).ps refman.dvi
+	done; \\
+	\$(DX_DVIPS) -o ../\$(PACKAGE).ps refman.dvi
 
 ]])["]],
 [[DX_SNIPPET_ps=""]])
@@ -486,19 +486,19 @@ doxygen-pdf: \$(DX_CLEAN_PDF)
 
 ]m4_foreach([DX_i], [DX_loop],
 [[\$(DX_DOCDIR]DX_i[)/\$(PACKAGE).pdf: \$(DX_DOCDIR]DX_i[)/\$(PACKAGE).tag
-    \$(DX_V_LATEX)cd \$(DX_DOCDIR]DX_i[)/latex; \\
-    rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \\
-    \$(DX_PDFLATEX) refman.tex; \\
-    \$(DX_MAKEINDEX) refman.idx; \\
-    \$(DX_PDFLATEX) refman.tex; \\
-    countdown=5; \\
-    while \$(DX_EGREP) 'Rerun (LaTeX|to get cross-references right)' \\
-                      refman.log > /dev/null 2>&1 \\
-       && test \$\$countdown -gt 0; do \\
-        \$(DX_PDFLATEX) refman.tex; \\
-        countdown=\`expr \$\$countdown - 1\`; \\
-    done; \\
-    mv refman.pdf ../\$(PACKAGE).pdf
+	\$(DX_V_LATEX)cd \$(DX_DOCDIR]DX_i[)/latex; \\
+	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \\
+	\$(DX_PDFLATEX) refman.tex; \\
+	\$(DX_MAKEINDEX) refman.idx; \\
+	\$(DX_PDFLATEX) refman.tex; \\
+	countdown=5; \\
+	while \$(DX_EGREP) 'Rerun (LaTeX|to get cross-references right)' \\
+	                  refman.log > /dev/null 2>&1 \\
+	   && test \$\$countdown -gt 0; do \\
+	    \$(DX_PDFLATEX) refman.tex; \\
+	    countdown=\`expr \$\$countdown - 1\`; \\
+	done; \\
+	mv refman.pdf ../\$(PACKAGE).pdf
 
 ]])["]],
 [[DX_SNIPPET_pdf=""]])
@@ -546,26 +546,26 @@ doxygen-doc: doxygen-run \$(DX_PS_GOAL) \$(DX_PDF_GOAL)
 
 ]m4_foreach([DX_i], [DX_loop],
 [[\$(DX_DOCDIR]DX_i[)/\$(PACKAGE).tag: \$(DX_CONFIG]DX_i[) \$(pkginclude_HEADERS)
-    \$(A""M_V_at)rm -rf \$(DX_DOCDIR]DX_i[)
-    \$(DX_V_DXGEN)\$(DX_ENV) DOCDIR=\$(DX_DOCDIR]DX_i[) \$(DX_DOXYGEN) \$(DX_CONFIG]DX_i[)
-    \$(A""M_V_at)echo Timestamp >\$][@
+	\$(A""M_V_at)rm -rf \$(DX_DOCDIR]DX_i[)
+	\$(DX_V_DXGEN)\$(DX_ENV) DOCDIR=\$(DX_DOCDIR]DX_i[) \$(DX_DOXYGEN) \$(DX_CONFIG]DX_i[)
+	\$(A""M_V_at)echo Timestamp >\$][@
 
 ]])dnl
 [DX_CLEANFILES = \\]
 m4_foreach([DX_i], [DX_loop],
-[[  \$(DX_DOCDIR]DX_i[)/doxygen_sqlite3.db \\
-    \$(DX_DOCDIR]DX_i[)/\$(PACKAGE).tag \\
+[[	\$(DX_DOCDIR]DX_i[)/doxygen_sqlite3.db \\
+	\$(DX_DOCDIR]DX_i[)/\$(PACKAGE).tag \\
 ]])dnl
-[   -r \\
-    \$(DX_CLEAN_HTML) \\
-    \$(DX_CLEAN_CHM) \\
-    \$(DX_CLEAN_CHI) \\
-    \$(DX_CLEAN_MAN) \\
-    \$(DX_CLEAN_RTF) \\
-    \$(DX_CLEAN_XML) \\
-    \$(DX_CLEAN_PS) \\
-    \$(DX_CLEAN_PDF) \\
-    \$(DX_CLEAN_LATEX)"]],
+[	-r \\
+	\$(DX_CLEAN_HTML) \\
+	\$(DX_CLEAN_CHM) \\
+	\$(DX_CLEAN_CHI) \\
+	\$(DX_CLEAN_MAN) \\
+	\$(DX_CLEAN_RTF) \\
+	\$(DX_CLEAN_XML) \\
+	\$(DX_CLEAN_PS) \\
+	\$(DX_CLEAN_PDF) \\
+	\$(DX_CLEAN_LATEX)"]],
 [[DX_SNIPPET_doc=""]])
 AC_SUBST([DX_RULES],
 ["${DX_SNIPPET_doc}"])dnl

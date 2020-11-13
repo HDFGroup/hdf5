@@ -1024,7 +1024,10 @@ AC_ARG_ENABLE([tests],
               [HDF5_TESTS=$enableval])
 
 if test "X$HDF5_TESTS" = "Xno"; then
+  AC_MSG_RESULT([yes])
   echo "Building HDF5 tests is disabled"
+else
+  AC_MSG_RESULT([no])
 fi
 
 ## ----------------------------------------------------------------------
@@ -1045,7 +1048,10 @@ AC_ARG_ENABLE([tools],
               [HDF5_TOOLS=$enableval])
 
 if test "X$HDF5_TOOLS" = "Xno"; then
+  AC_MSG_RESULT([yes])
   echo "Building HDF5 tools is disabled"
+else
+  AC_MSG_RESULT([no])
 fi
 
 ## ----------------------------------------------------------------------
@@ -1066,15 +1072,16 @@ AC_ARG_ENABLE([doxygen],
               [HDF5_DOXYGEN=$enableval])
 
 if test "X$HDF5_DOXYGEN" = "Xyes"; then
+  AC_MSG_RESULT([yes])
   DX_DOXYGEN_FEATURE(ON)
   DX_DOT_FEATURE(OFF)
   DX_HTML_FEATURE(ON)
   DX_CHM_FEATURE(OFF)
   DX_CHI_FEATURE(OFF)
-  DX_MAN_FEATURE(OFF)
+  DX_MAN_FEATURE(ON)
   DX_RTF_FEATURE(OFF)
   DX_XML_FEATURE(OFF)
-  DX_PDF_FEATURE(ON)
+  DX_PDF_FEATURE(OFF)
   DX_PS_FEATURE(OFF)
 
   AC_SUBST([DOXYGEN_PACKAGE])
@@ -1085,7 +1092,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   AC_SUBST([DOXYGEN_INPUT_DIRECTORY])
   AC_SUBST([DOXYGEN_OPTIMIZE_OUTPUT_FOR_C])
   AC_SUBST([DOXYGEN_MACRO_EXPANSION])
-  AC_SUBST([DOXYGEN_OUTPUT_DIR])
+  AC_SUBST([DOXYGEN_OUTPUT_DIRECTORY])
 
   DOXYGEN_PACKAGE=${PACKAGE_NAME}
   DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
@@ -1095,13 +1102,12 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_INPUT_DIRECTORY='$(SRCDIR) $(SRCDIR)/doxygen/dox'
   DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
   DOXYGEN_MACRO_EXPANSION=YES
-  DOXYGEN_OUTPUT_DIR=hdf5lib_docs
+  DOXYGEN_OUTPUT_DIRECTORY=hdf5lib_docs
 
-  DX_INIT_DOXYGEN([HDF5], [doxygen/Doxyfile], [hdf5lib_docs])
-
-  #AC_SUBST([DOXYGEN_OUTPUT_DIR], [hdf5lib_docs])
+  DX_INIT_DOXYGEN([HDF5], [../doxygen/Doxyfile], [hdf5lib_docs])
 
 else
+  AC_MSG_RESULT([no])
   echo "Doxygen support is disabled"
 fi
 
@@ -3819,6 +3825,7 @@ AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
+AM_CONDITIONAL([BUILD_DOXYGEN_CONDITIONAL], [test "X$HDF5_DOXYGEN" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
