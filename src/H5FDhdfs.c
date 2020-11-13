@@ -20,21 +20,38 @@
  *             File System (HDFS).
  */
 
-#include "H5private.h"   /* Generic Functions        */
-#include "H5Eprivate.h"  /* Error handling           */
-#include "H5FDprivate.h" /* File drivers             */
-#include "H5FDhdfs.h"    /* hdfs file driver         */
-#include "H5FLprivate.h" /* Free Lists               */
-#include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management        */
+#ifdef H5_HAVE_LIBHDFS
+/* This source code file is part of the H5FD driver module
+ * NOTE: If we're just building the binary compatibility stubs,
+ * we're never going to really initialize the package, so we
+ * don't include this.
+ */
+#include "H5FDdrvr_module.h"
+#endif /* H5_HAVE_LIBHDFS */
+
+#include "H5private.h"      /* Generic Functions        */
+#include "H5Eprivate.h"     /* Error handling           */
+#include "H5FDprivate.h"    /* File drivers             */
+#include "H5FDhdfs.h"       /* hdfs file driver         */
+#include "H5FLprivate.h"    /* Free Lists               */
+#include "H5Iprivate.h"     /* IDs                      */
+#include "H5MMprivate.h"    /* Memory management        */
 
 #ifdef H5_HAVE_LIBHDFS
 
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
-
-/* HDFS routines */
-#include "hdfs.h"
+/* HDFS routines
+ * Have to turn off -Wstrict-prototypes as this header contains functions
+ * defined as foo() instead of foo(void), which triggers warnings that HDF5
+ * then interprets as errors.
+ * -Wundef isn't interpreted as an error by HDF5, but the header does do
+ *  some bad symbol interpretation that raises a warning that is out of our
+ *  control.
+ */
+H5_GCC_DIAG_OFF("strict-prototypes")
+H5_GCC_DIAG_OFF("undef")
+#include <hdfs.h>
+H5_GCC_DIAG_ON("strict-prototypes")
+H5_GCC_DIAG_ON("undef")
 
 /* toggle function call prints: 1 turns on */
 #define HDFS_DEBUG 0
@@ -361,7 +378,7 @@ H5FD_hdfs_init(void)
     unsigned int bin_i;
 #endif
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", FUNC);
@@ -598,8 +615,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  John Mainzer
- *              9/10/17
+ * Programmer:  Jacob Smith 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1700,4 +1716,48 @@ H5FD__hdfs_unlock(H5FD_t H5_ATTR_UNUSED *_file)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__hdfs_unlock() */
+
+#else /* H5_HAVE_LIBHDFS */
+
+/* No-op stubs to avoid binary compatibility problems with previous
+ * HDF5 1.10 versions. Non-functional versions of these API calls were
+ * erroneously included in the library even when the HDFS VFD was not
+ * configured.
+ */
+hid_t
+H5FD_hdfs_init(void)
+{
+    /* This should never be called since the header doesn't invoke it */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_LEAVE_NOAPI(H5I_INVALID_HID)
+}
+
+herr_t
+H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
+{
+    herr_t ret_value = FAIL;
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE2("e", "i*x", fapl_id, fa_out);
+
+    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "HDFS VFD not included in the HDF5 library")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+}
+
+herr_t
+H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
+{
+    herr_t ret_value = FAIL;
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE2("e", "i*x", fapl_id, fa);
+
+    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "HDFS VFD not included in the HDF5 library")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+}
+
 #endif /* H5_HAVE_LIBHDFS */
