@@ -1,0 +1,36 @@
+/*! \mainpage API Documentation for HDF5 Version 1.13 (Draft)
+ *
+ * \todo Fix the search form for server deployments.
+ * \todo Make it mobile-friendly
+ *
+ * \section intro_sec Introduction
+ *
+ * \todo Write an introduction.
+ *
+ * \section quick_links Quick Links
+ *
+ * <ul>
+ * <li>\ref PDT "Predefined Datatypes"</li>
+ * <li>\ref api-compat-macros "API Compatibility Macros"</li>
+ * <li><a href="https://hdf5.wiki/">HDF5 Wiki</a></li>
+ * </ul>
+ *
+ * \section using_locations The Use of Locations (Identifier + Name) in the HDF5 API
+ *
+ * \todo Make this crystal clear!
+ *
+ * \section cpp_note Programming Note for C++ Developers Using C Functions
+ *
+ * If a C routine that takes a function pointer as an argument is called from
+ * within C++ code, the C routine should be returned from normally.
+ *
+ * Examples of this kind of routine include callbacks such as H5Pset_elink_cb()
+ * and H5Pset_type_conv_cb() and functions such as H5Tconvert() and H5Ewalk2().
+ *
+ * Exiting the routine in its normal fashion allows the HDF5 C library to clean
+ * up its work properly. In other words, if the C++ application jumps out of
+ * the routine back to the C++ \c catch statement, the library is not given the
+ * opportunity to close any temporary data structures that were set up when the
+ * routine was called. The C++ application should save some state as the
+ * routine is started so that any problem that occurs might be diagnosed.
+ */
