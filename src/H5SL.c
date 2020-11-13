@@ -2233,7 +2233,7 @@ H5SL_release(H5SL_t *slist)
         HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes")
 
 done:
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SL_release() */
 
 /*--------------------------------------------------------------------------
