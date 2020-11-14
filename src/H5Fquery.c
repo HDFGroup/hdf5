@@ -1299,3 +1299,23 @@ H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_cont_info */
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_get_file_locking
+ *
+ * Purpose:  Get the file locking flag for the file
+ *
+ * Return:   TRUE/FALSE
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_file_locking(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->use_file_locking)
+} /* end H5F_get_file_locking */

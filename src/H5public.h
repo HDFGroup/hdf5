@@ -92,11 +92,11 @@ extern "C" {
 #endif
 
 /* Version numbers */
-#define H5_VERS_MAJOR      1   /* For major interface/format changes  	     */
-#define H5_VERS_MINOR      12  /* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE    1   /* For tweaks, bug-fixes, or development     */
-#define H5_VERS_SUBRELEASE "3" /* For pre-releases like snap0       */
-/* Empty string for real releases.           */
+#define H5_VERS_MAJOR      1                        /* For major interface/format changes       */
+#define H5_VERS_MINOR      12                       /* For minor interface/format changes       */
+#define H5_VERS_RELEASE    1                        /* For tweaks, bug-fixes, or development    */
+#define H5_VERS_SUBRELEASE "3"                      /* For pre-releases like snap0              */
+                                                    /* Empty string for real releases.           */
 #define H5_VERS_INFO "HDF5 library version: 1.12.1-3" /* Full version string */
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
@@ -333,13 +333,15 @@ typedef enum H5_index_t {
     H5_INDEX_N             /* Number of indices defined            */
 } H5_index_t;
 
-/*
+/**
  * Storage info struct used by H5O_info_t and H5F_info_t
  */
+//! [H5_ih_info_t_snip]
 typedef struct H5_ih_info_t {
-    hsize_t index_size; /* btree and/or list */
+    hsize_t index_size; /**< btree and/or list */
     hsize_t heap_size;
 } H5_ih_info_t;
+//! [H5_ih_info_t_snip]
 
 /* Tokens are unique and permanent identifiers that are
  * used to reference HDF5 objects in a container. */

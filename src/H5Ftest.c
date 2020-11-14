@@ -253,3 +253,35 @@ H5F__same_file_test(hid_t file_id1, hid_t file_id2)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__same_file_test() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__reparse_file_lock_variable_test
+ *
+ * Purpose:     Re-parse the file locking environment variable.
+ *
+ *              Since getenv(3) is fairly expensive, we only parse it once,
+ *              when the library opens. This test function is used to
+ *              re-parse the environment variable after we've changed it
+ *              with setnev(3).
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:	Dana Robinson
+ *              Summer 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__reparse_file_lock_variable_test(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check the file locking environment variable */
+    if (H5F__parse_file_lock_env_var(&use_locks_env_g) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to parse file locking environment variable")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__reparse_file_lock_variable_test() */

@@ -385,6 +385,8 @@ H5_DLL herr_t H5AC_insert_entry(H5F_t *f, const H5AC_class_t *type, haddr_t addr
                                 unsigned int flags);
 H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
 H5_DLL herr_t H5AC_prep_for_file_close(H5F_t *f);
+H5_DLL herr_t H5AC_prep_for_file_flush(H5F_t *f);
+H5_DLL herr_t H5AC_secure_from_file_flush(H5F_t *f);
 H5_DLL herr_t H5AC_create_flush_dependency(void *parent_thing, void *child_thing);
 H5_DLL void * H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata, unsigned flags);
 H5_DLL herr_t H5AC_resize_entry(void *thing, size_t new_size);

@@ -594,13 +594,11 @@ Java_hdf_hdf5lib_HDF5Constants_H5E_1CANTLOCK(JNIEnv *env, jclass cls)
 {
     return H5E_CANTLOCK;
 }
-/*
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5E_1CANTLOCKFILE(JNIEnv *env, jclass cls)
 {
     return H5E_CANTLOCKFILE;
 }
-*/
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5E_1CANTMARKCLEAN(JNIEnv *env, jclass cls)
 {
@@ -781,13 +779,11 @@ Java_hdf_hdf5lib_HDF5Constants_H5E_1CANTUNLOCK(JNIEnv *env, jclass cls)
 {
     return H5E_CANTUNLOCK;
 }
-/*
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5E_1CANTUNLOCKFILE(JNIEnv *env, jclass cls)
 {
     return H5E_CANTUNLOCKFILE;
 }
-*/
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5E_1CANTUNPIN(JNIEnv *env, jclass cls)
 {

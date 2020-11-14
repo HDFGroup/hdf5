@@ -5,6 +5,19 @@ AlignConsecutiveMacros: true
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 AlwaysBreakAfterReturnType: AllDefinitions
+# Can enable the following section when llvm 12.x is out
+#AttributeMacros:
+#  - H5_ATTR_FORMAT
+#  - H5_ATTR_UNUSED
+#  - H5_ATTR_DEPRECATED_USED
+#  - H5_ATTR_NDEBUG_UNUSED
+#  - H5_ATTR_DEBUG_API_USED
+#  - H5_ATTR_PARALLEL_UNUSED
+#  - H5_ATTR_PARALLEL_USED
+#  - H5_ATTR_NORETURN
+#  - H5_ATTR_CONST
+#  - H5_ATTR_PURE
+#  - H5_ATTR_FALLTHROUGH
 BraceWrapping:
   AfterFunction:   true
   BeforeCatch:     true

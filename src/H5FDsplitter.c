@@ -210,7 +210,7 @@ H5FD_splitter_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     H5FD_SPLITTER_LOG_CALL(FUNC);
 
@@ -585,7 +585,7 @@ H5FD__splitter_fapl_copy(const void *_old_fa)
     if (NULL == new_fa_ptr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL")
 
-    HDmemcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_splitter_fapl_t));
+    H5MM_memcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_splitter_fapl_t));
     HDstrncpy(new_fa_ptr->wo_path, old_fa_ptr->wo_path, H5FD_SPLITTER_PATH_MAX);
     HDstrncpy(new_fa_ptr->log_file_path, old_fa_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX);
 
@@ -1096,10 +1096,11 @@ H5FD__splitter_lock(H5FD_t *_file, hbool_t rw)
 
     /* Place the lock on each file */
     if (H5FD_lock(file->rw_file, rw) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCK, FAIL, "unable to lock R/W file")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock R/W file")
+
     if (file->wo_file != NULL)
         if (H5FD_lock(file->wo_file, rw) < 0)
-            H5FD_SPLITTER_WO_ERROR(file, FUNC, H5E_VFL, H5E_CANTLOCK, FAIL, "unable to lock W/O file")
+            H5FD_SPLITTER_WO_ERROR(file, FUNC, H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1129,10 +1130,11 @@ H5FD__splitter_unlock(H5FD_t *_file)
 
     /* Remove the lock on each file */
     if (H5FD_unlock(file->rw_file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCK, FAIL, "unable to unlock R/W file")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock R/W file")
+
     if (file->wo_file != NULL)
         if (H5FD_unlock(file->wo_file) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCK, FAIL, "unable to unlock W/O file")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1298,14 +1300,14 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
         char * s;
 
         size = HDstrlen(atfunc) + HDstrlen(msg) + 3; /* ':', ' ', '\n' */
-        s    = (char *)HDmalloc(sizeof(char) * (size + 1));
+        s    = (char *)H5MM_malloc(sizeof(char) * (size + 1));
         if (NULL == s)
             ret_value = FAIL;
         else if (size < (size_t)HDsnprintf(s, size + 1, "%s: %s\n", atfunc, msg))
             ret_value = FAIL;
         else if (size != HDfwrite(s, 1, size, file->logfp))
             ret_value = FAIL;
-        HDfree(s);
+        H5MM_free(s);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)

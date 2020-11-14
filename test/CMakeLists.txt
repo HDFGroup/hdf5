@@ -690,6 +690,26 @@ if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_use_append_chunk_FORMAT use_append_chunk)
 endif ()
 
+set (use_append_chunk_mirror_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_chunk_mirror.c ${HDF5_TEST_SOURCE_DIR}/use_common.c ${HDF5_TEST_SOURCE_DIR}/use.h)
+add_executable (use_append_chunk_mirror ${use_append_chunk_mirror_SOURCES})
+target_compile_options(use_append_chunk_mirror PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+target_include_directories (use_append_chunk_mirror PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+if (NOT BUILD_SHARED_LIBS)
+  TARGET_C_PROPERTIES (use_append_chunk_mirror STATIC)
+  target_link_libraries (use_append_chunk_mirror PRIVATE ${HDF5_TEST_LIB_TARGET})
+else ()
+  TARGET_C_PROPERTIES (use_append_chunk_mirror SHARED)
+  target_link_libraries (use_append_chunk_mirror PRIVATE ${HDF5_TEST_LIBSH_TARGET})
+endif ()
+set_target_properties (use_append_chunk_mirror PROPERTIES FOLDER test)
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_use_append_chunk_mirror_FORMAT use_append_chunk_mirror)
+endif ()
+
 set (use_append_mchunks_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_mchunks.c ${HDF5_TEST_SOURCE_DIR}/use_common.c ${HDF5_TEST_SOURCE_DIR}/use.h)
 add_executable (use_append_mchunks ${use_append_mchunks_SOURCES})
 target_compile_options(use_append_mchunks PRIVATE "${HDF5_CMAKE_C_FLAGS}")

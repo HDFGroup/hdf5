@@ -191,6 +191,32 @@
 
 ./config/site-specific/BlankForm
 
+./doc/code-conventions.md
+
+./doxygen/aliases
+./doxygen/Doxyfile.in
+./doxygen/dox/H5Acreate.dox
+./doxygen/dox/H5Aiterate.dox
+./doxygen/dox/H5Fget_info.dox
+./doxygen/dox/H5Lget_info_by_idx.dox
+./doxygen/dox/H5Lget_info.dox
+./doxygen/dox/H5Literate_by_name.dox
+./doxygen/dox/H5Literate.dox
+./doxygen/dox/H5Lvisit_by_name.dox
+./doxygen/dox/H5Lvisit.dox
+./doxygen/dox/H5Oget_info_by_idx.dox
+./doxygen/dox/H5Oget_info_by_name.dox
+./doxygen/dox/H5Oget_info.dox
+./doxygen/dox/H5Ovisit_by_name.dox
+./doxygen/dox/H5Ovisit.dox
+./doxygen/dox/H5Sencode.dox
+./doxygen/dox/mainpage.dox
+./doxygen/dox/rm-template.dox
+./doxygen/examples/H5Fclose.c
+./doxygen/examples/H5Fcreate.c
+./doxygen/examples/hello_hdf5.c
+./doxygen/img/HDFG-logo.png
+
 ./examples/Attributes.txt
 ./examples/Makefile.am
 ./examples/h5_chunk_read.c
@@ -2735,6 +2761,7 @@
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_zero.ddl
+./tools/test/h5repack/testfiles/h5repack_HDFFV-10590_CVE-2018-17432.h5
 ./tools/test/h5repack/testfiles/GS.h5repack_paged_nopersist.h5.ddl
 ./tools/test/h5repack/testfiles/S.h5repack_fsm_aggr_persist.h5.ddl
 ./tools/test/h5repack/testfiles/SP.h5repack_fsm_aggr_nopersist.h5.ddl

@@ -96,9 +96,9 @@ CHECK_CLEANFILES=*.chkexe *.chklog *.clog *.clog2
 # commands that should be executed even if a file with the same name already
 # exists.
 .PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
-        build-tests check-clean check-install check-p check-s check-vfd \
-        check-passthrough-vol install-doc lib progs tests uninstall-doc \
-        _exec_check-s _test help
+	build-tests check-clean check-install check-p check-s check-vfd \
+	check-passthrough-vol install-doc lib progs tests uninstall-doc \
+	_exec_check-s _test help trace doxygen
 
 help:
 	@$(top_srcdir)/bin/makehelp

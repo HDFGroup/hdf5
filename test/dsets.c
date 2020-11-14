@@ -110,6 +110,8 @@ const char *FILENAME[] = {"dataset",             /* 0 */
 #define DSET_FLETCHER32_NAME_3    "fletcher32_3"
 #define DSET_SHUF_DEF_FLET_NAME   "shuffle+deflate+fletcher32"
 #define DSET_SHUF_DEF_FLET_NAME_2 "shuffle+deflate+fletcher32_2"
+#define DSET_OPTIONAL_SCALAR      "dataset_with_scalar_space"
+#define DSET_OPTIONAL_VLEN        "dataset_with_vlen_type"
 #ifdef H5_HAVE_FILTER_SZIP
 #define DSET_SZIP_NAME             "szip"
 #define DSET_SHUF_SZIP_FLET_NAME   "shuffle+szip+fletcher32"
@@ -373,13 +375,13 @@ test_create(hid_t file)
     dims[0] = 256;
     dims[1] = 512;
     space   = H5Screate_simple(2, dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /* Create a small data space for compact dataset */
     small_dims[0] = 16;
     small_dims[1] = 8;
     small_space   = H5Screate_simple(2, small_dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /*
      * Create a dataset using the default dataset creation properties.    We're
@@ -445,13 +447,13 @@ test_create(hid_t file)
      * layout.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
 
     /* Attempt to create a dataset with invalid chunk sizes */
     csize[0] = dims[0] * 2;
     csize[1] = dims[1] * 2;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
     H5E_BEGIN_TRY
     {
         dataset = H5Dcreate2(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, create_parms,
@@ -467,7 +469,7 @@ test_create(hid_t file)
     csize[0] = 5;
     csize[1] = 100;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     dataset =
         H5Dcreate2(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, create_parms, H5P_DEFAULT);
@@ -489,11 +491,11 @@ test_create(hid_t file)
      * Create a compact dataset, then close it.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
     status = H5Pset_layout(create_parms, H5D_COMPACT);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Pset_alloc_time(create_parms, H5D_ALLOC_TIME_EARLY);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     dataset = H5Dcreate2(file, DSET_COMPACT_NAME, H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT, create_parms,
                          H5P_DEFAULT);
@@ -565,7 +567,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         /* Create a small conversion buffer to test strip mining */
         tconv_buf = HDmalloc((size_t)1000);
         xfer      = H5Pcreate(H5P_DATASET_XFER);
-        assert(xfer >= 0);
+        HDassert(xfer >= 0);
         if (H5Pset_buffer(xfer, (size_t)1000, tconv_buf, NULL) < 0)
             goto error;
 
@@ -4334,9 +4336,9 @@ test_nbit_compound_3(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
-        if (new_data[i].i != orig_data[i].i || strcmp(new_data[i].str, orig_data[i].str) != 0 ||
-            strcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 || new_data[i].v.len != orig_data[i].v.len ||
-            new_data[i].r != orig_data[i].r) {
+        if (new_data[i].i != orig_data[i].i || HDstrcmp(new_data[i].str, orig_data[i].str) != 0 ||
+            HDstrcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 ||
+            new_data[i].v.len != orig_data[i].v.len || new_data[i].r != orig_data[i].r) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu\n", (unsigned long)i);
@@ -6115,6 +6117,115 @@ error:
 } /* end test_can_apply2() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_optional_filters
+ *
+ * Purpose:     Tests that H5Dcreate2 will not fail when a combination of
+ *              type, space, etc... doesn't work for a filter and filter is
+ *              optional.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              24 July 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_optional_filters(hid_t file)
+{
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
+    hsize_t      dim1d[1];                  /* Dataspace dimensions */
+    hid_t        dsid    = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        sid     = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        strtid  = H5I_INVALID_HID; /* Datatype ID for string */
+    hid_t        vlentid = H5I_INVALID_HID; /* Datatype ID for vlen */
+    hid_t        dcplid  = H5I_INVALID_HID; /* Dataspace creation property list ID */
+
+    TESTING("dataset with optional filters");
+
+    /* Create dcpl with special filter */
+    if ((dcplid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Create the datatype */
+    if ((strtid = H5Tcreate(H5T_STRING, H5T_VARIABLE)) < 0)
+        TEST_ERROR;
+
+    /* Create the data space */
+    if ((sid = H5Screate(H5S_SCALAR)) < 0)
+        TEST_ERROR;
+
+    /* The filter is optional. */
+    if (H5Pset_filter(dcplid, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) < 0)
+        TEST_ERROR;
+
+    /* Create dataset with optional filter */
+    if ((dsid = H5Dcreate2(file, DSET_OPTIONAL_SCALAR, strtid, sid, H5P_DEFAULT, dcplid, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* Close datatype */
+    if (H5Tclose(strtid) < 0)
+        TEST_ERROR;
+
+    /* Set dataspace dimensions */
+    dim1d[0] = DIM1;
+
+    /* Create a non-scalar dataspace */
+    if ((sid = H5Screate_simple(1, dim1d, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create a vlen datatype */
+    if ((vlentid = H5Tvlen_create(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+
+    /* Create dataset with optional filter */
+    if ((dsid = H5Dcreate2(file, DSET_OPTIONAL_VLEN, vlentid, sid, H5P_DEFAULT, dcplid, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* Close datatype */
+    if (H5Tclose(vlentid) < 0)
+        TEST_ERROR;
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcplid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Pclose(dcplid);
+        H5Tclose(strtid);
+        H5Tclose(vlentid);
+    }
+    H5E_END_TRY;
+    return FAIL;
+} /* end test_optional_filters() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_can_apply_szip
  *
  * Purpose:    Tests library behavior when szip filter indicates it can't
@@ -7721,7 +7832,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     TESTING(testname);
 
-    assert(NPOINTS < 100);
+    HDassert(NPOINTS < 100);
 
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
 
@@ -8243,13 +8354,13 @@ test_deprec(hid_t file)
     dims[0] = 256;
     dims[1] = 512;
     space   = H5Screate_simple(2, dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /* Create a small data space for compact dataset */
     small_dims[0] = 16;
     small_dims[1] = 8;
     small_space   = H5Screate_simple(2, small_dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /*
      * Create a dataset using the default dataset creation properties.    We're
@@ -8302,7 +8413,7 @@ test_deprec(hid_t file)
      * layout.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
 
     /* Add the deflate filter, if available */
 #if defined H5_HAVE_FILTER_DEFLATE
@@ -8338,7 +8449,7 @@ test_deprec(hid_t file)
     csize[0] = dims[0] * 2;
     csize[1] = dims[1] * 2;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
     H5E_BEGIN_TRY
     {
         dataset = H5Dcreate1(file, DSET_DEPREC_NAME_CHUNKED, H5T_NATIVE_DOUBLE, space, create_parms);
@@ -8353,7 +8464,7 @@ test_deprec(hid_t file)
     csize[0] = 5;
     csize[1] = 100;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     if ((dataset = H5Dcreate1(file, DSET_DEPREC_NAME_CHUNKED, H5T_NATIVE_DOUBLE, space, create_parms)) < 0)
         goto error;
@@ -8378,11 +8489,11 @@ test_deprec(hid_t file)
      * Create a compact dataset, then close it.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
     status = H5Pset_layout(create_parms, H5D_COMPACT);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Pset_alloc_time(create_parms, H5D_ALLOC_TIME_EARLY);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     if ((dataset = H5Dcreate1(file, DSET_DEPREC_NAME_COMPACT, H5T_NATIVE_DOUBLE, small_space, create_parms)) <
         0)
@@ -15121,6 +15232,7 @@ main(void)
                 nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
                 nerrors += (test_can_apply(file) < 0 ? 1 : 0);
                 nerrors += (test_can_apply2(file) < 0 ? 1 : 0);
+                nerrors += (test_optional_filters(file) < 0 ? 1 : 0);
                 nerrors += (test_set_local(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_can_apply_szip(file) < 0 ? 1 : 0);
                 nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);

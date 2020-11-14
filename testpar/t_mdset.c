@@ -1456,10 +1456,8 @@ read_attribute(hid_t obj_id, int this_type, int num)
     if (this_type == is_group) {
         HDsprintf(attr_name, "Group Attribute %d", num);
         aid = H5Aopen(obj_id, attr_name, H5P_DEFAULT);
-        if (MAINPROCESS) {
-            H5Aread(aid, H5T_NATIVE_INT, &in_num);
-            vrfy_errors = dataset_vrfy(NULL, NULL, NULL, group_block, &in_num, &num);
-        }
+        H5Aread(aid, H5T_NATIVE_INT, &in_num);
+        vrfy_errors = dataset_vrfy(NULL, NULL, NULL, group_block, &in_num, &num);
         H5Aclose(aid);
     }
     else if (this_type == is_dset) {
@@ -1467,10 +1465,8 @@ read_attribute(hid_t obj_id, int this_type, int num)
         for (i = 0; i < 8; i++)
             out_data[i] = i;
         aid = H5Aopen(obj_id, attr_name, H5P_DEFAULT);
-        if (MAINPROCESS) {
-            H5Aread(aid, H5T_NATIVE_INT, in_data);
-            vrfy_errors = dataset_vrfy(NULL, NULL, NULL, dset_block, in_data, out_data);
-        }
+        H5Aread(aid, H5T_NATIVE_INT, in_data);
+        vrfy_errors = dataset_vrfy(NULL, NULL, NULL, dset_block, in_data, out_data);
         H5Aclose(aid);
     }
 

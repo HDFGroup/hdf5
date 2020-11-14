@@ -2168,8 +2168,6 @@ test_ros3(void)
     hid_t            driver_id    = -1;     /* ID for this VFD              */
     unsigned long    driver_flags = 0;      /* VFD feature flags            */
     char             filename[1024];        /* filename                     */
-    void *           os_file_handle = NULL; /* OS file handle               */
-    hsize_t          file_size;             /* file size                    */
     H5FD_ros3_fapl_t test_ros3_fa;
     H5FD_ros3_fapl_t ros3_fa_0 = {
         /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,
@@ -2201,9 +2199,9 @@ test_ros3(void)
     /* need a macro to compare instances of H5FD_ros3_fapl_t */
     if ((test_ros3_fa.version != ros3_fa_0.version) ||
         (test_ros3_fa.authenticate != ros3_fa_0.authenticate) ||
-        (strcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
-        (strcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
-        (strcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
+        (HDstrcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
+        (HDstrcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
+        (HDstrcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
         TEST_ERROR;
 
     h5_fixname(FILENAME[10], fapl_id, filename, sizeof(filename));
@@ -2252,7 +2250,7 @@ error:
         AT();                                                                                                \
         HDfprintf(stderr, mesg);                                                                             \
         H5Eprint2(H5E_DEFAULT, stderr);                                                                      \
-        fflush(stderr);                                                                                      \
+        HDfflush(stderr);                                                                                    \
         ret_value = -1;                                                                                      \
         goto done;                                                                                           \
     }
@@ -2464,7 +2462,7 @@ run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_err
     }
 
     /* Verify existence of logfile if appropriate */
-    logfile = fopen(vfd_config->log_file_path, "r");
+    logfile = HDfopen(vfd_config->log_file_path, "r");
     if ((TRUE == provide_logfile_path && NULL == logfile) ||
         (FALSE == provide_logfile_path && NULL != logfile)) {
         SPLITTER_TEST_FAULT("no logfile when one was expected\n");
@@ -2485,7 +2483,7 @@ done:
     }
 
     if (logfile != NULL)
-        fclose(logfile);
+        HDfclose(logfile);
 
     HDfree(vfd_config);
     HDfree(filename_rw);
