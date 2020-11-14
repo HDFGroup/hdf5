@@ -138,8 +138,11 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
     flags = *p++;
 
     /* Get or determine the type of the extent */
-    if (version >= H5O_SDSPACE_VERSION_2)
+    if (version >= H5O_SDSPACE_VERSION_2) {
         sdim->type = (H5S_class_t)*p++;
+        if (sdim->type != H5S_SIMPLE && sdim->rank > 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid rank for scalar or NULL dataspace")
+    } /* end if */
     else {
         /* Set the dataspace type to be simple or scalar as appropriate */
         if (sdim->rank > 0)
@@ -248,13 +251,15 @@ H5O__sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
         *p++ = 0; /*reserved*/
     }             /* end else */
 
-    /* Current & maximum dimensions */
-    if (sdim->rank > 0) {
-        for (u = 0; u < sdim->rank; u++)
-            H5F_ENCODE_LENGTH(f, p, sdim->size[u]);
-        if (flags & H5S_VALID_MAX) {
+    /* Encode dataspace dimensions for simple dataspaces */
+    if (H5S_SIMPLE == sdim->type) {
+        /* Encode current & maximum dimensions */
+        if (sdim->rank > 0) {
             for (u = 0; u < sdim->rank; u++)
-                H5F_ENCODE_LENGTH(f, p, sdim->max[u]);
+                H5F_ENCODE_LENGTH(f, p, sdim->size[u]);
+            if (flags & H5S_VALID_MAX)
+                for (u = 0; u < sdim->rank; u++)
+                    H5F_ENCODE_LENGTH(f, p, sdim->max[u]);
         } /* end if */
     }     /* end if */
 
