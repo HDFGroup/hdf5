@@ -455,7 +455,6 @@ public class HDF5Constants {
     private static final int H5ES_STATUS_IN_PROGRESS = H5ES_STATUS_IN_PROGRESS();
     private static final int H5ES_STATUS_SUCCEED = H5ES_STATUS_SUCCEED();
     private static final int H5ES_STATUS_FAIL = H5ES_STATUS_FAIL();
-    private static final int H5ES_STATUS_CANCELED = H5ES_STATUS_CANCELED();
 
     public static final int H5F_ACC_CREAT = H5F_ACC_CREAT();
     public static final int H5F_ACC_EXCL = H5F_ACC_EXCL();
@@ -1508,8 +1507,6 @@ public class HDF5Constants {
     private static native final int H5ES_STATUS_SUCCEED();
 
     private static native final int H5ES_STATUS_FAIL();
-
-    private static native final int H5ES_STATUS_CANCELED();
 
     private static native final int H5F_ACC_CREAT();
 
