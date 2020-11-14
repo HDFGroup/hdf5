@@ -50,6 +50,7 @@
 ./m4/ax_java_check_class.m4
 ./m4/ax_java_options.m4
 ./m4/ax_jni_include_dir.m4
+./m4/ax_prog_doxygen.m4
 ./m4/ax_prog_jar.m4
 ./m4/ax_prog_java_cc.m4
 ./m4/ax_prog_java_works.m4
@@ -190,6 +191,15 @@
 ./config/intel-warnings/general
 
 ./config/site-specific/BlankForm
+
+./doxygen/aliases
+./doxygen/Doxyfile.in
+./doxygen/dox/mainpage.dox
+./doxygen/dox/rm-template.dox
+./doxygen/examples/H5Fclose.c
+./doxygen/examples/H5Fcreate.c
+./doxygen/examples/hello_hdf5.c
+./doxygen/img/HDFG-logo.png
 
 ./examples/Attributes.txt
 ./examples/Makefile.am
