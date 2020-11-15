@@ -426,7 +426,7 @@ struct H5VL_class_t;
 /* Container/connector introspection routines */
 typedef struct H5VL_introspect_class_t {
     herr_t (*get_conn_cls)(void *obj, H5VL_get_conn_lvl_t lvl, const struct H5VL_class_t **conn_cls);
-    herr_t (*opt_query)(void *obj, H5VL_subclass_t cls, int opt_type, hbool_t *supported);
+    herr_t (*opt_query)(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags);
 } H5VL_introspect_class_t;
 
 /* Async request operation routines */
@@ -506,6 +506,18 @@ H5_DLL void *H5VLobject(hid_t obj_id);
 H5_DLL hid_t H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id);
 H5_DLL hid_t H5VLpeek_connector_id_by_name(const char *name);
 H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
+
+/* User-defined optional operations */
+H5_DLL herr_t H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name,
+    int *op_val);
+H5_DLL herr_t H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name,
+    int *op_val);
+H5_DLL herr_t H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name);
+H5_DLL herr_t H5VLattr_optional_op(hid_t attr_id, H5VL_attr_optional_t opt_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VLdataset_optional_op(hid_t dset_id, H5VL_dataset_optional_t opt_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VLdatatype_optional_op(hid_t type_id, H5VL_datatype_optional_t opt_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VLfile_optional_op(hid_t file_id, H5VL_file_optional_t opt_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VLgroup_optional_op(hid_t group_id, H5VL_group_optional_t opt_type, hid_t dxpl_id, void **req, ...);
 
 #ifdef __cplusplus
 }

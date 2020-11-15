@@ -1154,7 +1154,7 @@ dump_fcpl(hid_t fid)
     unsigned sym_ik;    /* symbol table B-tree internal 'K' value */
     unsigned istore_ik; /* indexed storage B-tree internal 'K' value */
 
-    hbool_t supported = FALSE;
+    uint64_t supported = 0;
 
     /* Dumping the information here only makes sense for the native
      * VOL connector. The only VOL call here is H5Fget_info(), so we'll
@@ -1163,7 +1163,7 @@ dump_fcpl(hid_t fid)
      */
     H5VLquery_optional(fid, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_GET_INFO, &supported);
 
-    if (!supported)
+    if(!(supported & H5VL_OPT_QUERY_SUPPORTED))
         return;
 
     fcpl = H5Fget_create_plist(fid);

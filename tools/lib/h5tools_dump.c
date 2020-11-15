@@ -3299,7 +3299,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             }
             else {
                 haddr_t ioffset;
-                hbool_t supported = FALSE;
+                uint64_t supported = 0;
 
                 /* NORMAL FILE */
 
@@ -3322,7 +3322,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                  */
                 H5VLquery_optional(dset_id, H5VL_SUBCLS_DATASET, H5VL_NATIVE_DATASET_GET_OFFSET, &supported);
 
-                if (supported) {
+                if(supported & H5VL_OPT_QUERY_SUPPORTED) {
 
                     ctx->need_prefix = TRUE;
 
@@ -3777,12 +3777,12 @@ h5tools_dump_comment(FILE *stream, const h5tool_format_t *info, h5tools_context_
                                            * instead of the current stripmine position i; this is necessary
                                            * to print the array indices
                                            */
-    hbool_t supported = FALSE;
+    uint64_t supported = 0;
 
     /* Check if comments are supported and return if not */
     H5VLquery_optional(obj_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
 
-    if (!supported)
+    if(!(supported & H5VL_OPT_QUERY_SUPPORTED))
         return;
 
     /* setup */

@@ -261,12 +261,19 @@ H5VL_term_package(void)
                 n++;
             } /* end if */
             else {
-                /* Destroy the VOL connector ID group */
-                n += (H5I_dec_type_ref(H5I_VOL) > 0);
+                if (H5VL__num_opt_operation() > 0) {
+                    /* Unregister all dynamically registered optional operations */
+                    (void)H5VL__term_opt_operation();
+                    n++;
+                } /* end if */
+                else {
+                    /* Destroy the VOL connector ID group */
+                    n += (H5I_dec_type_ref(H5I_VOL) > 0);
 
-                /* Mark interface as closed */
-                if (0 == n)
-                    H5_PKG_INIT_VAR = FALSE;
+                    /* Mark interface as closed */
+                    if (0 == n)
+                        H5_PKG_INIT_VAR = FALSE;
+                } /* end else */
             } /* end else */
         }     /* end else */
     }         /* end if */

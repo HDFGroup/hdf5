@@ -2161,7 +2161,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
             char *  comment     = NULL;
             char *  obj_tok_str = NULL;
             ssize_t cmt_bufsize = -1;
-            hbool_t supported   = FALSE;
+            uint64_t supported = 0;
 
             /* Display attributes */
             H5TOOLS_DEBUG("Display attributes");
@@ -2200,7 +2200,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
             /* Only emit comments if the VOL connector supports that */
             H5VLquery_optional(obj_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
 
-            if (supported) {
+            if(supported & H5VL_OPT_QUERY_SUPPORTED) {
 
                 /* Object comment */
                 cmt_bufsize = H5Oget_comment(obj_id, comment, buf_size);

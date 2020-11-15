@@ -150,8 +150,7 @@ H5_DLL herr_t H5VL__native_object_optional(void *obj, H5VL_object_optional_t opt
 /* Connector/container introspection functions */
 H5_DLL herr_t H5VL__native_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl,
                                                    const H5VL_class_t **conn_cls);
-H5_DLL herr_t H5VL__native_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type,
-                                                hbool_t *supported);
+H5_DLL herr_t H5VL__native_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags);
 
 /* Blob callbacks */
 H5_DLL herr_t H5VL__native_blob_put(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
