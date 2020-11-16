@@ -113,8 +113,11 @@ H5_DLL herr_t     H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr);
 
 /* Dereference */
 H5_DLL hid_t H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
+H5_DLL hid_t H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 H5_DLL hid_t H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
+H5_DLL hid_t H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 H5_DLL hid_t H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
+H5_DLL hid_t H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, hid_t es_id);
 
 /* Get type */
 H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
