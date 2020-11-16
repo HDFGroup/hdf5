@@ -204,13 +204,9 @@ $(top_srcdir)/src/H5overflow.h: $(top_srcdir)/src/H5overflow.txt
 	perl $(top_srcdir)/bin/make_overflow $?
 
 # doxygen support
-doxygen:
-	rm -fr $(top_builddir)/hdf5lib_docs
-	env $(DX_ENV) \
-		PROJECT_NAME="HDF5" \
-		SRCDIR=$(top_srcdir) \
-		OUTPUTDIR=$(top_builddir)/hdf5lib_docs \
-		$(DX_DOXYGEN) $(top_builddir)/$(DX_CONFIG)
+if BUILD_DOXYGEN_CONDITIONAL
+doxygen: doxygen-doc
+endif
 
 # Add TRACE macros to library source files.  This is done via the trace script
 # in the hdf5/bin directory.  If the file contains HDF5 API macros, a "clean"

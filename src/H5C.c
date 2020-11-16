@@ -7307,7 +7307,7 @@ H5C__load_entry(H5F_t *f,
         /* Check for too many tries */
         if (tries == 0)
             HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL,
-                        "incorrect metadatda checksum after all read attempts")
+                        "incorrect metadata checksum after all read attempts")
 
         /* Calculate and track the # of retries */
         retries = max_tries - tries;
