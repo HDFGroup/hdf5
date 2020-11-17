@@ -43,6 +43,8 @@
 #include "H5Tpkg.h"      /* Datatypes                                */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
+#include "uthash.h" /* Hash table functionality                 */
+
 /* Local Macros */
 
 /* Combine a Type number and an atom index into an atom */
@@ -52,10 +54,11 @@
 
 /* Atom information structure used */
 typedef struct H5I_id_info_t {
-    hid_t       id;        /* ID for this info                */
-    unsigned    count;     /* ref. count for this atom            */
-    unsigned    app_count; /* ref. count of application visible atoms  */
-    const void *obj_ptr;   /* pointer associated with the atom        */
+    hid_t          id;        /* ID for this info                */
+    unsigned       count;     /* ref. count for this atom            */
+    unsigned       app_count; /* ref. count of application visible atoms  */
+    const void *   obj_ptr;   /* pointer associated with the atom        */
+    UT_hash_handle hh;        /* Hash table handle (must be LAST) */
 } H5I_id_info_t;
 
 /* ID type structure used */
@@ -65,7 +68,14 @@ typedef struct {
     uint64_t           id_count;   /* Current number of IDs held            */
     uint64_t           nextid;     /* ID to use for the next atom            */
     H5I_id_info_t *    last_info;  /* Info for most recent ID looked up        */
-    H5SL_t *           ids;        /* Pointer to skip list that stores IDs     */
+    /* Library IDs are stored in a hash table, user IDs are stored in a skip
+     * list, which is slower but handles the case where ID delete callbacks
+     * delete other IDs via a mark-and-sweep scheme.
+     */
+    union {
+        H5I_id_info_t *hash_table; /* Hash table pointer for this ID type */
+        H5SL_t *       skip_list;  /* Pointer to skip list that stores IDs */
+    } ids;
 } H5I_id_type_t;
 
 typedef struct {
@@ -169,15 +179,25 @@ H5I_term_package(void)
 
         /* How many types are still being used? */
         for (type = 0; type < H5I_next_type; type++)
-            if ((type_ptr = H5I_id_type_list_g[type]) && type_ptr->ids)
-                n++;
+            if (H5I_IS_LIB_TYPE(type)) {
+                if ((type_ptr = H5I_id_type_list_g[type]) && type_ptr->ids.hash_table)
+                    n++;
+            }
+            else {
+                if ((type_ptr = H5I_id_type_list_g[type]) && type_ptr->ids.skip_list)
+                    n++;
+            }
 
         /* If no types are used then clean up */
         if (0 == n) {
             for (type = 0; type < H5I_next_type; type++) {
                 type_ptr = H5I_id_type_list_g[type];
                 if (type_ptr) {
-                    HDassert(NULL == type_ptr->ids);
+                    if (H5I_IS_LIB_TYPE(type))
+                        HDassert(NULL == type_ptr->ids.hash_table);
+                    else
+                        HDassert(NULL == type_ptr->ids.skip_list);
+
                     type_ptr                 = H5FL_FREE(H5I_id_type_t, type_ptr);
                     H5I_id_type_list_g[type] = NULL;
                     n++;
@@ -313,8 +333,12 @@ H5I_register_type(const H5I_class_t *cls)
         type_ptr->id_count  = 0;
         type_ptr->nextid    = cls->reserved;
         type_ptr->last_info = NULL;
-        if (NULL == (type_ptr->ids = H5SL_create(H5SL_TYPE_HID, NULL)))
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTCREATE, FAIL, "skip list creation failed")
+        if (H5I_IS_LIB_TYPE(cls->type_id))
+            type_ptr->ids.hash_table = NULL;
+        else {
+            if (NULL == (type_ptr->ids.skip_list = H5SL_create(H5SL_TYPE_HID, NULL)))
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTCREATE, FAIL, "skip list creation failed")
+        }
     } /* end if */
 
     /* Increment the count of the times this type has been initialized */
@@ -323,9 +347,10 @@ H5I_register_type(const H5I_class_t *cls)
 done:
     if (ret_value < 0) { /* Clean up on error */
         if (type_ptr) {
-            if (type_ptr->ids)
-                H5SL_close(type_ptr->ids);
-            (void)H5FL_FREE(H5I_id_type_t, type_ptr);
+            if (FALSE == H5I_IS_LIB_TYPE(cls->type_id))
+                if (type_ptr->ids.skip_list)
+                    H5SL_close(type_ptr->ids.skip_list);
+            H5FL_FREE(H5I_id_type_t, type_ptr);
         } /* end if */
     }     /* end if */
 
@@ -556,8 +581,23 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
     udata.force   = force;
     udata.app_ref = app_ref;
 
-    /* Attempt to free all ids in the type */
-    if (H5SL_try_free_safe(udata.type_ptr->ids, H5I__clear_type_cb, &udata) < 0)
+    if (H5I_IS_LIB_TYPE(type)) {
+        H5I_id_info_t *item = NULL;
+        H5I_id_info_t *tmp  = NULL;
+
+        /* This is a "delete-safe" iteration */
+        HASH_ITER(hh, udata.type_ptr->ids.hash_table, item, tmp)
+        {
+            htri_t ret = H5I__clear_type_cb((void *)item, NULL, (void *)&udata);
+            if (FAIL == ret)
+                HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "iteration failed")
+            if (TRUE == ret)
+                HASH_DELETE(hh, udata.type_ptr->ids.hash_table, item);
+        }
+    }
+    else
+        /* Attempt to free all ids in the type */
+        if (H5SL_try_free_safe(udata.type_ptr->ids.skip_list, H5I__clear_type_cb, &udata) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, FAIL, "can't free ids in type")
 
 done:
@@ -702,9 +742,15 @@ H5I__destroy_type(H5I_type_t type)
         if (type_ptr->cls->flags & H5I_CLASS_IS_APPLICATION)
             type_ptr->cls = H5FL_FREE(H5I_class_t, (void *)type_ptr->cls);
 
-    if (H5SL_close(type_ptr->ids) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEOBJ, FAIL, "can't close skip list")
-    type_ptr->ids = NULL;
+    if (H5I_IS_LIB_TYPE(type)) {
+        HASH_CLEAR(hh, type_ptr->ids.hash_table);
+        type_ptr->ids.hash_table = NULL;
+    }
+    else {
+        if (H5SL_close(type_ptr->ids.skip_list) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEOBJ, FAIL, "can't close skip list")
+        type_ptr->ids.skip_list = NULL;
+    }
 
     type_ptr                 = H5FL_FREE(H5I_id_type_t, type_ptr);
     H5I_id_type_list_g[type] = NULL;
@@ -783,7 +829,10 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     id_ptr->obj_ptr   = object;
 
     /* Insert into the type */
-    if (H5SL_insert(type_ptr->ids, id_ptr, &id_ptr->id) < 0)
+    if (H5I_IS_LIB_TYPE(type))
+        /* Insert into the hash table */
+        HASH_ADD(hh, type_ptr->ids.hash_table, id, sizeof(hid_t), id_ptr);
+    else if (H5SL_insert(type_ptr->ids.skip_list, id_ptr, &id_ptr->id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert ID node into skip list")
     type_ptr->id_count++;
     type_ptr->nextid++;
@@ -860,7 +909,10 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
     id_ptr->obj_ptr   = object;
 
     /* Insert into the type */
-    if (H5SL_insert(type_ptr->ids, id_ptr, &id_ptr->id) < 0)
+    if (H5I_IS_LIB_TYPE(type))
+        /* Insert into the hash table */
+        HASH_ADD(hh, type_ptr->ids.hash_table, id, sizeof(hid_t), id_ptr);
+    else if (H5SL_insert(type_ptr->ids.skip_list, id_ptr, &id_ptr->id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't insert ID node into skip list")
     type_ptr->id_count++;
 
@@ -1201,7 +1253,7 @@ H5I__remove_verify(hid_t id, H5I_type_t id_type)
 static void *
 H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
 {
-    H5I_id_info_t *curr_id;          /* Pointer to the current atom */
+    H5I_id_info_t *curr_id   = NULL; /* Pointer to the current atom */
     void *         ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1209,8 +1261,16 @@ H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
     /* Sanity check */
     HDassert(type_ptr);
 
-    /* Get the ID node for the ID */
-    if (NULL == (curr_id = (H5I_id_info_t *)H5SL_remove(type_ptr->ids, &id)))
+    /* Delete the node */
+    if (H5I_IS_LIB_TYPE(type_ptr->cls->type_id)) {
+        /* Remove the node from the hash table */
+        HASH_FIND(hh, type_ptr->ids.hash_table, &id, sizeof(hid_t), curr_id);
+        if (curr_id)
+            HASH_DELETE(hh, type_ptr->ids.hash_table, curr_id);
+        else
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, NULL, "can't remove ID node from hash table")
+    }
+    else if (NULL == (curr_id = (H5I_id_info_t *)H5SL_remove(type_ptr->ids.skip_list, &id)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, NULL, "can't remove ID node from skip list")
 
     /* Check if this ID was the last one accessed */
@@ -1915,7 +1975,7 @@ H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
     /* Note that H5I_iterate returns an error code.  We ignore it
      * here, as we can't do anything with it without revising the API.
      */
-    (void)H5I_iterate(type, H5I__search_cb, &udata, TRUE);
+    H5I_iterate(type, H5I__search_cb, &udata, TRUE);
 
     /* Set return value */
     ret_value = udata.ret_obj;
@@ -2107,7 +2167,20 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
         iter_udata.obj_type   = type;
 
         /* Iterate over IDs */
-        if ((iter_status = H5SL_iterate(type_ptr->ids, H5I__iterate_cb, &iter_udata)) < 0)
+        if (H5I_IS_LIB_TYPE(type)) {
+            H5I_id_info_t *item = NULL;
+            H5I_id_info_t *tmp  = NULL;
+
+            HASH_ITER(hh, type_ptr->ids.hash_table, item, tmp)
+            {
+                int ret = H5I__iterate_cb((void *)item, NULL, (void *)&iter_udata);
+                if (H5_ITER_ERROR == ret)
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "iteration failed")
+                if (H5_ITER_STOP == ret)
+                    break;
+            }
+        }
+        else if ((iter_status = H5SL_iterate(type_ptr->ids.skip_list, H5I__iterate_cb, &iter_udata)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "iteration failed")
     } /* end if */
 
@@ -2149,7 +2222,10 @@ H5I__find_id(hid_t id)
         ret_value = type_ptr->last_info;
     else {
         /* Locate the ID node for the ID */
-        ret_value = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id);
+        if (H5I_IS_LIB_TYPE(H5I_TYPE(id)))
+            HASH_FIND(hh, type_ptr->ids.hash_table, &id, sizeof(hid_t), ret_value);
+        else
+            ret_value = (H5I_id_info_t *)H5SL_search(type_ptr->ids.skip_list, &id);
 
         /* Remember this ID */
         type_ptr->last_info = ret_value;
@@ -2329,7 +2405,20 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
         udata.ret_id   = H5I_INVALID_HID;
 
         /* Iterate over IDs for the ID type */
-        if ((iter_status = H5SL_iterate(type_ptr->ids, H5I__find_id_cb, &udata)) < 0)
+        if (H5I_IS_LIB_TYPE(type)) {
+            H5I_id_info_t *item = NULL;
+            H5I_id_info_t *tmp  = NULL;
+
+            HASH_ITER(hh, type_ptr->ids.hash_table, item, tmp)
+            {
+                int ret = H5I__find_id_cb((void *)item, NULL, (void *)&udata);
+                if (H5_ITER_ERROR == ret)
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "iteration failed")
+                if (H5_ITER_STOP == ret)
+                    break;
+            }
+        }
+        else if ((iter_status = H5SL_iterate(type_ptr->ids.skip_list, H5I__find_id_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "iteration failed")
 
         *id = udata.ret_id;
@@ -2453,7 +2542,27 @@ H5I_dump_ids_for_type(H5I_type_t type)
         /* List */
         if (type_ptr->id_count > 0) {
             HDfprintf(stderr, "     List:\n");
-            H5SL_iterate(type_ptr->ids, H5I__id_dump_cb, &type);
+
+            if (H5I_IS_LIB_TYPE(type)) {
+                H5I_id_info_t *item = NULL;
+                H5I_id_info_t *tmp  = NULL;
+
+                /* Normally we care about the callback's return value
+                 * (H5I_ITER_CONT, etc.), but this is an iteration over all
+                 * the IDs so we don't care.
+                 *
+                 * XXX: Update this to emit an error message on errors?
+                 */
+                HDfprintf(stderr, "     (HASH TABLE)\n");
+                HASH_ITER(hh, type_ptr->ids.hash_table, item, tmp)
+                {
+                    H5I__id_dump_cb((void *)item, NULL, (void *)&type);
+                }
+            }
+            else {
+                HDfprintf(stderr, "     (SKIP LIST)\n");
+                H5SL_iterate(type_ptr->ids.skip_list, H5I__id_dump_cb, &type);
+            }
         }
     }
     else
