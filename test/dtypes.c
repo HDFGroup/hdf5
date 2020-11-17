@@ -1891,7 +1891,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || strcmp(rdata.str, wdata.str)) {
+    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || HDstrcmp(rdata.str, wdata.str)) {
         H5_FAILED();
         AT();
         HDprintf("incorrect read data\n");
@@ -2097,7 +2097,7 @@ test_compound_10(void)
 
         t1 = rdata[i].text.p;
         t2 = wdata[i].text.p;
-        if (strcmp((char *)t1, (char *)t2)) {
+        if (HDstrcmp((char *)t1, (char *)t2)) {
             H5_FAILED();
             AT();
             HDprintf("incorrect VL read data\n");
@@ -2502,7 +2502,7 @@ test_compound_12(void)
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
-        puts("  Tries to cut off the last member. Should have failed.");
+        HDputs("  Tries to cut off the last member. Should have failed.");
         goto error;
     }
 
@@ -3054,7 +3054,7 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || strcmp(rdata1.str, wdata1.str)) {
+    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || HDstrcmp(rdata1.str, wdata1.str)) {
         H5_FAILED();
         AT();
         HDprintf("incorrect read data\n");
@@ -3885,7 +3885,7 @@ test_query(void)
         HDprintf("Can't get name for enum member\n");
         goto error;
     } /* end if */
-    if (strcmp("YELLOW", enum_name)) {
+    if (HDstrcmp("YELLOW", enum_name)) {
         H5_FAILED();
         HDprintf("Incorrect name for enum member\n");
         goto error;

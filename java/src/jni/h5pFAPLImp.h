@@ -331,6 +331,32 @@ JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Pget_1evict_1on_1close(JNIEnv *
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_file_locking
+ * Signature: (JZZ)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1file_1locking(JNIEnv *env, jclass clss, jlong fapl_id,
+                                                                 jboolean use_file_locking,
+                                                                 jboolean ignore_when_disabled);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_use_file_locking
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Pget_1use_1file_1locking(JNIEnv *env, jclass clss,
+                                                                          jlong fapl_id);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_ignore_disabled_file_locking
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Pget_1ignore_1disabled_1file_1locking(JNIEnv *env,
+                                                                                       jclass  clss,
+                                                                                       jlong   fapl_id);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_metadata_read_attempts
  * Signature: (JJ)V
  */

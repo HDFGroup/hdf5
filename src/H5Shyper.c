@@ -2137,24 +2137,31 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
                 case 0:
                     do {
                         DUFF_GUTS
+                        /* FALLTHROUGH */
                         H5_ATTR_FALLTHROUGH
                         case 7:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 6:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 5:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 4:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 3:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 2:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 1:
                             DUFF_GUTS
@@ -10100,7 +10107,7 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], cons
         case H5S_SEL_POINTS:          /* Can't combine hyperslab operations and point selections currently */
             if (op == H5S_SELECT_SET) /* Allow only "set" operation to proceed */
                 break;
-            /* Else fall through to error */
+            /* FALLTHROUGH (to error) */
             H5_ATTR_FALLTHROUGH
 
         case H5S_SEL_ERROR:

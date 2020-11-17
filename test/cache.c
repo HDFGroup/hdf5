@@ -2785,6 +2785,10 @@ write_permitted_check(int
  *
  * Modifications:
  *
+ *              Updated tests to accommodate the case in which the
+ *              slist is disabled.
+ *                                           JRM -- 5/14/20
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2982,7 +2986,8 @@ check_insert_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 4) || (cache_ptr->index_size != 4 * entry_sizes[entry_type]) ||
-            (cache_ptr->slist_len != 4) || (cache_ptr->slist_size != 4 * entry_sizes[entry_type]) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 4) || (cache_ptr->slist_size != 4 * entry_sizes[entry_type]))) ||
             (cache_ptr->pl_len != 0) || (cache_ptr->pl_size != (size_t)0) || (cache_ptr->pel_len != 2) ||
             (cache_ptr->pel_size != 2 * entry_sizes[entry_type]) || (cache_ptr->LRU_list_len != 2) ||
             (cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type])
@@ -3007,10 +3012,11 @@ check_insert_entry(unsigned paged)
         if ((cache_ptr->insertions[entry_type] != 4) || (cache_ptr->pinned_insertions[entry_type] != 2) ||
             (cache_ptr->pins[entry_type] != 2) || (cache_ptr->unpins[entry_type] != 0) ||
             (cache_ptr->dirty_pins[entry_type] != 0) || (cache_ptr->max_index_len != 4) ||
-            (cache_ptr->max_index_size != 4 * entry_sizes[entry_type]) || (cache_ptr->max_slist_len != 4) ||
-            (cache_ptr->max_slist_size != 4 * entry_sizes[entry_type]) || (cache_ptr->max_pl_len != 0) ||
-            (cache_ptr->max_pl_size != (size_t)0) || (cache_ptr->max_pel_len != 2) ||
-            (cache_ptr->max_pel_size != 2 * entry_sizes[entry_type])) {
+            (cache_ptr->max_index_size != 4 * entry_sizes[entry_type]) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 4) || (cache_ptr->slist_size != 4 * entry_sizes[entry_type]))) ||
+            (cache_ptr->max_pl_len != 0) || (cache_ptr->max_pl_size != (size_t)0) ||
+            (cache_ptr->max_pel_len != 2) || (cache_ptr->max_pel_size != 2 * entry_sizes[entry_type])) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected insert results 11.";
@@ -3150,6 +3156,12 @@ check_flush_cache(unsigned paged)
  *
  * Modifications:
  *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3157,7 +3169,6 @@ static void
 check_flush_cache__empty_cache(H5F_t *file_ptr)
 {
     H5C_t *cache_ptr = file_ptr->shared->cache;
-    herr_t result;
 
     if (cache_ptr == NULL) {
 
@@ -3172,51 +3183,34 @@ check_flush_cache__empty_cache(H5F_t *file_ptr)
 
     /* Test behaviour on an empty cache.  Can't do much sanity
      * checking in this case, so simply check the return values.
+     *
+     * Check of return values is done in the H5C_FLUSH_CACHE() macro.
      */
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "flush with flags = 0x00 failed on empty cache.\n";
-        }
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "flush with flags = 0x00 failed on empty cache.\n")
     }
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
-
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "flush with flags = 0x04 failed on empty cache.\n";
-        }
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "flush with flags = 0x04 failed on empty cache.\n")
     }
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG);
-
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "flush with flags = 0x08 failed on empty cache.\n";
-        }
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG,
+                        "flush with flags = 0x08 failed on empty cache.\n")
     }
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_MARKED_ENTRIES_FLAG);
-
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "flush with flags = 0x10 failed on empty cache.\n";
-        }
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_MARKED_ENTRIES_FLAG,
+                        "flush with flags = 0x10 failed on empty cache.\n")
     }
+
+    return;
 
 } /* check_flush_cache__empty_cache() */
 
@@ -4435,6 +4429,12 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
  *
  * Modifications:
  *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -4444,7 +4444,6 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 {
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
-    herr_t        result;
     unsigned      u;
     size_t        total_entry_size = 0;
     test_entry_t *base_addr;
@@ -4513,11 +4512,10 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, flush_flags);
+        H5C_FLUSH_CACHE(file_ptr, flush_flags, "dummy failure message.\n")
 
-        if (result < 0) {
+        if (!pass) {
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in multi entry test #%d.", flush_flags,
                        test_num);
             failure_mssg = msg;
@@ -4571,9 +4569,9 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
     /* clean up the cache to prep for the next test */
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG, "dummy mssg.\n")
 
-        if (result < 0) {
+        if (!pass) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in multi entry test #%d.", test_num);
@@ -4618,6 +4616,12 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
  *
  * Modifications:
  *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                           JRM -- 5/16/20
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -4627,7 +4631,6 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 {
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
-    herr_t        result;
     unsigned      u;
     int           j;
     size_t        total_entry_size = 0;
@@ -4703,11 +4706,10 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, flush_flags);
+        H5C_FLUSH_CACHE(file_ptr, flush_flags, "dummy failure message.\n")
 
-        if (result < 0) {
+        if (!pass) {
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in pe multi entry test #%d.",
                        flush_flags, test_num);
             failure_mssg = msg;
@@ -4762,9 +4764,9 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
     /* clean up the cache to prep for the next test */
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG, "dummy mssg.\n")
 
-        if (result < 0) {
+        if (!pass) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in pe multi entry test #%d.", test_num);
@@ -8006,6 +8008,12 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
  *
  * Modifications:
  *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                           JRM -- 5/16/20
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -8018,7 +8026,6 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 {
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
-    herr_t        result;
     int           i;
     int           j;
     test_entry_t *base_addr;
@@ -8139,9 +8146,9 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, flush_flags);
+        H5C_FLUSH_CACHE(file_ptr, flush_flags, "dummy failure message")
 
-        if (result < 0) {
+        if (!pass) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in flush op test #%d.", flush_flags,
@@ -8214,74 +8221,104 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
 #if 0 /* This is useful debugging code.  Lets keep it around for a while. */
 
-        if(entry_ptr->size != check[i].expected_size) {
-            HDfprintf(stdout, "entry_ptr->size (expected) = %d (%d).\n",
-                (int)(entry_ptr->size),
-                (int)(check[i].expected_size));
-        }
-        if((!entry_ptr->header.destroy_in_progress) &&
-            (check[i].in_cache) &&
-                     (entry_ptr->header.size != check[i].expected_size)) {
-                    HDfprintf(stdout,
+                if ( entry_ptr->size != check[i].expected_size ) {
+
+                    HDfprintf(stdout, "entry_ptr->size (expected) = %d (%d).\n",
+                              (int)(entry_ptr->size),
+                              (int)(check[i].expected_size));
+                }
+
+                if ( ( ! entry_ptr->header.destroy_in_progress ) &&
+                     ( check[i].in_cache ) &&
+                     ( entry_ptr->header.size != check[i].expected_size ) ) {
+
+                        HDfprintf(stdout,
                               "(!destroy in progress and in cache and size (expected) = %d (%d).\n",
                               (int)(entry_ptr->header.size),
-                (int)(check[i].expected_size));
-        }
-        if(entry_ptr->at_main_addr != check[i].at_main_addr) {
-            HDfprintf(stdout, "(%d,%d) at main addr (expected) = %d (%d).\n",
-                (int)(check[i].entry_type),
-                (int)(check[i].entry_index),
-                              (int)(entry_ptr->at_main_addr),
-                (int)(check[i].at_main_addr));
+                              (int)(check[i].expected_size));
                 }
-        if(entry_ptr->is_dirty != check[i].is_dirty) {
-            HDfprintf(stdout, "entry_ptr->is_dirty (expected) = %d (%d).\n",
-                    (int)(entry_ptr->is_dirty),
-                (int)(check[i].is_dirty));
-        }
-        if(entry_ptr->header.is_dirty != check[i].is_dirty) {
-            HDfprintf(stdout, "entry_ptr->header.is_dirty (expected) = %d (%d).\n",
-                    (int)(entry_ptr->header.is_dirty),
-                (int)(check[i].is_dirty));
-        }
-            if(entry_ptr->is_protected != check[i].is_protected) {
-                    HDfprintf(stdout, "entry_ptr->is_protected (expected) = %d (%d).\n",
-                (int)(entry_ptr->is_protected),
-                (int)(check[i].is_protected));
-        }
-            if(entry_ptr->header.is_protected != check[i].is_protected) {
-                    HDfprintf(stdout, "entry_ptr->header.is_protected (expected) = %d (%d).\n",
-                (int)(entry_ptr->is_protected),
-                (int)(check[i].is_protected));
-        }
-        if(entry_ptr->is_pinned != check[i].is_pinned) {
-            HDfprintf(stdout, "entry_ptr->is_pinned (expected) = %d (%d).\n",
-                (int)(entry_ptr->is_pinned),
-                (int)(check[i].is_pinned));
-        }
-        if(entry_ptr->header.is_pinned != check[i].is_pinned) {
-            HDfprintf(stdout, "entry_ptr->header.is_pinned (expected) = %d (%d).\n",
-                (int)(entry_ptr->header.is_pinned),
-                (int)(check[i].is_pinned));
-        }
-        if(entry_ptr->deserialized !=
-                check[i].expected_deserialized) {
-            HDfprintf(stdout,
-                "entry_ptr->deserialized (expected) = %d (%d).\n",
-                (int)(entry_ptr->deserialized),
-                (int)(check[i].expected_deserialized));
-        }
-        if(entry_ptr->serialized != check[i].expected_serialized) {
-            HDfprintf(stdout,
-                "entry_ptr->serialized (expected) = %d (%d).\n",
-                (int)(entry_ptr->serialized),
-                (int)(check[i].expected_serialized));
-        }
-        if(entry_ptr->destroyed != check[i].expected_destroyed) {
-            HDfprintf(stdout, "entry_ptr->destroyed (expected) = %d (%d).\n",
-                (int)(entry_ptr->destroyed),
-                (int)(check[i].expected_destroyed));
-        }
+
+                if ( entry_ptr->at_main_addr != check[i].at_main_addr ) {
+
+                    HDfprintf(stdout,
+                              "(%d,%d) at main addr (expected) = %d (%d).\n",
+                              (int)(check[i].entry_type),
+                              (int)(check[i].entry_index),
+                              (int)(entry_ptr->at_main_addr),
+                              (int)(check[i].at_main_addr));
+                }
+
+                if ( entry_ptr->is_dirty != check[i].is_dirty ) {
+
+                    HDfprintf(stdout,
+                              "entry_ptr->is_dirty (expected) = %d (%d).\n",
+                              (int)(entry_ptr->is_dirty),
+                              (int)(check[i].is_dirty));
+                }
+
+                if ( entry_ptr->header.is_dirty != check[i].is_dirty ) {
+
+                    HDfprintf(stdout,
+                          "entry_ptr->header.is_dirty (expected) = %d (%d).\n",
+                          (int)(entry_ptr->header.is_dirty),
+                          (int)(check[i].is_dirty));
+                }
+
+                if ( entry_ptr->is_protected != check[i].is_protected ) {
+
+                    HDfprintf(stdout,
+                              "entry_ptr->is_protected (expected) = %d (%d).\n",
+                              (int)(entry_ptr->is_protected),
+                              (int)(check[i].is_protected));
+                }
+
+                if ( entry_ptr->header.is_protected != check[i].is_protected ) {
+
+                     HDfprintf(stdout,
+                       "entry_ptr->header.is_protected (expected) = %d (%d).\n",
+                       (int)(entry_ptr->is_protected),
+                       (int)(check[i].is_protected));
+                }
+
+                if ( entry_ptr->is_pinned != check[i].is_pinned ) {
+
+                     HDfprintf(stdout,
+                              "entry_ptr->is_pinned (expected) = %d (%d).\n",
+                              (int)(entry_ptr->is_pinned),
+                              (int)(check[i].is_pinned));
+                }
+
+                if ( entry_ptr->header.is_pinned != check[i].is_pinned ) {
+
+                    HDfprintf(stdout,
+                          "entry_ptr->header.is_pinned (expected) = %d (%d).\n",
+                          (int)(entry_ptr->header.is_pinned),
+                          (int)(check[i].is_pinned));
+                }
+
+                if ( entry_ptr->deserialized != check[i].expected_deserialized ) {
+
+                    HDfprintf(stdout,
+                              "entry_ptr->deserialized (expected) = %d (%d).\n",
+                              (int)(entry_ptr->deserialized),
+                              (int)(check[i].expected_deserialized));
+                }
+
+                if ( entry_ptr->serialized != check[i].expected_serialized ) {
+
+                    HDfprintf(stdout,
+                              "entry_ptr->serialized (expected) = %d (%d).\n",
+                              (int)(entry_ptr->serialized),
+                              (int)(check[i].expected_serialized));
+                }
+
+                if ( entry_ptr->destroyed != check[i].expected_destroyed ) {
+
+                    HDfprintf(stdout, \
+                              "entry_ptr->destroyed (expected) = %d (%d).\n",
+                              (int)(entry_ptr->destroyed),
+                              (int)(check[i].expected_destroyed));
+                }
 #endif
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128, "Check2 failed on entry %d after flush op test #%d.", i,
@@ -8310,11 +8347,10 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
     /* clean up the cache to prep for the next test */
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG, "dummy mssg.")
 
-        if (result < 0) {
+        if (!pass) {
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in flush op test #%d.", test_num);
             failure_mssg = msg;
         }
@@ -8377,10 +8413,16 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
  *
  * Modifications:
  *
- *        Updated test for minor changes in the behaviour
- *        of H5C__flush_single_entry().
+ *              Updated test for minor changes in the behaviour
+ *              of H5C__flush_single_entry().
  *
- *                    JRM -- 2/16/15
+ *                                          JRM -- 2/16/15
+ *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                           JRM -- 5/16/20
  *
  *-------------------------------------------------------------------------
  */
@@ -8393,7 +8435,6 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
     int                          num_variable_entries = 10;
     int                          num_monster_entries  = 31;
     int                          num_large_entries    = 0;
-    herr_t                       result;
     test_entry_t *               entry_ptr;
     test_entry_t *               base_addr;
     struct expected_entry_status expected[10 + 31 + 14] = {
@@ -10407,14 +10448,10 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush invalidate failed after flush op eviction test")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed after flush op eviction test";
-        }
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after cleanup of flush op eviction test";
@@ -12150,6 +12187,12 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
  *
  * Modifications:
  *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -12161,7 +12204,6 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 {
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
-    herr_t        result;
     test_entry_t *base_addr;
     test_entry_t *entry_ptr = NULL;
 
@@ -12204,11 +12246,10 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, flush_flags);
+        H5C_FLUSH_CACHE(file_ptr, flush_flags, "dummy failure mssg.")
 
-        if (result < 0) {
+        if (!pass) { /* construct and set actual failure message */
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in single entry test #%d.",
                        flush_flags, test_num);
 
@@ -12249,11 +12290,10 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
     /* clean up the cache to prep for the next test */
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG, "dummy failure mssg.")
 
-        if (result < 0) {
+        if (!pass) { /* construct and set actual failure message */
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in single entry test #%d.", test_num);
             failure_mssg = msg;
         }
@@ -12288,13 +12328,18 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
  *
  * Modifications:
  *
- *         JRM -- 5/17/06
- *         Added the pop_mark_dirty_prot and pop_mark_dirty_pinned
- *         flags and supporting code to allow us to test the
- *         H5C_mark_entry_dirty() call.  Use the
- *         call to mark the entry dirty while the entry is protected
- *         if pop_mark_dirty_prot is TRUE, and to mark the entry
- *         dirty while it is pinned if pop_mark_dirty_pinned is TRUE.
+ *              JRM -- 5/17/06
+ *              Added the pop_mark_dirty_prot and pop_mark_dirty_pinned
+ *              flags and supporting code to allow us to test the
+ *              H5C_mark_entry_dirty() call.  Use the
+ *              call to mark the entry dirty while the entry is protected
+ *              if pop_mark_dirty_prot is TRUE, and to mark the entry
+ *              dirty while it is pinned if pop_mark_dirty_pinned is TRUE.
+ *
+ *              JRM -- 5/14/20
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
  *
  *-------------------------------------------------------------------------
  */
@@ -12310,7 +12355,6 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
     hbool_t       expected_deserialized = TRUE;
-    herr_t        result;
     test_entry_t *base_addr;
     test_entry_t *entry_ptr = NULL;
 
@@ -12364,11 +12408,10 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, flush_flags);
+        H5C_FLUSH_CACHE(file_ptr, flush_flags, "dummy failure message\n")
 
-        if (result < 0) {
+        if (!pass) { /* construct and set the correct failure message */
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in pinned single entry test #%d.",
                        flush_flags, test_num);
             failure_mssg = msg;
@@ -12423,11 +12466,10 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG, "dummy mssg\n")
 
-        if (result < 0) {
+        if (!pass) {
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in pinned single entry test #%d.",
                        test_num);
             failure_mssg = msg;
@@ -13714,6 +13756,12 @@ check_pin_protected_entry(unsigned paged)
  * Programmer:  John Mainzer
  *              7/7/06
  *
+ * Modifications:
+ *
+ *              Updated function to allow for disabling of the slist.
+ *
+ *                                             JRM -- 5/18/20
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -13878,7 +13926,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 1) || (cache_ptr->index_size != (LARGE_ENTRY_SIZE / 2)) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 2))) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 2))))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 3.");
@@ -13952,7 +14001,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 1) || (cache_ptr->index_size != LARGE_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 4.");
@@ -14008,7 +14058,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 1) || (cache_ptr->index_size != (LARGE_ENTRY_SIZE / 4)) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 4))) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 4))))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 5.");
@@ -14057,7 +14108,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 1) || (cache_ptr->index_size != LARGE_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 6.");
@@ -14125,8 +14177,8 @@ check_resize_entry(unsigned paged)
 
     if (pass) {
 
-        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) || (cache_ptr->slist_len != 0) ||
-            (cache_ptr->slist_size != 0)) {
+        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 7.");
@@ -14138,8 +14190,8 @@ check_resize_entry(unsigned paged)
 
     if (pass) {
 
-        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) || (cache_ptr->slist_len != 0) ||
-            (cache_ptr->slist_size != 0)) {
+        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 8.");
@@ -14166,7 +14218,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 3) || (cache_ptr->index_size != 3 * LARGE_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 9.");
@@ -14182,7 +14235,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 4) || (cache_ptr->index_size != 4 * LARGE_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 10.");
@@ -14251,8 +14305,9 @@ check_resize_entry(unsigned paged)
 
         if ((cache_ptr->index_len != 4) ||
             (cache_ptr->index_size != ((3 * LARGE_ENTRY_SIZE) + (LARGE_ENTRY_SIZE / 2))) ||
-            (cache_ptr->slist_len != 2) ||
-            (cache_ptr->slist_size != (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 2)))) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) ||
+              (cache_ptr->slist_size != (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 2)))))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 11.");
@@ -14326,7 +14381,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 4) || (cache_ptr->index_size != 4 * LARGE_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 12.");
@@ -14383,8 +14439,9 @@ check_resize_entry(unsigned paged)
 
         if ((cache_ptr->index_len != 4) ||
             (cache_ptr->index_size != ((3 * LARGE_ENTRY_SIZE) + (LARGE_ENTRY_SIZE / 4))) ||
-            (cache_ptr->slist_len != 2) ||
-            (cache_ptr->slist_size != (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 4)))) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) ||
+              (cache_ptr->slist_size != (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 4)))))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 13.");
@@ -14433,7 +14490,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 4) || (cache_ptr->index_size != (4 * LARGE_ENTRY_SIZE)) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != (2 * LARGE_ENTRY_SIZE))) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != (2 * LARGE_ENTRY_SIZE))))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 14.");
@@ -14502,7 +14560,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 3) || (cache_ptr->index_size != (3 * LARGE_ENTRY_SIZE)) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 15.");
@@ -14524,8 +14583,8 @@ check_resize_entry(unsigned paged)
 
     if (pass) {
 
-        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) || (cache_ptr->slist_len != 0) ||
-            (cache_ptr->slist_size != 0)) {
+        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 16.");
@@ -14567,6 +14626,9 @@ check_resize_entry(unsigned paged)
  *
  * Modifications:
  *
+ *              Updated function to allow for disabling of the slist.
+ *
+ *                                             JRM -- 5/18/20
  *
  *-------------------------------------------------------------------------
  */
@@ -14656,8 +14718,9 @@ check_evictions_enabled(unsigned paged)
     /* verify that it is empty */
     if (pass) {
 
-        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) || (cache_ptr->slist_len != 0) ||
-            (cache_ptr->slist_size != 0) || (cache_ptr->evictions_enabled != TRUE)) {
+        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0))) ||
+            (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 1.");
@@ -14700,7 +14763,7 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -14726,7 +14789,7 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -14781,7 +14844,8 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -14843,7 +14907,8 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != FALSE)) {
 
             pass = FALSE;
@@ -14869,7 +14934,8 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 17) || (cache_ptr->index_size != 17 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != FALSE)) {
 
             pass = FALSE;
@@ -14894,7 +14960,8 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 18) || (cache_ptr->index_size != 18 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != FALSE)) {
 
             pass = FALSE;
@@ -14936,7 +15003,8 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 18) || (cache_ptr->index_size != 18 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -14965,7 +15033,8 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -15069,7 +15138,8 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 17) || (cache_ptr->index_size != 17 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != FALSE)) {
 
             pass = FALSE;
@@ -15110,7 +15180,8 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 3) || (cache_ptr->slist_size != 3 * MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 3) || (cache_ptr->slist_size != 3 * MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -15205,13 +15276,19 @@ check_evictions_enabled(unsigned paged)
  *
  * Modifications:
  *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().
+ *
+ *                                          JRM -- 5/14/20
+ *
  *-------------------------------------------------------------------------
  */
 
 static unsigned
 check_flush_protected_err(unsigned paged)
 {
-    H5F_t *file_ptr = NULL;
+    H5F_t *file_ptr  = NULL;
+    H5C_t *cache_ptr = NULL;
 
     if (paged)
         TESTING("flush cache with protected entry error (paged aggregation)")
@@ -15231,27 +15308,41 @@ check_flush_protected_err(unsigned paged)
 
         file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
 
+        if (pass) {
+
+            cache_ptr = file_ptr->shared->cache;
+        }
+
         protect_entry(file_ptr, 0, 0);
 
-        if (H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET) >= 0) {
+        /* enable slist prior to flush */
+        if ((pass) && (H5C_set_slist_enabled(cache_ptr, TRUE, FALSE) < 0)) {
+
+            pass         = FALSE;
+            failure_mssg = "unable to enable slist prior to flush.\n";
+        }
+
+        if ((pass) && (H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET) >= 0)) {
 
             pass         = FALSE;
             failure_mssg = "flush succeeded on cache with protected entry.\n";
         }
-        else {
 
-            unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
+        /* disable the slist after the flush */
+        if ((pass) && (H5C_set_slist_enabled(cache_ptr, FALSE, FALSE) < 0)) {
 
-            if (H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET) < 0) {
-
-                pass         = FALSE;
-                failure_mssg = "flush failed after unprotect.\n";
-            }
-            else {
-
-                takedown_cache(file_ptr, FALSE, FALSE);
-            }
+            pass         = FALSE;
+            failure_mssg = "unable to disable slist after  flush.\n";
         }
+
+        unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
+
+        if (pass) {
+
+            H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "flush failed after unprotect.\n")
+        }
+
+        takedown_cache(file_ptr, FALSE, FALSE);
     }
 
     if (pass) {
@@ -29821,10 +29912,18 @@ done:
  * Purpose:     Verify that the order that entries with flush dependencies
  *              is correct
  *
- * Return:    0 on success, non-zero on failure
+ * Return:      0 on success, non-zero on failure
  *
- * Programmer:    Quincey Koziol
- *               3/17/09
+ * Programmer:  Quincey Koziol
+ *              3/17/09
+ *
+ * Modifications:
+ *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -29923,8 +30022,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
 
@@ -29938,8 +30035,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -30024,8 +30121,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
 
@@ -30051,8 +30146,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -30139,8 +30234,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -30170,8 +30263,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -30266,8 +30359,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -30297,8 +30388,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -30438,8 +30529,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -30487,8 +30576,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -30665,8 +30754,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -30714,8 +30801,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -30841,8 +30928,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -30880,8 +30965,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -30979,8 +31064,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -31018,8 +31101,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31171,8 +31254,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
 
@@ -31223,8 +31304,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31426,8 +31507,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -31479,8 +31558,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31702,8 +31781,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -31755,8 +31832,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32017,8 +32094,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -32066,8 +32141,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32361,8 +32436,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -32410,8 +32483,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -33623,7 +33696,11 @@ check_entry_deletions_during_scans(unsigned paged)
  *
  * Modifications:
  *
- *        None.
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -33633,7 +33710,6 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
 {
     H5C_t *cache_ptr = file_ptr->shared->cache;
     int    i;
-    herr_t result;
     /* clang-format off */
     struct expected_entry_status expected[36] =
     {
@@ -33755,14 +33831,10 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush inval failed in cedds expunge dirty entry in flush test")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed in cedds expunge dirty entry in flush test";
-        }
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after cedds expunge dirty entry in flush test";
@@ -33838,7 +33910,11 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
  *
  * Modifications:
  *
- *        None.
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -33850,7 +33926,6 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
     int       i;
     const int num_huge_entries    = 4;
     const int num_monster_entries = 32;
-    herr_t    result;
     /* clang-format off */
     struct expected_entry_status expected[36] =
     {
@@ -34089,14 +34164,10 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush invalidate failed after flush op eviction test")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed after flush op eviction test";
-        }
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after cleanup of flush op eviction test";
@@ -34199,7 +34270,11 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
  *
  * Modifications:
  *
- *        None.
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -34507,14 +34582,10 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush invalidate failed after flush op eviction test")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed after flush op eviction test";
-        }
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after cleanup of flush op eviction test";
@@ -34658,7 +34729,11 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
  *
  * Modifications:
  *
- *        None.
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -34669,7 +34744,6 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
     H5C_t *                   cache_ptr = file_ptr->shared->cache;
     int                       i;
     int                       expected_hash_bucket = 0;
-    herr_t                    result;
     haddr_t                   entry_addr;
     test_entry_t *            entry_ptr;
     test_entry_t *            base_addr = NULL;
@@ -34883,14 +34957,10 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush invalidate failed after flush op eviction test")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed after flush op eviction test";
-        }
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after cleanup of flush op eviction test";
@@ -35050,7 +35120,15 @@ check_stats(unsigned paged)
  *
  * Modifications:
  *
- *        None.
+ *              Modified slist stats checks to allow for the case that
+ *              the slist is disabled.
+ *
+ *              Also added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
+ *
  *
  *-------------------------------------------------------------------------
  */
@@ -35060,7 +35138,6 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
 {
     H5C_t *cache_ptr = file_ptr->shared->cache;
     int    i;
-    herr_t result;
 
     if (pass) {
         if (cache_ptr == NULL) {
@@ -35120,13 +35197,15 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(1).";
         } /* end if */
 
-    if (pass)
+    if (pass) {
+
         if ((cache_ptr->total_ht_insertions != 32) || (cache_ptr->total_ht_deletions != 0) ||
             (cache_ptr->successful_ht_searches != 0) || (cache_ptr->total_successful_ht_search_depth != 0) ||
             (cache_ptr->failed_ht_searches != 32) || (cache_ptr->total_failed_ht_search_depth != 48) ||
             (cache_ptr->max_index_len != 32) || (cache_ptr->max_index_size != 2 * 1024 * 1024) ||
             (cache_ptr->max_clean_index_size != 0) || (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) ||
-            (cache_ptr->max_slist_len != 32) || (cache_ptr->max_slist_size != 2 * 1024 * 1024) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->max_slist_len != 32) || (cache_ptr->max_slist_size != 2 * 1024 * 1024))) ||
             (cache_ptr->max_pl_len != 0) || (cache_ptr->max_pl_size != 0) || (cache_ptr->max_pel_len != 0) ||
             (cache_ptr->max_pel_size != 0) || (cache_ptr->calls_to_msic != 0) ||
             (cache_ptr->total_entries_skipped_in_msic != 0) ||
@@ -35138,6 +35217,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(1).";
         } /* end if */
+    }
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     if (pass)
@@ -35190,17 +35270,19 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(2).";
         } /* end if */
 
-    if (pass)
+    if (pass) {
+
         if ((cache_ptr->total_ht_insertions != 32) || (cache_ptr->total_ht_deletions != 0) ||
             (cache_ptr->successful_ht_searches != 32) ||
             (cache_ptr->total_successful_ht_search_depth != 96) || (cache_ptr->failed_ht_searches != 32) ||
             (cache_ptr->total_failed_ht_search_depth != 48) || (cache_ptr->max_index_len != 32) ||
             (cache_ptr->max_index_size != 2 * 1024 * 1024) || (cache_ptr->max_clean_index_size != 0) ||
-            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) || (cache_ptr->max_slist_len != 32) ||
-            (cache_ptr->max_slist_size != 2 * 1024 * 1024) || (cache_ptr->max_pl_len != 1) ||
-            (cache_ptr->max_pl_size != 64 * 1024) || (cache_ptr->max_pel_len != 0) ||
-            (cache_ptr->max_pel_size != 0) || (cache_ptr->calls_to_msic != 0) ||
-            (cache_ptr->total_entries_skipped_in_msic != 0) ||
+            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->max_slist_len != 32) || (cache_ptr->max_slist_size != 2 * 1024 * 1024))) ||
+            (cache_ptr->max_pl_len != 1) || (cache_ptr->max_pl_size != 64 * 1024) ||
+            (cache_ptr->max_pel_len != 0) || (cache_ptr->max_pel_size != 0) ||
+            (cache_ptr->calls_to_msic != 0) || (cache_ptr->total_entries_skipped_in_msic != 0) ||
             (cache_ptr->total_entries_scanned_in_msic != 0) ||
             (cache_ptr->max_entries_skipped_in_msic != 0) || (cache_ptr->max_entries_scanned_in_msic != 0) ||
             (cache_ptr->entries_scanned_to_make_space != 0) || (cache_ptr->slist_scan_restarts != 0) ||
@@ -35209,6 +35291,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(2).";
         } /* end if */
+    }
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     if (pass)
@@ -35261,18 +35344,20 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(3).";
         } /* end if */
 
-    if (pass)
+    if (pass) {
+
         if ((cache_ptr->total_ht_insertions != 33) || (cache_ptr->total_ht_deletions != 1) ||
             (cache_ptr->successful_ht_searches != 32) ||
             (cache_ptr->total_successful_ht_search_depth != 96) || (cache_ptr->failed_ht_searches != 33) ||
             (cache_ptr->total_failed_ht_search_depth != 52) || (cache_ptr->max_index_len != 32) ||
             (cache_ptr->max_index_size != 2 * 1024 * 1024) ||
             (cache_ptr->max_clean_index_size != 2 * 1024 * 1024) ||
-            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) || (cache_ptr->max_slist_len != 32) ||
-            (cache_ptr->max_slist_size != 2 * 1024 * 1024) || (cache_ptr->max_pl_len != 1) ||
-            (cache_ptr->max_pl_size != 64 * 1024) || (cache_ptr->max_pel_len != 0) ||
-            (cache_ptr->max_pel_size != 0) || (cache_ptr->calls_to_msic != 1) ||
-            (cache_ptr->total_entries_skipped_in_msic != 0) ||
+            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->max_slist_len != 32) || (cache_ptr->max_slist_size != 2 * 1024 * 1024))) ||
+            (cache_ptr->max_pl_len != 1) || (cache_ptr->max_pl_size != 64 * 1024) ||
+            (cache_ptr->max_pel_len != 0) || (cache_ptr->max_pel_size != 0) ||
+            (cache_ptr->calls_to_msic != 1) || (cache_ptr->total_entries_skipped_in_msic != 0) ||
             (cache_ptr->total_entries_scanned_in_msic != 33) ||
             (cache_ptr->max_entries_skipped_in_msic != 0) || (cache_ptr->max_entries_scanned_in_msic != 33) ||
             (cache_ptr->entries_scanned_to_make_space != 33) || (cache_ptr->slist_scan_restarts != 0) ||
@@ -35281,6 +35366,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(3).";
         } /* end if */
+    }
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     if (pass)
@@ -35310,14 +35396,10 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush invalidate failed in check_stats__smoke_check_1()")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed in check_stats__smoke_check_1()";
-        } /* end if */
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after check_stats__smoke_check_1()";
@@ -35351,18 +35433,20 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(4).";
         } /* end if */
 
-    if (pass)
+    if (pass) {
+
         if ((cache_ptr->total_ht_insertions != 33) || (cache_ptr->total_ht_deletions != 33) ||
             (cache_ptr->successful_ht_searches != 33) ||
             (cache_ptr->total_successful_ht_search_depth != 99) || (cache_ptr->failed_ht_searches != 33) ||
             (cache_ptr->total_failed_ht_search_depth != 52) || (cache_ptr->max_index_len != 32) ||
             (cache_ptr->max_index_size != 2 * 1024 * 1024) ||
             (cache_ptr->max_clean_index_size != 2 * 1024 * 1024) ||
-            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) || (cache_ptr->max_slist_len != 32) ||
-            (cache_ptr->max_slist_size != 2 * 1024 * 1024) || (cache_ptr->max_pl_len != 1) ||
-            (cache_ptr->max_pl_size != 64 * 1024) || (cache_ptr->max_pel_len != 0) ||
-            (cache_ptr->max_pel_size != 0) || (cache_ptr->calls_to_msic != 1) ||
-            (cache_ptr->total_entries_skipped_in_msic != 0) ||
+            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->max_slist_len != 32) || (cache_ptr->max_slist_size != 2 * 1024 * 1024))) ||
+            (cache_ptr->max_pl_len != 1) || (cache_ptr->max_pl_size != 64 * 1024) ||
+            (cache_ptr->max_pel_len != 0) || (cache_ptr->max_pel_size != 0) ||
+            (cache_ptr->calls_to_msic != 1) || (cache_ptr->total_entries_skipped_in_msic != 0) ||
             (cache_ptr->total_entries_scanned_in_msic != 33) ||
             (cache_ptr->max_entries_skipped_in_msic != 0) || (cache_ptr->max_entries_scanned_in_msic != 33) ||
             (cache_ptr->entries_scanned_to_make_space != 33) || (cache_ptr->slist_scan_restarts != 0) ||
@@ -35371,6 +35455,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(4).";
         } /* end if */
+    }
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     if (pass)

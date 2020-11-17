@@ -449,6 +449,14 @@ done:
  * Programmer:  Robb Matzke
  *              Jul  9 1997
  *
+ * Changes:
+ *
+ *             In the parallel case, added code to setup the MDC slist
+ *             before the call to H5AC__flush_entries() and take it down
+ *             afterwards.
+ *
+ *                                            JRM -- 7/29/20
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -477,15 +485,20 @@ H5AC_dest(H5F_t *f)
     if (H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
 
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to get logging status")
-    if (log_enabled && curr_logging)
+    if (log_enabled && curr_logging) {
+
         if (H5C_log_write_destroy_cache_msg(f->shared->cache) < 0)
 
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    }
+
     /* Tear down logging */
-    if (log_enabled)
+    if (log_enabled) {
+
         if (H5C_log_tear_down(f->shared->cache) < 0)
 
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging tear-down failed")
+    }
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -495,19 +508,46 @@ H5AC_dest(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed")
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
-    if (aux_ptr)
+
+    if (aux_ptr) {
+
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
-    /* If the file was opened R/W, attempt to flush all entries
-     * from rank 0 & Bcast clean list to other ranks.
-     *
-     * Must not flush in the R/O case, as this will trigger the
-     * free space manager settle routines.
-     */
-    if (H5F_ACC_RDWR & H5F_INTENT(f))
-        if (H5AC__flush_entries(f) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+        /* If the file was opened R/W, attempt to flush all entries
+         * from rank 0 & Bcast clean list to other ranks.
+         *
+         * Must not flush in the R/O case, as this will trigger the
+         * free space manager settle routines.
+         *
+         * Must also enable the skip list before the call to
+         * H5AC__flush_entries() and disable it afterwards, as the
+         * skip list will be disabled after the previous flush.
+         *
+         * Note that H5C_dest() does slist setup and take down as well.
+         * Unfortunately, we can't do the setup and take down just once,
+         * as H5C_dest() is called directly in the test code.
+         *
+         * Fortunately, the cache should be clean or close to it at this
+         * point, so the overhead should be minimal.
+         */
+        if (H5F_ACC_RDWR & H5F_INTENT(f)) {
+
+            /* enable and load the slist */
+            if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+
+            if (H5AC__flush_entries(f) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+
+            /* disable the slist -- should be empty */
+            if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed")
+        }
+    }
 #endif /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */
@@ -902,9 +942,10 @@ H5AC_mark_entry_dirty(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_entry_dirty_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_entry_dirty_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_dirty() */
@@ -954,9 +995,10 @@ H5AC_mark_entry_clean(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_entry_clean_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_entry_clean_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_clean() */
@@ -995,9 +1037,10 @@ H5AC_mark_entry_unserialized(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_unserialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_unserialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_unserialized() */
@@ -1035,9 +1078,10 @@ H5AC_mark_entry_serialized(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_serialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_serialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_serialized() */
@@ -1134,9 +1178,10 @@ H5AC_pin_protected_entry(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_pin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_pin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_pin_protected_entry() */
@@ -1179,6 +1224,107 @@ done:
 } /* H5AC_prep_for_file_close() */
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_prep_for_file_flush
+ *
+ * Purpose:     This function should be called just prior to the first
+ *              call to H5AC_flush() during a file flush.
+ *
+ *              Its purpose is to handly any setup required prior to
+ *              metadata cache flush.
+ *
+ *              Initially, this means setting up the slist prior to the
+ *              flush.  We do this in a seperate call because
+ *              H5F__flush_phase2() make repeated calls to H5AC_flush().
+ *              Handling this detail in separate calls allows us to avoid
+ *              the overhead of setting up and taking down the skip list
+ *              repeatedly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/5/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_prep_for_file_flush(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_prep_for_file_flush() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_secure_from_file_flush
+ *
+ * Purpose:     This function should be called just after the last
+ *              call to H5AC_flush() during a file flush.
+ *
+ *              Its purpose is to perform any necessary cleanup after the
+ *              metadata cache flush.
+ *
+ *              The objective of the call is to allow the metadata cache
+ *              to do any necessary necessary cleanup work after a cache
+ *              flush.
+ *
+ *              Initially, this means taking down the slist after the
+ *              flush.  We do this in a seperate call because
+ *              H5F__flush_phase2() make repeated calls to H5AC_flush().
+ *              Handling this detail in separate calls allows us to avoid
+ *              the overhead of setting up and taking down the skip list
+ *              repeatedly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/5/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_secure_from_file_flush(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_secure_from_file_flush() */
+
+/*-------------------------------------------------------------------------
+ *
  * Function:    H5AC_create_flush_dependency()
  *
  * Purpose:     Create a flush dependency between two entries in the metadata
@@ -1214,10 +1360,11 @@ H5AC_create_flush_dependency(void *parent_thing, void *child_thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_create_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing, (H5AC_info_t *)child_thing,
-                                        ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_create_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing,
+                                            (H5AC_info_t *)child_thing, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_create_flush_dependency() */
@@ -1345,9 +1492,10 @@ H5AC_resize_entry(void *thing, size_t new_size)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_resize_entry_msg(cache_ptr, entry_ptr, new_size, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_resize_entry_msg(cache_ptr, entry_ptr, new_size, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_resize_entry() */
@@ -1387,9 +1535,10 @@ H5AC_unpin_entry(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_unpin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_unpin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_unpin_entry() */
@@ -1429,10 +1578,11 @@ H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_destroy_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing, (H5AC_info_t *)child_thing,
-                                         ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_destroy_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing,
+                                             (H5AC_info_t *)child_thing, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_destroy_flush_dependency() */
@@ -2581,9 +2731,10 @@ H5AC_remove_entry(void *_entry)
 
 done:
     /* If currently logging, generate a message */
-    if (cache->log_info->logging)
-        if (H5C_log_write_remove_entry_msg(cache, entry, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache != NULL && cache->log_info != NULL)
+        if (cache->log_info->logging)
+            if (H5C_log_write_remove_entry_msg(cache, entry, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_remove_entry() */

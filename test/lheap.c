@@ -103,7 +103,7 @@ main(void)
         if (j > 4)
             buf[j] = '\0';
 
-        if (UFAIL == (obj[i] = H5HL_insert(f, heap, strlen(buf) + 1, buf))) {
+        if (UFAIL == (obj[i] = H5HL_insert(f, heap, HDstrlen(buf) + 1, buf))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -155,7 +155,7 @@ main(void)
             goto error;
         }
 
-        if (strcmp(s, buf)) {
+        if (HDstrcmp(s, buf)) {
             H5_FAILED();
             HDprintf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
             HDprintf("    got: \"%s\"\n", s);

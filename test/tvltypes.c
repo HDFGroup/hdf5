@@ -2676,13 +2676,13 @@ test_vltypes_fill_value(void)
                 } break;
 
                 case H5D_VIRTUAL:
-                    assert(0 && "Invalid layout type!");
+                    HDassert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
-                    assert(0 && "Unknown layout type!");
+                    HDassert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 
@@ -2784,13 +2784,13 @@ test_vltypes_fill_value(void)
                     break;
 
                 case H5D_VIRTUAL:
-                    assert(0 && "Invalid layout type!");
+                    HDassert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
-                    assert(0 && "Unknown layout type!");
+                    HDassert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 
@@ -2969,13 +2969,13 @@ test_vltypes_fill_value(void)
                     break;
 
                 case H5D_VIRTUAL:
-                    assert(0 && "Invalid layout type!");
+                    HDassert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
-                    assert(0 && "Unknown layout type!");
+                    HDassert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 
@@ -3241,5 +3241,5 @@ test_vltypes(void)
 void
 cleanup_vltypes(void)
 {
-    remove(FILENAME);
+    HDremove(FILENAME);
 }

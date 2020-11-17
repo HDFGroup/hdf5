@@ -773,7 +773,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
     else {
         aux_ptr->dirty_bytes += entry_ptr->size;
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-        aux_ptr->unprotect_dirty_bytes += entry_size;
+        aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
         aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
     }  /* end else */
@@ -971,7 +971,7 @@ H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr)
     aux_ptr->dirty_bytes += entry_ptr->size;
 
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-    aux_ptr->insert_dirty_bytes += size;
+    aux_ptr->insert_dirty_bytes += entry_ptr->size;
     aux_ptr->insert_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
@@ -1849,6 +1849,8 @@ done:
  * Programmer:  John Mainzer
  *              April 28, 2010
  *
+ * Changes:     None.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1877,10 +1879,12 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
      * However, when flushing from within the close operation from a file,
      * it's possible to skip this barrier (on the second flush of the cache).
      */
-    if (!H5CX_get_mpi_file_flushing())
+    if (!H5CX_get_mpi_file_flushing()) {
+
         if (MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
 
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
+    }
 
     /* Flush data to disk, from rank 0 process */
     if (aux_ptr->mpi_rank == 0) {
@@ -1904,8 +1908,10 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
          * enforce POSIX semantics on the server that pretends to be a
          * file system in our parallel tests.
          */
-        if (aux_ptr->write_done)
+        if (aux_ptr->write_done) {
+
             (aux_ptr->write_done)();
+        }
     } /* end if */
 
     /* Propagate cleaned entries to other ranks. */

@@ -59,6 +59,13 @@
 /* Initial allocated size of the "flush_dep_parent" array */
 #define H5C_FLUSH_DEP_PARENT_INIT 8
 
+
+/* Set to TRUE to enable the slist optimization.  If this field is TRUE,
+ * the slist is disabled whenever a flush is not in progress.
+ */
+#define H5C__SLIST_OPT_ENABLED                  TRUE
+
+
 /****************************************************************************
  *
  * We maintain doubly linked lists of instances of H5C_cache_entry_t for a
@@ -1573,7 +1580,25 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *        Added code to maintain the cache_ptr->slist_ring_len
  *        and cache_ptr->slist_ring_size arrays.
  *
+ *              JRM -- 4/29/20
+ *              Reworked macro to support the slist_enabled field
+ *              of H5C_t.  If slist_enabled == TRUE, the macro
+ *              functions as before.  Otherwise, the macro is a no-op,
+ *              and the slist must be empty.
+ *
  *-------------------------------------------------------------------------
+ */
+
+/* NOTE:  The H5C__INSERT_ENTRY_IN_SLIST() macro is set up so that
+ *
+ *            H5C_DO_SANITY_CHECKS
+ *
+ *        and
+ *
+ *            H5C_DO_SLIST_SANITY_CHECKS
+ *
+ *        can be selected independantly.  This is easy to miss as the
+ *        two #defines are easy to confuse.
  */
 
 #if H5C_DO_SLIST_SANITY_CHECKS
@@ -1594,33 +1619,43 @@ if ( ( (cache_ptr)->index_size !=                                           \
 {                                                                              \
     HDassert( (cache_ptr) );                                                   \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
-    HDassert( (entry_ptr) );                                                   \
-    HDassert( (entry_ptr)->size > 0 );                                         \
-    HDassert( H5F_addr_defined((entry_ptr)->addr) );                           \
-    HDassert( !((entry_ptr)->in_slist) );                                      \
-    HDassert( !ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                     \
-    HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                        \
-    HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                           \
-    HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=                \
-              (cache_ptr)->slist_len );                                        \
-    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=               \
-              (cache_ptr)->slist_size );                                       \
                                                                                \
-    if(H5SL_insert((cache_ptr)->slist_ptr, entry_ptr, &(entry_ptr)->addr) < 0) \
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val), "can't insert entry in skip list") \
+    if ( (cache_ptr)->slist_enabled ) {                                        \
                                                                                \
-    (entry_ptr)->in_slist = TRUE;                                              \
-    (cache_ptr)->slist_changed = TRUE;                                         \
-    (cache_ptr)->slist_len++;                                                  \
-    (cache_ptr)->slist_size += (entry_ptr)->size;                              \
-    ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])++;                        \
-    ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (entry_ptr)->size;    \
-    (cache_ptr)->slist_len_increase++;                                         \
-    (cache_ptr)->slist_size_increase += (int64_t)((entry_ptr)->size);          \
+        HDassert( (entry_ptr) );                                               \
+        HDassert( (entry_ptr)->size > 0 );                                     \
+        HDassert( H5F_addr_defined((entry_ptr)->addr) );                       \
+        HDassert( !((entry_ptr)->in_slist) );                                  \
+        HDassert( ! ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
+        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
+        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
+        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
+                  (cache_ptr)->slist_len );                                    \
+        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
+                  (cache_ptr)->slist_size );                                   \
                                                                                \
-    HDassert( (cache_ptr)->slist_len > 0 );                                    \
-    HDassert( (cache_ptr)->slist_size > 0 );                                   \
+        if ( H5SL_insert((cache_ptr)->slist_ptr, entry_ptr,                    \
+                         &((entry_ptr)->addr)) < 0)                            \
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val),                   \
+                        "can't insert entry in skip list")                     \
                                                                                \
+        (entry_ptr)->in_slist = TRUE;                                          \
+        (cache_ptr)->slist_changed = TRUE;                                     \
+        (cache_ptr)->slist_len++;                                              \
+        (cache_ptr)->slist_size += (entry_ptr)->size;                          \
+        ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])++;                    \
+        ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (entry_ptr)->size;\
+        (cache_ptr)->slist_len_increase++;                                     \
+        (cache_ptr)->slist_size_increase += (int64_t)((entry_ptr)->size);      \
+                                                                               \
+        HDassert( (cache_ptr)->slist_len > 0 );                                \
+        HDassert( (cache_ptr)->slist_size > 0 );                               \
+                                                                               \
+    } else { /* slist disabled */                                              \
+                                                                               \
+        HDassert( (cache_ptr)->slist_len == 0 );                               \
+        HDassert( (cache_ptr)->slist_size == 0 );                              \
+    }                                                                          \
 } /* H5C__INSERT_ENTRY_IN_SLIST */
 
 #else /* H5C_DO_SANITY_CHECKS */
@@ -1629,31 +1664,42 @@ if ( ( (cache_ptr)->index_size !=                                           \
 {                                                                              \
     HDassert( (cache_ptr) );                                                   \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
-    HDassert( (entry_ptr) );                                                   \
-    HDassert( (entry_ptr)->size > 0 );                                         \
-    HDassert( H5F_addr_defined((entry_ptr)->addr) );                           \
-    HDassert( !((entry_ptr)->in_slist) );                                      \
-    HDassert( !ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                     \
-    HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                        \
-    HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                           \
-    HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=                \
-              (cache_ptr)->slist_len );                                        \
-    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=               \
-              (cache_ptr)->slist_size );                                       \
                                                                                \
-    if(H5SL_insert((cache_ptr)->slist_ptr, entry_ptr, &(entry_ptr)->addr) < 0) \
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val), "can't insert entry in skip list") \
+    if ( (cache_ptr)->slist_enabled ) {                                        \
                                                                                \
-    (entry_ptr)->in_slist = TRUE;                                              \
-    (cache_ptr)->slist_changed = TRUE;                                         \
-    (cache_ptr)->slist_len++;                                                  \
-    (cache_ptr)->slist_size += (entry_ptr)->size;                              \
-    ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])++;                        \
-    ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (entry_ptr)->size;    \
+        HDassert( (entry_ptr) );                                               \
+        HDassert( (entry_ptr)->size > 0 );                                     \
+        HDassert( ! ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
+        HDassert( H5F_addr_defined((entry_ptr)->addr) );                       \
+        HDassert( !((entry_ptr)->in_slist) );                                  \
+        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
+        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
+        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
+                  (cache_ptr)->slist_len );                                    \
+        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
+                  (cache_ptr)->slist_size );                                   \
+        HDassert( (cache_ptr)->slist_ptr );                                    \
                                                                                \
-    HDassert( (cache_ptr)->slist_len > 0 );                                    \
-    HDassert( (cache_ptr)->slist_size > 0 );                                   \
+        if ( H5SL_insert((cache_ptr)->slist_ptr, entry_ptr,                    \
+                         &((entry_ptr)->addr)) < 0)                            \
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val),                   \
+                        "can't insert entry in skip list")                     \
                                                                                \
+        (entry_ptr)->in_slist = TRUE;                                          \
+        (cache_ptr)->slist_changed = TRUE;                                     \
+        (cache_ptr)->slist_len++;                                              \
+        (cache_ptr)->slist_size += (entry_ptr)->size;                          \
+        ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])++;                    \
+        ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (entry_ptr)->size;\
+                                                                               \
+        HDassert( (cache_ptr)->slist_len > 0 );                                \
+        HDassert( (cache_ptr)->slist_size > 0 );                               \
+                                                                               \
+    } else { /* slist disabled */                                              \
+                                                                               \
+        HDassert( (cache_ptr)->slist_len == 0 );                               \
+        HDassert( (cache_ptr)->slist_size == 0 );                              \
+    }                                                                          \
 } /* H5C__INSERT_ENTRY_IN_SLIST */
 
 #endif /* H5C_DO_SANITY_CHECKS */
@@ -1671,79 +1717,127 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *
  * Programmer:  John Mainzer, 5/10/04
  *
+ * Modifications:
+ *
+ *              JRM -- 7/21/04
+ *              Updated function for the addition of the hash table.
+ *
+ *              JRM - 7/27/04
+ *              Converted from the function H5C_remove_entry_from_tree()
+ *              to the macro H5C__REMOVE_ENTRY_FROM_TREE in the hopes of
+ *              wringing a little more performance out of the cache.
+ *
+ *              QAK -- 11/27/04
+ *              Switched over to using skip list routines.
+ *
+ *              JRM -- 3/28/07
+ *              Updated sanity checks for the new is_read_only and
+ *              ro_ref_count fields in H5C_cache_entry_t.
+ *
+ *              JRM -- 12/13/14
+ *              Added code to set cache_ptr->slist_changed to TRUE
+ *              when an entry is removed from the slist.
+ *
+ *              JRM -- 4/29/20
+ *              Reworked macro to support the slist_enabled field
+ *              of H5C_t.  If slist_enabled == TRUE, the macro
+ *              functions as before.  Otherwise, the macro is a no-op,
+ *              and the slist must be empty.
+ *
  *-------------------------------------------------------------------------
  */
 
 #if H5C_DO_SANITY_CHECKS
-#define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)    \
-{                                                                           \
-    HDassert( (cache_ptr) );                                                \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
-    HDassert( (entry_ptr) );                                                \
-    HDassert( !((entry_ptr)->is_read_only) );                               \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
-    HDassert( (entry_ptr)->size > 0 );                                      \
-    HDassert( (entry_ptr)->in_slist );                                      \
-    HDassert( (cache_ptr)->slist_ptr );                                     \
-    HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                     \
-    HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                        \
-    HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=             \
-              (cache_ptr)->slist_len );                                     \
-    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=            \
-              (cache_ptr)->slist_size );                                    \
-                                                                            \
-    if ( H5SL_remove((cache_ptr)->slist_ptr, &(entry_ptr)->addr)            \
-             != (entry_ptr) )                                               \
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "can't delete entry from skip list") \
-                                                                            \
-    HDassert( (cache_ptr)->slist_len > 0 );                                 \
-    if(!(during_flush))                                                     \
-        (cache_ptr)->slist_changed = TRUE;                                  \
-    (cache_ptr)->slist_len--;                                               \
-    HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );               \
-    (cache_ptr)->slist_size -= (entry_ptr)->size;                           \
-    ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])--;                     \
-    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=            \
-              (entry_ptr)->size );                                          \
-    ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size; \
-    (cache_ptr)->slist_len_increase--;                                      \
-    (cache_ptr)->slist_size_increase -= (int64_t)((entry_ptr)->size);       \
-    (entry_ptr)->in_slist = FALSE;                                          \
+#define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)       \
+{                                                                              \
+    HDassert( (cache_ptr) );                                                   \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
+                                                                               \
+    if ( (cache_ptr)->slist_enabled ) {                                        \
+                                                                               \
+        HDassert( (entry_ptr) );                                               \
+        HDassert( !((entry_ptr)->is_read_only) );                              \
+        HDassert( ((entry_ptr)->ro_ref_count) == 0 );                          \
+        HDassert( (entry_ptr)->size > 0 );                                     \
+        HDassert( (entry_ptr)->in_slist );                                     \
+        HDassert( (cache_ptr)->slist_ptr );                                    \
+        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
+        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
+        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
+                  (cache_ptr)->slist_len );                                    \
+        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
+                  (cache_ptr)->slist_size );                                   \
+        HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
+                                                                               \
+        if ( H5SL_remove((cache_ptr)->slist_ptr, &(entry_ptr)->addr)           \
+                 != (entry_ptr) )                                              \
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL,                         \
+                        "can't delete entry from skip list")                   \
+                                                                               \
+        HDassert( (cache_ptr)->slist_len > 0 );                                \
+        if(!(during_flush))                                                    \
+            (cache_ptr)->slist_changed = TRUE;                                 \
+        (cache_ptr)->slist_len--;                                              \
+        HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
+        (cache_ptr)->slist_size -= (entry_ptr)->size;                          \
+        ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])--;                    \
+        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=           \
+                  (entry_ptr)->size );                                         \
+        ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size;\
+        (cache_ptr)->slist_len_increase--;                                     \
+        (cache_ptr)->slist_size_increase -= (int64_t)((entry_ptr)->size);      \
+        (entry_ptr)->in_slist = FALSE;                                         \
+                                                                               \
+    } else { /* slist disabled */                                              \
+                                                                               \
+        HDassert( (cache_ptr)->slist_len == 0 );                               \
+        HDassert( (cache_ptr)->slist_size == 0 );                               \
+    }                                                                          \
 } /* H5C__REMOVE_ENTRY_FROM_SLIST */
 
 #else /* H5C_DO_SANITY_CHECKS */
 
-#define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)    \
-{                                                                           \
-    HDassert( (cache_ptr) );                                                \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
-    HDassert( (entry_ptr) );                                                \
-    HDassert( !((entry_ptr)->is_read_only) );                               \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
-    HDassert( (entry_ptr)->in_slist );                                      \
-    HDassert( (cache_ptr)->slist_ptr );                                     \
-    HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                     \
-    HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                        \
-    HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=             \
-              (cache_ptr)->slist_len );                                     \
-    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=            \
-              (cache_ptr)->slist_size );                                    \
-                                                                            \
-    if ( H5SL_remove((cache_ptr)->slist_ptr, &(entry_ptr)->addr)            \
-             != (entry_ptr) )                                               \
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "can't delete entry from skip list") \
-                                                                            \
-    HDassert( (cache_ptr)->slist_len > 0 );                                 \
-    if(!(during_flush))                                                     \
-        (cache_ptr)->slist_changed = TRUE;                                  \
-    (cache_ptr)->slist_len--;                                               \
-    HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );               \
-    (cache_ptr)->slist_size -= (entry_ptr)->size;                           \
-    ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])--;                     \
-    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=            \
-              (entry_ptr)->size );                                          \
-    ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size; \
-    (entry_ptr)->in_slist = FALSE;                                          \
+#define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)       \
+{                                                                              \
+    HDassert( (cache_ptr) );                                                   \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
+                                                                               \
+    if ( (cache_ptr)->slist_enabled ) {                                        \
+                                                                               \
+        HDassert( (entry_ptr) );                                               \
+        HDassert( !((entry_ptr)->is_read_only) );                              \
+        HDassert( ((entry_ptr)->ro_ref_count) == 0 );                          \
+        HDassert( (entry_ptr)->in_slist );                                     \
+        HDassert( (cache_ptr)->slist_ptr );                                    \
+        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
+        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
+        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
+                  (cache_ptr)->slist_len );                                    \
+        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
+                  (cache_ptr)->slist_size );                                   \
+                                                                               \
+        if ( H5SL_remove((cache_ptr)->slist_ptr, &(entry_ptr)->addr)           \
+             != (entry_ptr) )                                                  \
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL,                         \
+                        "can't delete entry from skip list")                   \
+                                                                               \
+        HDassert( (cache_ptr)->slist_len > 0 );                                \
+        if(!(during_flush))                                                    \
+            (cache_ptr)->slist_changed = TRUE;                                 \
+        (cache_ptr)->slist_len--;                                              \
+        HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
+        (cache_ptr)->slist_size -= (entry_ptr)->size;                          \
+        ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])--;                    \
+        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=           \
+                  (entry_ptr)->size );                                         \
+        ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size;\
+        (entry_ptr)->in_slist = FALSE;                                         \
+                                                                               \
+    } else { /* slist disabled */                                              \
+                                                                               \
+        HDassert( (cache_ptr)->slist_len == 0 );                               \
+        HDassert( (cache_ptr)->slist_size == 0 );                              \
+    }                                                                          \
 } /* H5C__REMOVE_ENTRY_FROM_SLIST */
 
 #endif /* H5C_DO_SANITY_CHECKS */
@@ -1781,6 +1875,12 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *              Added code to maintain the cache_ptr->slist_ring_len
  *              and cache_ptr->slist_ring_size arrays.
  *
+ *              JRM -- 4/29/20
+ *              Reworked macro to support the slist_enabled field
+ *              of H5C_t.  If slist_enabled == TRUE, the macro
+ *              functions as before.  Otherwise, the macro is a no-op,
+ *              and the slist must be empty.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1790,32 +1890,43 @@ if ( ( (cache_ptr)->index_size !=                                           \
 {                                                                             \
     HDassert( (cache_ptr) );                                                  \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                       \
-    HDassert( (old_size) > 0 );                                               \
-    HDassert( (new_size) > 0 );                                               \
-    HDassert( (old_size) <= (cache_ptr)->slist_size );                        \
-    HDassert( (cache_ptr)->slist_len > 0 );                                   \
-    HDassert( ((cache_ptr)->slist_len > 1) ||                                 \
-              ( (cache_ptr)->slist_size == (old_size) ) );                    \
-    HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                       \
-    HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                          \
-    HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=               \
-              (cache_ptr)->slist_len );                                       \
-    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=              \
-              (cache_ptr)->slist_size );                                      \
                                                                               \
-    (cache_ptr)->slist_size -= (old_size);                                    \
-    (cache_ptr)->slist_size += (new_size);                                    \
+    if ( (cache_ptr)->slist_enabled ) {                                       \
                                                                               \
-    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=(old_size) ); \
-    ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (old_size);          \
-    ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (new_size);          \
+        HDassert( (old_size) > 0 );                                           \
+        HDassert( (new_size) > 0 );                                           \
+        HDassert( (old_size) <= (cache_ptr)->slist_size );                    \
+        HDassert( (cache_ptr)->slist_len > 0 );                               \
+        HDassert( ((cache_ptr)->slist_len > 1) ||                             \
+                  ( (cache_ptr)->slist_size == (old_size) ) );                \
+        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                   \
+        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                      \
+        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=           \
+                  (cache_ptr)->slist_len );                                   \
+        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=          \
+                  (cache_ptr)->slist_size );                                  \
                                                                               \
-    (cache_ptr)->slist_size_increase -= (int64_t)(old_size);                  \
-    (cache_ptr)->slist_size_increase += (int64_t)(new_size);                  \
+        (cache_ptr)->slist_size -= (old_size);                                \
+        (cache_ptr)->slist_size += (new_size);                                \
                                                                               \
-    HDassert( (new_size) <= (cache_ptr)->slist_size );                        \
-    HDassert( ( (cache_ptr)->slist_len > 1 ) ||                               \
-              ( (cache_ptr)->slist_size == (new_size) ) );                    \
+        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)]             \
+                  >= (old_size) );                                            \
+                                                                              \
+        ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (old_size);      \
+        ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (new_size);      \
+                                                                              \
+        (cache_ptr)->slist_size_increase -= (int64_t)(old_size);              \
+        (cache_ptr)->slist_size_increase += (int64_t)(new_size);              \
+                                                                              \
+        HDassert( (new_size) <= (cache_ptr)->slist_size );                    \
+        HDassert( ( (cache_ptr)->slist_len > 1 ) ||                           \
+                  ( (cache_ptr)->slist_size == (new_size) ) );                \
+                                                                              \
+    } else { /* slist disabled */                                             \
+                                                                              \
+        HDassert( (cache_ptr)->slist_len == 0 );                              \
+        HDassert( (cache_ptr)->slist_size == 0 );                             \
+    }                                                                         \
 } /* H5C__UPDATE_SLIST_FOR_SIZE_CHANGE */
 
 #else /* H5C_DO_SANITY_CHECKS */
@@ -1824,29 +1935,39 @@ if ( ( (cache_ptr)->index_size !=                                           \
 {                                                                             \
     HDassert( (cache_ptr) );                                                  \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                       \
-    HDassert( (old_size) > 0 );                                               \
-    HDassert( (new_size) > 0 );                                               \
-    HDassert( (old_size) <= (cache_ptr)->slist_size );                        \
-    HDassert( (cache_ptr)->slist_len > 0 );                                   \
-    HDassert( ((cache_ptr)->slist_len > 1) ||                                 \
-              ( (cache_ptr)->slist_size == (old_size) ) );                    \
-    HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                       \
-    HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                          \
-    HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=               \
-              (cache_ptr)->slist_len );                                       \
-    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=              \
-              (cache_ptr)->slist_size );                                      \
                                                                               \
-    (cache_ptr)->slist_size -= (old_size);                                    \
-    (cache_ptr)->slist_size += (new_size);                                    \
+    if ( (cache_ptr)->slist_enabled ) {                                       \
                                                                               \
-    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=(old_size) ); \
-    ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (old_size);          \
-    ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (new_size);          \
+        HDassert( (old_size) > 0 );                                           \
+        HDassert( (new_size) > 0 );                                           \
+        HDassert( (old_size) <= (cache_ptr)->slist_size );                    \
+        HDassert( (cache_ptr)->slist_len > 0 );                               \
+        HDassert( ((cache_ptr)->slist_len > 1) ||                             \
+                  ( (cache_ptr)->slist_size == (old_size) ) );                \
+        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                   \
+        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                      \
+        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=           \
+                  (cache_ptr)->slist_len );                                   \
+        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=          \
+                  (cache_ptr)->slist_size );                                  \
                                                                               \
-    HDassert( (new_size) <= (cache_ptr)->slist_size );                        \
-    HDassert( ( (cache_ptr)->slist_len > 1 ) ||                               \
-              ( (cache_ptr)->slist_size == (new_size) ) );                    \
+        (cache_ptr)->slist_size -= (old_size);                                \
+        (cache_ptr)->slist_size += (new_size);                                \
+                                                                              \
+        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=          \
+                  (old_size) );                                               \
+        ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (old_size);      \
+        ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (new_size);      \
+                                                                              \
+        HDassert( (new_size) <= (cache_ptr)->slist_size );                    \
+        HDassert( ( (cache_ptr)->slist_len > 1 ) ||                           \
+                  ( (cache_ptr)->slist_size == (new_size) ) );                \
+                                                                              \
+    } else { /* slist disabled */                                             \
+                                                                              \
+        HDassert( (cache_ptr)->slist_len == 0 );                              \
+        HDassert( (cache_ptr)->slist_size == 0 );                             \
+    }                                                                         \
 } /* H5C__UPDATE_SLIST_FOR_SIZE_CHANGE */
 
 #endif /* H5C_DO_SANITY_CHECKS */
@@ -3752,6 +3873,36 @@ typedef struct H5C_tag_info_t {
  * are flushed. (this has been changed -- dirty entries are now removed from
  * the skip list as they are flushed.  JRM - 10/25/05)
  *
+ * Update 4/21/20:
+ *
+ * Profiling indicates that the cost of maintaining the skip list is
+ * significant.  As it is only used on flush and close, maintaining it
+ * only when needed is an obvious optimization.
+ *
+ * To do this, we add a flag to control maintenanace of the skip list.
+ * This flag is initially set to FALSE, which disables all operations
+ * on the skip list.
+ *
+ * At the beginning of either flush or close, we scan the index list,
+ * insert all dirtly entries in the skip list, and enable operations
+ * on skip list by setting above control flag to true.
+ *
+ * At the end of a complete flush, we verify that the skip list is empty,
+ * and set the control flag back to false, so as to avoid skip list
+ * maintenance overhead until the next flush or close.
+ *
+ * In the case of a partial flush (i.e. flush marked entries), we remove
+ * all remaining entries from the skip list, and then set the control flag
+ * back to false -- again avoiding skip list maintenance overhead until
+ * the next flush or close.
+ *
+ * slist_enabled: Boolean flag used to control operation of the skip
+ *              list.  If this filed is FALSE, operations on the
+ *              slist are no-ops, and the slist must be empty.  If
+ *              it is TRUE, operations on the slist proceed as usual,
+ *              and all dirty entries in the metadata cache must be
+ *              listed in the slist.
+ *
  * slist_changed: Boolean flag used to indicate whether the contents of
  *        the slist has changed since the last time this flag was
  *        reset.  This is used in the cache flush code to detect
@@ -4698,6 +4849,7 @@ struct H5C_t {
     H5C_cache_entry_t *        entry_watched_for_removal;
 
     /* Fields for maintaining list of in-order entries, for flushing */
+    hbool_t                     slist_enabled;
     hbool_t            slist_changed;
     uint32_t                    slist_len;
     size_t                      slist_size;

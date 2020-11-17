@@ -3089,6 +3089,56 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ssel_iter_get_seq_list() */
 
+/*--------------------------------------------------------------------------
+ NAME
+    H5Ssel_iter_reset
+ PURPOSE
+    Resets a dataspace selection iterator back to an initial state.
+ USAGE
+    herr_t H5Ssel_iter_reset(sel_iter_id)
+        hid_t   sel_iter_id;  IN: ID of the dataspace selection iterator to
+                                  reset
+        hid_t   space_id;     IN: ID of the dataspace with selection to
+                                  iterate over
+ RETURNS
+    Non-negative on success / Negative on failure
+ DESCRIPTION
+    Resets a dataspace selection iterator back to an initial state so that
+    the iterator may be used for iteration once again.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Ssel_iter_reset(hid_t sel_iter_id, hid_t space_id)
+{
+    H5S_sel_iter_t *sel_iter;
+    H5S_t *         space;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", sel_iter_id, space_id);
+
+    /* Check args */
+    if (NULL == (sel_iter = (H5S_sel_iter_t *)H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace selection iterator")
+    if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
+
+    /* Call selection type-specific release routine */
+    if (H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL,
+                    "problem releasing a selection iterator's type-specific info")
+
+    /* Simply re-initialize iterator */
+    if (H5S_select_iter_init(sel_iter, space, sel_iter->elmt_size, sel_iter->flags) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to re-initialize selection iterator")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Ssel_iter_reset() */
+
 /*-------------------------------------------------------------------------
  * Function:	H5S_sel_iter_close
  *

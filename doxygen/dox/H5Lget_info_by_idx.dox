@@ -1,0 +1,18 @@
+ /**
+ * \ingroup LMGT
+ * \def H5Lget_info_by_idx()
+ * H5Lget_info_by_idx() is a macro that is mapped to either H5Lget_info_by_idx1()
+ * or H5Lget_info_by_idx2() Such macros are provided to facilitate application
+ * compatibility. Their use and mappings are fully described in Compatibility
+ * Macros in HDF5. If the library and/or application is compiled for Release
+ * 1.12 emulation, H5Lget_info_by_idx() will be mapped to H5Lget_info_by_idx2() and
+ * H5Lget_info_by_idx1() is deprecated. With earlier versions, H5Lget_infoby_idx() is mapped to
+ * H5Lget_info_by_idx1(). Specific compile-time compatibility flags and the resulting
+ * mappings are as follows:
+ * \li No compatibility flag: H5Lget_info_by_idx2() (using 1.12 source) H5Lget_info_by_idx1()
+ *     (using 1.10 or 1.8 source)
+ * \li Emulate Release 1.12: H5Lget_info_by_idx2()
+ * \li Emulate Release 1.8 or 1.10 interface: H5Lget_info_by_idx1()
+ *
+ * \todo Fix the reference.
+ */

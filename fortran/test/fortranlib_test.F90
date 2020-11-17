@@ -186,6 +186,10 @@ PROGRAM fortranlibtest
   CALL test_chunk_cache(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset chunk cache configuration', total_error)
 
+  ret_total_error = 0
+  CALL test_misc_properties(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Miscellaneous properties', total_error)
+
 !
 !      '========================================='
 !      'Testing ATTRIBUTE interface              '

@@ -215,8 +215,8 @@ public class HDF5Constants {
     public static final long H5E_CANTLOAD = H5E_CANTLOAD();
     /** Minor error codes - Resource errors - Unable to lock object */
     public static final long H5E_CANTLOCK = H5E_CANTLOCK();
-//    /** Minor error codes - File accessibility errors  Unable to lock file */
-//    public static final long H5E_CANTLOCKFILE = H5E_CANTLOCKFILE();
+    /** Minor error codes - File accessibility errors  Unable to lock file */
+    public static final long H5E_CANTLOCKFILE = H5E_CANTLOCKFILE();
     /** Minor error codes - Cache related errors - Unable to mark a pinned entry as clean */
     public static final long H5E_CANTMARKCLEAN = H5E_CANTMARKCLEAN();
     /** Minor error codes - Cache related errors - Unable to mark a pinned entry as dirty */
@@ -289,8 +289,8 @@ public class HDF5Constants {
     public static final long H5E_CANTUNDEPEND = H5E_CANTUNDEPEND();
     /** Minor error codes - Resource errors - Unable to unlock object */
     public static final long H5E_CANTUNLOCK = H5E_CANTUNLOCK();
-//    /** Minor error codes - File accessibility errors  Unable to unlock file */
-//    public static final long H5E_CANTUNLOCKFILE = H5E_CANTUNLOCKFILE();
+    /** Minor error codes - File accessibility errors  Unable to unlock file */
+    public static final long H5E_CANTUNLOCKFILE = H5E_CANTUNLOCKFILE();
     /** Minor error codes - Cache related errors - Unable to un-pin cache entry */
     public static final long H5E_CANTUNPIN = H5E_CANTUNPIN();
     /** Minor error codes - Cache related errors - Unable to unprotect metadata */
@@ -1262,7 +1262,7 @@ public class HDF5Constants {
 
     private static native final long H5E_CANTLOCK();
 
-//    private static native final long H5E_CANTLOCKFILE();
+    private static native final long H5E_CANTLOCKFILE();
 
     private static native final long H5E_CANTMARKCLEAN();
 
@@ -1336,7 +1336,7 @@ public class HDF5Constants {
 
     private static native final long H5E_CANTUNLOCK();
 
-//    private static native final long H5E_CANTUNLOCKFILE();
+    private static native final long H5E_CANTUNLOCKFILE();
 
     private static native final long H5E_CANTUNPIN();
 
