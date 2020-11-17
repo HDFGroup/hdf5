@@ -603,7 +603,7 @@ if (MSVC)
 endif ()
 
 set (MAKE_SYSTEM)
-if (CMAKE_BUILD_TOOL MATCHES "make")
+if (CMAKE_MAKE_PROGRAM MATCHES "make")
   set (MAKE_SYSTEM 1)
 endif ()
 
