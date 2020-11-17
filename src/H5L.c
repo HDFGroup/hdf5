@@ -466,10 +466,6 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_target parameter cannot be NULL")
     if (!*link_target)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_target parameter cannot be an empty string")
-    if (!link_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_name parameter cannot be NULL")
-    if (!*link_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_name parameter cannot be an empty string")
     if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
@@ -480,6 +476,7 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
     /* Set the LCPL for the API context */
     H5CX_set_lcpl(lcpl_id);
 
+    /* link_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
     if (H5VL_setup_name_args(link_loc_id, link_name, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr, &loc_params) <
         0)
@@ -830,8 +827,7 @@ H5L__delete_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **tok
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    /* name is verified in H5VL_setup_name_args() */
 
     /* Set up object access arguments */
     if (H5VL_setup_name_args(loc_id, name, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
@@ -1180,10 +1176,7 @@ H5L__exists_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **tok
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    if (!name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL")
-    if (!*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be an empty string")
+    /* name is verified in H5VL_setup_name_args() */
 
     /* Set up object access arguments */
     if (H5VL_setup_name_args(loc_id, name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
