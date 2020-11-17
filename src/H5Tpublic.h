@@ -50,6 +50,7 @@ typedef enum H5T_class_t {
 /**
  * Byte orders
  */
+//! [H5T_order_t_snip]
 typedef enum H5T_order_t {
     H5T_ORDER_ERROR      = -1,  /**< error                                   */
     H5T_ORDER_LE         = 0,   /**< little endian                           */
@@ -59,10 +60,12 @@ typedef enum H5T_order_t {
     H5T_ORDER_NONE       = 4    /**< no particular order (strings, bits,..)  */
     /*H5T_ORDER_NONE must be last */
 } H5T_order_t;
+//! [H5T_order_t_snip]
 
 /**
  * Types of integer sign schemes
  */
+//! [H5T_sign_t_snip]
 typedef enum H5T_sign_t {
     H5T_SGN_ERROR        = -1,  /**< error                                   */
     H5T_SGN_NONE         = 0,   /**< this is an unsigned type                */
@@ -70,10 +73,12 @@ typedef enum H5T_sign_t {
 
     H5T_NSGN             = 2    /** sentinel: this must be last!             */
 } H5T_sign_t;
+//! [H5T_sign_t_snip]
 
 /**
  * Floating-point normalization schemes
  */
+//! [H5T_norm_t_snip]
 typedef enum H5T_norm_t {
     H5T_NORM_ERROR       = -1,  /**< error                                   */
     H5T_NORM_IMPLIED     = 0,   /**< msb of mantissa isn't stored, always 1  */
@@ -81,6 +86,7 @@ typedef enum H5T_norm_t {
     H5T_NORM_NONE        = 2    /**< not normalized                          */
     /*H5T_NORM_NONE must be last */
 } H5T_norm_t;
+//! [H5T_norm_t_snip]
 
 /**
  * Character set to use for text strings.
@@ -135,14 +141,16 @@ typedef enum H5T_str_t {
 /**
  * Type of padding to use in other atomic types
  */
+//! [H5T_pad_t_snip]
 typedef enum H5T_pad_t {
     H5T_PAD_ERROR        = -1,  /**< error                           */
     H5T_PAD_ZERO         = 0,   /**< always set to zero              */
     H5T_PAD_ONE          = 1,   /**< always set to one               */
     H5T_PAD_BACKGROUND   = 2,   /**< set to background value         */
 
-    H5T_NPAD             = 3    /*THIS MUST BE LAST                          */
+    H5T_NPAD             = 3    /**< sentinal: THIS MUST BE LAST     */
 } H5T_pad_t;
+//! [H5T_pad_t_snip]
 
 /**
  * Commands sent to conversion functions
@@ -1135,6 +1143,22 @@ H5_DLL herr_t H5Tclose(hid_t type_id);
  *
  */
 H5_DLL htri_t H5Tequal(hid_t type1_id, hid_t type2_id);
+/**
+ * \ingroup H5T
+ *
+ * \brief Locks a datatype
+ *
+ * \type_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Tlock() locks the datatype specified by the dtype_id identifier,
+ *          making it read-only and non-destructible. This is normally done by
+ *          the library for predefined datatypes so the application does not
+ *          inadvertently change or delete a predefined type. Once a datatype
+ *          is locked it can never be unlocked.
+ *
+ */
 H5_DLL herr_t H5Tlock(hid_t type_id);
 /**
  * \ingroup H5T
@@ -1184,6 +1208,29 @@ H5_DLL herr_t H5Tlock(hid_t type_id);
  */
 H5_DLL herr_t H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id,
                          hid_t tapl_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5T
+ *
+ * \brief Opens a committed (named) datatype
+ *
+ * \fgdta_loc_id
+ * \param[in] name Name of the datatype to open
+ * \tapl_id
+ *
+ * \return \hid_t{datatype}
+ *
+ * \details H5Topen2() opens a committed datatype at the location specified
+ *          by \p loc_id and returns an identifier for the datatype. \p
+ *          loc_id is either a file or group identifier. The identifier should
+ *          eventually be closed by calling H5Tclose()  to release resources.
+ *
+ *          The committed datatype is opened with the datatype access property
+ *          list tapl_id.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL hid_t  H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
 /**
  * \ingroup H5T
@@ -1281,7 +1328,61 @@ H5_DLL hid_t  H5Tget_create_plist(hid_t type_id);
  *
  */
 H5_DLL htri_t H5Tcommitted(hid_t type_id);
+/**
+ * \ingroup H5T
+ *
+ * \brief Encodes a datatype object description into a binary buffer
+ *
+ * \param[in] obj_id Identifier of the object to be encoded
+ * \param[in,out] buf Buffer for the object to be encoded into.
+ * \param[in,out] nalloc IN: The size of the allocated buffer
+ *                       OUT: The size of the buffer needed
+ *
+ * \return \herr_t
+ *
+ * \details H5Tencode() Given datatype identifier, H5Tencode() converts a
+ *          datatype description into binary form in a buffer. Using this
+ *          binary form in the buffer, a datatype object can be reconstructed
+ *          using H5Tdecode() to return a new object handle (\ref hid_t) for
+ *          this datatype.
+ *
+ *          If the provided buffer is NULL, only the size of buffer needed is
+ *          returned through \p nalloc.
+ *
+ *          A preliminary H5Tencode() call can be made to find out the size
+ *          of the buffer needed. This value is returned as \p nalloc. That
+ *          value can then be assigned to \p nalloc for a second H5Tencode()
+ *          call, which will retrieve the actual encoded object.
+ *
+ *          If the library finds that \p nalloc is not big enough for the
+ *          object, it simply returns the size of the buffer needed through
+ *          \p nalloc without encoding the provided buffer.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
+/**
+ * \ingroup H5T
+ *
+ * \brief Decodes a binary object description of datatype and return a new
+ *        object handle
+ *
+ * \param[in] buf Buffer for the datatype object to be decoded
+ *
+ * \return \hid_t{datatype}
+ *
+ * \details H5Tdecode() Given an object description of datatype in binary in a
+ *          buffer, H5Tdecode() reconstructs the HDF5 datatype object and
+ *          returns a new object handle for it. The binary description of
+ *          the object is encoded by H5Tencode(). User is responsible for
+ *          passing in the right buffer.
+ *
+ *          The datatype identifier returned by this function can be released
+ *          with H5Tclose() when the identifier is no longer needed so that
+ *          resource leaks will not develop.
+ *
+ */
 H5_DLL hid_t  H5Tdecode(const void *buf);
 /**
  * \ingroup H5T
@@ -1322,6 +1423,27 @@ H5_DLL hid_t  H5Tdecode(const void *buf);
  *
  */
 H5_DLL herr_t H5Tflush(hid_t type_id);
+/**
+ * \ingroup H5T
+ *
+ * \brief Refreshes all buffers associated with a committed datatype
+ *
+ * \type_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Trefresh() causes all buffers associated with a committed
+ *          datatype to be cleared and immediately re-loaded with updated
+ *          contents from disk.
+ *
+ *          This function essentially closes the datatype, evicts all
+ *          metadata associated with it from the cache, and then re-opens the
+ *          datatype. The reopened datatype is automatically re-registered
+ *          with the same identifier.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Trefresh(hid_t type_id);
 
 /* Operations defined on compound datatypes */
@@ -1348,7 +1470,6 @@ H5_DLL char * H5Tget_tag(hid_t type);
 
 /* Querying property values */
 /**
- * --------------------------------------------------------------------------
  * \ingroup H5T
  *
  * \brief Returns the base datatype from which a datatype is derived
@@ -1450,16 +1571,215 @@ H5_DLL htri_t      H5Tdetect_class(hid_t type_id, H5T_class_t cls);
  *
  */
 H5_DLL size_t      H5Tget_size(hid_t type_id);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Returns the byte order of an atomic datatype
+ *
+ * \type_id
+ *
+ * \return Returns a byte order constant if successful; otherwise returns
+ *         #H5T_ORDER_ERROR (-1)
+ *
+ * \details H5Tget_order() returns the byte order of an atomic datatype.
+ *          Possible return values are:
+ *          \snippet this H5T_order_t_snip
+ *          Members of a compound datatype need not have the same byte
+ *          order. If members of a compound datatype have more than one of
+ *          little endian, big endian, or VAX byte order, H5Tget_order() will
+ *          return #H5T_ORDER_MIXED for the compound datatype. A byte order of
+ *          #H5T_ORDER_NONE will, however, be ignored; for example, if one or
+ *          more members of a compound datatype have byte order #H5T_ORDER_NONE
+ *          but all other members have byte order #H5T_ORDER_LE,  H5Tget_order()
+ *          will return #H5T_ORDER_LE for the compound datatype.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL H5T_order_t H5Tget_order(hid_t type_id);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Returns the precision of an atomic datatype
+ *
+ * \type_id
+ *
+ * \return Returns the number of significant bits if successful; otherwise 0
+ *
+ * \details H5Tget_precision() returns the precision of an atomic datatype
+ *          (for example, integer or float) or a datatype whose base (parent)
+ *          type is an atomic type (for example, array, enum and variable
+ *          length). The precision is the number of significant bits which,
+ *          unless padding is present, is 8 times larger than the value
+ *          returned by H5Tget_size().
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL size_t      H5Tget_precision(hid_t type_id);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Retrieves the bit offset of the first significant bit
+ *
+ * \type_id
+ *
+ * \return Returns an offset value if successful; otherwise returns a
+ *         negative value.
+ *
+ * \details H5Tget_offset() retrieves the bit offset of the first significant
+ *          bit. The significant bits of an atomic datum can be offset from the
+ *          beginning of the memory for that datum by an amount of padding. The
+ *          'offset' property specifies the number of bits of padding that
+ *          appear to the "right of" the value. That is, if we have a 32-bit
+ *          datum with 16-bits of precision having the value 0x1122 then it
+ *          will be laid out in memory as (from small byte address toward
+ *          larger byte addresses):
+ *          \code{.unparsed}
+ *          0:  [ pad]  [0x11]  [0x22]  [ pad]
+ *          1:  [ pad]  [0x22]  [0x11]  [ pad]
+ *          2:  [0x11]  [ pad]  [ pad]  [0x22]
+ *          3:  [0x22]  [ pad]  [ pad]  [0x11]
+ *          \endcode
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL int         H5Tget_offset(hid_t type_id);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Retrieves the padding type of the least and most-significant bit padding
+ *
+ * \type_id
+ * \param[out] lsb Buffer for the least-significant bit padding type
+ * \param[out] msb Buffer for the most-significant bit padding type
+ *
+ * \return \herr_t
+ *
+ * \details H5Tget_pad() retrieves the padding type of the least and
+ *          most-significant bit padding. Valid padding types are:
+ *          \snippet this H5T_pad_t_snip
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t      H5Tget_pad(hid_t type_id, H5T_pad_t *lsb /*out*/, H5T_pad_t *msb /*out*/);
-H5_DLL H5T_sign_t  H5Tget_sign(hid_t type_id);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Retrieves the sign type for an integer type
+ *
+ * \type_id
+ *
+ * \return Returns a valid sign type if successful; otherwise #H5T_SGN_ERROR (-1)
+ *
+ * \details H5Tget_sign() retrieves the sign type for an integer type.
+ *          Valid types are:
+ *          \snippet this H5T_sign_t_snip
+ *
+ * \since 1.2.0
+ *
+ */
+H5_DLL H5T_sign_t H5Tget_sign(hid_t type_id);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Retrieves floating point datatype bit field information
+ *
+ * \type_id
+ * \param[out] spos Pointer to location to return floating-point sign bit
+ * \param[out] epos Pointer to location to return exponent bit-position
+ * \param[out] esize Pointer to location to return size of exponent in bits
+ * \param[out] mpos Pointer to location to return mantissa bit-position
+ * \param[out] msize Pointer to location to return size of mantissa in bits
+ *
+ * \return \herr_t
+ *
+ * \details H5Tget_fields() retrieves information about the locations of
+ *          the various bit fields of a floating point datatype. The field
+ *          positions are bit positions in the significant region of the
+ *          datatype. Bits are numbered with the least significant bit number
+ *          zero. Any (or even all) of the arguments can be null pointers.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tget_fields(hid_t type_id, size_t *spos /*out*/, size_t *epos /*out*/, size_t *esize /*out*/,
                             size_t *mpos /*out*/, size_t *msize /*out*/);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Retrieves the exponent bias of a floating-point type
+ *
+ * \type_id
+ *
+ * \return Returns the bias if successful and 0, otherwise.
+ *
+ * \details H5Tget_ebias() retrieves the exponent bias of a floating-point type.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL size_t H5Tget_ebias(hid_t type_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ATOM
+ *
+ * \brief Retrieves mantissa normalization of a floating-point datatype
+ *
+ * \type_id
+ *
+ * \return Returns a valid normalization type if successful; otherwise
+ *         returns #H5T_NORM_ERROR (-1)
+ *
+ * \details H5Tget_norm() retrieves the mantissa normalization of a
+ *          floating-point datatype. Valid normalization types are:
+ *          \snippet this H5T_norm_t_snip
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL H5T_norm_t  H5Tget_norm(hid_t type_id);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Retrieves the internal padding type for unused bits in floating-point
+ *        datatypes
+ *
+ * \type_id
+ *
+ * \return Returns a valid padding type if successful; otherwise returns
+ *         #H5T_PAD_ERROR (-1).
+ *
+ * \details H5Tget_inpad() retrieves the internal padding type for unused
+ *          bits in floating-point datatypes. Valid padding types are:
+ *          \snippet this H5T_pad_t_snip
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL H5T_pad_t   H5Tget_inpad(hid_t type_id);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Retrieves the type of padding used for a string datatype
+ *
+ * \type_id
+ *
+ * \return Returns a valid string of the padding if successful; otherwise
+ *         returns #H5T_STR_ERROR (-1)
+ *
+ * \details H5Tget_strpad() retrieves the type of padding used for a string
+ *          datatype.
+ *
+ *          The string padding type is set with H5Tset_strpad().  Possible
+ *          values returned are:
+ * \str_pad_type
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL H5T_str_t   H5Tget_strpad(hid_t type_id);
 H5_DLL int         H5Tget_nmembers(hid_t type_id);
 H5_DLL char *      H5Tget_member_name(hid_t type_id, unsigned membno);
@@ -1468,7 +1788,46 @@ H5_DLL size_t      H5Tget_member_offset(hid_t type_id, unsigned membno);
 H5_DLL H5T_class_t H5Tget_member_class(hid_t type_id, unsigned membno);
 H5_DLL hid_t       H5Tget_member_type(hid_t type_id, unsigned membno);
 H5_DLL herr_t      H5Tget_member_value(hid_t type_id, unsigned membno, void *value /*out*/);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Retrieves the character set type of a string datatype
+ *
+ * \type_id
+ *
+ * \return Returns a valid character set type if successful; otherwise
+ *         #H5T_CSET_ERROR (-1).
+ *
+ * \details H5Tget_cset() retrieves the character set type of a string datatype.
+ *          Valid character set types are:
+ *          \csets
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL H5T_cset_t  H5Tget_cset(hid_t type_id);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Determines whether datatype is a variable-length string
+ *
+ * \type_id
+ *
+ * \return Returns:
+ *         \li a positive value if the specified datatype is a variable-length
+ *             string
+ *         \li 0 if the specified datatype is not a variable-length string
+ *         \li a negative value when the function fails
+ *
+ * \details H5Tis_variable_str() determines whether the datatype identified
+ *          by \p dtype_id is a variable-length string.
+ *
+ *          This function can be used to distinguish between fixed and
+ *          variable-length string datatypes.
+ *
+ * \since 1.6.0
+ *
+ */
 H5_DLL htri_t      H5Tis_variable_str(hid_t type_id);
 /**
  * \ingroup H5T
@@ -1556,24 +1915,375 @@ H5_DLL htri_t      H5Tis_variable_str(hid_t type_id);
 H5_DLL hid_t       H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
 
 /* Setting property values */
+/**
+ * \ingroup H5T
+ *
+ * \brief Sets size for a datatype.
+ *
+ * \type_id
+ * \param[in] size New datatype size is bytes or #H5T_VARIABLE
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_size() sets the total size, \p size, in bytes, for a
+ *          datatype.
+ *
+ *          \p size must have a positive value, unless it is passed in as
+ *          #H5T_VARIABLE and the datatype is a string datatype.
+ *
+ *          \li Numeric datatypes: If the datatype is atomic and the size
+ *          is decreased so that significant bits of the datatype extend
+ *          beyond the edge of the new size, then the offset property of the
+ *          datatype is decreased toward zero.  If the offset becomes zero
+ *          and the significant bits of the datatype still hang over the edge
+ *          of the new size, then the number of significant bits is decreased.
+ *
+ *          \li String or character datatypes: The size set for a string
+ *          datatype should include space for the null-terminator character,
+ *          otherwise it will not be stored on (or retrieved from)
+ *          disk. Adjusting the size of a string automatically sets the
+ *          precision to \p 8*size.
+ *
+ *          \li Variable-length string datatypes: If \p dtype_id is a
+ *          variable-length string, size must normally be set to #H5T_VARIABLE.
+ *
+ *          \li Compound datatypes: This function may be used to increase or
+ *          decrease the size of a compound datatype, but the function will
+ *          fail if the new size is too small to accommodate all member fields.
+ *
+ *          \li Ineligible datatypes: This function cannot be used with
+ *          enumerated datatypes (#H5T_ENUM), array datatypes (#H5T_ARRAY),
+ *          variable-length array datatypes (#H5T_VLEN), or reference datatypes
+ *          (#H5T_REFERENCE).
+ *
+ * \since 1.2.0
+ *
+ * \see H5Tget_size()
+ *
+ *\todo Create an example for H5Tset_size().
+ *\todo Original has a reference to “Creating variable-length string datatypes”.
+ *
+ */
 H5_DLL herr_t H5Tset_size(hid_t type_id, size_t size);
 H5_DLL herr_t H5Tset_order(hid_t type_id, H5T_order_t order);
 H5_DLL herr_t H5Tset_precision(hid_t type_id, size_t prec);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Sets the bit offset of the first significant bit
+ *
+ * \type_id
+ * \param[in] offset Offset of first significant bit
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_offset() sets the bit offset of the first significant
+ *          bit. The significant bits of an atomic datum can be offset from
+ *          the beginning of the memory for that datum by an amount of
+ *          padding. The offset property specifies the number of bits of
+ *          padding that appear “to the right of” the value. That is,
+ *          if we have a 32-bit datum with 16-bits of precision having the
+ *          value 0x1122, then it will be laid out in memory as (from small
+ *          byte address toward larger byte addresses):
+ *          \code{.unparsed}
+ *          0:  [ pad]  [0x11]  [0x22]  [ pad]
+ *          1:  [ pad]  [0x22]  [0x11]  [ pad]
+ *          2:  [0x11]  [ pad]  [ pad]  [0x22]
+ *          3:  [0x22]  [ pad]  [ pad]  [0x11]
+ *          \endcode
+ *          If the offset is incremented then the total size is incremented
+ *          also if necessary to prevent significant bits of the value from
+ *          hanging over the edge of the datatype.
+ *
+ *          The offset of an #H5T_STRING cannot be set to anything but zero.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_offset(hid_t type_id, size_t offset);
 H5_DLL herr_t H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb);
 H5_DLL herr_t H5Tset_sign(hid_t type_id, H5T_sign_t sign);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Sets locations and sizes of floating point bit fields
+ *
+ * \type_id
+ * \param[in] spos Sign position, i.e., the bit offset of the floating-point
+ *                 sign bit
+ * \param[in] epos Exponent bit position
+ * \param[in] esize Size of exponent in bits
+ * \param[in] mpos Mantissa bit position
+ * \param[in] msize Size of mantissa in bits
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_fields() sets the locations and sizes of the various
+ *          floating-point bit fields. The field positions are bit positions
+ *          in the significant region of the datatype. Bits are numbered with
+ *          the least significant bit number zero.
+ *
+ *          Fields are not allowed to extend beyond the number of bits of
+ *          precision, nor are they allowed to overlap with one another.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Sets the exponent bias of a floating-point type
+ *
+ * \type_id
+ * \param[in] ebias Exponent bias value
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_ebias() sets the exponent bias of a floating-point type.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_ebias(hid_t type_id, size_t ebias);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Sets the mantissa normalization of a floating-point datatype
+ *
+ * \type_id
+ * \param[in] norm Mantissa normalization type
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_norm() sets the mantissa normalization of a floating-point
+ *          datatype. Valid normalization types are:
+ *          \snippet this H5T_norm_t_snip
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_norm(hid_t type_id, H5T_norm_t norm);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Fills unused internal floating-point bits
+ *
+ * \type_id
+ * \param[in] pad Padding type
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_inpad() If any internal bits of a floating point-type are
+ *          unused (that is, those significant bits which are not part of the
+ *          sign, exponent, or mantissa), then H5Tset_inpad()  will be filled
+ *          according to the value of the padding value property inpad. Valid
+ *          padding types are:
+ *          \snippet this H5T_pad_t_snip
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_inpad(hid_t type_id, H5T_pad_t pad);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Sets character set to be used in a string or character datatype
+ *
+ * \type_id
+ * \param[in] cset Character set type
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_cset() sets the character set to be used in a dataset with
+ *          a string or character datatype.
+ *
+ *          Valid values for cset include the following:
+ *          \csets
+ *          For example, if the character set for the datatype \p type_id is set
+ *          to #H5T_CSET_UTF8, string or character data of datatype dtype_id
+ *          will be encoded using the UTF-8 Unicode character set.
+ *
+ *          ASCII and UTF-8 Unicode are the only currently supported character
+ *          encodings. Extended ASCII encodings (for example, ISO 8859) are
+ *          not supported. This encoding policy is not enforced by the HDF5
+ *          library. Using encodings other than ASCII and UTF-8 can lead to
+ *          compatibility and usability problems.
+ *
+ *          Note that H5Tset_cset()  sets the character set for a character or
+ *          string datatype while H5Pset_char_encoding()  sets the character
+ *          set used for an HDF5 link or attribute name.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_cset(hid_t type_id, H5T_cset_t cset);
 H5_DLL herr_t H5Tset_strpad(hid_t type_id, H5T_str_t strpad);
 
 /* Type conversion database */
+/**
+ * \ingroup CONV
+ *
+ * \brief Registers a datatype conversion function
+ *
+ * \param[in] pers Conversion function type
+ * \param[in] name Name displayed in diagnostic output
+ * \type_id{src_id} of source datatype
+ * \type_id{dst_id} of destination datatype
+ * \param[in] func Function to convert between source and destination datatypes
+ *
+ * \return \herr_t
+ *
+ * \details H5Tregister() registers a hard or soft conversion function for a
+ *          datatype conversion path. The parameter \p pers indicates whether a
+ *          conversion function is hard (#H5T_PERS_HARD) or soft
+ *          (#H5T_PERS_SOFT). User-defined functions employing compiler casting
+ *          are designated as \Emph{hard}; other user-defined conversion
+ *          functions registered with the HDF5 library (with H5Tregister() )
+ *          are designated as \Emph{soft}. The HDF5 library also has its own
+ *          hard and soft conversion functions.
+ *
+ *          A conversion path can have only one hard function. When type is
+ *          #H5T_PERS_HARD, \p func replaces any previous hard function.
+ *
+ *          When type is #H5T_PERS_SOFT, H5Tregister() adds the function to the
+ *          end of the master soft list and replaces the soft function in all
+ *          applicable existing conversion paths. Soft functions are used when
+ *          determining which conversion function is appropriate for this path.
+ *
+ *          The \p name is used only for debugging and should be a short
+ *          identifier for the function.
+ *
+ *          The path is specified by the source and destination datatypes \p
+ *          src_id and \p dst_id. For soft conversion functions, only the class
+ *          of these types is important.
+ *
+ *          The type of the conversion function pointer is declared as:
+ *          \snippet this H5T_conv_t_snip
+ *
+ *          The \ref H5T_cdata_t \c struct is declared as:
+ *          \snippet this H5T_cdata_t_snip
+ *
+ * \since 1.6.3 The following change occurred in the \ref H5T_conv_t function:
+ *              the \c nelmts parameter type changed to size_t.
+ *
+ */
 H5_DLL herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func);
+/**
+ * \ingroup CONV
+ *
+ * \brief Removes a conversion function
+ *
+ * \param[in] pers Conversion function type
+ * \param[in] name Name displayed in diagnostic output
+ * \type_id{src_id} of source datatype
+ * \type_id{dst_id} of destination datatype
+ * \param[in] func Function to convert between source and destination datatypes
+ *
+ * \return \herr_t
+ *
+ * \details H5Tunregister() removes a conversion function matching criteria
+ *          such as soft or hard conversion, source and destination types, and
+ *          the conversion function.
+ *
+ *          If a user is trying to remove a conversion function he registered,
+ *          all parameters can be used. If he is trying to remove a library’s
+ *          default conversion function, there is no guarantee the \p name and
+ *          \p func parameters will match the user’s chosen values. Passing in
+ *          some values may cause this function to fail. A good practice is to
+ *          pass in NULL as their values.
+ *
+ *          All parameters are optional. The missing parameters will be used to
+ *          generalize the search criteria.
+ *
+ *          The conversion function pointer type declaration is described in
+ *          H5Tregister().
+ *
+ * \version 1.6.3 The following change occurred in the \ref H5T_conv_t function:
+ *                the \c nelmts parameter type changed to size_t.
+ *
+ */
 H5_DLL herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func);
+/**
+ * \ingroup CONV
+ *
+ * \brief Finds a conversion function
+ *
+ * \type_id{src_id} of source datatype
+ * \type_id{dst_id} of destination datatype
+ * \param[out] pcdata Pointer to type conversion data
+ *
+ * \return Returns a pointer to a suitable conversion function if successful.
+ *         Otherwise returns NULL.
+ *
+ * \details H5Tfind() finds a conversion function that can handle a conversion
+ *          from type \p src_id to type \p dst_id. The \p pcdata argument is a
+ *          pointer to a pointer to type conversion data which was created and
+ *          initialized by the soft type conversion function of this path when
+ *          the conversion function was installed on the path.
+ *
+ */
 H5_DLL H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
+/**
+ * \ingroup CONV
+ *
+ * \brief Check whether the library’s default conversion is hard conversion
+ *
+ * \type_id{src_id} of source datatype
+ * \type_id{dst_id} of destination datatype
+ *
+ * \return \htri_t
+ *
+ * \details H5Tcompiler_conv() determines whether the library’s conversion
+ *          function from type \p src_id to type \p dst_id is a compiler (hard)
+ *          conversion or not. A compiler conversion uses compiler’s casting; a
+ *          library (soft) conversion uses the library’s own conversion
+ *          function.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL htri_t     H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup CONV
+ *
+ * \brief Converts data from one specified datatype to another
+ *
+ * \type_id{src_id} of source datatype
+ * \type_id{dst_id} of destination datatype
+ * \param[in] nelmts Size of array \p buf
+ * \param[in,out] buf Array containing pre- and post-conversion values
+ * \param[in] background Optional background buffer
+ * \dxpl_id{plist_id}
+ *
+ * \return \herr_t
+ *
+ * \details H5Tconvert() converts \p nelmts elements from a source datatype,
+ *          specified by \p src_id, to a destination datatype, \p dst_id. The
+ *          source elements are packed in \p buf and on return the destination
+ *          elements will be packed in \p buf. That is, the conversion is
+ *          performed in place.
+ *
+ *          The optional background buffer is for use with compound datatypes.
+ *          It is an array of \p nelmts values for the destination datatype
+ *          which can then be merged with the converted values to recreate the
+ *          compound datatype. For instance, background might be an array of
+ *          structs with the \c a and \c b fields already initialized and the
+ *          conversion of buf supplies the \c c and \c d field values.
+ *
+ *          The parameter \p plist_id contains the dataset transfer property list
+ *          identifier which is passed to the conversion functions. As of
+ *          Release 1.2, this parameter is only used to pass along the
+ *          variable-length datatype custom allocation information.
+ *
+ * \note H5Tconvert() will not resize the buffer \p buf; it must be large
+ *       enough to hold the larger of the input and output data.
+ *
+ * \version 1.6.3 \p nelmts parameter type changed to size_t.
+ * \version 1.4.0 \p nelmts parameter type changed to \ref hsize_t.
+ *
+ */
 H5_DLL herr_t     H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *background,
                              hid_t plist_id);
 H5_DLL herr_t     H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
