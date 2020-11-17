@@ -5370,7 +5370,6 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native long H5Iget_file_id(long obj_id) throws HDF5LibraryException;
 
-
     /**
      * H5Iget_name_long retrieves the name of an object specified by the identifier, obj_id.
      * @deprecated
@@ -5387,6 +5386,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
+    @Deprecated
     public synchronized static native long H5Iget_name_long(long obj_id, String[] name, long size)
             throws HDF5LibraryException, NullPointerException;
     /**
@@ -10047,7 +10047,7 @@ public class H5 implements java.io.Serializable {
             throws HDF5LibraryException, NullPointerException;
 
     /**
-     * H5Pget_fapl_direct queries properties set by the H5Pset_fapl_core.
+     * H5Pget_fapl_direct queries properties set by the H5Pset_fapl_direct.
      *
      * @param fapl_id
      *            IN: File access property list identifier
@@ -11028,50 +11028,7 @@ public class H5 implements java.io.Serializable {
     // //
     // ////////////////////////////////////////////////////////////
 
-    /**
-     * H5Sclose releases a dataspace.
-     *
-     * @param space_id
-     *            Identifier of dataspace to release.
-     *
-     * @return a non-negative value if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     **/
-    public static int H5Sclose(long space_id) throws HDF5LibraryException {
-        if (space_id < 0)
-            return 0; // throw new HDF5LibraryException("Negative ID");;
-
-        log.trace("OPEN_IDS: H5Sclose remove {}", space_id);
-        OPEN_IDS.remove(space_id);
-        log.trace("OPEN_IDS: {}", OPEN_IDS.size());
-        return _H5Sclose(space_id);
-    }
-
-    private synchronized static native int _H5Sclose(long space_id) throws HDF5LibraryException;
-
-    /**
-     * H5Scopy creates a new dataspace which is an exact copy of the dataspace identified by space_id.
-     *
-     * @param space_id
-     *            Identifier of dataspace to copy.
-     * @return a dataspace identifier if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     **/
-    public static long H5Scopy(long space_id) throws HDF5LibraryException {
-        long id = _H5Scopy(space_id);
-        if (id > 0) {
-            log.trace("OPEN_IDS: H5Scopy add {}", id);
-            OPEN_IDS.add(id);
-            log.trace("OPEN_IDS: {}", OPEN_IDS.size());
-        }
-        return id;
-    }
-
-    private synchronized static native long _H5Scopy(long space_id) throws HDF5LibraryException;
+    /**************** Operations on dataspaces ********************/
 
     /**
      * H5Screate creates a new dataspace of a particular type.
@@ -11128,6 +11085,111 @@ public class H5 implements java.io.Serializable {
             throws HDF5Exception, NullPointerException;
 
     /**
+     * H5Sset_extent_simple sets or resets the size of an existing dataspace.
+     *
+     * @param space_id
+     *            Dataspace identifier.
+     * @param rank
+     *            Rank, or dimensionality, of the dataspace.
+     * @param current_size
+     *            Array containing current size of dataspace.
+     * @param maximum_size
+     *            Array containing maximum size of dataspace.
+     *
+     * @return a dataspace identifier if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native long H5Sset_extent_simple(long space_id, int rank, long[] current_size,
+            long[] maximum_size) throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * H5Sset_extent_simple sets or resets the size of an existing dataspace.
+     *
+     * @param space_id
+     *            Dataspace identifier.
+     * @param rank
+     *            Rank, or dimensionality, of the dataspace.
+     * @param current_size
+     *            Array containing current size of dataspace.
+     * @param maximum_size
+     *            Array containing maximum size of dataspace.
+     *
+     * @return a dataspace identifier if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static long H5Sset_extent_simple(long space_id, int rank, byte[] current_size,
+            byte[] maximum_size) throws HDF5LibraryException, NullPointerException {
+        ByteBuffer csbb = ByteBuffer.wrap(current_size);
+        long[] lacs = (csbb.asLongBuffer()).array();
+        ByteBuffer maxsbb = ByteBuffer.wrap(maximum_size);
+        long[] lamaxs = (maxsbb.asLongBuffer()).array();
+
+        return H5Sset_extent_simple(space_id, rank, lacs, lamaxs);
+    }
+
+    /**
+     * H5Scopy creates a new dataspace which is an exact copy of the dataspace identified by space_id.
+     *
+     * @param space_id
+     *            Identifier of dataspace to copy.
+     * @return a dataspace identifier if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public static long H5Scopy(long space_id) throws HDF5LibraryException {
+        long id = _H5Scopy(space_id);
+        if (id > 0) {
+            log.trace("OPEN_IDS: H5Scopy add {}", id);
+            OPEN_IDS.add(id);
+            log.trace("OPEN_IDS: {}", OPEN_IDS.size());
+        }
+        return id;
+    }
+
+    private synchronized static native long _H5Scopy(long space_id) throws HDF5LibraryException;
+
+    /**
+     * H5Sclose releases a dataspace.
+     *
+     * @param space_id
+     *            Identifier of dataspace to release.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public static int H5Sclose(long space_id) throws HDF5LibraryException {
+        if (space_id < 0)
+            return 0; // throw new HDF5LibraryException("Negative ID");;
+
+        log.trace("OPEN_IDS: H5Sclose remove {}", space_id);
+        OPEN_IDS.remove(space_id);
+        log.trace("OPEN_IDS: {}", OPEN_IDS.size());
+        return _H5Sclose(space_id);
+    }
+
+    private synchronized static native int _H5Sclose(long space_id) throws HDF5LibraryException;
+
+    /**
+     * H5Sencode converts a data space description into binary form in a buffer.
+     *
+     * @param obj_id
+     *            IN: Identifier of the object to be encoded.
+     *
+     * @return the buffer for the object to be encoded into.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native byte[] H5Sencode(long obj_id) throws HDF5LibraryException, NullPointerException;
+
+    /**
      * H5Sdecode reconstructs the HDF5 data space object and returns a new object handle for it.
      *
      * @param buf
@@ -11143,17 +11205,89 @@ public class H5 implements java.io.Serializable {
     public synchronized static native long H5Sdecode(byte[] buf) throws HDF5LibraryException, NullPointerException;
 
     /**
-     * H5Sencode converts a data space description into binary form in a buffer.
+     * H5Sget_simple_extent_npoints determines the number of elements in a dataspace.
      *
-     * @param obj_id
-     *            IN: Identifier of the object to be encoded.
-     *
-     * @return the buffer for the object to be encoded into.
+     * @param space_id
+     *            ID of the dataspace object to query
+     * @return the number of elements in the dataspace if successful
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native byte[] H5Sencode(long obj_id) throws HDF5LibraryException, NullPointerException;
+    public synchronized static native long H5Sget_simple_extent_npoints(long space_id) throws HDF5LibraryException;
+
+    /**
+     * H5Sget_simple_extent_ndims determines the dimensionality (or rank) of a dataspace.
+     *
+     * @param space_id
+     *            IN: Identifier of the dataspace
+     *
+     * @return the number of dimensions in the dataspace if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native int H5Sget_simple_extent_ndims(long space_id) throws HDF5LibraryException;
+
+    /**
+     * H5Sget_simple_extent_dims returns the size and maximum sizes of each dimension of a dataspace through the dims
+     * and maxdims parameters.
+     *
+     * @param space_id
+     *            IN: Identifier of the dataspace object to query
+     * @param dims
+     *            OUT: Pointer to array to store the size of each dimension.
+     * @param maxdims
+     *            OUT: Pointer to array to store the maximum size of each dimension.
+     *
+     * @return the number of dimensions in the dataspace if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - dims or maxdims is null.
+     **/
+    public synchronized static native int H5Sget_simple_extent_dims(long space_id, long[] dims, long[] maxdims)
+            throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * H5Sis_simple determines whether a dataspace is a simple dataspace.
+     *
+     * @param space_id
+     *            Identifier of the dataspace to query
+     *
+     * @return true if is a simple dataspace
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native boolean H5Sis_simple(long space_id) throws HDF5LibraryException;
+
+    /**
+     * H5Sget_simple_extent_type queries a dataspace to determine the current class of a dataspace.
+     *
+     * @param space_id
+     *            Dataspace identifier.
+     *
+     * @return a dataspace class name if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native int H5Sget_simple_extent_type(long space_id) throws HDF5LibraryException;
+
+    /**
+     * H5Sset_extent_none removes the extent from a dataspace and sets the type to H5S_NONE.
+     *
+     * @param space_id
+     *            The identifier for the dataspace from which the extent is to be removed.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native int H5Sset_extent_none(long space_id) throws HDF5LibraryException;
 
     /**
      * H5Sextent_copy copies the extent from source_space_id to dest_space_id. This action may change the type of the
@@ -11188,122 +11322,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native boolean H5Sextent_equal(long first_space_id, long second_space_id)
             throws HDF5LibraryException;
 
-    /**
-     * H5Sget_select_bounds retrieves the coordinates of the bounding box containing the current selection and places
-     * them into user-supplied buffers.
-     * <P>
-     * The start and end buffers must be large enough to hold the dataspace rank number of coordinates.
-     *
-     * @param spaceid
-     *            Identifier of dataspace to release.
-     * @param start
-     *            coordinates of lowest corner of bounding box.
-     * @param end
-     *            coordinates of highest corner of bounding box.
-     *
-     * @return a non-negative value if successful,with start and end initialized.
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     * @exception NullPointerException
-     *                - start or end is null.
-     **/
-    public synchronized static native int H5Sget_select_bounds(long spaceid, long[] start, long[] end)
-            throws HDF5LibraryException, NullPointerException;
-
-    /**
-     * H5Sget_select_elem_npoints returns the number of element points in the current dataspace selection.
-     *
-     * @param spaceid
-     *            Identifier of dataspace to release.
-     *
-     * @return a non-negative value if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     **/
-    public synchronized static native long H5Sget_select_elem_npoints(long spaceid) throws HDF5LibraryException;
-
-    /**
-     * H5Sget_select_elem_pointlist returns an array of of element points in the current dataspace selection. The point
-     * coordinates have the same dimensionality (rank) as the dataspace they are located within, one coordinate per
-     * point.
-     *
-     * @param spaceid
-     *            Identifier of dataspace to release.
-     * @param startpoint
-     *            first point to retrieve
-     * @param numpoints
-     *            number of points to retrieve
-     * @param buf
-     *            returns points startblock to startblock+num-1, each points is <i>rank</i> longs.
-     *
-     * @return a non-negative value if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     * @exception NullPointerException
-     *                - buf is null.
-     **/
-    public synchronized static native int H5Sget_select_elem_pointlist(long spaceid, long startpoint, long numpoints,
-            long[] buf) throws HDF5LibraryException, NullPointerException;
-
-    /**
-     * H5Sget_select_hyper_blocklist returns an array of hyperslab blocks. The block coordinates have the same
-     * dimensionality (rank) as the dataspace they are located within. The list of blocks is formatted as follows:
-     *
-     * <pre>
-     *    &lt;"start" coordinate&gt;, immediately followed by
-     *    &lt;"opposite" corner coordinate&gt;, followed by
-     *   the next "start" and "opposite" coordinates,
-     *   etc.
-     *   until all of the selected blocks have been listed.
-     * </pre>
-     *
-     * @param spaceid
-     *            Identifier of dataspace to release.
-     * @param startblock
-     *            first block to retrieve
-     * @param numblocks
-     *            number of blocks to retrieve
-     * @param buf
-     *            returns blocks startblock to startblock+num-1, each block is <i>rank</i> * 2 (corners) longs.
-     *
-     * @return a non-negative value if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     * @exception NullPointerException
-     *                - buf is null.
-     **/
-    public synchronized static native int H5Sget_select_hyper_blocklist(long spaceid, long startblock, long numblocks,
-            long[] buf) throws HDF5LibraryException, NullPointerException;
-
-    /**
-     * H5Sget_select_hyper_nblocks returns the number of hyperslab blocks in the current dataspace selection.
-     *
-     * @param spaceid
-     *            Identifier of dataspace to release.
-     *
-     * @return a non-negative value if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     **/
-    public synchronized static native long H5Sget_select_hyper_nblocks(long spaceid) throws HDF5LibraryException;
-
-    /**
-     * H5Sget_select_npoints determines the number of elements in the current selection of a dataspace.
-     *
-     * @param space_id
-     *            IN: Identifier of the dataspace object to query
-     *
-     * @return the number of elements in the selection if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     **/
-    public synchronized static native long H5Sget_select_npoints(long space_id) throws HDF5LibraryException;
+    /***************** Operations on dataspace selections *****************/
 
     /**
      * H5Sget_select_type retrieves the type of selection currently defined for the dataspace space_id.
@@ -11319,76 +11338,118 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Sget_select_type(long space_id) throws HDF5LibraryException;
 
     /**
-     * H5Sget_simple_extent_dims returns the size and maximum sizes of each dimension of a dataspace through the dims
-     * and maxdims parameters.
+     * H5Sget_select_npoints determines the number of elements in the current selection of a dataspace.
      *
      * @param space_id
      *            IN: Identifier of the dataspace object to query
-     * @param dims
-     *            OUT: Pointer to array to store the size of each dimension.
-     * @param maxdims
-     *            OUT: Pointer to array to store the maximum size of each dimension.
      *
-     * @return the number of dimensions in the dataspace if successful
+     * @return the number of elements in the selection if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native long H5Sget_select_npoints(long space_id) throws HDF5LibraryException;
+
+    /**
+     * H5Sselect_copy copies all the selection information (including offset) from the source
+     * dataspace to the destination dataspace.
+     * @param dst_id              ID of the destination dataspace
+     * @param src_id              ID of the source dataspace
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Sselect_copy(long dst_id, long src_id) throws HDF5LibraryException;
+
+    /**
+     * H5Sselect_valid verifies that the selection for the dataspace.
+     *
+     * @param space_id
+     *            The identifier for the dataspace in which the selection is being reset.
+     *
+     * @return true if the selection is contained within the extent and FALSE if it is not or is an error.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native boolean H5Sselect_valid(long space_id) throws HDF5LibraryException;
+
+    /**
+     * H5Sselect_adjust moves a selection by subtracting an offset from it.
+     *
+     * @param space_id
+     *            ID of dataspace to adjust
+     * @param offset
+     *            Offset to subtract
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      * @exception NullPointerException
-     *                - dims or maxdims is null.
+     *                - offset is null.
      **/
-    public synchronized static native int H5Sget_simple_extent_dims(long space_id, long[] dims, long[] maxdims)
+     public synchronized static native void H5Sselect_adjust(long space_id, long[][] offset)
+             throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * H5Sget_select_bounds retrieves the coordinates of the bounding box containing the current selection and places
+     * them into user-supplied buffers.
+     * <P>
+     * The start and end buffers must be large enough to hold the dataspace rank number of coordinates.
+     *
+     * @param space_id
+     *            Identifier of dataspace to release.
+     * @param start
+     *            coordinates of lowest corner of bounding box.
+     * @param end
+     *            coordinates of highest corner of bounding box.
+     *
+     * @return a non-negative value if successful,with start and end initialized.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - start or end is null.
+     **/
+    public synchronized static native int H5Sget_select_bounds(long space_id, long[] start, long[] end)
             throws HDF5LibraryException, NullPointerException;
 
     /**
-     * H5Sget_simple_extent_ndims determines the dimensionality (or rank) of a dataspace.
+     * H5Sselect_shape_same checks to see if the current selection in the dataspaces are the same
+     * dimensionality and shape.
+     * This is primarily used for reading the entire selection in one swoop.
      *
-     * @param space_id
-     *            IN: Identifier of the dataspace
+     * @param   space1_id         ID of 1st Dataspace pointer to compare
+     * @param   space2_id         ID of 2nd Dataspace pointer to compare
      *
-     * @return the number of dimensions in the dataspace if successful
+     * @return true if the selection is the same dimensionality and shape;
+     *         false otherwise
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native int H5Sget_simple_extent_ndims(long space_id) throws HDF5LibraryException;
+    public synchronized static native boolean H5Sselect_shape_same(long space1_id, long space2_id) throws HDF5LibraryException;
 
     /**
-     * H5Sget_simple_extent_npoints determines the number of elements in a dataspace.
+     * H5Sselect_intersect_block checks to see if the current selection in the
+     * dataspace intersects with the block given.
      *
      * @param space_id
-     *            ID of the dataspace object to query
-     * @return the number of elements in the dataspace if successful
+     *             ID of dataspace pointer to compare
+     * @param start
+     *             Starting coordinate of block
+     * @param end
+     *             Opposite ("ending") coordinate of block
+     *
+     * @return a TRUE  if the current selection in the dataspace intersects with the block given
+     *           FALSE otherwise
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - offset is null.
      **/
-    public synchronized static native long H5Sget_simple_extent_npoints(long space_id) throws HDF5LibraryException;
-
-    /**
-     * H5Sget_simple_extent_type queries a dataspace to determine the current class of a dataspace.
-     *
-     * @param space_id
-     *            Dataspace identifier.
-     *
-     * @return a dataspace class name if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     **/
-    public synchronized static native int H5Sget_simple_extent_type(long space_id) throws HDF5LibraryException;
-
-    /**
-     * H5Sis_simple determines whether a dataspace is a simple dataspace.
-     *
-     * @param space_id
-     *            Identifier of the dataspace to query
-     *
-     * @return true if is a simple dataspace
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     **/
-    public synchronized static native boolean H5Sis_simple(long space_id) throws HDF5LibraryException;
+     public synchronized static native boolean H5Sselect_intersect_block(long space_id, long[] start, long[] end)
+             throws HDF5LibraryException, NullPointerException;
 
     /**
      * H5Soffset_simple sets the offset of a simple dataspace space_id.
@@ -11453,6 +11514,18 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Sselect_all(long space_id) throws HDF5LibraryException;
 
     /**
+     * H5Sselect_none resets the selection region for the dataspace space_id to include no elements.
+     *
+     * @param space_id
+     *            IN: The identifier of the dataspace to be reset.
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native int H5Sselect_none(long space_id) throws HDF5LibraryException;
+
+    /**
      * H5Sselect_elements selects array elements to be included in the selection for the space_id dataspace.
      *
      * @param space_id
@@ -11508,6 +11581,43 @@ public class H5 implements java.io.Serializable {
         theArray = null;
         return retVal;
     }
+
+    /**
+     * H5Sget_select_elem_npoints returns the number of element points in the current dataspace selection.
+     *
+     * @param spaceid
+     *            Identifier of dataspace to release.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native long H5Sget_select_elem_npoints(long spaceid) throws HDF5LibraryException;
+
+    /**
+     * H5Sget_select_elem_pointlist returns an array of of element points in the current dataspace selection. The point
+     * coordinates have the same dimensionality (rank) as the dataspace they are located within, one coordinate per
+     * point.
+     *
+     * @param spaceid
+     *            Identifier of dataspace to release.
+     * @param startpoint
+     *            first point to retrieve
+     * @param numpoints
+     *            number of points to retrieve
+     * @param buf
+     *            returns points startblock to startblock+num-1, each points is <i>rank</i> longs.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - buf is null.
+     **/
+    public synchronized static native int H5Sget_select_elem_pointlist(long spaceid, long startpoint, long numpoints,
+            long[] buf) throws HDF5LibraryException, NullPointerException;
 
     /**
      * H5Sselect_hyperslab selects a hyperslab region to add to the current selected region for the dataspace specified
@@ -11578,90 +11688,89 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Sselect_hyperslab(long space_id, int op, long[] start, long[] stride,
             long[] count, long[] block) throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
+
     /**
-     * H5Sselect_none resets the selection region for the dataspace space_id to include no elements.
+     * H5Scombine_hyperslab combines a hyperslab selection with the current selection for a dataspace,
+     * creating a new dataspace to return the generated selection.
+     * If the current selection is not a hyperslab, it is freed and the hyperslab
+     * parameters passed in are combined with the H5S_SEL_ALL hyperslab (ie. a
+     * selection composing the entire current extent).  If STRIDE or BLOCK is
+     * NULL, they are assumed to be set to all '1'.
      *
      * @param space_id
-     *            IN: The identifier of the dataspace to be reset.
-     * @return a non-negative value if successful
+     *            IN: Dataspace ID of selection to use
+     * @param op
+     *            IN: Operation to perform on current selection.
+     * @param start
+     *            IN: Offset of start of hyperslab
+     * @param stride
+     *            IN: Hyperslab stride.
+     * @param count
+     *            IN: Number of blocks included in hyperslab.
+     * @param block
+     *            IN: Size of block in hyperslab.
+     *
+     * @return a dataspace ID on success / H5I_INVALID_HID on failure
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - an input array is null.
+     * @exception IllegalArgumentException
+     *                - an input array is invalid.
+     **/
+    public synchronized static native long H5Scombine_hyperslab(long space_id, int op, long[] start, long[] stride,
+            long[] count, long[] block) throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
+
+    /**
+     * H5Smodify_select refine an existing hyperslab selection with an operation, using a second
+     * hyperslab.  The first selection is modified to contain the result of
+     * space1 operated on by space2.
+     *
+     * @param space1_id
+     *               ID of the destination dataspace
+     * @param op
+     *               Operation to perform on current selection.
+     * @param space2_id
+     *               ID of the source dataspace
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native int H5Sselect_none(long space_id) throws HDF5LibraryException;
+    public synchronized static native void H5Smodify_select(long space1_id, int op, long space2_id) throws HDF5LibraryException;
 
     /**
-     * H5Sselect_valid verifies that the selection for the dataspace.
+     * H5Scombine_select combines two existing hyperslab selections with an operation, returning
+     * a new dataspace with the resulting selection.  The dataspace extent from
+     * space1 is copied for the dataspace extent of the newly created dataspace.
      *
-     * @param space_id
-     *            The identifier for the dataspace in which the selection is being reset.
+     * @param space1_id
+     *               ID of the first dataspace
+     * @param op
+     *               Operation to perform on current selection.
+     * @param space2_id
+     *               ID of the second dataspace
      *
-     * @return true if the selection is contained within the extent and FALSE if it is not or is an error.
+     * @return a dataspace ID on success / H5I_INVALID_HID on failure
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native boolean H5Sselect_valid(long space_id) throws HDF5LibraryException;
+    public synchronized static native long H5Scombine_select(long space1_id, int op, long space2_id) throws HDF5LibraryException;
 
     /**
-     * H5Sset_extent_none removes the extent from a dataspace and sets the type to H5S_NONE.
+     * H5Sis_regular_hyperslab retrieves a regular hyperslab selection for the dataspace specified
+     * by space_id.
      *
      * @param space_id
-     *            The identifier for the dataspace from which the extent is to be removed.
+     *            IN: Identifier of dataspace selection to query
      *
-     * @return a non-negative value if successful
+     * @return a TRUE/FALSE for hyperslab selection if successful
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native int H5Sset_extent_none(long space_id) throws HDF5LibraryException;
-
-    /**
-     * H5Sset_extent_simple sets or resets the size of an existing dataspace.
-     *
-     * @param space_id
-     *            Dataspace identifier.
-     * @param rank
-     *            Rank, or dimensionality, of the dataspace.
-     * @param current_size
-     *            Array containing current size of dataspace.
-     * @param maximum_size
-     *            Array containing maximum size of dataspace.
-     *
-     * @return a dataspace identifier if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     **/
-    public synchronized static native long H5Sset_extent_simple(long space_id, int rank, long[] current_size,
-            long[] maximum_size) throws HDF5LibraryException, NullPointerException;
-
-    /**
-     * H5Sset_extent_simple sets or resets the size of an existing dataspace.
-     *
-     * @param space_id
-     *            Dataspace identifier.
-     * @param rank
-     *            Rank, or dimensionality, of the dataspace.
-     * @param current_size
-     *            Array containing current size of dataspace.
-     * @param maximum_size
-     *            Array containing maximum size of dataspace.
-     *
-     * @return a dataspace identifier if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     **/
-    public synchronized static long H5Sset_extent_simple(long space_id, int rank, byte[] current_size,
-            byte[] maximum_size) throws HDF5LibraryException, NullPointerException {
-        ByteBuffer csbb = ByteBuffer.wrap(current_size);
-        long[] lacs = (csbb.asLongBuffer()).array();
-        ByteBuffer maxsbb = ByteBuffer.wrap(maximum_size);
-        long[] lamaxs = (maxsbb.asLongBuffer()).array();
-
-        return H5Sset_extent_simple(space_id, rank, lacs, lamaxs);
-    }
+     public synchronized static native boolean H5Sis_regular_hyperslab(long space_id) throws HDF5LibraryException;
 
     /**
      * H5Sget_regular_hyperslab determines if a hyperslab selection is regular for the dataspace specified
@@ -11687,33 +11796,82 @@ public class H5 implements java.io.Serializable {
      **/
      public synchronized static native void H5Sget_regular_hyperslab(long space_id, long[] start, long[] stride, long[] count, long[] block) throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
+     /**
+      * H5Sget_select_hyper_nblocks returns the number of hyperslab blocks in the current dataspace selection.
+      *
+      * @param spaceid
+      *            Identifier of dataspace to release.
+      *
+      * @return a non-negative value if successful
+      *
+      * @exception HDF5LibraryException
+      *                - Error from the HDF-5 Library.
+      **/
+     public synchronized static native long H5Sget_select_hyper_nblocks(long spaceid) throws HDF5LibraryException;
+
     /**
-     * H5Sis_regular_hyperslab retrieves a regular hyperslab selection for the dataspace specified
-     * by space_id.
+     * H5Sget_select_hyper_blocklist returns an array of hyperslab blocks. The block coordinates have the same
+     * dimensionality (rank) as the dataspace they are located within. The list of blocks is formatted as follows:
      *
-     * @param space_id
-     *            IN: Identifier of dataspace selection to query
+     * <pre>
+     *    &lt;"start" coordinate&gt;, immediately followed by
+     *    &lt;"opposite" corner coordinate&gt;, followed by
+     *   the next "start" and "opposite" coordinates,
+     *   etc.
+     *   until all of the selected blocks have been listed.
+     * </pre>
      *
-     * @return a TRUE/FALSE for hyperslab selection if successful
+     * @param spaceid
+     *            Identifier of dataspace to release.
+     * @param startblock
+     *            first block to retrieve
+     * @param numblocks
+     *            number of blocks to retrieve
+     * @param buf
+     *            returns blocks startblock to startblock+num-1, each block is <i>rank</i> * 2 (corners) longs.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - buf is null.
+     **/
+    public synchronized static native int H5Sget_select_hyper_blocklist(long spaceid, long startblock, long numblocks,
+            long[] buf) throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * H5Sselect_project_intersection projects the intersection of the selections of src_space_id and
+     * src_intersect_space_id within the selection of src_space_id as a
+     * selection within the selection of dst_space_id.
+     *
+     * @param src_space_id
+     *          Selection that is mapped to dst_space_id, and intersected with src_intersect_space_id
+     * @param dst_space_id
+     *          Selection that is mapped to src_space_id
+     * @param src_intersect_space_id
+     *          Selection whose intersection with src_space_id is projected to dst_space_id to obtain the result
+     *
+     * @return a dataspace with a selection equal to the intersection of
+     *         src_intersect_space_id and src_space_id projected from src_space to dst_space on success
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-     public synchronized static native boolean H5Sis_regular_hyperslab(long space_id) throws HDF5LibraryException;
+    public synchronized static native long H5Sselect_project_intersection(long src_space_id, long dst_space_id,
+            long src_intersect_space_id) throws HDF5LibraryException;
 
-    // /////// unimplemented ////////
-    // #ifdef NEW_HYPERSLAB_API
-    //  hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
-    //                                  const hsize_t start[],
-    //                                  const hsize_t _stride[],
-    //                                  const hsize_t count[],
-    //                                  const hsize_t _block[]);
-    // herr_t H5Sselect_select(hid_t space1_id, H5S_seloper_t op,
-    //                                  hid_t space2_id);
-    // hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op,
-    //                                  hid_t space2_id);
-    // #endif /* NEW_HYPERSLAB_API */
-    // herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
+
+     // /////// unimplemented ////////
+     ///// Operations on dataspace selections /////
+
+     //
+     ///// Operations on dataspace selection iterators /////
+     //public synchronized static native     H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags);
+     //public synchronized static native    H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes, size_t *nseq,
+     //                                       size_t *nbytes, hsize_t *off, size_t *len);
+     //public synchronized static native    H5Ssel_iter_reset(hid_t sel_iter_id, hid_t space_id);
+     //public synchronized static native    H5Ssel_iter_close(hid_t sel_iter_id);
 
 
 

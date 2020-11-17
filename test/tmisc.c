@@ -1254,9 +1254,9 @@ test_misc8(void)
     int *   wdata;        /* Data to write */
     int *   tdata;        /* Temporary pointer to data write */
 #ifdef VERIFY_DATA
-    int *rdata;                 /* Data to read */
-    int *tdata2;                /* Temporary pointer to data to read */
-#endif                          /* VERIFY_DATA */
+    int *rdata;  /* Data to read */
+    int *tdata2; /* Temporary pointer to data to read */
+#endif /* VERIFY_DATA */
     unsigned u, v;              /* Local index variables */
     int      mdc_nelmts;        /* Metadata number of elements */
     size_t   rdcc_nelmts;       /* Raw data number of elements */
@@ -1578,7 +1578,7 @@ test_misc8(void)
     if (storage_size >= (MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
-#else  /* Compression is not configured */
+#else /* Compression is not configured */
     if (storage_size != (MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
@@ -1612,7 +1612,7 @@ test_misc8(void)
     if (storage_size >= (MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
-#else  /* Compression is not configured */
+#else /* Compression is not configured */
     if (storage_size != (MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
@@ -1677,7 +1677,7 @@ test_misc8(void)
     if (storage_size >= (4 * MISC8_CHUNK_DIM0 * MISC8_CHUNK_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
-#else  /* Compression is not configured */
+#else /* Compression is not configured */
     if (storage_size != (4 * MISC8_CHUNK_DIM0 * MISC8_CHUNK_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
@@ -2962,8 +2962,8 @@ test_misc18(void)
     hid_t did1, did2; /* Dataset IDs */
     hid_t aid;        /* Attribute ID */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    H5O_info1_t old_oinfo;           /* (deprecated) information about object */
-#endif                               /* H5_NO_DEPRECATED_SYMBOLS */
+    H5O_info1_t old_oinfo; /* (deprecated) information about object */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     H5O_info2_t       oinfo;         /* Data model information about object */
     H5O_native_info_t ninfo;         /* Native file format information about object */
     char              attr_name[32]; /* Attribute name buffer */
@@ -5082,7 +5082,7 @@ test_misc27(void)
     H5E_BEGIN_TRY { gid = H5Gopen2(fid, MISC27_GROUP, H5P_DEFAULT); }
     H5E_END_TRY;
     VERIFY(gid, FAIL, "H5Gopen2");
-#else  /* H5_STRICT_FORMAT_CHECKS */
+#else /* H5_STRICT_FORMAT_CHECKS */
     /* Open group with incorrect # of object header messages */
     gid = H5Gopen2(fid, MISC27_GROUP, H5P_DEFAULT);
     CHECK(gid, FAIL, "H5Gopen2");
@@ -5399,7 +5399,7 @@ test_misc31(void)
     hid_t  group_id; /* Group id */
     hid_t  dtype_id; /* Datatype id */
     herr_t ret;      /* Generic return value */
-#endif               /* H5_NO_DEPRECATED_SYMBOLS */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Deprecated routines initialize after H5close()\n"));
@@ -5474,7 +5474,7 @@ test_misc31(void)
     ret = H5Tclose(dtype_id);
     CHECK(ret, FAIL, "H5Tclose");
 
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
     /* Output message about test being skipped */
     MESSAGE(5, (" ...Skipped"));
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -5523,7 +5523,7 @@ test_misc32(void)
     CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
     buffer = H5allocate_memory(0, TRUE);
     CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
-#endif                                           /* NDEBUG */
+#endif /* NDEBUG */
 
     /* RESIZE */
 
@@ -5542,7 +5542,7 @@ test_misc32(void)
 #ifdef NDEBUG
     resized = H5resize_memory(NULL, 0);
     CHECK_PTR_NULL(resized, "H5resize_memory"); /*BAD*/
-#endif                                          /* NDEBUG */
+#endif /* NDEBUG */
 
 } /* end test_misc32() */
 
@@ -5700,7 +5700,7 @@ test_misc35(void)
     CHECK(arr_size_start, 0, "H5get_free_list_sizes");
     CHECK(blk_size_start, 0, "H5get_free_list_sizes");
     CHECK(fac_size_start, 0, "H5get_free_list_sizes");
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
     /* All the values should be == 0 */
     VERIFY(reg_size_start, 0, "H5get_free_list_sizes");
     VERIFY(arr_size_start, 0, "H5get_free_list_sizes");
@@ -5739,7 +5739,7 @@ test_misc35(void)
     CHECK(alloc_stats.total_alloc_blocks_count, 0, "H5get_alloc_stats");
     CHECK(alloc_stats.curr_alloc_blocks_count, 0, "H5get_alloc_stats");
     CHECK(alloc_stats.peak_alloc_blocks_count, 0, "H5get_alloc_stats");
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
     /* All the values should be == 0 */
     VERIFY(alloc_stats.total_alloc_bytes, 0, "H5get_alloc_stats");
     VERIFY(alloc_stats.curr_alloc_bytes, 0, "H5get_alloc_stats");
@@ -5784,10 +5784,10 @@ test_misc(void)
     test_misc19(); /* Test incrementing & decrementing ref count on IDs */
     test_misc20(); /* Test problems with truncated dimensions in version 2 of storage layout message */
 #ifdef H5_HAVE_FILTER_SZIP
-    test_misc21();  /* Test that "late" allocation time is treated the same as "incremental", for chunked
-                       datasets w/a filters */
-    test_misc22();  /* check szip bits per pixel */
-#endif              /* H5_HAVE_FILTER_SZIP */
+    test_misc21(); /* Test that "late" allocation time is treated the same as "incremental", for chunked
+                      datasets w/a filters */
+    test_misc22(); /* check szip bits per pixel */
+#endif /* H5_HAVE_FILTER_SZIP */
     test_misc23();  /* Test intermediate group creation */
     test_misc24();  /* Test inappropriate API opens of objects */
     test_misc25a(); /* Exercise null object header message merge bug */

@@ -5165,7 +5165,7 @@ run_int_fp_conv(const char *name)
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
 #if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
-#else  /* H5_LLONG_TO_LDOUBLE_CORRECT */
+#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
     {
         char str[256]; /*hello string        */
 
@@ -5177,7 +5177,7 @@ run_int_fp_conv(const char *name)
 #endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
 #if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
-#else  /* H5_LLONG_TO_LDOUBLE_CORRECT */
+#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
     {
         char str[256]; /*hello string        */
 

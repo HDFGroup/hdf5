@@ -144,7 +144,7 @@ curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata)
         return written;
 
     if (size > 0) {
-        HDmemcpy(&(sds->data[sds->size]), ptr, product);
+        H5MM_memcpy(&(sds->data[sds->size]), ptr, product);
         sds->size += product;
         written = product;
     }
@@ -263,12 +263,12 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         namecpy = (char *)H5MM_malloc(sizeof(char) * (namelen + 1));
         if (namecpy == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for name copy.");
-        HDmemcpy(namecpy, name, (namelen + 1));
+        H5MM_memcpy(namecpy, name, (namelen + 1));
 
         valuecpy = (char *)H5MM_malloc(sizeof(char) * (valuelen + 1));
         if (valuecpy == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for value copy.");
-        HDmemcpy(valuecpy, value, (valuelen + 1));
+        H5MM_memcpy(valuecpy, value, (valuelen + 1));
 
         nvcat = (char *)H5MM_malloc(sizeof(char) * catwrite);
         if (nvcat == NULL)
@@ -701,14 +701,14 @@ H5FD_s3comms_hrb_init_request(const char *_verb, const char *_resource, const ch
         res = (char *)H5MM_malloc(sizeof(char) * (reslen + 1));
         if (res == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, NULL, "no space for resource string");
-        HDmemcpy(res, _resource, (reslen + 1));
+        H5MM_memcpy(res, _resource, (reslen + 1));
     }
     else {
         res = (char *)H5MM_malloc(sizeof(char) * (reslen + 2));
         if (res == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, NULL, "no space for resource string");
         *res = '/';
-        HDmemcpy((&res[1]), _resource, (reslen + 1));
+        H5MM_memcpy((&res[1]), _resource, (reslen + 1));
         HDassert((reslen + 1) == HDstrlen(res));
     } /* end if (else resource string not starting with '/') */
 
@@ -910,7 +910,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
     handle->httpverb = (char *)H5MM_malloc(sizeof(char) * 16);
     if (handle->httpverb == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "unable to allocate space for S3 request HTTP verb");
-    HDmemcpy(handle->httpverb, "HEAD", 5);
+    H5MM_memcpy(handle->httpverb, "HEAD", 5);
 
     headerresponse = (char *)H5MM_malloc(sizeof(char) * CURL_MAX_HTTP_HEADER);
     if (headerresponse == NULL)
@@ -1078,19 +1078,19 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
         handle->region = (char *)H5MM_malloc(sizeof(char) * tmplen);
         if (handle->region == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "could not malloc space for handle region copy.");
-        HDmemcpy(handle->region, region, tmplen);
+        H5MM_memcpy(handle->region, region, tmplen);
 
         tmplen            = HDstrlen(id) + 1;
         handle->secret_id = (char *)H5MM_malloc(sizeof(char) * tmplen);
         if (handle->secret_id == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "could not malloc space for handle ID copy.");
-        HDmemcpy(handle->secret_id, id, tmplen);
+        H5MM_memcpy(handle->secret_id, id, tmplen);
 
         tmplen              = SHA256_DIGEST_LENGTH;
         handle->signing_key = (unsigned char *)H5MM_malloc(sizeof(unsigned char) * tmplen);
         if (handle->signing_key == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "could not malloc space for handle key copy.");
-        HDmemcpy(handle->signing_key, signing_key, tmplen);
+        H5MM_memcpy(handle->signing_key, signing_key, tmplen);
     } /* if authentication information provided */
 
     /************************
@@ -1138,7 +1138,7 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
      *********************/
 
     HDassert(handle->httpverb != NULL);
-    HDmemcpy(handle->httpverb, "GET", 4);
+    H5MM_memcpy(handle->httpverb, "GET", 4);
 
     ret_value = handle;
 
@@ -2150,7 +2150,7 @@ H5FD_s3comms_nlowercase(char *dest, const char *s, size_t len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination cannot be null.");
 
     if (len > 0) {
-        HDmemcpy(dest, s, len);
+        H5MM_memcpy(dest, s, len);
         do {
             len--;
             dest[len] = (char)HDtolower((int)dest[len]);
@@ -2686,14 +2686,14 @@ H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const 
     if (ret <= 0 || ret >= 127)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem adding day and region to string")
 
-    HDmemcpy((dest + d), "AWS4-HMAC-SHA256\n", 17);
+    H5MM_memcpy((dest + d), "AWS4-HMAC-SHA256\n", 17);
     d = 17;
 
-    HDmemcpy((dest + d), now, HDstrlen(now));
+    H5MM_memcpy((dest + d), now, HDstrlen(now));
     d += HDstrlen(now);
     dest[d++] = '\n';
 
-    HDmemcpy((dest + d), tmp, HDstrlen(tmp));
+    H5MM_memcpy((dest + d), tmp, HDstrlen(tmp));
     d += HDstrlen(tmp);
     dest[d++] = '\n';
 
@@ -2777,7 +2777,7 @@ H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written)
             s_len++;
 
             /* write output into dest */
-            HDmemcpy(dest, s, s_len);
+            H5MM_memcpy(dest, s, s_len);
         }
     }
 

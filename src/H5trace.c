@@ -81,7 +81,7 @@ static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degr
  * Function:    H5_trace_args_bool
  *
  * Purpose:     This routine formats an hbool_t and adds the output to
- *		the MS managed string argument.
+ *		the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -109,7 +109,7 @@ H5_trace_args_bool(H5RS_str_t *rs, hbool_t val)
  * Function:    H5_trace_args_cset
  *
  * Purpose:     This routine formats an H5T_cset_t and adds the output to
- *		the MS managed string argument.
+ *		the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -165,7 +165,7 @@ H5_trace_args_cset(H5RS_str_t *rs, H5T_cset_t cset)
  * Function:    H5_trace_args_close_degree
  *
  * Purpose:     This routine formats an H5F_close_degree_t and adds the output to
- *		the MS managed string argument.
+ *		the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -208,7 +208,7 @@ H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degree)
  * Function:    H5_trace_args
  *
  * Purpose:     This routine formats a set of function arguments, placing the
- *		resulting string in the MS managed string argument.
+ *		resulting string in the refcounted string (RS) argument.
  *
  *		The TYPE argument is a string which gives the type of each of
  *              the following argument pairs.  Each type begins with zero or
@@ -1125,10 +1125,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5ES_STATUS_FAIL:
                                     H5RS_acat(rs, "H5ES_STATUS_FAIL");
-                                    break;
-
-                                case H5ES_STATUS_CANCELED:
-                                    H5RS_acat(rs, "H5ES_STATUS_CANCELED");
                                     break;
 
                                 default:
@@ -3331,6 +3327,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_REQUEST_WAITALL");
                                     break;
 
+                                case H5VL_REQUEST_GET_ERR_STACK:
+                                    H5RS_acat(rs, "H5VL_REQUEST_GET_ERR_STACK");
+                                    break;
+
                                 default:
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
@@ -3860,7 +3860,7 @@ double
 H5_trace(const double *returning, const char *func, const char *type, ...)
 {
     va_list           ap;
-    H5RS_str_t        *rs = NULL;
+    H5RS_str_t *      rs = NULL;
     hssize_t          i;
     FILE *            out                 = H5_debug_g.trace;
     static hbool_t    is_first_invocation = TRUE;
@@ -3948,7 +3948,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         H5RS_asprintf_cat(rs, "%*s%s(", 2 * current_depth, "", func);
     } /* end else */
 
-    /* Format arguments into the managed string */
+    /* Format arguments into the refcounted string */
     HDva_start(ap, type);
     H5_trace_args(rs, type, ap);
     HDva_end(ap);

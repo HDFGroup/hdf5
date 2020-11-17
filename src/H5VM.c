@@ -486,7 +486,7 @@ H5VM_hyper_copy(unsigned n, const hsize_t *_size, const hsize_t *dst_size, const
 #ifdef NO_INLINED_CODE
     dst_start = H5VM_hyper_stride(n, size, dst_size, dst_offset, dst_stride);
     src_start = H5VM_hyper_stride(n, size, src_size, src_offset, src_stride);
-#else  /* NO_INLINED_CODE */
+#else /* NO_INLINED_CODE */
     /* in-line version of two calls to H5VM_hyper_stride() */
     {
         hsize_t dst_acc; /*accumulator				*/

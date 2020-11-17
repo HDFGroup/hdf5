@@ -48,6 +48,31 @@ New Features
 
     Configuration:
     -------------
+    - Autotools and CMake target added to produce doxygen generated documentation
+
+      The default is OFF or disabled.
+      Autoconf option is '--enable-doxygen'
+          autotools make target is 'doxygen' and will build all doxygen targets
+      CMake configure option is 'HDF5_BUILD_DOC'.
+          CMake target is 'doxygen' for all available doxygen targets
+          CMake target is 'hdf5lib_doc' for the src subdirectory
+
+      (ADB - 2020/11/03)
+
+    - CMake option to use MSVC naming conventions with MinGW
+
+      HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
+      when using a MinGW toolchain
+
+      (xan - 2020/10/30)
+
+    - CMake option to statically link gcc libs with MinGW
+
+      HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
+      with the MinGW toolchain
+
+      (xan - 2020/10/30)
+
     - CMake option to build the HDF filter plugins project as an external project
 
       The HDF filter plugins project is a collection of registered compression
@@ -717,6 +742,15 @@ New Features
 
     Java Library:
     ----------------
+    - Added new H5S functions.
+
+      H5Sselect_copy, H5Sselect_shape_same, H5Sselect_adjust,
+      H5Sselect_intersect_block, H5Sselect_project_intersection,
+      H5Scombine_hyperslab, H5Smodify_select, H5Scombine_select
+      wrapper functions added.
+
+      (ADB - 2020/10/27, HDFFV-10868)
+
     - Added ability to test java library with VOLs.
 
       Created new CMake script that combines the java and vol test scripts.

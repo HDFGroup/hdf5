@@ -199,7 +199,7 @@ H5_DLL float     Wroundf(float arg);
 #define HDsetenv(N, V, O)    Wsetenv(N, V, O)
 #define HDflock(F, L)        Wflock(F, L)
 #define HDgetlogin()         Wgetlogin()
-#define HDsnprintf           c99_snprintf  /*varargs*/
+#define HDsnprintf           c99_snprintf /*varargs*/
 #define HDvsnprintf          c99_vsnprintf /*varargs*/
 
 /* Non-POSIX functions */

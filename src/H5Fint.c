@@ -2624,8 +2624,8 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
     hid_t new_fapl_id = H5I_INVALID_HID; /* ID for duplicated FAPL */
 #ifdef H5_HAVE_SYMLINK
     /* This has to be declared here to avoid unfreed resources on errors */
-    char *realname = NULL;      /* Fully resolved path name of file */
-#endif                          /* H5_HAVE_SYMLINK */
+    char *realname = NULL; /* Fully resolved path name of file */
+#endif                     /* H5_HAVE_SYMLINK */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC

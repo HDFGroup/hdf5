@@ -564,9 +564,10 @@ test_fapl_config_validation(void)
             JSVERIFY(config.version, fa_fetch.version, "version number mismatch")
             JSVERIFY(config.namenode_port, fa_fetch.namenode_port, "namenode port mismatch")
             JSVERIFY(config.stream_buffer_size, fa_fetch.stream_buffer_size, "streambuffer size mismatch")
-            JSVERIFY_STR(config.namenode_name, fa_fetch.namenode_name, NULL)
-            JSVERIFY_STR(config.user_name, fa_fetch.user_name, NULL)
-            JSVERIFY_STR(config.kerberos_ticket_cache, fa_fetch.kerberos_ticket_cache, NULL)
+            JSVERIFY_STR(config.namenode_name, fa_fetch.namenode_name, "node name mismatch")
+            JSVERIFY_STR(config.user_name, fa_fetch.user_name, "user name mismatch")
+            JSVERIFY_STR(config.kerberos_ticket_cache, fa_fetch.kerberos_ticket_cache,
+                         "kerberos ticket cache mismatch")
         }
 
         /*-----------------------------
@@ -996,7 +997,7 @@ test_eof_eoa(void)
 
     /* verify as found
      */
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), NULL)
+    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EOF mismatch")
     JSVERIFY(H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), H5FDget_eof(fd_shakespeare, H5FD_MEM_DRAW),
              "mismatch between DEFAULT and RAW memory types")
     JSVERIFY(0, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA should be unset by H5FDopen")
@@ -1272,7 +1273,7 @@ test_read(void)
                           HADDR_UNDEF); /* Demonstrate success with "automatic" value */
     FAIL_IF(NULL == file_raven)
 
-    JSVERIFY(6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), NULL)
+    JSVERIFY(6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), "EOF mismatch")
 
     /*********
      * TESTS *
@@ -1432,8 +1433,8 @@ test_noops_and_autofails(void)
     /* no-op calls to `lock()` and `unlock()`
      */
     JSVERIFY(SUCCEED, H5FDlock(file, TRUE), "lock always succeeds; has no effect")
-    JSVERIFY(SUCCEED, H5FDlock(file, FALSE), NULL)
-    JSVERIFY(SUCCEED, H5FDunlock(file), NULL)
+    JSVERIFY(SUCCEED, H5FDlock(file, FALSE), "lock issue")
+    JSVERIFY(SUCCEED, H5FDunlock(file), "unlock issue")
     /* Lock/unlock with null file or similar error crashes tests.
      * HDassert in calling heirarchy, `H5FD[un]lock()` and `H5FD_[un]lock()`
      */

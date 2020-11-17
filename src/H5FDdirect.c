@@ -383,15 +383,14 @@ done:
 static void *
 H5FD__direct_fapl_get(H5FD_t *_file)
 {
-    H5FD_direct_t *file = (H5FD_direct_t *)_file;
-    void *         ret_value; /* Return value */
+    H5FD_direct_t *file      = (H5FD_direct_t *)_file;
+    void *         ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Set return value */
     ret_value = H5FD__direct_fapl_copy(&(file->fa));
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__direct_fapl_get() */
 
@@ -444,10 +443,10 @@ H5FD__direct_fapl_copy(const void *_old_fa)
 static H5FD_t *
 H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    int                 o_flags;
-    int                 fd   = (-1);
-    H5FD_direct_t *     file = NULL;
-    H5FD_direct_fapl_t *fa;
+    int                       o_flags;
+    int                       fd   = (-1);
+    H5FD_direct_t *           file = NULL;
+    const H5FD_direct_fapl_t *fa;
 #ifdef H5_HAVE_WIN32_API
     HFILE                              filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
@@ -496,7 +495,7 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     /* Get the driver specific information */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if (NULL == (fa = (H5FD_direct_fapl_t *)H5P_peek_driver_info(plist)))
+    if (NULL == (fa = (const H5FD_direct_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
 
     file->fd = fd;
@@ -546,7 +545,8 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         }
         else {
             file->fa.must_align = FALSE;
-            HDftruncate(file->fd, (HDoff_t)0);
+            if (-1 == HDftruncate(file->fd, (HDoff_t)0))
+                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, NULL, "unable to truncate file")
         }
     }
     else {
@@ -660,7 +660,7 @@ H5FD__direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         HGOTO_DONE(-1)
     if (f1->device > f2->device)
         HGOTO_DONE(1)
-#else  /* H5_DEV_T_IS_SCALAR */
+#else /* H5_DEV_T_IS_SCALAR */
     /* If dev_t isn't a scalar value on this system, just use memcmp to
      * determine if the values are the same or not.  The actual return value
      * shouldn't really matter...
@@ -793,7 +793,7 @@ H5FD__direct_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_direct_t *file = (const H5FD_direct_t *)_file;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(file->eof)
 }
@@ -1276,7 +1276,7 @@ H5FD__direct_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_AT
         (void)SetFilePointer((HANDLE)filehandle, li.LowPart, &li.HighPart, FILE_BEGIN);
         if (SetEndOfFile((HANDLE)filehandle) == 0)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
-#else  /* H5_HAVE_WIN32_API */
+#else /* H5_HAVE_WIN32_API */
         if (-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* H5_HAVE_WIN32_API */

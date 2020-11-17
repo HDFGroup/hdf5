@@ -200,7 +200,7 @@ BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -,
 #ifndef NDEBUG
     H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
 #endif                                                /* NDEBUG */
-    const uint64_t *elmt = (const uint64_t *)_elmt;   /* Convenience pointer to native elements */
+    const uint64_t *elmt = (const uint64_t *)_elmt; /* Convenience pointer to native elements */
 
     /* Sanity checks */
     HDassert(raw);
@@ -242,8 +242,8 @@ BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -,
 #ifndef NDEBUG
     H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
 #endif                                                /* NDEBUG */
-    uint64_t *     elmt = (uint64_t *)_elmt;          /* Convenience pointer to native elements */
-    const uint8_t *raw  = (const uint8_t *)_raw;      /* Convenience pointer to raw elements */
+    uint64_t *     elmt = (uint64_t *)_elmt;     /* Convenience pointer to native elements */
+    const uint8_t *raw  = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
 
     /* Sanity checks */
     HDassert(raw);

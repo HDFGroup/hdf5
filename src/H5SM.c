@@ -1092,7 +1092,7 @@ H5SM_try_share(H5F_t *f, H5O_t *open_oh, unsigned defer_flags, unsigned type_id,
     if (defer_flags & H5SM_WAS_DEFERRED)
 #ifndef NDEBUG
         deferred_type = ((H5O_shared_t *)mesg)->type;
-#else  /* NDEBUG */
+#else /* NDEBUG */
         if ((((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_HERE) &&
             (((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_SOHM))
             HGOTO_DONE(FALSE);
@@ -1411,7 +1411,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
         if (defer)
             HDmemset(&shared.u, 0, sizeof(shared.u));
 #endif /* H5_USING_MEMCHECKER */
-    }  /* end if */
+    } /* end if */
     else {
         htri_t share_in_ohdr; /* Whether the new message can be shared in another object's header */
 

@@ -421,7 +421,7 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
                     HDassert(!stab_exists);
                 } /* end else */
 #endif            /* NDEBUG */
-            }     /* end if */
+            } /* end if */
             else if (obj_type == H5O_TYPE_UNKNOWN) {
                 /* Try to retrieve symbol table information for caching */
                 H5O_loc_t  targ_oloc;   /* Location of link target */

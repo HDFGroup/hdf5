@@ -845,7 +845,7 @@ endif ()
 ###    F I L T E R  P L U G I N  T E S T S
 ##############################################################################
 if (BUILD_SHARED_LIBS)
-  if (WIN32 OR MINGW)
+  if (WIN32)
     set (CMAKE_SEP "\;")
     set (BIN_REL_PATH "../../")
   else ()
@@ -941,7 +941,7 @@ endif ()
 ###    V O L  P L U G I N  T E S T S
 ##############################################################################
 if (BUILD_SHARED_LIBS)
-  if (WIN32 OR MINGW)
+  if (WIN32)
     set (CMAKE_SEP "\;")
     set (BIN_REL_PATH "../../")
   else ()

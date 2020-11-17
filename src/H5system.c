@@ -346,7 +346,7 @@ H5_make_time(struct tm *tm)
      * VS 2015 is removed, with _get_timezone replacing it.
      */
     long timezone = 0;
-#endif                /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
     time_t ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

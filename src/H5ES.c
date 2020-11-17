@@ -129,59 +129,68 @@ H5ESget_count(hid_t es_id, size_t *count /*out*/)
 
     /* Retrieve the count, if non-NULL */
     if (count)
-        *count = es->act_count;
+        *count = H5ES__list_count(&es->active);
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5ESget_count() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5EStest
+ * Function:    H5ESget_op_counter
  *
- * Purpose:     Test if all operations in event set have completed
+ * Purpose:     Retrieve the counter that will be assigned to the next operation
+ *              inserted into the event set.
+ *
+ * Note:        This is designed for wrapper libraries mainly, to use as a
+ *              mechanism for matching operations inserted into the event
+ *              set with [possible] errors that occur.
  *
  * Return:      SUCCEED / FAIL
  *
  * Programmer:	Quincey Koziol
- *              Monday, July 13, 2020
+ *              Fiiday, November 6, 2020
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5EStest(hid_t es_id, H5ES_status_t *status)
+H5ESget_op_counter(hid_t es_id, uint64_t *op_counter /*out*/)
 {
     H5ES_t *es;                  /* Event set */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Es", es_id, status);
+    H5TRACE2("e", "ix", es_id, op_counter);
 
     /* Check arguments */
     if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
-    if (NULL == status)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL status pointer")
 
-    /* Check status of events in event set */
-    if (H5ES__test(es, status) < 0)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't check status of operations")
+    /* Retrieve the operation counter, if non-NULL */
+    if (op_counter)
+        *op_counter = es->op_counter;
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5EStest() */
+} /* end H5ESget_op_counter() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ESwait
  *
- * Purpose:     Wait (with timeout) for all operations in event set to complete
+ * Purpose:     Wait (with timeout) for operations in event set to complete
  *
- * Note:        Timeout value is in ns, and is per-operation, not for H5ESwait
- *              itself.
+ * Note:        Timeout value is in ns, and is for the H5ESwait call, not each
+ *              individual operation.   For example: if '10' is passed as
+ *              a timeout value and the event set waited 4ns for the first
+ *              operation to complete, the remaining operations would be
+ *              allowed to wait for at most 6ns more.  i.e. the timeout value
+ *              is "used up" across all operations, until it reaches 0, then
+ *              any remaining operations are only checked for completion, not
+ *              waited on.
  *
- * Note:        This call will stop waiting on operations and will return after
- *              the first operation that does not succeed (i.e. FAIL or CANCEL
- *              for its status) or is still in progress when the timeout is
- *              reached (i.e. IN_PROGRESS for its status).
+ * Note:        This call will stop waiting on operations and will return
+ *              immediately if an operation fails.  If a failure occurs, the
+ *              value returned for the # of operations in progress may be
+ *              inaccurate.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -191,22 +200,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status)
+H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress /*out*/,
+    hbool_t *op_failed /*out*/)
 {
     H5ES_t *es;                  /* Event set */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iUL*Es", es_id, timeout, status);
+    H5TRACE4("e", "iULxx", es_id, timeout, num_in_progress, op_failed);
 
     /* Check arguments */
     if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
-    if (NULL == status)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL status pointer")
+    if (NULL == num_in_progress)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL num_in_progress pointer")
+    if (NULL == op_failed)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL op_failed pointer")
 
     /* Wait for operations */
-    if (H5ES__wait(es, timeout, status, TRUE) < 0)
+    if (H5ES__wait(es, timeout, num_in_progress, op_failed) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "can't wait on operations")
 
 done:
@@ -276,8 +288,8 @@ H5ESget_err_count(hid_t es_id, size_t *num_errs /*out*/)
 
     /* Retrieve the error flag, if non-NULL */
     if (num_errs) {
-        if(es->err_occurred)
-            *num_errs = es->err_count;
+        if (es->err_occurred)
+            *num_errs = H5ES__list_count(&es->failed);
         else
             *num_errs = 0;
     } /* end if */
@@ -285,6 +297,49 @@ H5ESget_err_count(hid_t es_id, size_t *num_errs /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5ESget_err_count() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ESget_err_info
+ *
+ * Purpose:     Retrieve information about failed operations
+ *
+ * Note:        The strings retrieved for each error info must be released
+ *              by calling H5free_memory().
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, November 6, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[] /*out*/,
+    size_t *num_cleared /*out*/)
+{
+    H5ES_t *es;                  /* Event set */
+    herr_t  ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "izxx", es_id, num_err_info, err_info, num_cleared);
+
+    /* Check arguments */
+    if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+    if (0 == num_err_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "err_info array size is 0")
+    if (NULL == err_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL err_info array pointer")
+    if (NULL == num_cleared)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL errors cleared pointer")
+
+    /* Retrieve the error information */
+    if (H5ES__get_err_info(es, num_err_info, err_info, num_cleared) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't retrieve error info for failed operation(s)")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESget_err_info() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ESclose

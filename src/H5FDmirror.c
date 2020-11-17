@@ -126,7 +126,7 @@ typedef struct H5FD_mirror_t {
     } while (0)
 #else
 #define LOG_XMIT_BYTES(label, buf, len) /* no-op */
-#endif                                  /* MIRROR_DEBUG_XMIT_BYTE */
+#endif /* MIRROR_DEBUG_XMIT_BYTE */
 
 #if MIRROR_DEBUG_OP_CALLS
 #define LOG_OP_CALL(name)                                                                                    \
@@ -136,7 +136,7 @@ typedef struct H5FD_mirror_t {
     } while (0)
 #else
 #define LOG_OP_CALL(name) /* no-op */
-#endif                    /* MIRROR_DEBUG_OP_CALLS */
+#endif /* MIRROR_DEBUG_OP_CALLS */
 
 /* Prototypes */
 static herr_t  H5FD__mirror_term(void);
@@ -242,7 +242,7 @@ H5FD_mirror_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     LOG_OP_CALL(FUNC);
 
@@ -298,7 +298,7 @@ H5FD__mirror_xmit_decode_uint16(uint16_t *out, const unsigned char *_buf)
 
     HDassert(_buf && out);
 
-    HDmemcpy(&n, _buf, sizeof(n));
+    H5MM_memcpy(&n, _buf, sizeof(n));
     *out = (uint16_t)HDntohs(n);
 
     return 2; /* number of bytes eaten */
@@ -326,7 +326,7 @@ H5FD__mirror_xmit_decode_uint32(uint32_t *out, const unsigned char *_buf)
 
     HDassert(_buf && out);
 
-    HDmemcpy(&n, _buf, sizeof(n));
+    H5MM_memcpy(&n, _buf, sizeof(n));
     *out = (uint32_t)HDntohl(n);
 
     return 4; /* number of bytes eaten */
@@ -385,7 +385,7 @@ H5FD__mirror_xmit_decode_uint64(uint64_t *out, const unsigned char *_buf)
 
     HDassert(_buf && out);
 
-    HDmemcpy(&n, _buf, sizeof(n));
+    H5MM_memcpy(&n, _buf, sizeof(n));
     if (TRUE == is_host_little_endian())
         *out = BSWAP_64(n);
     else
@@ -412,7 +412,7 @@ H5FD__mirror_xmit_decode_uint8(uint8_t *out, const unsigned char *_buf)
 
     HDassert(_buf && out);
 
-    HDmemcpy(out, _buf, sizeof(uint8_t));
+    H5MM_memcpy(out, _buf, sizeof(uint8_t));
 
     return 1; /* number of bytes eaten */
 } /* end H5FD__mirror_xmit_decode_uint8() */
@@ -439,7 +439,7 @@ H5FD__mirror_xmit_encode_uint16(unsigned char *_dest, uint16_t v)
     HDassert(_dest);
 
     n = (uint16_t)HDhtons(v);
-    HDmemcpy(_dest, &n, sizeof(n));
+    H5MM_memcpy(_dest, &n, sizeof(n));
 
     return 2;
 } /* end H5FD__mirror_xmit_encode_uint16() */
@@ -466,7 +466,7 @@ H5FD__mirror_xmit_encode_uint32(unsigned char *_dest, uint32_t v)
     HDassert(_dest);
 
     n = (uint32_t)HDhtonl(v);
-    HDmemcpy(_dest, &n, sizeof(n));
+    H5MM_memcpy(_dest, &n, sizeof(n));
 
     return 4;
 } /* end H5FD__mirror_xmit_encode_uint32() */
@@ -494,7 +494,7 @@ H5FD__mirror_xmit_encode_uint64(unsigned char *_dest, uint64_t v)
 
     if (TRUE == is_host_little_endian())
         n = BSWAP_64(v);
-    HDmemcpy(_dest, &n, sizeof(n));
+    H5MM_memcpy(_dest, &n, sizeof(n));
 
     return 8;
 } /* H5FD__mirror_xmit_encode_uint64() */
@@ -519,7 +519,7 @@ H5FD__mirror_xmit_encode_uint8(unsigned char *dest, uint8_t v)
 
     HDassert(dest);
 
-    HDmemcpy(dest, &v, sizeof(v));
+    H5MM_memcpy(dest, &v, sizeof(v));
 
     return 1;
 } /* end H5FD__mirror_xmit_encode_uint8() */
@@ -1188,7 +1188,7 @@ H5FD__mirror_fapl_get(H5FD_t *_file)
     if (NULL == fa)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "calloc failed");
 
-    HDmemcpy(fa, &(file->fa), sizeof(H5FD_mirror_fapl_t));
+    H5MM_memcpy(fa, &(file->fa), sizeof(H5FD_mirror_fapl_t));
 
     ret_value = fa;
 
@@ -1224,7 +1224,7 @@ H5FD__mirror_fapl_copy(const void *_old_fa)
     if (new_fa == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "memory allocation failed");
 
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_mirror_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_mirror_fapl_t));
     ret_value = new_fa;
 
 done:
@@ -1298,7 +1298,7 @@ H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_dst /*out*/)
 
     HDassert(fa_src->magic == H5FD_MIRROR_FAPL_MAGIC); /* sanity check */
 
-    HDmemcpy(fa_dst, fa_src, sizeof(H5FD_mirror_fapl_t));
+    H5MM_memcpy(fa_dst, fa_src, sizeof(H5FD_mirror_fapl_t));
 
 done:
     FUNC_LEAVE_API(ret_value);

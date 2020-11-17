@@ -193,15 +193,15 @@ const char *FILENAME[] = {"dataset",             /* 0 */
 #define DATA_NOT_CORRUPTED 0
 
 /* Parameters for the "set local" test */
-#define BOGUS2_PERM_NPARMS 2  /* Number of "permanent" parameters */
+#define BOGUS2_PERM_NPARMS 2 /* Number of "permanent" parameters */
 #define BOGUS2_PARAM_1     13 /* (No particular meaning, just for checking value) */
 #define BOGUS2_PARAM_2     35 /* (No particular meaning, just for checking value) */
-#define BOGUS2_ALL_NPARMS  4  /* Total number of parameter = permanent + "local" parameters */
+#define BOGUS2_ALL_NPARMS  4 /* Total number of parameter = permanent + "local" parameters */
 
 /* Dimensionality for conversion buffer test */
-#define DIM1 100  /* Dim. Size of data member # 1 */
+#define DIM1 100 /* Dim. Size of data member # 1 */
 #define DIM2 5000 /* Dim. Size of data member # 2 */
-#define DIM3 10   /* Dim. Size of data member # 3 */
+#define DIM3 10 /* Dim. Size of data member # 3 */
 
 /* Parameters for internal filter test */
 #define FILTER_CHUNK_DIM1 2
@@ -2412,7 +2412,7 @@ test_get_filter_info(void)
         if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) != 0) ||
             ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
             TEST_ERROR
-    }  /* end else */
+    } /* end else */
 #endif /* H5_HAVE_FILTER_SZIP */
 
     /* Verify that get_filter_info throws an error when given a bad filter */
@@ -2454,7 +2454,7 @@ test_filters(hid_t file, hid_t
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     hsize_t deflate_size; /* Size of dataset with deflate filter */
-#endif                    /* H5_HAVE_FILTER_DEFLATE */
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
 #ifdef H5_HAVE_FILTER_SZIP
     hsize_t  szip_size; /* Size of dataset with szip filter */
@@ -2466,7 +2466,7 @@ test_filters(hid_t file, hid_t
 
 #if defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP)
     hsize_t combo_size; /* Size of dataset with multiple filters */
-#endif                  /* defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP) */
+#endif /* defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP) */
 
     /* test the H5Zget_filter_info function */
     if (test_get_filter_info() < 0)
@@ -2569,7 +2569,7 @@ test_filters(hid_t file, hid_t
     /* Clean up objects used for this test */
     if (H5Pclose(dc) < 0)
         goto error;
-#else  /* H5_HAVE_FILTER_DEFLATE */
+#else /* H5_HAVE_FILTER_DEFLATE */
     TESTING("deflate filter");
     SKIPPED();
     HDputs("    Deflate filter not enabled");
@@ -2611,7 +2611,7 @@ test_filters(hid_t file, hid_t
         SKIPPED();
     }
 
-#else  /* H5_HAVE_FILTER_SZIP */
+#else /* H5_HAVE_FILTER_SZIP */
     TESTING("szip filter");
     SKIPPED();
     HDputs("    Szip filter not enabled");
@@ -2686,7 +2686,7 @@ test_filters(hid_t file, hid_t
     /* Clean up objects used for this test */
     if (H5Pclose(dc) < 0)
         goto error;
-#else  /* H5_HAVE_FILTER_DEFLATE */
+#else /* H5_HAVE_FILTER_DEFLATE */
     TESTING("shuffle+deflate+fletcher32 filters");
     SKIPPED();
     HDputs("    Deflate filter not enabled");
@@ -2764,7 +2764,7 @@ test_filters(hid_t file, hid_t
         SKIPPED();
     }
 
-#else  /* H5_HAVE_FILTER_SZIP */
+#else /* H5_HAVE_FILTER_SZIP */
     TESTING("shuffle+szip+fletcher32 filters");
     SKIPPED();
     HDputs("    szip filter not enabled");
@@ -2820,7 +2820,7 @@ test_missing_filter(hid_t file)
         H5_FAILED();
         HDprintf("    Line %d: Can't unregister deflate filter\n", __LINE__);
         goto error;
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_FILTER_DEFLATE */
     /* Verify deflate filter is not registered currently */
     if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != FALSE) {
@@ -3006,7 +3006,7 @@ test_missing_filter(hid_t file)
         H5_FAILED();
         HDprintf("    Line %d: Deflate filter not available\n", __LINE__);
         goto error;
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Pop API context */
@@ -6257,7 +6257,7 @@ test_can_apply_szip(hid_t
     const hsize_t chunk_dims[2]  = {250, 2048}; /* Chunk dimensions */
     const hsize_t chunk_dims2[2] = {2, 1};      /* Chunk dimensions */
     herr_t        ret;                          /* Status value */
-#endif                                          /* H5_HAVE_FILTER_SZIP */
+#endif /* H5_HAVE_FILTER_SZIP */
 
     TESTING("dataset szip filter 'can apply' callback");
 
@@ -6409,7 +6409,7 @@ test_can_apply_szip(hid_t
         SKIPPED();
         HDputs("    Szip encoding is not enabled.");
     }
-#else  /* H5_HAVE_FILTER_SZIP */
+#else /* H5_HAVE_FILTER_SZIP */
     SKIPPED();
     HDputs("    Szip filter is not enabled.");
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -10668,7 +10668,7 @@ test_fixed_array(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     unsigned compress; /* Whether chunks should be compressed */
-#endif                 /* H5_HAVE_FILTER_DEFLATE */
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
     h5_stat_size_t empty_size; /* Size of an empty file */
     h5_stat_size_t file_size;  /* Size of each file created */
@@ -11087,7 +11087,7 @@ test_fixed_array(hid_t fapl)
 
         } /* end for */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    }  /* end for */
+    } /* end for */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Release buffers */
@@ -11179,7 +11179,7 @@ test_single_chunk(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     unsigned compress; /* Whether chunks should be compressed */
-#endif                 /* H5_HAVE_FILTER_DEFLATE */
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
     size_t         n, i;       /* local index variables */
     herr_t         ret;        /* Generic return value */
@@ -11391,7 +11391,7 @@ test_single_chunk(hid_t fapl)
 
         } /* end for */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    }  /* end for */
+    } /* end for */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Release buffers */

@@ -361,7 +361,7 @@ H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr)
 
         fake_cache_ptr->image_entries = (H5C_image_entry_t *)H5MM_xfree(fake_cache_ptr->image_entries);
         fake_cache_ptr                = (H5C_t *)H5MM_xfree(fake_cache_ptr);
-    }  /* end block */
+    } /* end block */
 #endif /* NDEBUG */
 
 done:
@@ -908,7 +908,7 @@ done:
 herr_t
 #if H5C_COLLECT_CACHE_STATS
 H5C_image_stats(H5C_t *cache_ptr, hbool_t print_header)
-#else  /* H5C_COLLECT_CACHE_STATS */
+#else /* H5C_COLLECT_CACHE_STATS */
 H5C_image_stats(H5C_t *cache_ptr, hbool_t H5_ATTR_UNUSED print_header)
 #endif /* H5C_COLLECT_CACHE_STATS */
 {
@@ -918,7 +918,7 @@ H5C_image_stats(H5C_t *cache_ptr, hbool_t H5_ATTR_UNUSED print_header)
     int64_t total_misses = 0;
     double  hit_rate;
     double  prefetch_use_rate;
-#endif                          /* H5C_COLLECT_CACHE_STATS */
+#endif /* H5C_COLLECT_CACHE_STATS */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1024,7 +1024,7 @@ H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr)
                 HMPI_GOTO_ERROR(FAIL, "can't receive cache image MPI_Bcast", mpi_result)
         } /* end else-if */
     }     /* end block */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1607,7 +1607,7 @@ H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_image_ctl
             HDassert(!(cache_ptr->image_ctl.generate_image));
         } /* end else */
 #ifdef H5_HAVE_PARALLEL
-    }  /* end else */
+    } /* end else */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -2088,7 +2088,7 @@ H5C__destroy_pf_entry_child_flush_deps(H5C_t *cache_ptr, H5C_cache_entry_t *pf_e
                     u++;
                 } /* end while */
                 HDassert(found);
-#endif        /* NDEBUG */
+#endif /* NDEBUG */
             } /* end if */
         }     /* end if */
 
@@ -3172,7 +3172,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
          * we add code to store and restore adaptive resize status.
          */
         HDassert(lru_rank_holes <= H5C__MAX_EPOCH_MARKERS);
-    }  /* end block */
+    } /* end block */
 #endif /* NDEBUG */
 
     /* Check to see if the cache is oversize, and evict entries as
@@ -3480,7 +3480,7 @@ H5C__write_cache_image(H5F_t *f, const H5C_t *cache_ptr)
 #ifdef H5_HAVE_PARALLEL
         } /* end if */
     }     /* end block */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

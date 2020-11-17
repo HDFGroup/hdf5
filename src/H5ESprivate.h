@@ -48,7 +48,7 @@ typedef struct H5ES_t H5ES_t;
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
-herr_t H5ES_insert(hid_t es_id, H5VL_t *connector, void *token,
-    const char *caller, const char *caller_args, ...);
+herr_t H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, const char *caller_args,
+                   ...);
 
 #endif /* _H5ESprivate_H */

@@ -187,6 +187,7 @@ $Source = "";
 # to the type), they must have a "real" abbreviation added (like the ones
 # above), moved to the section of entries above, and support for displaying
 # the type must be added to H5_trace_args().
+               "H5ES_err_info_t"            => "#",
                "H5FD_t"                     => "#",
                "H5FD_hdfs_fapl_t"           => "#",
                "H5FD_mirror_fapl_t"         => "#",
@@ -195,6 +196,7 @@ $Source = "";
                "H5L_class_t"                => "#",
                "H5VL_class_t"               => "#",
                "H5VL_loc_params_t"          => "#",
+               "H5VL_request_status_t"      => "#",
               );
 
 

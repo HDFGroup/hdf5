@@ -94,7 +94,7 @@ typedef struct H5FD_splitter_t {
     } while (0)
 #else
 #define H5FD_SPLITTER_LOG_CALL(name) /* no-op */
-#endif                               /* H5FD_SPLITTER_DEBUG_OP_CALLS */
+#endif /* H5FD_SPLITTER_DEBUG_OP_CALLS */
 
 /* Private functions */
 
@@ -210,7 +210,7 @@ H5FD_splitter_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     H5FD_SPLITTER_LOG_CALL(FUNC);
 
@@ -585,7 +585,7 @@ H5FD__splitter_fapl_copy(const void *_old_fa)
     if (NULL == new_fa_ptr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL")
 
-    HDmemcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_splitter_fapl_t));
+    H5MM_memcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_splitter_fapl_t));
     HDstrncpy(new_fa_ptr->wo_path, old_fa_ptr->wo_path, H5FD_SPLITTER_PATH_MAX);
     HDstrncpy(new_fa_ptr->log_file_path, old_fa_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX);
 
@@ -1300,14 +1300,14 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
         char * s;
 
         size = HDstrlen(atfunc) + HDstrlen(msg) + 3; /* ':', ' ', '\n' */
-        s    = (char *)HDmalloc(sizeof(char) * (size + 1));
+        s    = (char *)H5MM_malloc(sizeof(char) * (size + 1));
         if (NULL == s)
             ret_value = FAIL;
         else if (size < (size_t)HDsnprintf(s, size + 1, "%s: %s\n", atfunc, msg))
             ret_value = FAIL;
         else if (size != HDfwrite(s, 1, size, file->logfp))
             ret_value = FAIL;
-        HDfree(s);
+        H5MM_free(s);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)

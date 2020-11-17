@@ -626,7 +626,7 @@ H5T__vlen_mem_str_getptr(void *_vl)
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     char *s = *(char **)_vl; /* Pointer to the user's string information */
 #else
-    char *      s = NULL; /* Pointer to the user's string information */
+    char *s = NULL; /* Pointer to the user's string information */
 #endif
 
     FUNC_ENTER_STATIC_NOERR
@@ -717,7 +717,7 @@ H5T__vlen_mem_str_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     char *s = *(char **)_vl; /* Pointer to the user's string information */
 #else
-    char *s;        /* Pointer to the user's string information */
+    char *s; /* Pointer to the user's string information */
 #endif
 
     FUNC_ENTER_STATIC_NOERR
