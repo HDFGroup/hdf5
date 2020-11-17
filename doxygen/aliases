@@ -60,8 +60,8 @@ ALIASES += space_id{1}="\param[in] \1 Dataspace identifier"
 # Dataypes
 ################################################################################
 
-ALIASES += dtype_id="\param[in] dtype_id Datatype identifier"
-ALIASES += dtype_id{1}="\param[in] \1 Datatype identifier"
+ALIASES += type_id="\param[in] type_id Datatype identifier"
+ALIASES += type_id{1}="\param[in] \1 Datatype identifier"
 
 ALIASES += file_type_id{1}="\param[in] \1 Datatype (in-file) identifier"
 ALIASES += mem_type_id{1}="\param[in] \1 Datatype (in-memory) identifier"
@@ -133,14 +133,20 @@ ALIASES += lapl_id{1}="\param[in] \1 Link access property list identifier"
 ALIASES += lcpl_id="\param[in] lcpl_id Link creation property list identifier"
 ALIASES += lcpl_id{1}="\param[in] \1 Link creation property list identifier"
 
-ALIASES += vipl_id="\param[in] vipl_id VOL initialization property list identifier"
-ALIASES += vipl_id{1}="\param[in] \1 vipl_id VOL initialization property list identifier"
-
 ALIASES += plist_id="\param[in] plist_id Property list identifier"
 ALIASES += plist_id{1}="\param[in] \1 Property list identifier"
 
 ALIASES += plistcls_id="\param[in] plistcls_id Property list class identifier"
 ALIASES += plistcls_id{1}="\param[in] \1 Property list class identifier"
+
+ALIASES += tapl_id="\param[in] tapl_id Datatype access property list identifier"
+ALIASES += tapl_id{1}="\param[in] \1 Datatype access property list identifier"
+
+ALIASES += tcpl_id="\param[in] tcpl_id Datatype creation property list identifier"
+ALIASES += tcpl_id{1}="\param[in] \1 Datatype creation property list identifier"
+
+ALIASES += vipl_id="\param[in] vipl_id VOL initialization property list identifier"
+ALIASES += vipl_id{1}="\param[in] \1 vipl_id VOL initialization property list identifier"
 
 ################################################################################
 # Objects
