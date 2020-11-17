@@ -1447,25 +1447,304 @@ H5_DLL herr_t H5Tflush(hid_t type_id);
 H5_DLL herr_t H5Trefresh(hid_t type_id);
 
 /* Operations defined on compound datatypes */
+/**
+ * \ingroup COMPOUND
+ *
+ * \brief Adds a new member to a compound datatype.
+ *
+ * \type_id{parent_id}
+ * \param[in] name      Name of the field to insert
+ * \param[in] offset    Offset in memory structure of the field to insert
+ * \param[in] member_id  Datatype identifier of the field to insert
+ *
+ * \return \herr_t
+ *
+ * \details H5Tinsert() adds another member to the compound datatype, specified
+ *          \p type_id.
+ *
+ *          The new member has a \p name which must be unique within the
+ *          compound datatype. The \p offset argument defines the start of the
+ *          member in an instance of the compound datatype, and \p member_id
+ *          is the datatype identifier of the new member.
+ *
+ *          \note Members of a compound datatype do not have to be atomic
+ *          datatypes; a compound datatype can have a member which is a
+ *          compound datatype.
+ *
+ * \since 1.2.0
+ *
+ * \todo Create example for  H5Tinsert
+ *
+ */
 H5_DLL herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id);
+/**
+ * \ingroup COMPOUND
+ *
+ * \brief Recursively removes padding from within a compound datatype
+ *
+ * \type_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Tpack() recursively removes padding from within a compound
+ *          datatype to make it more efficient (space-wise) to store that data.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tpack(hid_t type_id);
 
 /* Operations defined on enumeration datatypes */
+/**
+ * \ingroup ENUM
+ *
+ * \brief Creates a new enumeration datatype
+ *
+ * \param[in] base_id Datatype identifier for the base datatype.  Must be an
+ *            integer datatype
+ *
+ * \return \hid_t{enumeration datatype}
+ *
+ * \details H5Tenum_create() creates a new enumeration datatype based on the
+ *          specified base datatype, dtype_id, which must be an integer datatype.
+ *
+ *          If a particular architecture datatype is required, a little endian
+ *          or big endian datatype for example, use a native datatype as the
+ *          base datatype and use H5Tconvert()  on values as they are read
+ *          from or written to a dataset.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL hid_t  H5Tenum_create(hid_t base_id);
+/**
+ * \ingroup ENUM
+ *
+ * \brief Inserts a new enumeration datatype member
+ *
+ * \type_id{type}
+ * \param[in] name  Name of the new member
+ * \param[in] value Pointer to the value of the new member
+ *
+ * \return \herr_t
+ *
+ * \details H5Tenum_insert() inserts a new enumeration datatype member into an
+ *          enumeration datatype.
+ *
+ *          \p type_id is the datatype identifier for the enumeration datatype,
+ *          \p name is the name of the new member, and \p value points to the
+ *           value of the new member.
+ *
+ *          \p name and \p value must both be unique within \p dtype_id.
+ *
+ *          \p value points to data which must be of the integer base datatype
+ *          used when the enumeration datatype was created. If a particular
+ *          architecture datatype is required, a little endian or big endian
+ *          datatype for example, use a native datatype as the base datatype
+ *          and use H5Tconvert() on values as they are read from or written
+ *          to a dataset.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tenum_insert(hid_t type, const char *name, const void *value);
+/**
+ * \ingroup ENUM
+ *
+ * \brief Returns the symbol name corresponding to a specified member of an
+ *        enumeration datatype
+ *
+ * \type_id{type}
+ * \param[in] value Value of the enumeration datatype
+ * \param[out] name Buffer for output of the symbol name
+ * \param[in] size Anticipated size of the symbol name, in bytes
+ *
+ * \return Returns a non-negative value if successful. Otherwise returns a
+ *         negative value
+ *
+ * \details H5Tenum_nameof() finds the symbol name that corresponds to the
+ *          specified \p value of the enumeration datatype \p type.
+ *
+ *          At most \p size characters of the symbol \p name are copied into
+ *          the \p name buffer. If the entire symbol name and null terminator
+ *          do not fit in the name buffer, then as many characters as possible
+ *          are copied (not null terminated) and the function fails.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tenum_nameof(hid_t type, const void *value, char *name /*out*/, size_t size);
+/**
+ * \ingroup ENUM
+ *
+ * \brief Returns the value corresponding to a specified member of an
+ *        enumeration datatype
+ *
+ * \type_id{type}
+ * \param[in] name Symbol name of the enumeration datatype
+ * \param[out] value Buffer for the value of the enumeration datatype
+ *
+ * \return \herr_t
+ *
+ * \details H5Tenum_valueof() finds the value that corresponds to the
+ *          specified name of the enumeration datatype \p dtype_id.
+ *
+ *          Values returned in \p value will be of the enumerated type’s
+ *          base type, that is, the datatype used by H5Tenum_create() when
+ *          the enumerated type was created.
+ *
+ *          The \p value buffer must be at least large enough to hold a value
+ *          of that base type. If the size is unknown, you can determine it
+ *          with H5Tget_size().
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tenum_valueof(hid_t type, const char *name, void *value /*out*/);
 
 /* Operations defined on variable-length datatypes */
+/**
+ * \ingroup VLEN
+ *
+ * \brief Creates a new variable-length array datatype
+ *
+ * \type_id{base_id}, the element type of the datatype to create
+ *
+ * \return \hid_t{variable-length datatype}
+ *
+ * \details H5Tvlen_create() creates a new one-dimensional array datatype of
+ *          variable-length (VL) with the base datatype \p base_id.
+ *
+ *          This one-dimensional array often represents a data sequence of the
+ *          base datatype, such as characters for character sequences or vertex
+ *          coordinates for polygon lists. The base type specified for the VL
+ *          datatype can be any HDF5 datatype, including another VL datatype, a
+ *          compound datatype, or an atomic datatype.
+ *
+ *          When necessary, use H5Tget_super() to determine the base type of
+ *          the VL datatype.
+ *
+ *          The datatype identifier returned from this function should be
+ *          released with H5Tclose() or resource leaks will result. Under
+ *          certain circumstances, H5Dvlen_reclaim() must also be used.
+ *
+ * \attention H5Tvlen_create() cannot be used to create a variable-length
+ *            string datatype. H5Tvlen_create() called with a string or
+ *            character base type creates a variable-length sequence of strings
+ *            (a variable-length, 1-dimensional array), with each element of
+ *            the array being of the string or character base type.\n
+ *            To create a variable-length string datatype, see "Creating
+ *            variable-length string datatypes."
+ *
+ * \todo Fix the reference.
+ *
+ */
 H5_DLL hid_t H5Tvlen_create(hid_t base_id);
 
 /* Operations defined on array datatypes */
+/**
+ * \ingroup ARRAY
+ *
+ * \brief Creates an array datatype object
+ *
+ * \param[in] base_id Datatype identifier for the array base datatype
+ * \param[in] ndims Rank of the array
+ * \param[in] dim Size of each array dimension
+ *
+ * \return \hid_t{array datatype}
+ *
+ * \details H5Tarray_create2() creates a new array datatype object.\n\n
+ *          \p base_id is the datatype of every element of the array, i.e.,
+ *          of the number at each position in the array.
+ *
+ *          \p ndims is the number of dimensions and the size of each dimension
+ *          is specified in the array \p dim. The value of \p rank is
+ *          currently limited to #H5S_MAX_RANK and must be greater than 0
+ *          (zero). All dimension sizes specified in \p dim must be greater
+ *          than 0 (zero).
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL hid_t H5Tarray_create2(hid_t base_id, unsigned ndims, const hsize_t dim[/* ndims */]);
+/**
+ * \ingroup ARRAY
+ *
+ * \brief Returns the rank of an array datatype
+ *
+ * \type_id
+ *
+ * \return Returns the rank of the array if successful; otherwise returns a
+ *         negative value.
+ *
+ * \details H5Tget_array_ndims() returns the rank, i.e., the number of
+ *          dimensions, of an array datatype object.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL int   H5Tget_array_ndims(hid_t type_id);
+/**
+ * \ingroup ARRAY
+ *
+ * \brief Retrieves sizes of array dimensions
+ *
+ * \type_id
+ * \param[out] dims Sizes of array dimensions
+ *
+ * \return Returns the non-negative number of dimensions of the array type
+ *         if successful; otherwise returns a negative value.
+ *
+ * \details H5Tget_array_dims2() returns the sizes of the dimensions of the
+ *          specified array datatype object in the array \p dims.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL int   H5Tget_array_dims2(hid_t type_id, hsize_t dims[]);
 
 /* Operations defined on opaque datatypes */
+/**
+ * \ingroup OPAQUE
+ *
+ * \brief Tags an opaque datatype
+ *
+ * \type_id{type} of an opaque datatype
+ * \param[in] tag Descriptive ASCII string with which the opaque datatype is
+ *                to be tagged
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_tag() tags an opaque datatype \p type with a descriptive
+ *          ASCII identifier, \p tag.
+ *
+ *          \p tag is intended to provide a concise description; the maximum
+ *          size is hard-coded in the HDF5 library as 256 bytes
+ *          (#H5T_OPAQUE_TAG_MAX).
+ *
+ * \version 1.6.5 The #H5T_OPAQUE_TAG_MAX macro constant, specifying the
+ *                maximum size of an opaque datatype tag, was added in
+ *                H5Tpublic.h.
+ *
+ */
 H5_DLL herr_t H5Tset_tag(hid_t type, const char *tag);
+/**
+ * \ingroup OPAQUE
+ *
+ * \brief Gets the tag associated with an opaque datatype
+ *
+ * \type_id{type} of an opaque datatype
+ *
+ * \return Returns a pointer to an allocated string if successful; otherwise
+ *         returns NULL.
+ *
+ * \details H5Tget_tag() returns the tag associated with the opaque datatype
+ *         \p type.
+ *
+ * \attention The tag is returned via a pointer to an allocated string, which
+ *            the caller must free.
+ *
+ */
 H5_DLL char * H5Tget_tag(hid_t type);
 
 /* Querying property values */
@@ -1489,7 +1768,6 @@ H5_DLL char * H5Tget_tag(hid_t type);
  */
 H5_DLL hid_t       H5Tget_super(hid_t type);
 /**
- * --------------------------------------------------------------------------
  * \ingroup H5T
  *
  * \brief Returns a datatype class
@@ -1781,12 +2059,164 @@ H5_DLL H5T_pad_t   H5Tget_inpad(hid_t type_id);
  *
  */
 H5_DLL H5T_str_t   H5Tget_strpad(hid_t type_id);
+/**
+ * \ingroup COMPOUND
+ *
+ * \brief Retrieves the number of elements in a compound or enumeration datatype
+ *
+ * \type_id
+ *
+ * \return Returns the number of elements if successful; otherwise returns a
+ *         negative value.
+ *
+ * \details H5Tget_nmembers() retrieves the number of fields in a compound
+ *          datatype or the number of members of an enumeration datatype.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL int         H5Tget_nmembers(hid_t type_id);
+/**
+ * \ingroup COMPOUND
+ *
+ * \brief Retrieves the name of a compound or enumeration datatype member
+ *
+ * \type_id
+ * \param[in] membno Zero-based index of the field or element
+ *
+ * \return Returns a valid pointer to a string allocated with malloc() if
+ *         successful; otherwise returns NULL.
+ *
+ * \details H5Tget_member_name() retrieves the name of a field of a compound
+ *          datatype or an element of an enumeration datatype.
+ *
+ *          The index of the target field or element is specified in \p
+ *          member_no. Compound datatype fields and enumeration datatype
+ *          elements are stored in no particular order with index values of
+ *          0 through N-1, where N is the value returned by H5Tget_nmembers().
+ *
+ *          The HDF5 library allocates a buffer to receive the name of
+ *          the field. The caller must subsequently free the buffer with
+ *          H5free_memory().
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL char *      H5Tget_member_name(hid_t type_id, unsigned membno);
+/**
+ * \ingroup COMPOUND
+ *
+ * \brief Retrieves the index of a compound or enumeration datatype member
+ *
+ * \type_id
+ * \param[in] name Name of the field or member
+ *
+ * \return \herr_t
+ *
+ * \details H5Tget_member_index() retrieves the index of a field of a compound
+ *          datatype or an element of an enumeration datatype.
+ *
+ *          The name of the target field or element is specified by \p name.
+ *
+ *          Fields are stored in no particular order with index values of 0
+ *          through N-1, where N is the value returned by H5Tget_nmembers() .
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL int         H5Tget_member_index(hid_t type_id, const char *name);
+/**
+ * \ingroup COMPOUND
+ *
+ * \brief Retrieves the offset of a field of a compound datatype
+ *
+ * \type_id
+ * \param[in] membno Zero-based index of the field or element
+ *
+ * \return Returns the byte offset of the field if successful; otherwise
+ *         returns 0 (zero).
+ *
+ * \details H5Tget_member_offset() retrieves the byte offset of the beginning
+ *          of a field within a compound datatype with respect to the beginning
+ *          of the compound datatype datum.
+ *
+ *          Note that zero is a valid offset and that this function will fail
+ *          only if a call to H5Tget_member_class() fails with the same arguments.
+ *
+ * \version 1.6.4 \p member_no parameter type changed to unsigned.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL size_t      H5Tget_member_offset(hid_t type_id, unsigned membno);
+/**
+ * \ingroup COMPOUND
+ *
+ * \brief Returns datatype class of compound datatype member
+ *
+ * \type_id
+ * \param[in] membno Zero-based index of the field or element
+ *
+ * \return Returns the datatype class, a non-negative value, if successful;
+ *         otherwise returns a negative value.
+ *
+ * \details Given a compound datatype, \p dtype_id, H5Tget_member_class()
+ *          returns the datatype class of the member specified by \p member_no.
+ *
+ *          Valid class identifiers, as defined in H5Tpublic.h, are:
+ *          \snippet this H5T_class_t_snip
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL H5T_class_t H5Tget_member_class(hid_t type_id, unsigned membno);
+/**
+ * \ingroup COMPOUND
+ *
+ * \brief Returns the datatype of the specified member
+ *
+ * \type_id
+ * \param[in] membno Zero-based index of the field or element
+ *
+ * \return Returns the identifier of a copy of the datatype of the field if
+ *         successful; otherwise returns a negative value.
+ *
+ * \details H5Tget_member_type() returns the datatype of the specified member.
+ *          The caller should invoke H5Tclose() to release resources associated
+ *          with the type.
+ *
+ * \version 1.6.4 \p membno parameter type changed to unsigned.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL hid_t       H5Tget_member_type(hid_t type_id, unsigned membno);
+/**
+ * \ingroup ENUM
+ *
+ * \brief Returns the value of an enumeration datatype member
+ *
+ * \type_id
+ * \param[in] membno Number of the enumeration datatype member
+ * \param[out] value Buffer for the value of the enumeration datatype member
+ *
+ * \return \herr_t
+ *
+ * \details H5Tget_member_value() returns the value of the enumeration datatype
+ *          member \p member_no.
+ *
+ *          The member value is returned in a user-supplied buffer pointed to
+ *          by \p value. Values returned in \p value will be of the enumerated
+ *          type’s base type, that is, the datatype used by H5Tenum_create()
+ *          when the enumerated type was created.
+ *
+ *          The value buffer must be at least large enough to hold a value
+ *          of that base type. If the size is unknown, you can determine it
+ *          with H5Tget_size().
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t      H5Tget_member_value(hid_t type_id, unsigned membno, void *value /*out*/);
 /**
  * \ingroup ATOM
@@ -1965,7 +2395,74 @@ H5_DLL hid_t       H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
  *
  */
 H5_DLL herr_t H5Tset_size(hid_t type_id, size_t size);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Sets the byte order of a datatype
+ *
+ * \type_id
+ * \param[in] order Byte order constant
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_order() sets the byte order of a datatype.\n
+ *          Byte order can currently be set to any of the following:
+ *          \snippet this H5T_order_t_snip
+ *          #H5T_ORDER_MIXED (3) is a valid value for order only when
+ *          returned by the function H5Tget_order(); it cannot be set with
+ *          H5Tset_order().
+ *
+ *          #H5T_ORDER_NONE (4) is a valid value for order, but it has no
+ *          effect. It is valid only for fixed-length strings and object and
+ *          region references and specifies “no particular order.”
+ *
+ *          The byte order of a derived datatype is initially the same as
+ *          that of the parent type, but can be changed with H5Tset_order().
+ *
+ *          This function cannot be used with a datatype after it has been
+ *          committed.
+ *
+ * \note    Special considerations:
+ *          \li ENUM datatypes: Byte order must be set before any member on
+ *              an ENUM is defined.
+ *          \li Compound datatypes: Byte order is set individually on each member
+ *              of a compound datatype; members of a compound datatype need not
+ *              have the same byte order.
+ *          \li Opaque datatypes: Byte order can be set but has no effect.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_order(hid_t type_id, H5T_order_t order);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Sets the precision of an atomic datatype
+ *
+ * \type_id
+ * \param[in] prec Number of bits of precision for datatype
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_precision() sets the precision of an atomic datatype. The
+ *          precision is the number of significant bits which, unless
+ *          padding is present, is 8 times larger than the value returned
+ *          by H5Tget_size().
+ *
+ *          If the precision is increased then the offset is decreased and
+ *          then the size is increased to insure that significant bits do not
+ *          "hang over" the edge of the datatype.
+ *
+ *          Changing the precision of an #H5T_STRING automatically changes
+ *          the size as well. The precision must be a multiple of 8.
+ *
+ *          When decreasing the precision of a floating point type, set the
+ *          locations and sizes of the sign, mantissa, and exponent fields
+ *          first.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_precision(hid_t type_id, size_t prec);
 /**
  * \ingroup ATOM
@@ -2001,7 +2498,41 @@ H5_DLL herr_t H5Tset_precision(hid_t type_id, size_t prec);
  *
  */
 H5_DLL herr_t H5Tset_offset(hid_t type_id, size_t offset);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Sets the least and most-significant bits padding types
+ *
+ * \type_id
+ * \param[in] lsb Padding type for least-significant bits
+ * \param[in] msb Padding type for most-significant bits
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_pad() sets the least and most-significant bits padding types.
+ *          Available values are:
+ * \padding_type
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Sets the sign property for an integer type
+ *
+ * \type_id
+ * \param[in] sign Sign type
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_sign() sets the sign property for an integer type:
+ * \sign_prop
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_sign(hid_t type_id, H5T_sign_t sign);
 /**
  * \ingroup ATOM
@@ -2118,6 +2649,37 @@ H5_DLL herr_t H5Tset_inpad(hid_t type_id, H5T_pad_t pad);
  *
  */
 H5_DLL herr_t H5Tset_cset(hid_t type_id, H5T_cset_t cset);
+/**
+ * \ingroup ATOM
+ *
+ * \brief Defines the type of padding used for character strings
+ *
+ * \type_id
+ * \param[in] strpad String padding type
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_strpad() defines the type of padding used for a string
+ *          datatype.
+ *
+ *          The method used to store character strings differs with the
+ *          programming language.  C usually null terminates strings while
+ *          Fortran left-justifies and space-pads strings.
+ *
+ *          Valid values of \p strpad are as follows:
+ *          \str_pad_type
+ *          When converting from a longer string to a shorter string, the
+ *          behavior is as follows. If the shorter string is #H5T_STR_NULLPAD
+ *          or #H5T_STR_SPACEPAD, then the string is simply truncated. If
+ *          the short string is #H5T_STR_NULLTERM, it is truncated and a null
+ *          terminator is appended.
+ *
+ *          When converting from a shorter string to a longer string, the
+ *          longer string is padded on the end by appending nulls or spaces.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tset_strpad(hid_t type_id, H5T_str_t strpad);
 
 /* Type conversion database */
@@ -2286,6 +2848,28 @@ H5_DLL htri_t     H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
  */
 H5_DLL herr_t     H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *background,
                              hid_t plist_id);
+/**
+ * \ingroup VLEN
+ *
+ * \brief Reclaims the variable length (VL) datatype memory buffers
+ *
+ * \type_id
+ * \space_id
+ * \dxpl_id{plist_id} used to create the buffer
+ * \param[in] buf Pointer to the buffer to be reclaimed
+ *
+ * \return \herr_t
+ *
+ * \details H5Treclaim() reclaims memory buffers created to store VL datatypes.
+ *          It only frees the variable length data in the selection defined in
+ *          the dataspace specified by \p space_id. The dataset transfer
+ *          property list \p plist_id is required to find the correct
+ *          allocation and/or free methods for the variable-length data in the
+ *          buffer.
+ *
+ * \since 1.12.0
+ *
+ */
 H5_DLL herr_t     H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
@@ -2299,10 +2883,139 @@ H5_DLL herr_t     H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void
 /* Typedefs */
 
 /* Function prototypes */
+/**
+ * \ingroup H5T
+ *
+ * \brief Commits a transient datatype to a file, creating a new named datatype
+ *
+ * \fg_loc_id
+ * \param[in] name Name given to committed datatype
+ * \param[in] type_id Identifier of datatype to be committed
+ *
+ * \return \herr_t
+ *
+ * \deprecated This function has been renamed from H5Tcommit() and is
+ *             deprecated in favor of the macro #H5Tcommit or the function
+ *             H5Tcommit2().
+ *
+ * \details H5Tcommit1() commits the transient datatype (not immutable) to
+ *          a file, turning it into a named datatype.
+ *
+ *          The datatype \p dtype_id is committed as a named datatype at the
+ *          location \p loc_id, which is either a file or group identifier,
+ *          with the name \p name.
+ *
+ *          \p name can be a relative path based at \p loc_id or an absolute
+ *          path from the root of the file. Use of this function requires
+ *          that any intermediate groups specified in the path already exist.
+ *
+ *          As is the case for any object in a group, the length of the name
+ *          of a named datatype is not limited.
+ *
+ *          See H5Tcommit_anon() for a discussion of the differences between
+ *          H5Tcommit() and H5Tcommit_anon().
+ *
+ *          This function will not accept a datatype that cannot actually
+ *          hold data. This currently includes compound datatypes with no
+ *          fields and enumerated datatypes with no members.
+ *
+ * \version 1.8.7 Function modified in this release to reject datatypes that
+ *          will not accommodate actual data, such as a compound datatype with
+ *          no fields or an enumerated datatype with no members.
+ * \version 1.8.0 C function H5Tcommit() renamed to H5Tcommit1() and deprecated
+ *          in this release.
+ * \since 1.2.0
+ *
+ */
 H5_DLL herr_t H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id);
+/**
+ * \ingroup H5T
+ *
+ * \brief Opens a named datatype
+ *
+ * \fg_loc_id
+ * \param[in] name A datatype name, defined within the specified file or group
+ *
+ * \return \herr_t
+ *
+ * \deprecated This function has been renamed from H5Topen() and is
+ *             deprecated in favor of the macro #H5Topen or the function
+ *             H5Topen2().
+ *
+ * \details H5Topen1() opens a named datatype at the location specified by
+ *          \p loc_id and returns an identifier for the datatype. \p loc_id
+ *          can be either a file or group identifier. The identifier should
+ *          eventually be closed by calling H5Tclose()  to release resources.
+ *
+ * \version 1.8.0 Function H5Topen() renamed to H5Topen1() and deprecated in
+ *          this release.
+ *
+ * \since 1.2.0
+ *
+ */
 H5_DLL hid_t  H5Topen1(hid_t loc_id, const char *name);
+/**
+ * \ingroup ARRAY
+ *
+ * \brief Creates an array datatype object
+ *
+ * \param[in] base_id Datatype identifier for the array base datatype
+ * \param[in] ndims Rank of the array
+ * \param[in] dim Size of each array dimension
+ * \param[in] perm Dimension permutation   (Currently not implemented.)
+ *
+ * \return \hid_t{array datatype}
+ *
+ * \deprecated This function has been renamed from H5Tarray_create() and is
+ *             deprecated in favor of the macro #H5Tarray_create or the function
+ *             H5Tarray_create2().
+ *
+ * \details H5Tarray_create1() creates a new array datatype object.\n\n
+ *          \p base_id is the datatype of every element of the array, i.e.,
+ *          of the number at each position in the array.
+ *
+ *          \p rank is the number of dimensions and the size of each dimension
+ *          is specified in the array dims. The value of rank is currently
+ *          limited to #H5S_MAX_RANK and must be greater than 0 (zero). All
+ *          dimension sizes specified in dims must be greater than 0 (zero).
+ *
+ *          The array \p perm is designed to contain the dimension permutation,
+ *          i.e. C versus FORTRAN array order.   (The parameter perm is
+ *          currently unused and is not yet implemented.)
+ *
+ * \version 1.8.0 Function H5Tarray_create() renamed to H5Tarray_create1()
+ *          and deprecated in this release.
+ * \since 1.4.0
+ *
+ */
 H5_DLL hid_t  H5Tarray_create1(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
                                const int perm[/* ndims */]);
+/**
+ * \ingroup ARRAY
+ *
+ * \brief Retrieves sizes of array dimensions
+ *
+ * \type_id
+ * \param[out] dims Sizes of array dimensions
+ * \param[out] perm Dimension permutations (This parameter is not used.)
+ *
+ * \return Returns the non-negative number of dimensions of the array type
+ *         if successful; otherwise, returns a negative value.
+ *
+ * \deprecated This function has been renamed from H5Tget_array_dims() and is
+ *             deprecated in favor of the macro #H5Tget_array_dims or the
+ *             function H5Tget_array_dims2().
+ *
+ * \details H5Tget_array_dims1() returns the sizes of the dimensions and
+ *          the dimension permutations of the specified array datatype object.
+ *
+ *          The sizes of the dimensions are returned in the array \p dims.
+ *
+ * \version 1.8.0 Function H5Tarray_create() renamed to H5Tarray_create1()
+ *          and deprecated in this release.
+ * \since 1.2.0
+ *
+ */
 H5_DLL int    H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int perm[]);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
