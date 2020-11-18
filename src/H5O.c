@@ -68,7 +68,7 @@ static herr_t H5O__get_info_by_name_api_common(hid_t loc_id, const char *name,
     H5O_info2_t *oinfo /*out*/, unsigned fields, hid_t lapl_id, void **token_ptr, 
     H5VL_object_t ** _vol_obj_ptr);
 
-static herr_t H5O__close_api_common(hid_t object_id);
+static htri_t H5O__close_check_common(hid_t object_id);
 
 /*********************/
 /* Package Variables */
@@ -1373,18 +1373,19 @@ done:
 } /* end H5Ovisit_by_name3() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__close_api_common
+ * Function:    H5O__close_check_common
  *
- * Purpose:     This is the common function for closing an object.
+ * Purpose:     This is the common function to validate an object
+ *              when closing it.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      TRUE/FALSE/FAIL
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__close_api_common(hid_t object_id)
+static htri_t
+H5O__close_check_common(hid_t object_id)
 {
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1414,7 +1415,7 @@ H5O__close_api_common(hid_t object_id)
         case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL,
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FALSE,
                         "not a valid file object ID (dataset, group, or datatype)")
             break;
     } /* end switch */
@@ -1448,8 +1449,8 @@ H5Oclose(hid_t object_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
-    /* Retrieve group information asynchronously */
-    if(H5O__close_api_common(object_id) < 0)
+    /* Validate the object type before closing */
+    if(H5O__close_check_common(object_id) <= 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "not a valid object")
 
     if (H5I_dec_app_ref(object_id) < 0)
@@ -1481,8 +1482,8 @@ H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line,
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, object_id, es_id);
 
-    /* Retrieve group information asynchronously */
-    if(H5O__close_api_common(object_id) < 0)
+    /* Validate the object type before closing */
+    if(H5O__close_check_common(object_id) <= 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "not a valid object")
 
     /* Prepare for possible asynchronous operation */
