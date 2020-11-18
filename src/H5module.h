@@ -11,25 +11,24 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose: This file contains declarations which define macros for the
- *          H5PL package.  Including this header means that the source file
- *          is part of the H5PL package.
+ * Purpose:	This file contains declarations which define macros for the
+ *		H5 package.  Including this header means that the source file
+ *		is part of the H5 package.
  */
-
-#ifndef _H5PLmodule_H
-#define _H5PLmodule_H
+#ifndef _H5module_H
+#define _H5module_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
  */
-#define H5PL_MODULE
-#define H5_MY_PKG      H5PL
-#define H5_MY_PKG_ERR  H5E_PLUGIN
-#define H5_MY_PKG_INIT YES
+#define H5_MODULE
+#define H5_MY_PKG       H5
+#define H5_MY_PKG_ERR   H5E_LIB
+#define H5_MY_PKG_INIT  YES
 
-/**\defgroup H5PL H5PL
- * \brief Plugins
- * \todo Describe what programmatically controlling dynamically loaded plugins (H5PL) is all about
+/**\defgroup H5 H5
+ * \brief General Library Functions
+ * \todo Describe concisely what the functions in this module are about.
  */
 
-#endif /* _H5PLmodule_H */
+#endif /* _H5module_H */
