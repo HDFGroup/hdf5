@@ -68,6 +68,8 @@ static herr_t H5O__get_info_by_name_api_common(hid_t loc_id, const char *name,
     H5O_info2_t *oinfo /*out*/, unsigned fields, hid_t lapl_id, void **token_ptr, 
     H5VL_object_t ** _vol_obj_ptr);
 
+static herr_t H5O__close_api_common(hid_t object_id);
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -195,8 +197,11 @@ H5Oopen_async(const char *app_file, const char *app_func, unsigned app_line,
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id)) < 0) {
+            if (H5I_dec_app_ref_always_close(ret_value) < 0)
+                HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -319,8 +324,11 @@ H5Oopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                H5ARG_TRACE10(FUNC, "*s*sIui*sIiIohii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE10(FUNC, "*s*sIui*sIiIohii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, lapl_id, es_id)) < 0) {
+            if (H5I_dec_app_ref_always_close(ret_value) < 0)
+                HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")            
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -703,7 +711,7 @@ H5O__get_info_by_name_api_common(hid_t loc_id, const char *name, H5O_info2_t *oi
     /* "name" is checked in H5VL_setup_name_args() */
     /* Set up object access arguments */
     if (H5VL_setup_name_args(loc_id, name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Retrieve the object's information */
     if (H5VL_object_get(*vol_obj_ptr, &loc_params, H5VL_OBJECT_GET_INFO, H5P_DATASET_XFER_DEFAULT, token_ptr,
@@ -1365,29 +1373,20 @@ done:
 } /* end H5Ovisit_by_name3() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Oclose
+ * Function:    H5O__close_api_common
  *
- * Purpose:     Close an open file object.
- *
- *              This is the companion to H5Oopen. It is used to close any
- *              open object in an HDF5 file (but not IDs are that not file
- *              objects, such as property lists and dataspaces). It has
- *              the same effect as calling H5Gclose, H5Dclose, or H5Tclose.
+ * Purpose:     This is the common function for closing an object.
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	James Laird
- *		July 14 2006
- *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5Oclose(hid_t object_id)
+static herr_t
+H5O__close_api_common(hid_t object_id)
 {
-    herr_t ret_value = SUCCEED;
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", object_id);
+    FUNC_ENTER_STATIC
 
     /* Get the type of the object and close it in the correct way */
     switch (H5I_get_type(object_id)) {
@@ -1397,8 +1396,6 @@ H5Oclose(hid_t object_id)
         case H5I_MAP:
             if (H5I_object(object_id) == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object")
-            if (H5I_dec_app_ref(object_id) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
             break;
 
         case H5I_UNINIT:
@@ -1423,8 +1420,8 @@ H5Oclose(hid_t object_id)
     } /* end switch */
 
 done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Oclose() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O__close_api_common() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Oclose
@@ -1444,6 +1441,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
+H5Oclose(hid_t object_id)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", object_id);
+
+    /* Retrieve group information asynchronously */
+    if(H5O__close_api_common(object_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "not a valid object")
+
+    if (H5I_dec_app_ref(object_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oclose() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Oclose_async
+ *
+ * Purpose:     Asynchronous version of H5Oclose
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
 H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line, 
     hid_t object_id, hid_t es_id)
 {
@@ -1456,64 +1481,36 @@ H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line,
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, object_id, es_id);
 
-    /* Get the type of the object and close it in the correct way */
-    switch (H5I_get_type(object_id)) {
-        case H5I_GROUP:
-        case H5I_DATATYPE:
-        case H5I_DATASET:
-        case H5I_MAP:
-            if (H5I_object(object_id) == NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object")
+    /* Retrieve group information asynchronously */
+    if(H5O__close_api_common(object_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "not a valid object")
 
-            /* Prepare for possible asynchronous operation */
-            if (H5ES_NONE != es_id) {
-                /* Get file object's connector */
-                if (NULL == (vol_obj = H5VL_vol_object(object_id)))
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get VOL object for object")
+    /* Prepare for possible asynchronous operation */
+    if (H5ES_NONE != es_id) {
+        /* Get file object's connector */
+        if (NULL == (vol_obj = H5VL_vol_object(object_id)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get VOL object for object")
 
-                /* Increase connector's refcount, so it doesn't get closed if closing
-                 * this object ID closes the file */
-                connector = vol_obj->connector;
-                H5VL_conn_inc_rc(connector);
+        /* Increase connector's refcount, so it doesn't get closed if closing
+         * this object ID closes the file */
+        connector = vol_obj->connector;
+        H5VL_conn_inc_rc(connector);
 
-                /* Point at token for operation to set up */
-                token_ptr = &token;
-            } /* end if */
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
 
-            /* Asynchronously decrement reference count on ID.
-             * When it reaches zero the object will be closed.
-             */
-            if (H5I_dec_app_ref_async(object_id, token_ptr) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "decrementing object ID failed")
+    /* Asynchronously decrement reference count on ID.
+     * When it reaches zero the object will be closed.
+     */
+    if (H5I_dec_app_ref_async(object_id, token_ptr) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "decrementing object ID failed")
 
-            /* If a token was created, add the token to the event set */
-            if (NULL != token)
-                if (H5ES_insert(es_id, vol_obj->connector, token, 
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token, 
                         H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, object_id, es_id)) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
-
-            break;
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_FILE:
-        case H5I_DATASPACE:
-        case H5I_ATTR:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_SPACE_SEL_ITER:
-        case H5I_EVENTSET:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL,
-                        "not a valid file object ID (dataset, group, or datatype)")
-            break;
-    } /* end switch */
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
