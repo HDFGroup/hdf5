@@ -955,7 +955,32 @@ H5_DLL ssize_t  H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
 /**
  * \ingroup MDC
  *
- * \todo Finish this!
+ * \brief Obtains current metadata cache configuration for target file
+ *
+ * \file_id
+ * \param[in,out] config_ptr Pointer to the H5AC_cache_config_t instance in which
+ *                        the current metadata cache configuration is to be
+ *                        reported. The fields of this structure are discussed
+ *                        \ref H5AC-cache-config-t "here".
+ * \return \herr_t
+ *
+ * \details H5Fget_mdc_config() loads the current metadata cache configuration
+ *          into the instance of H5AC_cache_config_t pointed to by the \p config_ptr
+ *          parameter.
+ *
+ *          Note that the \c version field of \p config_ptr must be initialized
+ *          --this allows the library to support old versions of the H5AC_cache_config_t
+ *          structure.
+ *
+ *          See the overview of the metadata cache in the special topics section of
+ *          the user manual for details on metadata cache configuration. If you haven't
+ *          read and understood that documentation, the results of this call will not
+ *          make much sense.
+ *
+ * \since 1.8.0
+ *
+ * \todo Fix the reference!
+ *
  */
 H5_DLL herr_t   H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
 /**
@@ -1282,19 +1307,141 @@ H5_DLL herr_t   H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver
 /**
  * \ingroup MDC
  *
- * \todo Finish this!
+ * \brief Starts logging metadata cache events if logging was previously enabled
+ *
+ * \file_id
+ *
+ * \return \herr_t
+ *
+ * \details The metadata cache is a central part of the HDF5 library through
+ *          which all \Emph{file metadata} reads and writes take place. File
+ *          metadata is normally invisible to the user and is used by the
+ *          library for purposes such as locating and indexing data. File
+ *          metadata should not be confused with user metadata, which consists
+ *          of attributes created by users and attached to HDF5 objects such
+ *          as datasets via H5A API calls.
+ *
+ *          Due to the complexity of the cache, a trace/logging feature has been
+ *          created that can be used by HDF5 developers for debugging and performance
+ *          analysis. The functions that control this functionality will normally be
+ *          of use to a very limited number of developers outside of The HDF Group.
+ *          The functions have been documented to help users create logs that can
+ *          be sent with bug reports.
+ *
+ *          Control of the log functionality is straightforward. Logging is enabled
+ *          via the H5Pset_mdc_log_options() function, which will modify the file
+ *          access property list used to open or create a file. This function has
+ *          a flag that determines whether logging begins at file open or starts
+ *          in a paused state. Log messages can then be controlled via the
+ *          H5Fstart_mdc_logging() and H5Fstop_mdc_logging() functions.
+ *          H5Pget_mdc_log_options() can be used to examine a file access property
+ *          list, and H5Fget_mdc_logging_status() will return the current state of
+ *          the logging flags.
+ *
+ *          The log format is described in the \Emph{Metadata Cache Logging} document.
+ *
+ * \note Logging can only be started or stopped if metadata cache logging was enabled
+ *       via H5Pset_mdc_log_options().\n
+ *       When enabled and currently logging, the overhead of the logging feature will
+ *       almost certainly be significant.\n
+ *       The log file is opened when the HDF5 file is opened or created and not when
+ *       this function is called for the first time.\n
+ *       This function opens the log file and starts logging metadata cache operations
+ *       for a particular file. Calling this function when logging has already been
+ *       enabled will be considered an error.
+ *
+ * \since 1.10.0
+ *
+ * \todo Fix the document reference!
+ *
  */
 H5_DLL herr_t   H5Fstart_mdc_logging(hid_t file_id);
 /**
  * \ingroup MDC
  *
- * \todo Finish this!
+ * \brief Stops logging metadata cache events if logging was previously enabled and is currently ongoing
+ *
+ * \file_id
+ *
+ * \return \herr_t
+ *
+ * \details The metadata cache is a central part of the HDF5 library through
+ *          which all \Emph{file metadata} reads and writes take place. File
+ *          metadata is normally invisible to the user and is used by the
+ *          library for purposes such as locating and indexing data. File
+ *          metadata should not be confused with user metadata, which consists
+ *          of attributes created by users and attached to HDF5 objects such
+ *          as datasets via H5A API calls.
+ *
+ *          Due to the complexity of the cache, a trace/logging feature has been
+ *          created that can be used by HDF5 developers for debugging and performance
+ *          analysis. The functions that control this functionality will normally be
+ *          of use to a very limited number of developers outside of The HDF Group.
+ *          The functions have been documented to help users create logs that can
+ *          be sent with bug reports.
+ *
+ *          Control of the log functionality is straightforward. Logging is enabled
+ *          via the H5Pset_mdc_log_options() function, which will modify the file
+ *          access property list used to open or create a file. This function has
+ *          a flag that determines whether logging begins at file open or starts
+ *          in a paused state. Log messages can then be controlled via the
+ *          H5Fstart_mdc_logging() and H5Fstop_mdc_logging() functions.
+ *          H5Pget_mdc_log_options() can be used to examine a file access property
+ *          list, and H5Fget_mdc_logging_status() will return the current state of
+ *          the logging flags.
+ *
+ *          The log format is described in the \Emph{Metadata Cache Logging} document.
+ *
+ * \note Logging can only be started or stopped if metadata cache logging was enabled
+ *       via H5Pset_mdc_log_options().\n
+ *       This function only suspends the logging operations. The log file will remain
+ *       open and will not be closed until the HDF5 file is closed.
+ *
+ * \since 1.10.0
+ *
  */
 H5_DLL herr_t   H5Fstop_mdc_logging(hid_t file_id);
 /**
  * \ingroup MDC
  *
- * \todo Finish this!
+ * \brief Gets the current metadata cache logging status
+ *
+ * \file_id
+ * \param[out] is_enabled Whether logging is enabled
+ * \param[out] is_currently_logging Whether events are currently being logged
+ * \return \herr_t
+ *
+ * \details The metadata cache is a central part of the HDF5 library through
+ *          which all \Emph{file metadata} reads and writes take place. File
+ *          metadata is normally invisible to the user and is used by the
+ *          library for purposes such as locating and indexing data. File
+ *          metadata should not be confused with user metadata, which consists
+ *          of attributes created by users and attached to HDF5 objects such
+ *          as datasets via H5A API calls.
+ *
+ *          Due to the complexity of the cache, a trace/logging feature has been
+ *          created that can be used by HDF5 developers for debugging and performance
+ *          analysis. The functions that control this functionality will normally be
+ *          of use to a very limited number of developers outside of The HDF Group.
+ *          The functions have been documented to help users create logs that can
+ *          be sent with bug reports.
+ *
+ *          Control of the log functionality is straightforward. Logging is enabled
+ *          via the H5Pset_mdc_log_options() function, which will modify the file
+ *          access property list used to open or create a file. This function has
+ *          a flag that determines whether logging begins at file open or starts
+ *          in a paused state. Log messages can then be controlled via the
+ *          H5Fstart_mdc_logging() and H5Fstop_mdc_logging() functions.
+ *          H5Pget_mdc_log_options() can be used to examine a file access property
+ *          list, and H5Fget_mdc_logging_status() will return the current state of
+ *          the logging flags.
+ *
+ *          The log format is described in the \Emph{Metadata Cache Logging} document.
+ *
+ * \note Unlike H5Fstart_mdc_logging() and H5Fstop_mdc_logging(), this function can
+ *       be called on any open file identifier.
+ *
+ * \since 1.10.0
  */
 H5_DLL herr_t   H5Fget_mdc_logging_status(hid_t            file_id,
                                           /*OUT*/ hbool_t *is_enabled,
