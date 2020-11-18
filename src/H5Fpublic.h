@@ -226,6 +226,7 @@ typedef enum H5F_file_space_type_t {
     H5F_FILE_SPACE_NTYPES           /**< Sentinel */
 } H5F_file_space_type_t;
 
+//! [H5F_retry_info_t_snip]
 #define H5F_NUM_METADATA_READ_RETRY_TYPES 21
 
 /**
@@ -236,6 +237,7 @@ typedef struct H5F_retry_info_t {
     unsigned  nbins;
     uint32_t *retries[H5F_NUM_METADATA_READ_RETRY_TYPES];
 } H5F_retry_info_t;
+//! [H5F_retry_info_t_snip]
 
 /**
  * Callback for H5Pset_object_flush_cb() in a file access property list
@@ -1068,13 +1070,118 @@ H5_DLL herr_t   H5Fget_info2(hid_t obj_id, H5F_info2_t *file_info);
 /**
  * \ingroup SWMR
  *
- * \todo Finish this!
+ * \brief Retrieves the collection of read retries for metadata entries with checksum
+ *
+ * \file_id
+ * \param[out] info Struct containing the collection of read retries for metadata
+ *                  entries with checksum
+ * \return \herr_t\n
+ *
+ * \details \Bold{Failure Modes:}
+ *       \li When the input identifier is not a file identifier.
+ *       \li When the pointer to the output structure is NULL.
+ *       \li When the memory allocation for \p retries failed.
+ *
+ * \details H5Fget_metadata_read_retry_info() retrieves information regarding the number
+ *          of read retries for metadata entries with checksum for the file \p file_id.
+ *          This information is reported in the H5F_retry_info_t struct defined in
+ *          H5Fpublic.h as follows:
+ *          \snippet this H5F_retry_info_t_snip
+ *          \c nbins is the number of bins for each \c retries[i] of metadata entry \c i.
+ *          It is calculated based on the current number of read attempts used in the
+ *          library and logarithmic base 10.
+ *
+ *          If read retries are incurred for a metadata entry \c i, the library will
+ *          allocate memory for \Code{retries[i] (nbins * sizeof(uint32_t)} and store
+ *          the collection of retries there. If there are no retries for a metadata entry
+ *          \c i, \Code{retries[i]} will be NULL. After a call to this routine, users should
+ *          free each \Code{retries[i]} that is non-NULL, otherwise resource leak will occur.
+ *
+ *          For the library default read attempts of 100 for SWMR access, nbins will be 2
+ *          as depicted below:
+ *          \li \Code{retries[i][0]} is the number of 1 to 9 read retries.
+ *          \li \Code{retries[i][1]} is the number of 10 to 99 read retries.
+ *          For the library default read attempts of 1 for non-SWMR access, \c nbins will
+ *          be 0 and each \Code{retries[i]} will be NULL.
+ *
+ *          The following table lists the 21 metadata entries of \Code{retries[]}:
+ *          <table>
+ *          <tr>
+ *          <th>Index for \Code{retries[]}</th>
+ *          <th>Metadata entries<sup>*</sup></th>
+ *          </tr>
+ *          <tr><td>0</td><td>Object header (version 2)</td></tr>
+ *          <tr><td>1</td><td>Object header chunk (version 2)</td></tr>
+ *          <tr><td>2</td><td>B-tree header (version 2)</td></tr>
+ *          <tr><td>3</td><td>B-tree internal node (version 2)</td></tr>
+ *          <tr><td>4</td><td>B-tree leaf node (version 2)</td></tr>
+ *          <tr><td>5</td><td>Fractal heap header</td></tr>
+ *          <tr><td>6</td><td>Fractal heap direct block (optional checksum)</td></tr>
+ *          <tr><td>7</td><td>Fractal heap indirect block</td></tr>
+ *          <tr><td>8</td><td>Free-space header</td></tr>
+ *          <tr><td>9</td><td>Free-space sections</td></tr>
+ *          <tr><td>10</td><td>Shared object header message table</td></tr>
+ *          <tr><td>11</td><td>Shared message record list</td></tr>
+ *          <tr><td>12</td><td>Extensive array header</td></tr>
+ *          <tr><td>13</td><td>Extensive array index block</td></tr>
+ *          <tr><td>14</td><td>Extensive array super block</td></tr>
+ *          <tr><td>15</td><td>Extensive array data block</td></tr>
+ *          <tr><td>16</td><td>Extensive array data block page</td></tr>
+ *          <tr><td>17</td><td>Fixed array super block</td></tr>
+ *          <tr><td>18</td><td>Fixed array data block</td></tr>
+ *          <tr><td>19</td><td>Fixed array data block page</td></tr>
+ *          <tr><td>20</td><td>File's superblock (version 2)</td></tr>
+ *          <tr><td colspan=2><sup>*</sup> All entries are of version 0 (zero) unless indicated otherwise.</td></tr>
+ *          </table>
+ *
+ * \note   On a system that is not atomic, the library might possibly read inconsistent
+ *         metadata with checksum when performing single-writer/multiple-reader (SWMR)
+ *         operations for an HDF5 file. Upon encountering such situations, the library
+ *         will try reading the metadata again for a set number of times to attempt to
+ *         obtain consistent data. The maximum number of read attempts used by the library
+ *         will be either the value set via H5Pset_metadata_read_attempts() or the library
+ *         default value when a value is not set.\n
+ *         When the current number of metadata read attempts used in the library is unable
+ *         to remedy the reading of inconsistent metadata on a system, the user can assess
+ *         the information obtained via this routine to derive a different maximum value.
+ *         The information can also be helpful for debugging purposes to identify potential
+ *         issues with metadata flush dependencies and SWMR implementation in general.
+ *
+ * \since 1.10.0
+ *
  */
 H5_DLL herr_t   H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
 /**
  * \ingroup SWMR
  *
- * \todo Finish this!
+ * \brief Retrieves free-space section information for a file
+ *
+ * \file_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Fstart_swmr_write() will activate SWMR writing mode for a file
+ *          associated with \p file_id. This routine will prepare and ensure
+ *          the file is safe for SWMR writing as follows:
+ *          \li Check that the file is opened with write access (#H5F_ACC_RDWR).
+ *          \li Check that the file is opened with the latest library format to
+ *              ensure data structures with check-summed metadata are used.
+ *          \li Check that the file is not already marked in SWMR writing mode.
+ *          \li Enable reading retries for check-summed metadata to remedy
+ *              possible checksum failures from reading inconsistent metadata
+ *              on a system that is not atomic.
+ *          \li Turn off usage of the library's accumulator to avoid possible
+ *              ordering problem on a system that is not atomic.
+ *          \li Perform a flush of the file’s data buffers and metadata to set
+ *              a consistent state for starting SWMR write operations.
+ *
+ *          Library objects are groups, datasets, and committed datatypes. For
+ *          the current implementation, groups and datasets can remain open when
+ *          activating SWMR writing mode, but not committed datatypes. Attributes
+ *          attached to objects cannot remain open either.
+ *
+ * \since 1.10.0
+ *
  */
 H5_DLL herr_t   H5Fstart_swmr_write(hid_t file_id);
 /**
