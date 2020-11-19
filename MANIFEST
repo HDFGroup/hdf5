@@ -196,6 +196,7 @@
 
 ./doxygen/aliases
 ./doxygen/Doxyfile.in
+./doxygen/dox/api-compat-macros.dox
 ./doxygen/dox/H5Acreate.dox
 ./doxygen/dox/H5Aiterate.dox
 ./doxygen/dox/H5Fget_info.dox
