@@ -2072,13 +2072,91 @@ H5_DLL herr_t   H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 /**
  * \ingroup PH5F
  *
- * \todo Finish this!
+ * \brief Sets the MPI atomicity mode
+ *
+ * \file_id
+ * \param[in] flag Logical flag for atomicity setting. Valid values are:
+ *                 \li \c 1 -- Sets MPI file access to atomic mode.
+ *                 \li \c 0 -- Sets MPI file access to nonatomic mode.
+ * \returns \herr_t
+ *
+ * \par Motivation
+ * H5Fset_mpi_atomicity() is applicable only in parallel environments using MPI I/O.
+ * The function is one of the tools used to ensure sequential consistency. This means
+ * that a set of operations will behave as though they were performed in a serial
+ * order consistent with the program order.
+ *
+ * \details
+ * \parblock
+ * H5Fset_mpi_atomicity() sets MPI consistency semantics for data access to the file,
+ * \p file_id.
+ *
+ * If \p flag is set to \c 1, all file access operations will appear atomic, guaranteeing
+ * sequential consistency. If \p flag is set to \c 0, enforcement of atomic file access
+ * will be turned off.
+ *
+ * H5Fset_mpi_atomicity() is a collective function and all participating processes must
+ * pass the same values for \p file_id and \p flag.
+ *
+ * This function is available only when the HDF5 library is configured with parallel support
+ * (\Code{--enable-parallel}). It is useful only when used with the #H5FD_MPIO driver
+ * (see H5Pset_fapl_mpio()).
+ * \endparblock
+ *
+ * \attention
+ * \parblock
+ * H5Fset_mpi_atomicity() calls \Code{MPI_File_set_atomicity} underneath and is not supported
+ * if the execution platform does not support \Code{MPI_File_set_atomicity}. When it is
+ * supported and used, the performance of data access operations may drop significantly.
+ *
+ * In certain scenarios, even when \Code{MPI_File_set_atomicity} is supported, setting
+ * atomicity with H5Fset_mpi_atomicity() and \p flag set to 1 does not always yield
+ * strictly atomic updates. For example, some H5Dwrite() calls translate to multiple
+ * \Code{MPI_File_write_at} calls. This happens in all cases where the high-level file
+ * access routine translates to multiple lower level file access routines.
+ * The following scenarios will raise this issue:
+ * \li Non-contiguous file access using independent I/O
+ * \li Partial collective I/O using chunked access
+ * \li Collective I/O using filters or when data conversion is required
+ *
+ * This issue arises because MPI atomicity is a matter of MPI file access operations rather
+ * than HDF5 access operations. But the user is normally seeking atomicity at the HDF5 level.
+ * To accomplish this, the application must set a barrier after a write, H5Dwrite(), but before
+ * the next read, H5Dread(), in addition to calling H5Fset_mpi_atomicity().The barrier will
+ * guarantee that all underlying write operations execute atomically before the read
+ * operations starts. This ensures additional ordering semantics and will normally produce
+ * the desired behavior.
+ * \endparblock
+ *
+ * \see Enabling a Strict Consistency Semantics Model in Parallel HDF5
+ *
+ * \since 1.8.9
+ *
+ * \todo Fix the reference!
  */
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
 /**
  * \ingroup PH5F
  *
- * \todo Finish this!
+ * \brief Retrieves the atomicity mode in use
+ *
+ * \file_id
+ * \param[out] flag Logical flag for atomicity setting. Valid values are:
+ *                  \li 1 -- MPI file access is set to atomic mode.
+ *                  \li 0 -- MPI file access is set to nonatomic mode.
+ * \returns \herr_t
+ *
+ * \details H5Fget_mpi_atomicity() retrieves the current consistency semantics mode for
+ *          data access for the file \p file_id.
+ *
+ *          Upon successful return, \p flag will be set to \c 1 if file access is set
+ *          to atomic mode and \c 0 if file access is set to nonatomic mode.
+ *
+ * \see Enabling a Strict Consistency Semantics Model in Parallel HDF5
+ *
+ * \since 1.8.9
+ *
+ * \todo Fix the reference!
  */
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #endif /* H5_HAVE_PARALLEL */
