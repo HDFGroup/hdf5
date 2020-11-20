@@ -120,12 +120,6 @@ static int H5I_next_type = (int)H5I_NTYPES;
 /* Declare a free list to manage the H5I_id_info_t struct */
 H5FL_DEFINE_STATIC(H5I_id_info_t);
 
-/* Declare a free list to manage the H5I_id_type_t struct */
-H5FL_DEFINE_STATIC(H5I_id_type_t);
-
-/* Declare a free list to manage the H5I_class_t struct */
-H5FL_DEFINE_STATIC(H5I_class_t);
-
 H5FL_EXTERN(H5VL_object_t);
 
 /*--------------------- Local function prototypes ---------------------------*/
@@ -178,7 +172,7 @@ H5I_term_package(void)
                 type_ptr = H5I_id_type_list_g[type];
                 if (type_ptr) {
                     HDassert(NULL == type_ptr->ids);
-                    type_ptr                 = H5FL_FREE(H5I_id_type_t, type_ptr);
+                    type_ptr = H5MM_xfree(type_ptr);
                     H5I_id_type_list_g[type] = NULL;
                     n++;
                 } /* end if */
@@ -247,7 +241,7 @@ H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I
     } /* end else */
 
     /* Allocate new ID class */
-    if (NULL == (cls = H5FL_CALLOC(H5I_class_t)))
+    if (NULL == (cls = H5MM_calloc(sizeof(H5I_class_t))))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, H5I_BADID, "ID class allocation failed")
 
     /* Initialize class fields */
@@ -267,7 +261,7 @@ done:
     /* Clean up on error */
     if (ret_value < 0)
         if (cls)
-            cls = H5FL_FREE(H5I_class_t, cls);
+            cls = H5MM_xfree(cls);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iregister_type() */
@@ -298,7 +292,7 @@ H5I_register_type(const H5I_class_t *cls)
     /* Initialize the type */
     if (NULL == H5I_id_type_list_g[cls->type_id]) {
         /* Allocate the type information for new type */
-        if (NULL == (type_ptr = (H5I_id_type_t *)H5FL_CALLOC(H5I_id_type_t)))
+        if (NULL == (type_ptr = (H5I_id_type_t *)H5MM_calloc(sizeof(H5I_id_type_t))))
             HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, FAIL, "ID type allocation failed")
         H5I_id_type_list_g[cls->type_id] = type_ptr;
     } /* end if */
@@ -325,7 +319,7 @@ done:
         if (type_ptr) {
             if (type_ptr->ids)
                 H5SL_close(type_ptr->ids);
-            (void)H5FL_FREE(H5I_id_type_t, type_ptr);
+            H5MM_free(type_ptr);
         } /* end if */
     }     /* end if */
 
@@ -700,13 +694,14 @@ H5I__destroy_type(H5I_type_t type)
 
         /* Check if we should release the ID class */
         if (type_ptr->cls->flags & H5I_CLASS_IS_APPLICATION)
-            type_ptr->cls = H5FL_FREE(H5I_class_t, (void *)type_ptr->cls);
+            type_ptr->cls = H5MM_xfree_const(type_ptr->cls);
 
     if (H5SL_close(type_ptr->ids) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEOBJ, FAIL, "can't close skip list")
     type_ptr->ids = NULL;
 
-    type_ptr                 = H5FL_FREE(H5I_id_type_t, type_ptr);
+    type_ptr = H5MM_xfree(type_ptr);
+
     H5I_id_type_list_g[type] = NULL;
 
 done:
