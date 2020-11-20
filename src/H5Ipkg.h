@@ -36,7 +36,7 @@
 /**************************/
 
 /*
- * Number of bits to use for ID Type in each atom. Increase if more types
+ * Number of bits to use for ID Type in each ID. Increase if more types
  * are needed (though this will decrease the number of available IDs per
  * type). This is the only number that must be changed since all other bit
  * field sizes and masks are calculated from TYPE_BITS.
@@ -47,13 +47,13 @@
 #define H5I_MAX_NUM_TYPES TYPE_MASK
 
 /*
- * Number of bits to use for the Atom index in each atom (assumes 8-bit
+ * Number of bits to use for the ID index in each ID (assumes 8-bit
  * bytes). We don't use the sign bit.
  */
 #define ID_BITS ((sizeof(hid_t) * 8) - (TYPE_BITS + 1))
 #define ID_MASK (((hid_t)1 << ID_BITS) - 1)
 
-/* Map an atom to an ID type number */
+/* Map an ID to an ID type number */
 #define H5I_TYPE(a) ((H5I_type_t)(((hid_t)(a) >> ID_BITS) & TYPE_MASK))
 
 /****************************/

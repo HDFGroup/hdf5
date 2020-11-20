@@ -12,43 +12,44 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * FILE:    H5I.c - Internal storage routines for handling "IDs"
+ * FILE:    H5I.c - Routines for handling IDs
  *
  * REMARKS: IDs which allow objects (void * currently) to be bundled
  *          into "types" for more general storage.
  *
- * DESIGN:  The types are stored in an array of pointers to store each
- *          type in an element. Each "type" node contains a link to a
- *          hash table to manage the IDs in each type.  Allowed types are
- *          values within the range 1 to H5I_MAX_NUM_TYPES and are given out
- *          at run-time.  Types used by the library are stored in global
- *          variables defined in H5Ipublic.h.
  */
 
-#include "H5Imodule.h" /* This source code file is part of the H5I module */
-#define H5T_FRIEND     /* Suppress error about including H5Tpkg */
+/****************/
+/* Module Setup */
+/****************/
 
+#include "H5Imodule.h" /* This source code file is part of the H5I module */
+
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5ACprivate.h" /* Metadata cache                           */
-#include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
-#include "H5Fprivate.h"  /* File access                              */
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Ipkg.h"      /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
-#include "H5Oprivate.h"  /* Object headers                           */
 #include "H5SLprivate.h" /* Skip Lists                               */
-#include "H5Tpkg.h"      /* Datatypes                                */
+#include "H5Tprivate.h"  /* Datatypes                                */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
+/****************/
 /* Local Macros */
+/****************/
 
 /* Combine a Type number and an ID index into an ID */
 #define H5I_MAKE(g, i) ((((hid_t)(g)&TYPE_MASK) << ID_BITS) | ((hid_t)(i)&ID_MASK))
 
-/* Local typedefs */
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* ID information structure used */
 typedef struct H5I_id_info_t {
@@ -101,10 +102,33 @@ typedef struct {
     hbool_t        app_ref;  /* Whether this is an appl. ref. call */
 } H5I_clear_type_ud_t;
 
+/********************/
+/* Package Typedefs */
+/********************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+static void *         H5I__unwrap(void *object, H5I_type_t type);
+static htri_t         H5I__clear_type_cb(void *_id, void *key, void *udata);
+static int            H5I__destroy_type(H5I_type_t type);
+static void *         H5I__remove_verify(hid_t id, H5I_type_t id_type);
+static void *         H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id);
+static int            H5I__inc_type_ref(H5I_type_t type);
+static int            H5I__get_type_ref(H5I_type_t type);
+static int            H5I__search_cb(void *obj, hid_t id, void *_udata);
+static H5I_id_info_t *H5I__find_id(hid_t id);
+static int            H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
+static int            H5I__find_id_cb(void *_item, void *_key, void *_udata);
+static int            H5I__id_dump_cb(void *_item, void *_key, void *_udata);
+
+/*********************/
+/* Package Variables */
+/*********************/
+
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
-
-/*-------------------- Locally scoped variables -----------------------------*/
 
 /* Array of pointers to ID types */
 static H5I_id_type_t *H5I_id_type_list_g[H5I_MAX_NUM_TYPES];
@@ -120,21 +144,14 @@ static int H5I_next_type_g = (int)H5I_NTYPES;
 /* Declare a free list to manage the H5I_id_info_t struct */
 H5FL_DEFINE_STATIC(H5I_id_info_t);
 
-H5FL_EXTERN(H5VL_object_t);
+/*****************************/
+/* Library Private Variables */
+/*****************************/
 
-/*--------------------- Local function prototypes ---------------------------*/
-static void *         H5I__unwrap(void *object, H5I_type_t type);
-static htri_t         H5I__clear_type_cb(void *_id, void *key, void *udata);
-static int            H5I__destroy_type(H5I_type_t type);
-static void *         H5I__remove_verify(hid_t id, H5I_type_t id_type);
-static void *         H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id);
-static int            H5I__inc_type_ref(H5I_type_t type);
-static int            H5I__get_type_ref(H5I_type_t type);
-static int            H5I__search_cb(void *obj, hid_t id, void *_udata);
-static H5I_id_info_t *H5I__find_id(hid_t id);
-static int            H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
-static int            H5I__find_id_cb(void *_item, void *_key, void *_udata);
-static int            H5I__id_dump_cb(void *_item, void *_key, void *_udata);
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5I_term_package
@@ -245,7 +262,7 @@ H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I
         HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, H5I_BADID, "ID class allocation failed")
 
     /* Initialize class fields */
-    cls->type_id   = new_type;
+    cls->type      = new_type;
     cls->flags     = H5I_CLASS_IS_APPLICATION;
     cls->reserved  = reserved;
     cls->free_func = free_func;
@@ -287,18 +304,18 @@ H5I_register_type(const H5I_class_t *cls)
 
     /* Sanity check */
     HDassert(cls);
-    HDassert(cls->type_id > 0 && (int)cls->type_id < H5I_MAX_NUM_TYPES);
+    HDassert(cls->type > 0 && (int)cls->type < H5I_MAX_NUM_TYPES);
 
     /* Initialize the type */
-    if (NULL == H5I_id_type_list_g[cls->type_id]) {
+    if (NULL == H5I_id_type_list_g[cls->type]) {
         /* Allocate the type information for new type */
         if (NULL == (type_ptr = (H5I_id_type_t *)H5MM_calloc(sizeof(H5I_id_type_t))))
             HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, FAIL, "ID type allocation failed")
-        H5I_id_type_list_g[cls->type_id] = type_ptr;
+        H5I_id_type_list_g[cls->type] = type_ptr;
     }
     else {
         /* Get the pointer to the existing type */
-        type_ptr = H5I_id_type_list_g[cls->type_id];
+        type_ptr = H5I_id_type_list_g[cls->type];
     }
 
     /* Initialize the ID type structure for new types */
@@ -599,7 +616,7 @@ H5I__clear_type_cb(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
                     HDfprintf(H5DEBUG(I),
                               "H5I: free type=%d obj=0x%08lx "
                               "failure ignored\n",
-                              (int)udata->type_ptr->cls->type_id, (unsigned long)(info->object));
+                              (int)udata->type_ptr->cls->type, (unsigned long)(info->object));
                 }
 #endif /* H5I_DEBUG */
 

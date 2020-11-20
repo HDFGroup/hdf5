@@ -11,18 +11,18 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
+ * Programmer:  Quincey Koziol
+ *              Saturday, September 12, 2015
  *
- * Purpose:	This file contains declarations which define macros for the
- *		H5I package.  Including this header means that the source file
- *		is part of the H5I package.
+ * Purpose:     This file contains declarations which define macros for the
+ *              H5I package.  Including this header means that the source file
+ *              is part of the H5I package.
  */
 #ifndef _H5Imodule_H
 #define _H5Imodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
- *      reporting macros.
+ * reporting macros.
  */
 #define H5I_MODULE
 #define H5_MY_PKG      H5I
