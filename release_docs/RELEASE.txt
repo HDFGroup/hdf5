@@ -43,7 +43,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.20
+- Bug Fixes since HDF5-1.8.21
 - Supported Platforms
 - Supported Configuration Features Summary
 - More Tested Platforms
