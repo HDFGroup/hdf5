@@ -99,7 +99,7 @@ H5_DLLVAR int H5I_next_type_g;
 /******************************/
 
 H5_DLL int            H5I__destroy_type(H5I_type_t type);
-H5_DLL void *         H5I__remove_verify(hid_t id, H5I_type_t id_type);
+H5_DLL void *         H5I__remove_verify(hid_t id, H5I_type_t type);
 H5_DLL int            H5I__inc_type_ref(H5I_type_t type);
 H5_DLL int            H5I__get_type_ref(H5I_type_t type);
 H5_DLL H5I_id_info_t *H5I__find_id(hid_t id);

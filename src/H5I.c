@@ -338,20 +338,20 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5Iobject_verify(hid_t id, H5I_type_t id_type)
+H5Iobject_verify(hid_t id, H5I_type_t type)
 {
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE2("*x", "iIt", id, id_type);
+    H5TRACE2("*x", "iIt", id, type);
 
     /* Validate parameters */
-    if (H5I_IS_LIB_TYPE(id_type))
+    if (H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
-    if (id_type < 1 || (int)id_type >= H5I_next_type_g)
+    if (type < 1 || (int)type >= H5I_next_type_g)
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "identifier has invalid type")
 
-    ret_value = H5I_object_verify(id, id_type);
+    ret_value = H5I_object_verify(id, type);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -407,18 +407,18 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5Iremove_verify(hid_t id, H5I_type_t id_type)
+H5Iremove_verify(hid_t id, H5I_type_t type)
 {
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE2("*x", "iIt", id, id_type);
+    H5TRACE2("*x", "iIt", id, type);
 
-    if (H5I_IS_LIB_TYPE(id_type))
+    if (H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
 
     /* Remove the id */
-    ret_value = H5I__remove_verify(id, id_type);
+    ret_value = H5I__remove_verify(id, type);
 
 done:
     FUNC_LEAVE_API(ret_value)

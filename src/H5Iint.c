@@ -670,17 +670,17 @@ H5I_object(hid_t id)
  *-------------------------------------------------------------------------
  */
 void *
-H5I_object_verify(hid_t id, H5I_type_t id_type)
+H5I_object_verify(hid_t id, H5I_type_t type)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID info */
     void *         ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(id_type >= 1 && (int)id_type < H5I_next_type_g);
+    HDassert(type >= 1 && (int)type < H5I_next_type_g);
 
     /* Verify that the type of the ID is correct & lookup the ID */
-    if (id_type == H5I_TYPE(id) && NULL != (info = H5I__find_id(id))) {
+    if (type == H5I_TYPE(id) && NULL != (info = H5I__find_id(id))) {
         /* Get the object pointer to return */
         H5_GCC_DIAG_OFF("cast-qual")
         ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
@@ -741,21 +741,21 @@ H5I_get_type(hid_t id)
 htri_t
 H5I_is_file_object(hid_t id)
 {
-    H5I_type_t id_type   = H5I_get_type(id);
+    H5I_type_t type      = H5I_get_type(id);
     htri_t     ret_value = FAIL;
 
     FUNC_ENTER_NOAPI(FAIL);
 
     /* Fail if the ID type is out of range */
-    if (id_type < 1 || id_type >= H5I_NTYPES)
+    if (type < 1 || type >= H5I_NTYPES)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID type out of range");
 
     /* Return TRUE if the ID is a file object (dataset, group, map, or committed
      * datatype), FALSE otherwise.
      */
-    if (H5I_DATASET == id_type || H5I_GROUP == id_type || H5I_MAP == id_type)
+    if (H5I_DATASET == type || H5I_GROUP == type || H5I_MAP == type)
         ret_value = TRUE;
-    else if (H5I_DATATYPE == id_type) {
+    else if (H5I_DATATYPE == type) {
 
         H5T_t *dt = NULL;
 
@@ -788,7 +788,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5I__remove_verify(hid_t id, H5I_type_t id_type)
+H5I__remove_verify(hid_t id, H5I_type_t type)
 {
     void *ret_value = NULL; /*return value            */
 
@@ -797,7 +797,7 @@ H5I__remove_verify(hid_t id, H5I_type_t id_type)
     /* Argument checking will be performed by H5I_remove() */
 
     /* Verify that the type of the ID is correct */
-    if (id_type == H5I_TYPE(id))
+    if (type == H5I_TYPE(id))
         ret_value = H5I_remove(id);
 
     FUNC_LEAVE_NOAPI(ret_value)
