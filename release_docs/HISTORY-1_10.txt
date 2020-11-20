@@ -3,6 +3,7 @@ HDF5 History
 
 This file contains development history of the HDF5 1.10 branch
 
+09.      Release Information for hdf5-1.10.7
 08.      Release Information for hdf5-1.10.6
 07.      Release Information for hdf5-1.10.5
 06.      Release Information for hdf5-1.10.4
