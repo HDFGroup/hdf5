@@ -33,7 +33,6 @@ CONTENTS
 - New Features
 - Support for new platforms and languages
 - Bug Fixes since HDF5-1.12.0-alpha1
-- Major Bug Fixes since HDF5-1.10.0
 - Supported Platforms
 - Tested Configuration Features Summary
 - More Tested Platforms
@@ -48,116 +47,116 @@ New Features
     -------------
     - Autotools and CMake target added to produce doxygen generated documentation
 
-      The default is OFF or disabled.
-      Autoconf option is '--enable-doxygen'
+        The default is OFF or disabled.
+        Autoconf option is '--enable-doxygen'
           autotools make target is 'doxygen' and will build all doxygen targets
-      CMake configure option is 'HDF5_BUILD_DOC'.
+        CMake configure option is 'HDF5_BUILD_DOC'.
           CMake target is 'doxygen' for all available doxygen targets
           CMake target is 'hdf5lib_doc' for the src subdirectory
 
-      (ADB - 2020/11/13)
+        (ADB - 2020/11/13)
 
     - CMake option to use MSVC naming conventions with MinGW
 
-      HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
-      when using a MinGW toolchain
+        HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
+        when using a MinGW toolchain
 
-      (xan - 2020/10/30)
+        (xan - 2020/10/30)
 
     - CMake option to statically link gcc libs with MinGW
 
-      HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
-      with the MinGW toolchain
+        HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
+        with the MinGW toolchain
 
-      (xan - 2020/10/30)
+        (xan - 2020/10/30)
 
     - CMake option to build the HDF filter plugins project as an external project
 
-      The HDF filter plugins project is a collection of registered compression
-      filters that can be dynamically loaded when needed to access data stored
-      in a hdf5 file. This CMake-only option allows the plugins to be built and
-      distributed with the hdf5 library and tools. Like the options for szip and
-      zlib, either a tgz file or a git repository can be specified for the source.
+        The HDF filter plugins project is a collection of registered compression
+        filters that can be dynamically loaded when needed to access data stored
+        in a hdf5 file. This CMake-only option allows the plugins to be built and
+        distributed with the hdf5 library and tools. Like the options for szip and
+        zlib, either a tgz file or a git repository can be specified for the source.
 
-      The necessary options are (see the INSTALL_CMake.txt file):
+        The necessary options are (see the INSTALL_CMake.txt file):
           HDF5_ENABLE_PLUGIN_SUPPORT
           PLUGIN_TGZ_NAME or PLUGIN_GIT_URL
-      There are more options necessary for various filters and the plugin project
-      documents should be referenced.
+        There are more options necessary for various filters and the plugin project
+        documents should be referenced.
 
       (ADB - 2020/10/16, OESS-98)
 
     - Added CMake option to format source files
 
-      HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
-      pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
-      or tool folder. All sources can be formatted by executing the format target;
-         make format
+        HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
+        pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
+        or tool folder. All sources can be formatted by executing the format target;
+        make format
 
-      (ADB - 2020/09/24)
+        (ADB - 2020/09/24)
 
     - CMake option to link the generated Fortran MOD files into the include
-      directory.
+        directory.
 
-      The Fortran generation of MOD files by a Fortran compile can produce
-      different binary files between SHARED and STATIC compiles with different
-      compilers and/or different platforms. Note that it has been found that
-      different versions of Fortran compilers will produce incompatible MOD
-      files. Currently, CMake will locate these MOD files in subfolders of
-      the include directory and add that path to the Fortran library target
-      in the CMake config file, which can be used by the CMake find library
-      process. For other build systems using the binary from a CMake install,
-      a new CMake configuration can be used to copy the pre-chosen version
-      of the Fortran MOD files into the install include directory.
+        The Fortran generation of MOD files by a Fortran compile can produce
+        different binary files between SHARED and STATIC compiles with different
+        compilers and/or different platforms. Note that it has been found that
+        different versions of Fortran compilers will produce incompatible MOD
+        files. Currently, CMake will locate these MOD files in subfolders of
+        the include directory and add that path to the Fortran library target
+        in the CMake config file, which can be used by the CMake find library
+        process. For other build systems using the binary from a CMake install,
+        a new CMake configuration can be used to copy the pre-chosen version
+        of the Fortran MOD files into the install include directory.
 
-      The default will depend on the configuration of
-      BUILD_STATIC_LIBS and BUILD_SHARED_LIBS:
+        The default will depend on the configuration of
+        BUILD_STATIC_LIBS and BUILD_SHARED_LIBS:
             YES                   YES         Default to SHARED
             YES                   NO          Default to STATIC
             NO                    YES         Default to SHARED
             NO                    NO          Default to SHARED
-      The defaults can be overriden by setting the config option
-         HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
+        The defaults can be overriden by setting the config option
+            HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
 
-      (ADB - 2020/07/9, HDFFV-11116)
+        (ADB - 2020/07/9, HDFFV-11116)
 
     - CMake option to use AEC (open source SZip) library instead of SZip
 
-      The open source AEC library is a replacement library for SZip. In
-      order to use it for hdf5 the libaec CMake source was changed to add
-      "-fPIC" and exclude test files. Autotools does not build the
-      compression libraries within hdf5 builds. New option USE_LIBAEC is
-      required to compensate for the different files produced by AEC build.
+        The open source AEC library is a replacement library for SZip. In
+        order to use it for hdf5 the libaec CMake source was changed to add
+        "-fPIC" and exclude test files. Autotools does not build the
+        compression libraries within hdf5 builds. New option USE_LIBAEC is
+        required to compensate for the different files produced by AEC build.
 
-      (ADB - 2020/04/22, OESS-65)
+        (ADB - 2020/04/22, OESS-65)
 
     - CMake ConfigureChecks.cmake file now uses CHECK_STRUCT_HAS_MEMBER
 
-      Some handcrafted tests in HDFTests.c has been removed and the CMake
-      CHECK_STRUCT_HAS_MEMBER module has been used.
+        Some handcrafted tests in HDFTests.c has been removed and the CMake
+        CHECK_STRUCT_HAS_MEMBER module has been used.
 
-      (ADB - 2020/03/24, TRILAB-24)
+        (ADB - 2020/03/24, TRILAB-24)
 
     - Both build systems use same set of warnings flags
 
-      GNU C, C++ and gfortran warnings flags were moved to files in a config
-      sub-folder named gnu-warnings. Flags that only are available for a specific
-      version of the compiler are in files named with that version.
-      Clang C warnings flags were moved to files in a config sub-folder
-      named clang-warnings.
-      Intel C, Fortran warnings flags were moved to files in a config sub-folder
-      named intel-warnings.
+        GNU C, C++ and gfortran warnings flags were moved to files in a config
+        sub-folder named gnu-warnings. Flags that only are available for a specific
+        version of the compiler are in files named with that version.
+        Clang C warnings flags were moved to files in a config sub-folder
+        named clang-warnings.
+        Intel C, Fortran warnings flags were moved to files in a config sub-folder
+        named intel-warnings.
 
-      There are flags in named "error-xxx" files with warnings that may
-      be promoted to errors. Some source files may still need fixes.
+        There are flags in named "error-xxx" files with warnings that may
+        be promoted to errors. Some source files may still need fixes.
 
-      There are also pairs of files named "developer-xxx" and "no-developer-xxx"
-      that are chosen by the CMake option:HDF5_ENABLE_DEV_WARNINGS or the
-      configure option:--enable-developer-warnings.
+        There are also pairs of files named "developer-xxx" and "no-developer-xxx"
+        that are chosen by the CMake option:HDF5_ENABLE_DEV_WARNINGS or the
+        configure option:--enable-developer-warnings.
 
-      In addition, CMake no longer applies these warnings for examples.
+        In addition, CMake no longer applies these warnings for examples.
 
-      (ADB - 2020/03/24, TRILAB-192)
+        (ADB - 2020/03/24, TRILAB-192)
 
 
     Library:
@@ -165,32 +164,32 @@ New Features
     - Added two new API routines for tracking library memory use:
         H5get_alloc_stats() and H5get_free_list_sizes().
 
-      (QAK - 2020/03/25)
+        (QAK - 2020/03/25)
 
     Java Library:
     ----------------
     - Added new H5S functions.
 
-      H5Sselect_copy, H5Sselect_shape_same, H5Sselect_adjust,
-      H5Sselect_intersect_block, H5Sselect_project_intersection,
-      H5Scombine_hyperslab, H5Smodify_select, H5Scombine_select
-      wrapper functions added.
+        H5Sselect_copy, H5Sselect_shape_same, H5Sselect_adjust,
+        H5Sselect_intersect_block, H5Sselect_project_intersection,
+        H5Scombine_hyperslab, H5Smodify_select, H5Scombine_select
+        wrapper functions added.
 
-      (ADB - 2020/10/27, HDFFV-10868)
+        (ADB - 2020/10/27, HDFFV-10868)
 
 
     Tools:
     ------
     - h5repack added options to control how external links are handled.
 
-      Currently h5repack preserves external links and cannot copy and merge
-      data from the external files. Two options, merge and prune, were added to
-      control how to merge data from an external link into the resulting file.
-       --merge             Follow external soft link recursively and merge data.
-       --prune             Do not follow external soft links and remove link.
-       --merge --prune     Follow external link, merge data and remove dangling link.
+        Currently h5repack preserves external links and cannot copy and merge
+        data from the external files. Two options, merge and prune, were added to
+        control how to merge data from an external link into the resulting file.
+           --merge             Follow external soft link recursively and merge data.
+           --prune             Do not follow external soft links and remove link.
+           --merge --prune     Follow external link, merge data and remove dangling link.
 
-      (ADB - 2020/08/05, HDFFV-9984)
+        (ADB - 2020/08/05, HDFFV-9984)
 
 
 Support for new platforms, languages and compilers.
@@ -205,82 +204,83 @@ Bug Fixes since HDF5-1.12.0 release
         have no entries to contribute.  This fixes parallel regression test
         failures with IBM SpectrumScale MPI on the Summit system at ORNL.
 
-      (QAK - 2020/09/02)
+        (QAK - 2020/09/02)
 
     - Avoid setting up complex MPI types with 0-length vectors, which some
         MPI implementations don't handle well.  (In particular, IBM
         SpectrumScale MPI on the Summit system at ORNL)
 
-      (QAK - 2020/08/21)
+        (QAK - 2020/08/21)
 
     - Explicitly declared dlopen to use RTLD_LOCAL
 
-      dlopen documentation states that if neither RTLD_GLOBAL nor
-      RTLD_LOCAL are specified, then the default behavior is unspecified.
-      The default on linux is usually RTLD_LOCAL while macos will default
-      to RTLD_GLOBAL.
+        dlopen documentation states that if neither RTLD_GLOBAL nor
+        RTLD_LOCAL are specified, then the default behavior is unspecified.
+        The default on linux is usually RTLD_LOCAL while macos will default
+        to RTLD_GLOBAL.
 
-      (ADB - 2020/08/12, HDFFV-11127)
+        (ADB - 2020/08/12, HDFFV-11127)
+
+    - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
+        causes asserts/errors when passed to other dataspace API calls.
+
+        H5S_NO_CLASS is an internal class value that should not have been
+        exposed via a public API call.
+
+        In debug builds of the library, this can cause asserts to trip. In
+        non-debug builds, it will produce normal library errors.
+
+        The new library behavior is for H5Sset_extent_none() to convert
+        the dataspace into one of type H5S_NULL, which is better handled
+         by the library and easier for developers to reason about.
+
+        (DER - 2020/07/27, HDFFV-11027)
 
     - Fixed the segmentation fault when reading attributes with multiple threads
 
-      It was reported that the reading of attributes with variable length string
-      datatype will crash with segmentation fault particularly when the number of
-      threads is high (>16 threads).  The problem was due to the file pointer that
-      was set in the variable length string datatype for the attribute.  That file
-      pointer was already closed when the attribute was accessed.
+        It was reported that the reading of attributes with variable length string
+        datatype will crash with segmentation fault particularly when the number of
+        threads is high (>16 threads).  The problem was due to the file pointer that
+        was set in the variable length string datatype for the attribute.  That file
+        pointer was already closed when the attribute was accessed.
 
-      The problem was fixed by setting the file pointer to the current opened file pointer
-      when the attribute was accessed.  Similar patch up was done before when reading
-      dataset with variable length string datatype.
+        The problem was fixed by setting the file pointer to the current opened file pointer
+        when the attribute was accessed.  Similar patch up was done before when reading
+        dataset with variable length string datatype.
 
-      (VC - 2020/07/13, HDFFV-11080)
+        (VC - 2020/07/13, HDFFV-11080)
 
     - Reduce overhead for H5open(), which is involved in public symbols like
         H5T_NATIVE_INT, etc.
 
-      (QAK - 2020/06/18)
+        (QAK - 2020/06/18)
 
     - Cache last ID looked up for an ID type (dataset, datatype, file, etc),
         improving performance when accessing the same ID repeatedly.
 
-      (QAK - 2020/06/11)
+        (QAK - 2020/06/11)
 
     - Streamline I/O to a single element, improving performance for record
         appends to chunked datasets.
 
-      (QAK - 2020/06/11)
+        (QAK - 2020/06/11)
 
     - Remove redundant tagging of metadata cache entries for some chunked
         dataset operations, slightly improving performance for chunked
         datasets.
 
-      (QAK - 2020/06/10)
+        (QAK - 2020/06/10)
 
     - Better detect selections with the same shape, improving performance for
         some uses of H5DOappend (and other situations).
 
-      (QAK - 2020/06/07)
+        (QAK - 2020/06/07)
 
     - Don't allocate an empty (0-dimensioned) chunked dataset's chunk
         index, until the dataset's dimensions are increased.
 
-      (QAK - 2020/05/07)
+        (QAK - 2020/05/07)
 
-    - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
-      causes asserts/errors when passed to other dataspace API calls.
-
-      H5S_NO_CLASS is an internal class value that should not have been
-      exposed via a public API call.
-
-      In debug builds of the library, this can cause asserts to trip. In
-      non-debug builds, it will produce normal library errors.
-
-      The new library behavior is for H5Sset_extent_none() to convert
-      the dataspace into one of type H5S_NULL, which is better handled
-      by the library and easier for developers to reason about.
-
-      (DER - 2020/07/27, HDFFV-11027)
 
     Tools:
     ------
@@ -291,26 +291,26 @@ Bug Fixes since HDF5-1.12.0 release
 
     - Fixed configure issue when building HDF5 with NAG Fortran 7.0.
 
-    HDF5 now accounts for the addition of half-precision floating-point
-    in NAG 7.0 with a KIND=16.
+        HDF5 now accounts for the addition of half-precision floating-point
+        in NAG 7.0 with a KIND=16.
 
-    (MSB - 2020/02/28, HDFFV-11033)
+        (MSB - 2020/02/28, HDFFV-11033)
 
     High-Level Library
     ------------------
     - Eliminated unnecessary code in H5DOappend(), improving its performance.
 
-      (QAK - 2020/06/05)
+        (QAK - 2020/06/05)
 
     Testing
     -------
     - Stopped java/test/junit.sh.in installing libs for testing under ${prefix}
 
-      Lib files needed are now copied to a subdirectory in the java/test
-      directory, and on Macs the loader path for libhdf5.xxxs.so is changed
-      in the temporary copy of libhdf5_java.dylib.
+        Lib files needed are now copied to a subdirectory in the java/test
+        directory, and on Macs the loader path for libhdf5.xxxs.so is changed
+        in the temporary copy of libhdf5_java.dylib.
 
-      (LRK, 2020/7/2, HDFFV-11063)
+        (LRK, 2020/7/2, HDFFV-11063)
 
 
 Supported Platforms

@@ -1,33 +1,24 @@
-HDF5 version 1.11.6 currently under development
-================================================================================
+HDF5  HISTORY
+=============
 
 
 INTRODUCTION
 
-This document describes the differences between this release and the previous
-HDF5 release. It contains information on the platforms tested and known
-problems in this release. For more details check the HISTORY*.txt files in the
+This document describes the differences between the HDF5-1.10.0 and
+HDF5 1.12.0 releases. For more details check the HISTORY*.txt files in the
 HDF5 source.
 
-Note that documentation in the links below will be updated at the time of each
-final release.
+Information about supported and tested platforms is provided for historical
+reasons only and may not be accurate.
 
-Links to HDF5 documentation can be found on The HDF5 web page:
 
-     https://portal.hdfgroup.org/display/HDF5/HDF5
+For more information, see the HDF5 home page:
 
-The official HDF5 releases can be obtained from:
-
-     https://www.hdfgroup.org/downloads/hdf5/
-
-Changes from Release to Release and New Features in the HDF5-1.10.x release series
-can be found at:
-
-     https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
+    http://www.hdfgroup.org/HDF5/
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
-     help@hdfgroup.org
+    help@hdfgroup.org
 
 
 CONTENTS
@@ -200,7 +191,7 @@ New Features
       files.
 
       (JS - 2019/10/08)
-    
+
     - Add S3 and HDFS VFDs to HDF5 maintenance
 
       Fix windows requirements and java tests. Windows requires CMake 3.13.
@@ -380,7 +371,7 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
-    - Improved peformance when creating a large number of small datasets by
+    - Improved performance when creating a large number of small datasets by
       retrieving default property values from the API context instead of doing
       skip list searches.
 
