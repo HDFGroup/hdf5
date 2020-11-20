@@ -1,0 +1,146 @@
+#-------------------------------------------------------------------------------
+# Plugins must be built SHARED
+#-------------------------------------------------------------------------------
+macro (EXTERNAL_PLUGIN_LIBRARY compress_type)
+  if (${compress_type} MATCHES "GIT")
+    EXTERNALPROJECT_ADD (PLUGIN
+        GIT_REPOSITORY ${PLUGIN_URL}
+        GIT_TAG ${PLUGIN_BRANCH}
+        LIST_SEPARATOR |
+        INSTALL_COMMAND ""
+        CMAKE_ARGS
+            -DUSE_SHARED_LIBS:BOOL=ON
+            -DBUILD_SHARED_LIBS:BOOL=ON
+            -DH5PL_ALLOW_EXTERNAL_SUPPORT:STRING=${HDF5_ALLOW_EXTERNAL_SUPPORT}
+            -DBUILD_TESTING:STRING=OFF
+            -DBUILD_EXAMPLES:STRING=OFF
+            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+            -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+            -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+            -DCMAKE_PDB_OUTPUT_DIRECTORY:PATH=${CMAKE_PDB_OUTPUT_DIRECTORY}
+            -DDISABLE_PLUGIN_ENCODER:BOOL=OFF
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+            -DCMAKE_TOOLCHAIN_FILE:STRING=${CMAKE_TOOLCHAIN_FILE}
+            # the hdf5 settings
+            -DHDF5_PACKAGE_NAME:STRING=hdf5
+            -DHDF5_HDF5_HEADER:STRING=h5pubconf.h
+            -DHDF5_LINK_LIBS:STRING=$<TARGET_LINKER_FILE:${HDF5_LIBSH_TARGET}>
+            -DHDF5_INCLUDE_DIR:PATH=${HDF5_SRC_DIR}|${HDF5_SRC_BINARY_DIR}
+            -DPL_PACKAGE_NAME:STRING=${PLUGIN_PACKAGE_NAME}
+            -DH5PL_CPACK_ENABLE:BOOL=ON
+            -DHDF5_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}
+            -DTGZPATH:PATH=${TGZPATH}
+            # the filters
+            -DBSHUF_TGZ_NAME:STRING=${BSHUF_TGZ_NAME}
+            -DBSHUF_PACKAGE_NAME:STRING=${BSHUF_PACKAGE_NAME}
+            -DBLOSC_TGZ_NAME:STRING=${BLOSC_TGZ_NAME}
+            -DBLOSC_PACKAGE_NAME:STRING=${BLOSC_PACKAGE_NAME}
+            -DZLIB_TGZ_NAME:STRING=${ZLIB_TGZ_NAME}
+            -DZLIB_PACKAGE_NAME:STRING=${ZLIB_PACKAGE_NAME}
+            -DBZ2_TGZ_NAME:STRING=${BZ2_TGZ_NAME}
+            -DBZ2_PACKAGE_NAME:STRING=${BZ2_PACKAGE_NAME}
+            #-DFPZIP_TGZ_NAME:STRING=${FPZIP_TGZ_NAME}
+            #-DFPZIP_PACKAGE_NAME:STRING=${FPZIP_PACKAGE_NAME}
+            -DJPEG_TGZ_NAME:STRING=${JPEG_TGZ_NAME}
+            -DJPEG_PACKAGE_NAME:STRING=${JPEG_PACKAGE_NAME}
+            -DLZ4_TGZ_NAME:STRING=${LZ4_TGZ_NAME}
+            -DLZ4_PACKAGE_NAME:STRING=${LZ4_PACKAGE_NAME}
+            -DLZF_TGZ_NAME:STRING=${LZF_TGZ_NAME}
+            -DLZF_PACKAGE_NAME:STRING=${LZF_PACKAGE_NAME}
+            -DSZF_TGZ_NAME:STRING=${SZF_TGZ_NAME}
+            -DSZF_PACKAGE_NAME:STRING=${SZF_PACKAGE_NAME}
+            -DZFP_TGZ_NAME:STRING=${ZFP_TGZ_NAME}
+            -DZFP_PACKAGE_NAME:STRING=${ZFP_PACKAGE_NAME}
+    )
+  elseif (${compress_type} MATCHES "TGZ")
+    EXTERNALPROJECT_ADD (PLUGIN
+        URL ${PLUGIN_URL}
+        URL_MD5 ""
+        LIST_SEPARATOR |
+        INSTALL_COMMAND ""
+        CMAKE_ARGS
+            -DUSE_SHARED_LIBS:BOOL=ON
+            -DBUILD_SHARED_LIBS:BOOL=ON
+            -DH5PL_ALLOW_EXTERNAL_SUPPORT:STRING=${HDF5_ALLOW_EXTERNAL_SUPPORT}
+            -DBUILD_TESTING:STRING=OFF
+            -DBUILD_EXAMPLES:STRING=OFF
+            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+            -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+            -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+            -DCMAKE_PDB_OUTPUT_DIRECTORY:PATH=${CMAKE_PDB_OUTPUT_DIRECTORY}
+            -DDISABLE_PLUGIN_ENCODER:BOOL=OFF
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+            -DCMAKE_TOOLCHAIN_FILE:STRING=${CMAKE_TOOLCHAIN_FILE}
+            # the hdf5 settings
+            -DHDF5_PACKAGE_NAME:STRING=hdf5
+            -DHDF5_HDF5_HEADER:STRING=h5pubconf.h
+            -DHDF5_LINK_LIBS:STRING=$<TARGET_LINKER_FILE:${HDF5_LIBSH_TARGET}>
+            -DHDF5_INCLUDE_DIR:PATH=${HDF5_SRC_DIR}|${HDF5_SRC_BINARY_DIR}
+            -DPL_PACKAGE_NAME:STRING=${PLUGIN_PACKAGE_NAME}
+            -DH5PL_CPACK_ENABLE:BOOL=ON
+            -DHDF5_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}
+            -DTGZPATH:PATH=${TGZPATH}
+            # the filters
+            -DBSHUF_TGZ_NAME:STRING=${BSHUF_TGZ_NAME}
+            -DBSHUF_PACKAGE_NAME:STRING=${BSHUF_PACKAGE_NAME}
+            -DBLOSC_TGZ_NAME:STRING=${BLOSC_TGZ_NAME}
+            -DBLOSC_PACKAGE_NAME:STRING=${BLOSC_PACKAGE_NAME}
+            -DZLIB_TGZ_NAME:STRING=${ZLIB_TGZ_NAME}
+            -DZLIB_PACKAGE_NAME:STRING=${ZLIB_PACKAGE_NAME}
+            -DBZ2_TGZ_NAME:STRING=${BZ2_TGZ_NAME}
+            -DBZ2_PACKAGE_NAME:STRING=${BZ2_PACKAGE_NAME}
+            #-DFPZIP_TGZ_NAME:STRING=${FPZIP_TGZ_NAME}
+            #-DFPZIP_PACKAGE_NAME:STRING=${FPZIP_PACKAGE_NAME}
+            -DJPEG_TGZ_NAME:STRING=${JPEG_TGZ_NAME}
+            -DJPEG_PACKAGE_NAME:STRING=${JPEG_PACKAGE_NAME}
+            -DLZ4_TGZ_NAME:STRING=${LZ4_TGZ_NAME}
+            -DLZ4_PACKAGE_NAME:STRING=${LZ4_PACKAGE_NAME}
+            -DLZF_TGZ_NAME:STRING=${LZF_TGZ_NAME}
+            -DLZF_PACKAGE_NAME:STRING=${LZF_PACKAGE_NAME}
+            -DSZF_TGZ_NAME:STRING=${SZF_TGZ_NAME}
+            -DSZF_PACKAGE_NAME:STRING=${SZF_PACKAGE_NAME}
+            -DZFP_TGZ_NAME:STRING=${ZFP_TGZ_NAME}
+            -DZFP_PACKAGE_NAME:STRING=${ZFP_PACKAGE_NAME}
+    )
+  endif ()
+  externalproject_get_property (PLUGIN BINARY_DIR SOURCE_DIR)
+  set (PLUGIN_BINARY_DIR "${BINARY_DIR}")
+
+#  include (${BINARY_DIR}/PLUGIN-targets.cmake)
+  set (PLUGIN_LIBRARY "PLUGIN")
+  set (PLUGIN_FOUND 1)
+endmacro ()
+
+#-------------------------------------------------------------------------------
+macro (FILTER_OPTION plname)
+  string(TOLOWER ${plname} PLUGIN_NAME)
+  option (ENABLE_${plname} "Enable Library Building for ${plname} plugin" ON)
+  if (ENABLE_${plname})
+    option (HDF_${plname}_USE_EXTERNAL "Use External Library Building for ${PLUGIN_NAME} plugin" 0)
+    if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
+      set (HDF_${plname}_USE_EXTERNAL 1 CACHE BOOL "Use External Library Building for ${PLUGIN_NAME} plugin" FORCE)
+      if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
+        set (HDF_${plname}_URL ${HDF_${plname}_GIT_URL})
+        set (HDF_${plname}_BRANCH ${HDF_${plname}_GIT_BRANCH})
+      elseif (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
+        if (NOT TGZPATH)
+          set (TGZPATH ${H5PL_SOURCE_DIR})
+       endif ()
+        set (HDF_${plname}_URL ${TGZPATH}/${HDF_${plname}_TGZ_NAME})
+      endif ()
+    endif ()
+    add_subdirectory (${plname})
+    set_global_variable (H5PL_LIBRARIES_TO_EXPORT "${H5PL_LIBRARIES_TO_EXPORT};${H5${plname}_LIBRARIES_TO_EXPORT}")
+  endif ()
+endmacro ()
+
+#-------------------------------------------------------------------------------
+macro (PACKAGE_PLUGIN_LIBRARY compress_type)
+  if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "TGZ")
+    message (STATUS "Filter PLUGIN is to be packaged")
+  endif ()
+endmacro ()

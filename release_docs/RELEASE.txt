@@ -56,6 +56,36 @@ New Features
 
     Configuration
     -------------
+    - CMake option to use MSVC naming conventions with MinGW
+
+      HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
+      when using a MinGW toolchain
+
+      (xan - 2020/10/30)
+
+    - CMake option to statically link gcc libs with MinGW
+
+      HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
+      with the MinGW toolchain
+
+      (xan - 2020/10/30)
+
+    - CMake option to build the HDF filter plugins project as an external project
+
+      The HDF filter plugins project is a collection of registered compression
+      filters that can be dynamically loaded when needed to access data stored
+      in a hdf5 file. This CMake-only option allows the plugins to be built and
+      distributed with the hdf5 library and tools. Like the options for szip and
+      zlib, either a tgz file or a git repository can be specified for the source.
+
+      The necessary options are (see the INSTALL_CMake.txt file):
+          HDF5_ENABLE_PLUGIN_SUPPORT
+          PLUGIN_TGZ_NAME or PLUGIN_GIT_URL
+      There are more options necessary for various filters and the plugin project
+      documents should be referenced.
+
+      (ADB - 2020/10/16, OESS-98)
+
     - Added CMake option to format source files
 
       HDF5_ENABLE_FORMATTERS option will enable creation of targets using the

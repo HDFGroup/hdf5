@@ -143,8 +143,8 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
     endif ()
   endif ()
 
-  #----- Use MSVC Naming conventions for Shared Libraries
-  if (MINGW AND ${libtype} MATCHES "SHARED")
+  option (HDF5_MSVC_NAMING_CONVENTION "Use MSVC Naming conventions for Shared Libraries" OFF)
+  if (HDF5_MSVC_NAMING_CONVENTION AND MINGW AND ${libtype} MATCHES "SHARED")
     set_target_properties (${libtarget} PROPERTIES
         IMPORT_SUFFIX ".lib"
         IMPORT_PREFIX ""
@@ -343,7 +343,7 @@ macro (HDF_DIR_PATHS package_prefix)
     set (${package_prefix}_INSTALL_INCLUDE_DIR include)
   endif ()
   if (NOT ${package_prefix}_INSTALL_DATA_DIR)
-    if (NOT WIN32)
+    if (NOT MSVC)
       if (APPLE)
         if (${package_prefix}_BUILD_FRAMEWORKS)
           set (${package_prefix}_INSTALL_EXTRA_DIR ../SharedSupport)
@@ -353,11 +353,12 @@ macro (HDF_DIR_PATHS package_prefix)
         set (${package_prefix}_INSTALL_FWRK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
       endif ()
       set (${package_prefix}_INSTALL_DATA_DIR share)
-      set (${package_prefix}_INSTALL_CMAKE_DIR share/cmake)
     else ()
       set (${package_prefix}_INSTALL_DATA_DIR ".")
-      set (${package_prefix}_INSTALL_CMAKE_DIR cmake)
     endif ()
+  endif ()
+  if (NOT ${package_prefix}_INSTALL_CMAKE_DIR)
+    set (${package_prefix}_INSTALL_CMAKE_DIR share/cmake)
   endif ()
 
   # Always use full RPATH, i.e. don't skip the full RPATH for the build tree
@@ -427,6 +428,19 @@ macro (HDF_DIR_PATHS package_prefix)
       set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
     endif ()
   endif ()
+
+#-----------------------------------------------------------------------------
+# Setup pre-3.14 FetchContent
+#-----------------------------------------------------------------------------
+  if(${CMAKE_VERSION} VERSION_LESS 3.14)
+    macro(FetchContent_MakeAvailable NAME)
+        FetchContent_GetProperties(${NAME})
+        if(NOT ${NAME}_POPULATED)
+            FetchContent_Populate(${NAME})
+            add_subdirectory(${${NAME}_SOURCE_DIR} ${${NAME}_BINARY_DIR})
+        endif()
+    endmacro()
+  endif()
 endmacro ()
 
 macro (ADD_H5_FLAGS h5_flag_var infile)

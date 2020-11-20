@@ -33,7 +33,7 @@ set (examples
 
 foreach (example ${examples})
   add_executable (${example} ${HDF5_EXAMPLES_SOURCE_DIR}/${example}.c)
-  target_include_directories (${example} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (${example} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${example} STATIC)
     target_link_libraries (${example} PRIVATE ${HDF5_LIB_TARGET})
@@ -53,7 +53,7 @@ endforeach ()
 
 if (H5_HAVE_PARALLEL)
   add_executable (ph5example ${HDF5_EXAMPLES_SOURCE_DIR}/ph5example.c)
-  target_include_directories (ph5example PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (ph5example PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (ph5example STATIC)
     target_link_libraries (ph5example PRIVATE ${HDF5_LIB_TARGET} ${MPI_C_LIBRARIES})

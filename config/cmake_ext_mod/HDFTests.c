@@ -178,7 +178,7 @@ int DebugReport(int reportType, char* message, int* returnValue)
 
 int main(void)
 {
-  char *llwidthArgs[] = { "I64", "l64", "l", "L", "q", "ll", NULL };
+  char *llwidthArgs[] = { "I64", "l64", "ll", "l", "L", "q", NULL };
   char *s = malloc(128);
   char **currentArg = NULL;
   LL_TYPE x = (LL_TYPE)1048576 * (LL_TYPE)1048576;
