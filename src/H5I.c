@@ -175,14 +175,14 @@ H5I_term_package(void)
                     type_ptr = H5MM_xfree(type_ptr);
                     H5I_id_type_list_g[type] = NULL;
                     n++;
-                } /* end if */
-            }     /* end for */
+                }
+            }
 
             /* Mark interface closed */
             if (0 == n)
                 H5_PKG_INIT_VAR = FALSE;
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5I_term_package() */
@@ -220,7 +220,7 @@ H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I
     if (H5I_next_type < H5I_MAX_NUM_TYPES) {
         new_type = (H5I_type_t)H5I_next_type;
         H5I_next_type++;
-    } /* end if */
+    }
     else {
         hbool_t done; /* Indicate that search was successful */
         int     i;    /* Local index variable */
@@ -232,13 +232,13 @@ H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I
                 /* Found a free type ID */
                 new_type = (H5I_type_t)i;
                 done     = TRUE;
-            } /* end if */
-        }     /* end for */
+            }
+        }
 
         /* Verify that we found a type to give out */
         if (done == FALSE)
             HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, H5I_BADID, "Maximum number of ID types exceeded")
-    } /* end else */
+    }
 
     /* Allocate new ID class */
     if (NULL == (cls = H5MM_calloc(sizeof(H5I_class_t))))
@@ -295,11 +295,11 @@ H5I_register_type(const H5I_class_t *cls)
         if (NULL == (type_ptr = (H5I_id_type_t *)H5MM_calloc(sizeof(H5I_id_type_t))))
             HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, FAIL, "ID type allocation failed")
         H5I_id_type_list_g[cls->type_id] = type_ptr;
-    } /* end if */
+    }
     else {
         /* Get the pointer to the existing type */
         type_ptr = H5I_id_type_list_g[cls->type_id];
-    } /* end else */
+    }
 
     /* Initialize the ID type structure for new types */
     if (type_ptr->init_count == 0) {
@@ -309,19 +309,20 @@ H5I_register_type(const H5I_class_t *cls)
         type_ptr->last_info = NULL;
         if (NULL == (type_ptr->ids = H5SL_create(H5SL_TYPE_HID, NULL)))
             HGOTO_ERROR(H5E_ATOM, H5E_CANTCREATE, FAIL, "skip list creation failed")
-    } /* end if */
+    }
 
     /* Increment the count of the times this type has been initialized */
     type_ptr->init_count++;
 
 done:
-    if (ret_value < 0) { /* Clean up on error */
+    /* Clean up on error */
+    if (ret_value < 0) {
         if (type_ptr) {
             if (type_ptr->ids)
                 H5SL_close(type_ptr->ids);
             H5MM_free(type_ptr);
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register_type() */
@@ -367,8 +368,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    James Laird
- *        Nathaniel Furrer
+ * Programmer:  James Laird
+ *              Nathaniel Furrer
  *              Friday, April 23, 2004
  *
  *-------------------------------------------------------------------------
@@ -400,7 +401,7 @@ H5Inmembers(H5I_type_t type, hsize_t *num_members)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTCOUNT, FAIL, "can't compute number of members")
 
         H5_CHECKED_ASSIGN(*num_members, hsize_t, members, int64_t);
-    } /* end if */
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -416,7 +417,7 @@ done:
  *
  *              Failure:    Negative
  *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, March 24, 1999
  *
  *-------------------------------------------------------------------------
@@ -473,12 +474,12 @@ H5I__unwrap(void *obj_ptr, H5I_type_t type)
 
         vol_obj   = (const H5VL_object_t *)obj_ptr;
         ret_value = H5VL_object_data(vol_obj);
-    } /* end if */
+    }
     else if (H5I_DATATYPE == type) {
         H5T_t *dt = (H5T_t *)obj_ptr;
 
         ret_value = (void *)H5T_get_actual_type(dt);
-    } /* end if */
+    }
     else
         ret_value = obj_ptr;
 
@@ -494,8 +495,8 @@ H5I__unwrap(void *obj_ptr, H5I_type_t type)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    James Laird
- *        Nathaniel Furrer
+ * Programmer:  James Laird
+ *              Nathaniel Furrer
  *              Friday, April 23, 2004
  *
  *-------------------------------------------------------------------------
@@ -525,7 +526,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, March 24, 1999
  *
  *-------------------------------------------------------------------------
@@ -599,17 +600,17 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
                               "H5I: free type=%d obj=0x%08lx "
                               "failure ignored\n",
                               (int)udata->type_ptr->cls->type_id, (unsigned long)(id->obj_ptr));
-                } /* end if */
-#endif            /*H5I_DEBUG*/
+                }
+#endif /* H5I_DEBUG */
 
                 /* Indicate node should be removed from list */
                 ret_value = TRUE;
-            } /* end if */
-        }     /* end if */
+            }
+        }
         else {
             /* Indicate node should be removed from list */
             ret_value = TRUE;
-        } /* end else */
+        }
 
         /* Remove ID if requested */
         if (ret_value) {
@@ -618,8 +619,8 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
 
             /* Decrement the number of IDs in the type */
             udata->type_ptr->id_count--;
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__clear_type_cb() */
@@ -635,8 +636,8 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Nathaniel Furrer
- *        James Laird
+ * Programmer:  Nathaniel Furrer
+ *              James Laird
  *
  *-------------------------------------------------------------------------
  */
@@ -667,8 +668,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Nathaniel Furrer
- *        James Laird
+ * Programmer:  Nathaniel Furrer
+ *              James Laird
  *
  *-------------------------------------------------------------------------
  */
@@ -688,9 +689,10 @@ H5I__destroy_type(H5I_type_t type)
     if (type_ptr == NULL || type_ptr->init_count <= 0)
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
-    /* Close/clear/destroy all IDs for this type */
-    H5E_BEGIN_TRY { H5I_clear_type(type, TRUE, FALSE); }
-    H5E_END_TRY /*don't care about errors*/
+        /* Close/clear/destroy all IDs for this type */
+        H5E_BEGIN_TRY {
+            H5I_clear_type(type, TRUE, FALSE);
+        } H5E_END_TRY /* don't care about errors */
 
         /* Check if we should release the ID class */
         if (type_ptr->cls->flags & H5I_CLASS_IS_APPLICATION)
@@ -875,8 +877,8 @@ done:
  *                          with the specified ID.
  *              Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        Saturday, February 27, 2010
+ * Programmer:  Quincey Koziol
+ *              Saturday, February 27, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -974,8 +976,8 @@ done:
  *                          specified ID.
  *              Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        Wednesday, July 31, 2002
+ * Programmer:  Quincey Koziol
+ *              Wednesday, July 31, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1011,8 +1013,8 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
  *                          ID types).
  *              Failure:    H5I_BADID
  *
- * Programmer:    Robb Matzke
- *        Friday, February 19, 1999
+ * Programmer:  Robb Matzke
+ *              Friday, February 19, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1123,8 +1125,8 @@ done:
  *                          calling H5I_object().
  *              Failure:    NULL
  *
- * Programmer:    James Laird
- *        Nathaniel Furrer
+ * Programmer:  James Laird
+ *              Nathaniel Furrer
  *
  *-------------------------------------------------------------------------
  */
@@ -1157,8 +1159,8 @@ done:
  *                          calling H5I_object().
  *              Failure:    NULL
  *
- * Programmer:    James Laird
- *        Nat Furrer
+ * Programmer:  James Laird
+ *              Nat Furrer
  *
  *-------------------------------------------------------------------------
  */
@@ -1231,8 +1233,6 @@ done:
  *                          same pointer which would have been found by
  *                          calling H5I_object().
  *              Failure:    NULL
- *
- * Programmer:    Unknown
  *
  *-------------------------------------------------------------------------
  */
@@ -1314,7 +1314,7 @@ done:
 int
 H5I_dec_ref(hid_t id)
 {
-    H5I_id_info_t *id_ptr;        /* Pointer to the new ID */
+    H5I_id_info_t *id_ptr;        /* Pointer to the ID */
     int            ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI((-1))
@@ -1352,14 +1352,14 @@ H5I_dec_ref(hid_t id)
             if (NULL == H5I__remove_common(type_ptr, id))
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, (-1), "can't remove ID node")
             ret_value = 0;
-        } /* end if */
+        }
         else
             ret_value = -1;
-    } /* end if */
+    }
     else {
         --(id_ptr->count);
         ret_value = (int)id_ptr->count;
-    } /* end else */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1406,7 +1406,7 @@ H5I_dec_app_ref(hid_t id)
 
         /* Set return value */
         ret_value = (int)id_ptr->app_count;
-    } /* end if */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1730,11 +1730,11 @@ H5I_dec_type_ref(H5I_type_t type)
     if (1 == type_ptr->init_count) {
         H5I__destroy_type(type);
         ret_value = 0;
-    } /* end if */
+    }
     else {
         --(type_ptr->init_count);
         ret_value = (herr_t)type_ptr->init_count;
-    } /* end else */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2047,7 +2047,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             ret_value = H5_ITER_STOP; /* terminate iteration early */
         else if (cb_ret_val < 0)
             ret_value = H5_ITER_ERROR; /* indicate failure (which terminates iteration) */
-    }                                  /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_cb() */
@@ -2104,7 +2104,7 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
         /* Iterate over IDs */
         if ((iter_status = H5SL_iterate(type_ptr->ids, H5I__iterate_cb, &iter_udata)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "iteration failed")
-    } /* end if */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2148,7 +2148,7 @@ H5I__find_id(hid_t id)
 
         /* Remember this ID */
         type_ptr->last_info = ret_value;
-    } /* end else */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2163,10 +2163,7 @@ done:
  *
  *              Failure:    -1
  *
- * NOTE:        Not safe for arbitrary VOL connectors as it relies on
- *              private H5G calls.
- *
- * Comments: Public function
+ * Notes:
  *  If 'name' is non-NULL then write up to 'size' bytes into that
  *  buffer and always return the length of the entry name.
  *  Otherwise 'size' is ignored and the function does not store the name,
@@ -2241,7 +2238,7 @@ H5Iget_file_id(hid_t obj_id)
         /* Get the file ID */
         if ((ret_value = H5F_get_file_id(vol_obj, type, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file ID")
-    } /* end if */
+    }
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5I_INVALID_HID, "not an ID of a file object")
 
@@ -2281,7 +2278,7 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     if (obj_ptr == udata->object) {
         udata->ret_id = item->id;
         ret_value     = H5_ITER_STOP;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__find_id_cb() */
@@ -2328,7 +2325,7 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
             HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "iteration failed")
 
         *id = udata.ret_id;
-    } /* end if */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
