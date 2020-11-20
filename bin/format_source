@@ -19,7 +19,6 @@ find . -type d \( -path ./config \) -prune \
         -or -name H5Edefin.h \
         -or -name H5version.h \
         -or -name H5overflow.h \
-        -or -name uthash.h \
         \) \) \
     -and \( -iname *.h -or -iname *.c -or -iname *.cpp -or -iname *.hpp \) \) \
     | xargs clang-format -style=file -i -fallback-style=none

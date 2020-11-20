@@ -1054,11 +1054,10 @@
 ./src/H5Zshuffle.c
 ./src/H5Zszip.c
 ./src/H5Ztrans.c
-./src/H5win32defs.h
 ./src/Makefile.am
 ./src/hdf5.h
 ./src/libhdf5.settings.in
-./src/uthash.h
+./src/H5win32defs.h
 
 ./test/AtomicWriterReader.txt
 ./test/COPYING
