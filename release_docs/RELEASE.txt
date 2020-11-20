@@ -396,9 +396,6 @@ option.
   CMake: h5c++, h5cc, h5hlc++, h5hlcc
 
 The include folder holds the header files and the fortran mod files. CMake
-the share folder.
-
-The bin folder contains the tools and the build scripts. Additionally, CMake
 places the fortran mod files into separate shared and static subfolders,
 while Autotools places one set of mod files into the include folder. Because
 CMake produces a tools library, the header files for tools will appear in

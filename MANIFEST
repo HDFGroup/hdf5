@@ -194,6 +194,7 @@
 
 ./doxygen/aliases
 ./doxygen/Doxyfile.in
+./doxygen/dox/api-compat-macros.dox
 ./doxygen/dox/mainpage.dox
 ./doxygen/dox/rm-template.dox
 ./doxygen/examples/H5Fclose.c
