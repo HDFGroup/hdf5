@@ -564,7 +564,6 @@ H5_DLL herr_t H5Ldelete_by_idx_async(const char *app_file, const char *app_func,
  * \since 1.8.0
  *
  */
->>>>>>> origin/develop
 H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size_t size, hid_t lapl_id);
 /**
  * \ingroup H5L
