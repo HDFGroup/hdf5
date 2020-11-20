@@ -16,7 +16,6 @@
  *
  * REMARKS: IDs which allow objects (void * currently) to be bundled
  *          into "types" for more general storage.
- *
  */
 
 /****************/
@@ -608,6 +607,7 @@ H5I__clear_type_cb(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
      */
     if (udata->force || (info->count - (!udata->app_ref * info->app_count)) <= 1) {
         /* Check for a 'free' function and call it, if it exists */
+        H5_GCC_DIAG_OFF("cast-qual")
         if (udata->type_info->cls->free_func &&
             (udata->type_info->cls->free_func)((void *)info->object) < 0) { /* (Casting away const OK -QAK) */
             if (udata->force) {
@@ -628,6 +628,7 @@ H5I__clear_type_cb(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
             /* Indicate node should be removed from list */
             ret_value = TRUE;
         }
+        H5_GCC_DIAG_ON("cast-qual")
 
         /* Remove ID if requested */
         if (ret_value) {
@@ -912,7 +913,9 @@ H5I_subst(hid_t id, const void *new_object)
         HGOTO_ERROR(H5E_ATOM, H5E_NOTFOUND, NULL, "can't get ID ref count")
 
     /* Get the old object pointer to return */
+    H5_GCC_DIAG_OFF("cast-qual")
     ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+    H5_GCC_DIAG_ON("cast-qual")
 
     /* Set the new object pointer for the ID */
     info->object = new_object;
@@ -944,7 +947,9 @@ H5I_object(hid_t id)
     /* General lookup of the ID */
     if (NULL != (info = H5I__find_id(id))) {
         /* Get the object pointer to return */
+        H5_GCC_DIAG_OFF("cast-qual")
         ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+        H5_GCC_DIAG_ON("cast-qual")
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1011,7 +1016,9 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
     /* Verify that the type of the ID is correct & lookup the ID */
     if (id_type == H5I_TYPE(id) && NULL != (info = H5I__find_id(id))) {
         /* Get the object pointer to return */
+        H5_GCC_DIAG_OFF("cast-qual")
         ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+        H5_GCC_DIAG_ON("cast-qual")
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1231,7 +1238,10 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     if (type_info->last_id_info == info)
         type_info->last_id_info = NULL;
 
+    H5_GCC_DIAG_OFF("cast-qual")
     ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+    H5_GCC_DIAG_ON("cast-qual")
+
     info      = H5FL_FREE(H5I_id_info_t, info);
 
     /* Decrement the number of IDs in the type */
@@ -1363,6 +1373,7 @@ H5I_dec_ref(hid_t id)
         /* Get the ID's type */
         type_info = H5I_type_info_array_g[H5I_TYPE(id)];
 
+        H5_GCC_DIAG_OFF("cast-qual")
         /* (Casting away const OK -QAK) */
         if (!type_info->cls->free_func || (type_info->cls->free_func)((void *)info->object) >= 0) {
             /* Remove the node from the type */
@@ -1372,6 +1383,7 @@ H5I_dec_ref(hid_t id)
         }
         else
             ret_value = -1;
+        H5_GCC_DIAG_ON("cast-qual")
     }
     else {
         --(info->count);
@@ -2053,11 +2065,13 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         /* The stored object pointer might be an H5VL_object_t, in which
          * case we'll need to get the wrapped object struct (H5F_t *, etc.).
          */
-        object = H5I__unwrap((void *)info->object, type);
+        H5_GCC_DIAG_OFF("cast-qual")
+        object = H5I__unwrap((void *)info->object, type); /* Casting away const OK */
+        H5_GCC_DIAG_ON("cast-qual")
 
         /* Invoke callback function */
         cb_ret_val =
-            (*udata->user_func)((void *)object, info->id, udata->user_udata); /* (Casting away const OK) */
+            (*udata->user_func)((void *)object, info->id, udata->user_udata);
 
         /* Set the return value based on the callback's return value */
         if (cb_ret_val > 0)
@@ -2289,7 +2303,9 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     HDassert(udata);
 
     /* Get a pointer to the VOL connector's data */
-    object = H5I__unwrap(info->object, type);
+    H5_GCC_DIAG_OFF("cast-qual")
+    object = H5I__unwrap((void *)info->object, type); /* Casting away const OK */
+    H5_GCC_DIAG_ON("cast-qual")
 
     /* Check for a match */
     if (object == udata->object) {
@@ -2394,7 +2410,10 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         case H5I_DATATYPE: {
             const H5T_t *dt = (const H5T_t *)info->object;
 
+            H5_GCC_DIAG_OFF("cast-qual")
             object = (void *)H5T_get_actual_type((H5T_t *)dt); /* Casting away const OK - QAK */
+            H5_GCC_DIAG_ON("cast-qual")
+
             path    = H5T_nameof((const H5T_t *)object);
             break;
         }
