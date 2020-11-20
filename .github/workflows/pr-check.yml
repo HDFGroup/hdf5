@@ -99,6 +99,7 @@ jobs:
     - name: Autotools Configure 
       if: matrix.generator == 'autogen'
       run: |
+        sh ./autogen.sh
         sh ./bin/chkmanifest
         mkdir "${{ runner.workspace }}/build"
         cd "${{ runner.workspace }}/build"
