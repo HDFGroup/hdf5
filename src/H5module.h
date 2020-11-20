@@ -11,27 +11,24 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
  * Purpose:	This file contains declarations which define macros for the
- *		H5I package.  Including this header means that the source file
- *		is part of the H5I package.
+ *		H5 package.  Including this header means that the source file
+ *		is part of the H5 package.
  */
-#ifndef _H5Imodule_H
-#define _H5Imodule_H
+#ifndef _H5module_H
+#define _H5module_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
  */
-#define H5I_MODULE
-#define H5_MY_PKG      H5I
-#define H5_MY_PKG_ERR  H5E_ATOM
-#define H5_MY_PKG_INIT NO
+#define H5_MODULE
+#define H5_MY_PKG       H5
+#define H5_MY_PKG_ERR   H5E_LIB
+#define H5_MY_PKG_INIT  YES
 
-/**\defgroup H5I H5I
- * \brief Identifier Interface
+/**\defgroup H5 H5
+ * \brief General Library Functions
  * \todo Describe concisely what the functions in this module are about.
  */
 
-#endif /* _H5Imodule_H */
+#endif /* _H5module_H */

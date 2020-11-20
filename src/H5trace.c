@@ -25,6 +25,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#include "H5module.h" /* This source code file is part of the H5 module */
 #define H5I_FRIEND /*suppress error about including H5Ipkg      */
 
 /***********/

@@ -25,6 +25,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#include "H5module.h" /* This source code file is part of the H5 module */
 
 /***********/
 /* Headers */
@@ -346,8 +347,8 @@ H5_make_time(struct tm *tm)
      * VS 2015 is removed, with _get_timezone replacing it.
      */
     long timezone = 0;
-#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
-    time_t ret_value; /* Return value */
+#endif                /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+    time_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

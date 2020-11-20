@@ -196,6 +196,7 @@
 
 ./doxygen/aliases
 ./doxygen/Doxyfile.in
+./doxygen/dox/api-compat-macros.dox
 ./doxygen/dox/H5Acreate.dox
 ./doxygen/dox/H5Aiterate.dox
 ./doxygen/dox/H5Fget_info.dox
@@ -560,6 +561,7 @@
 ./src/H5err.txt
 ./src/H5detect.c
 ./src/H5make_libsettings.c
+./src/H5module.h
 ./src/H5mpi.c
 ./src/H5overflow.txt
 ./src/H5private.h
@@ -1052,10 +1054,11 @@
 ./src/H5Zshuffle.c
 ./src/H5Zszip.c
 ./src/H5Ztrans.c
+./src/H5win32defs.h
 ./src/Makefile.am
 ./src/hdf5.h
 ./src/libhdf5.settings.in
-./src/H5win32defs.h
+./src/uthash.h
 
 ./test/AtomicWriterReader.txt
 ./test/COPYING
