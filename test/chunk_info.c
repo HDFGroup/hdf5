@@ -542,7 +542,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Allocate input (compressed) buffer */
-    inbuf = HDmalloc(z_dst_nbytes);
+    inbuf = HDcalloc(1, z_dst_nbytes);
 
     /* Set chunk size to the compressed chunk size and the chunk point
        to the compressed data chunk */
@@ -567,7 +567,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     }
 #else
     /* Allocate input (non-compressed) buffer */
-    inbuf = HDmalloc(CHK_SIZE);
+    inbuf = HDcalloc(1, CHK_SIZE);
     HDmemcpy(inbuf, direct_buf, CHK_SIZE);
 #endif /* end H5_HAVE_FILTER_DEFLATE */
 
