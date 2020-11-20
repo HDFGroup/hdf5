@@ -346,13 +346,6 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type, 
             break;
         }
 
-        case H5VL_DATASET_WAIT: { /* H5Dwait */
-            /* The native VOL connector doesn't support asynchronous
-             *      operations, so this is a no-op.
-             */
-            break;
-        }
-
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
     } /* end switch */

@@ -1346,7 +1346,8 @@ error:
 
 } /* end test_basic_datatype_operation() */
 
-typedef herr_t (*reg_opt_oper_t)(hid_t obj_id, int opt_type, hid_t dxpl_id, void **req, ...);
+typedef herr_t (*reg_opt_oper_t)(const char *app_file, const char *app_func, unsigned app_line,
+    hid_t obj_id, int opt_type, hid_t dxpl_id, hid_t es_id, ...);
 
 /*-------------------------------------------------------------------------
  * Function:    exercise_reg_opt_oper()
@@ -1426,7 +1427,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id,
     fake_obj = -1;
     fake_arg = -1;
     H5E_BEGIN_TRY {
-        ret = (*reg_opt_op)(obj_id, op_val, H5P_DEFAULT, H5_REQUEST_NULL, &fake_arg);
+        ret = (*reg_opt_op)(__FILE__, __func__, __LINE__, obj_id, op_val, H5P_DEFAULT, H5ES_NONE, &fake_arg);
     } H5E_END_TRY;
     if(FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to perform an optional operation with a NULL callback");
@@ -1474,7 +1475,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id,
     fake_obj = -1;
     fake_arg = -1;
     reg_opt_curr_op_val = op_val;
-    if((*reg_opt_op)(obj_id, op_val, H5P_DEFAULT, H5_REQUEST_NULL, &fake_arg) < 0)
+    if((*reg_opt_op)(__FILE__, __func__, __LINE__, obj_id, op_val, H5P_DEFAULT, H5ES_NONE, &fake_arg) < 0)
         TEST_ERROR;
 
     /* Verify that fake object & argument were modified correctly */
@@ -1487,7 +1488,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id,
     fake_obj = -1;
     fake_arg = -1;
     reg_opt_curr_op_val = op_val2;
-    if((*reg_opt_op)(obj_id, op_val2, H5P_DEFAULT, H5_REQUEST_NULL, &fake_arg) < 0)
+    if((*reg_opt_op)(__FILE__, __func__, __LINE__, obj_id, op_val2, H5P_DEFAULT, H5ES_NONE, &fake_arg) < 0)
         TEST_ERROR;
 
     /* Verify that fake object & argument were modified correctly */

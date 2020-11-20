@@ -29,7 +29,8 @@
 
 #include "H5private.h"   /* Generic Functions                                */
 #include "H5Eprivate.h"  /* Error handling                                   */
-#include "H5Fprivate.h"  /* File access				            */
+#include "H5ESprivate.h" /* Event Sets                                       */
+#include "H5Fprivate.h"  /* File access				             */
 #include "H5Iprivate.h"  /* IDs                                              */
 #include "H5MMprivate.h" /* Memory management                                */
 #include "H5Pprivate.h"  /* Property lists                                   */
@@ -330,25 +331,28 @@ done:
  */
 static herr_t
 H5VL__common_optional_op(hid_t id, H5I_type_t id_type, H5VL_reg_opt_oper_t reg_opt_op,
-    int opt_type, hid_t dxpl_id, void **req, va_list arguments)
+    int opt_type, hid_t dxpl_id, void **req, H5VL_object_t **_vol_obj_ptr,
+    va_list arguments)
 {
-    H5VL_object_t *vol_obj;             /* Attribute for this operation */
+    H5VL_object_t *tmp_vol_obj = NULL;  /* Object for id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for id */
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Check ID type & get VOL object */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(id, id_type)))
+    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(id, id_type)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid identifier")
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj) < 0)
+    if(H5VL_set_vol_wrapper(*vol_obj_ptr) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if((ret_value = (*reg_opt_op)(vol_obj->data, vol_obj->connector->cls, opt_type, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (*reg_opt_op)((*vol_obj_ptr)->data, (*vol_obj_ptr)->connector->cls, opt_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute optional callback")
 
 done:
@@ -1697,22 +1701,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_optional_op(hid_t attr_id, H5VL_attr_optional_t opt_type,
-    hid_t dxpl_id, void **req/*out*/, ...)
+H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+    hid_t attr_id, H5VL_attr_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    H5VL_object_t *vol_obj   = NULL;    /* Attribute VOL object */
+    void *token     = NULL;             /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iVsix", attr_id, opt_type, dxpl_id, req);
+    H5TRACE7("e", "*s*sIuiVsii", app_file, app_func, app_line, attr_id, opt_type, dxpl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Call the common VOL connector optional routine */
-    HDva_start(arguments, req);
+    HDva_start(arguments, es_id);
     arg_started = TRUE;
     if((ret_value = H5VL__common_optional_op(attr_id, H5I_ATTR, H5VL__attr_optional,
-            opt_type, dxpl_id, req, arguments)) < 0)
+            opt_type, dxpl_id, token_ptr, &vol_obj, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVsii", app_file, app_func, app_line, attr_id, opt_type, dxpl_id, es_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
     /* End access to the va_list, if we started it */
@@ -2560,22 +2577,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_optional_op(hid_t dset_id, H5VL_dataset_optional_t opt_type, hid_t dxpl_id,
-    void **req/*out*/, ...)
+H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+    hid_t dset_id, H5VL_dataset_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    H5VL_object_t *vol_obj   = NULL;    /* Dataset VOL object */
+    void *token     = NULL;             /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iVtix", dset_id, opt_type, dxpl_id, req);
+    H5TRACE7("e", "*s*sIuiVtii", app_file, app_func, app_line, dset_id, opt_type, dxpl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
+    HDva_start(arguments, es_id);
     arg_started = TRUE;
     if(H5VL__common_optional_op(dset_id, H5I_DATASET, H5VL__dataset_optional,
-            opt_type, dxpl_id, req, arguments) < 0)
+            opt_type, dxpl_id, token_ptr, &vol_obj, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVtii", app_file, app_func, app_line, dset_id, opt_type, dxpl_id, es_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
     /* End access to the va_list, if we started it */
@@ -3205,21 +3235,30 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_datatype_optional_op(const H5VL_object_t *vol_obj, H5VL_datatype_optional_t opt_type,
-    hid_t dxpl_id, void **req, va_list arguments)
+H5VL_datatype_optional_op(H5VL_object_t *vol_obj, H5VL_datatype_optional_t opt_type,
+    hid_t dxpl_id, void **req, H5VL_object_t **_vol_obj_ptr, va_list arguments)
 {
+    H5VL_object_t *tmp_vol_obj = NULL;  /* Object for id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for id */
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity check */
+    HDassert(vol_obj);
+
+    /* Set up vol_obj_ptr */
+    *vol_obj_ptr = vol_obj;
+
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj) < 0)
+    if(H5VL_set_vol_wrapper(*vol_obj_ptr) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL__datatype_optional(vol_obj->data, vol_obj->connector->cls, opt_type, dxpl_id, req, arguments) < 0)
+    if(H5VL__datatype_optional((*vol_obj_ptr)->data, (*vol_obj_ptr)->connector->cls, opt_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype optional callback")
 
 done:
@@ -3275,26 +3314,39 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_optional_op(hid_t type_id, H5VL_datatype_optional_t opt_type,
-    hid_t dxpl_id, void **req/*out*/, ...)
+H5VLdatatype_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+    hid_t type_id, H5VL_datatype_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...)
 {
     H5T_t *dt;                          /* Datatype for this operation */
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    H5VL_object_t *vol_obj   = NULL;    /* Datatype VOL object */
+    void *token     = NULL;             /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iVuix", type_id, opt_type, dxpl_id, req);
+    H5TRACE7("e", "*s*sIuiVuii", app_file, app_func, app_line, type_id, opt_type, dxpl_id, es_id);
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
     /* Only invoke callback if VOL object is set for the datatype */
-    HDva_start(arguments, req);
+    HDva_start(arguments, es_id);
     arg_started = TRUE;
-    if(H5T_invoke_vol_optional(dt, opt_type, dxpl_id, req, arguments) < 0)
+    if(H5T_invoke_vol_optional(dt, opt_type, dxpl_id, token_ptr, &vol_obj, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to invoke datatype optional callback")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVuii", app_file, app_func, app_line, type_id, opt_type, dxpl_id, es_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
     /* End access to the va_list, if we started it */
@@ -3979,22 +4031,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_optional_op(hid_t file_id, H5VL_file_optional_t opt_type,
-    hid_t dxpl_id, void **req/*out*/, ...)
+H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+    hid_t file_id, H5VL_file_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    H5VL_object_t *vol_obj   = NULL;    /* File VOL object */
+    void *token     = NULL;             /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iVvix", file_id, opt_type, dxpl_id, req);
+    H5TRACE7("e", "*s*sIuiVvii", app_file, app_func, app_line, file_id, opt_type, dxpl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
+    HDva_start(arguments, es_id);
     arg_started = TRUE;
     if(H5VL__common_optional_op(file_id, H5I_FILE, H5VL__file_optional,
-            opt_type, dxpl_id, req, arguments) < 0)
+            opt_type, dxpl_id, token_ptr, &vol_obj, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute file optional callback")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVvii", app_file, app_func, app_line, file_id, opt_type, dxpl_id, es_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
     /* End access to the va_list, if we started it */
@@ -4646,22 +4711,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_optional_op(hid_t group_id, H5VL_group_optional_t opt_type,
-    hid_t dxpl_id, void **req/*out*/, ...)
+H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+    hid_t group_id, H5VL_group_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    H5VL_object_t *vol_obj   = NULL;    /* Group VOL object */
+    void *token     = NULL;             /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iVwix", group_id, opt_type, dxpl_id, req);
+    H5TRACE7("e", "*s*sIuiVwii", app_file, app_func, app_line, group_id, opt_type, dxpl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
+    HDva_start(arguments, es_id);
     arg_started = TRUE;
     if((ret_value = H5VL__common_optional_op(group_id, H5I_GROUP, H5VL__group_optional,
-            opt_type, dxpl_id, req, arguments)) < 0)
+            opt_type, dxpl_id, token_ptr, &vol_obj, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group optional callback")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVwii", app_file, app_func, app_line, group_id, opt_type, dxpl_id, es_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
     /* End access to the va_list, if we started it */

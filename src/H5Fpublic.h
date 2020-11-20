@@ -1313,7 +1313,6 @@ H5_DLL herr_t   H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
  *
  */
 H5_DLL herr_t   H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
-H5_DLL herr_t   H5Fwait(hid_t file_id);
 
 #ifdef H5_HAVE_PARALLEL
 /**

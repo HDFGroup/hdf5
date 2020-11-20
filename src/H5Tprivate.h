@@ -149,7 +149,7 @@ H5_DLL herr_t  H5T_restore_refresh_state(hid_t tid, struct H5O_shared_t *cached_
 H5_DLL hbool_t H5T_already_vol_managed(const H5T_t *dt);
 H5_DLL htri_t  H5T_is_vl_storage(const H5T_t *dt);
 H5_DLL herr_t H5T_invoke_vol_optional(H5T_t *dt, H5VL_datatype_optional_t opt_type,
-    hid_t dxpl_id, void **req, va_list arguments);
+    hid_t dxpl_id, void **req, H5VL_object_t **vol_obj_ptr, va_list arguments);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);

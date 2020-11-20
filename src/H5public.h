@@ -368,8 +368,12 @@ typedef struct H5_alloc_stats_t {
     size_t             peak_alloc_blocks_count;  /* Peak # of blocks allocated */
 } H5_alloc_stats_t;
 
+/* Library shutdown callback */
+typedef void (*H5_atclose_func_t)(void *ctx);
+
 /* Functions in H5.c */
 H5_DLL herr_t H5open(void);
+H5_DLL herr_t H5atclose(H5_atclose_func_t func, void *ctx);
 H5_DLL herr_t H5close(void);
 H5_DLL herr_t H5dont_atexit(void);
 H5_DLL herr_t H5garbage_collect(void);

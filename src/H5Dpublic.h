@@ -172,7 +172,6 @@ H5_DLL herr_t  H5Dset_extent(hid_t dset_id, const hsize_t size[]);
 H5_DLL herr_t  H5Dset_extent_async(const char *app_file, const char *app_func, unsigned app_line,
                                    hid_t dset_id, const hsize_t size[], hid_t es_id);
 H5_DLL herr_t  H5Dflush(hid_t dset_id);
-H5_DLL herr_t  H5Dwait(hid_t dset_id);
 H5_DLL herr_t  H5Drefresh(hid_t dset_id);
 H5_DLL herr_t  H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_id,
                           void *dst_buf);
