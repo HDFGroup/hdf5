@@ -37,6 +37,7 @@
 #include "H5CXprivate.h" /* API Contexts */
 #include "H5Dprivate.h"  /* Datasets */
 #include "H5Eprivate.h"  /* Errors   */
+#include "H5ESprivate.h" /* Event Sets */
 #include "H5Fprivate.h"  /* Files    */
 #include "H5Gprivate.h"  /* Groups   */
 #include "H5Iprivate.h"  /* IDs      */
@@ -48,10 +49,45 @@
 /********************/
 static herr_t H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag);
 static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc);
+static herr_t H5O__flush_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
+static herr_t H5O__refresh_api_common(hid_t oid, void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
 
 /*************/
 /* Functions */
 /*************/
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__flush_api_common
+ *
+ * Purpose:     This is the common function for flushing an object.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__flush_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
+{
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;               /* Location parameters for object access */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+
+    if(H5VL_setup_loc_args(obj_id, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
+
+    /* Flush the object */
+    if (H5VL_object_specific(*vol_obj_ptr, &loc_params, H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT,
+                             token_ptr, obj_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O__flush_api_common() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Oflush
@@ -68,33 +104,57 @@ static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *
 herr_t
 H5Oflush(hid_t obj_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of obj_id     */
-    H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", obj_id);
 
-    /* Check args */
-    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-    /* Set up collective metadata if appropriate */
-    if (H5CX_set_loc(obj_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
-
-    /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(obj_id);
-
-    /* Flush the object */
-    if (H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, obj_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
+    /* To flush an object synchronously */
+    if(H5O__flush_api_common(obj_id, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to synchronously flush object")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oflush() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Oflush_async
+ *
+ * Purpose:     Asynchronous version of H5Oflush
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oflush_async(const char *app_file, const char *app_func, unsigned app_line, 
+    hid_t obj_id, hid_t es_id)
+{
+    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
+    void *            token     = NULL;         /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, obj_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Flush an object asynchronously */
+    if(H5O__flush_api_common(obj_id, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to asynchronously flush object")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, obj_id, es_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Oflush_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_flush
@@ -215,6 +275,39 @@ done:
 } /* end H5O__oh_tag() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O__refresh_api_common
+ *
+ * Purpose:     This is the common function for refreshing an object.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__refresh_api_common(hid_t oid, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
+{
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;               /* Location parameters for object access */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+
+    if(H5VL_setup_loc_args(oid, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
+
+    /* Refresh the object */
+    if (H5VL_object_specific(*vol_obj_ptr, &loc_params, H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT,
+                             token_ptr, oid) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O__refresh_api_common() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Orefresh
  *
  * Purpose:     Refreshes all buffers associated with an object.
@@ -229,34 +322,57 @@ done:
 herr_t
 H5Orefresh(hid_t oid)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of oid     */
-    H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", oid);
 
-    /* Check args */
-    if (NULL == (vol_obj = H5VL_vol_object(oid)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-    /* Set up collective metadata if appropriate */
-    if (H5CX_set_loc(oid) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
-
-    /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(oid);
-
-    /* Refresh the object */
-    if (H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, oid) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
+    /* To refresh an object synchronously */
+    if(H5O__refresh_api_common(oid, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to synchronously refresh object")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Orefresh() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Orefresh_async
+ *
+ * Purpose:     Asynchronous version of H5Orefresh
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Orefresh_async(const char *app_file, const char *app_func, unsigned app_line, 
+    hid_t oid, hid_t es_id)
+{
+    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
+    void *            token     = NULL;         /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, oid, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Refresh an object asynchronously */
+    if(H5O__refresh_api_common(oid, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to asynchronously refresh object")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, oid, es_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Orefresh_async() */
 /*-------------------------------------------------------------------------
  * Function:    H5O_refresh_metadata
  *

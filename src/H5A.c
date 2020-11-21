@@ -310,13 +310,13 @@ H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
-    if (!obj_name || !*obj_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no object name")
+
     if (!attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "attr_name parameter cannot be NULL")
     if (!*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "attr_name parameter cannot be an empty string")
 
+    /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
     if (H5VL_setup_name_args(loc_id, obj_name, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
@@ -618,11 +618,11 @@ H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *att
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
-    if (!obj_name || !*obj_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no object name")
-    if (!attr_name || !*attr_name)
+
+    if(!attr_name || !*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no attribute name")
 
+    /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
     if (H5VL_setup_name_args(loc_id, obj_name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
@@ -1672,9 +1672,8 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if (!obj_name || !*obj_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
-    if (!old_name)
+
+    if(!old_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be NULL")
     if (!*old_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be an empty string")
@@ -1683,6 +1682,7 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
     if (!*new_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new attribute name cannot be an empty string")
 
+    /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
     if (H5VL_setup_name_args(loc_id, obj_name, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set object access arguments")
@@ -2327,7 +2327,7 @@ H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, h
 
     /* Asynchronously check if an attribute exists */
     if ((ret_value = H5A__exists_api_common(obj_id, attr_name, token_ptr, &vol_obj)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously rename attribute")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously check if attribute exists")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -2363,11 +2363,10 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if (!obj_name || !*obj_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
-    if (!attr_name || !*attr_name)
+    if(!attr_name || !*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
+    /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
     if (H5VL_setup_name_args(loc_id, obj_name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set object access arguments")

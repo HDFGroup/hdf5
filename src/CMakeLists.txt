@@ -385,6 +385,8 @@ IDE_GENERATED_PROPERTIES ("H5HP" "${H5HP_HDRS}" "${H5HP_SOURCES}" )
 
 set (H5I_SOURCES
     ${HDF5_SRC_DIR}/H5I.c
+    ${HDF5_SRC_DIR}/H5Idbg.c
+    ${HDF5_SRC_DIR}/H5Iint.c
     ${HDF5_SRC_DIR}/H5Itest.c
 )
 set (H5I_HDRS
@@ -722,6 +724,7 @@ set (H5Z_HDRS
 IDE_GENERATED_PROPERTIES ("H5Z" "${H5Z_HDRS}" "${H5Z_SOURCES}" )
 
 set (H5_MODULE_HEADERS
+    ${HDF5_SRC_DIR}/H5module.h
     ${HDF5_SRC_DIR}/H5Amodule.h
     ${HDF5_SRC_DIR}/H5ACmodule.h
     ${HDF5_SRC_DIR}/H5Bmodule.h

@@ -386,7 +386,7 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
 {
     H5ES_wait_ctx_t *ctx = (H5ES_wait_ctx_t *)_ctx;     /* Callback context */
     H5VL_request_status_t ev_status = H5VL_REQUEST_STATUS_SUCCEED;      /* Status from event's operation */
-    uint64_t start_time, elapsed_time;  /* Start and elapsed times for waiting on an operation */
+    uint64_t start_time = 0, elapsed_time = 0;  /* Start and elapsed times for waiting on an operation */
     int ret_value = H5_ITER_CONT;       /* Return value */
 
     FUNC_ENTER_STATIC

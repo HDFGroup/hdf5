@@ -25,6 +25,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#include "H5module.h" /* This source code file is part of the H5 module */
 
 /***********/
 /* Headers */
@@ -379,7 +380,7 @@ uint32_t
 H5_checksum_lookup3(const void *key, size_t length, uint32_t initval)
 {
     const uint8_t *k = (const uint8_t *)key;
-    uint32_t       a, b, c; /* internal state */
+    uint32_t       a, b, c = 0; /* internal state */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
