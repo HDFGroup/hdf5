@@ -4300,11 +4300,12 @@ H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled /*out*/, char *locati
         H5MM_memcpy(location, location_ptr, *location_size);
 
     /* Get location size, including terminating NULL */
-    if (location_size)
+    if (location_size) {
         if (location_ptr)
             *location_size = HDstrlen(location_ptr) + 1;
         else
             *location_size = 0;
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
