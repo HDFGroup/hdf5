@@ -42,7 +42,7 @@
 /****************************/
 
 typedef struct H5I_class_t {
-    H5I_type_t type_id;   /* Class ID for the type */
+    H5I_type_t type;      /* Class "value" for the type */
     unsigned   flags;     /* Class behavior flags */
     unsigned   reserved;  /* Number of reserved IDs for this type */
                           /* [A specific number of type entries may be
@@ -88,7 +88,7 @@ H5_DLL herr_t     H5I_find_id(const void *object, H5I_type_t type, hid_t *id /*o
 
 /* Functions that manipulate objects */
 H5_DLL void * H5I_object(hid_t id);
-H5_DLL void * H5I_object_verify(hid_t id, H5I_type_t id_type);
+H5_DLL void * H5I_object_verify(hid_t id, H5I_type_t type);
 H5_DLL void * H5I_remove(hid_t id);
 H5_DLL void * H5I_subst(hid_t id, const void *new_object);
 H5_DLL htri_t H5I_is_file_object(hid_t id);

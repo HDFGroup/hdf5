@@ -55,7 +55,7 @@ typedef enum H5I_type_t {
 } H5I_type_t;
 
 /**
- * Type of atoms to return to users
+ * Type of IDs to return to users
  */
 typedef int64_t hid_t;
 
@@ -131,13 +131,13 @@ H5_DLL hid_t      H5Iregister(H5I_type_t type, const void *object);
  * \brief Returns the object referenced by an ID
  *
  * \param[in] id ID to be dereferenced
- * \param[in] id_type The identifier type
+ * \param[in] type The identifier type
 
  *
  * \return Pointer to the object referenced by \p id on success, NULL on failure.
  *
  * \details H5Iobject_verify() returns a pointer to the memory referenced by id
- *          after verifying that \p id is of type \p id_type. This function is
+ *          after verifying that \p id is of type \p type. This function is
  *          analogous to dereferencing a pointer in C with type checking.
  *
  * \note H5Iobject_verify() does not change the ID it is called on in any way
@@ -147,24 +147,24 @@ H5_DLL hid_t      H5Iregister(H5I_type_t type, const void *object);
  * \see H5Iregister()
  *
  */
-H5_DLL void *     H5Iobject_verify(hid_t id, H5I_type_t id_type);
+H5_DLL void *     H5Iobject_verify(hid_t id, H5I_type_t type);
 /**
  * \ingroup H5I
  *
  * \brief Removes an ID from its type
  *
  * \param[in] id The ID to be removed from its type
- * \param[in] id_type The identifier type
+ * \param[in] type The identifier type
 
  *
  * \return Returns a pointer to the memory referred to by \p id on success,
  *         NULL on failure.
  *
- * \details H5Iremove_verify() first ensures that \p id belongs to \p id_type.
+ * \details H5Iremove_verify() first ensures that \p id belongs to \p type.
  *          If so, it removes \p id from its type and returns the pointer
  *          to the memory it referred to. This pointer is the same pointer that
  *          was placed in storage by H5Iregister(). If id does not belong to
- *          \p id_type, then NULL is returned.
+ *          \p type, then NULL is returned.
  *
  *          The \p id parameter is the ID which is to be removed from its type.
  *
@@ -177,7 +177,7 @@ H5_DLL void *     H5Iobject_verify(hid_t id, H5I_type_t id_type);
  *       to avoid memory leaks.
  *
  */
-H5_DLL void *     H5Iremove_verify(hid_t id, H5I_type_t id_type);
+H5_DLL void *     H5Iremove_verify(hid_t id, H5I_type_t type);
 /**
  * \ingroup H5I
  *
@@ -191,7 +191,7 @@ H5_DLL void *     H5Iremove_verify(hid_t id, H5I_type_t id_type);
  *          \p id.
  *
  *          Valid types returned by the function are:
- *          \id_types
+ *          \types
  *
  *          If no valid type can be determined or the identifier submitted is
  *          invalid, the function returns #H5I_BADID.
