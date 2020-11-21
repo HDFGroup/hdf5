@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* 
- * H5Iint.c - ID testing functions
+ * H5Itest.c - ID testing functions
  */
 
 /****************/
