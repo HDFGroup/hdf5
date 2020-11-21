@@ -1466,6 +1466,14 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         } /* end block */
                         break;
 
+                        case 'c': /* H5_atclose_func_t */
+                        {
+                            H5_atclose_func_t cfunc = (H5_atclose_func_t)HDva_arg(ap, H5_atclose_func_t);
+
+                            H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)cfunc);
+                        } /* end block */
+                        break;
+
                         case 's': /* hssize_t */
                         {
                             hssize_t hssize = HDva_arg(ap, hssize_t);

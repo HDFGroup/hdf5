@@ -993,6 +993,7 @@ H5atclose(H5_atclose_func_t func, void *ctx)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "Hc*x", func, ctx);
 
     /* Check arguments */
     if(NULL == func)
