@@ -72,10 +72,10 @@ H5O_SHARED_DECODE(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *iofla
 #ifdef H5_STRICT_FORMAT_CHECKS
         if (*ioflags & H5O_DECODEIO_DIRTY)
             HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, NULL, "unable to mark shared message dirty")
-#else  /* H5_STRICT_FORMAT_CHECKS */
+#else /* H5_STRICT_FORMAT_CHECKS */
         *ioflags &= ~H5O_DECODEIO_DIRTY;
 #endif /* H5_STRICT_FORMAT_CHECKS */
-    }  /* end if */
+    } /* end if */
     else {
         /* Decode native message directly */
         if (NULL == (ret_value = H5O_SHARED_DECODE_REAL(f, open_oh, mesg_flags, ioflags, p_size, p)))
@@ -237,7 +237,7 @@ H5O_SHARED_DELETE(H5F_t *f, H5O_t *open_oh, void *_mesg)
         /* Decrement the reference count on the native message directly */
         if (H5O_SHARED_DELETE_REAL(f, open_oh, _mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for native message")
-    }  /* end else */
+    } /* end else */
 #endif /* H5O_SHARED_DELETE_REAL */
 
 done:
@@ -288,7 +288,7 @@ H5O_SHARED_LINK(H5F_t *f, H5O_t *open_oh, void *_mesg)
         /* Increment the reference count on the native message directly */
         if (H5O_SHARED_LINK_REAL(f, open_oh, _mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "unable to increment ref count for native message")
-    }  /* end else */
+    } /* end else */
 #endif /* H5O_SHARED_LINK_REAL */
 
 done:
@@ -333,7 +333,7 @@ H5O_SHARED_COPY_FILE(H5F_t *file_src, void *_native_src, H5F_t *file_dst, hbool_
     if (NULL == (dst_mesg = H5O_SHARED_COPY_FILE_REAL(file_src, H5O_SHARED_TYPE, _native_src, file_dst,
                                                       recompute_size, cpy_info, udata)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy native message to another file")
-#else  /* H5O_SHARED_COPY_FILE_REAL */
+#else /* H5O_SHARED_COPY_FILE_REAL */
     /* No copy file callback defined, just copy the message itself */
     if (NULL == (dst_mesg = (H5O_SHARED_TYPE->copy)(_native_src, NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy native message")

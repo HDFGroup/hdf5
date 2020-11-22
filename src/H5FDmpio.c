@@ -200,7 +200,7 @@ H5FD_mpio_init(void)
 {
 #ifdef H5FDmpio_DEBUG
     static int H5FD_mpio_Debug_inited = 0;
-#endif                                       /* H5FDmpio_DEBUG */
+#endif /* H5FDmpio_DEBUG */
     const char *s;                           /* String for environment variables */
     hid_t       ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -229,7 +229,7 @@ H5FD_mpio_init(void)
             } /* end while */
         }     /* end if */
         H5FD_mpio_Debug_inited++;
-    }  /* end if */
+    } /* end if */
 #endif /* H5FDmpio_DEBUG */
 
     /* Set return value */

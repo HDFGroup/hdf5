@@ -383,8 +383,8 @@ done:
 static void *
 H5FD__direct_fapl_get(H5FD_t *_file)
 {
-    H5FD_direct_t *file = (H5FD_direct_t *)_file;
-    void          *ret_value = NULL; /* Return value */
+    H5FD_direct_t *file      = (H5FD_direct_t *)_file;
+    void *         ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -443,9 +443,9 @@ H5FD__direct_fapl_copy(const void *_old_fa)
 static H5FD_t *
 H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    int                 o_flags;
-    int                 fd   = (-1);
-    H5FD_direct_t *     file = NULL;
+    int                       o_flags;
+    int                       fd   = (-1);
+    H5FD_direct_t *           file = NULL;
     const H5FD_direct_fapl_t *fa;
 #ifdef H5_HAVE_WIN32_API
     HFILE                              filehandle;
@@ -660,7 +660,7 @@ H5FD__direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         HGOTO_DONE(-1)
     if (f1->device > f2->device)
         HGOTO_DONE(1)
-#else  /* H5_DEV_T_IS_SCALAR */
+#else /* H5_DEV_T_IS_SCALAR */
     /* If dev_t isn't a scalar value on this system, just use memcmp to
      * determine if the values are the same or not.  The actual return value
      * shouldn't really matter...
@@ -1276,7 +1276,7 @@ H5FD__direct_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_AT
         (void)SetFilePointer((HANDLE)filehandle, li.LowPart, &li.HighPart, FILE_BEGIN);
         if (SetEndOfFile((HANDLE)filehandle) == 0)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
-#else  /* H5_HAVE_WIN32_API */
+#else /* H5_HAVE_WIN32_API */
         if (-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* H5_HAVE_WIN32_API */

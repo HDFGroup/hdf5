@@ -1279,7 +1279,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                 }
                 nfound += diff_ldouble_element(mem1, mem2, elemtno, opts);
             } /*H5T_NATIVE_LDOUBLE*/
-#endif        /* H5_SIZEOF_LONG_DOUBLE */
+#endif /* H5_SIZEOF_LONG_DOUBLE */
 
             break; /* H5T_FLOAT class */
 

@@ -2821,8 +2821,8 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
                 HDassert((tot_nelmts + (hsize_t)select_nelmts) >= nelmts);
             } /* end block */
 #endif        /* NDEBUG */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    }     /* end if */
 
 done:
     /* Cleanup I/O operation */

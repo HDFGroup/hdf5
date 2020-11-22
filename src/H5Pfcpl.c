@@ -564,7 +564,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sym_k(hid_t plist_id, unsigned *ik /*out */, unsigned *lk /*out */)
+H5Pget_sym_k(hid_t plist_id, unsigned *ik /*out*/, unsigned *lk /*out*/)
 {
     unsigned        btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;               /* Property list pointer */
@@ -654,7 +654,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out */)
+H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out*/)
 {
     unsigned        btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;               /* Property list pointer */

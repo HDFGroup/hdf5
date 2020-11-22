@@ -116,10 +116,10 @@ typedef enum H5F_scope_t {
  * How does file close behave?
  */
 typedef enum H5F_close_degree_t {
-    H5F_CLOSE_DEFAULT   = 0, /**< Use the degree pre-defined by underlining VFL */
-    H5F_CLOSE_WEAK      = 1, /**< File closes only after all opened objects are closed */
-    H5F_CLOSE_SEMI      = 2, /**< If no opened objects, file is close; otherwise, file close fails */
-    H5F_CLOSE_STRONG    = 3  /**< If there are opened objects, close them first, then close file */
+    H5F_CLOSE_DEFAULT = 0, /**< Use the degree pre-defined by underlining VFL */
+    H5F_CLOSE_WEAK    = 1, /**< File closes only after all opened objects are closed */
+    H5F_CLOSE_SEMI    = 2, /**< If no opened objects, file is close; otherwise, file close fails */
+    H5F_CLOSE_STRONG  = 3  /**< If there are opened objects, close them first, then close file */
 } H5F_close_degree_t;
 
 /**
@@ -201,9 +201,8 @@ typedef enum H5F_libver_t {
  * File space handling strategy
  */
 typedef enum H5F_fspace_strategy_t {
-    H5F_FSPACE_STRATEGY_FSM_AGGR =
-        0, /**< Mechanisms: free-space managers, aggregators, and virtual file drivers
-                This is the library default when not set */
+    H5F_FSPACE_STRATEGY_FSM_AGGR = 0, /**< Mechanisms: free-space managers, aggregators, and virtual file
+                                         drivers This is the library default when not set */
     H5F_FSPACE_STRATEGY_PAGE =
         1, /**< Mechanisms: free-space managers with embedded paged aggregation and virtual file drivers */
     H5F_FSPACE_STRATEGY_AGGR = 2, /**< Mechanisms: aggregators and virtual file drivers */
@@ -273,7 +272,7 @@ extern "C" {
  * \since 1.12.0
  *
  */
-H5_DLL htri_t   H5Fis_accessible(const char *container_name, hid_t fapl_id);
+H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
 /**
  * \example H5Fcreate.c
  *          After creating an HDF5 file with H5Fcreate(), we close it with
@@ -356,7 +355,7 @@ H5_DLL htri_t   H5Fis_accessible(const char *container_name, hid_t fapl_id);
  * \see H5Fopen(), H5Fclose()
  *
  */
-H5_DLL hid_t    H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+H5_DLL hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 /**
  * \ingroup H5F
  *
@@ -446,7 +445,7 @@ H5_DLL hid_t    H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, h
  * \see H5Fclose()
  *
  */
-H5_DLL hid_t    H5Fopen(const char *filename, unsigned flags, hid_t fapl_id);
+H5_DLL hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id);
 /**
  * \ingroup H5F
  *
@@ -472,7 +471,7 @@ H5_DLL hid_t    H5Fopen(const char *filename, unsigned flags, hid_t fapl_id);
  *       \p file_id then use H5Freopen() on \p file_id to reopen it.
  *
  */
-H5_DLL hid_t    H5Freopen(hid_t file_id);
+H5_DLL hid_t H5Freopen(hid_t file_id);
 /**
  * \ingroup H5F
  *
@@ -502,7 +501,7 @@ H5_DLL hid_t    H5Freopen(hid_t file_id);
  *            actually flushed to disk.
  *
  */
-H5_DLL herr_t   H5Fflush(hid_t object_id, H5F_scope_t scope);
+H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
 /**
  * \example H5Fclose.c
  *          After creating an HDF5 file with H5Fcreate(), we close it with
@@ -551,7 +550,7 @@ H5_DLL herr_t   H5Fflush(hid_t object_id, H5F_scope_t scope);
  * \see H5Fopen()
  *
  */
-H5_DLL herr_t   H5Fclose(hid_t file_id);
+H5_DLL herr_t H5Fclose(hid_t file_id);
 /**
  * \ingroup H5F
  *
@@ -590,7 +589,7 @@ H5_DLL herr_t   H5Fclose(hid_t file_id);
  * \since 1.12.0
  *
  */
-H5_DLL herr_t   H5Fdelete(const char *filename, hid_t fapl_id);
+H5_DLL herr_t H5Fdelete(const char *filename, hid_t fapl_id);
 /**
  * \ingroup H5F
  *
@@ -608,7 +607,7 @@ H5_DLL herr_t   H5Fdelete(const char *filename, hid_t fapl_id);
  *          H5Pclose().
  *
  */
-H5_DLL hid_t    H5Fget_create_plist(hid_t file_id);
+H5_DLL hid_t H5Fget_create_plist(hid_t file_id);
 /**
  * \ingroup H5F
  *
@@ -621,7 +620,7 @@ H5_DLL hid_t    H5Fget_create_plist(hid_t file_id);
  *          identifier of the specified file.
  *
  */
-H5_DLL hid_t    H5Fget_access_plist(hid_t file_id);
+H5_DLL hid_t H5Fget_access_plist(hid_t file_id);
 /**
  * \ingroup H5F
  *
@@ -648,7 +647,7 @@ H5_DLL hid_t    H5Fget_access_plist(hid_t file_id);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t   H5Fget_intent(hid_t file_id, unsigned *intent);
+H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned *intent);
 /**
  * \ingroup H5F
  *
@@ -666,7 +665,7 @@ H5_DLL herr_t   H5Fget_intent(hid_t file_id, unsigned *intent);
  * \since 1.12.0
  *
  */
-H5_DLL herr_t   H5Fget_fileno(hid_t file_id, unsigned long *fileno);
+H5_DLL herr_t H5Fget_fileno(hid_t file_id, unsigned long *fileno);
 /**
  * \ingroup H5F
  *
@@ -701,7 +700,7 @@ H5_DLL herr_t   H5Fget_fileno(hid_t file_id, unsigned long *fileno);
  *                search to objects opened through current file identifier.
  *
  */
-H5_DLL ssize_t  H5Fget_obj_count(hid_t file_id, unsigned types);
+H5_DLL ssize_t H5Fget_obj_count(hid_t file_id, unsigned types);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5F
@@ -740,7 +739,7 @@ H5_DLL ssize_t  H5Fget_obj_count(hid_t file_id, unsigned types);
  * \since 1.6.0
  *
  */
-H5_DLL ssize_t  H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *obj_id_list);
+H5_DLL ssize_t H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *obj_id_list);
 /**
  * \ingroup H5F
  *
@@ -766,7 +765,7 @@ H5_DLL ssize_t  H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, h
  * \since 1.6.0
  *
  */
-H5_DLL herr_t   H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
+H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
 /**
  * \ingroup H5F
  *
@@ -791,7 +790,7 @@ H5_DLL herr_t   H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
  *       default file mount property list.
  *
  */
-H5_DLL herr_t   H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
+H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 /**
  * \ingroup H5F
  *
@@ -813,7 +812,7 @@ H5_DLL herr_t   H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
  *          of the child.
  *
  */
-H5_DLL herr_t   H5Funmount(hid_t loc, const char *name);
+H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 /**
  * \ingroup H5F
  *
@@ -861,7 +860,7 @@ H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
  * \since 1.6.3
  *
  */
-H5_DLL herr_t   H5Fget_filesize(hid_t file_id, hsize_t *size);
+H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
 /**
  * \ingroup H5F
  *
@@ -878,7 +877,7 @@ H5_DLL herr_t   H5Fget_filesize(hid_t file_id, hsize_t *size);
  * \since 1.10.2
  *
  */
-H5_DLL herr_t   H5Fget_eoa(hid_t file_id, haddr_t *eoa);
+H5_DLL herr_t H5Fget_eoa(hid_t file_id, haddr_t *eoa);
 /**
  * \ingroup H5F
  *
@@ -897,7 +896,7 @@ H5_DLL herr_t   H5Fget_eoa(hid_t file_id, haddr_t *eoa);
  * \since 1.10.2
  *
  */
-H5_DLL herr_t   H5Fincrement_filesize(hid_t file_id, hsize_t increment);
+H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
 /**
  * \ingroup H5F
  *
@@ -951,7 +950,7 @@ H5_DLL herr_t   H5Fincrement_filesize(hid_t file_id, hsize_t increment);
  * \since 1.8.0
  *
  */
-H5_DLL ssize_t  H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
+H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
 /**
  * \ingroup MDC
  *
@@ -1154,7 +1153,7 @@ H5_DLL ssize_t  H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
  * \todo Fix the reference!
  *
  */
-H5_DLL herr_t   H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
+H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
 /**
  * \ingroup MDC
  *
@@ -1407,7 +1406,7 @@ H5_DLL herr_t   H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr
  *
  * \todo Fix the MDC document reference!
  */
-H5_DLL herr_t   H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
+H5_DLL herr_t H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
 /**
  * \ingroup MDC
  *
@@ -1431,7 +1430,7 @@ H5_DLL herr_t   H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr
  *          details on the metadata cache and its adaptive resize algorithms.
  *
  */
-H5_DLL herr_t   H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr);
+H5_DLL herr_t H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr);
 /**
  * \ingroup MDC
  *
@@ -1462,8 +1461,8 @@ H5_DLL herr_t   H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr);
  *          metadata cache in the special topics section of the user manual for a discussion of this.
  *
  */
-H5_DLL herr_t   H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
-                                size_t *cur_size_ptr, int *cur_num_entries_ptr);
+H5_DLL herr_t H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+                              size_t *cur_size_ptr, int *cur_num_entries_ptr);
 /**
  * \ingroup MDC
  *
@@ -1492,7 +1491,7 @@ H5_DLL herr_t   H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min
  *
  * \todo Fix the MDC document reference!
  */
-H5_DLL herr_t   H5Freset_mdc_hit_rate_stats(hid_t file_id);
+H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
 /**
  * \ingroup H5F
  *
@@ -1531,7 +1530,7 @@ H5_DLL herr_t   H5Freset_mdc_hit_rate_stats(hid_t file_id);
  * \since 1.6.3
  *
  */
-H5_DLL ssize_t  H5Fget_name(hid_t obj_id, char *name, size_t size);
+H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 /**
  * \ingroup H5F
  *
@@ -1576,7 +1575,7 @@ H5_DLL ssize_t  H5Fget_name(hid_t obj_id, char *name, size_t size);
  * \since 1.10.0
  *
  */
-H5_DLL herr_t   H5Fget_info2(hid_t obj_id, H5F_info2_t *file_info);
+H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *file_info);
 /**
  * \ingroup SWMR
  *
@@ -1660,7 +1659,7 @@ H5_DLL herr_t   H5Fget_info2(hid_t obj_id, H5F_info2_t *file_info);
  * \since 1.10.0
  *
  */
-H5_DLL herr_t   H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
+H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
 /**
  * \ingroup SWMR
  *
@@ -1693,7 +1692,7 @@ H5_DLL herr_t   H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t 
  * \since 1.10.0
  *
  */
-H5_DLL herr_t   H5Fstart_swmr_write(hid_t file_id);
+H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
 /**
  * \ingroup H5F
  *
@@ -1741,8 +1740,8 @@ H5_DLL herr_t   H5Fstart_swmr_write(hid_t file_id);
  * \since 1.10.0
  *
  */
-H5_DLL ssize_t  H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
-                                     H5F_sect_info_t *sect_info /*out*/);
+H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
+                                    H5F_sect_info_t *sect_info /*out*/);
 /**
  * \ingroup H5F
  *
@@ -1765,7 +1764,7 @@ H5_DLL ssize_t  H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsect
  * \since 1.8.7
  *
  */
-H5_DLL herr_t   H5Fclear_elink_file_cache(hid_t file_id);
+H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);
 /**
  * \ingroup H5F
  *
@@ -1788,7 +1787,7 @@ H5_DLL herr_t   H5Fclear_elink_file_cache(hid_t file_id);
  * \since 1.10.2
  *
  */
-H5_DLL herr_t   H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high);
+H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high);
 /**
  * \ingroup MDC
  *
@@ -1840,7 +1839,7 @@ H5_DLL herr_t   H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver
  * \todo Fix the document reference!
  *
  */
-H5_DLL herr_t   H5Fstart_mdc_logging(hid_t file_id);
+H5_DLL herr_t H5Fstart_mdc_logging(hid_t file_id);
 /**
  * \ingroup MDC
  *
@@ -1885,7 +1884,7 @@ H5_DLL herr_t   H5Fstart_mdc_logging(hid_t file_id);
  * \since 1.10.0
  *
  */
-H5_DLL herr_t   H5Fstop_mdc_logging(hid_t file_id);
+H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
 /**
  * \ingroup MDC
  *
@@ -1928,15 +1927,14 @@ H5_DLL herr_t   H5Fstop_mdc_logging(hid_t file_id);
  *
  * \since 1.10.0
  */
-H5_DLL herr_t   H5Fget_mdc_logging_status(hid_t            file_id,
-                                          /*OUT*/ hbool_t *is_enabled,
-                                          /*OUT*/ hbool_t *is_currently_logging);
+H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
+                                        hbool_t *is_currently_logging);
 /**
  * \ingroup SWMR
  *
  * \todo Finish this!
  */
-H5_DLL herr_t   H5Fformat_convert(hid_t fid);
+H5_DLL herr_t H5Fformat_convert(hid_t fid);
 /**
  * \ingroup H5F
  *
@@ -1952,7 +1950,7 @@ H5_DLL herr_t   H5Fformat_convert(hid_t fid);
  * \since 1.10.1
  *
  */
-H5_DLL herr_t   H5Freset_page_buffering_stats(hid_t file_id);
+H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
 /**
  * \ingroup H5F
  *
@@ -1980,8 +1978,8 @@ H5_DLL herr_t   H5Freset_page_buffering_stats(hid_t file_id);
  * \since 1.10.1
  *
  */
-H5_DLL herr_t   H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2],
-                                            unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
+H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2],
+                                          unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
 /**
  * \ingroup MDC
  *
@@ -2012,7 +2010,7 @@ H5_DLL herr_t   H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
  *
  * \since 1.10.1
  */
-H5_DLL herr_t   H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
+H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
 /**
  * \ingroup H5F
  *
@@ -2035,7 +2033,7 @@ H5_DLL herr_t   H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_
  * \since 1.10.5
  *
  */
-H5_DLL herr_t   H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
+H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
 /**
  * \ingroup H5F
  *
@@ -2066,7 +2064,7 @@ H5_DLL herr_t   H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
  * \since 1.10.5
  *
  */
-H5_DLL herr_t   H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
+H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 
 #ifdef H5_HAVE_PARALLEL
 /**
