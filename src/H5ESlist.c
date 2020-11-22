@@ -67,7 +67,6 @@
 /* Local Variables */
 /*******************/
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES__list_insert
  *
@@ -146,8 +145,8 @@ H5ES__list_count(const H5ES_event_list_t *el)
 int
 H5ES__list_iterate(H5ES_event_list_t *el, H5ES_list_iter_func_t cb, void *ctx)
 {
-    H5ES_event_t *ev;                   /* Event in list */
-    int ret_value = H5_ITER_CONT;       /* Return value */
+    H5ES_event_t *ev;                       /* Event in list */
+    int           ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -158,14 +157,14 @@ H5ES__list_iterate(H5ES_event_list_t *el, H5ES_list_iter_func_t cb, void *ctx)
     /* Iterate over events in list */
     ev = el->head;
     while (ev) {
-        H5ES_event_t *tmp;       /* Temporary event */
+        H5ES_event_t *tmp; /* Temporary event */
 
         /* Get pointer to next node, so it's safe if this one is removed */
         tmp = ev->next;
 
         /* Perform iterator callback */
-        if((ret_value = (*cb)(ev, ctx)) != H5_ITER_CONT) {
-            if(ret_value < 0)
+        if ((ret_value = (*cb)(ev, ctx)) != H5_ITER_CONT) {
+            if (ret_value < 0)
                 HERROR(H5E_EVENTSET, H5E_CANTNEXT, "iteration operator failed");
             break;
         } /* end if */
@@ -214,4 +213,3 @@ H5ES__list_remove(H5ES_event_list_t *el, const H5ES_event_t *ev)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5ES__list_remove() */
-

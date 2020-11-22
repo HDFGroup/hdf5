@@ -408,9 +408,9 @@ herr_t
 H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired)
 {
     FUNC_ENTER_API_NAMECHECK_ONLY
-        /*NO TRACE*/
+    /*NO TRACE*/
 
-        FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))}
+    FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))}
 /* end H5TSmutex_acquire() */
 
 /*--------------------------------------------------------------------------
@@ -433,7 +433,8 @@ H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired)
  *
  *--------------------------------------------------------------------------
  */
-herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex)
+herr_t
+H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
     herr_t ret_value = 0;
 
@@ -513,9 +514,9 @@ H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count)
     ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
     if (ret_value)
         HGOTO_DONE(ret_value);
-    *lock_count = mutex->lock_count;
+    *lock_count       = mutex->lock_count;
     mutex->lock_count = 0;
-    ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock);
+    ret_value         = HDpthread_mutex_unlock(&mutex->atomic_lock);
 
     /* If the lock count drops to zero, signal the condition variable, to
      * wake another thread.
@@ -532,7 +533,6 @@ H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS__mutex_unlock */
-
 
 /*--------------------------------------------------------------------------
  * NAME
@@ -709,7 +709,7 @@ H5TS_cancel_count_inc(void)
             HDfree(cancel_counter);
             HGOTO_DONE(FAIL);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Check if thread entering library */
     if (cancel_counter->cancel_count == 0)
@@ -777,7 +777,6 @@ H5TS_cancel_count_dec(void)
 } /* end H5TS_cancel_count_dec() */
 
 #ifdef H5_HAVE_WIN_THREADS
-
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_win32_process_enter

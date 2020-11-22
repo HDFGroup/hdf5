@@ -35,7 +35,6 @@
 #include "H5SLprivate.h" /* Skip lists				 */
 #include "H5VLpkg.h"     /* Virtual Object Layer                 */
 
-
 /****************/
 /* Local Macros */
 /****************/
@@ -46,8 +45,8 @@
 
 /* Dynamic operation info */
 typedef struct H5VL_dyn_op_t {
-    char *op_name;              /* Name of operation */
-    int op_val;                 /* Value of operation */
+    char *op_name; /* Name of operation */
+    int   op_val;  /* Value of operation */
 } H5VL_dyn_op_t;
 
 /********************/
@@ -69,41 +68,40 @@ static void H5VL__release_dyn_op(H5VL_dyn_op_t *dyn_op);
 
 /* The current optional operation values */
 static int H5VL_opt_vals_g[H5VL_SUBCLS_TOKEN + 1] = {
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_NONE */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_INFO */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_WRAP */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_ATTR */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_DATASET */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_DATATYPE */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_FILE */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_GROUP */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_LINK */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_OBJECT */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_REQUEST */
-    H5VL_RESERVED_NATIVE_OPTIONAL,          /* H5VL_SUBCLS_BLOB */
-    H5VL_RESERVED_NATIVE_OPTIONAL           /* H5VL_SUBCLS_TOKEN */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_NONE */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_INFO */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_WRAP */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_ATTR */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_DATASET */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_DATATYPE */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_FILE */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_GROUP */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_LINK */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_OBJECT */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_REQUEST */
+    H5VL_RESERVED_NATIVE_OPTIONAL, /* H5VL_SUBCLS_BLOB */
+    H5VL_RESERVED_NATIVE_OPTIONAL  /* H5VL_SUBCLS_TOKEN */
 };
 
 /* The current optional operations' info */
 static H5SL_t *H5VL_opt_ops_g[H5VL_SUBCLS_TOKEN + 1] = {
-    NULL,          /* H5VL_SUBCLS_NONE */
-    NULL,          /* H5VL_SUBCLS_INFO */
-    NULL,          /* H5VL_SUBCLS_WRAP */
-    NULL,          /* H5VL_SUBCLS_ATTR */
-    NULL,          /* H5VL_SUBCLS_DATASET */
-    NULL,          /* H5VL_SUBCLS_DATATYPE */
-    NULL,          /* H5VL_SUBCLS_FILE */
-    NULL,          /* H5VL_SUBCLS_GROUP */
-    NULL,          /* H5VL_SUBCLS_LINK */
-    NULL,          /* H5VL_SUBCLS_OBJECT */
-    NULL,          /* H5VL_SUBCLS_REQUEST */
-    NULL,          /* H5VL_SUBCLS_BLOB */
-    NULL           /* H5VL_SUBCLS_TOKEN */
+    NULL, /* H5VL_SUBCLS_NONE */
+    NULL, /* H5VL_SUBCLS_INFO */
+    NULL, /* H5VL_SUBCLS_WRAP */
+    NULL, /* H5VL_SUBCLS_ATTR */
+    NULL, /* H5VL_SUBCLS_DATASET */
+    NULL, /* H5VL_SUBCLS_DATATYPE */
+    NULL, /* H5VL_SUBCLS_FILE */
+    NULL, /* H5VL_SUBCLS_GROUP */
+    NULL, /* H5VL_SUBCLS_LINK */
+    NULL, /* H5VL_SUBCLS_OBJECT */
+    NULL, /* H5VL_SUBCLS_REQUEST */
+    NULL, /* H5VL_SUBCLS_BLOB */
+    NULL  /* H5VL_SUBCLS_TOKEN */
 };
 
 /* Declare a free list to manage the H5VL_class_t struct */
 H5FL_DEFINE_STATIC(H5VL_dyn_op_t);
-
 
 /*---------------------------------------------------------------------------
  * Function:    H5VL__release_dyn_op
@@ -139,7 +137,7 @@ H5VL__release_dyn_op(H5VL_dyn_op_t *dyn_op)
 static herr_t
 H5VL__term_opt_operation_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op_data)
 {
-    H5VL_dyn_op_t *item = (H5VL_dyn_op_t *)_item;       /* Item to release */
+    H5VL_dyn_op_t *item = (H5VL_dyn_op_t *)_item; /* Item to release */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -163,13 +161,13 @@ H5VL__term_opt_operation_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_
 herr_t
 H5VL__term_opt_operation(void)
 {
-    size_t subcls;              /* Index over the elements of operation array */
+    size_t subcls; /* Index over the elements of operation array */
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Iterate over the VOL subclasses */
-    for(subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++)
-        if(H5VL_opt_ops_g[subcls])
+    for (subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++)
+        if (H5VL_opt_ops_g[subcls])
             H5SL_destroy(H5VL_opt_ops_g[subcls], H5VL__term_opt_operation_cb, NULL);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -186,11 +184,10 @@ H5VL__term_opt_operation(void)
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VL__register_opt_operation(H5VL_subclass_t subcls, const char *op_name,
-    int *op_val)
+H5VL__register_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val)
 {
     H5VL_dyn_op_t *new_op;              /* Info about new operation */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -199,7 +196,7 @@ H5VL__register_opt_operation(H5VL_subclass_t subcls, const char *op_name,
     HDassert(op_name && *op_name);
 
     /* Check for duplicate operation */
-    if(H5VL_opt_ops_g[subcls]) {
+    if (H5VL_opt_ops_g[subcls]) {
         if (NULL != H5SL_search(H5VL_opt_ops_g[subcls], op_name))
             HGOTO_ERROR(H5E_VOL, H5E_EXISTS, FAIL, "operation name already exists")
     } /* end if */
@@ -239,14 +236,14 @@ done:
 size_t
 H5VL__num_opt_operation(void)
 {
-    size_t subcls;              /* Index over the elements of operation array */
-    size_t ret_value = 0;       /* Return value */
+    size_t subcls;        /* Index over the elements of operation array */
+    size_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Iterate over the VOL subclasses */
-    for(subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++)
-        if(H5VL_opt_ops_g[subcls])
+    for (subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++)
+        if (H5VL_opt_ops_g[subcls])
             ret_value += H5SL_count(H5VL_opt_ops_g[subcls]);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -263,10 +260,9 @@ H5VL__num_opt_operation(void)
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VL__find_opt_operation(H5VL_subclass_t subcls, const char *op_name,
-    int *op_val)
+H5VL__find_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -275,8 +271,8 @@ H5VL__find_opt_operation(H5VL_subclass_t subcls, const char *op_name,
     HDassert(op_name && *op_name);
 
     /* Check for dynamic operations in the VOL subclass */
-    if(H5VL_opt_ops_g[subcls]) {
-        H5VL_dyn_op_t *dyn_op;              /* Info about operation */
+    if (H5VL_opt_ops_g[subcls]) {
+        H5VL_dyn_op_t *dyn_op; /* Info about operation */
 
         /* Search for dynamic operation with correct name */
         if (NULL == (dyn_op = H5SL_search(H5VL_opt_ops_g[subcls], op_name)))
@@ -305,7 +301,7 @@ done:
 herr_t
 H5VL__unregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -313,8 +309,8 @@ H5VL__unregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
     HDassert(op_name && *op_name);
 
     /* Check for dynamic operations in the VOL subclass */
-    if(H5VL_opt_ops_g[subcls]) {
-        H5VL_dyn_op_t *dyn_op;              /* Info about operation */
+    if (H5VL_opt_ops_g[subcls]) {
+        H5VL_dyn_op_t *dyn_op; /* Info about operation */
 
         /* Search for dynamic operation with correct name */
         if (NULL == (dyn_op = H5SL_remove(H5VL_opt_ops_g[subcls], op_name)))
@@ -324,16 +320,15 @@ H5VL__unregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
         H5VL__release_dyn_op(dyn_op);
 
         /* Close the skip list, if no more operations in it */
-        if(0 == H5SL_count(H5VL_opt_ops_g[subcls])) {
-            if(H5SL_close(H5VL_opt_ops_g[subcls]) < 0)
+        if (0 == H5SL_count(H5VL_opt_ops_g[subcls])) {
+            if (H5SL_close(H5VL_opt_ops_g[subcls]) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "can't close dyn op skip list")
             H5VL_opt_ops_g[subcls] = NULL;
         } /* end if */
-    } /* end if */
+    }     /* end if */
     else
         HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL, "operation name isn't registered")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__unregister_opt_operation() */
-

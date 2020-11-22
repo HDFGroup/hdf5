@@ -274,9 +274,9 @@ H5VL_term_package(void)
                     if (0 == n)
                         H5_PKG_INIT_VAR = FALSE;
                 } /* end else */
-            } /* end else */
-        }     /* end else */
-    }         /* end if */
+            }     /* end else */
+        }         /* end else */
+    }             /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5VL_term_package() */

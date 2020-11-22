@@ -2162,12 +2162,12 @@ static herr_t
 test_ros3(void)
 {
 #ifdef H5_HAVE_ROS3_VFD
-    hid_t            fid          = -1; /* file ID                      */
-    hid_t            fapl_id      = -1; /* file access property list ID */
-    hid_t            fapl_id_out  = -1; /* from H5Fget_access_plist     */
-    hid_t            driver_id    = -1; /* ID for this VFD              */
-    unsigned long    driver_flags = 0;  /* VFD feature flags            */
-    char             filename[1024];    /* filename                     */
+    hid_t            fid          = -1;     /* file ID                      */
+    hid_t            fapl_id      = -1;     /* file access property list ID */
+    hid_t            fapl_id_out  = -1;     /* from H5Fget_access_plist     */
+    hid_t            driver_id    = -1;     /* ID for this VFD              */
+    unsigned long    driver_flags = 0;      /* VFD feature flags            */
+    char             filename[1024];        /* filename                     */
     H5FD_ros3_fapl_t test_ros3_fa;
     H5FD_ros3_fapl_t ros3_fa_0 = {
         /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,

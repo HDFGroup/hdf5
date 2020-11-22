@@ -1163,7 +1163,7 @@ dump_fcpl(hid_t fid)
      */
     H5VLquery_optional(fid, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_GET_INFO, &supported);
 
-    if(!(supported & H5VL_OPT_QUERY_SUPPORTED))
+    if (!(supported & H5VL_OPT_QUERY_SUPPORTED))
         return;
 
     fcpl = H5Fget_create_plist(fid);

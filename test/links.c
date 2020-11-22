@@ -9800,8 +9800,8 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
                          base_driver == H5FD_MPIO || base_driver == H5FD_CORE)
                             ? H5P_DEFAULT
                             : fapl;
-    op_data.fam_size  = ELINK_CB_FAM_SIZE;
-    op_data.code      = 0;
+    op_data.fam_size = ELINK_CB_FAM_SIZE;
+    op_data.code     = 0;
 
     /* Create family fapl */
     if ((fam_fapl = H5Pcopy(fapl)) < 0)
@@ -19182,7 +19182,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     unsigned v;    /* Local index variable */
     hsize_t  skip; /* # of links to skip in group */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    int gskip; /* # of links to skip in group, with H5Giterate */
+    int gskip;  /* # of links to skip in group, with H5Giterate */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     herr_t ret; /* Generic return value */
 
@@ -19670,7 +19670,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     unsigned v;    /* Local index variable */
     hsize_t  skip; /* # of links to skip in group */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    int gskip; /* # of links to skip in group, with H5Giterate */
+    int gskip;  /* # of links to skip in group, with H5Giterate */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     herr_t ret; /* Generic return value */
 
@@ -22503,7 +22503,7 @@ main(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                 nerrors += ud_hard_links_deprec(fapl2) < 0 ? 1 : 0; /* requires new format groups */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-                nerrors += ud_link_reregister(fapl2) < 0 ? 1 : 0; /* requires new format groups */
+                nerrors += ud_link_reregister(fapl2) < 0 ? 1 : 0;   /* requires new format groups */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                 nerrors += ud_link_reregister_deprec(fapl2) < 0 ? 1 : 0; /* requires new format groups */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

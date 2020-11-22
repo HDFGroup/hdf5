@@ -189,8 +189,9 @@ H5_DLL herr_t H5VL_datatype_specific(const H5VL_object_t *vol_obj, H5VL_datatype
                                      hid_t dxpl_id, void **req, ...);
 H5_DLL herr_t H5VL_datatype_optional(const H5VL_object_t *vol_obj, H5VL_datatype_optional_t opt_type,
                                      hid_t dxpl_id, void **req, ...);
-H5_DLL herr_t H5VL_datatype_optional_op(H5VL_object_t *vol_obj, H5VL_datatype_optional_t opt_type, hid_t dxpl_id, void **req,
-                                        H5VL_object_t **vol_obj_ptr, va_list arguments);
+H5_DLL herr_t H5VL_datatype_optional_op(H5VL_object_t *vol_obj, H5VL_datatype_optional_t opt_type,
+                                        hid_t dxpl_id, void **req, H5VL_object_t **vol_obj_ptr,
+                                        va_list arguments);
 H5_DLL herr_t H5VL_datatype_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req);
 
 /* File functions */
@@ -258,7 +259,8 @@ H5_DLL herr_t H5VL_introspect_opt_query(const H5VL_object_t *vol_obj, H5VL_subcl
                                         uint64_t *flags);
 
 /* Asynchronous functions */
-H5_DLL herr_t H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5VL_request_status_t *status);
+H5_DLL herr_t H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout,
+                                H5VL_request_status_t *status);
 H5_DLL herr_t H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void *ctx);
 H5_DLL herr_t H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status);
 H5_DLL herr_t H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t specific_type, ...);

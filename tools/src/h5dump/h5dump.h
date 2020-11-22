@@ -83,7 +83,7 @@ typedef struct {
 dump_opt_t dump_opts = {TRUE, FALSE, TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE, FALSE,
                         TRUE, FALSE, FALSE, FALSE, FALSE, TRUE,  FALSE, 0};
 
-#define PACKED_BITS_MAX      8 /* Maximum number of packed-bits to display */
+#define PACKED_BITS_MAX      8                       /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX (8 * sizeof(long long)) /* Maximum bits size of integer types of packed-bits */
 /* mask list for packed bits */
 unsigned long long packed_mask[PACKED_BITS_MAX]; /* packed bits are restricted to 8*sizeof(llong) bytes */

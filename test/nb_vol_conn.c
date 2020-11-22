@@ -208,7 +208,8 @@ static herr_t H5VL_nonblock_object_optional(void *obj, H5VL_object_optional_t op
 /* Container/connector introspection callbacks */
 static herr_t H5VL_nonblock_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl,
                                                     const H5VL_class_t **conn_cls);
-static herr_t H5VL_nonblock_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags);
+static herr_t H5VL_nonblock_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type,
+                                                 uint64_t *flags);
 
 /* Async request callbacks */
 static herr_t H5VL_nonblock_request_wait(void *req, uint64_t timeout, H5VL_request_status_t *status);
@@ -2797,7 +2798,7 @@ H5VL_nonblock_request_specific(void *obj, H5VL_request_specific_t specific_type,
 
             /* Release requests that have completed */
             if (H5VL_REQUEST_WAITANY == specific_type) {
-                size_t *       idx;    /* Pointer to the index of completed request */
+                size_t *               idx;    /* Pointer to the index of completed request */
                 H5VL_request_status_t *status; /* Pointer to the request's status */
 
                 /* Retrieve the remaining arguments */
@@ -2819,8 +2820,8 @@ H5VL_nonblock_request_specific(void *obj, H5VL_request_specific_t specific_type,
                 } /* end if */
             }     /* end if */
             else if (H5VL_REQUEST_WAITSOME == specific_type) {
-                size_t *       outcount;          /* # of completed requests */
-                unsigned *     array_of_indices;  /* Array of indices for completed requests */
+                size_t *               outcount;          /* # of completed requests */
+                unsigned *             array_of_indices;  /* Array of indices for completed requests */
                 H5VL_request_status_t *array_of_statuses; /* Array of statuses for completed requests */
 
                 /* Retrieve the remaining arguments */
@@ -2847,10 +2848,10 @@ H5VL_nonblock_request_specific(void *obj, H5VL_request_specific_t specific_type,
 
                         tmp_o = (H5VL_nonblock_t *)req_array[idx_array[u]];
                         H5VL_nonblock_free_obj(tmp_o);
-                    }                             /* end for */
-                }                                 /* end if */
-            }                                     /* end else-if */
-            else {                                /* H5VL_REQUEST_WAITALL == specific_type */
+                    }                                     /* end for */
+                }                                         /* end if */
+            }                                             /* end else-if */
+            else {                                        /* H5VL_REQUEST_WAITALL == specific_type */
                 H5VL_request_status_t *array_of_statuses; /* Array of statuses for completed requests */
 
                 /* Retrieve the remaining arguments */

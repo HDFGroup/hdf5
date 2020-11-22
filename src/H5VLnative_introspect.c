@@ -35,10 +35,10 @@
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subcls,
-    int opt_type, uint64_t *flags)
+H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subcls, int opt_type,
+                                  uint64_t *flags)
 {
-    herr_t ret_value = SUCCEED;      /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -49,7 +49,7 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
     *flags = H5VL_OPT_QUERY_SUPPORTED;
 
     /* Set appropriate flags for each operation in each subclass */
-    switch(subcls) {
+    switch (subcls) {
         case H5VL_SUBCLS_NONE:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown optional 'none' operation")
 
@@ -60,7 +60,7 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown optional wrapper operation")
 
         case H5VL_SUBCLS_ATTR:
-            switch(opt_type) {
+            switch (opt_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                 case H5VL_NATIVE_ATTR_ITERATE_OLD:
                     /* Don't allow asynchronous execution, due to iterator callbacks */
@@ -75,7 +75,7 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
             break;
 
         case H5VL_SUBCLS_DATASET:
-            switch(opt_type) {
+            switch (opt_type) {
                 case H5VL_NATIVE_DATASET_FORMAT_CONVERT:
                     *flags |= H5VL_OPT_QUERY_MODIFY_METADATA;
                     break;
@@ -108,7 +108,7 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown optional datatype operation")
 
         case H5VL_SUBCLS_FILE:
-            switch(opt_type) {
+            switch (opt_type) {
                 case H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE:
                 case H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE:
                 case H5VL_NATIVE_FILE_SET_MDC_CONFIG:
@@ -162,7 +162,7 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
             break;
 
         case H5VL_SUBCLS_GROUP:
-            switch(opt_type) {
+            switch (opt_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                 case H5VL_NATIVE_GROUP_ITERATE_OLD:
                     /* Don't allow asynchronous execution, due to iterator callbacks */
@@ -184,7 +184,7 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown optional link operation")
 
         case H5VL_SUBCLS_OBJECT:
-            switch(opt_type) {
+            switch (opt_type) {
                 case H5VL_NATIVE_OBJECT_GET_COMMENT:
                     *flags |= H5VL_OPT_QUERY_QUERY_METADATA;
                     break;

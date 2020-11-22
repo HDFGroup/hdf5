@@ -1284,20 +1284,20 @@ H5T_already_vol_managed(const H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_invoke_vol_optional(H5T_t *dt, H5VL_datatype_optional_t opt_type,
-    hid_t dxpl_id, void **req, H5VL_object_t **vol_obj_ptr, va_list arguments)
+H5T_invoke_vol_optional(H5T_t *dt, H5VL_datatype_optional_t opt_type, hid_t dxpl_id, void **req,
+                        H5VL_object_t **vol_obj_ptr, va_list arguments)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check that datatype is committed */
-    if(!H5T_is_named(dt))
+    if (!H5T_is_named(dt))
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a committed datatype")
 
     /* Only invoke callback if VOL object is set for the datatype */
-    if(dt->vol_obj)
-        if(H5VL_datatype_optional_op(dt->vol_obj, opt_type, dxpl_id, req, vol_obj_ptr, arguments) < 0)
+    if (dt->vol_obj)
+        if (H5VL_datatype_optional_op(dt->vol_obj, opt_type, dxpl_id, req, vol_obj_ptr, arguments) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPERATE, FAIL, "unable to execute datatype optional callback")
 
 done:

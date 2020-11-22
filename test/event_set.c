@@ -38,11 +38,11 @@ const char *FILENAME[] = {"event_set_1", NULL};
 static int
 test_es_create(void)
 {
-    hid_t   es_id;        /* Event set ID */
-    size_t  count;        /* # of events in set */
-    size_t  num_errs;     /* # of failed events in set */
-    uint64_t num_ops;     /* # of events inserted into set */
-    hbool_t err_occurred; /* Whether an error has occurred */
+    hid_t    es_id;        /* Event set ID */
+    size_t   count;        /* # of events in set */
+    size_t   num_errs;     /* # of failed events in set */
+    uint64_t num_ops;      /* # of events inserted into set */
+    hbool_t  err_occurred; /* Whether an error has occurred */
 
     TESTING("event set creation");
 

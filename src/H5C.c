@@ -7131,7 +7131,7 @@ H5C__load_entry(H5F_t *f,
     MPI_Comm comm     = MPI_COMM_NULL; /* File MPI Communicator                    */
     int      mpi_code;                 /* MPI error code                           */
 #endif /* H5_HAVE_PARALLEL */
-    void *ret_value = NULL; /* Return value                             */
+    void *ret_value = NULL;            /* Return value                             */
 
     FUNC_ENTER_STATIC
 
@@ -7306,8 +7306,7 @@ H5C__load_entry(H5F_t *f,
 
         /* Check for too many tries */
         if (tries == 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL,
-                        "incorrect metadata checksum after all read attempts")
+            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "incorrect metadata checksum after all read attempts")
 
         /* Calculate and track the # of retries */
         retries = max_tries - tries;

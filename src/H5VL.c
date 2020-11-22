@@ -905,7 +905,7 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags/*out*/)
+H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL;
     herr_t         ret_value = SUCCEED; /* Return value */
@@ -914,13 +914,13 @@ H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t 
     H5TRACE4("e", "iVSIsx", obj_id, subcls, opt_type, flags);
 
     /* Check args */
-    if(NULL == flags)
+    if (NULL == flags)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid 'flags' pointer")
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Query the connector */
-    if(H5VL_introspect_opt_query(vol_obj, subcls, opt_type, flags) < 0)
+    if (H5VL_introspect_opt_query(vol_obj, subcls, opt_type, flags) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to query VOL connector operation")
 
 done:
@@ -933,7 +933,8 @@ done:
  * Purpose:     Allow a VOL connector to register a new optional operation
  *              for a VOL object subclass.   The operation name must be runtime
  *              unique for each operation, preferably avoiding naming clashes
- *              by using a Uniform Type Identifier (UTI, https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/understanding_utis/understand_utis_conc/understand_utis_conc.html)
+ *              by using a Uniform Type Identifier (UTI,
+ *https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/understanding_utis/understand_utis_conc/understand_utis_conc.html)
  *              for each operation name.  The value returned in the 'op_val'
  *              pointer will be unique for that VOL connector to use for its
  *              operation on that subclass.
@@ -956,28 +957,28 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val/*out*/)
+H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val /*out*/)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "VS*sx", subcls, op_name, op_val);
 
     /* Check args */
-    if(NULL == op_val)
+    if (NULL == op_val)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_val pointer")
-    if(NULL == op_name)
+    if (NULL == op_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_name pointer")
-    if('\0' == *op_name)
+    if ('\0' == *op_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_name string")
-    if(!((H5VL_SUBCLS_ATTR == subcls) || (H5VL_SUBCLS_DATASET == subcls) ||
-            (H5VL_SUBCLS_DATATYPE == subcls) || (H5VL_SUBCLS_FILE == subcls) ||
-            (H5VL_SUBCLS_GROUP == subcls)))
+    if (!((H5VL_SUBCLS_ATTR == subcls) || (H5VL_SUBCLS_DATASET == subcls) ||
+          (H5VL_SUBCLS_DATATYPE == subcls) || (H5VL_SUBCLS_FILE == subcls) || (H5VL_SUBCLS_GROUP == subcls)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid VOL subclass type")
 
     /* Register the operation */
-    if(H5VL__register_opt_operation(subcls, op_name, op_val) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register dynamic optional operation: '%s'", op_name)
+    if (H5VL__register_opt_operation(subcls, op_name, op_val) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register dynamic optional operation: '%s'",
+                    op_name)
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -994,27 +995,26 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val/*out*/)
+H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val /*out*/)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "VS*sx", subcls, op_name, op_val);
 
     /* Check args */
-    if(NULL == op_val)
+    if (NULL == op_val)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_val pointer")
-    if(NULL == op_name)
+    if (NULL == op_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_name pointer")
-    if('\0' == *op_name)
+    if ('\0' == *op_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_name string")
-    if(!((H5VL_SUBCLS_ATTR == subcls) || (H5VL_SUBCLS_DATASET == subcls) ||
-            (H5VL_SUBCLS_DATATYPE == subcls) || (H5VL_SUBCLS_FILE == subcls) ||
-            (H5VL_SUBCLS_GROUP == subcls)))
+    if (!((H5VL_SUBCLS_ATTR == subcls) || (H5VL_SUBCLS_DATASET == subcls) ||
+          (H5VL_SUBCLS_DATATYPE == subcls) || (H5VL_SUBCLS_FILE == subcls) || (H5VL_SUBCLS_GROUP == subcls)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid VOL subclass type")
 
     /* Find the operation */
-    if(H5VL__find_opt_operation(subcls, op_name, op_val) < 0)
+    if (H5VL__find_opt_operation(subcls, op_name, op_val) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL, "can't find dynamic optional operation: '%s'", op_name)
 
 done:
@@ -1034,26 +1034,25 @@ done:
 herr_t
 H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "VS*s", subcls, op_name);
 
     /* Check args */
-    if(NULL == op_name)
+    if (NULL == op_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_name pointer")
-    if('\0' == *op_name)
+    if ('\0' == *op_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_name string")
-    if(!((H5VL_SUBCLS_ATTR == subcls) || (H5VL_SUBCLS_DATASET == subcls) ||
-            (H5VL_SUBCLS_DATATYPE == subcls) || (H5VL_SUBCLS_FILE == subcls) ||
-            (H5VL_SUBCLS_GROUP == subcls)))
+    if (!((H5VL_SUBCLS_ATTR == subcls) || (H5VL_SUBCLS_DATASET == subcls) ||
+          (H5VL_SUBCLS_DATATYPE == subcls) || (H5VL_SUBCLS_FILE == subcls) || (H5VL_SUBCLS_GROUP == subcls)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid VOL subclass type")
 
     /* Unregister the operation */
-    if(H5VL__unregister_opt_operation(subcls, op_name) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREMOVE, FAIL, "can't unregister dynamic optional operation: '%s'", op_name)
+    if (H5VL__unregister_opt_operation(subcls, op_name) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREMOVE, FAIL, "can't unregister dynamic optional operation: '%s'",
+                    op_name)
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5VLunregister_opt_operation() */
-

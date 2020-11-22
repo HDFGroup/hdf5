@@ -86,8 +86,7 @@ struct H5P_genclass_t {
     char *                 name;   /* Name of property list class */
     H5P_plist_type_t       type;   /* Type of property */
     size_t                 nprops; /* Number of properties in class */
-    unsigned
-        plists; /* Number of property lists that have been created since the last modification to the class */
+    unsigned plists;  /* Number of property lists that have been created since the last modification to the class */
     unsigned classes; /* Number of classes that have been derived since the last modification to the class */
     unsigned ref_count; /* Number of outstanding ID's open on this class object */
     hbool_t  deleted;  /* Whether this class has been deleted and is waiting for dependent classes & proplists

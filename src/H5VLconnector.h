@@ -199,10 +199,10 @@ typedef enum H5VL_request_status_t {
 
 /* types for async request SPECIFIC callback */
 typedef enum H5VL_request_specific_t {
-    H5VL_REQUEST_WAITANY,  /* Wait until any request completes */
-    H5VL_REQUEST_WAITSOME, /* Wait until at least one requesst completes */
-    H5VL_REQUEST_WAITALL,  /* Wait until all requests complete */
-    H5VL_REQUEST_GET_ERR_STACK  /* Retrieve error stack for failed operation */
+    H5VL_REQUEST_WAITANY,      /* Wait until any request completes */
+    H5VL_REQUEST_WAITSOME,     /* Wait until at least one requesst completes */
+    H5VL_REQUEST_WAITALL,      /* Wait until all requests complete */
+    H5VL_REQUEST_GET_ERR_STACK /* Retrieve error stack for failed operation */
 } H5VL_request_specific_t;
 
 /* Typedef and values for native VOL connector request optional VOL operations */
@@ -555,41 +555,44 @@ H5_DLL hid_t H5VLpeek_connector_id_by_name(const char *name);
 H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 
 /* User-defined optional operations */
-H5_DLL herr_t H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name,
-    int *op_val);
-H5_DLL herr_t H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name,
-    int *op_val);
+H5_DLL herr_t H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val);
+H5_DLL herr_t H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val);
 H5_DLL herr_t H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name);
 H5_DLL herr_t H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                    hid_t attr_id, H5VL_attr_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...);
+                                   hid_t attr_id, H5VL_attr_optional_t opt_type, hid_t dxpl_id, hid_t es_id,
+                                   ...);
 H5_DLL herr_t H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                    hid_t dset_id, H5VL_dataset_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...);
+                                      hid_t dset_id, H5VL_dataset_optional_t opt_type, hid_t dxpl_id,
+                                      hid_t es_id, ...);
 H5_DLL herr_t H5VLdatatype_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                    hid_t type_id, H5VL_datatype_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...);
+                                       hid_t type_id, H5VL_datatype_optional_t opt_type, hid_t dxpl_id,
+                                       hid_t es_id, ...);
 H5_DLL herr_t H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                    hid_t file_id, H5VL_file_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...);
+                                   hid_t file_id, H5VL_file_optional_t opt_type, hid_t dxpl_id, hid_t es_id,
+                                   ...);
 H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                    hid_t group_id, H5VL_group_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...);
+                                    hid_t group_id, H5VL_group_optional_t opt_type, hid_t dxpl_id,
+                                    hid_t es_id, ...);
 
 /* API Wrappers for "optional_op" routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
 #ifndef H5VL_MODULE
 /* Inject application compile-time macros into function calls */
-#define H5VLattr_optional_op(...)       H5VLattr_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5VLdataset_optional_op(...)    H5VLdataset_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5VLdatatype_optional_op(...)   H5VLdatatype_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5VLfile_optional_op(...)       H5VLfile_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5VLgroup_optional_op(...)      H5VLgroup_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5VLattr_optional_op(...)     H5VLattr_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5VLdataset_optional_op(...)  H5VLdataset_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5VLdatatype_optional_op(...) H5VLdatatype_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5VLfile_optional_op(...)     H5VLfile_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5VLgroup_optional_op(...)    H5VLgroup_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
-#define H5VLattr_optional_op_wrap       H5VLattr_optional_op
-#define H5VLdataset_optional_op_wrap    H5VLdataset_optional_op
-#define H5VLdatatype_optional_op_wrap   H5VLdatatype_optional_op
-#define H5VLfile_optional_op_wrap       H5VLfile_optional_op
-#define H5VLgroup_optional_op_wrap      H5VLgroup_optional_op
+#define H5VLattr_optional_op_wrap     H5VLattr_optional_op
+#define H5VLdataset_optional_op_wrap  H5VLdataset_optional_op
+#define H5VLdatatype_optional_op_wrap H5VLdatatype_optional_op
+#define H5VLfile_optional_op_wrap     H5VLfile_optional_op
+#define H5VLgroup_optional_op_wrap    H5VLgroup_optional_op
 #endif /* H5VL_MODULE */
 
 #ifdef __cplusplus
