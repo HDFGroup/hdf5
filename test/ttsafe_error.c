@@ -72,7 +72,7 @@ tts_error(void)
 
     /* Must initialize these at runtime */
     expected_g[0].maj_num = H5E_DATASET;
-    expected_g[0].min_num = H5E_CANTINIT;
+    expected_g[0].min_num = H5E_CANTCREATE;
 
     expected_g[1].maj_num = H5E_VOL;
     expected_g[1].min_num = H5E_CANTCREATE;
