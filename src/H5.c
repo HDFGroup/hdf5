@@ -335,7 +335,10 @@ H5_term_library(void)
             curr_atclose = curr_atclose->next;
             H5FL_FREE(H5_atclose_node_t, tmp_atclose);
         } /* end while */
-    }     /* end if */
+
+        /* Reset list head, in case library is re-initialized */
+        H5_atclose_head = NULL;
+    } /* end if */
 
     /*
      * Terminate each interface. The termination functions return a positive
