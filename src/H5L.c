@@ -586,7 +586,7 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t new_lo
     H5VL_object_t   tmp_vol_obj;                    /* Temporary object */
     H5VL_object_t * tmp_vol_obj_ptr = &tmp_vol_obj; /* Ptr to temporary object */
     H5VL_object_t **tmp_vol_obj_ptr_ptr =
-        (_vol_obj_ptr ? &_vol_obj_ptr : &tmp_vol_obj_ptr); /* Ptr to ptr to temporary object */
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj_ptr); /* Ptr to ptr to temporary object */
     H5VL_loc_params_t loc_params1;         /* Location parameters for cur_loc_id object access */
     H5VL_loc_params_t loc_params2;         /* Location parameters for new_loc_id object access */
     herr_t            ret_value = SUCCEED; /* Return value */
