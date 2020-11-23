@@ -79,12 +79,9 @@ typedef struct H5G_gnba_iter_t {
 
 static htri_t      H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r);
 static H5RS_str_t *H5G__build_fullpath(const char *prefix, const char *name);
-#ifdef NOT_YET
-static H5RS_str_t *H5G__build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r);
-#endif /* NOT_YET */
-static herr_t H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char *src_path,
-                                  const char *dst_path);
-static int    H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
+static herr_t      H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char *src_path,
+                                       const char *dst_path);
+static int         H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
 
 /*********************/
 /* Package Variables */
@@ -354,44 +351,6 @@ H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_build_fullpath_refstr_str() */
-
-#ifdef NOT_YET
-
-/*-------------------------------------------------------------------------
- * Function: H5G_name_build_refstr_refstr
- *
- * Purpose: Build a full path from a prefix & base pair of reference counted
- *              strings
- *
- * Return: Pointer to reference counted string on success, NULL on error
- *
- * Programmer: Quincey Koziol
- *
- * Date: August 19, 2005
- *
- *-------------------------------------------------------------------------
- */
-static H5RS_str_t *
-H5G__build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r)
-{
-    const char *prefix;    /* Pointer to raw string of prefix */
-    const char *name;      /* Pointer to raw string of name */
-    H5RS_str_t *ret_value; /* Return value */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Get the pointer to the prefix */
-    prefix = H5RS_get_str(prefix_r);
-
-    /* Get the pointer to the raw src user path */
-    name = H5RS_get_str(name_r);
-
-    /* Create reference counted string for path */
-    ret_value = H5G__build_fullpath(prefix, name);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G__build_fullpath_refstr_refstr() */
-#endif /* NOT_YET */
 
 /*-------------------------------------------------------------------------
  * Function:    H5G__name_init

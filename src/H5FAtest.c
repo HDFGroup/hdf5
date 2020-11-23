@@ -241,7 +241,7 @@ BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -,
 /* Local variables */
 #ifndef NDEBUG
     H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
-#endif                                                /* NDEBUG */
+#endif /* NDEBUG */
     uint64_t *     elmt = (uint64_t *)_elmt;          /* Convenience pointer to native elements */
     const uint8_t *raw  = (const uint8_t *)_raw;      /* Convenience pointer to raw elements */
 

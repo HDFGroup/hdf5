@@ -578,7 +578,7 @@ hs_dr_pio_test__takedown(struct hs_dr_pio_test_vars_t *tv_ptr)
 {
 #if HS_DR_PIO_TEST__TAKEDOWN__DEBUG
     const char *fcnName = "hs_dr_pio_test__takedown()";
-#endif               /* HS_DR_PIO_TEST__TAKEDOWN__DEBUG */
+#endif /* HS_DR_PIO_TEST__TAKEDOWN__DEBUG */
     int    mpi_rank; /* needed by the VRFY macro */
     herr_t ret;      /* Generic return value */
 

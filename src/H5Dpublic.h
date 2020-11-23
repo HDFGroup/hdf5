@@ -131,7 +131,6 @@ H5_DLL hid_t   H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t s
                           hid_t dcpl_id, hid_t dapl_id);
 H5_DLL hid_t   H5Dcreate_anon(hid_t file_id, hid_t type_id, hid_t space_id, hid_t plist_id, hid_t dapl_id);
 H5_DLL hid_t   H5Dopen2(hid_t file_id, const char *name, hid_t dapl_id);
-H5_DLL herr_t  H5Dclose(hid_t dset_id);
 H5_DLL hid_t   H5Dget_space(hid_t dset_id);
 H5_DLL herr_t  H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation);
 H5_DLL hid_t   H5Dget_type(hid_t dset_id);
@@ -163,9 +162,10 @@ H5_DLL herr_t  H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, h
                           void *dst_buf);
 H5_DLL herr_t  H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf_size,
                          void *dst_buf, H5D_gather_func_t op, void *op_data);
-H5_DLL herr_t  H5Ddebug(hid_t dset_id);
+H5_DLL herr_t  H5Dclose(hid_t dset_id);
 
 /* Internal API routines */
+H5_DLL herr_t H5Ddebug(hid_t dset_id);
 H5_DLL herr_t H5Dformat_convert(hid_t dset_id);
 H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 

@@ -18,9 +18,21 @@
  *
  */
 
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FLprivate.h" /* Free lists                           */
-#include "H5RSprivate.h" /* Reference-counted strings            */
+/***********/
+/* Headers */
+/***********/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FLprivate.h" /* Free lists                               */
+#include "H5RSprivate.h" /* Reference-counted strings                */
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* Private typedefs & structs */
 struct H5RS_str_t {
@@ -28,6 +40,25 @@ struct H5RS_str_t {
     unsigned wrapped; /* Indicates that the string to be ref-counted is not copied */
     unsigned n;       /* Reference count of number of pointers sharing string */
 };
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Declare a free list to manage the H5RS_str_t struct */
 H5FL_DEFINE_STATIC(H5RS_str_t);
@@ -135,13 +166,13 @@ done:
 H5RS_str_t *
 H5RS_wrap(const char *s)
 {
-    H5RS_str_t *ret_value; /* Return value */
+    H5RS_str_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Allocate ref-counted string structure */
     if (NULL == (ret_value = H5FL_MALLOC(H5RS_str_t)))
-        HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Set the internal fields */
     ret_value->s       = (char *)s;

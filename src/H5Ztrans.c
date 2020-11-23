@@ -1033,7 +1033,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void *array, size_t array_size
 #if CHAR_MIN >= 0
         else if (array_type == H5T_NATIVE_SCHAR)
             H5Z_XFORM_DO_OP5(signed char, array_size)
-#else  /* CHAR_MIN >= 0 */
+#else /* CHAR_MIN >= 0 */
         else if (array_type == H5T_NATIVE_UCHAR)
             H5Z_XFORM_DO_OP5(unsigned char, array_size)
 #endif /* CHAR_MIN >= 0 */

@@ -486,9 +486,9 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
             default:
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else     /* NDEBUG */
+#else /* NDEBUG */
                 HDassert(0 && "Unknown action?!?");
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */
     }     /* end if */
     else
@@ -904,9 +904,9 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
             default:
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else     /* NDEBUG */
+#else /* NDEBUG */
                 HDassert(0 && "Unknown action?!?");
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */
     }     /* end if */
     else
@@ -1283,9 +1283,9 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
             default:
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else     /* NDEBUG */
+#else /* NDEBUG */
                 HDassert(0 && "Unknown action?!?");
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */
     }     /* end if */
     else

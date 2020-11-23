@@ -662,22 +662,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
+H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_dst)
 {
-    const H5FD_hdfs_fapl_t *fa        = NULL;
+    const H5FD_hdfs_fapl_t *fa_src    = NULL;
     H5P_genplist_t *        plist     = NULL;
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa_out);
+    H5TRACE2("e", "i*x", fapl_id, fa_dst);
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
-    if (fa_out == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_out is NULL")
-
+    if (fa_dst == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst ptr is NULL")
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if (plist == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
@@ -685,12 +684,12 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
     if (H5FD_HDFS != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
 
-    fa = (const H5FD_hdfs_fapl_t *)H5P_peek_driver_info(plist);
-    if (fa == NULL)
+    fa_src = (const H5FD_hdfs_fapl_t *)H5P_peek_driver_info(plist);
+    if (fa_src == NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     /* Copy the hdfs fapl data out */
-    H5MM_memcpy(fa_out, fa, sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(fs_dst, fa_src, sizeof(H5FD_hdfs_fapl_t));
 
 done:
     FUNC_LEAVE_API(ret_value)
