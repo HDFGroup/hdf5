@@ -1185,7 +1185,6 @@ H5_DLL herr_t       H5Pset_external(hid_t plist_id, const char *name, off_t offs
 H5_DLL int          H5Pget_external_count(hid_t plist_id);
 H5_DLL herr_t       H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out*/,
                                     off_t *offset /*out*/, hsize_t *size /*out*/);
-H5_DLL herr_t       H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block);
 H5_DLL herr_t       H5Pset_nbit(hid_t plist_id);
 H5_DLL herr_t       H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor);
 H5_DLL herr_t       H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status);
