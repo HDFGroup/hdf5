@@ -275,7 +275,7 @@ check_file(char *filename)
     TESTING("dataset of LE FLOAT with Deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += check_data_f(DATASETNAME16, fid);
-#else  /*H5_HAVE_FILTER_DEFLATE*/
+#else /*H5_HAVE_FILTER_DEFLATE*/
     SKIPPED();
     HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_DEFLATE*/
@@ -283,7 +283,7 @@ check_file(char *filename)
     TESTING("dataset of BE FLOAT with Deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += check_data_f(DATASETNAME17, fid);
-#else  /*H5_HAVE_FILTER_DEFLATE*/
+#else /*H5_HAVE_FILTER_DEFLATE*/
     SKIPPED();
     HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_DEFLATE*/
@@ -291,7 +291,7 @@ check_file(char *filename)
     TESTING("dataset of LE FLOAT with Szip filter");
 #ifdef H5_HAVE_FILTER_SZIP
     nerrors += check_data_f(DATASETNAME18, fid);
-#else  /*H5_HAVE_FILTER_SZIP*/
+#else /*H5_HAVE_FILTER_SZIP*/
     SKIPPED();
     HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_SZIP*/
@@ -299,7 +299,7 @@ check_file(char *filename)
     TESTING("dataset of BE FLOAT with Szip filter");
 #ifdef H5_HAVE_FILTER_SZIP
     nerrors += check_data_f(DATASETNAME19, fid);
-#else  /*H5_HAVE_FILTER_SZIP*/
+#else /*H5_HAVE_FILTER_SZIP*/
     SKIPPED();
     HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_SZIP*/

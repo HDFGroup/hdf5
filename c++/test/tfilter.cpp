@@ -222,7 +222,7 @@ test_szip_filter(H5File &file1)
         SKIPPED();
     }
 
-#else  /* H5_HAVE_FILTER_SZIP */
+#else /* H5_HAVE_FILTER_SZIP */
     SUBTEST("szip filter");
     SKIPPED();
     H5std_string fname = file1.getFileName();

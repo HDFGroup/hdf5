@@ -10,6 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*
+ * This file contains public declarations for the H5ES (event set) module.
+ */
+
 #ifndef _H5ESpublic_H
 #define _H5ESpublic_H
 

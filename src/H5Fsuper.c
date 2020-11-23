@@ -329,7 +329,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
     hbool_t  skip_eof_check = FALSE;            /* Whether to skip checking the EOF value */
 #ifdef H5_HAVE_PARALLEL
     int mpi_size = 1;
-#endif                          /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(H5AC__SUPERBLOCK_TAG)
@@ -879,12 +879,12 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 
                     /* Do the same kluge until we know for sure.  VC */
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
-                                                               /* KLUGE ALERT!!
-                                                                *
-                                                                * H5F__super_ext_write_msg() expects f->shared->sblock to
-                                                                * be set -- verify that it is NULL, and then set it.
-                                                                * Set it back to NULL when we are done.
-                                                                */
+                    /* KLUGE ALERT!!
+                     *
+                     * H5F__super_ext_write_msg() expects f->shared->sblock to
+                     * be set -- verify that it is NULL, and then set it.
+                     * Set it back to NULL when we are done.
+                     */
                     HDassert(f->shared->sblock == NULL);
                     f->shared->sblock = sblock;
 #endif /* JRM */

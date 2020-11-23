@@ -89,7 +89,7 @@ extern "C" {
  * \since 1.8.15
  *
  */
-H5_DLL herr_t  H5PLset_loading_state(unsigned int plugin_control_mask);
+H5_DLL herr_t H5PLset_loading_state(unsigned int plugin_control_mask);
 /**
  * \ingroup H5PL
  * \brief Queries the loadability of dynamic plugin types
@@ -114,7 +114,7 @@ H5_DLL herr_t  H5PLset_loading_state(unsigned int plugin_control_mask);
  * \since 1.8.15
  *
  */
-H5_DLL herr_t  H5PLget_loading_state(unsigned int *plugin_control_mask /*out*/);
+H5_DLL herr_t H5PLget_loading_state(unsigned int *plugin_control_mask /*out*/);
 /**
  * \ingroup H5PL
  * \brief Inserts a plugin path at the end of the plugin search path list
@@ -127,7 +127,7 @@ H5_DLL herr_t  H5PLget_loading_state(unsigned int *plugin_control_mask /*out*/);
  * \since 1.10.1
  *
  */
-H5_DLL herr_t  H5PLappend(const char *search_path);
+H5_DLL herr_t H5PLappend(const char *search_path);
 /**
  * \ingroup H5PL
  * \brief Inserts a plugin path at the beginning of the plugin search path list
@@ -140,7 +140,7 @@ H5_DLL herr_t  H5PLappend(const char *search_path);
  * \since 1.10.1
  *
  */
-H5_DLL herr_t  H5PLprepend(const char *search_path);
+H5_DLL herr_t H5PLprepend(const char *search_path);
 /**
  * \ingroup H5PL
  * \brief Replaces the path at the specified index in the plugin search path list
@@ -154,7 +154,7 @@ H5_DLL herr_t  H5PLprepend(const char *search_path);
  * \since 1.10.1
  *
  */
-H5_DLL herr_t  H5PLreplace(const char *search_path, unsigned int index);
+H5_DLL herr_t H5PLreplace(const char *search_path, unsigned int index);
 /**
  * \ingroup H5PL
  * \brief Inserts a path at the specified index in the plugin search path list
@@ -169,7 +169,7 @@ H5_DLL herr_t  H5PLreplace(const char *search_path, unsigned int index);
  * \since 1.10.1
  *
  */
-H5_DLL herr_t  H5PLinsert(const char *search_path, unsigned int index);
+H5_DLL herr_t H5PLinsert(const char *search_path, unsigned int index);
 /**
  * \ingroup H5PL
  * \brief Removes a plugin path at a specified index from the plugin search path list
@@ -183,7 +183,7 @@ H5_DLL herr_t  H5PLinsert(const char *search_path, unsigned int index);
  * \since 1.10.1
  *
  */
-H5_DLL herr_t  H5PLremove(unsigned int index);
+H5_DLL herr_t H5PLremove(unsigned int index);
 /**
  * \ingroup H5PL
  * \brief Queries the plugin search path list at the specified index
@@ -220,7 +220,7 @@ H5_DLL ssize_t H5PLget(unsigned int index, char *path_buf /*out*/, size_t buf_si
  * \since 1.10.1
  *
  */
-H5_DLL herr_t  H5PLsize(unsigned int *num_paths /*out*/);
+H5_DLL herr_t H5PLsize(unsigned int *num_paths /*out*/);
 
 #ifdef __cplusplus
 }

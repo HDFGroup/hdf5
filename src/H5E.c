@@ -306,14 +306,14 @@ H5E__set_default_auto(H5E_t *stk)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifdef H5_USE_16_API_DEFAULT
     stk->auto_op.vers = 1;
-#else  /* H5_USE_16_API */
+#else /* H5_USE_16_API */
     stk->auto_op.vers = 2;
 #endif /* H5_USE_16_API_DEFAULT */
 
     stk->auto_op.func1 = stk->auto_op.func1_default = (H5E_auto1_t)H5Eprint1;
     stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5Eprint2;
     stk->auto_op.is_default                         = TRUE;
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
     stk->auto_op.func2 = (H5E_auto2_t)H5Eprint2;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -1318,6 +1318,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+H5_ATTR_FORMAT(printf, 8, 9)
 herr_t
 H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid_t cls_id, hid_t maj_id,
          hid_t min_id, const char *fmt, ...)

@@ -374,7 +374,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
             H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
                        H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, NULL);
 #ifdef H5_HAVE_PARALLEL
-    }  /* end else */
+    } /* end else */
 #endif /* H5_HAVE_PARALLEL */
 
     if (NULL == f->shared->cache)
@@ -432,7 +432,7 @@ done:
             aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
         } /* end if */
     }     /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_create() */
@@ -466,7 +466,7 @@ H5AC_dest(H5F_t *f)
     hbool_t curr_logging; /* TRUE if currently logging */
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t *aux_ptr = NULL;
-#endif                          /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -585,7 +585,7 @@ H5AC_dest(H5F_t *f)
         aux_ptr->magic = 0;
         aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
 
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -1104,7 +1104,7 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
 {
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t *aux_ptr;
-#endif                          /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1414,7 +1414,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata, unsi
 #ifdef H5_HAVE_PARALLEL
     HDassert(0 == (flags &
                    (unsigned)(~(H5C__READ_ONLY_FLAG | H5C__FLUSH_LAST_FLAG | H5C__FLUSH_COLLECTIVELY_FLAG))));
-#else  /* H5_HAVE_PARALLEL */
+#else /* H5_HAVE_PARALLEL */
     HDassert(0 == (flags & (unsigned)(~(H5C__READ_ONLY_FLAG | H5C__FLUSH_LAST_FLAG))));
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1631,7 +1631,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, un
     hbool_t deleted;
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t *aux_ptr = NULL;
-#endif                          /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1674,7 +1674,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, un
         if (deleted && aux_ptr->mpi_rank == 0)
             if (H5AC__log_deleted_entry((H5AC_info_t *)thing) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5AC__log_deleted_entry() failed")
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     if (H5C_unprotect(f, addr, thing, flags) < 0)
@@ -2163,7 +2163,7 @@ H5AC__check_if_write_permitted(const H5F_t
             write_permitted = aux_ptr->write_permitted;
         else
             write_permitted = FALSE;
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     *write_permitted_ptr = write_permitted;

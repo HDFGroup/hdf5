@@ -463,7 +463,7 @@ test_dataset_write_with_filters(hid_t fid)
     /* Clean up objects used for this test */
     if (H5Pclose(dcpl_id) < 0)
         TEST_ERROR;
-#else  /* H5_HAVE_FILTER_DEFLATE */
+#else /* H5_HAVE_FILTER_DEFLATE */
     SKIPPED();
     HDputs("    Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -649,7 +649,7 @@ test_dataset_read_with_filters(hid_t fid)
     if (H5Dclose(did) < 0)
         TEST_ERROR;
 
-#else  /* H5_HAVE_FILTER_DEFLATE */
+#else /* H5_HAVE_FILTER_DEFLATE */
     SKIPPED();
     HDputs("    Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */

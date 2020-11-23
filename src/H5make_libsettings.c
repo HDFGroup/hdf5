@@ -144,7 +144,7 @@ print_header(void)
 #ifdef H5_HAVE_GETPWUID
     struct passwd *pwd = NULL;
 #else
-    int pwd      = 1;
+    int pwd = 1;
 #endif
     static const char *month_name[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};

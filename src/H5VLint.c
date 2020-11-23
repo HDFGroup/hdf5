@@ -2325,11 +2325,10 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
     /* If the datatype is already VOL-managed, the datatype's vol_obj
      * field will get clobbered later, so disallow this.
      */
-    if (type == H5I_DATATYPE) {
+    if (type == H5I_DATATYPE)
         if (vol_wrap_ctx->connector->id == H5VL_NATIVE)
             if (TRUE == H5T_already_vol_managed((const H5T_t *)obj))
                 HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "can't wrap an uncommitted datatype")
-    }
 
     /* Wrap the object with VOL connector info */
     if (NULL == (new_obj = H5VL__wrap_obj(obj, type)))

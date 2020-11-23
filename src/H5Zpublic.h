@@ -36,49 +36,49 @@ typedef int H5Z_filter_t;
 /**
  * no filter
  */
-#define H5Z_FILTER_ERROR	(-1)
+#define H5Z_FILTER_ERROR (-1)
 /**
  * reserved indefinitely
-*/
-#define H5Z_FILTER_NONE		0
+ */
+#define H5Z_FILTER_NONE 0
 /**
  * deflation like gzip
  */
-#define H5Z_FILTER_DEFLATE	1
+#define H5Z_FILTER_DEFLATE 1
 /**
  * shuffle the data
  */
-#define H5Z_FILTER_SHUFFLE      2
+#define H5Z_FILTER_SHUFFLE 2
 /**
  * fletcher32 checksum of EDC
-*/
-#define H5Z_FILTER_FLETCHER32   3
+ */
+#define H5Z_FILTER_FLETCHER32 3
 /**
  * szip compression
  */
-#define H5Z_FILTER_SZIP         4
+#define H5Z_FILTER_SZIP 4
 /**
  * nbit compression
  */
-#define H5Z_FILTER_NBIT         5
+#define H5Z_FILTER_NBIT 5
 /**
  * scale+offset compression
  */
-#define H5Z_FILTER_SCALEOFFSET  6
+#define H5Z_FILTER_SCALEOFFSET 6
 /**
  * filter ids below this value are reserved for library use
  */
-#define H5Z_FILTER_RESERVED     256
+#define H5Z_FILTER_RESERVED 256
 /**
  * maximum filter id
  */
-#define H5Z_FILTER_MAX		65535
+#define H5Z_FILTER_MAX 65535
 
 /* General macros */
 /**
  * Symbol to remove all filters in H5Premove_filter()
  */
-#define H5Z_FILTER_ALL   0
+#define H5Z_FILTER_ALL 0
 /**
  * Maximum number of filters allowed in a pipeline
  *
@@ -86,35 +86,35 @@ typedef int H5Z_filter_t;
  *            currently each filter uses a bit in a 32-bit field, so the format
  *            would have to be changed to accommodate that)
  */
-#define H5Z_MAX_NFILTERS        32
+#define H5Z_MAX_NFILTERS 32
 
 /* Flags for filter definition (stored) */
 /**
  * definition flag mask
  */
-#define H5Z_FLAG_DEFMASK	0x00ff
+#define H5Z_FLAG_DEFMASK 0x00ff
 /**
  * filter is mandatory
  */
-#define H5Z_FLAG_MANDATORY  0x0000
+#define H5Z_FLAG_MANDATORY 0x0000
 /**
  * filter is optional
  */
-#define H5Z_FLAG_OPTIONAL	0x0001
+#define H5Z_FLAG_OPTIONAL 0x0001
 
 /* Additional flags for filter invocation (not stored) */
 /**
  * invocation flag mask
  */
-#define H5Z_FLAG_INVMASK	0xff00
+#define H5Z_FLAG_INVMASK 0xff00
 /**
  * reverse direction; read
  */
-#define H5Z_FLAG_REVERSE	0x0100
+#define H5Z_FLAG_REVERSE 0x0100
 /**
  * skip EDC filters for read
  */
-#define H5Z_FLAG_SKIP_EDC	0x0200
+#define H5Z_FLAG_SKIP_EDC 0x0200
 
 /* Special parameters for szip compression */
 /* [These are aliases for the similar definitions in szlib.h, which we can't
@@ -122,78 +122,77 @@ typedef int H5Z_filter_t;
  * header file] */
 /**
  * \ingroup SZIP */
-#define H5_SZIP_ALLOW_K13_OPTION_MASK   1
+#define H5_SZIP_ALLOW_K13_OPTION_MASK 1
 /**
  * \ingroup SZIP */
-#define H5_SZIP_CHIP_OPTION_MASK        2
+#define H5_SZIP_CHIP_OPTION_MASK 2
 /**
  * \ingroup SZIP */
-#define H5_SZIP_EC_OPTION_MASK          4
+#define H5_SZIP_EC_OPTION_MASK 4
 /**
  * \ingroup SZIP */
-#define H5_SZIP_NN_OPTION_MASK          32
+#define H5_SZIP_NN_OPTION_MASK 32
 /**
  * \ingroup SZIP */
-#define H5_SZIP_MAX_PIXELS_PER_BLOCK    32
+#define H5_SZIP_MAX_PIXELS_PER_BLOCK 32
 
 /* Macros for the shuffle filter */
 /**
  * \ingroup SHUFFLE
  * Number of parameters that users can set for the shuffle filter
-*/
-#define H5Z_SHUFFLE_USER_NPARMS    0
+ */
+#define H5Z_SHUFFLE_USER_NPARMS 0
 /**
  * \ingroup SHUFFLE
  * Total number of parameters for the shuffle filter
  */
-#define H5Z_SHUFFLE_TOTAL_NPARMS   1
+#define H5Z_SHUFFLE_TOTAL_NPARMS 1
 
 /* Macros for the szip filter */
 /**
  * \ingroup SZIP
  * Number of parameters that users can set for SZIP
  */
-#define H5Z_SZIP_USER_NPARMS    2
+#define H5Z_SZIP_USER_NPARMS 2
 /**
  * \ingroup SZIP
  * Total number of parameters for SZIP filter
  */
-#define H5Z_SZIP_TOTAL_NPARMS   4
+#define H5Z_SZIP_TOTAL_NPARMS 4
 /**
  * \ingroup SZIP
  * "User" parameter for option mask
  */
-#define H5Z_SZIP_PARM_MASK      0
+#define H5Z_SZIP_PARM_MASK 0
 /**
  * \ingroup SZIP
  * "User" parameter for pixels-per-block
  */
-#define H5Z_SZIP_PARM_PPB       1
+#define H5Z_SZIP_PARM_PPB 1
 /**
  * \ingroup SZIP
  * "Local" parameter for bits-per-pixel
  */
-#define H5Z_SZIP_PARM_BPP       2
+#define H5Z_SZIP_PARM_BPP 2
 /**
  * \ingroup SZIP
  * "Local" parameter for pixels-per-scanline
  */
-#define H5Z_SZIP_PARM_PPS       3
+#define H5Z_SZIP_PARM_PPS 3
 
 /* Macros for the nbit filter */
 /**
  * \ingroup NBIT
  * Number of parameters that users can set for the N-bit filter
  */
-#define H5Z_NBIT_USER_NPARMS     0     /* Number of parameters that users can set */
+#define H5Z_NBIT_USER_NPARMS 0 /* Number of parameters that users can set */
 
 /* Macros for the scale offset filter */
 /**
  * \ingroup SCALEOFFSET
  * Number of parameters that users can set for the scale-offset filter
  */
-#define H5Z_SCALEOFFSET_USER_NPARMS      2
-
+#define H5Z_SCALEOFFSET_USER_NPARMS 2
 
 /* Special parameters for ScaleOffset filter*/
 /**
@@ -240,15 +239,14 @@ typedef enum H5Z_cb_return_t {
 /**
  *  Filter callback function definition
  */
-typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void* buf,
-                                size_t buf_size, void* op_data);
+typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf, size_t buf_size, void *op_data);
 
 /**
  * Structure for filter callback property
  */
 typedef struct H5Z_cb_t {
-    H5Z_filter_func_t   func;
-    void                *op_data;
+    H5Z_filter_func_t func;
+    void *            op_data;
 } H5Z_cb_t;
 
 #ifdef __cplusplus
@@ -333,14 +331,14 @@ typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigne
  */
 //! [H5Z_class2_t_snip]
 typedef struct H5Z_class2_t {
-    int version;                    /**< Version number of the H5Z_class_t struct     */
-    H5Z_filter_t id;                /**< Filter ID number                             */
-    unsigned encoder_present;       /**< Does this filter have an encoder?            */
-    unsigned decoder_present;       /**< Does this filter have a decoder?             */
-    const char	*name;              /**< Comment for debugging                        */
-    H5Z_can_apply_func_t can_apply; /**< The "can apply" callback for a filter        */
-    H5Z_set_local_func_t set_local; /**< The "set local" callback for a filter        */
-    H5Z_func_t filter;              /**< The actual filter function                   */
+    int                  version;         /**< Version number of the H5Z_class_t struct     */
+    H5Z_filter_t         id;              /**< Filter ID number                             */
+    unsigned             encoder_present; /**< Does this filter have an encoder?            */
+    unsigned             decoder_present; /**< Does this filter have a decoder?             */
+    const char *         name;            /**< Comment for debugging                        */
+    H5Z_can_apply_func_t can_apply;       /**< The "can apply" callback for a filter        */
+    H5Z_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
+    H5Z_func_t           filter;          /**< The actual filter function                   */
 } H5Z_class2_t;
 //! [H5Z_class2_t_snip]
 
@@ -639,11 +637,11 @@ H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_confi
  */
 //! [H5Z_class1_t_snip]
 typedef struct H5Z_class1_t {
-    H5Z_filter_t id;		/**< Filter ID number			     */
-    const char	*name;		/**< Comment for debugging		     */
+    H5Z_filter_t         id;        /**< Filter ID number			     */
+    const char *         name;      /**< Comment for debugging		     */
     H5Z_can_apply_func_t can_apply; /**< The "can apply" callback for a filter */
     H5Z_set_local_func_t set_local; /**< The "set local" callback for a filter */
-    H5Z_func_t filter;		/**< The actual filter function		     */
+    H5Z_func_t           filter;    /**< The actual filter function		     */
 } H5Z_class1_t;
 //! [H5Z_class1_t_snip]
 
