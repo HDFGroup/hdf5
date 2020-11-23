@@ -671,9 +671,9 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
     if (H5R__decode_token_region_compat(f, buf, &buf_size, NULL, cont_info.token_size, &space) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "unable to get dataspace")
 
-    /* Atomize */
+    /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID")
 
 done:
     if (file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)

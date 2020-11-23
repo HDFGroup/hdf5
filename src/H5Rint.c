@@ -191,7 +191,7 @@ H5R__init_package(void)
  RETURNS
     void
  DESCRIPTION
-    Release IDs for the atom group, deferring full interface shutdown
+    Release IDs for the ID group, deferring full interface shutdown
     until later (in H5R_term_package).
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -224,7 +224,7 @@ H5R_top_term_package(void)
  RETURNS
     void
  DESCRIPTION
-    Release the atom group and any other resources allocated.
+    Release the ID group and any other resources allocated.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
      Can't report errors...
@@ -578,7 +578,7 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
 
     /* Get an ID for the file */
     if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
     /* Get the file object */
     if (NULL == (vol_obj = H5VL_vol_object(ret_value)))

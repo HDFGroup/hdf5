@@ -107,7 +107,7 @@ H5Tarray_create2(hid_t base_id, unsigned ndims, const hsize_t dim[/* ndims */])
     if (NULL == (dt = H5T__array_create(base, ndims, dim)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to create datatype")
 
-    /* Atomize the type */
+    /* Register the type */
     if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
 
@@ -357,7 +357,7 @@ H5Tarray_create1(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
     if (NULL == (dt = H5T__array_create(base, (unsigned)ndims, dim)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to create datatype")
 
-    /* Atomize the type */
+    /* Register the type */
     if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
 

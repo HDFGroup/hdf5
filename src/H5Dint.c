@@ -192,7 +192,7 @@ H5D__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the dataset IDs */
+    /* Initialize the ID group for the dataset IDs */
     if (H5I_register_type(H5I_DATASET_CLS) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
@@ -1672,7 +1672,7 @@ H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id)
 
         /* Get dataset access property list */
         if (NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dapl ID");
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for dapl ID");
 
         /* Check if append flush property exists */
         if (H5P_exist_plist(dapl, H5D_ACS_APPEND_FLUSH_NAME) > 0) {
@@ -3867,9 +3867,9 @@ H5D__get_space(const H5D_t *dset)
     if (NULL == (space = H5S_copy(dset->shared->space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace")
 
-    /* Create an atom */
+    /* Create an ID */
     if ((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
 done:
     if (ret_value < 0)
@@ -3914,17 +3914,17 @@ H5D__get_type(const H5D_t *dset)
     if (H5T_lock(dt, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
-    /* Create an atom */
+    /* Create an ID */
     if (H5T_is_named(dt)) {
         /* If this is a committed datatype, we need to recreate the
          * two-level IDs, where the VOL object is a copy of the
          * returned datatype.
          */
         if ((ret_value = H5VL_wrap_register(H5I_DATATYPE, dt, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register datatype")
     } /* end if */
     else if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register datatype")
 
 done:
     if (ret_value < 0)

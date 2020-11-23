@@ -461,7 +461,7 @@ H5Z__check_unregister(hid_t ocpl_id, H5Z_filter_t filter_id)
 
     /* Get the plist structure of object creation */
     if (NULL == (plist = H5P_object_verify(ocpl_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_PLINE, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Check if the object creation property list uses the filter */
     if ((ret_value = H5P_filter_in_pline(plist, filter_id)) < 0)
@@ -849,7 +849,7 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
                 /* Get ID for dataspace to pass to filter routines */
                 if ((space_id = H5I_register(H5I_DATASPACE, space, FALSE)) < 0) {
                     (void)H5S_close(space);
-                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
+                    HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
                 }
 
                 /* Make the callbacks */
