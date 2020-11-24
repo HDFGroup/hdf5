@@ -533,7 +533,6 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS__mutex_unlock */
 
-
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_mutex_unlock
@@ -709,7 +708,7 @@ H5TS_cancel_count_inc(void)
             HDfree(cancel_counter);
             HGOTO_DONE(FAIL);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Check if thread entering library */
     if (cancel_counter->cancel_count == 0)
@@ -777,7 +776,6 @@ H5TS_cancel_count_dec(void)
 } /* end H5TS_cancel_count_dec() */
 
 #ifdef H5_HAVE_WIN_THREADS
-
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_win32_process_enter

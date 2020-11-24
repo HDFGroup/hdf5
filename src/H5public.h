@@ -720,7 +720,7 @@ H5_DLL herr_t H5free_memory(void *mem);
  * \since 1.8.15
  *
  */
-H5_DLL void * H5allocate_memory(size_t size, hbool_t clear);
+H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);
 /**
  * \ingroup H5
  * \brief Resizes and, if required, re-allocates memory that will later be
@@ -794,7 +794,7 @@ H5_DLL void * H5allocate_memory(size_t size, hbool_t clear);
  * \since 1.8.15
  *
  */
-H5_DLL void * H5resize_memory(void *mem, size_t size);
+H5_DLL void *H5resize_memory(void *mem, size_t size);
 
 #ifdef __cplusplus
 }

@@ -168,14 +168,14 @@ typedef enum H5G_link_iterate_op_type_t {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     H5G_LINK_OP_OLD, /* "Old" application callback */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-    H5G_LINK_OP_NEW /* "New" application callback */
+    H5G_LINK_OP_NEW  /* "New" application callback */
 } H5G_link_iterate_op_type_t;
 
 typedef struct {
     H5G_link_iterate_op_type_t op_type;
     union {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-        H5G_iterate_t op_old; /* "Old" application callback for each link */
+        H5G_iterate_t op_old;  /* "Old" application callback for each link */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
         H5L_iterate2_t op_new; /* "New" application callback for each link */
     } op_func;

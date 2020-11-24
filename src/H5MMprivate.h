@@ -48,9 +48,9 @@ H5_DLL void * H5MM_xfree(void *mem);
 H5_DLL void * H5MM_xfree_const(const void *mem);
 H5_DLL void * H5MM_memcpy(void *dest, const void *src, size_t n);
 H5_DLL herr_t H5MM_get_alloc_stats(H5_alloc_stats_t *stats);
-#if defined   H5_MEMORY_ALLOC_SANITY_CHECK
-H5_DLL void H5MM_sanity_check_all(void);
-H5_DLL void H5MM_final_sanity_check(void);
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
+H5_DLL void   H5MM_sanity_check_all(void);
+H5_DLL void   H5MM_final_sanity_check(void);
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 #endif /* _H5MMprivate_H */

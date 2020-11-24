@@ -30,7 +30,7 @@ typedef struct H5F_t H5F_t;
 /* Private headers needed by this file */
 #include "H5MMprivate.h" /* Memory management            */
 #ifdef H5_HAVE_PARALLEL
-#include "H5Pprivate.h" /* Property lists               */
+#include "H5Pprivate.h"  /* Property lists               */
 #endif /* H5_HAVE_PARALLEL */
 #include "H5VMprivate.h" /* Vectors and arrays           */
 #include "H5VLprivate.h" /* Virtual Object Layer         */
@@ -648,13 +648,12 @@ typedef struct H5F_t H5F_t;
 
 /* B-tree internal 'K' values */
 #define HDF5_BTREE_SNODE_IK_DEF 16
-#define HDF5_BTREE_CHUNK_IK_DEF                                                                              \
-    32 /* Note! this value is assumed                                                                        \
-           to be 32 for version 0                                                                            \
-           of the superblock and                                                                             \
-           if it is changed, the code                                                                        \
-           must compensate. -QAK                                                                             \
-        */
+#define HDF5_BTREE_CHUNK_IK_DEF 32       /* Note! this value is assumed                                       \
+                                            to be 32 for version 0                                           \
+                                            of the superblock and                                            \
+                                            if it is changed, the code                                       \
+                                            must compensate. -QAK                                            \
+                                         */
 #define HDF5_BTREE_IK_MAX_ENTRIES 65536 /* 2^16 - 2 bytes for storing entries (children) */
 /* See format specification on version 1 B-trees */
 

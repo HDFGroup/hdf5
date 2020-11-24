@@ -32,12 +32,12 @@
  * \ingroup H5VLDEF
  * Invalid ID for VOL connector ID
  */
-#define H5_VOL_INVALID  (-1)
+#define H5_VOL_INVALID (-1)
 /**
  * \ingroup H5VLDEF
  * Native HDF5 file format VOL connector
  */
-#define H5_VOL_NATIVE   0
+#define H5_VOL_NATIVE 0
 /**
  * \ingroup H5VLDEF
  * VOL connector IDs below this value are reserved for library use
@@ -47,7 +47,7 @@
  * \ingroup H5VLDEF
  * Maximum VOL connector ID
  */
-#define H5_VOL_MAX      65535
+#define H5_VOL_MAX 65535
 
 /*******************/
 /* Public Typedefs */
@@ -129,7 +129,7 @@ extern "C" {
  *
  * \since 1.12.0
  */
-H5_DLL hid_t   H5VLregister_connector_by_name(const char *connector_name, hid_t vipl_id);
+H5_DLL hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vipl_id);
 /**
  * \ingroup H5VL
  * \brief Registers a new VOL connector by value
@@ -168,7 +168,7 @@ H5_DLL hid_t   H5VLregister_connector_by_name(const char *connector_name, hid_t 
  *
  * \since 1.12.0
  */
-H5_DLL hid_t   H5VLregister_connector_by_value(H5VL_class_value_t connector_value, hid_t vipl_id);
+H5_DLL hid_t H5VLregister_connector_by_value(H5VL_class_value_t connector_value, hid_t vipl_id);
 /**
  * \ingroup H5VL
  * \brief Tests whether a VOL class has been registered under a certain name
@@ -182,7 +182,7 @@ H5_DLL hid_t   H5VLregister_connector_by_value(H5VL_class_value_t connector_valu
  *
  * \since 1.12.0
  */
-H5_DLL htri_t  H5VLis_connector_registered_by_name(const char *name);
+H5_DLL htri_t H5VLis_connector_registered_by_name(const char *name);
 /**
  * \ingroup H5VL
  * \brief Tests whether a VOL class has been registered for a given value
@@ -205,7 +205,7 @@ H5_DLL htri_t  H5VLis_connector_registered_by_name(const char *name);
  *
  * \since 1.12.0
  */
-H5_DLL htri_t  H5VLis_connector_registered_by_value(H5VL_class_value_t connector_value);
+H5_DLL htri_t H5VLis_connector_registered_by_value(H5VL_class_value_t connector_value);
 /**
  * \ingroup H5VL
  * \brief Retrieves the VOL connector identifier for a given object identifier
@@ -220,7 +220,7 @@ H5_DLL htri_t  H5VLis_connector_registered_by_value(H5VL_class_value_t connector
  *
  * \since 1.12.0
  */
-H5_DLL hid_t   H5VLget_connector_id(hid_t obj_id);
+H5_DLL hid_t H5VLget_connector_id(hid_t obj_id);
 /**
  * \ingroup H5VL
  * \brief Retrieves the identifier for a registered VOL connector name
@@ -234,7 +234,7 @@ H5_DLL hid_t   H5VLget_connector_id(hid_t obj_id);
  *
  * \since 1.12.0
  */
-H5_DLL hid_t   H5VLget_connector_id_by_name(const char *name);
+H5_DLL hid_t H5VLget_connector_id_by_name(const char *name);
 /**
  * \ingroup H5VL
  * \brief Retrieves the identifier for a registered VOL connector value
@@ -257,7 +257,7 @@ H5_DLL hid_t   H5VLget_connector_id_by_name(const char *name);
  *
  * \since 1.12.0
  */
-H5_DLL hid_t   H5VLget_connector_id_by_value(H5VL_class_value_t connector_value);
+H5_DLL hid_t H5VLget_connector_id_by_value(H5VL_class_value_t connector_value);
 /**
  * \ingroup H5VL
  * \brief Retrieves a connector name for a VOL
@@ -292,7 +292,7 @@ H5_DLL ssize_t H5VLget_connector_name(hid_t id, char *name /*out*/, size_t size)
  *
  * \since 1.12.0
  */
-H5_DLL herr_t  H5VLclose(hid_t connector_id);
+H5_DLL herr_t H5VLclose(hid_t connector_id);
 /**
  * \ingroup H5VL
  * \brief Removes a VOL connector identifier from the library
@@ -310,7 +310,7 @@ H5_DLL herr_t  H5VLclose(hid_t connector_id);
  *
  * \since 1.12.0
  */
-H5_DLL herr_t  H5VLunregister_connector(hid_t connector_id);
+H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
 /**
  * \ingroup H5VL
  * \brief Determine if a VOL connector supports a particular
@@ -324,7 +324,7 @@ H5_DLL herr_t  H5VLunregister_connector(hid_t connector_id);
  *
  * \since 1.12.0
  */
-H5_DLL herr_t  H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, hbool_t *supported);
+H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, hbool_t *supported);
 
 #ifdef __cplusplus
 }
