@@ -232,11 +232,153 @@ H5_DLLVAR hid_t H5P_LST_REFERENCE_ACCESS_ID_g;
 /*********************/
 
 /* Generic property list routines */
+
+/**
+ * \ingroup GPLO
+ *
+ * \brief Terminates access to a property list
+ *
+ * \plist_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Pclose() terminates access to a property list. All property
+ *          lists should be closed when the application is finished
+ *          accessing them. This frees resources used by the property
+ *          list.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pclose(hid_t plist_id);
+/**
+ * \ingroup GPLO
+ *
+ * \brief Creates a new property list as an instance of a property list class
+ *
+ * \plistcls_id{cls_id}
+ *
+ * \return \hid_t{property list}
+ *
+ * \details H5Pcreate() creates a new property list as an instance of
+ *          some property list class. The new property list is initialized
+ *          with default values for the specified class. The classes are as
+ *          follows:
+ *
+ * <table>
+ *   <tr>
+ *     <th>Class Identifier</th>
+ *     <th>Class Name</th>
+ *     <th>Comments</th>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_ATTRIBUTE_CREATE</td>
+ *     <td>attribute create</td>
+ *     <td>Properties for attribute creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_DATASET_ACCESS</td>
+ *     <td>dataset access</td>
+ *     <td>Properties for dataset access</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_DATASET_CREATE</td>
+ *     <td>dataset create</td>
+ *     <td>Properties for dataset creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_DATASET_XFER</td>
+ *     <td>data transfer</td>
+ *     <td>Properties for raw data transfer</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_DATATYPE_ACCESS</td>
+ *     <td>datatype access</td>
+ *     <td>Properties for datatype access</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_DATATYPE_CREATE</td>
+ *     <td>datatype create</td>
+ *     <td>Properties for datatype creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_FILE_ACCESS</td>
+ *     <td>file access</td>
+ *     <td>Properties for file access</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_FILE_CREATE</td>
+ *     <td>file create</td>
+ *     <td>Properties for file creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_FILE_MOUNT</td>
+ *     <td>file mount</td>
+ *     <td>Properties for file mounting</td>
+ *   </tr>
+ *   <tr valign="top">
+ *     <td>#H5P_GROUP_ACCESS</td>
+ *     <td>group access</td>
+ *     <td>Properties for group access</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_GROUP_CREATE</td>
+ *     <td>group create</td>
+ *     <td>Properties for group creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_LINK_ACCESS</td>
+ *     <td>link access</td>
+ *     <td>Properties governing link traversal when accessing objects</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_LINK_CREATE</td>
+ *     <td>link create</td>
+ *     <td>Properties governing link creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_OBJECT_COPY</td>
+ *     <td>object copy</td>
+ *     <td>Properties governing the object copying process</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_OBJECT_CREATE</td>
+ *     <td>object create</td>
+ *     <td>Properties for object creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_STRING_CREATE</td>
+ *     <td>string create</td>
+ *     <td>Properties for character encoding when encoding strings or
+ *       object names</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_VOL_INITIALIZE</td>
+ *     <td>vol initialize</td>
+ *     <td>Properties for VOL initialization</td>
+ *   </tr>
+ * </table>
+ *
+ * This property list must eventually be closed with H5Pclose();
+ * otherwise, errors are likely to occur.
+ *
+ * \version 1.12.0 The #H5P_VOL_INITIALIZE property list class was added
+ * \version 1.8.15 For each class, the class name returned by
+ *                 H5Pget_class_name() was added.
+ *                 The list of possible Fortran values was updated.
+ * \version 1.8.0 The following property list classes were added at this
+ *                release: #H5P_DATASET_ACCESS, #H5P_GROUP_CREATE,
+ *                #H5P_GROUP_ACCESS, #H5P_DATATYPE_CREATE,
+ *                #H5P_DATATYPE_ACCESS, #H5P_ATTRIBUTE_CREATE
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL hid_t H5Pcreate(hid_t cls_id);
 H5_DLL hid_t  H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func_t cls_create,
                               void *create_data, H5P_cls_copy_func_t cls_copy, void *copy_data,
                               H5P_cls_close_func_t cls_close, void *close_data);
 H5_DLL char * H5Pget_class_name(hid_t pclass_id);
-H5_DLL hid_t  H5Pcreate(hid_t cls_id);
 H5_DLL herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value,
                            H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
                            H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del,
@@ -262,10 +404,80 @@ H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
 H5_DLL herr_t H5Premove(hid_t plist_id, const char *name);
 H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
 H5_DLL herr_t H5Pclose_class(hid_t plist_id);
-H5_DLL herr_t H5Pclose(hid_t plist_id);
 H5_DLL hid_t  H5Pcopy(hid_t plist_id);
 
 /* Object creation property list (OCPL) routines */
+
+/**
+ * \ingroup OCPL
+ *
+ * \brief Returns information about a filter in a pipeline
+ *
+ * \todo Signature for H5Pget_filter2 is different in H5Pocpl.c than in
+ *       H5Ppublic.h
+ *
+ * \plist_id{plist_id}
+ * \param[in] idx    Sequence number within the filter pipeline of the filter
+ *                   for which information is sought
+ * \param[out] flags Bit vector specifying certain general properties of the
+ *                   filter
+ * \param[in,out] cd_nelmts Number of elements in \p cd_values
+ * \param[out]    cd_values Auxiliary data for the filter
+ * \param[in]     namelen   Anticipated number of characters in \p name
+ * \param[out]    name      Name of the filter
+ * \param[out] filter_config Bit field, as described in H5Zget_filter_info()
+ *
+ * \return Returns a negative value on failure, and the filter identifier
+ *         if successful (see #H5Z_filter_t):
+ *         - #H5Z_FILTER_DEFLATE     Data compression filter,
+ *                                    employing the gzip algorithm
+ *         - #H5Z_FILTER_SHUFFLE     Data shuffling filter
+ *         - #H5Z_FILTER_FLETCHER32  Error detection filter, employing the
+ *                                     Fletcher32 checksum algorithm
+ *         - #H5Z_FILTER_SZIP        Data compression filter, employing the
+ *                                     SZIP algorithm
+ *         - #H5Z_FILTER_NBIT        Data compression filter, employing the
+ *                                     N-bit algorithm
+ *         - #H5Z_FILTER_SCALEOFFSET Data compression filter, employing the
+ *                                     scale-offset algorithm
+ *
+ * \details H5Pget_filter2() returns information about a filter specified by
+ *          its filter number, in a filter pipeline specified by the property
+ *          list with which it is associated.
+ *
+ *          \p plist_id must be a dataset or group creation property list.
+ *
+ *          \p idx is a value between zero and N-1, as described in
+ *          H5Pget_nfilters(). The function will return a negative value if
+ *          the filter number is out of range.
+ *
+ *          The structure of the \p flags argument is discussed in
+ *          H5Pset_filter().
+ *
+ *          On input, \p cd_nelmts indicates the number of entries in the
+ *          \p cd_values array, as allocated by the caller; on return,
+ *          \p cd_nelmts contains the number of values defined by the filter.
+ *
+ *          If \p name is a pointer to an array of at least \p namelen bytes,
+ *          the filter name will be copied into that array. The name will be
+ *          null terminated if \p namelen is large enough. The filter name
+ *          returned will be the name appearing in the file, the name
+ *          registered for the filter, or an empty string.
+ *
+ *          \p filter_config is the bit field described in
+ *          H5Zget_filter_info().
+ *
+ * \version 1.8.5 Function extended to work with group creation property
+ *                lists.
+ * \since 1.8.0
+ *
+ */
+H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx,
+       unsigned int *flags/*out*/,
+       size_t *cd_nelmts/*out*/,
+       unsigned cd_values[]/*out*/,
+       size_t namelen, char name[],
+       unsigned *filter_config /*out*/);
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
 H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags);
@@ -277,9 +489,6 @@ H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                             const unsigned int c_values[]);
 H5_DLL int    H5Pget_nfilters(hid_t plist_id);
-H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned filter, unsigned int *flags /*out*/,
-                                   size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
-                                   char name[], unsigned *filter_config /*out*/);
 H5_DLL herr_t       H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*/,
                                          size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                          char name[] /*out*/, unsigned *filter_config /*out*/);
@@ -379,10 +588,592 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
                                       unsigned *min_raw_per);
 
 /* Dataset creation property list (DCPL) routines */
-H5_DLL herr_t       H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
+
+/**
+ * \ingroup DCPL
+ *
+ * \brief Retrieves the size of chunks for the raw data of a chunked
+ *        layout dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[in]  max_ndims Size of the \p dims array
+ * \param[out] dim Array to store the chunk dimensions
+ *
+ * \return Returns chunk dimensionality if successful;
+ *         otherwise returns a negative value.
+ *
+ * \details H5Pget_chunk() retrieves the size of chunks for the raw data
+ *          of a chunked layout dataset. This function is only valid for
+ *          dataset creation property lists. At most, \p max_ndims elements
+ *          of \p dim will be initialized.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Retrieves the edge chunk option setting from a dataset creation
+ *        property list
+ *
+ * \dcpl_id{plist_id}
+ * \param[out] opts  Edge chunk option flag. Valid values are described in
+ *                   H5Pset_chunk_opts(). The option status can be
+ *                   retrieved using the bitwise AND operator ( & ). For
+ *                   example, the expression
+ *                   (opts&#H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) will
+ *                   evaluate to #H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS if
+ *                   that option has been enabled. Otherwise, it will
+ *                   evaluate to 0 (zero).
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_chunk_opts() retrieves the edge chunk option setting
+ *          stored in the dataset creation property list \p plist_id.
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned *opts);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Retrieves the time when fill values are written to a dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[out] fill_time Setting for the timing of writing fill values to
+ *                       the dataset
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_fill_time() examines the dataset creation property list
+ *          \p plist_id to determine when fill values are to be written to
+ *          a dataset. Valid values returned in \p fill_time are as
+ *          follows:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_IFSET</td>
+ *            <td>Fill values are written to the dataset when storage
+ *                space is allocated only if there is a user-defined fill
+ *                value, i.e., one set with H5Pset_fill_value(). (Default)
+ *             </td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_ALLOC</td>
+ *            <td>Fill values are written to the dataset when storage
+ *                space is allocated.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_NEVER</td>
+ *            <td>Fill values are never written to the dataset.</td>
+ *           </tr>
+ *          </table>
+ *
+ * \note H5Pget_fill_time() is designed to work in coordination with the
+ *       dataset fill value and dataset storage allocation time properties,
+ *       retrieved with the functions H5Pget_fill_value() and
+ *       H5Pget_alloc_time().
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t
+    *fill_time/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Retrieves a dataset fill value
+ *
+ * \dcpl_id{plist_id}
+ * \param[in]  type_id Datatype identifier for the value passed via
+ *                     \p value
+ * \param[out] value   Pointer to buffer to contain the returned
+ *                     fill value
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_fill_value() returns the dataset fill value defined in
+ *          the dataset creation property list \p plist_id. The fill value
+ *          is returned through the \p value pointer and will be converted
+ *          to the datatype specified  by \p type_id. This datatype may
+ *          differ from the fill value datatype in the property list, but
+ *          the HDF5 library must be able to convert between the two
+ *          datatypes.
+ *
+ *          If the fill value is undefined, i.e., set to NULL in the
+ *          property list, H5Pget_fill_value() will return an error.
+ *          H5Pfill_value_defined() should be used to check for this
+ *          condition before H5Pget_fill_value() is called.
+ *
+ *          Memory must be allocated by the calling application.
+ *
+ * \note H5Pget_fill_value() is designed to coordinate with the dataset
+ *       storage allocation time and fill value write time properties,
+ *       which can be retrieved with the functions H5Pget_alloc_time()
+ *       and H5Pget_fill_time(), respectively.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id,
+     void *value/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup DCPL
+ *
+ * \brief Returns the layout of the raw data for a dataset
+ *
+ * \dcpl_id{plist_id}
+ *
+ * \return Returns the layout type (a non-negative value) of a dataset
+ *         creation property list if successful. Valid return values are:
+ *         - #H5D_COMPACT: Raw data is stored in the object header in the
+ *                        file.
+ *         - #H5D_CONTIGUOUS: Raw data is stored separately from the object
+ *                           header in one contiguous chunk in the file.
+ *         - #H5D_CHUNKED: Raw data is stored separately from the object
+ *                        header in chunks in separate locations in the
+ *                        file.
+ *         - #H5D_VIRTUAL: Raw data is drawn from multiple datasets in
+ *                        different files.
+ * \return
+ *         Otherwise, returns a negative value indicating failure.
+ *
+ * \details H5Pget_layout() returns the layout of the raw data for a
+ *          dataset. This function is only valid for dataset creation
+ *          property lists.
+ *
+ *          Note that a compact storage layout may affect writing data to
+ *          the dataset with parallel applications. See the H5Dwrite()
+ *          documentation for details.
+ *
+ * \version 1.10.0 #H5D_VIRTUAL added in this release.
+ *
+ * \since 1.0.0
+ *
+ */
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
-H5_DLL herr_t       H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
-H5_DLL int          H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[] /*out*/);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup DCPL
+ *
+ * \brief Sets the size of the chunks used to store a chunked layout
+ *        dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] ndims  The number of dimensions of each chunk
+ * \param[in] dim    An array defining the size, in dataset elements, of
+ *                   each chunk
+ *
+ * \return \herr_t
+ * \details H5Pset_chunk() sets the size of the chunks used to store a
+ *          chunked layout dataset. This function is only valid for dataset
+ *          creation property lists.
+ *
+ *          The \p ndims parameter currently must be the same size as the
+ *          rank of the dataset.
+ *
+ *          The values of the \p dim array define the size of the chunks
+ *          to store the dataset's raw data. The unit of measure for \p dim
+ *          values is dataset elements.
+ *
+ *          As a side-effect of this function, the layout of the dataset is
+ *          changed to #H5D_CHUNKED, if it is not already so set.
+ *
+ * \note Chunk size cannot exceed the size of a fixed-size dataset. For
+ *       example, a dataset consisting of a 5x4 fixed-size array cannot be
+ *       defined with 10x10 chunks. Chunk maximums:
+ *       - The maximum number of elements in a chunk is 2<sup>32</sup>-1 which
+ *         is equal to 4,294,967,295. If the number of elements in a chunk is
+ *         set via H5Pset_chunk() to a value greater than 2<sup>32</sup>-1,
+ *         then H5Pset_chunk() will fail.
+ *       - The maximum size for any chunk is 4GB. If a chunk that is larger
+ *         than 4GB attempts to be written with H5Dwrite(), then H5Dwrite()
+ *         will fail.
+ *
+ * \see H5Pset_layout(), H5Dwrite()
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Sets the edge chunk option in a dataset creation property list
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] opts Edge chunk option flag. Valid values are:
+ *                 \li #H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS
+ *                     When enabled, filters are not applied to partial
+ *                     edge chunks. When disabled, partial edge chunks are
+ *                     filtered. Enabling this option will improve
+ *                     performance when appending to the dataset and, when
+ *                     compression filters are used, prevent reallocation
+ *                     of these chunks. Datasets created with this option
+ *                     enabled will be inaccessible with HDF5 library
+ *                     versions before Release 1.10. Default: \e Disabled
+ *                 \li 0 (zero) Disables option; partial edge chunks
+ *                     will be compressed.
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_chunk_opts() sets the edge chunk option in the
+ *          dataset creation property list \p dcpl_id.
+ *
+ *          The available option is detailed in the parameters section.
+ *          Only chunks that are not completely filled by the dataset’s
+ *          dataspace are affected by this option. Such chunks are
+ *          referred to as partial edge chunks.
+ *
+ * \note \b Motivation: H5Pset_chunk_opts() is used to specify storage
+ *       options for chunks on the edge of a dataset’s dataspace. This
+ *       capability allows the user to tune performance in cases where
+ *       the dataset size may not be a multiple of the chunk size and
+ *       the handling of partial edge chunks can impact performance.
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Sets the time when fill values are written to a dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] fill_time When to write fill values to a dataset
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_fill_time() sets up the timing for writing fill values
+ *          to a dataset. This property is set in the dataset creation
+ *          property list \p plist_id. Timing is specified in \p fill_time
+ *          with one of the following values:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_IFSET</td>
+ *            <td>Write fill values to the dataset when storage space is
+ *                allocated only if there is a user-defined fill value,
+ *                i.e.,one set with H5Pset_fill_value(). (Default)</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_ALLOC</td>
+ *            <td>Write fill values to the dataset when storage space is
+ *                allocated.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_NEVER</td>
+ *            <td>Never write fill values to the dataset.</td>
+ *           </tr>
+ *          </table>
+ *
+ * \note H5Pset_fill_time() is designed for coordination with the dataset
+ *      fill value and dataset storage allocation time properties, set
+ *      with the functions H5Pset_fill_value() and H5Pset_alloc_time().
+ *      See H5Dcreate() for further cross-references.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Sets the fill value for a dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] type_id Datatype of \p value
+ * \param[in] value Pointer to buffer containing value to use as
+ *            fill value
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_fill_value() sets the fill value for a dataset in the
+ *          dataset creation property list. \p value is interpreted as
+ *          being of datatype \p type_id. This datatype may differ from
+ *          that of the dataset, but the HDF5 library must be able to
+ *          convert \p value to the dataset datatype when the dataset is
+ *          created.
+ *
+ *          The default fill value is 0 (zero), which is interpreted
+ *          according to the actual dataset datatype.
+ *
+ *          Setting \p value to NULL indicates that the fill value is to
+ *          be undefined.
+ *
+ * \note Applications sometimes write data only to portions of an allocated
+ *       dataset. It is often useful in such cases to fill the unused space
+ *       with a known fill value. This function allows the user application
+ *       to set that fill value; the functions H5Dfill() and
+ *       H5Pset_fill_time(), respectively, provide the ability to apply the
+ *       fill value on demand or to set up its automatic application.
+ *
+ * \note A fill value should be defined so that it is appropriate for the
+ *       application. While the HDF5 default fill value is 0 (zero), it is
+ *       often appropriate to use another value. It might be useful, for
+ *       example, to use a value that is known to be impossible for the
+ *       application to legitimately generate.
+ *
+ * \note H5Pset_fill_value() is designed to work in concert with
+ *       H5Pset_alloc_time() and H5Pset_fill_time(). H5Pset_alloc_time()
+ *       and H5Pset_fill_time() govern the timing of dataset storage
+ *       allocation and fill value write operations and can be important in
+ *       tuning application performance.
+ *
+ * \note See H5Dcreate() for further cross-references.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
+     const void *value);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Sets up use of the shuffle filter
+ *
+ * \dcpl_id{plist_id}
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_shuffle() sets the shuffle filter, #H5Z_FILTER_SHUFFLE,
+ *          in the dataset creation property list \p plist_id. The shuffle
+ *          filter de-interlaces a block of data by reordering the bytes.
+ *          All the bytes from one consistent byte position of each data
+ *          element are placed together in one block; all bytes from a
+ *          second consistent byte position of each data element are placed
+ *          together a second block; etc. For example, given three data
+ *          elements of a 4-byte datatype stored as 012301230123, shuffling
+ *          will re-order data as 000111222333. This can be a valuable step
+ *          in an effective compression algorithm because the bytes in each
+ *          byte position are often closely related to each other and
+ *          putting them together can increase the compression ratio.
+ *
+ *          As implied above, the primary value of the shuffle filter lies
+ *          in its coordinated use with a compression filter; it does not
+ *          provide data compression when used alone. When the shuffle
+ *          filter is applied to a dataset immediately prior to the use of
+ *          a compression filter, the compression ratio achieved is often
+ *          superior to that achieved by the use of a compression filter
+ *          without the shuffle filter.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pset_shuffle(hid_t plist_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup DCPL
+ *
+ * \brief Sets the type of storage used to store the raw data for a dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] layout Type of storage layout for raw data
+ *
+ * \return \herr_t
+ * \details H5Pset_layout() sets the type of storage used to store the raw
+ *          data for a dataset. This function is only valid for dataset
+ *          creation property lists.
+ *
+ *          Valid values for \p layout are:
+ *           - #H5D_COMPACT: Store raw data in the dataset object header
+ *                           in file. This should only be used for datasets
+ *                           with small amounts of raw data. The raw data
+ *                           size limit is 64K (65520 bytes). Attempting
+ *                           to create a dataset with raw data larger than
+ *                           this limit will cause the H5Dcreate() call to
+ *                           fail.
+ *           - #H5D_CONTIGUOUS: Store raw data separately from the object
+ *                              header in one large chunk in the file.
+ *           - #H5D_CHUNKED: Store raw data separately from the object header
+ *                           as chunks of data in separate locations in
+ *                           the file.
+ *           - #H5D_VIRTUAL: Draw raw data from multiple datasets in
+ *                           different files.
+ *
+ *          Note that a compact storage layout may affect writing data to
+ *          the dataset with parallel applications. See the note in
+ *          H5Dwrite() documentation for details.
+ * \version 1.10.0 #H5D_VIRTUAL added in this release.
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup DCPL
+ *
+ * \brief Sets up use of the SZIP compression filter
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] options_mask A bit-mask conveying the desired SZIP options;
+ *                         Valid values are #H5_SZIP_EC_OPTION_MASK and
+ *                         #H5_SZIP_NN_OPTION_MASK.
+ * \param[in] pixels_per_block The number of pixels or data elements in each
+ *            data block
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_szip() sets an SZIP compression filter, #H5Z_FILTER_SZIP,
+ *          for a dataset. SZIP is a compression method designed for use with
+ *          scientific data.
+ *
+ *          Before proceeding, all users should review the “Limitations”
+ *          section below.
+ *
+ *          Users familiar with SZIP outside the HDF5 context may benefit
+ *          from reviewing the Note “For Users Familiar with SZIP in Other
+ *          Contexts” below.
+ *
+ *          In the text below, the term pixel refers to an HDF5 data element.
+ *          This terminology derives from SZIP compression's use with image
+ *          data, where pixel referred to an image pixel.
+ *
+ *          The SZIP \p bits_per_pixel value (see Note, below) is automatically
+ *          set, based on the HDF5 datatype. SZIP can be used with atomic
+ *          datatypes that may have size of 8, 16, 32, or 64 bits.
+ *          Specifically, a dataset with a datatype that is 8-, 16-, 32-, or
+ *          64-bit signed or unsigned integer; char; or 32- or 64-bit float
+ *          can be compressed with SZIP. See Note, below, for further
+ *          discussion of the the SZIP \p bits_per_pixel setting.
+ *
+ *          SZIP options are passed in an options mask, \p options_mask,
+ *          as follows.
+ *
+ *          <table>
+ *            <tr>
+ *             <th>Option</th>
+ *             <th>Description (Mutually exclusive; select one.)</th>
+ *            </tr>
+ *            <tr>
+ *             <td>#H5_SZIP_EC_OPTION_MASK</td>
+ *             <td>Selects entropy coding method</td>
+ *            </tr>
+ *            <tr>
+ *             <td>#H5_SZIP_NN_OPTION_MASK</td>
+ *             <td>Selects nearest neighbor coding method</td>
+ *            </tr>
+ *           </table>
+ *
+ *           The following guidelines can be used in determining which
+ *           option to select:
+ *
+ *           - The entropy coding method, the EC option specified by
+ *             #H5_SZIP_EC_OPTION_MASK, is best suited for data that has been
+ *             processed. The EC method works best for small numbers.
+ *           - The nearest neighbor coding method, the NN option specified
+ *             by #H5_SZIP_NN_OPTION_MASK, preprocesses the data then the
+ *             applies EC method as above.
+ *
+ *           Other factors may affect results, but the above criteria
+ *           provides a good starting point for optimizing data compression.
+ *
+ *           SZIP compresses data block by block, with a user-tunable block
+ *           size. This block size is passed in the parameter
+ *           \p pixels_per_block and must be even and not greater than 32,
+ *           with typical values being 8, 10, 16, or 32. This parameter
+ *           affects compression ratio; the more pixel values vary, the
+ *           smaller this number should be to achieve better performance.
+ *
+ *           In HDF5, compression can be applied only to chunked datasets.
+ *           If \p pixels_per_block is bigger than the total number of
+ *           elements in a dataset chunk, H5Pset_szip() will succeed but
+ *           the subsequent call to H5Dcreate() will fail; the conflict
+ *           can be detected only when the property list is used.
+ *
+ *           To achieve optimal performance for SZIP compression, it is
+ *           recommended that a chunk's fastest-changing dimension be equal
+ *           to N times \p pixels_per_block where N is the maximum number of
+ *           blocks per scan line allowed by the SZIP library. In the
+ *           current version of SZIP, N is set to 128.
+ *
+ *           SZIP compression is an optional HDF5 filter.
+ *
+ *           \b Limitations:
+ *
+ *           - SZIP compression cannot be applied to compound, array,
+ *             variable-length, enumeration, or any other user-defined
+ *             datatypes. If an SZIP filter is set in a dataset creation
+ *             property list used to create a dataset containing a
+ *             non-allowed datatype, the call to H5Dcreate() will fail; the
+ *             conflict can be detected only when the property list is used.
+ *           - Users should be aware that there are factors that affect one’s
+ *             rights and ability to use SZIP compression by reviewing the
+ *             SZIP copyright notice.
+ *
+ * \note \b For \b Users \b Familiar \b with \b SZIP \b in \b Other \b Contexts:
+ *
+ * \note  The following notes are of interest primarily to those who have
+ *        used SZIP compression outside of the HDF5 context.
+ *        In non-HDF5 applications, SZIP typically requires that the user
+ *        application supply additional parameters:
+ *        - \p pixels_in_object, the number of pixels in the object to
+ *          be compressed
+ *        - \p bits_per_pixel, the number of bits per pixel
+ *        - \p pixels_per_scanline, the number of pixels per scan line
+ *
+ * \note  These values need not be independently supplied in the HDF5
+ *        environment as they are derived from the datatype and dataspace,
+ *        which are already known. In particular, HDF5 sets
+ *        \p pixels_in_object to the number of elements in a chunk and
+ *        \p bits_per_pixel to the size of the element or pixel datatype.
+ *
+ * \note  The following algorithm is used to set \p pixels_per_scanline:
+ *        - If the size of a chunk's fastest-changing dimension, size,
+ *          is greater than 4K, set \p pixels_per_scanline to 128 times
+ *          \p pixels_per_block.
+ *        - If size is less than 4K but greater than \p pixels_per_block,
+ *          set \p pixels_per_scanline to the minimum of size and 128
+ *          times \p pixels_per_block.
+ *        - If size is less than \p pixels_per_block but greater than the
+ *          number elements in the chunk, set \p pixels_per_scanline to
+ *          the minimum of the number elements in the chunk and 128 times
+ *          \p pixels_per_block.
+ *
+ * \note  The HDF5 datatype may have precision that is less than the full
+ *        size of the data element, e.g., an 11-bit integer can be defined
+ *        using H5Tset_precision(). To a certain extent, SZIP can take
+ *        advantage of the precision of the datatype to improve compression:
+ *        - If the HDF5 datatype size is 24-bit or less and the offset of
+ *          the bits in the HDF5 datatype is zero (see H5Tset_offset() or
+ *          H5Tget_offset()), the data is the in lowest N bits of the data
+ *          element. In this case, the SZIP \p bits_per_pixel is set to the
+ *          precision of the HDF5 datatype.
+ *        - If the offset is not zero, the SZIP \p bits_per_pixel will be
+ *          set to the number of bits in the full size of the data element.
+ *        - If the HDF5 datatype precision is 25-bit to 32-bit, the SZIP
+ *          \p bits_per_pixel will be set to 32.
+ *        - If the HDF5 datatype precision is 33-bit to 64-bit, the SZIP
+ *          \p bits_per_pixel will be set to 64.
+ *
+ * \note HDF5 always modifies the options mask provided by the user to set up
+ *       usage of RAW_OPTION_MASK, ALLOW_K13_OPTION_MASK, and one of
+ *       LSB_OPTION_MASK or MSB_OPTION_MASK, depending on endianness of the
+ *       datatype.
+ *
+ * \since 1.6.0
+ *
+ *--------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block);
 H5_DLL herr_t       H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
                                    const char *src_dset_name, hid_t src_space_id);
 H5_DLL herr_t       H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/);
@@ -391,22 +1182,14 @@ H5_DLL hid_t        H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index);
 H5_DLL ssize_t      H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name /*out*/, size_t size);
 H5_DLL ssize_t      H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name /*out*/, size_t size);
 H5_DLL herr_t       H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size);
-H5_DLL herr_t       H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
-H5_DLL herr_t       H5Pget_chunk_opts(hid_t plist_id, unsigned *opts);
 H5_DLL int          H5Pget_external_count(hid_t plist_id);
 H5_DLL herr_t       H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out*/,
                                     off_t *offset /*out*/, hsize_t *size /*out*/);
-H5_DLL herr_t       H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block);
-H5_DLL herr_t       H5Pset_shuffle(hid_t plist_id);
 H5_DLL herr_t       H5Pset_nbit(hid_t plist_id);
 H5_DLL herr_t       H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor);
-H5_DLL herr_t       H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value);
-H5_DLL herr_t       H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value /*out*/);
 H5_DLL herr_t       H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status);
 H5_DLL herr_t       H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time);
 H5_DLL herr_t       H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time /*out*/);
-H5_DLL herr_t       H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
-H5_DLL herr_t       H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time /*out*/);
 H5_DLL herr_t       H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
 H5_DLL herr_t       H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
 
@@ -526,6 +1309,59 @@ H5_DLL herr_t       H5Pinsert1(hid_t plist_id, const char *name, size_t size, vo
                                H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
                                H5P_prp_close_func_t prp_close);
 H5_DLL herr_t       H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup OCPL
+ *
+ * \brief Returns information about a filter in a pipeline (DEPRECATED)
+ *
+ * \todo H5Pget_filter1() prototype does not match source in H5Pocpl.c.
+ *       Also, it is not in a deprecated file. Is that okay?
+ *
+ * \plist_id{plist_id}
+ * \param[in] filter Sequence number within the filter pipeline of the filter
+ *                   for which information is sought
+ * \param[out] flags Bit vector specifying certain general properties of
+ *                the filter
+ * \param[in,out] cd_nelmts Number of elements in \p cd_values
+ * \param[out] cd_values Auxiliary data for the filter
+ * \param[in] namelen Anticipated number of characters in \p name
+ * \param[out] name Name of the filter
+ *
+ * \return Returns the filter identifier if successful;  Otherwise returns
+ *         a negative value. See: #H5Z_filter_t
+ *
+ * \details H5Pget_filter1() returns information about a filter, specified
+ *          by its filter number, in a filter pipeline, specified by the
+ *          property list with which it is associated.
+ *
+ *          \p plist_id must be a dataset or group creation property list.
+ *
+ *          \p filter is a value between zero and N-1, as described in
+ *          H5Pget_nfilters(). The function will return a negative value
+ *          if the filter number is out of range.
+ *
+ *          The structure of the \p flags argument is discussed in
+ *          H5Pset_filter().
+ *
+ *          On input, \p cd_nelmts indicates the number of entries in the
+ *          \p cd_values array, as allocated by the caller; on return,
+ *          \p cd_nelmts contains the number of values defined by the filter.
+ *
+ *          If \p name is a pointer to an array of at least \p namelen
+ *          bytes, the filter name will be copied into that array. The name
+ *          will be null terminated if \p namelen is large enough. The
+ *          filter name returned will be the name appearing in the file, the
+ *          name registered for the filter, or an empty string.
+ *
+ * \version 1.8.5 Function extended to work with group creation property
+ *                lists.
+ * \version 1.8.0 N-bit and scale-offset filters added.
+ * \version 1.8.0 Function H5Pget_filter() renamed to H5Pget_filter1() and
+ *                deprecated in this release.
+ * \version 1.6.4 \p filter parameter type changed to unsigned.
+ *
+ */
 H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int *flags /*out*/,
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                    char name[]);
