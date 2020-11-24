@@ -45,27 +45,6 @@ typedef herr_t (*H5A_operator2_t)(hid_t location_id /*in*/, const char *attr_nam
 extern "C" {
 #endif
 
-/*-------------------------------------------------------------------------*/
-/**
- * \ingroup H5A
- *
- * \brief Closes the specified attribute
- *
- * \attr_id
- *
- * \return \herr_t
- *
- * \details H5Aclose() terminates access to the attribute specified by
- *          \p attr_id by releasing the identifier.
- *
- * \attention Further use of a released attribute identifier is illegal; a
- *            function using such an identifier will generate an error.
- *
- * \since 1.0.0
- *
- * \see H5Acreate(), H5Aopen()
- */
-H5_DLL herr_t  H5Aclose(hid_t attr_id);
 /* --------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -401,6 +380,26 @@ H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name, const char *
 H5_DLL htri_t H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
                                       hid_t loc_id, const char *obj_name, const char *attr_name,
                                       hid_t lapl_id, hid_t es_id);
+/*-------------------------------------------------------------------------*/
+/**
+ * \ingroup H5A
+ *
+ * \brief Closes the specified attribute
+ *
+ * \attr_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Aclose() terminates access to the attribute specified by
+ *          \p attr_id by releasing the identifier.
+ *
+ * \attention Further use of a released attribute identifier is illegal; a
+ *            function using such an identifier will generate an error.
+ *
+ * \since 1.0.0
+ *
+ * \see H5Acreate(), H5Aopen()
+ */
 H5_DLL herr_t H5Aclose(hid_t attr_id);
 H5_DLL herr_t H5Aclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id,
                              hid_t es_id);
