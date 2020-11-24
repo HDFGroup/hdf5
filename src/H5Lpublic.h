@@ -963,8 +963,8 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index
 H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
                           H5L_iterate2_t op, void *op_data);
 H5_DLL herr_t H5Literate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id,
-                               H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op,
-                               void *op_data, hid_t es_id);
+                              H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op,
+                              void *op_data, hid_t es_id);
 /**
  * \ingroup TRAV
  *

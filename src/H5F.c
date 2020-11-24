@@ -877,7 +877,7 @@ H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, void **token_ptr, H5VL
         H5I_DATASET != obj_type && H5I_ATTR != obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-    /* Get the object */
+    /* Get the file object */
     if (NULL == (*vol_obj_ptr = H5VL_vol_object(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
