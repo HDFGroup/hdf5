@@ -2288,6 +2288,8 @@ case "X-$WARNINGS_AS_ERRORS" in
     AC_MSG_RESULT([yes])
     ;;
   X-no)
+    H5_CFLAGS="$H5_CFLAGS $H5_NECFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $H5_NECXXFLAGS"
     AC_MSG_RESULT([no])
     ;;
   *)
