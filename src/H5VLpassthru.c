@@ -2871,10 +2871,10 @@ H5VL_pass_through_request_specific(void *obj, H5VL_request_specific_t specific_t
 
                         tmp_o = (H5VL_pass_through_t *)req_array[idx_array[u]];
                         H5VL_pass_through_free_obj(tmp_o);
-                    }                                     /* end for */
-                }                                         /* end if */
-            }                                             /* end else-if */
-            else {                                        /* H5VL_REQUEST_WAITALL == specific_type */
+                    }                             /* end for */
+                }                                 /* end if */
+            }                                     /* end else-if */
+            else {                                /* H5VL_REQUEST_WAITALL == specific_type */
                 H5VL_request_status_t *array_of_statuses; /* Array of statuses for completed requests */
 
                 /* Retrieve the remaining arguments */

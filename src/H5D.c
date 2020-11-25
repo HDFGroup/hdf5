@@ -1022,7 +1022,7 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters, void *buf)
+H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters, void *buf /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL;
     herr_t         ret_value = SUCCEED; /* Return value */

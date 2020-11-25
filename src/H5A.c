@@ -311,7 +311,6 @@ H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
-
     if (!attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "attr_name parameter cannot be NULL")
     if (!*attr_name)
@@ -1027,7 +1026,7 @@ done:
         This function reads a complete attribute from disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
+H5Aread(hid_t attr_id, hid_t dtype_id, void *buf /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1052,7 +1051,7 @@ done:
  *--------------------------------------------------------------------------*/
 herr_t
 H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id, hid_t dtype_id,
-              void *buf, hid_t es_id)
+              void *buf /*out*/, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for attr_id */
     void *         token     = NULL;            /* Request token for async operation        */
@@ -1681,7 +1680,6 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-
     if (!old_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be NULL")
     if (!*old_name)
@@ -1819,7 +1817,7 @@ done:
             attribute.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op,
+H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx /*in,out */, H5A_operator2_t op,
             void *op_data)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
@@ -1898,7 +1896,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
-                   hsize_t *idx, H5A_operator2_t op, void *op_data, hid_t lapl_id)
+                   hsize_t *idx /*in,out */, H5A_operator2_t op, void *op_data, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object location */
     H5VL_loc_params_t loc_params;
@@ -2395,7 +2393,7 @@ done:
  * Purpose:	Checks if an attribute with a given name exists on an object.
  *
  * Return:	Success:	TRUE/FALSE
- * 		    Failure:	Negative
+ * 		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 1, 2007

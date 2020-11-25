@@ -338,7 +338,7 @@ H5Oopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_li
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Dopen_by_idx_async() */
+} /* end H5Oopen_by_idx_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Oopen_by_token

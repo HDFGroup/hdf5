@@ -1238,7 +1238,6 @@ H5is_library_terminating(hbool_t *is_terminating)
 
 #if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API) &&         \
     defined(H5_HAVE_WIN_THREADS)
-
 /*-------------------------------------------------------------------------
  * Function:    DllMain
  *

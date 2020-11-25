@@ -6368,7 +6368,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_wait(void *req, hid_t connector_id, uint64_t timeout, H5VL_request_status_t *status)
+H5VLrequest_wait(void *req, hid_t connector_id, uint64_t timeout, H5VL_request_status_t *status /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
@@ -6575,7 +6575,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_cancel(void *req, hid_t connector_id, H5VL_request_status_t *status)
+H5VLrequest_cancel(void *req, hid_t connector_id, H5VL_request_status_t *status /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
