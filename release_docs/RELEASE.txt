@@ -47,6 +47,19 @@ New Features
 
     Configuration:
     -------------
+    - Fixed POSIX problems when building w/ gcc on Solaris
+
+      When building on Solaris using gcc, the POSIX symbols were not
+      being set correctly, which could lead to issues like clock_gettime()
+      not being found.
+
+      The standard is now set to gnu99 when building with gcc on Solaris,
+      which allows POSIX things to be #defined and linked correctly. This
+      differs slightly from the gcc norm, where we set the standard to c99
+      and manually set POSIX #define symbols.
+
+      (DER - 2020/11/25, HDFFV-11191)
+
     - Added a configure-time option to consider certain compiler warnings
       as errors
 
