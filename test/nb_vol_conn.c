@@ -2573,7 +2573,7 @@ H5VL_nonblock_object_optional(void *obj, H5VL_object_optional_t opt_type, hid_t 
 } /* end H5VL_nonblock_object_optional() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_nonblock_introspect_get_conn_clss
+ * Function:    H5VL_nonblock_introspect_get_conn_cls
  *
  * Purpose:     Query the connector class.
  *
@@ -2581,7 +2581,7 @@ H5VL_nonblock_object_optional(void *obj, H5VL_object_optional_t opt_type, hid_t 
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5VL_nonblock_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl, const H5VL_class_t **conn_cls)
 {
     H5VL_nonblock_t *o = (H5VL_nonblock_t *)obj;
@@ -2611,7 +2611,7 @@ H5VL_nonblock_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl, const 
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5VL_nonblock_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags)
 {
     H5VL_nonblock_t *o = (H5VL_nonblock_t *)obj;
@@ -2951,7 +2951,7 @@ H5VL_nonblock_request_free(void *obj)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5VL_nonblock_blob_put(void *obj, const void *buf, size_t size, void *blob_id, void *ctx)
 {
     H5VL_nonblock_t *o = (H5VL_nonblock_t *)obj;
@@ -2975,7 +2975,7 @@ H5VL_nonblock_blob_put(void *obj, const void *buf, size_t size, void *blob_id, v
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5VL_nonblock_blob_get(void *obj, const void *blob_id, void *buf, size_t size, void *ctx)
 {
     H5VL_nonblock_t *o = (H5VL_nonblock_t *)obj;
@@ -2999,7 +2999,7 @@ H5VL_nonblock_blob_get(void *obj, const void *blob_id, void *buf, size_t size, v
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5VL_nonblock_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments)
 {
     H5VL_nonblock_t *o = (H5VL_nonblock_t *)obj;
@@ -3023,7 +3023,7 @@ H5VL_nonblock_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_t speci
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5VL_nonblock_blob_optional(void *obj, void *blob_id, H5VL_blob_optional_t opt_type, va_list arguments)
 {
     H5VL_nonblock_t *o = (H5VL_nonblock_t *)obj;
@@ -3139,7 +3139,7 @@ H5VL_nonblock_token_from_str(void *obj, H5I_type_t obj_type, const char *token_s
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5VL_nonblock_optional(void *obj, int op_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_nonblock_t *o = (H5VL_nonblock_t *)obj;
