@@ -305,12 +305,12 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
+H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list /*out*/)
 {
     ssize_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE4("Zs", "iIuz*i", file_id, types, max_objs, oid_list);
+    H5TRACE4("Zs", "iIuzx", file_id, types, max_objs, oid_list);
 
     /* Check arguments */
     if (0 == (types & H5F_OBJ_ALL))
@@ -384,13 +384,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_vfd_handle(hid_t file_id, hid_t fapl_id, void **file_handle)
+H5Fget_vfd_handle(hid_t file_id, hid_t fapl_id, void **file_handle /*out*/)
 {
     H5VL_object_t *vol_obj;             /* File info */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii**x", file_id, fapl_id, file_handle);
+    H5TRACE3("e", "iix", file_id, fapl_id, file_handle);
 
     /* Check args */
     if (!file_handle)
@@ -840,12 +840,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_intent(hid_t file_id, unsigned *intent_flags)
+H5Fget_intent(hid_t file_id, unsigned *intent_flags /*out*/)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Iu", file_id, intent_flags);
+    H5TRACE2("e", "ix", file_id, intent_flags);
 
     /* If no intent flags were passed in, exit quietly */
     if (intent_flags) {
@@ -876,12 +876,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_fileno(hid_t file_id, unsigned long *fnumber)
+H5Fget_fileno(hid_t file_id, unsigned long *fnumber /*out*/)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Ul", file_id, fnumber);
+    H5TRACE2("e", "ix", file_id, fnumber);
 
     /* If no fnumber pointer was passed in, exit quietly */
     if (fnumber) {
@@ -944,13 +944,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_filesize(hid_t file_id, hsize_t *size)
+H5Fget_filesize(hid_t file_id, hsize_t *size /*out*/)
 {
     H5VL_object_t *vol_obj;             /* File info */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*h", file_id, size);
+    H5TRACE2("e", "ix", file_id, size);
 
     /* Check args */
     if (!size)
@@ -1005,13 +1005,13 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Fget_file_image(hid_t file_id, void *buf, size_t buf_len)
+H5Fget_file_image(hid_t file_id, void *buf /*out*/, size_t buf_len)
 {
     H5VL_object_t *vol_obj;   /* File object for file ID  */
     ssize_t        ret_value; /* Return value             */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "i*xz", file_id, buf, buf_len);
+    H5TRACE3("Zs", "ixz", file_id, buf, buf_len);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -1041,13 +1041,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config)
+H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL;
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", file_id, config);
+    H5TRACE2("e", "ix", file_id, config);
 
     /* Check args */
     if ((NULL == config) || (config->version != H5AC__CURR_CACHE_CONFIG_VERSION))
@@ -1084,7 +1084,7 @@ H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", file_id, config_ptr);
+    H5TRACE2("e", "i*Cc", file_id, config_ptr);
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
@@ -1112,13 +1112,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate)
+H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate /*out*/)
 {
     H5VL_object_t *vol_obj;
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*d", file_id, hit_rate);
+    H5TRACE2("e", "ix", file_id, hit_rate);
 
     /* Check args */
     if (NULL == hit_rate)
@@ -1149,14 +1149,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_size(hid_t file_id, size_t *max_size, size_t *min_clean_size, size_t *cur_size,
-                int *cur_num_entries)
+H5Fget_mdc_size(hid_t file_id, size_t *max_size /*out*/, size_t *min_clean_size /*out*/,
+                size_t *cur_size /*out*/, int *cur_num_entries /*out*/)
 {
     H5VL_object_t *vol_obj;
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*z*z*z*Is", file_id, max_size, min_clean_size, cur_size, cur_num_entries);
+    H5TRACE5("e", "ixxxx", file_id, max_size, min_clean_size, cur_size, cur_num_entries);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -1271,14 +1271,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
+H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo /*out*/)
 {
     H5VL_object_t *vol_obj = NULL;
     H5I_type_t     type;
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", obj_id, finfo);
+    H5TRACE2("e", "ix", obj_id, finfo);
 
     /* Check args */
     if (!finfo)
@@ -1314,13 +1314,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info)
+H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL;    /* File object for file ID */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", file_id, info);
+    H5TRACE2("e", "ix", file_id, info);
 
     /* Check args */
     if (!info)
@@ -1545,13 +1545,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled, hbool_t *is_currently_logging)
+H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled /*out*/, hbool_t *is_currently_logging /*out*/)
 {
     H5VL_object_t *vol_obj;             /* File info */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*b*b", file_id, is_enabled, is_currently_logging);
+    H5TRACE3("e", "ixx", file_id, is_enabled, is_currently_logging);
 
     /* Sanity check */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -1682,14 +1682,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2], unsigned misses[2],
-                            unsigned evictions[2], unsigned bypasses[2])
+H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2] /*out*/, unsigned hits[2] /*out*/,
+                            unsigned misses[2] /*out*/, unsigned evictions[2] /*out*/,
+                            unsigned bypasses[2] /*out*/)
 {
     H5VL_object_t *vol_obj;             /* File object */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*Iu*Iu*Iu*Iu*Iu", file_id, accesses, hits, misses, evictions, bypasses);
+    H5TRACE6("e", "ixxxxx", file_id, accesses, hits, misses, evictions, bypasses);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -1720,13 +1721,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_len)
+H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr /*out*/, hsize_t *image_len /*out*/)
 {
     H5VL_object_t *vol_obj;             /* File info */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*a*h", file_id, image_addr, image_len);
+    H5TRACE3("e", "ixx", file_id, image_addr, image_len);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -1753,13 +1754,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_eoa(hid_t file_id, haddr_t *eoa)
+H5Fget_eoa(hid_t file_id, haddr_t *eoa /*out*/)
 {
     H5VL_object_t *vol_obj;             /* File info */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*a", file_id, eoa);
+    H5TRACE2("e", "ix", file_id, eoa);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -1819,13 +1820,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize)
+H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", file_id, minimize);
+    H5TRACE2("e", "ix", file_id, minimize);
 
     if (NULL == minimize)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out pointer 'minimize' cannot be NULL")

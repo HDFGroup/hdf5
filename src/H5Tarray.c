@@ -255,13 +255,13 @@ H5T__get_array_ndims(const H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 int
-H5Tget_array_dims2(hid_t type_id, hsize_t dims[])
+H5Tget_array_dims2(hid_t type_id, hsize_t dims[] /*out*/)
 {
     H5T_t *dt;        /* pointer to array data type	*/
     int    ret_value; /* return value			*/
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("Is", "i*h", type_id, dims);
+    H5TRACE2("Is", "ix", type_id, dims);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -383,13 +383,13 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int H5_ATTR_UNUSED perm[])
+H5Tget_array_dims1(hid_t type_id, hsize_t dims[] /*out*/, int H5_ATTR_UNUSED perm[] /*out*/)
 {
     H5T_t *dt;        /* Array datatype to query	*/
     int    ret_value; /* return value			*/
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Is", "i*h*Is", type_id, dims, perm);
+    H5TRACE3("Is", "ixx", type_id, dims, perm);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

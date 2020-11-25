@@ -49,6 +49,9 @@ typedef struct H5TS_cancel_struct {
     unsigned int cancel_count;
 } H5TS_cancel_t;
 
+/* Function pointer typedef for thread callback function */
+typedef void *(*H5TS_thread_cb_t)(void *);
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -703,7 +706,7 @@ H5TS_win32_thread_exit(void)
  *--------------------------------------------------------------------------
  */
 H5TS_thread_t
-H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
+H5TS_create_thread(H5TS_thread_cb_t func, H5TS_attr_t *attr, void *udata)
 {
     H5TS_thread_t ret_value;
 

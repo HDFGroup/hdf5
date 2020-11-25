@@ -207,6 +207,9 @@ typedef struct H5D_filtered_collective_io_info_t {
     } async_info;
 } H5D_filtered_collective_io_info_t;
 
+/* Function pointer typedef for sort function */
+typedef int (*H5D_mpio_sort_func_cb_t)(const void *, const void *);
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -527,7 +530,7 @@ done:
 static herr_t
 H5D__mpio_array_gatherv(void *local_array, size_t local_array_num_entries, size_t array_entry_size,
                         void **_gathered_array, size_t *_gathered_array_num_entries, hbool_t allgather,
-                        int root, MPI_Comm comm, int (*sort_func)(const void *, const void *))
+                        int root, MPI_Comm comm, H5D_mpio_sort_func_cb_t sort_func)
 {
     size_t gathered_array_num_entries = 0;    /* The size of the newly-constructed array */
     void * gathered_array             = NULL; /* The newly-constructed array returned to the caller */

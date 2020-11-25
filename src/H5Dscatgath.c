@@ -916,7 +916,7 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_id, void *dst_buf)
+H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_id, void *dst_buf /*out*/)
 {
     H5T_t *         type;                     /* Datatype */
     H5S_t *         dst_space;                /* Dataspace */
@@ -930,7 +930,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_
     herr_t          ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "x*xii*x", op, op_data, type_id, dst_space_id, dst_buf);
+    H5TRACE5("e", "DS*xiix", op, op_data, type_id, dst_space_id, dst_buf);
 
     /* Check args */
     if (op == NULL)
@@ -1012,7 +1012,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf_size, void *dst_buf,
+H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf_size, void *dst_buf /*out*/,
           H5D_gather_func_t op, void *op_data)
 {
     H5T_t *         type;                /* Datatype */
@@ -1026,7 +1026,7 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*xiz*xx*x", src_space_id, src_buf, type_id, dst_buf_size, dst_buf, op, op_data);
+    H5TRACE7("e", "i*xizxDg*x", src_space_id, src_buf, type_id, dst_buf_size, dst_buf, op, op_data);
 
     /* Check args */
     if (NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
