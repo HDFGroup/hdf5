@@ -51,7 +51,7 @@ typedef enum H5I_type_t {
     H5I_NTYPES          /* number of library types, MUST BE LAST!       */
 } H5I_type_t;
 
-/* Type of atoms to return to users */
+/* Type of IDs to return to users */
 typedef int64_t hid_t;
 
 #define PRIdHID PRId64
