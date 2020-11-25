@@ -123,7 +123,10 @@ if test "X-gcc" = "X-$cc_vendor"; then
         # case to add the flag everywhere else
         cygwin-*)
             ;;
-
+        # On Solaris, gcc needs the gnu99 standard to pick up certain POSIX-y things
+        *solaris*)
+            H5_CFLAGS="$H5_CFLAGS -std=gnu99"
+            ;;
         *)
             H5_CFLAGS="$H5_CFLAGS -std=c99"
             ;;
