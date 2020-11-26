@@ -844,6 +844,7 @@ set (H5_PUBLIC_HEADERS
     ${H5S_HDRS}
     ${H5SM_HDRS}
     ${H5T_HDRS}
+    ${H5TS_HDRS}
     ${H5VL_HDRS}
     ${H5Z_HDRS}
 )
