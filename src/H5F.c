@@ -1051,7 +1051,7 @@ H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config /*out*/)
 
     /* Check args */
     if ((NULL == config) || (config->version != H5AC__CURR_CACHE_CONFIG_VERSION))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad configptr")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config ptr")
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
