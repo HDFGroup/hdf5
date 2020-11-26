@@ -4520,7 +4520,7 @@ check_invalid_tag_application(void)
         TEST_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         TEST_ERROR
     api_ctx_pushed = FALSE;
 
@@ -4540,7 +4540,7 @@ check_invalid_tag_application(void)
 #if H5C_DO_TAGGING_SANITY_CHECKS
 error:
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     return 1;
 #endif /* H5C_DO_TAGGING_SANITY_CHECKS */
