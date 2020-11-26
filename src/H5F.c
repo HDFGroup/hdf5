@@ -1105,46 +1105,6 @@ done:
 } /* end H5Fdelete() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F__reopen_api_common
- *
- * Purpose:     This is the common function for reopening an HDF5 file
- *              files.
- *
- * Return:      Success:    A file ID
- *              Failure:    H5I_INVALID_HID
- *
- *-------------------------------------------------------------------------
- */
-static hid_t
-H5F__reopen_api_common(hid_t file_id, void **token_ptr)
-{
-    void *         file      = NULL;            /* File struct for new file */
-    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Get the file object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
-
-    /* Reopen the file */
-    if (H5VL_file_specific(vol_obj, H5VL_FILE_REOPEN, H5P_DATASET_XFER_DEFAULT, token_ptr, &file) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file via the VOL connector")
-
-    /* Make sure that worked */
-    if (NULL == file)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
-
-    /* Get an ID for the file */
-    if ((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__reopen_api_common() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5Fmount
  *
  * Purpose:     Mount file CHILD_ID onto the group specified by LOC_ID and
@@ -1258,6 +1218,46 @@ H5Funmount(hid_t loc_id, const char *name)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Funmount() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__reopen_api_common
+ *
+ * Purpose:     This is the common function for reopening an HDF5 file
+ *              files.
+ *
+ * Return:      Success:    A file ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5F__reopen_api_common(hid_t file_id, void **token_ptr)
+{
+    void *         file      = NULL;            /* File struct for new file */
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Get the file object */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
+
+    /* Reopen the file */
+    if (H5VL_file_specific(vol_obj, H5VL_FILE_REOPEN, H5P_DATASET_XFER_DEFAULT, token_ptr, &file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file via the VOL connector")
+
+    /* Make sure that worked */
+    if (NULL == file)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
+
+    /* Get an ID for the file */
+    if ((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__reopen_api_common() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Freopen
