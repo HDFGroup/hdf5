@@ -11,39 +11,24 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
  * Purpose:	This file contains declarations which define macros for the
- *		H5A package.  Including this header means that the source file
- *		is part of the H5A package.
+ *		H5 package.  Including this header means that the source file
+ *		is part of the H5 package.
  */
-#ifndef _H5Amodule_H
-#define _H5Amodule_H
+#ifndef _H5module_H
+#define _H5module_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
  */
-#define H5A_MODULE
-#define H5_MY_PKG      H5A
-#define H5_MY_PKG_ERR  H5E_ATTR
-#define H5_MY_PKG_INIT YES
+#define H5_MODULE
+#define H5_MY_PKG       H5
+#define H5_MY_PKG_ERR   H5E_LIB
+#define H5_MY_PKG_INIT  YES
 
-/**\defgroup H5A H5A
- * \brief Attribute Interface
- *
- * \details The Attribute Interface, H5A, provides a mechanism for attaching
- *          additional information to a dataset, group, or named datatype.
- *
- *          Attributes are accessed by opening the object that they are
- *          attached to and are not independent objects. Typically an
- *          attribute is small in size and contains user metadata about the
- *          object that it is attached to.
- *
- *          Attributes look similar to HDF5 datasets in that they have a
- *          datatype and dataspace. However, they do not support partial
- *          I/O operations and cannot be compressed or extended.
- *
+/**\defgroup H5 H5
+ * \brief General Library Functions
+ * \todo Describe concisely what the functions in this module are about.
  */
 
-#endif /* _H5Amodule_H */
+#endif /* _H5module_H */

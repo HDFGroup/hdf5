@@ -2160,7 +2160,6 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API_INIT(err)                                                                             \
     /* Initialize the library */                                                                             \
     if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {                                                                \
-        H5_INIT_GLOBAL = TRUE;                                                                               \
         if (H5_init_library() < 0)                                                                           \
             HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed")                        \
     } /* end if */                                                                                           \
@@ -2603,7 +2602,6 @@ extern hbool_t H5_api_entered_g; /* Has library already been entered through API
                                                                                                              \
     /* Initialize the library or bust */                                                                     \
     if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {                                                                \
-        H5_INIT_GLOBAL = TRUE;                                                                               \
         if (H5_init_library() < 0) {                                                                         \
             /* (Can't use H5E_THROW here) */                                                                 \
             H5E_PRINTF(H5E_CANTINIT, "interface initialization failed");                                     \

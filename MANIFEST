@@ -197,6 +197,7 @@
 ./doxygen/aliases
 ./doxygen/Doxyfile.in
 ./doxygen/dox/api-compat-macros.dox
+./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/H5Acreate.dox
 ./doxygen/dox/H5Aiterate.dox
 ./doxygen/dox/H5Fget_info.dox
@@ -563,6 +564,7 @@
 ./src/H5err.txt
 ./src/H5detect.c
 ./src/H5make_libsettings.c
+./src/H5module.h
 ./src/H5mpi.c
 ./src/H5overflow.txt
 ./src/H5private.h
