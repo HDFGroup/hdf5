@@ -1020,12 +1020,12 @@ done:
         This function reads a complete attribute from disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
+H5Aread(hid_t attr_id, hid_t dtype_id, void *buf /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
+    H5TRACE3("e", "iix", attr_id, dtype_id, buf);
 
     /* Synchronously read the data */
     if (H5A__read_api_common(attr_id, dtype_id, buf, NULL, NULL) < 0)
@@ -1809,7 +1809,7 @@ done:
             attribute.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op,
+H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx /*in,out */, H5A_operator2_t op,
             void *op_data)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
@@ -1888,7 +1888,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
-                   hsize_t *idx, H5A_operator2_t op, void *op_data, hid_t lapl_id)
+                   hsize_t *idx /*in,out */, H5A_operator2_t op, void *op_data, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object location */
     H5VL_loc_params_t loc_params;

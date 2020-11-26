@@ -373,7 +373,7 @@ done:
     Deprecated in favor of H5Aiterate2
 --------------------------------------------------------------------------*/
 herr_t
-H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
+H5Aiterate1(hid_t loc_id, unsigned *attr_num /*in,out*/, H5A_operator1_t op, void *op_data)
 {
     H5VL_object_t *vol_obj = NULL; /* Object of loc_id */
     herr_t         ret_value;      /* Return value */
