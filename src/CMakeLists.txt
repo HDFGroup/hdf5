@@ -746,6 +746,7 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5PBmodule.h
     ${HDF5_SRC_DIR}/H5PLmodule.h
     ${HDF5_SRC_DIR}/H5Rmodule.h
+    ${HDF5_SRC_DIR}/H5RSmodule.h
     ${HDF5_SRC_DIR}/H5Smodule.h
     ${HDF5_SRC_DIR}/H5SLmodule.h
     ${HDF5_SRC_DIR}/H5SMmodule.h

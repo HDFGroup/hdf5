@@ -173,7 +173,7 @@ H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func_t cls_create
     hid_t           ret_value = H5I_INVALID_HID; /* Return value		   */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE8("i", "i*sx*xx*xx*x", parent, name, cls_create, create_data, cls_copy, copy_data, cls_close,
+    H5TRACE8("i", "i*sPc*xPo*xPl*x", parent, name, cls_create, create_data, cls_copy, copy_data, cls_close,
              close_data);
 
     /* Check arguments. */
@@ -414,8 +414,8 @@ H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_p
     herr_t          ret_value;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE11("e", "i*sz*xxxxxxxx", cls_id, name, size, def_value, prp_create, prp_set, prp_get, prp_delete,
-              prp_copy, prp_cmp, prp_close);
+    H5TRACE11("e", "i*sz*xPCPSPGPDPOPMPL", cls_id, name, size, def_value, prp_create, prp_set, prp_get,
+              prp_delete, prp_copy, prp_cmp, prp_close);
 
     /* Check arguments. */
     if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
@@ -598,7 +598,7 @@ H5Pinsert2(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_s
     herr_t          ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE10("e", "i*sz*xxxxxxx", plist_id, name, size, value, prp_set, prp_get, prp_delete, prp_copy,
+    H5TRACE10("e", "i*sz*xPSPGPDPOPMPL", plist_id, name, size, value, prp_set, prp_get, prp_delete, prp_copy,
               prp_cmp, prp_close);
 
     /* Check arguments. */
@@ -756,14 +756,14 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Pget_size(hid_t id, const char *name, size_t *size)
+H5Pget_size(hid_t id, const char *name, size_t *size /*out*/)
 {
     H5P_genclass_t *pclass;    /* Property class to query */
     H5P_genplist_t *plist;     /* Property list to query */
     herr_t          ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*s*z", id, name, size);
+    H5TRACE3("e", "i*sx", id, name, size);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -961,14 +961,14 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Pget_nprops(hid_t id, size_t *nprops)
+H5Pget_nprops(hid_t id, size_t *nprops /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list to query */
     H5P_genclass_t *pclass;              /* Property class to query */
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*z", id, nprops);
+    H5TRACE2("e", "ix", id, nprops);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -1199,7 +1199,7 @@ H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
     int           ret_value;    /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("Is", "i*Isx*x", id, idx, iter_func, iter_data);
+    H5TRACE4("Is", "i*IsPi*x", id, idx, iter_func, iter_data);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -1262,13 +1262,13 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Pget(hid_t plist_id, const char *name, void *value)
+H5Pget(hid_t plist_id, const char *name, void *value /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*s*x", plist_id, name, value);
+    H5TRACE3("e", "i*sx", plist_id, name, value);
 
     /* Check arguments. */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))

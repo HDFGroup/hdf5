@@ -946,13 +946,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_nlinks(hid_t plist_id, size_t *nlinks)
+H5Pget_nlinks(hid_t plist_id, size_t *nlinks /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*z", plist_id, nlinks);
+    H5TRACE2("e", "ix", plist_id, nlinks);
 
     if (!nlinks)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer passed in");
@@ -1021,7 +1021,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
+H5Pget_elink_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
 {
     H5P_genplist_t *plist;     /* Property list pointer */
     char *          my_prefix; /* Library's copy of the prefix */
@@ -1029,7 +1029,7 @@ H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
     ssize_t         ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "i*sz", plist_id, prefix, size);
+    H5TRACE3("Zs", "ixz", plist_id, prefix, size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
@@ -1180,13 +1180,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_elink_acc_flags(hid_t lapl_id, unsigned *flags)
+H5Pget_elink_acc_flags(hid_t lapl_id, unsigned *flags /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Iu", lapl_id, flags);
+    H5TRACE2("e", "ix", lapl_id, flags);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
@@ -1223,7 +1223,7 @@ H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ix*x", lapl_id, func, op_data);
+    H5TRACE3("e", "iLt*x", lapl_id, func, op_data);
 
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */
@@ -1260,14 +1260,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data)
+H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func /*out*/, void **op_data /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     H5L_elink_cb_t  cb_info;             /* Callback info struct */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*x**x", lapl_id, func, op_data);
+    H5TRACE3("e", "ixx", lapl_id, func, op_data);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))

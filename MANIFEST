@@ -956,6 +956,7 @@
 ./src/H5Rprivate.h
 ./src/H5Rpublic.h
 ./src/H5RS.c
+./src/H5RSmodule.h
 ./src/H5RSprivate.h
 ./src/H5S.c
 ./src/H5Sall.c
