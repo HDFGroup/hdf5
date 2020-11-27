@@ -72,7 +72,7 @@ typedef struct H5F_olist_t {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5F__close_cb(H5VL_object_t *file_vol_obj);
+static herr_t H5F__close_cb(H5VL_object_t *file_vol_obj, void **request);
 static herr_t H5F__set_vol_conn(H5F_t *file);
 static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list,
                                hbool_t app_ref, size_t *obj_id_count_ptr);
@@ -236,7 +236,7 @@ H5F_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__close_cb(H5VL_object_t *file_vol_obj)
+H5F__close_cb(H5VL_object_t *file_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -246,7 +246,7 @@ H5F__close_cb(H5VL_object_t *file_vol_obj)
     HDassert(file_vol_obj);
 
     /* Close the file */
-    if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     /* Free the VOL object */

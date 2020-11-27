@@ -3140,6 +3140,37 @@ done:
 } /* end H5Ssel_iter_reset() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5S__sel_iter_close_cb
+ *
+ * Purpose:     Called when the ref count reaches zero on a selection iterator's ID
+ *
+ * Return:	Non-negative on success / Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *	        Wednesday, April 8, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S__sel_iter_close_cb(H5S_sel_iter_t *_sel_iter, void H5_ATTR_UNUSED **request)
+{
+    H5S_sel_iter_t *sel_iter  = (H5S_sel_iter_t *)_sel_iter; /* The selection iterator to close */
+    herr_t          ret_value = SUCCEED;                     /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(sel_iter);
+
+    /* Close the selection iterator object */
+    if (H5S_sel_iter_close(sel_iter) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CLOSEERROR, FAIL, "unable to close selection iterator");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S__sel_iter_close_cb() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5S_sel_iter_close
  *
  * Purpose:	Releases a dataspace selection iterator and its memory.

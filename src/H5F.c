@@ -706,7 +706,9 @@ H5Fclose(hid_t file_id)
     if (H5I_FILE != H5I_get_type(file_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
 
-    /* Close the file */
+    /* Synchronously decrement reference count on ID.
+     * When it reaches zero the file will be closed.
+     */
     if (H5I_dec_app_ref(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 

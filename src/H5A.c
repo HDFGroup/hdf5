@@ -1456,12 +1456,14 @@ H5Aclose(hid_t attr_id)
     H5TRACE1("e", "i", attr_id);
 
     /* Check arguments */
-    if (NULL == H5I_object_verify(attr_id, H5I_ATTR))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    if (H5I_ATTR != H5I_get_type(attr_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a attribute ID")
 
-    /* Decrement references to that atom (and close it) */
+    /* Decrement the counter on the attribute ID. It will be freed if the count
+     * reaches zero.
+     */
     if (H5I_dec_app_ref(attr_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "decrementing attribute ID failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
