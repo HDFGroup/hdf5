@@ -588,11 +588,11 @@ H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
-#define H5VLattr_optional_op_wrap     H5VLattr_optional_op
-#define H5VLdataset_optional_op_wrap  H5VLdataset_optional_op
-#define H5VLdatatype_optional_op_wrap H5VLdatatype_optional_op
-#define H5VLfile_optional_op_wrap     H5VLfile_optional_op
-#define H5VLgroup_optional_op_wrap    H5VLgroup_optional_op
+#define H5VLattr_optional_op_wrap     H5_NO_EXPAND(H5VLattr_optional_op)
+#define H5VLdataset_optional_op_wrap  H5_NO_EXPAND(H5VLdataset_optional_op)
+#define H5VLdatatype_optional_op_wrap H5_NO_EXPAND(H5VLdatatype_optional_op)
+#define H5VLfile_optional_op_wrap     H5_NO_EXPAND(H5VLfile_optional_op)
+#define H5VLgroup_optional_op_wrap    H5_NO_EXPAND(H5VLgroup_optional_op)
 #endif /* H5VL_MODULE */
 
 #ifdef __cplusplus
