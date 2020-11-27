@@ -91,6 +91,9 @@ extern "C" {
 #define H5_GCC_DIAG_ON(x)
 #endif
 
+/* Macro to hide a symbol from further preprocessor substitutions */
+#define H5_NO_EXPAND(x)         (x)
+
 /* Version numbers */
 #define H5_VERS_MAJOR      1                        /* For major interface/format changes       */
 #define H5_VERS_MINOR      13                       /* For minor interface/format changes       */

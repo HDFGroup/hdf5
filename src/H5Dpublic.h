@@ -197,6 +197,17 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 #define H5Dwrite_async(...)      H5Dwrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Dset_extent_async(...) H5Dset_extent_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Dclose_async(...)      H5Dclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+
+/* Define "wrapper" versions of function calls, to allow compile-time values to
+ *      be passed in by language wrapper or library layer on top of HDF5.
+ */
+#define H5Dcreate_async_wrap            H5_NO_EXPAND(H5Dcreate_async)
+#define H5Dopen_async_wrap              H5_NO_EXPAND(H5Dopen_async)
+#define H5Dget_space_async_wrap         H5_NO_EXPAND(H5Dget_space_async)
+#define H5Dread_async_wrap              H5_NO_EXPAND(H5Dread_async)
+#define H5Dwrite_async_wrap             H5_NO_EXPAND(H5Dwrite_async)
+#define H5Dset_extent_async_wrap        H5_NO_EXPAND(H5Dset_extent_async)
+#define H5Dclose_async_wrap             H5_NO_EXPAND(H5Dclose_async)
 #endif /* H5D_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.

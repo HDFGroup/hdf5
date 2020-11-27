@@ -1617,6 +1617,16 @@ H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hi
 #define H5Ldelete_by_idx_async(...) H5Ldelete_by_idx_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Lexists_async(...)        H5Lexists_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Literate_async(...)       H5Literate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+
+/* Define "wrapper" versions of function calls, to allow compile-time values to
+ *      be passed in by language wrapper or library layer on top of HDF5.
+ */
+#define H5Lcreate_hard_async_wrap       H5_NO_EXPAND(H5Lcreate_hard_async)
+#define H5Lcreate_soft_async_wrap       H5_NO_EXPAND(H5Lcreate_soft_async)
+#define H5Ldelete_async_wrap            H5_NO_EXPAND(H5Ldelete_async)
+#define H5Ldelete_by_idx_async_wrap     H5_NO_EXPAND(H5Ldelete_by_idx_async)
+#define H5Lexists_async_wrap            H5_NO_EXPAND(H5Lexists_async)
+#define H5Literate_async_wrap           H5_NO_EXPAND(H5Literate_async)
 #endif /* H5L_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
