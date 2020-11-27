@@ -420,6 +420,22 @@ H5_DLL herr_t H5Aclose_async(const char *app_file, const char *app_func, unsigne
 #define H5Aexists_async(...)         H5Aexists_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Aexists_by_name_async(...) H5Aexists_by_name_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Aclose_async(...)          H5Aclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+
+/* Define "wrapper" versions of function calls, to allow compile-time values to
+ *      be passed in by language wrapper or library layer on top of HDF5.
+ */
+#define H5Acreate_async_wrap            H5_NO_EXPAND(H5Acreate_async)
+#define H5Acreate_by_name_async_wrap    H5_NO_EXPAND(H5Acreate_by_name_async)
+#define H5Aopen_async_wrap              H5_NO_EXPAND(H5Aopen_async)
+#define H5Aopen_by_name_async_wrap      H5_NO_EXPAND(H5Aopen_by_name_async)
+#define H5Aopen_by_idx_async_wrap       H5_NO_EXPAND(H5Aopen_by_idx_async)
+#define H5Awrite_async_wrap             H5_NO_EXPAND(H5Awrite_async)
+#define H5Aread_async_wrap              H5_NO_EXPAND(H5Aread_async)
+#define H5Arename_async_wrap            H5_NO_EXPAND(H5Arename_async)
+#define H5Arename_by_name_async_wrap    H5_NO_EXPAND(H5Arename_by_name_async)
+#define H5Aexists_async_wrap            H5_NO_EXPAND(H5Aexists_async)
+#define H5Aexists_by_name_async_wrap    H5_NO_EXPAND(H5Aexists_by_name_async)
+#define H5Aclose_async_wrap             H5_NO_EXPAND(H5Aclose_async)
 #endif /* H5A_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.

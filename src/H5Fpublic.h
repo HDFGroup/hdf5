@@ -2179,6 +2179,15 @@ H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #define H5Freopen_async(...) H5Freopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Fflush_async(...)  H5Fflush_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Fclose_async(...)  H5Fclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+
+/* Define "wrapper" versions of function calls, to allow compile-time values to
+ *      be passed in by language wrapper or library layer on top of HDF5.
+ */
+#define H5Fcreate_async_wrap    H5_NO_EXPAND(H5Fcreate_async)
+#define H5Fopen_async_wrap      H5_NO_EXPAND(H5Fopen_async)
+#define H5Freopen_async_wrap    H5_NO_EXPAND(H5Freopen_async)
+#define H5Fflush_async_wrap     H5_NO_EXPAND(H5Fflush_async)
+#define H5Fclose_async_wrap     H5_NO_EXPAND(H5Fclose_async)
 #endif /* H5F_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
