@@ -137,8 +137,7 @@ H5FL_DEFINE_STATIC(H5AC_slist_entry_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
-                                   void (*sync_point_done)(unsigned num_writes, haddr_t *written_entries_tbl))
+H5AC__set_sync_point_done_callback(H5C_t *cache_ptr, H5AC_sync_point_done_cb_t sync_point_done)
 {
     H5AC_aux_t *aux_ptr;
 
@@ -170,7 +169,7 @@ H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC__set_write_done_callback(H5C_t *cache_ptr, void (*write_done)(void))
+H5AC__set_write_done_callback(H5C_t *cache_ptr, H5AC_write_done_cb_t write_done)
 {
     H5AC_aux_t *aux_ptr;
 

@@ -251,13 +251,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense)
+H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned *min_dense /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Iu*Iu", plist_id, max_compact, min_dense);
+    H5TRACE3("e", "ixx", plist_id, max_compact, min_dense);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
@@ -342,12 +342,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags)
+H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
 {
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Iu", plist_id, crt_order_flags);
+    H5TRACE2("e", "ix", plist_id, crt_order_flags);
 
     /* Get values */
     if (crt_order_flags) {
@@ -445,12 +445,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times)
+H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times /*out*/)
 {
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", plist_id, track_times);
+    H5TRACE2("e", "ix", plist_id, track_times);
 
     /* Get values */
     if (track_times) {
@@ -931,13 +931,13 @@ done:
 herr_t
 H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*/,
                      size_t *cd_nelmts /*in_out*/, unsigned cd_values[] /*out*/, size_t namelen,
-                     char name[] /*out*/, unsigned *filter_config)
+                     char name[] /*out*/, unsigned *filter_config /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "iZfx*zxzx*Iu", plist_id, id, flags, cd_nelmts, cd_values, namelen, name, filter_config);
+    H5TRACE8("e", "iZfx*zxzxx", plist_id, id, flags, cd_nelmts, cd_values, namelen, name, filter_config);
 
     /* Check args */
     if (cd_nelmts || cd_values) {

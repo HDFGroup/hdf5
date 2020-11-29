@@ -85,7 +85,7 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "*xi", cls, vipl_id);
+    H5TRACE2("i", "*#i", cls, vipl_id);
 
     /* Check arguments */
     if (!cls)
@@ -757,13 +757,13 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLretrieve_lib_state(void **state)
+H5VLretrieve_lib_state(void **state /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "**x", state);
+    H5TRACE1("e", "x", state);
 
     /* Check args */
     if (NULL == state)

@@ -4138,13 +4138,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5C_COLLECT_CACHE_STATS
 static herr_t
-H5C__pin_entry_from_client(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
-#else
-static herr_t
-H5C__pin_entry_from_client(H5C_t H5_ATTR_UNUSED *cache_ptr, H5C_cache_entry_t *entry_ptr)
+H5C__pin_entry_from_client(H5C_t
+#if !H5C_COLLECT_CACHE_STATS
+                               H5_ATTR_UNUSED
 #endif
+                                   *          cache_ptr,
+                           H5C_cache_entry_t *entry_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

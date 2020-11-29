@@ -1272,14 +1272,14 @@ H5FD__mirror_fapl_free(void *_fa)
  * -------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_dst)
+H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_dst /*out*/)
 {
     const H5FD_mirror_fapl_t *fa_src    = NULL;
     H5P_genplist_t *          plist     = NULL;
     herr_t                    ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa_dst);
+    H5TRACE2("e", "ix", fapl_id, fa_dst);
 
     LOG_OP_CALL(FUNC);
 
@@ -1320,7 +1320,7 @@ H5Pset_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa)
     herr_t          ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa);
+    H5TRACE2("e", "i*#", fapl_id, fa);
 
     LOG_OP_CALL(FUNC);
 

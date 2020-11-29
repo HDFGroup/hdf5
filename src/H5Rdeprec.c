@@ -481,7 +481,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H5O_type_t *obj_type)
+H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H5O_type_t *obj_type /*out*/)
 {
     H5VL_object_t *      vol_obj      = NULL;                    /* Object of loc_id */
     H5I_type_t           vol_obj_type = H5I_BADID;               /* Object type of loc_id */
@@ -491,7 +491,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H5O_type_t *obj
     herr_t               ret_value = SUCCEED;                    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iRt*x*Ot", id, ref_type, ref, obj_type);
+    H5TRACE4("e", "iRt*xx", id, ref_type, ref, obj_type);
 
     /* Check args */
     if (buf == NULL)
@@ -693,7 +693,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name, size_t size)
+H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name /*out*/, size_t size)
 {
     H5VL_object_t *      vol_obj      = NULL;                    /* Object of loc_id */
     H5I_type_t           vol_obj_type = H5I_BADID;               /* Object type of loc_id */
@@ -703,7 +703,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name, size_t s
     ssize_t              ret_value = -1;                         /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE5("Zs", "iRt*x*sz", id, ref_type, ref, name, size);
+    H5TRACE5("Zs", "iRt*xxz", id, ref_type, ref, name, size);
 
     /* Check args */
     if (buf == NULL)

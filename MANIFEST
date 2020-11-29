@@ -158,6 +158,7 @@
 ./config/clang-warnings/error-general
 ./config/clang-warnings/general
 ./config/clang-warnings/no-developer-general
+./config/clang-warnings/noerror-general
 ./config/gnu-warnings/4.8-4.last
 ./config/gnu-warnings/4.8
 ./config/gnu-warnings/4.9
@@ -171,6 +172,8 @@
 ./config/gnu-warnings/cxx-5
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
+./config/gnu-warnings/cxx-noerror-5
+./config/gnu-warnings/cxx-noerror-general
 ./config/gnu-warnings/developer-4.8
 ./config/gnu-warnings/developer-7
 ./config/gnu-warnings/developer-8
@@ -187,6 +190,9 @@
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
+./config/gnu-warnings/noerror-5
+./config/gnu-warnings/noerror-8
+./config/gnu-warnings/noerror-general
 ./config/intel-warnings/ifort-general
 ./config/intel-warnings/general
 
@@ -535,9 +541,11 @@
 
 ./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
+./release_docs/HISTORY-1_8_0-1_10_0.txt
+./release_docs/HISTORY-1_10_0-1_12_0.txt
 ./release_docs/HISTORY-1_8.txt
 ./release_docs/HISTORY-1_10.txt
-./release_docs/HISTORY-1_8_0-1_10_0.txt
+./release_docs/HISTORY-1_12.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_CMake.txt
 ./release_docs/INSTALL_Cygwin.txt
@@ -948,6 +956,7 @@
 ./src/H5Rprivate.h
 ./src/H5Rpublic.h
 ./src/H5RS.c
+./src/H5RSmodule.h
 ./src/H5RSprivate.h
 ./src/H5S.c
 ./src/H5Sall.c

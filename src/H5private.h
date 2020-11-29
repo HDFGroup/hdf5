@@ -1259,6 +1259,57 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDprintf
 #define HDprintf printf
 #endif /* HDprintf */
+#ifndef HDpthread_attr_destroy
+#define HDpthread_attr_destroy(A) pthread_attr_destroy(A)
+#endif /* HDpthread_attr_destroy */
+#ifndef HDpthread_attr_init
+#define HDpthread_attr_init(A) pthread_attr_init(A)
+#endif /* HDpthread_attr_init */
+#ifndef HDpthread_attr_setscope
+#define HDpthread_attr_setscope(A, S) pthread_attr_setscope(A, S)
+#endif /* HDpthread_attr_setscope */
+#ifndef HDpthread_cond_init
+#define HDpthread_cond_init(C, A) pthread_cond_init(C, A)
+#endif /* HDpthread_cond_init */
+#ifndef HDpthread_cond_signal
+#define HDpthread_cond_signal(C) pthread_cond_signal(C)
+#endif /* HDpthread_cond_signal */
+#ifndef HDpthread_cond_wait
+#define HDpthread_cond_wait(C, M) pthread_cond_wait(C, M)
+#endif /* HDpthread_cond_wait */
+#ifndef HDpthread_create
+#define HDpthread_create(R, A, F, U) pthread_create(R, A, F, U)
+#endif /* HDpthread_create */
+#ifndef HDpthread_equal
+#define HDpthread_equal(T1, T2) pthread_equal(T1, T2)
+#endif /* HDpthread_equal */
+#ifndef HDpthread_getspecific
+#define HDpthread_getspecific(K) pthread_getspecific(K)
+#endif /* HDpthread_getspecific */
+#ifndef HDpthread_join
+#define HDpthread_join(T, V) pthread_join(T, V)
+#endif /* HDpthread_join */
+#ifndef HDpthread_key_create
+#define HDpthread_key_create(K, D) pthread_key_create(K, D)
+#endif /* HDpthread_key_create */
+#ifndef HDpthread_mutex_init
+#define HDpthread_mutex_init(M, A) pthread_mutex_init(M, A)
+#endif /* HDpthread_mutex_init */
+#ifndef HDpthread_mutex_lock
+#define HDpthread_mutex_lock(M) pthread_mutex_lock(M)
+#endif /* HDpthread_mutex_lock */
+#ifndef HDpthread_mutex_unlock
+#define HDpthread_mutex_unlock(M) pthread_mutex_unlock(M)
+#endif /* HDpthread_mutex_unlock */
+#ifndef HDpthread_self
+#define HDpthread_self() pthread_self()
+#endif /* HDpthread_self */
+#ifndef HDpthread_setcancelstate
+#define HDpthread_setcancelstate(N, O) pthread_setcancelstate(N, O)
+#endif /* HDpthread_setcancelstate */
+#ifndef HDpthread_setspecific
+#define HDpthread_setspecific(K, V) pthread_setspecific(K, V)
+#endif /* HDpthread_setspecific */
 #ifndef HDputc
 #define HDputc(C, F) putc(C, F)
 #endif /* HDputc*/
@@ -1943,7 +1994,31 @@ extern char H5libhdf5_settings[]; /* embedded library information */
 #define H5TRACE_RETURN(V)                                                 /*void*/
 #endif /* H5_DEBUG_API */
 
+/* Argument tracing macros (defined all the time) */
+#define H5ARG_TRACE0(C, T)                         C, T
+#define H5ARG_TRACE1(C, T, A0)                     C, T, #A0, A0
+#define H5ARG_TRACE2(C, T, A0, A1)                 C, T, #A0, A0, #A1, A1
+#define H5ARG_TRACE3(C, T, A0, A1, A2)             C, T, #A0, A0, #A1, A1, #A2, A2
+#define H5ARG_TRACE4(C, T, A0, A1, A2, A3)         C, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3
+#define H5ARG_TRACE5(C, T, A0, A1, A2, A3, A4)     C, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4
+#define H5ARG_TRACE6(C, T, A0, A1, A2, A3, A4, A5) C, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5
+#define H5ARG_TRACE7(C, T, A0, A1, A2, A3, A4, A5, A6)                                                       \
+    C, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6
+#define H5ARG_TRACE8(C, T, A0, A1, A2, A3, A4, A5, A6, A7)                                                   \
+    C, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7, A7
+#define H5ARG_TRACE9(C, T, A0, A1, A2, A3, A4, A5, A6, A7, A8)                                               \
+    C, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7, A7, #A8, A8
+#define H5ARG_TRACE10(C, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)                                          \
+    C, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7, A7, #A8, A8, #A9, A9
+#define H5ARG_TRACE11(C, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)                                     \
+    C, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7, A7, #A8, A8, #A9, A9, #A10, A10
+#define H5ARG_TRACE12(C, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11)                                \
+    C, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7, A7, #A8, A8, #A9, A9, #A10,    \
+        A10, #A11, A11
+
+struct H5RS_str_t;
 H5_DLL double H5_trace(const double *calltime, const char *func, const char *type, ...);
+H5_DLL herr_t H5_trace_args(struct H5RS_str_t *rs, const char *type, va_list ap);
 
 /*-------------------------------------------------------------------------
  * Purpose:  Register function entry for library initialization and code
@@ -2251,6 +2326,23 @@ H5_DLL herr_t H5CX_pop(void);
                         FUNC_ENTER_API_INIT(err);                                                            \
                         {
 
+/*
+ * Use this macro for API functions that shouldn't perform _any_ initialization
+ *      of the library or an interface, or push themselves on the function
+ *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
+ *	API name itself.  Examples are: H5TSmutex_acquire,
+ *
+ */
+#define FUNC_ENTER_API_NAMECHECK_ONLY                                                                        \
+    {                                                                                                        \
+        {                                                                                                    \
+            {                                                                                                \
+                {                                                                                            \
+                    {                                                                                        \
+                        {                                                                                    \
+                            FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                        \
+                            {
+
 /* Note: this macro only works when there's _no_ interface initialization routine for the module */
 #define FUNC_ENTER_NOAPI_INIT(err)                                                                           \
     /* Initialize the package, if appropriate */                                                             \
@@ -2330,6 +2422,17 @@ H5_DLL herr_t H5CX_pop(void);
         FUNC_ENTER_COMMON_NOERR(!H5_IS_API(FUNC));                                                           \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
+/*
+ * Use this macro for non-API functions that shouldn't perform _any_ initialization
+ *      of the library or an interface, or push themselves on the function
+ *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
+ *	API name itself.  Examples are private routines in the H5TS package.
+ *
+ */
+#define FUNC_ENTER_NOAPI_NAMECHECK_ONLY                                                                      \
+    {                                                                                                        \
+        FUNC_ENTER_COMMON_NOERR(!H5_IS_API(FUNC));
+
 /* Use the following two macros as replacements for the FUNC_ENTER_NOAPI
  * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
  * up a metadata tag. */
@@ -2396,6 +2499,17 @@ H5_DLL herr_t H5CX_pop(void);
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));                                                            \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+
+/*
+ * Use this macro for non-API functions that shouldn't perform _any_ initialization
+ *      of the library or an interface, or push themselves on the function
+ *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
+ *	API name itself.  Examples are static routines in the H5TS package.
+ *
+ */
+#define FUNC_ENTER_STATIC_NAMECHECK_ONLY                                                                     \
+    {                                                                                                        \
+        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));
 
 /* Use the following macro as replacement for the FUNC_ENTER_STATIC
  * macro when the function needs to set up a metadata tag. */
@@ -2474,6 +2588,18 @@ H5_DLL herr_t H5CX_pop(void);
     }                                                                                                        \
     } /*end scope from beginning of FUNC_ENTER*/
 
+/* Use this macro to match the FUNC_ENTER_API_NAMECHECK_ONLY macro */
+#define FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)                                                             \
+    ;                                                                                                        \
+    } /*end scope from end of FUNC_ENTER*/                                                                   \
+    return (ret_value);                                                                                      \
+    }                                                                                                        \
+    }                                                                                                        \
+    }                                                                                                        \
+    }                                                                                                        \
+    }                                                                                                        \
+    } /*end scope from beginning of FUNC_ENTER*/
+
 #define FUNC_LEAVE_NOAPI(ret_value)                                                                          \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
@@ -2497,6 +2623,14 @@ H5_DLL herr_t H5CX_pop(void);
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     return (ret_value);                                                                                      \
+    } /*end scope from beginning of FUNC_ENTER*/
+
+/* Use these macros to match the FUNC_ENTER_NOAPI_NAMECHECK_ONLY macro */
+#define FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                                                           \
+    return (ret_value);                                                                                      \
+    } /*end scope from beginning of FUNC_ENTER*/
+#define FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY                                                                 \
+    return;                                                                                                  \
     } /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro when exiting a function that set up a metadata tag */

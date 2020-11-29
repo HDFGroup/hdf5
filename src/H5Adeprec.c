@@ -373,13 +373,13 @@ done:
     Deprecated in favor of H5Aiterate2
 --------------------------------------------------------------------------*/
 herr_t
-H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
+H5Aiterate1(hid_t loc_id, unsigned *attr_num /*in,out*/, H5A_operator1_t op, void *op_data)
 {
     H5VL_object_t *vol_obj = NULL; /* Object of loc_id */
     herr_t         ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5_ITER_ERROR)
-    H5TRACE4("e", "i*Iux*x", loc_id, attr_num, op, op_data);
+    H5TRACE4("e", "i*IuAo*x", loc_id, attr_num, op, op_data);
 
     /* check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))

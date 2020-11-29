@@ -40,13 +40,6 @@
 /* Local Typedefs */
 /******************/
 
-/* Object header iterator callbacks */
-/* Data structure for callback for locating the index by name */
-typedef struct H5A_iter_cb1 {
-    const char *name;
-    int         idx;
-} H5A_iter_cb1;
-
 /********************/
 /* Package Typedefs */
 /********************/
@@ -59,9 +52,6 @@ typedef struct H5A_iter_cb1 {
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -69,160 +59,6 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /*******************/
 /* Local Variables */
 /*******************/
-
-/* Declare the free lists of H5A_t */
-H5FL_DEFINE(H5A_t);
-
-/* Declare the free lists for H5A_shared_t's */
-H5FL_DEFINE(H5A_shared_t);
-
-/* Declare a free list to manage blocks of type conversion data */
-H5FL_BLK_DEFINE(attr_buf);
-
-/* Attribute ID class */
-static const H5I_class_t H5I_ATTR_CLS[1] = {{
-    H5I_ATTR,                 /* ID class value */
-    0,                        /* Class flags */
-    0,                        /* # of reserved IDs for class */
-    (H5I_free_t)H5A__close_cb /* Callback routine for closing objects of this class */
-}};
-
-/* Flag indicating "top" of interface has been initialized */
-static hbool_t H5A_top_package_initialize_s = FALSE;
-
-/*-------------------------------------------------------------------------
- * Function: H5A_init
- *
- * Purpose:  Initialize the interface from some other layer.
- *
- * Return:   Success:    non-negative
- *
- *           Failure:    negative
- *-------------------------------------------------------------------------
- */
-herr_t
-H5A_init(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_init() */
-
-/*--------------------------------------------------------------------------
-NAME
-   H5A__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5A__init_package()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
-herr_t
-H5A__init_package(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /*
-     * Create attribute ID type.
-     */
-    if (H5I_register_type(H5I_ATTR_CLS) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
-    /* Mark "top" of interface as initialized, too */
-    H5A_top_package_initialize_s = TRUE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A__init_package() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5A_top_term_package
- PURPOSE
-    Terminate various H5A objects
- USAGE
-    void H5A_top_term_package()
- RETURNS
- DESCRIPTION
-    Release IDs for the ID group, deferring full interface shutdown
-    until later (in H5A_term_package).
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-int
-H5A_top_term_package(void)
-{
-    int n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if (H5A_top_package_initialize_s) {
-        if (H5I_nmembers(H5I_ATTR) > 0) {
-            (void)H5I_clear_type(H5I_ATTR, FALSE, FALSE);
-            n++; /*H5I*/
-        }        /* end if */
-
-        /* Mark closed */
-        if (0 == n)
-            H5A_top_package_initialize_s = FALSE;
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(n)
-} /* H5A_top_term_package() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5A_term_package
- PURPOSE
-    Terminate various H5A objects
- USAGE
-    void H5A_term_package()
- RETURNS
- DESCRIPTION
-    Release any other resources allocated.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
-
-     Finishes shutting down the interface, after H5A_top_term_package()
-     is called
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-int
-H5A_term_package(void)
-{
-    int n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if (H5_PKG_INIT_VAR) {
-        /* Sanity checks */
-        HDassert(0 == H5I_nmembers(H5I_ATTR));
-        HDassert(FALSE == H5A_top_package_initialize_s);
-
-        /* Destroy the attribute object id group */
-        n += (H5I_dec_type_ref(H5I_ATTR) > 0);
-
-        /* Mark closed */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(n)
-} /* H5A_term_package() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5Acreate2
@@ -685,13 +521,13 @@ done:
         This function reads a complete attribute from disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
+H5Aread(hid_t attr_id, hid_t dtype_id, void *buf /*out*/)
 {
     H5VL_object_t *vol_obj;   /* Attribute object for ID */
     herr_t         ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
+    H5TRACE3("e", "iix", attr_id, dtype_id, buf);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -849,14 +685,14 @@ done:
     properly terminate the string.
 --------------------------------------------------------------------------*/
 ssize_t
-H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
+H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
 {
     H5VL_object_t *   vol_obj = NULL; /* Attribute object for ID */
     H5VL_loc_params_t loc_params;
     ssize_t           ret_value = -1;
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "iz*s", attr_id, buf_size, buf);
+    H5TRACE3("Zs", "izx", attr_id, buf_size, buf);
 
     /* check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -995,14 +831,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Aget_info(hid_t attr_id, H5A_info_t *ainfo)
+H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/)
 {
     H5VL_object_t *   vol_obj;
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", attr_id, ainfo);
+    H5TRACE2("e", "ix", attr_id, ainfo);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1036,7 +872,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H5A_info_t *ainfo,
+H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H5A_info_t *ainfo /*out*/,
                     hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj;
@@ -1044,7 +880,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*s*xi", loc_id, obj_name, attr_name, ainfo, lapl_id);
+    H5TRACE5("e", "i*s*sxi", loc_id, obj_name, attr_name, ainfo, lapl_id);
 
     /* Check args */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -1094,14 +930,14 @@ done:
  */
 herr_t
 H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
-                   H5A_info_t *ainfo, hid_t lapl_id)
+                   H5A_info_t *ainfo /*out*/, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj;
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIoh*xi", loc_id, obj_name, idx_type, order, n, ainfo, lapl_id);
+    H5TRACE7("e", "i*sIiIohxi", loc_id, obj_name, idx_type, order, n, ainfo, lapl_id);
 
     /* Check args */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -1300,7 +1136,7 @@ done:
             attribute.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op,
+H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx /*in,out */, H5A_operator2_t op,
             void *op_data)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
@@ -1308,7 +1144,7 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *i
     herr_t            ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iIiIo*hx*x", loc_id, idx_type, order, idx, op, op_data);
+    H5TRACE6("e", "iIiIo*hAO*x", loc_id, idx_type, order, idx, op, op_data);
 
     /* check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -1379,14 +1215,14 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
-                   hsize_t *idx, H5A_operator2_t op, void *op_data, hid_t lapl_id)
+                   hsize_t *idx /*in,out */, H5A_operator2_t op, void *op_data, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object location */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIo*hx*xi", loc_id, obj_name, idx_type, order, idx, op, op_data, lapl_id);
+    H5TRACE8("e", "i*sIiIo*hAO*xi", loc_id, obj_name, idx_type, order, idx, op, op_data, lapl_id);
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
