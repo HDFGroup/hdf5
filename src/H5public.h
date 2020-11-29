@@ -419,7 +419,7 @@ H5_DLL herr_t H5open(void);
  * \details H5atclose() registers a callback that the HDF5 library will invoke
  *          when closing.   Registered callbacks are invoked in LIFO order,
  *          similar to the Standard C 'atexit' routine.  For example, if 'func1'
- *          registered, then 'func2', when the library is closing 'func2' will
+ *          is registered, then 'func2', when the library is closing 'func2' will
  *          be invoked first, then 'func1'.   The \p ctx pointer will be passed
  *          to \p func when it's invoked.  NULL is allowed for \p ctx.
  *
