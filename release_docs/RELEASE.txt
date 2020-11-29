@@ -47,6 +47,20 @@ New Features
 
     Configuration:
     -------------
+    - FreeBSD Autotools configuration now defaults to 'cc' and 'c++' compilers
+
+      On FreeBSD, the autotools defaulted to 'gcc' as the C compiler and did
+      not process C++ options. Since FreeBSD 10, the default compiler has
+      been clang (via 'cc').
+
+      The default compilers have been set to 'cc' for C and 'c++' for C++,
+      which will pick up clang and clang++ respectively on FreeBSD 10+.
+      Additionally, clang options are now set correctly for both C and C++
+      and g++ options will now be set if that compiler is being used (an
+      omission from the former functionality).
+
+      (DER - 2020/11/28, HDFFV-11193)
+
     - Fixed POSIX problems when building w/ gcc on Solaris
 
       When building on Solaris using gcc, the POSIX symbols were not
