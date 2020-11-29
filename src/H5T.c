@@ -2997,7 +2997,7 @@ herr_t
 H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *background, hid_t dxpl_id)
 {
     H5T_path_t *tpath;               /* type conversion info    */
-    H5T_t *     src, *dst;           /* unregisterd types        */
+    H5T_t *     src, *dst;           /* unregistered types      */
     herr_t      ret_value = SUCCEED; /* Return value            */
 
     FUNC_ENTER_API(FAIL)
