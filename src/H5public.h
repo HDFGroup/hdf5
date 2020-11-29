@@ -386,6 +386,9 @@ typedef struct H5_alloc_stats_t {
     size_t             peak_alloc_blocks_count;  /**< Peak # of blocks allocated */
 } H5_alloc_stats_t;
 
+/* Library shutdown callback */
+typedef void (*H5_atclose_func_t)(void *ctx);
+
 /* Functions in H5.c */
 /**
  * \ingroup H5
@@ -403,6 +406,26 @@ typedef struct H5_alloc_stats_t {
  *          it more than once.
  */
 H5_DLL herr_t H5open(void);
+/**
+ * \ingroup H5
+ * \brief Registers a callback for the library to invoke when it's closing.
+ * \param[in] func The function pointer to invoke
+ * \param[in] ctx Context to pass to \p func when invoked
+ * \return \herr_t
+ *
+ * \details H5atclose() registers a callback that the HDF5 library will invoke
+ *          when closing.   Registered callbacks are invoked in LIFO order,
+ *          similar to the Standard C 'atexit' routine.  For example, if 'func1'
+ *          is registered, then 'func2', when the library is closing 'func2' will
+ *          be invoked first, then 'func1'.   The \p ctx pointer will be passed
+ *          to \p func when it's invoked.  NULL is allowed for \p ctx.
+ *
+ *          If the HDF5 library is initialized and closed more than once, the
+ *          \p func callback must be registered within each open/close cycle.
+ *
+ * \since 1.12.1
+ */
+H5_DLL herr_t H5atclose(H5_atclose_func_t func, void *ctx);
 /**
  * \ingroup H5
  * \brief Flushes all data to disk, closes all open objects, and releases memory
@@ -611,6 +634,22 @@ H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *rel
  *
  */
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum, unsigned relnum);
+/**
+ * \ingroup H5
+ * \brief Checks whether the HDF5 library is closing.
+ * \param[out] is_terminating Flag indicating whether library is shutting down
+ * \return \herr_t
+ *
+ * \details H5is_library_terminating() queries whether the HDF5 library is in
+ *          the process of shutting down.  The \p is_terminating flag will only
+ *          be set to TRUE after shutdown starts, it will be FALSE before the
+ *          library has been initialized, while the library is initialized, and
+ *          after it has been closed.  The value of \p is_terminating is
+ *          undefined if this routine fails.
+ *
+ * \since 1.12.1
+ */
+H5_DLL herr_t H5is_library_terminating(hbool_t *is_terminating);
 /**
  * \ingroup H5
  * \brief Determines whether the HDF5 library was built with the thread-safety
