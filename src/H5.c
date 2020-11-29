@@ -1181,10 +1181,10 @@ H5free_memory(void *mem)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5is_library_threadsafe(hbool_t *is_ts)
+H5is_library_threadsafe(hbool_t *is_ts /*out*/)
 {
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*b", is_ts);
+    H5TRACE1("e", "x", is_ts);
 
     HDassert(is_ts);
 
@@ -1213,10 +1213,10 @@ H5is_library_threadsafe(hbool_t *is_ts)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5is_library_terminating(hbool_t *is_terminating)
+H5is_library_terminating(hbool_t *is_terminating /*out*/)
 {
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*b", is_terminating);
+    H5TRACE1("e", "x", is_terminating);
 
     HDassert(is_terminating);
 
