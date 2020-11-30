@@ -5218,8 +5218,6 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
 
     /* Set the flag to indicate both source and destination types are compound types
      * for the optimization of data reading (in H5Dio.c).
-     *
-     * Jan-Willem Blokland, 11 March 2020
      * Make sure that path->are_compounds is only TRUE for compound types.
      */
     path->are_compounds = FALSE;
