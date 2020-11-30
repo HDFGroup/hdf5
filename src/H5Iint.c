@@ -984,7 +984,7 @@ H5I_dec_ref(hid_t id)
 
     /* Synchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_ref(id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1064,7 +1064,7 @@ H5I_dec_app_ref(hid_t id)
 
     /* Synchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_app_ref(id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1137,7 +1137,7 @@ H5I_dec_app_ref_always_close(hid_t id)
 
     /* Synchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_app_ref_always_close(id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
