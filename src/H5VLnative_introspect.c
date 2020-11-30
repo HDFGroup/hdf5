@@ -99,7 +99,7 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
                     break;
 
                 default:
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown optional attribute operation")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown optional dataset operation")
                     break;
             } /* end switch */
             break;
@@ -156,7 +156,7 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
                     break;
 
                 default:
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown optional attribute operation")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown optional file operation")
                     break;
             } /* end switch */
             break;
@@ -175,7 +175,7 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
                 default:
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown optional attribute operation")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown optional group operation")
                     break;
             } /* end switch */
             break;
