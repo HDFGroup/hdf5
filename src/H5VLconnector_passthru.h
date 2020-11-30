@@ -195,7 +195,7 @@ H5_DLL herr_t H5VLobject_optional(void *obj, hid_t connector_id, H5VL_object_opt
 H5_DLL herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl,
                                           const H5VL_class_t **conn_cls);
 H5_DLL herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type,
-                                       hbool_t *supported);
+                                       uint64_t *flags);
 
 /* Public wrappers for asynchronous request callbacks */
 H5_DLL herr_t H5VLrequest_wait(void *req, hid_t connector_id, uint64_t timeout, H5ES_status_t *status);
