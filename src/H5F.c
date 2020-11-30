@@ -88,8 +88,8 @@ H5FL_EXTERN(H5VL_object_t);
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_create_plist
  *
- * Purpose:     Get an atom for a copy of the file-creation property list for
- *              this file. This function returns an atom with a copy of the
+ * Purpose:     Get an ID for a copy of the file-creation property list for
+ *              this file. This function returns an ID with a copy of the
  *              properties used to create a file.
  *
  * Return:      Success:    Object ID for a copy of the file creation
@@ -531,9 +531,9 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
                                              H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
-    /* Get an atom for the file */
+    /* Get an ID for the file */
     if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
     /* Get the file object */
     if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
@@ -621,7 +621,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 
     /* Get an ID for the file */
     if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
     /* Get the file object */
     if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
@@ -773,6 +773,121 @@ done:
 } /* end H5Fdelete() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Fmount
+ *
+ * Purpose:     Mount file CHILD_ID onto the group specified by LOC_ID and
+ *              NAME using mount properties PLIST_ID.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
+{
+    H5VL_object_t *loc_vol_obj   = NULL; /* Parent object        */
+    H5VL_object_t *child_vol_obj = NULL; /* Child object         */
+    H5I_type_t     loc_type;             /* ID type of location  */
+    H5I_type_t     child_type;           /* ID type of child     */
+    herr_t         ret_value = SUCCEED;  /* Return value         */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*sii", loc_id, name, child_id, plist_id);
+
+    /* Check arguments */
+    loc_type = H5I_get_type(loc_id);
+    if (H5I_FILE != loc_type && H5I_GROUP != loc_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "loc_id parameter not a file or group ID")
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be the empty string")
+    child_type = H5I_get_type(child_id);
+    if (H5I_FILE != child_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "child_id parameter not a file ID")
+    if (H5P_DEFAULT == plist_id)
+        plist_id = H5P_FILE_MOUNT_DEFAULT;
+    else if (TRUE != H5P_isa_class(plist_id, H5P_FILE_MOUNT))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "plist_id is not a file mount property list ID")
+
+    /* Set up collective metadata if appropriate */
+    if (H5CX_set_loc(loc_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+
+    /* Get the location object */
+    if (NULL == (loc_vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get location object")
+
+    /* Get the child object */
+    if (NULL == (child_vol_obj = (H5VL_object_t *)H5I_object(child_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get child object")
+
+    /* Check if both objects are associated with the same VOL connector */
+    if (loc_vol_obj->connector->cls->value != child_vol_obj->connector->cls->value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL connector")
+
+    /* Perform the mount operation */
+    if (H5VL_file_specific(loc_vol_obj, H5VL_FILE_MOUNT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+                           (int)loc_type, name, child_vol_obj->data, plist_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fmount() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Funmount
+ *
+ * Purpose:     Given a mount point, dissassociate the mount point's file
+ *              from the file mounted there. Do not close either file.
+ *
+ *              The mount point can either be the group in the parent or the
+ *              root group of the mounted file (both groups have the same
+ *              name). If the mount point was opened before the mount then
+ *              it's the group in the parent, but if it was opened after the
+ *              mount then it's the root group of the child.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Funmount(hid_t loc_id, const char *name)
+{
+    H5VL_object_t *vol_obj = NULL;      /* Parent object        */
+    H5I_type_t     loc_type;            /* ID type of location  */
+    herr_t         ret_value = SUCCEED; /* Return value         */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*s", loc_id, name);
+
+    /* Check arguments */
+    loc_type = H5I_get_type(loc_id);
+    if (H5I_FILE != loc_type && H5I_GROUP != loc_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "loc_id parameter not a file or group ID")
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be the empty string")
+
+    /* Set up collective metadata if appropriate */
+    if (H5CX_set_loc(loc_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+
+    /* Get the location object */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get location object")
+
+    /* Perform the unmount operation */
+    if (H5VL_file_specific(vol_obj, H5VL_FILE_UNMOUNT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+                           (int)loc_type, name) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Funmount() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Freopen
  *
  * Purpose:     Reopen a file.  The new file handle which is returned points
@@ -810,9 +925,9 @@ H5Freopen(hid_t file_id)
     if (NULL == file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
 
-    /* Get an atom for the file */
+    /* Get an ID for the file */
     if ((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
     /* Get the file object */
     if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
