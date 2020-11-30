@@ -2690,7 +2690,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     record = 2862; /* Record to left of insertion point in right internal node (now) */
     if (check_node_depth(bt2, &record, (unsigned)1) < 0)
         TEST_ERROR
-#endif             /* NONE */
+#endif /* NONE */
     record = 3137; /* Record to right of insertion point in right internal node (now) */
     if (check_node_depth(bt2, &record, (unsigned)1) < 0)
         TEST_ERROR
@@ -2871,7 +2871,7 @@ test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam, cons
     record = 3049; /* Record to left of insertion point in middle internal node */
     if (check_node_depth(bt2, &record, (unsigned)1) < 0)
         TEST_ERROR
-#endif             /* NONE */
+#endif /* NONE */
     record = 2822; /* Record to right of insertion point in middle internal node */
     if (check_node_depth(bt2, &record, (unsigned)1) < 0)
         TEST_ERROR

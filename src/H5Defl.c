@@ -272,8 +272,8 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
         tempto_read = MIN((size_t)(efl->slot[u].size - skip), (hsize_t)size);
         H5_CHECK_OVERFLOW(tempto_read, hsize_t, size_t);
         to_read = (size_t)tempto_read;
-#else  /* NDEBUG */
-        to_read  = MIN((size_t)(efl->slot[u].size - skip), (hsize_t)size);
+#else /* NDEBUG */
+        to_read = MIN((size_t)(efl->slot[u].size - skip), (hsize_t)size);
 #endif /* NDEBUG */
         if ((n = HDread(fd, buf, to_read)) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_READERROR, FAIL, "read error in external raw data file")
@@ -364,7 +364,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
         tempto_write = MIN(efl->slot[u].size - skip, (hsize_t)size);
         H5_CHECK_OVERFLOW(tempto_write, hsize_t, size_t);
         to_write = (size_t)tempto_write;
-#else  /* NDEBUG */
+#else /* NDEBUG */
         to_write = MIN((size_t)(efl->slot[u].size - skip), size);
 #endif /* NDEBUG */
         if ((size_t)HDwrite(fd, buf, to_write) != to_write)

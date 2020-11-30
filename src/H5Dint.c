@@ -344,11 +344,6 @@ H5D__close_cb(H5VL_object_t *dset_vol_obj)
         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset");
 
 done:
-    /* XXX: (MSC) Weird thing for datasets and filters:
-     * Always decrement the ref count on the VOL for datasets, since
-     * the ID is removed even if the close fails.
-     */
-
     /* Free the VOL object */
     if (H5VL_free_object(dset_vol_obj) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object");
@@ -2006,7 +2001,7 @@ H5D_close(H5D_t *dataset)
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif                     /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Destroy any cached layout information for the dataset */
@@ -2170,7 +2165,7 @@ H5D_mult_refresh_close(hid_t dset_id)
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif                     /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Destroy any cached layout information for the dataset */
@@ -2380,7 +2375,7 @@ H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc, hb
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif                     /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Check if we need to initialize the space */
@@ -2502,7 +2497,7 @@ H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t 
             HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif                 /* NDEBUG */
+#endif /* NDEBUG */
     } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
 done:

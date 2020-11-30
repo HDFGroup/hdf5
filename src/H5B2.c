@@ -1313,9 +1313,9 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
                  */
 #ifdef OLD_WAY
             HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
-#else     /* OLD_WAY */
+#else /* OLD_WAY */
             HGOTO_DONE(FAIL)
-#endif    /* OLD_WAY */
+#endif /* OLD_WAY */
         } /* end if */
         else {
             /* Make callback for current record */

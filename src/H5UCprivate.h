@@ -59,4 +59,4 @@ typedef struct H5UC_t {
 H5_DLL H5UC_t *H5UC_create(void *s, H5UC_free_func_t free_func);
 H5_DLL herr_t  H5UC_decr(H5UC_t *rc);
 
-#endif /* _H5RSprivate_H */
+#endif /* _H5UCprivate_H */

@@ -269,8 +269,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_logging_status(const H5C_t *cache, /*OUT*/ hbool_t *is_enabled,
-                       /*OUT*/ hbool_t *is_currently_logging)
+H5C_get_logging_status(const H5C_t *cache, hbool_t *is_enabled, hbool_t *is_currently_logging)
 {
     FUNC_ENTER_NOAPI_NOERR
 

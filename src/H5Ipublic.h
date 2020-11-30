@@ -33,24 +33,24 @@
  *           work correctly with it. \endinternal
  */
 typedef enum H5I_type_t {
-    H5I_UNINIT      = (-2),     /**< uninitialized type                        */
-    H5I_BADID       = (-1),     /**< invalid Type                              */
-    H5I_FILE        = 1,        /**< type ID for File objects                  */
-    H5I_GROUP,                  /**< type ID for Group objects                 */
-    H5I_DATATYPE,               /**< type ID for Datatype objects              */
-    H5I_DATASPACE,              /**< type ID for Dataspace objects             */
-    H5I_DATASET,                /**< type ID for Dataset objects               */
-    H5I_MAP,                    /**< type ID for Map objects                   */
-    H5I_ATTR,                   /**< type ID for Attribute objects             */
-    H5I_VFL,                    /**< type ID for virtual file layer            */
-    H5I_VOL,                    /**< type ID for virtual object layer          */
-    H5I_GENPROP_CLS,            /**< type ID for generic property list classes */
-    H5I_GENPROP_LST,            /**< type ID for generic property lists        */
-    H5I_ERROR_CLASS,            /**< type ID for error classes                 */
-    H5I_ERROR_MSG,              /**< type ID for error messages                */
-    H5I_ERROR_STACK,            /**< type ID for error stacks                  */
-    H5I_SPACE_SEL_ITER,         /**< type ID for dataspace selection iterator  */
-    H5I_NTYPES                  /**< number of library types, MUST BE LAST!    */
+    H5I_UNINIT = (-2),  /**< uninitialized type                        */
+    H5I_BADID  = (-1),  /**< invalid Type                              */
+    H5I_FILE   = 1,     /**< type ID for File objects                  */
+    H5I_GROUP,          /**< type ID for Group objects                 */
+    H5I_DATATYPE,       /**< type ID for Datatype objects              */
+    H5I_DATASPACE,      /**< type ID for Dataspace objects             */
+    H5I_DATASET,        /**< type ID for Dataset objects               */
+    H5I_MAP,            /**< type ID for Map objects                   */
+    H5I_ATTR,           /**< type ID for Attribute objects             */
+    H5I_VFL,            /**< type ID for virtual file layer            */
+    H5I_VOL,            /**< type ID for virtual object layer          */
+    H5I_GENPROP_CLS,    /**< type ID for generic property list classes */
+    H5I_GENPROP_LST,    /**< type ID for generic property lists        */
+    H5I_ERROR_CLASS,    /**< type ID for error classes                 */
+    H5I_ERROR_MSG,      /**< type ID for error messages                */
+    H5I_ERROR_STACK,    /**< type ID for error stacks                  */
+    H5I_SPACE_SEL_ITER, /**< type ID for dataspace selection iterator  */
+    H5I_NTYPES          /**< number of library types, MUST BE LAST!    */
 } H5I_type_t;
 
 /* Type of IDs to return to users */
@@ -64,12 +64,12 @@ typedef int64_t hid_t;
 /**
  * The size of identifiers
  */
-#define H5_SIZEOF_HID_T         H5_SIZEOF_INT64_T
+#define H5_SIZEOF_HID_T H5_SIZEOF_INT64_T
 
 /**
  * An invalid object ID. This is also negative for error return.
  */
-#define H5I_INVALID_HID         (-1)
+#define H5I_INVALID_HID (-1)
 
 /**
  * A function for freeing objects. This function will be called with an object
@@ -121,7 +121,7 @@ extern "C" {
  *          and returned via a call to H5Iobject_verify().
  *
  */
-H5_DLL hid_t      H5Iregister(H5I_type_t type, const void *object);
+H5_DLL hid_t H5Iregister(H5I_type_t type, const void *object);
 /**
  * \ingroup H5I
  *
@@ -144,7 +144,7 @@ H5_DLL hid_t      H5Iregister(H5I_type_t type, const void *object);
  * \see H5Iregister()
  *
  */
-H5_DLL void *     H5Iobject_verify(hid_t id, H5I_type_t id_type);
+H5_DLL void *H5Iobject_verify(hid_t id, H5I_type_t type);
 /**
  * \ingroup H5I
  *
@@ -174,7 +174,7 @@ H5_DLL void *     H5Iobject_verify(hid_t id, H5I_type_t id_type);
  *       to avoid memory leaks.
  *
  */
-H5_DLL void *     H5Iremove_verify(hid_t id, H5I_type_t id_type);
+H5_DLL void *H5Iremove_verify(hid_t id, H5I_type_t type);
 /**
  * \ingroup H5I
  *
@@ -227,7 +227,7 @@ H5_DLL H5I_type_t H5Iget_type(hid_t id);
  * \since 1.6.3
  *
  */
-H5_DLL hid_t      H5Iget_file_id(hid_t id);
+H5_DLL hid_t H5Iget_file_id(hid_t id);
 /**
  * \ingroup H5I
  *
@@ -269,7 +269,7 @@ H5_DLL hid_t      H5Iget_file_id(hid_t id);
  * \since 1.6.0
  *
  */
-H5_DLL ssize_t    H5Iget_name(hid_t id, char *name /*out*/, size_t size);
+H5_DLL ssize_t H5Iget_name(hid_t id, char *name /*out*/, size_t size);
 /**
  * \ingroup H5I
  *
@@ -314,7 +314,7 @@ H5_DLL ssize_t    H5Iget_name(hid_t id, char *name /*out*/, size_t size);
  * \since 1.6.2
  *
  */
-H5_DLL int        H5Iinc_ref(hid_t id);
+H5_DLL int H5Iinc_ref(hid_t id);
 /**
  * \ingroup H5I
  *
@@ -360,7 +360,7 @@ H5_DLL int        H5Iinc_ref(hid_t id);
  * \since 1.6.2
  *
  */
-H5_DLL int        H5Idec_ref(hid_t id);
+H5_DLL int H5Idec_ref(hid_t id);
 /**
  * \ingroup H5I
  *
@@ -384,7 +384,7 @@ H5_DLL int        H5Idec_ref(hid_t id);
  * \since 1.6.2
  *
  */
-H5_DLL int        H5Iget_ref(hid_t id);
+H5_DLL int H5Iget_ref(hid_t id);
 /**
  * \ingroup H5I
  *
@@ -440,7 +440,7 @@ H5_DLL H5I_type_t H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free
  *          all identifiers of this type will be deleted.
  *
  */
-H5_DLL herr_t     H5Iclear_type(H5I_type_t type, hbool_t force);
+H5_DLL herr_t H5Iclear_type(H5I_type_t type, hbool_t force);
 /**
  * \ingroup H5I
  *
@@ -463,7 +463,7 @@ H5_DLL herr_t     H5Iclear_type(H5I_type_t type, hbool_t force);
  *          variable holding the value of the destroyed type to #H5I_UNINIT.
  *
  */
-H5_DLL herr_t     H5Idestroy_type(H5I_type_t type);
+H5_DLL herr_t H5Idestroy_type(H5I_type_t type);
 /**
  * \ingroup H5I
  *
@@ -482,7 +482,7 @@ H5_DLL herr_t     H5Idestroy_type(H5I_type_t type);
  *          been created by a call to H5Iregister_type().
  *
  */
-H5_DLL int        H5Iinc_type_ref(H5I_type_t type);
+H5_DLL int H5Iinc_type_ref(H5I_type_t type);
 /**
  * \ingroup H5I
  *
@@ -502,7 +502,7 @@ H5_DLL int        H5Iinc_type_ref(H5I_type_t type);
  *          been created by a call to H5Iregister_type().
  *
  */
-H5_DLL int        H5Idec_type_ref(H5I_type_t type);
+H5_DLL int H5Idec_type_ref(H5I_type_t type);
 /**
  * \ingroup H5I
  *
@@ -521,7 +521,7 @@ H5_DLL int        H5Idec_type_ref(H5I_type_t type);
  *          created by a call to H5Iregister_type().
  *
  */
-H5_DLL int        H5Iget_type_ref(H5I_type_t type);
+H5_DLL int H5Iget_type_ref(H5I_type_t type);
 /**
  * \ingroup H5I
  *
@@ -562,7 +562,7 @@ H5_DLL int        H5Iget_type_ref(H5I_type_t type);
  *          parameter. It can be used to further define the search at run-time.
  *
  */
-H5_DLL void *     H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key);
+H5_DLL void *H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key);
 /**
  * \ingroup H5I
  *
@@ -591,7 +591,7 @@ H5_DLL void *     H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key);
  * \since 1.12.0
  *
  */
-H5_DLL herr_t     H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data);
+H5_DLL herr_t H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data);
 /**
  * \ingroup H5I
  *
@@ -611,7 +611,7 @@ H5_DLL herr_t     H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_da
  *          the value 0.
  *
  */
-H5_DLL herr_t     H5Inmembers(H5I_type_t type, hsize_t *num_members);
+H5_DLL herr_t H5Inmembers(H5I_type_t type, hsize_t *num_members);
 /**
  * \ingroup H5I
  *
@@ -627,7 +627,7 @@ H5_DLL herr_t     H5Inmembers(H5I_type_t type, hsize_t *num_members);
  * \since 1.8.0
  *
  */
-H5_DLL htri_t     H5Itype_exists(H5I_type_t type);
+H5_DLL htri_t H5Itype_exists(H5I_type_t type);
 /**
  * \ingroup H5I
  *
@@ -655,7 +655,7 @@ H5_DLL htri_t     H5Itype_exists(H5I_type_t type);
  * \since 1.8.3
  *
  */
-H5_DLL htri_t     H5Iis_valid(hid_t id);
+H5_DLL htri_t H5Iis_valid(hid_t id);
 
 #ifdef __cplusplus
 }

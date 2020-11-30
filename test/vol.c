@@ -18,6 +18,7 @@
  *          other mechanisms.
  */
 
+/* Headers needed */
 #include "h5test.h"
 
 /* Filename */
@@ -90,7 +91,7 @@ static const H5VL_class_t fake_vol_g = {
         /* datatype_cls */
         NULL, /* commit       */
         NULL, /* open         */
-        NULL, /* get_size     */
+        NULL, /* get          */
         NULL, /* specific     */
         NULL, /* optional     */
         NULL  /* close        */

@@ -648,7 +648,7 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
 #ifdef H5MF_ALLOC_DEBUG_MORE
         HDfprintf(stderr, "%s: section is dropped\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-    }  /* end if */
+    } /* end if */
     /* Adjust the section if it is not at page end but its size + prem is at page end */
     else if (prem <= H5F_PGEND_META_THRES(udata->f)) {
         (*sect)->sect_info.size += prem;
@@ -656,7 +656,7 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
         HDfprintf(stderr, "%s: section is adjusted {%a, %Hu}\n", FUNC, (*sect)->sect_info.addr,
                   (*sect)->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-    }  /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
