@@ -115,11 +115,11 @@ H5S__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the dataspace IDs */
+    /* Initialize the ID group for the dataspace IDs */
     if (H5I_register_type(H5I_DATASPACE_CLS) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize dataspace ID class")
 
-    /* Initialize the atom group for the dataspace selction iterator IDs */
+    /* Initialize the ID group for the dataspace selction iterator IDs */
     if (H5I_register_type(H5I_SPACE_SEL_ITER_CLS) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
                     "unable to initialize dataspace selection iterator ID class")
@@ -141,7 +141,7 @@ done:
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
-    Release IDs for the atom group, deferring full interface shutdown
+    Release IDs for the ID group, deferring full interface shutdown
     until later (in H5S_term_package).
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -185,7 +185,7 @@ H5S_top_term_package(void)
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
-    Release the atom group and any other resources allocated.
+    Release the ID group and any other resources allocated.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
      Can't report errors...
@@ -382,9 +382,9 @@ H5Screate(H5S_class_t type)
     if (NULL == (new_ds = H5S_create(type)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace")
 
-    /* Atomize */
+    /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, new_ds, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
 
 done:
     if (ret_value < 0)
@@ -531,9 +531,9 @@ H5Scopy(hid_t space_id)
     if (NULL == (dst = H5S_copy(src, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy dataspace")
 
-    /* Atomize */
+    /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, dst, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID")
 
 done:
     if (ret_value < 0)
@@ -1230,7 +1230,7 @@ H5Sis_simple(hid_t space_id)
 
     /* Check args and all the boring stuff. */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "not a dataspace")
 
     ret_value = H5S__is_simple(space);
 
@@ -1276,7 +1276,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/], con
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "not a dataspace")
     if (rank > 0 && dims == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified")
     if (rank < 0 || rank > H5S_MAX_RANK)
@@ -1432,9 +1432,9 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/], const hsize_t maxdims[/
     if (NULL == (space = H5S_create_simple((unsigned)rank, dims, maxdims)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, H5I_INVALID_HID, "can't create simple dataspace")
 
-    /* Atomize */
+    /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID")
 
 done:
     if (ret_value < 0)
@@ -1804,7 +1804,7 @@ H5Sset_extent_none(hid_t space_id)
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "not a dataspace")
 
     /* Clear the previous extent from the dataspace */
     if (H5S__extent_release(&space->extent) < 0)
