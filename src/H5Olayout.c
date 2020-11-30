@@ -90,10 +90,11 @@ H5FL_DEFINE(H5O_layout_t);
 static void *
 H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
                   unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
-                  size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                  size_t p_size, const uint8_t *p)
 {
     H5O_layout_t *mesg = NULL;
     unsigned      u;
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
     void *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -174,6 +175,10 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
         if (mesg->type == H5D_COMPACT) {
             UINT32DECODE(p, mesg->storage.u.compact.size);
             if (mesg->storage.u.compact.size > 0) {
+                /* Ensure that size doesn't exceed buffer size, due to possible data corruption */
+                if (p + mesg->storage.u.compact.size - 1 > p_end)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "storage fill size exceeds buffer size")
+
                 if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for compact data buffer")
@@ -191,6 +196,10 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
             case H5D_COMPACT:
                 UINT16DECODE(p, mesg->storage.u.compact.size);
                 if (mesg->storage.u.compact.size > 0) {
+                    /* Ensure that size doesn't exceed buffer size, due to possible data corruption */
+                    if (p + mesg->storage.u.compact.size - 1 > p_end)
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "storage size exceeds buffer size")
+
                     if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                     "memory allocation failed for compact data buffer")
