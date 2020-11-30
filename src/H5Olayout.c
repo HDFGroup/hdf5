@@ -177,7 +177,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
             if (mesg->storage.u.compact.size > 0) {
                 /* Ensure that size doesn't exceed buffer size, due to possible data corruption */
                 if (p + mesg->storage.u.compact.size - 1 > p_end)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "storage fill size exceeds buffer size")
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "storage fill size exceeds buffer size")
 
                 if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -198,7 +198,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                 if (mesg->storage.u.compact.size > 0) {
                     /* Ensure that size doesn't exceed buffer size, due to possible data corruption */
                     if (p + mesg->storage.u.compact.size - 1 > p_end)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "storage size exceeds buffer size")
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "storage size exceeds buffer size")
 
                     if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,

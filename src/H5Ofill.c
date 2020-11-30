@@ -222,7 +222,7 @@ H5O_fill_new_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t
 
                 /* Ensure that fill size doesn't exceed buffer size, due to possible data corruption */
                 if (p + fill->size - 1 > p_end)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "fill size exceeds buffer size")
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "fill size exceeds buffer size")
 
                 if (NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
@@ -331,7 +331,7 @@ H5O_fill_old_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t
     if (fill->size > 0) {
         /* Ensure that fill size doesn't exceed buffer size, due to possible data corruption */
         if (p + fill->size - 1 > p_end)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "fill size exceeds buffer size")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "fill size exceeds buffer size")
 
         if (NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
