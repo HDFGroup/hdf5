@@ -59,15 +59,17 @@
 /* Helper routines for sync/async API calls */
 static hid_t H5O__open_api_common(hid_t loc_id, const char *name, hid_t lapl_id,
     void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
-
-static hid_t H5O__open_by_idx_api_common(hid_t loc_id, const char *group_name, 
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id, 
+static hid_t H5O__open_by_idx_api_common(hid_t loc_id, const char *group_name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id,
     void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
-
-static herr_t H5O__get_info_by_name_api_common(hid_t loc_id, const char *name, 
+static herr_t H5O__get_info_by_name_api_common(hid_t loc_id, const char *name,
     H5O_info2_t *oinfo /*out*/, unsigned fields, hid_t lapl_id, void **token_ptr, 
     H5VL_object_t ** _vol_obj_ptr);
-
+static herr_t H5O__copy_api_common(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
+    const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, void **token_ptr,
+    H5VL_object_t ** _vol_obj_ptr);
+static herr_t H5O__flush_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
+static herr_t H5O__refresh_api_common(hid_t oid, void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
 static htri_t H5O__close_check_common(hid_t object_id);
 
 /*********************/
@@ -242,8 +244,9 @@ H5O__open_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t idx
                                                token_ptr)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
 
+    /* Get an ID for the object */
     if ((ret_value = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -383,11 +386,410 @@ H5Oopen_by_token(hid_t loc_id, H5O_token_t token)
 
     /* Register the object's ID */
     if ((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_token() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__copy_api_common
+ *
+ * Purpose:     This is the common function for copying an object.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__copy_api_common(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
+    const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id,
+    void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
+{
+    /* dst_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params2;
+
+    /* src_id */
+    H5VL_object_t *   vol_obj1 = NULL; /* object of src_id */
+    H5VL_loc_params_t loc_params1;
+
+    herr_t            ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if (!src_name || !*src_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no source name specified")
+    if (!dst_name || !*dst_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
+
+    /* Get correct property lists */
+    if (H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    else if (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
+
+    /* Get object copy property list */
+    if (H5P_DEFAULT == ocpypl_id)
+        ocpypl_id = H5P_OBJECT_COPY_DEFAULT;
+    else if (TRUE != H5P_isa_class(ocpypl_id, H5P_OBJECT_COPY))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object copy property list")
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
+
+    if (H5VL_setup_loc_args(src_loc_id, &vol_obj1, &loc_params1) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
+
+    /* get the object */
+    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    loc_params2.type     = H5VL_OBJECT_BY_SELF;
+    loc_params2.obj_type = H5I_get_type(dst_loc_id);
+
+    /* Copy the object */
+    if (H5VL_object_copy(vol_obj1, &loc_params1, src_name, *vol_obj_ptr, &loc_params2, dst_name, ocpypl_id,
+                         lcpl_id, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O__copy_api_common() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Ocopy
+ *
+ * Purpose:     Copy an object (group or dataset) to destination location
+ *              within a file or cross files. PLIST_ID is a property list
+ *              which is used to pass user options and properties to the
+ *              copy. The name, dst_name, must not already be taken by some
+ *              other object in the destination group.
+ *
+ *              H5Ocopy() will fail if the name of the destination object
+ *                  exists in the destination group.  For example,
+ *                  H5Ocopy(fid_src, "/dset", fid_dst, "/dset", ...)
+ *                  will fail if "/dset" exists in the destination file
+ *
+ *              OPTIONS THAT HAVE BEEN IMPLEMENTED.
+ *                  H5O_COPY_SHALLOW_HIERARCHY_FLAG
+ *                      If this flag is specified, only immediate members of
+ *                      the group are copied. Otherwise (default), it will
+ *                      recursively copy all objects below the group
+ *                  H5O_COPY_EXPAND_SOFT_LINK_FLAG
+ *                      If this flag is specified, it will copy the objects
+ *                      pointed by the soft links. Otherwise (default), it
+ *                      will copy the soft link as they are
+ *                  H5O_COPY_WITHOUT_ATTR_FLAG
+ *                      If this flag is specified, it will copy object without
+ *                      copying attributes. Otherwise (default), it will
+ *                      copy object along with all its attributes
+ *                  H5O_COPY_EXPAND_REFERENCE_FLAG
+ *                      1) Copy object between two different files:
+ *                          When this flag is specified, it will copy objects that
+ *                          are pointed by the references and update the values of
+ *                          references in the destination file.  Otherwise (default)
+ *                          the values of references in the destination will set to
+ *                          zero
+ *                          The current implementation does not handle references
+ *                          inside of other datatype structure. For example, if
+ *                          a member of compound datatype is reference, H5Ocopy()
+ *                          will copy that field as it is. It will not set the
+ *                          value to zero as default is used nor copy the object
+ *                          pointed by that field the flag is set
+ *                      2) Copy object within the same file:
+ *                          This flag does not have any effect to the H5Ocopy().
+ *                          Datasets or attributes of references are copied as they
+ *                          are, i.e. values of references of the destination object
+ *                          are the same as the values of the source object
+ *
+ *              OPTIONS THAT MAY APPLY TO COPY IN THE FUTURE.
+ *                  H5O_COPY_EXPAND_EXT_LINK_FLAG
+ *                      If this flag is specified, it will expand the external links
+ *                      into new objects, Otherwise (default), it will keep external
+ *                      links as they are (default)
+ *
+ *              PROPERTIES THAT MAY APPLY TO COPY IN FUTURE
+ *                  Change data layout such as chunk size
+ *                  Add filter such as data compression.
+ *                  Add an attribute to the copied object(s) that say the  date/time
+ *                      for the copy or other information about the source file.
+ *
+ *              The intermediate group creation property should be passed in
+ *              using the lcpl instead of the ocpypl.
+ *
+ * Usage:      H5Ocopy(src_loc_id, src_name, dst_loc_id, dst_name, ocpypl_id, lcpl_id)
+ *             hid_t src_loc_id         IN: Source file or group identifier.
+ *             const char *src_name     IN: Name of the source object to be copied
+ *             hid_t dst_loc_id         IN: Destination file or group identifier
+ *             const char *dst_name     IN: Name of the destination object
+ *             hid_t ocpypl_id          IN: Properties which apply to the copy
+ *             hid_t lcpl_id            IN: Properties which apply to the new hard link
+ *
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name, hid_t ocpypl_id,
+        hid_t lcpl_id)
+{
+    herr_t            ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name, ocpypl_id, lcpl_id);
+
+    /* To copy an object synchronously */
+    if(H5O__copy_api_common(src_loc_id, src_name, dst_loc_id, dst_name, ocpypl_id, lcpl_id, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to synchronously copy object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Ocopy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Ocopy_async
+ *
+ * Purpose:     Asynchronous version of H5Ocopy
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Ocopy_async(const char *app_file, const char *app_func, unsigned app_line, 
+    hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name, 
+    hid_t ocpypl_id, hid_t lcpl_id, hid_t es_id)
+{
+    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
+    void *            token     = NULL;         /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE10("e", "*s*sIui*si*siii", app_file, app_func, app_line, src_loc_id, src_name, dst_loc_id,
+              dst_name, ocpypl_id, lcpl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* To copy an object asynchronously */
+    if(H5O__copy_api_common(src_loc_id, src_name, dst_loc_id, dst_name, ocpypl_id, lcpl_id, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to asynchronously copy object")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                H5ARG_TRACE10(FUNC, "*s*sIui*si*siii", app_file, app_func, app_line, src_loc_id, src_name, dst_loc_id, dst_name, ocpypl_id, lcpl_id, es_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Ocopy_async() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__flush_api_common
+ *
+ * Purpose:     This is the common function for flushing an object.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__flush_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
+{
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;               /* Location parameters for object access */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+
+    if(H5VL_setup_loc_args(obj_id, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
+
+    /* Flush the object */
+    if (H5VL_object_specific(*vol_obj_ptr, &loc_params, H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT,
+                             token_ptr, obj_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O__flush_api_common() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Oflush
+ *
+ * Purpose:     Flushes all buffers associated with an object to disk.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              May 19, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oflush(hid_t obj_id)
+{
+    herr_t            ret_value = SUCCEED; /* Return value     */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", obj_id);
+
+    /* To flush an object synchronously */
+    if(H5O__flush_api_common(obj_id, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to synchronously flush object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oflush() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Oflush_async
+ *
+ * Purpose:     Asynchronous version of H5Oflush
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oflush_async(const char *app_file, const char *app_func, unsigned app_line, 
+    hid_t obj_id, hid_t es_id)
+{
+    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
+    void *            token     = NULL;         /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, obj_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Flush an object asynchronously */
+    if(H5O__flush_api_common(obj_id, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to asynchronously flush object")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, obj_id, es_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Oflush_async() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__refresh_api_common
+ *
+ * Purpose:     This is the common function for refreshing an object.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__refresh_api_common(hid_t oid, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
+{
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;               /* Location parameters for object access */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+
+    if(H5VL_setup_loc_args(oid, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
+
+    /* Refresh the object */
+    if (H5VL_object_specific(*vol_obj_ptr, &loc_params, H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT,
+                             token_ptr, oid) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O__refresh_api_common() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Orefresh
+ *
+ * Purpose:     Refreshes all buffers associated with an object.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              July 28, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Orefresh(hid_t oid)
+{
+    herr_t            ret_value = SUCCEED; /* Return value     */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", oid);
+
+    /* To refresh an object synchronously */
+    if(H5O__refresh_api_common(oid, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to synchronously refresh object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Orefresh() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Orefresh_async
+ *
+ * Purpose:     Asynchronous version of H5Orefresh
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Orefresh_async(const char *app_file, const char *app_func, unsigned app_line, 
+    hid_t oid, hid_t es_id)
+{
+    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
+    void *            token     = NULL;         /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, oid, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Refresh an object asynchronously */
+    if(H5O__refresh_api_common(oid, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to asynchronously refresh object")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, oid, es_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Orefresh_async() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Olink

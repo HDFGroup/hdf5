@@ -42,7 +42,7 @@ set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES
 
 set (HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES
     exceptions/HDF5Exception.java
-    exceptions/HDF5AtomException.java
+    exceptions/HDF5IdException.java
     exceptions/HDF5AttributeException.java
     exceptions/HDF5BtreeException.java
     exceptions/HDF5DataFiltersException.java

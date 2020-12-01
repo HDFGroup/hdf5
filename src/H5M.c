@@ -107,7 +107,7 @@ H5M__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the map IDs */
+    /* Initialize the ID group for the map IDs */
     if (H5I_register_type(H5I_MAP_CLS) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
@@ -282,9 +282,9 @@ H5Mcreate(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, 
                       lcpl_id, key_type_id, val_type_id, mcpl_id, mapl_id, &map) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTINIT, H5I_INVALID_HID, "unable to create map")
 
-    /* Get an atom for the map */
+    /* Get an ID for the map */
     if ((ret_value = H5VL_register(H5I_MAP, map, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize map handle")
+        HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register map handle")
 
 done:
     /* Cleanup on failure */
@@ -353,7 +353,7 @@ H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id
                       H5P_LINK_CREATE_DEFAULT, key_type_id, val_type_id, mcpl_id, mapl_id, &map) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTINIT, H5I_INVALID_HID, "unable to create map")
 
-    /* Get an atom for the map */
+    /* Get an ID for the map */
     if ((ret_value = H5VL_register(H5I_MAP, map, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register map")
 
@@ -415,9 +415,9 @@ H5Mopen(hid_t loc_id, const char *name, hid_t mapl_id)
                       mapl_id, &map) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open map")
 
-    /* Register an atom for the map */
+    /* Register an ID for the map */
     if ((ret_value = H5VL_register(H5I_MAP, map, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register map atom")
+        HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register map ID")
 
 done:
     /* Cleanup on failure */

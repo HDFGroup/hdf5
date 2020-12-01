@@ -747,7 +747,7 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
     hssize_t    snelmts;                  /* elements in attribute */
     size_t      nelmts;                   /* elements in attribute*/
     H5T_path_t *tpath  = NULL;            /* type conversion info    */
-    hid_t       src_id = -1, dst_id = -1; /* temporary type atoms*/
+    hid_t       src_id = -1, dst_id = -1; /* temporary type IDs*/
     size_t      src_type_size;            /* size of source type     */
     size_t      dst_type_size;            /* size of destination type */
     size_t      buf_size;                 /* desired buffer size    */
@@ -856,7 +856,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
     hssize_t    snelmts;                  /* elements in attribute */
     size_t      nelmts;                   /* elements in attribute */
     H5T_path_t *tpath  = NULL;            /* conversion information*/
-    hid_t       src_id = -1, dst_id = -1; /* temporary type atoms */
+    hid_t       src_id = -1, dst_id = -1; /* temporary type IDs */
     size_t      src_type_size;            /* size of source type    */
     size_t      dst_type_size;            /* size of destination type*/
     size_t      buf_size;                 /* desired buffer size    */
@@ -1014,9 +1014,9 @@ H5A_get_space(H5A_t *attr)
     if (NULL == (ds = H5S_copy(attr->shared->ds, FALSE, TRUE)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy dataspace")
 
-    /* Atomize */
+    /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID")
 
 done:
     if (H5I_INVALID_HID == ret_value && ds && H5S_close(ds) < 0)
@@ -1064,18 +1064,18 @@ H5A__get_type(H5A_t *attr)
     if (H5T_lock(dt, FALSE) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to lock transient datatype")
 
-    /* Atomize */
+    /* Register */
     if (H5T_is_named(dt)) {
         /* If this is a committed datatype, we need to recreate the
          * two level IDs, where the VOL object is a copy of the
          * returned datatype
          */
         if ((ret_value = H5VL_wrap_register(H5I_DATATYPE, dt, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
     }
     else {
         if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
     }
 
 done:
@@ -2347,10 +2347,10 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
             if (NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, NULL, "can't create simple dataspace")
 
-            /* Atomize */
+            /* Register */
             if ((buf_sid = H5I_register(H5I_DATASPACE, buf_space, FALSE)) < 0) {
                 H5S_close(buf_space);
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register dataspace ID")
+                HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, NULL, "unable to register dataspace ID")
             } /* end if */
 
             /* Allocate memory for recclaim buf */
@@ -2758,7 +2758,7 @@ H5A__iterate(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5
 
     /* Get an ID for the object */
     if ((obj_loc_id = H5VL_wrap_register(obj_type, temp_obj, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
     /* Call internal attribute iteration routine */
     if ((ret_value = H5A__iterate_common(obj_loc_id, idx_type, order, idx, &attr_op, op_data)) < 0)
