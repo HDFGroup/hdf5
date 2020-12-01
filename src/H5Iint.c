@@ -77,9 +77,9 @@ typedef struct {
 static void * H5I__unwrap(void *object, H5I_type_t type);
 static htri_t H5I__clear_type_cb(void *_id, void *key, void *udata);
 static void * H5I__remove_common(H5I_type_info_t *type_info, hid_t id);
-static int    H5I__dec_ref(hid_t id, void **token);
-static int    H5I__dec_app_ref(hid_t id, void **token);
-static int    H5I__dec_app_ref_always_close(hid_t id, void **token);
+static int    H5I__dec_ref(hid_t id, void **request);
+static int    H5I__dec_app_ref(hid_t id, void **request);
+static int    H5I__dec_app_ref_always_close(hid_t id, void **request);
 static int    H5I__find_id_cb(void *_item, void *_key, void *_udata);
 
 /*********************/
@@ -898,7 +898,7 @@ done:
  *              function has been defined at type creation time.
  *
  * Note:        Allows for asynchronous 'close' operation on object, with
- *              token != H5_REQUEST_NULL.
+ *              request != H5_REQUEST_NULL.
  *
  * Return:      Success:    New reference count
  *              Failure:    -1
@@ -909,7 +909,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5I__dec_ref(hid_t id, void **token)
+H5I__dec_ref(hid_t id, void **request)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID */
     int            ret_value = 0;    /* Return value */
@@ -945,7 +945,7 @@ H5I__dec_ref(hid_t id, void **token)
 
         H5_GCC_DIAG_OFF("cast-qual")
         /* (Casting away const OK -QAK) */
-        if (!type_info->cls->free_func || (type_info->cls->free_func)((void *)info->object, token) >= 0) {
+        if (!type_info->cls->free_func || (type_info->cls->free_func)((void *)info->object, request) >= 0) {
             /* Remove the node from the type */
             if (NULL == H5I__remove_common(type_info, id))
                 HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, (-1), "can't remove ID node")
@@ -999,18 +999,15 @@ done:
  *              count for an ID as well as normal reference count.
  *
  * Note:        Allows for asynchronous 'close' operation on object, with
- *              token != H5_REQUEST_NULL.
+ *              request != H5_REQUEST_NULL.
  *
  * Return:      Success:    New app. reference count
  *              Failure:    -1
  *
- * Programmer:  Houjun Tang
- *              Oct 21, 2019
- *
  *-------------------------------------------------------------------------
  */
 static int
-H5I__dec_app_ref(hid_t id, void **token)
+H5I__dec_app_ref(hid_t id, void **request)
 {
     int ret_value = 0; /* Return value */
 
@@ -1020,7 +1017,7 @@ H5I__dec_app_ref(hid_t id, void **token)
     HDassert(id >= 0);
 
     /* Call regular decrement reference count routine */
-    if ((ret_value = H5I__dec_ref(id, token)) < 0)
+    if ((ret_value = H5I__dec_ref(id, request)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
 
     /* Check if the ID still exists */
@@ -1117,7 +1114,7 @@ done:
  *              routine fails
  *
  * Note:        Allows for asynchronous 'close' operation on object, with
- *              token != H5_REQUEST_NULL.
+ *              request != H5_REQUEST_NULL.
  *
  * Return:      Success:    New app. reference count
  *              Failure:    -1
@@ -1128,7 +1125,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5I__dec_app_ref_always_close(hid_t id, void **token)
+H5I__dec_app_ref_always_close(hid_t id, void **request)
 {
     int ret_value = 0; /* Return value */
 
@@ -1138,7 +1135,7 @@ H5I__dec_app_ref_always_close(hid_t id, void **token)
     HDassert(id >= 0);
 
     /* Call application decrement reference count routine */
-    ret_value = H5I__dec_app_ref(id, token);
+    ret_value = H5I__dec_app_ref(id, request);
 
     /* Check for failure */
     if (ret_value < 0) {

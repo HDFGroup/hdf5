@@ -468,16 +468,16 @@ done:
 static herr_t
 H5F__post_open_api_common(H5VL_object_t *vol_obj, void **token_ptr)
 {
-    hbool_t supported;           /* Whether 'post open' operation is supported by VOL connector */
-    herr_t  ret_value = SUCCEED; /* Return value     */
+    uint64_t supported;         /* Whether 'post open' operation is supported by VOL connector */
+    herr_t ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_STATIC
 
     /* Check for 'post open' callback */
-    supported = FALSE;
+    supported = 0;
     if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't check for 'post open' operation")
-    if (supported)
+    if (supported & H5VL_OPT_QUERY_SUPPORTED)
         /* Make the 'post open' callback */
         if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to make file 'post open' callback")
@@ -498,7 +498,7 @@ done:
 static hid_t
 H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, void **token_ptr)
 {
-    H5F_t *               new_file = NULL;             /* File struct for new file                 */
+    void *                new_file = NULL;             /* File struct for new file                 */
     H5P_genplist_t *      plist;                       /* Property list pointer                    */
     H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
     hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
@@ -550,7 +550,7 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create a new file or truncate an existing file through the VOL */
-    if (NULL == (new_file = (H5F_t *)H5VL_file_create(&connector_prop, filename, flags, fcpl_id, fapl_id,
+    if (NULL == (new_file = H5VL_file_create(&connector_prop, filename, flags, fcpl_id, fapl_id,
                                                       H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
