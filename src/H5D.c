@@ -53,6 +53,9 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Library Private Variables */
 /*****************************/
 
+/* Declare extern free list to manage the H5S_sel_iter_t struct */
+H5FL_EXTERN(H5S_sel_iter_t);
+
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
 
@@ -222,7 +225,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
                                     dcpl_id, dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
-    /* Get an atom for the dataset */
+    /* Get an ID for the dataset */
     if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
@@ -284,9 +287,9 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
                                           H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset")
 
-    /* Register an atom for the dataset */
+    /* Register an ID for the dataset */
     if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset atom")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset ID")
 
 done:
     if (H5I_INVALID_HID == ret_value)
@@ -594,6 +597,483 @@ done:
 } /* end H5Dget_offset() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Dread
+ *
+ * Purpose:     Reads (part of) a DSET from the file into application
+ *              memory BUF. The part of the dataset to read is defined with
+ *              MEM_SPACE_ID and FILE_SPACE_ID. The data points are
+ *              converted from their file type to the MEM_TYPE_ID specified.
+ *              Additional miscellaneous data transfer properties can be
+ *              passed to this function with the PLIST_ID argument.
+ *
+ *              The FILE_SPACE_ID can be the constant H5S_ALL which indicates
+ *              that the entire file dataspace is to be referenced.
+ *
+ *              The MEM_SPACE_ID can be the constant H5S_ALL in which case
+ *              the memory dataspace is the same as the file dataspace
+ *              defined when the dataset was created.
+ *
+ *              The number of elements in the memory dataspace must match
+ *              the number of elements in the file dataspace.
+ *
+ *              The PLIST_ID can be the constant H5P_DEFAULT in which
+ *              case the default data transfer properties are used.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, December 4, 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
+        void *buf /*out*/)
+{
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
+
+    /* Check arguments */
+    if (mem_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid memory dataspace ID")
+    if (file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file dataspace ID")
+
+    /* Get dataset pointer */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Read the data */
+    if ((ret_value = H5VL_dataset_read(vol_obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf,
+                                       H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dread() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dread_chunk
+ *
+ * Purpose:     Reads an entire chunk from the file directly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Matthew Strong (GE Healthcare)
+ *              14 February 2016
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters, void *buf)
+{
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "ii*h*Iu*x", dset_id, dxpl_id, offset, filters, buf);
+
+    /* Check arguments */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
+    if (!buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf cannot be NULL")
+    if (!offset)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offset cannot be NULL")
+    if (!filters)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filters cannot be NULL")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID")
+
+    /* Read the raw chunk */
+    if (H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_CHUNK_READ, dxpl_id, H5_REQUEST_NULL, offset,
+                              filters, buf) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dread_chunk() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dwrite
+ *
+ * Purpose:     Writes (part of) a DSET from application memory BUF to the
+ *              file. The part of the dataset to write is defined with the
+ *              MEM_SPACE_ID and FILE_SPACE_ID arguments. The data points
+ *              are converted from their current type (MEM_TYPE_ID) to their
+ *              file datatype. Additional miscellaneous data transfer
+ *              properties can be passed to this function with the
+ *              PLIST_ID argument.
+ *
+ *              The FILE_SPACE_ID can be the constant H5S_ALL which indicates
+ *              that the entire file dataspace is to be referenced.
+ *
+ *              The MEM_SPACE_ID can be the constant H5S_ALL in which case
+ *              the memory dataspace is the same as the file dataspace
+ *              defined when the dataset was created.
+ *
+ *              The number of elements in the memory dataspace must match
+ *              the number of elements in the file dataspace.
+ *
+ *              The PLIST_ID can be the constant H5P_DEFAULT in which
+ *              case the default data transfer properties are used.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, December 4, 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
+         const void *buf)
+{
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
+
+    /* Check arguments */
+    if (mem_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid memory dataspace ID")
+    if (file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file dataspace ID")
+
+    /* Get dataset pointer */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Write the data */
+    if ((ret_value = H5VL_dataset_write(vol_obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf,
+                                        H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dwrite() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dwrite_chunk
+ *
+ * Purpose:     Writes an entire chunk to the file directly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		        30 July 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, size_t data_size,
+               const void *buf)
+{
+    H5VL_object_t *vol_obj = NULL;
+    uint32_t       data_size_32;        /* Chunk data size (limited to 32-bits currently) */
+    herr_t         ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, filters, offset, data_size, buf);
+
+    /* Check arguments */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset ID")
+    if (!buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf cannot be NULL")
+    if (!offset)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offset cannot be NULL")
+    if (0 == data_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data_size cannot be zero")
+
+    /* Make sure data size is less than 4 GiB */
+    data_size_32 = (uint32_t)data_size;
+    if (data_size != (size_t)data_size_32)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid data_size - chunks cannot be > 4 GiB")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID")
+
+    /* Write chunk */
+    if (H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_CHUNK_WRITE, dxpl_id, H5_REQUEST_NULL, filters,
+                              offset, data_size_32, buf) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dwrite_chunk() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dscatter
+ *
+ * Purpose:     Scatters data provided by the callback op to the
+ *              destination buffer dst_buf, where the dimensions of
+ *              dst_buf and the selection to be scattered to are specified
+ *              by the dataspace dst_space_id.  The type of the data to be
+ *              scattered is specified by type_id.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              14 Jan 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_id, void *dst_buf /*out*/)
+{
+    H5T_t *         type;                     /* Datatype */
+    H5S_t *         dst_space;                /* Dataspace */
+    H5S_sel_iter_t *iter           = NULL;    /* Selection iteration info*/
+    hbool_t         iter_init      = FALSE;   /* Selection iteration info has been initialized */
+    const void *    src_buf        = NULL;    /* Source (contiguous) data buffer */
+    size_t          src_buf_nbytes = 0;       /* Size of src_buf */
+    size_t          type_size;                /* Datatype element size */
+    hssize_t        nelmts;                   /* Number of remaining elements in selection */
+    size_t          nelmts_scatter = 0;       /* Number of elements to scatter to dst_buf */
+    herr_t          ret_value      = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "DS*xiix", op, op_data, type_id, dst_space_id, dst_buf);
+
+    /* Check args */
+    if (op == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid callback function pointer")
+    if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if (NULL == (dst_space = (H5S_t *)H5I_object_verify(dst_space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+    if (dst_buf == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination buffer provided")
+
+    /* Get datatype element size */
+    if (0 == (type_size = H5T_GET_SIZE(type)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get datatype size")
+
+    /* Get number of elements in dataspace */
+    if ((nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(dst_space)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get number of elements in selection")
+
+    /* Allocate the selection iterator */
+    if (NULL == (iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
+
+    /* Initialize selection iterator */
+    if (H5S_select_iter_init(iter, dst_space, type_size, 0) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize selection iterator information")
+    iter_init = TRUE;
+
+    /* Loop until all data has been scattered */
+    while (nelmts > 0) {
+        /* Make callback to retrieve data */
+        if (op(&src_buf, &src_buf_nbytes, op_data) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, FAIL, "callback operator returned failure")
+
+        /* Calculate number of elements */
+        nelmts_scatter = src_buf_nbytes / type_size;
+
+        /* Check callback results */
+        if (!src_buf)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback did not return a buffer")
+        if (src_buf_nbytes == 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback returned a buffer size of 0")
+        if (src_buf_nbytes % type_size)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buffer size is not a multiple of datatype size")
+        if (nelmts_scatter > (size_t)nelmts)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback returned more elements than in selection")
+
+        /* Scatter data */
+        if (H5D__scatter_mem(src_buf, iter, nelmts_scatter, dst_buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "scatter failed")
+
+        nelmts -= (hssize_t)nelmts_scatter;
+    } /* end while */
+
+done:
+    /* Release selection iterator */
+    if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+    if (iter)
+        iter = H5FL_FREE(H5S_sel_iter_t, iter);
+
+    FUNC_LEAVE_API(ret_value)
+} /* H5Dscatter() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dgather
+ *
+ * Purpose:     Gathers data provided from the source buffer src_buf to
+ *              contiguous buffer dst_buf, then calls the callback op.
+ *              The dimensions of src_buf and the selection to be gathered
+ *              are specified by the dataspace src_space_id.  The type of
+ *              the data to be gathered is specified by type_id.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              16 Jan 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf_size, void *dst_buf /*out*/,
+          H5D_gather_func_t op, void *op_data)
+{
+    H5T_t *         type;                /* Datatype */
+    H5S_t *         src_space;           /* Dataspace */
+    H5S_sel_iter_t *iter      = NULL;    /* Selection iteration info*/
+    hbool_t         iter_init = FALSE;   /* Selection iteration info has been initialized */
+    size_t          type_size;           /* Datatype element size */
+    hssize_t        nelmts;              /* Number of remaining elements in selection */
+    size_t          dst_buf_nelmts;      /* Number of elements that can fit in dst_buf */
+    size_t          nelmts_gathered;     /* Number of elements gathered from src_buf */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "i*xizxDg*x", src_space_id, src_buf, type_id, dst_buf_size, dst_buf, op, op_data);
+
+    /* Check args */
+    if (NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+    if (src_buf == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no source buffer provided")
+    if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if (dst_buf_size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination buffer size is 0")
+    if (dst_buf == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination buffer provided")
+
+    /* Get datatype element size */
+    if (0 == (type_size = H5T_GET_SIZE(type)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get datatype size")
+
+    /* Get number of elements in dst_buf_size */
+    dst_buf_nelmts = dst_buf_size / type_size;
+    if (dst_buf_nelmts == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "destination buffer is not large enough to hold one element")
+
+    /* Get number of elements in dataspace */
+    if ((nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(src_space)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get number of elements in selection")
+
+    /* If dst_buf is not large enough to hold all the elements, make sure there
+     * is a callback */
+    if (((size_t)nelmts > dst_buf_nelmts) && (op == NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback supplied and destination buffer too small")
+
+    /* Allocate the selection iterator */
+    if (NULL == (iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
+
+    /* Initialize selection iterator */
+    if (H5S_select_iter_init(iter, src_space, type_size, 0) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize selection iterator information")
+    iter_init = TRUE;
+
+    /* Loop until all data has been scattered */
+    while (nelmts > 0) {
+        /* Gather data */
+        if (0 ==
+            (nelmts_gathered = H5D__gather_mem(src_buf, iter, MIN(dst_buf_nelmts, (size_t)nelmts), dst_buf)))
+            HGOTO_ERROR(H5E_IO, H5E_CANTCOPY, FAIL, "gather failed")
+        HDassert(nelmts_gathered == MIN(dst_buf_nelmts, (size_t)nelmts));
+
+        /* Make callback to process dst_buf */
+        if (op && op(dst_buf, nelmts_gathered * type_size, op_data) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, FAIL, "callback operator returned failure")
+
+        nelmts -= (hssize_t)nelmts_gathered;
+        HDassert(op || (nelmts == 0));
+    } /* end while */
+
+done:
+    /* Release selection iterator */
+    if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+    if (iter)
+        iter = H5FL_FREE(H5S_sel_iter_t, iter);
+
+    FUNC_LEAVE_API(ret_value)
+} /* H5Dgather() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Dfill
+ PURPOSE
+    Fill a selection in memory with a value
+ USAGE
+    herr_t H5Dfill(fill, fill_type, space, buf, buf_type)
+        const void *fill;       IN: Pointer to fill value to use
+        hid_t fill_type_id;     IN: Datatype of the fill value
+        void *buf;              IN/OUT: Memory buffer to fill selection within
+        hid_t buf_type_id;      IN: Datatype of the elements in buffer
+        hid_t space_id;         IN: Dataspace describing memory buffer &
+                                    containing selection to use.
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to fill elements in a memory buffer.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    If "fill" parameter is NULL, use all zeros as fill value
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_t space_id)
+{
+    H5S_t *space;               /* Dataspace */
+    H5T_t *fill_type;           /* Fill-value datatype */
+    H5T_t *buf_type;            /* Buffer datatype */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*xi*xii", fill, fill_type_id, buf, buf_type_id, space_id);
+
+    /* Check args */
+    if (buf == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
+    if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataspace")
+    if (NULL == (fill_type = (H5T_t *)H5I_object_verify(fill_type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
+    if (NULL == (buf_type = (H5T_t *)H5I_object_verify(buf_type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
+
+    /* Fill the selection in the memory buffer */
+    if (H5D__fill(fill, fill_type, buf, buf_type, space) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Dfill() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Diterate
  *
  * Purpose: This routine iterates over all the elements selected in a memory
@@ -707,7 +1187,7 @@ herr_t
 H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size /*out*/)
 {
     H5VL_object_t *vol_obj;   /* Dataset for this operation */
-    hbool_t        supported; /* Whether 'get vlen buf size' operation is supported by VOL connector */
+    uint64_t       supported; /* Whether 'get vlen buf size' operation is supported by VOL connector */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -724,11 +1204,12 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *s
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid 'size' pointer")
 
     /* Check if the 'get_vlen_buf_size' callback is supported */
-    supported = FALSE;
+    supported = 0;
     if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_DATASET, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE,
                                   &supported) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'get vlen buf size' operation")
-    if (supported) {
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID,
+                    "can't check for 'get vlen buf size' operation")
+    if (supported & H5VL_OPT_QUERY_SUPPORTED) {
         /* Make the 'get_vlen_buf_size' callback */
         if (H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE, H5P_DATASET_XFER_DEFAULT,
                                   H5_REQUEST_NULL, type_id, space_id, size) < 0)
