@@ -20,7 +20,7 @@
 #include "H5Ipkg.h"
 
 static herr_t
-free_wrapper(void *p)
+free_wrapper(void *p, void **_ctx)
 {
     HDfree(p);
     return SUCCEED;
@@ -615,7 +615,7 @@ typedef struct rct_obj_t {
  * master list of objects.
  */
 static herr_t
-rct_free_cb(void *_obj)
+rct_free_cb(void *_obj, void **_ctx)
 {
     rct_obj_t *     obj = (rct_obj_t *)_obj;
     long            remove_nth;

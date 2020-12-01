@@ -80,7 +80,7 @@ typedef int64_t hid_t;
  * can be removed from the ID type. If the function returns negative
  * (failure) then the object will remain in the ID type.
  */
-typedef herr_t (*H5I_free_t)(void *);
+typedef herr_t (*H5I_free_t)(void *, void **);
 
 /**
  * The type of a function to compare objects & keys

@@ -77,6 +77,9 @@ typedef struct {
 static void * H5I__unwrap(void *object, H5I_type_t type);
 static htri_t H5I__clear_type_cb(void *_id, void *key, void *udata);
 static void * H5I__remove_common(H5I_type_info_t *type_info, hid_t id);
+static int    H5I__dec_ref(hid_t id, void **request);
+static int    H5I__dec_app_ref(hid_t id, void **request);
+static int    H5I__dec_app_ref_always_close(hid_t id, void **request);
 static int    H5I__find_id_cb(void *_item, void *_key, void *_udata);
 
 /*********************/
@@ -367,7 +370,7 @@ H5I__clear_type_cb(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
         /* Check for a 'free' function and call it, if it exists */
         H5_GCC_DIAG_OFF("cast-qual")
         if (udata->type_info->cls->free_func &&
-            (udata->type_info->cls->free_func)((void *)info->object) < 0) { /* (Casting away const OK -QAK) */
+            (udata->type_info->cls->free_func)((void *)info->object, H5_REQUEST_NULL) < 0) { /* (Casting away const OK -QAK) */
             if (udata->force) {
 #ifdef H5I_DEBUG
                 if (H5DEBUG(I)) {
@@ -887,7 +890,7 @@ done:
 } /* end H5I_remove() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5I_dec_ref
+ * Function:    H5I__dec_ref
  *
  * Purpose:     Decrements the number of references outstanding for an ID.
  *              This will fail if the type is not a reference counted type.
@@ -895,18 +898,21 @@ done:
  *              if the reference count for the ID reaches 0 and a free
  *              function has been defined at type creation time.
  *
+ * Note:        Allows for asynchronous 'close' operation on object, with
+ *              request != H5_REQUEST_NULL.
+ *
  * Return:      Success:    New reference count
  *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
-int
-H5I_dec_ref(hid_t id)
+static int
+H5I__dec_ref(hid_t id, void **request)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID */
     int            ret_value = 0;    /* Return value */
 
-    FUNC_ENTER_NOAPI((-1))
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(id >= 0);
@@ -937,7 +943,7 @@ H5I_dec_ref(hid_t id)
 
         H5_GCC_DIAG_OFF("cast-qual")
         /* (Casting away const OK -QAK) */
-        if (!type_info->cls->free_func || (type_info->cls->free_func)((void *)info->object) >= 0) {
+        if (!type_info->cls->free_func || (type_info->cls->free_func)((void *)info->object, request) >= 0) {
             /* Remove the node from the type */
             if (NULL == H5I__remove_common(type_info, id))
                 HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, (-1), "can't remove ID node")
@@ -954,24 +960,20 @@ H5I_dec_ref(hid_t id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I_dec_ref() */
+} /* end H5I__dec_ref */
 
 /*-------------------------------------------------------------------------
- * Function:    H5I_dec_app_ref
+ * Function:    H5I_dec_ref
  *
- * Purpose:     Wrapper for case of modifying the application ref.
- *              count for an ID as well as normal reference count.
+ * Purpose:     Decrements the number of references outstanding for an ID.
  *
- * Return:      Success:    New app. reference count
+ * Return:      Success:    New reference count
  *              Failure:    -1
- *
- * Programmer:  Quincey Koziol
- *              Sept 16, 2010
  *
  *-------------------------------------------------------------------------
  */
 int
-H5I_dec_app_ref(hid_t id)
+H5I_dec_ref(hid_t id)
 {
     int ret_value = 0; /* Return value */
 
@@ -980,8 +982,40 @@ H5I_dec_app_ref(hid_t id)
     /* Sanity check */
     HDassert(id >= 0);
 
+    /* Synchronously decrement refcount on ID */
+    if ((ret_value = H5I__dec_ref(id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_dec_ref() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I__dec_app_ref
+ *
+ * Purpose:     Wrapper for case of modifying the application ref.
+ *              count for an ID as well as normal reference count.
+ *
+ * Note:        Allows for asynchronous 'close' operation on object, with
+ *              request != H5_REQUEST_NULL.
+ *
+ * Return:      Success:    New app. reference count
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5I__dec_app_ref(hid_t id, void **request)
+{
+    int ret_value = 0; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(id >= 0);
+
     /* Call regular decrement reference count routine */
-    if ((ret_value = H5I_dec_ref(id)) < 0)
+    if ((ret_value = H5I__dec_ref(id, request)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
 
     /* Check if the ID still exists */
@@ -1002,13 +1036,89 @@ H5I_dec_app_ref(hid_t id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I__dec_app_ref() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I_dec_app_ref
+ *
+ * Purpose:     Wrapper for case of modifying the application ref. count for
+ *              an ID as well as normal reference count.
+ *
+ * Return:      Success:    New app. reference count
+ *              Failure:    -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Sept 16, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5I_dec_app_ref(hid_t id)
+{
+    int ret_value = 0; /* Return value */
+
+    FUNC_ENTER_NOAPI((-1))
+
+    /* Sanity check */
+    HDassert(id >= 0);
+
+    /* Synchronously decrement refcount on ID */
+    if ((ret_value = H5I__dec_app_ref(id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_app_ref() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I__dec_app_ref_always_close
+ *
+ * Purpose:     Wrapper for case of always closing the ID, even when the free
+ *              routine fails
+ *
+ * Note:        Allows for asynchronous 'close' operation on object, with
+ *              request != H5_REQUEST_NULL.
+ *
+ * Return:      Success:    New app. reference count
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5I__dec_app_ref_always_close(hid_t id, void **request)
+{
+    int ret_value = 0; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(id >= 0);
+
+    /* Call application decrement reference count routine */
+    ret_value = H5I__dec_app_ref(id, request);
+
+    /* Check for failure */
+    if (ret_value < 0) {
+        /*
+         * If an object is closing, we can remove the ID even though the free
+         * method might fail.  This can happen when a mandatory filter fails to
+         * write when a dataset is closed and the chunk cache is flushed to the
+         * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
+         */
+        H5I_remove(id);
+
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I__dec_app_ref_always_close() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5I_dec_app_ref_always_close
  *
  * Purpose:     Wrapper for case of always closing the ID, even when the free
- *              routine fails
+ *              routine fails.
  *
  * Return:      Success:    New app. reference count
  *              Failure:    -1
@@ -1025,21 +1135,9 @@ H5I_dec_app_ref_always_close(hid_t id)
     /* Sanity check */
     HDassert(id >= 0);
 
-    /* Call application decrement reference count routine */
-    ret_value = H5I_dec_app_ref(id);
-
-    /* Check for failure */
-    if (ret_value < 0) {
-        /*
-         * If an object is closing, we can remove the ID even though the free
-         * method might fail.  This can happen when a mandatory filter fails to
-         * write when a dataset is closed and the chunk cache is flushed to the
-         * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
-         */
-        H5I_remove(id);
-
+    /* Synchronously decrement refcount on ID */
+    if ((ret_value = H5I__dec_app_ref_always_close(id, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
