@@ -1539,9 +1539,7 @@ H5Z_xform_create(const char *expr)
                     "unable to allocate memory for data transform expression")
 
     /* Find the number of times "x" is used in this equation, and allocate room for storing that many points
-     *
-     * Jan-Willem Blokland, 11 March 2020
-     * A more sophisticated check to support scientific notation.
+     * A more sophisticated check is needed to support scientific notation.
      */
     for (i = 0; i < HDstrlen(expr); i++) {
         if (HDisalpha(expr[i])) {
