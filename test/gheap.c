@@ -589,7 +589,7 @@ main(void)
     HDputs("All global heap tests passed.");
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -601,7 +601,7 @@ error:
     H5E_END_TRY;
 
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     HDputs("*** TESTS FAILED ***");
     HDexit(EXIT_FAILURE);

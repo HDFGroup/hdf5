@@ -2022,7 +2022,7 @@ H5VL_reset_lib_state(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Pop the API context off the stack */
-    if (H5CX_pop() < 0)
+    if (H5CX_pop(FALSE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't pop API context")
 
 done:
