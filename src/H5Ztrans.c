@@ -13,12 +13,12 @@
 
 #include "H5Zmodule.h" /* This source code file is part of the H5Z module */
 
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5VMprivate.h" /* H5VM_array_fill			*/
-#include "H5Zpkg.h"      /* Data filters				*/
+#include "H5private.h"   /* Generic Functions                   */
+#include "H5Eprivate.h"  /* Error handling                      */
+#include "H5Iprivate.h"  /* IDs                                 */
+#include "H5MMprivate.h" /* Memory management                   */
+#include "H5VMprivate.h" /* H5VM_array_fill                     */
+#include "H5Zpkg.h"      /* Data filters                                */
 
 /* Token types */
 typedef enum {
@@ -993,12 +993,12 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_xform_eval
- * Purpose: 	If the transform is trivial, this function applies it.
- * 		Otherwise, it calls H5Z__xform_eval_full to do the full
- * 		transform.
+ * Purpose:     If the transform is trivial, this function applies it.
+ *              Otherwise, it calls H5Z__xform_eval_full to do the full
+ *              transform.
  * Return:      SUCCEED if transform applied successfully, FAIL otherwise
  * Programmer:  Leon Arber
- * 		5/1/04
+ *              5/1/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1109,8 +1109,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Z__xform_eval_full
  *
- * Purpose: 	Does a full evaluation of the parse tree contained in tree
- * 		and applies this transform to array.
+ * Purpose:     Does a full evaluation of the parse tree contained in tree
+ *              and applies this transform to array.
  *
  * Notes:       In the case of a polynomial data transform (ie, the left and right
  *              subtree are both of type H5Z_XFORM_SYMBOL), the convention is
@@ -1120,7 +1120,7 @@ done:
  * Return:      Nothing
  *
  * Programmer:  Leon Arber
- * 		5/1/04
+ *              5/1/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1538,10 +1538,20 @@ H5Z_xform_create(const char *expr)
                     "unable to allocate memory for data transform expression")
 
     /* Find the number of times "x" is used in this equation, and allocate room for storing that many points
+     * A more sophisticated check is needed to support scientific notation.
      */
-    for (i = 0; i < HDstrlen(expr); i++)
-        if (HDisalpha(expr[i]))
+    for (i = 0; i < HDstrlen(expr); i++) {
+        if (HDisalpha(expr[i])) {
+            if ((i > 0) && (i < (HDstrlen(expr) - 1))) {
+                if (((expr[i] == 'E') || (expr[i] == 'e')) &&
+                    (HDisdigit(expr[i - 1]) || (expr[i - 1] == '.')) &&
+                    (HDisdigit(expr[i + 1]) || (expr[i + 1] == '-') || (expr[i + 1] == '+')))
+                    continue;
+            }
+
             count++;
+        }
+    }
 
     /* When there are no "x"'s in the equation (ie, simple transform case),
      * we don't need to allocate any space since no array will have to be
@@ -1752,7 +1762,7 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
  * Function: H5Z_xform_extract_xform_str
  *
  * Purpose: Extracts the pointer to the data transform strings from the
- * 		data transform property.`
+ *              data transform property.`
  * Return:
  *          Pointer to a copy of the string in the data_xform property.
  *

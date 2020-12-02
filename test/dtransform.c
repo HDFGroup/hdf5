@@ -581,6 +581,7 @@ test_specials(hid_t file)
     const char *special3 = "1000/x";
     const char *special4 = "-x";
     const char *special5 = "+x";
+    const char *special6 = "2e+1*x";
 
     TESTING("data transform of some special cases")
 
@@ -693,6 +694,29 @@ test_specials(hid_t file)
             data_res[row][col] = transformData[row][col];
 
     if ((dset_id = H5Dcreate2(file, "/special5", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, transformData) < 0)
+        TEST_ERROR
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
+        TEST_ERROR
+
+    COMPARE_INT(read_buf, data_res)
+
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR
+
+    /*-----------------------------
+     * Operation 6: 2e+1*x
+     *----------------------------*/
+    if (H5Pset_data_transform(dxpl_id, special6) < 0)
+        TEST_ERROR;
+
+    for (row = 0; row < ROWS; row++)
+        for (col = 0; col < COLS; col++)
+            data_res[row][col] = transformData[row][col] * 20;
+
+    if ((dset_id = H5Dcreate2(file, "/special6", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT,
                               H5P_DEFAULT)) < 0)
         TEST_ERROR
     if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, transformData) < 0)
