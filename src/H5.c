@@ -1191,21 +1191,24 @@ H5free_memory(void *mem)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5is_library_threadsafe(hbool_t *is_ts)
+H5is_library_threadsafe(hbool_t *is_ts /*out*/)
 {
+    herr_t ret_value = SUCCEED;         /* Return value */
+
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*b", is_ts);
+    H5TRACE1("e", "x", is_ts);
 
-    HDassert(is_ts);
-
-    /* At this time, it is impossible for this to fail. */
+    if(is_ts) {
 #ifdef H5_HAVE_THREADSAFE
-    *is_ts = TRUE;
+        *is_ts = TRUE;
 #else /* H5_HAVE_THREADSAFE */
-    *is_ts = FALSE;
+        *is_ts = FALSE;
 #endif /* H5_HAVE_THREADSAFE */
+    }
+    else
+        ret_value = FAIL;
 
-    FUNC_LEAVE_API_NOINIT(SUCCEED)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5is_library_threadsafe() */
 
 /*-------------------------------------------------------------------------
@@ -1223,17 +1226,21 @@ H5is_library_threadsafe(hbool_t *is_ts)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5is_library_terminating(hbool_t *is_terminating)
+H5is_library_terminating(hbool_t *is_terminating /*out*/)
 {
+    herr_t ret_value = SUCCEED;         /* Return value */
+
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*b", is_terminating);
+    H5TRACE1("e", "x", is_terminating);
 
     HDassert(is_terminating);
 
-    /* At this time, it is impossible for this to fail. */
-    *is_terminating = H5_TERM_GLOBAL;
+    if(is_terminating)
+        *is_terminating = H5_TERM_GLOBAL;
+    else
+        ret_value = FAIL;
 
-    FUNC_LEAVE_API_NOINIT(SUCCEED)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5is_library_terminating() */
 
 #if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API) &&         \

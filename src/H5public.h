@@ -664,6 +664,22 @@ H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 H5_DLL herr_t H5is_library_terminating(hbool_t *is_terminating);
 /**
  * \ingroup H5
+ * \brief Checks whether the HDF5 library is closing.
+ * \param[out] is_terminating Flag indicating whether library is shutting down
+ * \return \herr_t
+ *
+ * \details H5is_library_terminating() queries whether the HDF5 library is in
+ *          the process of shutting down.  The \p is_terminating flag will only
+ *          be set to TRUE after shutdown starts, it will be FALSE before the
+ *          library has been initialized, while the library is initialized, and
+ *          after it has been closed.  The value of \p is_terminating is
+ *          undefined if this routine fails.
+ *
+ * \since 1.12.1
+ */
+H5_DLL herr_t H5is_library_terminating(hbool_t *is_terminating);
+/**
+ * \ingroup H5
  * \brief Determines whether the HDF5 library was built with the thread-safety
  *        feature enabled
  *

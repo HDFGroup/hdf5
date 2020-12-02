@@ -2475,7 +2475,7 @@ done:
     /* Close the location given to the user callback if it was created */
     if (grp_id >= 0) {
         if (H5I_dec_app_ref(grp_id) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
     } /* end if */
     else if (grp != NULL) {
         if (H5G_close(grp) < 0)
@@ -3240,7 +3240,7 @@ done:
     /* Close the location given to the user callback if it was created */
     if (grp_id >= 0) {
         if (H5I_dec_app_ref(grp_id) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
     } /* end if */
     else if (grp != NULL) {
         if (H5G_close(grp) < 0)

@@ -98,8 +98,8 @@ H5FL_EXTERN(H5VL_object_t);
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_create_plist
  *
- * Purpose:     Get an atom for a copy of the file-creation property list for
- *              this file. This function returns an atom with a copy of the
+ * Purpose:     Get an ID for a copy of the file-creation property list for
+ *              this file. This function returns an ID with a copy of the
  *              properties used to create a file.
  *
  * Return:      Success:    Object ID for a copy of the file creation
@@ -468,8 +468,8 @@ done:
 static herr_t
 H5F__post_open_api_common(H5VL_object_t *vol_obj, void **token_ptr)
 {
-    uint64_t supported;           /* Whether 'post open' operation is supported by VOL connector */
-    herr_t   ret_value = SUCCEED; /* Return value     */
+    uint64_t supported;         /* Whether 'post open' operation is supported by VOL connector */
+    herr_t ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_STATIC
 
@@ -554,9 +554,9 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_
                                              H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
-    /* Get an atom for the file */
+    /* Get an ID for the file */
     if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -734,7 +734,7 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void *
 
     /* Get an ID for the file */
     if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1253,7 +1253,7 @@ H5F__reopen_api_common(hid_t file_id, void **token_ptr)
 
     /* Get an ID for the file */
     if ((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

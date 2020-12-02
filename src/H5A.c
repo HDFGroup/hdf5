@@ -2128,7 +2128,7 @@ H5Aclose(hid_t attr_id)
 
     /* Check arguments */
     if (H5I_ATTR != H5I_get_type(attr_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a attribute ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute ID")
 
     /* Decrement the counter on the attribute ID. It will be freed if the count
      * reaches zero.

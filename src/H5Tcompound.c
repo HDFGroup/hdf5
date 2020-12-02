@@ -215,7 +215,7 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
 
     /* Get an ID for the datatype */
     if ((ret_value = H5I_register(H5I_DATATYPE, memb_dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable register datatype atom")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable register datatype ID")
 
 done:
     if (ret_value < 0)
