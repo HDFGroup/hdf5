@@ -331,6 +331,7 @@ set (H5_TESTS
     thread_id # special link
     vol
     timer
+    cmpd_dtransform
 )
 
 macro (ADD_H5_EXE file)
