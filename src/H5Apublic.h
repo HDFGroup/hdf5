@@ -374,11 +374,11 @@ H5_DLL herr_t  H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char 
 H5_DLL herr_t H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                                hsize_t n, hid_t lapl_id);
 H5_DLL htri_t H5Aexists(hid_t obj_id, const char *attr_name);
-H5_DLL htri_t H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
-                              const char *attr_name, hid_t es_id);
+H5_DLL herr_t H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
+                              const char *attr_name, hbool_t *exists, hid_t es_id);
 H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name, const char *attr_name, hid_t lapl_id);
-H5_DLL htri_t H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
-                                      hid_t loc_id, const char *obj_name, const char *attr_name,
+H5_DLL herr_t H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
+                                      hid_t loc_id, const char *obj_name, const char *attr_name, hbool_t *exists,
                                       hid_t lapl_id, hid_t es_id);
 /*-------------------------------------------------------------------------*/
 /**

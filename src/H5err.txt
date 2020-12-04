@@ -204,6 +204,7 @@ MINOR, BTREE, H5E_CANTINSERT, Unable to insert object
 MINOR, BTREE, H5E_CANTLIST, Unable to list node
 MINOR, BTREE, H5E_CANTMODIFY, Unable to modify record
 MINOR, BTREE, H5E_CANTREMOVE, Unable to remove object
+MINOR, BTREE, H5E_CANTFIND, Unable to check for record
 
 # Object header related errors
 MINOR, OHDR, H5E_LINKCOUNT, Bad object header link count

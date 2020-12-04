@@ -75,7 +75,7 @@ static herr_t    H5G__node_create(H5F_t *f, H5B_ins_t op, void *_lt_key, void *_
                                   haddr_t *addr_p /*out*/);
 static int       H5G__node_cmp2(void *_lt_key, void *_udata, void *_rt_key);
 static int       H5G__node_cmp3(void *_lt_key, void *_udata, void *_rt_key);
-static htri_t    H5G__node_found(H5F_t *f, haddr_t addr, const void *_lt_key, void *_udata);
+static herr_t    H5G__node_found(H5F_t *f, haddr_t addr, const void *_lt_key, hbool_t *found, void *_udata);
 static H5B_ins_t H5G__node_insert(H5F_t *f, haddr_t addr, void *_lt_key, hbool_t *lt_key_changed,
                                   void *_md_key, void *_udata, void *_rt_key, hbool_t *rt_key_changed,
                                   haddr_t *new_node_p /*out*/);
@@ -97,7 +97,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G__node_create,       /*new           */
     H5G__node_cmp2,         /*cmp2          */
     H5G__node_cmp3,         /*cmp3          */
-    H5G__node_found,        /*found	        */
+    H5G__node_found,        /*found         */
     H5G__node_insert,       /*insert        */
     TRUE,                   /*follow min branch?    */
     TRUE,                   /*follow max branch?    */
@@ -463,8 +463,7 @@ done:
  *              UDATA entry field to the symbol table.
  *
  * Return:      Success:    Non-negative (TRUE/FALSE) if found and data
- *                          returned through the UDATA pointer.
- *
+ *                          returned through the UDATA pointer, if *FOUND is true.
  *              Failure:    Negative if not found.
  *
  * Programmer:  Robb Matzke
@@ -472,15 +471,16 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
-H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, void *_udata)
+static herr_t
+H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key,
+                hbool_t *found, void *_udata)
 {
     H5G_bt_lkp_t *udata = (H5G_bt_lkp_t *)_udata;
     H5G_node_t *  sn    = NULL;
     unsigned      lt = 0, idx = 0, rt;
     int           cmp = 1;
     const char *  s;
-    htri_t        ret_value = TRUE; /* Return value */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -489,6 +489,7 @@ H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, void
      */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
+    HDassert(found);
     HDassert(udata && udata->common.heap);
 
     /*
@@ -515,11 +516,15 @@ H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, void
     } /* end while */
 
     if (cmp)
-        HGOTO_DONE(FALSE)
+        *found = FALSE;
+    else {
+        /* Set the 'found it' flag */
+        *found = TRUE;
 
-    /* Call user's callback operator */
-    if ((udata->op)(&sn->entry[idx], udata->op_data) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "iterator callback failed")
+        /* Call user's callback operator */
+        if ((udata->op)(&sn->entry[idx], udata->op_data) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "iterator callback failed")
+    } /* end else */
 
 done:
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)

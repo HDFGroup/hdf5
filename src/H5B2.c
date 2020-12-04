@@ -445,15 +445,15 @@ H5B2_iterate(H5B2_t *bt2, H5B2_operator_t op, void *op_data)
  *              If 'OP' is NULL, then this routine just returns "TRUE" when
  *              a record is present in the B-tree.
  *
- * Return:	Non-negative (TRUE/FALSE) on success, negative on failure.
+ * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		Feb 23 2005
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
+herr_t
+H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_data)
 {
     H5B2_hdr_t *    hdr;              /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;    /* Node pointer info for current node */
@@ -462,12 +462,13 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
     int             cmp;              /* Comparison value of records */
     unsigned        idx;              /* Location of record which matches key */
     H5B2_nodepos_t  curr_pos;         /* Position of the current node */
-    htri_t          ret_value = TRUE; /* Return value */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
     HDassert(bt2);
+    HDassert(found);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -479,8 +480,10 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
     curr_node_ptr = hdr->root;
 
     /* Check for empty tree */
-    if (curr_node_ptr.node_nrec == 0)
-        HGOTO_DONE(FALSE)
+    if (curr_node_ptr.node_nrec == 0) {
+        *found = FALSE;
+        HGOTO_DONE(SUCCEED)
+    }
 
     /* Check record against min & max records in tree, to attempt to quickly
      *  find candidates or avoid further searching.
@@ -488,25 +491,31 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
     if (hdr->min_native_rec != NULL) {
         if ((hdr->cls->compare)(udata, hdr->min_native_rec, &cmp) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
-        if (cmp < 0)
-            HGOTO_DONE(FALSE) /* Less than the least record--not found */
+        if (cmp < 0) {
+            *found = FALSE;     /* Less than the least record--not found */
+            HGOTO_DONE(SUCCEED)
+        }
         else if (cmp == 0) {  /* Record is found */
             if (op && (op)(hdr->min_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
                             "'found' callback failed for B-tree find operation")
-            HGOTO_DONE(TRUE)
+            *found = TRUE;
+            HGOTO_DONE(SUCCEED)
         } /* end if */
     }     /* end if */
     if (hdr->max_native_rec != NULL) {
         if ((hdr->cls->compare)(udata, hdr->max_native_rec, &cmp) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
-        if (cmp > 0)
-            HGOTO_DONE(FALSE) /* Less than the least record--not found */
+        if (cmp > 0) {
+            *found = FALSE;     /* Greater than the largest record--not found */
+            HGOTO_DONE(SUCCEED)
+        }
         else if (cmp == 0) {  /* Record is found */
             if (op && (op)(hdr->max_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
                             "'found' callback failed for B-tree find operation")
-            HGOTO_DONE(TRUE)
+            *found = TRUE;
+            HGOTO_DONE(SUCCEED)
         } /* end if */
     }     /* end if */
 
@@ -584,8 +593,7 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
             /* Make callback for current record */
             if (op && (op)(H5B2_INT_NREC(internal, hdr, idx), op_data) < 0) {
                 /* Unlock current node */
-                if (H5AC_unprotect(hdr->f, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) <
-                    0)
+                if (H5AC_unprotect(hdr->f, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
@@ -597,7 +605,8 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             /* Indicate record found */
-            HGOTO_DONE(TRUE)
+            *found = TRUE;
+            HGOTO_DONE(SUCCEED)
         } /* end else */
 
         /* Decrement depth we're at in B-tree */
@@ -619,8 +628,7 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
         } /* end if */
 
         /* Locate record */
-        if (H5B2__locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx, &cmp) <
-            0) {
+        if (H5B2__locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx, &cmp) < 0) {
             /* Unlock current node before failing */
             H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET);
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
@@ -632,7 +640,8 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             /* Record not found */
-            HGOTO_DONE(FALSE)
+            *found = FALSE;
+            HGOTO_DONE(SUCCEED)
         } /* end if */
         else {
             /* Make callback for current record */
@@ -656,7 +665,7 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
                                             "memory allocation failed for v2 B-tree min record info")
                         H5MM_memcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
-                }     /* end if */
+                } /* end if */
                 if (idx == (unsigned)(leaf->nrec - 1)) {
                     if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                         if (hdr->max_native_rec == NULL)
@@ -665,13 +674,16 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
                                             "memory allocation failed for v2 B-tree max record info")
                         H5MM_memcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
-                }     /* end if */
-            }         /* end if */
-        }             /* end else */
+                } /* end if */
+            } /* end if */
+        } /* end else */
 
         /* Unlock current node */
         if (H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+
+        /* Indicate record found */
+        *found = TRUE;
     } /* end block */
 
 done:

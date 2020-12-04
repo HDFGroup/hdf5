@@ -131,7 +131,7 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc, const 
     H5G_loc_t  src_loc;             /* Source object group location */
     H5G_name_t src_path;            /* Opened source object hier. path */
     H5O_loc_t  src_oloc;            /* Opened source object object location */
-    htri_t     dst_exists;          /* Does destination name exist already? */
+    hbool_t    dst_exists;          /* Does destination name exist already? */
     hbool_t    loc_found = FALSE;   /* Location at 'name' found */
     hbool_t    obj_open  = FALSE;   /* Entry at 'name' found */
     herr_t     ret_value = SUCCEED; /* Return value */
@@ -145,9 +145,10 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc, const 
     HDassert(dst_name && *dst_name);
 
     /* Check if destination name already exists */
-    if ((dst_exists = H5L_exists_tolerant(dst_loc, dst_name)) < 0)
+    dst_exists = FALSE;
+    if (H5L_exists_tolerant(dst_loc, dst_name, &dst_exists) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check if destination name exists")
-    if (TRUE == dst_exists)
+    if (dst_exists)
         HGOTO_ERROR(H5E_OHDR, H5E_EXISTS, FAIL, "destination object already exists")
 
     /* Set up opened group location to fill in */

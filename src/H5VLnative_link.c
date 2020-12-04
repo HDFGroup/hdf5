@@ -318,14 +318,14 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
 
     switch (specific_type) {
         case H5VL_LINK_EXISTS: {
-            htri_t *  ret = HDva_arg(arguments, htri_t *);
+            hbool_t * exists = HDva_arg(arguments, hbool_t *);
             H5G_loc_t loc;
 
             if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
             /* Check for the existence of the link */
-            if ((*ret = H5L__exists(&loc, loc_params->loc_data.loc_by_name.name)) < 0)
+            if (H5L__exists(&loc, loc_params->loc_data.loc_by_name.name, exists) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to specific link info")
             break;
         }

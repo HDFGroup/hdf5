@@ -646,7 +646,6 @@ H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *rel
  *
  */
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum, unsigned relnum);
-H5_DLL herr_t H5is_library_terminating(hbool_t *is_terminating);
 /**
  * \ingroup H5
  * \brief Checks whether the HDF5 library is closing.
