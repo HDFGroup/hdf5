@@ -611,7 +611,11 @@ done:
  *
  *              The MEM_SPACE_ID can be the constant H5S_ALL in which case
  *              the memory dataspace is the same as the file dataspace
- *              defined when the dataset was created.
+ *              defined when the dataset was created.  The MEM_SPACE_ID can
+ *              also be the constant H5S_BLOCK, which indicates that the
+ *              buffer provided is a single contiguous block of memory, with
+ *              the same # of elements as specified in the FILE_SPACE_ID
+ *              selection.
  *
  *              The number of elements in the memory dataspace must match
  *              the number of elements in the file dataspace.
@@ -723,7 +727,11 @@ done:
  *
  *              The MEM_SPACE_ID can be the constant H5S_ALL in which case
  *              the memory dataspace is the same as the file dataspace
- *              defined when the dataset was created.
+ *              defined when the dataset was created.  The MEM_SPACE_ID can
+ *              also be the constant H5S_BLOCK, which indicates that the
+ *              buffer provided is a single contiguous block of memory, with
+ *              the same # of elements as specified in the FILE_SPACE_ID
+ *              selection.
  *
  *              The number of elements in the memory dataspace must match
  *              the number of elements in the file dataspace.
