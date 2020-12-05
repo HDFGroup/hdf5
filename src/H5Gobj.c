@@ -1079,12 +1079,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk)
+herr_t
+H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, hbool_t *found, H5O_link_t *lnk)
 {
     H5O_linfo_t linfo;             /* Link info message */
     htri_t      linfo_exists;      /* Whether the link info message exists */
-    htri_t      ret_value = FALSE; /* Return value */
+    herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
 
@@ -1099,19 +1099,19 @@ H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk)
         /* Check for dense link storage */
         if (H5F_addr_defined(linfo.fheap_addr)) {
             /* Get the object's info from the dense link storage */
-            if ((ret_value = H5G__dense_lookup(grp_oloc->file, &linfo, name, lnk)) < 0)
+            if (H5G__dense_lookup(grp_oloc->file, &linfo, name, found, lnk) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
         } /* end if */
         else {
             /* Get the object's info from the link messages */
-            if ((ret_value = H5G__compact_lookup(grp_oloc, name, lnk)) < 0)
+            if (H5G__compact_lookup(grp_oloc, name, found, lnk) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
         } /* end else */
     }     /* end if */
     else
         /* Get the object's info from the symbol table */
-        if ((ret_value = H5G__stab_lookup(grp_oloc, name, lnk)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
+        if (H5G__stab_lookup(grp_oloc, name, found, lnk) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)

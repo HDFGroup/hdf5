@@ -707,8 +707,8 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *
  */
 H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
-H5_DLL htri_t H5Lexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                              const char *name, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Lexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                              const char *name, hbool_t *exists, hid_t lapl_id, hid_t es_id);
 /**
  * \ingroup H5L
  *

@@ -80,11 +80,11 @@ static herr_t H5A__rename_api_common(hid_t loc_id, const char *old_name, const c
 static herr_t H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *old_attr_name,
                                              const char *new_attr_name, hid_t lapl_id, void **token_ptr,
                                              H5VL_object_t **_vol_obj_ptr);
-static htri_t H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name,
+static herr_t H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name, hbool_t *attr_exists,
                                  void **token_ptr);
-static htri_t H5A__exists_api_common(hid_t obj_id, const char *attr_name, void **token_ptr,
+static herr_t H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists, void **token_ptr,
                                      H5VL_object_t **_vol_obj_ptr);
-static htri_t H5A__exists_by_name_api_common(hid_t obj_id, const char *obj_name, const char *attr_name,
+static herr_t H5A__exists_by_name_api_common(hid_t obj_id, const char *obj_name, const char *attr_name, hbool_t *attr_exists,
                                              hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 
 /*********************/
@@ -2207,11 +2207,11 @@ done:
  *  RETURNS
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
-static htri_t
+static herr_t
 H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name,
-                   void **token_ptr)
+                   hbool_t *attr_exists, void **token_ptr)
 {
-    htri_t ret_value = FAIL; /* Return value */
+    herr_t ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2225,7 +2225,7 @@ H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
 
     /* Check if the attribute exists */
     if (H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, token_ptr,
-                           attr_name, &ret_value) < 0)
+                           attr_name, attr_exists) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:
@@ -2240,14 +2240,14 @@ done:
  *  RETURNS
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
-static htri_t
-H5A__exists_api_common(hid_t obj_id, const char *attr_name, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+static herr_t
+H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    htri_t            ret_value = FAIL;               /* Return value */
+    herr_t            ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2256,13 +2256,15 @@ H5A__exists_api_common(hid_t obj_id, const char *attr_name, void **token_ptr, H5
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (!attr_name || !*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    if (NULL == attr_exists)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer for attribute existence")
 
     /* Set up object access arguments */
     if (H5VL_setup_self_args(obj_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Check if the attribute exists */
-    if ((ret_value = H5A__exists_common(*vol_obj_ptr, &loc_params, attr_name, token_ptr)) < 0)
+    if (H5A__exists_common(*vol_obj_ptr, &loc_params, attr_name, attr_exists, token_ptr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:
@@ -2286,14 +2288,19 @@ done:
 htri_t
 H5Aexists(hid_t obj_id, const char *attr_name)
 {
-    htri_t ret_value; /* Return value */
+    hbool_t exists;          /* Flag for attribute existance */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "i*s", obj_id, attr_name);
 
     /* Synchronously check if an attribute exists */
-    if ((ret_value = H5A__exists_api_common(obj_id, attr_name, NULL, NULL)) < 0)
+    exists = FALSE;
+    if (H5A__exists_api_common(obj_id, attr_name, &exists, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
+
+    /* Set return value */
+    ret_value = (htri_t)exists;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2307,31 +2314,31 @@ done:
  * RETURNS
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
-htri_t
+herr_t
 H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
-                const char *attr_name, hid_t es_id)
+                const char *attr_name, hbool_t *attr_exists, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
     void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    htri_t         ret_value;                   /* Return value */
+    herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("t", "*s*sIui*si", app_file, app_func, app_line, obj_id, attr_name, es_id);
+    H5TRACE7("e", "*s*sIui*s*bi", app_file, app_func, app_line, obj_id, attr_name, attr_exists, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
         token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Asynchronously check if an attribute exists */
-    if ((ret_value = H5A__exists_api_common(obj_id, attr_name, token_ptr, &vol_obj)) < 0)
+    if (H5A__exists_api_common(obj_id, attr_name, attr_exists, token_ptr, &vol_obj) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously check if attribute exists")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(
                 es_id, vol_obj->connector, token,
-                H5ARG_TRACE6(FUNC, "*s*sIui*si", app_file, app_func, app_line, obj_id, attr_name, es_id)) < 0)
+                H5ARG_TRACE7(FUNC, "*s*sIui*s*bi", app_file, app_func, app_line, obj_id, attr_name, attr_exists, es_id)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -2346,15 +2353,15 @@ done:
  *  RETURNS
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
-static htri_t
-H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id,
-                               void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+static herr_t
+H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name, hbool_t *attr_exists,
+                               hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    htri_t            ret_value = FAIL;               /* Return value */
+    herr_t            ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2363,6 +2370,8 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (!attr_name || !*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    if (NULL == attr_exists)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer for attribute existence")
 
     /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
@@ -2370,7 +2379,7 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Check if the attribute exists */
-    if ((ret_value = H5A__exists_common(*vol_obj_ptr, &loc_params, attr_name, token_ptr)) < 0)
+    if (H5A__exists_common(*vol_obj_ptr, &loc_params, attr_name, attr_exists, token_ptr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:
@@ -2393,14 +2402,19 @@ done:
 htri_t
 H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
-    htri_t ret_value; /* Return value */
+    hbool_t exists;          /* Flag for attribute existance */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("t", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* Synchronously check if an attribute exists */
-    if ((ret_value = H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, lapl_id, NULL, NULL)) < 0)
+    exists = FALSE;
+    if (H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, &exists, lapl_id, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
+
+    /* Set return value */
+    ret_value = (htri_t)exists;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2414,31 +2428,31 @@ done:
  * RETURNS
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
-htri_t
+herr_t
 H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                        const char *obj_name, const char *attr_name, hid_t lapl_id, hid_t es_id)
+                        const char *obj_name, const char *attr_name, hbool_t *attr_exists, hid_t lapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
     void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    htri_t         ret_value;                   /* Return value */
+    herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("t", "*s*sIui*s*sii", app_file, app_func, app_line, loc_id, obj_name, attr_name, lapl_id, es_id);
+    H5TRACE9("e", "*s*sIui*s*s*bii", app_file, app_func, app_line, loc_id, obj_name, attr_name, attr_exists,
+             lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
         token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Asynchronously check if an attribute exists */
-    if ((ret_value =
-             H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, lapl_id, token_ptr, &vol_obj)) < 0)
+    if (H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, attr_exists, lapl_id, token_ptr, &vol_obj) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously rename attribute")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE8(FUNC, "*s*sIui*s*sii", app_file, app_func, app_line, loc_id, obj_name, attr_name, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE9(FUNC, "*s*sIui*s*s*bii", app_file, app_func, app_line, loc_id, obj_name, attr_name, attr_exists, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
