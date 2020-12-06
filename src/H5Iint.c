@@ -367,27 +367,52 @@ H5I__clear_type_cb(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
      * one and forcing is off.
      */
     if (udata->force || (info->count - (!udata->app_ref * info->app_count)) <= 1) {
-        /* Check for a 'free' function and call it, if it exists */
+        /* Check if this is an un-realized future object */
         H5_GCC_DIAG_OFF("cast-qual")
-        if (udata->type_info->cls->free_func &&
-            (udata->type_info->cls->free_func)((void *)info->object, H5_REQUEST_NULL) < 0) { /* (Casting away const OK -QAK) */
-            if (udata->force) {
+        if (info->is_future) {
+            /* Discard the future object */
+            if((info->discard_cb)((void *)info->object) < 0) {
+                if (udata->force) {
 #ifdef H5I_DEBUG
-                if (H5DEBUG(I)) {
-                    HDfprintf(H5DEBUG(I),
-                              "H5I: free type=%d obj=0x%08lx "
-                              "failure ignored\n",
-                              (int)udata->type_info->cls->type, (unsigned long)(info->object));
-                }
+                    if (H5DEBUG(I)) {
+                        HDfprintf(H5DEBUG(I),
+                                  "H5I: discard type=%d obj=0x%08lx "
+                                  "failure ignored\n",
+                                  (int)udata->type_info->cls->type, (unsigned long)(info->object));
+                    }
 #endif /* H5I_DEBUG */
 
+                    /* Indicate node should be removed from list */
+                    ret_value = TRUE;
+                }
+            }
+            else {
                 /* Indicate node should be removed from list */
                 ret_value = TRUE;
             }
         }
         else {
-            /* Indicate node should be removed from list */
-            ret_value = TRUE;
+            /* Check for a 'free' function and call it, if it exists */
+            if (udata->type_info->cls->free_func &&
+                (udata->type_info->cls->free_func)((void *)info->object, H5_REQUEST_NULL) < 0) {
+                if (udata->force) {
+#ifdef H5I_DEBUG
+                    if (H5DEBUG(I)) {
+                        HDfprintf(H5DEBUG(I),
+                                  "H5I: free type=%d obj=0x%08lx "
+                                  "failure ignored\n",
+                                  (int)udata->type_info->cls->type, (unsigned long)(info->object));
+                    }
+#endif /* H5I_DEBUG */
+
+                    /* Indicate node should be removed from list */
+                    ret_value = TRUE;
+                }
+            }
+            else {
+                /* Indicate node should be removed from list */
+                ret_value = TRUE;
+            }
         }
         H5_GCC_DIAG_ON("cast-qual")
 
@@ -457,15 +482,18 @@ done:
 } /* end H5I__destroy_type() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5I_register
+ * Function:    H5I__register
  *
  * Purpose:     Registers an OBJECT in a TYPE and returns an ID for it.
  *              This routine does _not_ check for unique-ness of the objects,
  *              if you register an object twice, you will get two different
  *              IDs for it.  This routine does make certain that each ID in a
  *              type is unique.  IDs are created by getting a unique number
- *              for the type the ID is in and incorporating the type into
+ *              for the type the ID is in and incorporating the TYPE into
  *              the ID which is returned to the user.
+ *
+ *              IDs are marked as "future" if the realize_cb and discard_cb
+ *              parameters are non-NULL.
  *
  * Return:      Success:    New object ID
  *              Failure:    H5I_INVALID_HID
@@ -473,14 +501,15 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
+H5I__register(H5I_type_t type, const void *object, hbool_t app_ref,
+              H5I_future_realize_func_t realize_cb, H5I_future_discard_func_t discard_cb)
 {
     H5I_type_info_t *type_info = NULL;            /* Pointer to the type */
     H5I_id_info_t *  info      = NULL;            /* Pointer to the new ID information */
     hid_t            new_id    = H5I_INVALID_HID; /* New ID */
     hid_t            ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
@@ -497,6 +526,9 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     info->count     = 1; /* initial reference count */
     info->app_count = !!app_ref;
     info->object    = object;
+    info->is_future = (NULL != realize_cb);
+    info->realize_cb = realize_cb;
+    info->discard_cb = discard_cb;
 
     /* Insert into the type */
     if (H5SL_insert(type_info->ids, info, &info->id) < 0)
@@ -512,6 +544,35 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 
     /* Set return value */
     ret_value = new_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I__register() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I_register
+ *
+ * Purpose:     Library-private wrapper for H5I__register.
+ *
+ * Return:      Success:    New object ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
+{
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+
+    /* Sanity checks */
+    HDassert(type >= H5I_FILE && type < H5I_NTYPES);
+    HDassert(object);
+
+    /* Retrieve ID for object */
+    if (H5I_INVALID_HID == (ret_value = H5I__register(type, object, app_ref, NULL, NULL)))
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1527,6 +1588,7 @@ H5I__find_id(hid_t id)
 {
     H5I_type_t       type;             /* ID's type */
     H5I_type_info_t *type_info = NULL; /* Pointer to the type */
+    H5I_id_info_t *  id_info = NULL;   /* ID's info */
     H5I_id_info_t *  ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -1541,14 +1603,52 @@ H5I__find_id(hid_t id)
 
     /* Check for same ID as we have looked up last time */
     if (type_info->last_id_info && type_info->last_id_info->id == id)
-        ret_value = type_info->last_id_info;
+        id_info = type_info->last_id_info;
     else {
         /* Locate the ID node for the ID */
-        ret_value = (H5I_id_info_t *)H5SL_search(type_info->ids, &id);
+        id_info = (H5I_id_info_t *)H5SL_search(type_info->ids, &id);
 
         /* Remember this ID */
-        type_info->last_id_info = ret_value;
+        type_info->last_id_info = id_info;
     }
+
+    /* Check if this is a future ID */
+    H5_GCC_DIAG_OFF("cast-qual")
+    if (id_info && id_info->is_future) {
+        hid_t actual_id = H5I_INVALID_HID;      /* ID for actual object */
+        void *future_object;                    /* Pointer to the future object */
+        void *actual_object;                    /* Pointer to the actual object */
+
+        /* Invoke the realize callback, to get the actual object */
+        if ((id_info->realize_cb)((void *)id_info->object, &actual_id) < 0)
+            HGOTO_DONE(NULL)
+
+        /* Verify that we received a valid ID, of the same type */
+        if (H5I_INVALID_HID == actual_id)
+            HGOTO_DONE(NULL)
+        if (H5I_TYPE(id) != H5I_TYPE(actual_id))
+            HGOTO_DONE(NULL)
+
+        /* Swap the actual object in for the future object */
+        future_object = (void *)id_info->object;
+        actual_object = H5I__remove_common(type_info, actual_id);
+        HDassert(actual_object);
+        id_info->object = actual_object;
+
+        /* Discard the future object */
+        if ((id_info->discard_cb)(future_object) < 0)
+            HGOTO_DONE(NULL)
+        future_object = NULL;
+
+        /* Change the ID from 'future' to 'actual' */
+        id_info->is_future = FALSE;
+        id_info->realize_cb = NULL;
+        id_info->discard_cb = NULL;
+    }
+    H5_GCC_DIAG_ON("cast-qual")
+
+    /* Set return value */
+    ret_value = id_info;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

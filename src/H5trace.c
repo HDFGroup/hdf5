@@ -1677,6 +1677,14 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'I':
                     switch (type[1]) {
+                        case 'D': /* H5I_future_discard_func_t */
+                        {
+                            H5I_future_discard_func_t ifdisc = (H5I_future_discard_func_t)HDva_arg(ap, H5I_future_discard_func_t);
+
+                            H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifdisc);
+                        } /* end block */
+                        break;
+
                         case 'f': /* H5I_free_t */
                         {
                             H5I_free_t ifree = (H5I_free_t)HDva_arg(ap, H5I_free_t);
@@ -1751,6 +1759,14 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     break;
                             } /* end switch */
                         }     /* end block */
+                        break;
+
+                        case 'R': /* H5I_future_realize_func_t */
+                        {
+                            H5I_future_realize_func_t ifreal = (H5I_future_realize_func_t)HDva_arg(ap, H5I_future_realize_func_t);
+
+                            H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifreal);
+                        } /* end block */
                         break;
 
                         case 's': /* int / int32_t */
