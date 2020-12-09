@@ -118,20 +118,20 @@ How to Trace Async Operations?
 extern "C" {
 #endif
 
-hid_t  H5EScreate(void);
-/* herr_t H5ESinsert(hid_t es_id, <request token?>); (For VOL connector authors only) */
-herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress,
+H5_DLL hid_t  H5EScreate(void);
+/* H5_DLL herr_t H5ESinsert(hid_t es_id, <request token?>); (For VOL connector authors only) */
+H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress,
                 hbool_t *err_occurred);
-/* herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred); */
-herr_t H5ESget_count(hid_t es_id, size_t *count);
-herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
-herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
-herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
-herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info,
+/* H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred); */
+H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
+H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
+H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
+H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
+H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info,
                             H5ES_err_info_t err_info[], size_t *err_cleared);
-/* herr_t H5EScomplete_func(hid_t es_id, int (*func)(const H5ES_op_info_t *op_info, H5ES_status_t status, hid_t err_stack, void *ctx), void *ctx);
+/* H5_DLL herr_t H5EScomplete_func(hid_t es_id, int (*func)(const H5ES_op_info_t *op_info, H5ES_status_t status, hid_t err_stack, void *ctx), void *ctx);
  */
-herr_t H5ESclose(hid_t es_id);
+H5_DLL herr_t H5ESclose(hid_t es_id);
 
 #ifdef __cplusplus
 }
