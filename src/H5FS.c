@@ -362,7 +362,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
 
 #ifdef H5FS_DEBUG
             HDfprintf(stderr, "%s: Done expunging free space section info from cache\n", FUNC);
-#endif    /* H5FS_DEBUG */
+#endif /* H5FS_DEBUG */
         } /* end if */
         else {
 #ifdef H5FS_DEBUG
@@ -513,7 +513,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                              */
 #ifdef H5FS_DEBUG
                             HDfprintf(stderr, "%s: Section info can't 'go away', header will own it\n", FUNC);
-#endif                    /* H5FS_DEBUG */
+#endif /* H5FS_DEBUG */
                         } /* end if */
                         else {
 #ifdef H5FS_DEBUG

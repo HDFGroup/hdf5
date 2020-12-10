@@ -692,7 +692,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
             /* Use the asprintf() routine, since it does what we're trying to do below */
             if (HDasprintf(&obj1fullname, "/%s", objname1) < 0)
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "name buffer allocation failed");
-#else  /* H5_HAVE_ASPRINTF */
+#else /* H5_HAVE_ASPRINTF */
             /* (malloc 2 more for "/" and end-of-line) */
             if ((obj1fullname = (char *)HDmalloc(HDstrlen(objname1) + 2)) == NULL)
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "name buffer allocation failed");
@@ -711,7 +711,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
             /* Use the asprintf() routine, since it does what we're trying to do below */
             if (HDasprintf(&obj2fullname, "/%s", objname2) < 0)
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "name buffer allocation failed");
-#else  /* H5_HAVE_ASPRINTF */
+#else /* H5_HAVE_ASPRINTF */
             /* (malloc 2 more for "/" and end-of-line) */
             if ((obj2fullname = (char *)HDmalloc(HDstrlen(objname2) + 2)) == NULL)
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "name buffer allocation failed");
@@ -1174,7 +1174,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                 if (HDasprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name) < 0) {
                     H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
                 }
-#else  /* H5_HAVE_ASPRINTF */
+#else /* H5_HAVE_ASPRINTF */
             if ((obj1_fullpath = (char *)HDmalloc(HDstrlen(grp1_path) + HDstrlen(table->objs[i].name) + 1)) ==
                 NULL) {
                 H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
@@ -1192,7 +1192,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                 if (HDasprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name) < 0) {
                     H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
                 }
-#else  /* H5_HAVE_ASPRINTF */
+#else /* H5_HAVE_ASPRINTF */
             if ((obj2_fullpath = (char *)HDmalloc(HDstrlen(grp2_path) + HDstrlen(table->objs[i].name) + 1)) ==
                 NULL) {
                 H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
@@ -1388,7 +1388,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                         }     /* end else */
                     }         /* end if */
                 }             /* end else */
-#endif                        /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
                 if (obj1_fullpath)
                     HDfree(obj1_fullpath);
                 if (obj2_fullpath)

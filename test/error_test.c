@@ -132,7 +132,7 @@ test_error(hid_t file)
 #ifdef H5_USE_16_API
     if (old_func != (H5E_auto_t)H5Eprint)
         TEST_ERROR;
-#else  /* H5_USE_16_API */
+#else /* H5_USE_16_API */
     if (old_func != (H5E_auto2_t)H5Eprint2)
         TEST_ERROR;
 #endif /* H5_USE_16_API */
@@ -511,7 +511,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_copy
  *
- * Purpose:     Test copyinging an error stack
+ * Purpose:     Test copying an error stack
  *
  * Return:      Success:    0
  *              Failure:    -1

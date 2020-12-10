@@ -150,7 +150,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
     unsigned long rec_to_flush;      /* # of records left to write before flush */
 #ifdef OUT
     volatile int dummy;            /* Dummy varialbe for busy sleep */
-#endif                             /* OUT */
+#endif /* OUT */
     hsize_t       dim[2] = {1, 0}; /* Dataspace dimensions */
     unsigned long u, v;            /* Local index variables */
 

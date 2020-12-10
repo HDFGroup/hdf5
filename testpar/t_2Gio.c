@@ -4220,7 +4220,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     herr_t      ret;
 #ifdef LATER /* fletcher32 */
     H5Z_filter_t filter_info;
-#endif       /* LATER */
+#endif /* LATER */
     char message[256];
 
     /* Set up MPI parameters */
@@ -4248,7 +4248,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
 
             ret = H5Pset_fletcher32(dcpl);
             VRFY((ret >= 0),"set filter (flecher32) succeeded");
-#endif       /* LATER */
+#endif /* LATER */
     }
     else  {
         VRFY(0, "Unexpected mode, only test for TEST_FILTERS_READ.");
@@ -4290,7 +4290,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     test_name = "Broken Collective I/O - Filter is required";
     no_collective_cause_local_expected = H5D_MPIO_FILTERS;
     no_collective_cause_global_expected = H5D_MPIO_FILTERS;
-#endif       /* LATER */
+#endif /* LATER */
 
     /* Get the file dataspace */
     file_space = H5Dget_space(dataset);
@@ -4421,9 +4421,9 @@ no_collective_cause_tests(void)
     test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
     test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
 #ifdef LATER /* fletcher32 */
-             /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and
-              * H5Dwrite is ready for mpio + filter feature.
-              */
+    /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and
+     * H5Dwrite is ready for mpio + filter feature.
+     */
     /* test_no_collective_cause_mode (TEST_FILTERS); */
     test_no_collective_cause_mode_filter(TEST_FILTERS_READ);
 #endif /* LATER */

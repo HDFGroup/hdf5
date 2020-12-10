@@ -932,7 +932,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
                     }
                 } /* end if (sizeof(long long) == nsize) */
-#endif            /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
+#endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
                 break;
 
             case H5T_COMPOUND:
@@ -1268,7 +1268,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         for (x = 0; x < ctx->indent_level + 1; x++)
                             h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
                     } /* end if */
-#endif                /* LATER */
+#endif /* LATER */
 
                     ctx->indent_level++;
 

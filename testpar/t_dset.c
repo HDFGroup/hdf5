@@ -3985,9 +3985,9 @@ no_collective_cause_tests(void)
     test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
     test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
 #ifdef LATER /* fletcher32 */
-             /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and
-              * H5Dwrite is ready for mpio + filter feature.
-              */
+    /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and
+     * H5Dwrite is ready for mpio + filter feature.
+     */
     /* test_no_collective_cause_mode (TEST_FILTERS); */
     test_no_collective_cause_mode_filter(TEST_FILTERS_READ);
 #endif /* LATER */

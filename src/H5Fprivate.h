@@ -31,7 +31,7 @@ typedef struct H5F_t H5F_t;
 #include "H5MMprivate.h" /* Memory management            */
 #ifdef H5_HAVE_PARALLEL
 #include "H5Pprivate.h"  /* Property lists               */
-#endif                   /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 #include "H5VMprivate.h" /* Vectors and arrays           */
 #include "H5VLprivate.h" /* Virtual Object Layer         */
 
@@ -618,7 +618,7 @@ typedef struct H5F_t H5F_t;
 #ifdef H5_HAVE_PARALLEL
 #define H5F_ACS_MPI_PARAMS_COMM_NAME "mpi_params_comm" /* the MPI communicator */
 #define H5F_ACS_MPI_PARAMS_INFO_NAME "mpi_params_info" /* the MPI info struct */
-#endif                                                 /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME "local" /* Whether absolute symlinks local to file. */
@@ -648,8 +648,7 @@ typedef struct H5F_t H5F_t;
 
 /* B-tree internal 'K' values */
 #define HDF5_BTREE_SNODE_IK_DEF 16
-#define HDF5_BTREE_CHUNK_IK_DEF                                                                              \
-    32                                  /* Note! this value is assumed                                       \
+#define HDF5_BTREE_CHUNK_IK_DEF 32       /* Note! this value is assumed                                       \
                                             to be 32 for version 0                                           \
                                             of the superblock and                                            \
                                             if it is changed, the code                                       \

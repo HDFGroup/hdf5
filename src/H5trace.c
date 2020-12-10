@@ -25,7 +25,8 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5I_FRIEND /*suppress error about including H5Ipkg      */
+#include "H5module.h" /* This source code file is part of the H5 module */
+#define H5I_FRIEND    /*suppress error about including H5Ipkg      */
 
 /***********/
 /* Headers */
@@ -3717,5 +3718,5 @@ error:
     if (H5_debug_g.ttimes)
         return function_times.elapsed;
     else
-        return 0.0F;
+        return (double)0.0F;
 } /* end H5_trace() */

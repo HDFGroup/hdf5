@@ -27,4 +27,19 @@
 #define H5_MY_PKG_ERR  H5E_VOL
 #define H5_MY_PKG_INIT YES
 
+/**
+ * \defgroup H5VL H5VL
+ * \brief Virtual Object Layer Interface
+ * \todo Describe concisely what the functions in this module are about.
+ *
+ * \defgroup H5VLDEF Definitions
+ * \ingroup H5VL
+ * \defgroup H5VLDEV VOL Developer
+ * \ingroup H5VL
+ * \defgroup H5VLNAT Native VOL
+ * \ingroup H5VL
+ * \defgroup H5VLPT Pass-through VOL
+ * \ingroup H5VL
+ */
+
 #endif /* _H5VLmodule_H */
