@@ -368,7 +368,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 
     /* Register the object's ID */
     if ((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle")
 
 done:
     FUNC_LEAVE_API(ret_value)

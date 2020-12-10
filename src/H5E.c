@@ -181,17 +181,17 @@ H5E__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the error class IDs */
+    /* Initialize the ID group for the error class IDs */
     if (H5I_register_type(H5I_ERRCLS_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
-    /* Initialize the atom group for the major error IDs */
+    /* Initialize the ID group for the major error IDs */
     if (H5I_register_type(H5I_ERRMSG_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
-    /* Initialize the atom group for the error stacks */
+    /* Initialize the ID group for the error stacks */
     if (H5I_register_type(H5I_ERRSTK_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
 #ifndef H5_HAVE_THREADSAFE
     H5E_stack_g[0].nused = 0;

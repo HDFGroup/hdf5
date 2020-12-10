@@ -226,7 +226,7 @@ H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Set property values */
     if (H5P_set(plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &max_compact) < 0)
@@ -261,7 +261,7 @@ H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get values */
     if (max_compact) {
@@ -305,7 +305,7 @@ H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get object header flags */
     if (H5P_get(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
@@ -359,7 +359,7 @@ H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
 
         /* Get the plist structure */
         if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
         /* Get object header flags */
         if (H5P_get(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
@@ -412,7 +412,7 @@ H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get object header flags */
     if (H5P_get(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
@@ -459,7 +459,7 @@ H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times /*out*/)
 
         /* Get the plist structure */
         if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
         /* Get object header flags */
         if (H5P_get(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
@@ -590,7 +590,7 @@ H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Modify the filter parameters of the I/O pipeline */
     if (H5P_modify_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
@@ -652,7 +652,7 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Call the private function */
     if (H5P__set_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
@@ -759,7 +759,7 @@ H5Pget_nfilters(hid_t plist_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get the pipeline property to query */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -833,7 +833,7 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5Z_FILTER_ERROR, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, H5Z_FILTER_ERROR, "can't find object for ID")
 
     /* Get the pipeline property to query */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -962,7 +962,7 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get filter information */
     if (H5P_get_filter_by_id(plist, id, flags, cd_nelmts, cd_values, namelen, name, filter_config) < 0)
@@ -999,7 +999,7 @@ H5Pall_filters_avail(hid_t plist_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get the pipeline property to query */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -1073,7 +1073,7 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get the pipeline property to modify */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -1128,7 +1128,7 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get the pipeline property to append to */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -1171,7 +1171,7 @@ H5Pset_fletcher32(hid_t plist_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get the pipeline property to append to */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -1781,7 +1781,7 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5Z_FILTER_ERROR, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, H5Z_FILTER_ERROR, "can't find object for ID")
 
     /* Get pipeline info */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -1860,7 +1860,7 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get filter info */
     if (H5P_get_filter_by_id(plist, id, flags, cd_nelmts, cd_values, namelen, name, NULL) < 0)

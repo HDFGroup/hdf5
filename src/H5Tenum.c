@@ -62,9 +62,9 @@ H5Tenum_create(hid_t parent_id)
     if (NULL == (dt = H5T__enum_create(parent)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_INVALID_HID, "cannot create enum type")
 
-    /* Atomize the type */
+    /* Register the type */
     if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register data type atom")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register data type ID")
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -886,13 +886,14 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                         HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,
                                     "couldn't finish optimized multiple filtered chunk MPI-IO")
                 } /* end if */
-                else if (H5D__link_chunk_filtered_collective_io(io_info, type_info, fm) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish filtered linked chunk MPI-IO")
+                else
+                    if (H5D__link_chunk_filtered_collective_io(io_info, type_info, fm) < 0)
+                        HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish filtered linked chunk MPI-IO")
             } /* end if */
             else
                 /* Perform unfiltered link chunk collective IO */
                 if (H5D__link_chunk_collective_io(io_info, type_info, fm, sum_chunk) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish linked chunk MPI-IO")
+                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish linked chunk MPI-IO")
             break;
 
         case H5D_MULTI_CHUNK_IO: /* direct request to do multi-chunk IO */
@@ -906,7 +907,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
             else
                 /* Perform unfiltered multi chunk collective IO */
                 if (H5D__multi_chunk_collective_io(io_info, type_info, fm) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish optimized multiple chunk MPI-IO")
+                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish optimized multiple chunk MPI-IO")
             break;
     } /* end switch */
 
@@ -1377,8 +1378,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
     H5CX_set_mpio_actual_io_mode(H5D_MPIO_CHUNK_COLLECTIVE);
 
     /* Build a list of selected chunks in the collective io operation */
-    if (H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries) <
-        0)
+    if (H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't construct filtered I/O info list")
 
     if (io_info->op_type == H5D_IO_OP_WRITE) { /* Filtered collective write */
@@ -2838,7 +2838,7 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
                         "unable to allocate number of assigned chunks array")
 
         for (i = 0; i < shared_chunks_info_array_num_entries;) {
-            H5D_filtered_collective_io_info_t chunk_entry;
+            H5D_filtered_collective_io_info_t *chunk_entry;
             haddr_t last_seen_addr  = shared_chunks_info_array[i].chunk_states.chunk_current.offset;
             size_t  set_begin_index = i;
             size_t  num_writers     = 0;
@@ -2846,17 +2846,17 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
 
             /* Process each set of duplicate entries caused by another process writing to the same chunk */
             do {
-                chunk_entry = shared_chunks_info_array[i];
+                chunk_entry = &shared_chunks_info_array[i];
 
-                send_counts[chunk_entry.owners.original_owner] += (int)sizeof(chunk_entry);
+                send_counts[chunk_entry->owners.original_owner] += (int)sizeof(*chunk_entry);
 
                 /* The new owner of the chunk is determined by the process
                  * writing to the chunk which currently has the least amount
                  * of chunks assigned to it
                  */
-                if (num_assigned_chunks_array[chunk_entry.owners.original_owner] <
+                if (num_assigned_chunks_array[chunk_entry->owners.original_owner] <
                     num_assigned_chunks_array[new_chunk_owner])
-                    new_chunk_owner = chunk_entry.owners.original_owner;
+                    new_chunk_owner = chunk_entry->owners.original_owner;
 
                 num_writers++;
             } while (++i < shared_chunks_info_array_num_entries &&
@@ -2907,6 +2907,8 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
                                                               sizeof(unsigned char *))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate modification data buffer array")
 
+    /* Perform all the sends on the chunks that this rank doesn't own */
+    /* (Sends and recvs must be two separate loops, to avoid deadlock) */
     for (i = 0, last_assigned_idx = 0; i < *local_chunk_array_num_entries; i++) {
         H5D_filtered_collective_io_info_t *chunk_entry = &local_chunk_array[i];
 
@@ -2965,7 +2967,13 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
 
             num_send_requests++;
         } /* end if */
-        else {
+    } /* end for */
+
+    /* Perform all the recvs on the chunks this rank owns */
+    for (i = 0, last_assigned_idx = 0; i < *local_chunk_array_num_entries; i++) {
+        H5D_filtered_collective_io_info_t *chunk_entry = &local_chunk_array[i];
+
+        if (mpi_rank == chunk_entry->owners.new_owner) {
             /* Allocate all necessary buffers for an asynchronous receive operation */
             if (chunk_entry->num_writers > 1) {
                 MPI_Message message;

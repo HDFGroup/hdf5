@@ -1497,7 +1497,7 @@ H5O_bogus_oh(H5F_t *f, H5O_t *oh, unsigned bogus_id, unsigned mesg_flags)
         else if (bogus_id == H5O_BOGUS_INVALID_ID)
             type = H5O_MSG_BOGUS_INVALID;
         else
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID for 'bogus' message")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "invalid ID for 'bogus' message")
 
         /* Allocate space in the object header for bogus message */
         if (H5O__msg_alloc(f, oh, type, &mesg_flags, bogus, &idx) < 0)
@@ -2793,7 +2793,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
 
     /* Get an ID for the visited object */
     if ((obj_id = H5VL_wrap_register(opened_type, obj, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register visited object")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register visited object")
 
     /* Make callback for starting object */
     if ((ret_value = op(obj_id, ".", &oinfo, op_data)) < 0)

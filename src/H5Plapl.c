@@ -478,7 +478,7 @@ H5P__lacc_elink_fapl_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
 
     /* Close the FAPL */
     if (l_fapl_id != H5P_DEFAULT && H5I_dec_ref(l_fapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close atom for file access property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close ID for file access property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -604,7 +604,7 @@ H5P__lacc_elink_fapl_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
 
     /* Close the FAPL */
     if ((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id) < 0))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close atom for file access property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close ID for file access property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -919,7 +919,7 @@ H5Pset_nlinks(hid_t plist_id, size_t nlinks)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Set number of links */
     if (H5P_set(plist, H5L_ACS_NLINKS_NAME, &nlinks) < 0)
@@ -959,7 +959,7 @@ H5Pget_nlinks(hid_t plist_id, size_t *nlinks /*out*/)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get the current number of links */
     if (H5P_get(plist, H5L_ACS_NLINKS_NAME, nlinks) < 0)
@@ -994,7 +994,7 @@ H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Set prefix */
     if (H5P_set(plist, H5L_ACS_ELINK_PREFIX_NAME, &prefix) < 0)
@@ -1033,7 +1033,7 @@ H5Pget_elink_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get the current prefix */
     if (H5P_peek(plist, H5L_ACS_ELINK_PREFIX_NAME, &my_prefix) < 0)
@@ -1116,7 +1116,7 @@ H5Pget_elink_fapl(hid_t lapl_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     if (H5P_get(plist, H5L_ACS_ELINK_FAPL_NAME, &ret_value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fapl for links")
@@ -1156,7 +1156,7 @@ H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Set flags */
     if (H5P_set(plist, H5L_ACS_ELINK_FLAGS_NAME, &flags) < 0)
@@ -1190,7 +1190,7 @@ H5Pget_elink_acc_flags(hid_t lapl_id, unsigned *flags /*out*/)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get flags */
     if (flags)
@@ -1232,7 +1232,7 @@ H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Populate the callback info struct */
     cb_info.func      = func;
@@ -1271,7 +1271,7 @@ H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func /*out*/, void **op_dat
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get callback_info */
     if (H5P_get(plist, H5L_ACS_ELINK_CB_NAME, &cb_info) < 0)

@@ -47,6 +47,20 @@ New Features
 
     Configuration:
     -------------
+    - FreeBSD Autotools configuration now defaults to 'cc' and 'c++' compilers
+
+      On FreeBSD, the autotools defaulted to 'gcc' as the C compiler and did
+      not process C++ options. Since FreeBSD 10, the default compiler has
+      been clang (via 'cc').
+
+      The default compilers have been set to 'cc' for C and 'c++' for C++,
+      which will pick up clang and clang++ respectively on FreeBSD 10+.
+      Additionally, clang options are now set correctly for both C and C++
+      and g++ options will now be set if that compiler is being used (an
+      omission from the former functionality).
+
+      (DER - 2020/11/28, HDFFV-11193)
+
     - Fixed POSIX problems when building w/ gcc on Solaris
 
       When building on Solaris using gcc, the POSIX symbols were not
@@ -326,6 +340,16 @@ New Features
 
     Library:
     --------
+    - Replaced H5E_ATOM with H5E_ID in H5Epubgen.h
+
+      The term "atom" is archaic and not in line with current HDF5 library
+      terminology, which uses "ID" instead. "Atom" has mostly been purged
+      from the library internals and this change removes H5E_ATOM from
+      the H5Epubgen.h (exposed via H5Epublic.h) and replaces it with
+      H5E_ID.
+
+      (DER - 2020/11/24, HDFFV-11190)
+
     - Add new public function H5Ssel_iter_reset
 
         This function resets a dataspace selection iterator back to an
@@ -486,6 +510,16 @@ New Features
 
     Java Library:
     ----------------
+    - Replaced HDF5AtomException with HDF5IdException
+
+      Since H5E_ATOM changed to H5E_ID in the C library, the Java exception
+      that wraps the error category was also renamed. Its functionality
+      remains unchanged aside from the name.
+
+      (See also the HDFFV-11190 note in the C library section)
+
+      (DER - 2020/11/24, HDFFV-11190)
+
     - Added new H5S functions.
 
         H5Sselect_copy, H5Sselect_shape_same, H5Sselect_adjust,

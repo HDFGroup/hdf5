@@ -326,7 +326,7 @@
             /* Adjust information for this type */                                                           \
             H5_GLUE3(H5T_INIT_TYPE_, GUTS, _CORE)                                                            \
                                                                                                              \
-            /* Atomize result */                                                                             \
+            /* Register result */                                                                             \
             if ((GLOBAL = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)                                        \
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")        \
     }
@@ -804,7 +804,7 @@ H5T__init_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Initialize the atom group for the file IDs */
+    /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_DATATYPE_CLS) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
@@ -1822,7 +1822,7 @@ done:
  * Errors:
  *        ARGS      BADVALUE    Invalid size.
  *        DATATYPE  CANTINIT    Can't create type.
- *        DATATYPE  CANTREGISTER    Can't register datatype atom.
+ *        DATATYPE  CANTREGISTER    Can't register datatype ID.
  *
  * Programmer:    Robb Matzke
  *        Friday, December  5, 1997
@@ -1939,7 +1939,7 @@ done:
     /* If we got a type ID from a passed-in dataset, we need to close that */
     if (dset_tid != H5I_INVALID_HID)
         if (H5I_dec_app_ref(dset_tid) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADATOM, H5I_INVALID_HID, "problem freeing temporary dataset type ID")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADID, FAIL, "problem freeing temporary dataset type ID")
 
     /* Close the new datatype on errors */
     if (H5I_INVALID_HID == ret_value)
@@ -2062,7 +2062,7 @@ H5Tclose(hid_t type_id)
 
     /* When the reference count reaches zero the resources are freed */
     if (H5I_dec_app_ref(type_id) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "problem freeing id")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3140,7 +3140,7 @@ herr_t
 H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *background, hid_t dxpl_id)
 {
     H5T_path_t *tpath;               /* type conversion info    */
-    H5T_t *     src, *dst;           /* unatomized types        */
+    H5T_t *     src, *dst;           /* unregistered types      */
     herr_t      ret_value = SUCCEED; /* Return value            */
 
     FUNC_ENTER_API(FAIL)
@@ -3548,8 +3548,8 @@ done:
  * Note:      Common code for both H5T_copy and H5T_copy_reopen, as part of
  *            the const-correct datatype copying routines.
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3596,8 +3596,8 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3624,8 +3624,8 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3655,8 +3655,8 @@ done:
  *
  * Note:      Common code for both H5T_copy and H5T_copy_reopen.
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3926,8 +3926,8 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -5360,7 +5360,10 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     } /* end else-if */
 
     /* Set the flag to indicate both source and destination types are compound types
-     * for the optimization of data reading (in H5Dio.c). */
+     * for the optimization of data reading (in H5Dio.c).
+     * Make sure that path->are_compounds is only TRUE for compound types.
+     */
+    path->are_compounds = FALSE;
     if (H5T_COMPOUND == H5T_get_class(src, TRUE) && H5T_COMPOUND == H5T_get_class(dst, TRUE))
         path->are_compounds = TRUE;
 

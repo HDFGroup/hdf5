@@ -83,7 +83,7 @@ typedef struct {
     char *sep; /* Pointer to next separator in the string */
 
     /* Up */
-    hbool_t exists; /* Whether the link exists or not */
+    hbool_t *exists; /* Whether the link exists or not */
 } H5L_trav_le_t;
 
 /* User data for path traversal routine for getting link value */
@@ -141,7 +141,7 @@ static herr_t H5L__delete_api_common(hid_t loc_id, const char *name, hid_t lapl_
 static herr_t H5L__delete_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                             H5_iter_order_t order, hsize_t n, hid_t lapl_id, void **token_ptr,
                                             H5VL_object_t **_vol_obj_ptr);
-static htri_t H5L__exists_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **token_ptr,
+static herr_t H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id, void **token_ptr,
                                      H5VL_object_t **_vol_obj_ptr);
 static herr_t H5L__iterate_api_common(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
                                       hsize_t *idx_p, H5L_iterate2_t op, void *op_data, void **token_ptr,
@@ -734,6 +734,103 @@ done:
 } /* H5Lcreate_hard_async() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Lcreate_external
+ *
+ * Purpose:     Creates an external link from LINK_NAME to OBJ_NAME.
+ *
+ *              External links are links to objects in other HDF5 files.  They
+ *              are allowed to "dangle" like soft links internal to a file.
+ *              FILE_NAME is the name of the file that OBJ_NAME is is contained
+ *              within.  If OBJ_NAME is given as a relative path name, the
+ *              path will be relative to the root group of FILE_NAME.
+ *              LINK_NAME is interpreted relative to LINK_LOC_ID, which is
+ *              either a file ID or a group ID.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, May 18, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_id, const char *link_name,
+                   hid_t lcpl_id, hid_t lapl_id)
+{
+    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    H5VL_loc_params_t loc_params;
+    char *            norm_obj_name = NULL; /* Pointer to normalized current name */
+    void *            ext_link_buf  = NULL; /* Buffer to contain external link */
+    size_t            buf_size;             /* Size of buffer to hold external link */
+    size_t            file_name_len;        /* Length of file name string */
+    size_t            norm_obj_name_len;    /* Length of normalized object name string */
+    uint8_t *         p;                    /* Pointer into external link buffer */
+    H5L_type_t        link_type = H5L_TYPE_EXTERNAL;
+    herr_t            ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*s*si*sii", file_name, obj_name, link_loc_id, link_name, lcpl_id, lapl_id);
+
+    /* Check arguments */
+    if (!file_name || !*file_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no file name specified")
+    if (!obj_name || !*obj_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name specified")
+    if (!link_name || !*link_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no link name specified")
+
+    /* Get the link creation property list */
+    if (H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
+
+    /* Get normalized copy of the link target */
+    if (NULL == (norm_obj_name = H5G_normalize(obj_name)))
+        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize object name")
+
+    /* Combine the filename and link name into a single buffer to give to the UD link */
+    file_name_len     = HDstrlen(file_name) + 1;
+    norm_obj_name_len = HDstrlen(norm_obj_name) + 1;
+    buf_size          = 1 + file_name_len + norm_obj_name_len;
+    if (NULL == (ext_link_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate udata buffer")
+
+    /* Encode the external link information */
+    p    = (uint8_t *)ext_link_buf;
+    *p++ = (H5L_EXT_VERSION << 4) | H5L_EXT_FLAGS_ALL; /* External link version & flags */
+    HDstrncpy((char *)p, file_name, buf_size - 1);     /* Name of file containing external link's object */
+    p += file_name_len;
+    HDstrncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1)); /* External link's object */
+
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name    = link_name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(link_loc_id);
+
+    /* get the location object */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(link_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    /* Create an external link */
+    if (H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj, &loc_params, lcpl_id, lapl_id,
+                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)link_type, ext_link_buf,
+                         buf_size) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create external link")
+
+done:
+    H5MM_xfree(ext_link_buf);
+    H5MM_xfree(norm_obj_name);
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Lcreate_external() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Lcreate_ud
  *
  * Purpose:     Creates a user-defined link of type LINK_TYPE named LINK_NAME
@@ -1163,20 +1260,22 @@ done:
  *      Non-negative on success/Negative on failure
  *
  *--------------------------------------------------------------------------*/
-static htri_t
-H5L__exists_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **token_ptr,
-                       H5VL_object_t **_vol_obj_ptr)
+static herr_t
+H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id,
+                       void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    htri_t            ret_value = FAIL;               /* Return value */
+    herr_t            ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Check arguments */
     /* name is verified in H5VL_setup_name_args() */
+    if(NULL == exists)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer for link existence")
 
     /* Set up object access arguments */
     if (H5VL_setup_name_args(loc_id, name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
@@ -1184,7 +1283,7 @@ H5L__exists_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **tok
 
     /* Check for the existence of the link */
     if (H5VL_link_specific(*vol_obj_ptr, &loc_params, H5VL_LINK_EXISTS, H5P_DATASET_XFER_DEFAULT, token_ptr,
-                           &ret_value) < 0)
+                           exists) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1206,14 +1305,19 @@ done:
 htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
+    hbool_t exists;          /* Flag to indicate if link exists */
     htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Synchronously check if a link exists */
-    if ((ret_value = H5L__exists_api_common(loc_id, name, lapl_id, NULL, NULL)) < 0)
+    exists = FALSE;
+    if (H5L__exists_api_common(loc_id, name, &exists, lapl_id, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to synchronously check link existence")
+
+    /* Set return value */
+    ret_value = (htri_t)exists;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1227,30 +1331,30 @@ done:
  * Return:      Success:    TRUE/FALSE/FAIL
  *
  *--------------------------------------------------------------------------*/
-htri_t
+herr_t
 H5Lexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name,
-                hid_t lapl_id, hid_t es_id)
+                hbool_t *exists, hid_t lapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
     void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    htri_t         ret_value = FAIL;            /* Return value */
+    herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("t", "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id);
+    H5TRACE8("e", "*s*sIui*s*bii", app_file, app_func, app_line, loc_id, name, exists, lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
         token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Asynchronously check if a link exists */
-    if ((ret_value = H5L__exists_api_common(loc_id, name, lapl_id, token_ptr, &vol_obj)) < 0)
+    if (H5L__exists_api_common(loc_id, name, exists, lapl_id, token_ptr, &vol_obj) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to asynchronously check link existence")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE8(FUNC, "*s*sIui*s*bii", app_file, app_func, app_line, loc_id, name, exists, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1902,6 +2006,88 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lvisit_by_name2() */
 
+/*-------------------------------------------------------------------------
+ * Function: H5Lunpack_elink_val
+ *
+ * Purpose: Given a buffer holding the "link value" from an external link,
+ *              gets pointers to the information within the link value buffer.
+ *
+ *              External link link values contain some flags and
+ *              two NULL-terminated strings, one after the other.
+ *
+ *              The FLAGS value will be filled in and FILENAME and
+ *              OBJ_PATH will be set to pointers within ext_linkval (unless
+ *              any of these values is NULL).
+ *
+ *              Using this function on strings that aren't external link
+ *              udata buffers can result in segmentation faults.
+ *
+ * Return: Non-negative on success/ Negative on failure
+ *
+ * Programmer:  James Laird
+ *              Monday, July 17, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size, unsigned *flags, const char **filename,
+                    const char **obj_path)
+{
+    const uint8_t *ext_linkval = (const uint8_t *)_ext_linkval; /* Pointer to the link value */
+    unsigned       lnk_version;                                 /* External link format version */
+    unsigned       lnk_flags;                                   /* External link flags */
+    size_t         len;                                         /* Length of the filename in the linkval*/
+    herr_t         ret_value = SUCCEED;                         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*xz*Iu**s**s", _ext_linkval, link_size, flags, filename, obj_path);
+
+    /* Sanity check external link buffer */
+    if (ext_linkval == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an external link linkval buffer")
+    lnk_version = (*ext_linkval >> 4) & 0x0F;
+    lnk_flags   = *ext_linkval & 0x0F;
+    if (lnk_version > H5L_EXT_VERSION)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad version number for external link")
+    if (lnk_flags & (unsigned)~H5L_EXT_FLAGS_ALL)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad flags for external link")
+    if (link_size <= 2)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid external link buffer")
+
+    /* Try to do some error checking.  If the last character in the linkval
+     * (the last character of obj_path) isn't NULL, then something's wrong.
+     */
+    if (ext_linkval[link_size - 1] != '\0')
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "linkval buffer is not NULL-terminated")
+
+    /* We're now guaranteed that HDstrlen won't segfault, since the buffer has
+     * at least one NULL in it.
+     */
+    len = HDstrlen((const char *)ext_linkval + 1);
+
+    /* If the first NULL we found was at the very end of the buffer, then
+     * this external link value has no object name and is invalid.
+     */
+    if ((len + 1) >= (link_size - 1))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "linkval buffer doesn't contain an object path")
+
+    /* If we got here then the buffer contains (at least) two strings packed
+     * in the correct way.  Assume it's correct and return pointers to the
+     * filename and object path.
+     */
+    if (filename)
+        *filename = (const char *)ext_linkval + 1;
+    if (obj_path)
+        *obj_path = ((const char *)ext_linkval + 1) + len + 1; /* Add one for NULL terminator */
+
+    /* Set the flags to return */
+    if (flags)
+        *flags = lnk_flags;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Lunpack_elink_val() */
+
 /*
  *-------------------------------------------------------------------------
  *-------------------------------------------------------------------------
@@ -2296,7 +2482,7 @@ done:
     /* Close the location given to the user callback if it was created */
     if (grp_id >= 0) {
         if (H5I_dec_app_ref(grp_id) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
     } /* end if */
     else if (grp != NULL) {
         if (H5G_close(grp) < 0)
@@ -3061,7 +3247,7 @@ done:
     /* Close the location given to the user callback if it was created */
     if (grp_id >= 0) {
         if (H5I_dec_app_ref(grp_id) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
     } /* end if */
     else if (grp != NULL) {
         if (H5G_close(grp) < 0)
@@ -3298,7 +3484,7 @@ H5L__exists_final_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
     FUNC_ENTER_STATIC_NOERR
 
     /* Check if the name in this group resolved to a valid link */
-    udata->exists = (hbool_t)(lnk != NULL);
+    *udata->exists = (hbool_t)(lnk != NULL);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -3353,10 +3539,10 @@ H5L__exists_inter_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
                 HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if link exists")
         } /* end if */
         else
-            udata->exists = TRUE;
+            *udata->exists = TRUE;
     } /* end if */
     else
-        udata->exists = FALSE;
+        *udata->exists = FALSE;
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -3381,20 +3567,21 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5L_exists_tolerant(const H5G_loc_t *loc, const char *name)
+herr_t
+H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hbool_t *exists)
 {
     H5L_trav_le_t  udata;            /* User data for traversal */
     H5G_traverse_t cb_func;          /* Callback function for tranversal */
     char *         name_copy = NULL; /* Duplicate of name */
     char *         name_trav;        /* Name to traverse */
-    htri_t         ret_value = FAIL; /* Return value */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(loc);
     HDassert(name);
+    HDassert(exists);
 
     /* Copy the name and skip leading '/'s */
     name_trav = name_copy = H5MM_strdup(name);
@@ -3403,27 +3590,25 @@ H5L_exists_tolerant(const H5G_loc_t *loc, const char *name)
 
     /* A path of "/" will always exist in a file */
     if ('\0' == *name_trav)
-        HGOTO_DONE(TRUE)
-
-    /* Set up user data & correct callback */
-    udata.exists = FALSE;
-    if (NULL == (udata.sep = HDstrchr(name_trav, '/')))
-        cb_func = H5L__exists_final_cb;
+        *exists = TRUE;
     else {
-        /* Chew through adjacent separators, if present */
-        do {
-            *udata.sep = '\0';
-            udata.sep++;
-        } while ('/' == *udata.sep);
-        cb_func = H5L__exists_inter_cb;
-    } /* end else */
+        /* Set up user data & correct callback */
+        udata.exists = exists;
+        if (NULL == (udata.sep = HDstrchr(name_trav, '/')))
+            cb_func = H5L__exists_final_cb;
+        else {
+            /* Chew through adjacent separators, if present */
+            do {
+                *udata.sep = '\0';
+                udata.sep++;
+            } while ('/' == *udata.sep);
+            cb_func = H5L__exists_inter_cb;
+        } /* end else */
 
-    /* Traverse the group hierarchy to locate the link to check */
-    if (H5G_traverse(loc, name_trav, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, cb_func, &udata) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if link exists")
-
-    /* Set return value */
-    ret_value = (htri_t)udata.exists;
+        /* Traverse the group hierarchy to locate the link to check */
+        if (H5G_traverse(loc, name_trav, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, cb_func, &udata) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if link exists")
+    }
 
 done:
     /* Release duplicated string */
@@ -3440,32 +3625,35 @@ done:
  * Note:	Same as H5L_exists_tolerant, except that missing links are reported
  *		as failures
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
+ * Return:	Non-negative on success, with *exists set/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 16 2007
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5L__exists(const H5G_loc_t *loc, const char *name)
+herr_t
+H5L__exists(const H5G_loc_t *loc, const char *name, hbool_t *exists)
 {
-    H5L_trav_le_t udata;            /* User data for traversal */
-    htri_t        ret_value = FAIL; /* Return value */
+    H5L_trav_le_t udata;               /* User data for traversal */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity checks */
+    HDassert(loc);
+    HDassert(name);
+    HDassert(exists);
+
     /* A path of "/" will always exist in a file */
     if (0 == HDstrcmp(name, "/"))
-        HGOTO_DONE(TRUE)
-
-    /* Traverse the group hierarchy to locate the object to get info about */
-    udata.exists = FALSE;
-    if (H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__exists_final_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_EXISTS, FAIL, "path doesn't exist")
-
-    /* Set return value */
-    ret_value = (htri_t)udata.exists;
+        *exists = TRUE;
+    else {
+        /* Traverse the group hierarchy to locate the object to get info about */
+        udata.exists = exists;
+        if (H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__exists_final_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_EXISTS, FAIL, "link doesn't exist")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

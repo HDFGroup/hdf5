@@ -337,6 +337,7 @@ set (H5_TESTS
     thread_id # special link
     vol
     timer
+    cmpd_dtransform
     event_set # multiple source
 )
 
