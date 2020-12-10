@@ -174,9 +174,10 @@ static const H5VL_class_t reg_opt_vol_g = {
  * functionality.
  */
 static const H5VL_class_t fake_vol_g = {
-    0,              /* version      */
+    H5VL_VERSION,   /* VOL class struct version */
     FAKE_VOL_VALUE, /* value        */
     FAKE_VOL_NAME,  /* name         */
+    0,              /* connector version */
     0,              /* capability flags */
     NULL,           /* initialize   */
     NULL,           /* terminate    */
@@ -392,6 +393,7 @@ test_vol_registration(void)
     htri_t is_registered = FAIL;
     hid_t  vol_id        = H5I_INVALID_HID;
     hid_t  vol_id2       = H5I_INVALID_HID;
+    H5VL_class_t *bad_fake_vol_class = NULL;
 
     TESTING("VOL registration");
 
@@ -414,6 +416,19 @@ test_vol_registration(void)
         FAIL_PUTS_ERROR("should not be able to register a connector with an incorrect property list");
     if (H5Pclose(lapl_id) < 0)
         TEST_ERROR;
+
+    /* Test registering a VOL connector with an incompatible version # */
+    if (NULL == (bad_fake_vol_class = HDmalloc(sizeof(H5VL_class_t))))
+        TEST_ERROR;
+    HDmemcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
+    bad_fake_vol_class->version = H5VL_VERSION + 1;
+    H5E_BEGIN_TRY {
+        vol_id = H5VLregister_connector(bad_fake_vol_class, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if (H5I_INVALID_HID != vol_id)
+        FAIL_PUTS_ERROR("should not be able to register a connector with an incompatible version #");
+    HDfree(bad_fake_vol_class);
+    bad_fake_vol_class = NULL;
 
     /* Load a VOL interface
      * The vipl_id does nothing without a VOL that needs it, but we do need to
@@ -488,8 +503,11 @@ error:
         H5Pclose(vipl_id);
     }
     H5E_END_TRY;
-    return FAIL;
 
+    if (bad_fake_vol_class)
+        HDfree(bad_fake_vol_class);
+
+    return FAIL;
 } /* end test_vol_registration() */
 
 /*-------------------------------------------------------------------------

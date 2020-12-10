@@ -245,9 +245,10 @@ static herr_t H5VL_nonblock_optional(void *obj, int op_type, hid_t dxpl_id, void
 
 /* Non-blocking VOL connector class struct */
 static const H5VL_class_t H5VL_nonblock_g = {
-    H5VL_NONBLOCK_VERSION,                   /* version      */
+    H5VL_VERSION,                            /* VOL class struct version */
     (H5VL_class_value_t)H5VL_NONBLOCK_VALUE, /* value        */
     H5VL_NONBLOCK_NAME,                      /* name         */
+    H5VL_NONBLOCK_VERSION,                   /* connector version */
     0,                                       /* capability flags */
     H5VL_nonblock_init,                      /* initialize   */
     H5VL_nonblock_term,                      /* terminate    */

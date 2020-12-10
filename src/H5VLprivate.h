@@ -14,7 +14,7 @@
 #define _H5VLprivate_H
 
 /* Include package's public header */
-#include "H5VLpublic.h" /* Generic Functions                    */
+#include "H5VLpublic.h"         /* Generic Functions                    */
 
 /* Private headers needed by this file */
 
@@ -69,7 +69,8 @@ H5_DLL int64_t H5VL_conn_dec_rc(H5VL_t *connector);
 H5_DLL herr_t  H5VL_conn_free(const H5VL_connector_prop_t *info);
 
 /* Functions that deal with VOL connectors */
-H5_DLL hid_t H5VL_register_connector(const void *cls, hbool_t app_ref, hid_t vipl_id);
+union H5PL_key_t;
+H5_DLL herr_t H5VL_check_plugin_load(const H5VL_class_t *cls, const union H5PL_key_t *key, hbool_t *success);
 
 /* NOTE:    The object and ID functions below deal in VOL objects (i.e.;
  *          H5VL_object_t). Similar non-VOL calls exist in H5Iprivate.h. Use

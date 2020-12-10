@@ -1124,7 +1124,7 @@ done:
 } /* end H5VL_file_is_same() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_register_connector
+ * Function:    H5VL__register_connector
  *
  * Purpose:     Registers a new VOL connector as a member of the virtual object
  *              layer class.
@@ -1140,13 +1140,13 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
+H5VL__register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
 {
     const H5VL_class_t *cls       = (const H5VL_class_t *)_cls;
     H5VL_class_t *      saved     = NULL;
     hid_t               ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(cls);
@@ -1177,10 +1177,10 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_register_connector() */
+} /* end H5VL__register_connector() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL__register_connector
+ * Function:    H5VL__register_connector_by_class
  *
  * Purpose:     Registers a new VOL connector as a member of the virtual object
  *              layer class.
@@ -1197,7 +1197,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL__register_connector(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id)
+H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id)
 {
     H5VL_get_connector_ud_t op_data;                     /* Callback info for connector search */
     hid_t                   ret_value = H5I_INVALID_HID; /* Return value */
@@ -1222,13 +1222,13 @@ H5VL__register_connector(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id
     } /* end if */
     else {
         /* Create a new class ID */
-        if ((ret_value = H5VL_register_connector(cls, app_ref, vipl_id)) < 0)
+        if ((ret_value = H5VL__register_connector(cls, app_ref, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector")
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__register_connector() */
+} /* end H5VL__register_connector_by_class() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__register_connector_by_name
@@ -1282,7 +1282,7 @@ H5VL__register_connector_by_name(const char *name, hbool_t app_ref, hid_t vipl_i
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")
 
         /* Register the connector we loaded */
-        if ((ret_value = H5VL_register_connector(cls, app_ref, vipl_id)) < 0)
+        if ((ret_value = H5VL__register_connector(cls, app_ref, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID")
     } /* end else */
 
@@ -1342,7 +1342,7 @@ H5VL__register_connector_by_value(H5VL_class_value_t value, hbool_t app_ref, hid
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")
 
         /* Register the connector we loaded */
-        if ((ret_value = H5VL_register_connector(cls, app_ref, vipl_id)) < 0)
+        if ((ret_value = H5VL__register_connector(cls, app_ref, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID")
     } /* end else */
 
@@ -2391,6 +2391,58 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_wrap_register() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_check_plugin_load
+ *
+ * Purpose:     Check if a VOL connector matches the search criteria, and
+ *              can be loaded.
+ *
+ * Note:        Matching the connector's name / value, but the connector
+ *              having an incompatible version is not an error, but means
+ *              that the connector isn't a "match".  Setting the SUCCEED
+ *              value to FALSE and not failing for that case allows the
+ *              plugin framework to keep looking for other DLLs that match
+ *              and have a compatible version.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *success)
+{
+    herr_t           ret_value    = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(cls);
+    HDassert(key);
+    HDassert(success);
+
+    /* Which kind of key are we looking for? */
+    if (key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
+        /* Check if plugin name matches VOL connector class name */
+        if (cls->name && !HDstrcmp(cls->name, key->vol.u.name))
+            *success     = TRUE;
+    }     /* end if */
+    else {
+        /* Sanity check */
+        HDassert(key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+
+        /* Check if plugin value matches VOL connector class value */
+        if (cls->value == key->vol.u.value)
+            *success     = TRUE;
+    }     /* end else */
+
+    /* Connector is a match, but might not be a compatible version */
+    if (*success && cls->version != H5VL_VERSION)
+        *success = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_check_plugin_load() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_setup_args
