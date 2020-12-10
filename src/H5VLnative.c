@@ -50,7 +50,6 @@ static const H5VL_class_t H5VL_native_cls_g = {
     H5VL_VERSION,        /* VOL class struct version */
     H5VL_NATIVE_VALUE,   /* value        */
     H5VL_NATIVE_NAME,    /* name         */
-    H5VL_NATIVE_VERSION, /* connector version */
     0,                   /* capability flags */
     NULL,                /* initialize   */
     H5VL__native_term,   /* terminate    */

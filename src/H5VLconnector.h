@@ -448,7 +448,6 @@ typedef struct H5VL_class_t {
     unsigned           version;          /**< VOL connector class struct version #     */
     H5VL_class_value_t value;            /**< Value to identify connector              */
     const char *       name;             /**< Connector name (MUST be unique!)         */
-    unsigned           conn_version;     /**< Version # of connector                   */
     unsigned           cap_flags;        /**< Capability flags for connector           */
     herr_t (*initialize)(hid_t vipl_id); /**< Connector initialization callback        */
     herr_t (*terminate)(void);           /**< Connector termination callback           */

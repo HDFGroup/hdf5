@@ -266,7 +266,6 @@ static const H5VL_class_t H5VL_pass_through_g = {
     H5VL_VERSION,                            /* VOL class struct version */
     (H5VL_class_value_t)H5VL_PASSTHRU_VALUE, /* value        */
     H5VL_PASSTHRU_NAME,                      /* name         */
-    H5VL_PASSTHRU_VERSION,                   /* connector version */
     0,                                       /* capability flags */
     H5VL_pass_through_init,                  /* initialize   */
     H5VL_pass_through_term,                  /* terminate    */

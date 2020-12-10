@@ -45,7 +45,6 @@ static const H5VL_class_t fake_vol_g = {
     H5VL_VERSION,   /* VOL class struct version */
     FAKE_VOL_VALUE, /* value        */
     FAKE_VOL_NAME,  /* name         */
-    0,              /* connector version */
     0,              /* capability flags */
     NULL,           /* initialize   */
     NULL,           /* terminate    */
