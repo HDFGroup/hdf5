@@ -161,6 +161,14 @@ New Features
 
     Library:
     --------
+    - Added H5VL_VERSION macro that indicates the version of the VOL framework
+        implemented by a version of the library.  Currently, compatibility
+        checking enforces that the 'version' field in the H5VL_class_t for
+        a VOL connector must match the version of the VOL framework for the
+        library when it is registered or dynamically loaded.
+
+        (QAK - 2020/12/10)
+
     - Added two new API routines for tracking library memory use:
         H5get_alloc_stats() and H5get_free_list_sizes().
 

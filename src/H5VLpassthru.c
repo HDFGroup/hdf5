@@ -263,7 +263,7 @@ static herr_t H5VL_pass_through_optional(void *obj, int op_type, hid_t dxpl_id, 
 
 /* Pass through VOL connector class struct */
 static const H5VL_class_t H5VL_pass_through_g = {
-    H5VL_PASSTHRU_VERSION,                   /* version      */
+    H5VL_VERSION,                            /* VOL class struct version */
     (H5VL_class_value_t)H5VL_PASSTHRU_VALUE, /* value        */
     H5VL_PASSTHRU_NAME,                      /* name         */
     0,                                       /* capability flags */

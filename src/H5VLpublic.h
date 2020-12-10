@@ -25,6 +25,17 @@
 /* Public Macros */
 /*****************/
 
+/**
+ * \ingroup H5VLDEF
+ * \brief Version # of VOL class struct & callbacks
+ *
+ * \details Each VOL connector must set the 'version' field in the H5VL_class_t
+ *          struct to the version of the H5VL_class_t struct that the connector
+ *          implements.  The HDF5 library will reject connectors with
+ *          incompatible structs.
+ */
+#define H5VL_VERSION 0
+
 /* VOL connector identifier values
  * These are H5VL_class_value_t values, NOT hid_t values!
  */
