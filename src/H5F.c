@@ -461,8 +461,8 @@ done:
  *
  * Purpose:     This is the common function for 'post open' operations
  *
- * Return:      Success:    A file ID
- *              Failure:    H5I_INVALID_HID
+ * Return:      SUCCEED/FAIL
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
