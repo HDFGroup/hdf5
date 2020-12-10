@@ -262,7 +262,6 @@ set (ttsafe_SOURCES
 
 set (event_set_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/event_set.c
-    ${HDF5_TEST_SOURCE_DIR}/nb_vol_conn.c
 )
 
 set (H5_TESTS

@@ -18,7 +18,6 @@
  */
 #include "h5test.h"
 #include "H5srcdir.h"
-#include "nb_vol_conn.h"
 
 const char *FILENAME[] = {"event_set_1", NULL};
 
@@ -107,7 +106,6 @@ error:
 int
 main(void)
 {
-    H5VL_nonblock_info_t nb_info;                   /* Non-blocking VOL connector info */
     hid_t                fapl_id = H5I_INVALID_HID; /* File access property list */
     int                  nerrors = 0;               /* Error count */
 
@@ -115,19 +113,8 @@ main(void)
     h5_reset();
     fapl_id = h5_fileaccess();
 
-    /* Set up the non-blocking VOL connector's info */
-    nb_info.under_vol_id   = H5VL_NATIVE;
-    nb_info.under_vol_info = NULL;
-
-    /* Use the non-blocking VOL connector for these tests */
-    if (H5Pset_vol(fapl_id, H5VL_NONBLOCK, &nb_info) < 0)
-        nerrors++;
-
     /* Tests */
     nerrors += test_es_create();
-#ifdef NOT_YET
-    nerrors += test_file_create(fapl_id, FILENAME[0]);
-#endif /* NOT_YET */
 
     /* Cleanup */
     h5_cleanup(FILENAME, fapl_id);
