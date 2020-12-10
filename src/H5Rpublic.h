@@ -127,7 +127,7 @@ extern "C" {
  *          that is a group, dataset or committed datatype property list.
  *
  *          The parameter \p ref_ptr is a pointer of type 
- *          \ref H5R_ref_t, which is defined in \c H5Rpublic.h 
+ *          H5R_ref_t, which is defined in H5Rpublic.h 
  *          as follows:   
  *          \snippet this H5R_ref_t_snip
  *
@@ -140,7 +140,6 @@ extern "C" {
  *
  * \since 1.12.0 
  *
- *-------------------------------------------------------------------------
  */
 H5_DLL herr_t   H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
 
@@ -172,13 +171,12 @@ H5_DLL herr_t   H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, 
  *          that is a dataset property list in this case.
  *
  *          The parameter \p ref_ptr is a pointer of type 
- *          \ref H5R_ref_t, which is defined in \c H5Rpublic.h 
+ *          H5R_ref_t, which is defined in H5Rpublic.h 
  *          as follows:   
  *          \snippet this H5R_ref_t_snip
  *
  * \since 1.12.0 
  *
- *-------------------------------------------------------------------------
  */
 H5_DLL herr_t   H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, H5R_ref_t *ref_ptr);
 
@@ -211,13 +209,12 @@ H5_DLL herr_t   H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id,
  *          property list.
  *
  *          The parameter \p ref_ptr is a pointer of type 
- *          \ref H5R_ref_t, which is defined in \c H5Rpublic.h 
+ *          H5R_ref_t, which is defined in H5Rpublic.h 
  *          as follows:   
  *          \snippet this H5R_ref_t_snip
  *
  * \since 1.12.0 
  *
- *-------------------------------------------------------------------------
  */
 H5_DLL herr_t   H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl_id, H5R_ref_t *ref_ptr);
 
@@ -236,7 +233,7 @@ H5_DLL herr_t   H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_
  *          from a previous create call.
  *           
  *          The parameter \p ref_ptr is a pointer of type 
- *          \ref H5R_ref_t, which is defined in \c H5Rpublic.h 
+ *          H5R_ref_t, which is defined in H5Rpublic.h 
  *          as follows:   
  *          \snippet this H5R_ref_t_snip
  *
@@ -266,7 +263,7 @@ H5_DLL herr_t   H5Rdestroy(H5R_ref_t *ref_ptr);
  *          returns the type of the reference.
  *
  *          The parameter \p ref_ptr is a pointer of type 
- *          \ref H5R_ref_t, which is defined in \c H5Rpublic.h 
+ *          H5R_ref_t, which is defined in H5Rpublic.h 
  *          as follows:   
  *          \snippet this H5R_ref_t_snip
  *
@@ -300,7 +297,6 @@ H5_DLL herr_t   H5Rdestroy(H5R_ref_t *ref_ptr);
  *
  * \since 1.12.0 
  *
- *-------------------------------------------------------------------------
  */
 H5_DLL H5R_type_t   H5Rget_type(const H5R_ref_t *ref_ptr);
 
@@ -320,7 +316,7 @@ H5_DLL H5R_type_t   H5Rget_type(const H5R_ref_t *ref_ptr);
  * \details H5Requal() determines whether two references point to the 
  *          same object, region or attribute.
  *
- *          \ref H5R_ref_t is a \c struct defined in \c H5Rpublic.h 
+ *          H5R_ref_t is a \c struct defined in H5Rpublic.h 
  *          as follows:   
  *          \snippet this H5R_ref_t_snip
  *
@@ -345,7 +341,7 @@ H5_DLL htri_t   H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
  *          \p src_ref_ptr points to the reference to copy and 
  *          \p dst_ref_ptr is the pointer to the destination reference.
  *
- *          \ref H5R_ref_t is defined in \c H5Rpublic.h as follows:   
+ *          H5R_ref_t is defined in H5Rpublic.h as follows:   
  *          \snippet this H5R_ref_t_snip
  *
  * \todo Check H5R_ref_t is different from portal; 
@@ -354,7 +350,6 @@ H5_DLL htri_t   H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
  *
  * \since 1.12.0 
  *
- *-------------------------------------------------------------------------
  */
 H5_DLL herr_t   H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr);
 
@@ -380,7 +375,7 @@ H5_DLL hid_t    H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
  *          the type of the referenced object in \p obj_type.
  *
  *          The parameter \p ref_ptr is a pointer of type 
- *          \ref H5R_ref_t, which is defined in \c H5Rpublic.h 
+ *          H5R_ref_t, which is defined in H5Rpublic.h 
  *          as follows:   
  *          \snippet this H5R_ref_t_snip
  *
@@ -393,7 +388,7 @@ H5_DLL hid_t    H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
  *          object, is the type of the object that the reference points
  *          to. When the function completes successfully, it returns one
  *          of the following valid object type values
- *          (defined in \c H5Opublic.h):
+ *          (defined in H5Opublic.h):
  *           
  *          <table>
  *          <tr>
@@ -416,7 +411,6 @@ H5_DLL hid_t    H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
  *
  * \since 1.12.0 
  *
- *-------------------------------------------------------------------------
  */
 H5_DLL herr_t   H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
 
@@ -447,7 +441,7 @@ H5_DLL herr_t   H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *
  *          H5Rget_file_name() call, which will retrieve the actual name.
  *
  *          The parameter \p ref_ptr is a pointer of type 
- *          \ref H5R_ref_t, which is defined in \c H5Rpublic.h 
+ *          H5R_ref_t, which is defined in H5Rpublic.h 
  *          as follows:   
  *          \snippet this H5R_ref_t_snip
  *
@@ -477,7 +471,7 @@ H5_DLL ssize_t  H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf, size_t siz
  * \details H5Rget_obj_name() retrieves the object name for the object, 
  *          region or attribute reference pointed to by ref_ptr.
  *          The parameter \p ref_ptr is a pointer of type 
- *          \ref H5R_ref_t, which is defined in \c H5Rpublic.h 
+ *          H5R_ref_t, which is defined in H5Rpublic.h 
  *          as follows:   
  *          \snippet this H5R_ref_t_snip
  *
@@ -512,7 +506,6 @@ H5_DLL ssize_t  H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf, size_t siz
  *
  * \since 1.12.0 
  *
- *-------------------------------------------------------------------------
  */
 H5_DLL ssize_t  H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf, size_t size);
 
@@ -540,7 +533,7 @@ H5_DLL ssize_t  H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf, si
  *          call, which will retrieve the actual name.
  *
  *          The parameter \p ref_ptr is a pointer of type 
- *          \ref H5R_ref_t, which is defined in \c H5Rpublic.h 
+ *          H5R_ref_t, which is defined in H5Rpublic.h 
  *          as follows:   
  *          \snippet this H5R_ref_t_snip
  *
@@ -598,12 +591,12 @@ H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
  *
  *          <table>
  *          <tr>
- *              <td>\ref hdset_reg_ref_t</td>
+ *              <td>hdset_reg_ref_t</td>
  *              <td>#H5R_DATASET_REGION</td>
  *              <td>Dataset region reference</td>
  *          </tr>
  *          <tr>
- *              <td>\ref hobj_ref_t</td>
+ *              <td>#hobj_ref_t</td>
  *              <td>#H5R_OBJECT</td>
  *              <td>Object reference</td>
  *          </tr>
@@ -624,13 +617,11 @@ H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
  *
  * \todo Check couldn't find the exact example as in portal;
  *       Move part of parameter description for space_id to detail
- * \todo Check I split history into version and since
  * 
  * \version 1.8.8 Fortran updated to Fortran2003.
  *
  * \since 1.8.0
  *
- *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id);
 
@@ -697,7 +688,7 @@ H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t re
  *          .
  *
  *          When the function completes successfully, it returns one of 
- *          the following valid object type values (defined in \c H5Opublic.h):
+ *          the following valid object type values (defined in H5Opublic.h):
  *
  *          <table>
  *          <tr>
@@ -722,7 +713,6 @@ H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t re
  *
  * \since 1.8.0 
  *
- *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H5O_type_t *obj_type);
 
@@ -734,8 +724,8 @@ H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, c
  *
  * \brief Sets up a dataspace and selection as specified by a region reference
  *
- * \param[in] loc_id File identifier or identifier for any object 
- *                   in the file containing the referenced region
+ * \param[in] id File identifier or identifier for any object 
+ *               in the file containing the referenced region
  * \param[in] ref_type Reference type of \p ref, which must be 
  *                     #H5R_DATASET_REGION
  * \param[in] ref Region reference to open
@@ -747,7 +737,7 @@ H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, c
  *          a region reference, \p ref, and defines a selection matching the
  *          selection pointed to by \p ref within the dataspace copy.
  *
- *          \p loc_id is used to identify the file containing the referenced 
+ *          \p id is used to identify the file containing the referenced 
  *          region; it can be a file identifier or an identifier for any object in the file.
  *
  *          The parameter \p ref_type specifies the reference type of \p ref 
@@ -763,10 +753,10 @@ H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, c
  *      \snippet h5_ref2reg_deprec.c H5Rget_region_snip
  *
  * \todo Check the example is a bit different from portal
+ * \todo Change the "dataset" to "id" in the declaration
  *
- *-------------------------------------------------------------------------
  */
-H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
+H5_DLL hid_t H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref);
 
 /**
  *-------------------------------------------------------------------------
@@ -796,7 +786,7 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  *          containing the reference or an identifier for any object 
  *          in that file.
  *
- *          \ref H5R_type_t is the reference type of \p ref. 
+ *          #H5R_type_t is the reference type of \p ref. 
  *          Valid values include the following:
  *
  *          <table>
@@ -840,13 +830,10 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  *      An example snippet from examples/h5_ref2reg_deprec.c:
  *      \snippet h5_ref2reg_deprec.c H5Rget_name_snip
  *
- * \todo Check I split history into version and since
- *
  * \version 1.8.8 Fortran updated to Fortran2003.
  *
  * \since 1.8.0
  *
- *-------------------------------------------------------------------------
  */
 H5_DLL ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *ref, char *name, size_t size);
 
