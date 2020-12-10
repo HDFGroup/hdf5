@@ -43,7 +43,8 @@
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL hid_t   H5VL__register_connector(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id);
+H5_DLL hid_t   H5VL__register_connector(const void *cls, hbool_t app_ref, hid_t vipl_id);
+H5_DLL hid_t   H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id);
 H5_DLL hid_t   H5VL__register_connector_by_name(const char *name, hbool_t app_ref, hid_t vipl_id);
 H5_DLL hid_t   H5VL__register_connector_by_value(H5VL_class_value_t value, hbool_t app_ref, hid_t vipl_id);
 H5_DLL htri_t  H5VL__is_connector_registered_by_name(const char *name);
