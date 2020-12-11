@@ -3646,3 +3646,5 @@
 ./tools/test/misc/Makefile.in
 ./tools/test/misc/vds/Makefile.in
 ./tools/test/perform/Makefile.in
+./utils/Makefile.in
+./utils/mirror_vfd/Makefile.in
