@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@lbl.gov>
+ * Programmer:	Quincey Koziol
  *		Wednesday, April 8, 2020
  *
  * Purpose:	This file contains declarations which are visible only within
