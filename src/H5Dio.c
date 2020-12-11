@@ -417,7 +417,6 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_
     }  /* end else */
 #endif /*H5_HAVE_PARALLEL*/
 
-
     /* Make certain that the number of elements in each selection is the same */
     nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
     if (nelmts != H5S_GET_SELECT_NPOINTS(file_space))

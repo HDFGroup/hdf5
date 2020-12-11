@@ -14864,16 +14864,16 @@ error:
 static herr_t
 test_h5s_block(void)
 {
-    hid_t   file_id                     = -1;   /* File ID */
-    char    filename[FILENAME_BUF_SIZE] = "";
-    hid_t   dset_id                     = -1;   /* Dataset ID */
-    hsize_t dims[1]                     = {20}; /* Dataset's dataspace size */
-    hsize_t start                       = 2;    /* Starting offset of hyperslab selection */
-    hsize_t count                       = 10;   /* Count of hyperslab selection */
-    hid_t   file_space_id               = -1;   /* File dataspace ID */
-    int     buf[20];                            /* Memory buffer for I/O */
-    unsigned u;                                 /* Local index variable */
-    herr_t  ret;
+    hid_t    file_id                     = -1; /* File ID */
+    char     filename[FILENAME_BUF_SIZE] = "";
+    hid_t    dset_id                     = -1;   /* Dataset ID */
+    hsize_t  dims[1]                     = {20}; /* Dataset's dataspace size */
+    hsize_t  start                       = 2;    /* Starting offset of hyperslab selection */
+    hsize_t  count                       = 10;   /* Count of hyperslab selection */
+    hid_t    file_space_id               = -1;   /* File dataspace ID */
+    int      buf[20];                            /* Memory buffer for I/O */
+    unsigned u;                                  /* Local index variable */
+    herr_t   ret;
 
     TESTING("contiguous memory buffers with H5S_BLOCK");
 
@@ -14886,7 +14886,8 @@ test_h5s_block(void)
         FAIL_STACK_ERROR
     if ((file_space_id = H5Screate_simple(1, dims, NULL)) < 0)
         FAIL_STACK_ERROR
-    if ((dset_id = H5Dcreate2(file_id, "dset", H5T_NATIVE_INT, file_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dset_id = H5Dcreate2(file_id, "dset", H5T_NATIVE_INT, file_space_id, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     for (u = 0; u < 20; u++)
@@ -14897,9 +14898,8 @@ test_h5s_block(void)
     /*********/
 
     /* Check error cases */
-    H5E_BEGIN_TRY {
-        ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_BLOCK, H5P_DEFAULT, buf);
-    } H5E_END_TRY;
+    H5E_BEGIN_TRY { ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_BLOCK, H5P_DEFAULT, buf); }
+    H5E_END_TRY;
     if (ret == SUCCEED)
         TEST_ERROR
 
