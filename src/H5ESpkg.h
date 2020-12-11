@@ -11,8 +11,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Wednesday, April 8, 2020
+ * Programmer:  Quincey Koziol
+ *              Wednesday, April 8, 2020
  *
  * Purpose:	This file contains declarations which are visible only within
  *		the H5ES package.  Source files outside the H5ES package should

@@ -270,7 +270,7 @@ H5_init_library(void)
     if (H5FS_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize FS interface")
     if (H5S_init() < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize dataspace interface")
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataspace interface")
 
     /* Finish initializing interfaces that depend on the interfaces above */
     if (H5VL_init_phase2() < 0)
@@ -1249,7 +1249,6 @@ H5is_library_terminating(hbool_t *is_terminating /*out*/)
 
 #if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API) &&         \
     defined(H5_HAVE_WIN_THREADS)
-
 /*-------------------------------------------------------------------------
  * Function:    DllMain
  *

@@ -193,15 +193,15 @@ const char *FILENAME[] = {"dataset",             /* 0 */
 #define DATA_NOT_CORRUPTED 0
 
 /* Parameters for the "set local" test */
-#define BOGUS2_PERM_NPARMS 2 /* Number of "permanent" parameters */
+#define BOGUS2_PERM_NPARMS 2  /* Number of "permanent" parameters */
 #define BOGUS2_PARAM_1     13 /* (No particular meaning, just for checking value) */
 #define BOGUS2_PARAM_2     35 /* (No particular meaning, just for checking value) */
-#define BOGUS2_ALL_NPARMS  4 /* Total number of parameter = permanent + "local" parameters */
+#define BOGUS2_ALL_NPARMS  4  /* Total number of parameter = permanent + "local" parameters */
 
 /* Dimensionality for conversion buffer test */
-#define DIM1 100 /* Dim. Size of data member # 1 */
+#define DIM1 100  /* Dim. Size of data member # 1 */
 #define DIM2 5000 /* Dim. Size of data member # 2 */
-#define DIM3 10 /* Dim. Size of data member # 3 */
+#define DIM3 10   /* Dim. Size of data member # 3 */
 
 /* Parameters for internal filter test */
 #define FILTER_CHUNK_DIM1 2

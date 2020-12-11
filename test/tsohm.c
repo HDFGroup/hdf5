@@ -3817,10 +3817,10 @@ test_sohm(void)
 {
     MESSAGE(5, ("Testing Shared Object Header Messages\n"));
 
-    test_sohm_fcpl();        /* Test SOHMs and file creation plists */
-    test_sohm_fcpl_errors(); /* Bogus H5P* calls for SOHMs */
-    test_sohm_size1();       /* Tests the sizes of files with one SOHM */
-#if 0                        /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
+    test_sohm_fcpl();          /* Test SOHMs and file creation plists */
+    test_sohm_fcpl_errors();   /* Bogus H5P* calls for SOHMs */
+    test_sohm_size1();         /* Tests the sizes of files with one SOHM */
+#if 0                          /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
     test_sohm_size_consistency_open_create();
 #endif /* Jira HDFFV-10645 */
     test_sohm_attrs();         /* Tests shared messages in attributes */

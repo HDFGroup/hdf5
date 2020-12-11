@@ -833,8 +833,8 @@ herr_t
 H5D__virtual_delete(H5F_t *f, H5O_storage_t *storage)
 {
 #ifdef NOT_YET
-    int heap_rc; /* Reference count of global heap object */
-#endif           /* NOT_YET */
+    int heap_rc;                /* Reference count of global heap object */
+#endif                          /* NOT_YET */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE

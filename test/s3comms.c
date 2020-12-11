@@ -372,7 +372,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 #define S3_TEST_RESOURCE_TEXT_PUBLIC     "Poe_Raven.txt"
 #define S3_TEST_RESOURCE_MISSING         "missing.csv"
 
-#define S3_TEST_RUN_TIMEOUT  0 /* run tests that might hang */
+#define S3_TEST_RUN_TIMEOUT  0   /* run tests that might hang */
 #define S3_TEST_MAX_URL_SIZE 256 /* char array size */
 
 /* Global variables for aws test profile.

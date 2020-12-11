@@ -504,7 +504,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -668,7 +668,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -931,8 +931,7 @@ H5L__delete_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **tok
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Unlink */
-    if (H5VL_link_specific(*vol_obj_ptr, &loc_params, H5VL_LINK_DELETE, H5P_DATASET_XFER_DEFAULT, token_ptr) <
-        0)
+    if (H5VL_link_specific(*vol_obj_ptr, &loc_params, H5VL_LINK_DELETE, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
@@ -1045,7 +1044,7 @@ H5L__delete_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t i
     /* Set up object access arguments */
     if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr,
                             &loc_params) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Delete the link */
     if (H5VL_link_specific(*vol_obj_ptr, &loc_params, H5VL_LINK_DELETE, H5P_DATASET_XFER_DEFAULT, token_ptr) <

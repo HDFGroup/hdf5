@@ -964,9 +964,6 @@ done:
  * Return:      Success:    New reference count
  *              Failure:    -1
  *
- * Programmer:  Houjun Tang
- *              Oct 21, 2019
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1038,7 +1035,7 @@ done:
 int
 H5I_dec_ref(hid_t id)
 {
-    int ret_value = 0;          /* Return value */
+    int ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI((-1))
 
@@ -1118,7 +1115,7 @@ done:
 int
 H5I_dec_app_ref(hid_t id)
 {
-    int            ret_value = 0;   /* Return value */
+    int ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI((-1))
 
@@ -1179,9 +1176,6 @@ done:
  *
  * Return:      Success:    New app. reference count
  *              Failure:    -1
- *
- * Programmer:  Houjun Tang
- *              Oct 21, 2019
  *
  *-------------------------------------------------------------------------
  */

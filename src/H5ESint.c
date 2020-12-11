@@ -12,11 +12,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5ESint.c
- *			Apr  8 2020
- *			Quincey Koziol
+ * Created:     H5ESint.c
+ *              Apr  8 2020
+ *              Quincey Koziol
  *
- * Purpose:		Internal "event set" routines for managing asynchronous
+ * Purpose:     Internal "event set" routines for managing asynchronous
  *                      operations.
  *
  *                      Please see the asynchronous I/O RFC document
@@ -112,8 +112,8 @@ H5FL_DEFINE_STATIC(H5ES_t);
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *	        Monday, April 6, 2020
+ * Programmer:  Quincey Koziol
+ *              Monday, April 6, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -141,8 +141,8 @@ done:
  *                          affect other interfaces; zero otherwise.
  *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *	        Monday, April 6, 2020
+ * Programmer:  Quincey Koziol
+ *              Monday, April 6, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -172,8 +172,8 @@ H5ES_term_package(void)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Monday, April 6, 2020
+ * Programmer:  Quincey Koziol
+ *              Monday, April 6, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -204,7 +204,7 @@ done:
  * Return:      Success:    Pointer to an event set struct
  *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
@@ -239,8 +239,8 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Wednesday, April 8, 2020
+ * Programmer:  Quincey Koziol
+ *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -342,8 +342,8 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Thursday, October 15, 2020
+ * Programmer:  Quincey Koziol
+ *              Thursday, October 15, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -376,8 +376,8 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Sunday, November 7, 2020
+ * Programmer:  Quincey Koziol
+ *              Sunday, November 7, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -452,8 +452,8 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Monday, July 13, 2020
+ * Programmer:  Quincey Koziol
+ *              Monday, July 13, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -495,8 +495,8 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Monday, November 11, 2020
+ * Programmer:  Quincey Koziol
+ *              Monday, November 11, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -555,8 +555,8 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Friday, November 6, 2020
+ * Programmer:  Quincey Koziol
+ *              Friday, November 6, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -599,8 +599,8 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Monday, November 11, 2020
+ * Programmer:  Quincey Koziol
+ *              Monday, November 11, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -634,8 +634,8 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Monday, April 6, 2020
+ * Programmer:  Quincey Koziol
+ *              Monday, April 6, 2020
  *
  *-------------------------------------------------------------------------
  */

@@ -566,8 +566,7 @@ test_fapl_config_validation(void)
             JSVERIFY(config.stream_buffer_size, fa_fetch.stream_buffer_size, "streambuffer size mismatch")
             JSVERIFY_STR(config.namenode_name, fa_fetch.namenode_name, "node name mismatch")
             JSVERIFY_STR(config.user_name, fa_fetch.user_name, "user name mismatch")
-            JSVERIFY_STR(config.kerberos_ticket_cache, fa_fetch.kerberos_ticket_cache,
-                         "kerberos ticket cache mismatch")
+            JSVERIFY_STR(config.kerberos_ticket_cache, fa_fetch.kerberos_ticket_cache, "kerberos ticket cache mismatch")
         }
 
         /*-----------------------------
