@@ -25,4 +25,4 @@ set (H5PL_GIT_BRANCH "master" CACHE STRING "" FORCE)
 set (H5PL_TGZ_NAME "${PLUGIN_TGZ_NAME}" CACHE STRING "Use plugins from compressed file" FORCE)
 
 set (PL_PACKAGE_NAME "${PLUGIN_PACKAGE_NAME}" CACHE STRING "Name of plugins package" FORCE)
-set (H5PL_CPACK_ENABLE ON CACHE BOOL "Enable the CPACK include and components" FORCE)
+set (H5PL_CPACK_ENABLE OFF CACHE BOOL "Enable the CPACK include and components" FORCE)
