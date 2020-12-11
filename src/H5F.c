@@ -742,19 +742,19 @@ H5Fdelete(const char *filename, hid_t fapl_id)
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Get the VOL info from the fapl */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
     if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get VOL connector info")
 
     /* Stash a copy of the "top-level" connector property, before any pass-through
      *  connectors modify or unwrap it.
      */
     if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set VOL connector info in API context")
 
     /* Make sure this is HDF5 storage for this VOL connector */
     if (H5VL_file_specific(NULL, H5VL_FILE_IS_ACCESSIBLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fapl_id,

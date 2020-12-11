@@ -332,7 +332,7 @@ H5TS_pthread_first_thread_init(void)
  *    H5TS_mutex_lock(&mutex_var)
  *
  * RETURNS
- *    0 on success and non-zero on error.
+ *    Non-negative on success / Negative on failure
  *
  * DESCRIPTION
  *    Recursive lock semantics for HDF5 (locking) -
@@ -347,7 +347,7 @@ H5TS_pthread_first_thread_init(void)
 herr_t
 H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -389,7 +389,7 @@ done:
  *    H5TS_mutex_unlock(&mutex_var)
  *
  * RETURNS
- *    0 on success and non-zero on error.
+ *    Non-negative on success / Negative on failure
  *
  * DESCRIPTION
  *    Recursive lock semantics for HDF5 (unlocking) -
@@ -404,7 +404,7 @@ done:
 herr_t
 H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 {
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -444,7 +444,7 @@ done:
  *    H5TS_cancel_count_inc()
  *
  * RETURNS
- *    0 on success non-zero error code on error.
+ *    Non-negative on success / Negative on failure
  *
  * DESCRIPTION
  *    Creates a cancellation counter for a thread if it is the first time

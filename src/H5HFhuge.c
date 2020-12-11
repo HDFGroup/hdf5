@@ -525,7 +525,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, H5HF__huge_bt2_filt_indir_found, &found_rec) != TRUE)
-                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
+                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
             /* Retrieve the object's length */
             *obj_len_p = (size_t)found_rec.obj_size;
@@ -539,7 +539,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, H5HF__huge_bt2_indir_found, &found_rec) != TRUE)
-                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
+                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
             /* Retrieve the object's length */
             *obj_len_p = (size_t)found_rec.len;
@@ -607,7 +607,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, H5HF__huge_bt2_filt_indir_found, &found_rec) != TRUE)
-                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
+                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
             /* Retrieve the object's address & length */
             obj_addr = found_rec.addr;
@@ -621,7 +621,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, H5HF__huge_bt2_indir_found, &found_rec) != TRUE)
-                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
+                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
             /* Retrieve the object's address & length */
             obj_addr = found_rec.addr;
@@ -699,7 +699,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, H5HF__huge_bt2_filt_indir_found, &found_rec) != TRUE)
-                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
+                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
             /* Retrieve the object's address & length */
             obj_addr = found_rec.addr;
@@ -715,7 +715,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, H5HF__huge_bt2_indir_found, &found_rec) != TRUE)
-                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
+                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
             /* Retrieve the object's address & length */
             obj_addr = found_rec.addr;
@@ -846,7 +846,7 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
 
         /* Look up object in v2 B-tree */
         if (H5B2_find(hdr->huge_bt2, &search_rec, H5HF__huge_bt2_indir_found, &found_rec) != TRUE)
-            HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
+            HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
         /* Retrieve the object's address & length */
         obj_addr = found_rec.addr;
