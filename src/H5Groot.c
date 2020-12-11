@@ -246,8 +246,8 @@ H5G_mkroot(H5F_t *f, hbool_t create_root)
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to verify symbol table")
             } /* end if */
 #endif        /* H5_STRICT_FORMAT_CHECKS */
-        }     /* end if */
-    }         /* end else */
+        } /* end if */
+    }     /* end else */
 
     /* Cache the root group's symbol table information in the root group symbol
      * table entry.  It will have been allocated by now if it needs to be

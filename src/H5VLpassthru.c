@@ -263,7 +263,7 @@ static herr_t H5VL_pass_through_optional(void *obj, int op_type, hid_t dxpl_id, 
 
 /* Pass through VOL connector class struct */
 static const H5VL_class_t H5VL_pass_through_g = {
-    H5VL_PASSTHRU_VERSION,                   /* version      */
+    H5VL_VERSION,                            /* VOL class struct version */
     (H5VL_class_value_t)H5VL_PASSTHRU_VALUE, /* value        */
     H5VL_PASSTHRU_NAME,                      /* name         */
     0,                                       /* capability flags */
@@ -2905,8 +2905,11 @@ H5VL_pass_through_request_specific(void *obj, H5VL_request_specific_t specific_t
         /* Finish use of copied vararg list */
         va_end(tmp_arguments);
     } /* end if */
-    else
-        assert(0 && "Unknown 'specific' operation");
+    else {
+        H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
+
+        ret_value = H5VLrequest_specific(o->under_object, o->under_vol_id, specific_type, arguments);
+    } /* end else */
 
     return ret_value;
 } /* end H5VL_pass_through_request_specific() */

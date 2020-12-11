@@ -820,10 +820,10 @@ H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
         default:
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else  /* NDEBUG */
+#else /* NDEBUG */
             HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    }  /* end switch */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1004,8 +1004,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     /* Check for any serialized sections */
     if (fspace->serial_sect_count > 0) {
         hsize_t old_tot_sect_count; /* Total section count from header */
-        hsize_t H5_ATTR_NDEBUG_UNUSED
-                                      old_serial_sect_count; /* Total serializable section count from header */
+        hsize_t H5_ATTR_NDEBUG_UNUSED old_serial_sect_count; /* Total serializable section count from header */
         hsize_t H5_ATTR_NDEBUG_UNUSED old_ghost_sect_count;  /* Total ghost section count from header */
         hsize_t H5_ATTR_NDEBUG_UNUSED old_tot_space;         /* Total space managed from header */
         unsigned                      sect_cnt_size;         /* The size of the section size counts */
@@ -1358,9 +1357,9 @@ H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
             default:
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else     /* NDEBUG */
+#else /* NDEBUG */
                 HDassert(0 && "Unknown action?!?");
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */
     }     /* end if */
 

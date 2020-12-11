@@ -465,7 +465,7 @@ parse_args(int argc, char **argv)
  * End:
  */
 
-#else  /* H5_HAVE_PARALLEL */
+#else /* H5_HAVE_PARALLEL */
 /* dummy program since H5_HAVE_PARALLEL is not configured in */
 int
 main(int H5_ATTR_UNUSED argc, char H5_ATTR_UNUSED **argv)

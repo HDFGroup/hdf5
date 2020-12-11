@@ -445,7 +445,7 @@ typedef struct H5VL_token_class_t {
 //! [H5VL_class_t_snip]
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
-    unsigned int       version;          /**< VOL connector class struct version #     */
+    unsigned           version;          /**< VOL connector class struct version #     */
     H5VL_class_value_t value;            /**< Value to identify connector              */
     const char *       name;             /**< Connector name (MUST be unique!)         */
     unsigned           cap_flags;        /**< Capability flags for connector           */

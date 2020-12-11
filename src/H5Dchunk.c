@@ -2429,7 +2429,7 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_
 #ifdef H5_HAVE_PARALLEL
         } /* end else */
 #endif    /* H5_HAVE_PARALLEL */
-    }     /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4427,7 +4427,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
             /* Check for the chunk expanding too much to encode in a 32-bit value */
             if (orig_chunk_size > ((size_t)0xffffffff))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
-#endif    /* H5_SIZEOF_SIZE_T > 4 */
+#endif /* H5_SIZEOF_SIZE_T > 4 */
         } /* end if */
     }     /* end if */
 
@@ -4629,7 +4629,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
 #ifdef H5_HAVE_PARALLEL
                 } /* end else */
 #endif            /* H5_HAVE_PARALLEL */
-            }     /* end if */
+            } /* end if */
 
             /* Insert the chunk record into the index */
             if (need_insert && ops->insert)

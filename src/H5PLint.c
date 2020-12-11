@@ -354,30 +354,19 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
         }
 
         case H5PL_TYPE_VOL: {
-            const H5VL_class_t *cls;
+            const void *cls;
 
             /* Get the plugin info */
-            if (NULL == (cls = (const H5VL_class_t *)(*get_plugin_info)()))
+            if (NULL == (cls = (const void *)(*get_plugin_info)()))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VOL connector info from plugin")
 
-            /* Which kind of key are we looking for? */
-            if (key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
-                /* If the plugin names match, we're done. Set the output parameters. */
-                if (cls->name && !HDstrcmp(cls->name, key->vol.u.name)) {
-                    *plugin_info = (const void *)cls;
-                    *success     = TRUE;
-                } /* end if */
-            }     /* end if */
-            else {
-                /* Sanity check */
-                HDassert(key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+            /* Ask VOL interface if this class is the one we are looking for and is compatible, etc */
+            if (H5VL_check_plugin_load(cls, key, success) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "VOL connector compatibility check failed")
 
-                /* If the plugin values match, we're done. Set the output parameters. */
-                if (cls->value == key->vol.u.value) {
-                    *plugin_info = (const void *)cls;
-                    *success     = TRUE;
-                } /* end if */
-            }     /* end else */
+            /* Check for finding the correct plugin */
+            if (*success)
+                *plugin_info = cls;
 
             break;
         }

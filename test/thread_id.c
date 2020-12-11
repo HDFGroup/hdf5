@@ -314,7 +314,7 @@ main(void)
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
-#else  /*H5_HAVE_THREADSAFE && !H5_HAVE_WIN_THREADS*/
+#else /*H5_HAVE_THREADSAFE && !H5_HAVE_WIN_THREADS*/
 int
 main(void)
 {

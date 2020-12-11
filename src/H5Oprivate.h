@@ -29,22 +29,22 @@ typedef struct H5O_t      H5O_t;
 typedef struct H5O_fill_t H5O_fill_t;
 
 /* Include the public header file for this API */
-#include "H5Opublic.h" /* Object header functions              */
+#include "H5Opublic.h"   /* Object header functions             */
 
 /* Public headers needed by this file */
-#include "H5Dpublic.h" /* Dataset functions                    */
-#include "H5Lpublic.h" /* Link functions                       */
-#include "H5Spublic.h" /* Dataspace functions			*/
+#include "H5Dpublic.h"   /* Dataset functions                   */
+#include "H5Lpublic.h"   /* Link functions                      */
+#include "H5Spublic.h"   /* Dataspace functions			*/
 
 /* Private headers needed by this file */
-#include "H5private.h"   /* Generic Functions                    */
-#include "H5ACprivate.h" /* Metadata cache                       */
+#include "H5private.h"   /* Generic Functions                   */
+#include "H5ACprivate.h" /* Metadata cache                      */
 #include "H5Fprivate.h"  /* File access				*/
-#include "H5HGprivate.h" /* Global Heaps                         */
+#include "H5HGprivate.h" /* Global Heaps                        */
 #include "H5SLprivate.h" /* Skip lists				*/
 #include "H5Tprivate.h"  /* Datatype functions			*/
-#include "H5VLprivate.h"
-#include "H5Zprivate.h" /* I/O pipeline filters			*/
+#include "H5VLprivate.h" /* Virtual Object Layer                */
+#include "H5Zprivate.h"  /* I/O pipeline filters		*/
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;

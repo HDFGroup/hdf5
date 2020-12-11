@@ -176,15 +176,15 @@ typedef long long ssize_t;
  */
 #if H5_SIZEOF_INT64_T >= 8
 #elif H5_SIZEOF_INT >= 8
-typedef int           int64_t;
+typedef int int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 8
-typedef long               int64_t;
+typedef long int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
 #elif H5_SIZEOF_LONG_LONG >= 8
-typedef long long          int64_t;
+typedef long long int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_LONG_LONG
 #else
@@ -199,12 +199,12 @@ typedef long long          int64_t;
 #define UINT64_MAX ((uint64_t)-1)
 #endif
 #elif H5_SIZEOF_INT >= 8
-typedef unsigned      uint64_t;
+typedef unsigned uint64_t;
 #define UINT64_MAX UINT_MAX
 #undef H5_SIZEOF_UINT64_T
 #define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 8
-typedef unsigned long      uint64_t;
+typedef unsigned long uint64_t;
 #define UINT64_MAX ULONG_MAX
 #undef H5_SIZEOF_UINT64_T
 #define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
@@ -289,15 +289,15 @@ typedef unsigned long long haddr_t;
  */
 #if H5_SIZEOF_UINT32_T >= 4
 #elif H5_SIZEOF_SHORT >= 4
-typedef short         uint32_t;
+typedef short uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_SHORT
 #elif H5_SIZEOF_INT >= 4
-typedef unsigned int       uint32_t;
+typedef unsigned int uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 4
-typedef unsigned long      uint32_t;
+typedef unsigned long uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_LONG
 #else
@@ -719,7 +719,7 @@ H5_DLL herr_t H5free_memory(void *mem);
  * \since 1.8.15
  *
  */
-H5_DLL void * H5allocate_memory(size_t size, hbool_t clear);
+H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);
 /**
  * \ingroup H5
  * \brief Resizes and, if required, re-allocates memory that will later be
@@ -793,7 +793,7 @@ H5_DLL void * H5allocate_memory(size_t size, hbool_t clear);
  * \since 1.8.15
  *
  */
-H5_DLL void * H5resize_memory(void *mem, size_t size);
+H5_DLL void *H5resize_memory(void *mem, size_t size);
 
 #ifdef __cplusplus
 }

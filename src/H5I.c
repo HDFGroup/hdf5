@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
+/*
  * H5I.c - Public routines for handling IDs
  */
 
@@ -93,8 +93,8 @@ static int H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
 H5I_type_t
 H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I_free_t free_func)
 {
-    H5I_class_t *cls = NULL;            /* New ID class */
-    H5I_type_t   new_type = H5I_BADID;  /* New ID type value */
+    H5I_class_t *cls       = NULL;      /* New ID class */
+    H5I_type_t   new_type  = H5I_BADID; /* New ID type value */
     H5I_type_t   ret_value = H5I_BADID; /* Return value */
 
     FUNC_ENTER_API(H5I_BADID)
@@ -109,7 +109,7 @@ H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I
     }
     else {
         hbool_t done; /* Indicate that search was successful */
-        int i;
+        int     i;
 
         /* Look for a free type to give out */
         done = FALSE;
@@ -637,8 +637,8 @@ done:
 htri_t
 H5Iis_valid(hid_t id)
 {
-    H5I_id_info_t *info = NULL;         /* Pointer to the ID info */
-    htri_t         ret_value = TRUE;    /* Return value */
+    H5I_id_info_t *info      = NULL; /* Pointer to the ID info */
+    htri_t         ret_value = TRUE; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "i", id);
@@ -710,8 +710,8 @@ H5I__search_cb(void *obj, hid_t id, void *_udata)
 void *
 H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
 {
-    H5I_search_ud_t udata;              /* Context for iteration */
-    void *          ret_value = NULL;   /* Return value */
+    H5I_search_ud_t udata;            /* Context for iteration */
+    void *          ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE3("*x", "Itx*x", type, func, key);
@@ -756,9 +756,9 @@ done:
 static int
 H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
 {
-    H5I_iterate_pub_ud_t *udata = (H5I_iterate_pub_ud_t *)_udata; /* User data for callback */
-    herr_t                cb_ret_val = FAIL;                      /* User callback return value */
-    int                   ret_value = H5_ITER_ERROR;              /* Callback return value */
+    H5I_iterate_pub_ud_t *udata      = (H5I_iterate_pub_ud_t *)_udata; /* User data for callback */
+    herr_t                cb_ret_val = FAIL;                           /* User callback return value */
+    int                   ret_value  = H5_ITER_ERROR;                  /* Callback return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -802,7 +802,7 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
 herr_t
 H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data)
 {
-    H5I_iterate_pub_ud_t int_udata; /* Internal user data */
+    H5I_iterate_pub_ud_t int_udata;        /* Internal user data */
     herr_t               ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -913,5 +913,3 @@ H5Iget_name(hid_t id, char *name /*out*/, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_name() */
-
-

@@ -1202,7 +1202,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 #ifdef H5MF_ALLOC_DEBUG_MORE
         HDfprintf(stderr, "%s: After H5FS_sect_add()\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-    }  /* end if */
+    } /* end if */
     else {
         htri_t         merged; /* Whether node was merged */
         H5MF_sect_ud_t udata;  /* User data for callback */
@@ -1369,7 +1369,7 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
             HDfprintf(stderr, "%s: H5MF__aggr_try_extend = %t\n", FUNC, ret_value);
-#endif    /* H5MF_ALLOC_DEBUG_MORE */
+#endif /* H5MF_ALLOC_DEBUG_MORE */
         } /* end if */
 
         /* If no extension so far, try to extend into a free-space section */
@@ -1395,7 +1395,7 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
                                 "error extending block in free space manager")
 #ifdef H5MF_ALLOC_DEBUG_MORE
                 HDfprintf(stderr, "%s: Try to H5FS_sect_try_extend = %t\n", FUNC, ret_value);
-#endif        /* H5MF_ALLOC_DEBUG_MORE */
+#endif /* H5MF_ALLOC_DEBUG_MORE */
             } /* end if */
 
             /* For paged aggregation and a metadata block: try to extend into page end threshold */
@@ -1406,7 +1406,7 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
                     ret_value = TRUE;
 #ifdef H5MF_ALLOC_DEBUG_MORE
                 HDfprintf(stderr, "%s: Try to extend into the page end threshold = %t\n", FUNC, ret_value);
-#endif        /* H5MF_ALLOC_DEBUG_MORE */
+#endif /* H5MF_ALLOC_DEBUG_MORE */
             } /* end if */
         }     /* end if */
     }         /* allow_extend */
@@ -2944,7 +2944,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                                 HDassert(fs_stat.serial_sect_count > 0);
                                 HDassert(fs_stat.alloc_sect_size > 0);
                                 HDassert(fs_stat.alloc_sect_size == fs_stat.sect_size);
-#endif                        /* NDEBUG */
+#endif /* NDEBUG */
                             } /* end if */
                             else {
                                 HDassert(!H5F_addr_defined(fs_stat.addr));
