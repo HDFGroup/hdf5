@@ -161,12 +161,8 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t
 
     /* check args */
     HDassert(dataset && dataset->oloc.file);
-
-    if (!file_space)
-        file_space = dataset->shared->space;
-    if (!mem_space)
-        mem_space = file_space;
-    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
+    HDassert(file_space);
+    HDassert(mem_space);
 
     /* Set up datatype info for operation */
     if (H5D__typeinfo_init(dataset, mem_type_id, FALSE, &type_info) < 0)
@@ -189,11 +185,12 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Make certain that the number of elements in each selection is the same */
+    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
     if (nelmts != H5S_GET_SELECT_NPOINTS(file_space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "src and dest dataspaces have different number of elements selected")
 
-    /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
+    /* Check for a NULL buffer */
     if (NULL == buf) {
         /* Check for any elements selected (which is invalid) */
         if (nelmts > 0)
@@ -225,7 +222,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t
      * Note that in general, this requires us to touch up the memory buffer as
      * well.
      */
-    if (TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
+    if (nelmts > 0 && TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
         H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
         const void *adj_buf = NULL; /* Pointer to the location in buf corresponding  */
                                     /* to the beginning of the projected mem space.  */
@@ -377,6 +374,8 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_
 
     /* check args */
     HDassert(dataset && dataset->oloc.file);
+    HDassert(file_space);
+    HDassert(mem_space);
 
     /* All filters in the DCPL must have encoding enabled. */
     if (!dataset->shared->checked_filters) {
@@ -418,20 +417,14 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_
     }  /* end else */
 #endif /*H5_HAVE_PARALLEL*/
 
-    /* Initialize dataspace information */
-    if (!file_space)
-        file_space = dataset->shared->space;
-    if (!mem_space)
-        mem_space = file_space;
-
-    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
 
     /* Make certain that the number of elements in each selection is the same */
+    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
     if (nelmts != H5S_GET_SELECT_NPOINTS(file_space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "src and dest dataspaces have different number of elements selected")
 
-    /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
+    /* Check for a NULL buffer */
     if (NULL == buf) {
         /* Check for any elements selected (which is invalid) */
         if (nelmts > 0)
@@ -463,7 +456,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_
      * Note that in general, this requires us to touch up the memory buffer
      * as well.
      */
-    if (TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
+    if (nelmts > 0 && TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
         H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
         const void *adj_buf = NULL; /* Pointer to the location in buf corresponding  */
                                     /* to the beginning of the projected mem space.  */
