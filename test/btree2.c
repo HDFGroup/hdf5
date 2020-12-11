@@ -667,7 +667,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         TEST_ERROR
 
     /* Attempt to find record in B-tree with no records */
-    idx = 0;
+    idx   = 0;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, NULL) < 0)
         TEST_ERROR
@@ -699,7 +699,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to find non-existant record in B-tree with 1 record */
     /* (Should not be found, but not fail) */
-    idx = 41;
+    idx   = 41;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         TEST_ERROR
@@ -715,7 +715,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         TEST_ERROR
 
     /* Attempt to find existant record in B-tree with 1 record */
-    idx = 42;
+    idx   = 42;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         TEST_ERROR
@@ -776,7 +776,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to find non-existant record in level-0 B-tree with several records */
     /* (Should not be found, but not fail) */
-    idx = 41;
+    idx   = 41;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         TEST_ERROR
@@ -784,7 +784,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         TEST_ERROR
 
     /* Attempt to find existant record in level-0 B-tree with several record */
-    idx = 56;
+    idx   = 56;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         TEST_ERROR
@@ -951,7 +951,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_p
 
     /* Attempt to find non-existant record in level-1 B-tree */
     /* (Should not be found, but not fail) */
-    idx = INSERT_SPLIT_ROOT_NREC + 10;
+    idx   = INSERT_SPLIT_ROOT_NREC + 10;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         TEST_ERROR
@@ -959,7 +959,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_p
         TEST_ERROR
 
     /* Attempt to find existant record in root of level-1 B-tree */
-    idx = 33;
+    idx   = 33;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         FAIL_STACK_ERROR
@@ -967,7 +967,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_p
         TEST_ERROR
 
     /* Attempt to find existant record in leaf of level-1 B-tree */
-    idx = 56;
+    idx   = 56;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         FAIL_STACK_ERROR
@@ -1697,7 +1697,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
 
     /* Attempt to find non-existant record in level-2 B-tree */
     /* (Should not be found, but not fail) */
-    idx = INSERT_SPLIT_ROOT_NREC * 30;
+    idx   = INSERT_SPLIT_ROOT_NREC * 30;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         TEST_ERROR
@@ -1705,7 +1705,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
         TEST_ERROR
 
     /* Attempt to find existant record in root of level-2 B-tree */
-    idx = 948;
+    idx   = 948;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         FAIL_STACK_ERROR
@@ -1718,7 +1718,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
         TEST_ERROR
 
     /* Attempt to find existant record in internal node of level-2 B-tree */
-    idx = 505;
+    idx   = 505;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         FAIL_STACK_ERROR
@@ -1731,7 +1731,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
         TEST_ERROR
 
     /* Attempt to find existant record in leaf of level-2 B-tree */
-    idx = 555;
+    idx   = 555;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         FAIL_STACK_ERROR
@@ -2993,7 +2993,7 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
     hsize_t     temp_rec;       /* Temporary record */
     H5B2_stat_t bt2_stat;       /* Statistics about B-tree created */
     hsize_t     nrec;           /* Number of records in B-tree */
-    hbool_t     found;       /* Whether record was found */
+    hbool_t     found;          /* Whether record was found */
     herr_t      ret;            /* Generic error return value */
 
     /* Initialize random number seed */
@@ -3099,7 +3099,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Attempt to find non-existant record in level-4 B-tree */
     /* (Should not be found, but not fail) */
-    idx = INSERT_MANY * 2;
+    idx   = INSERT_MANY * 2;
     found = FALSE;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
         TEST_ERROR
@@ -3249,7 +3249,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     /* (Should not be found, but not fail) */
     find.key = 10;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (hsize_t)-1)
@@ -3269,7 +3269,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to find existant record in B-tree with 1 record */
     find.key = 42;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != 72)
@@ -3279,7 +3279,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Try again with NULL 'op' */
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, NULL, NULL) < 0)
         FAIL_STACK_ERROR
     if (find.val != (hsize_t)-1)
@@ -3323,7 +3323,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     /* (Should not be found, but not fail) */
     find.key = 10;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (hsize_t)-1)
@@ -3343,7 +3343,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to find modified record in B-tree with 1 record */
     find.key = 42;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != 43)
@@ -3353,7 +3353,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Try again with NULL 'op' */
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, NULL, NULL) < 0)
         FAIL_STACK_ERROR
     if (find.val != (hsize_t)-1)
@@ -3417,7 +3417,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     /* (Should not be found, but not fail) */
     find.key = 10;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         TEST_ERROR
     if (find.val != (hsize_t)-1)
@@ -3427,7 +3427,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to find existant record in level-0 B-tree with several records */
     find.key = 56;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         TEST_ERROR
     if (find.val != 12)
@@ -3508,7 +3508,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     /* (Should not be found, but not fail) */
     find.key = 41;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         TEST_ERROR
     if (find.val != (hsize_t)-1)
@@ -3518,7 +3518,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to find existant record in level-0 B-tree with several record */
     find.key = 56;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         TEST_ERROR
     if (find.val != 22)
@@ -3756,7 +3756,7 @@ test_update_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_p
     /* (Should not be found, but not fail) */
     find.key = 800;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         TEST_ERROR
     if (find.val != (hsize_t)-1)
@@ -3767,7 +3767,7 @@ test_update_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_p
     /* Attempt to find existant record in root of level-1 B-tree */
     find.key = 33;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.key != 33)
@@ -3780,7 +3780,7 @@ test_update_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_p
     /* Attempt to find existant record in leaf of level-1 B-tree */
     find.key = 56;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.key != 56)
@@ -4552,7 +4552,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* (Should not be found, but not fail) */
     find.key = INSERT_SPLIT_ROOT_NREC_REC * 42;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         TEST_ERROR
     if (find.val != (hsize_t)-1)
@@ -4563,7 +4563,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* Attempt to find existant record in root of level-2 B-tree */
     find.key = 1347;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (1347 * 2))
@@ -4579,7 +4579,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* Attempt to find existant record in internal node of level-2 B-tree */
     find.key = 513;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (513 * 2))
@@ -4595,7 +4595,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* Attempt to find existant record in leaf of level-2 B-tree */
     find.key = 555;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (555 * 2))
@@ -4729,7 +4729,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* (Should not be found, but not fail) */
     find.key = INSERT_SPLIT_ROOT_NREC_REC * 42;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         TEST_ERROR
     if (find.val != (hsize_t)-1)
@@ -4740,7 +4740,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* Attempt to find existant record in root of level-2 B-tree */
     find.key = 1344;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (1344 * 2))
@@ -4756,7 +4756,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* Attempt to find existant record in internal node of level-2 B-tree */
     find.key = 512;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (512 * 2))
@@ -4772,7 +4772,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* Attempt to find existant record in leaf of level-2 B-tree */
     find.key = 555;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (555 * 2))
@@ -4916,7 +4916,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* (Should not be found, but not fail) */
     find.key = INSERT_SPLIT_ROOT_NREC_REC * 42;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         TEST_ERROR
     if (find.val != (hsize_t)-1)
@@ -4927,7 +4927,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* Attempt to find existant record in root of level-2 B-tree */
     find.key = 1345;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (1345 * 2))
@@ -4943,7 +4943,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* Attempt to find existant record in internal node of level-2 B-tree */
     find.key = 513;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (513 * 2))
@@ -4959,7 +4959,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     /* Attempt to find existant record in leaf of level-2 B-tree */
     find.key = 555;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         FAIL_STACK_ERROR
     if (find.val != (555 * 2))
@@ -5162,7 +5162,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     /* (Should not be found, but not fail) */
     find.key = INSERT_MANY_REC * 2;
     find.val = (hsize_t)-1;
-    found = FALSE;
+    found    = FALSE;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
         TEST_ERROR
     if (find.val != (hsize_t)-1)
@@ -9756,8 +9756,8 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
         TEST_ERROR
 
     /* Attempt to find modified record */
-    record = 4331;
-    found  = 4331;
+    record    = 4331;
+    found     = 4331;
     rec_found = FALSE;
     if (H5B2_find(bt2, &record, &rec_found, find_cb, &found) < 0)
         FAIL_STACK_ERROR
@@ -9804,8 +9804,8 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
         TEST_ERROR
 
     /* Attempt to find modified record */
-    record = 5352;
-    found  = 5352;
+    record    = 5352;
+    found     = 5352;
     rec_found = FALSE;
     if (H5B2_find(bt2, &record, &rec_found, find_cb, &found) < 0)
         STACK_ERROR
@@ -9852,8 +9852,8 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
         TEST_ERROR
 
     /* Attempt to find modified record */
-    record = 9448;
-    found  = 9448;
+    record    = 9448;
+    found     = 9448;
     rec_found = FALSE;
     if (H5B2_find(bt2, &record, &rec_found, find_cb, &found) < 0)
         STACK_ERROR

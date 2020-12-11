@@ -159,7 +159,8 @@ static herr_t H5VL__introspect_get_conn_cls(void *obj, const H5VL_class_t *cls, 
                                             const H5VL_class_t **conn_cls);
 static herr_t H5VL__introspect_opt_query(void *obj, const H5VL_class_t *cls, H5VL_subclass_t subcls,
                                          int opt_type, uint64_t *flags);
-static herr_t H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t timeout, H5VL_request_status_t *status);
+static herr_t H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t timeout,
+                                 H5VL_request_status_t *status);
 static herr_t H5VL__request_notify(void *req, const H5VL_class_t *cls, H5VL_request_notify_t cb, void *ctx);
 static herr_t H5VL__request_cancel(void *req, const H5VL_class_t *cls, H5VL_request_status_t *status);
 static herr_t H5VL__request_specific(void *req, const H5VL_class_t *cls,
@@ -1486,14 +1487,15 @@ done:
  */
 herr_t
 H5VLattr_get_vararg(void *obj, hid_t connector_id, H5VL_attr_get_t get_type, hid_t dxpl_id,
-    void **req /*out*/, ...)
+                    void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVaix", obj, connector_id, get_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1638,14 +1640,15 @@ done:
  */
 herr_t
 H5VLattr_specific_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                  H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req /*out*/, ...)
+                         H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#iVbix", obj, loc_params, connector_id, specific_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1790,14 +1793,15 @@ done:
  */
 herr_t
 H5VLattr_optional_vararg(void *obj, hid_t connector_id, H5VL_attr_optional_t opt_type, hid_t dxpl_id,
-                  void **req /*out*/, ...)
+                         void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVsix", obj, connector_id, opt_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2492,14 +2496,15 @@ done:
  */
 herr_t
 H5VLdataset_get_vararg(void *obj, hid_t connector_id, H5VL_dataset_get_t get_type, hid_t dxpl_id,
-        void **req /*out*/, ...)
+                       void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVcix", obj, connector_id, get_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2643,15 +2648,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_specific_vararg(void *obj, hid_t connector_id, H5VL_dataset_specific_t specific_type, hid_t dxpl_id,
-                     void **req /*out*/, ...)
+H5VLdataset_specific_vararg(void *obj, hid_t connector_id, H5VL_dataset_specific_t specific_type,
+                            hid_t dxpl_id, void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVdix", obj, connector_id, specific_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2795,14 +2801,15 @@ done:
  */
 herr_t
 H5VLdataset_optional_vararg(void *obj, hid_t connector_id, H5VL_dataset_optional_t opt_type, hid_t dxpl_id,
-                     void **req /*out*/, ...)
+                            void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVtix", obj, connector_id, opt_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3312,14 +3319,15 @@ done:
  */
 herr_t
 H5VLdatatype_get_vararg(void *obj, hid_t connector_id, H5VL_datatype_get_t get_type, hid_t dxpl_id,
-                 void **req /*out*/, ...)
+                        void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVeix", obj, connector_id, get_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3467,15 +3475,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_specific_vararg(void *obj, hid_t connector_id, H5VL_datatype_specific_t specific_type, hid_t dxpl_id,
-                      void **req /*out*/, ...)
+H5VLdatatype_specific_vararg(void *obj, hid_t connector_id, H5VL_datatype_specific_t specific_type,
+                             hid_t dxpl_id, void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVfix", obj, connector_id, specific_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3665,14 +3674,15 @@ done:
  */
 herr_t
 H5VLdatatype_optional_vararg(void *obj, hid_t connector_id, H5VL_datatype_optional_t opt_type, hid_t dxpl_id,
-                      void **req /*out*/, ...)
+                             void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVuix", obj, connector_id, opt_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4177,12 +4187,13 @@ herr_t
 H5VLfile_get_vararg(void *obj, hid_t connector_id, H5VL_file_get_t get_type, hid_t dxpl_id,
                     void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVgix", obj, connector_id, get_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4362,14 +4373,15 @@ done:
  */
 herr_t
 H5VLfile_specific_vararg(void *obj, hid_t connector_id, H5VL_file_specific_t specific_type, hid_t dxpl_id,
-                  void **req /*out*/, ...)
+                         void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVhix", obj, connector_id, specific_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -4511,14 +4523,15 @@ done:
  */
 herr_t
 H5VLfile_optional_vararg(void *obj, hid_t connector_id, H5VL_file_optional_t opt_type, hid_t dxpl_id,
-                  void **req /*out*/, ...)
+                         void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVvix", obj, connector_id, opt_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5018,12 +5031,13 @@ herr_t
 H5VLgroup_get_vararg(void *obj, hid_t connector_id, H5VL_group_get_t get_type, hid_t dxpl_id,
                      void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiViix", obj, connector_id, get_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5168,14 +5182,15 @@ done:
  */
 herr_t
 H5VLgroup_specific_vararg(void *obj, hid_t connector_id, H5VL_group_specific_t specific_type, hid_t dxpl_id,
-                   void **req /*out*/, ...)
+                          void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVjix", obj, connector_id, specific_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5320,14 +5335,15 @@ done:
  */
 herr_t
 H5VLgroup_optional_vararg(void *obj, hid_t connector_id, H5VL_group_optional_t opt_type, hid_t dxpl_id,
-                   void **req /*out*/, ...)
+                          void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVwix", obj, connector_id, opt_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5647,15 +5663,16 @@ done:
  */
 herr_t
 H5VLlink_create_vararg(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
-                hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
-                void **req /*out*/, ...)
+                       hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req /*out*/,
+                       ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE8("e", "Vk*x*#iiiix", create_type, obj, loc_params, connector_id, lcpl_id, lapl_id, dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -6011,15 +6028,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_get_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_get_t get_type,
-             hid_t dxpl_id, void **req /*out*/, ...)
+H5VLlink_get_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+                    H5VL_link_get_t get_type, hid_t dxpl_id, void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#iVlix", obj, loc_params, connector_id, get_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6164,14 +6182,15 @@ done:
  */
 herr_t
 H5VLlink_specific_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                  H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req /*out*/, ...)
+                         H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#iVmix", obj, loc_params, connector_id, specific_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6315,14 +6334,15 @@ done:
  */
 herr_t
 H5VLlink_optional_vararg(void *obj, hid_t connector_id, H5VL_link_optional_t opt_type, hid_t dxpl_id,
-                  void **req /*out*/, ...)
+                         void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVxix", obj, connector_id, opt_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6679,15 +6699,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_get_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_object_get_t get_type,
-               hid_t dxpl_id, void **req /*out*/, ...)
+H5VLobject_get_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+                      H5VL_object_get_t get_type, hid_t dxpl_id, void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#iVnix", obj, loc_params, connector_id, get_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6837,15 +6858,15 @@ done:
  */
 herr_t
 H5VLobject_specific_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                    H5VL_object_specific_t specific_type, hid_t dxpl_id,
-                    void **req /*out*/, ...)
+                           H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#iVoix", obj, loc_params, connector_id, specific_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6993,14 +7014,15 @@ done:
  */
 herr_t
 H5VLobject_optional_vararg(void *obj, hid_t connector_id, H5VL_object_optional_t opt_type, hid_t dxpl_id,
-                    void **req /*out*/, ...)
+                           void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiVyix", obj, connector_id, opt_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -7675,12 +7697,13 @@ done:
 herr_t
 H5VLrequest_specific_vararg(void *req, hid_t connector_id, H5VL_request_specific_t specific_type, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE3("e", "*xiVr", req, connector_id, specific_type);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -7798,12 +7821,13 @@ done:
 herr_t
 H5VLrequest_optional_vararg(void *req, hid_t connector_id, H5VL_request_optional_t opt_type, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE3("e", "*xiVz", req, connector_id, opt_type);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -8299,14 +8323,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLblob_specific_vararg(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_t specific_type, ...)
+H5VLblob_specific_vararg(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_t specific_type,
+                         ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE4("e", "*xi*xVB", obj, connector_id, blob_id, specific_type);
 
     /* Get class pointer */
     if (NULL == obj)
@@ -8460,12 +8486,13 @@ done:
 herr_t
 H5VLblob_optional_vararg(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_optional_t opt_type, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE4("e", "*xi*xVA", obj, connector_id, blob_id, opt_type);
 
     /* Get class pointer */
     if (NULL == obj)
@@ -8978,12 +9005,13 @@ done:
 herr_t
 H5VLoptional_vararg(void *obj, hid_t connector_id, int op_type, hid_t dxpl_id, void **req /*out*/, ...)
 {
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    va_list arguments;              /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;    /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_class_t *cls;                   /* VOL connector's class struct */
+    va_list       arguments;             /* Argument list passed from the API call */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xiIsix", obj, connector_id, op_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)

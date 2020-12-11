@@ -417,8 +417,7 @@ H5D__btree_cmp3(void *_lt_key, void *_udata, void *_rt_key)
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5D__btree_found(H5F_t H5_ATTR_UNUSED *f, haddr_t addr, const void *_lt_key,
-                 hbool_t *found, void *_udata)
+H5D__btree_found(H5F_t H5_ATTR_UNUSED *f, haddr_t addr, const void *_lt_key, hbool_t *found, void *_udata)
 {
     H5D_chunk_ud_t *       udata  = (H5D_chunk_ud_t *)_udata;
     const H5D_btree_key_t *lt_key = (const H5D_btree_key_t *)_lt_key;
@@ -446,7 +445,7 @@ H5D__btree_found(H5F_t H5_ATTR_UNUSED *f, haddr_t addr, const void *_lt_key,
     udata->chunk_block.offset = addr;
     udata->chunk_block.length = lt_key->nbytes;
     udata->filter_mask        = lt_key->filter_mask;
-    *found = TRUE;
+    *found                    = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -996,8 +995,8 @@ done:
 static herr_t
 H5D__btree_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
-    hbool_t found;              /* Whether chunk was found */
-    herr_t ret_value = SUCCEED; /* Return value */
+    hbool_t found;               /* Whether chunk was found */
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 

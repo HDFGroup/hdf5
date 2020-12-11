@@ -48,9 +48,10 @@ static herr_t reg_opt_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid_
 #define REG_OPT_VOL_NAME  "reg_opt"
 #define REG_OPT_VOL_VALUE ((H5VL_class_value_t)502)
 static const H5VL_class_t reg_opt_vol_g = {
-    0,                 /* version      */
+    H5VL_VERSION,      /* VOL class struct version */
     REG_OPT_VOL_VALUE, /* value        */
     REG_OPT_VOL_NAME,  /* name         */
+    0,                 /* version      */
     0,                 /* capability flags */
     NULL,              /* initialize   */
     NULL,              /* terminate    */
@@ -386,13 +387,13 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_t get_type, hid
 static herr_t
 test_vol_registration(void)
 {
-    hid_t  native_id     = H5I_INVALID_HID;
-    hid_t  lapl_id       = H5I_INVALID_HID;
-    hid_t  vipl_id       = H5I_INVALID_HID;
-    herr_t ret           = SUCCEED;
-    htri_t is_registered = FAIL;
-    hid_t  vol_id        = H5I_INVALID_HID;
-    hid_t  vol_id2       = H5I_INVALID_HID;
+    hid_t         native_id          = H5I_INVALID_HID;
+    hid_t         lapl_id            = H5I_INVALID_HID;
+    hid_t         vipl_id            = H5I_INVALID_HID;
+    herr_t        ret                = SUCCEED;
+    htri_t        is_registered      = FAIL;
+    hid_t         vol_id             = H5I_INVALID_HID;
+    hid_t         vol_id2            = H5I_INVALID_HID;
     H5VL_class_t *bad_fake_vol_class = NULL;
 
     TESTING("VOL registration");
@@ -422,9 +423,8 @@ test_vol_registration(void)
         TEST_ERROR;
     HDmemcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
     bad_fake_vol_class->version = H5VL_VERSION + 1;
-    H5E_BEGIN_TRY {
-        vol_id = H5VLregister_connector(bad_fake_vol_class, H5P_DEFAULT);
-    } H5E_END_TRY;
+    H5E_BEGIN_TRY { vol_id = H5VLregister_connector(bad_fake_vol_class, H5P_DEFAULT); }
+    H5E_END_TRY;
     if (H5I_INVALID_HID != vol_id)
         FAIL_PUTS_ERROR("should not be able to register a connector with an incompatible version #");
     HDfree(bad_fake_vol_class);

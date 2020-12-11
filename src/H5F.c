@@ -468,8 +468,8 @@ done:
 static herr_t
 H5F__post_open_api_common(H5VL_object_t *vol_obj, void **token_ptr)
 {
-    uint64_t supported;         /* Whether 'post open' operation is supported by VOL connector */
-    herr_t ret_value = SUCCEED; /* Return value     */
+    uint64_t supported;           /* Whether 'post open' operation is supported by VOL connector */
+    herr_t   ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_STATIC
 

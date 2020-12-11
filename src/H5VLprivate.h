@@ -14,7 +14,7 @@
 #define _H5VLprivate_H
 
 /* Include package's public header */
-#include "H5VLpublic.h"         /* Generic Functions                    */
+#include "H5VLpublic.h" /* Generic Functions                    */
 
 /* Private headers needed by this file */
 
@@ -60,8 +60,9 @@ typedef enum H5VL_get_connector_kind_t {
 /******************************/
 
 /* Utility functions */
-H5_DLL herr_t  H5VL_init_phase1(void);
-H5_DLL herr_t  H5VL_init_phase2(void);
+H5_DLL herr_t H5VL_init_phase1(void);
+H5_DLL herr_t H5VL_init_phase2(void);
+H5_DLL H5VL_t *H5VL_new_connector(hid_t connector_id);
 H5_DLL herr_t  H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_class_t *cls2);
 H5_DLL herr_t  H5VL_conn_copy(H5VL_connector_prop_t *value);
 H5_DLL int64_t H5VL_conn_inc_rc(H5VL_t *connector);

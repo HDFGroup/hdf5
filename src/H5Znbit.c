@@ -95,13 +95,13 @@ H5Z_class2_t H5Z_NBIT[1] = {{
 }};
 
 /* Local macros */
-#define H5Z_NBIT_ATOMIC     1    /* Atomic datatype class: integer/floating-point */
-#define H5Z_NBIT_ARRAY      2    /* Array datatype class */
-#define H5Z_NBIT_COMPOUND   3    /* Compound datatype class */
-#define H5Z_NBIT_NOOPTYPE   4    /* Other datatype class: nbit does no compression */
+#define H5Z_NBIT_ATOMIC     1 /* Atomic datatype class: integer/floating-point */
+#define H5Z_NBIT_ARRAY      2 /* Array datatype class */
+#define H5Z_NBIT_COMPOUND   3 /* Compound datatype class */
+#define H5Z_NBIT_NOOPTYPE   4 /* Other datatype class: nbit does no compression */
 #define H5Z_NBIT_MAX_NPARMS 4096 /* Max number of parameters for filter */
-#define H5Z_NBIT_ORDER_LE   0    /* Little endian for datatype byte order */
-#define H5Z_NBIT_ORDER_BE   1    /* Big endian for datatype byte order */
+#define H5Z_NBIT_ORDER_LE   0 /* Little endian for datatype byte order */
+#define H5Z_NBIT_ORDER_BE   1 /* Big endian for datatype byte order */
 
 /* Local variables */
 

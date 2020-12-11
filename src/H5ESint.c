@@ -50,6 +50,11 @@
 /* Local Typedefs */
 /******************/
 
+/* Callback context for get time estimate (gte) operations */
+typedef struct H5ES_gte_ctx_t {
+    uint64_t *time_est; /* Pointer to accumulated time estimate */
+} H5ES_gte_ctx_t;
+
 /* Callback context for wait operations */
 typedef struct H5ES_wait_ctx_t {
     H5ES_t * es;              /* Event set being operated on */
@@ -57,6 +62,13 @@ typedef struct H5ES_wait_ctx_t {
     size_t * num_in_progress; /* Count of # of operations that have not completed */
     hbool_t *op_failed;       /* Flag to indicate an operation failed */
 } H5ES_wait_ctx_t;
+
+/* Callback context for cancel operations */
+typedef struct H5ES_cancel_ctx_t {
+    H5ES_t * es;               /* Event set being operated on */
+    size_t * num_not_canceled; /* Count of # of operations were not canceled */
+    hbool_t *op_failed;        /* Flag to indicate an operation failed */
+} H5ES_cancel_ctx_t;
 
 /* Callback context for get error info (gei) operations */
 typedef struct H5ES_gei_ctx_t {
@@ -74,8 +86,13 @@ typedef struct H5ES_gei_ctx_t {
 /* Local Prototypes */
 /********************/
 static herr_t H5ES__close_cb(void *es, void **request_token);
+static herr_t H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app_file,
+                           const char *app_func, unsigned app_line, const char *caller, const char *api_args);
+static int    H5ES__get_time_estimate_cb(H5ES_event_t *ev, void *_ctx);
 static herr_t H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev);
+static herr_t H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status);
 static int    H5ES__wait_cb(H5ES_event_t *ev, void *_ctx);
+static int    H5ES__cancel_cb(H5ES_event_t *ev, void *_ctx);
 static int    H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx);
 static int    H5ES__close_failed_cb(H5ES_event_t *ev, void *_ctx);
 
@@ -233,6 +250,78 @@ done:
 } /* end H5ES__create() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5ES__insert
+ *
+ * Purpose:     Insert a request token into an event set
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Friday, December 11, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app_file, const char *app_func,
+             unsigned app_line, const char *caller, const char *api_args)
+{
+    H5ES_event_t *ev          = NULL;    /* Event for request */
+    hbool_t       ev_inserted = FALSE;   /* Flag to indicate that event is in active list */
+    herr_t        ret_value   = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(es);
+
+    /* Create new event */
+    if (NULL == (ev = H5ES__event_new(connector, request_token)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, FAIL, "can't create event object")
+
+    /* Copy the app source information */
+    if (NULL == (ev->op_info.app_file_name = H5MM_xstrdup(app_file)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source file name")
+    if (NULL == (ev->op_info.app_func_name = H5MM_xstrdup(app_func)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source function name")
+    ev->op_info.app_line_num = app_line;
+
+    /* Set the event's operation counter */
+    ev->op_info.op_ins_count = es->op_counter++;
+
+    /* Set the event's timestamp & execution time */
+    ev->op_info.op_ins_ts    = H5_now_usec();
+    ev->op_info.op_exec_ts   = UINT64_MAX;
+    ev->op_info.op_exec_time = UINT64_MAX;
+
+    /* Copy the API routine's name & arguments */
+    if (NULL == (ev->op_info.api_name = H5MM_xstrdup(caller)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine name")
+    if (NULL == (ev->op_info.api_args = H5MM_xstrdup(api_args)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine arguments")
+
+    /* Append fully initialized event onto the event set's 'active' list */
+    H5ES__list_append(&es->active, ev);
+    ev_inserted = TRUE;
+
+    /* Invoke the event set's 'insert' callback, if present */
+    if (es->ins_func)
+        if ((es->ins_func)(&ev->op_info, es->ins_ctx) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CALLBACK, FAIL, "'insert' callback for event set failed")
+
+done:
+    /* Release resources on error */
+    if (ret_value < 0)
+        if (ev) {
+            if (ev_inserted)
+                H5ES__list_remove(&es->active, ev);
+            if (H5ES__event_free(ev) < 0)
+                HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "unable to release event")
+        }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__insert() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5ES_insert
  *
  * Purpose:     Insert a request token into an event set
@@ -247,15 +336,15 @@ done:
 herr_t
 H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, const char *caller_args, ...)
 {
-    H5ES_t *      es = NULL;             /* Event set for the operation */
-    H5ES_event_t *ev = NULL;             /* Event for request */
-    H5RS_str_t *  rs = NULL;             /* Ref-counted string to compose formatted argument string in */
-    const char *  app_file;              /* Application source file name */
-    const char *  app_func;              /* Application source function name */
-    const char *  s;                     /* Pointer to internal string from ref-counted string */
-    va_list       ap;                    /* Varargs for caller */
-    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
-    herr_t        ret_value   = SUCCEED; /* Return value */
+    H5ES_t *    es = NULL;             /* Event set for the operation */
+    const char *app_file;              /* Application source file name */
+    const char *app_func;              /* Application source function name */
+    unsigned    app_line;              /* Application source line number */
+    H5RS_str_t *rs = NULL;             /* Ref-counted string to compose formatted argument string in */
+    const char *api_args;              /* Pointer to api_args string from ref-counted string */
+    va_list     ap;                    /* Varargs for caller */
+    hbool_t     arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t      ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -273,10 +362,6 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
     if (es->err_occurred)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "event set has failed operations")
 
-    /* Create new event */
-    if (NULL == (ev = H5ES__event_new(connector, token)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, FAIL, "can't create event object")
-
     /* Start working on the API routines arguments */
     HDva_start(ap, caller_args);
     arg_started = TRUE;
@@ -284,24 +369,10 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
     /* Copy the app source information */
     (void)HDva_arg(ap, char *); /* Toss the 'app_file' parameter name */
     app_file = HDva_arg(ap, char *);
-    if (NULL == (ev->app_file = H5MM_strdup(app_file)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source file name")
     (void)HDva_arg(ap, char *); /* Toss the 'app_func' parameter name */
     app_func = HDva_arg(ap, char *);
-    if (NULL == (ev->app_func = H5MM_strdup(app_func)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source function name")
     (void)HDva_arg(ap, char *); /* Toss the 'app_line' parameter name */
-    ev->app_line = HDva_arg(ap, unsigned);
-
-    /* Set the event's operation counter */
-    ev->ev_count = es->op_counter++;
-
-    /* Set the event's timestamp */
-    ev->ev_time = H5_now_usec();
-
-    /* Copy the API routine's name */
-    if (NULL == (ev->api_name = H5MM_strdup(caller)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine name")
+    app_line = HDva_arg(ap, unsigned);
 
     /* Create the string for the API routine's arguments */
     if (NULL == (rs = H5RS_create(NULL)))
@@ -312,13 +383,12 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
     HDassert(0 == HDstrncmp(caller_args, "*s*sIu", 6));
     if (H5_trace_args(rs, caller_args + 6, ap) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "can't create formatted API arguments")
-    if (NULL == (s = H5RS_get_str(rs)))
+    if (NULL == (api_args = H5RS_get_str(rs)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't get pointer to formatted API arguments")
-    if (NULL == (ev->api_args = H5MM_strdup(s)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine arguments")
 
-    /* Append fully initialized event onto the event set's 'active' list */
-    H5ES__list_append(&es->active, ev);
+    /* Insert the operation into the event set */
+    if (H5ES__insert(es, connector, token, app_file, app_func, app_line, caller, api_args) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "event set has failed operations")
 
 done:
     /* Clean up */
@@ -327,13 +397,123 @@ done:
     if (rs)
         H5RS_decr(rs);
 
-    /* Release resources on error */
-    if (ret_value < 0)
-        if (ev && H5ES__event_free(ev) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "unable to release event")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES_insert() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__insert_request
+ *
+ * Purpose:     Directly insert a request token into an event set
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Friday, December 11, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ES__insert_request(H5ES_t *es, H5VL_t *connector, void *token)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(es);
+    HDassert(connector);
+    HDassert(token);
+
+    /* Insert an 'anonymous' operation into the event set */
+    if (H5ES__insert(es, connector, token, NULL, NULL, 0, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "event set has failed operations")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__insert_request() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__get_time_estimate_cb
+ *
+ * Purpose:     Callback for retrieving time estimates for operations
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Thursday, December 10, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5ES__get_time_estimate_cb(H5ES_event_t *ev, void *_ctx)
+{
+    H5ES_gte_ctx_t *ctx = (H5ES_gte_ctx_t *)_ctx; /* Callback context */
+    uint64_t        op_time_est;                  /* Time estimate for operation */
+    int             ret_value = H5_ITER_CONT;     /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ev);
+    HDassert(ctx);
+
+    /* Query the time estimate from the connector */
+    if (H5VL_request_specific(ev->request, H5VL_REQUEST_GET_TIME_ESTIMATE, &op_time_est) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, H5_ITER_ERROR, "unable to get time estimate")
+
+    /* Check for "unknown" time estimate value and stop iteration */
+    if (UINT64_MAX == op_time_est) {
+        /* Record the "unknown" value */
+        *ctx->time_est = UINT64_MAX;
+
+        /* Exit from the iteration */
+        ret_value = H5_ITER_STOP;
+    } /* end if */
+    else
+        /* Add the estimate to the current estimate */
+        *ctx->time_est += op_time_est;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__get_time_estimate_cb() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__get_time_estimate
+ *
+ * Purpose:     Estimate time to complete operations in event set
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Thursday, December 10, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ES__get_time_estimate(H5ES_t *es, uint64_t *time_est)
+{
+    H5ES_gte_ctx_t ctx;                 /* Iterator callback context info */
+    herr_t         ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(es);
+    HDassert(time_est);
+
+    /* Set user's parameter to known value */
+    *time_est = 0;
+
+    /* Set up context for iterator callbacks */
+    ctx.time_est = time_est;
+
+    /* Iterate over the events in the set, retrieving the time estimate for each */
+    if (H5ES__list_iterate(&es->active, H5ES__get_time_estimate_cb, &ctx) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__get_time_estimate() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__handle_fail
@@ -368,6 +548,91 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5ES__handle_fail() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__op_complete
+ *
+ * Purpose:     Handle an operation completing
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Friday, December 11, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
+{
+    hid_t  err_stack_id = H5I_INVALID_HID; /* Error stack for failed operation */
+    herr_t ret_value    = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(es);
+    HDassert(ev);
+
+    /* Check for event that hasn't actually completed */
+    if (H5VL_REQUEST_STATUS_IN_PROGRESS == ev_status || H5VL_REQUEST_STATUS_CANT_CANCEL == ev_status)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "event hasn't completed?!?")
+
+    /* Handle each form of event completion */
+    if (H5VL_REQUEST_STATUS_SUCCEED == ev_status || H5VL_REQUEST_STATUS_CANCELED == ev_status) {
+        /* Invoke the event set's 'complete' callback, if present */
+        if (es->comp_func) {
+            H5ES_status_t op_status; /* Status for complete callback */
+
+            /* Set appropriate info for callback */
+            if (H5VL_REQUEST_STATUS_SUCCEED == ev_status) {
+                /* Translate status */
+                op_status = H5ES_STATUS_SUCCEED;
+
+                /* Retrieve the execution time info */
+                if (H5VL_request_specific(ev->request, H5VL_REQUEST_GET_EXEC_TIME, &ev->op_info.op_exec_ts,
+                                          &ev->op_info.op_exec_time) < 0)
+                    HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL,
+                                "unable to retrieve execution time info for operation")
+            }
+            else
+                /* Translate status */
+                op_status = H5ES_STATUS_CANCELED;
+
+            if ((es->comp_func)(&ev->op_info, op_status, H5I_INVALID_HID, es->comp_ctx) < 0)
+                HGOTO_ERROR(H5E_EVENTSET, H5E_CALLBACK, FAIL, "'complete' callback for event set failed")
+        } /* end if */
+
+        /* Event success or cancellation */
+        if (H5ES__event_completed(ev, &es->active) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "unable to release completed event")
+    } /* end if */
+    else if (H5VL_REQUEST_STATUS_FAIL == ev_status) {
+        /* Invoke the event set's 'complete' callback, if present */
+        if (es->comp_func) {
+            /* Retrieve the error stack for the operation */
+            if (H5VL_request_specific(ev->request, H5VL_REQUEST_GET_ERR_STACK, &err_stack_id) < 0)
+                HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "unable to retrieve error stack for operation")
+
+            if ((es->comp_func)(&ev->op_info, H5ES_STATUS_FAIL, err_stack_id, es->comp_ctx) < 0)
+                HGOTO_ERROR(H5E_EVENTSET, H5E_CALLBACK, FAIL, "'complete' callback for event set failed")
+        } /* end if */
+
+        /* Handle failure */
+        if (H5ES__handle_fail(es, ev) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "unable to handle failed event")
+    } /* end else-if */
+    else
+        HGOTO_ERROR(H5E_EVENTSET, H5E_BADVALUE, FAIL, "unknown event status?!?")
+
+done:
+    /* Clean up */
+    if (H5I_INVALID_HID != err_stack_id)
+        if (H5I_dec_ref(err_stack_id) < 0)
+            HDONE_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL,
+                        "unable to decrement ref count on error stack for failed operation")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__op_complete() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__wait_cb
@@ -405,9 +670,9 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
 
     /* Check for status values that indicate we should break out of the loop */
     if (ev_status == H5VL_REQUEST_STATUS_FAIL) {
-        /* Handle failure */
-        if (H5ES__handle_fail(ctx->es, ev) < 0)
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, H5_ITER_ERROR, "unable to handle failed event")
+        /* Handle event completion */
+        if (H5ES__op_complete(ctx->es, ev, ev_status) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, H5_ITER_ERROR, "unable to release completed event")
 
         /* Record the error */
         *ctx->op_failed = TRUE;
@@ -416,12 +681,17 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
         ret_value = H5_ITER_STOP;
     } /* end if */
     else if (ev_status == H5VL_REQUEST_STATUS_SUCCEED) {
-        if (H5ES__event_completed(ev, &ctx->es->active) < 0)
+        /* Handle event completion */
+        if (H5ES__op_complete(ctx->es, ev, ev_status) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, H5_ITER_ERROR, "unable to release completed event")
     } /* end else-if */
+    else if (ev_status == H5VL_REQUEST_STATUS_CANT_CANCEL)
+        /* Should never get a status of 'can't cancel' back from test / wait operation */
+        HGOTO_ERROR(H5E_EVENTSET, H5E_BADVALUE, H5_ITER_ERROR,
+                    "received \"can't cancel\" status for operation")
     else if (ev_status == H5VL_REQUEST_STATUS_CANCELED)
         /* Should never get a status of 'cancel' back from test / wait operation */
-        HGOTO_ERROR(H5E_EVENTSET, H5E_BADVALUE, H5_ITER_ERROR, "received 'cancel' status for operation")
+        HGOTO_ERROR(H5E_EVENTSET, H5E_BADVALUE, H5_ITER_ERROR, "received \"cancel\" status for operation")
     else {
         /* Sanity check */
         HDassert(ev_status == H5VL_REQUEST_STATUS_IN_PROGRESS);
@@ -489,6 +759,114 @@ done:
 } /* end H5ES__wait() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5ES__cancel_cb
+ *
+ * Purpose:     Callback for canceling operations
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Thursday, December 10, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5ES__cancel_cb(H5ES_event_t *ev, void *_ctx)
+{
+    H5ES_cancel_ctx_t *   ctx       = (H5ES_cancel_ctx_t *)_ctx;   /* Callback context */
+    H5VL_request_status_t ev_status = H5VL_REQUEST_STATUS_SUCCEED; /* Status from event's operation */
+    int                   ret_value = H5_ITER_CONT;                /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ev);
+    HDassert(ctx);
+
+    /* Attempt to cancel the request */
+    if (H5VL_request_cancel(ev->request, &ev_status) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCANCEL, H5_ITER_ERROR, "unable to cancel operation")
+
+    /* Check for status values that indicate we should break out of the loop */
+    if (ev_status == H5VL_REQUEST_STATUS_FAIL) {
+        /* Handle event completion */
+        if (H5ES__op_complete(ctx->es, ev, ev_status) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, H5_ITER_ERROR, "unable to handle failed event")
+
+        /* Record the error */
+        *ctx->op_failed = TRUE;
+
+        /* Exit from the iteration */
+        ret_value = H5_ITER_STOP;
+    } /* end if */
+    else if (ev_status == H5VL_REQUEST_STATUS_SUCCEED) {
+        /* Increment "not canceled" counter */
+        (*ctx->num_not_canceled)++;
+
+        /* Handle event completion */
+        if (H5ES__op_complete(ctx->es, ev, ev_status) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, H5_ITER_ERROR, "unable to release completed event")
+    } /* end else-if */
+    else if (ev_status == H5VL_REQUEST_STATUS_CANT_CANCEL || ev_status == H5VL_REQUEST_STATUS_IN_PROGRESS) {
+        /* Increment "not canceled" counter */
+        (*ctx->num_not_canceled)++;
+    } /* end else-if */
+    else {
+        /* Sanity check */
+        HDassert(ev_status == H5VL_REQUEST_STATUS_CANCELED);
+
+        /* Handle event completion */
+        if (H5ES__op_complete(ctx->es, ev, ev_status) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, H5_ITER_ERROR, "unable to release completed event")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__cancel_cb() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__cancel
+ *
+ * Purpose:     Cancel operations in event set
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Thursday, December 10, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ES__cancel(H5ES_t *es, size_t *num_not_canceled, hbool_t *op_failed)
+{
+    H5ES_cancel_ctx_t ctx;                 /* Iterator callback context info */
+    herr_t            ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(es);
+    HDassert(num_not_canceled);
+    HDassert(op_failed);
+
+    /* Set user's parameters to known values */
+    *num_not_canceled = 0;
+    *op_failed        = FALSE;
+
+    /* Set up context for iterator callbacks */
+    ctx.es               = es;
+    ctx.num_not_canceled = num_not_canceled;
+    ctx.op_failed        = op_failed;
+
+    /* Iterate over the events in the set, attempting to cancel them */
+    if (H5ES__list_iterate(&es->active, H5ES__cancel_cb, &ctx) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__cancel() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5ES__get_err_info_cb
  *
  * Purpose:     Retrieve information about a failed operation
@@ -513,17 +891,19 @@ H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
     HDassert(ctx);
 
     /* Copy operation info for event */
-    if (NULL == (ctx->curr_err_info->api_name = H5MM_strdup(ev->api_name)))
+    if (NULL == (ctx->curr_err_info->api_name = H5MM_strdup(ev->op_info.api_name)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 API name")
-    if (NULL == (ctx->curr_err_info->api_args = H5MM_strdup(ev->api_args)))
+    if (NULL == (ctx->curr_err_info->api_args = H5MM_strdup(ev->op_info.api_args)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 API routine arguments")
-    if (NULL == (ctx->curr_err_info->app_file_name = H5MM_strdup(ev->app_file)))
+    if (NULL == (ctx->curr_err_info->app_file_name = H5MM_strdup(ev->op_info.app_file_name)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy app source file name")
-    if (NULL == (ctx->curr_err_info->app_func_name = H5MM_strdup(ev->app_func)))
+    if (NULL == (ctx->curr_err_info->app_func_name = H5MM_strdup(ev->op_info.app_func_name)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy app function name")
-    ctx->curr_err_info->app_line_num = ev->app_line;
-    ctx->curr_err_info->op_ins_count = ev->ev_count;
-    ctx->curr_err_info->op_ins_ts    = ev->ev_time;
+    ctx->curr_err_info->app_line_num = ev->op_info.app_line_num;
+    ctx->curr_err_info->op_ins_count = ev->op_info.op_ins_count;
+    ctx->curr_err_info->op_ins_ts    = ev->op_info.op_ins_ts;
+    ctx->curr_err_info->op_exec_ts   = ev->op_info.op_exec_ts;
+    ctx->curr_err_info->op_exec_time = ev->op_info.op_exec_time;
 
     /* Get error stack for event */
     if (H5VL_request_specific(ev->request, H5VL_REQUEST_GET_ERR_STACK, &ctx->curr_err_info->err_stack_id) < 0)

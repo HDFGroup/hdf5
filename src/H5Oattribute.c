@@ -99,7 +99,7 @@ typedef struct {
     const char *name; /* Name of attribute to open */
 
     /* up */
-    hbool_t *exists;  /* Pointer to flag to indicate attribute exists */
+    hbool_t *exists; /* Pointer to flag to indicate attribute exists */
 } H5O_iter_xst_t;
 
 /********************/
@@ -1802,7 +1802,7 @@ H5O__attr_exists(const H5O_loc_t *loc, const char *name, hbool_t *attr_exists)
         H5O_mesg_operator_t op;    /* Wrapper for operator */
 
         /* Set up user data for callback */
-        udata.name  = name;
+        udata.name   = name;
         udata.exists = attr_exists;
 
         /* Iterate over existing attributes, checking for attribute with same name */

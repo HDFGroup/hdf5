@@ -371,7 +371,7 @@ H5I__clear_type_cb(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
         H5_GCC_DIAG_OFF("cast-qual")
         if (info->is_future) {
             /* Discard the future object */
-            if((info->discard_cb)((void *)info->object) < 0) {
+            if ((info->discard_cb)((void *)info->object) < 0) {
                 if (udata->force) {
 #ifdef H5I_DEBUG
                     if (H5DEBUG(I)) {
@@ -460,10 +460,9 @@ H5I__destroy_type(H5I_type_t type)
     if (type_info == NULL || type_info->init_count <= 0)
         HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type")
 
-        /* Close/clear/destroy all IDs for this type */
-        H5E_BEGIN_TRY {
-            H5I_clear_type(type, TRUE, FALSE);
-        } H5E_END_TRY /* don't care about errors */
+    /* Close/clear/destroy all IDs for this type */
+    H5E_BEGIN_TRY { H5I_clear_type(type, TRUE, FALSE); }
+    H5E_END_TRY /* don't care about errors */
 
         /* Check if we should release the ID class */
         if (type_info->cls->flags & H5I_CLASS_IS_APPLICATION)
@@ -501,8 +500,8 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5I__register(H5I_type_t type, const void *object, hbool_t app_ref,
-              H5I_future_realize_func_t realize_cb, H5I_future_discard_func_t discard_cb)
+H5I__register(H5I_type_t type, const void *object, hbool_t app_ref, H5I_future_realize_func_t realize_cb,
+              H5I_future_discard_func_t discard_cb)
 {
     H5I_type_info_t *type_info = NULL;            /* Pointer to the type */
     H5I_id_info_t *  info      = NULL;            /* Pointer to the new ID information */
@@ -521,12 +520,12 @@ H5I__register(H5I_type_t type, const void *object, hbool_t app_ref,
         HGOTO_ERROR(H5E_ID, H5E_NOSPACE, H5I_INVALID_HID, "memory allocation failed")
 
     /* Create the struct & its ID */
-    new_id          = H5I_MAKE(type, type_info->nextid);
-    info->id        = new_id;
-    info->count     = 1; /* initial reference count */
-    info->app_count = !!app_ref;
-    info->object    = object;
-    info->is_future = (NULL != realize_cb);
+    new_id           = H5I_MAKE(type, type_info->nextid);
+    info->id         = new_id;
+    info->count      = 1; /* initial reference count */
+    info->app_count  = !!app_ref;
+    info->object     = object;
+    info->is_future  = (NULL != realize_cb);
     info->realize_cb = realize_cb;
     info->discard_cb = discard_cb;
 
@@ -1589,7 +1588,7 @@ H5I__find_id(hid_t id)
 {
     H5I_type_t       type;             /* ID's type */
     H5I_type_info_t *type_info = NULL; /* Pointer to the type */
-    H5I_id_info_t *  id_info = NULL;   /* ID's info */
+    H5I_id_info_t *  id_info   = NULL; /* ID's info */
     H5I_id_info_t *  ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -1616,9 +1615,9 @@ H5I__find_id(hid_t id)
     /* Check if this is a future ID */
     H5_GCC_DIAG_OFF("cast-qual")
     if (id_info && id_info->is_future) {
-        hid_t actual_id = H5I_INVALID_HID;      /* ID for actual object */
-        void *future_object;                    /* Pointer to the future object */
-        void *actual_object;                    /* Pointer to the actual object */
+        hid_t actual_id = H5I_INVALID_HID; /* ID for actual object */
+        void *future_object;               /* Pointer to the future object */
+        void *actual_object;               /* Pointer to the actual object */
 
         /* Invoke the realize callback, to get the actual object */
         if ((id_info->realize_cb)((void *)id_info->object, &actual_id) < 0)
@@ -1642,7 +1641,7 @@ H5I__find_id(hid_t id)
         future_object = NULL;
 
         /* Change the ID from 'future' to 'actual' */
-        id_info->is_future = FALSE;
+        id_info->is_future  = FALSE;
         id_info->realize_cb = NULL;
         id_info->discard_cb = NULL;
     }

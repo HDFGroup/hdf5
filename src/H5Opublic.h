@@ -257,13 +257,13 @@ H5_DLL herr_t  H5Otoken_from_str(hid_t loc_id, const char *token_str, H5O_token_
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
-#define H5Oopen_async_wrap              H5_NO_EXPAND(H5Oopen_async)
-#define H5Oopen_by_idx_async_wrap       H5_NO_EXPAND(H5Oopen_by_idx_async)
-#define H5Oget_info_by_name_async_wrap  H5_NO_EXPAND(H5Oget_info_by_name_async)
-#define H5Oclose_async_wrap             H5_NO_EXPAND(H5Oclose_async)
-#define H5Oflush_async_wrap             H5_NO_EXPAND(H5Oflush_async)
-#define H5Orefresh_async_wrap           H5_NO_EXPAND(H5Orefresh_async)
-#define H5Ocopy_async_wrap              H5_NO_EXPAND(H5Ocopy_async)
+#define H5Oopen_async_wrap             H5_NO_EXPAND(H5Oopen_async)
+#define H5Oopen_by_idx_async_wrap      H5_NO_EXPAND(H5Oopen_by_idx_async)
+#define H5Oget_info_by_name_async_wrap H5_NO_EXPAND(H5Oget_info_by_name_async)
+#define H5Oclose_async_wrap            H5_NO_EXPAND(H5Oclose_async)
+#define H5Oflush_async_wrap            H5_NO_EXPAND(H5Oflush_async)
+#define H5Orefresh_async_wrap          H5_NO_EXPAND(H5Orefresh_async)
+#define H5Ocopy_async_wrap             H5_NO_EXPAND(H5Ocopy_async)
 #endif
 
 /* The canonical 'undefined' token value */

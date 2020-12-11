@@ -139,14 +139,14 @@ H5ES__event_free(H5ES_event_t *ev)
     /* Sanity check */
     HDassert(ev);
 
-    if (ev->api_name)
-        H5MM_xfree_const(ev->api_name);
-    if (ev->api_args)
-        H5MM_xfree_const(ev->api_args);
-    if (ev->app_file)
-        H5MM_xfree_const(ev->app_file);
-    if (ev->app_func)
-        H5MM_xfree_const(ev->app_func);
+    if (ev->op_info.api_name)
+        H5MM_xfree_const(ev->op_info.api_name);
+    if (ev->op_info.api_args)
+        H5MM_xfree_const(ev->op_info.api_args);
+    if (ev->op_info.app_file_name)
+        H5MM_xfree_const(ev->op_info.app_file_name);
+    if (ev->op_info.app_func_name)
+        H5MM_xfree_const(ev->op_info.app_func_name);
     if (ev->request) {
         /* Free the request */
         if (H5VL_request_free(ev->request) < 0)
@@ -188,8 +188,9 @@ H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el)
     HDfprintf(stderr,
               "%s: releasing event for '%s' (count: %llu, timestamp: %llu), with args '%s', in app source "
               "file '%s', function '%s', and line %u\n",
-              FUNC, ev->api_name, (unsigned long long)ev->ev_count, (unsigned long long)ev->ev_time,
-              ev->api_args, ev->app_file, ev->app_func, ev->app_line);
+              FUNC, ev->op_info.api_name, (unsigned long long)ev->op_info.op_ins_count,
+              (unsigned long long)ev->op_info.op_ins_ts, ev->op_info.api_args, ev->op_info.app_file_name,
+              ev->op_info.app_func_name, ev->op_info.app_line_num);
 
     /* Remove the event from the event list */
     H5ES__list_remove(el, ev);

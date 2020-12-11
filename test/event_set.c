@@ -106,8 +106,8 @@ error:
 int
 main(void)
 {
-    hid_t                fapl_id = H5I_INVALID_HID; /* File access property list */
-    int                  nerrors = 0;               /* Error count */
+    hid_t fapl_id = H5I_INVALID_HID; /* File access property list */
+    int   nerrors = 0;               /* Error count */
 
     /* Setup */
     h5_reset();

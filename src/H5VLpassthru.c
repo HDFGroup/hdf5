@@ -1780,8 +1780,8 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_t specific_type, 
         under_vol_id = o->under_vol_id;
 
         /* Re-issue 'file specific' call, using the unwrapped pieces */
-        ret_value = H5VLfile_specific_vararg(o->under_object, o->under_vol_id, specific_type,
-                                             dxpl_id, req, (int)loc_type, name, child_file->under_object, plist_id);
+        ret_value = H5VLfile_specific_vararg(o->under_object, o->under_vol_id, specific_type, dxpl_id, req,
+                                             (int)loc_type, name, child_file->under_object, plist_id);
     } /* end if */
     else if (specific_type == H5VL_FILE_IS_ACCESSIBLE || specific_type == H5VL_FILE_DELETE) {
         H5VL_pass_through_info_t *info;
@@ -1811,7 +1811,8 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_t specific_type, 
         under_vol_id = info->under_vol_id;
 
         /* Re-issue 'file specific' call */
-        ret_value = H5VLfile_specific_vararg(NULL, info->under_vol_id, specific_type, dxpl_id, req, under_fapl_id, name, ret);
+        ret_value = H5VLfile_specific_vararg(NULL, info->under_vol_id, specific_type, dxpl_id, req,
+                                             under_fapl_id, name, ret);
 
         /* Close underlying FAPL */
         H5Pclose(under_fapl_id);
@@ -2164,8 +2165,8 @@ H5VL_pass_through_link_create(H5VL_link_create_type_t create_type, void *obj,
         } /* end if */
 
         /* Re-issue 'link create' call, using the unwrapped pieces */
-        ret_value = H5VLlink_create_vararg(create_type, (o ? o->under_object : NULL),
-                                           loc_params, under_vol_id, lcpl_id, lapl_id, dxpl_id, req, cur_obj, cur_params);
+        ret_value = H5VLlink_create_vararg(create_type, (o ? o->under_object : NULL), loc_params,
+                                           under_vol_id, lcpl_id, lapl_id, dxpl_id, req, cur_obj, cur_params);
     } /* end if */
     else
         ret_value = H5VLlink_create(create_type, (o ? o->under_object : NULL), loc_params, under_vol_id,
@@ -2742,8 +2743,8 @@ H5VL_pass_through_request_specific(void *obj, H5VL_request_specific_t specific_t
                 status = va_arg(tmp_arguments, H5VL_request_status_t *);
 
                 /* Reissue the WAITANY 'request specific' call */
-                ret_value = H5VLrequest_specific_vararg(o->under_object, o->under_vol_id,
-                                                        specific_type, req_count, under_req_array, timeout, idx, status);
+                ret_value = H5VLrequest_specific_vararg(o->under_object, o->under_vol_id, specific_type,
+                                                        req_count, under_req_array, timeout, idx, status);
 
                 /* Release the completed request, if it completed */
                 if (ret_value >= 0 && *status != H5ES_STATUS_IN_PROGRESS) {
@@ -2765,7 +2766,9 @@ H5VL_pass_through_request_specific(void *obj, H5VL_request_specific_t specific_t
                 array_of_statuses = va_arg(tmp_arguments, H5VL_request_status_t *);
 
                 /* Reissue the WAITSOME 'request specific' call */
-                ret_value = H5VLrequest_specific_vararg(o->under_object, o->under_vol_id, specific_type, req_count, under_req_array, timeout, outcount, array_of_indices, array_of_statuses);
+                ret_value = H5VLrequest_specific_vararg(o->under_object, o->under_vol_id, specific_type,
+                                                        req_count, under_req_array, timeout, outcount,
+                                                        array_of_indices, array_of_statuses);
 
                 /* If any requests completed, release them */
                 if (ret_value >= 0 && *outcount > 0) {
@@ -2780,17 +2783,19 @@ H5VL_pass_through_request_specific(void *obj, H5VL_request_specific_t specific_t
 
                         tmp_o = (H5VL_pass_through_t *)req_array[idx_array[u]];
                         H5VL_pass_through_free_obj(tmp_o);
-                    }                             /* end for */
-                }                                 /* end if */
-            }                                     /* end else-if */
-            else {                                /* H5VL_REQUEST_WAITALL == specific_type */
+                    }                                     /* end for */
+                }                                         /* end if */
+            }                                             /* end else-if */
+            else {                                        /* H5VL_REQUEST_WAITALL == specific_type */
                 H5VL_request_status_t *array_of_statuses; /* Array of statuses for completed requests */
 
                 /* Retrieve the remaining arguments */
                 array_of_statuses = va_arg(tmp_arguments, H5VL_request_status_t *);
 
                 /* Reissue the WAITALL 'request specific' call */
-                ret_value = H5VLrequest_specific_vararg(o->under_object, o->under_vol_id, specific_type, req_count, under_req_array, timeout, array_of_statuses);
+                ret_value =
+                    H5VLrequest_specific_vararg(o->under_object, o->under_vol_id, specific_type, req_count,
+                                                under_req_array, timeout, array_of_statuses);
 
                 /* Release the completed requests */
                 if (ret_value >= 0) {

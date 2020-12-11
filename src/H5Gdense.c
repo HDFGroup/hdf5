@@ -487,8 +487,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, hbool_t *found,
-    H5O_link_t *lnk)
+H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, hbool_t *found, H5O_link_t *lnk)
 {
     H5G_bt2_ud_common_t udata;               /* User data for v2 B-tree link lookup */
     H5HF_t *            fheap     = NULL;    /* Fractal heap handle */

@@ -286,6 +286,7 @@ MINOR, PLUGIN, H5E_OPENERROR, Can't open directory or file
 
 # Asynchronous operation errors
 MINOR, ASYNC, H5E_CANTWAIT, Can't wait on operation
+MINOR, ASYNC, H5E_CANTCANCEL, Can't cancel operation
 
 # No error, for backward compatibility */
 MINOR, NONE, H5E_NONE_MINOR, No error

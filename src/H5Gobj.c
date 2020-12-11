@@ -1082,8 +1082,8 @@ done:
 herr_t
 H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, hbool_t *found, H5O_link_t *lnk)
 {
-    H5O_linfo_t linfo;             /* Link info message */
-    htri_t      linfo_exists;      /* Whether the link info message exists */
+    H5O_linfo_t linfo;               /* Link info message */
+    htri_t      linfo_exists;        /* Whether the link info message exists */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
@@ -1111,7 +1111,7 @@ H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, hbool_t *found, H5O
     else
         /* Get the object's info from the symbol table */
         if (H5G__stab_lookup(grp_oloc, name, found, lnk) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
