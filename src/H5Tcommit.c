@@ -58,9 +58,7 @@
 static herr_t H5T__commit_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
                                      hid_t tcpl_id, hid_t tapl_id, void **token_ptr,
                                      H5VL_object_t **_vol_obj_ptr);
-static hid_t  H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
-static hid_t H5T__open_api_common_thisone(hid_t loc_id, const char *name, hid_t tapl_id);
-static hid_t H5T__open2_common(hid_t loc_id, const char *name, hid_t tapl_id);
+static hid_t H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 static H5T_t *H5T__open_oid(const H5G_loc_t *loc);
 
 /*********************/
@@ -692,8 +690,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen2() */
 
-
-
 /*-------------------------------------------------------------------------
  * Function:    H5Topen_async
  *
@@ -721,7 +717,7 @@ H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid
         token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Open the datatype asynchronously */
-    if ((ret_value = H5T__open_api_common(loc_id, name, tapl_id, NULL, NULL)) < 0)
+    if ((ret_value = H5T__open_api_common(loc_id, name, tapl_id, token_ptr, &vol_obj)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open named datatype asynchronously")
 
     /* If a token was created, add the token to the event set */

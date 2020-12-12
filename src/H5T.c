@@ -2031,7 +2031,7 @@ H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     } /* end if */
 
     /* When the reference count reaches zero the resources are freed */
-    if (H5I_dec_app_ref(type_id) < 0)
+    if (H5I_dec_app_ref_async(type_id, token_ptr) < 0)
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "problem freeing id")
 
     /* If a token was created, add the token to the event set */
