@@ -102,8 +102,8 @@ struct space4_struct {
 #define CONFIG_8  1
 #define CONFIG_16 2
 #define CONFIG_32 3
-#define POWER8    256 /* 2^8 */
-#define POWER16   65536 /* 2^16 */
+#define POWER8    256        /* 2^8 */
+#define POWER16   65536      /* 2^16 */
 #define POWER32   4294967296 /* 2^32 */
 
 /****************************************************************

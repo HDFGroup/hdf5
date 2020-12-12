@@ -96,7 +96,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
 #ifdef FILLVAL_WORKS
     symbol_t fillval; /* Dataset fill value */
 #endif                /* FILLVAL_WORKS */
-    unsigned u, v; /* Local index variable */
+    unsigned u, v;    /* Local index variable */
 
     HDassert(filename);
     HDassert(index_type);

@@ -240,7 +240,7 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, H5O_inf
             void *vol_obj_data;
 
             if (NULL == (vol_obj_data = H5VL_object_data(vol_obj)))
-                HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get underlying VOL object")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get underlying VOL object")
 
             oinfo->fileno = dm_info.fileno;
             oinfo->type   = dm_info.type;

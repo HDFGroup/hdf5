@@ -80,7 +80,7 @@ typedef struct {
 } dump_opt_t;
 extern dump_opt_t dump_opts;
 
-#define PACKED_BITS_MAX      8 /* Maximum number of packed-bits to display */
+#define PACKED_BITS_MAX      8                     /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX 8 * sizeof(long long) /* Maximum bits size of integer types of packed-bits */
 /* mask list for packed bits */
 extern unsigned long long

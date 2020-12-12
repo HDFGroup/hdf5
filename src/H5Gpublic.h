@@ -135,7 +135,7 @@ H5_DLL herr_t H5Gclose_async(const char *app_file, const char *app_func, unsigne
 
 /* Macros for types of objects in a group (see H5G_obj_t definition) */
 #define H5G_NTYPES      256 /* Max possible number of types	*/
-#define H5G_NLIBTYPES   8 /* Number of internal types	*/
+#define H5G_NLIBTYPES   8   /* Number of internal types	*/
 #define H5G_NUSERTYPES  (H5G_NTYPES - H5G_NLIBTYPES)
 #define H5G_USERTYPE(X) (8 + (X)) /* User defined types		*/
 

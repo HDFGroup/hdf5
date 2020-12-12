@@ -12,11 +12,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5ESlist.c
- *			Nov  7 2020
- *			Quincey Koziol
+ * Created:     H5ESlist.c
+ *              Nov  7 2020
+ *	            Quincey Koziol
  *
- * Purpose:		Operations on "event lists" for managing asynchronous
+ * Purpose:     Operations on "event lists" for managing asynchronous
  *                      operations.
  *
  *                      Please see the asynchronous I/O RFC document
@@ -74,8 +74,8 @@
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Saturday, November 7, 2020
+ * Programmer:  Quincey Koziol
+ *              Saturday, November 7, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -110,8 +110,8 @@ H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Saturday, November 7, 2020
+ * Programmer:  Quincey Koziol
+ *              Saturday, November 7, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -137,8 +137,8 @@ H5ES__list_count(const H5ES_event_list_t *el)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Saturday, November 7, 2020
+ * Programmer:  Quincey Koziol
+ *              Saturday, November 7, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -183,8 +183,8 @@ H5ES__list_iterate(H5ES_event_list_t *el, H5ES_list_iter_func_t cb, void *ctx)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Houjun Tang
- *	        Thursday, July 30, 2020
+ * Programmer:  Houjun Tang
+ *              Thursday, July 30, 2020
  *
  *-------------------------------------------------------------------------
  */

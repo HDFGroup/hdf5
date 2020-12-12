@@ -159,8 +159,11 @@ endif
 
 # Test with just the native connector, with a single pass-through connector
 # and with a doubly-stacked pass-through.
+#
+# native = 0
+# pass-through = 1
 VOL_LIST = native "pass_through under_vol=0;under_info={}" \
-           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
+           "pass_through under_vol=1;under_info={under_vol=0;under_info={}}"
 
 # Additional target for running timing test
 timings _timings: testmeta

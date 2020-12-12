@@ -516,7 +516,7 @@ H5I__register(H5I_type_t type, const void *object, hbool_t app_ref, H5I_future_r
     type_info = H5I_type_info_array_g[type];
     if ((NULL == type_info) || (type_info->init_count <= 0))
         HGOTO_ERROR(H5E_ID, H5E_BADGROUP, H5I_INVALID_HID, "invalid type")
-    if (NULL == (info = H5FL_MALLOC(H5I_id_info_t)))
+    if (NULL == (info = H5FL_CALLOC(H5I_id_info_t)))
         HGOTO_ERROR(H5E_ID, H5E_NOSPACE, H5I_INVALID_HID, "memory allocation failed")
 
     /* Create the struct & its ID */
@@ -626,7 +626,7 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
         HGOTO_ERROR(H5E_ID, H5E_BADRANGE, FAIL, "invalid type for provided ID")
 
     /* Allocate new structure to house this ID */
-    if (NULL == (info = H5FL_MALLOC(H5I_id_info_t)))
+    if (NULL == (info = H5FL_CALLOC(H5I_id_info_t)))
         HGOTO_ERROR(H5E_ID, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Create the struct & insert requested ID */
@@ -634,6 +634,12 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
     info->count     = 1; /* initial reference count*/
     info->app_count = !!app_ref;
     info->object    = object;
+    /* This API call is only used by the native VOL connector, which is
+     * not asynchronous.
+     */
+    info->is_future  = FALSE;
+    info->realize_cb = NULL;
+    info->discard_cb = NULL;
 
     /* Insert into the type */
     if (H5SL_insert(type_info->ids, info, &info->id) < 0)
@@ -964,9 +970,6 @@ done:
  * Return:      Success:    New reference count
  *              Failure:    -1
  *
- * Programmer:  Houjun Tang
- *              Oct 21, 2019
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1179,9 +1182,6 @@ done:
  *
  * Return:      Success:    New app. reference count
  *              Failure:    -1
- *
- * Programmer:  Houjun Tang
- *              Oct 21, 2019
  *
  *-------------------------------------------------------------------------
  */

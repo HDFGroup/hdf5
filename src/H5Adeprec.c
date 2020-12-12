@@ -387,12 +387,12 @@ H5Aiterate1(hid_t loc_id, unsigned *attr_num /*in,out*/, H5A_operator1_t op, voi
 
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
-        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5_ITER_ERROR, "invalid location identifier")
+        HGOTO_ERROR(H5E_ATTR, H5E_BADTYPE, H5_ITER_ERROR, "invalid location identifier")
 
     /* Call attribute iteration routine */
     if ((ret_value = H5VL_attr_optional(vol_obj, H5VL_NATIVE_ATTR_ITERATE_OLD, H5P_DATASET_XFER_DEFAULT,
                                         H5_REQUEST_NULL, loc_id, attr_num, op, op_data)) < 0)
-        HERROR(H5E_VOL, H5E_BADITER, "error iterating over attributes");
+        HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
 done:
     FUNC_LEAVE_API(ret_value)
