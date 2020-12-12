@@ -300,7 +300,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Iregister
  *
- * Purpose:     Public interface to H5I_register.
+ * Purpose:     Register an object.
  *
  * Return:      Success:    New object ID
  *              Failure:    H5I_INVALID_HID
@@ -318,6 +318,7 @@ H5Iregister(H5I_type_t type, const void *object)
     if (H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ID, H5E_BADGROUP, H5I_INVALID_HID, "cannot call public function on library type")
 
+    /* Register the object */
     ret_value = H5I_register(type, object, TRUE);
 
 done:

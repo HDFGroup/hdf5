@@ -1422,8 +1422,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	James Laird
- *		July 14 2006
+ * Programmer:  James Laird
+ *              July 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1716,7 +1716,7 @@ H5Otoken_cmp(hid_t loc_id, const H5O_token_t *token1, const H5O_token_t *token2,
 
     /* Compare the two tokens */
     if (H5VL_token_cmp(vol_obj, token1, token2, cmp_value) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "object token comparison failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOMPARE, FAIL, "object token comparison failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1752,11 +1752,11 @@ H5Otoken_to_str(hid_t loc_id, const H5O_token_t *token, char **token_str)
 
     /* Get object type */
     if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get underlying VOL object type")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get underlying VOL object type")
 
     /* Serialize the token */
     if (H5VL_token_to_str(vol_obj, vol_obj_type, token, token_str) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "object token serialization failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "object token serialization failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1792,11 +1792,11 @@ H5Otoken_from_str(hid_t loc_id, const char *token_str, H5O_token_t *token)
 
     /* Get object type */
     if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get underlying VOL object type")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get underlying VOL object type")
 
     /* Deserialize the token */
     if (H5VL_token_from_str(vol_obj, vol_obj_type, token_str, token) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "object token deserialization failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL, "object token deserialization failed")
 
 done:
     FUNC_LEAVE_API(ret_value)

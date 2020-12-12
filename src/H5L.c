@@ -434,7 +434,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -505,7 +505,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -3250,6 +3250,10 @@ H5L__exists(const H5G_loc_t *loc, const char *name)
     htri_t        ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDassert(loc);
+    HDassert(name);
 
     /* A path of "/" will always exist in a file */
     if (0 == HDstrcmp(name, "/"))

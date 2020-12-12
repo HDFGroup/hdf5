@@ -1478,6 +1478,10 @@ H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name)
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity check */
+    HDassert(obj_name);
+    HDassert(attr_name);
+
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
     obj_loc.path = &obj_path;

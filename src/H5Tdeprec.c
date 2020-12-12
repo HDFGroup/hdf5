@@ -135,7 +135,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
 
     /* Set up VOL object */
     if (NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "can't allocate top object structure")
     new_obj->connector = vol_obj->connector;
     new_obj->connector->nrefs++;
     new_obj->data = data;
