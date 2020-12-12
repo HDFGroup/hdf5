@@ -505,7 +505,7 @@ H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "unable to get object token")
 
     /* Set up arguments for object access by token */
-    if (H5VL_setup_token_args(loc_id, ref_ptr, &obj_token, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_token_args(loc_id, &obj_token, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
 
     /* Open object by token */
@@ -637,7 +637,7 @@ H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "unable to get object token")
 
     /* Set up arguments for object access by token */
-    if (H5VL_setup_token_args(loc_id, ref_ptr, &obj_token, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_token_args(loc_id, &obj_token, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
 
     /* Open object by token */
@@ -716,18 +716,10 @@ done:
 hid_t
 H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id)
 {
-    hid_t             loc_id;                          /* Reference location ID */
-    H5VL_object_t *   vol_obj = NULL;                  /* Object of loc_id */
-    H5VL_loc_params_t loc_params;                      /* Location parameters */
-    H5O_token_t       obj_token = {0};                 /* Object token */
-    void *            token     = NULL;                /* Request token for async operation */
-    void **           token_ptr = H5_REQUEST_NULL;     /* Pointer to request token for async operation */
-    H5I_type_t        opened_type;                     /* Opened object type */
-    void *            opened_obj    = NULL;            /* Opened object */
-    hid_t             opened_obj_id = H5I_INVALID_HID; /* Opened object ID */
-    H5S_t *           space         = NULL;            /* Dataspace pointer (copy) */
-    hid_t             space_id      = H5I_INVALID_HID; /* Dataspace ID */
-    hid_t             ret_value     = H5I_INVALID_HID; /* Return value */
+    H5VL_object_t *vol_obj   = NULL;            /* Object of loc_id */
+    void *         token     = NULL;            /* Request token for async operation */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE7("i", "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id);

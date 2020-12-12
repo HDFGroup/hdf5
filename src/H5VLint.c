@@ -2683,8 +2683,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_setup_token_args(hid_t loc_id, H5R_ref_t *ref_ptr, H5O_token_t *obj_token,
-                      H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params)
+H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_obj,
+                      H5VL_loc_params_t *loc_params)
 {
     herr_t      ret_value = SUCCEED; /* Return value */
 

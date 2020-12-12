@@ -131,8 +131,8 @@ H5_DLL herr_t H5VL_setup_name_args(hid_t loc_id, const char *name, const struct 
 H5_DLL herr_t H5VL_setup_idx_args(hid_t loc_id, const char *name, H5_index_t idx_type, H5_iter_order_t order,
                                   hsize_t n, const struct H5P_libclass_t *libclass, hbool_t is_collective,
                                   hid_t acspl_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params);
-H5_DLL herr_t H5VL_setup_token_args(hid_t loc_id, H5R_ref_t *ref_ptr, H5O_token_t *obj_token,
-                                    H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params);
+H5_DLL herr_t H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_obj,
+                                    H5VL_loc_params_t *loc_params);
 
 /**********************************
  * VOL connector callback wrappers
