@@ -67,7 +67,7 @@ const char *FILENAME[] = {"tchunk_info_earliest", "tchunk_info_v18",  "tchunk_in
 #define V2_BTREE_INDEX_DSET_NAME    "Version 2 B-Tree Index Dataset"
 #define SKIP_FILTER_DSET_NAME       "Dataset with Skipping One Filter"
 #define FILENAME_BUF_SIZE           256 /* Size for file names */
-#define RANK                        2 /* Rank for datasets */
+#define RANK                        2   /* Rank for datasets */
 
 /* Dimension of the dataset */
 #define NX 24

@@ -183,7 +183,7 @@ H5Oopen_async(const char *app_file, const char *app_func, unsigned app_line,
     H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
     void *            token     = NULL;         /* Request token for async operation        */
     void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
-    hid_t ret_value;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;          /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE7("i", "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id);
@@ -207,7 +207,7 @@ H5Oopen_async(const char *app_file, const char *app_func, unsigned app_line,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Dopen_async() */
+} /* end H5Oopen_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__open_by_idx_api_common
@@ -310,7 +310,7 @@ H5Oopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_li
     H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
     void *            token     = NULL;         /* Request token for async operation        */
     void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
-    hid_t ret_value;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;          /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE10("i", "*s*sIui*sIiIohii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n,
@@ -335,7 +335,7 @@ H5Oopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_li
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Dopen_by_idx_async() */
+} /* end H5Oopen_by_idx_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Oopen_by_token
@@ -585,7 +585,7 @@ H5Ocopy_async(const char *app_file, const char *app_func, unsigned app_line,
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
                 H5ARG_TRACE10(FUNC, "*s*sIui*si*siii", app_file, app_func, app_line, src_loc_id, src_name, dst_loc_id, dst_name, ocpypl_id, lcpl_id, es_id)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -685,7 +685,7 @@ H5Oflush_async(const char *app_file, const char *app_func, unsigned app_line,
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
                 H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, obj_id, es_id)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -785,7 +785,7 @@ H5Orefresh_async(const char *app_file, const char *app_func, unsigned app_line,
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
                 H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, oid, es_id)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1838,8 +1838,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	James Laird
- *		July 14 2006
+ * Programmer:  James Laird
+ *              July 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1917,7 +1917,7 @@ H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line,
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oclose_async() */
@@ -2167,7 +2167,7 @@ H5Otoken_cmp(hid_t loc_id, const H5O_token_t *token1, const H5O_token_t *token2,
 
     /* Compare the two tokens */
     if (H5VL_token_cmp(vol_obj, token1, token2, cmp_value) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "object token comparison failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOMPARE, FAIL, "object token comparison failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2203,11 +2203,11 @@ H5Otoken_to_str(hid_t loc_id, const H5O_token_t *token, char **token_str)
 
     /* Get object type */
     if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get underlying VOL object type")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get underlying VOL object type")
 
     /* Serialize the token */
     if (H5VL_token_to_str(vol_obj, vol_obj_type, token, token_str) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "object token serialization failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "object token serialization failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2243,11 +2243,11 @@ H5Otoken_from_str(hid_t loc_id, const char *token_str, H5O_token_t *token)
 
     /* Get object type */
     if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get underlying VOL object type")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get underlying VOL object type")
 
     /* Deserialize the token */
     if (H5VL_token_from_str(vol_obj, vol_obj_type, token_str, token) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "object token deserialization failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL, "object token deserialization failed")
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -178,7 +178,7 @@ hid_t
 H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
            hid_t dapl_id)
 {
-    hid_t ret_value; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE7("i", "i*siiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id, dapl_id);
@@ -209,7 +209,7 @@ H5Dcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
     void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    hid_t          ret_value;                   /* Return value */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE11("i", "*s*sIui*siiiiii", app_file, app_func, app_line, loc_id, name, type_id, space_id, lcpl_id,
@@ -418,7 +418,7 @@ H5Dopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
     void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    hid_t          ret_value;                   /* Return value */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE7("i", "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, dapl_id, es_id);
@@ -617,7 +617,7 @@ H5Dget_space_async(const char *app_file, const char *app_func, unsigned app_line
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
     void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    hid_t          ret_value;                   /* Return value */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE5("i", "*s*sIuii", app_file, app_func, app_line, dset_id, es_id);
@@ -969,7 +969,7 @@ done:
  *
  * Purpose:     Asynchronously read dataset elements.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Houjun Tang
  *              Oct 15, 2019
@@ -1153,7 +1153,7 @@ done:
  *
  * Purpose:     For asynchronous VOL with request token
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Houjun Tang
  *              Oct 15, 2019
@@ -1420,7 +1420,7 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
         /* Gather data */
         if (0 ==
             (nelmts_gathered = H5D__gather_mem(src_buf, iter, MIN(dst_buf_nelmts, (size_t)nelmts), dst_buf)))
-            HGOTO_ERROR(H5E_IO, H5E_CANTCOPY, FAIL, "gather failed")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "gather failed")
         HDassert(nelmts_gathered == MIN(dst_buf_nelmts, (size_t)nelmts));
 
         /* Make callback to process dst_buf */
@@ -1665,7 +1665,7 @@ H5D__set_extent_api_common(hid_t dset_id, const hsize_t size[], void **token_ptr
 
     /* Check args */
     if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
     if (!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size array cannot be NULL")
 
@@ -1792,7 +1792,7 @@ done:
  * Purpose:     Wait for all operations on a dataset.
  *              Tang: added for async
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */

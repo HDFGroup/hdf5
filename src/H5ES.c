@@ -12,11 +12,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5ES.c
- *			Apr  6 2020
- *			Quincey Koziol
+ * Created:     H5ES.c
+ *              Apr  6 2020
+ *              Quincey Koziol
  *
- * Purpose:		Implements an "event set" for managing asynchronous
+ * Purpose:     Implements an "event set" for managing asynchronous
  *                      operations.
  *
  *                      Please see the asynchronous I/O RFC document
@@ -76,7 +76,7 @@
  * Return:      Success:    An ID for the event set
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
@@ -109,7 +109,7 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
@@ -147,7 +147,7 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Fiiday, November 6, 2020
  *
  *-------------------------------------------------------------------------
@@ -194,7 +194,7 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, July 13, 2020
  *
  *-------------------------------------------------------------------------
@@ -232,7 +232,7 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, October 15, 2020
  *
  *-------------------------------------------------------------------------
@@ -268,7 +268,7 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, October 15, 2020
  *
  *-------------------------------------------------------------------------
@@ -308,7 +308,7 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, November 6, 2020
  *
  *-------------------------------------------------------------------------
@@ -350,7 +350,7 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------

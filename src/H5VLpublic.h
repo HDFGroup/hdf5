@@ -361,8 +361,8 @@ H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_t
 #endif
 
 /* Semi-public headers mainly for VOL connector authors */
-#include "H5VLconnector.h" /* VOL connector author routines */
+#include "H5VLconnector.h"          /* VOL connector author routines */
 #include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
-#include "H5VLnative.h" /* Native VOL connector macros, for VOL connector authors */
+#include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
 
 #endif /* _H5VLpublic_H */

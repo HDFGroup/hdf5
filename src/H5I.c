@@ -347,9 +347,9 @@ H5Iregister_future(H5I_type_t type, const void *object,
 
     /* Check arguments */
     if (NULL == realize_cb)
-        HGOTO_ERROR(H5E_ID, H5E_BADVALUE, FAIL, "NULL pointer for realize_cb not allowed")
+        HGOTO_ERROR(H5E_ID, H5E_BADVALUE, H5I_INVALID_HID, "NULL pointer for realize_cb not allowed")
     if (NULL == discard_cb)
-        HGOTO_ERROR(H5E_ID, H5E_BADVALUE, FAIL, "NULL pointer for realize_cb not allowed")
+        HGOTO_ERROR(H5E_ID, H5E_BADVALUE, H5I_INVALID_HID, "NULL pointer for realize_cb not allowed")
 
     /* Register the future object */
     if((ret_value = H5I__register(type, object, TRUE, realize_cb, discard_cb)) < 0)

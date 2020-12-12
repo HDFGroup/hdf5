@@ -90,7 +90,6 @@ static htri_t H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t
 static herr_t H5O__copy_insert_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst,
                                        H5O_copy_t *cpy_info);
 
-
 /*********************/
 /* Package Variables */
 /*********************/

@@ -104,7 +104,7 @@ SECTION, FSPACE, Free space errors
 SECTION, PIPELINE, I/O pipeline errors
 SECTION, SYSTEM, System level errors
 SECTION, PLUGIN, Plugin errors
-SECTION, ASYNC, Plugin errors
+SECTION, ASYNC, Asynchronous I/O errors
 SECTION, NONE, No error
 
 # Minor errors

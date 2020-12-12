@@ -12,11 +12,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5ESevent.c
- *			Nov  7 2020
- *			Quincey Koziol
+ * Created:     H5ESevent.c
+ *              Nov  7 2020
+ *              Quincey Koziol
  *
- * Purpose:		Operations on "events" for managing asynchronous
+ * Purpose:     Operations on "events" for managing asynchronous
  *                      operations.
  *
  *                      Please see the asynchronous I/O RFC document
@@ -79,8 +79,8 @@ H5FL_DEFINE_STATIC(H5ES_event_t);
  *
  * Return:      Non-NULL pointer to new event on success, NULL on failure
  *
- * Programmer:	Quincey Koziol
- *	        Saturday, November 7, 2020
+ * Programmer:  Quincey Koziol
+ *              Saturday, November 7, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -125,8 +125,8 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Saturday, November 7, 2020
+ * Programmer:  Quincey Koziol
+ *              Saturday, November 7, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -171,8 +171,8 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Sunday, November 8, 2020
+ * Programmer:  Quincey Koziol
+ *              Sunday, November 8, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -185,10 +185,6 @@ H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el)
 
     /* Sanity check */
     HDassert(ev);
-
-HDfprintf(stderr, "%s: releasing event for '%s' (count: %llu, timestamp: %llu), with args '%s', in app source file '%s', function '%s', and line %u\n",
-      FUNC, ev->api_name, (unsigned long long)ev->ev_count, (unsigned long long)ev->ev_time,
-      ev->api_args, ev->app_file, ev->app_func, ev->app_line);
 
     /* Remove the event from the event list */
     H5ES__list_remove(el, ev);

@@ -334,10 +334,10 @@ H5TS_pthread_first_thread_init(void)
  *
  * Purpose:     Attempts to acquire a mutex lock, without blocking
  *
- * Note:	On success, the 'acquired' flag indicates if the HDF5 library
- *		global lock was acquired.
+ * Note:        On success, the 'acquired' flag indicates if the HDF5 library
+ *              global lock was acquired.
  *
- * Note:	The Windows threads code is very likely bogus.
+ * Note:        The Windows threads code is very likely bogus.
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -349,7 +349,7 @@ H5TS_pthread_first_thread_init(void)
 static herr_t
 H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acquired)
 {
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC_NAMECHECK_ONLY
 
@@ -394,8 +394,8 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acqui
  *
  * Purpose:     Attempts to acquire the HDF5 library global lock
  *
- * Note:	On success, the 'acquired' flag indicates if the HDF5 library
- *		global lock was acquired.
+ * Note:        On success, the 'acquired' flag indicates if the HDF5 library
+ *              global lock was acquired.
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -408,9 +408,10 @@ herr_t
 H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired)
 {
     FUNC_ENTER_API_NAMECHECK_ONLY
-        /*NO TRACE*/
 
-        FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))}
+    /*NO TRACE*/
+
+    FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))}
 /* end H5TSmutex_acquire() */
 
 /*--------------------------------------------------------------------------
@@ -421,7 +422,7 @@ H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired)
  *    H5TS_mutex_lock(&mutex_var)
  *
  * RETURNS
- *    0 on success and non-zero on error.
+ *    Non-negative on success / Negative on failure
  *
  * DESCRIPTION
  *    Recursive lock semantics for HDF5 (locking) -
@@ -433,9 +434,10 @@ H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired)
  *
  *--------------------------------------------------------------------------
  */
-herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex)
+herr_t
+H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -486,7 +488,7 @@ done:
  *    H5TS__mutex_unlock(&mutex_var, &lock_count)
  *
  * RETURNS
- *    0 on success and non-zero on error.
+ *    Non-negative on success / Negative on failure
  *
  * DESCRIPTION
  *    Recursive lock semantics for HDF5 (unlocking) -
@@ -500,7 +502,7 @@ done:
 static herr_t
 H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count)
 {
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -541,7 +543,7 @@ done:
  *    H5TS_mutex_unlock(&mutex_var)
  *
  * RETURNS
- *    0 on success and non-zero on error.
+ *    Non-negative on success / Negative on failure
  *
  * DESCRIPTION
  *    Recursive lock semantics for HDF5 (unlocking) -
@@ -556,7 +558,7 @@ done:
 herr_t
 H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 {
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -603,7 +605,7 @@ done:
 herr_t
 H5TSmutex_get_attempt_count(unsigned int *count)
 {
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API_NAMECHECK_ONLY
     /*NO TRACE*/
@@ -637,7 +639,7 @@ done:
 herr_t
 H5TSmutex_release(unsigned int *lock_count)
 {
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API_NAMECHECK_ONLY
     /*NO TRACE*/
@@ -657,7 +659,7 @@ H5TSmutex_release(unsigned int *lock_count)
  *    H5TS_cancel_count_inc()
  *
  * RETURNS
- *    0 on success non-zero error code on error.
+ *    Non-negative on success / Negative on failure
  *
  * DESCRIPTION
  *    Creates a cancellation counter for a thread if it is the first time
