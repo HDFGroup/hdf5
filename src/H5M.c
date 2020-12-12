@@ -40,10 +40,13 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5M__close_cb(H5VL_object_t *map_vol_obj, void **request);
-static hid_t  H5M__create_api_common(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
+
+#ifdef H5_HAVE_MAP_API
+static hid_t H5M__create_api_common(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 static hid_t H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
 static herr_t H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value, hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 static herr_t H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value, hid_t dxpl_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
+#endif /*  H5_HAVE_MAP_API */
 
 /*********************/
 /* Package Variables */
@@ -660,13 +663,13 @@ H5Mclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, map_id, es_id)) < 0) {
-            if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_MAP, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on map ID")
+        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, map_id, es_id)) < 0)
             HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, FAIL, "can't insert token into event set")
-        } /* end if */
 
 done:
+    if (connector && H5VL_conn_dec_rc(connector) < 0)
+        HDONE_ERROR(H5E_MAP, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Mclose_async() */
 
@@ -967,11 +970,8 @@ H5Mput_async(const char *app_file, const char *app_func, unsigned app_line, hid_
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, es_id)) < 0) {
-            if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_MAP, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on map ID")
+                        H5ARG_TRACE10(FUNC, "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, FAIL, "can't insert token into event set")
-        } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1091,11 +1091,8 @@ H5Mget_async(const char *app_file, const char *app_func, unsigned app_line, hid_
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, es_id)) < 0) {
-            if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_MAP, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on map ID")
+                        H5ARG_TRACE10(FUNC, "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, FAIL, "can't insert token into event set")
-        } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
