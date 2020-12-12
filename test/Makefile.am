@@ -152,19 +152,6 @@ cache_image_SOURCES=cache_image.c genall5.c
 mirror_vfd_SOURCES=mirror_vfd.c genall5.c
 event_set_SOURCES=event_set.c
 
-VFD_LIST = sec2 stdio core core_paged split multi family
-if DIRECT_VFD_CONDITIONAL
-  VFD_LIST += direct
-endif
-
-# Test with just the native connector, with a single pass-through connector
-# and with a doubly-stacked pass-through.
-#
-# native = 0
-# pass-through = 1
-VOL_LIST = native "pass_through under_vol=0;under_info={}" \
-           "pass_through under_vol=1;under_info={under_vol=0;under_info={}}"
-
 # Additional target for running timing test
 timings _timings: testmeta
 	@for timing in $(TIMINGS) dummy; do                                   \
@@ -173,7 +160,6 @@ timings _timings: testmeta
 	      $(RUNEXEC) ./$$timing $(TEST_FLAGS) || exit 1;                  \
 	   fi;                                                                \
 	done;
-
 
 # The flush1 test must run before the flush2 test
 flush2.chkexe_: flush1.chkexe_
