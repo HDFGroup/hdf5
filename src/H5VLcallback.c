@@ -153,7 +153,8 @@ static herr_t H5VL__introspect_get_conn_cls(void *obj, const H5VL_class_t *cls, 
                                             const H5VL_class_t **conn_cls);
 static herr_t H5VL__introspect_opt_query(void *obj, const H5VL_class_t *cls, H5VL_subclass_t subcls,
                                          int opt_type, uint64_t *flags);
-static herr_t H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t timeout, H5VL_request_status_t *status);
+static herr_t H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t timeout,
+                                 H5VL_request_status_t *status);
 static herr_t H5VL__request_notify(void *req, const H5VL_class_t *cls, H5VL_request_notify_t cb, void *ctx);
 static herr_t H5VL__request_cancel(void *req, const H5VL_class_t *cls, H5VL_request_status_t *status);
 static herr_t H5VL__request_specific(void *req, const H5VL_class_t *cls,

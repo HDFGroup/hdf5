@@ -141,8 +141,8 @@ static herr_t H5L__delete_api_common(hid_t loc_id, const char *name, hid_t lapl_
 static herr_t H5L__delete_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                             H5_iter_order_t order, hsize_t n, hid_t lapl_id, void **token_ptr,
                                             H5VL_object_t **_vol_obj_ptr);
-static herr_t H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id, void **token_ptr,
-                                     H5VL_object_t **_vol_obj_ptr);
+static herr_t H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id,
+                                     void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 static herr_t H5L__iterate_api_common(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
                                       hsize_t *idx_p, H5L_iterate2_t op, void *op_data, void **token_ptr,
                                       H5VL_object_t **_vol_obj_ptr);
@@ -560,7 +560,8 @@ H5Lcreate_soft_async(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE9(FUNC, "*s*sIu*si*siii", app_file, app_func, app_line, link_target, link_loc_id, link_name, lcpl_id, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE9(FUNC, "*s*sIu*si*siii", app_file, app_func, app_line, link_target,
+                                     link_loc_id, link_name, lcpl_id, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -726,7 +727,8 @@ H5Lcreate_hard_async(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIui*si*siii", app_file, app_func, app_line, cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE10(FUNC, "*s*sIui*si*siii", app_file, app_func, app_line, cur_loc_id,
+                                      cur_name, new_loc_id, new_name, lcpl_id, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -931,7 +933,8 @@ H5L__delete_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **tok
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Unlink */
-    if (H5VL_link_specific(*vol_obj_ptr, &loc_params, H5VL_LINK_DELETE, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
+    if (H5VL_link_specific(*vol_obj_ptr, &loc_params, H5VL_LINK_DELETE, H5P_DATASET_XFER_DEFAULT, token_ptr) <
+        0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
@@ -1003,7 +1006,8 @@ H5Ldelete_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id,
+                                     es_id)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1126,7 +1130,8 @@ H5Ldelete_by_idx_async(const char *app_file, const char *app_func, unsigned app_
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIui*sIiIohii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE10(FUNC, "*s*sIui*sIiIohii", app_file, app_func, app_line, loc_id,
+                                      group_name, idx_type, order, n, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1260,8 +1265,8 @@ done:
  *
  *--------------------------------------------------------------------------*/
 static herr_t
-H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id,
-                       void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id, void **token_ptr,
+                       H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
@@ -1273,7 +1278,7 @@ H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t la
 
     /* Check arguments */
     /* name is verified in H5VL_setup_name_args() */
-    if(NULL == exists)
+    if (NULL == exists)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer for link existence")
 
     /* Set up object access arguments */
@@ -1304,8 +1309,8 @@ done:
 htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    hbool_t exists;          /* Flag to indicate if link exists */
-    htri_t ret_value = FAIL; /* Return value */
+    hbool_t exists;           /* Flag to indicate if link exists */
+    htri_t  ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
@@ -1353,7 +1358,8 @@ H5Lexists_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE8(FUNC, "*s*sIui*s*bii", app_file, app_func, app_line, loc_id, name, exists, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE8(FUNC, "*s*sIui*s*bii", app_file, app_func, app_line, loc_id, name,
+                                     exists, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1789,7 +1795,8 @@ H5Literate_async(const char *app_file, const char *app_func, unsigned app_line, 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIuiIiIo*hLI*xi", app_file, app_func, app_line, group_id, idx_type, order, idx_p, op, op_data, es_id)) < 0)
+                        H5ARG_TRACE10(FUNC, "*s*sIuiIiIo*hLI*xi", app_file, app_func, app_line, group_id,
+                                      idx_type, order, idx_p, op, op_data, es_id)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -3569,10 +3576,10 @@ done:
 herr_t
 H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hbool_t *exists)
 {
-    H5L_trav_le_t  udata;            /* User data for traversal */
-    H5G_traverse_t cb_func;          /* Callback function for tranversal */
-    char *         name_copy = NULL; /* Duplicate of name */
-    char *         name_trav;        /* Name to traverse */
+    H5L_trav_le_t  udata;               /* User data for traversal */
+    H5G_traverse_t cb_func;             /* Callback function for tranversal */
+    char *         name_copy = NULL;    /* Duplicate of name */
+    char *         name_trav;           /* Name to traverse */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

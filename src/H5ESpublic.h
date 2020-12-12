@@ -28,12 +28,13 @@
 #define H5ES_NONE (hid_t)0
 
 /* Special "wait" timeout values */
-#define H5ES_WAIT_FOREVER (UINT64_MAX)  /* Wait until all operations complete */
-#define H5ES_WAIT_NONE    (0)           /* Don't wait for operations to complete,
-                                         *  just check their status.
-                                         *  (this allows H5ESwait to behave
-                                         *   like a 'test' operation)
-                                         */
+#define H5ES_WAIT_FOREVER (UINT64_MAX) /* Wait until all operations complete */
+#define H5ES_WAIT_NONE                                                                                       \
+    (0) /* Don't wait for operations to complete,                                                            \
+         *  just check their status.                                                                         \
+         *  (this allows H5ESwait to behave                                                                  \
+         *   like a 'test' operation)                                                                        \
+         */
 
 /*******************/
 /* Public Typedefs */
@@ -49,16 +50,16 @@ typedef enum H5ES_status_t {
 /* Information about failed operations in event set */
 typedef struct H5ES_err_info_t {
     /* Operation info */
-    char *api_name;             /* Name of HDF5 API routine called */
-    char *api_args;             /* "Argument string" for arguments to HDF5 API routine called */
-    char *app_file_name;        /* Name of source file where the HDF5 API routine was called */
-    char *app_func_name;        /* Name of function where the HDF5 API routine was called */
-    unsigned app_line_num;      /* Line # of source file where the HDF5 API routine was called */
-    uint64_t op_ins_count;      /* Counter of operation's insertion into event set */
-    uint64_t op_ins_ts;         /* Timestamp for when the operation was inserted into the event set */
+    char *   api_name;      /* Name of HDF5 API routine called */
+    char *   api_args;      /* "Argument string" for arguments to HDF5 API routine called */
+    char *   app_file_name; /* Name of source file where the HDF5 API routine was called */
+    char *   app_func_name; /* Name of function where the HDF5 API routine was called */
+    unsigned app_line_num;  /* Line # of source file where the HDF5 API routine was called */
+    uint64_t op_ins_count;  /* Counter of operation's insertion into event set */
+    uint64_t op_ins_ts;     /* Timestamp for when the operation was inserted into the event set */
 
     /* Error info */
-    hid_t err_stack_id;         /* ID for error stack from failed operation */
+    hid_t err_stack_id; /* ID for error stack from failed operation */
 } H5ES_err_info_t;
 
 /*
@@ -119,14 +120,13 @@ extern "C" {
 #endif
 
 H5_DLL hid_t  H5EScreate(void);
-H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress,
-                hbool_t *err_occurred);
+H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, hbool_t *err_occurred);
 H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
 H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
 H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
 H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
-H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info,
-                            H5ES_err_info_t err_info[], size_t *err_cleared);
+H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[],
+                               size_t *err_cleared);
 H5_DLL herr_t H5ESclose(hid_t es_id);
 
 #ifdef __cplusplus

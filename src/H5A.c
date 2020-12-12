@@ -80,12 +80,13 @@ static herr_t H5A__rename_api_common(hid_t loc_id, const char *old_name, const c
 static herr_t H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *old_attr_name,
                                              const char *new_attr_name, hid_t lapl_id, void **token_ptr,
                                              H5VL_object_t **_vol_obj_ptr);
-static herr_t H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name, hbool_t *attr_exists,
-                                 void **token_ptr);
-static herr_t H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists, void **token_ptr,
-                                     H5VL_object_t **_vol_obj_ptr);
-static herr_t H5A__exists_by_name_api_common(hid_t obj_id, const char *obj_name, const char *attr_name, hbool_t *attr_exists,
-                                             hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
+static herr_t H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name,
+                                 hbool_t *attr_exists, void **token_ptr);
+static herr_t H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists,
+                                     void **token_ptr, H5VL_object_t **_vol_obj_ptr);
+static herr_t H5A__exists_by_name_api_common(hid_t obj_id, const char *obj_name, const char *attr_name,
+                                             hbool_t *attr_exists, hid_t lapl_id, void **token_ptr,
+                                             H5VL_object_t **_vol_obj_ptr);
 
 /*********************/
 /* Package Variables */
@@ -274,7 +275,8 @@ H5Acreate_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id)) < 0) {
+                        H5ARG_TRACE10(FUNC, "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, attr_name,
+                                      type_id, space_id, acpl_id, aapl_id, es_id)) < 0) {
             if (H5I_dec_app_ref(ret_value) < 0)
                 HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -421,7 +423,9 @@ H5Acreate_by_name_async(const char *app_file, const char *app_func, unsigned app
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE12(FUNC, "*s*sIui*s*siiiiii", app_file, app_func, app_line, loc_id, obj_name, attr_name, type_id, space_id, acpl_id, aapl_id, lapl_id, es_id)) < 0) {
+                        H5ARG_TRACE12(FUNC, "*s*sIui*s*siiiiii", app_file, app_func, app_line, loc_id,
+                                      obj_name, attr_name, type_id, space_id, acpl_id, aapl_id, lapl_id,
+                                      es_id)) < 0) {
             if (H5I_dec_app_ref(ret_value) < 0)
                 HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -582,7 +586,8 @@ H5Aopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, attr_name, aapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, attr_name,
+                                     aapl_id, es_id)) < 0) {
             if (H5I_dec_app_ref(ret_value) < 0)
                 HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -618,7 +623,7 @@ H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *att
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
 
-    if(!attr_name || !*attr_name)
+    if (!attr_name || !*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no attribute name")
 
     /* obj_name is verified in H5VL_setup_name_args() */
@@ -711,7 +716,8 @@ H5Aopen_by_name_async(const char *app_file, const char *app_func, unsigned app_l
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE9(FUNC, "*s*sIui*s*siii", app_file, app_func, app_line, loc_id, obj_name, attr_name, aapl_id, lapl_id, es_id)) < 0) {
+                        H5ARG_TRACE9(FUNC, "*s*sIui*s*siii", app_file, app_func, app_line, loc_id, obj_name,
+                                     attr_name, aapl_id, lapl_id, es_id)) < 0) {
             if (H5I_dec_app_ref(ret_value) < 0)
                 HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -849,7 +855,8 @@ H5Aopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE11(FUNC, "*s*sIui*sIiIohiii", app_file, app_func, app_line, loc_id, obj_name, idx_type, order, n, aapl_id, lapl_id, es_id)) < 0) {
+                        H5ARG_TRACE11(FUNC, "*s*sIui*sIiIohiii", app_file, app_func, app_line, loc_id,
+                                      obj_name, idx_type, order, n, aapl_id, lapl_id, es_id)) < 0) {
             if (H5I_dec_app_ref(ret_value) < 0)
                 HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -959,7 +966,8 @@ H5Awrite_async(const char *app_file, const char *app_func, unsigned app_line, hi
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id,
+                                     buf, es_id)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1065,7 +1073,8 @@ H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id,
+                                     buf, es_id)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1641,7 +1650,8 @@ H5Arename_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*s*si", app_file, app_func, app_line, loc_id, old_name, new_name, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIui*s*si", app_file, app_func, app_line, loc_id, old_name,
+                                     new_name, es_id)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1672,7 +1682,7 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
 
-    if(!old_name)
+    if (!old_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be NULL")
     if (!*old_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be an empty string")
@@ -1759,7 +1769,8 @@ H5Arename_by_name_async(const char *app_file, const char *app_func, unsigned app
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE9(FUNC, "*s*sIui*s*s*sii", app_file, app_func, app_line, loc_id, obj_name, old_attr_name, new_attr_name, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE9(FUNC, "*s*sIui*s*s*sii", app_file, app_func, app_line, loc_id, obj_name,
+                                     old_attr_name, new_attr_name, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1808,8 +1819,8 @@ done:
             attribute.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx /*in,out */, H5A_operator2_t op,
-            void *op_data)
+H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx /*in,out */,
+            H5A_operator2_t op, void *op_data)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
@@ -2212,7 +2223,7 @@ static herr_t
 H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name,
                    hbool_t *attr_exists, void **token_ptr)
 {
-    herr_t ret_value = SUCCEED;            /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2242,7 +2253,8 @@ done:
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
 static herr_t
-H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists, void **token_ptr,
+                       H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
@@ -2289,8 +2301,8 @@ done:
 htri_t
 H5Aexists(hid_t obj_id, const char *attr_name)
 {
-    hbool_t exists;          /* Flag for attribute existance */
-    htri_t ret_value = FAIL; /* Return value */
+    hbool_t exists;           /* Flag for attribute existance */
+    htri_t  ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "i*s", obj_id, attr_name);
@@ -2337,9 +2349,9 @@ H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, h
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(
-                es_id, vol_obj->connector, token,
-                H5ARG_TRACE7(FUNC, "*s*sIui*s*bi", app_file, app_func, app_line, obj_id, attr_name, attr_exists, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIui*s*bi", app_file, app_func, app_line, obj_id, attr_name,
+                                     attr_exists, es_id)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -2355,8 +2367,9 @@ done:
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
 static herr_t
-H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name, hbool_t *attr_exists,
-                               hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name,
+                               hbool_t *attr_exists, hid_t lapl_id, void **token_ptr,
+                               H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
@@ -2369,7 +2382,7 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(!attr_name || !*attr_name)
+    if (!attr_name || !*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
     if (NULL == attr_exists)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer for attribute existence")
@@ -2403,8 +2416,8 @@ done:
 htri_t
 H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
-    hbool_t exists;          /* Flag for attribute existance */
-    htri_t ret_value = FAIL; /* Return value */
+    hbool_t exists;           /* Flag for attribute existance */
+    htri_t  ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("t", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
@@ -2431,7 +2444,8 @@ done:
  *--------------------------------------------------------------------------*/
 herr_t
 H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                        const char *obj_name, const char *attr_name, hbool_t *attr_exists, hid_t lapl_id, hid_t es_id)
+                        const char *obj_name, const char *attr_name, hbool_t *attr_exists, hid_t lapl_id,
+                        hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
@@ -2447,13 +2461,15 @@ H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app
         token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Asynchronously check if an attribute exists */
-    if (H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, attr_exists, lapl_id, token_ptr, &vol_obj) < 0)
+    if (H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, attr_exists, lapl_id, token_ptr,
+                                       &vol_obj) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously rename attribute")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE9(FUNC, "*s*sIui*s*s*bii", app_file, app_func, app_line, loc_id, obj_name, attr_name, attr_exists, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE9(FUNC, "*s*sIui*s*s*bii", app_file, app_func, app_line, loc_id, obj_name,
+                                     attr_name, attr_exists, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:

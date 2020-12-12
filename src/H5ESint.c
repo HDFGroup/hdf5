@@ -52,17 +52,17 @@
 
 /* Callback context for wait operations */
 typedef struct H5ES_wait_ctx_t {
-    H5ES_t *es;                 /* Event set being operated on */
-    uint64_t timeout;           /* Timeout for wait operation */
-    size_t *num_in_progress;    /* Count of # of operations that have not completed */
-    hbool_t *op_failed;         /* Flag to indicate an operation failed */
+    H5ES_t * es;              /* Event set being operated on */
+    uint64_t timeout;         /* Timeout for wait operation */
+    size_t * num_in_progress; /* Count of # of operations that have not completed */
+    hbool_t *op_failed;       /* Flag to indicate an operation failed */
 } H5ES_wait_ctx_t;
 
 /* Callback context for get error info (gei) operations */
 typedef struct H5ES_gei_ctx_t {
-    H5ES_t *es;                 /* Event set being operated on */
-    size_t num_err_info;        /* # of elements in err_info[] array */
-    size_t curr_err;            /* Index of current error in array */
+    H5ES_t *         es;            /* Event set being operated on */
+    size_t           num_err_info;  /* # of elements in err_info[] array */
+    size_t           curr_err;      /* Index of current error in array */
     H5ES_err_info_t *curr_err_info; /* Pointer to current element in err_info[] array */
 } H5ES_gei_ctx_t;
 
@@ -75,9 +75,9 @@ typedef struct H5ES_gei_ctx_t {
 /********************/
 static herr_t H5ES__close_cb(void *es, void **request_token);
 static herr_t H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev);
-static int H5ES__wait_cb(H5ES_event_t *ev, void *_ctx);
-static int H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx);
-static int H5ES__close_failed_cb(H5ES_event_t *ev, void *_ctx);
+static int    H5ES__wait_cb(H5ES_event_t *ev, void *_ctx);
+static int    H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx);
+static int    H5ES__close_failed_cb(H5ES_event_t *ev, void *_ctx);
 
 /*********************/
 /* Package Variables */
@@ -247,15 +247,15 @@ done:
 herr_t
 H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, const char *caller_args, ...)
 {
-    H5ES_t *       es      = NULL;        /* Event set for the operation */
-    H5ES_event_t * ev      = NULL;        /* Event for request */
-    H5RS_str_t *   rs      = NULL;        /* Ref-counted string to compose formatted argument string in */
-    const char *   app_file;              /* Application source file name */
-    const char *   app_func;              /* Application source function name */
-    const char *   s;                     /* Pointer to internal string from ref-counted string */
-    va_list        ap;                    /* Varargs for caller */
-    hbool_t        arg_started = FALSE;   /* Whether the va_list has been started */
-    herr_t         ret_value   = SUCCEED; /* Return value */
+    H5ES_t *      es = NULL;             /* Event set for the operation */
+    H5ES_event_t *ev = NULL;             /* Event for request */
+    H5RS_str_t *  rs = NULL;             /* Ref-counted string to compose formatted argument string in */
+    const char *  app_file;              /* Application source file name */
+    const char *  app_func;              /* Application source function name */
+    const char *  s;                     /* Pointer to internal string from ref-counted string */
+    va_list       ap;                    /* Varargs for caller */
+    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -384,10 +384,10 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
 static int
 H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
 {
-    H5ES_wait_ctx_t *ctx = (H5ES_wait_ctx_t *)_ctx;     /* Callback context */
-    H5VL_request_status_t ev_status = H5VL_REQUEST_STATUS_SUCCEED;      /* Status from event's operation */
-    uint64_t start_time = 0, elapsed_time = 0;  /* Start and elapsed times for waiting on an operation */
-    int ret_value = H5_ITER_CONT;       /* Return value */
+    H5ES_wait_ctx_t *     ctx       = (H5ES_wait_ctx_t *)_ctx;     /* Callback context */
+    H5VL_request_status_t ev_status = H5VL_REQUEST_STATUS_SUCCEED; /* Status from event's operation */
+    uint64_t start_time = 0, elapsed_time = 0; /* Start and elapsed times for waiting on an operation */
+    int      ret_value = H5_ITER_CONT;         /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -396,17 +396,17 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
     HDassert(ctx);
 
     /* Wait on the request */
-    if(ctx->timeout != H5ES_WAIT_NONE && ctx->timeout != H5ES_WAIT_FOREVER)
+    if (ctx->timeout != H5ES_WAIT_NONE && ctx->timeout != H5ES_WAIT_FOREVER)
         start_time = H5_now_usec();
     if (H5VL_request_wait(ev->request, ctx->timeout, &ev_status) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, H5_ITER_ERROR, "unable to test operation")
-    if(ctx->timeout != H5ES_WAIT_NONE && ctx->timeout != H5ES_WAIT_FOREVER)
+    if (ctx->timeout != H5ES_WAIT_NONE && ctx->timeout != H5ES_WAIT_FOREVER)
         elapsed_time = H5_now_usec() - start_time;
 
     /* Check for status values that indicate we should break out of the loop */
     if (ev_status == H5VL_REQUEST_STATUS_FAIL) {
         /* Handle failure */
-        if(H5ES__handle_fail(ctx->es, ev) < 0)
+        if (H5ES__handle_fail(ctx->es, ev) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, H5_ITER_ERROR, "unable to handle failed event")
 
         /* Record the error */
@@ -431,13 +431,13 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
     } /* end if */
 
     /* Check for updateable timeout */
-    if(ctx->timeout != H5ES_WAIT_NONE && ctx->timeout != H5ES_WAIT_FOREVER) {
+    if (ctx->timeout != H5ES_WAIT_NONE && ctx->timeout != H5ES_WAIT_FOREVER) {
         /* Update timeout for next operation */
-        if((elapsed_time * 1000) > ctx->timeout)
+        if ((elapsed_time * 1000) > ctx->timeout)
             ctx->timeout = H5ES_WAIT_NONE;
         else
-            ctx->timeout -= (elapsed_time * 1000);  /* Convert us to ns */
-    } /* end if */
+            ctx->timeout -= (elapsed_time * 1000); /* Convert us to ns */
+    }                                              /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -460,8 +460,8 @@ done:
 herr_t
 H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, hbool_t *op_failed)
 {
-    H5ES_wait_ctx_t ctx;    /* Iterator callback context info */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    H5ES_wait_ctx_t ctx;                 /* Iterator callback context info */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -472,13 +472,13 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, hbool_t *op_fa
 
     /* Set user's parameters to known values */
     *num_in_progress = 0;
-    *op_failed = FALSE;
+    *op_failed       = FALSE;
 
     /* Set up context for iterator callbacks */
-    ctx.es = es;
-    ctx.timeout = timeout;
+    ctx.es              = es;
+    ctx.timeout         = timeout;
     ctx.num_in_progress = num_in_progress;
-    ctx.op_failed = op_failed;
+    ctx.op_failed       = op_failed;
 
     /* Iterate over the events in the set, waiting for them to complete */
     if (H5ES__list_iterate(&es->active, H5ES__wait_cb, &ctx) < 0)
@@ -503,8 +503,8 @@ done:
 static int
 H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
 {
-    H5ES_gei_ctx_t *ctx = (H5ES_gei_ctx_t *)_ctx;     /* Callback context */
-    int ret_value = H5_ITER_CONT;       /* Return value */
+    H5ES_gei_ctx_t *ctx       = (H5ES_gei_ctx_t *)_ctx; /* Callback context */
+    int             ret_value = H5_ITER_CONT;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -513,17 +513,17 @@ H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
     HDassert(ctx);
 
     /* Copy operation info for event */
-    if(NULL == (ctx->curr_err_info->api_name = H5MM_strdup(ev->api_name)))
+    if (NULL == (ctx->curr_err_info->api_name = H5MM_strdup(ev->api_name)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 API name")
-    if(NULL == (ctx->curr_err_info->api_args = H5MM_strdup(ev->api_args)))
+    if (NULL == (ctx->curr_err_info->api_args = H5MM_strdup(ev->api_args)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 API routine arguments")
-    if(NULL == (ctx->curr_err_info->app_file_name = H5MM_strdup(ev->app_file)))
+    if (NULL == (ctx->curr_err_info->app_file_name = H5MM_strdup(ev->app_file)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy app source file name")
-    if(NULL == (ctx->curr_err_info->app_func_name = H5MM_strdup(ev->app_func)))
+    if (NULL == (ctx->curr_err_info->app_func_name = H5MM_strdup(ev->app_func)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy app function name")
     ctx->curr_err_info->app_line_num = ev->app_line;
     ctx->curr_err_info->op_ins_count = ev->ev_count;
-    ctx->curr_err_info->op_ins_ts = ev->ev_time;
+    ctx->curr_err_info->op_ins_ts    = ev->ev_time;
 
     /* Get error stack for event */
     if (H5VL_request_specific(ev->request, H5VL_REQUEST_GET_ERR_STACK, &ctx->curr_err_info->err_stack_id) < 0)
@@ -541,7 +541,7 @@ H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
     ctx->curr_err_info++;
 
     /* Stop iteration if err_info[] array is full */
-    if(ctx->curr_err == ctx->num_err_info)
+    if (ctx->curr_err == ctx->num_err_info)
         ret_value = H5_ITER_STOP;
 
 done:
@@ -561,11 +561,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[],
-    size_t *num_cleared)
+H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[], size_t *num_cleared)
 {
-    H5ES_gei_ctx_t ctx;         /* Iterator callback context info */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5ES_gei_ctx_t ctx;                 /* Iterator callback context info */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -576,9 +575,9 @@ H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[],
     HDassert(num_cleared);
 
     /* Set up context for iterator callbacks */
-    ctx.es = es;
-    ctx.num_err_info = num_err_info;
-    ctx.curr_err = 0;
+    ctx.es            = es;
+    ctx.num_err_info  = num_err_info;
+    ctx.curr_err      = 0;
     ctx.curr_err_info = &err_info[0];
 
     /* Iterate over the failed events in the set, copying their error info */
@@ -607,8 +606,8 @@ done:
 static int
 H5ES__close_failed_cb(H5ES_event_t *ev, void *_ctx)
 {
-    H5ES_t *es = (H5ES_t *)_ctx;        /* Callback context */
-    int ret_value = H5_ITER_CONT;       /* Return value */
+    H5ES_t *es        = (H5ES_t *)_ctx; /* Callback context */
+    int     ret_value = H5_ITER_CONT;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -651,8 +650,9 @@ H5ES__close(H5ES_t *es)
 
     /* Fail if active operations still present */
     if (H5ES__list_count(&es->active) > 0)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCLOSEOBJ, FAIL,
-                    "can't close event set while unfinished operations are present (i.e. wait on event set first)")
+        HGOTO_ERROR(
+            H5E_EVENTSET, H5E_CANTCLOSEOBJ, FAIL,
+            "can't close event set while unfinished operations are present (i.e. wait on event set first)")
 
     /* Iterate over the failed events in the set, releasing them */
     if (H5ES__list_iterate(&es->failed, H5ES__close_failed_cb, (void *)es) < 0)

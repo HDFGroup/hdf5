@@ -472,8 +472,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key,
-                hbool_t *found, void *_udata)
+H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, hbool_t *found, void *_udata)
 {
     H5G_bt_lkp_t *udata = (H5G_bt_lkp_t *)_udata;
     H5G_node_t *  sn    = NULL;

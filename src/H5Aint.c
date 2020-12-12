@@ -1471,10 +1471,10 @@ done:
 herr_t
 H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name, hbool_t *attr_exists)
 {
-    H5G_loc_t  obj_loc;           /* Location used to open group */
-    H5G_name_t obj_path;          /* Opened object group hier. path */
-    H5O_loc_t  obj_oloc;          /* Opened object object location */
-    hbool_t    loc_found = FALSE; /* Entry at 'obj_name' found */
+    H5G_loc_t  obj_loc;             /* Location used to open group */
+    H5G_name_t obj_path;            /* Opened object group hier. path */
+    H5O_loc_t  obj_oloc;            /* Opened object object location */
+    hbool_t    loc_found = FALSE;   /* Entry at 'obj_name' found */
     herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE

@@ -836,10 +836,10 @@ done:
 herr_t
 H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name, hbool_t *found, H5O_link_t *lnk)
 {
-    H5HL_t *          heap = NULL;      /* Pointer to local heap */
-    H5G_bt_lkp_t      bt_udata;         /* Data to pass through B-tree	*/
-    H5G_stab_fnd_ud_t udata;            /* 'User data' to give to callback */
-    H5O_stab_t        stab;             /* Symbol table message		*/
+    H5HL_t *          heap = NULL;         /* Pointer to local heap */
+    H5G_bt_lkp_t      bt_udata;            /* Data to pass through B-tree	*/
+    H5G_stab_fnd_ud_t udata;               /* 'User data' to give to callback */
+    H5O_stab_t        stab;                /* Symbol table message		*/
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE

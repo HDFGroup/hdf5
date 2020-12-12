@@ -71,7 +71,6 @@
 /* Declare a static free list to manage H5ES_event_t structs */
 H5FL_DEFINE_STATIC(H5ES_event_t);
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES__event_new
  *
@@ -87,9 +86,9 @@ H5FL_DEFINE_STATIC(H5ES_event_t);
 H5ES_event_t *
 H5ES__event_new(H5VL_t *connector, void *token)
 {
-    H5ES_event_t * ev      = NULL;      /* New event */
-    H5VL_object_t *request = NULL;      /* Async request token VOL object */
-    H5ES_event_t *ret_value = NULL;     /* Return value */
+    H5ES_event_t * ev        = NULL; /* New event */
+    H5VL_object_t *request   = NULL; /* Async request token VOL object */
+    H5ES_event_t * ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -133,7 +132,7 @@ done:
 herr_t
 H5ES__event_free(H5ES_event_t *ev)
 {
-    herr_t         ret_value   = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -179,7 +178,7 @@ done:
 herr_t
 H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el)
 {
-    herr_t         ret_value   = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -196,4 +195,3 @@ H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__event_completed() */
-

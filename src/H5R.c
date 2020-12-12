@@ -47,9 +47,12 @@
 /********************/
 
 /* Helper routines for sync/async API calls */
-static hid_t H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
-static hid_t H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
-static hid_t H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
+static hid_t H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, void **token_ptr,
+                                         H5VL_object_t **_vol_obj_ptr);
+static hid_t H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, void **token_ptr,
+                                         H5VL_object_t **_vol_obj_ptr);
+static hid_t H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void **token_ptr,
+                                       H5VL_object_t **_vol_obj_ptr);
 
 /*********************/
 /* Package Variables */
@@ -464,7 +467,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, void **token_ptr,
+                            H5VL_object_t **_vol_obj_ptr)
 {
     hid_t           loc_id;             /* Reference location ID */
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
@@ -509,7 +513,8 @@ H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
 
     /* Open object by token */
-    if (NULL == (opened_obj = H5VL_object_open(*vol_obj_ptr, &loc_params, &opened_type, H5P_DATASET_XFER_DEFAULT, token_ptr)))
+    if (NULL == (opened_obj = H5VL_object_open(*vol_obj_ptr, &loc_params, &opened_type,
+                                               H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token")
 
     /* Register object */
@@ -533,7 +538,7 @@ done:
 hid_t
 H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)
 {
-    hid_t             ret_value  = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "*Rrii", ref_ptr, rapl_id, oapl_id);
@@ -556,7 +561,8 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id)
+H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr,
+                     hid_t rapl_id, hid_t oapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object of loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
@@ -577,7 +583,8 @@ H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id,
+                                     oapl_id, es_id)) < 0) {
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -597,20 +604,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, void **token_ptr,
+                            H5VL_object_t **_vol_obj_ptr)
 {
     hid_t           loc_id;             /* Reference location ID */
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
-        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    H5VL_loc_params_t loc_params;                     /* Location parameters */
-    H5O_token_t obj_token = {0};                 /* Object token */
-    H5I_type_t  opened_type;                     /* Opened object type */
-    void *      opened_obj    = NULL;            /* Opened object */
-    hid_t       opened_obj_id = H5I_INVALID_HID; /* Opened object ID */
-    H5S_t *     space         = NULL;            /* Dataspace pointer (copy) */
-    hid_t       space_id      = H5I_INVALID_HID; /* Dataspace ID */
-    hid_t       ret_value     = H5I_INVALID_HID; /* Return value */
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);  /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;                      /* Location parameters */
+    H5O_token_t       obj_token = {0};                 /* Object token */
+    H5I_type_t        opened_type;                     /* Opened object type */
+    void *            opened_obj    = NULL;            /* Opened object */
+    hid_t             opened_obj_id = H5I_INVALID_HID; /* Opened object ID */
+    H5S_t *           space         = NULL;            /* Dataspace pointer (copy) */
+    hid_t             space_id      = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t             ret_value     = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -691,7 +699,7 @@ done:
 hid_t
 H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)
 {
-    hid_t             ret_value     = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "*Rrii", ref_ptr, rapl_id, oapl_id);
@@ -714,7 +722,8 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id)
+H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr,
+                     hid_t rapl_id, hid_t oapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object of loc_id */
     void *         token     = NULL;            /* Request token for async operation */
@@ -735,7 +744,8 @@ H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id,
+                                     oapl_id, es_id)) < 0) {
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on region ID")
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -755,7 +765,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void **token_ptr,
+                          H5VL_object_t **_vol_obj_ptr)
 {
     hid_t           loc_id;             /* Reference location ID */
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
@@ -771,7 +782,7 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
 
     FUNC_ENTER_STATIC
 
-  fprintf(stderr, "H5R__open_attr_api_common is here\n");
+    fprintf(stderr, "H5R__open_attr_api_common is here\n");
     /* Check args */
     if (ref_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid reference pointer")
@@ -803,7 +814,8 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
     loc_params.obj_type                    = H5I_get_type(loc_id);
 
     /* Open object by token */
-    if (NULL == (opened_obj = H5VL_object_open(*vol_obj_ptr, &loc_params, &opened_type, H5P_DATASET_XFER_DEFAULT, token_ptr)))
+    if (NULL == (opened_obj = H5VL_object_open(*vol_obj_ptr, &loc_params, &opened_type,
+                                               H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token")
 
     /* Register object */
@@ -879,7 +891,8 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, hid_t es_id)
+H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr,
+                   hid_t rapl_id, hid_t aapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
@@ -900,9 +913,11 @@ H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, aapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id,
+                                     aapl_id, es_id)) < 0) {
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID,
+                            "can't decrement count on attribute ID")
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 

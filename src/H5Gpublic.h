@@ -110,12 +110,12 @@ H5_DLL herr_t H5Gclose_async(const char *app_file, const char *app_func, unsigne
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
-#define H5Gcreate_async_wrap            H5_NO_EXPAND(H5Gcreate_async)
-#define H5Gopen_async_wrap              H5_NO_EXPAND(H5Gopen_async)
-#define H5Gget_info_async_wrap          H5_NO_EXPAND(H5Gget_info_async)
-#define H5Gget_info_by_name_async_wrap  H5_NO_EXPAND(H5Gget_info_by_name_async)
-#define H5Gget_info_by_idx_async_wrap   H5_NO_EXPAND(H5Gget_info_by_idx_async)
-#define H5Gclose_async_wrap             H5_NO_EXPAND(H5Gclose_async)
+#define H5Gcreate_async_wrap           H5_NO_EXPAND(H5Gcreate_async)
+#define H5Gopen_async_wrap             H5_NO_EXPAND(H5Gopen_async)
+#define H5Gget_info_async_wrap         H5_NO_EXPAND(H5Gget_info_async)
+#define H5Gget_info_by_name_async_wrap H5_NO_EXPAND(H5Gget_info_by_name_async)
+#define H5Gget_info_by_idx_async_wrap  H5_NO_EXPAND(H5Gget_info_by_idx_async)
+#define H5Gclose_async_wrap            H5_NO_EXPAND(H5Gclose_async)
 #endif /* H5G_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
@@ -135,7 +135,7 @@ H5_DLL herr_t H5Gclose_async(const char *app_file, const char *app_func, unsigne
 
 /* Macros for types of objects in a group (see H5G_obj_t definition) */
 #define H5G_NTYPES      256 /* Max possible number of types	*/
-#define H5G_NLIBTYPES   8   /* Number of internal types	*/
+#define H5G_NLIBTYPES   8 /* Number of internal types	*/
 #define H5G_NUSERTYPES  (H5G_NTYPES - H5G_NLIBTYPES)
 #define H5G_USERTYPE(X) (8 + (X)) /* User defined types		*/
 

@@ -352,7 +352,7 @@ H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, hbool_t *found, void *
             if ((ret_value = (type->found)(f, bt->child[idx], H5B_NKEY(bt, shared, idx), found, udata)) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "can't lookup key in leaf node")
         } /* end else */
-    } /* end else */
+    }     /* end else */
 
 done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)

@@ -1254,8 +1254,8 @@ test_misc8(void)
     int *   wdata;        /* Data to write */
     int *   tdata;        /* Temporary pointer to data write */
 #ifdef VERIFY_DATA
-    int *rdata;                 /* Data to read */
-    int *tdata2;                /* Temporary pointer to data to read */
+    int *rdata;  /* Data to read */
+    int *tdata2; /* Temporary pointer to data to read */
 #endif /* VERIFY_DATA */
     unsigned u, v;              /* Local index variables */
     int      mdc_nelmts;        /* Metadata number of elements */
@@ -2962,7 +2962,7 @@ test_misc18(void)
     hid_t did1, did2; /* Dataset IDs */
     hid_t aid;        /* Attribute ID */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    H5O_info1_t old_oinfo;           /* (deprecated) information about object */
+    H5O_info1_t old_oinfo; /* (deprecated) information about object */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     H5O_info2_t       oinfo;         /* Data model information about object */
     H5O_native_info_t ninfo;         /* Native file format information about object */
@@ -5759,18 +5759,18 @@ static int test_misc36_context;
 static void
 test_misc36_cb1(void *_ctx)
 {
-    int *ctx = (int *)_ctx;     /* Set up context pointer */
-    hbool_t is_terminating;     /* Flag indicating the library is terminating */
-    herr_t  ret;                /* Return value */
+    int *   ctx = (int *)_ctx; /* Set up context pointer */
+    hbool_t is_terminating;    /* Flag indicating the library is terminating */
+    herr_t  ret;               /* Return value */
 
     /* Check whether the library thinks it's terminating */
     is_terminating = FALSE;
-    ret = H5is_library_terminating(&is_terminating);
+    ret            = H5is_library_terminating(&is_terminating);
     CHECK(ret, FAIL, "H5is_library_terminating");
     VERIFY(is_terminating, TRUE, "H5is_library_terminating");
 
     /* Verify correct ordering for 'atclose' callbacks */
-    if(0 != *ctx)
+    if (0 != *ctx)
         HDabort();
 
     /* Update context value */
@@ -5780,18 +5780,18 @@ test_misc36_cb1(void *_ctx)
 static void
 test_misc36_cb2(void *_ctx)
 {
-    int *ctx = (int *)_ctx;     /* Set up context pointer */
-    hbool_t is_terminating;     /* Flag indicating the library is terminating */
-    herr_t  ret;                /* Return value */
+    int *   ctx = (int *)_ctx; /* Set up context pointer */
+    hbool_t is_terminating;    /* Flag indicating the library is terminating */
+    herr_t  ret;               /* Return value */
 
     /* Check whether the library thinks it's terminating */
     is_terminating = FALSE;
-    ret = H5is_library_terminating(&is_terminating);
+    ret            = H5is_library_terminating(&is_terminating);
     CHECK(ret, FAIL, "H5is_library_terminating");
     VERIFY(is_terminating, TRUE, "H5is_library_terminating");
 
     /* Verify correct ordering for 'atclose' callbacks */
-    if(1 != *ctx)
+    if (1 != *ctx)
         HDabort();
 
     /* Update context value */
@@ -5806,15 +5806,15 @@ test_misc36_cb2(void *_ctx)
 static void
 test_misc36(void)
 {
-    hbool_t is_terminating;     /* Flag indicating the library is terminating */
-    herr_t  ret;                /* Return value */
+    hbool_t is_terminating; /* Flag indicating the library is terminating */
+    herr_t  ret;            /* Return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("H5atclose and H5is_library_terminating API calls"));
 
     /* Check whether the library thinks it's terminating */
     is_terminating = TRUE;
-    ret = H5is_library_terminating(&is_terminating);
+    ret            = H5is_library_terminating(&is_terminating);
     CHECK(ret, FAIL, "H5is_library_terminating");
     VERIFY(is_terminating, FALSE, "H5is_library_terminating");
 
@@ -5824,7 +5824,7 @@ test_misc36(void)
 
     /* Check whether the library thinks it's terminating */
     is_terminating = TRUE;
-    ret = H5is_library_terminating(&is_terminating);
+    ret            = H5is_library_terminating(&is_terminating);
     CHECK(ret, FAIL, "H5is_library_terminating");
     VERIFY(is_terminating, FALSE, "H5is_library_terminating");
 
@@ -5836,7 +5836,7 @@ test_misc36(void)
 
     /* Check whether the library thinks it's terminating */
     is_terminating = TRUE;
-    ret = H5is_library_terminating(&is_terminating);
+    ret            = H5is_library_terminating(&is_terminating);
     CHECK(ret, FAIL, "H5is_library_terminating");
     VERIFY(is_terminating, FALSE, "H5is_library_terminating");
 
@@ -5897,9 +5897,9 @@ test_misc(void)
     test_misc19(); /* Test incrementing & decrementing ref count on IDs */
     test_misc20(); /* Test problems with truncated dimensions in version 2 of storage layout message */
 #ifdef H5_HAVE_FILTER_SZIP
-    test_misc21();  /* Test that "late" allocation time is treated the same as "incremental", for chunked
-                       datasets w/a filters */
-    test_misc22();  /* check szip bits per pixel */
+    test_misc21(); /* Test that "late" allocation time is treated the same as "incremental", for chunked
+                      datasets w/a filters */
+    test_misc22(); /* check szip bits per pixel */
 #endif /* H5_HAVE_FILTER_SZIP */
     test_misc23();  /* Test intermediate group creation */
     test_misc24();  /* Test inappropriate API opens of objects */

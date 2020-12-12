@@ -1679,7 +1679,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'D': /* H5I_future_discard_func_t */
                         {
-                            H5I_future_discard_func_t ifdisc = (H5I_future_discard_func_t)HDva_arg(ap, H5I_future_discard_func_t);
+                            H5I_future_discard_func_t ifdisc =
+                                (H5I_future_discard_func_t)HDva_arg(ap, H5I_future_discard_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifdisc);
                         } /* end block */
@@ -1763,7 +1764,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'R': /* H5I_future_realize_func_t */
                         {
-                            H5I_future_realize_func_t ifreal = (H5I_future_realize_func_t)HDva_arg(ap, H5I_future_realize_func_t);
+                            H5I_future_realize_func_t ifreal =
+                                (H5I_future_realize_func_t)HDva_arg(ap, H5I_future_realize_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifreal);
                         } /* end block */

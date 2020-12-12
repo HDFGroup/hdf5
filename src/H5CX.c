@@ -370,9 +370,9 @@ typedef struct H5CX_dxpl_cache_t {
     uint32_t mpio_global_no_coll_cause;       /* Global reason for breaking collective I/O
                                                  (H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME) */
     H5FD_mpio_chunk_opt_t
-             mpio_chunk_opt_mode;         /* Collective chunk option (H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME) */
-    unsigned mpio_chunk_opt_num;          /* Collective chunk thrreshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
-    unsigned mpio_chunk_opt_ratio;        /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
+             mpio_chunk_opt_mode;  /* Collective chunk option (H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME) */
+    unsigned mpio_chunk_opt_num;   /* Collective chunk thrreshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
+    unsigned mpio_chunk_opt_ratio; /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
 #endif /* H5_HAVE_PARALLEL */
     H5Z_EDC_t             err_detect;     /* Error detection info (H5D_XFER_EDC_NAME) */
     H5Z_cb_t              filter_cb;      /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */

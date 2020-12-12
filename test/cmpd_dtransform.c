@@ -24,27 +24,27 @@
 #define LENGTH   11
 
 typedef struct {
-  char name[64];
-  char unit[64];
+    char name[64];
+    char unit[64];
 } att_t;
 
 int
 main(void)
 {
-    hsize_t  dima[] = { 1 };
-    hsize_t  dims[] = { LENGTH };
-    hid_t    str_dtyp_id = H5I_INVALID_HID, att_dtyp_id = H5I_INVALID_HID;
-    hid_t    file_id = H5I_INVALID_HID;
-    hid_t    fspace_id = H5I_INVALID_HID;
-    hid_t    dset_id = H5I_INVALID_HID;
-    hid_t    att_dspc_id = H5I_INVALID_HID;
-    hid_t    att_attr_id = H5I_INVALID_HID;
-    hid_t    dxpl_id = H5I_INVALID_HID;
-    const char *expr = "2*x";
-    int *data     = NULL;
-    int *data_res = NULL;
-    att_t *atts = NULL;
-    att_t *atts_res = NULL;
+    hsize_t     dima[]      = {1};
+    hsize_t     dims[]      = {LENGTH};
+    hid_t       str_dtyp_id = H5I_INVALID_HID, att_dtyp_id = H5I_INVALID_HID;
+    hid_t       file_id     = H5I_INVALID_HID;
+    hid_t       fspace_id   = H5I_INVALID_HID;
+    hid_t       dset_id     = H5I_INVALID_HID;
+    hid_t       att_dspc_id = H5I_INVALID_HID;
+    hid_t       att_attr_id = H5I_INVALID_HID;
+    hid_t       dxpl_id     = H5I_INVALID_HID;
+    const char *expr        = "2*x";
+    int *       data        = NULL;
+    int *       data_res    = NULL;
+    att_t *     atts        = NULL;
+    att_t *     atts_res    = NULL;
 
     /* Compound datatype */
     if (NULL == (atts = HDmalloc(sizeof(att_t))))
@@ -75,14 +75,15 @@ main(void)
         FAIL_STACK_ERROR
 
     /* Create dataset. */
-    if ((dset_id = H5Dcreate2(file_id, "test_dset", H5T_NATIVE_INT, fspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dset_id = H5Dcreate2(file_id, "test_dset", H5T_NATIVE_INT, fspace_id, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Write the attribute (compound) to the dataset */
     if ((att_dspc_id = H5Screate_simple(1, dima, NULL)) < 0)
         FAIL_STACK_ERROR
-    if ((att_attr_id = H5Acreate2(dset_id, "ATTRIBUTES", att_dtyp_id, att_dspc_id, 
-                                  H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((att_attr_id =
+             H5Acreate2(dset_id, "ATTRIBUTES", att_dtyp_id, att_dspc_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
     if (H5Awrite(att_attr_id, att_dtyp_id, atts) < 0)
         FAIL_STACK_ERROR
@@ -155,7 +156,8 @@ main(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(dxpl_id);
         H5Aclose(att_attr_id);
         H5Sclose(att_dspc_id);
@@ -164,15 +166,16 @@ error:
         H5Fclose(file_id);
         H5Tclose(att_dtyp_id);
         H5Tclose(str_dtyp_id);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
-    if(atts)
+    if (atts)
         HDfree(atts);
-    if(atts_res)
+    if (atts_res)
         HDfree(atts_res);
-    if(data)
+    if (data)
         HDfree(data);
-    if(data_res)
+    if (data_res)
         HDfree(data_res);
 
     return 1;

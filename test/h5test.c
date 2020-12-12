@@ -2041,7 +2041,7 @@ h5_get_dummy_vol_class(void)
      * can be registered.
      */
     vol_class->version = H5VL_VERSION;
-    vol_class->name = "dummy";
+    vol_class->name    = "dummy";
 
     return vol_class;
 

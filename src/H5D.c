@@ -227,7 +227,8 @@ H5Dcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE11(FUNC, "*s*sIui*siiiiii", app_file, app_func, app_line, loc_id, name, type_id, space_id, lcpl_id, dcpl_id, dapl_id, es_id)) < 0) {
+                        H5ARG_TRACE11(FUNC, "*s*sIui*siiiiii", app_file, app_func, app_line, loc_id, name,
+                                      type_id, space_id, lcpl_id, dcpl_id, dapl_id, es_id)) < 0) {
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on dataset ID")
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -434,7 +435,8 @@ H5Dopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, dapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, dapl_id,
+                                     es_id)) < 0) {
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on dataset ID")
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -635,7 +637,8 @@ H5Dget_space_async(const char *app_file, const char *app_func, unsigned app_line
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, dset_id, es_id)) < 0) {
             if (H5I_dec_app_ref(ret_value) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on dataspace ID")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, H5I_INVALID_HID,
+                            "can't decrement count on dataspace ID")
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 
@@ -1001,7 +1004,8 @@ H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIuiiiiixi", app_file, app_func, app_line, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id)) < 0)
+                        H5ARG_TRACE10(FUNC, "*s*sIuiiiiixi", app_file, app_func, app_line, dset_id,
+                                      mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1186,7 +1190,8 @@ H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line, hi
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIuiiiii*xi", app_file, app_func, app_line, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id)) < 0)
+                        H5ARG_TRACE10(FUNC, "*s*sIuiiiii*xi", app_file, app_func, app_line, dset_id,
+                                      mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1627,8 +1632,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *s
     supported = 0;
     if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_DATASET, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE,
                                   &supported) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                    "can't check for 'get vlen buf size' operation")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check for 'get vlen buf size' operation")
     if (supported & H5VL_OPT_QUERY_SUPPORTED) {
         /* Make the 'get_vlen_buf_size' callback */
         if (H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE, H5P_DATASET_XFER_DEFAULT,

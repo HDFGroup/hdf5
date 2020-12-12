@@ -42,10 +42,16 @@
 static herr_t H5M__close_cb(H5VL_object_t *map_vol_obj, void **request);
 
 #ifdef H5_HAVE_MAP_API
-static hid_t H5M__create_api_common(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
-static hid_t H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
-static herr_t H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value, hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
-static herr_t H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value, hid_t dxpl_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
+static hid_t  H5M__create_api_common(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id,
+                                     hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, void **token_ptr,
+                                     H5VL_object_t **_vol_obj_ptr);
+static hid_t  H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token_ptr,
+                                   H5VL_object_t **_vol_obj_ptr);
+static herr_t H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id,
+                                  const void *value, hid_t dxpl_id, void **token_ptr,
+                                  H5VL_object_t **_vol_obj_ptr);
+static herr_t H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id,
+                                  void *value, hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 #endif /*  H5_HAVE_MAP_API */
 
 /*********************/
@@ -362,7 +368,8 @@ H5Mcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE11(FUNC, "*s*sIui*siiiiii", app_file, app_func, app_line, loc_id, name, key_type_id, val_type_id, lcpl_id, mcpl_id, mapl_id, es_id)) < 0) {
+                        H5ARG_TRACE11(FUNC, "*s*sIui*siiiiii", app_file, app_func, app_line, loc_id, name,
+                                      key_type_id, val_type_id, lcpl_id, mcpl_id, mapl_id, es_id)) < 0) {
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HDONE_ERROR(H5E_MAP, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on map ID")
             HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -455,13 +462,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
+H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token_ptr,
+                     H5VL_object_t **_vol_obj_ptr)
 {
-    void *            map     = NULL; /* map object from VOL connector */
-    H5VL_object_t *   tmp_vol_obj   = NULL;            /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
-    H5VL_loc_params_t loc_params;                   /* Location parameters */
-    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
+    void *          map         = NULL; /* map object from VOL connector */
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;                     /* Location parameters */
+    hid_t             ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -511,9 +520,9 @@ done:
 hid_t
 H5Mopen(hid_t loc_id, const char *name, hid_t mapl_id)
 {
-    void *            map     = NULL; /* map object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
+    void *         map       = NULL;            /* map object from VOL connector */
+    H5VL_object_t *vol_obj   = NULL;            /* object of loc_id */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "i*si", loc_id, name, mapl_id);
@@ -543,7 +552,8 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Mopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name, hid_t mapl_id, hid_t es_id)
+H5Mopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name,
+              hid_t mapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
@@ -564,7 +574,8 @@ H5Mopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, mapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, mapl_id,
+                                     es_id)) < 0) {
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HDONE_ERROR(H5E_MAP, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on map ID")
             HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -619,11 +630,11 @@ done:
 herr_t
 H5Mclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id, hid_t es_id)
 {
-    void *         token     = NULL;    /* Request token for async operation            */
-    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
-    H5VL_object_t *vol_obj   = NULL;    /* VOL object of dset_id */
-    H5VL_t *       connector = NULL;    /* VOL connector */
-    herr_t ret_value = SUCCEED; /* Return value */
+    void *         token     = NULL;            /* Request token for async operation            */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
+    H5VL_object_t *vol_obj   = NULL;            /* VOL object of dset_id */
+    H5VL_t *       connector = NULL;            /* VOL connector */
+    herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, map_id, es_id);
@@ -655,7 +666,8 @@ H5Mclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, map_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, map_id, es_id)) < 0)
             HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -860,13 +872,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value,
-       hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id,
+                    const void *value, hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    herr_t         ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;                       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -918,13 +930,14 @@ herr_t
 H5Mput(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value,
        hid_t dxpl_id)
 {
-    herr_t         ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "ii*xi*xi", map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id);
 
     /* Add key-value pair to the map synchronously */
-    if ((ret_value = H5M__put_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, NULL, NULL)) < 0)
+    if ((ret_value = H5M__put_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, NULL,
+                                         NULL)) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTPUT, FAIL, "unable to put value to map synchronously")
 
 done:
@@ -941,12 +954,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Mput_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value, hid_t dxpl_id, hid_t es_id)
+H5Mput_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id,
+             hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value, hid_t dxpl_id,
+             hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
     void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    herr_t         ret_value = SUCCEED; /* Return value */
+    herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE10("e", "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key,
@@ -957,13 +972,15 @@ H5Mput_async(const char *app_file, const char *app_func, unsigned app_line, hid_
         token_ptr = &token;
 
     /* Add key-value pair to the map asynchronously */
-    if ((ret_value = H5M__put_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, token_ptr, &vol_obj)) < 0)
+    if ((ret_value = H5M__put_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id,
+                                         token_ptr, &vol_obj)) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTPUT, FAIL, "unable to put value to map asynchronously")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE10(FUNC, "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id,
+                                      key_mem_type_id, key, val_mem_type_id, value, dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -980,11 +997,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value, hid_t dxpl_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
+H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value,
+                    hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t *   tmp_vol_obj   = NULL;            /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
-    herr_t         ret_value = SUCCEED; /* Return value */
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    herr_t ret_value = SUCCEED;                       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1039,13 +1058,14 @@ herr_t
 H5Mget(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value,
        hid_t dxpl_id)
 {
-    herr_t         ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "ii*xi*xi", map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id);
 
     /* Get key-value pair from the map synchronously */
-    if ((ret_value = H5M__get_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, NULL, NULL)) < 0)
+    if ((ret_value = H5M__get_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, NULL,
+                                         NULL)) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTGET, FAIL, "unable to get value from map synchronously")
 
 done:
@@ -1062,7 +1082,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Mget_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value, hid_t dxpl_id, hid_t es_id)
+H5Mget_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id,
+             hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value, hid_t dxpl_id,
+             hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void *         token     = NULL;            /* Request token for async operation        */
@@ -1078,13 +1100,15 @@ H5Mget_async(const char *app_file, const char *app_func, unsigned app_line, hid_
         token_ptr = &token;
 
     /* Get key-value pair from the map asynchronously */
-    if ((ret_value = H5M__get_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, token_ptr, &vol_obj)) < 0)
+    if ((ret_value = H5M__get_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id,
+                                         token_ptr, &vol_obj)) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTGET, FAIL, "unable to get value from map asynchronously")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE10(FUNC, "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id,
+                                      key_mem_type_id, key, val_mem_type_id, value, dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:

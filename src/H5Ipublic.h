@@ -213,8 +213,7 @@ H5_DLL hid_t H5Iregister(H5I_type_t type, const void *object);
  *          authors and is _not_ designed for general-purpose application use.
  *
  */
-H5_DLL hid_t H5Iregister_future(H5I_type_t type, const void *object,
-                                H5I_future_realize_func_t realize_cb,
+H5_DLL hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb,
                                 H5I_future_discard_func_t discard_cb);
 /**
  * \ingroup H5I
