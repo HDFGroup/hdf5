@@ -2714,3 +2714,38 @@ H5VL_setup_idx_args(hid_t loc_id, const char *name, H5_index_t idx_type, H5_iter
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_setup_idx_args() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_setup_token_args
+ *
+ * Purpose:     Set up arguments to access an object by token
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_setup_token_args(hid_t loc_id, H5R_ref_t *ref_ptr, H5O_token_t *obj_token,
+                      H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params)
+{
+    herr_t      ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+    HDassert(loc_params);
+
+    /* Get the location object */
+    if (NULL == (*vol_obj = (H5VL_object_t *)H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set location parameters */
+    loc_params->type                        = H5VL_OBJECT_BY_TOKEN;
+    loc_params->loc_data.loc_by_token.token = obj_token;
+    loc_params->obj_type                    = H5I_get_type(loc_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_setup_token_args() */
+

@@ -83,9 +83,12 @@ extern "C" {
 
 H5_DLL hid_t H5Mcreate(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id,
                        hid_t mcpl_id, hid_t mapl_id);
+H5_DLL hid_t H5Mcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, hid_t es_id);
 H5_DLL hid_t H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id, hid_t mapl_id);
 H5_DLL hid_t H5Mopen(hid_t loc_id, const char *name, hid_t mapl_id);
+H5_DLL hid_t H5Mopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name, hid_t mapl_id, hid_t es_id);
 H5_DLL herr_t H5Mclose(hid_t map_id);
+H5_DLL herr_t H5Mclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id, hid_t es_id);
 H5_DLL hid_t  H5Mget_key_type(hid_t map_id);
 H5_DLL hid_t  H5Mget_val_type(hid_t map_id);
 H5_DLL hid_t  H5Mget_create_plist(hid_t map_id);
@@ -93,14 +96,35 @@ H5_DLL hid_t  H5Mget_access_plist(hid_t map_id);
 H5_DLL herr_t H5Mget_count(hid_t map_id, hsize_t *count, hid_t dxpl_id);
 H5_DLL herr_t H5Mput(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id,
                      const void *value, hid_t dxpl_id);
+H5_DLL herr_t H5Mput_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5Mget(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value,
                      hid_t dxpl_id);
+H5_DLL herr_t H5Mget_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hbool_t *exists, hid_t dxpl_id);
 H5_DLL herr_t H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, void *op_data,
                          hid_t dxpl_id);
 H5_DLL herr_t H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_mem_type_id,
                                  H5M_iterate_t op, void *op_data, hid_t dxpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t dxpl_id);
+
+/* API Wrappers for async routines */
+/* (Must be defined _after_ the function prototype) */
+/* (And must only defined when included in application code, not the library) */
+#ifndef H5M_MODULE
+#define H5Mcreate_async(...) H5Mcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Mopen_async(...)   H5Mopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Mclose_async(...)  H5Mclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Mput_async(...)    H5Mput_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Mget_async(...)    H5Mget_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+
+/* Define "wrapper" versions of function calls, to allow compile-time values to
+ * be passed in by language wrapper or library layer on top of HDF5. */
+#define H5Mcreate_async_wrap H5_NO_EXPAND(H5Mcreate_async)
+#define H5Mopen_async_wrap   H5_NO_EXPAND(H5Mopen_async)
+#define H5Mclose_async_wrap  H5_NO_EXPAND(H5Mclose_async)
+#define H5Mput_async_wrap    H5_NO_EXPAND(H5Mput_async)
+#define H5Mget_async_wrap    H5_NO_EXPAND(H5Mget_async)
+#endif /* H5M_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
