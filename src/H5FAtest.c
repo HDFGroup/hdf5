@@ -200,7 +200,7 @@ BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -,
 #ifndef NDEBUG
     H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
 #endif                                                /* NDEBUG */
-    const uint64_t *elmt = (const uint64_t *)_elmt;   /* Convenience pointer to native elements */
+    const uint64_t *elmt = (const uint64_t *)_elmt; /* Convenience pointer to native elements */
 
     /* Sanity checks */
     HDassert(raw);

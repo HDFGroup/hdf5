@@ -2728,7 +2728,7 @@ herr_t
 H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_obj,
                       H5VL_loc_params_t *loc_params)
 {
-    herr_t      ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2748,4 +2748,3 @@ H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_setup_token_args() */
-

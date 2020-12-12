@@ -270,7 +270,8 @@ H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE9(FUNC, "*s*sIui*siiii", app_file, app_func, app_line, loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id)) < 0) {
+                        H5ARG_TRACE9(FUNC, "*s*sIui*siiii", app_file, app_func, app_line, loc_id, name,
+                                     lcpl_id, gcpl_id, gapl_id, es_id)) < 0) {
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID")
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -472,7 +473,8 @@ H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, gapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, gapl_id,
+                                     es_id)) < 0) {
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID")
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -616,7 +618,8 @@ H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line,
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert( es_id, vol_obj->connector, token,
+        if (H5ES_insert(
+                es_id, vol_obj->connector, token,
                 H5ARG_TRACE6(FUNC, "*s*sIuixi", app_file, app_func, app_line, loc_id, group_info, es_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -721,7 +724,8 @@ H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE8(FUNC, "*s*sIui*sxii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE8(FUNC, "*s*sIui*sxii", app_file, app_func, app_line, loc_id, name,
+                                     group_info, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -832,7 +836,8 @@ H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned ap
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE11(FUNC, "*s*sIui*sIiIohxii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE11(FUNC, "*s*sIui*sIiIohxii", app_file, app_func, app_line, loc_id,
+                                      group_name, idx_type, order, n, group_info, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:

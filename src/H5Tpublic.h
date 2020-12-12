@@ -1133,7 +1133,8 @@ H5_DLL herr_t H5Tclose(hid_t type_id);
  * \todo Create an example for H5Tclose_async().
  *
  */
-H5_DLL herr_t H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t type_id, hid_t es_id);
+H5_DLL herr_t H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t type_id,
+                             hid_t es_id);
 /**
  * \ingroup H5T
  *
@@ -1224,7 +1225,9 @@ H5_DLL herr_t H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lc
  * \todo Create an example for H5Tcommit_async().
  *
  */
-H5_DLL herr_t H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t es_id);
+H5_DLL herr_t H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                              const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id,
+                              hid_t es_id);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5T
@@ -1257,7 +1260,8 @@ H5_DLL hid_t H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
  * \todo Create an example for H5Topen_async().
  *
  */
-H5_DLL hid_t H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name, hid_t tapl_id, hid_t es_id);
+H5_DLL hid_t H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                           const char *name, hid_t tapl_id, hid_t es_id);
 /**
  * \ingroup H5T
  *
@@ -2914,8 +2918,8 @@ H5_DLL herr_t H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *bu
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  * be passed in by language wrapper or library layer on top of HDF5. */
 #define H5Tcommit_async_wrap H5_NO_EXPAND(H5Tcommit_async)
-#define H5Topen_async_wrap H5_NO_EXPAND(H5Topen_async)
-#define H5Tclose_async_wrap H5_NO_EXPAND(H5Tclose_async)
+#define H5Topen_async_wrap   H5_NO_EXPAND(H5Topen_async)
+#define H5Tclose_async_wrap  H5_NO_EXPAND(H5Tclose_async)
 #endif /* H5T_MODULE */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
