@@ -348,7 +348,6 @@ static herr_t H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T
 static htri_t H5T__compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T__set_size(H5T_t *dt, size_t size);
 static herr_t H5T__close_cb(H5T_t *dt, void **request);
-static hid_t  H5T__copy_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name,
                                        H5T_conv_func_t *conv);
 static hbool_t     H5T__detect_vlen_ref(const H5T_t *dt);
@@ -1854,30 +1853,33 @@ done:
 } /* end H5Tcreate() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5T__copy_api_common
+ * Function:    H5Tcopy
  *
- * Purpose:     This is the common function for copying a datytype.
+ * Purpose:     Copies a datatype.  The resulting datatype is not locked.
+ *              The datatype should be closed when no longer needed by
+ *              calling H5Tclose().
  *
  * Return:      Success:    The ID of a new datatype
  *
  *              Failure:    H5I_INVALID_HID
  *
+ * Note:        The returned type is always transient and unlocked. If the
+ *              TYPE_ID argument is a dataset instead of a datatype then
+ *              this function returns a transient, modifiable datatype
+ *              which is a copy of the dataset's datatype.
+ *
  *-------------------------------------------------------------------------
  */
-static hid_t
-H5T__copy_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+hid_t
+H5Tcopy(hid_t obj_id)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
-    H5VL_object_t **vol_obj_ptr =
-        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    H5VL_loc_params_t loc_params;                     /* Location parameters */
-
     H5T_t *dt        = NULL;            /* Pointer to the datatype to copy */
     H5T_t *new_dt    = NULL;            /* Pointer to the new datatype */
     hid_t  dset_tid  = H5I_INVALID_HID; /* Datatype ID from dataset */
     hid_t  ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE1("i", "i", obj_id);
 
     switch (H5I_get_type(obj_id)) {
         case H5I_DATATYPE:
@@ -1887,14 +1889,16 @@ H5T__copy_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t **_vol_obj_pt
             break;
 
         case H5I_DATASET: {
+            H5VL_object_t *vol_obj = NULL; /* Dataset structure */
+
             /* The argument is a dataset handle */
-            if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(obj_id, H5I_DATASET)))
+            if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(obj_id, H5I_DATASET)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "type_id is not a dataset ID")
 
             /* Get the datatype from the dataset
              * NOTE: This will have to be closed after we're done with it.
              */
-            if (H5VL_dataset_get(*vol_obj_ptr, H5VL_DATASET_GET_TYPE, H5P_DATASET_XFER_DEFAULT, token_ptr,
+            if (H5VL_dataset_get(vol_obj, H5VL_DATASET_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
                                  &dset_tid) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID,
                             "unable to get datatype from the dataset")
@@ -1946,93 +1950,8 @@ done:
         if (new_dt && H5T_close_real(new_dt) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release datatype info")
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T__copy_api_common() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Tcopy
- *
- * Purpose:     Copies a datatype.  The resulting datatype is not locked.
- *              The datatype should be closed when no longer needed by
- *              calling H5Tclose().
- *
- * Return:      Success:    The ID of a new datatype
- *
- *              Failure:    H5I_INVALID_HID
- *
- * Note:        The returned type is always transient and unlocked. If the
- *              TYPE_ID argument is a dataset instead of a datatype then
- *              this function returns a transient, modifiable datatype
- *              which is a copy of the dataset's datatype.
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5Tcopy(hid_t obj_id)
-{
-    H5T_t *dt        = NULL;            /* Pointer to the datatype to copy */
-    H5T_t *new_dt    = NULL;            /* Pointer to the new datatype */
-    hid_t  dset_tid  = H5I_INVALID_HID; /* Datatype ID from dataset */
-    hid_t  ret_value = H5I_INVALID_HID; /* Return value */
-
-    FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", obj_id);
-
-    /* Copy the object's datatype synchronously */
-    if ((ret_value = H5T__copy_api_common(obj_id, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "unable to copy datatype synchronously")
-
-done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcopy() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Tcopy_async
- *
- * Purpose:     Asynchronous version of H5Tcopy.
- *
- * Return:      Success:    The ID of a new datatype
- *
- *              Failure:    H5I_INVALID_HID
- *
- * Note:        The returned type is always transient and unlocked. If the
- *              TYPE_ID argument is a dataset instead of a datatype then
- *              this function returns a transient, modifiable datatype
- *              which is a copy of the dataset's datatype.
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5Tcopy_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id, hid_t es_id)
-{
-    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
-
-    FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE5("i", "*s*sIuii", app_file, app_func, app_line, obj_id, es_id);
-
-    /* Set up request token pointer for asynchronous operation */
-    if (H5ES_NONE != es_id)
-        token_ptr = &token; /* Point at token for VOL connector to set up */
-
-    /* Copy the object's datatype asynchronously */
-    if ((ret_value = H5T__copy_api_common(obj_id, token_ptr, &vol_obj)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "unable to copy datatype asynchronously")
-
-    /* If a token was created, add the token to the event set */
-    if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, obj_id, es_id)) < 0) {
-            if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on datatype ID")
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
-        } /* end if */
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Tcopy_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Tclose
@@ -2113,13 +2032,16 @@ H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
     /* When the reference count reaches zero the resources are freed */
     if (H5I_dec_app_ref(type_id) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "problem freeing id")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, type_id, es_id)) < 0)
+                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, type_id, es_id)) < 0) {
+            if (H5I_dec_app_ref_always_close(ret_value) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on datatype ID")
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+        } /* end if */
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
