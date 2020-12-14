@@ -54,46 +54,62 @@ CONTENTS
 New Features
 ============
 
-    Configuration
+    Configuration:
     -------------
+    - CMake option to build the HDF filter plugins project as an external project
+
+        The HDF filter plugins project is a collection of registered compression
+        filters that can be dynamically loaded when needed to access data stored
+        in a hdf5 file. This CMake-only option allows the plugins to be built and
+        distributed with the hdf5 library and tools. Like the options for szip and
+        zlib, either a tgz file or a git repository can be specified for the source.
+
+        The option was refactored to use the CMake FetchContent process. This allows
+        more control over the filter targets, but required external project command
+        options to be moved to a CMake include file, HDF5PluginCache.cmake. Also
+        enabled the filter examples to be used as tests for operation of the
+        filter plugins.
+
+        (ADB - 2020/12/10, OESS-98)
+
     - CMake option to use MSVC naming conventions with MinGW
 
-      HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
-      when using a MinGW toolchain
+        HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
+        when using a MinGW toolchain
 
-      (xan - 2020/10/30)
+        (xan - 2020/10/30)
 
     - CMake option to statically link gcc libs with MinGW
 
-      HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
-      with the MinGW toolchain
+        HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
+        with the MinGW toolchain
 
-      (xan - 2020/10/30)
+        (xan - 2020/10/30)
 
     - CMake option to build the HDF filter plugins project as an external project
 
-      The HDF filter plugins project is a collection of registered compression
-      filters that can be dynamically loaded when needed to access data stored
-      in a hdf5 file. This CMake-only option allows the plugins to be built and
-      distributed with the hdf5 library and tools. Like the options for szip and
-      zlib, either a tgz file or a git repository can be specified for the source.
+        The HDF filter plugins project is a collection of registered compression
+        filters that can be dynamically loaded when needed to access data stored
+        in a hdf5 file. This CMake-only option allows the plugins to be built and
+        distributed with the hdf5 library and tools. Like the options for szip and
+        zlib, either a tgz file or a git repository can be specified for the source.
 
-      The necessary options are (see the INSTALL_CMake.txt file):
+        The necessary options are (see the INSTALL_CMake.txt file):
           HDF5_ENABLE_PLUGIN_SUPPORT
           PLUGIN_TGZ_NAME or PLUGIN_GIT_URL
-      There are more options necessary for various filters and the plugin project
-      documents should be referenced.
+        There are more options necessary for various filters and the plugin project
+        documents should be referenced.
 
-      (ADB - 2020/10/16, OESS-98)
+        (ADB - 2020/10/16, OESS-98)
 
     - Added CMake option to format source files
 
-      HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
-      pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
-      or tool folder. All sources can be formatted by executing the format target;
-         make format
+        HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
+        pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
+        or tool folder. All sources can be formatted by executing the format target;
+        make format
 
-      (ADB - 2020/09/24)
+        (ADB - 2020/09/24)
 
     - CMake option to link the generated Fortran MOD files into the include
       directory.
@@ -575,12 +591,10 @@ They are built with the configure process unless specified otherwise.
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-                                  Visual Studio 2015 w/ MSMPI 10 (cmake)
-
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ MSMPI 10.1 (cmake)
 
     Mac OS X Yosemite 10.10.5     Apple LLVM version 6.1 (clang-602.0.53)
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
@@ -612,10 +626,6 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
 SunOS 5.11 32-bit                       n        y/y    n        y    y     y
 SunOS 5.11 64-bit                       n        y/y    n        y    y     y
-Windows 7                               y        y/y    n        y    y     y
-Windows 7 x64                           y        y/y    y        y    y     y
-Windows 7 Cygwin                        n        y/n    n        y    y     y
-Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
@@ -633,10 +643,6 @@ Platform                                 Shared  Shared    Shared    Thread-
                                          C libs  F90 libs  C++ libs  safe
 SunOS 5.11 32-bit                          y       y         y         y
 SunOS 5.11 64-bit                          y       y         y         y
-Windows 7                                  y       y         y         y
-Windows 7 x64                              y       y         y         y
-Windows 7 Cygwin                           n       n         n         y
-Windows 7 x64 Cygwin                       n       n         n         y
 Windows 10                                 y       y         y         y
 Windows 10 x64                             y       y         y         y
 Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y
@@ -667,14 +673,24 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (Debian 4.9.2-10) 4.9.2
                                   (cmake and autotools)
 
-   Fedora30 5.3.11-200.fc30.x86_64
-   #1 SMP x86_64  GNU/Linux       GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
-                                  GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+    Fedora32 5.8.18-200.fc32.x86_64
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
+                                     GNU Fortran (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
+                                     clang version 10.0.1 (Fedora 10.0.1-3.fc32)
+                                     (cmake and autotools)
+
+    Ubuntu20.10 -5.8.0-29-generic-x86_64
+    #31-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+                                     GNU Fortran (GCC) 10.2.0-13ubuntu1
                                      (cmake and autotools)
 
 
 Known Problems
 ==============
+    CMake files do not behave correctly with paths containing spaces.
+    Do not use spaces in paths because the required escaping for handling spaces
+    results in very complex and fragile build files.
+    ADB - 2019/05/07
 
     The dynamically loaded plugin test libraries require undefined references
     to HDF5 functions to be resolved at runtime in order to function properly.
@@ -687,6 +703,9 @@ Known Problems
     loaded plugin test libraries attempting to copy files from the previous
     locations in .libs directories.  This will be addressed in the next release
     when support for the Mac OS X 10.13 platform is added.
+
+    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
+    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
