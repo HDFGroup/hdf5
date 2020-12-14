@@ -476,6 +476,10 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
     /* Set the LCPL for the API context */
     H5CX_set_lcpl(lcpl_id);
 
+    /* Verify access property list and set up collective metadata if appropriate */
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
+
     /* link_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
     if (H5VL_setup_name_args(link_loc_id, link_name, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr, &loc_params) <
