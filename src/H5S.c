@@ -99,6 +99,27 @@ static const H5I_class_t H5I_SPACE_SEL_ITER_CLS[1] = {{
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5S_top_package_initialize_s = FALSE;
 
+/*-------------------------------------------------------------------------
+ * Function: H5S_init
+ *
+ * Purpose:  Initialize the interface from some other layer.
+ *
+ * Return:   Success:    non-negative
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_init(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_init() */
+
 /*--------------------------------------------------------------------------
 NAME
    H5S__init_package -- Initialize interface-specific information

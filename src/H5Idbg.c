@@ -136,6 +136,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
             break; /* Other types of IDs are not stored in files */

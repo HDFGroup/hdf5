@@ -216,10 +216,10 @@ typedef enum H5Z_SO_scale_type_t {
  * Values to decide if EDC is enabled for reading data
  */
 typedef enum H5Z_EDC_t {
-    H5Z_ERROR_EDC       = -1,   /**< error value */
-    H5Z_DISABLE_EDC     = 0,
-    H5Z_ENABLE_EDC      = 1,
-    H5Z_NO_EDC          = 2     /**< sentinel */
+    H5Z_ERROR_EDC   = -1, /**< error value */
+    H5Z_DISABLE_EDC = 0,
+    H5Z_ENABLE_EDC  = 1,
+    H5Z_NO_EDC      = 2 /**< sentinel */
 } H5Z_EDC_t;
 
 /* Bit flags for H5Zget_filter_info */
@@ -230,10 +230,10 @@ typedef enum H5Z_EDC_t {
  * Return values for filter callback function
  */
 typedef enum H5Z_cb_return_t {
-    H5Z_CB_ERROR  = -1,
-    H5Z_CB_FAIL   = 0,    /**< I/O should fail if filter fails. */
-    H5Z_CB_CONT   = 1,    /**< I/O continues if filter fails.   */
-    H5Z_CB_NO     = 2
+    H5Z_CB_ERROR = -1,
+    H5Z_CB_FAIL  = 0, /**< I/O should fail if filter fails. */
+    H5Z_CB_CONT  = 1, /**< I/O continues if filter fails.   */
+    H5Z_CB_NO    = 2
 } H5Z_cb_return_t;
 
 /**

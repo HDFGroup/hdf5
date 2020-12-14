@@ -898,4 +898,3 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__compound_opt_write() */
-

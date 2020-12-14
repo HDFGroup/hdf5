@@ -1128,10 +1128,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5ES_STATUS_FAIL");
                                     break;
 
-                                case H5ES_STATUS_CANCELED:
-                                    H5RS_acat(rs, "H5ES_STATUS_CANCELED");
-                                    break;
-
                                 default:
                                     H5RS_asprintf_cat(rs, "%ld", (long)status);
                                     break;
@@ -1663,6 +1659,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                                   (unsigned long long)obj);
                                 break;
 
+                            case H5I_EVENTSET:
+                                H5RS_asprintf_cat(rs, "0x%0llx (event set)", (unsigned long long)obj);
+                                break;
+
                             case H5I_NTYPES:
                                 H5RS_asprintf_cat(rs, "0x%0llx (ntypes - error)", (unsigned long long)obj);
                                 break;
@@ -1677,6 +1677,15 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'I':
                     switch (type[1]) {
+                        case 'D': /* H5I_future_discard_func_t */
+                        {
+                            H5I_future_discard_func_t ifdisc =
+                                (H5I_future_discard_func_t)HDva_arg(ap, H5I_future_discard_func_t);
+
+                            H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifdisc);
+                        } /* end block */
+                        break;
+
                         case 'f': /* H5I_free_t */
                         {
                             H5I_free_t ifree = (H5I_free_t)HDva_arg(ap, H5I_free_t);
@@ -1751,6 +1760,15 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     break;
                             } /* end switch */
                         }     /* end block */
+                        break;
+
+                        case 'R': /* H5I_future_realize_func_t */
+                        {
+                            H5I_future_realize_func_t ifreal =
+                                (H5I_future_realize_func_t)HDva_arg(ap, H5I_future_realize_func_t);
+
+                            H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifreal);
+                        } /* end block */
                         break;
 
                         case 's': /* int / int32_t */
@@ -1841,6 +1859,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5I_SPACE_SEL_ITER:
                                     H5RS_acat(rs, "H5I_SPACE_SEL_ITER");
+                                    break;
+
+                                case H5I_EVENTSET:
+                                    H5RS_acat(rs, "H5I_EVENTSET");
                                     break;
 
                                 case H5I_NTYPES:
@@ -2963,6 +2985,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_DATASET_REFRESH");
                                     break;
 
+                                case H5VL_DATASET_WAIT:
+                                    H5RS_acat(rs, "H5VL_DATASET_WAIT");
+                                    break;
+
                                 default:
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
@@ -3085,6 +3111,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5VL_FILE_IS_EQUAL:
                                     H5RS_acat(rs, "H5VL_FILE_IS_EQUAL");
+                                    break;
+
+                                case H5VL_FILE_WAIT:
+                                    H5RS_acat(rs, "H5VL_FILE_WAIT");
                                     break;
 
                                 default:
@@ -3314,6 +3344,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5VL_REQUEST_WAITALL:
                                     H5RS_acat(rs, "H5VL_REQUEST_WAITALL");
+                                    break;
+
+                                case H5VL_REQUEST_GET_ERR_STACK:
+                                    H5RS_acat(rs, "H5VL_REQUEST_GET_ERR_STACK");
                                     break;
 
                                 default:

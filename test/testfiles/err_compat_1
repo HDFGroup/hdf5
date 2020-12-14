@@ -12,14 +12,32 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
         minor: Bad value
 
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Dcreate2(): invalid location identifier
+  #000: (file name) line (number) in H5Dcreate2(): unable to synchronously create dataset
+    major: Dataset
+    minor: Unable to create file
+  #001: (file name) line (number) in H5D__create_api_common(): can't set object access arguments
+    major: Dataset
+    minor: Can't set value
+  #002: (file name) line (number) in H5VL_setup_acc_args(): invalid location identifier
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+  #003: (file name) line (number) in H5VL_vol_object(): invalid identifier type to function
     major: Invalid arguments to routine
     minor: Inappropriate type
 
 ********* Print error stack in customized way *********
-    error #000: (file name) in H5Dcreate2(): line (number)
+    error #000: (file name) in H5VL_vol_object(): line (number)
         major: Invalid arguments to routine
         minor: Inappropriate type
+    error #001: (file name) in H5VL_setup_acc_args(): line (number)
+        major: Invalid arguments to routine
+        minor: Inappropriate type
+    error #002: (file name) in H5D__create_api_common(): line (number)
+        major: Dataset
+        minor: Can't set value
+    error #003: (file name) in H5Dcreate2(): line (number)
+        major: Dataset
+        minor: Unable to create file
 
 ********* Print error stack in customized way *********
     error #000: (file name) in H5Eget_auto(1 or 2)(): line (number)
@@ -27,11 +45,29 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
         minor: Can't get value
 
 ********* Print error stack in customized way *********
-    error #000: (file name) in H5Dcreate2(): line (number)
+    error #000: (file name) in H5VL_vol_object(): line (number)
         major: Invalid arguments to routine
         minor: Inappropriate type
+    error #001: (file name) in H5VL_setup_acc_args(): line (number)
+        major: Invalid arguments to routine
+        minor: Inappropriate type
+    error #002: (file name) in H5D__create_api_common(): line (number)
+        major: Dataset
+        minor: Can't set value
+    error #003: (file name) in H5Dcreate2(): line (number)
+        major: Dataset
+        minor: Unable to create file
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Dcreate2(): invalid location identifier
+  #000: (file name) line (number) in H5Dcreate2(): unable to synchronously create dataset
+    major: Dataset
+    minor: Unable to create file
+  #001: (file name) line (number) in H5D__create_api_common(): can't set object access arguments
+    major: Dataset
+    minor: Can't set value
+  #002: (file name) line (number) in H5VL_setup_acc_args(): invalid location identifier
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+  #003: (file name) line (number) in H5VL_vol_object(): invalid identifier type to function
     major: Invalid arguments to routine
     minor: Inappropriate type
 
@@ -42,6 +78,9 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #001: (file name) line (number) in test_error2(): H5Dwrite shouldn't succeed
     major: Error API
     minor: Write failed
-  #002: (file name) line (number) in H5Dwrite(): dset_id is not a dataset ID
+  #002: (file name) line (number) in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #003: (file name) line (number) in H5D__write_api_common(): dset_id is not a dataset ID
     major: Invalid arguments to routine
     minor: Inappropriate type

@@ -409,6 +409,7 @@ set (test_CLEANFILES
     splitter.log
     mirror_rw/*
     mirror_wo/*
+    event_set_*.h5
 )
 
 # Remove any output file left over from previous test run

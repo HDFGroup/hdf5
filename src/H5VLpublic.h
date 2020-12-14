@@ -34,7 +34,7 @@
  *          implements.  The HDF5 library will reject connectors with
  *          incompatible structs.
  */
-#define H5VL_VERSION 1
+#define H5VL_VERSION 2
 
 /* VOL connector identifier values
  * These are H5VL_class_value_t values, NOT hid_t values!
@@ -103,19 +103,19 @@ typedef int H5VL_class_value_t;
  *          (Used for various queries, etc)
  */
 typedef enum H5VL_subclass_t {
-    H5VL_SUBCLS_NONE,                  /**< Operations outside of a subclass */
-    H5VL_SUBCLS_INFO,                  /**< 'Info' subclass */
-    H5VL_SUBCLS_WRAP,                  /**< 'Wrap' subclass */
-    H5VL_SUBCLS_ATTR,                  /**< 'Attribute' subclass */
-    H5VL_SUBCLS_DATASET,               /**< 'Dataset' subclass */
-    H5VL_SUBCLS_DATATYPE,              /**< 'Named datatype' subclass */
-    H5VL_SUBCLS_FILE,                  /**< 'File' subclass */
-    H5VL_SUBCLS_GROUP,                 /**< 'Group' subclass */
-    H5VL_SUBCLS_LINK,                  /**< 'Link' subclass */
-    H5VL_SUBCLS_OBJECT,                /**< 'Object' subclass */
-    H5VL_SUBCLS_REQUEST,               /**< 'Request' subclass */
-    H5VL_SUBCLS_BLOB,                  /**< 'Blob' subclass */
-    H5VL_SUBCLS_TOKEN                  /**< 'Token' subclass */
+    H5VL_SUBCLS_NONE,     /**< Operations outside of a subclass */
+    H5VL_SUBCLS_INFO,     /**< 'Info' subclass */
+    H5VL_SUBCLS_WRAP,     /**< 'Wrap' subclass */
+    H5VL_SUBCLS_ATTR,     /**< 'Attribute' subclass */
+    H5VL_SUBCLS_DATASET,  /**< 'Dataset' subclass */
+    H5VL_SUBCLS_DATATYPE, /**< 'Named datatype' subclass */
+    H5VL_SUBCLS_FILE,     /**< 'File' subclass */
+    H5VL_SUBCLS_GROUP,    /**< 'Group' subclass */
+    H5VL_SUBCLS_LINK,     /**< 'Link' subclass */
+    H5VL_SUBCLS_OBJECT,   /**< 'Object' subclass */
+    H5VL_SUBCLS_REQUEST,  /**< 'Request' subclass */
+    H5VL_SUBCLS_BLOB,     /**< 'Blob' subclass */
+    H5VL_SUBCLS_TOKEN     /**< 'Token' subclass */
 } H5VL_subclass_t;
 
 /********************/
@@ -361,8 +361,8 @@ H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_t
 #endif
 
 /* Semi-public headers mainly for VOL connector authors */
-#include "H5VLconnector.h"          /* VOL connector author routines */
+#include "H5VLconnector.h" /* VOL connector author routines */
 #include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
-#include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
+#include "H5VLnative.h" /* Native VOL connector macros, for VOL connector authors */
 
 #endif /* _H5VLpublic_H */

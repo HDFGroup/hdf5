@@ -99,10 +99,8 @@ H5_DLL herr_t H5PLset_loading_state(unsigned int plugin_control_mask);
  *                                 disabled.\n
  *                                 A plugin bit set to 1 (one) indicates that that the dynamic plugin type is
  *                                 enabled.\n
- *                                 If the value of \p plugin_control_mask is negative, all dynamic plugin types
- *                                 are enabled.\n
- *                                 If the value of \p plugin_control_mask is 0 (zero), all dynamic plugins
- *                                 are disabled.
+ *                                 If the value of \p plugin_control_mask is negative, all dynamic plugin
+ * types are enabled.\n If the value of \p plugin_control_mask is 0 (zero), all dynamic plugins are disabled.
  * \return \herr_t
  *
  * \details H5PLget_loading_state() retrieves the bitmask that controls whether a certain type of plugins

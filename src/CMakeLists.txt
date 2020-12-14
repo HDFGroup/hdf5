@@ -174,11 +174,16 @@ IDE_GENERATED_PROPERTIES ("H5EA" "${H5EA_HDRS}" "${H5EA_SOURCES}" )
 
 
 set (H5ES_SOURCES
+    ${HDF5_SRC_DIR}/H5ES.c
+    ${HDF5_SRC_DIR}/H5ESevent.c
+    ${HDF5_SRC_DIR}/H5ESint.c
+    ${HDF5_SRC_DIR}/H5ESlist.c
 )
 set (H5ES_HDRS
     ${HDF5_SRC_DIR}/H5ESpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5ES" "${H5ES_HDRS}" "${H5ES_SOURCES}" )
+
 
 
 set (H5F_SOURCES
@@ -440,6 +445,7 @@ set (H5MP_HDRS
 )
 IDE_GENERATED_PROPERTIES ("H5MP" "${H5MP_HDRS}" "${H5MP_SOURCES}" )
 
+
 set (H5O_SOURCES
     ${HDF5_SRC_DIR}/H5O.c
     ${HDF5_SRC_DIR}/H5Oainfo.c
@@ -640,6 +646,7 @@ set (H5TS_SOURCES
     ${HDF5_SRC_DIR}/H5TS.c
 )
 set (H5TS_HDRS
+    ${HDF5_SRC_DIR}/H5TSpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5TS" "${H5TS_HDRS}" "${H5TS_SOURCES}" )
 
@@ -726,6 +733,7 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5Dmodule.h
     ${HDF5_SRC_DIR}/H5Emodule.h
     ${HDF5_SRC_DIR}/H5EAmodule.h
+    ${HDF5_SRC_DIR}/H5ESmodule.h
     ${HDF5_SRC_DIR}/H5Fmodule.h
     ${HDF5_SRC_DIR}/H5FAmodule.h
     ${HDF5_SRC_DIR}/H5FDdrvr_module.h
@@ -767,6 +775,7 @@ set (common_SRCS
     ${H5D_SOURCES}
     ${H5E_SOURCES}
     ${H5EA_SOURCES}
+    ${H5ES_SOURCES}
     ${H5F_SOURCES}
     ${H5FA_SOURCES}
     ${H5FD_SOURCES}
@@ -836,6 +845,7 @@ set (H5_PUBLIC_HEADERS
     ${H5S_HDRS}
     ${H5SM_HDRS}
     ${H5T_HDRS}
+    ${H5TS_HDRS}
     ${H5VL_HDRS}
     ${H5Z_HDRS}
 )
@@ -874,6 +884,9 @@ set (H5_PRIVATE_HEADERS
 
     ${HDF5_SRC_DIR}/H5EApkg.h
     ${HDF5_SRC_DIR}/H5EAprivate.h
+
+    ${HDF5_SRC_DIR}/H5ESpkg.h
+    ${HDF5_SRC_DIR}/H5ESprivate.h
 
     ${HDF5_SRC_DIR}/H5Fpkg.h
     ${HDF5_SRC_DIR}/H5Fprivate.h

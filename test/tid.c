@@ -20,7 +20,7 @@
 #include "H5Ipkg.h"
 
 static herr_t
-free_wrapper(void *p, void **_ctx)
+free_wrapper(void *p, void H5_ATTR_UNUSED **_ctx)
 {
     HDfree(p);
     return SUCCEED;
@@ -575,9 +575,9 @@ out:
  */
 
 /* Macro definitions */
-#define RCT_MAX_NOBJS 25    /* Maximum number of objects in the list */
+#define RCT_MAX_NOBJS 25 /* Maximum number of objects in the list */
 #define RCT_MIN_NOBJS 5
-#define RCT_NITER     50    /* Number of times we cycle through object creation and deletion */
+#define RCT_NITER     50 /* Number of times we cycle through object creation and deletion */
 
 /* Structure to hold the master list of objects */
 typedef struct rct_obj_list_t {
@@ -595,10 +595,10 @@ typedef struct rct_obj_list_t {
 /* Structure for an object */
 typedef struct rct_obj_t {
     /* The ID for this object */
-    hid_t   id;
+    hid_t id;
 
     /* The number of times this object has been freed */
-    int     nfrees;
+    int nfrees;
 
     /* Whether we are currently freeing this object directly
      * through H5Idec_ref().
@@ -615,12 +615,12 @@ typedef struct rct_obj_t {
  * master list of objects.
  */
 static herr_t
-rct_free_cb(void *_obj, void **_ctx)
+rct_free_cb(void *_obj, void H5_ATTR_UNUSED **_ctx)
 {
-    rct_obj_t *     obj = (rct_obj_t *)_obj;
-    long            remove_nth;
-    long            i;
-    herr_t          ret;
+    rct_obj_t *obj = (rct_obj_t *)_obj;
+    long       remove_nth;
+    long       i;
+    herr_t     ret;
 
     /* Mark this object as freed */
     obj->nfrees++;
@@ -689,12 +689,12 @@ error:
 static int
 test_remove_clear_type(void)
 {
-    H5I_type_t      obj_type;
-    rct_obj_list_t  obj_list;
-    rct_obj_t *     objects = NULL; /* Convenience pointer to objects stored in master list */
-    size_t          list_size;
-    long            i, j;
-    herr_t          ret; /* return value */
+    H5I_type_t     obj_type;
+    rct_obj_list_t obj_list;
+    rct_obj_t *    objects = NULL; /* Convenience pointer to objects stored in master list */
+    size_t         list_size;
+    long           i, j;
+    herr_t         ret; /* return value */
 
     /* Register a user-defined type with our custom ID-deleting callback */
     obj_type = H5Iregister_type((size_t)8, 0, rct_free_cb);
@@ -703,7 +703,7 @@ test_remove_clear_type(void)
         goto error;
 
     /* Create an array to hold the objects in the master list */
-    list_size = RCT_MAX_NOBJS * sizeof(rct_obj_t);
+    list_size        = RCT_MAX_NOBJS * sizeof(rct_obj_t);
     obj_list.objects = HDmalloc(list_size);
     CHECK(obj_list.objects, NULL, "HDcalloc");
     if (NULL == obj_list.objects)
@@ -734,9 +734,9 @@ test_remove_clear_type(void)
         for (j = 0; j < obj_list.count; j++) {
 
             /* Object setup */
-            objects[j].nfrees   = 0;
-            objects[j].freeing  = FALSE;
-            objects[j].list = &obj_list;
+            objects[j].nfrees  = 0;
+            objects[j].freeing = FALSE;
+            objects[j].list    = &obj_list;
 
             /* Register an ID for it */
             objects[j].id = H5Iregister(obj_type, &objects[j]);
@@ -790,7 +790,7 @@ test_remove_clear_type(void)
 
         /* Verify the number of unfreed objects we found during our scan
          * matches the number stored in the list
-        */
+         */
         VERIFY(obj_list.remaining, found, "incorrect number of objects remaining");
         if (obj_list.remaining != found)
             goto error;
@@ -856,14 +856,504 @@ test_remove_clear_type(void)
 
 error:
     /* Cleanup. For simplicity, just destroy the types and ignore errors. */
-    H5E_BEGIN_TRY {
-        H5Idestroy_type(obj_type);
-    } H5E_END_TRY
+    H5E_BEGIN_TRY { H5Idestroy_type(obj_type); }
+    H5E_END_TRY
 
     HDfree(obj_list.objects);
 
     return -1;
 } /* end test_remove_clear_type() */
+
+/* Typedef for future objects */
+typedef struct {
+    H5I_type_t obj_type; /* ID type for actual object */
+} future_obj_t;
+
+/* Global (static) future ID object type */
+H5I_type_t future_obj_type_g = H5I_BADID;
+
+/* Callback to free the actual object for future object test */
+static herr_t
+free_actual_object(void *_p, void H5_ATTR_UNUSED **_ctx)
+{
+    int *p = (int *)_p;
+
+    if (7 != *p)
+        return FAIL;
+
+    HDfree(p);
+
+    return SUCCEED;
+}
+
+/* Callback to realize a future object */
+static herr_t
+realize_future_cb(void *_future_obj, hid_t *actual_id)
+{
+    future_obj_t *future_obj = (future_obj_t *)_future_obj; /* Future object */
+    int *         actual_obj;                               /* Pointer to the actual object */
+
+    /* Check for bad future object */
+    if (NULL == future_obj)
+        return FAIL;
+
+    /* Determine type of object to realize */
+    if (H5I_DATASPACE == future_obj->obj_type) {
+        hsize_t dims = 13;
+
+        if ((*actual_id = H5Screate_simple(1, &dims, NULL)) < 0)
+            return FAIL;
+    }
+    else if (H5I_DATATYPE == future_obj->obj_type) {
+        if ((*actual_id = H5Tcopy(H5T_NATIVE_INT)) < 0)
+            return FAIL;
+    }
+    else if (H5I_GENPROP_LST == future_obj->obj_type) {
+        if ((*actual_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+            return FAIL;
+    }
+    else {
+        /* Create a new object (the 'actual object') of the correct type */
+        if (NULL == (actual_obj = HDmalloc(sizeof(int))))
+            return FAIL;
+        *actual_obj = 7;
+
+        /* Register actual object of the user-defined type */
+        *actual_id = H5Iregister(future_obj->obj_type, actual_obj);
+        CHECK(*actual_id, FAIL, "H5Iregister");
+        if (*actual_id == FAIL)
+            return FAIL;
+    }
+
+    return SUCCEED;
+}
+
+/* Callback to discard a future object */
+static herr_t
+discard_future_cb(void *future_obj)
+{
+    if (NULL == future_obj)
+        return FAIL;
+
+    HDfree(future_obj);
+
+    return SUCCEED;
+}
+
+/* Callback to realize a future object when future objects are NULL*/
+static herr_t
+realize_future_generate_cb(void *_future_obj, hid_t *actual_id)
+{
+    future_obj_t *future_obj = (future_obj_t *)_future_obj; /* Future object */
+    int *         actual_obj;                               /* Pointer to the actual object */
+
+    if (NULL != future_obj)
+        return FAIL;
+    /* Create a new object (the 'actual object') of the correct type */
+    if (NULL == (actual_obj = HDmalloc(sizeof(int))))
+        return FAIL;
+    *actual_obj = 7;
+
+    /* Register actual object without using future object info */
+    *actual_id = H5Iregister(future_obj_type_g, actual_obj);
+    CHECK(*actual_id, FAIL, "H5Iregister");
+    if (*actual_id == FAIL)
+        return FAIL;
+
+    return SUCCEED;
+}
+
+/* Callback to discard a future object when future objects are NULL */
+static herr_t
+discard_future_generate_cb(void *future_obj)
+{
+    if (NULL != future_obj)
+        return FAIL;
+
+    return SUCCEED;
+}
+
+/* Test function */
+static int
+test_future_ids(void)
+{
+    H5I_type_t    obj_type;        /* New user-defined ID type */
+    hid_t         future_id;       /* ID for future object */
+    int           fake_future_obj; /* "Fake" future object for tests */
+    future_obj_t *future_obj;      /* Future object */
+    int *         actual_obj;      /* Actual object */
+    int *         actual_obj2;     /* Another actual object */
+    H5I_type_t    id_type;         /* Type of ID */
+    H5T_class_t   type_class;      /* Datatype class */
+    herr_t        ret;             /* Return value */
+
+    /* Register a user-defined type with our custom ID-deleting callback */
+    obj_type = H5Iregister_type((size_t)15, 0, free_actual_object);
+    CHECK(obj_type, H5I_BADID, "H5Iregister_type");
+    if (H5I_BADID == obj_type)
+        goto error;
+
+    /* Test basic error conditions */
+    fake_future_obj = 0;
+    H5E_BEGIN_TRY { future_id = H5Iregister_future(obj_type, &fake_future_obj, NULL, NULL); }
+    H5E_END_TRY
+    VERIFY(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID != future_id)
+        goto error;
+
+    H5E_BEGIN_TRY { future_id = H5Iregister_future(obj_type, &fake_future_obj, realize_future_cb, NULL); }
+    H5E_END_TRY
+    VERIFY(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID != future_id)
+        goto error;
+
+    H5E_BEGIN_TRY { future_id = H5Iregister_future(obj_type, &fake_future_obj, NULL, discard_future_cb); }
+    H5E_END_TRY
+    VERIFY(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID != future_id)
+        goto error;
+
+    H5E_BEGIN_TRY
+    {
+        future_id = H5Iregister_future(H5I_BADID, &fake_future_obj, realize_future_cb, discard_future_cb);
+    }
+    H5E_END_TRY
+    VERIFY(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID != future_id)
+        goto error;
+
+    /* Test base use-case: create a future object and destroy type without
+     *  realizing the future object.
+     */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = obj_type;
+    future_id            = H5Iregister_future(obj_type, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* Destroy the type */
+    ret = H5Idestroy_type(obj_type);
+    CHECK(ret, FAIL, "H5Idestroy_type");
+    if (FAIL == ret)
+        goto error;
+
+    /* Re-register a user-defined type with our custom ID-deleting callback */
+    obj_type = H5Iregister_type((size_t)15, 0, free_actual_object);
+    CHECK(obj_type, H5I_BADID, "H5Iregister_type");
+    if (H5I_BADID == obj_type)
+        goto error;
+
+    /* Test base use-case: create a future object and realize the actual object.  */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = obj_type;
+    future_id            = H5Iregister_future(obj_type, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    actual_obj = H5Iobject_verify(future_id, obj_type);
+    CHECK_PTR(actual_obj, "H5Iobject_verify");
+    if (NULL == actual_obj)
+        goto error;
+    VERIFY(*actual_obj, 7, "H5Iobject_verify");
+    if (7 != *actual_obj)
+        goto error;
+
+    /* Retrieve the object again and verify that it's the same actual object */
+    actual_obj2 = H5Iobject_verify(future_id, obj_type);
+    CHECK_PTR(actual_obj2, "H5Iobject_verify");
+    if (NULL == actual_obj2)
+        goto error;
+    VERIFY(*actual_obj2, 7, "H5Iobject_verify");
+    if (7 != *actual_obj2)
+        goto error;
+    VERIFY(actual_obj, actual_obj2, "H5Iobject_verify");
+    if (actual_obj != actual_obj2)
+        goto error;
+
+    /* Destroy the type */
+    ret = H5Idestroy_type(obj_type);
+    CHECK(ret, FAIL, "H5Idestroy_type");
+    if (FAIL == ret)
+        goto error;
+
+    /* Re-register a user-defined type with our custom ID-deleting callback */
+    obj_type = H5Iregister_type((size_t)15, 0, free_actual_object);
+    CHECK(obj_type, H5I_BADID, "H5Iregister_type");
+    if (H5I_BADID == obj_type)
+        goto error;
+
+    /* Set the global future object type */
+    future_obj_type_g = obj_type;
+
+    /* Test "actual object generator" use-case: create a future object with
+     *  NULL object pointer, to create new object of predefined type when
+     *  future object is realized.
+     */
+    future_id = H5Iregister_future(obj_type, NULL, realize_future_generate_cb, discard_future_generate_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* Realize the actual object, with will be dynamically allocated within
+     *  the 'realize' callback.
+     */
+    actual_obj = H5Iobject_verify(future_id, obj_type);
+    CHECK_PTR(actual_obj, "H5Iobject_verify");
+    if (NULL == actual_obj)
+        goto error;
+    VERIFY(*actual_obj, 7, "H5Iobject_verify");
+    if (7 != *actual_obj)
+        goto error;
+
+    /* Reset the global future object type */
+    future_obj_type_g = H5I_BADID;
+
+    /* Retrieve the object again and verify that it's the same actual object */
+    /* (Will fail if global future object type used) */
+    actual_obj2 = H5Iobject_verify(future_id, obj_type);
+    CHECK_PTR(actual_obj2, "H5Iobject_verify");
+    if (NULL == actual_obj2)
+        goto error;
+    VERIFY(*actual_obj2, 7, "H5Iobject_verify");
+    if (7 != *actual_obj2)
+        goto error;
+    VERIFY(actual_obj, actual_obj2, "H5Iobject_verify");
+    if (actual_obj != actual_obj2)
+        goto error;
+
+    /* Destroy the type */
+    ret = H5Idestroy_type(obj_type);
+    CHECK(ret, FAIL, "H5Idestroy_type");
+    if (FAIL == ret)
+        goto error;
+
+    /* Test base use-case: create a future object for a pre-defined type */
+    /* (DATASPACE) */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = H5I_DATASPACE;
+    future_id = H5Iregister_future(H5I_DATASPACE, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* (Can't verify the type of the future ID, because the library's current
+     *  implementation realizes the object during sanity checks on the ID)
+     */
+
+    /* Close future object for pre-defined type without realizing it */
+    ret = H5Idec_ref(future_id);
+    CHECK(ret, FAIL, "H5Idec_ref");
+    if (FAIL == ret)
+        goto error;
+
+    /* Test base use-case: create a future object for a pre-defined type */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = H5I_DATASPACE;
+    future_id = H5Iregister_future(H5I_DATASPACE, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* Verify that the application believes the future ID is a dataspace */
+    /* (Currently realizes the object "implicitly" during a sanity check) */
+    id_type = H5Iget_type(future_id);
+    CHECK(id_type, H5I_BADID, "H5Iget_type");
+    if (H5I_BADID == id_type)
+        goto error;
+    if (H5I_DATASPACE != id_type)
+        goto error;
+
+    /* Close future object for pre-defined type without realizing it */
+    ret = H5Idec_ref(future_id);
+    CHECK(ret, FAIL, "H5Idec_ref");
+    if (FAIL == ret)
+        goto error;
+
+    /* Test base use-case: create a future object for a pre-defined type */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = H5I_DATASPACE;
+    future_id = H5Iregister_future(H5I_DATASPACE, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* Realize future dataspace by requesting its rank */
+    ret = H5Sget_simple_extent_ndims(future_id);
+    CHECK(ret, FAIL, "H5Sget_simple_extent_ndims");
+    if (FAIL == ret)
+        goto error;
+    if (1 != ret)
+        goto error;
+
+    /* Verify that the application believes the ID is still a dataspace */
+    id_type = H5Iget_type(future_id);
+    CHECK(id_type, H5I_BADID, "H5Iget_type");
+    if (H5I_BADID == id_type)
+        goto error;
+    if (H5I_DATASPACE != id_type)
+        goto error;
+
+    /* Close future object for pre-defined type after realizing it */
+    ret = H5Idec_ref(future_id);
+    CHECK(ret, FAIL, "H5Idec_ref");
+    if (FAIL == ret)
+        goto error;
+
+    /* Test base use-case: create a future object for a pre-defined type */
+    /* (DATATYPE) */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = H5I_DATATYPE;
+    future_id            = H5Iregister_future(H5I_DATATYPE, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* (Can't verify the type of the future ID, because the library's current
+     *  implementation realizes the object during sanity checks on the ID)
+     */
+
+    /* Close future object for pre-defined type without realizing it */
+    ret = H5Idec_ref(future_id);
+    CHECK(ret, FAIL, "H5Idec_ref");
+    if (FAIL == ret)
+        goto error;
+
+    /* Test base use-case: create a future object for a pre-defined type */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = H5I_DATATYPE;
+    future_id            = H5Iregister_future(H5I_DATATYPE, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* Verify that the application believes the future ID is a datatype */
+    /* (Currently realizes the object "implicitly" during a sanity check) */
+    id_type = H5Iget_type(future_id);
+    CHECK(id_type, H5I_BADID, "H5Iget_type");
+    if (H5I_BADID == id_type)
+        goto error;
+    if (H5I_DATATYPE != id_type)
+        goto error;
+
+    /* Close future object for pre-defined type without realizing it */
+    ret = H5Idec_ref(future_id);
+    CHECK(ret, FAIL, "H5Idec_ref");
+    if (FAIL == ret)
+        goto error;
+
+    /* Test base use-case: create a future object for a pre-defined type */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = H5I_DATATYPE;
+    future_id            = H5Iregister_future(H5I_DATATYPE, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* Realize future datatype by requesting its class */
+    type_class = H5Tget_class(future_id);
+    CHECK(ret, FAIL, "H5Tget_class");
+    if (FAIL == ret)
+        goto error;
+    if (H5T_INTEGER != type_class)
+        goto error;
+
+    /* Verify that the application believes the ID is still a datatype */
+    id_type = H5Iget_type(future_id);
+    CHECK(id_type, H5I_BADID, "H5Iget_type");
+    if (H5I_BADID == id_type)
+        goto error;
+    if (H5I_DATATYPE != id_type)
+        goto error;
+
+    /* Close future object for pre-defined type after realizing it */
+    ret = H5Idec_ref(future_id);
+    CHECK(ret, FAIL, "H5Idec_ref");
+    if (FAIL == ret)
+        goto error;
+
+    /* Test base use-case: create a future object for a pre-defined type */
+    /* (PROPERTY LIST) */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = H5I_GENPROP_LST;
+    future_id = H5Iregister_future(H5I_GENPROP_LST, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* (Can't verify the type of the future ID, because the library's current
+     *  implementation realizes the object during sanity checks on the ID)
+     */
+
+    /* Close future object for pre-defined type without realizing it */
+    ret = H5Idec_ref(future_id);
+    CHECK(ret, FAIL, "H5Idec_ref");
+    if (FAIL == ret)
+        goto error;
+
+    /* Test base use-case: create a future object for a pre-defined type */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = H5I_GENPROP_LST;
+    future_id = H5Iregister_future(H5I_GENPROP_LST, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* Verify that the application believes the future ID is a property list */
+    /* (Currently realizes the object "implicitly" during a sanity check) */
+    id_type = H5Iget_type(future_id);
+    CHECK(id_type, H5I_BADID, "H5Iget_type");
+    if (H5I_BADID == id_type)
+        goto error;
+    if (H5I_GENPROP_LST != id_type)
+        goto error;
+
+    /* Close future object for pre-defined type without realizing it */
+    ret = H5Idec_ref(future_id);
+    CHECK(ret, FAIL, "H5Idec_ref");
+    if (FAIL == ret)
+        goto error;
+
+    /* Test base use-case: create a future object for a pre-defined type */
+    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj->obj_type = H5I_GENPROP_LST;
+    future_id = H5Iregister_future(H5I_GENPROP_LST, future_obj, realize_future_cb, discard_future_cb);
+    CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
+    if (H5I_INVALID_HID == future_id)
+        goto error;
+
+    /* Realize future property list by verifying its class */
+    ret = H5Pisa_class(future_id, H5P_DATASET_XFER);
+    CHECK(ret, FAIL, "H5Pisa_class");
+    if (FAIL == ret)
+        goto error;
+    if (TRUE != ret)
+        goto error;
+
+    /* Verify that the application believes the ID is still a property list */
+    id_type = H5Iget_type(future_id);
+    CHECK(id_type, H5I_BADID, "H5Iget_type");
+    if (H5I_BADID == id_type)
+        goto error;
+    if (H5I_GENPROP_LST != id_type)
+        goto error;
+
+    /* Close future object for pre-defined type after realizing it */
+    ret = H5Idec_ref(future_id);
+    CHECK(ret, FAIL, "H5Idec_ref");
+    if (FAIL == ret)
+        goto error;
+
+    return 0;
+
+error:
+    /* Cleanup. For simplicity, just destroy the types and ignore errors. */
+    H5E_BEGIN_TRY { H5Idestroy_type(obj_type); }
+    H5E_END_TRY
+
+    return -1;
+} /* end test_future_ids() */
 
 void
 test_ids(void)
@@ -883,4 +1373,6 @@ test_ids(void)
         TestErrPrintf("ID type list test failed\n");
     if (test_remove_clear_type() < 0)
         TestErrPrintf("ID remove during H5Iclear_type test failed\n");
+    if (test_future_ids() < 0)
+        TestErrPrintf("Future ID test failed\n");
 }

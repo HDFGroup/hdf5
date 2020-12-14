@@ -26,9 +26,7 @@
 
 #ifdef H5_HAVE_THREADSAFE
 /* Public headers needed by this file */
-#ifdef LATER
 #include "H5TSpublic.h" /* Public API prototypes */
-#endif                  /* LATER */
 
 #ifdef H5_HAVE_WIN_THREADS
 
@@ -81,6 +79,9 @@ typedef struct H5TS_mutex_struct {
     pthread_mutex_t atomic_lock;  /* lock for atomicity of new mechanism */
     pthread_cond_t  cond_var;     /* condition variable */
     unsigned int    lock_count;
+
+    pthread_mutex_t atomic_lock2; /* lock for attempt_lock_count */
+    unsigned int    attempt_lock_count;
 } H5TS_mutex_t;
 
 /* Portability wrappers around pthread types */

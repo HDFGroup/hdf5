@@ -81,7 +81,8 @@ typedef enum H5VL_dataset_get_t {
 typedef enum H5VL_dataset_specific_t {
     H5VL_DATASET_SET_EXTENT, /* H5Dset_extent                       */
     H5VL_DATASET_FLUSH,      /* H5Dflush                            */
-    H5VL_DATASET_REFRESH     /* H5Drefresh                          */
+    H5VL_DATASET_REFRESH,    /* H5Drefresh                          */
+    H5VL_DATASET_WAIT        /* H5Dwait                             */
 } H5VL_dataset_specific_t;
 
 /* Typedef for VOL connector dataset optional VOL operations */
@@ -120,7 +121,8 @@ typedef enum H5VL_file_specific_t {
     H5VL_FILE_UNMOUNT,       /* Unmount a file                   */
     H5VL_FILE_IS_ACCESSIBLE, /* Check if a file is accessible    */
     H5VL_FILE_DELETE,        /* Delete a file                    */
-    H5VL_FILE_IS_EQUAL       /* Check if two files are the same  */
+    H5VL_FILE_IS_EQUAL,      /* Check if two files are the same  */
+    H5VL_FILE_WAIT           /* Wait for async operations to complete */
 } H5VL_file_specific_t;
 
 /* Typedef for VOL connector file optional VOL operations */
@@ -184,11 +186,25 @@ typedef enum H5VL_object_specific_t {
 /* Typedef for VOL connector object optional VOL operations */
 typedef int H5VL_object_optional_t;
 
+/* Status values for async request operations */
+typedef enum H5VL_request_status_t {
+    H5VL_REQUEST_STATUS_IN_PROGRESS, /* Operation has not yet completed                       */
+    H5VL_REQUEST_STATUS_SUCCEED,     /* Operation has completed, successfully                 */
+    H5VL_REQUEST_STATUS_FAIL,        /* Operation has completed, but failed                   */
+    H5VL_REQUEST_STATUS_CANT_CANCEL, /* An attempt to cancel this operation was made, but it  */
+                                     /*  can't be canceled immediately.  The operation has    */
+                                     /*  not completed successfully or failed, and is not yet */
+                                     /*  in progress.  Another attempt to cancel it may be    */
+                                     /*  attempted and may (or may not) succeed.              */
+    H5VL_REQUEST_STATUS_CANCELED     /* Operation has not completed and was canceled          */
+} H5VL_request_status_t;
+
 /* types for async request SPECIFIC callback */
 typedef enum H5VL_request_specific_t {
-    H5VL_REQUEST_WAITANY,  /* Wait until any request completes */
-    H5VL_REQUEST_WAITSOME, /* Wait until at least one requesst completes */
-    H5VL_REQUEST_WAITALL   /* Wait until all requests complete */
+    H5VL_REQUEST_WAITANY,      /* Wait until any request completes */
+    H5VL_REQUEST_WAITSOME,     /* Wait until at least one requesst completes */
+    H5VL_REQUEST_WAITALL,      /* Wait until all requests complete */
+    H5VL_REQUEST_GET_ERR_STACK /* Retrieve error stack for failed operation */
 } H5VL_request_specific_t;
 
 /* Typedef and values for native VOL connector request optional VOL operations */
@@ -394,7 +410,7 @@ typedef struct H5VL_object_class_t {
 } H5VL_object_class_t;
 
 /* Asynchronous request 'notify' callback */
-typedef herr_t (*H5VL_request_notify_t)(void *ctx, H5ES_status_t status);
+typedef herr_t (*H5VL_request_notify_t)(void *ctx, H5VL_request_status_t status);
 
 /* "Levels" for 'get connector class' introspection callback */
 typedef enum H5VL_get_conn_lvl_t {
@@ -415,9 +431,9 @@ typedef struct H5VL_introspect_class_t {
 
 /* Async request operation routines */
 typedef struct H5VL_request_class_t {
-    herr_t (*wait)(void *req, uint64_t timeout, H5ES_status_t *status);
+    herr_t (*wait)(void *req, uint64_t timeout, H5VL_request_status_t *status);
     herr_t (*notify)(void *req, H5VL_request_notify_t cb, void *ctx);
-    herr_t (*cancel)(void *req);
+    herr_t (*cancel)(void *req, H5VL_request_status_t *status);
     herr_t (*specific)(void *req, H5VL_request_specific_t specific_type, va_list arguments);
     herr_t (*optional)(void *req, H5VL_request_optional_t opt_type, va_list arguments);
     herr_t (*free)(void *req);

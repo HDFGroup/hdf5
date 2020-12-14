@@ -319,11 +319,45 @@ H5Iregister(H5I_type_t type, const void *object)
         HGOTO_ERROR(H5E_ID, H5E_BADGROUP, H5I_INVALID_HID, "cannot call public function on library type")
 
     /* Register the object */
-    ret_value = H5I_register(type, object, TRUE);
+    if ((ret_value = H5I__register(type, object, TRUE, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iregister() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Iregister_future
+ *
+ * Purpose:     Register a "future" object.
+ *
+ * Return:      Success:    New future object ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb,
+                   H5I_future_discard_func_t discard_cb)
+{
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE4("i", "It*xIRID", type, object, realize_cb, discard_cb);
+
+    /* Check arguments */
+    if (NULL == realize_cb)
+        HGOTO_ERROR(H5E_ID, H5E_BADVALUE, H5I_INVALID_HID, "NULL pointer for realize_cb not allowed")
+    if (NULL == discard_cb)
+        HGOTO_ERROR(H5E_ID, H5E_BADVALUE, H5I_INVALID_HID, "NULL pointer for realize_cb not allowed")
+
+    /* Register the future object */
+    if ((ret_value = H5I__register(type, object, TRUE, realize_cb, discard_cb)) < 0)
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Iregister_future() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Iobject_verify

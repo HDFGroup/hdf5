@@ -56,6 +56,8 @@ typedef void *(*H5TS_thread_cb_t)(void *);
 /* Local Prototypes */
 /********************/
 static void   H5TS__key_destructor(void *key_val);
+static herr_t H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acquired);
+static herr_t H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count);
 
 /*********************/
 /* Package Variables */
@@ -303,6 +305,9 @@ H5TS_pthread_first_thread_init(void)
     HDpthread_cond_init(&H5_g.init_lock.cond_var, NULL);
     H5_g.init_lock.lock_count = 0;
 
+    HDpthread_mutex_init(&H5_g.init_lock.atomic_lock2, NULL);
+    H5_g.init_lock.attempt_lock_count = 0;
+
     /* Initialize integer thread identifiers. */
     H5TS_tid_init();
 
@@ -325,6 +330,90 @@ H5TS_pthread_first_thread_init(void)
 #endif /* H5_HAVE_WIN_THREADS */
 
 /*--------------------------------------------------------------------------
+ * Function:    H5TS__mutex_acquire
+ *
+ * Purpose:     Attempts to acquire a mutex lock, without blocking
+ *
+ * Note:        On success, the 'acquired' flag indicates if the HDF5 library
+ *              global lock was acquired.
+ *
+ * Note:        The Windows threads code is very likely bogus.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Februrary 27, 2019
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acquired)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC_NAMECHECK_ONLY
+
+#ifdef H5_HAVE_WIN_THREADS
+    EnterCriticalSection(&mutex->CriticalSection);
+    *acquired = TRUE;
+#else /* H5_HAVE_WIN_THREADS */
+    /* Attempt to acquire the mutex lock */
+    if (0 == HDpthread_mutex_lock(&mutex->atomic_lock)) {
+        pthread_t my_thread_id = HDpthread_self();
+
+        /* Check if locked already */
+        if (mutex->lock_count) {
+            /* Check for this thread already owning the lock */
+            if (HDpthread_equal(my_thread_id, mutex->owner_thread)) {
+                /* Already owned by self - increment count */
+                mutex->lock_count += lock_count;
+                *acquired = TRUE;
+            } /* end if */
+            else
+                *acquired = FALSE;
+        } /* end if */
+        else {
+            /* Take ownership of the mutex */
+            mutex->owner_thread = my_thread_id;
+            mutex->lock_count   = lock_count;
+            *acquired           = TRUE;
+        } /* end else */
+
+        if (0 != HDpthread_mutex_unlock(&mutex->atomic_lock))
+            ret_value = -1;
+    } /* end if */
+    else
+        ret_value = -1;
+#endif /* H5_HAVE_WIN_THREADS */
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS__mutex_acquire() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TSmutex_acquire
+ *
+ * Purpose:     Attempts to acquire the HDF5 library global lock
+ *
+ * Note:        On success, the 'acquired' flag indicates if the HDF5 library
+ *              global lock was acquired.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Februrary 27, 2019
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired){
+    FUNC_ENTER_API_NAMECHECK_ONLY
+
+        /*NO TRACE*/
+
+        FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))}
+/* end H5TSmutex_acquire() */
+
+/*--------------------------------------------------------------------------
  * NAME
  *    H5TS_mutex_lock
  *
@@ -344,8 +433,7 @@ H5TS_pthread_first_thread_init(void)
  *
  *--------------------------------------------------------------------------
  */
-herr_t
-H5TS_mutex_lock(H5TS_mutex_t *mutex)
+herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
     herr_t ret_value = SUCCEED;
 
@@ -354,6 +442,15 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 #ifdef H5_HAVE_WIN_THREADS
     EnterCriticalSection(&mutex->CriticalSection);
 #else /* H5_HAVE_WIN_THREADS */
+    /* Acquire the "attempt" lock, increment the attempt lock count, release the lock */
+    ret_value = HDpthread_mutex_lock(&mutex->atomic_lock2);
+    if (ret_value)
+        HGOTO_DONE(ret_value);
+    mutex->attempt_lock_count++;
+    ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock2);
+    if (ret_value)
+        HGOTO_DONE(ret_value);
+
     /* Acquire the library lock */
     ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
     if (ret_value)
@@ -380,6 +477,61 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_mutex_lock() */
+
+/*--------------------------------------------------------------------------
+ * NAME
+ *    H5TS__mutex_unlock
+ *
+ * USAGE
+ *    H5TS__mutex_unlock(&mutex_var, &lock_count)
+ *
+ * RETURNS
+ *    Non-negative on success / Negative on failure
+ *
+ * DESCRIPTION
+ *    Recursive lock semantics for HDF5 (unlocking) -
+ *    Reset the lock and return the current lock count
+ *
+ * PROGRAMMER: Houjun Tang
+ *             Nov 3, 2020
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+#ifdef H5_HAVE_WIN_THREADS
+    /* Releases ownership of the specified critical section object. */
+    LeaveCriticalSection(&mutex->CriticalSection);
+#else /* H5_HAVE_WIN_THREADS */
+
+    /* Reset the lock count for this thread */
+    ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
+    if (ret_value)
+        HGOTO_DONE(ret_value);
+    *lock_count       = mutex->lock_count;
+    mutex->lock_count = 0;
+    ret_value         = HDpthread_mutex_unlock(&mutex->atomic_lock);
+
+    /* If the lock count drops to zero, signal the condition variable, to
+     * wake another thread.
+     */
+    if (mutex->lock_count == 0) {
+        int err;
+
+        err = HDpthread_cond_signal(&mutex->cond_var);
+        if (err != 0)
+            ret_value = err;
+    } /* end if */
+#endif /* H5_HAVE_WIN_THREADS */
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS__mutex_unlock */
 
 /*--------------------------------------------------------------------------
  * NAME
@@ -435,6 +587,67 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_mutex_unlock */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TSmutex_get_attempt_count
+ *
+ * Purpose:     Get the current count of the global lock attempt
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Houjun Tang
+ *              June 24, 2019
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TSmutex_get_attempt_count(unsigned int *count)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API_NAMECHECK_ONLY
+    /*NO TRACE*/
+
+    ret_value = HDpthread_mutex_lock(&H5_g.init_lock.atomic_lock2);
+    if (ret_value)
+        HGOTO_DONE(ret_value);
+
+    *count = H5_g.init_lock.attempt_lock_count;
+
+    ret_value = HDpthread_mutex_unlock(&H5_g.init_lock.atomic_lock2);
+    if (ret_value)
+        HGOTO_DONE(ret_value);
+
+done:
+    FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
+} /* end H5TSmutex_get_attempt_count() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TSmutex_release
+ *
+ * Purpose:     Releases the HDF5 library global lock
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Februrary 27, 2019
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TSmutex_release(unsigned int *lock_count)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API_NAMECHECK_ONLY
+    /*NO TRACE*/
+
+    *lock_count = 0;
+    if (0 != H5TS__mutex_unlock(&H5_g.init_lock, lock_count))
+        ret_value = -1;
+
+    FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
+} /* end H5TSmutex_release() */
 
 /*--------------------------------------------------------------------------
  * NAME
@@ -495,7 +708,7 @@ H5TS_cancel_count_inc(void)
             HDfree(cancel_counter);
             HGOTO_DONE(FAIL);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Check if thread entering library */
     if (cancel_counter->cancel_count == 0)

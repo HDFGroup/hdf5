@@ -695,6 +695,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
             case H5I_SPACE_SEL_ITER:
+            case H5I_EVENTSET:
             case H5I_NTYPES:
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "unknown or invalid data object")
@@ -2621,8 +2622,8 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
     hid_t new_fapl_id = H5I_INVALID_HID; /* ID for duplicated FAPL */
 #ifdef H5_HAVE_SYMLINK
     /* This has to be declared here to avoid unfreed resources on errors */
-    char *realname = NULL;      /* Fully resolved path name of file */
-#endif /* H5_HAVE_SYMLINK */
+    char *realname = NULL; /* Fully resolved path name of file */
+#endif                     /* H5_HAVE_SYMLINK */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC

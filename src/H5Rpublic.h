@@ -113,8 +113,14 @@ H5_DLL herr_t     H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr);
 
 /* Dereference */
 H5_DLL hid_t H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
+H5_DLL hid_t H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_line,
+                                  H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 H5_DLL hid_t H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
+H5_DLL hid_t H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_line,
+                                  H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 H5_DLL hid_t H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
+H5_DLL hid_t H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line,
+                                H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, hid_t es_id);
 
 /* Get type */
 H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
@@ -123,6 +129,21 @@ H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *ob
 H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf, size_t size);
 H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf, size_t size);
 H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *buf, size_t size);
+
+/* API Wrappers for async routines */
+/* (Must be defined _after_ the function prototype) */
+/* (And must only defined when included in application code, not the library) */
+#ifndef H5R_MODULE
+#define H5Ropen_object_async(...) H5Ropen_object_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Ropen_region_async(...) H5Ropen_region_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Ropen_attr_async(...)   H5Ropen_attr_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+
+/* Define "wrapper" versions of function calls, to allow compile-time values to
+ * be passed in by language wrapper or library layer on top of HDF5. */
+#define H5Ropen_object_async_wrap H5_NO_EXPAND(H5Ropen_object_async)
+#define H5Ropen_region_async_wrap H5_NO_EXPAND(H5Ropen_region_async)
+#define H5Ropen_attr_async_wrap   H5_NO_EXPAND(H5Ropen_attr_async)
+#endif /* H5R_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

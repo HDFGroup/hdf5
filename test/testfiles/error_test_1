@@ -21,7 +21,10 @@ Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
 
 Testing error API based on data I/O
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Dwrite(): dset_id is not a dataset ID
+  #000: (file name) line (number) in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #001: (file name) line (number) in H5D__write_api_common(): dset_id is not a dataset ID
     major: Invalid arguments to routine
     minor: Inappropriate type
 Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
@@ -32,37 +35,43 @@ Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
     major: Error in IO
     minor: Error in H5Dwrite
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #002: (file name) line (number) in H5Dwrite(): dset_id is not a dataset ID
+  #002: (file name) line (number) in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #003: (file name) line (number) in H5D__write_api_common(): dset_id is not a dataset ID
     major: Invalid arguments to routine
     minor: Inappropriate type
 
 Testing error message during data reading when filter isn't registered
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Dread(): can't read data
+  #000: (file name) line (number) in H5Dread(): can't synchronously read data
     major: Dataset
     minor: Read failed
-  #001: (file name) line (number) in H5VL_dataset_read(): dataset read failed
+  #001: (file name) line (number) in H5D__read_api_common(): can't read data
+    major: Dataset
+    minor: Read failed
+  #002: (file name) line (number) in H5VL_dataset_read(): dataset read failed
     major: Virtual Object Layer
     minor: Read failed
-  #002: (file name) line (number) in H5VL__dataset_read(): dataset read failed
+  #003: (file name) line (number) in H5VL__dataset_read(): dataset read failed
     major: Virtual Object Layer
     minor: Read failed
-  #003: (file name) line (number) in H5VL__native_dataset_read(): can't read data
+  #004: (file name) line (number) in H5VL__native_dataset_read(): can't read data
     major: Dataset
     minor: Read failed
-  #004: (file name) line (number) in H5D__read(): can't read data
+  #005: (file name) line (number) in H5D__read(): can't read data
     major: Dataset
     minor: Read failed
-  #005: (file name) line (number) in H5D__chunk_read(): unable to read raw data chunk
+  #006: (file name) line (number) in H5D__chunk_read(): unable to read raw data chunk
     major: Low-level I/O
     minor: Read failed
-  #006: (file name) line (number) in H5D__chunk_lock(): data pipeline read failed
+  #007: (file name) line (number) in H5D__chunk_lock(): data pipeline read failed
     major: Dataset
     minor: Filter operation failed
-  #007: (file name) line (number) in H5Z_pipeline(): required filter 'bogus' is not registered
+  #008: (file name) line (number) in H5Z_pipeline(): required filter 'bogus' is not registered
     major: Data filters
     minor: Read failed
-  #008: (file name) line (number) in H5PL_load(): filter plugins disabled
+  #009: (file name) line (number) in H5PL_load(): filter plugins disabled
     major: Plugin for dynamically loaded library
     minor: Unable to load metadata into cache
 
