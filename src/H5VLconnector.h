@@ -81,7 +81,8 @@ typedef enum H5VL_dataset_get_t {
 typedef enum H5VL_dataset_specific_t {
     H5VL_DATASET_SET_EXTENT, /* H5Dset_extent                       */
     H5VL_DATASET_FLUSH,      /* H5Dflush                            */
-    H5VL_DATASET_REFRESH     /* H5Drefresh                          */
+    H5VL_DATASET_REFRESH,    /* H5Drefresh                          */
+    H5VL_DATASET_WAIT        /* H5Dwait                             */
 } H5VL_dataset_specific_t;
 
 /* Typedef for VOL connector dataset optional VOL operations */
@@ -120,7 +121,8 @@ typedef enum H5VL_file_specific_t {
     H5VL_FILE_UNMOUNT,       /* Unmount a file                   */
     H5VL_FILE_IS_ACCESSIBLE, /* Check if a file is accessible    */
     H5VL_FILE_DELETE,        /* Delete a file                    */
-    H5VL_FILE_IS_EQUAL       /* Check if two files are the same  */
+    H5VL_FILE_IS_EQUAL,      /* Check if two files are the same  */
+    H5VL_FILE_WAIT           /* Wait for async operations to complete */
 } H5VL_file_specific_t;
 
 /* Typedef for VOL connector file optional VOL operations */

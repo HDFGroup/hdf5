@@ -1681,6 +1681,7 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+
     if (!old_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be NULL")
     if (!*old_name)
@@ -2405,7 +2406,7 @@ done:
  * Purpose:	Checks if an attribute with a given name exists on an object.
  *
  * Return:	Success:	TRUE/FALSE
- * 		Failure:	Negative
+ * 		    Failure:	Negative
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 1, 2007

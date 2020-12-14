@@ -3015,6 +3015,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_DATASET_REFRESH");
                                     break;
 
+                                case H5VL_DATASET_WAIT:
+                                    H5RS_acat(rs, "H5VL_DATASET_WAIT");
+                                    break;
+
                                 default:
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
@@ -3137,6 +3141,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5VL_FILE_IS_EQUAL:
                                     H5RS_acat(rs, "H5VL_FILE_IS_EQUAL");
+                                    break;
+
+                                case H5VL_FILE_WAIT:
+                                    H5RS_acat(rs, "H5VL_FILE_WAIT");
                                     break;
 
                                 default:

@@ -958,8 +958,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5I__dec_ref
  *
- * Purpose:     Decrements the number of references outstanding for an ID.
- *              This will fail if the type is not a reference counted type.
+ * Purpose:     This will fail if the type is not a reference counted type.
  *              The ID type's 'free' function will be called for the ID
  *              if the reference count for the ID reaches 0 and a free
  *              function has been defined at type creation time.
