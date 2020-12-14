@@ -31,6 +31,7 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 
 
 CONTENTS
+========
 
 - New Features
 - Support for new platforms and languages
@@ -47,55 +48,71 @@ New Features
 
     Configuration:
     -------------
+    - CMake option to build the HDF filter plugins project as an external project
+
+        The HDF filter plugins project is a collection of registered compression
+        filters that can be dynamically loaded when needed to access data stored
+        in a hdf5 file. This CMake-only option allows the plugins to be built and
+        distributed with the hdf5 library and tools. Like the options for szip and
+        zlib, either a tgz file or a git repository can be specified for the source.
+
+        The option was refactored to use the CMake FetchContent process. This allows
+        more control over the filter targets, but required external project command
+        options to be moved to a CMake include file, HDF5PluginCache.cmake. Also
+        enabled the filter examples to be used as tests for operation of the
+        filter plugins.
+
+        (ADB - 2020/12/10, OESS-98)
+
     - Autotools and CMake target added to produce doxygen generated documentation
 
-      The default is OFF or disabled.
-      Autoconf option is '--enable-doxygen'
+        The default is OFF or disabled.
+        Autoconf option is '--enable-doxygen'
           autotools make target is 'doxygen' and will build all doxygen targets
-      CMake configure option is 'HDF5_BUILD_DOC'.
+        CMake configure option is 'HDF5_BUILD_DOC'.
           CMake target is 'doxygen' for all available doxygen targets
           CMake target is 'hdf5lib_doc' for the src subdirectory
 
-      (ADB - 2020/11/13)
+        (ADB - 2020/11/13)
 
     - CMake option to use MSVC naming conventions with MinGW
 
-      HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
-      when using a MinGW toolchain
+        HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
+        when using a MinGW toolchain
 
-      (xan - 2020/10/30)
+        (xan - 2020/10/30)
 
     - CMake option to statically link gcc libs with MinGW
 
-      HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
-      with the MinGW toolchain
+        HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
+        with the MinGW toolchain
 
-      (xan - 2020/10/30)
+        (xan - 2020/10/30)
 
     - CMake option to build the HDF filter plugins project as an external project
 
-      The HDF filter plugins project is a collection of registered compression
-      filters that can be dynamically loaded when needed to access data stored
-      in a hdf5 file. This CMake-only option allows the plugins to be built and
-      distributed with the hdf5 library and tools. Like the options for szip and
-      zlib, either a tgz file or a git repository can be specified for the source.
+        The HDF filter plugins project is a collection of registered compression
+        filters that can be dynamically loaded when needed to access data stored
+        in a hdf5 file. This CMake-only option allows the plugins to be built and
+        distributed with the hdf5 library and tools. Like the options for szip and
+        zlib, either a tgz file or a git repository can be specified for the source.
 
-      The necessary options are (see the INSTALL_CMake.txt file):
+        The necessary options are (see the INSTALL_CMake.txt file):
           HDF5_ENABLE_PLUGIN_SUPPORT
           PLUGIN_TGZ_NAME or PLUGIN_GIT_URL
-      There are more options necessary for various filters and the plugin project
-      documents should be referenced.
+        There are more options necessary for various filters and the plugin project
+        documents should be referenced.
 
-      (ADB - 2020/10/16, OESS-98)
+        (ADB - 2020/10/16, OESS-98)
 
     - Added CMake option to format source files
 
-      HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
-      pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
-      or tool folder. All sources can be formatted by executing the format target;
-         make format
+        HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
+        pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
+        or tool folder. All sources can be formatted by executing the format target;
+        make format
 
-      (ADB - 2020/09/24)
+        (ADB - 2020/09/24)
 
     Library:
     --------
@@ -113,12 +130,13 @@ New Features
     ----------------
     - Added new H5S functions.
 
-      H5Sselect_copy, H5Sselect_shape_same, H5Sselect_adjust,
-      H5Sselect_intersect_block, H5Sselect_project_intersection,
-      H5Scombine_hyperslab, H5Smodify_select, H5Scombine_select
-      wrapper functions added.
+        H5Sselect_copy, H5Sselect_shape_same, H5Sselect_adjust,
+        H5Sselect_intersect_block, H5Sselect_project_intersection,
+        H5Scombine_hyperslab, H5Smodify_select, H5Scombine_select
+        wrapper functions added.
 
-      (ADB - 2020/10/27, HDFFV-10868)
+        (ADB - 2020/10/27, HDFFV-10868)
+
 
     Tools:
     ------
@@ -146,7 +164,6 @@ Support for new platforms, languages and compilers.
 
 Bug Fixes since HDF5-1.10.7 release
 ==================================
-
     Library
     -------
     -
@@ -222,8 +239,6 @@ Supported Platforms
     32- and 64-bit                Studio 12.6 Fortran 95 8.8 SunOS_sparc 2017/05/30
     (hedgehog)                    Sun C++ 5.15 SunOS_sparc 2017/05/30
 
-    Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
@@ -250,7 +265,6 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
-Windows 7 x64                           y        y/y    y        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
 Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
@@ -267,7 +281,6 @@ Platform                                 Shared  Shared    Shared    Thread-
                                          C libs  F90 libs  C++ libs  safe
 Solaris2.11 32-bit                         y       y         y         y
 Solaris2.11 64-bit                         y       y         y         y
-Windows 7 x64                              y       y         y         y
 Windows 10                                 y       y         y         y
 Windows 10 x64                             y       y         y         y
 Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
@@ -332,9 +345,15 @@ The following platforms are not supported but have been tested for this release.
     # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
     (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
 
-    Fedora 32 5.7.15-200.fc32.x86_64  Clang version 10.0.0 (Fedora 10.0.0-2.fc32)
-    #1 SMP x86_64  GNU/Linux      GNU gcc (GCC) 10.2.1 20200723 (Red Hat 10.2.1-1)
-                                  GNU Fortran (GCC) 10.2.1 20200723 (Red Hat 10.2.1)
+    Fedora32 5.8.18-200.fc32.x86_64
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
+                                     GNU Fortran (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
+                                     clang version 10.0.1 (Fedora 10.0.1-3.fc32)
+                                     (cmake and autotools)
+
+    Ubuntu20.10 -5.8.0-29-generic-x86_64
+    #31-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+                                     GNU Fortran (GCC) 10.2.0-13ubuntu1
                                      (cmake and autotools)
 
     Mac OS X El Capitan 10.11.6   Apple clang version 7.3.0 from Xcode 7.3
