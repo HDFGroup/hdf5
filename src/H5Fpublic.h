@@ -200,6 +200,7 @@ typedef enum H5F_libver_t {
 /**
  * File space handling strategy
  */
+//! [H5F_fspace_strategy_t_snip]
 typedef enum H5F_fspace_strategy_t {
     H5F_FSPACE_STRATEGY_FSM_AGGR =
         0, /**< Mechanisms: free-space managers, aggregators, and virtual file drivers
@@ -210,6 +211,7 @@ typedef enum H5F_fspace_strategy_t {
     H5F_FSPACE_STRATEGY_NONE = 3, /**< Mechanisms: virtual file drivers */
     H5F_FSPACE_STRATEGY_NTYPES    /**< Sentinel */
 } H5F_fspace_strategy_t;
+//! [H5F_fspace_strategy_t_snip]
 
 /**
  * File space handling strategy for release 1.10.0
