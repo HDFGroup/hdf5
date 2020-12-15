@@ -12,7 +12,7 @@
 option (USE_LIBAEC "Use AEC library as SZip Filter" OFF)
 
 include (ExternalProject)
-#include(FetchContent)
+include (FetchContent)
 
 #option (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)" "NO")
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)")

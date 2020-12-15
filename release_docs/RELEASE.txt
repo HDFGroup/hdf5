@@ -29,6 +29,7 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 
 
 CONTENTS
+========
 
 - New Features
 - Support for new platforms and languages
@@ -45,6 +46,22 @@ New Features
 
     Configuration:
     -------------
+    - CMake option to build the HDF filter plugins project as an external project
+
+        The HDF filter plugins project is a collection of registered compression
+        filters that can be dynamically loaded when needed to access data stored
+        in a hdf5 file. This CMake-only option allows the plugins to be built and
+        distributed with the hdf5 library and tools. Like the options for szip and
+        zlib, either a tgz file or a git repository can be specified for the source.
+
+        The option was refactored to use the CMake FetchContent process. This allows
+        more control over the filter targets, but required external project command
+        options to be moved to a CMake include file, HDF5PluginCache.cmake. Also
+        enabled the filter examples to be used as tests for operation of the
+        filter plugins.
+
+        (ADB - 2020/12/10, OESS-98)
+
     - Autotools and CMake target added to produce doxygen generated documentation
 
         The default is OFF or disabled.
@@ -84,7 +101,7 @@ New Features
         There are more options necessary for various filters and the plugin project
         documents should be referenced.
 
-      (ADB - 2020/10/16, OESS-98)
+        (ADB - 2020/10/16, OESS-98)
 
     - Added CMake option to format source files
 
@@ -96,7 +113,7 @@ New Features
         (ADB - 2020/09/24)
 
     - CMake option to link the generated Fortran MOD files into the include
-        directory.
+      directory.
 
         The Fortran generation of MOD files by a Fortran compile can produce
         different binary files between SHARED and STATIC compiles with different
@@ -118,7 +135,7 @@ New Features
         The defaults can be overriden by setting the config option
             HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
 
-        (ADB - 2020/07/9, HDFFV-11116)
+        (ADB - 2020/07/09, HDFFV-11116)
 
     - CMake option to use AEC (open source SZip) library instead of SZip
 
@@ -193,16 +210,16 @@ New Features
         Currently h5repack preserves external links and cannot copy and merge
         data from the external files. Two options, merge and prune, were added to
         control how to merge data from an external link into the resulting file.
-           --merge             Follow external soft link recursively and merge data.
-           --prune             Do not follow external soft links and remove link.
-           --merge --prune     Follow external link, merge data and remove dangling link.
+            --merge             Follow external soft link recursively and merge data.
+            --prune             Do not follow external soft links and remove link.
+            --merge --prune     Follow external link, merge data and remove dangling link.
 
         (ADB - 2020/08/05, HDFFV-9984)
 
 
 Support for new platforms, languages and compilers.
 =======================================
-
+    -
 
 Bug Fixes since HDF5-1.12.0 release
 ==================================
@@ -230,7 +247,7 @@ Bug Fixes since HDF5-1.12.0 release
         (ADB - 2020/08/12, HDFFV-11127)
 
     - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
-        causes asserts/errors when passed to other dataspace API calls.
+      causes asserts/errors when passed to other dataspace API calls.
 
         H5S_NO_CLASS is an internal class value that should not have been
         exposed via a public API call.
@@ -240,7 +257,7 @@ Bug Fixes since HDF5-1.12.0 release
 
         The new library behavior is for H5Sset_extent_none() to convert
         the dataspace into one of type H5S_NULL, which is better handled
-         by the library and easier for developers to reason about.
+        by the library and easier for developers to reason about.
 
         (DER - 2020/07/27, HDFFV-11027)
 
@@ -318,7 +335,7 @@ Bug Fixes since HDF5-1.12.0 release
         directory, and on Macs the loader path for libhdf5.xxxs.so is changed
         in the temporary copy of libhdf5_java.dylib.
 
-        (LRK, 2020/7/2, HDFFV-11063)
+        (LRK, 2020/07/02, HDFFV-11063)
 
 
 Supported Platforms
@@ -367,12 +384,10 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-                                  Visual Studio 2015 w/ MSMPI 10 (cmake)
-
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ MSMPI 10.1 (cmake)
 
     Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
@@ -408,10 +423,6 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
-Windows 7                               y        y/y    n        y    y     y
-Windows 7 x64                           y        y/y    y        y    y     y
-Windows 7 Cygwin                        n        y/n    n        y    y     y
-Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
@@ -430,10 +441,6 @@ Platform                                 Shared  Shared    Shared    Thread-
                                          C libs  F90 libs  C++ libs  safe
 Solaris2.11 32-bit                         y       y         y         y
 Solaris2.11 64-bit                         y       y         y         y
-Windows 7                                  y       y         y         y
-Windows 7 x64                              y       y         y         y
-Windows 7 Cygwin                           n       n         n         y
-Windows 7 x64 Cygwin                       n       n         n         y
 Windows 10                                 y       y         y         y
 Windows 10 x64                             y       y         y         y
 Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y
@@ -481,9 +488,15 @@ The following platforms are not supported but have been tested for this release.
                                   MPICH 3.3
                                   OpenMPI 2.1.5, 3.1.3, 4.0.0
 
-   Fedora30 5.3.11-200.fc30.x86_64
-   #1 SMP x86_64  GNU/Linux       GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
-                                  GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+    Fedora32 5.8.18-200.fc32.x86_64
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
+                                     GNU Fortran (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
+                                     clang version 10.0.1 (Fedora 10.0.1-3.fc32)
+                                     (cmake and autotools)
+
+    Ubuntu20.10 -5.8.0-29-generic-x86_64
+    #31-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+                                     GNU Fortran (GCC) 10.2.0-13ubuntu1
                                      (cmake and autotools)
 
 
@@ -498,6 +511,9 @@ Known Problems
     applications.  Parallel applications can read files with metadata cache
     images, but since this is a collective operation, a deadlock is possible
     if one or more processes do not participate.
+
+    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
+    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
