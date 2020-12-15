@@ -270,7 +270,7 @@ H5_DLL herr_t H5Pclose(hid_t plist_id);
  *
  * \brief Closes an existing property list class
  *
- * \plistcls_id{class}
+ * \plistcls_id{plist_id}
  *
  * \return \herr_t
  *
@@ -281,7 +281,7 @@ H5_DLL herr_t H5Pclose(hid_t plist_id);
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pclose_class(hid_t class);
+H5_DLL herr_t H5Pclose_class(hid_t plist_id);
 /**
  * \ingroup GPLO
  *
@@ -1004,7 +1004,7 @@ H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
  *                    into the property's value
  * \param[in] get     Callback routine called when a property value is
  *                    retrieved from the property
- * \param[in] delete  Callback routine called when a property is deleted
+ * \param[in] prp_del Callback routine called when a property is deleted
  *                    from a property list
  * \param[in] copy    Callback routine called when a property is copied
  *                    from an existing property list
@@ -1108,7 +1108,7 @@ H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
  *          routine returns a negative value, the query routine returns
  *          an error value.
  *
- *          The \p delete routine is called when a property is being
+ *          The \p prp_del routine is called when a property is being
  *          deleted from a property list. The #H5P_prp_delete_func_t
  *          callback function is defined as follows:
  *
@@ -1136,10 +1136,10 @@ H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
  *           </tr>
  *          </table>
  *
- *          The \p delete routine may modify the value passed in, but the
- *          value is not used by the library when the \p delete routine
- *          returns. If the \p delete routine returns a negative value,
- *          the property list \p delete routine returns an error value but
+ *          The \p prp_del routine may modify the value passed in, but the
+ *          value is not used by the library when the \p prp_del routine
+ *          returns. If the \p prp_del routine returns a negative value,
+ *          the property list \p prp_del routine returns an error value but
  *          the property is still deleted.
  *
  *          The \p copy routine is called when a new property list with
@@ -1242,7 +1242,7 @@ H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
  */
 H5_DLL herr_t H5Pinsert2(hid_t plist_id, const char *name, size_t size,
     void *value, H5P_prp_set_func_t set, H5P_prp_get_func_t get,
-    H5P_prp_delete_func_t delete, H5P_prp_copy_func_t copy,
+    H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t copy,
     H5P_prp_compare_func_t compare, H5P_prp_close_func_t close);
 /**
  * \ingroup GPLOA
@@ -1354,7 +1354,7 @@ H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
  *                       copied into the property's value
  * \param[in] get        Callback routine called when a property value is
  *                       retrieved from the property
- * \param[in] delete     Callback routine called when a property is deleted
+ * \param[in] prp_del    Callback routine called when a property is deleted
  *                       from a property list
  * \param[in] copy       Callback routine called when a property is copied
  *                       from a property list
@@ -1490,7 +1490,7 @@ H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
  *          If the \p set routine returns a negative value, the query
  *          routine returns an error value.
  *
- *          The \p delete routine is called when a property is being
+ *          The \p prp_del routine is called when a property is being
  *          deleted from a property list. The #H5P_prp_delete_func_t
  *          callback function is defined as follows:
  *
@@ -1518,9 +1518,9 @@ H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
  *           </tr>
  *          </table>
  *
- *          The \p delete routine may modify the value passed in, but the
- *          value is not used by the library when the \p delete routine
- *          returns. If the \p delete routine returns a negative value,
+ *          The \p prp_del routine may modify the value passed in, but the
+ *          value is not used by the library when the \p prp_del routine
+ *          returns. If the \p prp_del routine returns a negative value,
  *          the property list  delete routine returns an error value but
  *          the property is still deleted.
  *
@@ -1623,7 +1623,7 @@ H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
 H5_DLL herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size,
     void *def_value, H5P_prp_create_func_t create,
     H5P_prp_set_func_t set, H5P_prp_get_func_t get,
-    H5P_prp_delete_func_t delete, H5P_prp_copy_func_t copy,
+    H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t copy,
     H5P_prp_compare_func_t compare, H5P_prp_close_func_t close);
 /**
  * \ingroup GPLOA
