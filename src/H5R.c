@@ -782,7 +782,6 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
 
     FUNC_ENTER_STATIC
 
-    fprintf(stderr, "H5R__open_attr_api_common is here\n");
     /* Check args */
     if (ref_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid reference pointer")
