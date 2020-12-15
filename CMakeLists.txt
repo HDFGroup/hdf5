@@ -762,6 +762,16 @@ if (BUILD_TESTING)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to build HDF5 Tools
+#-----------------------------------------------------------------------------
+if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
+  option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
+  if (HDF5_BUILD_TOOLS)
+    add_subdirectory (tools)
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Include filter plugins
 #-----------------------------------------------------------------------------
 include (CMakePlugins.cmake)
@@ -773,16 +783,6 @@ if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES)
 #    mark_as_advanced (HDF5_TEST_PLUGIN)
 
 #    TEST_PLUGIN_LIBRARY ()
-  endif ()
-endif ()
-
-#-----------------------------------------------------------------------------
-# Option to build HDF5 Tools
-#-----------------------------------------------------------------------------
-if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
-  option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
-  if (HDF5_BUILD_TOOLS)
-    add_subdirectory (tools)
   endif ()
 endif ()
 
