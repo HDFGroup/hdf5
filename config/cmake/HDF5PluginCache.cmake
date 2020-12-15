@@ -17,6 +17,9 @@ set (HDF5_INCLUDE_DIR "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}" CACHE PATH "hdf5 
 set (HDF5_INCLUDE_DIRS "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}" CACHE PATH "hdf5 include dirs" FORCE)
 set (HDF5_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE STRING "hdf5 build folder" FORCE)
 
+set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:h5dump-shared> CACHE STRING "hdf5 h5dump target" FORCE)
+set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:h5repack-shared> CACHE STRING "hdf5 h5repack target" FORCE)
+
 set (H5PL_ALLOW_EXTERNAL_SUPPORT "${HDF5_ALLOW_EXTERNAL_SUPPORT}" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
 
 set (H5PL_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/h5plugin.git" CACHE STRING "Use plugins from HDF repository" FORCE)
