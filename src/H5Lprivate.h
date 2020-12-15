@@ -114,7 +114,7 @@ H5_DLL herr_t H5L_init(void);
 H5_DLL herr_t H5L_link(const H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc, hid_t lcpl_id);
 H5_DLL herr_t H5L_link_object(const H5G_loc_t *new_loc, const char *new_name, H5O_obj_create_t *ocrt_info,
                               hid_t lcpl_id);
-H5_DLL htri_t H5L_exists_tolerant(const H5G_loc_t *loc, const char *name);
+H5_DLL herr_t H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hbool_t *exists);
 H5_DLL herr_t H5L_get_info(const H5G_loc_t *loc, const char *name, H5L_info2_t *linkbuf /*out*/);
 H5_DLL herr_t H5L_register_external(void);
 H5_DLL herr_t H5L_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,

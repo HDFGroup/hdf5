@@ -160,7 +160,7 @@ struct H5VL_connector_prop_t;
 H5_DLL herr_t H5P_init(void);
 
 /* Internal versions of API routines */
-H5_DLL herr_t H5P_close(void *_plist);
+H5_DLL herr_t H5P_close(H5P_genplist_t *plist);
 H5_DLL hid_t  H5P_create_id(H5P_genclass_t *pclass, hbool_t app_ref);
 H5_DLL hid_t  H5P_copy_plist(const H5P_genplist_t *old_plist, hbool_t app_ref);
 H5_DLL herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value);

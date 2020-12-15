@@ -207,6 +207,9 @@ typedef struct H5D_filtered_collective_io_info_t {
     } async_info;
 } H5D_filtered_collective_io_info_t;
 
+/* Function pointer typedef for sort function */
+typedef int (*H5D_mpio_sort_func_cb_t)(const void *, const void *);
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -424,7 +427,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space, co
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
         H5CX_test_set_mpio_coll_rank0_bcast(TRUE);
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
-    }  /* end if */
+    } /* end if */
 
     /* Set the return value, based on the global cause */
     ret_value = global_cause[0] > 0 ? FALSE : TRUE;
@@ -527,7 +530,7 @@ done:
 static herr_t
 H5D__mpio_array_gatherv(void *local_array, size_t local_array_num_entries, size_t array_entry_size,
                         void **_gathered_array, size_t *_gathered_array_num_entries, hbool_t allgather,
-                        int root, MPI_Comm comm, int (*sort_func)(const void *, const void *))
+                        int root, MPI_Comm comm, H5D_mpio_sort_func_cb_t sort_func)
 {
     size_t gathered_array_num_entries = 0;    /* The size of the newly-constructed array */
     void * gathered_array             = NULL; /* The newly-constructed array returned to the caller */
@@ -843,7 +846,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         else
             temp_not_link_io = TRUE;
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
-    }  /* end else */
+    } /* end else */
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     {
@@ -2835,7 +2838,7 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
                         "unable to allocate number of assigned chunks array")
 
         for (i = 0; i < shared_chunks_info_array_num_entries;) {
-            H5D_filtered_collective_io_info_t chunk_entry;
+            H5D_filtered_collective_io_info_t *chunk_entry;
             haddr_t last_seen_addr  = shared_chunks_info_array[i].chunk_states.chunk_current.offset;
             size_t  set_begin_index = i;
             size_t  num_writers     = 0;
@@ -2843,17 +2846,17 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
 
             /* Process each set of duplicate entries caused by another process writing to the same chunk */
             do {
-                chunk_entry = shared_chunks_info_array[i];
+                chunk_entry = &shared_chunks_info_array[i];
 
-                send_counts[chunk_entry.owners.original_owner] += (int)sizeof(chunk_entry);
+                send_counts[chunk_entry->owners.original_owner] += (int)sizeof(*chunk_entry);
 
                 /* The new owner of the chunk is determined by the process
                  * writing to the chunk which currently has the least amount
                  * of chunks assigned to it
                  */
-                if (num_assigned_chunks_array[chunk_entry.owners.original_owner] <
+                if (num_assigned_chunks_array[chunk_entry->owners.original_owner] <
                     num_assigned_chunks_array[new_chunk_owner])
-                    new_chunk_owner = chunk_entry.owners.original_owner;
+                    new_chunk_owner = chunk_entry->owners.original_owner;
 
                 num_writers++;
             } while (++i < shared_chunks_info_array_num_entries &&
@@ -2904,6 +2907,8 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
                                                               sizeof(unsigned char *))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate modification data buffer array")
 
+    /* Perform all the sends on the chunks that this rank doesn't own */
+    /* (Sends and recvs must be two separate loops, to avoid deadlock) */
     for (i = 0, last_assigned_idx = 0; i < *local_chunk_array_num_entries; i++) {
         H5D_filtered_collective_io_info_t *chunk_entry = &local_chunk_array[i];
 
@@ -2962,7 +2967,13 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
 
             num_send_requests++;
         } /* end if */
-        else {
+    }     /* end for */
+
+    /* Perform all the recvs on the chunks this rank owns */
+    for (i = 0, last_assigned_idx = 0; i < *local_chunk_array_num_entries; i++) {
+        H5D_filtered_collective_io_info_t *chunk_entry = &local_chunk_array[i];
+
+        if (mpi_rank == chunk_entry->owners.new_owner) {
             /* Allocate all necessary buffers for an asynchronous receive operation */
             if (chunk_entry->num_writers > 1) {
                 MPI_Message message;

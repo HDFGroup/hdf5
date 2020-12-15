@@ -95,6 +95,10 @@ typedef herr_t (*H5P_do_pclass_op_t)(H5P_genplist_t *plist, const char *name, H5
 /* Local Prototypes */
 /********************/
 
+/* Infrastructure routines */
+static herr_t H5P__close_class_cb(void *space, void **request);
+static herr_t H5P__close_list_cb(void *space, void **request);
+
 /* General helper routines */
 static H5P_genplist_t *H5P__create(H5P_genclass_t *pclass);
 static H5P_genprop_t * H5P__create_prop(const char *name, size_t size, H5P_prop_within_t type,
@@ -393,18 +397,18 @@ H5FL_DEFINE_STATIC(H5P_genplist_t);
 
 /* Generic Property Class ID class */
 static const H5I_class_t H5I_GENPROPCLS_CLS[1] = {{
-    H5I_GENPROP_CLS,             /* ID class value */
-    0,                           /* Class flags */
-    0,                           /* # of reserved IDs for class */
-    (H5I_free_t)H5P__close_class /* Callback routine for closing objects of this class */
+    H5I_GENPROP_CLS,                /* ID class value */
+    0,                              /* Class flags */
+    0,                              /* # of reserved IDs for class */
+    (H5I_free_t)H5P__close_class_cb /* Callback routine for closing objects of this class */
 }};
 
 /* Generic Property List ID class */
 static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
-    H5I_GENPROP_LST,      /* ID class value */
-    0,                    /* Class flags */
-    0,                    /* # of reserved IDs for class */
-    (H5I_free_t)H5P_close /* Callback routine for closing objects of this class */
+    H5I_GENPROP_LST,               /* ID class value */
+    0,                             /* Class flags */
+    0,                             /* # of reserved IDs for class */
+    (H5I_free_t)H5P__close_list_cb /* Callback routine for closing objects of this class */
 }};
 
 /*-------------------------------------------------------------------------
@@ -458,9 +462,9 @@ H5P__init_package(void)
      * Initialize the Generic Property class & object groups.
      */
     if (H5I_register_type(H5I_GENPROPCLS_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
     if (H5I_register_type(H5I_GENPROPLST_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
     /* Repeatedly pass over the list of property list classes for the library,
      * initializing each class if its parent class is initialized, until no
@@ -532,7 +536,7 @@ done:
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
-    Release the atom group and any other resources allocated.
+    Release the ID group and any other resources allocated.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
      Can't report errors...
@@ -620,6 +624,68 @@ H5P_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5P_term_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__close_class_cb
+ *
+ * Purpose:     Called when the ref count reaches zero on a property class's ID
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Wednesday, April 8, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__close_class_cb(void *_pclass, void H5_ATTR_UNUSED **request)
+{
+    H5P_genclass_t *pclass    = (H5P_genclass_t *)_pclass; /* Property list class to close */
+    herr_t          ret_value = SUCCEED;                   /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(pclass);
+
+    /* Close the property list class object */
+    if (H5P__close_class(pclass) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to close property list class");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__close_class_cb() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__close_list_cb
+ *
+ * Purpose:     Called when the ref count reaches zero on a property list's ID
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Wednesday, April 8, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__close_list_cb(void *_plist, void H5_ATTR_UNUSED **request)
+{
+    H5P_genplist_t *plist     = (H5P_genplist_t *)_plist; /* Property list to close */
+    herr_t          ret_value = SUCCEED;                  /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(plist);
+
+    /* Close the property list object */
+    if (H5P_close(plist) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to close property list");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__close_list_cb() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -949,9 +1015,9 @@ H5P_copy_plist(const H5P_genplist_t *old_plist, hbool_t app_ref)
     if (H5P__access_class(new_plist->pclass, H5P_MOD_INC_LST) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, H5I_INVALID_HID, "Can't increment class ref count")
 
-    /* Get an atom for the property list */
+    /* Get an ID for the property list */
     if ((new_plist_id = H5I_register(H5I_GENPROP_LST, new_plist, app_ref)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register property list")
 
     /* Save the property list ID in the property list struct, for use in the property class's 'close' callback
      */
@@ -1854,9 +1920,9 @@ H5P_create_id(H5P_genclass_t *pclass, hbool_t app_ref)
     if ((plist = H5P__create(pclass)) == NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, H5I_INVALID_HID, "unable to create property list")
 
-    /* Get an atom for the property list */
+    /* Get an ID for the property list */
     if ((plist_id = H5I_register(H5I_GENPROP_LST, plist, app_ref)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register property list")
 
     /* Save the property list ID in the property list struct, for use in the property class's 'close' callback
      */
@@ -3991,7 +4057,7 @@ H5P_object_verify(hid_t plist_id, hid_t pclass_id)
 
     /* Get the plist structure */
     if (NULL == (ret_value = (H5P_genplist_t *)H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, NULL, "can't find object for ID")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5010,11 +5076,10 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5P_close(void *_plist)
+H5P_close(H5P_genplist_t *plist)
 {
-    H5P_genclass_t *tclass; /* Temporary class pointer */
-    H5P_genplist_t *plist = (H5P_genplist_t *)_plist;
-    H5SL_t *        seen  = NULL;        /* Skip list to hold names of properties already seen */
+    H5P_genclass_t *tclass;              /* Temporary class pointer */
+    H5SL_t *        seen = NULL;         /* Skip list to hold names of properties already seen */
     size_t          nseen;               /* Number of items 'seen' */
     hbool_t         has_parent_class;    /* Flag to indicate that this property list's class has a parent */
     size_t          ndel;                /* Number of items deleted */
@@ -5393,10 +5458,9 @@ H5P__get_class_parent(const H5P_genclass_t *pclass)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5P__close_class(void *_pclass)
+H5P__close_class(H5P_genclass_t *pclass)
 {
-    H5P_genclass_t *pclass    = (H5P_genclass_t *)_pclass;
-    herr_t          ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

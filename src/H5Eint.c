@@ -440,10 +440,10 @@ H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
         walk_op.u.func1 = H5E__walk1_cb;
         if (H5E__walk(estack, H5E_WALK_DOWNWARD, &walk_op, (void *)&eprint) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
         HDassert(0 && "version 1 error stack print without deprecated symbols!");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-    }  /* end if */
+    } /* end if */
     else {
         walk_op.vers    = 2;
         walk_op.u.func2 = H5E__walk2_cb;
@@ -539,10 +539,10 @@ H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *o
             if (ret_value < 0)
                 HERROR(H5E_ERROR, H5E_CANTLIST, "can't walk error stack");
         } /* end if */
-#else     /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
         HDassert(0 && "version 1 error stack walk without deprecated symbols!");
-#endif    /* H5_NO_DEPRECATED_SYMBOLS */
-    }     /* end if */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+    } /* end if */
     else {
         HDassert(op->vers == 2);
         if (op->u.func2) {
@@ -939,7 +939,7 @@ H5E_dump_api_stack(hbool_t is_api)
 #ifdef H5_NO_DEPRECATED_SYMBOLS
         if (estack->auto_op.func2)
             (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
         if (estack->auto_op.vers == 1) {
             if (estack->auto_op.func1)
                 (void)((estack->auto_op.func1)(estack->auto_data));
@@ -949,7 +949,7 @@ H5E_dump_api_stack(hbool_t is_api)
                 (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
         } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-    }  /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

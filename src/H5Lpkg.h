@@ -35,6 +35,12 @@
 /* Package Private Macros */
 /**************************/
 
+/* Version of external link format */
+#define H5L_EXT_VERSION 0
+
+/* Valid flags for external links */
+#define H5L_EXT_FLAGS_ALL 0
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/
@@ -53,7 +59,7 @@ H5_DLL herr_t  H5L__create_soft(const char *target_path, const H5G_loc_t *cur_lo
                                 hid_t lcpl_id);
 H5_DLL herr_t  H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name, const void *ud_data,
                               size_t ud_data_size, H5L_type_t type, hid_t lcpl_id);
-H5_DLL htri_t  H5L__exists(const H5G_loc_t *loc, const char *name);
+H5_DLL herr_t  H5L__exists(const H5G_loc_t *loc, const char *name, hbool_t *exists);
 H5_DLL herr_t  H5L__get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
                                     H5_iter_order_t order, hsize_t n, H5L_info2_t *linfo /*out*/);
 H5_DLL ssize_t H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,

@@ -83,7 +83,7 @@ static herr_t H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[]);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
-static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj);
+static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj, void **request);
 static herr_t H5D__use_minimized_dset_headers(H5F_t *file, hbool_t *minimize);
 static herr_t H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc);
 static size_t H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr);
@@ -192,7 +192,7 @@ H5D__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the dataset IDs */
+    /* Initialize the ID group for the dataset IDs */
     if (H5I_register_type(H5I_DATASET_CLS) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
@@ -330,7 +330,7 @@ H5D_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__close_cb(H5VL_object_t *dset_vol_obj)
+H5D__close_cb(H5VL_object_t *dset_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -340,15 +340,10 @@ H5D__close_cb(H5VL_object_t *dset_vol_obj)
     HDassert(dset_vol_obj);
 
     /* Close the dataset */
-    if (H5VL_dataset_close(dset_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_dataset_close(dset_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset");
 
 done:
-    /* XXX: (MSC) Weird thing for datasets and filters:
-     * Always decrement the ref count on the VOL for datasets, since
-     * the ID is removed even if the close fails.
-     */
-
     /* Free the VOL object */
     if (H5VL_free_object(dset_vol_obj) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object");
@@ -1677,7 +1672,7 @@ H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id)
 
         /* Get dataset access property list */
         if (NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dapl ID");
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for dapl ID");
 
         /* Check if append flush property exists */
         if (H5P_exist_plist(dapl, H5D_ACS_APPEND_FLUSH_NAME) > 0) {
@@ -2006,7 +2001,7 @@ H5D_close(H5D_t *dataset)
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif                     /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Destroy any cached layout information for the dataset */
@@ -2170,7 +2165,7 @@ H5D_mult_refresh_close(hid_t dset_id)
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif                     /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Destroy any cached layout information for the dataset */
@@ -2380,7 +2375,7 @@ H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc, hb
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif                     /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Check if we need to initialize the space */
@@ -2502,7 +2497,7 @@ H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t 
             HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif                 /* NDEBUG */
+#endif /* NDEBUG */
     } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
 done:
@@ -3872,9 +3867,9 @@ H5D__get_space(const H5D_t *dset)
     if (NULL == (space = H5S_copy(dset->shared->space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace")
 
-    /* Create an atom */
+    /* Create an ID */
     if ((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
 done:
     if (ret_value < 0)
@@ -3919,17 +3914,17 @@ H5D__get_type(const H5D_t *dset)
     if (H5T_lock(dt, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
-    /* Create an atom */
+    /* Create an ID */
     if (H5T_is_named(dt)) {
         /* If this is a committed datatype, we need to recreate the
          * two-level IDs, where the VOL object is a copy of the
          * returned datatype.
          */
         if ((ret_value = H5VL_wrap_register(H5I_DATATYPE, dt, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register datatype")
     } /* end if */
     else if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register datatype")
 
 done:
     if (ret_value < 0)

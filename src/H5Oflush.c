@@ -37,6 +37,7 @@
 #include "H5CXprivate.h" /* API Contexts */
 #include "H5Dprivate.h"  /* Datasets */
 #include "H5Eprivate.h"  /* Errors   */
+#include "H5ESprivate.h" /* Event Sets */
 #include "H5Fprivate.h"  /* Files    */
 #include "H5Gprivate.h"  /* Groups   */
 #include "H5Iprivate.h"  /* IDs      */
@@ -52,49 +53,6 @@ static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *
 /*************/
 /* Functions */
 /*************/
-
-/*-------------------------------------------------------------------------
- * Function:    H5Oflush
- *
- * Purpose:     Flushes all buffers associated with an object to disk.
- *
- * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Mike McGreevy
- *              May 19, 2010
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Oflush(hid_t obj_id)
-{
-    H5VL_object_t *   vol_obj = NULL; /* Object of obj_id     */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value     */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", obj_id);
-
-    /* Check args */
-    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-    /* Set up collective metadata if appropriate */
-    if (H5CX_set_loc(obj_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
-
-    /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(obj_id);
-
-    /* Flush the object */
-    if (H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, obj_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Oflush() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_flush
@@ -213,49 +171,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__oh_tag() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Orefresh
- *
- * Purpose:     Refreshes all buffers associated with an object.
- *
- * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Mike McGreevy
- *              July 28, 2010
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Orefresh(hid_t oid)
-{
-    H5VL_object_t *   vol_obj = NULL; /* Object of oid     */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value     */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", oid);
-
-    /* Check args */
-    if (NULL == (vol_obj = H5VL_vol_object(oid)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-    /* Set up collective metadata if appropriate */
-    if (H5CX_set_loc(oid) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
-
-    /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(oid);
-
-    /* Refresh the object */
-    if (H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, oid) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Orefresh() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_refresh_metadata
@@ -486,6 +401,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_connector
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL,

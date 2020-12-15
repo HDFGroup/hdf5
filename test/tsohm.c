@@ -819,7 +819,7 @@ test_sohm_size1(void)
     hsize_t        oh_sizes[3];
     unsigned       oh_size_index = 0;
 
-#if 0  /* TBD: lying comment or bug. See Jira HDFFV-10646 */
+#if 0 /* TBD: lying comment or bug. See Jira HDFFV-10646 */
     hsize_t        norm_oh_size;
 #endif /* Jira HDFFV-10646 */
     hsize_t        sohm_oh_size;
@@ -922,7 +922,7 @@ test_sohm_size1(void)
     norm_empty_filesize  = file_sizes[0];
     norm_final_filesize  = file_sizes[1];
     norm_final_filesize2 = file_sizes[2];
-#if 0  /* TBD: lying comment or bug. See Jira HDFFV-10646 */
+#if 0 /* TBD: lying comment or bug. See Jira HDFFV-10646 */
     norm_oh_size = oh_sizes[0];
 #endif /* Jira HDFFV-10646 */
 
@@ -941,7 +941,7 @@ test_sohm_size1(void)
      */
     VERIFY(sohm_btree_oh_size, sohm_oh_size, "H5Oget_info_by_name");
 
-#if 0  /* TBD: lying comment or bug. See Jira HDFFV-10646 */
+#if 0 /* TBD: lying comment or bug. See Jira HDFFV-10646 */
     /* Object headers in SOHM files should be smaller than normal object
      * headers.
      */
@@ -992,7 +992,7 @@ test_sohm_size1(void)
  *
  *---------------------------------------------------------------------------
  */
-#if 0  /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
+#if 0 /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
 static void
 test_sohm_size_consistency_open_create(void)
 {
@@ -3817,12 +3817,12 @@ test_sohm(void)
 {
     MESSAGE(5, ("Testing Shared Object Header Messages\n"));
 
-    test_sohm_fcpl();          /* Test SOHMs and file creation plists */
-    test_sohm_fcpl_errors();   /* Bogus H5P* calls for SOHMs */
-    test_sohm_size1();         /* Tests the sizes of files with one SOHM */
-#if 0                          /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
+    test_sohm_fcpl();        /* Test SOHMs and file creation plists */
+    test_sohm_fcpl_errors(); /* Bogus H5P* calls for SOHMs */
+    test_sohm_size1();       /* Tests the sizes of files with one SOHM */
+#if 0                        /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
     test_sohm_size_consistency_open_create();
-#endif                         /* Jira HDFFV-10645 */
+#endif /* Jira HDFFV-10645 */
     test_sohm_attrs();         /* Tests shared messages in attributes */
     test_sohm_size2(0);        /* Tests the sizes of files with multiple SOHMs */
     test_sohm_size2(1);        /* Tests the sizes of files with multiple

@@ -2351,7 +2351,7 @@ test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t H5_ATTR_UNUSE
     return 0;
 } /* test_start_swmr_write_concur() */
 
-#else  /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
 static int
 test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
@@ -6508,7 +6508,7 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t H5_ATTR_UNUSED new_for
     return 0;
 } /* test_refresh_concur() */
 
-#else  /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
 static int
 test_refresh_concur(hid_t in_fapl, hbool_t new_format)

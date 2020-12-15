@@ -32,6 +32,7 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
+#include "H5ESprivate.h" /* Event Sets                               */
 #include "H5Fprivate.h"  /* Files                                    */
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5FOprivate.h" /* File objects                             */
@@ -325,7 +326,7 @@
             /* Adjust information for this type */                                                           \
             H5_GLUE3(H5T_INIT_TYPE_, GUTS, _CORE)                                                            \
                                                                                                              \
-            /* Atomize result */                                                                             \
+            /* Register result */                                                                            \
             if ((GLOBAL = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)                                        \
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")        \
     }
@@ -346,7 +347,7 @@ static herr_t H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t
 static herr_t H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_t func);
 static htri_t H5T__compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T__set_size(H5T_t *dt, size_t size);
-static herr_t H5T__close_cb(H5T_t *dt);
+static herr_t H5T__close_cb(H5T_t *dt, void **request);
 static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name,
                                        H5T_conv_func_t *conv);
 static hbool_t     H5T__detect_vlen_ref(const H5T_t *dt);
@@ -802,7 +803,7 @@ H5T__init_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Initialize the atom group for the file IDs */
+    /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_DATATYPE_CLS) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
@@ -1775,7 +1776,7 @@ H5T_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__close_cb(H5T_t *dt)
+H5T__close_cb(H5T_t *dt, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1790,7 +1791,7 @@ H5T__close_cb(H5T_t *dt)
      */
     if (NULL != dt->vol_obj) {
         /* Close the connector-managed datatype data */
-        if (H5VL_datatype_close(dt->vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if (H5VL_datatype_close(dt->vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype")
 
         /* Free the VOL object */
@@ -1820,7 +1821,7 @@ done:
  * Errors:
  *        ARGS      BADVALUE    Invalid size.
  *        DATATYPE  CANTINIT    Can't create type.
- *        DATATYPE  CANTREGISTER    Can't register datatype atom.
+ *        DATATYPE  CANTREGISTER    Can't register datatype ID.
  *
  * Programmer:    Robb Matzke
  *        Friday, December  5, 1997
@@ -1923,6 +1924,7 @@ H5Tcopy(hid_t obj_id)
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype or dataset")
@@ -1941,7 +1943,7 @@ done:
     /* If we got a type ID from a passed-in dataset, we need to close that */
     if (dset_tid != H5I_INVALID_HID)
         if (H5I_dec_app_ref(dset_tid) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADATOM, FAIL, "problem freeing temporary dataset type ID")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADID, FAIL, "problem freeing temporary dataset type ID")
 
     /* Close the new datatype on errors */
     if (H5I_INVALID_HID == ret_value)
@@ -1954,12 +1956,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Tclose
  *
- * Purpose:    Frees a datatype and all associated memory.
+ * Purpose:     Frees a datatype and all associated memory.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *        Tuesday, December  9, 1997
+ * Programmer:  Robb Matzke
+ *              Tuesday, December  9, 1997
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1979,11 +1981,71 @@ H5Tclose(hid_t type_id)
 
     /* When the reference count reaches zero the resources are freed */
     if (H5I_dec_app_ref(type_id) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "problem freeing id")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tclose() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Tclose_async
+ *
+ * Purpose:     Asynchronous version of H5Tclose.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t type_id, hid_t es_id)
+{
+    H5T_t *        dt;                          /* Pointer to datatype to close */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    H5VL_object_t *vol_obj   = NULL;            /* VOL object of dset_id */
+    H5VL_t *       connector = NULL;            /* VOL connector */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, type_id, es_id);
+
+    /* Check args */
+    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if (H5T_STATE_IMMUTABLE == dt->shared->state)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
+
+    /* Get dataset object's connector */
+    if (NULL == (vol_obj = H5VL_vol_object(type_id)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get VOL object for dataset")
+
+    /* Prepare for possible asynchronous operation */
+    if (H5ES_NONE != es_id) {
+        /* Increase connector's refcount, so it doesn't get closed if closing
+         * the dataset closes the file */
+        connector = vol_obj->connector;
+        H5VL_conn_inc_rc(connector);
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+
+    /* When the reference count reaches zero the resources are freed */
+    if (H5I_dec_app_ref_async(type_id, token_ptr) < 0)
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "problem freeing id")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, type_id, es_id)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    if (connector && H5VL_conn_dec_rc(connector) < 0)
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tclose_async() */
 
 /*-------------------------------------------------------------------------
  * Function:  H5Tequal
@@ -2714,7 +2776,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_c
     herr_t          ret_value = SUCCEED; /*return value                   */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "Te*siix", pers, name, src_id, dst_id, func);
+    H5TRACE5("e", "Te*siiTC", pers, name, src_id, dst_id, func);
 
     /* Check args */
     if (H5T_PERS_HARD != pers && H5T_PERS_SOFT != pers)
@@ -2867,7 +2929,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "Te*siix", pers, name, src_id, dst_id, func);
+    H5TRACE5("e", "Te*siiTC", pers, name, src_id, dst_id, func);
 
     /* Check arguments */
     if (src_id > 0 && (NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE))))
@@ -2901,14 +2963,14 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_conv_t
-H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
+H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata /*out*/)
 {
     H5T_t *     src, *dst;
     H5T_path_t *path;
     H5T_conv_t  ret_value; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE3("x", "ii**x", src_id, dst_id, pcdata);
+    H5TRACE3("TC", "iix", src_id, dst_id, pcdata);
 
     /* Check args */
     if (NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) ||
@@ -2997,7 +3059,7 @@ herr_t
 H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *background, hid_t dxpl_id)
 {
     H5T_path_t *tpath;               /* type conversion info    */
-    H5T_t *     src, *dst;           /* unatomized types        */
+    H5T_t *     src, *dst;           /* unregistered types      */
     herr_t      ret_value = SUCCEED; /* Return value            */
 
     FUNC_ENTER_API(FAIL)
@@ -3405,8 +3467,8 @@ done:
  * Note:      Common code for both H5T_copy and H5T_copy_reopen, as part of
  *            the const-correct datatype copying routines.
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3453,8 +3515,8 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3481,8 +3543,8 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3512,8 +3574,8 @@ done:
  *
  * Note:      Common code for both H5T_copy and H5T_copy_reopen.
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3783,8 +3845,8 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -5217,7 +5279,10 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     } /* end else-if */
 
     /* Set the flag to indicate both source and destination types are compound types
-     * for the optimization of data reading (in H5Dio.c). */
+     * for the optimization of data reading (in H5Dio.c).
+     * Make sure that path->are_compounds is only TRUE for compound types.
+     */
+    path->are_compounds = FALSE;
     if (H5T_COMPOUND == H5T_get_class(src, TRUE) && H5T_COMPOUND == H5T_get_class(dst, TRUE))
         path->are_compounds = TRUE;
 

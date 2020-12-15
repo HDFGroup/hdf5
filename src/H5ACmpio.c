@@ -137,8 +137,7 @@ H5FL_DEFINE_STATIC(H5AC_slist_entry_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
-                                   void (*sync_point_done)(unsigned num_writes, haddr_t *written_entries_tbl))
+H5AC__set_sync_point_done_callback(H5C_t *cache_ptr, H5AC_sync_point_done_cb_t sync_point_done)
 {
     H5AC_aux_t *aux_ptr;
 
@@ -170,7 +169,7 @@ H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC__set_write_done_callback(H5C_t *cache_ptr, void (*write_done)(void))
+H5AC__set_write_done_callback(H5C_t *cache_ptr, H5AC_write_done_cb_t write_done)
 {
     H5AC_aux_t *aux_ptr;
 
@@ -760,7 +759,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
             aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
             aux_ptr->unprotect_dirty_bytes_updates += 1;
-#endif    /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
+#endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
         } /* end if */
 
         /* the entry is dirty.  If it exists on the cleaned entries list,
@@ -776,7 +775,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
         aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
         aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-    }  /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1090,7 +1089,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
             aux_ptr->move_dirty_bytes += entry_size;
             aux_ptr->move_dirty_bytes_updates += 1;
-#endif    /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
+#endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
         } /* end else */
 
         /* insert / reinsert the entry in the dirty slist */
@@ -1104,7 +1103,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
         aux_ptr->move_dirty_bytes += entry_size;
         aux_ptr->move_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-    }  /* end else-if */
+    } /* end else-if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

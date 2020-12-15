@@ -87,7 +87,7 @@ struct H5P_genclass_t {
     H5P_plist_type_t       type;   /* Type of property */
     size_t                 nprops; /* Number of properties in class */
     unsigned
-             plists; /* Number of property lists that have been created since the last modification to the class */
+        plists; /* Number of property lists that have been created since the last modification to the class */
     unsigned classes; /* Number of classes that have been derived since the last modification to the class */
     unsigned ref_count; /* Number of outstanding ID's open on this class object */
     hbool_t  deleted;  /* Whether this class has been deleted and is waiting for dependent classes & proplists
@@ -166,7 +166,7 @@ H5_DLL herr_t H5P__unregister(H5P_genclass_t *pclass, const char *name);
 H5_DLL char * H5P__get_class_path(H5P_genclass_t *pclass);
 H5_DLL H5P_genclass_t *H5P__open_class_path(const char *path);
 H5_DLL H5P_genclass_t *H5P__get_class_parent(const H5P_genclass_t *pclass);
-H5_DLL herr_t          H5P__close_class(void *_pclass);
+H5_DLL herr_t          H5P__close_class(H5P_genclass_t *pclass);
 H5_DLL H5P_genprop_t *H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name);
 H5_DLL hid_t          H5P__new_plist_of_type(H5P_plist_type_t type);
 

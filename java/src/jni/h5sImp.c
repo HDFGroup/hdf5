@@ -1348,7 +1348,7 @@ done:
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Sselect_1copy(JNIEnv *env, jclass clss, jlong dst_id, jlong src_id)
 {
-    herr_t    status = FAIL;
+    herr_t status = FAIL;
 
     UNUSED(clss);
 
@@ -1692,7 +1692,7 @@ done:
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Smodify_1select(JNIEnv *env, jclass clss, jlong space1_id, jint op, jlong space2_id)
 {
-    herr_t    status = FAIL;
+    herr_t status = FAIL;
 
     UNUSED(clss);
 

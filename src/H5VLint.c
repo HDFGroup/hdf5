@@ -86,14 +86,12 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t         H5VL__free_cls(H5VL_class_t *cls);
+static herr_t         H5VL__free_cls(H5VL_class_t *cls, void **request);
 static int            H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data);
 static herr_t         H5VL__set_def_conn(void);
 static void *         H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
 static H5VL_object_t *H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector,
                                         hbool_t wrap_obj);
-static int64_t        H5VL__conn_inc_rc(H5VL_t *connector);
-static int64_t        H5VL__conn_dec_rc(H5VL_t *connector);
 static void *         H5VL__object(hid_t id, H5I_type_t obj_type);
 static herr_t         H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
 
@@ -222,7 +220,7 @@ H5VL__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the VL IDs */
+    /* Initialize the ID group for the VL IDs */
     if (H5I_register_type(H5I_VOL_CLS) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize H5VL interface")
 
@@ -289,7 +287,7 @@ H5VL_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__free_cls(H5VL_class_t *cls)
+H5VL__free_cls(H5VL_class_t *cls, void H5_ATTR_UNUSED **request)
 {
     herr_t ret_value = SUCCEED;
 
@@ -453,7 +451,7 @@ H5VL__set_def_conn(void)
 
     /* Get default file access pclass */
     if (NULL == (def_fapclass = (H5P_genclass_t *)H5I_object(H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_VOL, H5E_BADATOM, FAIL, "can't find object for default file access property class ID")
+        HGOTO_ERROR(H5E_VOL, H5E_BADID, FAIL, "can't find object for default file access property class ID")
 
     /* Change the default VOL for the default file access pclass */
     if (H5P_reset_vol_class(def_fapclass, &H5VL_def_conn_s) < 0)
@@ -462,7 +460,7 @@ H5VL__set_def_conn(void)
 
     /* Get default file access plist */
     if (NULL == (def_fapl = (H5P_genplist_t *)H5I_object(H5P_FILE_ACCESS_DEFAULT)))
-        HGOTO_ERROR(H5E_VOL, H5E_BADATOM, FAIL, "can't find object for default fapl ID")
+        HGOTO_ERROR(H5E_VOL, H5E_BADID, FAIL, "can't find object for default fapl ID")
 
     /* Change the default VOL for the default FAPL */
     if (H5P_set_vol(def_fapl, H5VL_def_conn_s.connector_id, H5VL_def_conn_s.connector_info) < 0)
@@ -572,7 +570,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
         new_vol_obj->data = object;
 
     /* Bump the reference count on the VOL connector */
-    H5VL__conn_inc_rc(vol_connector);
+    H5VL_conn_inc_rc(vol_connector);
     conn_rc_incr = TRUE;
 
     /* If this is a datatype, we have to hide the VOL object under the H5T_t pointer */
@@ -586,7 +584,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
 done:
     /* Cleanup on error */
     if (NULL == ret_value) {
-        if (conn_rc_incr && H5VL__conn_dec_rc(vol_connector) < 0)
+        if (conn_rc_incr && H5VL_conn_dec_rc(vol_connector) < 0)
             HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector")
     } /* end if */
 
@@ -710,7 +708,7 @@ H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t app_
 
     /* Register VOL object as _object_ type, for future object API calls */
     if ((ret_value = H5I_register(type, vol_obj, app_ref)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize handle")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register handle")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -816,6 +814,45 @@ done:
 } /* end H5VL_register_using_vol_id() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_create_object
+ *
+ * Purpose:     Similar to H5VL_register but does not create an ID.
+ *              Creates a new VOL object for the provided generic object
+ *              using the provided vol connector.  Should only be used for
+ *              internal objects returned from the connector such as
+ *              requests.
+ *
+ * Return:      Success:    A valid VOL object
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_object_t *
+H5VL_create_object(void *object, H5VL_t *vol_connector)
+{
+    H5VL_object_t *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Check arguments */
+    HDassert(object);
+    HDassert(vol_connector);
+
+    /* Set up VOL object for the passed-in data */
+    /* (Does not wrap object, since it's from a VOL callback) */
+    if (NULL == (ret_value = H5FL_CALLOC(H5VL_object_t)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate memory for VOL object")
+    ret_value->connector = vol_connector;
+    ret_value->data      = object;
+
+    /* Bump the reference count on the VOL connector */
+    H5VL_conn_inc_rc(vol_connector);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_create_object() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_create_object_using_vol_id
  *
  * Purpose:     Similar to H5VL_register_using_vol_id but does not create
@@ -871,7 +908,7 @@ done:
 } /* end H5VL_create_object_using_vol_id() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL__conn_inc_rc
+ * Function:    H5VL_conn_inc_rc
  *
  * Purpose:     Wrapper to increment the ref. count on a connector.
  *
@@ -882,10 +919,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static int64_t
-H5VL__conn_inc_rc(H5VL_t *connector)
+int64_t
+H5VL_conn_inc_rc(H5VL_t *connector)
 {
-    FUNC_ENTER_STATIC_NOERR
+    int64_t ret_value = -1;
+
+    FUNC_ENTER_NOAPI(-1)
 
     /* Check arguments */
     HDassert(connector);
@@ -893,11 +932,14 @@ H5VL__conn_inc_rc(H5VL_t *connector)
     /* Increment refcount for connector */
     connector->nrefs++;
 
-    FUNC_LEAVE_NOAPI(connector->nrefs)
-} /* end H5VL__conn_inc_rc() */
+    ret_value = connector->nrefs;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_conn_inc_rc() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL__conn_dec_rc
+ * Function:    H5VL_conn_dec_rc
  *
  * Purpose:     Wrapper to decrement the ref. count on a connector.
  *
@@ -908,12 +950,12 @@ H5VL__conn_inc_rc(H5VL_t *connector)
  *
  *-------------------------------------------------------------------------
  */
-static int64_t
-H5VL__conn_dec_rc(H5VL_t *connector)
+int64_t
+H5VL_conn_dec_rc(H5VL_t *connector)
 {
     int64_t ret_value = -1; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(-1)
 
     /* Check arguments */
     HDassert(connector);
@@ -936,7 +978,7 @@ H5VL__conn_dec_rc(H5VL_t *connector)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__conn_dec_rc() */
+} /* end H5VL_conn_dec_rc() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_free_object
@@ -959,7 +1001,7 @@ H5VL_free_object(H5VL_object_t *vol_obj)
     HDassert(vol_obj);
 
     /* Decrement refcount on connector */
-    if (H5VL__conn_dec_rc(vol_obj->connector) < 0)
+    if (H5VL_conn_dec_rc(vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
 
     vol_obj = H5FL_FREE(H5VL_object_t, vol_obj);
@@ -1075,7 +1117,7 @@ done:
 } /* end H5VL_file_is_same() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_register_connector
+ * Function:    H5VL__register_connector
  *
  * Purpose:     Registers a new VOL connector as a member of the virtual object
  *              layer class.
@@ -1091,13 +1133,13 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
+H5VL__register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
 {
     const H5VL_class_t *cls       = (const H5VL_class_t *)_cls;
     H5VL_class_t *      saved     = NULL;
     hid_t               ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(cls);
@@ -1128,10 +1170,10 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_register_connector() */
+} /* end H5VL__register_connector() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL__register_connector
+ * Function:    H5VL__register_connector_by_class
  *
  * Purpose:     Registers a new VOL connector as a member of the virtual object
  *              layer class.
@@ -1148,7 +1190,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL__register_connector(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id)
+H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id)
 {
     H5VL_get_connector_ud_t op_data;                     /* Callback info for connector search */
     hid_t                   ret_value = H5I_INVALID_HID; /* Return value */
@@ -1173,13 +1215,13 @@ H5VL__register_connector(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id
     } /* end if */
     else {
         /* Create a new class ID */
-        if ((ret_value = H5VL_register_connector(cls, app_ref, vipl_id)) < 0)
+        if ((ret_value = H5VL__register_connector(cls, app_ref, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector")
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__register_connector() */
+} /* end H5VL__register_connector_by_class() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__register_connector_by_name
@@ -1233,7 +1275,7 @@ H5VL__register_connector_by_name(const char *name, hbool_t app_ref, hid_t vipl_i
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")
 
         /* Register the connector we loaded */
-        if ((ret_value = H5VL_register_connector(cls, app_ref, vipl_id)) < 0)
+        if ((ret_value = H5VL__register_connector(cls, app_ref, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID")
     } /* end else */
 
@@ -1293,7 +1335,7 @@ H5VL__register_connector_by_value(H5VL_class_value_t value, hbool_t app_ref, hid
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")
 
         /* Register the connector we loaded */
-        if ((ret_value = H5VL_register_connector(cls, app_ref, vipl_id)) < 0)
+        if ((ret_value = H5VL__register_connector(cls, app_ref, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID")
     } /* end else */
 
@@ -1776,6 +1818,7 @@ H5VL__object(hid_t id, H5I_type_t obj_type)
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unknown data object type")
@@ -2022,7 +2065,7 @@ H5VL_reset_lib_state(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Pop the API context off the stack */
-    if (H5CX_pop() < 0)
+    if (H5CX_pop(FALSE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't pop API context")
 
 done:
@@ -2095,7 +2138,7 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
                         "unable to release connector's object wrapping context")
 
     /* Decrement refcount on connector */
-    if (H5VL__conn_dec_rc(vol_wrap_ctx->connector) < 0)
+    if (H5VL_conn_dec_rc(vol_wrap_ctx->connector) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
 
     /* Release object wrapping context */
@@ -2152,7 +2195,7 @@ H5VL_set_vol_wrapper(const H5VL_object_t *vol_obj)
             HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate VOL wrap context")
 
         /* Increment the outstanding objects that are using the connector */
-        H5VL__conn_inc_rc(vol_obj->connector);
+        H5VL_conn_inc_rc(vol_obj->connector);
 
         /* Set up VOL object wrapper context */
         vol_wrap_ctx->rc           = 1;
@@ -2325,11 +2368,10 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
     /* If the datatype is already VOL-managed, the datatype's vol_obj
      * field will get clobbered later, so disallow this.
      */
-    if (type == H5I_DATATYPE) {
+    if (type == H5I_DATATYPE)
         if (vol_wrap_ctx->connector->id == H5VL_NATIVE)
             if (TRUE == H5T_already_vol_managed((const H5T_t *)obj))
                 HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "can't wrap an uncommitted datatype")
-    }
 
     /* Wrap the object with VOL connector info */
     if (NULL == (new_obj = H5VL__wrap_obj(obj, type)))
@@ -2342,3 +2384,325 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_wrap_register() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_check_plugin_load
+ *
+ * Purpose:     Check if a VOL connector matches the search criteria, and
+ *              can be loaded.
+ *
+ * Note:        Matching the connector's name / value, but the connector
+ *              having an incompatible version is not an error, but means
+ *              that the connector isn't a "match".  Setting the SUCCEED
+ *              value to FALSE and not failing for that case allows the
+ *              plugin framework to keep looking for other DLLs that match
+ *              and have a compatible version.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *success)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(cls);
+    HDassert(key);
+    HDassert(success);
+
+    /* Which kind of key are we looking for? */
+    if (key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
+        /* Check if plugin name matches VOL connector class name */
+        if (cls->name && !HDstrcmp(cls->name, key->vol.u.name))
+            *success = TRUE;
+    } /* end if */
+    else {
+        /* Sanity check */
+        HDassert(key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+
+        /* Check if plugin value matches VOL connector class value */
+        if (cls->value == key->vol.u.value)
+            *success = TRUE;
+    } /* end else */
+
+    /* Connector is a match, but might not be a compatible version */
+    if (*success && cls->version != H5VL_VERSION)
+        *success = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_check_plugin_load() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_setup_args
+ *
+ * Purpose:     Set up arguments to access an object
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_setup_args(hid_t loc_id, H5I_type_t id_type, H5VL_object_t **vol_obj)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+
+    /* Get attribute pointer */
+    if (NULL == (*vol_obj = (H5VL_object_t *)H5I_object_verify(loc_id, id_type)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not the correct type of ID")
+
+    /* Set up collective metadata (if appropriate */
+    if (H5CX_set_loc(loc_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set collective metadata read")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_setup_args() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_setup_loc_args
+ *
+ * Purpose:     Set up arguments to access an object
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_setup_loc_args(hid_t loc_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+    HDassert(loc_params);
+
+    /* Get the location object */
+    if (NULL == (*vol_obj = (H5VL_object_t *)H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not the correct type of ID")
+
+    /* Set up collective metadata (if appropriate */
+    if (H5CX_set_loc(loc_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set collective metadata read")
+
+    /* Set location parameters */
+    loc_params->type     = H5VL_OBJECT_BY_SELF;
+    loc_params->obj_type = H5I_get_type(loc_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_setup_loc_args() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_setup_acc_args
+ *
+ * Purpose:     Set up arguments to access an object
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_setup_acc_args(hid_t loc_id, const H5P_libclass_t *libclass, hbool_t is_collective, hid_t *acspl_id,
+                    H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(libclass);
+    HDassert(acspl_id);
+    HDassert(vol_obj);
+    HDassert(loc_params);
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if (H5CX_set_apl(acspl_id, libclass, loc_id, is_collective) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set access property list info")
+
+    /* Get the location object */
+    if (NULL == (*vol_obj = (H5VL_object_t *)H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set location parameters */
+    loc_params->type     = H5VL_OBJECT_BY_SELF;
+    loc_params->obj_type = H5I_get_type(loc_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_setup_acc_args() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_setup_self_args
+ *
+ * Purpose:     Set up arguments to access an object "by self"
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_setup_self_args(hid_t loc_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+    HDassert(loc_params);
+
+    /* Get the location object */
+    if (NULL == (*vol_obj = (H5VL_object_t *)H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set location parameters */
+    loc_params->type     = H5VL_OBJECT_BY_SELF;
+    loc_params->obj_type = H5I_get_type(loc_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_setup_self_args() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_setup_name_args
+ *
+ * Purpose:     Set up arguments to access an object "by name"
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_setup_name_args(hid_t loc_id, const char *name, const H5P_libclass_t *libclass, hbool_t is_collective,
+                     hid_t acspl_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+    HDassert(loc_params);
+
+    /* Check args */
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be an empty string")
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if (H5CX_set_apl(&acspl_id, libclass, loc_id, is_collective) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set access property list info")
+
+    /* Get the location object */
+    if (NULL == (*vol_obj = (H5VL_object_t *)H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set up location parameters */
+    loc_params->type                         = H5VL_OBJECT_BY_NAME;
+    loc_params->loc_data.loc_by_name.name    = name;
+    loc_params->loc_data.loc_by_name.lapl_id = acspl_id;
+    loc_params->obj_type                     = H5I_get_type(loc_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_setup_name_args() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_setup_idx_args
+ *
+ * Purpose:     Set up arguments to access an object "by idx"
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_setup_idx_args(hid_t loc_id, const char *name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
+                    const H5P_libclass_t *libclass, hbool_t is_collective, hid_t acspl_id,
+                    H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+    HDassert(loc_params);
+
+    /* Check args */
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be an empty string")
+    if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if (H5CX_set_apl(&acspl_id, libclass, loc_id, is_collective) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set access property list info")
+
+    /* Get the location object */
+    if (NULL == (*vol_obj = (H5VL_object_t *)H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set location parameters */
+    loc_params->type                         = H5VL_OBJECT_BY_IDX;
+    loc_params->loc_data.loc_by_idx.name     = name;
+    loc_params->loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params->loc_data.loc_by_idx.order    = order;
+    loc_params->loc_data.loc_by_idx.n        = n;
+    loc_params->loc_data.loc_by_idx.lapl_id  = acspl_id;
+    loc_params->obj_type                     = H5I_get_type(loc_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_setup_idx_args() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_setup_token_args
+ *
+ * Purpose:     Set up arguments to access an object by token
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_obj,
+                      H5VL_loc_params_t *loc_params)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+    HDassert(loc_params);
+
+    /* Get the location object */
+    if (NULL == (*vol_obj = (H5VL_object_t *)H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set location parameters */
+    loc_params->type                        = H5VL_OBJECT_BY_TOKEN;
+    loc_params->loc_data.loc_by_token.token = obj_token;
+    loc_params->obj_type                    = H5I_get_type(loc_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_setup_token_args() */

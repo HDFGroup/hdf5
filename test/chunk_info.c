@@ -67,7 +67,7 @@ const char *FILENAME[] = {"tchunk_info_earliest", "tchunk_info_v18",  "tchunk_in
 #define V2_BTREE_INDEX_DSET_NAME    "Version 2 B-Tree Index Dataset"
 #define SKIP_FILTER_DSET_NAME       "Dataset with Skipping One Filter"
 #define FILENAME_BUF_SIZE           256 /* Size for file names */
-#define RANK                        2   /* Rank for datasets */
+#define RANK                        2 /* Rank for datasets */
 
 /* Dimension of the dataset */
 #define NX 24
@@ -489,7 +489,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     Bytef *      z_dst; /*destination buffer */
     uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(CHK_SIZE);
     uLong        z_src_nbytes = (uLong)CHK_SIZE;
-#endif                             /* end H5_HAVE_FILTER_DEFLATE */
+#endif /* end H5_HAVE_FILTER_DEFLATE */
     void *  inbuf      = NULL;     /* Pointer to new buffer */
     hsize_t chunk_size = CHK_SIZE; /* Size of a chunk, can be compressed or not */
     hsize_t ii, jj;                /* Array indices */
@@ -542,7 +542,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Allocate input (compressed) buffer */
-    inbuf = HDmalloc(z_dst_nbytes);
+    inbuf = HDcalloc(1, z_dst_nbytes);
 
     /* Set chunk size to the compressed chunk size and the chunk point
        to the compressed data chunk */
@@ -567,7 +567,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     }
 #else
     /* Allocate input (non-compressed) buffer */
-    inbuf = HDmalloc(CHK_SIZE);
+    inbuf = HDcalloc(1, CHK_SIZE);
     HDmemcpy(inbuf, direct_buf, CHK_SIZE);
 #endif /* end H5_HAVE_FILTER_DEFLATE */
 

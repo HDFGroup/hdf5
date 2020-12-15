@@ -72,7 +72,7 @@ typedef struct H5F_olist_t {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5F__close_cb(H5VL_object_t *file_vol_obj);
+static herr_t H5F__close_cb(H5VL_object_t *file_vol_obj, void **request);
 static herr_t H5F__set_vol_conn(H5F_t *file);
 static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list,
                                hbool_t app_ref, size_t *obj_id_count_ptr);
@@ -161,9 +161,7 @@ H5F__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /*
-     * Initialize the atom group for the file IDs.
-     */
+    /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_FILE_CLS) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
@@ -236,7 +234,7 @@ H5F_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__close_cb(H5VL_object_t *file_vol_obj)
+H5F__close_cb(H5VL_object_t *file_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -246,7 +244,7 @@ H5F__close_cb(H5VL_object_t *file_vol_obj)
     HDassert(file_vol_obj);
 
     /* Close the file */
-    if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     /* Free the VOL object */
@@ -697,6 +695,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
             case H5I_SPACE_SEL_ITER:
+            case H5I_EVENTSET:
             case H5I_NTYPES:
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "unknown or invalid data object")
@@ -2432,7 +2431,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
                 /* Try to close all the open objects in this file */
                 for (u = 0; u < obj_count; u++)
                     if (H5I_dec_ref(objs[u]) < 0)
-                        HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object")
+                        HGOTO_ERROR(H5E_ID, H5E_CLOSEERROR, FAIL, "can't close object")
             }
             if (result < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_obj_ids failed(1)")
@@ -2450,7 +2449,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
                 /* Try to close all the open objects in this file */
                 for (u = 0; u < obj_count; u++)
                     if (H5I_dec_ref(objs[u]) < 0)
-                        HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object")
+                        HGOTO_ERROR(H5E_ID, H5E_CLOSEERROR, FAIL, "can't close object")
             }
             if (result < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_ids failed(2)")
@@ -2553,13 +2552,13 @@ H5F_get_id(H5F_t *file)
     if (H5I_find_id(file, H5I_FILE, &ret_value) < 0 || H5I_INVALID_HID == ret_value) {
         /* resurrect the ID - Register an ID with the native connector */
         if ((ret_value = H5VL_wrap_register(H5I_FILE, file, FALSE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
         file->id_exists = TRUE;
     }
     else {
         /* Increment reference count on existing ID */
         if (H5I_inc_ref(ret_value, FALSE) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, H5I_INVALID_HID, "incrementing file ID failed")
+            HGOTO_ERROR(H5E_ID, H5E_CANTINC, H5I_INVALID_HID, "incrementing file ID failed")
     } /* end else */
 
 done:
@@ -2623,8 +2622,8 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
     hid_t new_fapl_id = H5I_INVALID_HID; /* ID for duplicated FAPL */
 #ifdef H5_HAVE_SYMLINK
     /* This has to be declared here to avoid unfreed resources on errors */
-    char *realname = NULL;      /* Fully resolved path name of file */
-#endif                          /* H5_HAVE_SYMLINK */
+    char *realname = NULL; /* Fully resolved path name of file */
+#endif                     /* H5_HAVE_SYMLINK */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -3664,7 +3663,7 @@ H5F__start_swmr_write(H5F_t *f)
 
             /* Close the object */
             if (H5I_dec_ref(obj_ids[u]) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEOBJ, FAIL, "decrementing object ID failed")
+                HGOTO_ERROR(H5E_ID, H5E_CANTCLOSEOBJ, FAIL, "decrementing object ID failed")
         } /* end for */
     }     /* end if */
 
@@ -3713,7 +3712,7 @@ H5F__start_swmr_write(H5F_t *f)
     /* Refresh (reopen) the objects (groups & datasets) in the file */
     for (u = 0; u < grp_dset_count; u++)
         if (H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], vol_connector, TRUE) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
+            HGOTO_ERROR(H5E_ID, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
 
 done:
     if (ret_value < 0 && setup) {
@@ -3867,7 +3866,7 @@ H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
         vol_wrapper_set = TRUE;
 
         if ((file_id = H5VL_wrap_register(H5I_FILE, vol_obj_file, app_ref)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
     } /* end if */
     else {
         /* Increment ref count on existing ID */

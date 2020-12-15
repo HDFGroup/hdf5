@@ -115,7 +115,7 @@ typedef struct H5FD_stdio_t {
     DWORD nFileIndexHigh;
     DWORD dwVolumeSerialNumber;
 
-    HANDLE      hFile; /* Native windows file handle */
+    HANDLE hFile; /* Native windows file handle */
 #endif /* H5_HAVE_WIN32_API */
 } H5FD_stdio_t;
 
@@ -338,7 +338,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     static const char *func         = "H5FD_stdio_open"; /* Function Name for error reporting */
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
-#else  /* H5_HAVE_WIN32_API */
+#else /* H5_HAVE_WIN32_API */
     struct stat sb;
 #endif /* H5_HAVE_WIN32_API */
 
@@ -431,7 +431,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     /* Get the file descriptor (needed for truncate and some Windows information) */
 #ifdef H5_HAVE_WIN32_API
     file->fd = _fileno(file->fp);
-#else  /* H5_HAVE_WIN32_API */
+#else /* H5_HAVE_WIN32_API */
     file->fd = fileno(file->fp);
 #endif /* H5_HAVE_WIN32_API */
     if (file->fd < 0) {
@@ -458,7 +458,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     file->nFileIndexHigh       = fileinfo.nFileIndexHigh;
     file->nFileIndexLow        = fileinfo.nFileIndexLow;
     file->dwVolumeSerialNumber = fileinfo.dwVolumeSerialNumber;
-#else  /* H5_HAVE_WIN32_API */
+#else /* H5_HAVE_WIN32_API */
     if (fstat(file->fd, &sb) < 0) {
         free(file);
         fclose(f);
@@ -549,7 +549,7 @@ H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         return -1;
     if (f1->device > f2->device)
         return 1;
-#else  /* H5_DEV_T_IS_SCALAR */
+#else /* H5_DEV_T_IS_SCALAR */
     /* If dev_t isn't a scalar value on this system, just use memcmp to
      * determine if the values are the same or not.  The actual return value
      * shouldn't really matter...
@@ -1075,7 +1075,7 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t /*UNUSED*/ 
             if (0 == bError)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR,
                             "unable to truncate/extend file properly", -1)
-#else  /* H5_HAVE_WIN32_API */
+#else /* H5_HAVE_WIN32_API */
             /* Reset seek offset to beginning of file, so that file isn't re-extended later */
             rewind(file->fp);
 

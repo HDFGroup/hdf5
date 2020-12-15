@@ -103,14 +103,14 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
 
 /* Local macros */
 #define H5Z_SCALEOFFSET_TOTAL_NPARMS     20 /* Total number of parameters for filter */
-#define H5Z_SCALEOFFSET_PARM_SCALETYPE   0  /* "User" parameter for scale type */
-#define H5Z_SCALEOFFSET_PARM_SCALEFACTOR 1  /* "User" parameter for scale factor */
-#define H5Z_SCALEOFFSET_PARM_NELMTS      2  /* "Local" parameter for number of elements in the chunk */
-#define H5Z_SCALEOFFSET_PARM_CLASS       3  /* "Local" parameter for datatype class */
-#define H5Z_SCALEOFFSET_PARM_SIZE        4  /* "Local" parameter for datatype size */
-#define H5Z_SCALEOFFSET_PARM_SIGN        5  /* "Local" parameter for integer datatype sign */
-#define H5Z_SCALEOFFSET_PARM_ORDER       6  /* "Local" parameter for datatype byte order */
-#define H5Z_SCALEOFFSET_PARM_FILAVAIL    7  /* "Local" parameter for dataset fill value existence */
+#define H5Z_SCALEOFFSET_PARM_SCALETYPE   0 /* "User" parameter for scale type */
+#define H5Z_SCALEOFFSET_PARM_SCALEFACTOR 1 /* "User" parameter for scale factor */
+#define H5Z_SCALEOFFSET_PARM_NELMTS      2 /* "Local" parameter for number of elements in the chunk */
+#define H5Z_SCALEOFFSET_PARM_CLASS       3 /* "Local" parameter for datatype class */
+#define H5Z_SCALEOFFSET_PARM_SIZE        4 /* "Local" parameter for datatype size */
+#define H5Z_SCALEOFFSET_PARM_SIGN        5 /* "Local" parameter for integer datatype sign */
+#define H5Z_SCALEOFFSET_PARM_ORDER       6 /* "Local" parameter for datatype byte order */
+#define H5Z_SCALEOFFSET_PARM_FILAVAIL    7 /* "Local" parameter for dataset fill value existence */
 #define H5Z_SCALEOFFSET_PARM_FILVAL      8 /* "Local" parameter for start location to store dataset fill value */
 
 #define H5Z_SCALEOFFSET_CLS_INTEGER 0 /* Integer (datatype class) */
@@ -951,7 +951,7 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get the plist structure */
     if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get datatype */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -1232,7 +1232,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
          */
         minval_size = sizeof(unsigned long long) <= ((unsigned char *)*buf)[4] ? sizeof(unsigned long long)
                                                                                : ((unsigned char *)*buf)[4];
-        minval = 0;
+        minval      = 0;
         for (i = 0; i < minval_size; i++) {
             minval_mask = ((unsigned char *)*buf)[5 + i];
             minval_mask <<= i * 8;

@@ -716,7 +716,7 @@ H5T__init_native(void)\n\
                     d[i].imp ? "IMPLIED" : "NONE"); /*normalization */
         }
 
-        /* Atomize the type */
+        /* Register the type */
         fprintf(rawoutstream, "\
     if((H5T_NATIVE_%s_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)\n\
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, \"can't register ID for built-in datatype\")\n",
@@ -1140,7 +1140,7 @@ print_header(void)
 #ifdef H5_HAVE_GETPWUID
     struct passwd *pwd = NULL;
 #else
-    int pwd      = 1;
+    int pwd = 1;
 #endif
     static const char *month_name[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};

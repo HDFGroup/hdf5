@@ -53,7 +53,7 @@
 struct H5MM_block_t; /* Forward declaration for typedef */
 typedef struct H5MM_block_t {
     unsigned char
-                         sig[H5MM_SIG_SIZE]; /* Signature for the block, to indicate it was allocated with H5MM* interface */
+        sig[H5MM_SIG_SIZE]; /* Signature for the block, to indicate it was allocated with H5MM* interface */
     struct H5MM_block_t *next; /* Pointer to next block in the list of allocated blocks */
     struct H5MM_block_t *prev; /* Pointer to previous block in the list of allocated blocks */
     union {
@@ -70,7 +70,7 @@ typedef struct H5MM_block_t {
 /********************/
 /* Local Prototypes */
 /********************/
-#if defined    H5_MEMORY_ALLOC_SANITY_CHECK
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
 static hbool_t H5MM__is_our_block(void *mem);
 static void    H5MM__sanity_check_block(const H5MM_block_t *block);
 static void    H5MM__sanity_check(void *mem);
@@ -271,7 +271,7 @@ H5MM_malloc(size_t size)
         H5MM_block_head_s.u.info.in_use = TRUE;
 
         H5MM_init_s = TRUE;
-    }  /* end if */
+    } /* end if */
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
     if (size) {
@@ -309,10 +309,10 @@ H5MM_malloc(size_t size)
         } /* end if */
         else
             ret_value = NULL;
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
         ret_value = HDmalloc(size);
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
-    }  /* end if */
+    } /* end if */
     else
         ret_value = NULL;
 
@@ -352,10 +352,10 @@ H5MM_calloc(size_t size)
 #if defined H5_MEMORY_ALLOC_SANITY_CHECK
         if (NULL != (ret_value = H5MM_malloc(size)))
             HDmemset(ret_value, 0, size);
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
         ret_value = HDcalloc((size_t)1, size);
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
-    }  /* end if */
+    } /* end if */
     else
         ret_value = NULL;
 
@@ -417,14 +417,14 @@ H5MM_realloc(void *mem, size_t size)
         }
         else
             ret_value = H5MM_xfree(mem);
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
         ret_value = HDrealloc(mem, size);
 
         /* Some platforms do not return NULL if size is zero. */
         if (0 == size)
             ret_value = NULL;
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
-    }  /* end else */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_realloc() */
@@ -542,10 +542,10 @@ H5MM_xfree(void *mem)
         }
         else
             HDfree(mem);
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
         HDfree(mem);
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
-    }  /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* end H5MM_xfree() */
@@ -642,8 +642,8 @@ H5MM_get_alloc_stats(H5_alloc_stats_t *stats)
         stats->total_alloc_blocks_count = H5MM_total_alloc_blocks_count_s;
         stats->curr_alloc_blocks_count  = H5MM_curr_alloc_blocks_count_s;
         stats->peak_alloc_blocks_count  = H5MM_peak_alloc_blocks_count_s;
-    }  /* end if */
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
+    } /* end if */
+#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
     if (stats)
         HDmemset(stats, 0, sizeof(H5_alloc_stats_t));
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */

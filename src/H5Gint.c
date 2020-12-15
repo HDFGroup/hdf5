@@ -84,10 +84,14 @@ typedef struct {
 
 static herr_t H5G__open_oid(H5G_t *grp);
 static herr_t H5G__visit_cb(const H5O_link_t *lnk, void *_udata);
+static herr_t H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request);
 
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Declare a free list to manage the H5G_t struct */
 H5FL_DEFINE(H5G_t);
@@ -103,6 +107,182 @@ H5FL_DEFINE(H5_obj_t);
 /*******************/
 /* Local Variables */
 /*******************/
+
+/* Group ID class */
+static const H5I_class_t H5I_GROUP_CLS[1] = {{
+    H5I_GROUP,                /* ID class value */
+    0,                        /* Class flags */
+    0,                        /* # of reserved IDs for class */
+    (H5I_free_t)H5G__close_cb /* Callback routine for closing objects of this class */
+}};
+
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5G_top_package_initialize_s = FALSE;
+
+/*-------------------------------------------------------------------------
+ * Function: H5G_init
+ *
+ * Purpose:  Initialize the interface from some other layer.
+ *
+ * Return:   Success:    non-negative
+ *
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_init(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G__init_package
+ *
+ * Purpose:	Initializes the H5G interface.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Monday, January	 5, 1998
+ *
+ * Notes:       The group creation properties are registered in the property
+ *              list interface initialization routine (H5P_init_package)
+ *              so that the file creation property class can inherit from it
+ *              correctly. (Which allows the file creation property list to
+ *              control the group creation properties of the root group of
+ *              a file) QAK - 24/10/2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Initialize the ID group for the group IDs */
+    if (H5I_register_type(H5I_GROUP_CLS) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    /* Mark "top" of interface as initialized, too */
+    H5G_top_package_initialize_s = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__init_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_top_term_package
+ *
+ * Purpose:	Close the "top" of the interface, releasing IDs, etc.
+ *
+ * Return:	Success:	Positive if anything is done that might
+ *				affect other interfaces; zero otherwise.
+ * 		Failure:	Negative.
+ *
+ * Programmer:	Quincey Koziol
+ *		Sunday, September	13, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5G_top_term_package(void)
+{
+    int n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (H5G_top_package_initialize_s) {
+        if (H5I_nmembers(H5I_GROUP) > 0) {
+            (void)H5I_clear_type(H5I_GROUP, FALSE, FALSE);
+            n++; /*H5I*/
+        }        /* end if */
+
+        /* Mark closed */
+        if (0 == n)
+            H5G_top_package_initialize_s = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5G_top_term_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_term_package
+ *
+ * Purpose:	Terminates the H5G interface
+ *
+ * Note:	Finishes shutting down the interface, after
+ *		H5G_top_term_package() is called
+ *
+ * Return:	Success:	Positive if anything is done that might
+ *				affect other interfaces; zero otherwise.
+ * 		Failure:	Negative.
+ *
+ * Programmer:	Robb Matzke
+ *		Monday, January	 5, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5G_term_package(void)
+{
+    int n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_GROUP));
+        HDassert(FALSE == H5G_top_package_initialize_s);
+
+        /* Destroy the group object id group */
+        n += (H5I_dec_type_ref(H5I_GROUP) > 0);
+
+        /* Mark closed */
+        if (0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5G_term_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G__close_cb
+ *
+ * Purpose:     Called when the ref count reaches zero on the group's ID
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(grp_vol_obj);
+
+    /* Close the group */
+    if (H5VL_group_close(grp_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close group")
+
+    /* Free the VOL object */
+    if (H5VL_free_object(grp_vol_obj) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "unable to free VOL object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__close_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5G__create_named
@@ -782,7 +962,7 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter
     if (NULL == (grp = H5G__open_name(loc, group_name)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if ((gid = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* Set up user data for callback */
     udata.gid      = gid;
@@ -1045,7 +1225,7 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_o
 
     /* Register an ID for the starting group */
     if ((gid = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* Get the location of the starting group */
     if (H5G_loc(gid, &start_loc) < 0)

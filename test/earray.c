@@ -375,7 +375,7 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
                   "\n",
                   earray_stats.stored.data_blk_size, state->data_blk_size);
         TEST_ERROR
-    }  /* end if */
+    } /* end if */
 #endif /* NOT_YET */
     if (earray_stats.stored.nsuper_blks != state->nsuper_blks) {
         HDfprintf(stdout,
@@ -391,7 +391,7 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
                   "\n",
                   earray_stats.stored.super_blk_size, state->super_blk_size);
         TEST_ERROR
-    }  /* end if */
+    } /* end if */
 #endif /* NOT_YET */
 
     /* All tests passed */
@@ -757,7 +757,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
 
         PASSED();
     }
-#else  /* NDEBUG */
+#else /* NDEBUG */
     SKIPPED();
     HDputs("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
@@ -2552,7 +2552,7 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -2572,7 +2572,7 @@ error:
     H5E_END_TRY;
 
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     return 1;
 } /* end main() */

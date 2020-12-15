@@ -139,7 +139,7 @@ main(void)
     nerrors += test_random_write(f);
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -160,7 +160,7 @@ main(void)
 
 error:
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     HDputs("*** TESTS FAILED ***");
     return 1;
@@ -2100,8 +2100,8 @@ test_swmr_write_big(hbool_t newest_format)
     uint8_t  wbuf[1024];                 /* Buffer for reading & writing */
     unsigned u;                          /* Local index variable */
 #ifdef H5_HAVE_UNISTD_H
-    pid_t pid;                      /* Process ID */
-#endif                              /* H5_HAVE_UNISTD_H */
+    pid_t pid; /* Process ID */
+#endif /* H5_HAVE_UNISTD_H */
     int     status;                 /* Status returned from child process */
     char *  driver         = NULL;  /* VFD string (from env variable) */
     hbool_t api_ctx_pushed = FALSE; /* Whether API context pushed */
@@ -2266,7 +2266,7 @@ test_swmr_write_big(hbool_t newest_format)
             FAIL_STACK_ERROR;
 
         /* Pop API context */
-        if (api_ctx_pushed && H5CX_pop() < 0)
+        if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
             FAIL_STACK_ERROR
         api_ctx_pushed = FALSE;
 
@@ -2284,7 +2284,7 @@ error:
     H5Fclose(fid);
 
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     H5Pclose(fapl);
 

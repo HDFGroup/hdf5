@@ -505,7 +505,7 @@ h5pget_version_c(hid_t_f H5_ATTR_UNUSED *prp_id, int_f *boot, int_f *freelist, i
 
     return 0;
 }
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
 int_f
 h5pget_version_c(hid_t_f *prp_id, int_f *boot, int_f *freelist, int_f *stab, int_f *shhdr)
 /******/

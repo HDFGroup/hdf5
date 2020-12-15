@@ -2126,7 +2126,7 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
             /* Decrement number of blocks */
             fast_dim_count--;
         } /* end while */
-#else     /* NO_DUFFS_DEVICE */
+#else /* NO_DUFFS_DEVICE */
         {
             size_t duffs_index; /* Counting index for Duff's device */
 
@@ -2169,7 +2169,7 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
                     } while (--duffs_index > 0);
             } /* end switch */
         }
-#endif    /* NO_DUFFS_DEVICE */
+#endif /* NO_DUFFS_DEVICE */
 #undef DUFF_GUTS
 
         /* Increment offset in destination buffer */
@@ -4773,13 +4773,13 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblo
 --------------------------------------------------------------------------*/
 herr_t
 H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks,
-                              hsize_t buf[/*numblocks*/])
+                              hsize_t buf[/*numblocks*/] /*out*/)
 {
     H5S_t *space;     /* Dataspace to modify selection of */
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihh*[a2]h", spaceid, startblock, numblocks, buf);
+    H5TRACE4("e", "ihhx", spaceid, startblock, numblocks, buf);
 
     /* Check args */
     if (buf == NULL)
@@ -10578,9 +10578,9 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], co
     if (H5S_combine_hyperslab(space, op, start, stride, count, block, &new_space) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, H5I_INVALID_HID, "unable to set hyperslab selection")
 
-    /* Atomize */
+    /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, new_space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID")
 
 done:
     if (ret_value < 0 && new_space)
@@ -10720,9 +10720,9 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     if (NULL == (new_space = H5S__combine_select(space1, op, space2)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, H5I_INVALID_HID, "unable to create hyperslab selection")
 
-    /* Atomize */
+    /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, new_space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID")
 
 done:
     if (ret_value < 0 && new_space)
@@ -11749,7 +11749,7 @@ done:
 
         for (u = 0; u < H5S_MAX_RANK; u++)
             HDassert(!udata.ps_span_info[u]);
-    }  /* end block */
+    } /* end block */
 #endif /* NDEBUG */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -12358,14 +12358,15 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t block[])
+H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[] /*out*/, hsize_t stride[] /*out*/,
+                         hsize_t count[] /*out*/, hsize_t block[] /*out*/)
 {
     H5S_t *  space;               /* Dataspace to query */
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*h*h*h*h", spaceid, start, stride, count, block);
+    H5TRACE5("e", "ixxxx", spaceid, start, stride, count, block);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))

@@ -1271,7 +1271,7 @@ old_api(hid_t fapl)
         TEST_ERROR
 
     PASSED();
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
     /* Shut compiler up */
     fapl = fapl;
 

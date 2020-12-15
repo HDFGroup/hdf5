@@ -102,25 +102,25 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_LAYOUT,   /*0x0008 Data Layout                     */
 #ifdef H5O_ENABLE_BOGUS
     H5O_MSG_BOGUS_VALID, /*0x0009 "Bogus valid" (for testing)     */
-#else                    /* H5O_ENABLE_BOGUS */
+#else /* H5O_ENABLE_BOGUS */
     NULL, /*0x0009 "Bogus valid" (for testing)     */
-#endif                   /* H5O_ENABLE_BOGUS */
-    H5O_MSG_GINFO,       /*0x000A Group information               */
-    H5O_MSG_PLINE,       /*0x000B Data storage -- filter pipeline */
-    H5O_MSG_ATTR,        /*0x000C Attribute                       */
-    H5O_MSG_NAME,        /*0x000D Object name                     */
-    H5O_MSG_MTIME,       /*0x000E Object modification date and time */
-    H5O_MSG_SHMESG,      /*0x000F File-wide shared message table  */
-    H5O_MSG_CONT,        /*0x0010 Object header continuation      */
-    H5O_MSG_STAB,        /*0x0011 Symbol table                    */
-    H5O_MSG_MTIME_NEW,   /*0x0012 New Object modification date and time */
-    H5O_MSG_BTREEK,      /*0x0013 Non-default v1 B-tree 'K' values */
-    H5O_MSG_DRVINFO,     /*0x0014 Driver info settings            */
-    H5O_MSG_AINFO,       /*0x0015 Attribute information           */
-    H5O_MSG_REFCOUNT,    /*0x0016 Object's ref. count             */
-    H5O_MSG_FSINFO,      /*0x0017 Free-space manager info         */
-    H5O_MSG_MDCI,        /*0x0018 Metadata cache image            */
-    H5O_MSG_UNKNOWN      /*0x0019 Placeholder for unknown message */
+#endif /* H5O_ENABLE_BOGUS */
+    H5O_MSG_GINFO,     /*0x000A Group information               */
+    H5O_MSG_PLINE,     /*0x000B Data storage -- filter pipeline */
+    H5O_MSG_ATTR,      /*0x000C Attribute                       */
+    H5O_MSG_NAME,      /*0x000D Object name                     */
+    H5O_MSG_MTIME,     /*0x000E Object modification date and time */
+    H5O_MSG_SHMESG,    /*0x000F File-wide shared message table  */
+    H5O_MSG_CONT,      /*0x0010 Object header continuation      */
+    H5O_MSG_STAB,      /*0x0011 Symbol table                    */
+    H5O_MSG_MTIME_NEW, /*0x0012 New Object modification date and time */
+    H5O_MSG_BTREEK,    /*0x0013 Non-default v1 B-tree 'K' values */
+    H5O_MSG_DRVINFO,   /*0x0014 Driver info settings            */
+    H5O_MSG_AINFO,     /*0x0015 Attribute information           */
+    H5O_MSG_REFCOUNT,  /*0x0016 Object's ref. count             */
+    H5O_MSG_FSINFO,    /*0x0017 Free-space manager info         */
+    H5O_MSG_MDCI,      /*0x0018 Metadata cache image            */
+    H5O_MSG_UNKNOWN    /*0x0019 Placeholder for unknown message */
 };
 
 /* Format version bounds for object header */
@@ -1076,7 +1076,7 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
             H5O_chunk_proxy_t *chk_proxy; /* Proxy for chunk, to bring it into memory */
 #ifndef NDEBUG
             size_t chkcnt = oh->nchunks; /* Count of chunks (for sanity checking) */
-#endif                                   /* NDEBUG */
+#endif /* NDEBUG */
 
             /* Bring the chunk into the cache */
             /* (which adds to the object header) */
@@ -1124,7 +1124,7 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
             (oh->nmesgs + udata.common.merged_null_msgs) != udata.v1_pfx_nmesgs)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - incorrect # of messages")
 #endif /* H5_STRICT_FORMAT_CHECKS */
-    }  /* end if */
+    } /* end if */
 
 #ifdef H5O_DEBUG
     H5O__assert(oh);
@@ -1497,7 +1497,7 @@ H5O_bogus_oh(H5F_t *f, H5O_t *oh, unsigned bogus_id, unsigned mesg_flags)
         else if (bogus_id == H5O_BOGUS_INVALID_ID)
             type = H5O_MSG_BOGUS_INVALID;
         else
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID for 'bogus' message")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "invalid ID for 'bogus' message")
 
         /* Allocate space in the object header for bogus message */
         if (H5O__msg_alloc(f, oh, type, &mesg_flags, bogus, &idx) < 0)
@@ -1827,6 +1827,7 @@ H5O_get_loc(hid_t object_id)
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, NULL, "invalid object type")
@@ -2792,7 +2793,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
 
     /* Get an ID for the visited object */
     if ((obj_id = H5VL_wrap_register(opened_type, obj, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register visited object")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register visited object")
 
     /* Make callback for starting object */
     if ((ret_value = op(obj_id, ".", &oinfo, op_data)) < 0)

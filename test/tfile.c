@@ -7847,7 +7847,7 @@ test_file(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_file_ishdf5(env_h5_drvr); /* Test detecting HDF5 files correctly */
     test_deprec();                 /* Test deprecated routines */
-#endif                             /* H5_NO_DEPRECATED_SYMBOLS */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     ret = H5Pclose(fapl_id);
     CHECK(ret, FAIL, "H5Pclose");

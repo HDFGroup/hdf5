@@ -1092,7 +1092,7 @@ H5SM_try_share(H5F_t *f, H5O_t *open_oh, unsigned defer_flags, unsigned type_id,
     if (defer_flags & H5SM_WAS_DEFERRED)
 #ifndef NDEBUG
         deferred_type = ((H5O_shared_t *)mesg)->type;
-#else  /* NDEBUG */
+#else /* NDEBUG */
         if ((((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_HERE) &&
             (((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_SOHM))
             HGOTO_DONE(FALSE);
@@ -1364,16 +1364,13 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
         if (defer) {
-            htri_t bt2_find; /* Result from searching in the v2 B-tree */
-
             /* If this returns 0, it means that the message wasn't found. */
             /* If it return 1, set the heap_id in the shared struct.  It will
              * return a heap ID, since a message with a reference count greater
              * than 1 is always shared in the heap.
              */
-            if ((bt2_find = H5B2_find(bt2, &key, NULL, NULL)) < 0)
+            if (H5B2_find(bt2, &key, &found, NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "can't search for message in index")
-            found = (hbool_t)bt2_find;
         } /* end if */
         else {
             H5SM_incr_ref_opdata op_data;
@@ -1411,7 +1408,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
         if (defer)
             HDmemset(&shared.u, 0, sizeof(shared.u));
 #endif /* H5_USING_MEMCHECKER */
-    }  /* end if */
+    } /* end if */
     else {
         htri_t share_in_ohdr; /* Whether the new message can be shared in another object's header */
 
@@ -1770,7 +1767,7 @@ H5SM__decr_ref(void *record, void *op_data, hbool_t *changed)
  */
 static herr_t
 H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, const H5O_shared_t *mesg,
-                        unsigned *cache_flags, size_t * /*out*/ mesg_size, void ** /*out*/ encoded_mesg)
+                        unsigned *cache_flags, size_t *mesg_size /*out*/, void **encoded_mesg /*out*/)
 {
     H5SM_list_t *   list = NULL;
     H5SM_mesg_key_t key;
@@ -2231,7 +2228,7 @@ H5SM_get_refcount(H5F_t *f, unsigned type_id, const H5O_shared_t *sh_mesg, hsize
         message = list->messages[list_pos];
     } /* end if */
     else {
-        htri_t msg_exists; /* Whether the message exists in the v2 B-tree */
+        hbool_t msg_exists; /* Whether the message exists in the v2 B-tree */
 
         /* Index is a B-tree */
         HDassert(header->index_type == H5SM_BTREE);
@@ -2241,7 +2238,8 @@ H5SM_get_refcount(H5F_t *f, unsigned type_id, const H5O_shared_t *sh_mesg, hsize
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
         /* Look up the message in the v2 B-tree */
-        if ((msg_exists = H5B2_find(bt2, &key, H5SM__get_refcount_bt2_cb, &message)) < 0)
+        msg_exists = FALSE;
+        if (H5B2_find(bt2, &key, &msg_exists, H5SM__get_refcount_bt2_cb, &message) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "error finding message in index")
         if (!msg_exists)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")

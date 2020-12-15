@@ -174,11 +174,16 @@ IDE_GENERATED_PROPERTIES ("H5EA" "${H5EA_HDRS}" "${H5EA_SOURCES}" )
 
 
 set (H5ES_SOURCES
+    ${HDF5_SRC_DIR}/H5ES.c
+    ${HDF5_SRC_DIR}/H5ESevent.c
+    ${HDF5_SRC_DIR}/H5ESint.c
+    ${HDF5_SRC_DIR}/H5ESlist.c
 )
 set (H5ES_HDRS
     ${HDF5_SRC_DIR}/H5ESpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5ES" "${H5ES_HDRS}" "${H5ES_SOURCES}" )
+
 
 
 set (H5F_SOURCES
@@ -380,6 +385,8 @@ IDE_GENERATED_PROPERTIES ("H5HP" "${H5HP_HDRS}" "${H5HP_SOURCES}" )
 
 set (H5I_SOURCES
     ${HDF5_SRC_DIR}/H5I.c
+    ${HDF5_SRC_DIR}/H5Idbg.c
+    ${HDF5_SRC_DIR}/H5Iint.c
     ${HDF5_SRC_DIR}/H5Itest.c
 )
 set (H5I_HDRS
@@ -437,6 +444,7 @@ set (H5MP_SOURCES
 set (H5MP_HDRS
 )
 IDE_GENERATED_PROPERTIES ("H5MP" "${H5MP_HDRS}" "${H5MP_SOURCES}" )
+
 
 set (H5O_SOURCES
     ${HDF5_SRC_DIR}/H5O.c
@@ -638,6 +646,7 @@ set (H5TS_SOURCES
     ${HDF5_SRC_DIR}/H5TS.c
 )
 set (H5TS_HDRS
+    ${HDF5_SRC_DIR}/H5TSpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5TS" "${H5TS_HDRS}" "${H5TS_SOURCES}" )
 
@@ -714,6 +723,7 @@ set (H5Z_HDRS
 IDE_GENERATED_PROPERTIES ("H5Z" "${H5Z_HDRS}" "${H5Z_SOURCES}" )
 
 set (H5_MODULE_HEADERS
+    ${HDF5_SRC_DIR}/H5module.h
     ${HDF5_SRC_DIR}/H5Amodule.h
     ${HDF5_SRC_DIR}/H5ACmodule.h
     ${HDF5_SRC_DIR}/H5Bmodule.h
@@ -723,6 +733,7 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5Dmodule.h
     ${HDF5_SRC_DIR}/H5Emodule.h
     ${HDF5_SRC_DIR}/H5EAmodule.h
+    ${HDF5_SRC_DIR}/H5ESmodule.h
     ${HDF5_SRC_DIR}/H5Fmodule.h
     ${HDF5_SRC_DIR}/H5FAmodule.h
     ${HDF5_SRC_DIR}/H5FDdrvr_module.h
@@ -743,6 +754,7 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5PBmodule.h
     ${HDF5_SRC_DIR}/H5PLmodule.h
     ${HDF5_SRC_DIR}/H5Rmodule.h
+    ${HDF5_SRC_DIR}/H5RSmodule.h
     ${HDF5_SRC_DIR}/H5Smodule.h
     ${HDF5_SRC_DIR}/H5SLmodule.h
     ${HDF5_SRC_DIR}/H5SMmodule.h
@@ -763,6 +775,7 @@ set (common_SRCS
     ${H5D_SOURCES}
     ${H5E_SOURCES}
     ${H5EA_SOURCES}
+    ${H5ES_SOURCES}
     ${H5F_SOURCES}
     ${H5FA_SOURCES}
     ${H5FD_SOURCES}
@@ -832,6 +845,7 @@ set (H5_PUBLIC_HEADERS
     ${H5S_HDRS}
     ${H5SM_HDRS}
     ${H5T_HDRS}
+    ${H5TS_HDRS}
     ${H5VL_HDRS}
     ${H5Z_HDRS}
 )
@@ -870,6 +884,9 @@ set (H5_PRIVATE_HEADERS
 
     ${HDF5_SRC_DIR}/H5EApkg.h
     ${HDF5_SRC_DIR}/H5EAprivate.h
+
+    ${HDF5_SRC_DIR}/H5ESpkg.h
+    ${HDF5_SRC_DIR}/H5ESprivate.h
 
     ${HDF5_SRC_DIR}/H5Fpkg.h
     ${HDF5_SRC_DIR}/H5Fprivate.h
@@ -1119,7 +1136,8 @@ else ()
   )
   if (BUILD_SHARED_LIBS)
     add_custom_command (
-        OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1
+        OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+                   ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
         COMMAND    ${CMAKE_COMMAND}

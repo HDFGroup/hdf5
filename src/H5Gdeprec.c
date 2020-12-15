@@ -222,7 +222,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
                                  H5P_GROUP_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
-    /* Get an atom for the group */
+    /* Get an ID for the group */
     if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
 
@@ -283,7 +283,7 @@ H5Gopen1(hid_t loc_id, const char *name)
                                        H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group")
 
-    /* Get an atom for the group */
+    /* Get an ID for the group */
     if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
 
@@ -724,7 +724,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
+H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf /*out*/)
 {
     H5VL_object_t *   vol_obj; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
@@ -732,7 +732,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
     int               ret_value; /* Return value */
 
     FUNC_ENTER_API(-1)
-    H5TRACE4("Is", "i*sz*s", loc_id, name, bufsize, buf);
+    H5TRACE4("Is", "i*szx", loc_id, name, bufsize, buf);
 
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "no name specified")
@@ -800,7 +800,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *o
     herr_t             ret_value; /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*Isx*x", loc_id, name, idx_p, op, op_data);
+    H5TRACE5("e", "i*s*IsGi*x", loc_id, name, idx_p, op, op_data);
 
     /* Check args */
     if (!name || !*name)
@@ -826,7 +826,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *o
 
     /* Get the object pointer */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
+        HGOTO_ERROR(H5E_ID, H5E_BADTYPE, (-1), "invalid identifier")
 
     /* Call private iteration function, through VOL callback */
     if ((ret_value = H5VL_group_optional(vol_obj, H5VL_NATIVE_GROUP_ITERATE_OLD, H5P_DATASET_XFER_DEFAULT,
@@ -858,7 +858,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs)
+H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs /*out*/)
 {
     H5VL_object_t *   vol_obj; /* Object of loc_id */
     H5I_type_t        id_type; /* Type of ID */
@@ -867,7 +867,7 @@ H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs)
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*h", loc_id, num_objs);
+    H5TRACE2("e", "ix", loc_id, num_objs);
 
     /* Check args */
     id_type = H5I_get_type(loc_id);
@@ -1131,14 +1131,14 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
+H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name /*out*/, size_t size)
 {
     H5VL_object_t *   vol_obj; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     ssize_t           ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("Zs", "ih*sz", loc_id, idx, name, size);
+    H5TRACE4("Zs", "ihxz", loc_id, idx, name, size);
 
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(loc_id) < 0)

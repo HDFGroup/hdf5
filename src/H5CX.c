@@ -213,7 +213,7 @@ typedef struct H5CX_t {
     MPI_Datatype ftype;              /* MPI datatype for file, when using collective I/O */
     hbool_t      mpi_file_flushing;  /* Whether an MPI-opened file is being flushed */
     hbool_t      rank0_bcast;        /* Whether a dataset meets read-with-rank0-and-bcast requirements */
-#endif                               /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
     /* Cached DXPL properties */
     size_t    max_temp_buf;            /* Maximum temporary buffer size */
@@ -241,8 +241,8 @@ typedef struct H5CX_t {
     hbool_t  mpio_chunk_opt_num_valid;   /* Whether collective chunk threshold is valid */
     unsigned mpio_chunk_opt_ratio;       /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
     hbool_t  mpio_chunk_opt_ratio_valid; /* Whether collective chunk ratio is valid */
-#endif                                   /* H5_HAVE_PARALLEL */
-    H5Z_EDC_t             err_detect;    /* Error detection info (H5D_XFER_EDC_NAME) */
+#endif /* H5_HAVE_PARALLEL */
+    H5Z_EDC_t             err_detect;           /* Error detection info (H5D_XFER_EDC_NAME) */
     hbool_t               err_detect_valid;     /* Whether error detection info is valid */
     H5Z_cb_t              filter_cb;            /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
     hbool_t               filter_cb_valid;      /* Whether filter callback function is valid */
@@ -298,8 +298,8 @@ typedef struct H5CX_t {
                                                      (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
     hbool_t
         mpio_coll_rank0_bcast_set; /* Whether instrumented "collective chunk multi ratio ind" value is set */
-#endif                             /* H5_HAVE_INSTRUMENTED_LIBRARY */
-#endif                             /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+#endif /* H5_HAVE_PARALLEL */
 
     /* Cached LCPL properties */
     H5T_cset_t encoding;                 /* Link name character encoding */
@@ -370,10 +370,10 @@ typedef struct H5CX_dxpl_cache_t {
     uint32_t mpio_global_no_coll_cause;       /* Global reason for breaking collective I/O
                                                  (H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME) */
     H5FD_mpio_chunk_opt_t
-             mpio_chunk_opt_mode;         /* Collective chunk option (H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME) */
-    unsigned mpio_chunk_opt_num;          /* Collective chunk thrreshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
-    unsigned mpio_chunk_opt_ratio;        /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
-#endif                                    /* H5_HAVE_PARALLEL */
+             mpio_chunk_opt_mode;  /* Collective chunk option (H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME) */
+    unsigned mpio_chunk_opt_num;   /* Collective chunk thrreshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
+    unsigned mpio_chunk_opt_ratio; /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
+#endif /* H5_HAVE_PARALLEL */
     H5Z_EDC_t             err_detect;     /* Error detection info (H5D_XFER_EDC_NAME) */
     H5Z_cb_t              filter_cb;      /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
     H5Z_data_xform_t *    data_transform; /* Data transform info (H5D_XFER_XFORM_NAME) */
@@ -422,7 +422,7 @@ typedef struct H5CX_fapl_cache_t {
 static H5CX_node_t **H5CX__get_context(void);
 #endif /* H5_HAVE_THREADSAFE */
 static void         H5CX__push_common(H5CX_node_t *cnode);
-static H5CX_node_t *H5CX__pop_common(void);
+static H5CX_node_t *H5CX__pop_common(hbool_t update_dxpl_props);
 
 /*********************/
 /* Package Variables */
@@ -437,7 +437,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 
 #ifndef H5_HAVE_THREADSAFE
 static H5CX_node_t *H5CX_head_g = NULL; /* Pointer to head of context stack */
-#endif                                  /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE */
 
 /* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
 static H5CX_dxpl_cache_t H5CX_def_dxpl_cache;
@@ -678,7 +678,7 @@ H5CX_term_package(void)
 
         /* Pop the top context node from the stack */
         /* (Can't check for errors, as rest of library is shut down) */
-        cnode = H5CX__pop_common();
+        cnode = H5CX__pop_common(FALSE);
 
         /* Free the context node */
         /* (Allocated with HDmalloc() in H5CX_push_special() ) */
@@ -932,9 +932,11 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
 
     /* Keep a reference to the current VOL wrapping context */
     (*api_state)->vol_wrap_ctx = (*head)->ctx.vol_wrap_ctx;
-    if (NULL != (*api_state)->vol_wrap_ctx)
+    if (NULL != (*api_state)->vol_wrap_ctx) {
+        HDassert((*head)->ctx.vol_wrap_ctx_valid);
         if (H5VL_inc_vol_wrapper((*api_state)->vol_wrap_ctx) < 0)
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "can't increment refcount on VOL wrapping context")
+    } /* end if */
 
     /* Keep a copy of the VOL connector property, if there is one */
     if ((*head)->ctx.vol_connector_prop_valid && (*head)->ctx.vol_connector_prop.connector_id > 0) {
@@ -1023,6 +1025,8 @@ H5CX_restore_state(const H5CX_state_t *api_state)
 
     /* Restore the VOL wrapper context */
     (*head)->ctx.vol_wrap_ctx = api_state->vol_wrap_ctx;
+    if (NULL != (*head)->ctx.vol_wrap_ctx)
+        (*head)->ctx.vol_wrap_ctx_valid = TRUE;
 
     /* Restore the VOL connector info */
     if (api_state->vol_connector_prop.connector_id) {
@@ -1367,7 +1371,7 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
 
             /* Get the plist structure for the access property list */
             if (NULL == (plist = (H5P_genplist_t *)H5I_object(*acspl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADATOM, FAIL, "can't find object for ID")
+                HGOTO_ERROR(H5E_CONTEXT, H5E_BADID, FAIL, "can't find object for ID")
 
             /* Get the collective metadata read flag */
             if (H5P_peek(plist, H5_COLL_MD_READ_FLAG_NAME, &md_coll_read) < 0)
@@ -1377,8 +1381,8 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
             if (H5P_USER_TRUE == md_coll_read)
                 is_collective = TRUE;
         } /* end if */
-#endif    /* H5_HAVE_PARALLEL */
-    }     /* end else */
+#endif /* H5_HAVE_PARALLEL */
+    } /* end else */
 
 #ifdef H5_HAVE_PARALLEL
     /* Check for collective operation */
@@ -1404,7 +1408,7 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
                 MPI_Barrier(mpi_comm);
         } /* end if */
     }     /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1465,7 +1469,7 @@ H5CX_set_loc(hid_t
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-#else  /* H5_HAVE_PARALLEL */
+#else /* H5_HAVE_PARALLEL */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -3559,7 +3563,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5CX_node_t *
-H5CX__pop_common(void)
+H5CX__pop_common(hbool_t update_dxpl_props)
 {
     H5CX_node_t **head =
         H5CX_get_my_context();     /* Get the pointer to the head of the API context, for this thread */
@@ -3575,21 +3579,23 @@ H5CX__pop_common(void)
     HDassert(head && *head);
 
     /* Check for cached DXPL properties to return to application */
+    if (update_dxpl_props) {
 #ifdef H5_HAVE_PARALLEL
-    H5CX_SET_PROP(H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, mpio_actual_chunk_opt)
-    H5CX_SET_PROP(H5D_MPIO_ACTUAL_IO_MODE_NAME, mpio_actual_io_mode)
-    H5CX_SET_PROP(H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, mpio_local_no_coll_cause)
-    H5CX_SET_PROP(H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, mpio_global_no_coll_cause)
+        H5CX_SET_PROP(H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, mpio_actual_chunk_opt)
+        H5CX_SET_PROP(H5D_MPIO_ACTUAL_IO_MODE_NAME, mpio_actual_io_mode)
+        H5CX_SET_PROP(H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, mpio_local_no_coll_cause)
+        H5CX_SET_PROP(H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, mpio_global_no_coll_cause)
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, mpio_coll_chunk_link_hard)
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, mpio_coll_chunk_multi_hard)
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, mpio_coll_chunk_link_num_true)
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, mpio_coll_chunk_link_num_false)
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, mpio_coll_chunk_multi_ratio_coll)
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, mpio_coll_chunk_multi_ratio_ind)
-    H5CX_SET_PROP(H5D_XFER_COLL_RANK0_BCAST_NAME, mpio_coll_rank0_bcast)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, mpio_coll_chunk_link_hard)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, mpio_coll_chunk_multi_hard)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, mpio_coll_chunk_link_num_true)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, mpio_coll_chunk_link_num_false)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, mpio_coll_chunk_multi_ratio_coll)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, mpio_coll_chunk_multi_ratio_ind)
+        H5CX_SET_PROP(H5D_XFER_COLL_RANK0_BCAST_NAME, mpio_coll_rank0_bcast)
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
+    } /* end if */
 
     /* Pop the top context node from the stack */
     ret_value = (*head);
@@ -3614,7 +3620,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5CX_pop(void)
+H5CX_pop(hbool_t update_dxpl_props)
 {
     H5CX_node_t *cnode;               /* Context node */
     herr_t       ret_value = SUCCEED; /* Return value */
@@ -3622,7 +3628,7 @@ H5CX_pop(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Perform common operations and get top context from stack */
-    if (NULL == (cnode = H5CX__pop_common()))
+    if (NULL == (cnode = H5CX__pop_common(update_dxpl_props)))
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error getting API context node")
 
     /* Free the context node */

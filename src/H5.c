@@ -14,6 +14,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#include "H5module.h" /* This source code file is part of the H5 module */
 
 /***********/
 /* Headers */
@@ -43,6 +44,13 @@
 /* Package Typedefs */
 /********************/
 
+/* Node for list of 'atclose' routines to invoke at library shutdown */
+typedef struct H5_atclose_node_t {
+    H5_atclose_func_t         func; /* Function to invoke */
+    void *                    ctx;  /* Context to pass to function */
+    struct H5_atclose_node_t *next; /* Pointer to next node in list */
+} H5_atclose_node_t;
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -54,6 +62,9 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -84,6 +95,39 @@ H5_debug_t     H5_debug_g; /* debugging info */
 /* Local Variables */
 /*******************/
 
+/* Linked list of registered 'atclose' functions to invoke at library shutdown */
+static H5_atclose_node_t *H5_atclose_head = NULL;
+
+/* Declare a free list to manage the H5_atclose_node_t struct */
+H5FL_DEFINE_STATIC(H5_atclose_node_t);
+
+/*--------------------------------------------------------------------------
+NAME
+    H5__init_package -- Initialize interface-specific information
+USAGE
+    herr_t H5__init_package()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+--------------------------------------------------------------------------*/
+herr_t
+H5__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Run the library initialization routine, if it hasn't already ran */
+    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {
+        if (H5_init_library() < 0)
+            HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "unable to initialize library")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5__init_package() */
+
 /*--------------------------------------------------------------------------
  * NAME
  *   H5_init_library -- Initialize library-global information
@@ -102,6 +146,11 @@ herr_t
 H5_init_library(void)
 {
     herr_t ret_value = SUCCEED;
+
+    /* Set the 'library initialized' flag as early as possible, to avoid
+     * possible re-entrancy.
+     */
+    H5_INIT_GLOBAL = TRUE;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -205,6 +254,8 @@ H5_init_library(void)
      *   It might not be initialized during normal file open.
      *   When the application does not close the file, routines in the module might
      *   be called via H5_term_library() when shutting down the file.
+     * The dataspace interface needs to be initialized so that future IDs for
+     *   dataspaces work.
      */
     if (H5E_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
@@ -218,6 +269,8 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface")
     if (H5FS_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize FS interface")
+    if (H5S_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataspace interface")
 
     /* Finish initializing interfaces that depend on the interfaces above */
     if (H5VL_init_phase2() < 0)
@@ -269,6 +322,28 @@ H5_term_library(void)
     /* Check if we should display error output */
     (void)H5Eget_auto2(H5E_DEFAULT, &func, NULL);
 
+    /* Iterate over the list of 'atclose' callbacks that have been registered */
+    if (H5_atclose_head) {
+        H5_atclose_node_t *curr_atclose; /* Current 'atclose' node */
+
+        /* Iterate over all 'atclose' nodes, making callbacks */
+        curr_atclose = H5_atclose_head;
+        while (curr_atclose) {
+            H5_atclose_node_t *tmp_atclose; /* Temporary pointer to 'atclose' node */
+
+            /* Invoke callback, providing context */
+            (*curr_atclose->func)(curr_atclose->ctx);
+
+            /* Advance to next node and free this one */
+            tmp_atclose  = curr_atclose;
+            curr_atclose = curr_atclose->next;
+            H5FL_FREE(H5_atclose_node_t, tmp_atclose);
+        } /* end while */
+
+        /* Reset list head, in case library is re-initialized */
+        H5_atclose_head = NULL;
+    } /* end if */
+
     /*
      * Terminate each interface. The termination functions return a positive
      * value if they do something that might affect some other interface in a
@@ -286,21 +361,31 @@ H5_term_library(void)
         /* Try to organize these so the "higher" level components get shut
          * down before "lower" level components that they might rely on. -QAK
          */
-        pending += DOWN(L);
 
-        /* Close the "top" of various interfaces (IDs, etc) but don't shut
-         *  down the whole interface yet, so that the object header messages
-         *  get serialized correctly for entries in the metadata cache and the
-         *  symbol table entry in the superblock gets serialized correctly, etc.
-         *  all of which is performed in the 'F' shutdown.
+        /* Close the event sets first, so that all asynchronous operations
+         *  complete before anything else attempts to shut down.
          */
-        pending += DOWN(A_top);
-        pending += DOWN(D_top);
-        pending += DOWN(G_top);
-        pending += DOWN(M_top);
-        pending += DOWN(R_top);
-        pending += DOWN(S_top);
-        pending += DOWN(T_top);
+        pending += DOWN(ES);
+
+        /* Close down the user-facing interfaces, after the event sets */
+        if (pending == 0) {
+            /* Close the interfaces dependent on others */
+            pending += DOWN(L);
+
+            /* Close the "top" of various interfaces (IDs, etc) but don't shut
+             *  down the whole interface yet, so that the object header messages
+             *  get serialized correctly for entries in the metadata cache and the
+             *  symbol table entry in the superblock gets serialized correctly, etc.
+             *  all of which is performed in the 'F' shutdown.
+             */
+            pending += DOWN(A_top);
+            pending += DOWN(D_top);
+            pending += DOWN(G_top);
+            pending += DOWN(M_top);
+            pending += DOWN(R_top);
+            pending += DOWN(S_top);
+            pending += DOWN(T_top);
+        } /* end if */
 
         /* Don't shut down the file code until objects in files are shut down */
         if (pending == 0)
@@ -336,6 +421,7 @@ H5_term_library(void)
          */
         if (pending == 0) {
             pending += DOWN(AC);
+            /* Shut down the "pluggable" interfaces, before the plugin framework */
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(VL);
@@ -367,7 +453,7 @@ H5_term_library(void)
             HDfprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
             HDabort();
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end if */
     }     /* end if */
 
@@ -560,12 +646,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, size_t *fac_size)
+H5get_free_list_sizes(size_t *reg_size /*out*/, size_t *arr_size /*out*/, size_t *blk_size /*out*/,
+                      size_t *fac_size /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*z*z*z*z", reg_size, arr_size, blk_size, fac_size);
+    H5TRACE4("e", "xxxx", reg_size, arr_size, blk_size, fac_size);
 
     /* Call the free list function to actually get the sizes */
     if (H5FL_get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) < 0)
@@ -600,12 +687,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_alloc_stats(H5_alloc_stats_t *stats)
+H5get_alloc_stats(H5_alloc_stats_t *stats /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*x", stats);
+    H5TRACE1("e", "x", stats);
 
     /* Call the internal allocation stat routine to get the values */
     if (H5MM_get_alloc_stats(stats) < 0)
@@ -763,12 +850,12 @@ H5__mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void 
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
+H5get_libversion(unsigned *majnum /*out*/, unsigned *minnum /*out*/, unsigned *relnum /*out*/)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Iu*Iu*Iu", majnum, minnum, relnum);
+    H5TRACE3("e", "xxx", majnum, minnum, relnum);
 
     /* Set the version information */
     if (majnum)
@@ -933,6 +1020,45 @@ done:
 } /* end H5open() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5atclose
+ *
+ * Purpose:	Register a callback for the library to invoke when it's
+ *		closing.  Callbacks are invoked in LIFO order.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5atclose(H5_atclose_func_t func, void *ctx)
+{
+    H5_atclose_node_t *new_atclose;         /* New 'atclose' node */
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "Hc*x", func, ctx);
+
+    /* Check arguments */
+    if (NULL == func)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL func pointer")
+
+    /* Allocate space for the 'atclose' node */
+    if (NULL == (new_atclose = H5FL_MALLOC(H5_atclose_node_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate 'atclose' node")
+
+    /* Set up 'atclose' node */
+    new_atclose->func = func;
+    new_atclose->ctx  = ctx;
+
+    /* Connector to linked-list of 'atclose' nodes */
+    new_atclose->next = H5_atclose_head;
+    H5_atclose_head   = new_atclose;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5atclose() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5close
  *
  * Purpose:	Terminate the library and release all resources.
@@ -1069,22 +1195,57 @@ H5free_memory(void *mem)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5is_library_threadsafe(hbool_t *is_ts)
+H5is_library_threadsafe(hbool_t *is_ts /*out*/)
 {
+    herr_t ret_value = SUCCEED; /* Return value */
+
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*b", is_ts);
+    H5TRACE1("e", "x", is_ts);
 
-    HDassert(is_ts);
-
-    /* At this time, it is impossible for this to fail. */
+    if (is_ts) {
 #ifdef H5_HAVE_THREADSAFE
-    *is_ts = TRUE;
-#else  /* H5_HAVE_THREADSAFE */
-    *is_ts = FALSE;
+        *is_ts = TRUE;
+#else /* H5_HAVE_THREADSAFE */
+        *is_ts = FALSE;
 #endif /* H5_HAVE_THREADSAFE */
+    }
+    else
+        ret_value = FAIL;
 
-    FUNC_LEAVE_API_NOINIT(SUCCEED)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5is_library_threadsafe() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5is_library_terminating
+ *
+ * Purpose:	Checks to see if the library is shutting down.
+ *
+ * Note:	Useful for plugins to detect when the library is terminating.
+ *		For example, a VOL connector could check if a "file close"
+ *		callback was the result of the library shutdown process, or
+ *		an API action from the application.
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5is_library_terminating(hbool_t *is_terminating /*out*/)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE1("e", "x", is_terminating);
+
+    HDassert(is_terminating);
+
+    if (is_terminating)
+        *is_terminating = H5_TERM_GLOBAL;
+    else
+        ret_value = FAIL;
+
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5is_library_terminating() */
 
 #if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API) &&         \
     defined(H5_HAVE_WIN_THREADS)

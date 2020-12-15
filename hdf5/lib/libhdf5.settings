@@ -1,0 +1,81 @@
+	    SUMMARY OF THE HDF5 CONFIGURATION
+	    =================================
+
+General Information:
+-------------------
+                   HDF5 Version: 1.13.0
+                  Configured on: Tue Dec 15 10:36:18 CST 2020
+                  Configured by: bljones@jelly
+                    Host system: x86_64-unknown-linux-gnu
+              Uname information: Linux jelly 3.10.0-327.18.2.el7.x86_64 #1 SMP Thu May 12 11:03:55 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
+                       Byte sex: little-endian
+             Installation point: /mnt/ftp/pub/outgoing/bljones/doxygen/myclean/hdf5
+
+Compiling Options:
+------------------
+                     Build Mode: debug
+              Debugging Symbols: yes
+                        Asserts: yes
+                      Profiling: no
+             Optimization Level: debug
+
+Linking Options:
+----------------
+                      Libraries: static, shared
+  Statically Linked Executables: 
+                        LDFLAGS: 
+                     H5_LDFLAGS: 
+                     AM_LDFLAGS: 
+                Extra libraries: -lz -ldl -lm 
+                       Archiver: ar
+                       AR_FLAGS: cr
+                         Ranlib: ranlib
+
+Languages:
+----------
+                              C: yes
+                     C Compiler: /usr/bin/gcc ( gcc (GCC) 4.8.5 20150623 )
+                       CPPFLAGS: 
+                    H5_CPPFLAGS: -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L   -UNDEBUG -DH5AC_DEBUG -DH5B2_DEBUG -DH5CX_DEBUG -DH5D_DEBUG -DH5F_DEBUG -DH5HL_DEBUG -DH5I_DEBUG -DH5O_DEBUG -DH5S_DEBUG -DH5ST_DEBUG -DH5T_DEBUG -DH5Z_DEBUG -DH5_DEBUG_API
+                    AM_CPPFLAGS: 
+                        C Flags: 
+                     H5 C Flags:  -std=c99  -Wall -Wcast-qual -Wconversion -Wextra -Wfloat-equal -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-include-dirs -Wno-c++-compat -Wno-format-nonliteral -Wshadow -Wundef -Wwrite-strings -pedantic -Wvla -Wlarger-than=2560 -Wlogical-op -Wframe-larger-than=16384 -Wpacked-bitfield-compat -Wsync-nand -Wstrict-overflow=5 -Wno-unsuffixed-float-constants -Wdouble-promotion -Wtrampolines -Wstack-usage=8192 -Wmaybe-uninitialized  -g -fno-omit-frame-pointer -Wno-aggregate-return -Wno-inline -Wno-missing-format-attribute -Wno-missing-noreturn -Wno-overlength-strings -Wno-jump-misses-init -Wno-suggest-attribute=const -Wno-suggest-attribute=noreturn -Wno-suggest-attribute=pure -Wno-suggest-attribute=format  -Wbad-function-cast -Wdeclaration-after-statement -Wimplicit-function-declaration -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-sign -Wpointer-to-int-cast -Wredundant-decls -Wstrict-prototypes -Wswitch -Wunused-function -Wunused-variable -Wunused-parameter -Wcast-align -Wunused-but-set-variable -Wformat 
+                     AM C Flags: 
+               Shared C Library: yes
+               Static C Library: yes
+
+
+                        Fortran: no
+
+                            C++: no
+
+                           Java: no
+
+
+Features:
+---------
+                   Parallel HDF5: no
+Parallel Filtered Dataset Writes: no
+              Large Parallel I/O: no
+              High-level library: yes
+                Build HDF5 Tests: yes
+                Build HDF5 Tools: yes
+                    Threadsafety: no
+             Default API mapping: v114
+  With deprecated public symbols: yes
+          I/O filters (external): deflate(zlib)
+                             MPE: no
+                   Map (H5M) API: no
+                      Direct VFD: no
+                      Mirror VFD: no
+              (Read-Only) S3 VFD: no
+            (Read-Only) HDFS VFD: no
+                         dmalloc: no
+  Packages w/ extra debug output: AC,B2,CX,D,F,HL,I,O,S,ST,T,Z
+                     API tracing: yes
+            Using memory checker: no
+ Memory allocation sanity checks: yes
+          Function stack tracing: no
+                Use file locking: best-effort
+       Strict file format checks: yes
+    Optimization instrumentation: no
