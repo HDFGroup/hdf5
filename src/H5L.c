@@ -697,6 +697,11 @@ done:
  *
  * Purpose:     Asynchronous version of H5Lcreate_hard
  *
+ * Note:        The implementation for this routine is different from other
+ *              _async operations, as the 'api_common' routine needs a "real"
+ *              H5VL_object_t to point at, which is usually provided by the
+ *              loc_id, but isn't here.
+ *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
@@ -706,7 +711,9 @@ H5Lcreate_hard_async(const char *app_file, const char *app_func, unsigned app_li
                      const char *cur_name, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
                      hid_t lapl_id, hid_t es_id)
 {
-    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    H5VL_object_t vol_obj;                      /* Object for loc_id */
+    H5VL_object_t *vol_obj_ptr = &vol_obj;      /* Pointer to object for loc_id */
+    H5VL_object_t **vol_obj_ptr_ptr = &vol_obj_ptr; /* Pointer to object pointer */
     void *         token     = NULL;            /* Request token for async operation        */
     void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
@@ -721,12 +728,12 @@ H5Lcreate_hard_async(const char *app_file, const char *app_func, unsigned app_li
 
     /* Creates a hard link asynchronously */
     if (H5L__create_hard_api_common(cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id, lapl_id, token_ptr,
-                                    &vol_obj) < 0)
+                                    vol_obj_ptr_ptr) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to asynchronously create hard link")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, vol_obj_ptr->connector, token,
                         H5ARG_TRACE10(FUNC, "*s*sIui*si*siii", app_file, app_func, app_line, cur_loc_id,
                                       cur_name, new_loc_id, new_name, lcpl_id, lapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
