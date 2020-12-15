@@ -720,6 +720,17 @@ Bug Fixes since HDF5-1.12.0 release
 
     Java Library:
     ----------------
+    - The H5FArray.java class, in which virtually the entire execution time
+        is spent using the HDFNativeData method that converts from an array
+        of bytes to an array of the destination Java type.
+
+        1. Convert the entire byte array into a 1-d array of the desired type,
+           rather than performing 1 conversion per row;
+        2. Use the Java Arrays method copyOfRange to grab the section of the
+           array from (1) that is desired to be inserted into the destination array.
+
+        (PGT,ADB - 2020/12/13, HDFFV-10865)
+
     - Added ability to test java library with VOLs.
 
         Created new CMake script that combines the java and vol test scripts.
