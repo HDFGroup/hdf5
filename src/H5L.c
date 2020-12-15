@@ -717,7 +717,6 @@ H5Lcreate_hard_async(const char *app_file, const char *app_func, unsigned app_li
 {
     H5VL_object_t vol_obj;                      /* Object for loc_id */
     H5VL_object_t *vol_obj_ptr = &vol_obj;      /* Pointer to object for loc_id */
-    H5VL_object_t **vol_obj_ptr_ptr = &vol_obj_ptr; /* Pointer to object pointer */
     void *         token     = NULL;            /* Request token for async operation        */
     void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
@@ -732,7 +731,7 @@ H5Lcreate_hard_async(const char *app_file, const char *app_func, unsigned app_li
 
     /* Creates a hard link asynchronously */
     if (H5L__create_hard_api_common(cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id, lapl_id, token_ptr,
-                                    vol_obj_ptr_ptr) < 0)
+                                    &vol_obj_ptr) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to asynchronously create hard link")
 
     /* If a token was created, add the token to the event set */
