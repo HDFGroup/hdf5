@@ -690,7 +690,7 @@ done:
 static hid_t
 H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void **token_ptr)
 {
-    H5F_t *               new_file = NULL;             /* File struct for new file                 */
+    void *                new_file = NULL;             /* File struct for new file                 */
     H5P_genplist_t *      plist;                       /* Property list pointer                    */
     H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
     hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
@@ -730,8 +730,8 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void *
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context")
 
     /* Open the file through the VOL layer */
-    if (NULL == (new_file = (H5F_t *)H5VL_file_open(&connector_prop, filename, flags, fapl_id,
-                                                    H5P_DATASET_XFER_DEFAULT, token_ptr)))
+    if (NULL == (new_file = H5VL_file_open(&connector_prop, filename, flags, fapl_id,
+                                           H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* Get an ID for the file */
