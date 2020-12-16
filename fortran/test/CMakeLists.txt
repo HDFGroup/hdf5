@@ -57,7 +57,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT BUILD_SHARED_LIBS)
+  if (NOT ONLY_SHARED_LIBS)
     clang_format (HDF5_FORTRAN_TESTS_FORMAT ${HDF5_F90_C_TEST_LIB_TARGET})
   else ()
     clang_format (HDF5_FORTRAN_TESTS_FORMAT ${HDF5_F90_C_TEST_LIBSH_TARGET})
