@@ -78,10 +78,15 @@ SERVER_ARGS="$SERVER_PORT $SERVER_VERBOSITY"
 ./mirror_server $SERVER_ARGS &
 
 ./mirror_vfd
-nerrors=$?
+if [ $? != 0 ]; then
+    nerrors=`expr $nerrors + 1`
+fi
 
 echo "Stopping Mirror Server"
 ./mirror_server_stop $SERVER_PORT
+if [ $? != 0 ]; then
+    nerrors=`expr $nerrors + 1`
+fi
 
 ###############################################################################
 ## Report and exit

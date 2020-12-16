@@ -159,7 +159,6 @@ until [ $verification_done -eq 1 ]; do
 
     # Check for core dump
     if [ $? -gt 0 ]; then
-        echo flushrefresh had error
         nerrors=`expr $nerrors + 1`
     fi
 
@@ -205,7 +204,6 @@ if [ $timedout -eq 0 ]; then
 
       # Check for core dump
       if [ $? -gt 0 ]; then
-          echo flushrefresh had error
           nerrors=`expr $nerrors + 1`
       fi
 
