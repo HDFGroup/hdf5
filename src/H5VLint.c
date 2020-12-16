@@ -1239,6 +1239,27 @@ H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_
 
     FUNC_ENTER_PACKAGE
 
+    /* Check arguments */
+    if (!cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
+                    "VOL connector class pointer cannot be NULL")
+    if (H5VL_VERSION != cls->version)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL connector has incompatible version")
+    if (!cls->name)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+                    "VOL connector class name cannot be the NULL pointer")
+    if (0 == HDstrlen(cls->name))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+                    "VOL connector class name cannot be the empty string")
+    if (cls->info_cls.copy && !cls->info_cls.free)
+        HGOTO_ERROR(
+            H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+            "VOL connector must provide free callback for VOL info objects when a copy callback is provided")
+    if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+                    "VOL connector must provide free callback for object wrapping contexts when a get "
+                    "callback is provided")
+
     /* Set up op data for iteration */
     op_data.kind     = H5VL_GET_CONNECTOR_BY_NAME;
     op_data.u.name   = cls->name;
@@ -2478,6 +2499,33 @@ H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_check_plugin_load() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__is_default_conn
+ *
+ * Purpose:     Check if the default connector will be used for a container.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL__is_default_conn(hid_t fapl_id, hid_t connector_id, hbool_t *is_default)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(is_default);
+
+    /* Determine if the default VOL connector will be used, based on non-default
+     * values in the FAPL, connector ID, or the HDF5_VOL_CONNECTOR environment
+     * variable being set.
+     */
+    *is_default = (H5VL_def_conn_s.connector_id == H5_DEFAULT_VOL)
+        && ((H5P_FILE_ACCESS_DEFAULT == fapl_id) || connector_id == H5_DEFAULT_VOL);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL__is_default_conn() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_setup_args

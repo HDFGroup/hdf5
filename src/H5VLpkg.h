@@ -59,6 +59,7 @@ H5_DLL hid_t   H5VL__peek_connector_id_by_name(const char *name);
 H5_DLL hid_t   H5VL__peek_connector_id_by_value(H5VL_class_value_t value);
 H5_DLL herr_t  H5VL__connector_str_to_info(const char *str, hid_t connector_id, void **info);
 H5_DLL ssize_t H5VL__get_connector_name(hid_t id, char *name /*out*/, size_t size);
+H5_DLL void    H5VL__is_default_conn(hid_t fapl_id, hid_t connector_id, hbool_t *is_default);
 H5_DLL herr_t  H5VL__register_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val);
 H5_DLL size_t  H5VL__num_opt_operation(void);
 H5_DLL herr_t  H5VL__find_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val);
