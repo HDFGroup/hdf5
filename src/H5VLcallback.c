@@ -1874,7 +1874,8 @@ H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVsii", app_file, app_func, app_line, attr_id, opt_type, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVsii", app_file, app_func, app_line, attr_id, opt_type,
+                                     dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -2882,7 +2883,8 @@ H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVtii", app_file, app_func, app_line, dset_id, opt_type, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVtii", app_file, app_func, app_line, dset_id, opt_type,
+                                     dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -3759,7 +3761,8 @@ H5VLdatatype_optional_op(const char *app_file, const char *app_func, unsigned ap
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVuii", app_file, app_func, app_line, type_id, opt_type, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVuii", app_file, app_func, app_line, type_id, opt_type,
+                                     dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -4135,7 +4138,7 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
 
         if (is_default_conn) {
             H5VL_file_open_find_connector_t find_connector_ud;
-            herr_t iter_ret;
+            herr_t                          iter_ret;
 
             find_connector_ud.connector_prop = connector_prop;
             find_connector_ud.filename       = name;
@@ -4158,8 +4161,9 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
 
                 if (NULL == (ret_value = H5VL__file_open(find_connector_ud.cls, name, flags,
                                                          find_connector_ud.fapl_id, dxpl_id, req)))
-                    HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "can't open file '%s' with VOL connector '%s'",
-                                name, find_connector_ud.cls->name)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL,
+                                "can't open file '%s' with VOL connector '%s'", name,
+                                find_connector_ud.cls->name)
             }
             else
                 HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
@@ -4738,7 +4742,8 @@ H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVvii", app_file, app_func, app_line, file_id, opt_type, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVvii", app_file, app_func, app_line, file_id, opt_type,
+                                     dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -5550,7 +5555,8 @@ H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_l
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVwii", app_file, app_func, app_line, group_id, opt_type, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVwii", app_file, app_func, app_line, group_id, opt_type,
+                                     dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:

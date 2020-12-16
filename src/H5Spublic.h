@@ -168,9 +168,8 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  * \since 1.12.0
  *
  */
-H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
-    const hsize_t start[], const hsize_t stride[], const hsize_t count[],
-    const hsize_t block[]);
+H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
+                                  const hsize_t stride[], const hsize_t count[], const hsize_t block[]);
 /**
  * \ingroup H5S
  *
@@ -191,7 +190,7 @@ H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
  *
  * \since 1.12.0
  *
-*/
+ */
 H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id);
 /**
  * \ingroup H5S
@@ -243,7 +242,7 @@ H5_DLL hid_t H5Scopy(hid_t space_id);
  * \since 1.0.0
  *
  */
-H5_DLL hid_t       H5Screate(H5S_class_t type);
+H5_DLL hid_t H5Screate(H5S_class_t type);
 /**
  * \ingroup H5S
  * \brief Creates a new simple dataspace and opens it for access
@@ -392,7 +391,7 @@ H5_DLL herr_t H5Sencode2(hid_t obj_id, void *buf, size_t *nalloc, hid_t fapl);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Sextent_copy(hid_t dst_id,hid_t src_id);
+H5_DLL herr_t H5Sextent_copy(hid_t dst_id, hid_t src_id);
 /**
  * \ingroup H5S
  *
@@ -444,8 +443,8 @@ H5_DLL htri_t H5Sextent_equal(hid_t space1_id, hid_t space2_id);
  * \since 1.10.0
  *
  */
-H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[],
-    hsize_t stride[], hsize_t count[], hsize_t block[]);
+H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[], hsize_t count[],
+                                       hsize_t block[]);
 /**
  * \ingroup H5S
  *
@@ -481,8 +480,7 @@ H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[],
  * \since 1.2.0
  *
  */
-H5_DLL herr_t H5Sget_select_bounds(hid_t spaceid, hsize_t start[],
-    hsize_t end[]);
+H5_DLL herr_t H5Sget_select_bounds(hid_t spaceid, hsize_t start[], hsize_t end[]);
 /**
  * \ingroup H5S
  *
@@ -541,8 +539,8 @@ H5_DLL hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
  * \since 1.2.0
  *
  */
-H5_DLL herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
-    hsize_t numpoints, hsize_t buf[/*numpoints*/]);
+H5_DLL herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoints,
+                                           hsize_t buf[/*numpoints*/]);
 /**
  * \ingroup H5S
  *
@@ -574,8 +572,8 @@ H5_DLL herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
  * \since 1.2.0
  *
  */
-H5_DLL herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
-    hsize_t numblocks, hsize_t buf[/*numblocks*/]);
+H5_DLL herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks,
+                                            hsize_t buf[/*numblocks*/]);
 /**
  * \ingroup H5S
  *
@@ -678,8 +676,7 @@ H5_DLL H5S_sel_type H5Sget_select_type(hid_t spaceid);
  * \since 1.0.0
  *
  */
-H5_DLL int H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[],
-   hsize_t maxdims[]);
+H5_DLL int H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[], hsize_t maxdims[]);
 /**
  * \ingroup H5S
  *
@@ -796,7 +793,7 @@ H5_DLL htri_t H5Sis_simple(hid_t space_id);
  *
  * \since 1.12.0
  *
-*/
+ */
 H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id);
 /**
  * \ingroup H5S
@@ -902,8 +899,8 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  * \since 1.12.0
  *
  */
-H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq,
-    size_t maxbytes, size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
+H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes, size_t *nseq,
+                                       size_t *nbytes, hsize_t *off, size_t *len);
 /**
  * \ingroup H5S
  *
@@ -1078,8 +1075,7 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
-    size_t num_elem, const hsize_t *coord);
+H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_elem, const hsize_t *coord);
 /**
  * \ingroup H5S
  *
@@ -1185,9 +1181,8 @@ H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
-    const hsize_t start[], const hsize_t stride[], const hsize_t count[],
-    const hsize_t block[]);
+H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
+                                  const hsize_t stride[], const hsize_t count[], const hsize_t block[]);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
@@ -1209,8 +1204,7 @@ H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
  * \since 1.12.0
  *
  */
-H5_DLL htri_t H5Sselect_intersect_block(hid_t space_id, const hsize_t *start,
-    const hsize_t *end);
+H5_DLL htri_t H5Sselect_intersect_block(hid_t space_id, const hsize_t *start, const hsize_t *end);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
@@ -1249,8 +1243,8 @@ H5_DLL herr_t H5Sselect_none(hid_t spaceid);
  * \since 1.12.0
  *
  */
-H5_DLL hid_t H5Sselect_project_intersection(hid_t src_space_id,
-    hid_t dst_space_id, hid_t src_intersect_space_id);
+H5_DLL hid_t H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_id,
+                                            hid_t src_intersect_space_id);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
@@ -1342,8 +1336,7 @@ H5_DLL herr_t H5Sset_extent_none(hid_t space_id);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Sset_extent_simple(hid_t space_id, int rank,
-    const hsize_t dims[], const hsize_t max[]);
+H5_DLL herr_t H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[], const hsize_t max[]);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

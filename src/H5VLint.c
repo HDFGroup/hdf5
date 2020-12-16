@@ -2521,8 +2521,8 @@ H5VL__is_default_conn(hid_t fapl_id, hid_t connector_id, hbool_t *is_default)
      * values in the FAPL, connector ID, or the HDF5_VOL_CONNECTOR environment
      * variable being set.
      */
-    *is_default = (H5VL_def_conn_s.connector_id == H5_DEFAULT_VOL)
-        && ((H5P_FILE_ACCESS_DEFAULT == fapl_id) || connector_id == H5_DEFAULT_VOL);
+    *is_default = (H5VL_def_conn_s.connector_id == H5_DEFAULT_VOL) &&
+                  ((H5P_FILE_ACCESS_DEFAULT == fapl_id) || connector_id == H5_DEFAULT_VOL);
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL__is_default_conn() */

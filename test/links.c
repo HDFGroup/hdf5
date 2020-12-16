@@ -631,7 +631,7 @@ cklinks(hid_t fapl, hbool_t new_format)
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
         FAIL_STACK_ERROR
 
-//! [H5Otoken_cmp_snip]
+    //! [H5Otoken_cmp_snip]
 
     /* Hard link */
     if (H5Oget_info_by_name3(file, "d1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
@@ -644,7 +644,7 @@ cklinks(hid_t fapl, hbool_t new_format)
         TEST_ERROR
     } /* end if */
 
-//! [H5Otoken_cmp_snip]
+    //! [H5Otoken_cmp_snip]
 
     if (H5Otoken_cmp(file, &oinfo1.token, &oinfo2.token, &token_cmp) < 0)
         FAIL_STACK_ERROR
@@ -15799,7 +15799,7 @@ obj_visit(hid_t fapl, hbool_t new_format)
     if ((fid = build_visit_file(fapl)) < 0)
         TEST_ERROR
 
-//! [H5Ovisit3_snip]
+    //! [H5Ovisit3_snip]
 
     /* Visit all the objects reachable from the root group (with file ID) */
     udata.idx  = 0;
@@ -15807,7 +15807,7 @@ obj_visit(hid_t fapl, hbool_t new_format)
     if (H5Ovisit3(fid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC) < 0)
         FAIL_STACK_ERROR
 
-//! [H5Ovisit3_snip]
+    //! [H5Ovisit3_snip]
 
     /* Visit all the objects reachable from the root group (with group ID) */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -15880,7 +15880,7 @@ obj_visit_by_name(hid_t fapl, hbool_t new_format)
     if ((fid = build_visit_file(fapl)) < 0)
         TEST_ERROR
 
-//! [H5Ovisit_by_name3_snip]
+    //! [H5Ovisit_by_name3_snip]
 
     /* Visit all the objects reachable from the root group (with file ID) */
     udata.idx  = 0;
@@ -15889,7 +15889,7 @@ obj_visit_by_name(hid_t fapl, hbool_t new_format)
                           H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
-//! [H5Ovisit_by_name3_snip]
+    //! [H5Ovisit_by_name3_snip]
 
     /* Visit all the objects reachable from the root group (with group ID) */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)

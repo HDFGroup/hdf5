@@ -202,7 +202,7 @@ H5Oopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id)) < 0) {
-        /* clang-format on */
+            /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -335,7 +335,7 @@ H5Oopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_li
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE10(FUNC, "*s*sIui*sIiIohii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, lapl_id, es_id)) < 0) {
-        /* clang-format on */
+            /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -594,7 +594,7 @@ H5Ocopy_async(const char *app_file, const char *app_func, unsigned app_line, hid
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE10(FUNC, "*s*sIui*si*siii", app_file, app_func, app_line, src_loc_id, src_name, dst_loc_id, dst_name, ocpypl_id, lcpl_id, es_id)) < 0)
-        /* clang-format on */
+            /* clang-format on */
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -696,7 +696,7 @@ H5Oflush_async(const char *app_file, const char *app_func, unsigned app_line, hi
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, obj_id, es_id)) < 0)
-        /* clang-format on */
+            /* clang-format on */
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -798,7 +798,7 @@ H5Orefresh_async(const char *app_file, const char *app_func, unsigned app_line, 
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, oid, es_id)) < 0)
-        /* clang-format on */
+            /* clang-format on */
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1188,7 +1188,8 @@ H5Oget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE9("e", "*s*sIui*sxIuii", app_file, app_func, app_line, loc_id, name, oinfo, fields, lapl_id, es_id);
+    H5TRACE9("e", "*s*sIui*sxIuii", app_file, app_func, app_line, loc_id, name, oinfo, fields, lapl_id,
+             es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1203,7 +1204,7 @@ H5Oget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE9(FUNC, "*s*sIui*sxIuii", app_file, app_func, app_line, loc_id, name, oinfo, fields, lapl_id, es_id)) < 0)
-        /* clang-format on */
+            /* clang-format on */
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1929,7 +1930,7 @@ H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, object_id, es_id)) < 0)
-        /* clang-format on */
+            /* clang-format on */
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:

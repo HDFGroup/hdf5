@@ -119,7 +119,7 @@ typedef int (*H5ES_event_complete_func_t)(const H5ES_op_info_t *op_info, H5ES_st
 extern "C" {
 #endif
 
-H5_DLL hid_t H5EScreate(void);
+H5_DLL hid_t  H5EScreate(void);
 H5_DLL herr_t H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request);
 H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, hbool_t *err_occurred);
 H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred);
