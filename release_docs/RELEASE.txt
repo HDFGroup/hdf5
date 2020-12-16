@@ -560,6 +560,20 @@ New Features
 
     Tools:
     ------
+    - Added h5delete tool
+
+        Deleting HDF5 storage when using the VOL can be tricky when the VOL
+        does not create files. The h5delete tool is a simple wrapper around
+        the H5Fdelete() API call that uses the VOL specified in the
+        HDF5_VOL_CONNECTOR environment variable to delete a "file". If
+        the call to H5Fdelete() fails, the tool will attempt to use
+        the POSIX remove(3) call call to remove the file.
+
+        Note that the HDF5 library does currently have support for
+        H5Fdelete() in the native VOL connector.
+
+        (DER - 2020/12/16)
+
     - h5repack added options to control how external links are handled.
 
         Currently h5repack preserves external links and cannot copy and merge
