@@ -563,5 +563,3 @@ if (NOT WIN32 AND NOT MINGW)
       COMPONENT fortlibraries
   )
 endif ()
-
-
