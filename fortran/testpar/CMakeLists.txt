@@ -5,7 +5,7 @@ project (HDF5_FORTRAN_TESTPAR C Fortran)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 set (TESTPAR_INCLUDES ${MPI_Fortran_INCLUDE_DIRS} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src))
-if (NOT BUILD_SHARED_LIBS)
+if (NOT ONLY_SHARED_LIBS)
   set (TESTPAR_INCLUDES ${TESTPAR_INCLUDES} ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
 else ()
   set (TESTPAR_INCLUDES ${TESTPAR_INCLUDES} ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
@@ -29,7 +29,7 @@ target_compile_options(parallel_test
         "${HDF5_CMAKE_Fortran_FLAGS}"
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
 )
-if (NOT BUILD_SHARED_LIBS)
+if (NOT ONLY_SHARED_LIBS)
   target_link_libraries (parallel_test
       PRIVATE
           ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_Fortran_LIBS}
