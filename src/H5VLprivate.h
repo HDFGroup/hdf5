@@ -181,7 +181,7 @@ H5_DLL herr_t H5VL_datatype_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, v
 /* File functions */
 H5_DLL void * H5VL_file_create(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
                                hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
-H5_DLL void * H5VL_file_open(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
+H5_DLL void * H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
                              hid_t fapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req,
                             ...);
