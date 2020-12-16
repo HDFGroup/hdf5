@@ -4,32 +4,24 @@ HDF5 version 1.8.22-snap12 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.21 and HDF5 1.10.22, and
-contains information on the platforms tested and known problems in HDF5-1.10.21.
-For more details check the HISTORY*.txt files in the HDF5 source.
+This document describes the differences between this release and the previous
+HDF5 release. It contains information on the platforms tested and known
+problems in this release. For more details check the HISTORY*.txt files in the
+HDF5 source.
 
-Links to the HDF5 1.8.21 source code, documentation, and additional materials
-can be found on the HDF5 web page at:
-
-     https://support.hdfgroup.org/HDF5/
-
-The HDF5 1.8.21 release can be obtained from:
-
-     https://support.hdfgroup.org/HDF5/release/obtain518.html
+Note that documentation in the links below will be updated at the time of each
+final release.
 
 Links to HDF5 documentation can be found on The HDF5 web page:
 
      https://portal.hdfgroup.org/display/HDF5/HDF5
 
-New features in the HDF5-1.8.x release series, including brief general
-descriptions of some new and modified APIs, are described in the "What's New
-in 1.8.0?" document:
+The official HDF5 releases can be obtained from:
 
-     https://www.hdfgroup.org/downloads/hdf5/
+     https://portal.hdfgroup.org/display/support/HDF5+1.8.22
 
-All new and modified APIs are listed in detail in the "HDF5 Software Changes
-from Release to Release" document, in the section "Release 1.8.22 (current
-release) versus Release 1.8.21
+Changes from Release to Release and New Features in the HDF5-1.8.x release series
+can be found at:
 
      https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
 
@@ -555,31 +547,18 @@ Bug Fixes since HDF5-1.8.21
 
 Supported Platforms
 ===================
-The following platforms are supported and have been tested for this release.
-They are built with the configure process unless specified otherwise.
 
-    Linux 2.6.32-573.22.1.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
-    #1 SMP x86_64 GNU/Linux       compilers:
-    (platypus/mayll)              Version 4.4.7 20120313
-                                     Versions 4.9.3, 5.3.0, 6.2.0
-                                  PGI C, Fortran, C++ for 64-bit target on
-                                  x86-64;
-                                      Version 16.10-0
-                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
-                                  compilers:
-                                     Version 17.0.0.196 Build 20160721
-                                  MPICH 3.1.4 compiled with GCC 4.9.3
-                                  OpenMPI 2.0.1 compiled with GCC 4.9.3
+    Linux 3.10.0-1127.10.1.el7    gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+        #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+        (echidna)                     GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
 
-    Linux 2.6.32-573.18.1.el6     gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
-                                  IBM XL C/C++ V13.1
-                                  IBM XL Fortran V15.1
+    Linux 2.6.32-573.18.1.el6     IBM XL C/C++ V13.1
+    #1 SMP ppc64 GNU/Linux        IBM XL Fortran V15.1
+    (ostrich)                     
 
     Linux 3.10.0-327.10.1.el7     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (kituo/moohan/jelly           Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+    (jelly/kituo/moohan)          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
                                      Versions 4.9.3, 5.3.0, 6.2.0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
@@ -587,9 +566,9 @@ They are built with the configure process unless specified otherwise.
                                   MPICH 3.1.4 compiled with GCC 4.9.3
                                   NAG Fortran Compiler Release 6.1(Tozai) Build 6116
 
-    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
-    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
-                                  Sun C++ 5.12 SunOS_sparc
+    SunOS 5.11 11.4.5.12.5.0      Sun C 5.15 SunOS_sparc 2017/05/30
+    32- and 64-bit                Studio 12.6 Fortran 95 8.8 SunOS_sparc 2017/05/30
+    (hedgehog)                    Sun C++ 5.15 SunOS_sparc 2017/05/30
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
@@ -664,9 +643,26 @@ More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
 
-    Linux 2.6.32-573.22.1.el6     g95 (GCC 4.0.3 (g95 0.94!)
-    #1 SMP x86_64 GNU/Linux
-    (mayll)
+    Linux 2.6.32-573.22.1.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (platypus)                    Version 4.4.7 20120313
+                                     Versions 4.9.3, 5.3.0, 6.2.0
+                                  PGI C, Fortran, C++ for 64-bit target on
+                                  x86-64;
+                                      Version 16.10-0
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 17.0.0.196 Build 20160721
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
+                                  OpenMPI 2.0.1 compiled with GCC 4.9.3
+
+    Linux 2.6.32-573.18.1.el6     gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
+
+    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
+    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
+                                  Sun C++ 5.12 SunOS_sparc
 
     Debian8.4.0 3.16.0-4-amd64 #1 SMP Debian 3.16.36-1 x86_64 GNU/Linux
                                   gcc (Debian 4.9.2-10) 4.9.2
