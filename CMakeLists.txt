@@ -844,17 +844,6 @@ endif ()
 #-----------------------------------------------------------------------------
 add_subdirectory (src)
 
-#-----------------------------------------------------------------------------
-# Include filter plugins
-#-----------------------------------------------------------------------------
-include (CMakePlugins.cmake)
-
-if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES)
-  if (HDF5_ENABLE_PLUGIN_SUPPORT AND PLUGIN_FOUND)
-    PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
-  endif ()
-endif ()
-
 if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
     if (NOT ONLY_SHARED_LIBS)
@@ -870,11 +859,6 @@ if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
     endif ()
     if (BUILD_SHARED_LIBS)
       add_dependencies (${HDF5_LIBSH_TARGET} SZIP)
-    endif ()
-  endif ()
-  if (PLUGIN_FOUND AND PLUGIN_USE_EXTERNAL)
-    if (BUILD_SHARED_LIBS)
-      add_dependencies (PLUGIN ${HDF5_LIBSH_TARGET})
     endif ()
   endif ()
 endif ()
@@ -954,6 +938,21 @@ if (BUILD_TESTING)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Include filter plugins
+#-----------------------------------------------------------------------------
+include (CMakePlugins.cmake)
+
+if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES)
+  if (HDF5_ENABLE_PLUGIN_SUPPORT AND PLUGIN_FOUND)
+    PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
+#    option (HDF5_TEST_PLUGIN "Execute plugin tests" ON)
+#    mark_as_advanced (HDF5_TEST_PLUGIN)
+
+#    TEST_PLUGIN_LIBRARY ()
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to build HDF5 Utilities
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/utils" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/utils")
@@ -970,6 +969,21 @@ if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools
   option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
   if (HDF5_BUILD_TOOLS)
     add_subdirectory (tools)
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Include filter plugins
+#-----------------------------------------------------------------------------
+include (CMakePlugins.cmake)
+
+if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES)
+  if (HDF5_ENABLE_PLUGIN_SUPPORT AND PLUGIN_FOUND)
+    PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
+#    option (HDF5_TEST_PLUGIN "Execute plugin tests" ON)
+#    mark_as_advanced (HDF5_TEST_PLUGIN)
+
+#    TEST_PLUGIN_LIBRARY ()
   endif ()
 endif ()
 
