@@ -1333,7 +1333,7 @@ H5T_save_refresh_state(hid_t tid, H5O_shared_t *cached_H5O_shared)
 
     if (NULL == (dt = (H5T_t *)H5I_object_verify(tid, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "tid is not a datatype ID")
-    vol_dt = (H5T_t *)(dt->vol_obj->data);
+    vol_dt = H5T_get_actual_type(dt);
     if (NULL == vol_dt)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "tid is not not a named datatype ID")
 
@@ -1373,7 +1373,7 @@ H5T_restore_refresh_state(hid_t tid, H5O_shared_t *cached_H5O_shared)
 
     if (NULL == (dt = (H5T_t *)H5I_object_verify(tid, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "tid not a datatype ID")
-    vol_dt = (H5T_t *)(dt->vol_obj->data);
+    vol_dt = H5T_get_actual_type(dt);
     if (NULL == vol_dt)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "tid is not not a named datatype ID")
 

@@ -35,8 +35,8 @@ UNENVCMD="unset HDF5_VDS_PREFIX"                # Unset the environment variable
 $ENVCMD $RUNSERIAL $TEST_BIN
 exitcode=$?
 if [ $exitcode -eq 0 ]; then
-        echo "Test prefix for HDF5_VDS_PREFIX PASSED"
-    else
+    echo "Test prefix for HDF5_VDS_PREFIX PASSED"
+else
     nerrors="`expr $nerrors + 1`"
     echo "***Error encountered for HDF5_VDS_PREFIX test***"
 fi
