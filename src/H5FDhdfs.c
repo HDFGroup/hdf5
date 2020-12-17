@@ -1730,6 +1730,7 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
     herr_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
+    H5TRACE2("e", "i*x", fapl_id, fa_out);
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "HDFS VFD not included in the HDF5 library")
 
@@ -1743,6 +1744,7 @@ H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
     herr_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
+    H5TRACE2("e", "i*x", fapl_id, fa);
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "HDFS VFD not included in the HDF5 library")
 
