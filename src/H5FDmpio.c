@@ -1271,7 +1271,11 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
      *          of the data.  (QAK - 2019/1/2)
      */
     if (rank0_bcast)
-        if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_LONG_LONG, 0, file->comm))
+#if MPI_VERSION >= 3
+        if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_COUNT, 0, file->comm))
+#else
+        if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_INT, 0, file->comm))
+#endif
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0)
 
             /* Get the type's size */
