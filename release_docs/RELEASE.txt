@@ -728,6 +728,10 @@ Known Problems
     in the HDF5 source. Please report any new problems found to
     help@hdfgroup.org.
 
+    Various tests in dt_arith, fillval, and dtypes failed with core dump
+    during integer conversion on Sun C 5.15 SunOS_sparc with 64-bit mode.  It
+    appeared that these failures were caused by invalid alignment.
+
 
 CMake vs. Autotools installations
 =================================
