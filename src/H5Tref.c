@@ -589,6 +589,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     H5F_t *         src_f     = NULL;
     hid_t           file_id   = H5I_INVALID_HID;
     H5R_ref_priv_t *dst_ref   = (H5R_ref_priv_t *)dst_buf;
+    H5R_ref_priv_t  tmp_ref;             /* Temporary reference to decode into */
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -599,6 +600,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     HDassert(src_size);
     HDassert(dst_buf);
     HDassert(dst_size == H5T_REF_MEM_SIZE);
+    HDcompile_assert(sizeof(*dst_ref) == sizeof(tmp_ref));
 
     /* Memory-to-memory conversion to support vlen conversion */
     if (NULL == src_file) {
@@ -624,13 +626,13 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL object")
 
     /* Make sure reference buffer is correctly initialized */
-    HDmemset(dst_buf, 0, dst_size);
+    HDmemset(&tmp_ref, 0, sizeof(tmp_ref));
 
     switch (src_type) {
         case H5R_OBJECT1: {
             size_t token_size = H5F_SIZEOF_ADDR(src_f);
 
-            if (H5R__create_object((const H5O_token_t *)src_buf, token_size, dst_ref) < 0)
+            if (H5R__create_object((const H5O_token_t *)src_buf, token_size, &tmp_ref) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create object reference")
         } break;
 
@@ -638,7 +640,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
             const struct H5Tref_dsetreg *src_reg    = (const struct H5Tref_dsetreg *)src_buf;
             size_t                       token_size = H5F_SIZEOF_ADDR(src_f);
 
-            if (H5R__create_region(&src_reg->token, token_size, src_reg->space, dst_ref) < 0)
+            if (H5R__create_region(&src_reg->token, token_size, src_reg->space, &tmp_ref) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create region reference")
 
             /* create_region creates its internal copy of the space */
@@ -655,7 +657,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
         case H5R_OBJECT2:
         case H5R_ATTR:
             /* Decode reference */
-            if (H5R__decode((const unsigned char *)src_buf, &src_size, dst_ref) < 0)
+            if (H5R__decode((const unsigned char *)src_buf, &src_size, &tmp_ref) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Cannot decode reference")
             break;
 
@@ -667,16 +669,19 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     } /* end switch */
 
     /* If no filename set, this is not an external reference */
-    if (NULL == H5R_REF_FILENAME(dst_ref)) {
+    if (NULL == H5R_REF_FILENAME(&tmp_ref)) {
         /* TODO temporary hack to retrieve file object */
         if ((file_id = H5F_get_file_id(src_file, H5I_FILE, FALSE)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
         /* Attach loc ID to reference and hold reference to it, this is a
          * user exposed reference so set app_ref to TRUE. */
-        if (H5R__set_loc_id(dst_ref, file_id, TRUE, TRUE) < 0)
+        if (H5R__set_loc_id(&tmp_ref, file_id, TRUE, TRUE) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "unable to attach location id to reference")
     } /* end if */
+
+    /* Set output info */
+    HDmemcpy(dst_ref, &tmp_ref, sizeof(tmp_ref));
 
 done:
     if ((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))
