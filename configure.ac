@@ -75,7 +75,13 @@ AM_SILENT_RULES([yes])
 ##
 ## By default, maintainer mode is enabled in development branches and disabled
 ## in release branches.
-AM_MAINTAINER_MODE([enable])
+##
+## NOTE: In 1.8, we have maintainer mode turned OFF at all times. This is
+##       because we have the generated files committed in this branch.
+##       The lack of consistent timestamps from git and bin/reconfigure's
+##       demand for ancient and particular versions of the autotools makes
+##       maintainer mode unusable in 1.8.x.
+AM_MAINTAINER_MODE([disable])
 
 ## ----------------------------------------------------------------------
 ## Set prefix default (install directory) to a directory in the build area.
