@@ -264,6 +264,16 @@ if test "X-gcc" = "X-$cc_vendor"; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 9)"
     fi
 
+    # gcc >= 9.3
+    if test $cc_vers_major -ge 10 -o $cc_vers_major -eq 9 -a $cc_vers_minor -ge 3; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 9.3)"
+    fi
+
+    # gcc >= 10
+    if test $cc_vers_major -ge 10; then
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-10)"
+    fi
+
     #################
     # Flags are set #
     #################
