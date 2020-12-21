@@ -219,9 +219,10 @@ H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, h
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
+        /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(FUNC, "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, name,
-                                      type_id, lcpl_id, tcpl_id, tapl_id, es_id)) < 0)
+                        H5ARG_TRACE10(FUNC, "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id, es_id)) < 0)
+        /* clang-format on */
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -729,9 +730,10 @@ H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
+        /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, tapl_id,
-                                     es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, tapl_id, es_id)) < 0) {
+        /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, H5I_INVALID_HID,
                             "can't decrement count on datatype ID")
@@ -1331,7 +1333,7 @@ H5T_save_refresh_state(hid_t tid, H5O_shared_t *cached_H5O_shared)
 
     if (NULL == (dt = (H5T_t *)H5I_object_verify(tid, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "tid is not a datatype ID")
-    vol_dt = (H5T_t *)(dt->vol_obj->data);
+    vol_dt = H5T_get_actual_type(dt);
     if (NULL == vol_dt)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "tid is not not a named datatype ID")
 
@@ -1371,7 +1373,7 @@ H5T_restore_refresh_state(hid_t tid, H5O_shared_t *cached_H5O_shared)
 
     if (NULL == (dt = (H5T_t *)H5I_object_verify(tid, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "tid not a datatype ID")
-    vol_dt = (H5T_t *)(dt->vol_obj->data);
+    vol_dt = H5T_get_actual_type(dt);
     if (NULL == vol_dt)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "tid is not not a named datatype ID")
 

@@ -38,11 +38,20 @@ if (NOT ONLY_SHARED_LIBS)
   set_target_properties (h5clear PROPERTIES FOLDER tools)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5clear")
 
+  add_executable (h5delete ${HDF5_TOOLS_SRC_MISC_SOURCE_DIR}/h5delete.c)
+  target_include_directories (h5delete PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_compile_options(h5delete PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  TARGET_C_PROPERTIES (h5delete STATIC)
+  target_link_libraries (h5delete PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (h5delete PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5delete")
+
   set (H5_DEP_EXECUTABLES
       h5debug
       h5repart
       h5mkgrp
-     h5clear
+      h5clear
+      h5delete
   )
 endif ()
 if (BUILD_SHARED_LIBS)
@@ -78,11 +87,20 @@ if (BUILD_SHARED_LIBS)
   set_target_properties (h5clear-shared PROPERTIES FOLDER tools)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5clear-shared")
 
+  add_executable (h5delete-shared ${HDF5_TOOLS_SRC_MISC_SOURCE_DIR}/h5delete.c)
+  target_include_directories (h5delete-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_compile_options(h5delete-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  TARGET_C_PROPERTIES (h5delete-shared SHARED)
+  target_link_libraries (h5delete-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (h5delete-shared PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5delete-shared")
+
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
       h5debug-shared
       h5repart-shared
       h5mkgrp-shared
       h5clear-shared
+      h5delete-shared
   )
 endif ()
 
@@ -95,11 +113,13 @@ if (HDF5_ENABLE_FORMATTERS)
     clang_format (HDF5_H5REPART_SRC_FORMAT h5repart)
     clang_format (HDF5_H5MKGRP_SRC_FORMAT h5mkgrp)
     clang_format (HDF5_H5CLEAR_SRC_FORMAT h5clear)
+    clang_format (HDF5_H5DELETE_SRC_FORMAT h5delete)
   else ()
     clang_format (HDF5_H5DEBUG_SRC_FORMAT h5debug-shared)
     clang_format (HDF5_H5REPART_SRC_FORMAT h5repart-shared)
     clang_format (HDF5_H5MKGRP_SRC_FORMAT h5mkgrp-shared)
     clang_format (HDF5_H5CLEAR_SRC_FORMAT h5clear-shared)
+    clang_format (HDF5_H5DELETE_SRC_FORMAT h5delete-shared)
   endif ()
 endif ()
 

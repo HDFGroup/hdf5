@@ -167,7 +167,9 @@
 ./config/gnu-warnings/7
 ./config/gnu-warnings/8
 ./config/gnu-warnings/9
+./config/gnu-warnings/9.3
 ./config/gnu-warnings/cxx-general
+./config/gnu-warnings/cxx-4.8
 ./config/gnu-warnings/cxx-4.9
 ./config/gnu-warnings/cxx-5
 ./config/gnu-warnings/cxx-error-5
@@ -177,6 +179,7 @@
 ./config/gnu-warnings/developer-4.8
 ./config/gnu-warnings/developer-7
 ./config/gnu-warnings/developer-8
+./config/gnu-warnings/developer-10
 ./config/gnu-warnings/developer-general
 ./config/gnu-warnings/error-5
 ./config/gnu-warnings/error-8
@@ -1695,6 +1698,7 @@
 ./tools/src/misc/Makefile.am
 ./tools/src/misc/h5clear.c
 ./tools/src/misc/h5debug.c
+./tools/src/misc/h5delete.c
 ./tools/src/misc/h5mkgrp.c
 ./tools/src/misc/h5repart.c
 ./tools/test/misc/Makefile.am
@@ -3505,6 +3509,7 @@
 ./config/cmake/HDFFortranCompilerFlags.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5PluginMacros.cmake
+./config/cmake/HDF5PluginCache.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/jrunTest.cmake
 ./config/cmake/jvolTest.cmake

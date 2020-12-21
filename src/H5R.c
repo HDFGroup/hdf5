@@ -582,9 +582,10 @@ H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_li
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
+        /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id,
-                                     oapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id)) < 0) {
+        /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -743,9 +744,10 @@ H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_li
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
+        /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id,
-                                     oapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id)) < 0) {
+        /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on region ID")
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
@@ -782,7 +784,6 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
 
     FUNC_ENTER_STATIC
 
-    fprintf(stderr, "H5R__open_attr_api_common is here\n");
     /* Check args */
     if (ref_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid reference pointer")
@@ -912,9 +913,10 @@ H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
+        /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id,
-                                     aapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, aapl_id, es_id)) < 0) {
+        /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID,
                             "can't decrement count on attribute ID")
