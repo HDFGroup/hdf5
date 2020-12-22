@@ -133,11 +133,17 @@ ALIASES += lapl_id{1}="\param[in] \1 Link access property list identifier"
 ALIASES += lcpl_id="\param[in] lcpl_id Link creation property list identifier"
 ALIASES += lcpl_id{1}="\param[in] \1 Link creation property list identifier"
 
+ALIASES += oapl_id="\param[in] oapl_id Object access property list identifier"
+ALIASES += oapl_id{1}="\param[in] \1 Object access property list identifier"
+
 ALIASES += plist_id="\param[in] plist_id Property list identifier"
 ALIASES += plist_id{1}="\param[in] \1 Property list identifier"
 
 ALIASES += plistcls_id="\param[in] plistcls_id Property list class identifier"
 ALIASES += plistcls_id{1}="\param[in] \1 Property list class identifier"
+
+ALIASES += rapl_id="\param[in] rapl_id Reference access property list identifier"
+ALIASES += rapl_id{1}="\param[in] \1 Reference access property list identifier"
 
 ALIASES += tapl_id="\param[in] tapl_id Datatype access property list identifier"
 ALIASES += tapl_id{1}="\param[in] \1 Datatype access property list identifier"
@@ -159,6 +165,15 @@ ALIASES += loc_obj_id{1}="\param[in] \1 Location identifier of object"
 ALIASES += fgdta_obj_id="\obj_id. The identifier may be that of a file, group, dataset, named datatype, or attribute."
 ALIASES += fgdta_obj_id{1}="\obj_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
 ALIASES += fgdta_loc_obj_id{1}="\loc_obj_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+
+################################################################################
+# Asynchronous Arguments
+################################################################################
+
+ALIASES += app_file="\param[in] app_file For internal use only, not a visible user parameter"
+ALIASES += app_func="\param[in] app_func For internal use only, not a visible user parameter"
+ALIASES += app_line="\param[in] app_line For internal use only, not a visible user parameter"
+ALIASES += es_id="\param[in] es_id The event set ID to add this asynchronous operation to. H5ES_NONE may be used for synchronous execution."
 
 ################################################################################
 # Others
