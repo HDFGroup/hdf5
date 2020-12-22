@@ -1,6 +1,11 @@
 HDF5 version 1.8.22-12 currently under development
 ================================================================================
 
+Notice: HDF5 1.8.22 will be followed later in 2021 by HDF5 1.8.23, the final
+release of HDF5 1.8.  HDF5 1.10 and HDF5 1.12 are currently available. 
+Detailed information about these releases can be found at: 
+https://portal.hdfgroup.org/display/HDF5/Release+Specific+Information
+
 INTRODUCTION
 ============
 
@@ -723,6 +728,11 @@ Known Problems
 
     CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
     issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
+
+    Various tests in dt_arith, fillval, and dtypes failed with core dump
+    during integer conversion on SunOS 5.11 with Sun C 5.15 SunOS_sparc in 
+    64-bit mode.  It appears that these failures were caused by invalid 
+    alignment, which is under investigation.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
