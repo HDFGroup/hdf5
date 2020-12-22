@@ -2,8 +2,9 @@ HDF5 version 1.8.22-12 currently under development
 ================================================================================
 
 Notice: HDF5 1.8.22 will be followed later in 2021 by HDF5 1.8.23, the final
-release of HDF5 1.8.  HDF5 1.10 and HDF5 1.12 are currently available. New 
-features and migration details are available on the HDF5 web page (link below). 
+release of HDF5 1.8.  HDF5 1.10 and HDF5 1.12 are currently available. 
+Detailed information about these releases can be found at: 
+https://portal.hdfgroup.org/display/HDF5/Release+Specific+Information
 
 INTRODUCTION
 ============
