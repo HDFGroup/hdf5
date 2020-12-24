@@ -7741,7 +7741,7 @@ static H5_ATTR_CONST long
 gcd(long l0, long r0)
 {
     long magnitude, remainder;
-    bool negative = ((l0 < 0) != (r0 < 0));
+    hbool_t negative = ((l0 < 0) != (r0 < 0));
     long l = HDlabs(l0), r = HDlabs(r0);
 
     do {

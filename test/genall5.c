@@ -209,7 +209,7 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
         HDassert(H5G_STORAGE_TYPE_COMPACT == grp_info.storage_type);
         HDassert(0 == grp_info.nlinks);
         HDassert(0 == grp_info.max_corder);
-        HDassert(false == grp_info.mounted);
+        HDassert(FALSE == grp_info.mounted);
     }
 
     if (pass) {
@@ -470,7 +470,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
         HDassert(H5G_STORAGE_TYPE_COMPACT == grp_info.storage_type);
         HDassert(nlinks == grp_info.nlinks);
         HDassert(nlinks == grp_info.max_corder);
-        HDassert(false == grp_info.mounted);
+        HDassert(FALSE == grp_info.mounted);
     }
 
     u = 0;
@@ -508,7 +508,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
             failure_mssg = "vrfy_ns_grp_c: H5T_CSET_ASCII != lnk_info.cset";
         }
         HDassert(ret >= 0);
-        HDassert(true == lnk_info.corder_valid);
+        HDassert(TRUE == lnk_info.corder_valid);
         HDassert(u == lnk_info.corder);
         HDassert(H5T_CSET_ASCII == lnk_info.cset);
 
@@ -881,7 +881,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
         HDassert(H5G_STORAGE_TYPE_DENSE == grp_info.storage_type);
         HDassert(nlinks == grp_info.nlinks);
         HDassert(nlinks == grp_info.max_corder);
-        HDassert(false == grp_info.mounted);
+        HDassert(FALSE == grp_info.mounted);
     }
 
     u = 0;
@@ -919,7 +919,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             failure_mssg = "vrfy_ns_grp_d: H5T_CSET_ASCII != lnk_info.cset";
         }
         HDassert(ret >= 0);
-        HDassert(true == lnk_info.corder_valid);
+        HDassert(TRUE == lnk_info.corder_valid);
         HDassert(u == lnk_info.corder);
         HDassert(H5T_CSET_ASCII == lnk_info.cset);
 
@@ -1244,7 +1244,7 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
         HDassert(H5G_STORAGE_TYPE_SYMBOL_TABLE == grp_info.storage_type);
         HDassert(0 == grp_info.nlinks);
         HDassert(0 == grp_info.max_corder);
-        HDassert(false == grp_info.mounted);
+        HDassert(FALSE == grp_info.mounted);
     }
 
     if (pass) {
@@ -1482,7 +1482,7 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         HDassert(H5G_STORAGE_TYPE_SYMBOL_TABLE == grp_info.storage_type);
         HDassert(nlinks == grp_info.nlinks);
         HDassert(0 == grp_info.max_corder);
-        HDassert(false == grp_info.mounted);
+        HDassert(FALSE == grp_info.mounted);
     }
 
     u = 0;
@@ -1516,7 +1516,7 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
             failure_mssg = "vrfy_os_grp_n: H5T_CSET_ASCII != lnk_info.cset";
         }
         HDassert(ret >= 0);
-        HDassert(false == lnk_info.corder_valid);
+        HDassert(FALSE == lnk_info.corder_valid);
         HDassert(H5T_CSET_ASCII == lnk_info.cset);
 
         if (0 == (u % 2)) {
