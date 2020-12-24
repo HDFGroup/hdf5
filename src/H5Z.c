@@ -1014,7 +1014,7 @@ H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
     H5O_pline_t     pline;                   /* Object's I/O pipeline information */
     H5S_class_t     space_class;             /* To check class of space */
     H5T_class_t     type_class;              /* To check if type is VL */
-    bool            bad_for_filters = FALSE; /* Suitable to have filters */
+    hbool_t         bad_for_filters = FALSE; /* Suitable to have filters */
     htri_t          ret_value       = FALSE; /* TRUE for ignoring filters */
 
     FUNC_ENTER_NOAPI(FAIL)
