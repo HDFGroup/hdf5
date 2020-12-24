@@ -54,7 +54,7 @@ typedef struct {
 #define DSET_NAME                "image"
 typedef struct searched_err_t {
     char message[256];
-    bool found;
+    hbool_t found;
 } searched_err_t;
 
 /* Call back function for test_corrupted_attnamelen */
@@ -972,7 +972,7 @@ find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_
 
     /* If the searched error message is found, stop the iteration */
     if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, searched_err->message) == 0) {
-        searched_err->found = true;
+        searched_err->found = TRUE;
         status              = H5_ITER_STOP;
     }
 
@@ -1018,14 +1018,14 @@ test_corrupted_attnamelen(void)
     if (err_status == -1) {
         /* Initialize client data */
         HDstrcpy(err_caught.message, err_message);
-        err_caught.found = false;
+        err_caught.found = FALSE;
 
         /* Look for the correct error message */
         ret = H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, find_err_msg_cb, &err_caught);
         CHECK(ret, FAIL, "H5Ewalk2");
 
         /* Fail if the indicated message is not found */
-        CHECK(err_caught.found, false, "test_corrupted_attnamelen: Expected error not found");
+        CHECK(err_caught.found, FALSE, "test_corrupted_attnamelen: Expected error not found");
     }
 
     /* Close the dataset and file */

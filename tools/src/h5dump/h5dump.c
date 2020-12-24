@@ -31,7 +31,7 @@ static h5tools_vol_info_t vol_info_g;
 /* Default "anonymous" S3 configuration */
 static H5FD_ros3_fapl_t ros3_fa_g = {
     1,     /* Structure Version */
-    false, /* Authenticate?     */
+    FALSE, /* Authenticate?     */
     "",    /* AWS Region        */
     "",    /* Access Key ID     */
     "",    /* Secret Access Key */
