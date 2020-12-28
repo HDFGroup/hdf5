@@ -67,8 +67,8 @@ H5_DLL void * H5HL_offset_into(const H5HL_t *heap, size_t offset);
 H5_DLL H5HL_t *H5HL_protect(H5F_t *f, haddr_t addr, unsigned flags);
 H5_DLL herr_t  H5HL_remove(H5F_t *f, H5HL_t *heap, size_t offset, size_t size);
 H5_DLL herr_t  H5HL_unprotect(H5HL_t *heap);
-H5_DLL herr_t  H5HL_depend(H5AC_info_t *parent_entry, H5HL_t *ea);
-H5_DLL herr_t  H5HL_undepend(H5AC_info_t *parent_entry, H5HL_t *ea);
+H5_DLL herr_t  H5HL_depend(H5AC_info_t *parent_entry, H5HL_t *heap);
+H5_DLL herr_t  H5HL_undepend(H5AC_info_t *parent_entry, H5HL_t *heap);
 
 /* Debugging routines for dumping file structures */
 H5_DLL herr_t H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth);
