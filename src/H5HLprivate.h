@@ -50,9 +50,14 @@
 /* Typedef for local heap in memory (defined in H5HLpkg.h) */
 typedef struct H5HL_t H5HL_t;
 
-/*
- * Library prototypes
- */
+/*****************************/
+/* Library-private Variables */
+/*****************************/
+
+/***************************************/
+/* Library-private Function Prototypes */
+/***************************************/
+
 H5_DLL herr_t H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr /*out*/);
 H5_DLL herr_t H5HL_delete(H5F_t *f, haddr_t addr);
 H5_DLL herr_t H5HL_get_size(H5F_t *f, haddr_t addr, size_t *size);
@@ -62,6 +67,8 @@ H5_DLL void * H5HL_offset_into(const H5HL_t *heap, size_t offset);
 H5_DLL H5HL_t *H5HL_protect(H5F_t *f, haddr_t addr, unsigned flags);
 H5_DLL herr_t  H5HL_remove(H5F_t *f, H5HL_t *heap, size_t offset, size_t size);
 H5_DLL herr_t  H5HL_unprotect(H5HL_t *heap);
+H5_DLL herr_t  H5HL_depend(H5AC_info_t *parent_entry, H5HL_t *ea);
+H5_DLL herr_t  H5HL_undepend(H5AC_info_t *parent_entry, H5HL_t *ea);
 
 /* Debugging routines for dumping file structures */
 H5_DLL herr_t H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth);

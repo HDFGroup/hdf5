@@ -354,7 +354,7 @@ H5_DLL herr_t H5G__stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_
                                H5O_type_t obj_type, const void *crt_info);
 H5_DLL herr_t H5G__stab_insert_real(H5F_t *f, const H5O_stab_t *stab, const char *name, H5O_link_t *obj_lnk,
                                     H5O_type_t obj_type, const void *crt_info);
-H5_DLL herr_t H5G__stab_delete(H5F_t *f, const H5O_stab_t *stab);
+H5_DLL herr_t H5G__stab_delete(H5F_t *f, H5O_t *open_oh, const H5O_stab_t *stab);
 H5_DLL herr_t H5G__stab_iterate(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
                                 H5G_lib_iterate_t op, void *op_data);
 H5_DLL herr_t H5G__stab_count(const struct H5O_loc_t *oloc, hsize_t *num_objs);

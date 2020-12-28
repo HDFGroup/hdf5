@@ -254,7 +254,7 @@ H5O__stab_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__stab_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *mesg)
+H5O__stab_delete(H5F_t *f, H5O_t *open_oh, void *mesg)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -265,7 +265,7 @@ H5O__stab_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *mesg)
     HDassert(mesg);
 
     /* Free the file space for the symbol table */
-    if (H5G__stab_delete(f, (const H5O_stab_t *)mesg) < 0)
+    if (H5G__stab_delete(f, open_oh, (const H5O_stab_t *)mesg) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free symbol table")
 
 done:

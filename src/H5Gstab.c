@@ -189,9 +189,11 @@ done:
 herr_t
 H5G__stab_create(H5O_loc_t *grp_oloc, const H5O_ginfo_t *ginfo, H5O_stab_t *stab)
 {
-    size_t heap_hint;           /* Local heap size hint */
-    size_t size_hint;           /* Local heap size hint */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5O_t  *oh   = NULL;         /* Pointer to the object header */
+    H5HL_t *heap = NULL;         /* Pointer to the local heap    */
+    size_t  heap_hint;           /* Local heap size hint */
+    size_t  size_hint;           /* Local heap size hint */
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
 
@@ -224,7 +226,27 @@ H5G__stab_create(H5O_loc_t *grp_oloc, const H5O_ginfo_t *ginfo, H5O_stab_t *stab
     if (H5O_msg_create(grp_oloc, H5O_STAB_ID, 0, H5O_UPDATE_TIME, stab) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
+    /* Check for SWMR writes to the file and create flush dependency */
+    if(H5F_INTENT(grp_oloc->file) & H5F_ACC_SWMR_WRITE) {
+        /* Pin the object header */
+        if(NULL == (oh = H5O_pin(grp_oloc, dxpl_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTPIN, FAIL, "unable to pin object header")
+
+        /* Protect the heap */
+        if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab->heap_addr, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
+
+        if(H5HL_depend((H5AC_info_t *)oh, heap) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on symbol table heap")
+    } /* end if */
+
 done:
+    /* Release resources */
+    if(heap && H5HL_unprotect(heap) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPIN, FAIL, "unable to un-pin object header")
+
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5G__stab_create() */
 
@@ -444,10 +466,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__stab_delete(H5F_t *f, const H5O_stab_t *stab)
+H5G__stab_delete(H5F_t *f, H5O_t *open_oh, const H5O_stab_t *stab)
 {
     H5HL_t *    heap = NULL;         /* Pointer to local heap */
-    H5G_bt_rm_t udata;               /*data to pass through B-tree	*/
+    H5G_bt_rm_t udata;               /* Data to pass through B-tree */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -468,6 +490,10 @@ H5G__stab_delete(H5F_t *f, const H5O_stab_t *stab)
     /* Delete entire B-tree */
     if (H5B_delete(f, H5B_SNODE, stab->btree_addr, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete symbol table B-tree")
+
+    /* Release local heap flush dependency */
+    if(H5HL_undepend((H5AC_info_t *)open_oh, heap) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on symbol table heap")
 
     /* Release resources */
     if (H5HL_unprotect(heap) < 0)
