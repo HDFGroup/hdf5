@@ -1006,3 +1006,60 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL, H5HL_heapsize(H5F_t *f, haddr_t add
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release local heap prefix");
 
 END_FUNC(PRIV) /* end H5HL_heapsize() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL_depend
+ *
+ * Purpose:     Create a flush dependency between two data structure components
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5HL_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
+
+    /* Sanity check */
+    HDassert(parent_entry);
+    HDassert(child_entry);
+
+    /* Create a flush dependency between parent and child entry */
+    if(FAIL == H5AC_create_flush_dependency(parent_entry, child_entry))
+        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency");
+
+CATCH
+
+END_FUNC(PRIV) /* end H5HL_depend() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL_undepend
+ *
+ * Purpose:     Destroy a flush dependency between two data structure components
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5HL_undepend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
+
+    /* Sanity check */
+    HDassert(parent_entry);
+    HDassert(child_entry);
+
+    /* Destroy a flush dependency between parent and child entry */
+    if(FAIL == H5AC_destroy_flush_dependency(parent_entry, child_entry))
+        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency");
+
+CATCH
+
+END_FUNC(PRIV) /* end H5HL_undepend() */
+
