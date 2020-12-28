@@ -229,11 +229,11 @@ H5G__stab_create(H5O_loc_t *grp_oloc, const H5O_ginfo_t *ginfo, H5O_stab_t *stab
     /* Check for SWMR writes to the file and create flush dependency */
     if(H5F_INTENT(grp_oloc->file) & H5F_ACC_SWMR_WRITE) {
         /* Pin the object header */
-        if(NULL == (oh = H5O_pin(grp_oloc, dxpl_id)))
+        if(NULL == (oh = H5O_pin(grp_oloc)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTPIN, FAIL, "unable to pin object header")
 
         /* Protect the heap */
-        if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab->heap_addr, H5AC_WRITE)))
+        if(NULL == (heap = H5HL_protect(grp_oloc->file, stab->heap_addr, H5AC_WRITE)))
             HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
         if(H5HL_depend((H5AC_info_t *)oh, heap) < 0)
