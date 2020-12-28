@@ -1,0 +1,3 @@
+This was the beginning of adding SWMR support for inserting links into old-style
+groups.   It seems unlikely to get used in the future, but might be worthwhile
+keeping in case it's useful someday. - QAK, 2020/12/28
