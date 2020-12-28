@@ -223,6 +223,8 @@ H5HL__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
     if(FAIL == H5AC_create_flush_dependency(parent_entry, child_entry))
         H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency");
 
+CATCH
+
 END_FUNC(PKG) /* end H5HL__create_flush_depend() */
 
 /*-------------------------------------------------------------------------
@@ -248,6 +250,8 @@ H5HL__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
     /* Destroy a flush dependency between parent and child entry */
     if(FAIL == H5AC_destroy_flush_dependency(parent_entry, child_entry))
         H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency");
+
+CATCH
 
 END_FUNC(PKG) /* end H5HL__destroy_flush_depend() */
 
