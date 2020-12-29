@@ -318,7 +318,7 @@ Bug Fixes since HDF5-1.12.0 release
         2. Use the Java Arrays method copyOfRange to grab the section of the
            array from (1) that is desired to be inserted into the destination array.
 
-        (PGT,ADB - 2020/12/13, HDFFV-10865)
+        (PGT,ADB - 2020/12/29, HDFFV-10865)
 
 
     Tools:
