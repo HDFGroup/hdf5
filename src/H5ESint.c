@@ -680,7 +680,7 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
         /* Exit from the iteration */
         ret_value = H5_ITER_STOP;
     } /* end if */
-    else if (ev_status == H5VL_REQUEST_STATUS_SUCCEED) {
+    else if (ev_status == H5VL_REQUEST_STATUS_SUCCEED || ev_status == H5VL_REQUEST_STATUS_CANCELED) {
         /* Handle event completion */
         if (H5ES__op_complete(ctx->es, ev, ev_status) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, H5_ITER_ERROR, "unable to release completed event")
@@ -689,9 +689,6 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
         /* Should never get a status of 'can't cancel' back from test / wait operation */
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADVALUE, H5_ITER_ERROR,
                     "received \"can't cancel\" status for operation")
-    else if (ev_status == H5VL_REQUEST_STATUS_CANCELED)
-        /* Should never get a status of 'cancel' back from test / wait operation */
-        HGOTO_ERROR(H5E_EVENTSET, H5E_BADVALUE, H5_ITER_ERROR, "received \"cancel\" status for operation")
     else {
         /* Sanity check */
         HDassert(ev_status == H5VL_REQUEST_STATUS_IN_PROGRESS);
