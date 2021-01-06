@@ -645,9 +645,9 @@ H5Mclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     if (H5I_MAP != H5I_get_type(map_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a map ID")
 
-    /* Get dataset object's connector */
+    /* Get map object's connector */
     if (NULL == (vol_obj = H5VL_vol_object(map_id)))
-        HGOTO_ERROR(H5E_MAP, H5E_CANTGET, FAIL, "can't get VOL object for dataset")
+        HGOTO_ERROR(H5E_MAP, H5E_CANTGET, FAIL, "can't get VOL object for map")
 
     /* Prepare for possible asynchronous operation */
     if (H5ES_NONE != es_id) {
