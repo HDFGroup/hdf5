@@ -307,6 +307,20 @@ Bug Fixes since HDF5-1.12.0 release
         (QAK - 2020/05/07)
 
 
+    Java Library:
+    ----------------
+    - The H5FArray.java class, in which virtually the entire execution time
+        is spent using the HDFNativeData method that converts from an array
+        of bytes to an array of the destination Java type.
+
+        1. Convert the entire byte array into a 1-d array of the desired type,
+           rather than performing 1 conversion per row;
+        2. Use the Java Arrays method copyOfRange to grab the section of the
+           array from (1) that is desired to be inserted into the destination array.
+
+        (PGT,ADB - 2020/12/29, HDFFV-10865)
+
+
     Tools:
     ------
 
