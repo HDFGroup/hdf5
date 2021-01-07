@@ -32,8 +32,8 @@ int
 main(int argc, const char *argv[])
 {
     hbool_t     quiet = FALSE;
-    const char  *name = NULL;
-    int         ret = 0;
+    const char *name  = NULL;
+    int         ret   = 0;
 
     switch (argc) {
         case 3:
@@ -42,7 +42,7 @@ main(int argc, const char *argv[])
                 return EXIT_FAILURE;
             }
             quiet = TRUE;
-            name = argv[2];
+            name  = argv[2];
             break;
         case 2:
             name = argv[1];
@@ -52,20 +52,22 @@ main(int argc, const char *argv[])
             return EXIT_FAILURE;
     }
 
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         /* Only uses the environment variable at this time */
         ret = (int)H5Fdelete(name, H5P_DEFAULT);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     /* The native VOL connector does not implement the H5Fdelete() call
      * at this time, so try to remove the file via the POSIX remove(3)
      * call on failures.
      */
     if (ret < 0)
-        ret  = HDremove(name);
+        ret = HDremove(name);
 
     if (ret < 0 && !quiet)
-            HDfprintf(stderr, "Unable to delete storage at: %s\n", name);
+        HDfprintf(stderr, "Unable to delete storage at: %s\n", name);
 
     return ret < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
