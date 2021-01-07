@@ -5880,7 +5880,8 @@ H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_int
 H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd);
 
 /* Group creation property list (GCPL) routines */
-H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */, unsigned *est_name_len /* out */);
+H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */,
+                                   unsigned *est_name_len /* out */);
 /**
  * \ingroup GCPL
  *
@@ -5946,7 +5947,8 @@ H5_DLL herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_fla
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned *min_dense /*out*/);
+H5_DLL herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/,
+                                       unsigned *min_dense /*out*/);
 H5_DLL herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*out*/);
 H5_DLL herr_t H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name_len);
 /**

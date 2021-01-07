@@ -60,7 +60,6 @@ typedef struct H5G_info_t {
 } H5G_info_t;
 //! [H5G_info_t_snip]
 
-
 /********************/
 /* Public Variables */
 /********************/
@@ -117,7 +116,7 @@ extern "C" {
  * \see H5Gopen2(), H5Gclose()
  *
  */
-H5_DLL hid_t  H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id);
+H5_DLL hid_t H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -140,8 +139,8 @@ H5_DLL hid_t  H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gc
  * \see H5Gcreate2()
  *
  */
-H5_DLL hid_t  H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                              const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t es_id);
+H5_DLL hid_t H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                             const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t es_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -190,7 +189,7 @@ H5_DLL hid_t  H5Gcreate_async(const char *app_file, const char *app_func, unsign
  * \since 1.8.0
  *
  */
-H5_DLL hid_t  H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id);
+H5_DLL hid_t H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -220,7 +219,7 @@ H5_DLL hid_t  H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id);
  * \see H5Gcreate2(), H5Gclose()
  *
  */
-H5_DLL hid_t  H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
+H5_DLL hid_t H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -241,8 +240,8 @@ H5_DLL hid_t  H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
  * \see H5Gopen2()
  *
  */
-H5_DLL hid_t  H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                            const char *name, hid_t gapl_id, hid_t es_id);
+H5_DLL hid_t H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                           const char *name, hid_t gapl_id, hid_t es_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -265,7 +264,7 @@ H5_DLL hid_t  H5Gopen_async(const char *app_file, const char *app_func, unsigned
  * \see H5Gcreate2(), H5Gclose()
  *
  */
-H5_DLL hid_t  H5Gget_create_plist(hid_t group_id);
+H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
 
 /**
  *-------------------------------------------------------------------------

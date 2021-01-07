@@ -53,7 +53,7 @@ typedef struct {
 #define CORRUPTED_ATNAMELEN_FILE "memleak_H5O_dtype_decode_helper_H5Odtype.h5"
 #define DSET_NAME                "image"
 typedef struct searched_err_t {
-    char message[256];
+    char    message[256];
     hbool_t found;
 } searched_err_t;
 
