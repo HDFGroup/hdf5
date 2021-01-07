@@ -586,10 +586,10 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
                    H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, size_t dst_size,
                    void H5_ATTR_UNUSED *bg_buf)
 {
-    H5F_t *         src_f     = NULL;
-    hid_t           file_id   = H5I_INVALID_HID;
-    H5R_ref_priv_t *dst_ref   = (H5R_ref_priv_t *)dst_buf;
-    H5R_ref_priv_t  tmp_ref;             /* Temporary reference to decode into */
+    H5F_t *         src_f   = NULL;
+    hid_t           file_id = H5I_INVALID_HID;
+    H5R_ref_priv_t *dst_ref = (H5R_ref_priv_t *)dst_buf;
+    H5R_ref_priv_t  tmp_ref; /* Temporary reference to decode into */
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
