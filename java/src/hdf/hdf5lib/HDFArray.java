@@ -170,10 +170,6 @@ public class HDFArray {
                             therow = IntegerToByte((Integer[]) _theArray);
                         }
                         else if (ArrayDescriptor.className
-                                .equals("java.lang.Short")) {
-                            therow = ShortToByte((Short[]) _theArray);
-                        }
-                        else if (ArrayDescriptor.className
                                 .equals("java.lang.Float")) {
                             therow = FloatObjToByte((Float[]) _theArray);
                         }
@@ -522,36 +518,34 @@ public class HDFArray {
             flattenedArray = (Object) _barray;
             break;
         case 'L':
-            switch (ArrayDescriptor.className) {
-            case "java.lang.Byte":
+            if (ArrayDescriptor.className.equals("java.lang.Byte")) {
                 flattenedArray = (Object) ByteToByteObj(_barray);
-                break;
-            case "java.lang.Short":
+            }
+            else if (ArrayDescriptor.className .equals("java.lang.Short")) {
                 flattenedArray = (Object) ByteToShort(_barray);
-                break;
-            case "java.lang.Integer":
+            }
+            else if (ArrayDescriptor.className .equals("java.lang.Integer")) {
                 flattenedArray = (Object) ByteToInteger(_barray);
-                break;
-            case "java.lang.Long":
+            }
+            else if (ArrayDescriptor.className .equals("java.lang.Long")) {
                 flattenedArray = (Object) ByteToLongObj(_barray);
-                break;
-            case "java.lang.Float":
+            }
+            else if (ArrayDescriptor.className .equals("java.lang.Float")) {
                 flattenedArray = (Object) ByteToFloatObj(_barray);
-                break;
-            case "java.lang.Double":
+            }
+            else if (ArrayDescriptor.className .equals("java.lang.Double")) {
                 flattenedArray = (Object) ByteToDoubleObj(_barray);
-                break;
-            default:
+            }
+            else {
                 HDF5JavaException ex = new HDF5JavaException(
-                        "HDFArray: unsupported Object type: "
-                                + ArrayDescriptor.NT);
+                        "HDFArray: unsupported Object type: " + ArrayDescriptor.NT);
                 throw (ex);
-            } // end of switch statement for arrays of boxed objects
-            default:
-                HDF5JavaException ex = new HDF5JavaException(
-                        "HDFArray: unknown or unsupported type: "
-                                + ArrayDescriptor.NT);
-                throw (ex);
+            }
+        default:
+            HDF5JavaException ex = new HDF5JavaException(
+                    "HDFArray: unknown or unsupported type: "
+                            + ArrayDescriptor.NT);
+            throw (ex);
         } // end of switch statement for arrays of primitives
 
         while (n < ArrayDescriptor.totalSize) {
@@ -603,26 +597,24 @@ public class HDFArray {
                     arow = (Object) Arrays.copyOfRange((double[]) flattenedArray, m, mm);
                     break;
                 case 'L':
-                    switch (ArrayDescriptor.className) {
-                    case "java.lang.Byte":
+                    if (ArrayDescriptor.className.equals("java.lang.Byte")) {
                         arow = (Object) Arrays.copyOfRange((Byte[])flattenedArray, m, mm);
-                        break;
-                    case "java.lang.Short":
+                    }
+                    else if (ArrayDescriptor.className .equals("java.lang.Short")) {
                         arow = (Object) Arrays.copyOfRange((Short[])flattenedArray, m, mm);
-                        break;
-                    case "java.lang.Integer":
+                    }
+                    else if (ArrayDescriptor.className .equals("java.lang.Integer")) {
                         arow = (Object) Arrays.copyOfRange((Integer[])flattenedArray, m, mm);
-                        break;
-                    case "java.lang.Long":
+                    }
+                    else if (ArrayDescriptor.className .equals("java.lang.Long")) {
                         arow = (Object) Arrays.copyOfRange((Long[])flattenedArray, m, mm);
-                        break;
-                    case "java.lang.Float":
+                    }
+                    else if (ArrayDescriptor.className .equals("java.lang.Float")) {
                         arow = (Object) Arrays.copyOfRange((Float[])flattenedArray, m, mm);
-                        break;
-                    case "java.lang.Double":
+                    }
+                    else if (ArrayDescriptor.className .equals("java.lang.Double")) {
                         arow = (Object) Arrays.copyOfRange((Double[])flattenedArray, m, mm);
-                        break;
-                    } // end of switch statement for arrays of boxed numerics
+                    }
                 } // end of switch statement for arrays of primitives
 
                 java.lang.reflect.Array.set(
