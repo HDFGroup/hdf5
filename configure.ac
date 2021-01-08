@@ -1986,7 +1986,7 @@ esac
 
 
 ## ----------------------------------------------------------------------
-## Does the struct stat have the st_blocks field?  This field is not Posix.
+## Does the struct stat have the st_blocks field? This field is not POSIX.
 ##
 AC_MSG_CHECKING([for st_blocks in struct stat])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
