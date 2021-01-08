@@ -26,9 +26,9 @@
 #define _H5Opublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions			*/
-#include "H5Ipublic.h" /* IDs			  		*/
-#include "H5Lpublic.h" /* Links		  		*/
+#include "H5public.h"  /* Generic Functions            */
+#include "H5Ipublic.h" /* IDs                          */
+#include "H5Lpublic.h" /* Links                        */
 
 /*****************/
 /* Public Macros */
@@ -109,10 +109,10 @@
 
 /* Types of objects in file */
 typedef enum H5O_type_t {
-    H5O_TYPE_UNKNOWN = -1,   /* Unknown object type		*/
-    H5O_TYPE_GROUP,          /* Object is a group		*/
-    H5O_TYPE_DATASET,        /* Object is a dataset		*/
-    H5O_TYPE_NAMED_DATATYPE, /* Object is a named data type	*/
+    H5O_TYPE_UNKNOWN = -1,   /* Unknown object type        */
+    H5O_TYPE_GROUP,          /* Object is a group          */
+    H5O_TYPE_DATASET,        /* Object is a dataset        */
+    H5O_TYPE_NAMED_DATATYPE, /* Object is a named data type    */
     H5O_TYPE_MAP,            /* Object is a map */
     H5O_TYPE_NTYPES          /* Number of different object types (must be last!) */
 } H5O_type_t;
@@ -293,9 +293,10 @@ H5_DLL hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
  * \details H5Open_by_idx() opens the nth object in the group specified by \p loc_id
  *          and \p group_name.
  *
- *          \p loc_id specifies a location identifier.  \p group_name specifies the group relative to
- *          \p loc_id in which the object can be found.  If \p loc_id fully specifies the group
- *          in which the object resides, \p group_name can be a dot (.).
+ *          \p loc_id specifies a location identifier.
+ *          \p group_name specifies the group relative to \p loc_id in which the object can be found.
+ *          If \p loc_id fully specifies the group in which the object resides,
+ *          \p group_name can be a dot (.).
  *
  *          The specific object to be opened within the group is specified by the three parameters:
  *          \p idx_type, \p order and \p n.
@@ -345,8 +346,10 @@ H5_DLL hid_t H5Oopen_by_idx_async(const char *app_file, const char *app_func, un
  * \param[in] name The name of the link to check
  * \lapl_id
  *
- * \return Returns a positive value if the object pointed to by the \p loc_id and \p name combination exists.
- * \return Returns 0 if the object pointed to by the \p loc_id and \p name combination does not exist.
+ * \return Returns a positive value if the object pointed to by
+ *         the \p loc_id and \p name combination exists.
+ * \return Returns 0 if the object pointed to by
+ *         the \p loc_id and \p name combination does not exist.
  * \return Returns a negatvie value when the function fails.
  *
  * \details H5Oexists_by_name() allows an application to determine whether
@@ -445,8 +448,8 @@ H5_DLL htri_t H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
  *          \snippet this H5O_info2_t_snip
  *
  *          Note the following about H5O_info2_t :
- *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime) only \c ctime has been
- *implemented.
+ *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime)
+ *            only \c ctime has been implemented.
  *          - The \c atime value is the last time the object was read or written.
  *          - The \c mtime value is the last time the raw data in the object was changed.
  *          - The \c ctime value is the last time the metadata for the object was changed.
@@ -515,8 +518,8 @@ H5_DLL herr_t H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
  *          \snippet this H5O_info2_t_snip
  *
  *          Note the following about H5O_info2_t :
- *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime) only \c ctime has been
- *implemented.
+ *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime)
+ *            only \c ctime has been implemented.
  *          - The \c atime value is the last time the object was read or written.
  *          - The \c mtime value is the last time the raw data in the object was changed.
  *          - The \c ctime value is the last time the metadata for the object was changed.
@@ -593,8 +596,8 @@ H5_DLL herr_t H5Oget_info_by_name_async(const char *app_file, const char *app_fu
  *          \snippet this H5O_info2_t_snip
  *
  *          Note the following about H5O_info2_t :
- *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime) only \c ctime has been
- *implemented.
+ *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime)
+ *            only \c ctime has been implemented.
  *          - The \c atime value is the last time the object was read or written.
  *          - The \c mtime value is the last time the raw data in the object was changed.
  *          - The \c ctime value is the last time the metadata for the object was changed.
@@ -1886,13 +1889,13 @@ typedef struct H5O_stat_t {
 /* (For H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx versions 1 & 2) */
 typedef struct H5O_info1_t {
     unsigned long  fileno;    /* File number that object is located in */
-    haddr_t        addr;      /* Object address in file	*/
+    haddr_t        addr;      /* Object address in file                */
     H5O_type_t     type;      /* Basic object type (group, dataset, etc.) */
     unsigned       rc;        /* Reference count of object    */
-    time_t         atime;     /* Access time			*/
-    time_t         mtime;     /* Modification time		*/
-    time_t         ctime;     /* Change time			*/
-    time_t         btime;     /* Birth time			*/
+    time_t         atime;     /* Access time                  */
+    time_t         mtime;     /* Modification time            */
+    time_t         ctime;     /* Change time                  */
+    time_t         btime;     /* Birth time                   */
     hsize_t        num_attrs; /* # of attributes attached to object */
     H5O_hdr_info_t hdr;       /* Object header information */
     /* Extra metadata storage for obj & attributes */
@@ -1985,8 +1988,8 @@ H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
  *          \snippet this H5O_info1_t_snip
  *
  *          Note the following about H5O_info1_t :
- *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime) only \c ctime has been
- *implemented.
+ *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime)
+ *            only \c ctime has been implemented.
  *          - The \c atime value is the last time the object was read or written.
  *          - The \c mtime value is the last time the raw data in the object was changed.
  *          - The \c ctime value is the last time the metadata for the object was changed.
@@ -2022,12 +2025,17 @@ H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
  *       will force metadata entries to be evicted from the cache,
  *       thus freeing the memory associated with the entries.
  *
- * \version 1.10.5 The macro #H5Oget_info was removed and the function H5Oget_info1() was copied to
- *H5Oget_info(). \version 1.10.3 Function H5Oget_info() was copied to H5Oget_info1(), and the macro
- *#H5Oget_info was created. \version 1.8.15 Added a note about the valid values for the \c version field in
- *the H5O_hdr_info_t structure. \version 1.8.11 Fortran subroutine introduced in this release. \version 1.8.10
- *Added #H5O_type_t structure to the Description section. \n Separated H5O_hdr_info_t structure from
- *#H5O_info_t in the Description section. \n Clarified the definition and implementation of the time fields.
+ * \version 1.10.5 The macro #H5Oget_info was removed and the function
+ *                 H5Oget_info1() was copied to H5Oget_info().
+ * \version 1.10.3 Function H5Oget_info() was copied to H5Oget_info1(),
+ *                 and the macro #H5Oget_info was created.
+ * \version 1.8.15 Added a note about the valid values for the \c version
+ *                 field in the H5O_hdr_info_t structure.
+ * \version 1.8.11 Fortran subroutine introduced in this release.
+ * \version 1.8.10 Added #H5O_type_t structure to the Description section. \n
+ *                 Separated H5O_hdr_info_t structure from #H5O_info_t in the
+ *                 Description section. \n
+ *                 Clarified the definition and implementation of the time fields.
  *
  * \since 1.8.0
  *
