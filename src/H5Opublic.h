@@ -26,9 +26,9 @@
 #define _H5Opublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions			*/
-#include "H5Ipublic.h" /* IDs			  		*/
-#include "H5Lpublic.h" /* Links		  		*/
+#include "H5public.h"  /* Generic Functions            */
+#include "H5Ipublic.h" /* IDs                          */
+#include "H5Lpublic.h" /* Links                        */
 
 /*****************/
 /* Public Macros */
@@ -109,10 +109,10 @@
 
 /* Types of objects in file */
 typedef enum H5O_type_t {
-    H5O_TYPE_UNKNOWN = -1,   /* Unknown object type		*/
-    H5O_TYPE_GROUP,          /* Object is a group		*/
-    H5O_TYPE_DATASET,        /* Object is a dataset		*/
-    H5O_TYPE_NAMED_DATATYPE, /* Object is a named data type	*/
+    H5O_TYPE_UNKNOWN = -1,   /* Unknown object type        */
+    H5O_TYPE_GROUP,          /* Object is a group          */
+    H5O_TYPE_DATASET,        /* Object is a dataset        */
+    H5O_TYPE_NAMED_DATATYPE, /* Object is a named data type    */
     H5O_TYPE_MAP,            /* Object is a map */
     H5O_TYPE_NTYPES          /* Number of different object types (must be last!) */
 } H5O_type_t;
@@ -222,22 +222,22 @@ extern "C" {
  *          specified by a location, \p loc_id, and a path name, \p name, in an HDF5 file.
  *
  *          This function opens the object in the same manner as H5Gopen(), H5Topen(), and H5Dopen().
- *          However, H5Oopen() does not require the type of object to be known beforehand.  
+ *          However, H5Oopen() does not require the type of object to be known beforehand.
  *          This can be useful with user-defined links, for instance, when only a path may be known.
  *
  *          H5Oopen() cannot be used to open a dataspace, attribute, property list, or file.
  *
- *          Once an object of unknown type has been opened with H5Oopen(), 
+ *          Once an object of unknown type has been opened with H5Oopen(),
  *          the type of that object can be determined by means of an H5Iget_type() call.
  *
  *          \p loc_id may be a file, group, dataset, named datatype, or attribute.
- *          If an attribute is specified for \p loc_id then the object where the 
+ *          If an attribute is specified for \p loc_id then the object where the
  *          attribute is attached will be accessed.
  *
  *          \p name must be the path to that object relative to \p loc_id.
  *
- *          \p lapl_id is the link access property list associated with the link pointing to 
- *          the object.  If default link access properties are appropriate, this can be 
+ *          \p lapl_id is the link access property list associated with the link pointing to
+ *          the object.  If default link access properties are appropriate, this can be
  *          passed in as #H5P_DEFAULT.
  *
  *          When it is no longer needed, the opened object should be closed with
@@ -245,7 +245,7 @@ extern "C" {
  *
  * \version 1.8.1 Fortran subroutine introduced in this release.
  *
- * \since 1.8.0 
+ * \since 1.8.0
  *
  */
 H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
@@ -263,14 +263,14 @@ H5_DLL hid_t H5Oopen_async(const char *app_file, const char *app_func, unsigned 
  *
  * \return \hid_ti{object}
  *
- * \details H5Oopen_by_token() opens an object specified by the object 
+ * \details H5Oopen_by_token() opens an object specified by the object
  *          identifier, \p loc_id and object token, \p token.
  *
  * \par Example
  *      An example snippet from examples/h5_extlink.c:
  *      \snippet h5_extlink.c H5Open_by_token_snip
  *
- * \since 1.12.0 
+ * \since 1.12.0
  *
  */
 H5_DLL hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
@@ -290,12 +290,13 @@ H5_DLL hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
  *
  * \return \hid_tv{object}
  *
- * \details H5Open_by_idx() opens the nth object in the group specified by \p loc_id 
+ * \details H5Open_by_idx() opens the nth object in the group specified by \p loc_id
  *          and \p group_name.
  *
- *          \p loc_id specifies a location identifier.  \p group_name specifies the group relative to
- *          \p loc_id in which the object can be found.  If \p loc_id fully specifies the group 
- *          in which the object resides, \p group_name can be a dot (.).
+ *          \p loc_id specifies a location identifier.
+ *          \p group_name specifies the group relative to \p loc_id in which the object can be found.
+ *          If \p loc_id fully specifies the group in which the object resides,
+ *          \p group_name can be a dot (.).
  *
  *          The specific object to be opened within the group is specified by the three parameters:
  *          \p idx_type, \p order and \p n.
@@ -305,22 +306,22 @@ H5_DLL hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
  *
  *          \indexes
  *
- *          \p order specifies the order in which the objects are to be referenced for the purposes 
+ *          \p order specifies the order in which the objects are to be referenced for the purposes
  *          of this function.  Valid orders include the following:
  *
  *          \orders
  *
- *          Note that for #H5_ITER_NATIVE, rather than implying a particular order, 
- *          it instructs the HDF5 library to iterate through the objects in the fastest 
+ *          Note that for #H5_ITER_NATIVE, rather than implying a particular order,
+ *          it instructs the HDF5 library to iterate through the objects in the fastest
  *          available order, i.e., in a natural order.
- * 
- *          \p n specifies the position of the object within the index.  Note that this count is 
- *          zero-based; 0 (zero) indicates that the function will return the value of the first object; 
+ *
+ *          \p n specifies the position of the object within the index.  Note that this count is
+ *          zero-based; 0 (zero) indicates that the function will return the value of the first object;
  *          if \p n is 5, the function will return the value of the sixth object; etc.
  *
  *          \p lapl_id specifies the link access property list to be used in accessing the object.
  *
- *          An object opened with this function should be closed when it is no longer needed so that 
+ *          An object opened with this function should be closed when it is no longer needed so that
  *          resource leaks will not develop.  H5Oclose() can be used to close groups, datasets,
  *          or committed datatypes.
  *
@@ -345,8 +346,10 @@ H5_DLL hid_t H5Oopen_by_idx_async(const char *app_file, const char *app_func, un
  * \param[in] name The name of the link to check
  * \lapl_id
  *
- * \return Returns a positive value if the object pointed to by the \p loc_id and \p name combination exists. 
- * \return Returns 0 if the object pointed to by the \p loc_id and \p name combination does not exist.
+ * \return Returns a positive value if the object pointed to by
+ *         the \p loc_id and \p name combination exists.
+ * \return Returns 0 if the object pointed to by
+ *         the \p loc_id and \p name combination does not exist.
  * \return Returns a negatvie value when the function fails.
  *
  * \details H5Oexists_by_name() allows an application to determine whether
@@ -424,7 +427,7 @@ H5_DLL hid_t H5Oopen_by_idx_async(const char *app_file, const char *app_func, un
  * \since 1.8.5
  *
  */
-H5_DLL htri_t  H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
+H5_DLL htri_t H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -438,14 +441,15 @@ H5_DLL htri_t  H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
  *
  * \return \herr_t
  *
- * \details H5Oget_info3() specifies an object by its identifier, \p loc_id , and 
+ * \details H5Oget_info3() specifies an object by its identifier, \p loc_id , and
  *          retrieves the metadata describing that object in \p oinfo , an H5O_info2_t \c struct.
  *
  *          The H5O_info2_t \c struct is defined in H5Opublic.h as follows :
  *          \snippet this H5O_info2_t_snip
  *
  *          Note the following about H5O_info2_t :
- *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime) only \c ctime has been implemented.
+ *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime)
+ *            only \c ctime has been implemented.
  *          - The \c atime value is the last time the object was read or written.
  *          - The \c mtime value is the last time the raw data in the object was changed.
  *          - The \c ctime value is the last time the metadata for the object was changed.
@@ -454,15 +458,15 @@ H5_DLL htri_t  H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
  *          The H5O_token_t is defined in H5public.h as follows:
  *          \snippet H5public.h H5O_token_t_snip
  *
- *          The H5O_type_t \c enum indicates the object type and 
+ *          The H5O_type_t \c enum indicates the object type and
  *          is defined in H5Opublic.h as follows:
  *          \snippet this H5O_type_t_snip
- *      
+ *
  *          Note that the object retrieved as indicated by \p loc_id
  *          refers only to the types specified by H5O_type_t.
  *
- *          The \p fields parameter contains flags to determine which fields will be filled in 
- *          the H5O_info2_t \c struct returned in \p oinfo. 
+ *          The \p fields parameter contains flags to determine which fields will be filled in
+ *          the H5O_info2_t \c struct returned in \p oinfo.
  *          These flags are defined in the H5Opublic.h file:
  *
  *          \obj_info_fields
@@ -487,13 +491,13 @@ H5_DLL htri_t  H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
+H5_DLL herr_t H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
 
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5O
  *
- * \brief Retrieves the metadata for an object, identifying the object by 
+ * \brief Retrieves the metadata for an object, identifying the object by
  *        location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
@@ -504,8 +508,8 @@ H5_DLL herr_t  H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
  *
  * \return \herr_t
  *
- * \details H5Oget_info_by_name3() specifies an object’s location and name, 
- *          \p loc_id and \p name, respectively, and retrieves the metadata 
+ * \details H5Oget_info_by_name3() specifies an object’s location and name,
+ *          \p loc_id and \p name, respectively, and retrieves the metadata
  *          describing that object in \p oinfo, an H5O_info2_t struct.
  *
  *          \p oinfo, in which the object information is returned, is a \c struct of
@@ -514,7 +518,8 @@ H5_DLL herr_t  H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
  *          \snippet this H5O_info2_t_snip
  *
  *          Note the following about H5O_info2_t :
- *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime) only \c ctime has been implemented.
+ *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime)
+ *            only \c ctime has been implemented.
  *          - The \c atime value is the last time the object was read or written.
  *          - The \c mtime value is the last time the raw data in the object was changed.
  *          - The \c ctime value is the last time the metadata for the object was changed.
@@ -523,20 +528,20 @@ H5_DLL herr_t  H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
  *          The H5O_token_t is defined in H5public.h as follows:
  *          \snippet H5public.h H5O_token_t_snip
  *
- *          The H5O_type_t \c enum indicates the object type and 
+ *          The H5O_type_t \c enum indicates the object type and
  *          is defined in H5Opublic.h as follows:
  *          \snippet this H5O_type_t_snip
  *
  *          Note that the object retrieved as indicated by \p loc_id
  *          refers only to the types specified by H5O_type_t.
  *
- *          The \p fields parameter contains flags to determine which fields will be filled in 
- *          the H5O_info2_t \c struct returned in \p oinfo. 
+ *          The \p fields parameter contains flags to determine which fields will be filled in
+ *          the H5O_info2_t \c struct returned in \p oinfo.
  *          These flags are defined in the H5Opublic.h file:
  *
  *          \obj_info_fields
  *
- *          The link access property list, \c lapl_id, is not currently used; 
+ *          The link access property list, \c lapl_id, is not currently used;
  *          it should be passed in as #H5P_DEFAULT.
  *
  * \par Example
@@ -546,17 +551,17 @@ H5_DLL herr_t  H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Oget_info_by_name3(hid_t loc_id, const char *name, H5O_info2_t *oinfo, unsigned fields,
-                                    hid_t lapl_id);
-H5_DLL herr_t  H5Oget_info_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
-                                         hid_t loc_id, const char *name, H5O_info2_t *oinfo /*out*/,
-                                         unsigned fields, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Oget_info_by_name3(hid_t loc_id, const char *name, H5O_info2_t *oinfo, unsigned fields,
+                                   hid_t lapl_id);
+H5_DLL herr_t H5Oget_info_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
+                                        hid_t loc_id, const char *name, H5O_info2_t *oinfo /*out*/,
+                                        unsigned fields, hid_t lapl_id, hid_t es_id);
 
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5O
  *
- * \brief Retrieves the metadata for an object, identifying the object 
+ * \brief Retrieves the metadata for an object, identifying the object
  *        by an index position
  *
  * \fgdta_loc_obj_id{loc_id}
@@ -591,7 +596,8 @@ H5_DLL herr_t  H5Oget_info_by_name_async(const char *app_file, const char *app_f
  *          \snippet this H5O_info2_t_snip
  *
  *          Note the following about H5O_info2_t :
- *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime) only \c ctime has been implemented.
+ *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime)
+ *            only \c ctime has been implemented.
  *          - The \c atime value is the last time the object was read or written.
  *          - The \c mtime value is the last time the raw data in the object was changed.
  *          - The \c ctime value is the last time the metadata for the object was changed.
@@ -600,19 +606,19 @@ H5_DLL herr_t  H5Oget_info_by_name_async(const char *app_file, const char *app_f
  *          H5O_token_t is defined in H5public.h as follows:
  *          \snippet H5public.h H5O_token_t_snip
  *
- *          The #H5O_type_t \c enum indicates the object type and 
+ *          The #H5O_type_t \c enum indicates the object type and
  *          is defined in H5Opublic.h as follows:
  *          \snippet this H5O_type_t_snip
  *
  *          Note that the object retrieved as indicated by \p loc_id
  *          refers only to the types specified by #H5O_type_t.
  *
- *          The \p fields parameter contains flags to determine which fields will be filled in 
- *          the H5O_info2_t \c struct returned in \p oinfo. 
+ *          The \p fields parameter contains flags to determine which fields will be filled in
+ *          the H5O_info2_t \c struct returned in \p oinfo.
  *          These flags are defined in the H5Opublic.h file:
  *          \obj_info_fields
  *
- *          The link access property list, \c lapl_id, is not currently used; 
+ *          The link access property list, \c lapl_id, is not currently used;
  *          it should be passed in as #H5P_DEFAULT.
  *
  * \par Example
@@ -622,9 +628,9 @@ H5_DLL herr_t  H5Oget_info_by_name_async(const char *app_file, const char *app_f
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Oget_info_by_idx3(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                   H5_iter_order_t order, hsize_t n, H5O_info2_t *oinfo, unsigned fields,
-                                   hid_t lapl_id);
+H5_DLL herr_t H5Oget_info_by_idx3(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+                                  H5_iter_order_t order, hsize_t n, H5O_info2_t *oinfo, unsigned fields,
+                                  hid_t lapl_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -658,7 +664,7 @@ H5_DLL herr_t  H5Oget_info_by_idx3(hid_t loc_id, const char *group_name, H5_inde
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Oget_native_info(hid_t loc_id, H5O_native_info_t *oinfo, unsigned fields);
+H5_DLL herr_t H5Oget_native_info(hid_t loc_id, H5O_native_info_t *oinfo, unsigned fields);
 
 /**
  *-------------------------------------------------------------------------
@@ -693,14 +699,14 @@ H5_DLL herr_t  H5Oget_native_info(hid_t loc_id, H5O_native_info_t *oinfo, unsign
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Oget_native_info_by_name(hid_t loc_id, const char *name, H5O_native_info_t *oinfo,
-                                          unsigned fields, hid_t lapl_id);
+H5_DLL herr_t H5Oget_native_info_by_name(hid_t loc_id, const char *name, H5O_native_info_t *oinfo,
+                                         unsigned fields, hid_t lapl_id);
 
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5O
  *
- * \brief Retrieve native file format information about an object 
+ * \brief Retrieve native file format information about an object
  *        according to the order of an index
  *
  * \fgdta_loc_obj_id{loc_id}
@@ -733,15 +739,15 @@ H5_DLL herr_t  H5Oget_native_info_by_name(hid_t loc_id, const char *name, H5O_na
  *          Possible values defined in H5Opublic.h are:
  *          \snippet this H5O_native_info_fields_snip
  *
- *          The link access property list, \c lapl_id, is not currently used; 
+ *          The link access property list, \c lapl_id, is not currently used;
  *          it should be passed in as #H5P_DEFAULT.
  *
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                         H5_iter_order_t order, hsize_t n, H5O_native_info_t *oinfo,
-                                         unsigned fields, hid_t lapl_id);
+H5_DLL herr_t H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+                                        H5_iter_order_t order, hsize_t n, H5O_native_info_t *oinfo,
+                                        unsigned fields, hid_t lapl_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -750,7 +756,7 @@ H5_DLL herr_t  H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H
  * \brief Creates a hard link to an object in an HDF5 file
  *
  * \param[in] obj_id Object to be linked
- * \param[in] new_loc_id Location identifier at which object is to be linked; 
+ * \param[in] new_loc_id Location identifier at which object is to be linked;
  *                       may be a file, group, dataset, named datatype or attribute identifier.
  * \param[in] new_name Name of link to be created, relative to \p new_loc_id.
  * \lcpl_id
@@ -766,7 +772,7 @@ H5_DLL herr_t  H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H
  *          H5Olink() is designed for two purposes:
  *          - To create the first hard link to an object that has just
  *            been created with H5Dcreate_anon(), H5Gcreate_anon(), or
- *            H5Tcommit_anon().  
+ *            H5Tcommit_anon().
  *          - To add additional structure to an existing
  *            file so that, for example, an object can be shared among
  *            multiple groups.
@@ -784,7 +790,7 @@ H5_DLL herr_t  H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H
  * \code
  *
  *      // Creates a link creation property list (LCPL).
- *      hid_t lcpl_id = H5Pcreate(H5P_LINK_CREATE);  
+ *      hid_t lcpl_id = H5Pcreate(H5P_LINK_CREATE);
  *
  *      // Sets "create missing intermediate groups" property in that LCPL.
  *      int status = H5Pset_create_intermediate_group(lcpl_id, TRUE);
@@ -797,7 +803,7 @@ H5_DLL herr_t  H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H
  *
  * \endcode
  *
- * \par 
+ * \par
  *      Note that unless the object is intended to be temporary,
  *      the H5O_LINK call is mandatory if an object created with one
  *      of the H5*_CREATE_ANON functions (or with H5T_COMMIT_ANON)
@@ -810,7 +816,7 @@ H5_DLL herr_t  H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H
  * \since 1.8.0
  *
  */
-H5_DLL herr_t  H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id);
+H5_DLL herr_t H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -836,8 +842,8 @@ H5_DLL herr_t  H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid
  *          count, an H5Oget_info() call is required; the reference count
  *          is returned in the \c rc field of the #H5O_info_t \c struct.
  *
- * \warning This function must be used with care! 
- * \warning Improper use can lead to inaccessible data, wasted space in the file, 
+ * \warning This function must be used with care!
+ * \warning Improper use can lead to inaccessible data, wasted space in the file,
  *          or <b><em>file corruption</em></b>.
  *
  * \version 1.8.11 Fortran subroutine introduced in this release.
@@ -845,7 +851,7 @@ H5_DLL herr_t  H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid
  * \since 1.8.0
  *
  */
-H5_DLL herr_t  H5Oincr_refcount(hid_t object_id);
+H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -871,8 +877,8 @@ H5_DLL herr_t  H5Oincr_refcount(hid_t object_id);
  *          count, an H5Oget_info() call is required; the reference count
  *          is returned in the \c rc field of the #H5O_info_t \c struct.
  *
- * \warning This function must be used with care! 
- * \warning Improper use can lead to inaccessible data, wasted space in the file, 
+ * \warning This function must be used with care!
+ * \warning Improper use can lead to inaccessible data, wasted space in the file,
  *          or <b><em>file corruption</em></b>.
  *
  * \version 1.8.11 Fortran subroutine introduced in this release.
@@ -880,7 +886,7 @@ H5_DLL herr_t  H5Oincr_refcount(hid_t object_id);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t  H5Odecr_refcount(hid_t object_id);
+H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -888,7 +894,7 @@ H5_DLL herr_t  H5Odecr_refcount(hid_t object_id);
  *
  * \brief Copies an object in an HDF5 file
  *
- * \param[in] src_loc_id Object identifier indicating the location of the 
+ * \param[in] src_loc_id Object identifier indicating the location of the
  *                       source object to be copied
  * \param[in] src_name Name of the source object to be copied
  * \param[in] dst_loc_id Location identifier specifying the destination
@@ -909,20 +915,20 @@ H5_DLL herr_t  H5Odecr_refcount(hid_t object_id);
  *
  *          The copy will be created with the path specified in \p dst_name,
  *          which must not pre-exist in the destination location. If
- *          \p dst_name already exists at the location \p dst_loc_id, 
- *          H5Ocopy() will fail. If \p dst_name is an absolute path, 
+ *          \p dst_name already exists at the location \p dst_loc_id,
+ *          H5Ocopy() will fail. If \p dst_name is an absolute path,
  *          the copy will be created relative to the file’s root group.
  *
  *          The copy of the object is created with the property lists
  *          specified by \p ocpypl_id and \p lcpl_id. #H5P_DEFAULT can be passed
  *          in for these property lists. The default behavior:
  *
- *          - of the link creation property list is to NOT create 
+ *          - of the link creation property list is to NOT create
  *             intermediate groups.
- *          - of the flags specified by the object creation property list 
- *            is described in H5Pset_copy_object(). 
+ *          - of the flags specified by the object creation property list
+ *            is described in H5Pset_copy_object().
  *
- *          These property lists or flags can be modified to govern the 
+ *          These property lists or flags can be modified to govern the
  *          behavior of H5Ocopy() as follows:
  *
  *          - A flag controlling the creation of intermediate groups that
@@ -936,7 +942,7 @@ H5_DLL herr_t  H5Odecr_refcount(hid_t object_id);
  *          - Flags controlling other aspects of object copying are set in the
  *              object copy property list \p ocpypl_id with H5Pset_copy_object().
  *
- *          H5Ocopy() will always try to make a copy of the object specified 
+ *          H5Ocopy() will always try to make a copy of the object specified
  *          in \p src_name.
  *
  *          - If the object specified by \p src_name is a group containing a
@@ -963,8 +969,8 @@ H5_DLL herr_t  H5Odecr_refcount(hid_t object_id);
  *          - H5Pset_create_intermediate_group()
  *          - H5Pset_mcdt_search_cb()
  *          .
- *      - Copying Committed Datatypes with #H5Ocopy - A comprehensive 
- *        discussion of copying committed datatypes (PDF) in 
+ *      - Copying Committed Datatypes with #H5Ocopy - A comprehensive
+ *        discussion of copying committed datatypes (PDF) in
  *        Advanced Topics in HDF5
  *
  * \version 1.8.9 Fortran subroutine introduced in this release.
@@ -972,11 +978,11 @@ H5_DLL herr_t  H5Odecr_refcount(hid_t object_id);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t  H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
-                       hid_t ocpypl_id, hid_t lcpl_id);
-H5_DLL herr_t  H5Ocopy_async(const char *app_file, const char *app_func, unsigned app_line, hid_t src_loc_id,
-                             const char *src_name, hid_t dst_loc_id, const char *dst_name, hid_t ocpypl_id,
-                             hid_t lcpl_id, hid_t es_id);
+H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
+                      hid_t ocpypl_id, hid_t lcpl_id);
+H5_DLL herr_t H5Ocopy_async(const char *app_file, const char *app_func, unsigned app_line, hid_t src_loc_id,
+                            const char *src_name, hid_t dst_loc_id, const char *dst_name, hid_t ocpypl_id,
+                            hid_t lcpl_id, hid_t es_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -1007,12 +1013,12 @@ H5_DLL herr_t  H5Ocopy_async(const char *app_file, const char *app_func, unsigne
  *          will be attached to the object to which the attribute belongs
  *          and not to the attribute itself.
  *
- * \version 1.8.11 Fortran subroutine introduced in this release.  
+ * \version 1.8.11 Fortran subroutine introduced in this release.
  *
  * \since 1.8.0
  *
  */
-H5_DLL herr_t  H5Oset_comment(hid_t obj_id, const char *comment);
+H5_DLL herr_t H5Oset_comment(hid_t obj_id, const char *comment);
 
 /**
  *-------------------------------------------------------------------------
@@ -1030,12 +1036,12 @@ H5_DLL herr_t  H5Oset_comment(hid_t obj_id, const char *comment);
  * \details H5Oset_comment_by_name() sets the comment for the specified object
  *          to the contents of \p comment. Any previously existing comment
  *          is overwritten.
- * 
+ *
  *          The target object is specified by \p loc_id and \p name.
- *          \p loc_id can specify any object in the file. 
+ *          \p loc_id can specify any object in the file.
  *          \p name can be one of the following:
  *
- *          - The name of the object specified as a path relative to \p loc_id 
+ *          - The name of the object specified as a path relative to \p loc_id
  *          - An absolute name of the object, starting from \c /, the file’s root group
  *          - A dot (\c .), if \p loc_id fully specifies the object
  *
@@ -1056,12 +1062,12 @@ H5_DLL herr_t  H5Oset_comment(hid_t obj_id, const char *comment);
  *          link access property list can come into play when traversing
  *          links to access an object.
  *
- * \version 1.8.11 Fortran subroutine introduced in this release.  
+ * \version 1.8.11 Fortran subroutine introduced in this release.
  *
  * \since 1.8.0
  *
  */
-H5_DLL herr_t  H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment, hid_t lapl_id);
+H5_DLL herr_t H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment, hid_t lapl_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -1080,7 +1086,7 @@ H5_DLL herr_t  H5Oset_comment_by_name(hid_t loc_id, const char *name, const char
  *
  * \details H5Oget_comment() retrieves the comment for the specified object in
  *          the buffer \p comment.
- *           
+ *
  *          The target object is specified by an identifier, \p object_id.
  *
  *          The size in bytes of the buffer \p comment, including the \c NULL
@@ -1096,7 +1102,7 @@ H5_DLL herr_t  H5Oset_comment_by_name(hid_t loc_id, const char *name, const char
  *          If an object does not have a comment, the empty string is
  *          returned in \p comment.
  *
- * \version 1.8.11 Fortran subroutine introduced in this release.  
+ * \version 1.8.11 Fortran subroutine introduced in this release.
  *
  * \since 1.8.0
  *
@@ -1115,26 +1121,26 @@ H5_DLL ssize_t H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize);
  * \param[in] bufsize Anticipated required size of the \p comment buffer
  * \lapl_id
  *
- * \return Upon success, returns the number of characters in the comment, 
- *         not including the \c NULL terminator, or zero (\c 0) if the object 
- *         has no comment. The value returned may be larger than \c bufsize. 
+ * \return Upon success, returns the number of characters in the comment,
+ *         not including the \c NULL terminator, or zero (\c 0) if the object
+ *         has no comment. The value returned may be larger than \c bufsize.
  *         Otherwise returns a negative value.
  *
- * \details H5Oget_comment_by_name() retrieves the comment for an object 
+ * \details H5Oget_comment_by_name() retrieves the comment for an object
  *          in the buffer \p comment.
  *
  *          The target object is specified by \p loc_id and \p name.
- *          \p loc_id can specify any object in the file. 
+ *          \p loc_id can specify any object in the file.
  *          \p name can be one of the following:
  *
- *          - The name of the object relative to \p loc_id 
+ *          - The name of the object relative to \p loc_id
  *          - An absolute name of the object, starting from \c /, the file’s root group
  *          - A dot (\c .), if \p loc_id fully specifies the object
  *
  *          The size in bytes of the comment, including the \c NULL terminator,
  *          is specified in \p bufsize. If \p bufsize is unknown, a preliminary
  *          H5Oget_comment_by_name() call with the pointer \p comment set
- *          to \c NULL will return the size of the comment <em>without</em> 
+ *          to \c NULL will return the size of the comment <em>without</em>
  *          the \c NULL terminator.
  *
  *          If \p bufsize is set to a smaller value than described above,
@@ -1148,7 +1154,7 @@ H5_DLL ssize_t H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize);
  *          link access property list can come into play when traversing
  *          links to access an object.
  *
- * \version 1.8.11 Fortran subroutine introduced in this release.  
+ * \version 1.8.11 Fortran subroutine introduced in this release.
  *
  * \since 1.8.0
  *
@@ -1165,11 +1171,11 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  * \fgdta_loc_obj_id{obj_id}
  * \idx_type
  * \order
- * \param[in] op Callback function passing data regarding the object 
+ * \param[in] op Callback function passing data regarding the object
  *               to the calling application
- * \param[in] op_data User-defined pointer to data required by the application 
+ * \param[in] op_data User-defined pointer to data required by the application
  *                    for its processing of the object
- * \param[in] fields Flags specifying the fields to be retrieved to the 
+ * \param[in] fields Flags specifying the fields to be retrieved to the
  *                   callback \p op
  *
  * \return On success, returns the return value of the first operator
@@ -1180,21 +1186,21 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *         within the library, or the first negative value returned by
  *         an operator.
  *
- * \details H5Ovisit3() is a recursive iteration function to visit the 
- *          object \p obj_id and, if \p obj_id is a group, all objects in 
- *          and below it in an HDF5 file, thus providing a mechanism for 
- *          an application to perform a common set of operations across 
- *          all of those objects or a dynamically selected subset. 
- *          For non-recursive iteration across the members of a group, 
+ * \details H5Ovisit3() is a recursive iteration function to visit the
+ *          object \p obj_id and, if \p obj_id is a group, all objects in
+ *          and below it in an HDF5 file, thus providing a mechanism for
+ *          an application to perform a common set of operations across
+ *          all of those objects or a dynamically selected subset.
+ *          For non-recursive iteration across the members of a group,
  *          see H5Literate2().
  *
  *          If \p obj_id is a group identifier, that group serves as the
  *          root of a recursive iteration. If \p obj_id is a file identifier,
  *          that file’s root group serves as the root of the recursive
- *          iteration.  If \p obj_id is an attribute identifier, 
+ *          iteration.  If \p obj_id is an attribute identifier,
  *          then the object where the attribute is attached will be iterated.
- *          If \p obj_id is any other type of object, such as a dataset or 
- *          named datatype, there is no iteration.  
+ *          If \p obj_id is any other type of object, such as a dataset or
+ *          named datatype, there is no iteration.
  *
  *          Two parameters are used to establish the iteration: \p idx_type
  *          and \p order.
@@ -1208,12 +1214,12 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *
  *          \indexes
  *
- *          Note that the index type passed in \p idx_type is a 
- *          <em>best effort</em> setting. If the application passes in 
- *          a value indicating iteration in creation order and a group is 
- *          encountered that was not tracked in creation order, that group 
- *          will be iterated over in alpha-numeric order by name, or 
- *          <em>name order</em>.  (<em>Name order</em> is the native order 
+ *          Note that the index type passed in \p idx_type is a
+ *          <em>best effort</em> setting. If the application passes in
+ *          a value indicating iteration in creation order and a group is
+ *          encountered that was not tracked in creation order, that group
+ *          will be iterated over in alpha-numeric order by name, or
+ *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
  *          \p order specifies the order in which objects are to be inspected
@@ -1227,28 +1233,28 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *
  *          \snippet this H5O_iterate2_t_snip
  *
- *          The parameters of this callback function have the following values 
+ *          The parameters of this callback function have the following values
  *          or meanings:
  *          <table>
  *          <tr>
  *              <td>\c obj</td>
- *              <td>Object that serves as root of the iteration; 
+ *              <td>Object that serves as root of the iteration;
  *                  same value as the H5Ovisit() \p obj_id parameter</td>
  *          </tr>
  *          <tr>
  *          <td>\c name</td>
- *          <td>Name of object, relative to \c obj, being examined at 
+ *          <td>Name of object, relative to \c obj, being examined at
  *              current step of the iteration</td>
  *          </tr>
  *          <tr>
  *              <td>\c info</td>
- *              <td>H5O_info2_t \c struct containing information 
+ *              <td>H5O_info2_t \c struct containing information
  *                  regarding that object</td>
  *          </tr>
  *          <tr>
  *              <td>\c op_data</td>
- *              <td>User-defined pointer to data required by the application in 
- *                  processing the object; a pass-through of the \c op_data pointer 
+ *              <td>User-defined pointer to data required by the application in
+ *                  processing the object; a pass-through of the \c op_data pointer
  *                  provided with the H5Ovisit() function call</td>
  *          </tr>
  *          </table>
@@ -1258,29 +1264,29 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *
  *          H5O_token_t is defined in H5public.h as follows:
  *          \snippet H5public.h H5O_token_t_snip
- *      
- *          The #H5O_type_t enum indicates the object type and is 
+ *
+ *          The #H5O_type_t enum indicates the object type and is
  *          defined in H5Opublic.h as follows:
  *          \snippet this H5O_type_t_snip
- *      
- *          Note that the object retrieved as indicated by \p obj_id 
+ *
+ *          Note that the object retrieved as indicated by \p obj_id
  *          refers only to the types specified by #H5O_type_t.
  *
  *          The return values from an operator are:
- *          - Zero causes the visit iterator to continue, returning zero when all 
+ *          - Zero causes the visit iterator to continue, returning zero when all
  *            group members have been processed.
- *          - A positive value causes the visit iterator to immediately return that 
+ *          - A positive value causes the visit iterator to immediately return that
  *            positive value, indicating short-circuit success.
- *          - A negative value causes the visit iterator to immediately return that 
+ *          - A negative value causes the visit iterator to immediately return that
  *            value, indicating failure.
  *
- *          The H5Ovisit3() \p op_data parameter is a user-defined pointer to the data 
- *          required to process objects in the course of the iteration. This pointer 
- *          is passed back to each step of the iteration in the callback 
- *          function’s \p op_data parameter. 
+ *          The H5Ovisit3() \p op_data parameter is a user-defined pointer to the data
+ *          required to process objects in the course of the iteration. This pointer
+ *          is passed back to each step of the iteration in the callback
+ *          function’s \p op_data parameter.
  *
- *          The \p fields parameter contains flags to determine which fields will 
- *          be retrieved by the \p op callback function. These flags are defined 
+ *          The \p fields parameter contains flags to determine which fields will
+ *          be retrieved by the \p op callback function. These flags are defined
  *          in the H5Opublic.h file:
  *          \obj_info_fields
  *
@@ -1302,7 +1308,7 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *       from normally.
  *
  * \note Examples of this kind of routine include callbacks such as
- *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and 
+ *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and
  *       functions such as H5Tconvert() and H5Ewalk2().
  *
  * \note Exiting the routine in its normal fashion allows the HDF5
@@ -1313,7 +1319,7 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *       the routine was called. The C++ application should save some
  *       state as the routine is started so that any problem that occurs
  *       might be diagnosed.
- *      
+ *
  * \par Example
  *      An example snippet from test/links.c:
  *      \snippet links.c H5Ovisit3_snip
@@ -1321,8 +1327,8 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate2_t op,
-                         void *op_data, unsigned fields);
+H5_DLL herr_t H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate2_t op,
+                        void *op_data, unsigned fields);
 
 /**
  *-------------------------------------------------------------------------
@@ -1335,11 +1341,11 @@ H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t orde
  *                     \p loc_id, that will serve as root of the iteration
  * \idx_type
  * \order
- * \param[in] op Callback function passing data regarding the object 
+ * \param[in] op Callback function passing data regarding the object
  *               to the calling application
- * \param[in] op_data User-defined pointer to data required by the application 
+ * \param[in] op_data User-defined pointer to data required by the application
  *                    for its processing of the object
- * \param[in] fields Flags specifying the fields to be retrieved to the 
+ * \param[in] fields Flags specifying the fields to be retrieved to the
  *                   callback function \p op
  * \lapl_id
  *
@@ -1351,22 +1357,22 @@ H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t orde
  *         within the library, or the first negative value returned by
  *         an operator.
  *
- * \details H5Ovisit_by_name3() is a recursive iteration function to visit 
- *          the object specified by the \p loc_id / \p obj_name parameter 
- *          pair and, if that object is a group, all objects in and below it 
- *          in an HDF5 file, thus providing a mechanism for an application to 
- *          perform a common set of operations across all of those objects or 
- *          a dynamically selected subset. For non-recursive iteration across 
+ * \details H5Ovisit_by_name3() is a recursive iteration function to visit
+ *          the object specified by the \p loc_id / \p obj_name parameter
+ *          pair and, if that object is a group, all objects in and below it
+ *          in an HDF5 file, thus providing a mechanism for an application to
+ *          perform a common set of operations across all of those objects or
+ *          a dynamically selected subset. For non-recursive iteration across
  *          the members of a group, see H5Literate2().
  *
  *          The object serving as the root of the iteration is specified
  *          by the \p loc_id / \p obj_name parameter pair. \p loc_id specifies
  *          a file or an object in a file;  if \p loc_id is an attribute identifier,
  *          the object where the attribute is attached will be used.
- *          \p obj_name specifies either an object in the file (with an absolute 
- *          name based in the file’s root group) or an object name relative 
+ *          \p obj_name specifies either an object in the file (with an absolute
+ *          name based in the file’s root group) or an object name relative
  *          to \p loc_id. If \p loc_id fully specifies the object that is to serve
- *          as the root of the iteration, \p obj_name should be '\c .' (a dot). 
+ *          as the root of the iteration, \p obj_name should be '\c .' (a dot).
  *          (Note that when \p loc_id fully specifies the object that is to serve
  *          as the root of the iteration, the user may wish to consider
  *          using H5Ovisit3() instead of H5Ovisit_by_name3().)
@@ -1383,12 +1389,12 @@ H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t orde
  *
  *          \indexes
  *
- *          Note that the index type passed in \p idx_type is a 
- *          <em>best effort</em> setting. If the application passes in a 
- *          value indicating iteration in creation order and a group is 
- *          encountered that was not tracked in creation order, that group 
- *          will be iterated over in alpha-numeric order by name, or 
- *          <em>name order</em>.  (<em>Name order</em> is the native order 
+ *          Note that the index type passed in \p idx_type is a
+ *          <em>best effort</em> setting. If the application passes in a
+ *          value indicating iteration in creation order and a group is
+ *          encountered that was not tracked in creation order, that group
+ *          will be iterated over in alpha-numeric order by name, or
+ *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
  *          \p order specifies the order in which objects are to be inspected
@@ -1402,7 +1408,7 @@ H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t orde
  *
  *          \snippet this H5O_iterate2_t_snip
  *
- *          The parameters of this callback function have the following 
+ *          The parameters of this callback function have the following
  *          values or meanings:
  *          <table>
  *          <tr>
@@ -1411,17 +1417,17 @@ H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t orde
  *          </tr>
  *          <tr>
  *          <td>\c name</td>
- *          <td>Name of object, relative to \c obj, being examined at 
+ *          <td>Name of object, relative to \c obj, being examined at
  *              current step of the iteration</td>
  *          </tr>
  *          <tr>
  *              <td>\c info</td>
- *              <td>H5O_info2_t \c struct containing information 
+ *              <td>H5O_info2_t \c struct containing information
  *                  regarding that object</td>
  *          </tr>
  *          <tr>
  *              <td>\c op_data</td>
- *              <td>User-defined pointer to data required by the application in 
+ *              <td>User-defined pointer to data required by the application in
  *                  processing the object</td>
  *          </tr>
  *          </table>
@@ -1431,11 +1437,11 @@ H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t orde
  *
  *          H5O_token_t is defined in H5public.h as follows:
  *          \snippet H5public.h H5O_token_t_snip
- *      
- *          The #H5O_type_t enum indicates the object type and is 
+ *
+ *          The #H5O_type_t enum indicates the object type and is
  *          defined in H5Opublic.h as follows:
  *          \snippet this H5O_type_t_snip
- *      
+ *
  *          The H5Ovisit_by_name3() \p op_data parameter is a user-defined
  *          pointer to the data required to process objects in the course
  *          of the iteration. This pointer is passed back to each step of
@@ -1449,14 +1455,14 @@ H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t orde
  *          that a link prefix be set in a link access property list
  *          (see H5Pset_elink_prefix()).
  *
- *          The \p fields parameter contains flags to determine which fields will 
- *          be retrieved by the \p op callback function. These flags are defined 
+ *          The \p fields parameter contains flags to determine which fields will
+ *          be retrieved by the \p op callback function. These flags are defined
  *          in the H5Opublic.h file:
  *          \obj_info_fields
  *
- *          H5Lvisit_by_name2() and H5Ovisit_by_name3() are companion 
- *          functions: one for examining and operating on links; the other 
- *          for examining and operating on the objects that those links point to. 
+ *          H5Lvisit_by_name2() and H5Ovisit_by_name3() are companion
+ *          functions: one for examining and operating on links; the other
+ *          for examining and operating on the objects that those links point to.
  *          Both functions ensure that by the time the function completes
  *          successfully, every link or object below the specified point
  *          in the file has been presented to the application for whatever
@@ -1468,7 +1474,7 @@ H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t orde
  *       from normally.
  *
  * \note Examples of this kind of routine include callbacks such as
- *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and 
+ *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and
  *       functions such as H5Tconvert() and H5Ewalk2().
  *
  * \note Exiting the routine in its normal fashion allows the HDF5
@@ -1479,7 +1485,7 @@ H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t orde
  *       the routine was called. The C++ application should save some
  *       state as the routine is started so that any problem that occurs
  *       might be diagnosed.
- *      
+ *
  * \par Example
  *      An example snippet from test/links.c:
  *      \snippet links.c H5Ovisit_by_name3_snip
@@ -1487,9 +1493,9 @@ H5_DLL herr_t  H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t orde
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Ovisit_by_name3(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-                                 H5_iter_order_t order, H5O_iterate2_t op, void *op_data, unsigned fields,
-                                 hid_t lapl_id);
+H5_DLL herr_t H5Ovisit_by_name3(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                                H5_iter_order_t order, H5O_iterate2_t op, void *op_data, unsigned fields,
+                                hid_t lapl_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -1510,14 +1516,14 @@ H5_DLL herr_t  H5Ovisit_by_name3(hid_t loc_id, const char *obj_name, H5_index_t 
  *          H5Oclose() is not used to close a dataspace, attribute, property
  *          list, or file.
  *
- * \version 1.8.8 Fortran subroutine introduced in this release.  
+ * \version 1.8.8 Fortran subroutine introduced in this release.
  *
  * \since 1.8.0
  *
  */
-H5_DLL herr_t  H5Oclose(hid_t object_id);
-H5_DLL herr_t  H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t object_id,
-                              hid_t es_id);
+H5_DLL herr_t H5Oclose(hid_t object_id);
+H5_DLL herr_t H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t object_id,
+                             hid_t es_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -1532,7 +1538,7 @@ H5_DLL herr_t  H5Oclose_async(const char *app_file, const char *app_func, unsign
  * \details H5Oflush() causes all buffers associated with an object to be immediately
  *          flushed to disk without removing the data from the cache.
  *
- *          The object associated with \p object_id can be any named object in an 
+ *          The object associated with \p object_id can be any named object in an
  *          HDF5 file including a dataset, a group, or a committed datatype.
  *
  * \note HDF5 does not possess full control over buffering. H5Oflush()
@@ -1561,13 +1567,13 @@ H5_DLL herr_t  H5Oclose_async(const char *app_file, const char *app_func, unsign
  *      - H5Oare_mdc_flushes_disabled()
  *      - H5Odisable_mdc_flushes()
  *      - H5Oenable_mdc_flushes()
- * 
+ *
  * \since 1.10.0
  *
  */
-H5_DLL herr_t  H5Oflush(hid_t obj_id);
-H5_DLL herr_t  H5Oflush_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
-                              hid_t es_id);
+H5_DLL herr_t H5Oflush(hid_t obj_id);
+H5_DLL herr_t H5Oflush_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
+                             hid_t es_id);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5O
@@ -1586,24 +1592,24 @@ H5_DLL herr_t  H5Oflush_async(const char *app_file, const char *app_func, unsign
  *          the object. The reopened object is automatically re-registered
  *          with the same identifier.
  *
- *          The object associated with \p oid can be any named object in an 
+ *          The object associated with \p oid can be any named object in an
  *          HDF5 file including a dataset, a group, or a committed datatype.
- * 
+ *
  * \since 1.10.0
  *
  */
-H5_DLL herr_t  H5Orefresh(hid_t oid);
-H5_DLL herr_t  H5Orefresh_async(const char *app_file, const char *app_func, unsigned app_line, hid_t oid,
-                                hid_t es_id);
+H5_DLL herr_t H5Orefresh(hid_t oid);
+H5_DLL herr_t H5Orefresh_async(const char *app_file, const char *app_func, unsigned app_line, hid_t oid,
+                               hid_t es_id);
 
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5O
  *
- * \brief Prevents metadata entries for an HDF5 object from being flushed 
+ * \brief Prevents metadata entries for an HDF5 object from being flushed
  *        from the metadata cache to storage
  *
- * \param[in] object_id Identifier of the object that will have flushes disabled; 
+ * \param[in] object_id Identifier of the object that will have flushes disabled;
  *                      may be a group, named datatype, or dataset identifier
  *
  * \return \herr_t
@@ -1622,26 +1628,26 @@ H5_DLL herr_t  H5Orefresh_async(const char *app_file, const char *app_func, unsi
  *          HDF5 object level (datasets, groups, committed datatypes)
  *          and the entire metadata cache level.
  *
- * \note HDF5 objects include datasets, groups, and committed datatypes. 
+ * \note HDF5 objects include datasets, groups, and committed datatypes.
  *       Only #hid_t identifiers that represent these objects can be passed to the function.
- * \note Passing in a #hid_t identifier that represents any other HDF5 entity is 
+ * \note Passing in a #hid_t identifier that represents any other HDF5 entity is
  *       considered an error.
- * \note It is an error to pass an HDF5 file identifier 
+ * \note It is an error to pass an HDF5 file identifier
  *       (obtained from H5Fopen() or H5Fcreate())
  *       to this function.
- * \note Misuse of this function can cause the cache to exhaust 
+ * \note Misuse of this function can cause the cache to exhaust
  *       available memory.
- * \note Objects can be returned to the default automatic flush behavior 
+ * \note Objects can be returned to the default automatic flush behavior
  *       with H5Oenable_mdc_flushes().
- * \note Flush prevention only pertains to new or dirty metadata entries. 
+ * \note Flush prevention only pertains to new or dirty metadata entries.
  *       Clean entries can be evicted from the cache.
- * \note Calling this function on an object that has already had flushes 
+ * \note Calling this function on an object that has already had flushes
  *       disabled will return an error.
  *
  * \since 1.10.0
  *
  */
-H5_DLL herr_t  H5Odisable_mdc_flushes(hid_t object_id);
+H5_DLL herr_t H5Odisable_mdc_flushes(hid_t object_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -1649,50 +1655,50 @@ H5_DLL herr_t  H5Odisable_mdc_flushes(hid_t object_id);
  *
  * \brief Enables flushing of dirty metadata entries from a file’s metadata cache
  *
- * \param[in] object_id Identifier of the object that will have flushes re-enabled; 
- *                      may be a group, named datatype, or dataset identifier 
+ * \param[in] object_id Identifier of the object that will have flushes re-enabled;
+ *                      may be a group, named datatype, or dataset identifier
  *
  * \return \herr_t
  *
  * \details H5Oenable_mdc_flushes(), H5Odisable_mdc_flushes()
- *          and associated flush functions can be used to control the flushing 
+ *          and associated flush functions can be used to control the flushing
  *          of entries from a file’s metadata cache.
  *
- *          This function allows an object or cache’s dirty metadata entries to be 
+ *          This function allows an object or cache’s dirty metadata entries to be
  *          flushed from the cache by the usual cache eviction/flush policy.
  *
- *          Metadata cache entries can be controlled at both the individual HDF5 
- *          object level (datasets, groups, committed datatypes) and the entire 
+ *          Metadata cache entries can be controlled at both the individual HDF5
+ *          object level (datasets, groups, committed datatypes) and the entire
  *          metadata cache level.
  *
  *
- * \note HDF5 objects include datasets, groups, and committed datatypes. 
- *       Only #hid_t identifiers that represent these objects can be 
+ * \note HDF5 objects include datasets, groups, and committed datatypes.
+ *       Only #hid_t identifiers that represent these objects can be
  *       passed to the function.
  *
  * \note Passing in a #hid_t identifier that represents any other HDF5 entity
  *       is considered an error.
  *
- * \note It is an error to pass an HDF5 file identifier 
+ * \note It is an error to pass an HDF5 file identifier
  *       (obtained from H5Fopen() or H5Fcreate())
  *       to this function.
  *
- * \note Using this function on an object that has not had flushes disabled 
- *       is considered an error. The state of an object can be determined 
+ * \note Using this function on an object that has not had flushes disabled
+ *       is considered an error. The state of an object can be determined
  *       with H5Oare_mdc_flushes_disabled().
  *
  * \note An object will be returned to the default flush algorithm when it is closed.
  *
- * \note All objects will be returned to the default flush algorithm when 
+ * \note All objects will be returned to the default flush algorithm when
  *       the file is closed.
  *
- * \note An object’s entries will not necessarily be flushed as a result of 
+ * \note An object’s entries will not necessarily be flushed as a result of
  *       calling this function.
  *
  * \since 1.10.0
  *
  */
-H5_DLL herr_t  H5Oenable_mdc_flushes(hid_t object_id);
+H5_DLL herr_t H5Oenable_mdc_flushes(hid_t object_id);
 
 /**
  *-------------------------------------------------------------------------
@@ -1700,11 +1706,11 @@ H5_DLL herr_t  H5Oenable_mdc_flushes(hid_t object_id);
  *
  * \brief Retrieves comment for specified object
  *
- * \param[in] object_id Identifier of an object in the cache; 
+ * \param[in] object_id Identifier of an object in the cache;
  *                      may be a group, named datatype, or dataset identifier
  * \param[out] are_disabled Flushes enabled/disabled
  *
- * \return \p are_disabled will be set to \c 1 if an object has had flushes disabled 
+ * \return \p are_disabled will be set to \c 1 if an object has had flushes disabled
  *            and \c 0 if it has not had flushes disabled.
  * \return \herr_t
  *
@@ -1712,22 +1718,22 @@ H5_DLL herr_t  H5Oenable_mdc_flushes(hid_t object_id);
  *          datatype) has had flushes of metadata entries disabled.
  *
  *          The H5Oenable_mdc_flushes(), H5Odisable_mdc_flushes() and
- *          associated flush functions can be used to control the flushing of 
+ *          associated flush functions can be used to control the flushing of
  *          entries from a file’s metadata cache. Metadata cache entries can be controlled
  *          at both the individual HDF5 object level (datasets, groups,
  *          committed datatypes) and the entire metadata cache level.
  *
- * \note HDF5 objects include datasets, groups, and committed datatypes. 
+ * \note HDF5 objects include datasets, groups, and committed datatypes.
  *       Only #hid_t identifiers that represent these objects can be passed to the function.
- * \note Passing in a #hid_t identifier that represents any other HDF5 entity is 
+ * \note Passing in a #hid_t identifier that represents any other HDF5 entity is
  *       considered an error.
- * \note It is an error to pass an HDF5 file identifier 
+ * \note It is an error to pass an HDF5 file identifier
  *       (obtained from H5Fopen() or H5Fcreate()) to this function.
  *
  * \since 1.10.0
  *
  */
-H5_DLL herr_t  H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled);
+H5_DLL herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled);
 
 /**
  *-------------------------------------------------------------------------
@@ -1742,14 +1748,14 @@ H5_DLL herr_t  H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disable
  *
  * \return \herr_t
  *
- * \details H5Otoken_cmp() compares two VOL connector object tokens, \p token1 
- *          and \p token2 for the file or group identifier specified by \p loc_id.  
+ * \details H5Otoken_cmp() compares two VOL connector object tokens, \p token1
+ *          and \p token2 for the file or group identifier specified by \p loc_id.
  *          Both object tokens must be from the same VOL connector class.
  *
  *          H5O_token_t is defined in H5public.h as follows:
  *          \snippet H5public.h H5O_token_t_snip
  *
- *          A comparison value, \p cmp_value, is returned, which indicates the 
+ *          A comparison value, \p cmp_value, is returned, which indicates the
  *          result of the comparison:
  *
  * <table>
@@ -1778,8 +1784,8 @@ H5_DLL herr_t  H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disable
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Otoken_cmp(hid_t loc_id, const H5O_token_t *token1, const H5O_token_t *token2,
-                            int *cmp_value);
+H5_DLL herr_t H5Otoken_cmp(hid_t loc_id, const H5O_token_t *token1, const H5O_token_t *token2,
+                           int *cmp_value);
 
 /**
  *-------------------------------------------------------------------------
@@ -1793,14 +1799,14 @@ H5_DLL herr_t  H5Otoken_cmp(hid_t loc_id, const H5O_token_t *token1, const H5O_t
  *
  * \return \herr_t
  *
- * \details H5Otoken_to_str() serializes a connector's object token specified by 
- *          \p token and the location identifier for the object, \p loc_id, 
+ * \details H5Otoken_to_str() serializes a connector's object token specified by
+ *          \p token and the location identifier for the object, \p loc_id,
  *          into a string, \p token_str.
  *
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Otoken_to_str(hid_t loc_id, const H5O_token_t *token, char **token_str);
+H5_DLL herr_t H5Otoken_to_str(hid_t loc_id, const H5O_token_t *token, char **token_str);
 
 /**
  *-------------------------------------------------------------------------
@@ -1814,14 +1820,14 @@ H5_DLL herr_t  H5Otoken_to_str(hid_t loc_id, const H5O_token_t *token, char **to
  *
  * \return \herr_t
  *
- * \details H5Otoken_from_str() deserializes a string, \p token_str, into a 
- *          connector object token, \p token, for the object specified by the 
+ * \details H5Otoken_from_str() deserializes a string, \p token_str, into a
+ *          connector object token, \p token, for the object specified by the
  *          location identifier, \p loc_id.
  *
  * \since 1.12.0
  *
  */
-H5_DLL herr_t  H5Otoken_from_str(hid_t loc_id, const char *token_str, H5O_token_t *token);
+H5_DLL herr_t H5Otoken_from_str(hid_t loc_id, const char *token_str, H5O_token_t *token);
 
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
@@ -1883,13 +1889,13 @@ typedef struct H5O_stat_t {
 /* (For H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx versions 1 & 2) */
 typedef struct H5O_info1_t {
     unsigned long  fileno;    /* File number that object is located in */
-    haddr_t        addr;      /* Object address in file	*/
+    haddr_t        addr;      /* Object address in file                */
     H5O_type_t     type;      /* Basic object type (group, dataset, etc.) */
     unsigned       rc;        /* Reference count of object    */
-    time_t         atime;     /* Access time			*/
-    time_t         mtime;     /* Modification time		*/
-    time_t         ctime;     /* Change time			*/
-    time_t         btime;     /* Birth time			*/
+    time_t         atime;     /* Access time                  */
+    time_t         mtime;     /* Modification time            */
+    time_t         ctime;     /* Change time                  */
+    time_t         btime;     /* Birth time                   */
     hsize_t        num_attrs; /* # of attributes attached to object */
     H5O_hdr_info_t hdr;       /* Object header information */
     /* Extra metadata storage for obj & attributes */
@@ -1924,34 +1930,34 @@ typedef herr_t (*H5O_iterate1_t)(hid_t obj, const char *name, const H5O_info1_t 
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Oopen_by_token().
  *
- * \details H5Oopen_by_addr() opens a group, dataset, or committed (named) datatype using its 
- *          address within an HDF5 file, \p addr. The resulting opened object is identical to 
- *          an object opened with H5Oopen() and should be closed with H5Oclose() or an 
+ * \details H5Oopen_by_addr() opens a group, dataset, or committed (named) datatype using its
+ *          address within an HDF5 file, \p addr. The resulting opened object is identical to
+ *          an object opened with H5Oopen() and should be closed with H5Oclose() or an
  *          object-type-specific closing function (such as H5Gclose()) when no longer needed.
  *
  *          \p loc_id is a location identifier in the file.
  *
- *          The object’s address within the file, \p addr, is the byte offset of the first byte 
- *          of the object header from the beginning of the HDF5 file space, i.e., from the 
- *          beginning of the super block (see the “HDF5 Storage Model” section of the The 
+ *          The object’s address within the file, \p addr, is the byte offset of the first byte
+ *          of the object header from the beginning of the HDF5 file space, i.e., from the
+ *          beginning of the super block (see the “HDF5 Storage Model” section of the The
  *          HDF5 Data Model and File Structure chapter of the <em>HDF5 User's Guide</em>.)
  *
  *          \p addr can be obtained via either of two function calls. H5Gget_objinfo() returns
- *          the object’s address in the \c objno field of the H5G_stat_t \c struct; 
+ *          the object’s address in the \c objno field of the H5G_stat_t \c struct;
  *          H5Lget_info() returns the address in the \c address field of the #H5L_info_t \c struct.
  *
- *          The address of the HDF5 file on a physical device has no effect on H5Oopen_by_addr(), 
- *          nor does the use of any file driver. As stated above, the object address is its 
- *          offset within the HDF5 file; HDF5’s file drivers will transparently map this to an 
+ *          The address of the HDF5 file on a physical device has no effect on H5Oopen_by_addr(),
+ *          nor does the use of any file driver. As stated above, the object address is its
+ *          offset within the HDF5 file; HDF5’s file drivers will transparently map this to an
  *          address on a storage device.
  *
- * \warning This function must be used with care! 
- * \warning Improper use can lead to inaccessible data, wasted space in the file, 
- *          or <b><em>file corruption</em></b>. 
- * \warning This function is dangerous if called on an invalid address. The risk can be safely 
+ * \warning This function must be used with care!
+ * \warning Improper use can lead to inaccessible data, wasted space in the file,
+ *          or <b><em>file corruption</em></b>.
+ * \warning This function is dangerous if called on an invalid address. The risk can be safely
  *          overcome by retrieving the object address with H5Gget_objinfo() or H5Lget_info()
- *          immediately before calling H5Oopen_by_addr(). The immediacy of the operation can be 
- *          important; if time has elapsed and the object has been deleted from the file, 
+ *          immediately before calling H5Oopen_by_addr(). The immediacy of the operation can be
+ *          important; if time has elapsed and the object has been deleted from the file,
  *          the address will be invalid and file corruption can result.
  *
  * \version 1.8.4 Fortran subroutine added in this release.
@@ -1959,7 +1965,7 @@ typedef herr_t (*H5O_iterate1_t)(hid_t obj, const char *name, const H5O_info1_t 
  * \since 1.8.0
  *
  */
-H5_DLL hid_t  H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
+H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
 
 /**
  *-------------------------------------------------------------------------
@@ -1975,35 +1981,36 @@ H5_DLL hid_t  H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Oget_info3() or the macro #H5Oget_info.
  *
- * \details H5Oget_info1() specifies an object by its identifier, \p loc_id , and 
- *          retrieves the metadata describing that object in \p oinfo , 
+ * \details H5Oget_info1() specifies an object by its identifier, \p loc_id , and
+ *          retrieves the metadata describing that object in \p oinfo ,
  *          defined as a \c struct of type H5O_info1_t :
  *
  *          \snippet this H5O_info1_t_snip
  *
  *          Note the following about H5O_info1_t :
- *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime) only \c ctime has been implemented.
+ *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime)
+ *            only \c ctime has been implemented.
  *          - The \c atime value is the last time the object was read or written.
  *          - The \c mtime value is the last time the raw data in the object was changed.
  *          - The \c ctime value is the last time the metadata for the object was changed.
  *          - The \c btime value is the time the object was created.
  *          - The fields nested in the \c meta_size field are for internal library use only.
  *
- *          The #H5O_type_t \c enum indicates the object type and 
+ *          The #H5O_type_t \c enum indicates the object type and
  *          is defined in H5Opublic.h as follows:
  *          \snippet this H5O_type_t_snip
  *
  *          Note that the object retrieved as indicated by \p loc_id
  *          refers only to the types specified by #H5O_type_t.
  *
- *          An H5O_hdr_info_t \c struct holds object header metadata and is 
+ *          An H5O_hdr_info_t \c struct holds object header metadata and is
  *          defined in H5Opublic.h as follows:
  *          \snippet this H5O_hdr_info_t_snip
  *
- *          Valid values for the \c version field are \c H5O_VERSION_1 and \c H5O_VERSION_2. 
+ *          Valid values for the \c version field are \c H5O_VERSION_1 and \c H5O_VERSION_2.
  *          Version 2 of the object header is smaller and more efficient than version 1.
  *
- *          Please be aware that the information held by H5O_hdr_info_t may only be useful to 
+ *          Please be aware that the information held by H5O_hdr_info_t may only be useful to
  *          developers with extensive HDF5 experience.
  *
  * \note If you are iterating through a lot of different objects to
@@ -2018,12 +2025,16 @@ H5_DLL hid_t  H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
  *       will force metadata entries to be evicted from the cache,
  *       thus freeing the memory associated with the entries.
  *
- * \version 1.10.5 The macro #H5Oget_info was removed and the function H5Oget_info1() was copied to H5Oget_info().
- * \version 1.10.3 Function H5Oget_info() was copied to H5Oget_info1(), and the macro #H5Oget_info was created.
- * \version 1.8.15 Added a note about the valid values for the \c version field in the H5O_hdr_info_t structure.
+ * \version 1.10.5 The macro #H5Oget_info was removed and the function
+ *                 H5Oget_info1() was copied to H5Oget_info().
+ * \version 1.10.3 Function H5Oget_info() was copied to H5Oget_info1(),
+ *                 and the macro #H5Oget_info was created.
+ * \version 1.8.15 Added a note about the valid values for the \c version
+ *                 field in the H5O_hdr_info_t structure.
  * \version 1.8.11 Fortran subroutine introduced in this release.
  * \version 1.8.10 Added #H5O_type_t structure to the Description section. \n
- *                 Separated H5O_hdr_info_t structure from #H5O_info_t in the Description section. \n
+ *                 Separated H5O_hdr_info_t structure from #H5O_info_t in the
+ *                 Description section. \n
  *                 Clarified the definition and implementation of the time fields.
  *
  * \since 1.8.0
@@ -2035,7 +2046,7 @@ H5_DLL herr_t H5Oget_info1(hid_t loc_id, H5O_info1_t *oinfo);
  *-------------------------------------------------------------------------
  * \ingroup H5O
  *
- * \brief Retrieves the metadata for an object, identifying the object 
+ * \brief Retrieves the metadata for an object, identifying the object
  *        by location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
@@ -2048,21 +2059,21 @@ H5_DLL herr_t H5Oget_info1(hid_t loc_id, H5O_info1_t *oinfo);
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Oget_info_by_name2() or the macro #H5Oget_info_by_name.
  *
- * \details H5Oget_info_by_name1() specifies an object’s location and name, \p loc_id 
+ * \details H5Oget_info_by_name1() specifies an object’s location and name, \p loc_id
  *          and \p name, respectively, and retrieves the metadata describing that object
  *          in \p oinfo, an H5O_info1_t \c struct.
- *          
+ *
  *          The \c struct H5O_info1_t is defined in H5Opublic.h and described
  *          in the H5Oget_info1() function entry.
- *          
+ *
  *          The link access property list, \p lapl_id, is not currently used;
  *          it should be passed in as #H5P_DEFAULT.
  *
- * \version 1.10.5 The macro #H5Oget_info_by_name was removed and the function 
+ * \version 1.10.5 The macro #H5Oget_info_by_name was removed and the function
  *                 H5Oget_info_by_name1() was copied to H5Oget_info_by_name().
  * \version 1.10.3 Function H5Oget_info_by_name() was copied to H5Oget_info_by_name1()
  *                 and the macro #H5Oget_info_by_name was created.
- * \version 1.8.8 Fortran 2003 subroutine and \c h5o_info_t derived type introduced 
+ * \version 1.8.8 Fortran 2003 subroutine and \c h5o_info_t derived type introduced
  *                in this release.
  *
  * \since 1.8.0
@@ -2074,7 +2085,7 @@ H5_DLL herr_t H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info1_t *
  *-------------------------------------------------------------------------
  * \ingroup H5O
  *
- * \brief Retrieves the metadata for an object, identifying the object 
+ * \brief Retrieves the metadata for an object, identifying the object
  *        by an index position
  *
  * \fgdta_loc_obj_id{loc_id}
@@ -2110,10 +2121,10 @@ H5_DLL herr_t H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info1_t *
  *          type H5O_info1_t .
  *          \snippet this H5O_info1_t_snip
  *
- *          The link access property list, \c lapl_id, is not currently used; 
+ *          The link access property list, \c lapl_id, is not currently used;
  *          it should be passed in as #H5P_DEFAULT.
  *
- * \version 1.10.5 The macro #H5Oget_info_by_idx was removed and the function 
+ * \version 1.10.5 The macro #H5Oget_info_by_idx was removed and the function
  *                 H5Oget_info_by_idx() was copied to H5Oget_info_by_idx1().
  * \version 1.10.3 Function H5Oget_info_by_idx() was copied to H5Oget_info_by_idx1()
  *                 and the macro #H5Oget_info_by_idx was created.
@@ -2140,12 +2151,12 @@ H5_DLL herr_t H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Oget_info3() or the macro H5Oget_info().
  *
- * \details H5Oget_info2() specifies an object by its identifier, \p loc_id , and 
+ * \details H5Oget_info2() specifies an object by its identifier, \p loc_id , and
  *          retrieves the metadata describing that object in \p oinfo , an H5O_info1_t \c struct.
  *          This \c struct type is described in H5Oget_info1().
  *
- *          The \p fields parameter contains flags to determine which fields will be filled in 
- *          the H5O_info1_t \c struct returned in \p oinfo. 
+ *          The \p fields parameter contains flags to determine which fields will be filled in
+ *          the H5O_info1_t \c struct returned in \p oinfo.
  *          These flags are defined in the H5Opublic.h file:
  *
  *          \obj_info_fields
@@ -2171,7 +2182,7 @@ H5_DLL herr_t H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo, unsigned fields);
  *-------------------------------------------------------------------------
  * \ingroup H5O
  *
- * \brief Retrieves the metadata for an object, identifying the object 
+ * \brief Retrieves the metadata for an object, identifying the object
  *        by location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
@@ -2188,7 +2199,7 @@ H5_DLL herr_t H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo, unsigned fields);
  * \details H5Oget_info_by_name2() specifies an object’s location and name, \p loc_id and
  *          \p name, respectively, and retrieves the metadata describing
  *          that object in \p oinfo, an H5O_info1_t \c struct.
- *          
+ *
  *          The \c struct H5O_info1_t is defined in H5Opublic.h and described
  *          in the H5Oget_info1() function entry.
  *
@@ -2198,7 +2209,7 @@ H5_DLL herr_t H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo, unsigned fields);
  *
  *          \obj_info_fields
  *
- *          The link access property list, \p lapl_id, is not currently used; 
+ *          The link access property list, \p lapl_id, is not currently used;
  *          it should be passed in as #H5P_DEFAULT.
  *
  * \since 1.10.3
@@ -2211,7 +2222,7 @@ H5_DLL herr_t H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info1_t *
  *-------------------------------------------------------------------------
  * \ingroup H5O
  *
- * \brief Retrieves the metadata for an object, identifying the object 
+ * \brief Retrieves the metadata for an object, identifying the object
  *        by an index position
  *
  * \fgdta_loc_obj_id{loc_id}
@@ -2236,18 +2247,18 @@ H5_DLL herr_t H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info1_t *
  *          \p n within that index.
  *
  *          \p oinfo, in which the object information is returned, is a \c struct of
- *          type H5O_info1_t.  This and other \c struct types used 
+ *          type H5O_info1_t.  This and other \c struct types used
  *          by H5Oget_info_by_idx2() are described in H5Oget_info_by_idx1().
  *
  *          If \p loc_id fully specifies the group in which the object resides,
  *          i\p group_name can be a dot (\c .).
  *
  *          The \p fields parameter contains flags to determine which fields will be
- *          filled in the H5O_info1_t \c struct returned in \p oinfo. 
+ *          filled in the H5O_info1_t \c struct returned in \p oinfo.
  *          These flags are defined in the H5Opublic.h file:
  *          \obj_info_fields
  *
- *          The link access property list, \c lapl_id, is not currently used; 
+ *          The link access property list, \c lapl_id, is not currently used;
  *          it should be passed in as #H5P_DEFAULT.
  *
  * \since 1.10.3
@@ -2266,9 +2277,9 @@ H5_DLL herr_t H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  * \fgdta_loc_obj_id{obj_id}
  * \idx_type
  * \order
- * \param[in] op Callback function passing data regarding the object 
+ * \param[in] op Callback function passing data regarding the object
  *               to the calling application
- * \param[in] op_data User-defined pointer to data required by the application 
+ * \param[in] op_data User-defined pointer to data required by the application
  *                    for its processing of the object
  *
  * \return On success, returns the return value of the first operator
@@ -2282,21 +2293,21 @@ H5_DLL herr_t H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Ovisit3() or the macro #H5Ovisit.
  *
- * \details H5Ovisit1() is a recursive iteration function to visit the 
- *          object \p obj_id and, if \p obj_id is a group, all objects in 
- *          and below it in an HDF5 file, thus providing a mechanism for 
- *          an application to perform a common set of operations across all 
- *          of those objects or a dynamically selected subset. For 
- *          non-recursive iteration across the members of a group, 
+ * \details H5Ovisit1() is a recursive iteration function to visit the
+ *          object \p obj_id and, if \p obj_id is a group, all objects in
+ *          and below it in an HDF5 file, thus providing a mechanism for
+ *          an application to perform a common set of operations across all
+ *          of those objects or a dynamically selected subset. For
+ *          non-recursive iteration across the members of a group,
  *          see  H5Literate1().
  *
  *          If \p obj_id is a group identifier, that group serves as the
  *          root of a recursive iteration. If \p obj_id is a file identifier,
  *          that file’s root group serves as the root of the recursive
- *          iteration.  If \p obj_id is an attribute identifier, 
+ *          iteration.  If \p obj_id is an attribute identifier,
  *          then the object where the attribute is attached will be iterated.
- *          If \p obj_id is any other type of object, such as a dataset or 
- *          named datatype, there is no iteration.  
+ *          If \p obj_id is any other type of object, such as a dataset or
+ *          named datatype, there is no iteration.
  *
  *          Two parameters are used to establish the iteration: \p idx_type
  *          and \p order.
@@ -2310,12 +2321,12 @@ H5_DLL herr_t H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  *
  *          \indexes
  *
- *          Note that the index type passed in \p idx_type is a 
- *          <em>best effort</em> setting. If the application passes in 
- *          a value indicating iteration in creation order and a group is 
- *          encountered that was not tracked in creation order, that group 
- *          will be iterated over in alpha-numeric order by name, or 
- *          <em>name order</em>.  (<em>Name order</em> is the native order 
+ *          Note that the index type passed in \p idx_type is a
+ *          <em>best effort</em> setting. If the application passes in
+ *          a value indicating iteration in creation order and a group is
+ *          encountered that was not tracked in creation order, that group
+ *          will be iterated over in alpha-numeric order by name, or
+ *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
  *          \p order specifies the order in which objects are to be inspected
@@ -2329,27 +2340,27 @@ H5_DLL herr_t H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  *
  *          \snippet this H5O_iterate1_t_snip
  *
- *          The parameters of this callback function have the following values 
+ *          The parameters of this callback function have the following values
  *          or meanings:
  *          <table>
  *          <tr>
  *              <td>\c obj</td>
- *              <td>Object that serves as root of the iteration; 
+ *              <td>Object that serves as root of the iteration;
  *                  same value as the H5Ovisit1() \p obj_id parameter</td>
  *          </tr>
  *          <tr>
  *          <td>\c name</td>
- *          <td>Name of object, relative to \c obj, being examined at 
+ *          <td>Name of object, relative to \c obj, being examined at
  *              current step of the iteration</td>
  *          </tr>
  *          <tr>
  *              <td>\c info</td>
- *              <td>H5O_info1_t \c struct containing information 
+ *              <td>H5O_info1_t \c struct containing information
  *                  regarding that object</td>
  *          </tr>
  *          <tr>
  *              <td>\c op_data</td>
- *              <td>User-defined pointer to data required by the application in 
+ *              <td>User-defined pointer to data required by the application in
  *                  processing the object</td>
  *          </tr>
  *          </table>
@@ -2358,17 +2369,17 @@ H5_DLL herr_t H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  *          \snippet this H5O_info1_t_snip
  *
  *          The return values from an operator are:
- *          - Zero causes the visit iterator to continue, returning zero when all 
+ *          - Zero causes the visit iterator to continue, returning zero when all
  *            group members have been processed.
- *          - A positive value causes the visit iterator to immediately return that 
+ *          - A positive value causes the visit iterator to immediately return that
  *            positive value, indicating short-circuit success.
- *          - A negative value causes the visit iterator to immediately return that 
+ *          - A negative value causes the visit iterator to immediately return that
  *            value, indicating failure.
  *
- *          The H5Ovisit1() \p op_data parameter is a user-defined pointer to the data 
- *          required to process objects in the course of the iteration. This pointer 
- *          is passed back to each step of the iteration in the callback 
- *          function’s \p op_data parameter. 
+ *          The H5Ovisit1() \p op_data parameter is a user-defined pointer to the data
+ *          required to process objects in the course of the iteration. This pointer
+ *          is passed back to each step of the iteration in the callback
+ *          function’s \p op_data parameter.
  *
  *          H5Lvisit1() and H5Ovisit1() are companion functions: one for
  *          examining and operating on links; the other for examining
@@ -2388,7 +2399,7 @@ H5_DLL herr_t H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  *       from normally.
  *
  * \note Examples of this kind of routine include callbacks such as
- *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and 
+ *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and
  *       functions such as H5Tconvert() and H5Ewalk2().
  *
  * \note Exiting the routine in its normal fashion allows the HDF5
@@ -2399,10 +2410,10 @@ H5_DLL herr_t H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  *       the routine was called. The C++ application should save some
  *       state as the routine is started so that any problem that occurs
  *       might be diagnosed.
- *      
- * \version 1.10.5 The macro #H5Ovisit was removed and the function 
+ *
+ * \version 1.10.5 The macro #H5Ovisit was removed and the function
  *          H5Ovisit1() was copied to H5Ovisit().
- * \version 1.10.3 Function H5Ovisit() was copied to H5Ovisit1(), 
+ * \version 1.10.3 Function H5Ovisit() was copied to H5Ovisit1(),
  *          and the macro #H5Ovisit was created.
  * \version 1.8.8 Fortran subroutine introduced in this release.
  *
@@ -2423,9 +2434,9 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *                     \p loc_id, that will serve as root of the iteration
  * \idx_type
  * \order
- * \param[in] op Callback function passing data regarding the object 
+ * \param[in] op Callback function passing data regarding the object
  *               to the calling application
- * \param[in] op_data User-defined pointer to data required by the application 
+ * \param[in] op_data User-defined pointer to data required by the application
  *                    for its processing of the object
  * \lapl_id
  *
@@ -2440,22 +2451,22 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Ovisit_by_name3() or the macro #H5Ovisit_by_name.
  *
- * \details H5Ovisit_by_name1() is a recursive iteration function to visit 
- *          the object specified by the \p loc_id / \p obj_name parameter 
- *          pair and, if that object is a group, all objects in and below it 
- *          in an HDF5 file, thus providing a mechanism for an application to 
- *          perform a common set of operations across all of those objects or 
- *          a dynamically selected subset. For non-recursive iteration across 
+ * \details H5Ovisit_by_name1() is a recursive iteration function to visit
+ *          the object specified by the \p loc_id / \p obj_name parameter
+ *          pair and, if that object is a group, all objects in and below it
+ *          in an HDF5 file, thus providing a mechanism for an application to
+ *          perform a common set of operations across all of those objects or
+ *          a dynamically selected subset. For non-recursive iteration across
  *          the members of a group, see H5Literate1().
  *
  *          The object serving as the root of the iteration is specified
  *          by the \p loc_id / \p obj_name parameter pair. \p loc_id specifies
  *          a file or an object in a file;  if \p loc_id is an attribute identifier,
  *          the object where the attribute is attached will be used.
- *          \p obj_name specifies either an object in the file (with an absolute 
- *          name based in the file’s root group) or an object name relative 
+ *          \p obj_name specifies either an object in the file (with an absolute
+ *          name based in the file’s root group) or an object name relative
  *          to \p loc_id. If \p loc_id fully specifies the object that is to serve
- *          as the root of the iteration, \p obj_name should be '\c .' (a dot). 
+ *          as the root of the iteration, \p obj_name should be '\c .' (a dot).
  *          (Note that when \p loc_id fully specifies the object that is to serve
  *          as the root of the iteration, the user may wish to consider
  *          using H5Ovisit1() instead of H5Ovisit_by_name1().)
@@ -2472,12 +2483,12 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *
  *          \indexes
  *
- *          Note that the index type passed in \p idx_type is a 
- *          <em>best effort</em> setting. If the application passes in a 
- *          value indicating iteration in creation order and a group is 
- *          encountered that was not tracked in creation order, that group 
- *          will be iterated over in alpha-numeric order by name, or 
- *          <em>name order</em>.  (<em>Name order</em> is the native order 
+ *          Note that the index type passed in \p idx_type is a
+ *          <em>best effort</em> setting. If the application passes in a
+ *          value indicating iteration in creation order and a group is
+ *          encountered that was not tracked in creation order, that group
+ *          will be iterated over in alpha-numeric order by name, or
+ *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
  *          \p order specifies the order in which objects are to be inspected
@@ -2506,9 +2517,9 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          that a link prefix be set in a link access property list
  *          (see H5Pset_elink_prefix()).
  *
- *          H5Lvisit_by_name1() and H5Ovisit_by_name1() are companion 
- *          functions: one for examining and operating on links; the other 
- *          for examining and operating on the objects that those links point to. 
+ *          H5Lvisit_by_name1() and H5Ovisit_by_name1() are companion
+ *          functions: one for examining and operating on links; the other
+ *          for examining and operating on the objects that those links point to.
  *          Both functions ensure that by the time the function completes
  *          successfully, every link or object below the specified point
  *          in the file has been presented to the application for whatever
@@ -2520,7 +2531,7 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *       from normally.
  *
  * \note Examples of this kind of routine include callbacks such as
- *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and 
+ *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and
  *       functions such as H5Tconvert() and H5Ewalk2().
  *
  * \note Exiting the routine in its normal fashion allows the HDF5
@@ -2532,9 +2543,9 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *       state as the routine is started so that any problem that occurs
  *       might be diagnosed.
  *
- * \version 1.10.5 The macro #H5Ovisit_by_name was removed and the function 
+ * \version 1.10.5 The macro #H5Ovisit_by_name was removed and the function
  *          H5Ovisit_by_name1() was copied to #H5Ovisit_by_name.
- * \version 1.10.3 The H5Ovisit_by_name() function was renamed to H5Ovisit_by_name1(), 
+ * \version 1.10.3 The H5Ovisit_by_name() function was renamed to H5Ovisit_by_name1(),
  *          and the macro #H5Ovisit_by_name was created.
  * \version 1.8.11 Fortran subroutine introduced in this release.
  *
@@ -2553,11 +2564,11 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  * \fgdta_loc_obj_id{obj_id}
  * \idx_type
  * \order
- * \param[in] op Callback function passing data regarding the object 
+ * \param[in] op Callback function passing data regarding the object
  *               to the calling application
- * \param[in] op_data User-defined pointer to data required by the application 
+ * \param[in] op_data User-defined pointer to data required by the application
  *                    for its processing of the object
- * \param[in] fields Flags specifying the fields to be retrieved to the 
+ * \param[in] fields Flags specifying the fields to be retrieved to the
  *                   callback \p op
  *
  * \return On success, returns the return value of the first operator
@@ -2571,21 +2582,21 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Ovisit3() or the macro #H5Ovisit.
  *
- * \details H5Ovisit2() is a recursive iteration function to visit the 
- *          object \p obj_id and, if \p obj_id is a group, all objects in 
- *          and below it in an HDF5 file, thus providing a mechanism for 
- *          an application to perform a common set of operations across all 
- *          of those objects or a dynamically selected subset. For 
- *          non-recursive iteration across the members of a group, 
+ * \details H5Ovisit2() is a recursive iteration function to visit the
+ *          object \p obj_id and, if \p obj_id is a group, all objects in
+ *          and below it in an HDF5 file, thus providing a mechanism for
+ *          an application to perform a common set of operations across all
+ *          of those objects or a dynamically selected subset. For
+ *          non-recursive iteration across the members of a group,
  *          see H5Literate1().
  *
  *          If \p obj_id is a group identifier, that group serves as the
  *          root of a recursive iteration. If \p obj_id is a file identifier,
  *          that file’s root group serves as the root of the recursive
- *          iteration.  If \p obj_id is an attribute identifier, 
+ *          iteration.  If \p obj_id is an attribute identifier,
  *          then the object where the attribute is attached will be iterated.
- *          If \p obj_id is any other type of object, such as a dataset or 
- *          named datatype, there is no iteration.  
+ *          If \p obj_id is any other type of object, such as a dataset or
+ *          named datatype, there is no iteration.
  *
  *          Two parameters are used to establish the iteration: \p idx_type
  *          and \p order.
@@ -2599,12 +2610,12 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  *
  *          \indexes
  *
- *          Note that the index type passed in \p idx_type is a 
- *          <em>best effort</em> setting. If the application passes in 
- *          a value indicating iteration in creation order and a group is 
- *          encountered that was not tracked in creation order, that group 
- *          will be iterated over in alpha-numeric order by name, or 
- *          <em>name order</em>.  (<em>Name order</em> is the native order 
+ *          Note that the index type passed in \p idx_type is a
+ *          <em>best effort</em> setting. If the application passes in
+ *          a value indicating iteration in creation order and a group is
+ *          encountered that was not tracked in creation order, that group
+ *          will be iterated over in alpha-numeric order by name, or
+ *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
  *          \p order specifies the order in which objects are to be inspected
@@ -2618,28 +2629,28 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  *
  *          \snippet this H5O_iterate1_t_snip
  *
- *          The parameters of this callback function have the following values 
+ *          The parameters of this callback function have the following values
  *          or meanings:
  *          <table>
  *          <tr>
  *              <td>\c obj</td>
- *              <td>Object that serves as root of the iteration; 
+ *              <td>Object that serves as root of the iteration;
  *                  same value as the H5Ovisit1() \p obj_id parameter</td>
  *          </tr>
  *          <tr>
  *          <td>\c name</td>
- *          <td>Name of object, relative to \c obj, being examined at 
+ *          <td>Name of object, relative to \c obj, being examined at
  *              current step of the iteration</td>
  *          </tr>
  *          <tr>
  *              <td>\c info</td>
- *              <td>H5O_info1_t \c struct containing information 
+ *              <td>H5O_info1_t \c struct containing information
  *                  regarding that object</td>
  *          </tr>
  *          <tr>
  *              <td>\c op_data</td>
- *              <td>User-defined pointer to data required by the application in 
- *                  processing the object; a pass-through of the \c op_data pointer 
+ *              <td>User-defined pointer to data required by the application in
+ *                  processing the object; a pass-through of the \c op_data pointer
  *                  provided with the H5Ovisit() function call</td>
  *          </tr>
  *          </table>
@@ -2648,20 +2659,20 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  *          described in the H5Oget_info1() function entry.
  *
  *          The return values from an operator are:
- *          - Zero causes the visit iterator to continue, returning zero when all 
+ *          - Zero causes the visit iterator to continue, returning zero when all
  *            group members have been processed.
- *          - A positive value causes the visit iterator to immediately return that 
+ *          - A positive value causes the visit iterator to immediately return that
  *            positive value, indicating short-circuit success.
- *          - A negative value causes the visit iterator to immediately return that 
+ *          - A negative value causes the visit iterator to immediately return that
  *            value, indicating failure.
  *
- *          The H5Ovisit2() \p op_data parameter is a user-defined pointer to the data 
- *          required to process objects in the course of the iteration. This pointer 
- *          is passed back to each step of the iteration in the callback 
- *          function’s \p op_data parameter. 
+ *          The H5Ovisit2() \p op_data parameter is a user-defined pointer to the data
+ *          required to process objects in the course of the iteration. This pointer
+ *          is passed back to each step of the iteration in the callback
+ *          function’s \p op_data parameter.
  *
- *          The \p fields parameter contains flags to determine which fields will 
- *          be retrieved by the \p op callback function. These flags are defined 
+ *          The \p fields parameter contains flags to determine which fields will
+ *          be retrieved by the \p op callback function. These flags are defined
  *          in the H5Opublic.h file:
  *          \obj_info_fields
  *
@@ -2683,7 +2694,7 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  *       from normally.
  *
  * \note Examples of this kind of routine include callbacks such as
- *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and 
+ *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and
  *       functions such as H5Tconvert() and H5Ewalk2().
  *
  * \note Exiting the routine in its normal fashion allows the HDF5
@@ -2694,7 +2705,7 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  *       the routine was called. The C++ application should save some
  *       state as the routine is started so that any problem that occurs
  *       might be diagnosed.
- *      
+ *
  * \since 1.10.3
  *
  */
@@ -2712,11 +2723,11 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *                     \p loc_id, that will serve as root of the iteration
  * \idx_type
  * \order
- * \param[in] op Callback function passing data regarding the object 
+ * \param[in] op Callback function passing data regarding the object
  *               to the calling application
- * \param[in] op_data User-defined pointer to data required by the application 
+ * \param[in] op_data User-defined pointer to data required by the application
  *                    for its processing of the object
- * \param[in] fields Flags specifying the fields to be retrieved to the 
+ * \param[in] fields Flags specifying the fields to be retrieved to the
  *                   callback function \p op
  * \lapl_id
  *
@@ -2731,22 +2742,22 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Ovisit_by_name3() or the macro #H5Ovisit_by_name.
  *
- * \details H5Ovisit_by_name2() is a recursive iteration function to visit 
- *          the object specified by the \p loc_id / \p obj_name parameter 
- *          pair and, if that object is a group, all objects in and below it 
- *          in an HDF5 file, thus providing a mechanism for an application to 
- *          perform a common set of operations across all of those objects or 
- *          a dynamically selected subset. For non-recursive iteration across 
+ * \details H5Ovisit_by_name2() is a recursive iteration function to visit
+ *          the object specified by the \p loc_id / \p obj_name parameter
+ *          pair and, if that object is a group, all objects in and below it
+ *          in an HDF5 file, thus providing a mechanism for an application to
+ *          perform a common set of operations across all of those objects or
+ *          a dynamically selected subset. For non-recursive iteration across
  *          the members of a group, see #H5Literate.
  *
  *          The object serving as the root of the iteration is specified
  *          by the \p loc_id / \p obj_name parameter pair. \p loc_id specifies
  *          a file or an object in a file;  if \p loc_id is an attribute identifier,
  *          the object where the attribute is attached will be used.
- *          \p obj_name specifies either an object in the file (with an absolute 
- *          name based in the file’s root group) or an object name relative 
+ *          \p obj_name specifies either an object in the file (with an absolute
+ *          name based in the file’s root group) or an object name relative
  *          to \p loc_id. If \p loc_id fully specifies the object that is to serve
- *          as the root of the iteration, \p obj_name should be '\c .' (a dot). 
+ *          as the root of the iteration, \p obj_name should be '\c .' (a dot).
  *          (Note that when \p loc_id fully specifies the object that is to serve
  *          as the root of the iteration, the user may wish to consider
  *          using H5Ovisit2() instead of #H5Ovisit_by_name.)
@@ -2763,12 +2774,12 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *
  *          \indexes
  *
- *          Note that the index type passed in \p idx_type is a 
- *          <em>best effort</em> setting. If the application passes in a 
- *          value indicating iteration in creation order and a group is 
- *          encountered that was not tracked in creation order, that group 
- *          will be iterated over in alpha-numeric order by name, or 
- *          <em>name order</em>.  (<em>Name order</em> is the native order 
+ *          Note that the index type passed in \p idx_type is a
+ *          <em>best effort</em> setting. If the application passes in a
+ *          value indicating iteration in creation order and a group is
+ *          encountered that was not tracked in creation order, that group
+ *          will be iterated over in alpha-numeric order by name, or
+ *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
  *          \p order specifies the order in which objects are to be inspected
@@ -2797,14 +2808,14 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          that a link prefix be set in a link access property list
  *          (see H5Pset_elink_prefix()).
  *
- *          The \p fields parameter contains flags to determine which fields will 
- *          be retrieved by the \p op callback function. These flags are defined 
+ *          The \p fields parameter contains flags to determine which fields will
+ *          be retrieved by the \p op callback function. These flags are defined
  *          in the H5Opublic.h file:
  *          \obj_info_fields
  *
- *          #H5Lvisit_by_name and #H5Ovisit_by_name are companion 
- *          functions: one for examining and operating on links; the other 
- *          for examining and operating on the objects that those links point to. 
+ *          #H5Lvisit_by_name and #H5Ovisit_by_name are companion
+ *          functions: one for examining and operating on links; the other
+ *          for examining and operating on the objects that those links point to.
  *          Both functions ensure that by the time the function completes
  *          successfully, every link or object below the specified point
  *          in the file has been presented to the application for whatever
@@ -2816,7 +2827,7 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *       from normally.
  *
  * \note Examples of this kind of routine include callbacks such as
- *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and 
+ *       H5Pset_elink_cb() and H5Pset_type_conv_cb() and
  *       functions such as H5Tconvert() and H5Ewalk2().
  *
  * \note Exiting the routine in its normal fashion allows the HDF5
@@ -2827,7 +2838,7 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *       the routine was called. The C++ application should save some
  *       state as the routine is started so that any problem that occurs
  *       might be diagnosed.
- *      
+ *
  * \since 1.10.3
  *
  */
