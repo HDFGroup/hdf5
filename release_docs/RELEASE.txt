@@ -503,6 +503,11 @@ Bug Fixes since HDF5-1.8.21
       (DER - 2019/09/17, HDFFV-10893)
 
 
+    Parallel Library
+    ----------------
+    - None
+
+
     Performance
     -------------
     - None
