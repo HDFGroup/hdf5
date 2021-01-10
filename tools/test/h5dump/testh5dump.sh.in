@@ -177,7 +177,6 @@ $SRC_H5DUMP_TESTFILES/tvldtypes5.h5
 $SRC_H5DUMP_TESTFILES/tvlenstr_array.h5
 $SRC_H5DUMP_TESTFILES/tvlstr.h5
 $SRC_H5DUMP_TESTFILES/tvms.h5
-$SRC_H5DUMP_TESTFILES/t10480H5O_fill.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -360,7 +359,6 @@ $SRC_H5DUMP_TESTFILES/twidedisplay.ddl
 $SRC_H5DUMP_TESTFILES/twithddl.exp
 $SRC_H5DUMP_TESTFILES/twithddlfile.ddl
 $SRC_H5DUMP_TESTFILES/twithddlfile.exp
-$SRC_H5DUMP_TESTFILES/t10480H5O_fill.ddl
 $SRC_H5DUMP_TESTFILES/h5dump-help.txt
 $SRC_H5DUMP_TESTFILES/out3.h5import
 $SRC_H5DUMP_TESTFILES/tbinregR.exp
@@ -861,64 +859,6 @@ TOOLTEST5() {
     if test -z "$HDF5_NOCLEANUP"; then
         rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
-}
-
-# Run a test that will fail.  If the test doesn't print out the error
-# error message as expected then increment the `nerrors' global variable
-# and (if $verbose is set) display the difference between the actual output
-# and the expected output. The expected output is given as the first
-# argument to this function and the actual output file is named by
-# replacing the `.ddl' with `.out'.  The actual output is not removed
-# if $HDF5_NOCLEANUP has a non-zero value.
-# If $1 == ignorecase then do caseless CMP and DIFF.
-# ADD_H5_TEST
-TOOLTEST_FAIL() {
-    # check if caseless compare and diff requested
-    if [ "$1" = ignorecase ]; then
-        caseless="-i"
-        # replace cmp with diff which runs much longer.
-        xCMP="$DIFF -i"
-        shift
-    else
-        caseless=""
-        # stick with faster cmp if ignorecase is not requested.
-        xCMP="$CMP"
-    fi
-
-    expect="$TESTDIR/$1"
-    actual="$TESTDIR/`basename $1 .ddl`.out"
-    actual_err="$TESTDIR/`basename $1 .ddl`.err"
-    actual_sav=${actual}-sav
-    actual_err_sav=${actual_err}-sav
-    shift
-
-    # Run test.
-    TESTING $DUMPER $@
-    (
-        cd $TESTDIR
-        $RUNSERIAL $DUMPER_BIN "$@"
-    ) >$actual 2>$actual_err
-
-    # save actual and actual_err in case they are needed later.
-    cp $actual $actual_sav
-    STDOUT_FILTER $actual
-    cp $actual_err $actual_err_sav
-    STDERR_FILTER $actual_err
-
-    if $xCMP $expect $actual_err > /dev/null 2>&1 ; then
-        echo " PASSED"
-    else
-        echo "*FAILED*"
-        echo "    Test is supposed to fail but didn't"
-        nerrors="`expr $nerrors + 1`"
-        test yes = "$verbose" && $DIFF $caseless $expect $actual |sed 's/^/    /'
-    fi
-
-    # Clean up output file
-#    if test -z "$HDF5_NOCLEANUP"; then
-#        rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
-#    fi
-
 }
 
 # ADD_HELP_TEST
@@ -1495,12 +1435,8 @@ TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
 # test to verify HDFFV-9407: long double full precision
 GREPTEST OUTTXT "1.123456789012345" t128bit_float.ddl -m %.35Lf t128bit_float.h5
 
-# test HDFFFV-10480, using corrupted file from a CVE group, before the fix,
-# h5dump would segfault.
-TOOLTEST_FAIL t10480H5O_fill.ddl t10480H5O_fill.h5
-
 # Clean up temporary files/directories
-#CLEAN_TESTFILES_AND_TESTDIR
+CLEAN_TESTFILES_AND_TESTDIR
 
 # Report test results and exit
 if test $nerrors -eq 0 ; then

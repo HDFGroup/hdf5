@@ -194,7 +194,6 @@
       ${HDF5_TOOLS_DIR}/testfiles/tvms.ddl
       ${HDF5_TOOLS_DIR}/testfiles/twidedisplay.ddl
       ${HDF5_TOOLS_DIR}/testfiles/twithddlfile.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tH5O_fill_new_decode-heap-buffer-overflow.ddl
       ${HDF5_TOOLS_DIR}/testfiles/h5dump-help.txt
       ${HDF5_TOOLS_DIR}/testfiles/out3.h5import
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.ddl
@@ -1131,9 +1130,6 @@
 
   # test to verify HDFFV-9407: long double full precision
   ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lf t128bit_float.h5)
-
-  # test to verify HDFFV-10480 CVE-2018-11206
-  ADD_H5_TEST(t10480H5O_fill.ddl 0 t10480H5O_fill.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
