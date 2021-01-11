@@ -762,6 +762,18 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Reclassify CMake messages, to allow new modes and --log-level option
+
+      CMake message commands have a mode argument. By default, STATUS mode
+      was chosen for any non-error message. CMake version 3.15 added additional
+      modes, NOTICE, VERBOSE, DEBUG and TRACE. All message commands with a mode
+      of STATUS were reviewed and most were reclassified as VERBOSE. The new
+      mode was protected by a check for a CMake version of at least 3.15. If CMake
+      version 3.17 or above is used, the user can use the command line option
+      of "--log-level" to further restrict which message commands are displayed.
+
+      (ADB - 2021/01/11, HDFFV-11144)
+
     - Fixes Autotools determination of the stat struct having an st_blocks field
 
       A missing parenthesis in an autoconf macro prevented building the test
@@ -771,7 +783,7 @@ Bug Fixes since HDF5-1.12.0 release
       CMake. This #define is only used in the tests and does not affect the
       HDF5 C library.
 
-      (DER - 2021/07/01, HDFFV-11201)
+      (DER - 2021/01/07, HDFFV-11201)
 
 
     Performance
