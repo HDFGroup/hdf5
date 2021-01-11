@@ -170,11 +170,29 @@ Bug Fixes since HDF5-1.10.7 release
 
     Java Library:
     ----------------
-    -
+    - The H5FArray.java class, in which virtually the entire execution time
+        is spent using the HDFNativeData method that converts from an array
+        of bytes to an array of the destination Java type.
+
+        1. Convert the entire byte array into a 1-d array of the desired type,
+           rather than performing 1 conversion per row;
+        2. Use the Java Arrays method copyOfRange to grab the section of the
+           array from (1) that is desired to be inserted into the destination array.
+
+        (PGT,ADB - 2020/12/29, HDFFV-10865)
 
     Configuration
     -------------
-    -
+    - Fixes Autotools determination of the stat struct having an st_blocks field
+
+      A missing parenthesis in an autoconf macro prevented building the test
+      code used to determine if the stat struct contains the st_blocks field.
+      Now that the test functions correctly, the H5_HAVE_STAT_ST_BLOCKS #define
+      found in H5pubconf.h will be defined correctly on both the Autotools and
+      CMake. This #define is only used in the tests and does not affect the
+      HDF5 C library.
+
+      (DER - 2021/07/01, HDFFV-11201)
 
     Performance
     -------------
