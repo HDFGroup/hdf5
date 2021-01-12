@@ -236,8 +236,8 @@ typedef struct H5FD_class_t {
     herr_t (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, size_t size, const void *buffer);
     herr_t (*flush)(H5FD_t *file, hid_t dxpl_id, unsigned closing);
     herr_t (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
-    herr_t (*lock)(H5FD_t *file, hbool_t last);
-    herr_t (*unlock)(H5FD_t *file);
+    herr_t  (*lock)(H5FD_t *file, unsigned char *oid, unsigned lock_type, hbool_t last);
+    herr_t  (*unlock)(H5FD_t *file, unsigned char *oid, hbool_t last);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
 } H5FD_class_t;
 
