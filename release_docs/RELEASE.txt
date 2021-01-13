@@ -356,6 +356,20 @@ New Features
 
     Library:
     --------
+    - H5FDregister() now allows registration of read-only VFDs
+
+      The H5FDregister() call required a VFD to have a write callback,
+      which prevented registering read-only VFDs like the read-only S3
+      (ros3) and HDFS (hdfs) VFDs from being registered unless they
+      implemented a no-op, fail-always write callback.
+
+      The registration checks no longer check for a write callback and
+      the no-op stubs have been removed from the ros3 and hdfs VFDs.
+      If a write operation is called on a VFD with no write callback, a
+      normal HDF5 error is returned.
+
+      (DER - 2021/01/12, HDFFV-11205)
+
     - Replaced H5E_ATOM with H5E_ID in H5Epubgen.h
 
       The term "atom" is archaic and not in line with current HDF5 library
