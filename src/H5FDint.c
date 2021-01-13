@@ -215,10 +215,6 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
     HDassert(file->cls);
     HDassert(buf);
 
-    /* Make sure this isn't being called on a read-only VFD */
-    if (!file->cls->write)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write request made to read-only VFD")
-
     /* Get proper DXPL for I/O */
     dxpl_id = H5CX_get_dxpl();
 
