@@ -57,28 +57,28 @@ New Features
 
         The HDF filter plugins project is a collection of registered compression
         filters that can be dynamically loaded when needed to access data stored
-        in a hdf5 file. This CMake-only option allows the plugins to be built and
+        in an hdf5 file. This CMake-only option allows the plugins to be built and
         distributed with the hdf5 library and tools. Like the options for szip and
         zlib, either a tgz file or a git repository can be specified for the source.
 
         The option was refactored to use the CMake FetchContent process. This allows
         more control over the filter targets, but required external project command
-        options to be moved to a CMake include file, HDF5PluginCache.cmake. Also
-        enabled the filter examples to be used as tests for operation of the
+        options to be moved to a CMake include file, HDF5PluginCache.cmake. It also
+        allows the filter examples to be used as tests for operation of the
         filter plugins.
 
         (ADB - 2020/12/10, OESS-98)
 
     - CMake option to use MSVC naming conventions with MinGW
 
-        HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
+        HDF5_MSVC_NAMING_CONVENTION option enables using MSVC naming conventions
         when using a MinGW toolchain
 
         (xan - 2020/10/30)
 
     - CMake option to statically link gcc libs with MinGW
 
-        HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
+        HDF5_MINGW_STATIC_GCC_LIBS allows statically linking libg/libstdc++
         with the MinGW toolchain
 
         (xan - 2020/10/30)
@@ -87,7 +87,7 @@ New Features
 
         The HDF filter plugins project is a collection of registered compression
         filters that can be dynamically loaded when needed to access data stored
-        in a hdf5 file. This CMake-only option allows the plugins to be built and
+        in an hdf5 file. This CMake-only option allows the plugins to be built and
         distributed with the hdf5 library and tools. Like the options for szip and
         zlib, either a tgz file or a git repository can be specified for the source.
 
@@ -138,8 +138,8 @@ New Features
       The open source AEC library is a replacement library for SZip. In
       order to use it for hdf5 the libaec CMake source was changed to add
       "-fPIC" and exclude test files. Autotools does not build the
-      compression libraries within hdf5 builds. New option USE_LIBAEC is
-      required to compensate for the different files produced by AEC build.
+      compression libraries within hdf5 builds. CMake requires new option 
+      USE_LIBAEC to compensate for the different files produced by AEC build.
 
       (ADB - 2020/04/22, OESS-65)
 
@@ -160,7 +160,7 @@ New Features
       Intel C, Fortran warnings flags were moved to files in a config sub-folder
       named intel-warnings.
 
-      There are flags in named "error-xxx" files with warnings that may
+      There are flags in files named "error-xxx" with warnings that may
       be promoted to errors. Some source files may still need fixes.
 
       There are also pairs of files named "developer-xxx" and "no-developer-xxx"
@@ -260,12 +260,12 @@ New Features
 
     - Add mingw CMake support with a toolchain file
 
-      There has been a number of mingw issues that has been linked under
+      There have been a number of mingw issues that have been linked under
       HDFFV-10845. It has been decided to implement the CMake cross-compiling
       technique of toolchain files. We will use a linux platform with the mingw
       compiler stack for testing. Only the C language is fully supported, and
       the error tests are skipped. The C++ language works for static but shared
-      builds has a shared library issue with the mingw Standard Exception Handling
+      builds have a shared library issue with the mingw Standard Exception Handling
       library, which is not available on Windows. Fortran has a common cross-compile
       problem with the fortran configure tests.
 
@@ -301,7 +301,7 @@ New Features
 
       (ADB - 2018/10/04, HDFFV-10594)
 
-    - Add warning flags for Intel compilers
+    - Add warnings flags for Intel compilers
 
       Identified Intel compiler specific warnings flags that should be used
       instead of GNU flags.
@@ -321,9 +321,13 @@ New Features
 
     Library
     -------
-    - Add S3 and HDFS VFDs to HDF5 maintenance
+    - Added S3 and HDFS Virtual File Drivers (VFDs) to HDF5
 
-      Fix windows requirements and java tests. Windows requires CMake 3.13.
+      These new VFDs have been added in HDF5-1.8.22.  Instructions to
+      enable them when configuring HDF5 on Linux and Mac may be found at
+      https://portal.hdfgroup.org/display/HDF5/Virtual+File+Drivers+-+S3+and+HDFS.
+
+      Installing on Windows requires CMake 3.13 and the following additional setup.
             Install openssl library (with dev files);
             from "Shining Light Productions". msi package preferred.
 
@@ -349,7 +353,9 @@ New Features
     - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
 
       Rather than always running H5detect and generating H5Tinit.c and
-      H5make_libsettings.c, supply a location for those files.
+      H5make_libsettings.c, supply a location for those files with CMake variables
+      HDF5_USE_PREGEN and HDF5_USE_PREGEN_DIR.  See release_docs/README_HPC 
+      section VI "Other cross compiling options".
 
       (ADB - 2018/09/18, HDFFV-10332)
 
@@ -517,7 +523,7 @@ Bug Fixes since HDF5-1.8.21
     -----
     - h5repack was fixed to repack the reference attributes properly.
       The code line that checks if the update of reference inside a compound
-      datatype is misplaced outside the code block loop that carries out the
+      datatype was misplaced outside the code block loop that carries out the
       check. In consequence, the next attribute that is not the reference
       type was repacked again as the reference type and caused the failure of
       repacking. The fix is to move the corresponding code line to the correct
@@ -545,6 +551,7 @@ Bug Fixes since HDF5-1.8.21
       the next major release.
 
       (LRK - 2019/05/09, HDFFV-10596)
+
 
     C++ API
     -------
@@ -692,8 +699,8 @@ The following platforms are not supported but have been tested for this release.
     (cori)                            intel/19.0.3
 
     Linux-4.4.180-94.107-default  cray-mpich/7.7.6
-    # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
-    (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
+    # 1SMP x86_64 GNU/Linux           gcc/8.3.0, 9.3.0
+    (mutrino)                         intel/19.0.4
 
     Fedora32 5.8.18-200.fc32.x86_64
     #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
