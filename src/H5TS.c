@@ -472,9 +472,9 @@ herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex)
 
     /* Release the library lock */
     ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock);
-#endif /* H5_HAVE_WIN_THREADS */
 
 done:
+#endif /* H5_HAVE_WIN_THREADS */
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_mutex_lock() */
 
@@ -527,9 +527,9 @@ H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count)
         if (err != 0)
             ret_value = err;
     } /* end if */
-#endif /* H5_HAVE_WIN_THREADS */
 
 done:
+#endif /* H5_HAVE_WIN_THREADS */
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS__mutex_unlock */
 
@@ -582,9 +582,9 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
         if (err != 0)
             ret_value = err;
     } /* end if */
-#endif /* H5_HAVE_WIN_THREADS */
 
 done:
+#endif /* H5_HAVE_WIN_THREADS */
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_mutex_unlock */
 
@@ -608,6 +608,9 @@ H5TSmutex_get_attempt_count(unsigned int *count)
     FUNC_ENTER_API_NAMECHECK_ONLY
     /*NO TRACE*/
 
+#ifdef H5_HAVE_WIN_THREADS
+    /* Add Win32 equivalent here when async is supported */
+#else /* H5_HAVE_WIN_THREADS */
     ret_value = HDpthread_mutex_lock(&H5_g.init_lock.atomic_lock2);
     if (ret_value)
         HGOTO_DONE(ret_value);
@@ -619,6 +622,7 @@ H5TSmutex_get_attempt_count(unsigned int *count)
         HGOTO_DONE(ret_value);
 
 done:
+#endif /* H5_HAVE_WIN_THREADS */
     FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
 } /* end H5TSmutex_get_attempt_count() */
 
@@ -719,9 +723,9 @@ H5TS_cancel_count_inc(void)
      * previous cancellation state until the final API routine is returning.
      */
     ++cancel_counter->cancel_count;
-#endif /* H5_HAVE_WIN_THREADS */
 
 done:
+#endif /* H5_HAVE_WIN_THREADS */
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_cancel_count_inc() */
 
