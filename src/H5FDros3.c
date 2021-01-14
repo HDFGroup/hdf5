@@ -228,6 +228,10 @@ static haddr_t H5FD__ros3_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD__ros3_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
 static herr_t  H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                void *buf);
+static herr_t  H5FD__ros3_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
+                                const void *buf);
+static herr_t  H5FD__ros3_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+
 static herr_t H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa);
 
 static const H5FD_class_t H5FD_ros3_g = {
@@ -257,9 +261,9 @@ static const H5FD_class_t H5FD_ros3_g = {
     H5FD__ros3_get_eof,       /* get_eof              */
     H5FD__ros3_get_handle,    /* get_handle           */
     H5FD__ros3_read,          /* read                 */
-    NULL,                     /* write                */
+    H5FD__ros3_write,         /* write                */
     NULL,                     /* flush                */
-    NULL,                     /* truncate             */
+    H5FD__ros3_truncate,      /* truncate             */
     NULL,                     /* lock                 */
     NULL,                     /* unlock               */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
@@ -1500,5 +1504,79 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_read() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function: H5FD__ros3_write()
+ *
+ * Purpose:
+ *
+ *     Write bytes to file.
+ *     UNSUPPORTED IN READ-ONLY ROS3 VFD.
+ *
+ * Return:
+ *
+ *     FAIL (Not possible with Read-Only S3 file.)
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-23
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
+                 haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf)
+{
+    herr_t ret_value = FAIL;
+
+    FUNC_ENTER_STATIC
+
+#if ROS3_DEBUG
+    HDfprintf(stdout, "H5FD__ros3_write() called.\n");
+#endif
+
+    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot write to read-only file.")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_write() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function: H5FD__ros3_truncate()
+ *
+ * Purpose:
+ *
+ *     Makes sure that the true file size is the same (or larger)
+ *     than the end-of-address.
+ *
+ *     NOT POSSIBLE ON READ-ONLY S3 FILES.
+ *
+ * Return:
+ *
+ *     FAIL (Not possible on Read-Only S3 files.)
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-23
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
+                    hbool_t H5_ATTR_UNUSED closing)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+#if ROS3_DEBUG
+    HDfprintf(stdout, "H5FD__ros3_truncate() called.\n");
+#endif
+
+    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot truncate read-only file.")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ros3_truncate() */
 
 #endif /* H5_HAVE_ROS3_VFD */
