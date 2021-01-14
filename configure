@@ -26432,13 +26432,14 @@ esac
 
 
 ## ----------------------------------------------------------------------
-## Does the struct stat have the st_blocks field?  This field is not Posix.
+## Does the struct stat have the st_blocks field? This field is not POSIX.
 ##
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for st_blocks in struct stat" >&5
 $as_echo_n "checking for st_blocks in struct stat... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+  #include <sys/stat.h>
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26450,11 +26451,10 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 int
 main ()
 {
-
+struct stat sb; sb.st_blocks=0;
   ;
   return 0;
-}[
-  #include <sys/stat.h>],[struct stat sb; sb.st_blocks=0;])
+}
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
 
