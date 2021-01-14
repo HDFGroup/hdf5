@@ -271,6 +271,10 @@ static haddr_t H5FD__hdfs_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD__hdfs_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
 static herr_t  H5FD__hdfs_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                void *buf);
+static herr_t  H5FD__hdfs_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
+                                const void *buf);
+static herr_t  H5FD__hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+
 static herr_t H5FD__hdfs_validate_config(const H5FD_hdfs_fapl_t *fa);
 
 static const H5FD_class_t H5FD_hdfs_g = {
@@ -300,9 +304,9 @@ static const H5FD_class_t H5FD_hdfs_g = {
     H5FD__hdfs_get_eof,       /* get_eof              */
     H5FD__hdfs_get_handle,    /* get_handle           */
     H5FD__hdfs_read,          /* read                 */
-    NULL,                     /* write                */
+    H5FD__hdfs_write,         /* write                */
     NULL,                     /* flush                */
-    NULL,                     /* truncate             */
+    H5FD__hdfs_truncate,      /* truncate             */
     NULL,                     /* lock                 */
     NULL,                     /* unlock               */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
@@ -667,7 +671,7 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_dst /*out*/)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     /* Copy the hdfs fapl data out */
-    H5MM_memcpy(fs_dst, fa_src, sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(fa_dst, fa_src, sizeof(H5FD_hdfs_fapl_t));
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1564,5 +1568,79 @@ H5FD__hdfs_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__hdfs_read() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function: H5FD__hdfs_write()
+ *
+ * Purpose:
+ *
+ *     Write bytes to file.
+ *     UNSUPPORTED IN READ-ONLY HDFS VFD.
+ *
+ * Return:
+ *
+ *     FAIL (Not possible with Read-Only S3 file.)
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-23
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__hdfs_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
+                 haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf)
+{
+    herr_t ret_value = FAIL;
+
+    FUNC_ENTER_STATIC
+
+#if HDFS_DEBUG
+    HDfprintf(stdout, "called %s.\n", FUNC);
+#endif
+
+    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot write to read-only file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__hdfs_write() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function: H5FD__hdfs_truncate()
+ *
+ * Purpose:
+ *
+ *     Makes sure that the true file size is the same (or larger)
+ *     than the end-of-address.
+ *
+ *     NOT POSSIBLE ON READ-ONLY S3 FILES.
+ *
+ * Return:
+ *
+ *     FAIL (Not possible on Read-Only S3 files.)
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-23
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__hdfs_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
+                    hbool_t H5_ATTR_UNUSED closing)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+#if HDFS_DEBUG
+    HDfprintf(stdout, "called %s.\n", FUNC);
+#endif
+
+    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot truncate read-only file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__hdfs_truncate() */
 
 #endif /* H5_HAVE_LIBHDFS */
