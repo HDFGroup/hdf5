@@ -139,6 +139,7 @@
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
+./config/libhdf5.pc.in
 ./config/linux-gnu
 ./config/linux-gnuaout
 ./config/linux-gnueabihf
@@ -3493,7 +3494,6 @@
 ./config/cmake/jrunTest.cmake
 ./config/cmake/jvolTest.cmake
 ./config/cmake/libh5cc.in
-./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml

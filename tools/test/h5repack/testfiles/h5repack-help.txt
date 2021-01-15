@@ -136,6 +136,7 @@ usage: h5repack [OPTIONS] file1 file2
         UD=<filter_number,filter_flag,cd_value_count,value1[,value2,...,valueN]>
             Required values: filter_number, filter_flag, cd_value_count, value1
             Optional values: value2 to valueN
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
         NONE (no parameter)
 
     LAYT - is a string with the format:

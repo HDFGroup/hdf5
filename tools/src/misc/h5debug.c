@@ -67,7 +67,6 @@
  * Return:  Non-NULL on success/NULL on failure
  *
  * Programmer:  Quincey Koziol
- *    koziol@hdfgroup.org
  *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -149,7 +148,6 @@ get_H5B2_class(const uint8_t *sig)
  * Return:  Non-NULL on success/NULL on failure
  *
  * Programmer:  Quincey Koziol
- *    koziol@hdfgroup.org
  *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -191,7 +189,6 @@ get_H5EA_class(const uint8_t *sig)
  * Return:  Non-NULL on success/NULL on failure
  *
  * Programmer:  Quincey Koziol
- *    koziol@hdfgroup.org
  *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
