@@ -576,6 +576,14 @@ New Features
 
     Tools:
     ------
+    - h5repack added help text for user-defined filters.
+
+        Added help text line that states the valid values of the filter flag
+        for user-defined filters;
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
+
+        (ADB - 2021/01/14, HDFFV-11099)
+
     - Added h5delete tool
 
         Deleting HDF5 storage when using the VOL can be tricky when the VOL
