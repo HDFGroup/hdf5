@@ -1107,6 +1107,7 @@
 ./test/cache_logging.c
 ./test/cache_tagging.c
 ./test/chunk_info.c
+./test/chunk_compress.c
 ./test/cmpd_dset.c
 ./test/cmpd_dtransform.c
 ./test/cork.c
