@@ -600,6 +600,13 @@ Supported Platforms
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ MSMPI 10.1 (cmake)
 
+    macOS High Sierra 10.13.6     Apple LLVM version 10.0.0 (clang-1000.10.44.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                        Intel icc/icpc/ifort version 19.0.4.233 20190416
+
+    macOS Mojave 10.14.6          Apple LLVM version 10.0.1 (clang-1001.0.46.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (bobcat)                      Intel icc/icpc/ifort version 19.0.4.233 20190416
 
 
 Tested Configuration Features Summary
@@ -720,6 +727,12 @@ The following platforms are not supported but have been tested for this release.
     Mac OS Sierra 10.12.6         Apple LLVM version 8.1 (clang-802.0.42)
     64-bit                        gfortran GNU Fortran (GCC) 7.4.0
     (kite)                        Intel icc/icpc/ifort version 17.0.2
+l
+
+
+    macOS Big Sur 11.1            Apple clang version 12.0.0 (clang-1200.0.32.28)
+    64-bit                        gfortran GNU Fortran )Homebrew GCC 10.2.0) 10.2.0
+    (BIGSUR-1)                    Intel icc/icpc/ifort version 2021.1
 
     SunOS 5.11 11.3               Sun C 5.15 SunOS_sparc
     32- and 64-bit                Sun Fortran 95 8.8 SunOS_sparc
