@@ -277,7 +277,7 @@ H5_DLL H5R_type_t H5Rget_type(const H5R_ref_t *ref_ptr);
  *          H5R_ref_t[#H5R_REF_BUF_SIZE];
  *
  */
-H5_DLL htri_t     H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
+H5_DLL htri_t H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
 
 /**
  * --------------------------------------------------------------------------
@@ -295,7 +295,7 @@ H5_DLL htri_t     H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr)
  *          pointer to the destination reference.
  *
  */
-H5_DLL herr_t     H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr);
+H5_DLL herr_t H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr);
 
 /* Dereference */
 

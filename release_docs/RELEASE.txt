@@ -576,6 +576,14 @@ New Features
 
     Tools:
     ------
+    - h5repack added help text for user-defined filters.
+
+        Added help text line that states the valid values of the filter flag
+        for user-defined filters;
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
+
+        (ADB - 2021/01/14, HDFFV-11099)
+
     - Added h5delete tool
 
         Deleting HDF5 storage when using the VOL can be tricky when the VOL
@@ -762,7 +770,28 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
-    -
+    - Reclassify CMake messages, to allow new modes and --log-level option
+
+      CMake message commands have a mode argument. By default, STATUS mode
+      was chosen for any non-error message. CMake version 3.15 added additional
+      modes, NOTICE, VERBOSE, DEBUG and TRACE. All message commands with a mode
+      of STATUS were reviewed and most were reclassified as VERBOSE. The new
+      mode was protected by a check for a CMake version of at least 3.15. If CMake
+      version 3.17 or above is used, the user can use the command line option
+      of "--log-level" to further restrict which message commands are displayed.
+
+      (ADB - 2021/01/11, HDFFV-11144)
+
+    - Fixes Autotools determination of the stat struct having an st_blocks field
+
+      A missing parenthesis in an autoconf macro prevented building the test
+      code used to determine if the stat struct contains the st_blocks field.
+      Now that the test functions correctly, the H5_HAVE_STAT_ST_BLOCKS #define
+      found in H5pubconf.h will be defined correctly on both the Autotools and
+      CMake. This #define is only used in the tests and does not affect the
+      HDF5 C library.
+
+      (DER - 2021/01/07, HDFFV-11201)
 
 
     Performance

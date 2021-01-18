@@ -274,8 +274,6 @@ static herr_t  H5FD__hdfs_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
 static herr_t  H5FD__hdfs_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                 const void *buf);
 static herr_t  H5FD__hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__hdfs_lock(H5FD_t *_file, hbool_t rw);
-static herr_t  H5FD__hdfs_unlock(H5FD_t *_file);
 
 static herr_t H5FD__hdfs_validate_config(const H5FD_hdfs_fapl_t *fa);
 
@@ -309,8 +307,8 @@ static const H5FD_class_t H5FD_hdfs_g = {
     H5FD__hdfs_write,         /* write                */
     NULL,                     /* flush                */
     H5FD__hdfs_truncate,      /* truncate             */
-    H5FD__hdfs_lock,          /* lock                 */
-    H5FD__hdfs_unlock,        /* unlock               */
+    NULL,                     /* lock                 */
+    NULL,                     /* unlock               */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 
@@ -673,7 +671,7 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_dst /*out*/)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     /* Copy the hdfs fapl data out */
-    H5MM_memcpy(fs_dst, fa_src, sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(fa_dst, fa_src, sizeof(H5FD_hdfs_fapl_t));
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1645,58 +1643,4 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__hdfs_truncate() */
 
-/*-------------------------------------------------------------------------
- *
- * Function: H5FD__hdfs_lock()
- *
- * Purpose:
- *
- *     Place an advisory lock on a file.
- *     No effect on Read-Only S3 file.
- *
- *     Suggestion: remove lock/unlock from class
- *                 would result in error at H5FD_[un]lock() (H5FD.c)
- *
- * Return:
- *
- *     SUCCEED (No-op always succeeds)
- *
- * Programmer: Jacob Smith
- *             2017-11-03
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__hdfs_lock(H5FD_t H5_ATTR_UNUSED *_file, hbool_t H5_ATTR_UNUSED rw)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD__hdfs_lock() */
-
-/*-------------------------------------------------------------------------
- *
- * Function: H5FD__hdfs_unlock()
- *
- * Purpose:
- *
- *     Remove the existing lock on the file.
- *     No effect on Read-Only S3 file.
- *
- * Return:
- *
- *     SUCCEED (No-op always succeeds)
- *
- * Programmer: Jacob Smith
- *             2017-11-03
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__hdfs_unlock(H5FD_t H5_ATTR_UNUSED *_file)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD__hdfs_unlock() */
 #endif /* H5_HAVE_LIBHDFS */
