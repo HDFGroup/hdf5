@@ -355,13 +355,20 @@ Bug Fixes since HDF5-1.12.0 release
       (DER - 2021/01/07, HDFFV-11201)
 
 
-    Tools:
-    ------
+    Tools
+    -----
+    - Fixed tools argument parsing.
+
+        Tools parsing used the length of the option from the long array to match
+        the option from the command line. This incorrectly matched a shorter long
+        name option that was happened to be a subset of another long option.
+        Changed to match whole names.
+
+        (ADB - 2021/01/19, HDFFV-11106)
 
 
     Fortran API
     -----------
-
     - Fixed configure issue when building HDF5 with NAG Fortran 7.0.
 
         HDF5 now accounts for the addition of half-precision floating-point
@@ -369,11 +376,13 @@ Bug Fixes since HDF5-1.12.0 release
 
         (MSB - 2020/02/28, HDFFV-11033)
 
+
     High-Level Library
     ------------------
     - Eliminated unnecessary code in H5DOappend(), improving its performance.
 
         (QAK - 2020/06/05)
+
 
     Testing
     -------
