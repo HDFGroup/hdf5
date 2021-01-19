@@ -25,7 +25,7 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *        s_opts   = "hVrv:qn:d:p:NcelxE:A:S";
+static const char *        s_opts   = "hVrv*qn:d:p:NcelxE:A:S";
 static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"version", no_arg, 'V'},
                                        {"report", no_arg, 'r'},
@@ -253,33 +253,27 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
 
             case 'v':
                 opts->mode_verbose = 1;
-                /* This for loop is for handling style like
-                 * -v, -v1, --verbose, --verbose=1.
-                 */
                 for (i = 1; i < argc; i++) {
                     /*
-                     * short opt
+                     * special check for short opt
                      */
-                    if (!strcmp(argv[i], "-v")) { /* no arg */
-                        opt_ind--;
+                    if (!strcmp(argv[i], "-v")) {
+                        if (opt_arg != NULL)
+                            opt_ind--;
                         opts->mode_verbose_level = 0;
                         break;
                     }
                     else if (!strncmp(argv[i], "-v", (size_t)2)) {
+                        if (opt_arg != NULL)
+                            opt_ind--;
                         opts->mode_verbose_level = atoi(&argv[i][2]);
                         break;
                     }
-
-                    /*
-                     * long opt
-                     */
-                    if (!strcmp(argv[i], "--verbose")) { /* no arg */
-                        opts->mode_verbose_level = 0;
-                        break;
-                    }
-                    else if (!strncmp(argv[i], "--verbose", (size_t)9) && argv[i][9] == '=') {
-                        opts->mode_verbose_level = atoi(&argv[i][10]);
-                        break;
+                    else {
+                        if (opt_arg != NULL)
+                            opts->mode_verbose_level = HDatoi(opt_arg);
+                        else
+                            opts->mode_verbose_level = 0;
                     }
                 }
                 break;
