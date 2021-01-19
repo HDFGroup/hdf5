@@ -356,6 +356,15 @@ New Features
 
     Library:
     --------
+    - Improved performance of H5Sget_select_elem_pointlist
+
+        Modified library to cache the point after the last block of points
+        retrieved by H5Sget_select_elem_pointlist, so a subsequent call to the
+        same function to retrieve the next block of points from the list can
+        proceed immediately without needing to iterate over the point list.
+
+        (NAF - 2021/01/19)
+
     - Replaced H5E_ATOM with H5E_ID in H5Epubgen.h
 
       The term "atom" is archaic and not in line with current HDF5 library
