@@ -139,6 +139,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     new_obj->connector = vol_obj->connector;
     new_obj->connector->nrefs++;
     new_obj->data = data;
+    new_obj->rc = 1;
 
     /* Set the committed type object to the VOL connector pointer in the H5T_t struct */
     dt->vol_obj = new_obj;
