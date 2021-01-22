@@ -444,7 +444,7 @@ public class HDFArray {
                     flattenedArray = (Object) ByteToInteger(_barray);
                 else if (ArrayDescriptor.className.equals("java.lang.Long"))
                     flattenedArray = (Object) ByteToLongObj(_barray);
-                else if (ArrayDescriptor.className.equals("java.lang.Float))
+                else if (ArrayDescriptor.className.equals("java.lang.Float"))
                     flattenedArray = (Object) ByteToFloatObj(_barray);
                 else if (ArrayDescriptor.className.equals("java.lang.Double"))
                     flattenedArray = (Object) ByteToDoubleObj(_barray);
@@ -452,7 +452,7 @@ public class HDFArray {
                     HDF5JavaException ex = new HDF5JavaException("HDFArray: unsupported Object type: " + ArrayDescriptor.NT);
                     throw (ex);
                 }
-            } // end of switch statement for arrays of boxed objects
+            } // end of statement for arrays of boxed objects
         default:
             HDF5JavaException ex = new HDF5JavaException("HDFArray: unknown or unsupported type: " + ArrayDescriptor.NT);
             throw (ex);
@@ -523,7 +523,7 @@ public class HDFArray {
                             HDF5JavaException ex = new HDF5JavaException("HDFArray: unsupported Object type: " + ArrayDescriptor.NT);
                             throw (ex);
                         }
-                    } // end of switch statement for arrays of boxed numerics
+                    } // end of statement for arrays of boxed numerics
                 } // end of switch statement for arrays of primitives
 
                 java.lang.reflect.Array.set(ArrayDescriptor.objs[ArrayDescriptor.dims - 2],
