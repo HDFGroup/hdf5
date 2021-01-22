@@ -983,6 +983,27 @@ done:
 } /* end H5VL_conn_dec_rc() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_object_inc_rc
+ *
+ * Purpose:     Wrapper to increment the ref count on a VOL object.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5VL_object_inc_rc(H5VL_object_t *vol_obj)
+{
+    FUNC_ENTER_NOAPI_NOERR_NOFS
+
+    /* Check arguments */
+    HDassert(vol_obj);
+
+    /* Increment refcount for object and return */
+    FUNC_LEAVE_NOAPI(++vol_obj->rc)
+} /* end H5VL_object_inc_rc() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_free_object
  *
  * Purpose:     Wrapper to unregister an object ID with a VOL aux struct
