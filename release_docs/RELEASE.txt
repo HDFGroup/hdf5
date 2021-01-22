@@ -676,7 +676,7 @@ Bug Fixes since HDF5-1.12.0 release
         consider file vlen and reference types to be equal if their files are
         the same.
 
-        (NAF - 2021/01/19)
+        (NAF - 2021/01/22)
 
     - Creation of dataset with optional filter
 
