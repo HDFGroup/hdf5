@@ -178,6 +178,15 @@ New Features
 
     Library:
     --------
+    - Improved performance of H5Sget_select_elem_pointlist
+
+        Modified library to cache the point after the last block of points
+        retrieved by H5Sget_select_elem_pointlist, so a subsequent call to the
+        same function to retrieve the next block of points from the list can
+        proceed immediately without needing to iterate over the point list.
+
+        (NAF - 2021/01/19)
+
     - Added H5VL_VERSION macro that indicates the version of the VOL framework
         implemented by a version of the library.  Currently, compatibility
         checking enforces that the 'version' field in the H5VL_class_t for
