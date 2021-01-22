@@ -579,8 +579,10 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 done:
     if (ret_value < 0)
         if (dt != NULL) {
-            if (dt->shared != NULL)
+            if (dt->shared != NULL) {
+                HDassert(!dt->shared->owned_vol_obj);
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
+            } /* end if */
             dt = H5FL_FREE(H5T_t, dt);
         } /* end if */
 

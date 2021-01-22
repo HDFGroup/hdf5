@@ -2010,7 +2010,7 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
         priv->subset_info.copy_size = 0;
 
         /*
-         * Insure that members are sorted.
+         * Ensure that members are sorted.
          */
         H5T__sort_value(src, NULL);
         H5T__sort_value(dst, NULL);
