@@ -4301,6 +4301,7 @@ H5T__set_size(H5T_t *dt, size_t size)
 
     /* Check args */
     HDassert(dt);
+    HDassert(dt->shared);
     HDassert(size != 0);
     HDassert(H5T_REFERENCE != dt->shared->type);
     HDassert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
@@ -4488,6 +4489,7 @@ H5T_get_size(const H5T_t *dt)
 
     /* check args */
     HDassert(dt);
+    HDassert(dt->shared);
 
     FUNC_LEAVE_NOAPI(dt->shared->size)
 } /* end H5T_get_size() */
@@ -4513,6 +4515,7 @@ H5T_get_force_conv(const H5T_t *dt)
 
     /* check args */
     HDassert(dt);
+    HDassert(dt->shared);
 
     FUNC_LEAVE_NOAPI(dt->shared->force_conv)
 } /* end H5T_get_force_conv() */
@@ -4552,6 +4555,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
     /* the easy case */
     if (dt1 == dt2)
         HGOTO_DONE(0);
+
+    HDassert(dt1->shared);
+    HDassert(dt2->shared);
 
     /* compare */
     if (dt1->shared->type < dt2->shared->type)
