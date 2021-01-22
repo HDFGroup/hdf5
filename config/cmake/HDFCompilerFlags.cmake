@@ -15,7 +15,9 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set (CMAKE_C_FLAGS "${CMAKE_C99_STANDARD_COMPILE_OPTION} ${CMAKE_C_FLAGS}")
 set (CMAKE_C_FLAGS "${CMAKE_C_SANITIZER_FLAGS} ${CMAKE_C_FLAGS}")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_SANITIZER_FLAGS} ${CMAKE_CXX_FLAGS}")
-message (STATUS "Warnings Configuration: default: ${CMAKE_C_FLAGS} : ${CMAKE_CXX_FLAGS}")
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+  message (VERBOSE "Warnings Configuration: default: ${CMAKE_C_FLAGS} : ${CMAKE_CXX_FLAGS}")
+endif ()
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
@@ -107,7 +109,9 @@ if (NOT MSVC AND NOT MINGW)
     elseif (CMAKE_C_COMPILER_ID STREQUAL "PGI")
       list (APPEND HDF5_CMAKE_C_FLAGS "-Minform=inform")
     endif ()
-    message (STATUS "CMAKE_C_FLAGS_GENERAL=${HDF5_CMAKE_C_FLAGS}")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "CMAKE_C_FLAGS_GENERAL=${HDF5_CMAKE_C_FLAGS}")
+    endif ()
   endif ()
 
   #-----------------------------------------------------------------------------
@@ -131,7 +135,6 @@ if (NOT MSVC AND NOT MINGW)
       ADD_H5_FLAGS (H5_CFLAGS0 "${HDF5_SOURCE_DIR}/config/clang-warnings/no-developer-general")
     endif ()
   endif ()
-
 
   if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     # Technically, variable-length arrays are part of the C99 standard, but
