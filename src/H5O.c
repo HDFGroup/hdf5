@@ -3346,7 +3346,7 @@ H5O_dec_rc(H5O_t *oh)
 
     /* check args */
     if (!oh)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object header")
 
     /* Decrement reference count */
     oh->rc--;
