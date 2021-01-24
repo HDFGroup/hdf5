@@ -290,6 +290,14 @@ New Features
 
       (ADB - 2019/06/12, HDFFV-10805)
 
+    - Change tools tests to search the error stack
+
+      There are some use cases which can cause the error stack of tools to be
+      different then the expected output. These tests now use grepTest.cmake;
+      this was changed to allow the error file to be searched for an expected string.
+
+      (ADB - 2019/04/15, HDFFV-10741)
+
     - Add toolchain and cross-compile support
 
       Added info on using a toolchain file to INSTALL_CMAKE.txt. A
