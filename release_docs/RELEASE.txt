@@ -329,6 +329,15 @@ New Features
 
     Library
     -------
+    - Improved performance of H5Sget_select_elem_pointlist
+
+      Modified library to cache the point after the last block of points
+      retrieved by H5Sget_select_elem_pointlist, so a subsequent call to the
+      same function to retrieve the next block of points from the list can
+      proceed immediately without needing to iterate over the point list.
+
+      (NAF - 2021/01/19)
+
     - Added S3 and HDFS Virtual File Drivers (VFDs) to HDF5
 
       These new VFDs have been added in HDF5-1.8.22.  Instructions to
