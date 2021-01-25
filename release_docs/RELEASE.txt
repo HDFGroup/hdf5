@@ -669,6 +669,15 @@ Bug Fixes since HDF5-1.12.0 release
 ==================================
     Library
     -------
+    - Fixed problems with vlens and refs inside compound using
+      H5VLget_file_type()
+
+        Modified library to properly ref count H5VL_object_t structs and only
+        consider file vlen and reference types to be equal if their files are
+        the same.
+
+        (NAF - 2021/01/22)
+
     - Creation of dataset with optional filter
 
         When the combination of type, space, etc doesn't work for filter
