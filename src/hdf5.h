@@ -24,6 +24,7 @@
 #include "H5ACpublic.h" /* Metadata cache                           */
 #include "H5Dpublic.h"  /* Datasets                                 */
 #include "H5Epublic.h"  /* Errors                                   */
+#include "H5ESpublic.h" /* Event Sets                               */
 #include "H5Fpublic.h"  /* Files                                    */
 #include "H5FDpublic.h" /* File drivers                             */
 #include "H5Gpublic.h"  /* Groups                                   */
