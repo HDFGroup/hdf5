@@ -1205,7 +1205,7 @@ TOOLTEST h5diff_801.txt -v h5diff_dset1.h5 h5diff_dset3.h5 /g1/array /g1/array
 # ##############################################################################
 # # dataset subsets
 # ##############################################################################
-#TRILABS_227 TOOLTEST h5diff_830.txt --enable-error-stack -v h5diff_dset1.h5 h5diff_dset2.h5 /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;]
+TOOLTEST h5diff_830.txt --enable-error-stack -v h5diff_dset1.h5 h5diff_dset2.h5 /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;]
 
 # ##############################################################################
 # VDS tests

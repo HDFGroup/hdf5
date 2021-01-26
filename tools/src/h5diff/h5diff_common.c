@@ -25,7 +25,7 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *        s_opts   = "hVrv:qn:d:p:NcelxE:A:S";
+static const char *        s_opts   = "hVrv*qn:d:p:NcelxE:A:S";
 static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"version", no_arg, 'V'},
                                        {"report", no_arg, 'r'},
@@ -76,7 +76,7 @@ check_options(diff_opt_t *opts)
     }
 }
 
-#if TRILABS_227
+//#if TRILABS_227
 /*-------------------------------------------------------------------------
  * Function:    parse_hsize_list
  *
@@ -192,7 +192,7 @@ parse_subset_params(const char *dset)
 
     return s;
 }
-#endif
+//#endif
 
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
@@ -253,33 +253,27 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
 
             case 'v':
                 opts->mode_verbose = 1;
-                /* This for loop is for handling style like
-                 * -v, -v1, --verbose, --verbose=1.
-                 */
                 for (i = 1; i < argc; i++) {
                     /*
-                     * short opt
+                     * special check for short opt
                      */
-                    if (!strcmp(argv[i], "-v")) { /* no arg */
-                        opt_ind--;
+                    if (!strcmp(argv[i], "-v")) {
+                        if (opt_arg != NULL)
+                            opt_ind--;
                         opts->mode_verbose_level = 0;
                         break;
                     }
                     else if (!strncmp(argv[i], "-v", (size_t)2)) {
+                        if (opt_arg != NULL)
+                            opt_ind--;
                         opts->mode_verbose_level = atoi(&argv[i][2]);
                         break;
                     }
-
-                    /*
-                     * long opt
-                     */
-                    if (!strcmp(argv[i], "--verbose")) { /* no arg */
-                        opts->mode_verbose_level = 0;
-                        break;
-                    }
-                    else if (!strncmp(argv[i], "--verbose", (size_t)9) && argv[i][9] == '=') {
-                        opts->mode_verbose_level = atoi(&argv[i][10]);
-                        break;
+                    else {
+                        if (opt_arg != NULL)
+                            opts->mode_verbose_level = HDatoi(opt_arg);
+                        else
+                            opts->mode_verbose_level = 0;
                     }
                 }
                 break;
@@ -486,11 +480,11 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
      * TRILABS_227 is complete except for an issue with printing indices
      * the following calls will enable subsetting
      */
-#if TRILABS_227
+    //#if TRILABS_227
     opts->sset[0] = parse_subset_params(*objname1);
 
     opts->sset[1] = parse_subset_params(*objname2);
-#endif
+    //#endif
 
     H5TOOLS_ENDDEBUG("");
 }
@@ -828,19 +822,27 @@ usage(void)
     /*
      * TRILABS_227 is complete except for an issue with printing indices
      * the following will be needed for subsetting
+     */
     PRINTVALSTREAM(rawoutstream, " Subsetting options:\n");
-    PRINTVALSTREAM(rawoutstream, "  Subsetting is available by using the fcompact form of subsetting, as
-    follows:\n"); PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]\n");
-    PRINTVALSTREAM(rawoutstream, "  It is not required to use all parameters, but until the last parameter
-    value used,\n"); PRINTVALSTREAM(rawoutstream, "  all of the semicolons (;) are required, even when a
-    parameter value is not specified. Example:\n"); PRINTVALSTREAM(rawoutstream, "    obj1
-    /foo/mydataset[START;;COUNT;BLOCK]\n"); PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START]\n");
-    PRINTVALSTREAM(rawoutstream, "  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1
-    in\n"); PRINTVALSTREAM(rawoutstream, "  each dimension. START is optional and will default to 0 in each
-    dimension.\n"); PRINTVALSTREAM(rawoutstream, "  Each of START, STRIDE, COUNT, and BLOCK must be a
-    comma-separated list of integers with\n"); PRINTVALSTREAM(rawoutstream, "  one integer for each dimension
-    of the dataset.\n"); PRINTVALSTREAM(rawoutstream, "\n");
-   */
+    PRINTVALSTREAM(rawoutstream,
+                   "  Subsetting is available by using the fcompact form of subsetting, as follows:\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  It is not required to use all parameters, but until the last parameter value used,\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "  all of the semicolons (;) are required, even when a parameter value is not specified. Example:\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;;COUNT;BLOCK]\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START]\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  each dimension. START is optional and will default to 0 in each dimension.\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "  Each of START, STRIDE, COUNT, and BLOCK must be a comma-separated list of integers with\n");
+    PRINTVALSTREAM(rawoutstream, "  one integer for each dimension of the dataset.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Exit code:\n");
     PRINTVALSTREAM(rawoutstream, "  0 if no differences, 1 if differences found, 2 if error\n");
     PRINTVALSTREAM(rawoutstream, "\n");
