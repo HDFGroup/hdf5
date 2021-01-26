@@ -31,6 +31,7 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 
 
 CONTENTS
+========
 
 - New Features
 - Support for new platforms and languages
@@ -812,20 +813,17 @@ Bug Fixes since HDF5-1.12.0 release
       (DER - 2021/01/07, HDFFV-11201)
 
 
-    Performance
-    -------------
-    -
-
-
-    Fortran
-    --------
-    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
-
-        (MSB - 2020/02/18, HDFFV-11029)
-
-
     Tools
     -----
+    - Fixed tools argument parsing.
+
+        Tools parsing used the length of the option from the long array to match
+        the option from the command line. This incorrectly matched a shorter long
+        name option that was happened to be a subset of another long option.
+        Changed to match whole names.
+
+        (ADB - 2021/01/19, HDFFV-11106)
+
     - The tools library was updated by standardizing the error stack process.
 
         General sequence is:
@@ -892,7 +890,19 @@ Bug Fixes since HDF5-1.12.0 release
         (ADB - 2019/12/06, HDFFV-10876 and HDFFV-10877)
 
 
-    High-Level APIs:
+    Performance
+    -------------
+    -
+
+
+    Fortran API
+    --------
+    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
+
+        (MSB - 2020/02/18, HDFFV-11029)
+
+
+    High-Level Library
     ------
     -
 
@@ -901,17 +911,21 @@ Bug Fixes since HDF5-1.12.0 release
     ------
     -
 
+
     Documentation
     -------------
     -
+
 
     F90 APIs
     --------
     -
 
+
     C++ APIs
     --------
     -
+
 
     Testing
     -------
