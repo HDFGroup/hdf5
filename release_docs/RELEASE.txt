@@ -356,6 +356,15 @@ New Features
 
     Library:
     --------
+    - Improved performance of H5Sget_select_elem_pointlist
+
+        Modified library to cache the point after the last block of points
+        retrieved by H5Sget_select_elem_pointlist, so a subsequent call to the
+        same function to retrieve the next block of points from the list can
+        proceed immediately without needing to iterate over the point list.
+
+        (NAF - 2021/01/19)
+
     - Replaced H5E_ATOM with H5E_ID in H5Epubgen.h
 
       The term "atom" is archaic and not in line with current HDF5 library
@@ -576,6 +585,14 @@ New Features
 
     Tools:
     ------
+    - h5repack added help text for user-defined filters.
+
+        Added help text line that states the valid values of the filter flag
+        for user-defined filters;
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
+
+        (ADB - 2021/01/14, HDFFV-11099)
+
     - Added h5delete tool
 
         Deleting HDF5 storage when using the VOL can be tricky when the VOL
@@ -652,6 +669,15 @@ Bug Fixes since HDF5-1.12.0 release
 ==================================
     Library
     -------
+    - Fixed problems with vlens and refs inside compound using
+      H5VLget_file_type()
+
+        Modified library to properly ref count H5VL_object_t structs and only
+        consider file vlen and reference types to be equal if their files are
+        the same.
+
+        (NAF - 2021/01/22)
+
     - Creation of dataset with optional filter
 
         When the combination of type, space, etc doesn't work for filter
