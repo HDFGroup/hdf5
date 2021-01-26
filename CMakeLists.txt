@@ -42,7 +42,7 @@ set (CMAKE_IGNORE_EOL "--ignore-eol")
 if (CMAKE_VERSION VERSION_LESS "3.14.0")
   set (CMAKE_IGNORE_EOL "")
   if (WIN32)
-    message (FATAL_ERROR "Windows builds require a minimum of CMake 3.14")
+    message (FATAL_ERROR "Windows builds requires a minimum of CMake 3.14")
   endif()
 endif ()
 
