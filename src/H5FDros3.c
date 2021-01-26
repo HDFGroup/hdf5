@@ -229,8 +229,6 @@ static herr_t  H5FD_ros3_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, had
 static herr_t  H5FD_ros3_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                const void *buf);
 static herr_t  H5FD_ros3_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD_ros3_lock(H5FD_t *_file, hbool_t rw);
-static herr_t  H5FD_ros3_unlock(H5FD_t *_file);
 static herr_t  H5FD_ros3_validate_config(const H5FD_ros3_fapl_t *fa);
 static void *  H5FD_ros3_fapl_get(H5FD_t *_file);
 static void *  H5FD_ros3_fapl_copy(const void *_old_fa);
@@ -265,8 +263,8 @@ static const H5FD_class_t H5FD_ros3_g = {
     H5FD_ros3_write,          /* write                */
     NULL,                     /* flush                */
     H5FD_ros3_truncate,       /* truncate             */
-    H5FD_ros3_lock,           /* lock                 */
-    H5FD_ros3_unlock,         /* unlock               */
+    NULL,                     /* lock                 */
+    NULL,                     /* unlock               */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 
@@ -1574,60 +1572,5 @@ H5FD_ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, h
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_ros3_truncate() */
-
-/*-------------------------------------------------------------------------
- *
- * Function: H5FD_ros3_lock()
- *
- * Purpose:
- *
- *     Place an advisory lock on a file.
- *     No effect on Read-Only S3 file.
- *
- *     Suggestion: remove lock/unlock from class
- *               > would result in error at H5FD_[un]lock() (H5FD.c)
- *
- * Return:
- *
- *     SUCCEED (No-op always succeeds)
- *
- * Programmer: Jacob Smith
- *             2017-11-03
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_ros3_lock(H5FD_t H5_ATTR_UNUSED *_file, hbool_t H5_ATTR_UNUSED rw)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD_ros3_lock() */
-
-/*-------------------------------------------------------------------------
- *
- * Function: H5FD_ros3_unlock()
- *
- * Purpose:
- *
- *     Remove the existing lock on the file.
- *     No effect on Read-Only S3 file.
- *
- * Return:
- *
- *     SUCCEED (No-op always succeeds)
- *
- * Programmer: Jacob Smith
- *             2017-11-03
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_ros3_unlock(H5FD_t H5_ATTR_UNUSED *_file)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD_ros3_unlock() */
 
 #endif /* H5_HAVE_ROS3_VFD */

@@ -1,5 +1,10 @@
-HDF5 version 1.8.22-12 currently under development
+HDF5 version 1.8.22 currently under development
 ================================================================================
+
+Notice: HDF5 1.8.22 will be followed later in 2021 by HDF5 1.8.23, the final
+release of HDF5 1.8.  HDF5 1.10 and HDF5 1.12 are currently available. 
+Detailed information about these releases can be found at: 
+https://portal.hdfgroup.org/display/HDF5/Release+Specific+Information
 
 INTRODUCTION
 ============
@@ -52,28 +57,28 @@ New Features
 
         The HDF filter plugins project is a collection of registered compression
         filters that can be dynamically loaded when needed to access data stored
-        in a hdf5 file. This CMake-only option allows the plugins to be built and
+        in an hdf5 file. This CMake-only option allows the plugins to be built and
         distributed with the hdf5 library and tools. Like the options for szip and
         zlib, either a tgz file or a git repository can be specified for the source.
 
         The option was refactored to use the CMake FetchContent process. This allows
         more control over the filter targets, but required external project command
-        options to be moved to a CMake include file, HDF5PluginCache.cmake. Also
-        enabled the filter examples to be used as tests for operation of the
+        options to be moved to a CMake include file, HDF5PluginCache.cmake. It also
+        allows the filter examples to be used as tests for operation of the
         filter plugins.
 
         (ADB - 2020/12/10, OESS-98)
 
     - CMake option to use MSVC naming conventions with MinGW
 
-        HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
+        HDF5_MSVC_NAMING_CONVENTION option enables using MSVC naming conventions
         when using a MinGW toolchain
 
         (xan - 2020/10/30)
 
     - CMake option to statically link gcc libs with MinGW
 
-        HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
+        HDF5_MINGW_STATIC_GCC_LIBS allows statically linking libg/libstdc++
         with the MinGW toolchain
 
         (xan - 2020/10/30)
@@ -82,7 +87,7 @@ New Features
 
         The HDF filter plugins project is a collection of registered compression
         filters that can be dynamically loaded when needed to access data stored
-        in a hdf5 file. This CMake-only option allows the plugins to be built and
+        in an hdf5 file. This CMake-only option allows the plugins to be built and
         distributed with the hdf5 library and tools. Like the options for szip and
         zlib, either a tgz file or a git repository can be specified for the source.
 
@@ -133,8 +138,8 @@ New Features
       The open source AEC library is a replacement library for SZip. In
       order to use it for hdf5 the libaec CMake source was changed to add
       "-fPIC" and exclude test files. Autotools does not build the
-      compression libraries within hdf5 builds. New option USE_LIBAEC is
-      required to compensate for the different files produced by AEC build.
+      compression libraries within hdf5 builds. CMake requires new option 
+      USE_LIBAEC to compensate for the different files produced by AEC build.
 
       (ADB - 2020/04/22, OESS-65)
 
@@ -155,7 +160,7 @@ New Features
       Intel C, Fortran warnings flags were moved to files in a config sub-folder
       named intel-warnings.
 
-      There are flags in named "error-xxx" files with warnings that may
+      There are flags in files named "error-xxx" with warnings that may
       be promoted to errors. Some source files may still need fixes.
 
       There are also pairs of files named "developer-xxx" and "no-developer-xxx"
@@ -255,12 +260,12 @@ New Features
 
     - Add mingw CMake support with a toolchain file
 
-      There has been a number of mingw issues that has been linked under
+      There have been a number of mingw issues that have been linked under
       HDFFV-10845. It has been decided to implement the CMake cross-compiling
       technique of toolchain files. We will use a linux platform with the mingw
       compiler stack for testing. Only the C language is fully supported, and
       the error tests are skipped. The C++ language works for static but shared
-      builds has a shared library issue with the mingw Standard Exception Handling
+      builds have a shared library issue with the mingw Standard Exception Handling
       library, which is not available on Windows. Fortran has a common cross-compile
       problem with the fortran configure tests.
 
@@ -285,6 +290,14 @@ New Features
 
       (ADB - 2019/06/12, HDFFV-10805)
 
+    - Change tools tests to search the error stack
+
+      There are some use cases which can cause the error stack of tools to be
+      different then the expected output. These tests now use grepTest.cmake;
+      this was changed to allow the error file to be searched for an expected string.
+
+      (ADB - 2019/04/15, HDFFV-10741)
+
     - Add toolchain and cross-compile support
 
       Added info on using a toolchain file to INSTALL_CMAKE.txt. A
@@ -296,7 +309,7 @@ New Features
 
       (ADB - 2018/10/04, HDFFV-10594)
 
-    - Add warning flags for Intel compilers
+    - Add warnings flags for Intel compilers
 
       Identified Intel compiler specific warnings flags that should be used
       instead of GNU flags.
@@ -316,9 +329,22 @@ New Features
 
     Library
     -------
-    - Add S3 and HDFS VFDs to HDF5 maintenance
+    - Improved performance of H5Sget_select_elem_pointlist
 
-      Fix windows requirements and java tests. Windows requires CMake 3.13.
+      Modified library to cache the point after the last block of points
+      retrieved by H5Sget_select_elem_pointlist, so a subsequent call to the
+      same function to retrieve the next block of points from the list can
+      proceed immediately without needing to iterate over the point list.
+
+      (NAF - 2021/01/19)
+
+    - Added S3 and HDFS Virtual File Drivers (VFDs) to HDF5
+
+      These new VFDs have been added in HDF5-1.8.22.  Instructions to
+      enable them when configuring HDF5 on Linux and Mac may be found at
+      https://portal.hdfgroup.org/display/HDF5/Virtual+File+Drivers+-+S3+and+HDFS.
+
+      Installing on Windows requires CMake 3.13 and the following additional setup.
             Install openssl library (with dev files);
             from "Shining Light Productions". msi package preferred.
 
@@ -344,7 +370,9 @@ New Features
     - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
 
       Rather than always running H5detect and generating H5Tinit.c and
-      H5make_libsettings.c, supply a location for those files.
+      H5make_libsettings.c, supply a location for those files with CMake variables
+      HDF5_USE_PREGEN and HDF5_USE_PREGEN_DIR.  See release_docs/README_HPC 
+      section VI "Other cross compiling options".
 
       (ADB - 2018/09/18, HDFFV-10332)
 
@@ -397,6 +425,17 @@ Bug Fixes since HDF5-1.8.21
       strings; v16, v18.
 
       (ADB - 2019/08/12, HDFFV-10879)
+
+    - Fixes Autotools determination of the stat struct having an st_blocks field
+
+      A missing parenthesis in an autoconf macro prevented building the test
+      code used to determine if the stat struct contains the st_blocks field.
+      Now that the test functions correctly, the H5_HAVE_STAT_ST_BLOCKS #define
+      found in H5pubconf.h will be defined correctly on both the Autotools and
+      CMake. This #define is only used in the tests and does not affect the
+      HDF5 C library.
+
+      (DER - 2021/07/01, HDFFV-11201)
 
 
     Library
@@ -501,7 +540,7 @@ Bug Fixes since HDF5-1.8.21
     -----
     - h5repack was fixed to repack the reference attributes properly.
       The code line that checks if the update of reference inside a compound
-      datatype is misplaced outside the code block loop that carries out the
+      datatype was misplaced outside the code block loop that carries out the
       check. In consequence, the next attribute that is not the reference
       type was repacked again as the reference type and caused the failure of
       repacking. The fix is to move the corresponding code line to the correct
@@ -529,6 +568,7 @@ Bug Fixes since HDF5-1.8.21
       the next major release.
 
       (LRK - 2019/05/09, HDFFV-10596)
+
 
     C++ API
     -------
@@ -577,6 +617,13 @@ Supported Platforms
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ MSMPI 10.1 (cmake)
 
+    macOS High Sierra 10.13.6     Apple LLVM version 10.0.0 (clang-1000.10.44.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                        Intel icc/icpc/ifort version 19.0.4.233 20190416
+
+    macOS Mojave 10.14.6          Apple LLVM version 10.0.1 (clang-1001.0.46.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (bobcat)                      Intel icc/icpc/ifort version 19.0.4.233 20190416
 
 
 Tested Configuration Features Summary
@@ -676,8 +723,8 @@ The following platforms are not supported but have been tested for this release.
     (cori)                            intel/19.0.3
 
     Linux-4.4.180-94.107-default  cray-mpich/7.7.6
-    # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
-    (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
+    # 1SMP x86_64 GNU/Linux           gcc/8.3.0, 9.3.0
+    (mutrino)                         intel/19.0.4
 
     Fedora32 5.8.18-200.fc32.x86_64
     #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
@@ -697,6 +744,12 @@ The following platforms are not supported but have been tested for this release.
     Mac OS Sierra 10.12.6         Apple LLVM version 8.1 (clang-802.0.42)
     64-bit                        gfortran GNU Fortran (GCC) 7.4.0
     (kite)                        Intel icc/icpc/ifort version 17.0.2
+l
+
+
+    macOS Big Sur 11.1            Apple clang version 12.0.0 (clang-1200.0.32.28)
+    64-bit                        gfortran GNU Fortran )Homebrew GCC 10.2.0) 10.2.0
+    (BIGSUR-1)                    Intel icc/icpc/ifort version 2021.1
 
     SunOS 5.11 11.3               Sun C 5.15 SunOS_sparc
     32- and 64-bit                Sun Fortran 95 8.8 SunOS_sparc
@@ -723,6 +776,11 @@ Known Problems
 
     CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
     issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
+
+    Various tests in dt_arith, fillval, and dtypes failed with core dump
+    during integer conversion on SunOS 5.11 with Sun C 5.15 SunOS_sparc in 
+    64-bit mode.  It appears that these failures were caused by invalid 
+    alignment, which is under investigation.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
