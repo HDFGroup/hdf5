@@ -156,7 +156,7 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE h5acreate_f(loc_id, name, type_id, space_id, attr_id, &
-       hdferr, acpl_id, aapl_id )
+       hdferr, acpl_id, aapl_id, es_id )
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Attribute name
@@ -168,13 +168,15 @@ CONTAINS
 !*****
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: acpl_id ! Attribute creation property list identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: aapl_id ! Attribute access property list identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: es_id   ! event stack for async identifier
 
     INTEGER(HID_T) :: acpl_id_default
     INTEGER(HID_T) :: aapl_id_default
+    INTEGER(HID_T) :: es_id_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
     INTERFACE
-       INTEGER(HID_T) FUNCTION H5Acreate2(loc_id, name, type_id, &
-            space_id, acpl_id_default, aapl_id_default) BIND(C,NAME='H5Acreate2')
+       INTEGER(HID_T) FUNCTION H5Acreate_async(loc_id, name, type_id, &
+            space_id, acpl_id_default, aapl_id_default, es_id_default) BIND(C,NAME='H5Acreate_async')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
          INTEGER(HID_T), INTENT(IN), VALUE :: loc_id
@@ -183,17 +185,20 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN), VALUE :: space_id
          INTEGER(HID_T), INTENT(IN), VALUE :: acpl_id_default
          INTEGER(HID_T), INTENT(IN), VALUE :: aapl_id_default
-       END FUNCTION H5Acreate2
+         INTEGER(HID_T), INTENT(IN), VALUE :: es_id_default
+       END FUNCTION H5Acreate_async
     END INTERFACE
 
     acpl_id_default = H5P_DEFAULT_F
     aapl_id_default = H5P_DEFAULT_F
+    es_id_default   = H5P_DEFAULT_F
     IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
     IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
+    IF (PRESENT(es_id))   es_id_default   = es_id
 
     c_name = TRIM(name)//C_NULL_CHAR
-    attr_id = h5acreate2(loc_id, c_name, type_id, space_id, &
-         acpl_id_default, aapl_id_default)
+    attr_id = H5Acreate_async(loc_id, c_name, type_id, space_id, &
+         acpl_id_default, aapl_id_default, es_id_default)
 
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
