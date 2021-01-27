@@ -243,11 +243,11 @@ do_ranks(hid_t fapl, hbool_t new_format)
 #ifdef H5_HAVE_FILTER_DEFLATE
             if (H5Pset_deflate(dcpl, 9) < 0)
                 TEST_ERROR
-#else     /* H5_HAVE_FILTER_DEFLATE */
+#else /* H5_HAVE_FILTER_DEFLATE */
             if (H5Pclose(dcpl) < 0)
                 TEST_ERROR
             continue;
-#endif    /* H5_HAVE_FILTER_DEFLATE */
+#endif /* H5_HAVE_FILTER_DEFLATE */
         } /* end if */
 
         if (config & CONFIG_FILL) {

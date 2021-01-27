@@ -7541,7 +7541,7 @@ test_file(void)
     test_min_dset_ohdr();  /* Test datset object header minimization */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_deprec(); /* Test deprecated routines */
-#endif             /* H5_NO_DEPRECATED_SYMBOLS */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     ret = H5Pclose(fapl_id);
     CHECK(ret, FAIL, "H5Pclose");

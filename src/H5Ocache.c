@@ -995,10 +995,10 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
         default:
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else  /* NDEBUG */
+#else /* NDEBUG */
             HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    }  /* end switch */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1284,7 +1284,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
     unsigned       chunkno;              /* Current chunk's index */
 #ifndef NDEBUG
     unsigned nullcnt; /* Count of null messages (for sanity checking gaps in chunks) */
-#endif                /* NDEBUG */
+#endif /* NDEBUG */
     hbool_t mesgs_modified =
         FALSE; /* Whether any messages were modified when the object header was deserialized */
     herr_t ret_value = SUCCEED; /* Return value */

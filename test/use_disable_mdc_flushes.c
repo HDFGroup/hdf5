@@ -33,9 +33,9 @@ const char *progname_g = "use_disable_mdc_flushes"; /* program name */
 
 /* these two definitions must match each other */
 #define UC_DATATYPE   H5T_NATIVE_SHORT /* use case HDF5 data type */
-#define UC_CTYPE      short            /* use case C data type */
-#define UC_RANK       3                /* use case dataset rank */
-#define Chunksize_DFT 256              /* chunksize default */
+#define UC_CTYPE      short /* use case C data type */
+#define UC_RANK       3 /* use case dataset rank */
+#define Chunksize_DFT 256 /* chunksize default */
 #define Hgoto_error(val)                                                                                     \
     {                                                                                                        \
         ret_value = val;                                                                                     \

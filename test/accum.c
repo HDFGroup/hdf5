@@ -2091,8 +2091,8 @@ test_swmr_write_big(hbool_t newest_format)
     uint8_t  wbuf[1024];                 /* Buffer for reading & writing */
     unsigned u;                          /* Local index variable */
 #ifdef H5_HAVE_UNISTD_H
-    pid_t pid;      /* Process ID */
-#endif              /* H5_HAVE_UNISTD_H */
+    pid_t pid; /* Process ID */
+#endif /* H5_HAVE_UNISTD_H */
     int     status; /* Status returned from child process */
     char *  new_argv[]     = {NULL};
     char *  driver         = NULL;  /* VFD string (from env variable) */

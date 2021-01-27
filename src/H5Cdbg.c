@@ -434,7 +434,7 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     double  average_entries_skipped_per_calls_to_msic         = 0.0f;
     double  average_dirty_pf_entries_skipped_per_call_to_msic = 0.0f;
     double  average_entries_scanned_per_calls_to_msic         = 0.0f;
-#endif                          /* H5C_COLLECT_CACHE_STATS */
+#endif /* H5C_COLLECT_CACHE_STATS */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -489,7 +489,7 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
         if (aggregate_max_pins < cache_ptr->max_pins[i])
             aggregate_max_pins = cache_ptr->max_pins[i];
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
-    }  /* end for */
+    } /* end for */
 
     if ((total_hits > 0) || (total_misses > 0))
         hit_rate = (double)100.0f * ((double)(total_hits)) / ((double)(total_hits + total_misses));
@@ -738,7 +738,7 @@ H5C_stats__reset(H5C_t *cache_ptr)
 #else /* NDEBUG */
 #if H5C_COLLECT_CACHE_STATS
 H5C_stats__reset(H5C_t *cache_ptr)
-#else  /* H5C_COLLECT_CACHE_STATS */
+#else /* H5C_COLLECT_CACHE_STATS */
 H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
 #endif /* H5C_COLLECT_CACHE_STATS */
 #endif /* NDEBUG */

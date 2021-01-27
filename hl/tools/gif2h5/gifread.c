@@ -354,7 +354,7 @@ ReadDataSubBlocks(GIFBYTE **MemGif2, /* GIF image file input FILE stream        
 #ifdef COMMENTED_OUT
         *ptr1++ = dataSize; /* Write the data count */
 #endif                      /* COMMENTED_OUT */
-        while (dataSize--)  /* Read/write the Plain Text data */
+        while (dataSize--) /* Read/write the Plain Text data */
             *ptr1++ = *(*MemGif2)++;
 
         /* Check if there is another data sub-block */

@@ -1645,10 +1645,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
                         "unable to open file: time = %s, name = '%s', tent_flags = %x", HDctime(&mytime),
                         name, tent_flags)
-#else     /* H5_USING_MEMCHECKER */
+#else /* H5_USING_MEMCHECKER */
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
                         name, tent_flags)
-#endif    /* H5_USING_MEMCHECKER */
+#endif /* H5_USING_MEMCHECKER */
         } /* end if */
         H5E_clear_stack(NULL);
         tent_flags = flags;
@@ -1659,10 +1659,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
                         "unable to open file: time = %s, name = '%s', tent_flags = %x", HDctime(&mytime),
                         name, tent_flags)
-#else     /* H5_USING_MEMCHECKER */
+#else /* H5_USING_MEMCHECKER */
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
                         name, tent_flags)
-#endif    /* H5_USING_MEMCHECKER */
+#endif /* H5_USING_MEMCHECKER */
         } /* end if */
     }     /* end if */
 
@@ -2465,8 +2465,8 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
     hid_t new_fapl_id = H5I_INVALID_HID; /* ID for duplicated FAPL */
 #ifdef H5_HAVE_SYMLINK
     /* This has to be declared here to avoid unfreed resources on errors */
-    char *realname = NULL;      /* Fully resolved path name of file */
-#endif                          /* H5_HAVE_SYMLINK */
+    char *realname = NULL; /* Fully resolved path name of file */
+#endif /* H5_HAVE_SYMLINK */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -2547,7 +2547,7 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
                 HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't duplicate real path")
         } /* end if */
     }     /* end if */
-#endif    /* H5_HAVE_SYMLINK */
+#endif /* H5_HAVE_SYMLINK */
 
     /* Check if we've resolved the file's name */
     if (NULL == *actual_name) {

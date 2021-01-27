@@ -212,9 +212,9 @@ typedef enum H5D_io_op_type_t {
 typedef struct H5D_io_info_t {
     const H5D_t *dset; /* Pointer to dataset being operated on */
 #ifdef H5_HAVE_PARALLEL
-    MPI_Comm comm;               /* MPI communicator for file */
-    hbool_t  using_mpi_vfd;      /* Whether the file is using an MPI-based VFD */
-#endif                           /* H5_HAVE_PARALLEL */
+    MPI_Comm comm;          /* MPI communicator for file */
+    hbool_t  using_mpi_vfd; /* Whether the file is using an MPI-based VFD */
+#endif                      /* H5_HAVE_PARALLEL */
     H5D_storage_t *  store;      /* Dataset storage info */
     H5D_layout_ops_t layout_ops; /* Dataset layout I/O operation function pointers */
     H5D_io_ops_t     io_ops;     /* I/O operation function pointers */

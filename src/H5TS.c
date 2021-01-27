@@ -29,7 +29,7 @@ typedef struct H5TS_cancel_struct {
 /* Global variable definitions */
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_once_t H5TS_first_init_g;
-#else  /* H5_HAVE_WIN_THREADS */
+#else /* H5_HAVE_WIN_THREADS */
 H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 #endif /* H5_HAVE_WIN_THREADS */
 H5TS_key_t H5TS_errstk_key_g;
@@ -291,7 +291,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 #ifdef H5_HAVE_WIN_THREADS
     EnterCriticalSection(&mutex->CriticalSection);
     return 0;
-#else  /* H5_HAVE_WIN_THREADS */
+#else /* H5_HAVE_WIN_THREADS */
     herr_t ret_value = pthread_mutex_lock(&mutex->atomic_lock);
 
     if (ret_value)
@@ -342,7 +342,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
     /* Releases ownership of the specified critical section object. */
     LeaveCriticalSection(&mutex->CriticalSection);
     return 0;
-#else  /* H5_HAVE_WIN_THREADS */
+#else /* H5_HAVE_WIN_THREADS */
     herr_t ret_value = pthread_mutex_lock(&mutex->atomic_lock);
 
     if (ret_value)
@@ -394,7 +394,7 @@ H5TS_cancel_count_inc(void)
 #ifdef H5_HAVE_WIN_THREADS
     /* unsupported; just return 0 */
     return SUCCEED;
-#else  /* H5_HAVE_WIN_THREADS */
+#else /* H5_HAVE_WIN_THREADS */
     H5TS_cancel_t *cancel_counter;
     herr_t         ret_value = SUCCEED;
 
@@ -456,7 +456,7 @@ H5TS_cancel_count_dec(void)
 #ifdef H5_HAVE_WIN_THREADS
     /* unsupported; will just return 0 */
     return SUCCEED;
-#else  /* H5_HAVE_WIN_THREADS */
+#else /* H5_HAVE_WIN_THREADS */
     register H5TS_cancel_t *cancel_counter;
     herr_t                  ret_value = SUCCEED;
 

@@ -81,7 +81,7 @@ static herr_t H5O__dtype_debug(H5F_t *f, const void *_mesg, FILE *stream, int in
         if (H5T__upgrade_version((DT), (VERS)) < 0)                                                          \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade " CLASS " encoding version")         \
         *(IOF) |= H5O_DECODEIO_DIRTY;                                                                        \
-    }  /* end if */
+    } /* end if */
 #endif /* H5_STRICT_FORMAT_CHECKS */
 
 /* This message derives from H5O message class */

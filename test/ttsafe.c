@@ -60,7 +60,7 @@ tts_is_threadsafe(void)
 #ifdef H5_HAVE_THREADSAFE
     is_ts     = FALSE;
     should_be = TRUE;
-#else  /* H5_HAVE_THREADSAFE */
+#else /* H5_HAVE_THREADSAFE */
     is_ts     = TRUE;
     should_be = FALSE;
 #endif /* H5_HAVE_THREADSAFE */

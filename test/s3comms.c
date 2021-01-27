@@ -1278,7 +1278,7 @@ test_HMAC_SHA256(void)
                 HDfprintf(stdout, "ERROR:\n!!! \"%s\"\n != \"%s\"\n", cases[i].exp, dest);
                 TEST_ERROR;
             }
-#else  /* VERBOSE not defined */
+#else /* VERBOSE not defined */
             /* simple pass/fail test
              */
             JSVERIFY(0, strncmp(cases[i].exp, dest, HDstrlen(cases[i].exp)), NULL);

@@ -162,9 +162,9 @@ test_mpio_overlap_writes(char *filename)
     return (nerrs);
 }
 
-#define MB            1048576     /* 1024*1024 == 2**20 */
-#define GB            1073741824  /* 1024**3 == 2**30 */
-#define TWO_GB_LESS1  2147483647  /* 2**31 - 1 */
+#define MB            1048576 /* 1024*1024 == 2**20 */
+#define GB            1073741824 /* 1024**3 == 2**30 */
+#define TWO_GB_LESS1  2147483647 /* 2**31 - 1 */
 #define FOUR_GB_LESS1 4294967295L /* 2**32 - 1 */
 /*
  * Verify that MPI_Offset exceeding 2**31 can be computed correctly.

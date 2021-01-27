@@ -6486,7 +6486,7 @@ test_int_float_except(void)
     hid_t  dxpl;     /* Dataset transfer property list */
     except_info_t e; /* Exception information */
     unsigned      u; /* Local index variables */
-#endif               /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
+#endif /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
 
     TESTING("exceptions for int <-> float conversions");
 
@@ -6602,7 +6602,7 @@ test_int_float_except(void)
         TEST_ERROR
 
     PASSED();
-#else  /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
+#else /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
     SKIPPED();
     HDputs("    Test skipped due to int or float not 4 bytes.");
 #endif /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */

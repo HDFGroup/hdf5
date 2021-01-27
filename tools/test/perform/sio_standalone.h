@@ -239,14 +239,14 @@ H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
 #define HDisalnum(C)     isalnum((int)(C)) /*cast for solaris warning*/
 #define HDisalpha(C)     isalpha((int)(C)) /*cast for solaris warning*/
 #define HDisatty(F)      isatty(F)
-#define HDiscntrl(C)     iscntrl((int)(C))  /*cast for solaris warning*/
-#define HDisdigit(C)     isdigit((int)(C))  /*cast for solaris warning*/
-#define HDisgraph(C)     isgraph((int)(C))  /*cast for solaris warning*/
-#define HDislower(C)     islower((int)(C))  /*cast for solaris warning*/
-#define HDisprint(C)     isprint((int)(C))  /*cast for solaris warning*/
-#define HDispunct(C)     ispunct((int)(C))  /*cast for solaris warning*/
-#define HDisspace(C)     isspace((int)(C))  /*cast for solaris warning*/
-#define HDisupper(C)     isupper((int)(C))  /*cast for solaris warning*/
+#define HDiscntrl(C)     iscntrl((int)(C)) /*cast for solaris warning*/
+#define HDisdigit(C)     isdigit((int)(C)) /*cast for solaris warning*/
+#define HDisgraph(C)     isgraph((int)(C)) /*cast for solaris warning*/
+#define HDislower(C)     islower((int)(C)) /*cast for solaris warning*/
+#define HDisprint(C)     isprint((int)(C)) /*cast for solaris warning*/
+#define HDispunct(C)     ispunct((int)(C)) /*cast for solaris warning*/
+#define HDisspace(C)     isspace((int)(C)) /*cast for solaris warning*/
+#define HDisupper(C)     isupper((int)(C)) /*cast for solaris warning*/
 #define HDisxdigit(C)    isxdigit((int)(C)) /*cast for solaris warning*/
 #define HDkill(P, S)     kill(P, S)
 #define HDlabs(X)        labs(X)
@@ -473,7 +473,7 @@ H5_DLL int c99_vsnprintf(char *str, size_t size, const char *format, va_list ap)
 #else /* H5_HAVE_WIN32_API */
 
 #if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *         strdup(const char *s);
+extern char *strdup(const char *s);
 #endif
 
 #define HDstrdup(S) strdup(S)

@@ -583,7 +583,7 @@ hs_dr_pio_test__takedown(struct hs_dr_pio_test_vars_t *tv_ptr)
 {
 #if HS_DR_PIO_TEST__TAKEDOWN__DEBUG
     const char *fcnName = "hs_dr_pio_test__takedown()";
-#endif               /* HS_DR_PIO_TEST__TAKEDOWN__DEBUG */
+#endif /* HS_DR_PIO_TEST__TAKEDOWN__DEBUG */
     int    mpi_rank; /* needed by the VRFY macro */
     herr_t ret;      /* Generic return value */
 
@@ -3694,7 +3694,7 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
 {
 #if CKRBRD_HS_DR_PIO_TEST__RUN_TEST__DEBUG
     const char *fcnName = "ckrbrd_hs_dr_pio_test__run_test()";
-#endif                                     /* CKRBRD_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
+#endif /* CKRBRD_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
     int                          mpi_rank; /* needed by VRFY */
     struct hs_dr_pio_test_vars_t test_vars = {
         /* int           mpi_size                        = */ -1,

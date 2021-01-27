@@ -548,7 +548,7 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
         HDmemset(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f) + size, 0,
                  need - (H5HG_SIZEOF_OBJHDR(f) + size));
 #endif /* OLD_WAY */
-    }  /* end if */
+    } /* end if */
     heap_flags |= H5AC__DIRTIED_FLAG;
 
     /* Return value */

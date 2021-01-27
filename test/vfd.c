@@ -617,7 +617,7 @@ test_direct(void)
 #ifndef H5_HAVE_DIRECT
     SKIPPED();
     return 0;
-#else  /*H5_HAVE_DIRECT*/
+#else /*H5_HAVE_DIRECT*/
 
     /* Set property list and file name for Direct driver.  Set memory alignment boundary
      * and file block size to 512 which is the minimum for Linux 2.6. */
@@ -2185,7 +2185,7 @@ test_ros3(void)
 #ifndef H5_HAVE_ROS3_VFD
     SKIPPED();
     return 0;
-#else  /* H5_HAVE_ROS3_VFD */
+#else /* H5_HAVE_ROS3_VFD */
 
     /* Set property list and file name for ROS3 driver. */
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)

@@ -1302,9 +1302,9 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
     H5HF_indirect_t *iblock = (H5HF_indirect_t *)_thing; /* Indirect block info */
     uint8_t *        image  = (uint8_t *)_image;         /* Pointer into raw data buffer */
 #ifndef NDEBUG
-    unsigned nchildren = 0;       /* Track # of children */
-    size_t   max_child = 0;       /* Track max. child entry used */
-#endif                            /* NDEBUG */
+    unsigned nchildren = 0; /* Track # of children */
+    size_t   max_child = 0; /* Track max. child entry used */
+#endif                      /* NDEBUG */
     uint32_t metadata_chksum;     /* Computed metadata checksum value */
     size_t   u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -1378,7 +1378,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
                 max_child = u;
         } /* end if */
 #endif    /* NDEBUG */
-    }     /* end for */
+    } /* end for */
 
     /* Compute checksum */
     metadata_chksum = H5_checksum_metadata((uint8_t *)_image, (size_t)(image - (uint8_t *)_image), 0);

@@ -277,10 +277,10 @@ struct H5O_t {
                                   /* (This is to simulate a bug in earlier
                                    *      versions of the library)
                                    */
-#endif                            /* H5O_ENABLE_BAD_MESG_COUNT */
+#endif /* H5O_ENABLE_BAD_MESG_COUNT */
 #ifndef NDEBUG
     size_t ndecode_dirtied; /* Number of messages dirtied by decoding */
-#endif                      /* NDEBUG */
+#endif /* NDEBUG */
 
     /* Chunk management information (not stored) */
     size_t rc; /* Reference count of [continuation] chunks using this structure */

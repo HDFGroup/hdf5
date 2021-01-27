@@ -1087,7 +1087,7 @@ finish:
     return (nerrors);
 }
 
-#else  /* H5_HAVE_PARALLEL */
+#else /* H5_HAVE_PARALLEL */
 /* dummy program since H5_HAVE_PARALLE is not configured in */
 int
 main(void)

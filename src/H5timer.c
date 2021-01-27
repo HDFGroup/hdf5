@@ -163,7 +163,7 @@ H5_now(void)
         HDgettimeofday(&now_tv, NULL);
         now = now_tv.tv_sec;
     }
-#else  /* H5_HAVE_GETTIMEOFDAY */
+#else /* H5_HAVE_GETTIMEOFDAY */
     now = HDtime(NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
@@ -201,8 +201,8 @@ H5_now_usec(void)
         HDgettimeofday(&now_tv, NULL);
         now = (uint64_t)(now_tv.tv_sec * (1000 * 1000)) + (uint64_t)now_tv.tv_usec;
     }
-#else  /* H5_HAVE_GETTIMEOFDAY */
-    now       = (uint64_t)(HDtime(NULL) * (1000 * 1000));
+#else /* H5_HAVE_GETTIMEOFDAY */
+    now = (uint64_t)(HDtime(NULL) * (1000 * 1000));
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     return (now);

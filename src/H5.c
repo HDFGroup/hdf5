@@ -360,7 +360,7 @@ H5_term_library(void)
             HDfprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
             HDabort();
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end if */
     }     /* end if */
 
@@ -1072,7 +1072,7 @@ H5is_library_threadsafe(hbool_t *is_ts)
     /* At this time, it is impossible for this to fail. */
 #ifdef H5_HAVE_THREADSAFE
     *is_ts = TRUE;
-#else  /* H5_HAVE_THREADSAFE */
+#else /* H5_HAVE_THREADSAFE */
     *is_ts = FALSE;
 #endif /* H5_HAVE_THREADSAFE */
 

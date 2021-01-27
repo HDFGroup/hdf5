@@ -440,10 +440,10 @@ H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
         walk_op.u.func1 = H5E__walk1_cb;
         if (H5E__walk(estack, H5E_WALK_DOWNWARD, &walk_op, (void *)&eprint) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
         HDassert(0 && "version 1 error stack print without deprecated symbols!");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-    }  /* end if */
+    } /* end if */
     else {
         walk_op.vers    = 2;
         walk_op.u.func2 = H5E__walk2_cb;
@@ -539,10 +539,10 @@ H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *o
             if (ret_value < 0)
                 HERROR(H5E_ERROR, H5E_CANTLIST, "can't walk error stack");
         } /* end if */
-#else     /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
         HDassert(0 && "version 1 error stack walk without deprecated symbols!");
-#endif    /* H5_NO_DEPRECATED_SYMBOLS */
-    }     /* end if */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+    } /* end if */
     else {
         HDassert(op->vers == 2);
         if (op->u.func2) {
@@ -652,9 +652,9 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 {
     va_list ap; /* Varargs info */
 #ifndef H5_HAVE_VASPRINTF
-    int tmp_len;                  /* Current size of description buffer */
-    int desc_len;                 /* Actual length of description when formatted */
-#endif                            /* H5_HAVE_VASPRINTF */
+    int tmp_len;  /* Current size of description buffer */
+    int desc_len; /* Actual length of description when formatted */
+#endif /* H5_HAVE_VASPRINTF */
     char *  tmp        = NULL;    /* Buffer to place formatted description in */
     hbool_t va_started = FALSE;   /* Whether the variable argument list is open */
     herr_t  ret_value  = SUCCEED; /* Return value */
@@ -687,7 +687,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
     /* Use the vasprintf() routine, since it does what we're trying to do below */
     if (HDvasprintf(&tmp, fmt, ap) < 0)
         HGOTO_DONE(FAIL)
-#else  /* H5_HAVE_VASPRINTF */
+#else /* H5_HAVE_VASPRINTF */
     /* Allocate space for the formatted description buffer */
     tmp_len = 128;
     if (NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
@@ -722,7 +722,7 @@ done:
      */
     if (tmp)
         HDfree(tmp);
-#else  /* H5_HAVE_VASPRINTF */
+#else /* H5_HAVE_VASPRINTF */
     if (tmp)
         H5MM_xfree(tmp);
 #endif /* H5_HAVE_VASPRINTF */
@@ -970,7 +970,7 @@ H5E_dump_api_stack(hbool_t is_api)
 #ifdef H5_NO_DEPRECATED_SYMBOLS
         if (estack->auto_op.func2)
             (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
         if (estack->auto_op.vers == 1) {
             if (estack->auto_op.func1)
                 (void)((estack->auto_op.func1)(estack->auto_data));
@@ -980,7 +980,7 @@ H5E_dump_api_stack(hbool_t is_api)
                 (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
         } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-    }  /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
