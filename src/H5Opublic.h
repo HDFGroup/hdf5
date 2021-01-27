@@ -26,9 +26,9 @@
 #define _H5Opublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions			*/
-#include "H5Ipublic.h" /* IDs			  		*/
-#include "H5Lpublic.h" /* Links		  		*/
+#include "H5public.h"  /* Generic Functions            */
+#include "H5Ipublic.h" /* IDs                          */
+#include "H5Lpublic.h" /* Links                        */
 
 /*****************/
 /* Public Macros */
@@ -103,10 +103,10 @@
 
 /* Types of objects in file */
 typedef enum H5O_type_t {
-    H5O_TYPE_UNKNOWN = -1,   /* Unknown object type		*/
-    H5O_TYPE_GROUP,          /* Object is a group		*/
-    H5O_TYPE_DATASET,        /* Object is a dataset		*/
-    H5O_TYPE_NAMED_DATATYPE, /* Object is a named data type	*/
+    H5O_TYPE_UNKNOWN = -1,   /* Unknown object type        */
+    H5O_TYPE_GROUP,          /* Object is a group          */
+    H5O_TYPE_DATASET,        /* Object is a dataset        */
+    H5O_TYPE_NAMED_DATATYPE, /* Object is a named data type    */
     H5O_TYPE_MAP,            /* Object is a map */
     H5O_TYPE_NTYPES          /* Number of different object types (must be last!) */
 } H5O_type_t;
@@ -257,13 +257,13 @@ typedef struct H5O_stat_t {
 /* (For H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx versions 1 & 2) */
 typedef struct H5O_info1_t {
     unsigned long  fileno;    /* File number that object is located in */
-    haddr_t        addr;      /* Object address in file	*/
+    haddr_t        addr;      /* Object address in file                */
     H5O_type_t     type;      /* Basic object type (group, dataset, etc.) */
     unsigned       rc;        /* Reference count of object    */
-    time_t         atime;     /* Access time			*/
-    time_t         mtime;     /* Modification time		*/
-    time_t         ctime;     /* Change time			*/
-    time_t         btime;     /* Birth time			*/
+    time_t         atime;     /* Access time                  */
+    time_t         mtime;     /* Modification time            */
+    time_t         ctime;     /* Change time                  */
+    time_t         btime;     /* Birth time                   */
     hsize_t        num_attrs; /* # of attributes attached to object */
     H5O_hdr_info_t hdr;       /* Object header information */
     /* Extra metadata storage for obj & attributes */

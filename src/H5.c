@@ -101,12 +101,12 @@ DESCRIPTION
 herr_t
 H5__init_package(void)
 {
-    herr_t          ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Run the library initialization routine, if it hasn't already ran */
-    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {                                                                \
+    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {
         if (H5_init_library() < 0)
             HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "unable to initialize library")
     } /* end if */
@@ -137,7 +137,7 @@ H5_init_library(void)
     /* Set the 'library initialized' flag as early as possible, to avoid
      * possible re-entrancy.
      */
-    H5_INIT_GLOBAL = TRUE;                                                                               \
+    H5_INIT_GLOBAL = TRUE;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -404,7 +404,7 @@ H5_term_library(void)
             HDfprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
             HDabort();
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end if */
     }     /* end if */
 
@@ -1116,7 +1116,7 @@ H5is_library_threadsafe(hbool_t *is_ts)
     /* At this time, it is impossible for this to fail. */
 #ifdef H5_HAVE_THREADSAFE
     *is_ts = TRUE;
-#else  /* H5_HAVE_THREADSAFE */
+#else /* H5_HAVE_THREADSAFE */
     *is_ts = FALSE;
 #endif /* H5_HAVE_THREADSAFE */
 

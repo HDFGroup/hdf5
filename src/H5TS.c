@@ -52,7 +52,7 @@ typedef struct H5TS_cancel_struct {
 /********************/
 /* Local Prototypes */
 /********************/
-static void   H5TS__key_destructor(void *key_val);
+static void H5TS__key_destructor(void *key_val);
 
 /*********************/
 /* Package Variables */
@@ -478,7 +478,7 @@ H5TS_cancel_count_inc(void)
             HDfree(cancel_counter);
             return FAIL;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Check if thread entering library */
     if (cancel_counter->cancel_count == 0)

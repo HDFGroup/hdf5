@@ -14,7 +14,7 @@
 #define _H5VLprivate_H
 
 /* Include package's public header */
-#include "H5VLpublic.h"         /* Generic Functions                    */
+#include "H5VLpublic.h" /* Generic Functions                    */
 
 /* Private headers needed by this file */
 

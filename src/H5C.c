@@ -7131,7 +7131,7 @@ H5C__load_entry(H5F_t *f,
     MPI_Comm comm     = MPI_COMM_NULL; /* File MPI Communicator                    */
     int      mpi_code;                 /* MPI error code                           */
 #endif /* H5_HAVE_PARALLEL */
-    void *ret_value = NULL;            /* Return value                             */
+    void *ret_value = NULL; /* Return value                             */
 
     FUNC_ENTER_STATIC
 

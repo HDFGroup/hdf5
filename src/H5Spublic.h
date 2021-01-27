@@ -171,7 +171,7 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  * \since 1.0.0
  *
  */
-H5_DLL hid_t       H5Screate(H5S_class_t type);
+H5_DLL hid_t H5Screate(H5S_class_t type);
 /**
  * \ingroup H5S
  * \brief Creates a new simple dataspace and opens it for access
@@ -222,7 +222,7 @@ H5_DLL hid_t       H5Screate(H5S_class_t type);
  * \since 1.0.0
  *
  */
-H5_DLL hid_t       H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[]);
+H5_DLL hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[]);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
@@ -269,8 +269,7 @@ H5_DLL hssize_t H5Sget_select_npoints(hid_t spaceid);
  * \since 1.0.0
  *
  */
-H5_DLL int H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[],
-   hsize_t maxdims[]);
+H5_DLL int H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[], hsize_t maxdims[]);
 /*-------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
@@ -394,9 +393,8 @@ H5_DLL int H5Sget_simple_extent_ndims(hid_t space_id);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
-    const hsize_t start[], const hsize_t stride[], const hsize_t count[],
-    const hsize_t block[]);
+H5_DLL herr_t      H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
+                                       const hsize_t stride[], const hsize_t count[], const hsize_t block[]);
 H5_DLL herr_t      H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[], const hsize_t max[]);
 H5_DLL hid_t       H5Scopy(hid_t space_id);
 H5_DLL herr_t      H5Sencode2(hid_t obj_id, void *buf, size_t *nalloc, hid_t fapl);
