@@ -201,6 +201,82 @@ CONTAINS
   END SUBROUTINE h5acreate_f
 
 !
+!****s* H5A/h5acreate_async_f
+!
+! NAME
+!  h5acreate_async_f
+!
+! PURPOSE
+!  Creates a dataset as an attribute of a group, dataset, or named datatype
+!
+! INPUTS
+!  loc_id 	 - identifier of an object (group, dataset,
+!                  or named datatype) attribute is attached to
+!  name 	 - attribute name
+!  type_id 	 - attribute datatype identifier
+!  space_id 	 - attribute dataspace identifier
+!  es_id         - event stack identifier
+!
+! OUTPUTS
+!  attr_id 	 - attribute identifier
+!  hdferr 	 - Returns 0 if successful and -1 if fails
+! OPTIONAL PARAMETERS
+!  acpl_id 	 - Attribute creation property list identifier
+!  appl_id 	 - Attribute access property list identifier
+!
+! AUTHOR
+!  M. Breitenfeld
+!  Jan 27 2021
+!
+! SOURCE
+  SUBROUTINE h5acreate_aysnc_f(loc_id, name, type_id, space_id, attr_id, &
+       es_id, hdferr, acpl_id, aapl_id)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id   ! Object identifier
+    CHARACTER(LEN=*), INTENT(IN) :: name   ! Attribute name
+    INTEGER(HID_T), INTENT(IN) :: type_id  ! Attribute datatype identifier
+    INTEGER(HID_T), INTENT(IN) :: space_id ! Attribute dataspace identifier
+    INTEGER(HID_T), INTENT(OUT) :: attr_id ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: es_id    ! Attribute identifier
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code:
+                                           ! 0 on success and -1 on failure
+!*****
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: acpl_id ! Attribute creation property list identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: aapl_id ! Attribute access property list identifier
+
+    INTEGER(HID_T) :: acpl_id_default
+    INTEGER(HID_T) :: aapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Acreate_async(loc_id, name, type_id, &
+            space_id, acpl_id_default, aapl_id_default, es_id) BIND(C,NAME='H5Acreate_async')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         INTEGER(HID_T), INTENT(IN), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+         INTEGER(HID_T), INTENT(IN), VALUE :: type_id
+         INTEGER(HID_T), INTENT(IN), VALUE :: space_id
+         INTEGER(HID_T), INTENT(IN), VALUE :: acpl_id_default
+         INTEGER(HID_T), INTENT(IN), VALUE :: aapl_id_default
+         INTEGER(HID_T), INTENT(IN), VALUE :: es_id
+       END FUNCTION H5Acreate_async
+    END INTERFACE
+
+    acpl_id_default = H5P_DEFAULT_F
+    aapl_id_default = H5P_DEFAULT_F
+    IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
+    IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
+
+    c_name = TRIM(name)//C_NULL_CHAR
+    attr_id = h5acreate_async(loc_id, c_name, type_id, space_id, &
+         acpl_id_default, aapl_id_default, es_id)
+
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5acreate_aysnc_f
+
+!
 !****s* H5A/h5aopen_name_f
 !
 ! NAME
