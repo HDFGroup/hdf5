@@ -850,7 +850,7 @@ H5VL_create_object(void *object, H5VL_t *vol_connector)
     ret_value->rc        = 1;
 
     /* Bump the reference count on the VOL connector */
-    H5VL_conn_inc_rc(vol_connector);
+    H5VL__conn_inc_rc(vol_connector);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
