@@ -31,6 +31,7 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 
 
 CONTENTS
+========
 
 - New Features
 - Support for new platforms and languages
@@ -356,6 +357,15 @@ New Features
 
     Library:
     --------
+    - Improved performance of H5Sget_select_elem_pointlist
+
+        Modified library to cache the point after the last block of points
+        retrieved by H5Sget_select_elem_pointlist, so a subsequent call to the
+        same function to retrieve the next block of points from the list can
+        proceed immediately without needing to iterate over the point list.
+
+        (NAF - 2021/01/19)
+
     - Replaced H5E_ATOM with H5E_ID in H5Epubgen.h
 
       The term "atom" is archaic and not in line with current HDF5 library
@@ -576,6 +586,14 @@ New Features
 
     Tools:
     ------
+    - h5repack added help text for user-defined filters.
+
+        Added help text line that states the valid values of the filter flag
+        for user-defined filters;
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
+
+        (ADB - 2021/01/14, HDFFV-11099)
+
     - Added h5delete tool
 
         Deleting HDF5 storage when using the VOL can be tricky when the VOL
@@ -652,6 +670,15 @@ Bug Fixes since HDF5-1.12.0 release
 ==================================
     Library
     -------
+    - Fixed problems with vlens and refs inside compound using
+      H5VLget_file_type()
+
+        Modified library to properly ref count H5VL_object_t structs and only
+        consider file vlen and reference types to be equal if their files are
+        the same.
+
+        (NAF - 2021/01/22)
+
     - Creation of dataset with optional filter
 
         When the combination of type, space, etc doesn't work for filter
@@ -786,20 +813,17 @@ Bug Fixes since HDF5-1.12.0 release
       (DER - 2021/01/07, HDFFV-11201)
 
 
-    Performance
-    -------------
-    -
-
-
-    Fortran
-    --------
-    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
-
-        (MSB - 2020/02/18, HDFFV-11029)
-
-
     Tools
     -----
+    - Fixed tools argument parsing.
+
+        Tools parsing used the length of the option from the long array to match
+        the option from the command line. This incorrectly matched a shorter long
+        name option that was happened to be a subset of another long option.
+        Changed to match whole names.
+
+        (ADB - 2021/01/19, HDFFV-11106)
+
     - The tools library was updated by standardizing the error stack process.
 
         General sequence is:
@@ -866,7 +890,19 @@ Bug Fixes since HDF5-1.12.0 release
         (ADB - 2019/12/06, HDFFV-10876 and HDFFV-10877)
 
 
-    High-Level APIs:
+    Performance
+    -------------
+    -
+
+
+    Fortran API
+    --------
+    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
+
+        (MSB - 2020/02/18, HDFFV-11029)
+
+
+    High-Level Library
     ------
     -
 
@@ -875,17 +911,21 @@ Bug Fixes since HDF5-1.12.0 release
     ------
     -
 
+
     Documentation
     -------------
     -
+
 
     F90 APIs
     --------
     -
 
+
     C++ APIs
     --------
     -
+
 
     Testing
     -------

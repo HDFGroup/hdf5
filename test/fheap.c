@@ -9423,9 +9423,9 @@ test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned
-        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    unsigned           row;      /* Current row in indirect block */
+    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the */
+                                                   /* first indirect blocks */
+    unsigned           row;        /* Current row in indirect block */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
