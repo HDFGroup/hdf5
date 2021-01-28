@@ -24,7 +24,7 @@ static int mpi_size, mpi_rank;
 
 #define DSET_NAME    "ExtendibleArray"
 #define CHUNK_SIZE   1000 /* #elements per chunk */
-#define CHUNK_FACTOR 200 /* default dataset size in terms of chunks */
+#define CHUNK_FACTOR 200  /* default dataset size in terms of chunks */
 #define CLOSE        1
 #define NO_CLOSE     0
 

@@ -306,14 +306,14 @@ H5E__set_default_auto(H5E_t *stk)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifdef H5_USE_16_API_DEFAULT
     stk->auto_op.vers = 1;
-#else /* H5_USE_16_API */
+#else  /* H5_USE_16_API */
     stk->auto_op.vers = 2;
 #endif /* H5_USE_16_API_DEFAULT */
 
     stk->auto_op.func1 = stk->auto_op.func1_default = (H5E_auto1_t)H5Eprint1;
     stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5Eprint2;
     stk->auto_op.is_default                         = TRUE;
-#else /* H5_NO_DEPRECATED_SYMBOLS */
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
     stk->auto_op.func2 = (H5E_auto2_t)H5Eprint2;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -1325,9 +1325,9 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
     va_list ap;     /* Varargs info */
     H5E_t * estack; /* Pointer to error stack to modify */
 #ifndef H5_HAVE_VASPRINTF
-    int tmp_len;  /* Current size of description buffer */
-    int desc_len; /* Actual length of description when formatted */
-#endif /* H5_HAVE_VASPRINTF */
+    int tmp_len;                  /* Current size of description buffer */
+    int desc_len;                 /* Actual length of description when formatted */
+#endif                            /* H5_HAVE_VASPRINTF */
     char *  tmp        = NULL;    /* Buffer to place formatted description in */
     hbool_t va_started = FALSE;   /* Whether the variable argument list is open */
     herr_t  ret_value  = SUCCEED; /* Return value */
@@ -1360,7 +1360,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
     /* Use the vasprintf() routine, since it does what we're trying to do below */
     if (HDvasprintf(&tmp, fmt, ap) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-#else /* H5_HAVE_VASPRINTF */
+#else  /* H5_HAVE_VASPRINTF */
     /* Allocate space for the formatted description buffer */
     tmp_len = 128;
     if (NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
@@ -1395,7 +1395,7 @@ done:
      */
     if (tmp)
         HDfree(tmp);
-#else /* H5_HAVE_VASPRINTF */
+#else  /* H5_HAVE_VASPRINTF */
     if (tmp)
         H5MM_xfree(tmp);
 #endif /* H5_HAVE_VASPRINTF */

@@ -513,7 +513,7 @@ h5pget_version_c(hid_t_f *prp_id, int_f *boot, int_f *freelist, int_f *stab, int
     *freelist = (int_f)c_freelist;
     *stab     = (int_f)c_stab;
     *shhdr    = (int_f)c_shhdr;
-#else /* H5_NO_DEPRECATED_SYMBOLS */
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
     /*
      * Fill in fake values [since we need a file ID to call H5Fget_info :-( -QAK ]
      */

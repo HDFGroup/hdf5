@@ -37,13 +37,13 @@ typedef struct H5O_fill_t H5O_fill_t;
 #include "H5Spublic.h" /* Dataspace functions			*/
 
 /* Private headers needed by this file */
-#include "H5private.h" /* Generic Functions                    */
+#include "H5private.h"   /* Generic Functions                    */
 #include "H5ACprivate.h" /* Metadata cache                       */
-#include "H5Fprivate.h" /* File access				*/
+#include "H5Fprivate.h"  /* File access				*/
 #include "H5HGprivate.h" /* Global Heaps                         */
 #include "H5SLprivate.h" /* Skip lists				*/
-#include "H5Tprivate.h" /* Datatype functions			*/
-#include "H5Zprivate.h" /* I/O pipeline filters			*/
+#include "H5Tprivate.h"  /* Datatype functions			*/
+#include "H5Zprivate.h"  /* I/O pipeline filters			*/
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
@@ -66,8 +66,8 @@ typedef struct H5O_mesg_t      H5O_mesg_t;
 
 /* Object header macros */
 #define H5O_MESG_MAX_SIZE 65536 /*max obj header message size	     */
-#define H5O_ALL           (-1) /* Operate on all messages of type   */
-#define H5O_FIRST         (-2) /* Operate on first message of type  */
+#define H5O_ALL           (-1)  /* Operate on all messages of type   */
+#define H5O_FIRST         (-2)  /* Operate on first message of type  */
 
 /* Flags needed when encoding messages */
 #define H5O_MSG_NO_FLAGS_SET                            0x00u
@@ -95,10 +95,10 @@ typedef struct H5O_mesg_t      H5O_mesg_t;
 /* #define H5O_ENABLE_BOGUS */
 
 /* ========= Object Creation properties ============ */
-#define H5O_CRT_ATTR_MAX_COMPACT_NAME "max compact attr" /* Max. # of attributes to store compactly */
-#define H5O_CRT_ATTR_MIN_DENSE_NAME   "min dense attr" /* Min. # of attributes to store densely */
+#define H5O_CRT_ATTR_MAX_COMPACT_NAME "max compact attr"    /* Max. # of attributes to store compactly */
+#define H5O_CRT_ATTR_MIN_DENSE_NAME   "min dense attr"      /* Min. # of attributes to store densely */
 #define H5O_CRT_OHDR_FLAGS_NAME       "object header flags" /* Object header flags */
-#define H5O_CRT_PIPELINE_NAME         "pline" /* Filter pipeline */
+#define H5O_CRT_PIPELINE_NAME         "pline"               /* Filter pipeline */
 #define H5O_CRT_PIPELINE_DEF                                                                                 \
     {                                                                                                        \
         {0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0, 0, NULL                          \
@@ -375,7 +375,7 @@ typedef struct H5O_link_t {
  * External File List Message
  * (Data structure in memory)
  */
-#define H5O_EFL_ALLOC     16 /*number of slots to alloc at once   */
+#define H5O_EFL_ALLOC     16            /*number of slots to alloc at once   */
 #define H5O_EFL_UNLIMITED H5F_UNLIMITED /*max possible file size	     */
 
 typedef struct H5O_efl_entry_t {

@@ -94,7 +94,7 @@ typedef struct H5FD_splitter_t {
     } while (0)
 #else
 #define H5FD_SPLITTER_LOG_CALL(name) /* no-op */
-#endif /* H5FD_SPLITTER_DEBUG_OP_CALLS */
+#endif                               /* H5FD_SPLITTER_DEBUG_OP_CALLS */
 
 /* Private functions */
 

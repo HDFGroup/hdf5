@@ -480,7 +480,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
 
         PASSED();
     }
-#else /* NDEBUG */
+#else  /* NDEBUG */
     SKIPPED();
     puts("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
