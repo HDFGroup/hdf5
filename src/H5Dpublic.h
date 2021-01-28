@@ -203,7 +203,7 @@ H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
+ * \ingroup H5D_async
  *
  * \brief Asynchronous version of H5Dcreate2()
  *
@@ -325,7 +325,7 @@ H5_DLL hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
+ * \ingroup H5D_async
  *
  * \brief Asynchronous version of H5Dopen2()
  *
@@ -370,7 +370,7 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
+ * \ingroup H5D_async
  *
  * \brief Asynchronous version of H5Dget_space()
  *
@@ -795,7 +795,7 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
+ * \ingroup H5D_async
  *
  * \brief Asynchronous version of H5Dread()
  *
@@ -932,7 +932,7 @@ H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
+ * \ingroup H5D_async
  *
  * \brief Asynchronous version of H5Dwrite()
  *
@@ -1292,7 +1292,7 @@ H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
+ * \ingroup H5D_async
  *
  * \brief Asynchronous version of H5Dset_extent()
  *
@@ -1536,13 +1536,10 @@ H5_DLL herr_t H5Dclose(hid_t dset_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
+ * \ingroup H5D_async
  *
  * \brief Asynchronous version of H5Dclose()
  *
- * \app_file
- * \app_func
- * \app_line
  * \dset_id
  * \es_id
  *
@@ -1551,7 +1548,11 @@ H5_DLL herr_t H5Dclose(hid_t dset_id);
  * \see H5Dclose()
  *
  */
-H5_DLL herr_t H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
+ H5_DLL herr_t H5Dclose_async(// \cond
+                              // \internal For internal use only, not visible as user parameters
+                             const char *app_file, const char *app_func, unsigned app_line,
+                             // \endcond
+                             hid_t dset_id,
                              hid_t es_id);
 
 /* Internal API routines */

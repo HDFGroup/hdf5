@@ -38,6 +38,10 @@
  *
  *          A Dataset is used by other HDF5 APIs, either by name or by a handle,
  *          which is obtained by either creating or opening the dataset.
+ *
+ * \defgroup H5D_async Asynchronous
+ * \brief Asynchronous H5D Functions
+ * \ingroup H5D
  */
 
 #endif /* _H5Dmodule_H */
