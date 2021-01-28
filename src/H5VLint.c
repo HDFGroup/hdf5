@@ -570,6 +570,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
     } /* end if */
     else
         new_vol_obj->data = object;
+    new_vol_obj->rc = 1;
 
     /* Bump the reference count on the VOL connector */
     H5VL__conn_inc_rc(vol_connector);
@@ -816,6 +817,46 @@ done:
 } /* end H5VL_register_using_vol_id() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_create_object
+ *
+ * Purpose:     Similar to H5VL_register but does not create an ID.
+ *              Creates a new VOL object for the provided generic object
+ *              using the provided vol connector.  Should only be used for
+ *              internal objects returned from the connector such as
+ *              requests.
+ *
+ * Return:      Success:    A valid VOL object
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_object_t *
+H5VL_create_object(void *object, H5VL_t *vol_connector)
+{
+    H5VL_object_t *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Check arguments */
+    HDassert(object);
+    HDassert(vol_connector);
+
+    /* Set up VOL object for the passed-in data */
+    /* (Does not wrap object, since it's from a VOL callback) */
+    if (NULL == (ret_value = H5FL_CALLOC(H5VL_object_t)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate memory for VOL object")
+    ret_value->connector = vol_connector;
+    ret_value->data      = object;
+    ret_value->rc        = 1;
+
+    /* Bump the reference count on the VOL connector */
+    H5VL__conn_inc_rc(vol_connector);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_create_object() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_create_object_using_vol_id
  *
  * Purpose:     Similar to H5VL_register_using_vol_id but does not create
@@ -939,6 +980,27 @@ done:
 } /* end H5VL__conn_dec_rc() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_object_inc_rc
+ *
+ * Purpose:     Wrapper to increment the ref count on a VOL object.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5VL_object_inc_rc(H5VL_object_t *vol_obj)
+{
+    FUNC_ENTER_NOAPI_NOERR_NOFS
+
+    /* Check arguments */
+    HDassert(vol_obj);
+
+    /* Increment refcount for object and return */
+    FUNC_LEAVE_NOAPI(++vol_obj->rc)
+} /* end H5VL_object_inc_rc() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_free_object
  *
  * Purpose:     Wrapper to unregister an object ID with a VOL aux struct
@@ -958,11 +1020,13 @@ H5VL_free_object(H5VL_object_t *vol_obj)
     /* Check arguments */
     HDassert(vol_obj);
 
-    /* Decrement refcount on connector */
-    if (H5VL__conn_dec_rc(vol_obj->connector) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
+    if(--vol_obj->rc == 0) {
+        /* Decrement refcount on connector */
+        if (H5VL__conn_dec_rc(vol_obj->connector) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
 
-    vol_obj = H5FL_FREE(H5VL_object_t, vol_obj);
+        vol_obj = H5FL_FREE(H5VL_object_t, vol_obj);
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
