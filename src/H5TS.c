@@ -65,7 +65,7 @@ static void H5TS__key_destructor(void *key_val);
 /* Global variable definitions */
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_once_t H5TS_first_init_g;
-#else /* H5_HAVE_WIN_THREADS */
+#else  /* H5_HAVE_WIN_THREADS */
 H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 #endif /* H5_HAVE_WIN_THREADS */
 
@@ -73,8 +73,8 @@ H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 H5TS_key_t H5TS_errstk_key_g; /* Error stack */
 #ifdef H5_HAVE_CODESTACK
 H5TS_key_t H5TS_funcstk_key_g; /* Function stack */
-#endif /* H5_HAVE_CODESTACK */
-H5TS_key_t H5TS_apictx_key_g; /* API context */
+#endif                         /* H5_HAVE_CODESTACK */
+H5TS_key_t H5TS_apictx_key_g;  /* API context */
 
 /*******************/
 /* Local Variables */
@@ -340,7 +340,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 
 #ifdef H5_HAVE_WIN_THREADS
     EnterCriticalSection(&mutex->CriticalSection);
-#else /* H5_HAVE_WIN_THREADS */
+#else  /* H5_HAVE_WIN_THREADS */
     /* Acquire the library lock */
     ret_value = pthread_mutex_lock(&mutex->atomic_lock);
     if (ret_value)
@@ -395,7 +395,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 #ifdef H5_HAVE_WIN_THREADS
     /* Releases ownership of the specified critical section object. */
     LeaveCriticalSection(&mutex->CriticalSection);
-#else /* H5_HAVE_WIN_THREADS */
+#else  /* H5_HAVE_WIN_THREADS */
 
     /* Decrement the lock count for this thread */
     ret_value = pthread_mutex_lock(&mutex->atomic_lock);
@@ -453,7 +453,7 @@ H5TS_cancel_count_inc(void)
 
 #ifdef H5_HAVE_WIN_THREADS
     /* unsupported */
-#else /* H5_HAVE_WIN_THREADS */
+#else  /* H5_HAVE_WIN_THREADS */
     /* Acquire the thread's cancellation counter */
     cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_s);
 
@@ -526,7 +526,7 @@ H5TS_cancel_count_dec(void)
 
 #ifdef H5_HAVE_WIN_THREADS
     /* unsupported */
-#else /* H5_HAVE_WIN_THREADS */
+#else  /* H5_HAVE_WIN_THREADS */
     /* Acquire the thread's cancellation counter */
     cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_s);
 

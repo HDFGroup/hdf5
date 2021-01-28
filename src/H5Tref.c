@@ -182,7 +182,7 @@ H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
             /* Release owned file */
             if (dt->shared->owned_vol_obj) {
-                if(H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+                if (H5VL_free_object(dt->shared->owned_vol_obj) < 0)
                     HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
                 dt->shared->owned_vol_obj = NULL;
             } /* end if */

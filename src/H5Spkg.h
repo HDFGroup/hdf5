@@ -286,7 +286,7 @@ typedef struct {
     H5S_sel_release_func_t  release;  /* Method to release current selection */
     H5S_sel_is_valid_func_t is_valid; /* Method to determine if current selection is valid for dataspace */
     H5S_sel_serial_size_func_t
-        serial_size; /* Method to determine number of bytes required to store current selection */
+                             serial_size; /* Method to determine number of bytes required to store current selection */
     H5S_sel_serialize_func_t serialize;     /* Method to store current selection in "serialized" form (a byte
                                                sequence suitable for storing on disk) */
     H5S_sel_deserialize_func_t deserialize; /* Method to store create selection from "serialized" form (a byte
@@ -294,7 +294,7 @@ typedef struct {
     H5S_sel_bounds_func_t
         bounds; /* Method to determine to smallest n-D bounding box containing the current selection */
     H5S_sel_offset_func_t
-        offset; /* Method to determine linear offset of initial element in selection within dataspace */
+                             offset; /* Method to determine linear offset of initial element in selection within dataspace */
     H5S_sel_unlim_dim_func_t unlim_dim; /* Method to get unlimited dimension of selection (or -1 for none) */
     H5S_sel_num_elem_non_unlim_func_t num_elem_non_unlim; /* Method to get the number of elements in a slice
                                                              through the unlimited dimension */
@@ -304,9 +304,9 @@ typedef struct {
     H5S_sel_shape_same_func_t
         shape_same; /* Method to determine if two dataspaces' selections are the same shape */
     H5S_sel_intersect_block_func_t
-        intersect_block;               /* Method to determine if a dataspaces' selection intersects a block */
-    H5S_sel_adjust_u_func_t  adjust_u; /* Method to adjust a selection by an offset */
-    H5S_sel_adjust_s_func_t  adjust_s; /* Method to adjust a selection by an offset (signed) */
+                             intersect_block; /* Method to determine if a dataspaces' selection intersects a block */
+    H5S_sel_adjust_u_func_t  adjust_u;        /* Method to adjust a selection by an offset */
+    H5S_sel_adjust_s_func_t  adjust_s;        /* Method to adjust a selection by an offset (signed) */
     H5S_sel_project_scalar   project_scalar; /* Method to construct scalar dataspace projection */
     H5S_sel_project_simple   project_simple; /* Method to construct simple dataspace projection */
     H5S_sel_iter_init_func_t iter_init;      /* Method to initialize iterator for current selection */
@@ -370,7 +370,7 @@ typedef struct H5S_sel_iter_class_t {
     H5S_sel_iter_next_block_func_t
         iter_next_block; /* Method to move selection iterator to the next block in the selection */
     H5S_sel_iter_get_seq_list_func_t
-        iter_get_seq_list; /* Method to retrieve a list of offset/length sequences for selection iterator */
+                                iter_get_seq_list; /* Method to retrieve a list of offset/length sequences for selection iterator */
     H5S_sel_iter_release_func_t iter_release; /* Method to release iterator for current selection */
 } H5S_sel_iter_class_t;
 

@@ -328,7 +328,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
     hbool_t  skip_eof_check = FALSE;            /* Whether to skip checking the EOF value */
 #ifdef H5_HAVE_PARALLEL
     int mpi_size = 1;
-#endif /* H5_HAVE_PARALLEL */
+#endif                          /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(H5AC__SUPERBLOCK_TAG)

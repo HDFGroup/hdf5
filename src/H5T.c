@@ -3435,7 +3435,7 @@ H5T__initiate_copy(const H5T_t *old_dt)
         (void)H5VL_object_inc_rc(new_dt->shared->owned_vol_obj);
 
     /* Reset vol_obj field */
-    new_dt->vol_obj               = NULL;
+    new_dt->vol_obj = NULL;
 
     /* Set return value */
     ret_value = new_dt;
