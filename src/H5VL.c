@@ -92,8 +92,7 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
                     "VOL connector class pointer cannot be NULL")
     if (H5VL_VERSION != cls->version)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector has incompatible version")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL connector has incompatible version")
     if (!cls->name)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
                     "VOL connector class name cannot be the NULL pointer")
@@ -706,7 +705,8 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
 
     /* Create VOL object for file if necessary (force_conv will be TRUE if and
      * only if file needs to be passed to H5T_set_loc) */
-    if (H5T_GET_FORCE_CONV(dtype) && (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id))))
+    if (H5T_GET_FORCE_CONV(dtype) &&
+        (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id))))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object")
 
     /* Copy the datatype */

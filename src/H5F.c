@@ -472,7 +472,7 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    void *                new_file = NULL;             /* File struct for new file                 */
+    void *                new_file = NULL; /* File struct for new file                 */
     H5P_genplist_t *      plist;           /* Property list pointer                    */
     H5VL_connector_prop_t connector_prop;  /* Property for VOL connector ID & info     */
     H5VL_object_t *       vol_obj = NULL;  /* VOL object for file                      */

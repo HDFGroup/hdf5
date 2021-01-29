@@ -97,7 +97,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G__node_create,       /*new           */
     H5G__node_cmp2,         /*cmp2          */
     H5G__node_cmp3,         /*cmp3          */
-    H5G__node_found,        /*found	        */
+    H5G__node_found,        /*found         */
     H5G__node_insert,       /*insert        */
     TRUE,                   /*follow min branch?    */
     TRUE,                   /*follow max branch?    */

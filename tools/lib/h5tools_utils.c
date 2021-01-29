@@ -194,10 +194,10 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
     if (sp == 1 && argv[opt_ind][0] == '-' && argv[opt_ind][1] == '-') {
         /* long command line option */
-        int         i;
-        const char  ch = '=';
-        char *arg = &argv[opt_ind][2];
-        size_t arg_len = 0;
+        int        i;
+        const char ch      = '=';
+        char *     arg     = &argv[opt_ind][2];
+        size_t     arg_len = 0;
 
         opt_arg = strchr(&argv[opt_ind][2], ch);
         arg_len = HDstrlen(&argv[opt_ind][2]);
@@ -224,7 +224,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                         else if (l_opts[i].has_arg == require_arg) {
                             if (opt_err)
                                 HDfprintf(rawerrorstream, "%s: option required for \"--%s\" flag\n", argv[0],
-                                        arg);
+                                          arg);
 
                             opt_opt = '?';
                         }
@@ -383,8 +383,6 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
  *
  * Programmer: Jacob Smith
  *             2017-11-10
- *
- * Changes: None.
  *
  *****************************************************************************
  */

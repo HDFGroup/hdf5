@@ -1020,7 +1020,7 @@ H5VL_free_object(H5VL_object_t *vol_obj)
     /* Check arguments */
     HDassert(vol_obj);
 
-    if(--vol_obj->rc == 0) {
+    if (--vol_obj->rc == 0) {
         /* Decrement refcount on connector */
         if (H5VL__conn_dec_rc(vol_obj->connector) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
@@ -2426,7 +2426,7 @@ done:
 herr_t
 H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *success)
 {
-    herr_t           ret_value    = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2439,16 +2439,16 @@ H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *
     if (key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
         /* Check if plugin name matches VOL connector class name */
         if (cls->name && !HDstrcmp(cls->name, key->vol.u.name))
-            *success     = TRUE;
-    }     /* end if */
+            *success = TRUE;
+    } /* end if */
     else {
         /* Sanity check */
         HDassert(key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
 
         /* Check if plugin value matches VOL connector class value */
         if (cls->value == key->vol.u.value)
-            *success     = TRUE;
-    }     /* end else */
+            *success = TRUE;
+    } /* end else */
 
     /* Connector is a match, but might not be a compatible version */
     if (*success && cls->version != H5VL_VERSION)

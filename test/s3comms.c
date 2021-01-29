@@ -291,7 +291,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
     if ((long)(actual) == (long)(expected)) {                                                                \
         JSERR_LONG((expected), (actual), (reason))                                                           \
         goto error;                                                                                          \
-    } /* JSVERIFY_NOT */
+    }  /* JSVERIFY_NOT */
 #endif /* JSVERIFY_NOT unused */
 
 /*----------------------------------------------------------------------------
@@ -348,7 +348,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
     if ((long)(actual) == (long)(expected)) {                                                                \
         JSERR_LONG((expected), (actual), (reason))                                                           \
         goto error;                                                                                          \
-    } /* JSVERIFY_NOT */
+    }  /* JSVERIFY_NOT */
 #endif /* JSVERIFY_NOT unused */
 
 /*----------------------------------------------------------------------------
@@ -1290,7 +1290,7 @@ test_HMAC_SHA256(void)
                 HDfprintf(stdout, "ERROR:\n!!! \"%s\"\n != \"%s\"\n", cases[i].exp, dest);
                 TEST_ERROR;
             }
-#else /* VERBOSE not defined */
+#else  /* VERBOSE not defined */
             /* simple pass/fail test
              */
             JSVERIFY(0, HDstrncmp(cases[i].exp, dest, HDstrlen(cases[i].exp)), NULL);

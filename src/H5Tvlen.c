@@ -284,7 +284,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
                 /* Release owned file */
                 if (dt->shared->owned_vol_obj) {
-                    if(H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+                    if (H5VL_free_object(dt->shared->owned_vol_obj) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
                     dt->shared->owned_vol_obj = NULL;
                 } /* end if */
@@ -637,7 +637,7 @@ H5T__vlen_mem_str_getptr(void *_vl)
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     char *s = *(char **)_vl; /* Pointer to the user's string information */
 #else
-    char *s = NULL; /* Pointer to the user's string information */
+    char *      s = NULL; /* Pointer to the user's string information */
 #endif
 
     FUNC_ENTER_STATIC_NOERR
@@ -728,7 +728,7 @@ H5T__vlen_mem_str_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     char *s = *(char **)_vl; /* Pointer to the user's string information */
 #else
-    char *s; /* Pointer to the user's string information */
+    char *s;        /* Pointer to the user's string information */
 #endif
 
     FUNC_ENTER_STATIC_NOERR

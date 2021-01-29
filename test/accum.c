@@ -2101,7 +2101,7 @@ test_swmr_write_big(hbool_t newest_format)
     unsigned u;                          /* Local index variable */
 #ifdef H5_HAVE_UNISTD_H
     pid_t pid;                      /* Process ID */
-#endif /* H5_HAVE_UNISTD_H */
+#endif                              /* H5_HAVE_UNISTD_H */
     int     status;                 /* Status returned from child process */
     char *  driver         = NULL;  /* VFD string (from env variable) */
     hbool_t api_ctx_pushed = FALSE; /* Whether API context pushed */

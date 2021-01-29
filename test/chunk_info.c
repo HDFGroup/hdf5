@@ -489,7 +489,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     Bytef *      z_dst; /*destination buffer */
     uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(CHK_SIZE);
     uLong        z_src_nbytes = (uLong)CHK_SIZE;
-#endif /* end H5_HAVE_FILTER_DEFLATE */
+#endif                             /* end H5_HAVE_FILTER_DEFLATE */
     void *  inbuf      = NULL;     /* Pointer to new buffer */
     hsize_t chunk_size = CHK_SIZE; /* Size of a chunk, can be compressed or not */
     hsize_t ii, jj;                /* Array indices */
