@@ -41,7 +41,7 @@ typedef struct H5T_t H5T_t;
 #define H5T_GET_SHARED(T)           ((T)->shared)
 #define H5T_GET_MEMBER_OFFSET(T, I) ((T)->u.compnd.memb[I].offset)
 #define H5T_GET_MEMBER_SIZE(T, I)   ((T)->u.compnd.memb[I].shared->size)
-#define H5T_GET_FORCE_CONV(T)       ((T)>shared->force_conv)
+#define H5T_GET_FORCE_CONV(T)       ((T)->shared->force_conv)
 #else /* H5T_MODULE */
 #define H5T_GET_SIZE(T)             (H5T_get_size(T))
 #define H5T_GET_SHARED(T)           (H5T_get_shared(T))
