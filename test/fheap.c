@@ -13850,7 +13850,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     if (NULL == (fh = H5HF_open(f, fh_addr)))
         FAIL_STACK_ERROR
 #endif /* QAK */
-       /* QAK */
+    /* QAK */
 
     /* Check up on heap... */
     state.huge_size  = obj_size;
