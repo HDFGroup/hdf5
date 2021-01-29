@@ -1015,8 +1015,8 @@ H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_
     void *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE10("*x", "*x*#i*siiiiix", obj, loc_params, connector_id, name, type_id, space_id, acpl_id,
-              aapl_id, dxpl_id, req);
+    H5TRACE10("*x", "*x*#i*siiiiix", obj, loc_params, connector_id, name, type_id, space_id, acpl_id, aapl_id,
+              dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4883,8 +4883,8 @@ H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id,
-             lapl_id, dxpl_id, req);
+    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id, lapl_id,
+             dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -4990,8 +4990,8 @@ H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id,
-             lapl_id, dxpl_id, req);
+    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id, lapl_id,
+             dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
