@@ -2236,9 +2236,37 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
         storage->printf_gap = (hsize_t)0;
 
     /* Retrieve VDS file FAPL to layout */
-    if (storage->source_fapl <= 0)
+    if (storage->source_fapl <= 0) {
+        H5P_genplist_t *source_fapl = NULL;               /* Source file FAPL */
+        H5F_close_degree_t close_degree = H5F_CLOSE_WEAK; /* Close degree for source files */
+
         if ((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fapl")
+
+        /* Get property list pointer */
+        if (NULL == (source_fapl = (H5P_genplist_t *)H5I_object(storage->source_fapl)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
+
+        /* Source files must always be opened with H5F_CLOSE_WEAK close degree */
+        if (H5P_set(source_fapl, H5F_ACS_CLOSE_DEGREE_NAME, &close_degree) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
+    } /* end if */
+#ifndef NDEBUG
+    else {
+        H5P_genplist_t *source_fapl = NULL; /* Source file FAPL */
+        H5F_close_degree_t close_degree;    /* Close degree for source files */
+
+        /* Get property list pointer */
+        if (NULL == (source_fapl = (H5P_genplist_t *)H5I_object(storage->source_fapl)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
+
+        /* Verify H5F_CLOSE_WEAK close degree is set */
+        if (H5P_get(source_fapl, H5F_ACS_CLOSE_DEGREE_NAME, &close_degree) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file close degree")
+
+        HDassert(close_degree == H5F_CLOSE_WEAK);
+    } /* end else */
+#endif /* NDEBUG */
 
     /* Copy DAPL to layout */
     if (storage->source_dapl <= 0)
