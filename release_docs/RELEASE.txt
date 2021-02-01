@@ -147,7 +147,14 @@ New Features
 
     Tools:
     ------
-    - 
+    - h5repack added help text for user-defined filters.
+
+        Added help text line that states the valid values of the filter flag
+        for user-defined filters;
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
+
+        (ADB - 2021/01/14, HDFFV-11099)
+
 
     High-Level APIs:
     ---------------
@@ -188,8 +195,21 @@ Bug Fixes since HDF5-1.10.7 release
 
         (PGT,ADB - 2020/12/29, HDFFV-10865)
 
+
     Configuration
     -------------
+    - Reclassify CMake messages, to allow new modes and --log-level option
+
+      CMake message commands have a mode argument. By default, STATUS mode
+      was chosen for any non-error message. CMake version 3.15 added additional
+      modes, NOTICE, VERBOSE, DEBUG and TRACE. All message commands with a mode
+      of STATUS were reviewed and most were reclassified as VERBOSE. The new
+      mode was protected by a check for a CMake version of at least 3.15. If CMake
+      version 3.17 or above is used, the user can use the command line option
+      of "--log-level" to further restrict which message commands are displayed.
+
+      (ADB - 2021/01/11, HDFFV-11144)
+
     - Fixes Autotools determination of the stat struct having an st_blocks field
 
       A missing parenthesis in an autoconf macro prevented building the test
@@ -199,39 +219,45 @@ Bug Fixes since HDF5-1.10.7 release
       CMake. This #define is only used in the tests and does not affect the
       HDF5 C library.
 
-      (DER - 2021/07/01, HDFFV-11201)
+      (DER - 2021/01/07, HDFFV-11201)
 
-    Performance
-    -------------
-    -
-
-    Fortran
-    --------
-    -
 
     Tools
     -----
+    - Fixed tools argument parsing.
+
+        Tools parsing used the length of the option from the long array to match
+        the option from the command line. This incorrectly matched a shorter long
+        name option that was happened to be a subset of another long option.
+        Changed to match whole names.
+
+        (ADB - 2021/01/19, HDFFV-11106)
+
+
+    Fortran API
+    -----------
     -
 
-    High-Level APIs:
+
+    High-Level Library
     ------
     -
 
-    Fortran High-Level APIs:
-    ------
-    -
 
     Documentation
     -------------
     -
 
+
     F90 APIs
     --------
     -
 
+
     C++ APIs
     --------
     -
+
 
     Testing
     -------

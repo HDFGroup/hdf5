@@ -236,6 +236,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "            Required values: filter_number, filter_flag, cd_value_count, value1\n");
     PRINTVALSTREAM(rawoutstream, "            Optional values: value2 to valueN\n");
+    PRINTVALSTREAM(rawoutstream, "            filter_flag: 1 is OPTIONAL or 0 is MANDATORY\n");
     PRINTVALSTREAM(rawoutstream, "        NONE (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    LAYT - is a string with the format:\n");
