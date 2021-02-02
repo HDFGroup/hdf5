@@ -440,6 +440,24 @@ Bug Fixes since HDF5-1.8.21
 
     Library
     -------
+    - Fixed issues CVE-2018-14033 and CVE-2018-11206
+
+      h5dump aborted when buffer size was corrupted, causing buffer over-read.
+
+      Checks for reading past the end of the buffer were added to prevent
+      the crashes and h5dump now simply fails with an error message when
+      this error condition occurs.
+
+      (BMR - 2020/12/16, HDFFV-10480 and HDFFV-11159)
+
+    - Fixed a segmentation fault
+
+      A segmentation fault occurred with a Mathworks corrupted file.
+
+      A detection of accessing a null pointer was added to prevent the problem.
+
+      (BMR - 2020/12/14, HDFFV-11150)
+
     - Explicitly declared dlopen to use RTLD_LOCAL
 
       dlopen documentation states that if neither RTLD_GLOBAL nor
