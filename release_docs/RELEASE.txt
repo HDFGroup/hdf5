@@ -755,14 +755,23 @@ The following platforms are not supported but have been tested for this release.
     (mutrino)                         intel/19.0.4
 
     Fedora33 5.10.10-200.fc33.x86_64
-    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
-                                     GNU Fortran (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125
+                                                   (Red Hat 10.2.1-9)
+                                     GNU Fortran (GCC) 10.2.1 20201125
+                                                       (Red Hat 10.2.1-9)
                                      clang version 11.0.0 (Fedora 11.0.0-2.fc33)
                                      (cmake and autotools)
 
     Ubuntu20.10 5.8.0-41-generic-x86_64
     #46-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
                                      GNU Fortran (GCC) 10.2.0-13ubuntu1
+                                     (cmake and autotools)
+
+    SUSE15sp2 5.3.18-22-default
+    #1 SMP x86_64  GNU/Linux         GNU gcc (SUSE Linux) 7.5.0
+                                     GNU Fortran (SUSE Linux) 7.5.0
+                                     clang version 7.0.1
+                                         (tags/RELEASE_701/final 349238)
                                      (cmake and autotools)
 
     Mac OS X El Capitan 10.11.6   Apple LLVM version 7.3.0 (clang-703.0.29)
