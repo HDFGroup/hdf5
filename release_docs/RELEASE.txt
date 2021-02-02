@@ -563,15 +563,21 @@ The following platforms are not supported but have been tested for this release.
                                   MPICH 3.3
                                   OpenMPI 2.1.5, 3.1.3, 4.0.0
 
-    Fedora32 5.8.18-200.fc32.x86_64
-    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
-                                     GNU Fortran (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
-                                     clang version 10.0.1 (Fedora 10.0.1-3.fc32)
+    Fedora33 5.10.10-200.fc33.x86_64
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+                                     GNU Fortran (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+                                     clang version 11.0.0 (Fedora 11.0.0-2.fc33)
                                      (cmake and autotools)
 
-    Ubuntu20.10 -5.8.0-29-generic-x86_64
-    #31-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+    Ubuntu20.10 5.8.0-41-generic-x86_64
+    #46-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
                                      GNU Fortran (GCC) 10.2.0-13ubuntu1
+                                     (cmake and autotools)
+
+    SUSE15sp2 5.3.18-22-default
+    #1 SMP x86_64  GNU/Linux         GNU gcc (SUSE Linux) 7.5.0
+                                     GNU Fortran (SUSE Linux) 7.5.0
+                                     clang version 7.0.1 (tags/RELEASE_701/final 349238)
                                      (cmake and autotools)
 
 
