@@ -40,8 +40,8 @@ const char *FILENAME[] = {"vds_virt_0", "vds_virt_1", "vds_src_0",  "vds_src_1",
 
 /* For verbose output just use standard error printing */
 #define TESTING_2_SUPPRESSED(WHAT) TESTING_2(WHAT)
-#define PASSED_SUPPRESSED() PASSED()
-#define TEST_ERROR_SUPPRESSED TEST_ERROR
+#define PASSED_SUPPRESSED()        PASSED()
+#define TEST_ERROR_SUPPRESSED      TEST_ERROR
 
 /* Print config directly to output */
 #define PRINT_CONFIG(...)                                                                                    \
@@ -54,7 +54,7 @@ const char *FILENAME[] = {"vds_virt_0", "vds_virt_1", "vds_src_0",  "vds_src_1",
 
 /* Global strings for error output */
 char vds_config_str_g[128] = "";
-char vds_test_str_g[128] = "";
+char vds_test_str_g[128]   = "";
 
 /* Replacement for TESTING_2 for non-verbose-output */
 #define TESTING_2_SUPPRESSED(WHAT)                                                                           \
@@ -68,7 +68,7 @@ char vds_test_str_g[128] = "";
 /* Replacement for TEST_ERROR for non-verbose output */
 #define TEST_ERROR_SUPPRESSED                                                                                \
     {                                                                                                        \
-        printf("Failed config: %s\nFailed test: %s\n", vds_config_str_g, vds_test_str_g);                     \
+        printf("Failed config: %s\nFailed test: %s\n", vds_config_str_g, vds_test_str_g);                    \
         TEST_ERROR                                                                                           \
     }
 
@@ -12321,8 +12321,9 @@ main(void)
             /* Display testing info */
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
-            HDsnprintf(msg, sizeof(msg), "Testing virtual dataset I/O with file version bounds: (%s, %s):", low_string,
-                      high_string);
+            HDsnprintf(msg, sizeof(msg),
+                       "Testing virtual dataset I/O with file version bounds: (%s, %s):", low_string,
+                       high_string);
             HDputs(msg);
 
             for (test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS;
@@ -12332,22 +12333,24 @@ main(void)
             TESTING_2("Virtual dataset I/O")
 #ifdef VDS_TEST_VERBOSE
             HDputs("");
-#else /* VDS_TEST_VERBOSE */
+#else  /* VDS_TEST_VERBOSE */
             tmp_nerrors = nerrors;
 #endif /* VDS_TEST_VERBOSE */
 
             for (bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
                 /* Skip invalid configurations */
-                if ((bit_config & TEST_IO_FCLOSE_SEMI)
-                        && (bit_config & TEST_IO_FCLOSE_STRONG))
+                if ((bit_config & TEST_IO_FCLOSE_SEMI) && (bit_config & TEST_IO_FCLOSE_STRONG))
                     continue;
 
                 /* Print message */
-                PRINT_CONFIG("%s%s%s, %s file close degree", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
+                PRINT_CONFIG(
+                    "%s%s%s, %s file close degree",
+                    bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
                          bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
                          bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "",
-                         bit_config & TEST_IO_FCLOSE_SEMI ? "H5F_CLOSE_SEMI" :
-                         (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"));
+                         bit_config & TEST_IO_FCLOSE_SEMI
+                             ? "H5F_CLOSE_SEMI"
+                             : (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"));
 
                 /* Set file close degree */
                 if (bit_config & TEST_IO_FCLOSE_SEMI) {
@@ -12372,7 +12375,7 @@ main(void)
             }
 
 #ifndef VDS_TEST_VERBOSE
-            if(tmp_nerrors == nerrors)
+            if (tmp_nerrors == nerrors)
                 PASSED();
 #endif /* VDS_TEST_VERBOSE */
 
