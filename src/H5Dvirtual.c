@@ -395,8 +395,8 @@ done:
  * Purpose:     Store virtual dataset layout information, for new dataset
  *
  * Note:        We assume here that the contents of the heap block cannot
- *		change!  If this ever stops being the case we must change
- *		this code to allow overwrites of the heap block.  -NAF
+ *        change!  If this ever stops being the case we must change
+ *        this code to allow overwrites of the heap block.  -NAF
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
@@ -2238,7 +2238,7 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
 
     /* Retrieve VDS file FAPL to layout */
     if (storage->source_fapl <= 0) {
-        H5P_genplist_t *    source_fapl = NULL;           /* Source file FAPL */
+        H5P_genplist_t *   source_fapl  = NULL;           /* Source file FAPL */
         H5F_close_degree_t close_degree = H5F_CLOSE_WEAK; /* Close degree for source files */
 
         if ((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)

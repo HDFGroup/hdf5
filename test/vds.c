@@ -12346,11 +12346,11 @@ main(void)
                 PRINT_CONFIG(
                     "%s%s%s, %s file close degree",
                     bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
-                         bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
-                         bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "",
-                         bit_config & TEST_IO_FCLOSE_SEMI
-                             ? "H5F_CLOSE_SEMI"
-                             : (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"));
+                    bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
+                    bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "",
+                    bit_config & TEST_IO_FCLOSE_SEMI
+                        ? "H5F_CLOSE_SEMI"
+                        : (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"));
 
                 /* Set file close degree */
                 if (bit_config & TEST_IO_FCLOSE_SEMI) {
