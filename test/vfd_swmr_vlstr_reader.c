@@ -94,6 +94,7 @@ main(int argc, char **argv)
     const struct timespec delay =
         {.tv_sec = 0, .tv_nsec = millisec_in_nanosecs * 11 / 10};
     testsel_t sel = TEST_NONE;
+    H5F_vfd_swmr_config_t config;
 
     assert(H5T_C_S1 != badhid);
 
@@ -135,8 +136,12 @@ main(int argc, char **argv)
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
-    fapl = vfd_swmr_create_fapl(false, sel == TEST_OOB, use_vfd_swmr,
-        "./vlstr-shadow");
+    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
+    init_vfd_swmr_config(&config, 4, 7, false, FALSE, 128, "./vlstr-shadow");
+
+    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
+    fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, sel == TEST_OOB, &config);
+
     if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
 

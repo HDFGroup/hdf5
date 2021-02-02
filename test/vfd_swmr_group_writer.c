@@ -272,6 +272,7 @@ main(int argc, char **argv)
     bool writer;
     state_t s;
     const char *personality;
+    H5F_vfd_swmr_config_t config;
 
     state_init(&s, argc, argv);
 
@@ -288,7 +289,11 @@ main(int argc, char **argv)
              "unknown personality, expected vfd_swmr_group_{reader,writer}");
     }
 
-    fapl = vfd_swmr_create_fapl(writer, true, s.use_vfd_swmr, "./group-shadow");
+    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
+    init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./group-shadow");
+
+    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
+    fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, &config);
 
     if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");

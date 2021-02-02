@@ -34,6 +34,7 @@
 
 #include "h5test.h"
 #include "vfd_swmr_common.h"
+#include "swmr_common.h"
 
 /****************/
 /* Local Macros */
@@ -200,33 +201,20 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
     HDassert(filename);
     HDassert(poll_time != 0);
     
-    /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0)
-        goto error;
-
-    if(H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI) < 0)
-        goto error;
-
-    /*
-     * Set up to open the file with VFD SWMR configured.
-     */
-     /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl, 4096, 0, 0) < 0)
-        goto error;
-
     /* Allocate memory for the configuration structure */
     if((config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         goto error;
 
-    config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config->tick_len = 4;
-    config->max_lag = 5;
-    config->writer = FALSE;
-    config->md_pages_reserved = 128;
-    HDstrcpy(config->md_file_path, "./rw-shadow");
+     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
+    init_vfd_swmr_config(config, 4, 5 , FALSE, FALSE, 128, "./rw-shadow");
 
-    /* Enable VFD SWMR configuration */
-    if(H5Pset_vfd_swmr_config(fapl, config) < 0)
+    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
+    if((fapl = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, config)) < 0) {
+        fprintf(stderr, "%s.%d: vfd_swmr_create_fapl failed\n", __func__, __LINE__);
+        goto error;
+    }
+
+    if(H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI) < 0)
         goto error;
 
     /* Emit informational message */
@@ -506,7 +494,7 @@ int main(int argc, const char *argv[])
     }
 
     /* Reading records from datasets */
-    if(read_records(COMMON_FILENAME, verbose, (unsigned long) nrecords, (unsigned)poll_time, (unsigned)reopen_count) < 0) {
+    if(read_records(VFD_SWMR_FILENAME, verbose, (unsigned long) nrecords, (unsigned)poll_time, (unsigned)reopen_count) < 0) {
         HDfprintf(stderr, "READER: Error reading records from datasets!\n");
         HDexit(1);
     } /* end if */

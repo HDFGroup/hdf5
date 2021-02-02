@@ -33,6 +33,7 @@
 
 #include "h5test.h"
 #include "vfd_swmr_common.h"
+#include "swmr_common.h"
 
 /********************/
 /* Local Prototypes */
@@ -84,12 +85,15 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
 
     HDassert(filename);
 
-    /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0)
+    /* Allocate memory for the configuration structure */
+    if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         return -1;
 
-    /* FOR NOW: set to use latest format, the "old" parameter is not used */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
+    init_vfd_swmr_config(config, 4, 5 , TRUE, FALSE, 128, "./rw-shadow");
+
+    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
+    if((fapl = vfd_swmr_create_fapl(TRUE, TRUE, FALSE, config)) < 0)
         return -1;
 
     if(use_log_vfd) {
@@ -99,29 +103,6 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
 
         H5Pset_fapl_log(fapl, verbose_name, H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
     } /* end if */
-
-    /*
-     * Set up to open the file with VFD SWMR configured.
-     */
-
-    /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl, 4096, 0, 0) < 0)
-        return -1;
-
-     /* Allocate memory for the configuration structure */
-     if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
-        return -1;
-
-    config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config->tick_len = 4;
-    config->max_lag = 5;
-    config->writer = TRUE;
-    config->md_pages_reserved = 128;
-    HDstrcpy(config->md_file_path, "./rw-shadow");
-
-    /* Enable VFD SWMR configuration */
-    if(H5Pset_vfd_swmr_config(fapl, config) < 0)
-        return -1;
 
     /* Open the file with VFD SWMR configured */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -246,12 +227,6 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file,
 
             /* Check for counter being reached */
             if(0 == rec_to_flush) {
-#ifdef TEMP_OUT
-                /* Flush contents of file */
-                if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-                    return -1;
-#endif /* TEMP_OUT */
-
                 /* Reset flush counter */
                 rec_to_flush = flush_count;
             } /* end if */
@@ -402,17 +377,17 @@ main(int argc, char * const *argv)
     /* Emit informational message */
     if(verbose) {
         HDfprintf(verbose_file, "WRITER: Opening skeleton file: %s\n",
-            COMMON_FILENAME);
+            VFD_SWMR_FILENAME);
     }
 
     /* Open file skeleton */
-    if((fid = open_skeleton(COMMON_FILENAME, verbose, verbose_file, random_seed, old)) < 0) {
+    if((fid = open_skeleton(VFD_SWMR_FILENAME, verbose, verbose_file, random_seed, old)) < 0) {
         HDfprintf(stderr, "WRITER: Error opening skeleton file!\n");
         HDexit(1);
     } /* end if */
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
-    h5_send_message(WRITER_MESSAGE, NULL, NULL);
+    h5_send_message(VFD_SWMR_WRITER_MESSAGE, NULL, NULL);
 
     /* Emit informational message */
     if(verbose)

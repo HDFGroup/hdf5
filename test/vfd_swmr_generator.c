@@ -28,6 +28,7 @@
 
 #include "h5test.h"
 #include "vfd_swmr_common.h"
+#include "swmr_common.h"
 
 /*
  * This file needs to access testing codefrom the H5O package.
@@ -106,15 +107,6 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
     HDassert(filename);
     HDassert(index_type);
 
-    /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0)
-        return -1;
-
-    /* Set to use the latest format with the latest chunk indexing */
-    /* FOR NOW: the parameter vfd_swmr_write is not used here as in swmr_generator.c */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        return -1;
-
     /* There are two chunk indexes tested here.
      * With one unlimited dimension, we get the extensible array index
      * type, with two unlimited dimensions, we get a v2 B-tree.
@@ -135,29 +127,21 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
      */
 
     if(vfd_swmr_write) {
-        /* Set file space strategy to paged aggregation in fcpl */
-        if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
-            return -1;
-
-         /* Enable page buffering in fapl */
-        if(H5Pset_page_buffer_size(fapl, 4096, 0, 0) < 0)
-            return -1;
-
         /* Allocate memory for the VFD SWMR configuration structure */
         if((config = HDcalloc(1, sizeof(*config))) == NULL)
             return -1;
 
-        config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-        config->tick_len = 4;
-        config->max_lag = 10;
-        config->writer = TRUE;
-        config->md_pages_reserved = 128; 
-        HDstrcpy(config->md_file_path, "generator-shadow");
+        /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
+        init_vfd_swmr_config(config, 4, 10 , vfd_swmr_write, FALSE, 128, "generator-shadow");
+    }
 
-        /* Enable VFD SWMR configuration in fapl */
-        if(H5Pset_vfd_swmr_config(fapl, config) < 0)
-            return -1;
-    } 
+    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
+    if((fapl = vfd_swmr_create_fapl(TRUE, vfd_swmr_write, FALSE, config)) < 0)
+        return -1;
+
+    /* Set file space strategy to paged aggregation in fcpl */
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
+        return -1;
 
     /* Create the file with VFD SWMR write configured */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
@@ -387,10 +371,10 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(stderr, "Generating skeleton file: %s\n", COMMON_FILENAME);
+        HDfprintf(stderr, "Generating skeleton file: %s\n", VFD_SWMR_FILENAME);
 
     /* Generate file skeleton */
-    if(gen_skeleton(COMMON_FILENAME, verbose, vfd_swmr_write, comp_level, index_type, random_seed) < 0) {
+    if(gen_skeleton(VFD_SWMR_FILENAME, verbose, vfd_swmr_write, comp_level, index_type, random_seed) < 0) {
         HDfprintf(stderr, "Error generating skeleton file!\n");
         HDexit(1);
     } /* end if */

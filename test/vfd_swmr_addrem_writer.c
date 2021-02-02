@@ -37,6 +37,7 @@
 
 #include "h5test.h"
 #include "vfd_swmr_common.h"
+#include "swmr_common.h"
 
 /****************/
 /* Local Macros */
@@ -83,10 +84,6 @@ open_skeleton(const char *filename, unsigned verbose)
 
     HDassert(filename);
 
-    /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0)
-        goto error;
-
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
         errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed", __func__, __LINE__);
 
@@ -94,32 +91,15 @@ open_skeleton(const char *filename, unsigned verbose)
                            H5D_CHUNK_CACHE_W0_DEFAULT) < 0)
         errx(EXIT_FAILURE, "H5Pset_chunk_cache failed");
 
-    /* Set to use the latest library format */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        goto error;
-
-    /*
-     * Set up to open the file with VFD SWMR configured.
-     */
-
-    /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl, 4096, 0, 0) < 0)
-        goto error;
-
      /* Allocate memory for the configuration structure */
      if((config = calloc(1, sizeof(*config))) == NULL)
         goto error;
 
-    config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config->tick_len = 4;
-    config->max_lag = 5;
-    config->writer = TRUE;
-    config->md_pages_reserved = 128;
-    esnprintf(config->md_file_path, sizeof(config->md_file_path),
-        "./rw-shadow");
+    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
+    init_vfd_swmr_config(config, 4, 5 , TRUE, FALSE, 128, "./rw-shadow");
 
-    /* Enable VFD SWMR configuration */
-    if(H5Pset_vfd_swmr_config(fapl, config) < 0)
+    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
+    if((fapl = vfd_swmr_create_fapl(TRUE, TRUE, FALSE, config)) < 0)
         goto error;
 
     /* Open the file */
@@ -298,12 +278,6 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
 
             /* Check for counter being reached */
             if(0 == op_to_flush) {
-#ifdef TEMP_OUT
-                /* Flush contents of file */
-                if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-                    return -1;
-#endif /* TEMP_OUT */
-
                 /* Reset flush counter */
                 op_to_flush = flush_count;
             } /* end if */
@@ -453,17 +427,17 @@ int main(int argc, const char *argv[])
     /* Emit informational message */
     if(verbose) {
         HDfprintf(stderr, "WRITER: Opening skeleton file: %s\n",
-            COMMON_FILENAME);
+            VFD_SWMR_FILENAME);
     }
 
     /* Open file skeleton */
-    if((fid = open_skeleton(COMMON_FILENAME, verbose)) < 0) {
+    if((fid = open_skeleton(VFD_SWMR_FILENAME, verbose)) < 0) {
         HDfprintf(stderr, "WRITER: Error opening skeleton file!\n");
         HDexit(1);
     } /* end if */
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
-    h5_send_message(WRITER_MESSAGE, NULL, NULL);
+    h5_send_message(VFD_SWMR_WRITER_MESSAGE, NULL, NULL);
 
     /* Emit informational message */
     if(verbose)
