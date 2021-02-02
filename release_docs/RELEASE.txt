@@ -411,6 +411,16 @@ New Features
 Support for New Platforms, Languages, and Compilers
 ===================================================
 
+    - Added support for macOS High Sierra 10.13.6 with Apple LLVM version 10.0.0
+        (clang-1000.10.44.4) and gfortran GNU Fortran (GCC) 6.3.0
+    - Added support for macOS Mojave 10.14.6 with Apple LLVM version 10.0.1
+        (clang-1001.0.46.4) and gfortran GNU Fortran (GCC) 6.3.0
+    - Added support for Intel icc/icpc/ifort version 19.0.4.233 20190416
+    - Added support for MPICH 3.3 compiled with GCC 7.2.0
+    - Added support for NAG Fortran Compiler Release 7.0(Yurakuchho) Build 7011
+    - Added support for OpenMPI 4.0.0 compiled with GCC 7.2.0
+    - Added support for Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+    - Added support for Visual Studio 2019 w/ MSMPI 10.1 (cmake)
 
 
 Bug Fixes since HDF5-1.8.21
@@ -744,14 +754,14 @@ The following platforms are not supported but have been tested for this release.
     # 1SMP x86_64 GNU/Linux           gcc/8.3.0, 9.3.0
     (mutrino)                         intel/19.0.4
 
-    Fedora32 5.8.18-200.fc32.x86_64
-    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
-                                     GNU Fortran (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
-                                     clang version 10.0.1 (Fedora 10.0.1-3.fc32)
+    Fedora33 5.10.10-200.fc33.x86_64
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+                                     GNU Fortran (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+                                     clang version 11.0.0 (Fedora 11.0.0-2.fc33)
                                      (cmake and autotools)
 
-    Ubuntu20.10 -5.8.0-29-generic-x86_64
-    #31-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+    Ubuntu20.10 5.8.0-41-generic-x86_64
+    #46-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
                                      GNU Fortran (GCC) 10.2.0-13ubuntu1
                                      (cmake and autotools)
 
@@ -773,8 +783,19 @@ l
     32- and 64-bit                Sun Fortran 95 8.8 SunOS_sparc
     (emu)
 
+
 Known Problems
 ==============
+    HDF5-1.8.22 binaries can replace the previous HDF5 version to run with
+    applications compiled and linked with HDF5-1.8.21 and possibly HDF5 versions
+    as early as 1.8.15.  However, HDF5 checks versions in lib files against
+    versions in header files used to compile the application and will cause the
+    application to abort when they do not match.  An environment variable
+    HDF5_DISABLE_VERSION_CHECK can be set to 2 to skip the check, to 1 to warn
+    but not abort, or to 0 for the default behavior, aborting when the HDF5
+    version in the lib files does not match the version in the header files.
+    LRK - 2020/02/02
+
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
