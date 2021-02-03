@@ -408,8 +408,6 @@ herr_t
 H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired){
     FUNC_ENTER_API_NAMECHECK_ONLY
 
-        /*NO TRACE*/
-
         FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))}
 /* end H5TSmutex_acquire() */
 
@@ -606,7 +604,6 @@ H5TSmutex_get_attempt_count(unsigned int *count)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API_NAMECHECK_ONLY
-    /*NO TRACE*/
 
 #ifdef H5_HAVE_WIN_THREADS
     /* Add Win32 equivalent here when async is supported */
@@ -644,7 +641,6 @@ H5TSmutex_release(unsigned int *lock_count)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API_NAMECHECK_ONLY
-    /*NO TRACE*/
 
     *lock_count = 0;
     if (0 != H5TS__mutex_unlock(&H5_g.init_lock, lock_count))
