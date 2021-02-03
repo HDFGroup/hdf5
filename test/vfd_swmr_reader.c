@@ -31,6 +31,7 @@
 
 #include "h5test.h"
 #include "vfd_swmr_common.h"
+#include "swmr_common.h"
 
 /********************/
 /* Local Prototypes */
@@ -317,9 +318,18 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     start_time = HDtime(NULL);
     curr_time = start_time;
 
-    /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0) {
-        fprintf(stderr, "%s.%d: h5_fileaccess failed\n", __func__, __LINE__);
+    /* Allocate memory for the configuration structure */
+    if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL) {
+        fprintf(stderr, "%s.%d: malloc failed\n", __func__, __LINE__);
+        goto error;
+    }
+
+    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
+    init_vfd_swmr_config(config, 4, 5 , FALSE, FALSE, 128, "./rw-shadow");
+
+    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
+    if((fapl = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, config)) < 0) {
+        fprintf(stderr, "%s.%d: vfd_swmr_create_fapl failed\n", __func__, __LINE__);
         goto error;
     }
 
@@ -331,36 +341,6 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
 
         H5Pset_fapl_log(fapl, verbose_name, H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
     } /* end if */
-
-    /*
-     * Set up to open the file with VFD SWMR configured.
-     */
-    /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl, 4096, 0, 0) < 0) {
-        fprintf(stderr, "%s.%d: H5Pset_page_buffer_size failed\n",
-            __func__, __LINE__);
-        goto error;
-    }
-
-    /* Allocate memory for the configuration structure */
-    if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL) {
-        fprintf(stderr, "%s.%d: malloc failed\n", __func__, __LINE__);
-        goto error;
-    }
-
-    config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config->tick_len = 4;
-    config->max_lag = 5;
-    config->writer = FALSE;
-    config->md_pages_reserved = 128;
-    HDstrcpy(config->md_file_path, "./rw-shadow");
-
-    /* Enable VFD SWMR configuration */
-    if(H5Pset_vfd_swmr_config(fapl, config) < 0) {
-        fprintf(stderr, "%s.%d: H5Pset_vfd_swmr_config failed\n",
-            __func__, __LINE__);
-        goto error;
-    }
 
     /* Loop over reading records until [at least] the correct # of seconds have passed */
     while(curr_time < (time_t)(start_time + (time_t)nseconds)) {
@@ -647,7 +627,7 @@ int main(int argc, const char *argv[])
     }
 
     /* Reading records from datasets */
-    if(read_records(COMMON_FILENAME, verbose, verbose_file, random_seed, (unsigned long)nseconds, (unsigned)poll_time, (unsigned)ncommon, (unsigned)nrandom) < 0) {
+    if(read_records(VFD_SWMR_FILENAME, verbose, verbose_file, random_seed, (unsigned long)nseconds, (unsigned)poll_time, (unsigned)ncommon, (unsigned)nrandom) < 0) {
         HDfprintf(stderr, "READER: Error reading records from datasets (random_seed = %u)!\n", random_seed);
         HDexit(1);
     } /* end if */

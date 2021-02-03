@@ -1134,14 +1134,18 @@ main(int argc, char **argv)
 
     for (i = 0; i < NELMTS(s.file); i++) {
         hid_t fapl;
+        H5F_vfd_swmr_config_t config;
 
         if (s.vds != vds_multi && i > 0) {
             s.file[i] = s.file[0];
             continue;
         }
 
-        fapl = vfd_swmr_create_fapl(s.writer, true, s.use_vfd_swmr,
-            "./bigset-shadow-%zu", i);
+        /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
+        init_vfd_swmr_config(&config, 4, 7, s.writer, FALSE, 128, "./bigset-shadow-%zu", i);
+
+        /* use_latest_format, use_vfd_swmr, only_meta_page, config */
+        fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, &config);
 
         if (fapl < 0)
             errx(EXIT_FAILURE, "vfd_swmr_create_fapl");

@@ -23,6 +23,7 @@
 
 #include "h5test.h"
 #include "vfd_swmr_common.h"
+#include "swmr_common.h"
 
 static const hid_t badhid = H5I_INVALID_HID;
 
@@ -227,16 +228,45 @@ await_signal(hid_t fid)
     }
 }
 
+/* Revised support routines that can be used for all VFD SWMR integration tests
+ */
+/* Initialize fields in config with the input parameters */
+void
+init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag, hbool_t writer,
+    hbool_t flush_raw_data, uint32_t md_pages_reserved, const char *md_file_fmtstr, ...)
+{
+    va_list ap;
+    
+    memset(config, 0, sizeof(H5F_vfd_swmr_config_t));
+
+    config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config->pb_expansion_threshold = 0; 
+
+    config->tick_len = tick_len;
+    config->max_lag = max_lag;
+    config->writer = writer;
+    config->flush_raw_data = flush_raw_data;
+    config->md_pages_reserved = md_pages_reserved;
+
+    va_start(ap, md_file_fmtstr);
+    evsnprintf(config->md_file_path, sizeof(config->md_file_path),
+        md_file_fmtstr, ap);
+    va_end(ap);
+
+} /* init_vfd_swmr_config() */
+
 /* Perform common VFD SWMR configuration on the file-access property list:
  * configure page buffering, set reasonable VFD SWMR defaults.
  */
+/* Set up the file-access property list:
+ * --configure for latest format or not
+ * --configure page buffering with only_meta_pages or not
+ * --configure for VFD SWMR or not
+ */
 hid_t
-vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr,
-    const char *mdfile_fmtstr, ...)
+vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_pages, H5F_vfd_swmr_config_t *config)
 {
-    H5F_vfd_swmr_config_t config;
     hid_t fapl;
-    va_list ap;
 
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0) {
@@ -244,15 +274,12 @@ vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr,
         return badhid;
     }
 
-    /* FOR NOW: set to use latest format, the "old" parameter is not used */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
-        warnx("H5Pset_libver_bounds");
-        return badhid;
+    if(use_latest_format) {
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+            warnx("H5Pset_libver_bounds");
+            return badhid;
+        }
     }
-
-    /*
-     * Set up to open the file with VFD SWMR configured.
-     */
 
     /* Enable page buffering */
     if(H5Pset_page_buffer_size(fapl, 4096, only_meta_pages ? 100 : 0, 0) < 0) {
@@ -260,25 +287,19 @@ vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr,
         return badhid;
     }
 
-    memset(&config, 0, sizeof(config));
-
-    config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config.tick_len = 4;
-    config.max_lag = 7;
-    config.writer = writer;
-    config.md_pages_reserved = 128;
-    va_start(ap, mdfile_fmtstr);
-    evsnprintf(config.md_file_path, sizeof(config.md_file_path),
-        mdfile_fmtstr, ap);
-    va_end(ap);
-
+    /*
+     * Set up to open the file with VFD SWMR configured.
+     */
     /* Enable VFD SWMR configuration */
-    if(use_vfd_swmr && H5Pset_vfd_swmr_config(fapl, &config) < 0) {
+    if(use_vfd_swmr && H5Pset_vfd_swmr_config(fapl, config) < 0) {
         warnx("H5Pset_vfd_swmr_config");
         return badhid;
     }
+
     return fapl;
-}
+
+} /* vfd_swmr_create_fapl() */
+
 
 /* Fetch a variable from the environment and parse it for unsigned long
  * content.  Return 0 if the variable is not present, -1 if it is present

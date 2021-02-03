@@ -231,6 +231,7 @@ main(int argc, char **argv)
     const char *personality = strstr(progname, "vfd_swmr_zoo_");
     estack_state_t es;
     char step = 'b';
+    H5F_vfd_swmr_config_t vfd_swmr_config;
 
     if (personality != NULL && strcmp(personality, "vfd_swmr_zoo_writer") == 0)
         writer = wait_for_signal = true;
@@ -290,7 +291,12 @@ main(int argc, char **argv)
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
-    fapl = vfd_swmr_create_fapl(writer, true, use_vfd_swmr, "./zoo-shadow");
+    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
+    init_vfd_swmr_config(&vfd_swmr_config, 4, 7, writer, FALSE, 128, "./zoo-shadow");
+
+    /* ? turn off use latest format argument via 1st argument? since later on it reset to early format */
+    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
+    fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, true, &vfd_swmr_config);
 
     if (use_vfd_swmr && H5Pget_vfd_swmr_config(fapl, &swmr_config) < 0)
         errx(EXIT_FAILURE, "H5Pget_vfd_swmr_config");
