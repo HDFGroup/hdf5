@@ -395,8 +395,8 @@ done:
  * Purpose:     Store virtual dataset layout information, for new dataset
  *
  * Note:        We assume here that the contents of the heap block cannot
- *		change!  If this ever stops being the case we must change
- *		this code to allow overwrites of the heap block.  -NAF
+ *        change!  If this ever stops being the case we must change
+ *        this code to allow overwrites of the heap block.  -NAF
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
@@ -2238,7 +2238,7 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
 
     /* Retrieve VDS file FAPL to layout */
     if (storage->source_fapl <= 0) {
-        H5P_genplist_t *source_fapl = NULL;               /* Source file FAPL */
+        H5P_genplist_t *   source_fapl  = NULL;           /* Source file FAPL */
         H5F_close_degree_t close_degree = H5F_CLOSE_WEAK; /* Close degree for source files */
 
         if ((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
@@ -2254,8 +2254,8 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
     } /* end if */
 #ifndef NDEBUG
     else {
-        H5P_genplist_t *source_fapl = NULL; /* Source file FAPL */
-        H5F_close_degree_t close_degree;    /* Close degree for source files */
+        H5P_genplist_t *   source_fapl = NULL; /* Source file FAPL */
+        H5F_close_degree_t close_degree;       /* Close degree for source files */
 
         /* Get property list pointer */
         if (NULL == (source_fapl = (H5P_genplist_t *)H5I_object(storage->source_fapl)))
@@ -2266,7 +2266,7 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file close degree")
 
         HDassert(close_degree == H5F_CLOSE_WEAK);
-    } /* end else */
+    }  /* end else */
 #endif /* NDEBUG */
 
     /* Copy DAPL to layout */
