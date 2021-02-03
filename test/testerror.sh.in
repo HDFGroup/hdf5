@@ -64,6 +64,12 @@ TEST() {
       # Skip the plugin for testing missing filter.
       $ENVCMD $RUNSERIAL $TEST_ERR_BIN
    ) >$actual 2>$actual_err
+
+   # Check for core dump
+   if [ $? != 0 ]; then
+       nerrors=`expr $nerrors + 1`
+   fi
+
    # Extract file name, line number, version and thread IDs because they may be different
    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
 	-e 's/line [0-9]*/line (number)/' \
