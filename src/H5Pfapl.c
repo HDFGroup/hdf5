@@ -311,6 +311,11 @@
 #endif
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC H5P__encode_hbool_t
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC H5P__decode_hbool_t
+/* Definition for 'implicit async allowed' property */
+#define H5F_ACS_VOL_IMPL_ASYNC_SIZE sizeof(hbool_t)
+#define H5F_ACS_VOL_IMPL_ASYNC_DEF  FALSE
+#define H5F_ACS_VOL_IMPL_ASYNC_ENC  H5P__encode_hbool_t
+#define H5F_ACS_VOL_IMPL_ASYNC_DEC  H5P__decode_hbool_t
 
 /******************/
 /* Local Typedefs */
@@ -505,6 +510,8 @@ static const hbool_t H5F_def_use_file_locking_g =
     H5F_ACS_USE_FILE_LOCKING_DEF; /* Default use file locking flag */
 static const hbool_t H5F_def_ignore_disabled_file_locks_g =
     H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF; /* Default ignore disabled file locks flag */
+static const hbool_t H5F_def_vol_impl_async_g =
+    H5F_ACS_VOL_IMPL_ASYNC_DEF; /* Default setting for 'implicit async allowed' property */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_reg_prop
@@ -802,6 +809,12 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
                            H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_SIZE, &H5F_def_ignore_disabled_file_locks_g,
                            NULL, NULL, NULL, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC,
                            H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the 'implicit async allowed' flag */
+    if (H5P__register_real(pclass, H5F_ACS_VOL_IMPL_ASYNC_NAME, H5F_ACS_VOL_IMPL_ASYNC_SIZE,
+                           &H5F_def_vol_impl_async_g, NULL, NULL, NULL, H5F_ACS_VOL_IMPL_ASYNC_ENC,
+                           H5F_ACS_VOL_IMPL_ASYNC_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -5760,6 +5773,107 @@ H5Pget_vol_async(hid_t plist_id, hbool_t *async_supported)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_vol_async() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_vol_implicit_async
+ *
+ * Purpose:     Controls whether implicit asynchronous operations are allowed.
+ *
+ *              Allowing / disallowing implicit asynchronous operations does not
+ *              affect operation of explicit asynchronous operations.
+ *
+ *              Asynchronous operations are implemented within VOL connectors, so
+ *              VOL connector authors should use H5Pget_vol_implicit_async() to
+ *              query whether an application has allowed implicit operations.
+ *
+ *              Implicit asynchronous operations are disallowed by default, so
+ *              H5Pget_vol_implicit_async() will return FALSE unless an application
+ *              allows them with H5Pset_vol_implicit_async().
+ *
+ * Note:        See the documentation for asynchronous operations for more details
+ *              about implicit asynchronous operations.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              Feb  4 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_vol_implicit_async(hid_t fapl_id, hbool_t allow_implicit_async)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Verify that the property list is the correct class */
+    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "property list ID is not a file access plist")
+
+    /* Get the plist structure */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for property list ID")
+
+    /* Set value */
+    if (H5P_set(plist, H5F_ACS_VOL_IMPL_ASYNC_NAME, &allow_implicit_async) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'implicit async allowed' property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_vol_implicit_async() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_vol_implicit_async
+ *
+ * Purpose:     Query whether implicit asynchronous operations are allowed.
+ *
+ *              Allowing / disallowing implicit asynchronous operations does not
+ *              affect operation of explicit asynchronous operations.
+ *
+ *              Asynchronous operations are implemented within VOL connectors, so
+ *              VOL connector authors should use this routine to
+ *              query whether an application has allowed implicit operations.
+ *
+ *              Implicit asynchronous operations are disallowed by default, so
+ *              H5Pget_vol_implicit_async() will return FALSE unless an application
+ *              allows them with H5Pset_vol_implicit_async().
+ *
+ * Note:        See the documentation for asynchronous operations for more details
+ *              about implicit asynchronous operations.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              Feb  4 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_vol_implicit_async(hid_t fapl_id, hbool_t *implicit_async_allowed /*out*/)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Verify that the property list is the correct class */
+    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "property list ID is not a file access plist")
+
+    /* Get the plist structure */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for property list ID")
+
+    /* Get value */
+    if (implicit_async_allowed)
+        if (H5P_get(plist, H5F_ACS_VOL_IMPL_ASYNC_NAME, implicit_async_allowed) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'implicit async allowed' property value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_vol_implicit_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_create
