@@ -7317,7 +7317,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_introspect_get_cap_flags(void *info, const H5VL_class_t *cls, unsigned *cap_flags)
+H5VL_introspect_get_cap_flags(const void *info, const H5VL_class_t *cls, unsigned *cap_flags)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -7351,7 +7351,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLintrospect_get_cap_flags(void *info, hid_t connector_id, unsigned *cap_flags /*out*/)
+H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, unsigned *cap_flags /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
@@ -7928,7 +7928,7 @@ H5VLrequest_specific_vararg(void *req, hid_t connector_id, H5VL_request_specific
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
+    HDva_start(arguments, specific_type);
     arg_started = TRUE;
     if ((ret_value = H5VL__request_specific(req, cls, specific_type, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
@@ -8052,7 +8052,7 @@ H5VLrequest_optional_vararg(void *req, hid_t connector_id, H5VL_request_optional
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
+    HDva_start(arguments, opt_type);
     arg_started = TRUE;
     if ((ret_value = H5VL__request_optional(req, cls, opt_type, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,

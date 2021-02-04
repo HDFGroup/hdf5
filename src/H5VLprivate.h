@@ -262,7 +262,7 @@ H5_DLL herr_t H5VL_object_optional(const H5VL_object_t *vol_obj, H5VL_object_opt
 /* Connector/container introspection functions */
 H5_DLL herr_t H5VL_introspect_get_conn_cls(const H5VL_object_t *vol_obj, H5VL_get_conn_lvl_t lvl,
                                            const H5VL_class_t **conn_cls);
-H5_DLL herr_t H5VL_introspect_get_cap_flags(void *info, const H5VL_class_t *cls, unsigned *cap_flags);
+H5_DLL herr_t H5VL_introspect_get_cap_flags(const void *info, const H5VL_class_t *cls, unsigned *cap_flags);
 H5_DLL herr_t H5VL_introspect_opt_query(const H5VL_object_t *vol_obj, H5VL_subclass_t subcls, int opt_type,
                                         uint64_t *flags);
 

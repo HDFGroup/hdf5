@@ -336,8 +336,16 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
                         "Objects are accessed through different VOL connectors and can't be linked")
 
     /* Construct a temporary source VOL object */
-    tmp_vol_obj.data      = (vol_obj1 ? vol_obj1->data : NULL);
-    tmp_vol_obj.connector = (vol_obj1 ? vol_obj1->connector : vol_obj2->connector);
+    if (vol_obj1) {
+        tmp_vol_obj.connector = vol_obj1->connector;
+        tmp_vol_obj.data      = vol_obj1->data;
+    } /* end if */
+    else {
+        HDassert(vol_obj2);
+
+        tmp_vol_obj.connector = vol_obj2->connector;
+        tmp_vol_obj.data      = NULL;
+    } /* end else */
 
     /* Move the link */
     if (H5VL_link_move(&tmp_vol_obj, &loc_params1, vol_obj2, &loc_params2, lcpl_id, lapl_id,
@@ -426,8 +434,16 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
                         "Objects are accessed through different VOL connectors and can't be linked")
 
     /* Construct a temporary source VOL object */
-    tmp_vol_obj.data      = (vol_obj1 ? vol_obj1->data : NULL);
-    tmp_vol_obj.connector = (vol_obj1 ? vol_obj1->connector : vol_obj2->connector);
+    if (vol_obj1) {
+        tmp_vol_obj.connector = vol_obj1->connector;
+        tmp_vol_obj.data      = vol_obj1->data;
+    } /* end if */
+    else {
+        HDassert(vol_obj2);
+
+        tmp_vol_obj.connector = vol_obj2->connector;
+        tmp_vol_obj.data      = NULL;
+    } /* end else */
 
     /* Copy the link */
     if (H5VL_link_copy(&tmp_vol_obj, &loc_params1, vol_obj2, &loc_params2, lcpl_id, lapl_id,
@@ -650,8 +666,17 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t new_lo
                         "Objects are accessed through different VOL connectors and can't be linked")
 
     /* Construct a temporary VOL object */
-    (*tmp_vol_obj_ptr_ptr)->data      = (vol_obj2 ? (vol_obj2->data) : NULL);
-    (*tmp_vol_obj_ptr_ptr)->connector = (vol_obj1 != NULL ? vol_obj1->connector : vol_obj2->connector);
+    if (vol_obj1)
+        (*tmp_vol_obj_ptr_ptr)->connector = vol_obj1->connector;
+    else {
+        HDassert(vol_obj2);
+
+        (*tmp_vol_obj_ptr_ptr)->connector = vol_obj2->connector;
+    } /* end else */
+    if (vol_obj2)
+        (*tmp_vol_obj_ptr_ptr)->data = vol_obj2->data;
+    else
+        (*tmp_vol_obj_ptr_ptr)->data = NULL;
 
     /* Create the link */
     if (H5VL_link_create(H5VL_LINK_CREATE_HARD, *tmp_vol_obj_ptr_ptr, &loc_params2, lcpl_id, lapl_id,

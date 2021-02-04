@@ -258,7 +258,7 @@ H5VL__native_introspect_get_conn_cls(void H5_ATTR_UNUSED *obj, H5VL_get_conn_lvl
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_introspect_get_cap_flags(void H5_ATTR_UNUSED *info, unsigned *cap_flags)
+H5VL__native_introspect_get_cap_flags(const void H5_ATTR_UNUSED *info, unsigned *cap_flags)
 {
     FUNC_ENTER_PACKAGE_NOERR
 

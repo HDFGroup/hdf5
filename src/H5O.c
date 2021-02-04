@@ -872,10 +872,9 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
     loc_params2.loc_data.loc_by_name.name    = new_name;
     loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
 
-    if (H5L_SAME_LOC != obj_id)
-        /* get the location object */
-        if (NULL == (vol_obj1 = H5VL_vol_object(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    /* Get the first location object */
+    if (NULL == (vol_obj1 = H5VL_vol_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
     if (H5L_SAME_LOC != new_loc_id)
         /* get the location object */
         if (NULL == (vol_obj2 = H5VL_vol_object(new_loc_id)))
@@ -889,7 +888,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
 
     /* Construct a temporary VOL object */
     tmp_vol_obj.data      = vol_obj2->data;
-    tmp_vol_obj.connector = (vol_obj1 != NULL ? vol_obj1->connector : vol_obj2->connector);
+    tmp_vol_obj.connector = vol_obj1->connector;
 
     /* Create a link to the object */
     if (H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, lapl_id,
