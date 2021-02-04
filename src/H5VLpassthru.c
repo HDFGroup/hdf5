@@ -215,6 +215,7 @@ static herr_t H5VL_pass_through_object_optional(void *obj, H5VL_object_optional_
 /* Container/connector introspection callbacks */
 static herr_t H5VL_pass_through_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl,
                                                         const H5VL_class_t **conn_cls);
+static herr_t H5VL_pass_through_introspect_get_cap_flags(void *info, unsigned *cap_flags);
 static herr_t H5VL_pass_through_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type,
                                                      uint64_t *flags);
 
@@ -346,8 +347,9 @@ static const H5VL_class_t H5VL_pass_through_g = {
     },
     {
         /* introspect_cls */
-        H5VL_pass_through_introspect_get_conn_cls, /* get_conn_cls */
-        H5VL_pass_through_introspect_opt_query,    /* opt_query */
+        H5VL_pass_through_introspect_get_conn_cls,  /* get_conn_cls */
+        H5VL_pass_through_introspect_get_cap_flags, /* get_cap_flags */
+        H5VL_pass_through_introspect_opt_query,     /* opt_query */
     },
     {
         /* request_cls */
@@ -2534,7 +2536,7 @@ H5VL_pass_through_object_optional(void *obj, H5VL_object_optional_t opt_type, hi
 } /* end H5VL_pass_through_object_optional() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_pass_through_introspect_get_conn_clss
+ * Function:    H5VL_pass_through_introspect_get_conn_cls
  *
  * Purpose:     Query the connector class.
  *
@@ -2562,6 +2564,36 @@ H5VL_pass_through_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl, co
 
     return ret_value;
 } /* end H5VL_pass_through_introspect_get_conn_cls() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_pass_through_introspect_get_cap_flags
+ *
+ * Purpose:     Query the capability flags for this connector and any
+ *              underlying connector(s).
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_pass_through_introspect_get_cap_flags(void *_info, unsigned *cap_flags)
+{
+    const H5VL_pass_through_info_t *info = (const H5VL_pass_through_info_t *)_info;
+    herr_t               ret_value;
+
+#ifdef ENABLE_PASSTHRU_LOGGING
+    printf("------- PASS THROUGH VOL INTROSPECT GetCapFlags\n");
+#endif
+
+    /* Invoke the query on the underlying VOL connector */
+    ret_value = H5VLintrospect_get_cap_flags(info->under_vol_info, info->under_vol_id, cap_flags);
+
+    /* Bitwise OR our capability flags in */
+    if(ret_value >= 0)
+        *cap_flags |= H5VL_pass_through_g.cap_flags;
+
+    return ret_value;
+} /* end H5VL_pass_through_introspect_get_cap_flags() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_pass_through_introspect_opt_query

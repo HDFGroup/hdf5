@@ -88,7 +88,6 @@ typedef struct {
 /********************/
 static herr_t         H5VL__free_cls(H5VL_class_t *cls, void **request);
 static int            H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data);
-static herr_t         H5VL__set_def_conn(void);
 static void *         H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
 static H5VL_object_t *H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector,
                                         hbool_t wrap_obj);
@@ -193,6 +192,10 @@ H5VL_init_phase2(void)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize attribute interface")
     if (H5M_init() < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize map interface")
+
+    /* Sanity check default VOL connector */
+    HDassert(H5VL_def_conn_s.connector_id == (-1));
+    HDassert(H5VL_def_conn_s.connector_info == NULL);
 
     /* Set up the default VOL connector in the default FAPL */
     if (H5VL__set_def_conn() < 0)
@@ -372,7 +375,7 @@ H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5VL__set_def_conn(void)
 {
     H5P_genplist_t *def_fapl;               /* Default file access property list */
@@ -383,11 +386,16 @@ H5VL__set_def_conn(void)
     void *          vol_info     = NULL;    /* VOL connector info */
     herr_t          ret_value    = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
-    HDassert(H5VL_def_conn_s.connector_id == (-1));
-    HDassert(H5VL_def_conn_s.connector_info == NULL);
+    /* Reset default VOL connector, if it's set already */
+    /* (Can happen during testing -QAK) */
+    if (H5VL_def_conn_s.connector_id > 0) {
+        /* Release the default VOL connector */
+        (void)H5VL_conn_free(&H5VL_def_conn_s);
+        H5VL_def_conn_s.connector_id   = -1;
+        H5VL_def_conn_s.connector_info = NULL;
+    } /* end if */
 
     /* Check for environment variable set */
     env_var = HDgetenv("HDF5_VOL_CONNECTOR");
@@ -2821,3 +2829,46 @@ H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_setup_token_args() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_get_cap_flags
+ *
+ * Purpose:     Query capability flags for connector property.
+ *
+ * Note:        VOL connector set with HDF5_VOL_CONNECTOR overrides the
+ *              property passed in.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, unsigned *cap_flags)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(connector_prop);
+
+    /* Copy the connector ID & info, if there is one */
+    if (connector_prop->connector_id > 0) {
+        H5VL_class_t *connector;                 /* Pointer to connector */
+
+        /* Retrieve the connector for the ID */
+        if (NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop->connector_id)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+        /* Query the connector's capability flags */
+        if (H5VL_introspect_get_cap_flags(connector_prop->connector_info, connector, cap_flags) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query connector's capability flags")
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "connector ID not set?")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_get_cap_flags() */
+

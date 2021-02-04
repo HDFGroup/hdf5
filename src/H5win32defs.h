@@ -195,11 +195,12 @@ H5_DLL float     Wroundf(float arg);
 }
 #endif /* __cplusplus */
 
-#define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
-#define HDsetenv(N, V, O)    Wsetenv(N, V, O)
 #define HDflock(F, L)        Wflock(F, L)
 #define HDgetlogin()         Wgetlogin()
+#define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
+#define HDsetenv(N, V, O)    Wsetenv(N, V, O)
 #define HDsnprintf           c99_snprintf  /*varargs*/
+#define HDunsetenv(S)        Wsetenv(S, "", 1)
 #define HDvsnprintf          c99_vsnprintf /*varargs*/
 
 /* Non-POSIX functions */

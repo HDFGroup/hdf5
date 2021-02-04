@@ -5708,6 +5708,60 @@ done:
 } /* end H5Pget_vol_info() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Pget_vol_async
+ *
+ * Purpose:     Queries the current VOL connector information
+ *              for a FAPL to determine if asynchronous operations will be
+ *              supported by a file open or create operation that uses this FAPL.
+ *
+ * Note:        This routine supports the use of the HDF5_VOL_CONNECTOR environment
+ *              environment variable to override the VOL connector set programmatically
+ *              for the FAPL (with H5Pset_vol).
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_vol_async(hid_t plist_id, hbool_t *async_supported)
+{
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", plist_id, async_supported);
+
+    /* Get the 'async supported' flag */
+    if (async_supported) {
+        if (TRUE == H5P_isa_class(plist_id, H5P_FILE_ACCESS)) {
+            H5P_genplist_t *plist;               /* Property list pointer */
+            H5VL_connector_prop_t connector_prop;            /* Property for VOL connector ID & info */
+            unsigned cap_flags = 0;         /* Capability flags for VOL connector */
+
+            /* Get property list for ID */
+            if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+            /* Get the connector property */
+            if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector property")
+
+            /* Query the capability flags */
+            if (H5VL_get_cap_flags(&connector_prop, &cap_flags) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector capability flags")
+
+            /* Check for async capability flag */
+            *async_supported = (cap_flags & H5VL_CAP_FLAG_ASYNC) > 0;
+        } /* end if */
+        else
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_vol_async() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_create
  *
  connectorose:     Create callback for the VOL connector ID & info property.

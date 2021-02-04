@@ -3942,6 +3942,30 @@ H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
  */
 H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
 
+/**
+ * \ingroup FAPL
+ *
+ * \brief Query if the VOL connector that will be used with this file access
+ *              property list (FAPL) supports asynchronous operations.
+ *
+ * \fapl_id{plist_id}
+ * \param[out]  async_supported  Flag to indicate if asynchronous operations are supported
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_vol_async() queries the current VOL connector information
+ *          for a FAPL to determine if asynchronous operations will be
+ *          supported by a file open or create operation that uses this FAPL.
+ *
+ * \note Note: This routine supports the use of the HDF5_VOL_CONNECTOR environment
+ *       variable to override the VOL connector set programmatically for the
+ *       FAPL (with H5Pset_vol).
+ *
+ * \since 1.13.0
+ *
+ */
+H5_DLL herr_t H5Pget_vol_async(hid_t plist_id, hbool_t *async_supported);
+
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective);
 H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);

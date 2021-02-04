@@ -1054,6 +1054,7 @@
 ./src/H5VLpkg.h
 ./src/H5VLprivate.h
 ./src/H5VLpublic.h
+./src/H5VLtest.c
 ./src/H5VM.c
 ./src/H5VMprivate.h
 ./src/H5WB.c

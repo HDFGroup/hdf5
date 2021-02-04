@@ -15,14 +15,47 @@
  *
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
-/* Note: H5VL__native_introspect_get_conn_cls is in src/H5VLnative.c so that
- *      it can return the address of the staticly declared class struct.
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+
+/* Note: H5VL__native_introspect_get_conn_cls and H5VL__native_introspect_get_cap_flags
+ *      are in src/H5VLnative.c so that they can work with the staticly declared
+ *      class struct.
  */
 
 /*---------------------------------------------------------------------------

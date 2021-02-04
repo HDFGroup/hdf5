@@ -33,8 +33,10 @@
 /*****************/
 
 /* Capability flags for connector */
-#define H5VL_CAP_FLAG_NONE       0    /* No special connector capabilities */
-#define H5VL_CAP_FLAG_THREADSAFE 0x01 /* Connector is threadsafe */
+#define H5VL_CAP_FLAG_NONE         0    /* No special connector capabilities */
+#define H5VL_CAP_FLAG_THREADSAFE   0x01 /* Connector is threadsafe */
+#define H5VL_CAP_FLAG_ASYNC        0x02 /* Connector performs operations asynchronously*/
+#define H5VL_CAP_FLAG_NATIVE_FILES 0x04 /* Connector produces native file format */
 
 /* Container info version */
 #define H5VL_CONTAINER_INFO_VERSION 0x01 /* Container info struct version */
@@ -426,6 +428,7 @@ struct H5VL_class_t;
 /* Container/connector introspection routines */
 typedef struct H5VL_introspect_class_t {
     herr_t (*get_conn_cls)(void *obj, H5VL_get_conn_lvl_t lvl, const struct H5VL_class_t **conn_cls);
+    herr_t (*get_cap_flags)(void *info, unsigned *cap_flags);
     herr_t (*opt_query)(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags);
 } H5VL_introspect_class_t;
 

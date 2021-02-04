@@ -14,6 +14,10 @@
  * Purpose:     Object token callbacks for the native VOL connector
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 /***********/
 /* Headers */
 /***********/

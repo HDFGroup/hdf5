@@ -460,6 +460,9 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
  *              Interestingly, getenv *is* available in the Windows
  *              POSIX layer, just not setenv.
  *
+ * Note:        Passing an empty string ("") for the value will remove
+ *              the variable from the environment (like unsetenv(3))
+ *
  * Return:      Success:    0
  *              Failure:    non-zero error code
  *
@@ -471,14 +474,14 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
 int
 Wsetenv(const char *name, const char *value, int overwrite)
 {
-    size_t  bufsize;
-    errno_t err;
-
     /* If we're not overwriting, check if the environment variable exists.
      * If it does (i.e.: the required buffer size to store the variable's
      * value is non-zero), then return an error code.
      */
     if (!overwrite) {
+        size_t  bufsize;
+        errno_t err;
+
         err = getenv_s(&bufsize, NULL, 0, name);
         if (err || bufsize)
             return (int)err;

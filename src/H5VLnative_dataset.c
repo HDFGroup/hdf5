@@ -15,8 +15,15 @@
  *
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5D_FRIEND /* Suppress error about including H5Dpkg    */
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Dpkg.h"      /* Datasets                                 */
@@ -30,6 +37,34 @@
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/* Helper routines for read/write API calls */
+static herr_t H5VL__native_dataset_io_setup(H5D_t *dset, hid_t file_space_id, hid_t mem_space_id,
+    H5S_t **file_space, H5S_t **mem_space);
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_dataset_io_setup
  *
@@ -39,7 +74,7 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5VL__native_dataset_io_setup(H5D_t *dset, hid_t file_space_id, hid_t mem_space_id, H5S_t **file_space,
                               H5S_t **mem_space)
 {

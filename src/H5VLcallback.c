@@ -1874,8 +1874,7 @@ H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVsii", app_file, app_func, app_line, attr_id, opt_type,
-                                     dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVsii", app_file, app_func, app_line, attr_id, opt_type, dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -2883,8 +2882,7 @@ H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVtii", app_file, app_func, app_line, dset_id, opt_type,
-                                     dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVtii", app_file, app_func, app_line, dset_id, opt_type, dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -3761,8 +3759,7 @@ H5VLdatatype_optional_op(const char *app_file, const char *app_func, unsigned ap
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVuii", app_file, app_func, app_line, type_id, opt_type,
-                                     dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVuii", app_file, app_func, app_line, type_id, opt_type, dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -4742,8 +4739,7 @@ H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVvii", app_file, app_func, app_line, file_id, opt_type,
-                                     dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVvii", app_file, app_func, app_line, file_id, opt_type, dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -5555,8 +5551,7 @@ H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_l
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVwii", app_file, app_func, app_line, group_id, opt_type,
-                                     dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVwii", app_file, app_func, app_line, group_id, opt_type, dxpl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -7309,6 +7304,76 @@ H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t l
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLintrospect_get_conn_cls() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_introspect_get_cap_flags
+ *
+ * Purpose:     Calls the connector-specific callback to query the connector's
+ *              capability flags.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_introspect_get_cap_flags(void *info, const H5VL_class_t *cls, unsigned *cap_flags)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(cls);
+    HDassert(cap_flags);
+
+    /* Check if the corresponding VOL callback exists */
+    if (NULL == cls->introspect_cls.get_cap_flags)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'get_cap_flags' method")
+
+    /* Call the corresponding VOL callback */
+    if ((cls->introspect_cls.get_cap_flags)(info, cap_flags) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query connector capability flags")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_introspect_get_cap_flags() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLintrospect_get_cap_flags
+ *
+ * Purpose:     Calls the connector-specific callback to query the connector's
+ *              capability flags.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLintrospect_get_cap_flags(void *info, hid_t connector_id, unsigned *cap_flags /*out*/)
+{
+    H5VL_class_t *cls;                 /* VOL connector's class struct */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE3("e", "*xix", info, connector_id, cap_flags);
+
+    /* Check args */
+    if (NULL == cap_flags)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL conn_cls pointer")
+
+    /* Get class pointer */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL_introspect_get_cap_flags(info, cls, cap_flags) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query connector's capability flags")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLintrospect_get_cap_flags() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL__introspect_opt_query
