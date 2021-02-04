@@ -506,6 +506,8 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
     } /* end for */
 
     /* release temporary working buffers */
+    for (i = 0; i < open_images; i++)
+        HDfree(filename[i]);
     HDfree(filename);
     HDfree(file_id);
     HDfree(dset_id);
