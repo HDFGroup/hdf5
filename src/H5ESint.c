@@ -279,10 +279,11 @@ H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, FAIL, "can't create event object")
 
     /* Copy the app source information */
-    if (NULL == (ev->op_info.app_file_name = H5MM_xstrdup(app_file)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source file name")
-    if (NULL == (ev->op_info.app_func_name = H5MM_xstrdup(app_func)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source function name")
+    /* The 'app_func' & 'app_file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
+    ev->op_info.app_file_name = app_file;
+    ev->op_info.app_func_name = app_func;
     ev->op_info.app_line_num = app_line;
 
     /* Set the event's operation counter */
@@ -294,8 +295,10 @@ H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app
     ev->op_info.op_exec_time = UINT64_MAX;
 
     /* Copy the API routine's name & arguments */
-    if (NULL == (ev->op_info.api_name = H5MM_xstrdup(caller)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine name")
+    /* The 'caller' string is also statically allocated (by the compiler)
+     * there's no need to duplicate it.
+     */
+    ev->op_info.api_name = caller;
     if (NULL == (ev->op_info.api_args = H5MM_xstrdup(api_args)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine arguments")
 
@@ -888,14 +891,14 @@ H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
     HDassert(ctx);
 
     /* Copy operation info for event */
-    if (NULL == (ctx->curr_err_info->api_name = H5MM_strdup(ev->op_info.api_name)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 API name")
+    /* The 'app_func_name', 'app_file_name', and 'api_name' strings are statically allocated (by the compiler)
+     * so there's no need to duplicate them.
+     */
+    ctx->curr_err_info->api_name = ev->op_info.api_name;
     if (NULL == (ctx->curr_err_info->api_args = H5MM_strdup(ev->op_info.api_args)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 API routine arguments")
-    if (NULL == (ctx->curr_err_info->app_file_name = H5MM_strdup(ev->op_info.app_file_name)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy app source file name")
-    if (NULL == (ctx->curr_err_info->app_func_name = H5MM_strdup(ev->op_info.app_func_name)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy app function name")
+    ctx->curr_err_info->app_file_name = ev->op_info.app_file_name;
+    ctx->curr_err_info->app_func_name = ev->op_info.app_func_name;
     ctx->curr_err_info->app_line_num = ev->op_info.app_line_num;
     ctx->curr_err_info->op_ins_count = ev->op_info.op_ins_count;
     ctx->curr_err_info->op_ins_ts    = ev->op_info.op_ins_ts;
