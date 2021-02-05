@@ -201,9 +201,6 @@ typedef enum H5VL_request_status_t {
 
 /* types for async request SPECIFIC callback */
 typedef enum H5VL_request_specific_t {
-    H5VL_REQUEST_WAITANY,           /* Wait until any request completes */
-    H5VL_REQUEST_WAITSOME,          /* Wait until at least one requesst completes */
-    H5VL_REQUEST_WAITALL,           /* Wait until all requests complete */
     H5VL_REQUEST_GET_ERR_STACK,     /* Retrieve error stack for failed operation */
     H5VL_REQUEST_GET_TIME_ESTIMATE, /* Retrieve time estimate for completing operation */
     H5VL_REQUEST_GET_EXEC_TIME      /* Retrieve execution time for operation */

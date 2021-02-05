@@ -3356,18 +3356,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5VL_request_specific_t specific = (H5VL_request_specific_t)HDva_arg(ap, int);
 
                             switch (specific) {
-                                case H5VL_REQUEST_WAITANY:
-                                    H5RS_acat(rs, "H5VL_REQUEST_WAITANY");
-                                    break;
-
-                                case H5VL_REQUEST_WAITSOME:
-                                    H5RS_acat(rs, "H5VL_REQUEST_WAITSOME");
-                                    break;
-
-                                case H5VL_REQUEST_WAITALL:
-                                    H5RS_acat(rs, "H5VL_REQUEST_WAITALL");
-                                    break;
-
                                 case H5VL_REQUEST_GET_ERR_STACK:
                                     H5RS_acat(rs, "H5VL_REQUEST_GET_ERR_STACK");
                                     break;
