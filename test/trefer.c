@@ -832,7 +832,7 @@ test_reference_cmpnd_obj(void)
     hsize_t    cmpnd_dims[] = {1};
     hid_t      dapl_id; /* Dataset access property list     */
     unsigned * ibuf, *obuf;
-    unsigned   i, j;     /* Counters                         */
+    unsigned   i;       /* Counters                         */
     H5O_type_t obj_type; /* Object type                      */
     herr_t     ret;      /* Generic return value             */
     s2_t       cmpnd_wbuf, cmpnd_rbuf;
