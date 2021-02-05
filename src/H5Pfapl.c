@@ -5739,7 +5739,7 @@ done:
 herr_t
 H5Pget_vol_async(hid_t plist_id, hbool_t *async_supported)
 {
-    herr_t          ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", plist_id, async_supported);
@@ -5747,9 +5747,9 @@ H5Pget_vol_async(hid_t plist_id, hbool_t *async_supported)
     /* Get the 'async supported' flag */
     if (async_supported) {
         if (TRUE == H5P_isa_class(plist_id, H5P_FILE_ACCESS)) {
-            H5P_genplist_t *plist;               /* Property list pointer */
-            H5VL_connector_prop_t connector_prop;            /* Property for VOL connector ID & info */
-            unsigned cap_flags = 0;         /* Capability flags for VOL connector */
+            H5P_genplist_t *      plist;          /* Property list pointer */
+            H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
+            unsigned              cap_flags = 0;  /* Capability flags for VOL connector */
 
             /* Get property list for ID */
             if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))

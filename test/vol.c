@@ -25,7 +25,7 @@
 #include "H5Tpkg.h"     /* Datatypes                            */
 #define H5VL_FRIEND     /* Suppress error about including H5VLpkg    */
 #define H5VL_TESTING
-#include "H5VLpkg.h"    /* Virtual Object Layer                 */
+#include "H5VLpkg.h" /* Virtual Object Layer                 */
 
 /* Filename */
 const char *FILENAME[] = {"native_vol_test", NULL};
@@ -307,13 +307,13 @@ static herr_t fake_async_get_cap_flags(void *info, unsigned *cap_flags);
  * functionality except to set the async capability flag.
  */
 static const H5VL_class_t fake_async_vol_g = {
-    H5VL_VERSION,   /* VOL class struct version */
+    H5VL_VERSION,         /* VOL class struct version */
     FAKE_ASYNC_VOL_VALUE, /* value        */
     FAKE_ASYNC_VOL_NAME,  /* name         */
-    0,              /* connector version */
-    H5VL_CAP_FLAG_ASYNC, /* capability flags */
-    NULL,           /* initialize   */
-    NULL,           /* terminate    */
+    0,                    /* connector version */
+    H5VL_CAP_FLAG_ASYNC,  /* capability flags */
+    NULL,                 /* initialize   */
+    NULL,                 /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* size    */
@@ -399,9 +399,9 @@ static const H5VL_class_t fake_async_vol_g = {
     },
     {
         /* introspect_cls */
-        NULL, /* get_conn_cls */
+        NULL,                     /* get_conn_cls */
         fake_async_get_cap_flags, /* get_cap_flags */
-        NULL, /* opt_query    */
+        NULL,                     /* opt_query    */
     },
     {
         /* request_cls */
@@ -1861,12 +1861,12 @@ error:
 static herr_t
 test_async_vol_props(void)
 {
-    hid_t fapl_id  = H5I_INVALID_HID;
-    hid_t vol_id   = H5I_INVALID_HID;
+    hid_t                    fapl_id = H5I_INVALID_HID;
+    hid_t                    vol_id  = H5I_INVALID_HID;
     H5VL_pass_through_info_t passthru_info;
-    hbool_t async_supported = FALSE;
-    hbool_t implicit_async_allowed = FALSE;
-    char *conn_env_str = NULL;
+    hbool_t                  async_supported        = FALSE;
+    hbool_t                  implicit_async_allowed = FALSE;
+    char *                   conn_env_str           = NULL;
 
     TESTING("Async VOL props");
 
@@ -1969,7 +1969,7 @@ test_async_vol_props(void)
         TEST_ERROR
 
     /* Stack the [internal] passthrough VOL connector on top of the fake async connector */
-    passthru_info.under_vol_id = vol_id;
+    passthru_info.under_vol_id   = vol_id;
     passthru_info.under_vol_info = NULL;
     if (H5Pset_vol(fapl_id, H5VL_PASSTHRU, &passthru_info) < 0)
         FAIL_STACK_ERROR;

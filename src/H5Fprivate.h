@@ -618,8 +618,9 @@ typedef struct H5F_t H5F_t;
 #ifdef H5_HAVE_PARALLEL
 #define H5F_ACS_MPI_PARAMS_COMM_NAME "mpi_params_comm" /* the MPI communicator */
 #define H5F_ACS_MPI_PARAMS_INFO_NAME "mpi_params_info" /* the MPI info struct */
-#endif /* H5_HAVE_PARALLEL */
-#define H5F_ACS_VOL_IMPL_ASYNC_NAME "vol_impl_async"   /* Whether or not implicit asynchronous operations are allowed */
+#endif                                                 /* H5_HAVE_PARALLEL */
+#define H5F_ACS_VOL_IMPL_ASYNC_NAME                                                                          \
+    "vol_impl_async" /* Whether or not implicit asynchronous operations are allowed */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME "local" /* Whether absolute symlinks local to file. */

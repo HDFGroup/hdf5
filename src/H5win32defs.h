@@ -199,7 +199,7 @@ H5_DLL float     Wroundf(float arg);
 #define HDgetlogin()         Wgetlogin()
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
 #define HDsetenv(N, V, O)    Wsetenv(N, V, O)
-#define HDsnprintf           c99_snprintf  /*varargs*/
+#define HDsnprintf           c99_snprintf /*varargs*/
 #define HDunsetenv(S)        Wsetenv(S, "", 1)
 #define HDvsnprintf          c99_vsnprintf /*varargs*/
 

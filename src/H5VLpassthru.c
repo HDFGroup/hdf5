@@ -2579,7 +2579,7 @@ herr_t
 H5VL_pass_through_introspect_get_cap_flags(const void *_info, unsigned *cap_flags)
 {
     const H5VL_pass_through_info_t *info = (const H5VL_pass_through_info_t *)_info;
-    herr_t               ret_value;
+    herr_t                          ret_value;
 
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL INTROSPECT GetCapFlags\n");
@@ -2589,7 +2589,7 @@ H5VL_pass_through_introspect_get_cap_flags(const void *_info, unsigned *cap_flag
     ret_value = H5VLintrospect_get_cap_flags(info->under_vol_info, info->under_vol_id, cap_flags);
 
     /* Bitwise OR our capability flags in */
-    if(ret_value >= 0)
+    if (ret_value >= 0)
         *cap_flags |= H5VL_pass_through_g.cap_flags;
 
     return ret_value;

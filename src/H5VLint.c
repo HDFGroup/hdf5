@@ -2855,7 +2855,7 @@ H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, unsigned *cap_fl
 
     /* Copy the connector ID & info, if there is one */
     if (connector_prop->connector_id > 0) {
-        H5VL_class_t *connector;                 /* Pointer to connector */
+        H5VL_class_t *connector; /* Pointer to connector */
 
         /* Retrieve the connector for the ID */
         if (NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop->connector_id)))
@@ -2871,4 +2871,3 @@ H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, unsigned *cap_fl
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_get_cap_flags() */
-
