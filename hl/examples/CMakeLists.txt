@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_HL_EXAMPLES )
+cmake_minimum_required (VERSION 3.12)
+project (HDF5_HL_EXAMPLES C)
 
 #-----------------------------------------------------------------------------
 # Define Sources
@@ -28,13 +28,24 @@ set (examples
 
 foreach (example ${examples})
   add_executable (hl_ex_${example} ${HDF5_HL_EXAMPLES_SOURCE_DIR}/${example}.c)
-  TARGET_C_PROPERTIES (hl_ex_${example} STATIC " " " ")
-  target_link_libraries (hl_ex_${example} ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
+  target_include_directories (hl_ex_${example} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  if (NOT BUILD_SHARED_LIBS)
+    TARGET_C_PROPERTIES (hl_ex_${example} STATIC)
+    target_link_libraries (hl_ex_${example} PRIVATE ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
+  else ()
+    TARGET_C_PROPERTIES (hl_ex_${example} SHARED)
+    target_link_libraries (hl_ex_${example} PRIVATE ${HDF5_HL_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  endif ()
   set_target_properties (hl_ex_${example} PROPERTIES FOLDER examples/hl)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_EXAMPLES_${example}_FORMAT hl_ex_${example})
+  endif ()
 endforeach ()
 
-if (BUILD_TESTING)
-
+if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
-
 endif ()

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -27,7 +27,7 @@ namespace H5 {
 // in "H5PredType.cpp" for information.
 
 // Initialize a pointer for the constant
-FileCreatPropList* FileCreatPropList::DEFAULT_ = 0;
+FileCreatPropList *FileCreatPropList::DEFAULT_ = 0;
 
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList::getConstant
@@ -39,13 +39,13 @@ FileCreatPropList* FileCreatPropList::DEFAULT_ = 0;
 //              object, throw a PropListIException.  This scenario should not happen.
 // Programmer   Binh-Minh Ribler - 2015
 //--------------------------------------------------------------------------
-FileCreatPropList* FileCreatPropList::getConstant()
+FileCreatPropList *
+FileCreatPropList::getConstant()
 {
     // Tell the C library not to clean up, H5Library::termH5cpp will call
     // H5close - more dependency if use H5Library::dontAtExit()
-    if (!IdComponent::H5dontAtexit_called)
-    {
-        (void) H5dont_atexit();
+    if (!IdComponent::H5dontAtexit_called) {
+        (void)H5dont_atexit();
         IdComponent::H5dontAtexit_called = true;
     }
 
@@ -54,8 +54,9 @@ FileCreatPropList* FileCreatPropList::getConstant()
     if (DEFAULT_ == 0)
         DEFAULT_ = new FileCreatPropList(H5P_FILE_CREATE);
     else
-        throw PropListIException("FileCreatPropList::getConstant", "FileCreatPropList::getConstant is being invoked on an allocated DEFAULT_");
-    return(DEFAULT_);
+        throw PropListIException("FileCreatPropList::getConstant",
+                                 "FileCreatPropList::getConstant is being invoked on an allocated DEFAULT_");
+    return (DEFAULT_);
 }
 
 //--------------------------------------------------------------------------
@@ -64,7 +65,8 @@ FileCreatPropList* FileCreatPropList::getConstant()
 //              points to.
 // Programmer   Binh-Minh Ribler - 2015
 //--------------------------------------------------------------------------
-void FileCreatPropList::deleteConstants()
+void
+FileCreatPropList::deleteConstants()
 {
     if (DEFAULT_ != 0)
         delete DEFAULT_;
@@ -73,7 +75,7 @@ void FileCreatPropList::deleteConstants()
 //--------------------------------------------------------------------------
 // Purpose      Constant for default property
 //--------------------------------------------------------------------------
-const FileCreatPropList& FileCreatPropList::DEFAULT = *getConstant();
+const FileCreatPropList &FileCreatPropList::DEFAULT = *getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -91,7 +93,7 @@ FileCreatPropList::FileCreatPropList() : PropList(H5P_FILE_CREATE) {}
 ///\param       original - IN: FileCreatPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FileCreatPropList::FileCreatPropList(const FileCreatPropList& original) : PropList(original) {}
+FileCreatPropList::FileCreatPropList(const FileCreatPropList &original) : PropList(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList overloaded constructor
@@ -114,13 +116,12 @@ FileCreatPropList::FileCreatPropList(const hid_t plist_id) : PropList(plist_id) 
 ///             Any (or even all) of the output arguments can be null pointers.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FileCreatPropList::getVersion(unsigned& super, unsigned& freelist, unsigned& stab, unsigned& shhdr) const
+void
+FileCreatPropList::getVersion(unsigned &super, unsigned &freelist, unsigned &stab, unsigned &shhdr) const
 {
     herr_t ret_value = H5Pget_version(id, &super, &freelist, &stab, &shhdr);
-    if(ret_value < 0)
-    {
-        throw PropListIException("FileCreatPropList::getVersion",
-                "H5Pget_version failed");
+    if (ret_value < 0) {
+        throw PropListIException("FileCreatPropList::getVersion", "H5Pget_version failed");
     }
 }
 
@@ -134,13 +135,12 @@ void FileCreatPropList::getVersion(unsigned& super, unsigned& freelist, unsigned
 ///             of 2 equal to 512 or greater (512, 1024, 2048, etc.)
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FileCreatPropList::setUserblock(hsize_t size) const
+void
+FileCreatPropList::setUserblock(hsize_t size) const
 {
     herr_t ret_value = H5Pset_userblock(id, size);
-    if(ret_value < 0)
-    {
-        throw PropListIException("FileCreatPropList::setUserblock",
-                "H5Pset_userblock failed");
+    if (ret_value < 0) {
+        throw PropListIException("FileCreatPropList::setUserblock", "H5Pset_userblock failed");
     }
 }
 
@@ -151,16 +151,15 @@ void FileCreatPropList::setUserblock(hsize_t size) const
 ///\exception   H5::PropListIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-hsize_t FileCreatPropList::getUserblock() const
+hsize_t
+FileCreatPropList::getUserblock() const
 {
     hsize_t userblock_size;
-    herr_t ret_value = H5Pget_userblock(id, &userblock_size);
-    if(ret_value < 0)
-    {
-        throw PropListIException("FileCreatPropList::getUserblock",
-                "H5Pget_userblock failed");
+    herr_t  ret_value = H5Pget_userblock(id, &userblock_size);
+    if (ret_value < 0) {
+        throw PropListIException("FileCreatPropList::getUserblock", "H5Pget_userblock failed");
     }
-    return(userblock_size);
+    return (userblock_size);
 }
 
 //--------------------------------------------------------------------------
@@ -176,13 +175,12 @@ hsize_t FileCreatPropList::getUserblock() const
 /// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSizes
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FileCreatPropList::setSizes(size_t sizeof_addr, size_t sizeof_size) const
+void
+FileCreatPropList::setSizes(size_t sizeof_addr, size_t sizeof_size) const
 {
     herr_t ret_value = H5Pset_sizes(id, sizeof_addr, sizeof_size);
-    if(ret_value < 0)
-    {
-        throw PropListIException("FileCreatPropList::setSizes",
-                "H5Pset_sizes failed");
+    if (ret_value < 0) {
+        throw PropListIException("FileCreatPropList::setSizes", "H5Pset_sizes failed");
     }
 }
 
@@ -194,13 +192,12 @@ void FileCreatPropList::setSizes(size_t sizeof_addr, size_t sizeof_size) const
 ///\exception   H5::PropListIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FileCreatPropList::getSizes(size_t& sizeof_addr, size_t& sizeof_size) const
+void
+FileCreatPropList::getSizes(size_t &sizeof_addr, size_t &sizeof_size) const
 {
     herr_t ret_value = H5Pget_sizes(id, &sizeof_addr, &sizeof_size);
-    if(ret_value < 0)
-    {
-        throw PropListIException("FileCreatPropList::getSizes",
-                "H5Pget_sizes failed");
+    if (ret_value < 0) {
+        throw PropListIException("FileCreatPropList::getSizes", "H5Pget_sizes failed");
     }
 }
 
@@ -216,13 +213,12 @@ void FileCreatPropList::getSizes(size_t& sizeof_addr, size_t& sizeof_size) const
 /// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSymK
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FileCreatPropList::setSymk(unsigned ik, unsigned lk) const
+void
+FileCreatPropList::setSymk(unsigned ik, unsigned lk) const
 {
     herr_t ret_value = H5Pset_sym_k(id, ik, lk);
-    if(ret_value < 0)
-    {
-        throw PropListIException("FileCreatPropList::setSymk",
-                "H5Pset_sym_k failed");
+    if (ret_value < 0) {
+        throw PropListIException("FileCreatPropList::setSymk", "H5Pset_sym_k failed");
     }
 }
 
@@ -237,13 +233,12 @@ void FileCreatPropList::setSymk(unsigned ik, unsigned lk) const
 /// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetSymK
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FileCreatPropList::getSymk(unsigned& ik, unsigned& lk) const
+void
+FileCreatPropList::getSymk(unsigned &ik, unsigned &lk) const
 {
     herr_t ret_value = H5Pget_sym_k(id, &ik, &lk);
-    if(ret_value < 0)
-    {
-        throw PropListIException("FileCreatPropList::getSymk",
-                "H5Pget_sym_k failed");
+    if (ret_value < 0) {
+        throw PropListIException("FileCreatPropList::getSymk", "H5Pget_sym_k failed");
     }
 }
 
@@ -258,13 +253,12 @@ void FileCreatPropList::getSymk(unsigned& ik, unsigned& lk) const
 /// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetIstoreK
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FileCreatPropList::setIstorek(unsigned ik) const
+void
+FileCreatPropList::setIstorek(unsigned ik) const
 {
     herr_t ret_value = H5Pset_istore_k(id, ik);
-    if(ret_value < 0)
-    {
-        throw PropListIException("FileCreatPropList::setIstorek",
-                "H5Pset_istore_k failed");
+    if (ret_value < 0) {
+        throw PropListIException("FileCreatPropList::setIstorek", "H5Pset_istore_k failed");
     }
 }
 
@@ -278,16 +272,15 @@ void FileCreatPropList::setIstorek(unsigned ik) const
 /// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetIstoreK
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-unsigned FileCreatPropList::getIstorek() const
+unsigned
+FileCreatPropList::getIstorek() const
 {
     unsigned ik;
-    herr_t ret_value = H5Pget_istore_k(id, &ik);
-    if(ret_value < 0)
-    {
-        throw PropListIException("FileCreatPropList::getIstorek",
-                "H5Pget_istore_k failed");
+    herr_t   ret_value = H5Pget_istore_k(id, &ik);
+    if (ret_value < 0) {
+        throw PropListIException("FileCreatPropList::getIstorek", "H5Pget_istore_k failed");
     }
-    return(ik);
+    return (ik);
 }
 
 //--------------------------------------------------------------------------
@@ -297,4 +290,4 @@ unsigned FileCreatPropList::getIstorek() const
 //--------------------------------------------------------------------------
 FileCreatPropList::~FileCreatPropList() {}
 
-} // end namespace
+} // namespace H5

@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -22,14 +22,18 @@ include $(top_srcdir)/config/commence.am
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
+if BUILD_TESTS_CONDITIONAL
 TEST_SCRIPT=testh5ls.sh
-check_SCRIPTS=$(TEST_SCRIPT)
-SCRIPT_DEPEND=h5ls$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
 if USE_PLUGINS_CONDITIONAL
    TEST_SCRIPT += h5ls_plugin.sh
 endif
 endif
+else 
+TEST_SCRIPT=
+endif
+check_SCRIPTS=$(TEST_SCRIPT)
+SCRIPT_DEPEND=h5ls$(EXEEXT)
 
 # This is our main target, the h5ls tool
 bin_PROGRAMS=h5ls

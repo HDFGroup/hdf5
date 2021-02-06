@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -36,21 +36,25 @@
       h5stat_newgrat
       h5stat_newgrat-UG
       h5stat_newgrat-UA
-      h5stat_err1_links
       h5stat_links1
       h5stat_links2
       h5stat_links3
       h5stat_links4
       h5stat_links5
-      h5stat_err1_dims
       h5stat_dims1
       h5stat_dims2
-      h5stat_err1_numattrs
-      h5stat_err2_numattrs
       h5stat_numattrs1
       h5stat_numattrs2
       h5stat_numattrs3
       h5stat_numattrs4
+  )
+  set (HDF5_REFERENCE_ERR_FILES
+      h5stat_err1_dims
+      h5stat_err1_links
+      h5stat_err1_numattrs
+      h5stat_err2_numattrs
+      h5stat_notexist
+      h5stat_nofile
   )
   set (HDF5_REFERENCE_TEST_FILES
       h5stat_filters.h5
@@ -61,6 +65,10 @@
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_H5STAT_SOURCE_DIR}/testfiles/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
+  endforeach ()
+
+  foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_H5STAT_SOURCE_DIR}/testfiles/${h5_file}.err" "${PROJECT_BINARY_DIR}/${h5_file}.err" "h5stat_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
@@ -77,28 +85,16 @@
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
-      if (NOT "${resultcode}" STREQUAL "0")
+      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat${tgt_file_ext}> ${ARGN})
+      if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
-          NAME H5STAT-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
-      add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_file_ext}>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -106,7 +102,30 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS H5STAT-${resultfile}-clear-objects)
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_ERR_TEST resultfile resultcode)
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat${tgt_file_ext}> ${ARGN})
+      if (${resultcode})
+        set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
+      endif ()
+    else (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5STAT-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_file_ext}>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
+              -D "TEST_ERRREF=${resultfile}.err"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
     endif ()
   endmacro ()
 
@@ -123,13 +142,8 @@
     endforeach ()
     add_test (
       NAME H5STAT-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove ${CLEAR_LIST}
+      COMMAND ${CMAKE_COMMAND} -E remove ${CLEAR_LIST}
     )
-    if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5STAT-clearall-objects")
   endif ()
 
 # Test for help flag
@@ -163,7 +177,7 @@
 #   -g -l 8
 #   --links=8
 #   --links=20 -g
-  ADD_H5_TEST (h5stat_err1_links 1 -l 0 h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err1_links 1 -l 0 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_links1 0 -g -l 8 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_links2 0 --links=8 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_links3 0 --links=20 -g h5stat_threshold.h5)
@@ -178,7 +192,7 @@
 #   -d --dims=-1 (incorrect threshold value)
 #   -gd -m 5
 #   -d --di=15
-  ADD_H5_TEST (h5stat_err1_dims 1 -d --dims=-1 h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err1_dims 1 -d --dims=-1 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_dims1 0 -gd -m 5 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_dims2 0 -d --di=15 h5stat_threshold.h5)
 #
@@ -188,8 +202,8 @@
 #   -AS -a 10
 #   -a 1
 #   -A --numattrs=25
-  ADD_H5_TEST (h5stat_err1_numattrs 1 -a -2 h5stat_threshold.h5)
-  ADD_H5_TEST (h5stat_err2_numattrs 1 --numattrs h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err1_numattrs 1 -a -2 h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err2_numattrs 1 --numattrs h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_numattrs1 0 -AS -a 10 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_numattrs2 0 -a 1 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_numattrs3 0 -A --numattrs=25 h5stat_threshold.h5)

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,7 +22,7 @@
 hid_t H5E_DATASET_g        = FAIL;      /* Dataset */
 hid_t H5E_FUNC_g           = FAIL;      /* Function entry/exit */
 hid_t H5E_STORAGE_g        = FAIL;      /* Data storage */
-hid_t H5E_FILE_g           = FAIL;      /* File accessibilty */
+hid_t H5E_FILE_g           = FAIL;      /* File accessibility */
 hid_t H5E_SOHM_g           = FAIL;      /* Shared Object Header Messages */
 hid_t H5E_SYM_g            = FAIL;      /* Symbol table */
 hid_t H5E_PLUGIN_g         = FAIL;      /* Plugin for dynamically loaded library */
@@ -131,7 +131,7 @@ hid_t H5E_NONE_MINOR_g     = FAIL;      /* No error */
 /* Plugin errors */
 hid_t H5E_OPENERROR_g      = FAIL;      /* Can't open directory or file */
 
-/* File accessibilty errors */
+/* File accessibility errors */
 hid_t H5E_FILEEXISTS_g     = FAIL;      /* File already exists */
 hid_t H5E_FILEOPEN_g       = FAIL;      /* File already open */
 hid_t H5E_CANTCREATE_g     = FAIL;      /* Unable to create file */

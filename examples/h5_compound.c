@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,10 +19,10 @@
 
 #include "hdf5.h"
 
-#define H5FILE_NAME          "SDScompound.h5"
-#define DATASETNAME   "ArrayOfStructures"
-#define LENGTH        10
-#define RANK          1
+#define H5FILE_NAME "SDScompound.h5"
+#define DATASETNAME "ArrayOfStructures"
+#define LENGTH      10
+#define RANK        1
 
 int
 main(void)
@@ -30,38 +30,37 @@ main(void)
 
     /* First structure  and dataset*/
     typedef struct s1_t {
-	int    a;
-	float  b;
-	double c;
+        int    a;
+        float  b;
+        double c;
     } s1_t;
-    s1_t       s1[LENGTH];
-    hid_t      s1_tid;     /* File datatype identifier */
+    s1_t  s1[LENGTH];
+    hid_t s1_tid; /* File datatype identifier */
 
     /* Second structure (subset of s1_t)  and dataset*/
     typedef struct s2_t {
-	double c;
-	int    a;
+        double c;
+        int    a;
     } s2_t;
-    s2_t       s2[LENGTH];
-    hid_t      s2_tid;    /* Memory datatype handle */
+    s2_t  s2[LENGTH];
+    hid_t s2_tid; /* Memory datatype handle */
 
     /* Third "structure" ( will be used to read float field of s1) */
-    hid_t      s3_tid;   /* Memory datatype handle */
-    float      s3[LENGTH];
+    hid_t s3_tid; /* Memory datatype handle */
+    float s3[LENGTH];
 
-    int        i;
-    hid_t      file, dataset, space; /* Handles */
-    herr_t     status;
-    hsize_t    dim[] = {LENGTH};   /* Dataspace dimensions */
-
+    int     i;
+    hid_t   file, dataset, space; /* Handles */
+    herr_t  status;
+    hsize_t dim[] = {LENGTH}; /* Dataspace dimensions */
 
     /*
      * Initialize the data
      */
-    for (i = 0; i< LENGTH; i++) {
+    for (i = 0; i < LENGTH; i++) {
         s1[i].a = i;
-        s1[i].b = i*i;
-        s1[i].c = 1./(i+1);
+        s1[i].b = i * i;
+        s1[i].c = 1. / (i + 1);
     }
 
     /*
@@ -77,7 +76,7 @@ main(void)
     /*
      * Create the memory data type.
      */
-    s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
+    s1_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
     H5Tinsert(s1_tid, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
     H5Tinsert(s1_tid, "c_name", HOFFSET(s1_t, c), H5T_NATIVE_DOUBLE);
     H5Tinsert(s1_tid, "b_name", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
@@ -126,12 +125,14 @@ main(void)
      */
     printf("\n");
     printf("Field c : \n");
-    for( i = 0; i < LENGTH; i++) printf("%.4f ", s2[i].c);
+    for (i = 0; i < LENGTH; i++)
+        printf("%.4f ", s2[i].c);
     printf("\n");
 
     printf("\n");
     printf("Field a : \n");
-    for( i = 0; i < LENGTH; i++) printf("%d ", s2[i].a);
+    for (i = 0; i < LENGTH; i++)
+        printf("%d ", s2[i].a);
     printf("\n");
 
     /*
@@ -151,7 +152,8 @@ main(void)
      */
     printf("\n");
     printf("Field b : \n");
-    for( i = 0; i < LENGTH; i++) printf("%.4f ", s3[i]);
+    for (i = 0; i < LENGTH; i++)
+        printf("%.4f ", s3[i]);
     printf("\n");
 
     /*

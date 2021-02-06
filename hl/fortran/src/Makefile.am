@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -49,6 +49,21 @@ libhdf5hl_fortran_la_SOURCES=H5DSfc.c H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c \
 
 # HDF5 HL Fortran library depends on HDF5 Library. 
 libhdf5hl_fortran_la_LIBADD=$(LIBH5_HL) $(LIBH5F)
+
+# The name of the lib file doesn't follow the same pattern as the other hl lib
+# files, namely libhdf5_hl_*.  Add a symlink with the compliant name to the
+# actual lib file.
+install-exec-hook:
+	cd $(DESTDIR)$(libdir) && \
+	    if test -f libhdf5hl_fortran.a -a \
+	    ! -f libhdf5_hl_fortran.a; then \
+	        $(LN_S) libhdf5hl_fortran.a libhdf5_hl_fortran.a; \
+	    fi; \
+	    if test -f libhdf5hl_fortran.so -a \
+	    ! -f libhdf5_hl_fortran.so; then \
+	        $(LN_S) libhdf5hl_fortran.so libhdf5_hl_fortran.so; \
+	    fi;
+
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules

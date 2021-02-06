@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Monday, August  2, 1999
  *
  * Purpose:	The public header file for the mpio driver.
@@ -23,9 +23,9 @@
 /* Macros */
 
 #ifdef H5_HAVE_PARALLEL
-#   define H5FD_MPIO	(H5FD_mpio_init())
+#define H5FD_MPIO (H5FD_mpio_init())
 #else
-#   define H5FD_MPIO	(-1)
+#define H5FD_MPIO (-1)
 #endif /* H5_HAVE_PARALLEL */
 
 #ifdef H5_HAVE_PARALLEL
@@ -44,13 +44,12 @@ H5_DLLVAR hbool_t H5FD_mpi_opt_types_g;
 #ifdef __cplusplus
 extern "C" {
 #endif
-H5_DLL hid_t H5FD_mpio_init(void);
-H5_DLL void H5FD_mpio_term(void);
+H5_DLL hid_t  H5FD_mpio_init(void);
+H5_DLL void   H5FD_mpio_term(void);
 H5_DLL herr_t H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
-H5_DLL herr_t H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/,
-			MPI_Info *info/*out*/);
+H5_DLL herr_t H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm /*out*/, MPI_Info *info /*out*/);
 H5_DLL herr_t H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode);
-H5_DLL herr_t H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/);
+H5_DLL herr_t H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode /*out*/);
 H5_DLL herr_t H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mode);
 H5_DLL herr_t H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode);
 H5_DLL herr_t H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc);

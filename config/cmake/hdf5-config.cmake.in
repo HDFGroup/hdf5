@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -37,13 +37,18 @@ set (${HDF5_PACKAGE_NAME}_ENABLE_F2003    @HDF5_ENABLE_F2003@)
 set (${HDF5_PACKAGE_NAME}_BUILD_CPP_LIB   @HDF5_BUILD_CPP_LIB@)
 set (${HDF5_PACKAGE_NAME}_BUILD_TOOLS     @HDF5_BUILD_TOOLS@)
 set (${HDF5_PACKAGE_NAME}_BUILD_HL_LIB    @HDF5_BUILD_HL_LIB@)
+set (${HDF5_PACKAGE_NAME}_ENABLE_THREADSAFE @HDF5_ENABLE_THREADSAFE@)
+set (${HDF5_PACKAGE_NAME}_ENABLE_PLUGIN_SUPPORT @HDF5_ENABLE_PLUGIN_SUPPORT@)
 set (${HDF5_PACKAGE_NAME}_ENABLE_Z_LIB_SUPPORT @HDF5_ENABLE_Z_LIB_SUPPORT@)
 set (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT  @HDF5_ENABLE_SZIP_SUPPORT@)
 set (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_ENCODING @HDF5_ENABLE_SZIP_ENCODING@)
-set (${HDF5_PACKAGE_NAME}_BUILD_SHARED_LIBS    @BUILD_SHARED_LIBS@)
+set (${HDF5_PACKAGE_NAME}_BUILD_SHARED_LIBS    @H5_ENABLE_SHARED_LIB@)
+set (${HDF5_PACKAGE_NAME}_BUILD_STATIC_LIBS    @H5_ENABLE_STATIC_LIB@)
 set (${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS      @HDF5_PACKAGE_EXTLIBS@)
 set (${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES @HDF5_LIBRARIES_TO_EXPORT@)
+set (${HDF5_PACKAGE_NAME}_ARCHITECTURE "@CMAKE_GENERATOR_ARCHITECTURE@")
 set (${HDF5_PACKAGE_NAME}_TOOLSET "@CMAKE_GENERATOR_TOOLSET@")
+set (${HDF5_PACKAGE_NAME}_DEFAULT_API_VERSION "@DEFAULT_API_VERSION@")
 
 #-----------------------------------------------------------------------------
 # Dependencies
@@ -85,42 +90,48 @@ endif ()
 #-----------------------------------------------------------------------------
 # Version Strings
 #-----------------------------------------------------------------------------
-set (HDF5_VERSION_STRING @HDF5_VERSION_STRING@)
-set (HDF5_VERSION_MAJOR  @HDF5_VERSION_MAJOR@)
-set (HDF5_VERSION_MINOR  @HDF5_VERSION_MINOR@)
+set (${HDF5_PACKAGE_NAME}_VERSION_STRING @HDF5_VERSION_STRING@)
+set (${HDF5_PACKAGE_NAME}_VERSION_MAJOR  @HDF5_VERSION_MAJOR@)
+set (${HDF5_PACKAGE_NAME}_VERSION_MINOR  @HDF5_VERSION_MINOR@)
 
 #-----------------------------------------------------------------------------
 # Don't include targets if this file is being picked up by another
 # project which has already built hdf5 as a subproject
 #-----------------------------------------------------------------------------
 if (NOT TARGET "@HDF5_PACKAGE@")
-  if (${HDF5_PACKAGE_NAME}_ENABLE_Z_LIB_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND NOT TARGET "zlib")
+  if (${HDF5_PACKAGE_NAME}_ENABLE_Z_LIB_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS)
     include (@PACKAGE_SHARE_INSTALL_DIR@/@ZLIB_PACKAGE_NAME@/@ZLIB_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
   endif ()
-  if (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND NOT TARGET "szip")
-    include (@PACKAGE_SHARE_INSTALL_DIR@/@SZIP_PACKAGE_NAME@/@SZIP_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
+  if (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS)
+    include (@PACKAGE_SHARE_INSTALL_DIR@/@SZ_PACKAGE_NAME@/@SZ_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
   endif ()
   include (@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake)
 endif ()
 
 # Handle default component(static) :
 if (NOT ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+  if (${HDF5_PACKAGE_NAME}_BUILD_STATIC_LIBS)
     set (${HDF5_PACKAGE_NAME}_LIB_TYPE)
     set (${HDF5_PACKAGE_NAME}_FIND_COMPONENTS C HL static)
     set (${HDF5_PACKAGE_NAME}_FIND_REQUIRED_static_C true)
+  else ()
+    set (${HDF5_PACKAGE_NAME}_LIB_TYPE)
+    set (${HDF5_PACKAGE_NAME}_FIND_COMPONENTS C HL shared)
+    set (${HDF5_PACKAGE_NAME}_FIND_REQUIRED_shared_C true)
+  endif ()
 endif ()
 
 # Handle requested components:
 list (REMOVE_DUPLICATES ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
 foreach (comp IN LISTS ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
-  if (${comp} STREQUAL "shared")
+  if (comp STREQUAL "shared")
     list (REMOVE_ITEM ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS ${comp})
     set (${HDF5_PACKAGE_NAME}_LIB_TYPE ${${HDF5_PACKAGE_NAME}_LIB_TYPE} ${comp})
 
     if (${HDF5_PACKAGE_NAME}_BUILD_FORTRAN)
       set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR_FORTRAN "@PACKAGE_INCLUDE_INSTALL_DIR@/shared")
     endif ()
-  elseif (${comp} STREQUAL "static")
+  elseif (comp STREQUAL "static")
     list (REMOVE_ITEM ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS ${comp})
     set (${HDF5_PACKAGE_NAME}_LIB_TYPE ${${HDF5_PACKAGE_NAME}_LIB_TYPE} ${comp})
 
@@ -132,20 +143,20 @@ endforeach ()
 foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
   foreach (comp IN LISTS ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
     set (hdf5_comp2)
-    if (${comp} STREQUAL "C")
+    if (comp STREQUAL "C")
       set (hdf5_comp "hdf5")
-    elseif (${comp} STREQUAL "CXX")
+    elseif (comp STREQUAL "CXX")
       set (hdf5_comp "hdf5_cpp")
-    elseif (${comp} STREQUAL "HL")
+    elseif (comp STREQUAL "HL")
       set (hdf5_comp "hdf5_hl")
-    elseif (${comp} STREQUAL "CXX_HL")
+    elseif (comp STREQUAL "CXX_HL")
       set (hdf5_comp "hdf5_hl_cpp")
-    elseif (${comp} STREQUAL "Tools")
+    elseif (comp STREQUAL "Tools")
       set (hdf5_comp "hdf5_tools")
-    elseif (${comp} STREQUAL "Fortran")
+    elseif (comp STREQUAL "Fortran")
       set (hdf5_comp2 "hdf5_f90cstub")
       set (hdf5_comp "hdf5_fortran")
-    elseif (${comp} STREQUAL "Fortran_HL")
+    elseif (comp STREQUAL "Fortran_HL")
       set (hdf5_comp2 "hdf5_hl_f90cstub")
       set (hdf5_comp "hdf5_hl_fortran")
     endif ()
@@ -160,12 +171,12 @@ foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
         else ()
           set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 1)
           string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_${libtype}_LIBRARY COMP_LIBRARY)
-          set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF5_PACKAGE@::${hdf5_comp2}-${libtype} @HDF5_PACKAGE@::${hdf5_comp}-${libtype})
+          set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF_PACKAGE_NAMESPACE@${hdf5_comp2}-${libtype} @HDF_PACKAGE_NAMESPACE@${hdf5_comp}-${libtype})
         endif ()
       else ()
         set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 1)
         string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_${libtype}_LIBRARY COMP_LIBRARY)
-        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF5_PACKAGE@::${hdf5_comp}-${libtype})
+        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF_PACKAGE_NAMESPACE@${hdf5_comp}-${libtype})
       endif ()
     endif ()
   endforeach ()

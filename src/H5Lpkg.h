@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: James Laird <matzke@llnl.gov>
+ * Programmer: James Laird
  *             Friday, December 1, 2005
  *
  * Purpose:     This file contains declarations which are visible
@@ -31,32 +31,26 @@
 
 /* Other private headers needed by this file */
 
-
 /**************************/
 /* Package Private Macros */
 /**************************/
-
 
 /****************************/
 /* Package Private Typedefs */
 /****************************/
 
-
 /*****************************/
 /* Package Private Variables */
 /*****************************/
-
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
 
-H5_DLL herr_t H5L_create_ud(const H5G_loc_t *link_loc, const char *link_name,
-    const void * ud_data, size_t ud_data_size, H5L_type_t type,
-    hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
-H5_DLL herr_t H5L_link_copy_file(H5F_t *dst_file, hid_t dxpl_id,
-    const H5O_link_t *_src_lnk, const H5O_loc_t *src_oloc, H5O_link_t *dst_lnk,
-    H5O_copy_t *cpy_info);
+H5_DLL herr_t H5L_create_ud(const H5G_loc_t *link_loc, const char *link_name, const void *ud_data,
+                            size_t ud_data_size, H5L_type_t type, hid_t lcpl_id, hid_t lapl_id,
+                            hid_t dxpl_id);
+H5_DLL herr_t H5L_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
+                                 const H5O_loc_t *src_oloc, H5O_link_t *dst_lnk, H5O_copy_t *cpy_info);
 
 #endif /* _H5Lpkg_H */
-

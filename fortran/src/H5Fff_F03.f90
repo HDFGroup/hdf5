@@ -7,18 +7,18 @@
 !  This file contains Fortran 2003 interfaces for H5F functions.
 !
 ! COPYRIGHT
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
-!   All rights reserved.                                                      *
-!                                                                             *
-!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
-!   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
-!   If you do not have access to either file, you may request a copy from     *
-!   help@hdfgroup.org.                                                        *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!  Copyright by The HDF Group.                                                 *
+!  Copyright by the Board of Trustees of the University of Illinois.           *
+!  All rights reserved.                                                        *
+!                                                                              *
+!  This file is part of HDF5.  The full HDF5 copyright notice, including       *
+!  terms governing use, modification, and redistribution, is contained in      *
+!  the COPYING file, which can be found at the root of the source code         *
+!  distribution tree, or in https://www.hdfgroup.org/licenses.                 *
+!  If you do not have access to either file, you may request a copy from       *
+!  help@hdfgroup.org.                                                          *
+!  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! NOTES
 !                         *** IMPORTANT ***
@@ -78,7 +78,7 @@ CONTAINS
          INTEGER(HID_T) , INTENT(IN) :: file_id
          TYPE(C_PTR)    , VALUE      :: buf_ptr
          INTEGER(SIZE_T), INTENT(IN) :: buf_len
-         INTEGER(SIZE_T), INTENT(IN) :: buf_size
+         INTEGER(SIZE_T), INTENT(OUT) :: buf_size
        END FUNCTION h5fget_file_image_c
     END INTERFACE
 

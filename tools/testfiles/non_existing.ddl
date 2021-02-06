@@ -28,4 +28,3 @@ GROUP "/" {
    }
 }
 }
-h5dump error: unable to open file "non_existing.h5"

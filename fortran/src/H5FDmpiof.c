@@ -12,18 +12,17 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  ******
-*/
+ */
 
 #include "H5f90.h"
 #include <mpi.h>
 #include "H5public.h"
-
 
 /* Support for C to Fortran translation in MPI */
 #ifndef H5_HAVE_MPI_MULTI_LANG_Comm
@@ -53,27 +52,28 @@
  * HISTORY
  *
  * SOURCE
-*/
+ */
 int_f
-nh5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
+nh5pset_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
 /******/
 {
-     int ret_value = -1;
-     hid_t c_prp_id;
-     herr_t ret;
-     MPI_Comm c_comm;
-     MPI_Info c_info;
-     c_comm = MPI_Comm_f2c(*comm);
-     c_info = MPI_Info_f2c(*info);
+    int      ret_value = -1;
+    hid_t    c_prp_id;
+    herr_t   ret;
+    MPI_Comm c_comm;
+    MPI_Info c_info;
+    c_comm = MPI_Comm_f2c(*comm);
+    c_info = MPI_Info_f2c(*info);
 
-     /*
-      * Call H5Pset_mpi function.
-      */
-     c_prp_id = *prp_id;
-     ret = H5Pset_fapl_mpio(c_prp_id, c_comm, c_info);
-     if (ret < 0) return ret_value;
-     ret_value = 0;
-     return ret_value;
+    /*
+     * Call H5Pset_mpi function.
+     */
+    c_prp_id = *prp_id;
+    ret      = H5Pset_fapl_mpio(c_prp_id, c_comm, c_info);
+    if (ret < 0)
+        return ret_value;
+    ret_value = 0;
+    return ret_value;
 }
 /****if* H5FDmpiof/h5pget_fapl_mpio_c
  * NAME
@@ -92,27 +92,28 @@ nh5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
  * HISTORY
  *
  * SOURCE
-*/
+ */
 int_f
-nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
+nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
 /******/
 {
-     int ret_value = -1;
-     hid_t c_prp_id;
-     herr_t ret;
-     MPI_Comm c_comm;
-     MPI_Info c_info;
+    int      ret_value = -1;
+    hid_t    c_prp_id;
+    herr_t   ret;
+    MPI_Comm c_comm;
+    MPI_Info c_info;
 
-     /*
-      * Call H5Pget_mpi function.
-      */
-     c_prp_id = *prp_id;
-     ret = H5Pget_fapl_mpio(c_prp_id, &c_comm, &c_info);
-     if (ret < 0) return ret_value;
-     *comm = (int_f) MPI_Comm_c2f(c_comm);
-     *info = (int_f) MPI_Info_c2f(c_info);
-     ret_value = 0;
-     return ret_value;
+    /*
+     * Call H5Pget_mpi function.
+     */
+    c_prp_id = *prp_id;
+    ret      = H5Pget_fapl_mpio(c_prp_id, &c_comm, &c_info);
+    if (ret < 0)
+        return ret_value;
+    *comm     = (int_f)MPI_Comm_c2f(c_comm);
+    *info     = (int_f)MPI_Info_c2f(c_info);
+    ret_value = 0;
+    return ret_value;
 }
 /****if* H5FDmpiof/h5pset_dxpl_mpio_c
  * NAME
@@ -131,38 +132,39 @@ nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
  * HISTORY
  *
  * SOURCE
-*/
+ */
 int_f
-nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
+nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f *data_xfer_mode)
 /******/
 {
-     int ret_value = -1;
-     hid_t c_prp_id;
-     herr_t ret;
-     H5FD_mpio_xfer_t c_data_xfer_mode;
-/*
-     switch (*data_xfer_mode) {
+    int              ret_value = -1;
+    hid_t            c_prp_id;
+    herr_t           ret;
+    H5FD_mpio_xfer_t c_data_xfer_mode;
+    /*
+         switch (*data_xfer_mode) {
 
-        case H5FD_MPIO_INDEPENDENT_F:
-             c_data_xfer_mode = H5FD_MPIO_INDEPENDENT;
-             break;
+            case H5FD_MPIO_INDEPENDENT_F:
+                 c_data_xfer_mode = H5FD_MPIO_INDEPENDENT;
+                 break;
 
-        case H5FD_MPIO_COLLECTIVE_F:
-             c_data_xfer_mode = H5FD_MPIO_COLLECTIVE;
-             break;
-        default:
-          return ret_value;
-      }
-*/
-     c_data_xfer_mode = (H5FD_mpio_xfer_t)*data_xfer_mode;
-     /*
-      * Call H5Pset_dxpl_mpio function.
-      */
-     c_prp_id = *prp_id;
-     ret = H5Pset_dxpl_mpio(c_prp_id, c_data_xfer_mode);
-     if (ret < 0) return ret_value;
-     ret_value = 0;
-     return ret_value;
+            case H5FD_MPIO_COLLECTIVE_F:
+                 c_data_xfer_mode = H5FD_MPIO_COLLECTIVE;
+                 break;
+            default:
+              return ret_value;
+          }
+    */
+    c_data_xfer_mode = (H5FD_mpio_xfer_t)*data_xfer_mode;
+    /*
+     * Call H5Pset_dxpl_mpio function.
+     */
+    c_prp_id = *prp_id;
+    ret      = H5Pset_dxpl_mpio(c_prp_id, c_data_xfer_mode);
+    if (ret < 0)
+        return ret_value;
+    ret_value = 0;
+    return ret_value;
 }
 
 /****if* H5FDmpiof/h5pget_dxpl_mpio_c
@@ -182,40 +184,41 @@ nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
  * HISTORY
  *
  * SOURCE
-*/
+ */
 int_f
-nh5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
+nh5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f *data_xfer_mode)
 /******/
 {
-     int ret_value = -1;
-     hid_t c_prp_id;
-     herr_t ret;
-     H5FD_mpio_xfer_t c_data_xfer_mode;
+    int              ret_value = -1;
+    hid_t            c_prp_id;
+    herr_t           ret;
+    H5FD_mpio_xfer_t c_data_xfer_mode;
 
-     /*
-      * Call H5Pget_xfer function.
-      */
-     c_prp_id = *prp_id;
-     ret = H5Pget_dxpl_mpio(c_prp_id, &c_data_xfer_mode);
-     if (ret < 0) return ret_value;
-     *data_xfer_mode = (int_f)c_data_xfer_mode;
-/*
-     switch (c_data_xfer_mode) {
+    /*
+     * Call H5Pget_xfer function.
+     */
+    c_prp_id = *prp_id;
+    ret      = H5Pget_dxpl_mpio(c_prp_id, &c_data_xfer_mode);
+    if (ret < 0)
+        return ret_value;
+    *data_xfer_mode = (int_f)c_data_xfer_mode;
+    /*
+         switch (c_data_xfer_mode) {
 
-        case H5FD_MPIO_INDEPENDENT:
-             *data_xfer_mode = H5FD_MPIO_INDEPENDENT_F;
-             break;
+            case H5FD_MPIO_INDEPENDENT:
+                 *data_xfer_mode = H5FD_MPIO_INDEPENDENT_F;
+                 break;
 
-        case H5FD_MPIO_COLLECTIVE:
-             *data_xfer_mode = H5FD_MPIO_COLLECTIVE_F;
-             break;
+            case H5FD_MPIO_COLLECTIVE:
+                 *data_xfer_mode = H5FD_MPIO_COLLECTIVE_F;
+                 break;
 
-        default:
-          return ret_value;
-      }
-*/
-     ret_value = 0;
-     return ret_value;
+            default:
+              return ret_value;
+          }
+    */
+    ret_value = 0;
+    return ret_value;
 }
 
 /****if* H5Pf/h5pget_mpio_actual_io_mode_c
@@ -235,22 +238,22 @@ nh5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
  *  M. Scot Breitenfeld
  *  July 27, 2012
  * SOURCE
-*/
+ */
 int_f
 nh5pget_mpio_actual_io_mode_c(hid_t_f *dxpl_id, int_f *actual_io_mode)
 /******/
 {
-  int ret_value = -1;
-  H5D_mpio_actual_io_mode_t c_actual_io_mode;
+    int                       ret_value = -1;
+    H5D_mpio_actual_io_mode_t c_actual_io_mode;
 
-  /*
-   * Call H5Pget_mpio_actual_io_mode_f function.
-   */
-  if( (H5Pget_mpio_actual_io_mode((hid_t)*dxpl_id, &c_actual_io_mode)) <0 )
-    return ret_value; /* error occurred */
+    /*
+     * Call H5Pget_mpio_actual_io_mode_f function.
+     */
+    if ((H5Pget_mpio_actual_io_mode((hid_t)*dxpl_id, &c_actual_io_mode)) < 0)
+        return ret_value; /* error occurred */
 
-  *actual_io_mode =(int_f)c_actual_io_mode;
+    *actual_io_mode = (int_f)c_actual_io_mode;
 
-  ret_value = 0;
-  return ret_value;
+    ret_value = 0;
+    return ret_value;
 }

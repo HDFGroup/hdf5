@@ -13,8 +13,11 @@
 /* Define the default plugins path to compile */
 #undef DEFAULT_PLUGINDIR
 
-/* Define if `dev_t' is a scalar */
+/* Define if dev_t is a scalar */
 #undef DEV_T_IS_SCALAR
+
+/* Define the examples directory */
+#undef EXAMPLESDIR
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
@@ -51,6 +54,9 @@
 
 /* Define if the function stack tracing code is to be compiled in */
 #undef HAVE_CODESTACK
+
+/* Define to 1 if you have the <curl/curl.h> header file. */
+#undef HAVE_CURL_CURL_H
 
 /* Define if Darwin or Mac OS X */
 #undef HAVE_DARWIN
@@ -112,6 +118,9 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define to 1 if you have the <hdfs.h> header file. */
+#undef HAVE_HDFS_H
+
 /* Define if the compiler understands inline */
 #undef HAVE_INLINE
 
@@ -128,11 +137,23 @@
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
+/* Define to 1 if you have the `crypto' library (-lcrypto). */
+#undef HAVE_LIBCRYPTO
+
+/* Define to 1 if you have the `curl' library (-lcurl). */
+#undef HAVE_LIBCURL
+
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL
 
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #undef HAVE_LIBDMALLOC
+
+/* Proceed to build with libhdfs */
+#undef HAVE_LIBHDFS
+
+/* Define to 1 if you have the `jvm' library (-ljvm). */
+#undef HAVE_LIBJVM
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
@@ -170,11 +191,20 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #undef HAVE_MPE_H
 
-/* Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists */
+/* Define if MPI_Comm_c2f and MPI_Comm_f2c exist */
 #undef HAVE_MPI_MULTI_LANG_Comm
 
-/* Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists */
+/* Define if MPI_Info_c2f and MPI_Info_f2c exist */
 #undef HAVE_MPI_MULTI_LANG_Info
+
+/* Define to 1 if you have the <openssl/evp.h> header file. */
+#undef HAVE_OPENSSL_EVP_H
+
+/* Define to 1 if you have the <openssl/hmac.h> header file. */
+#undef HAVE_OPENSSL_HMAC_H
+
+/* Define to 1 if you have the <openssl/sha.h> header file. */
+#undef HAVE_OPENSSL_SHA_H
 
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
@@ -187,6 +217,10 @@
 
 /* Define to 1 if you have the `rand_r' function. */
 #undef HAVE_RAND_R
+
+/* Define whether the Read-Only S3 virtual file driver (VFD) should be
+   compiled */
+#undef HAVE_ROS3_VFD
 
 /* Define to 1 if you have the `setjmp' function. */
 #undef HAVE_SETJMP
@@ -215,7 +249,7 @@
 /* Define to 1 if you have the `srandom' function. */
 #undef HAVE_SRANDOM
 
-/* Define if `struct stat' has the `st_blocks' field */
+/* Define if struct stat has the st_blocks field */
 #undef HAVE_STAT_ST_BLOCKS
 
 /* Define to 1 if you have the <stddef.h> header file. */
@@ -242,10 +276,10 @@
 /* Define to 1 if you have the `strtoull' function. */
 #undef HAVE_STRTOULL
 
-/* Define if `struct text_info' is defined */
+/* Define if struct text_info is defined */
 #undef HAVE_STRUCT_TEXT_INFO
 
-/* Define if `struct videoconfig' is defined */
+/* Define if struct videoconfig is defined */
 #undef HAVE_STRUCT_VIDEOCONFIG
 
 /* Define to 1 if you have the `symlink' function. */
@@ -281,7 +315,7 @@
 /* Define if we have thread safe support */
 #undef HAVE_THREADSAFE
 
-/* Define if `timezone' is a global variable */
+/* Define if timezone is a global variable */
 #undef HAVE_TIMEZONE
 
 /* Define if the ioctl TIOCGETD is defined */
@@ -293,7 +327,7 @@
 /* Define to 1 if you have the `tmpfile' function. */
 #undef HAVE_TMPFILE
 
-/* Define if `tm_gmtoff' is a member of `struct tm' */
+/* Define if tm_gmtoff is a member of struct tm */
 #undef HAVE_TM_GMTOFF
 
 /* Define to 1 if you have the <unistd.h> header file. */

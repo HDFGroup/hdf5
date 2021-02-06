@@ -3,23 +3,22 @@
 
 General Information:
 -------------------
-		   HDF5 Version: @H5_VERSION@
-		  Configured on: @CONFIG_DATE@
-		  Configured by: @CONFIG_USER@
-		 Configure mode: @CONFIG_MODE@
-		    Host system: @host_cpu@-@host_vendor@-@host_os@
-	      Uname information: @UNAME_INFO@
-		       Byte sex: @BYTESEX@
-		      Libraries: @STATIC_SHARED@
-	     Installation point: @prefix@
+                   HDF5 Version: @H5_VERSION@
+                  Configured on: @CONFIG_DATE@
+                  Configured by: @CONFIG_USER@
+                 Configure mode: @CONFIG_MODE@
+                    Host system: @host_cpu@-@host_vendor@-@host_os@
+              Uname information: @UNAME_INFO@
+                       Byte sex: @BYTESEX@
+             Installation point: @prefix@
 
 Compiling Options:
 ------------------
                Compilation Mode: @CONFIG_MODE@
                      C Compiler: @CC_VERSION@
-                         CFLAGS: @CFLAGS@
-                      H5_CFLAGS: @H5_CFLAGS@
-                      AM_CFLAGS: @AM_CFLAGS@
+                        C Flags: @CFLAGS@
+                     H5 C Flags: @H5_CFLAGS@ @H5_ECFLAGS@
+                     AM C Flags: @AM_CFLAGS@
                        CPPFLAGS: @CPPFLAGS@
                     H5_CPPFLAGS: @H5_CPPFLAGS@
                     AM_CPPFLAGS: @AM_CPPFLAGS@
@@ -29,11 +28,11 @@ Compiling Options:
                         LDFLAGS: @LDFLAGS@
                      H5_LDFLAGS: @H5_LDFLAGS@
                      AM_LDFLAGS: @AM_LDFLAGS@
- 	 	Extra libraries: @LIBS@
- 		       Archiver: @AR@
- 		 	 Ranlib: @RANLIB@
- 	      Debugged Packages: @DEBUG_PKG@
-		    API Tracing: @TRACE_API@
+                Extra libraries: @LIBS@
+                       Archiver: @AR@
+                         Ranlib: @RANLIB@
+              Debugged Packages: @DEBUG_PKG@
+                    API Tracing: @TRACE_API@
 
 Languages:
 ----------
@@ -49,24 +48,28 @@ Languages:
                             C++: @HDF_CXX@
 @BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CXX_VERSION@
 @BUILD_CXX_CONDITIONAL_TRUE@                      C++ Flags: @CXXFLAGS@
-@BUILD_CXX_CONDITIONAL_TRUE@                   H5 C++ Flags: @H5_CXXFLAGS@
+@BUILD_CXX_CONDITIONAL_TRUE@                   H5 C++ Flags: @H5_CXXFLAGS@ @H5_ECXXFLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@                   AM C++ Flags: @AM_CXXFLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@             Shared C++ Library: @enable_shared@
 @BUILD_CXX_CONDITIONAL_TRUE@             Static C++ Library: @enable_static@
 
 Features:
 ---------
-                  Parallel HDF5: @PARALLEL@
-             High Level library: @HDF5_HL@
-                   Threadsafety: @THREADSAFE@
-            Default API Mapping: @DEFAULT_API_VERSION@
- With Deprecated Public Symbols: @DEPRECATED_SYMBOLS@
-         I/O filters (external): @EXTERNAL_FILTERS@
-                            MPE: @MPE@
-                     Direct VFD: @DIRECT_VFD@
-                        dmalloc: @HAVE_DMALLOC@
-Clear file buffers before write: @CLEARFILEBUF@
-           Using memory checker: @USINGMEMCHECKER@
-         Function Stack Tracing: @CODESTACK@
-      Strict File Format Checks: @STRICT_FORMAT_CHECKS@
-   Optimization Instrumentation: @INSTRUMENT@
+                   Parallel HDF5: @PARALLEL@
+              High-level library: @HDF5_HL@
+                Build HDF5 Tests: @HDF5_TESTS@
+                Build HDF5 Tools: @HDF5_TOOLS@
+                    Threadsafety: @THREADSAFE@
+             Default API mapping: @DEFAULT_API_VERSION@
+  With deprecated public symbols: @DEPRECATED_SYMBOLS@
+          I/O filters (external): @EXTERNAL_FILTERS@
+                             MPE: @MPE@
+                      Direct VFD: @DIRECT_VFD@
+              (Read-Only) S3 VFD: @ROS3_VFD@
+            (Read-Only) HDFS VFD: @HAVE_LIBHDFS@
+                         dmalloc: @HAVE_DMALLOC@
+ Clear file buffers before write: @CLEARFILEBUF@
+            Using memory checker: @USINGMEMCHECKER@
+          Function stack tracing: @CODESTACK@
+       Strict file format checks: @STRICT_FORMAT_CHECKS@
+    Optimization instrumentation: @INSTRUMENT@

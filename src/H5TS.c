@@ -6,15 +6,15 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* private headers */
-#include "H5private.h"    /*library                     */
-#include "H5Eprivate.h"    /*error handling              */
-#include "H5MMprivate.h"  /*memory management functions    */
+#include "H5private.h"   /*library                     */
+#include "H5Eprivate.h"  /*error handling              */
+#include "H5MMprivate.h" /*memory management functions    */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -22,21 +22,46 @@
 
 /* cancelability structure */
 typedef struct H5TS_cancel_struct {
-    int previous_state;
+    int          previous_state;
     unsigned int cancel_count;
 } H5TS_cancel_t;
 
 /* Global variable definitions */
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_once_t H5TS_first_init_g;
-#else /* H5_HAVE_WIN_THREADS */
+#else  /* H5_HAVE_WIN_THREADS */
 H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 #endif /* H5_HAVE_WIN_THREADS */
 H5TS_key_t H5TS_errstk_key_g;
 H5TS_key_t H5TS_funcstk_key_g;
+H5TS_key_t H5TS_apictx_key_g;
 H5TS_key_t H5TS_cancel_key_g;
 
-
+#ifndef H5_HAVE_WIN_THREADS
+
+/* An H5TS_tid_t is a record of a thread identifier that is
+ * available for reuse.
+ */
+struct _tid;
+typedef struct _tid H5TS_tid_t;
+
+struct _tid {
+    H5TS_tid_t *next;
+    uint64_t    id;
+};
+
+/* Pointer to first free thread ID record or NULL. */
+static H5TS_tid_t *H5TS_tid_next_free = NULL;
+static uint64_t    H5TS_tid_next_id   = 0;
+
+/* Mutual exclusion for access to H5TS_tid_next_free and H5TS_tid_next_id. */
+static pthread_mutex_t H5TS_tid_mtx;
+
+/* Key for thread-local storage of the thread ID. */
+static H5TS_key_t H5TS_tid_key;
+
+#endif /* H5_HAVE_WIN_THREADS */
+
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_key_destructor
@@ -60,12 +85,132 @@ static void
 H5TS_key_destructor(void *key_val)
 {
     /* Use HDfree here instead of H5MM_xfree(), to avoid calling the H5CS routines */
-    if(key_val!=NULL)
+    if (key_val != NULL)
         HDfree(key_val);
 }
 
-
 #ifndef H5_HAVE_WIN_THREADS
+
+/*--------------------------------------------------------------------------
+ * NAME
+ *    H5TS_tid_destructor
+ *
+ * USAGE
+ *    H5TS_tid_destructor()
+ *
+ * RETURNS
+ *
+ * DESCRIPTION
+ *   When a thread shuts down, put its ID record on the free list.
+ *
+ *--------------------------------------------------------------------------
+ */
+static void
+H5TS_tid_destructor(void *_v)
+{
+    H5TS_tid_t *tid = _v;
+
+    if (tid == NULL)
+        return;
+
+    /* TBD use an atomic CAS */
+    pthread_mutex_lock(&H5TS_tid_mtx);
+    tid->next          = H5TS_tid_next_free;
+    H5TS_tid_next_free = tid;
+    pthread_mutex_unlock(&H5TS_tid_mtx);
+}
+
+/*--------------------------------------------------------------------------
+ * NAME
+ *    H5TS_tid_init
+ *
+ * USAGE
+ *    H5TS_tid_init()
+ *
+ * RETURNS
+ *
+ * DESCRIPTION
+ *   Initialize for integer thread identifiers.
+ *
+ *--------------------------------------------------------------------------
+ */
+static void
+H5TS_tid_init(void)
+{
+    pthread_mutex_init(&H5TS_tid_mtx, NULL);
+    pthread_key_create(&H5TS_tid_key, H5TS_tid_destructor);
+}
+
+/*--------------------------------------------------------------------------
+ * NAME
+ *    H5TS_thread_id
+ *
+ * USAGE
+ *    uint64_t id = H5TS_thread_id()
+ *
+ * RETURNS
+ *   Return an integer identifier, ID, for the current thread.
+ *
+ * DESCRIPTION
+ *   The ID satisfies the following properties:
+ *
+ *   1 1 <= ID <= UINT64_MAX
+ *   2 ID is constant over the thread's lifetime.
+ *   3 No two threads share an ID during their lifetimes.
+ *   4 A thread's ID is available for reuse as soon as it is joined.
+ *
+ *   ID 0 is reserved.  H5TS_thread_id() returns 0 if the library was not
+ *   built with thread safety or if an error prevents it from assigning an
+ *   ID.
+ *
+ *--------------------------------------------------------------------------
+ */
+uint64_t
+H5TS_thread_id(void)
+{
+    H5TS_tid_t *tid = pthread_getspecific(H5TS_tid_key);
+    H5TS_tid_t  proto_tid;
+
+    /* An ID is already assigned. */
+    if (tid != NULL)
+        return tid->id;
+
+    /* An ID is *not* already assigned: reuse an ID that's on the
+     * free list, or else generate a new ID.
+     *
+     * Allocating memory while holding a mutex is bad form, so
+     * point `tid` at `proto_tid` if we need to allocate some
+     * memory.
+     */
+    pthread_mutex_lock(&H5TS_tid_mtx);
+    if ((tid = H5TS_tid_next_free) != NULL)
+        H5TS_tid_next_free = tid->next;
+    else if (H5TS_tid_next_id != UINT64_MAX) {
+        tid     = &proto_tid;
+        tid->id = ++H5TS_tid_next_id;
+    }
+    pthread_mutex_unlock(&H5TS_tid_mtx);
+
+    /* If a prototype ID record was established, copy it to the heap. */
+    if (tid == &proto_tid) {
+        if ((tid = HDmalloc(sizeof(*tid))) != NULL)
+            *tid = proto_tid;
+    }
+
+    if (tid == NULL)
+        return 0;
+
+    /* Finish initializing the ID record and set a thread-local pointer
+     * to it.
+     */
+    tid->next = NULL;
+    if (pthread_setspecific(H5TS_tid_key, tid) != 0) {
+        H5TS_tid_destructor(tid);
+        return 0;
+    }
+
+    return tid->id;
+}
 
 /*--------------------------------------------------------------------------
  * NAME
@@ -89,12 +234,12 @@ H5TS_key_destructor(void *key_val)
 void
 H5TS_pthread_first_thread_init(void)
 {
-    H5_g.H5_libinit_g = FALSE;
-    
+    H5_g.H5_libinit_g = FALSE; /* Library hasn't been initialized */
+
 #ifdef H5_HAVE_WIN32_API
-# ifdef PTW32_STATIC_LIB
+#ifdef PTW32_STATIC_LIB
     pthread_win32_process_attach_np();
-# endif
+#endif
 #endif
 
     /* initialize global API mutex lock */
@@ -102,18 +247,23 @@ H5TS_pthread_first_thread_init(void)
     pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
     H5_g.init_lock.lock_count = 0;
 
+    /* Initialize integer thread identifiers. */
+    H5TS_tid_init();
+
     /* initialize key for thread-specific error stacks */
     pthread_key_create(&H5TS_errstk_key_g, H5TS_key_destructor);
 
     /* initialize key for thread-specific function stacks */
     pthread_key_create(&H5TS_funcstk_key_g, H5TS_key_destructor);
 
+    /* initialize key for thread-specific API contexts */
+    pthread_key_create(&H5TS_apictx_key_g, H5TS_key_destructor);
+
     /* initialize key for thread cancellability mechanism */
     pthread_key_create(&H5TS_cancel_key_g, H5TS_key_destructor);
 }
 #endif /* H5_HAVE_WIN_THREADS */
 
-
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_mutex_lock
@@ -137,33 +287,33 @@ H5TS_pthread_first_thread_init(void)
 herr_t
 H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
-#ifdef  H5_HAVE_WIN_THREADS
-    EnterCriticalSection( &mutex->CriticalSection); 
+#ifdef H5_HAVE_WIN_THREADS
+    EnterCriticalSection(&mutex->CriticalSection);
     return 0;
-#else /* H5_HAVE_WIN_THREADS */
+#else  /* H5_HAVE_WIN_THREADS */
     herr_t ret_value = pthread_mutex_lock(&mutex->atomic_lock);
 
     if (ret_value)
         return ret_value;
 
-    if(mutex->lock_count && pthread_equal(HDpthread_self(), mutex->owner_thread)) {
+    if (mutex->lock_count && pthread_equal(pthread_self(), mutex->owner_thread)) {
         /* already owned by self - increment count */
         mutex->lock_count++;
-    } else {
+    }
+    else {
         /* if owned by other thread, wait for condition signal */
-        while(mutex->lock_count)
+        while (mutex->lock_count)
             pthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
 
         /* After we've received the signal, take ownership of the mutex */
-        mutex->owner_thread = HDpthread_self();
-        mutex->lock_count = 1;
+        mutex->owner_thread = pthread_self();
+        mutex->lock_count   = 1;
     }
 
-    return pthread_mutex_unlock(&mutex->atomic_lock); 
+    return pthread_mutex_unlock(&mutex->atomic_lock);
 #endif /* H5_HAVE_WIN_THREADS */
 }
 
-
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_mutex_unlock
@@ -187,33 +337,32 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 herr_t
 H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 {
-#ifdef  H5_HAVE_WIN_THREADS
+#ifdef H5_HAVE_WIN_THREADS
     /* Releases ownership of the specified critical section object. */
     LeaveCriticalSection(&mutex->CriticalSection);
-    return 0; 
+    return 0;
 #else  /* H5_HAVE_WIN_THREADS */
     herr_t ret_value = pthread_mutex_lock(&mutex->atomic_lock);
 
-    if(ret_value)
+    if (ret_value)
         return ret_value;
 
     mutex->lock_count--;
 
     ret_value = pthread_mutex_unlock(&mutex->atomic_lock);
 
-    if(mutex->lock_count == 0) {
+    if (mutex->lock_count == 0) {
         int err;
 
         err = pthread_cond_signal(&mutex->cond_var);
-        if(err != 0)
+        if (err != 0)
             ret_value = err;
     } /* end if */
 
-    return ret_value; 
+    return ret_value;
 #endif /* H5_HAVE_WIN_THREADS */
 } /* H5TS_mutex_unlock */
 
-
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_cancel_count_inc
@@ -241,44 +390,43 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 herr_t
 H5TS_cancel_count_inc(void)
 {
-#ifdef  H5_HAVE_WIN_THREADS
+#ifdef H5_HAVE_WIN_THREADS
     /* unsupported; just return 0 */
     return SUCCEED;
-#else /* H5_HAVE_WIN_THREADS */
+#else  /* H5_HAVE_WIN_THREADS */
     H5TS_cancel_t *cancel_counter;
-    herr_t ret_value = SUCCEED; 
+    herr_t         ret_value = SUCCEED;
 
-    cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_g); 
+    cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_g);
 
     if (!cancel_counter) {
         /*
-   * First time thread calls library - create new counter and associate
-         * with key
+         * First time thread calls library - create new counter and associate
+         * with key.
+         *
+         * Don't use H5MM calls here since the destructor has to use HDfree in
+         * order to avoid codestack calls.
          */
-  cancel_counter = (H5TS_cancel_t *)H5MM_calloc(sizeof(H5TS_cancel_t));
+        cancel_counter = (H5TS_cancel_t *)HDcalloc(1, sizeof(H5TS_cancel_t));
 
-  if (!cancel_counter) {
-      H5E_push_stack(NULL, "H5TS_cancel_count_inc",
-         __FILE__, __LINE__, H5E_ERR_CLS_g, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
-      return FAIL;
-  }
+        if (!cancel_counter) {
+            HERROR(H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
+            return FAIL;
+        }
 
-        ret_value = pthread_setspecific(H5TS_cancel_key_g,
-          (void *)cancel_counter);
+        ret_value = pthread_setspecific(H5TS_cancel_key_g, (void *)cancel_counter);
     }
 
     if (cancel_counter->cancel_count == 0)
         /* thread entering library */
-        ret_value = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,
-             &cancel_counter->previous_state);
+        ret_value = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel_counter->previous_state);
 
     ++cancel_counter->cancel_count;
 
-    return ret_value; 
+    return ret_value;
 #endif /* H5_HAVE_WIN_THREADS */
 }
 
-
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_cancel_count_dec
@@ -304,25 +452,24 @@ H5TS_cancel_count_inc(void)
 herr_t
 H5TS_cancel_count_dec(void)
 {
-#ifdef  H5_HAVE_WIN_THREADS 
+#ifdef H5_HAVE_WIN_THREADS
     /* unsupported; will just return 0 */
     return SUCCEED;
-#else /* H5_HAVE_WIN_THREADS */
-    register H5TS_cancel_t *cancel_counter; 
-    herr_t ret_value = SUCCEED;
+#else  /* H5_HAVE_WIN_THREADS */
+    register H5TS_cancel_t *cancel_counter;
+    herr_t                  ret_value = SUCCEED;
 
-    cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_g); 
+    cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_g);
 
     if (cancel_counter->cancel_count == 1)
         ret_value = pthread_setcancelstate(cancel_counter->previous_state, NULL);
 
-    --cancel_counter->cancel_count; 
+    --cancel_counter->cancel_count;
 
     return ret_value;
 #endif /* H5_HAVE_WIN_THREADS */
 }
 
-
 #ifdef H5_HAVE_WIN_THREADS
 /*--------------------------------------------------------------------------
  * NAME
@@ -336,7 +483,7 @@ H5TS_cancel_count_dec(void)
  *
  *--------------------------------------------------------------------------
  */
-H5_DLL BOOL CALLBACK 
+H5_DLL BOOL CALLBACK
 H5TS_win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
 {
     BOOL ret_value = TRUE;
@@ -345,19 +492,21 @@ H5TS_win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
     InitializeCriticalSection(&H5_g.init_lock.CriticalSection);
 
     /* Set up thread local storage */
-    if(TLS_OUT_OF_INDEXES == (H5TS_errstk_key_g = TlsAlloc()))
+    if (TLS_OUT_OF_INDEXES == (H5TS_errstk_key_g = TlsAlloc()))
         ret_value = FALSE;
 
 #ifdef H5_HAVE_CODESTACK
-    if(TLS_OUT_OF_INDEXES == (H5TS_funcstk_key_g = TlsAlloc()))
+    if (TLS_OUT_OF_INDEXES == (H5TS_funcstk_key_g = TlsAlloc()))
         ret_value = FALSE;
 #endif /* H5_HAVE_CODESTACK */
+
+    if (TLS_OUT_OF_INDEXES == (H5TS_apictx_key_g = TlsAlloc()))
+        ret_value = FALSE;
 
     return ret_value;
 } /* H5TS_win32_process_enter() */
 #endif /* H5_HAVE_WIN_THREADS */
 
-
 #ifdef H5_HAVE_WIN_THREADS
 /*--------------------------------------------------------------------------
  * NAME
@@ -388,7 +537,6 @@ H5TS_win32_thread_enter(void)
 } /* H5TS_win32_thread_enter() */
 #endif /* H5_HAVE_WIN_THREADS */
 
-
 #ifdef H5_HAVE_WIN_THREADS
 /*--------------------------------------------------------------------------
  * NAME
@@ -418,16 +566,15 @@ H5TS_win32_process_exit(void)
 
     /* Clean up per-process thread local storage */
     TlsFree(H5TS_errstk_key_g);
-
 #ifdef H5_HAVE_CODESTACK
     TlsFree(H5TS_funcstk_key_g);
 #endif /* H5_HAVE_CODESTACK */
+    TlsFree(H5TS_apictx_key_g);
 
     return;
 } /* H5TS_win32_process_exit() */
 #endif /* H5_HAVE_WIN_THREADS */
 
-
 #ifdef H5_HAVE_WIN_THREADS
 /*--------------------------------------------------------------------------
  * NAME
@@ -457,20 +604,23 @@ H5TS_win32_thread_exit(void)
 
     /* Clean up per-thread thread local storage */
     lpvData = TlsGetValue(H5TS_errstk_key_g);
-    if(lpvData)
+    if (lpvData)
         LocalFree((HLOCAL)lpvData);
 
 #ifdef H5_HAVE_CODESTACK
     lpvData = TlsGetValue(H5TS_funcstk_key_g);
-    if(lpvData)
+    if (lpvData)
         LocalFree((HLOCAL)lpvData);
 #endif /* H5_HAVE_CODESTACK */
+
+    lpvData = TlsGetValue(H5TS_apictx_key_g);
+    if (lpvData)
+        LocalFree((HLOCAL)lpvData);
 
     return ret_value;
 } /* H5TS_win32_thread_exit() */
 #endif /* H5_HAVE_WIN_THREADS */
 
-
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_create_thread
@@ -491,7 +641,7 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 {
     H5TS_thread_t ret_value;
 
-#ifdef  H5_HAVE_WIN_THREADS 
+#ifdef H5_HAVE_WIN_THREADS
 
     /* When calling C runtime functions, you should use _beginthread or
      * _beginthreadex instead of CreateThread.  Threads created with
@@ -507,7 +657,7 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 
 #else /* H5_HAVE_WIN_THREADS */
 
-    pthread_create(&ret_value, attr, (void * (*)(void *))func, udata);
+    pthread_create(&ret_value, attr, (void *(*)(void *))func, udata);
 
 #endif /* H5_HAVE_WIN_THREADS */
 
@@ -515,4 +665,4 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 
 } /* H5TS_create_thread */
 
-#endif  /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE */

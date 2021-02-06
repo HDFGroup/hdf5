@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -22,8 +22,13 @@ include $(top_srcdir)/config/commence.am
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
-TEST_PROG=h5importtest
-TEST_SCRIPT=h5importtestutil.sh
+if BUILD_TESTS_CONDITIONAL
+	TEST_PROG=h5importtest
+	TEST_SCRIPT=h5importtestutil.sh
+else
+	TEST_PROG=
+	TEST_SCRIPT=
+endif
 
 check_PROGRAMS=$(TEST_PROG)
 check_SCRIPT=h5importtestutil.sh

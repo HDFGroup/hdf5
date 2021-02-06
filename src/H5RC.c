@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,17 +18,15 @@
  *
  */
 
-
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free lists                           */
-#include "H5RCprivate.h"        /* Reference-counted buffers            */
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free lists                           */
+#include "H5RCprivate.h" /* Reference-counted buffers            */
 
 /* Private typedefs & structs */
 
 /* Declare a free list to manage the H5RC_t struct */
 H5FL_DEFINE_STATIC(H5RC_t);
 
-
 /*--------------------------------------------------------------------------
  NAME
     H5RC_create
@@ -53,7 +51,7 @@ H5FL_DEFINE_STATIC(H5RC_t);
 H5RC_t *
 H5RC_create(void *o, H5RC_free_func_t free_func)
 {
-    H5RC_t *ret_value;   /* Return value */
+    H5RC_t *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -62,19 +60,18 @@ H5RC_create(void *o, H5RC_free_func_t free_func)
     HDassert(free_func);
 
     /* Allocate ref-counted string structure */
-    if(NULL == (ret_value = H5FL_MALLOC(H5RC_t)))
-        HGOTO_ERROR(H5E_RS,H5E_NOSPACE,NULL,"memory allocation failed")
+    if (NULL == (ret_value = H5FL_MALLOC(H5RC_t)))
+        HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set the internal fields */
-    ret_value->o = o;
-    ret_value->n = 1;
+    ret_value->o         = o;
+    ret_value->n         = 1;
     ret_value->free_func = free_func;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RC_create() */
 
-
 /*--------------------------------------------------------------------------
  NAME
     H5RC_decr
@@ -97,7 +94,7 @@ done:
 herr_t
 H5RC_decr(H5RC_t *rc)
 {
-    herr_t ret_value = SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -111,8 +108,8 @@ H5RC_decr(H5RC_t *rc)
     rc->n--;
 
     /* Check if we should delete this object now */
-    if(rc->n == 0) {
-        if((rc->free_func)(rc->o) < 0) {
+    if (rc->n == 0) {
+        if ((rc->free_func)(rc->o) < 0) {
             rc = H5FL_FREE(H5RC_t, rc);
             HGOTO_ERROR(H5E_RS, H5E_CANTFREE, FAIL, "memory release failed")
         } /* end if */
@@ -122,4 +119,3 @@ H5RC_decr(H5RC_t *rc)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RC_decr() */
-

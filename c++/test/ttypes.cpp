@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,16 +26,17 @@ using std::cerr;
 using std::endl;
 
 #include <string>
-#include "H5Cpp.h"      // C++ API header file
+#include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5cpputil.h"  // C++ utilility header file
+#include "h5test.h"
+#include "h5cpputil.h" // C++ utilility header file
 
 /*
  * Offset from alinged memory returned by malloc().  This can be used to test
  * that type conversions handle non-aligned buffers correctly.
  */
-#define ALIGNMENT       1
+#define ALIGNMENT 1
 
 /*
  * Define if you want to test alignment code on a machine that doesn't
@@ -50,32 +51,32 @@ using namespace H5;
 #define H5T_PACKAGE
 #include "H5Tpkg.h"
 #endif
-#define SET_ALIGNMENT(TYPE,VAL) \
-    H5T_NATIVE_##TYPE##_ALIGN_g=MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
+#define SET_ALIGNMENT(TYPE, VAL) H5T_NATIVE_##TYPE##_ALIGN_g = MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
 #endif
 
-const char *FILENAME[] = {
-    "dtypes1.h5",
-    "dtypes2.h5",
-    "dtypes3.h5",
-    NULL
-};
+const char *FILENAME[] = {"dtypes1.h5", "dtypes2.h5", "dtypes3.h5", NULL};
 
 /*
  * Count up or down depending on whether the machine is big endian or little
  * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
  * be I, otherwise the result will be Z-(I+1).
  */
-#define ENDIAN(Z,I)     (H5T_ORDER_BE==endian?(I):(Z)-((I)+1))
+#define ENDIAN(Z, I) (H5T_ORDER_BE == endian ? (I) : (Z) - ((I) + 1))
 
-
-typedef enum flt_t {
-    FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER
-} flt_t;
+typedef enum flt_t { FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER } flt_t;
 
 typedef enum int_t {
-    INT_CHAR, INT_UCHAR, INT_SHORT, INT_USHORT, INT_INT, INT_UINT,
-    INT_LONG, INT_ULONG, INT_LLONG, INT_ULLONG, INT_OTHER
+    INT_CHAR,
+    INT_UCHAR,
+    INT_SHORT,
+    INT_USHORT,
+    INT_INT,
+    INT_UINT,
+    INT_LONG,
+    INT_ULONG,
+    INT_LLONG,
+    INT_ULLONG,
+    INT_OTHER
 } int_t;
 
 typedef struct {
@@ -84,7 +85,7 @@ typedef struct {
     long   c;
     double d;
 } src_typ_t;
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_classes
  *
@@ -97,7 +98,8 @@ typedef struct {
  *
  *-------------------------------------------------------------------------
  */
-static void test_classes()
+static void
+test_classes()
 {
     SUBTEST("PredType::getClass()");
     try {
@@ -105,23 +107,23 @@ static void test_classes()
 
         // PredType::NATIVE_INT should be in H5T_INTEGER class
         H5T_class_t tcls = PredType::NATIVE_INT.getClass();
-        if (H5T_INTEGER!=tcls) {
+        if (H5T_INTEGER != tcls) {
             puts("    Invalid type class for H5T_NATIVE_INT");
         }
 
         // PredType::NATIVE_DOUBLE should be in H5T_FLOAT class
         tcls = PredType::NATIVE_DOUBLE.getClass();
-        if (H5T_FLOAT!=tcls) {
-        verify_val(tcls, H5T_FLOAT, "test_class: invalid type class for NATIVE_DOUBLE -", __LINE__, __FILE__);
+        if (H5T_FLOAT != tcls) {
+            verify_val(tcls, H5T_FLOAT, "test_class: invalid type class for NATIVE_DOUBLE -", __LINE__,
+                       __FILE__);
         }
         PASSED();
-    }   // end of try block
-    catch (Exception& E)
-    {
+    } // end of try block
+    catch (Exception &E) {
         issue_fail_msg("test_classes", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy
  *
@@ -134,7 +136,8 @@ static void test_classes()
  *
  *-------------------------------------------------------------------------
  */
-static void test_copy()
+static void
+test_copy()
 {
     SUBTEST("DataType::copy() and DataType::operator=");
     try {
@@ -144,7 +147,7 @@ static void test_copy()
 
         // Test copying a predefined type using DataType::copy
         DataType copied_type;
-        copied_type.copy (PredType::STD_B8LE);
+        copied_type.copy(PredType::STD_B8LE);
 
         // Test copying a user-defined type using DataType::operator=
         DataType assigned_usertype;
@@ -155,7 +158,7 @@ static void test_copy()
         copied_usertype.copy(copied_type);
 
         // Test copying a user-defined int type using DataType::operator=
-        IntType orig_int(PredType::STD_B8LE);
+        IntType  orig_int(PredType::STD_B8LE);
         DataType generic_type;
         generic_type = orig_int;
 
@@ -168,13 +171,11 @@ static void test_copy()
 
         PASSED();
     }
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_copy", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_query
  *
@@ -191,14 +192,14 @@ static void test_copy()
 const H5std_string CompT_NAME("Compound_type");
 const H5std_string EnumT_NAME("Enum_type");
 
-static void test_query()
+static void
+test_query()
 {
-    short       enum_val;
+    short enum_val;
 
     // Output message about test being performed
     SUBTEST("Query functions of compound and enumeration types");
-    try
-    {
+    try {
         // Create File
         H5File file(FILENAME[2], H5F_ACC_TRUNC);
 
@@ -213,11 +214,11 @@ static void test_query()
         // Create a enumerate datatype
         EnumType tid2(sizeof(short));
 
-        tid2.insert("RED", (enum_val=0,&enum_val));
-        tid2.insert("GREEN", (enum_val=1,&enum_val));
-        tid2.insert("BLUE", (enum_val=2,&enum_val));
-        tid2.insert("ORANGE", (enum_val=3,&enum_val));
-        tid2.insert("YELLOW", (enum_val=4,&enum_val));
+        tid2.insert("RED", (enum_val = 0, &enum_val));
+        tid2.insert("GREEN", (enum_val = 1, &enum_val));
+        tid2.insert("BLUE", (enum_val = 2, &enum_val));
+        tid2.insert("ORANGE", (enum_val = 3, &enum_val));
+        tid2.insert("YELLOW", (enum_val = 4, &enum_val));
 
         // Query member number and member index by name, for compound type
         int nmembs = tid1.getNmembers();
@@ -237,10 +238,10 @@ static void test_query()
         // prop list, then close it
         tid1.commit(file, CompT_NAME);
         PropList tcpl = tid1.getCreatePlist();
-        if (!IdComponent::isValid(tcpl.getId()))
-        {
+        if (!IdComponent::isValid(tcpl.getId())) {
             // Throw an invalid action exception
-            throw InvalidActionException("IdComponent::isValid", "Datatype creation property list is not valid");
+            throw InvalidActionException("IdComponent::isValid",
+                                         "Datatype creation property list is not valid");
         }
         tcpl.close();
         tid1.close();
@@ -249,10 +250,10 @@ static void test_query()
         // prop list, then close it
         tid2.commit(file, EnumT_NAME);
         tcpl = tid2.getCreatePlist();
-        if (!IdComponent::isValid(tcpl.getId()))
-        {
+        if (!IdComponent::isValid(tcpl.getId())) {
             // Throw an invalid action exception
-            throw InvalidActionException("IdComponent::isValid", "Datatype creation property list is not valid");
+            throw InvalidActionException("IdComponent::isValid",
+                                         "Datatype creation property list is not valid");
         }
         tcpl.close();
         tid2.close();
@@ -285,14 +286,12 @@ static void test_query()
         H5File file1(FILENAME[2], H5F_ACC_TRUNC);
 
         PASSED();
-    }   // end of try block
-    catch (Exception& E)
-    {
+    } // end of try block
+    catch (Exception &E) {
         issue_fail_msg("test_query", __LINE__, __FILE__, E.getCDetailMsg());
     }
-}   // test_query
+} // test_query
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_transient
  *
@@ -305,16 +304,17 @@ static void test_query()
  *
  *-------------------------------------------------------------------------
  */
-const char* filename1 = "dtypes1.h5";
-static void test_transient ()
+const char *filename1 = "dtypes1.h5";
+static void
+test_transient()
 {
-    static hsize_t      ds_size[2] = {10, 20};
+    static hsize_t ds_size[2] = {10, 20};
 
     SUBTEST("Transient datatypes");
     try {
 
         // Create the file and the dataspace.
-        H5File file(filename1, H5F_ACC_TRUNC);
+        H5File    file(filename1, H5F_ACC_TRUNC);
         DataSpace space(2, ds_size, ds_size);
 
         // Copying a predefined type results in a modifiable copy
@@ -325,8 +325,11 @@ static void test_transient ()
         try {
             Attribute attr(type.createAttribute("attr1", PredType::NATIVE_INT, space));
             // Should FAIL but didn't, so throw an invalid action exception
-            throw InvalidActionException("H5Object::createAttribute", "Attempted to commit a predefined datatype.");
-        } catch (AttributeIException& err) {}  // do nothing, failure expected
+            throw InvalidActionException("H5Object::createAttribute",
+                                         "Attempted to commit a predefined datatype.");
+        }
+        catch (AttributeIException &err) {
+        } // do nothing, failure expected
 
         // Create a dataset from a transient datatype
         // type.close(); - put trace in H5Tclose to make sure it's closed
@@ -339,8 +342,11 @@ static void test_transient ()
             itype.setPrecision(256);
 
             // Should FAIL but didn't, so throw an invalid action exception
-            throw InvalidActionException("PredType::setPrecision", "Dataset datatypes should not be modifiable!");
-        } catch (DataTypeIException& err) {}
+            throw InvalidActionException("PredType::setPrecision",
+                                         "Dataset datatypes should not be modifiable!");
+        }
+        catch (DataTypeIException &err) {
+        }
         itype.close();
 
         // Get a copy of the dataset's datatype by applying DataType::copy()
@@ -360,14 +366,12 @@ static void test_transient ()
         type.close();
         space.close();
         PASSED();
-    }   // end of try block
-    catch (Exception& E)
-    {
+    } // end of try block
+    catch (Exception &E) {
         issue_fail_msg("test_transient", __LINE__, __FILE__, E.getCDetailMsg());
     }
-}   // test_transient
+} // test_transient
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_named
  *
@@ -381,12 +385,13 @@ static void test_transient ()
  *-------------------------------------------------------------------------
  */
 const H5std_string filename2("dtypes2.h5");
-static void test_named ()
+static void
+test_named()
 {
-    static hsize_t      ds_size[2] = {10, 20};
-    hsize_t             i;
-    unsigned            attr_data[10][20];
-    DataType           *ds_type = NULL;
+    static hsize_t ds_size[2] = {10, 20};
+    hsize_t        i;
+    unsigned       attr_data[10][20];
+    DataType *     ds_type = NULL;
 
     SUBTEST("Named datatypes");
     try {
@@ -403,15 +408,16 @@ static void test_named ()
 
             // Should FAIL but didn't, so throw an invalid action exception
             throw InvalidActionException("PredType::commit", "Attempted to commit a predefined datatype.");
-        } catch (DataTypeIException& err) {}
+        }
+        catch (DataTypeIException &err) {
+        }
 
         // Copy a predefined datatype and commit the copy.
         IntType itype(PredType::NATIVE_INT);
         itype.commit(file, "native-int");
 
         // Test commit passing in const H5File& for prototype with const
-        try
-        {
+        try {
             // Create random char type
             IntType atype(PredType::NATIVE_UCHAR);
 
@@ -421,9 +427,8 @@ static void test_named ()
             // Commit type passing in const group; compilation would fail if
             // no matching prototype
             atype.commit(const_grp, "random uchar");
-        }   // end of try block
-        catch (Exception& E)
-        {
+        } // end of try block
+        catch (Exception &E) {
             issue_fail_msg("test_named", __LINE__, __FILE__, "Commit at const group");
         }
 
@@ -433,11 +438,14 @@ static void test_named ()
 
         // We should not be able to modify a type after it has been committed.
         try {
-            itype.setPrecision(256);    // attempt an invalid action...
+            itype.setPrecision(256); // attempt an invalid action...
 
             // Should FAIL but didn't, so throw an invalid action exception
-            throw InvalidActionException("IntType::setPrecision", "Attempted to modify a committed datatype.");
-        } catch (DataTypeIException& err) {}
+            throw InvalidActionException("IntType::setPrecision",
+                                         "Attempted to modify a committed datatype.");
+        }
+        catch (DataTypeIException &err) {
+        }
 
         // We should not be able to re-commit a committed type
         try {
@@ -445,12 +453,14 @@ static void test_named ()
 
             // Should FAIL but didn't, so throw an invalid action exception
             throw InvalidActionException("IntType::commit", "Attempted to re-commit a committed datatype.");
-        } catch (DataTypeIException& err) {} // do nothing, failure expected
+        }
+        catch (DataTypeIException &err) {
+        } // do nothing, failure expected
 
         // It should be possible to define an attribute for the named type
         Attribute attr1 = itype.createAttribute("attr1", PredType::NATIVE_UCHAR, space);
-        for (i=0; i<ds_size[0]*ds_size[1]; i++)
-            attr_data[0][i] = (int)i;/*tricky*/
+        for (i = 0; i < ds_size[0] * ds_size[1]; i++)
+            attr_data[0][i] = (int)i; /*tricky*/
         attr1.write(PredType::NATIVE_UINT, attr_data);
         attr1.close();
 
@@ -459,13 +469,15 @@ static void test_named ()
         IntType trans_type;
         trans_type.copy(itype);
         bool iscommitted = trans_type.committed();
-        verify_val(iscommitted, 0, "DataType::committed() - Copying a named type should result in a transient type!", __LINE__, __FILE__);
+        verify_val(iscommitted, 0,
+                   "DataType::committed() - Copying a named type should result in a transient type!",
+                   __LINE__, __FILE__);
         trans_type.setPrecision(256);
         trans_type.close();
 
         // Close the committed type and reopen it.  It should be a named type.
         itype.close();
-        itype = file.openIntType("native-int");
+        itype       = file.openIntType("native-int");
         iscommitted = itype.committed();
         if (!iscommitted)
             throw InvalidActionException("IntType::committed()", "Opened named types should be named types!");
@@ -473,8 +485,8 @@ static void test_named ()
         // Create a dataset that uses the named type, then get the dataset's
         // datatype and make sure it's a named type.
         DataSet dset = file.createDataSet("dset1", itype, space);
-        ds_type = new DataType(dset.getDataType());
-        iscommitted = ds_type->committed();
+        ds_type      = new DataType(dset.getDataType());
+        iscommitted  = ds_type->committed();
         if (!iscommitted)
             throw InvalidActionException("IntType::committed()", "Dataset type should be named type!");
         dset.close();
@@ -483,8 +495,8 @@ static void test_named ()
 
         // Reopen the dataset and its type, then make sure the type is
         // a named type.
-        dset = file.openDataSet("dset1");
-        ds_type = new DataType(dset.getDataType());
+        dset        = file.openDataSet("dset1");
+        ds_type     = new DataType(dset.getDataType());
         iscommitted = ds_type->committed();
         if (!iscommitted)
             throw InvalidActionException("IntType::committed()", "Dataset type should be named type!");
@@ -498,8 +510,8 @@ static void test_named ()
         delete ds_type;
 
         // Reopen the second dataset and make sure the type is shared
-        dset = file.openDataSet("dset2");
-        ds_type = new DataType(dset.getDataType());
+        dset        = file.openDataSet("dset2");
+        ds_type     = new DataType(dset.getDataType());
         iscommitted = ds_type->committed();
         if (!iscommitted)
             throw InvalidActionException("DataType::iscommitted()", "Dataset type should be named type!");
@@ -518,17 +530,15 @@ static void test_named ()
         space.close();
         file.close();
         PASSED();
-    }   // end of try block
-    catch (Exception& E)
-    {
+    } // end of try block
+    catch (Exception &E) {
         issue_fail_msg("test_named", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if(ds_type)
+    if (ds_type)
         delete ds_type;
-}   // test_named
+} // test_named
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_encode_decode
  *
@@ -542,11 +552,12 @@ static void test_named ()
  *-------------------------------------------------------------------------
  */
 const H5std_string filename3("encode_decode.h5");
-const int ARRAY1_RANK = 1;
-const int ARRAY1_DIM = 10;
-static void test_encode_decode()
+const int          ARRAY1_RANK = 1;
+const int          ARRAY1_DIM  = 10;
+static void
+test_encode_decode()
 {
-    short        enum_val;
+    short enum_val;
 
     SUBTEST("DataType::encode() and DataType::decode()");
     try {
@@ -572,7 +583,7 @@ static void test_encode_decode()
         verify_val(cmptyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
 
         // Decode compound type's buffer to a new CompType
-        CompType* decoded_cmp_ptr(static_cast<CompType *>(cmptyp.decode()));
+        CompType *decoded_cmp_ptr(static_cast<CompType *>(cmptyp.decode()));
 
         // Verify that the datatype was copied exactly via encoding/decoding
         verify_val(cmptyp == *decoded_cmp_ptr, true, "DataType::decode", __LINE__, __FILE__);
@@ -596,11 +607,11 @@ static void test_encode_decode()
         // Create a enumerate datatype
         EnumType enumtyp(sizeof(short));
 
-        enumtyp.insert("RED", (enum_val=0,&enum_val));
-        enumtyp.insert("GREEN", (enum_val=1,&enum_val));
-        enumtyp.insert("BLUE", (enum_val=2,&enum_val));
-        enumtyp.insert("ORANGE", (enum_val=3,&enum_val));
-        enumtyp.insert("YELLOW", (enum_val=4,&enum_val));
+        enumtyp.insert("RED", (enum_val = 0, &enum_val));
+        enumtyp.insert("GREEN", (enum_val = 1, &enum_val));
+        enumtyp.insert("BLUE", (enum_val = 2, &enum_val));
+        enumtyp.insert("ORANGE", (enum_val = 3, &enum_val));
+        enumtyp.insert("YELLOW", (enum_val = 4, &enum_val));
 
         // Encode compound type in a buffer
         enumtyp.encode();
@@ -609,7 +620,7 @@ static void test_encode_decode()
         verify_val(enumtyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
 
         // Decode enumeration type's buffer to a new EnumType
-        EnumType* decoded_enum_ptr(static_cast<EnumType *>(enumtyp.decode()));
+        EnumType *decoded_enum_ptr(static_cast<EnumType *>(enumtyp.decode()));
 
         // Verify that the datatype was copied exactly via encoding/decoding
         verify_val(enumtyp == *decoded_enum_ptr, true, "DataType::decode", __LINE__, __FILE__);
@@ -641,7 +652,7 @@ static void test_encode_decode()
         verify_val(vlsttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
 
         // Decode the variable-length type's buffer to a new StrType
-        StrType* decoded_str_ptr(static_cast<StrType *>(vlsttyp.decode()));
+        StrType *decoded_str_ptr(static_cast<StrType *>(vlsttyp.decode()));
 
         verify_val(vlsttyp == *decoded_str_ptr, true, "DataType::decode", __LINE__, __FILE__);
         verify_val(decoded_str_ptr->isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
@@ -651,7 +662,7 @@ static void test_encode_decode()
         // Test decoding the type by way of DataType*
 
         // Decode variable-length string type to a new DataType
-        DataType* decoded_vlstr_ptr(vlsttyp.decode());
+        DataType *decoded_vlstr_ptr(vlsttyp.decode());
 
         // Create a StrType instance from the DataType object and verify it
         StrType decoded_vlsttyp(decoded_vlstr_ptr->getId());
@@ -676,7 +687,7 @@ static void test_encode_decode()
         verify_val(arrtyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
 
         // Create an ArrayType instance from the decoded pointer and verify it
-        ArrayType* decoded_arr_ptr(static_cast<ArrayType *>(arrtyp.decode()));
+        ArrayType *decoded_arr_ptr(static_cast<ArrayType *>(arrtyp.decode()));
 
         verify_val(arrtyp == *decoded_arr_ptr, true, "DataType::decode", __LINE__, __FILE__);
 
@@ -708,7 +719,7 @@ static void test_encode_decode()
         verify_val(inttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
 
         // Create an IntType instance from the decoded pointer and verify it
-        IntType* decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
+        IntType *  decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
         H5T_sign_t int_sign = decoded_int_ptr->getSign();
         verify_val(int_sign, H5T_SGN_NONE, "DataType::decode", __LINE__, __FILE__);
         verify_val(inttyp == *decoded_int_ptr, true, "DataType::decode", __LINE__, __FILE__);
@@ -729,34 +740,32 @@ static void test_encode_decode()
         verify_val(flttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
 
         // Decode the array type's buffer
-        DataType* decoded_flt_ptr(flttyp.decode());
+        DataType *decoded_flt_ptr(flttyp.decode());
 
         // Create a IntType instance from the decoded pointer and verify it
         FloatType decoded_flttyp(decoded_flt_ptr->getId());
         verify_val(flttyp == decoded_flttyp, true, "DataType::decode", __LINE__, __FILE__);
 
-        H5std_string norm_string;
-        H5T_norm_t mant_norm = decoded_flttyp.getNorm(norm_string);
-        //verify_val(decoded_flttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
+        // H5std_string norm_string;
+        // H5T_norm_t mant_norm = decoded_flttyp.getNorm(norm_string);
+        // verify_val(decoded_flttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
 
         delete decoded_flt_ptr;
 
         PASSED();
     }
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_encode_decode", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
 
-
 /****************************************************************
 **
 **  test_types(): Main datatypes testing routine.
 **
 ****************************************************************/
-extern "C"
-void test_types()
+extern "C" void
+test_types()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Generic Data Types\n"));
@@ -769,9 +778,8 @@ void test_types()
     test_named();
     test_encode_decode();
 
-}   // test_types()
+} // test_types()
 
-
 /*-------------------------------------------------------------------------
  * Function:    cleanup_types
  *
@@ -784,9 +792,9 @@ void test_types()
  *
  *-------------------------------------------------------------------------
  */
-extern "C"
-void cleanup_types()
+extern "C" void
+cleanup_types()
 {
     for (int i = 0; i < 3; i++)
         HDremove(FILENAME[i]);
-}  // cleanup_types
+} // cleanup_types

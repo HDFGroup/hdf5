@@ -17,7 +17,7 @@
 !  function SIZEOF is available. It generates code that makes use of SIZEOF in
 !  H5fortran_detect.f90 which is a portable solution but is not standard
 !  compliant. The program H5test_kind_C_SIZEOF uses F2008 standard intrinsic
-!  function instead, which is the preferred method. 
+!  function instead, which is the preferred method.
 !
 !  The availability of SIZEOF is checked at configure time and the TRUE/FALSE
 !  condition is set in the configure variable "FORTRAN_HAVE_SIZEOF".
@@ -31,7 +31,7 @@
 !  This file is part of HDF5.  The full HDF5 copyright notice, including       *
 !  terms governing use, modification, and redistribution, is contained in      *
 !  the COPYING file, which can be found at the root of the source code         *
-!  distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.    *
+!  distribution tree, or in https://www.hdfgroup.org/licenses.                 *
 !  If you do not have access to either file, you may request a copy from       *
 !  help@hdfgroup.org.                                                          *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -104,7 +104,7 @@ WRITE(*,'(40(A,/))') &
 '!   This file is part of HDF5.  The full HDF5 copyright notice, including     *',&
 '!   terms governing use, modification, and redistribution, is contained in    *',&
 '!   the COPYING file, which can be found at the root of the source code       *',&
-'!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *',&
+'!   distribution tree, or in https://www.hdfgroup.org/licenses.               *',&
 '!   If you do not have access to either file, you may request a copy from     *',&
 '!   help@hdfgroup.org.                                                        *',&
 '! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&

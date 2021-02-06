@@ -7,7 +7,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -27,89 +27,99 @@ namespace H5 {
 */
 //  Inheritance: multiple H5Location/AbstractDs
 class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
-   public:
+  public:
+    // Copy constructor: makes a copy of an existing Attribute object.
+    Attribute(const Attribute &original);
 
-        // Copy constructor: makes a copy of an existing Attribute object.
-        Attribute(const Attribute& original);
+    // Default constructor
+    Attribute();
 
-        // Default constructor
-        Attribute();
+    // Creates a copy of an existing attribute using the attribute id
+    Attribute(const hid_t attr_id);
 
-        // Creates a copy of an existing attribute using the attribute id
-        Attribute(const hid_t attr_id);
+    // Closes this attribute.
+    virtual void close();
 
-        // Closes this attribute.
-        virtual void close();
+    // Gets the name of this attribute.
+    ssize_t      getName(char *attr_name, size_t buf_size = 0) const;
+    H5std_string getName(size_t len) const;
+    H5std_string getName() const;
+    ssize_t      getName(H5std_string &attr_name, size_t len = 0) const;
+    // The overloaded function below is replaced by the one above and it
+    // is kept for backward compatibility purpose.  Removed in 1.8.21.
+    // ssize_t getName(size_t buf_size, H5std_string& attr_name) const;
 
-        // Gets the name of this attribute.
-        ssize_t getName(char* attr_name, size_t buf_size = 0) const;
-        H5std_string getName(size_t len) const;
-        H5std_string getName() const;
-        ssize_t getName(H5std_string& attr_name, size_t len = 0) const;
-        // The overloaded function below is replaced by the one above and it
-        // is kept for backward compatibility purpose.  Removed in 1.8.21.
-        // ssize_t getName(size_t buf_size, H5std_string& attr_name) const;
+    // Gets a copy of the dataspace for this attribute.
+    virtual DataSpace getSpace() const;
 
-        // Gets a copy of the dataspace for this attribute.
-        virtual DataSpace getSpace() const;
+    // Returns the amount of storage size required for this attribute.
+    virtual hsize_t getStorageSize() const;
 
-        // Returns the amount of storage size required for this attribute.
-        virtual hsize_t getStorageSize() const;
+    // Returns the in memory size of this attribute's data.
+    virtual size_t getInMemDataSize() const;
 
-        // Returns the in memory size of this attribute's data.
-        virtual size_t getInMemDataSize() const;
+    // Reads data from this attribute.
+    void read(const DataType &mem_type, void *buf) const;
+    void read(const DataType &mem_type, H5std_string &strg) const;
 
-        // Reads data from this attribute.
-        void read(const DataType& mem_type, void *buf) const;
-        void read(const DataType& mem_type, H5std_string& strg) const;
+    // Writes data to this attribute.
+    void write(const DataType &mem_type, const void *buf) const;
+    void write(const DataType &mem_type, const H5std_string &strg) const;
 
-        // Writes data to this attribute.
-        void write(const DataType& mem_type, const void *buf) const;
-        void write(const DataType& mem_type, const H5std_string& strg) const;
+    // Flushes all buffers associated with the file specified by this
+    // attribute to disk.
+    void flush(H5F_scope_t scope) const;
 
-        // Flushes all buffers associated with the file specified by this
-        // attribute to disk.
-        void flush(H5F_scope_t scope) const;
+    ///\brief Returns this class name.
+    virtual H5std_string
+    fromClass() const
+    {
+        return ("Attribute");
+    }
 
-        ///\brief Returns this class name.
-        virtual H5std_string fromClass () const { return("Attribute"); }
+    // Gets the attribute id.
+    virtual hid_t getId() const;
 
-        // Gets the attribute id.
-        virtual hid_t getId() const;
+    // Throw group exception.
+    virtual void throwException(const H5std_string &func_name, const H5std_string &msg) const;
 
-        // Throw group exception.
-        virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
-
-        // Destructor: properly terminates access to this attribute.
-        virtual ~Attribute();
+    // Destructor: properly terminates access to this attribute.
+    virtual ~Attribute();
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-   protected:
-        // Sets the attribute id.
-        virtual void p_setId(const hid_t new_id);
+  protected:
+    // Sets the attribute id.
+    virtual void p_setId(const hid_t new_id);
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-   private:
-        hid_t id;       // HDF5 attribute id
+  private:
+    hid_t id; // HDF5 attribute id
 
-        // This function contains the common code that is used by
-        // getTypeClass and various API functions getXxxType
-        // defined in AbstractDs for generic datatype and specific
-        // sub-types
-        virtual hid_t p_get_type() const;
+    // This function contains the common code that is used by
+    // getTypeClass and various API functions getXxxType
+    // defined in AbstractDs for generic datatype and specific
+    // sub-types
+    virtual hid_t p_get_type() const;
 
-        // Reads variable or fixed len strings from this attribute.
-        void p_read_variable_len(const DataType& mem_type, H5std_string& strg) const;
-        void p_read_fixed_len(const DataType& mem_type, H5std_string& strg) const;
+    // Reads variable or fixed len strings from this attribute.
+    void p_read_variable_len(const DataType &mem_type, H5std_string &strg) const;
+    void p_read_fixed_len(const DataType &mem_type, H5std_string &strg) const;
 
-        // do not inherit H5Object::iterateAttrs
-        int iterateAttrs() { return 0; }
+    // do not inherit H5Object::iterateAttrs
+    int
+    iterateAttrs()
+    {
+        return 0;
+    }
 
-        // do not inherit H5Object::renameAttr
-        void renameAttr() {}
+    // do not inherit H5Object::renameAttr
+    void
+    renameAttr()
+    {
+    }
 
-        // Friend function to set Attribute id.  For library use only.
-        friend void f_Attribute_setId(Attribute* attr, hid_t new_id);
+    // Friend function to set Attribute id.  For library use only.
+    friend void f_Attribute_setId(Attribute *attr, hid_t new_id);
 
 }; // end of Attribute
 } // namespace H5

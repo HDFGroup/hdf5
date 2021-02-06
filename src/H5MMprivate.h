@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,11 +15,9 @@
  *
  * Created:             H5MMprivate.h
  *                      Jul 10 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Private header for memory management.
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -31,7 +29,7 @@
 /* Private headers needed by this file */
 #include "H5private.h"
 
-#define H5MM_free(Z)	HDfree(Z)
+#define H5MM_free(Z) HDfree(Z)
 
 /*
  * Library prototypes...
@@ -43,4 +41,4 @@ H5_DLL char *H5MM_xstrdup(const char *s);
 H5_DLL char *H5MM_strdup(const char *s);
 H5_DLL void *H5MM_xfree(void *mem);
 
-#endif
+#endif /* _H5MMprivate_H */

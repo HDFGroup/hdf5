@@ -22,7 +22,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -104,11 +104,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = testh5repack_detect_szip$(EXEEXT)
-@HAVE_SHARED_CONDITIONAL_TRUE@@USE_PLUGINS_CONDITIONAL_TRUE@am__append_1 = h5repack_plugin.sh
+@BUILD_TESTS_CONDITIONAL_TRUE@noinst_PROGRAMS = testh5repack_detect_szip$(EXEEXT)
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@USE_PLUGINS_CONDITIONAL_TRUE@am__append_1 = h5repack_plugin.sh
 check_PROGRAMS = $(am__EXEEXT_1)
 bin_PROGRAMS = h5repack$(EXEEXT)
-TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
+TESTS = $(am__EXEEXT_1) $(am__EXEEXT_2)
 subdir = tools/h5repack
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
@@ -123,7 +123,7 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdynlibadd_la_LIBADD =
 am__libdynlibadd_la_SOURCES_DIST = dynlib_rpk.c
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibadd_la_OBJECTS = dynlib_rpk.lo
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibadd_la_OBJECTS = dynlib_rpk.lo
 libdynlibadd_la_OBJECTS = $(am_libdynlibadd_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -133,18 +133,19 @@ libdynlibadd_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(AM_CFLAGS) $(CFLAGS) $(libdynlibadd_la_LDFLAGS) $(LDFLAGS) \
 	-o $@
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibadd_la_rpath =
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibadd_la_rpath =
 libdynlibvers_la_LIBADD =
 am__libdynlibvers_la_SOURCES_DIST = dynlib_vrpk.c
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibvers_la_OBJECTS = dynlib_vrpk.lo
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibvers_la_OBJECTS = dynlib_vrpk.lo
 libdynlibvers_la_OBJECTS = $(am_libdynlibvers_la_OBJECTS)
 libdynlibvers_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(AM_CFLAGS) $(CFLAGS) $(libdynlibvers_la_LDFLAGS) $(LDFLAGS) \
 	-o $@
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibvers_la_rpath =
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibvers_la_rpath =
 am__installdirs = "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 = h5repacktst$(EXEEXT)
+@BUILD_TESTS_CONDITIONAL_TRUE@am__EXEEXT_1 = h5repacktst$(EXEEXT) \
+@BUILD_TESTS_CONDITIONAL_TRUE@	h5repackgentest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am__objects_1 = h5repack.$(OBJEXT) h5repack_copy.$(OBJEXT) \
 	h5repack_filters.$(OBJEXT) h5repack_opttable.$(OBJEXT) \
@@ -153,21 +154,45 @@ am__objects_1 = h5repack.$(OBJEXT) h5repack_copy.$(OBJEXT) \
 am_h5repack_OBJECTS = $(am__objects_1) h5repack_main.$(OBJEXT)
 h5repack_OBJECTS = $(am_h5repack_OBJECTS)
 h5repack_LDADD = $(LDADD)
-h5repack_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_FALSE@h5repack_DEPENDENCIES = $(LIBH5TOOLS) \
+@BUILD_TESTS_CONDITIONAL_FALSE@	$(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@h5repack_DEPENDENCIES = $(LIBH5TOOLS) \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBH5TEST) $(LIBHDF5)
 h5repack_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5repack_LDFLAGS) $(LDFLAGS) -o $@
-am_h5repacktst_OBJECTS = $(am__objects_1) h5repacktst.$(OBJEXT)
+h5repackgentest_SOURCES = h5repackgentest.c
+h5repackgentest_OBJECTS = h5repackgentest.$(OBJEXT)
+h5repackgentest_LDADD = $(LDADD)
+@BUILD_TESTS_CONDITIONAL_FALSE@h5repackgentest_DEPENDENCIES =  \
+@BUILD_TESTS_CONDITIONAL_FALSE@	$(LIBH5TOOLS) $(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@h5repackgentest_DEPENDENCIES =  \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBH5TOOLS) $(LIBH5TEST) \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBHDF5)
+am__h5repacktst_SOURCES_DIST = h5repack.c h5repack_copy.c \
+	h5repack_filters.c h5repack_opttable.c h5repack_parse.c \
+	h5repack_refs.c h5repack_verify.c h5repacktst.c
+@BUILD_TESTS_CONDITIONAL_TRUE@am_h5repacktst_OBJECTS =  \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(am__objects_1) \
+@BUILD_TESTS_CONDITIONAL_TRUE@	h5repacktst.$(OBJEXT)
 h5repacktst_OBJECTS = $(am_h5repacktst_OBJECTS)
 h5repacktst_LDADD = $(LDADD)
-h5repacktst_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-am_testh5repack_detect_szip_OBJECTS =  \
-	testh5repack_detect_szip.$(OBJEXT)
+@BUILD_TESTS_CONDITIONAL_FALSE@h5repacktst_DEPENDENCIES =  \
+@BUILD_TESTS_CONDITIONAL_FALSE@	$(LIBH5TOOLS) $(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@h5repacktst_DEPENDENCIES =  \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBH5TOOLS) $(LIBH5TEST) \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBHDF5)
+am__testh5repack_detect_szip_SOURCES_DIST =  \
+	testh5repack_detect_szip.c
+@BUILD_TESTS_CONDITIONAL_TRUE@am_testh5repack_detect_szip_OBJECTS = testh5repack_detect_szip.$(OBJEXT)
 testh5repack_detect_szip_OBJECTS =  \
 	$(am_testh5repack_detect_szip_OBJECTS)
 testh5repack_detect_szip_LDADD = $(LDADD)
-testh5repack_detect_szip_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) \
-	$(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_FALSE@testh5repack_detect_szip_DEPENDENCIES =  \
+@BUILD_TESTS_CONDITIONAL_FALSE@	$(LIBH5TOOLS) $(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@testh5repack_detect_szip_DEPENDENCIES =  \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBH5TOOLS) $(LIBH5TEST) \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBHDF5)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -203,11 +228,12 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libdynlibadd_la_SOURCES) $(libdynlibvers_la_SOURCES) \
-	$(h5repack_SOURCES) $(h5repacktst_SOURCES) \
+	$(h5repack_SOURCES) h5repackgentest.c $(h5repacktst_SOURCES) \
 	$(testh5repack_detect_szip_SOURCES)
 DIST_SOURCES = $(am__libdynlibadd_la_SOURCES_DIST) \
 	$(am__libdynlibvers_la_SOURCES_DIST) $(h5repack_SOURCES) \
-	$(h5repacktst_SOURCES) $(testh5repack_detect_szip_SOURCES)
+	h5repackgentest.c $(am__h5repacktst_SOURCES_DIST) \
+	$(am__testh5repack_detect_szip_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -416,6 +442,8 @@ am__set_TESTS_bases = \
   bases=`echo $$bases`
 RECHECK_LOGS = $(TEST_LOGS)
 AM_RECURSIVE_TARGETS = check recheck
+@BUILD_TESTS_CONDITIONAL_TRUE@am__EXEEXT_2 = h5repack.sh \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(am__append_1)
 TEST_SUITE_LOG = test-suite.log
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
 LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
@@ -449,12 +477,13 @@ AMTAR = @AMTAR@
 # AM_CFLAGS is an automake construct which should be used by Makefiles 
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
-AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
+AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@ @H5_ECFLAGS@
 
 # Include src, test, and tools/lib directories
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
-	-I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
-AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+	-I$(top_srcdir)/test -I$(top_srcdir)/tools/lib \
+	-I$(top_srcdir)/tools/h5repack
+AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@ @H5_ECXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
@@ -469,6 +498,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_VERSION = @CC_VERSION@
 CFLAGS = @CFLAGS@
+CLANG_SANITIZE_CHECKS = @CLANG_SANITIZE_CHECKS@
 CLEARFILEBUF = @CLEARFILEBUF@
 CODESTACK = @CODESTACK@
 CONFIG_DATE = @CONFIG_DATE@
@@ -487,6 +517,7 @@ DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
+DEV_WARNINGS = @DEV_WARNINGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
@@ -514,6 +545,8 @@ GREP = @GREP@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
+H5_ECFLAGS = @H5_ECFLAGS@
+H5_ECXXFLAGS = @H5_ECXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
 H5_LDFLAGS = @H5_LDFLAGS@
@@ -521,9 +554,12 @@ H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
+HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -539,6 +575,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTRUMENT = @INSTRUMENT@
 INSTRUMENT_LIBRARY = @INSTRUMENT_LIBRARY@
+JNI_LDFLAGS = @JNI_LDFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -560,6 +597,7 @@ NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJECT_NAMELEN_DEFAULT_F = @OBJECT_NAMELEN_DEFAULT_F@
 OBJEXT = @OBJEXT@
+OPTIMIZATION = @OPTIMIZATION@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -572,8 +610,10 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PARALLEL = @PARALLEL@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PERL = @PERL@
+PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
+ROS3_VFD = @ROS3_VFD@
 RUNPARALLEL = @RUNPARALLEL@
 RUNSERIAL = @RUNSERIAL@
 R_INTEGER = @R_INTEGER@
@@ -587,6 +627,7 @@ STATIC_EXEC = @STATIC_EXEC@
 STATIC_SHARED = @STATIC_SHARED@
 STRICT_FORMAT_CHECKS = @STRICT_FORMAT_CHECKS@
 STRIP = @STRIP@
+SYMBOLS = @SYMBOLS@
 TESTPARALLEL = @TESTPARALLEL@
 THREADSAFE = @THREADSAFE@
 TIME = @TIME@
@@ -628,6 +669,7 @@ docdir = $(exec_prefix)/doc
 dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
+examplesdir = @examplesdir@
 exec_prefix = @exec_prefix@
 fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
@@ -713,20 +755,21 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # Temporary files.  *.h5 are generated by h5repack.  They should
 # copied to the testfiles/ directory if update is required.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 *.bin \
+# *.dat files may be created by h5repackgentest.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 *.dat *.bin \
 	testfiles/h5diff_attr1.h5 testfiles/tfamily*.h5
+@BUILD_TESTS_CONDITIONAL_FALSE@TEST_SCRIPT = 
 
 # Test programs and scripts
-TEST_SCRIPT = h5repack.sh $(am__append_1)
-TEST_PROG = h5repacktst
+@BUILD_TESTS_CONDITIONAL_TRUE@TEST_SCRIPT = h5repack.sh \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(am__append_1)
+@BUILD_TESTS_CONDITIONAL_FALSE@TEST_PROG = 
+@BUILD_TESTS_CONDITIONAL_TRUE@TEST_PROG = h5repacktst h5repackgentest
 SCRIPT_DEPEND = h5repack$(EXEEXT)
 check_SCRIPTS = $(TEST_SCRIPT)
 
 # Add h5repack specific linker flags here
 h5repack_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
-
-# Depend on the hdf5 library, the tools library, the test library
-LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 
 # Source files
 COMMON_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \
@@ -734,20 +777,26 @@ COMMON_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \
                h5repack_verify.c
 
 h5repack_SOURCES = $(COMMON_SOURCES) h5repack_main.c
-h5repacktst_SOURCES = $(COMMON_SOURCES) h5repacktst.c 
-testh5repack_detect_szip_SOURCES = testh5repack_detect_szip.c
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@noinst_LTLIBRARIES = libdynlibadd.la libdynlibvers.la
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibadd_la_SOURCES = dynlib_rpk.c
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibvers_la_SOURCES = dynlib_vrpk.c
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibadd_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibvers_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+# Depend on the hdf5 library and the tools library
+@BUILD_TESTS_CONDITIONAL_FALSE@LDADD = $(LIBH5TOOLS) $(LIBHDF5)
+
+# Depend on the hdf5 library, the tools library, the test library
+@BUILD_TESTS_CONDITIONAL_TRUE@LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@h5repacktst_SOURCES = $(COMMON_SOURCES) h5repacktst.c
+#testh5repack_detect_szip_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@testh5repack_detect_szip_SOURCES = testh5repack_detect_szip.c
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@noinst_LTLIBRARIES = libdynlibadd.la libdynlibvers.la
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibadd_la_SOURCES = dynlib_rpk.c
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibvers_la_SOURCES = dynlib_vrpk.c
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibadd_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibvers_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
 DISTCLEANFILES = h5repack.sh h5repack_plugin.sh
 
-# Automake needs to be taught how to build lib, dyn, progs, and tests targets.
+# Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
 # EXTRA_TEST variables are supplied to allow the user to force targets to
-# be built at certain times. 
+# be built at certain times.
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
@@ -813,11 +862,17 @@ clean-noinstLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
+@BUILD_TESTS_CONDITIONAL_FALSE@libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES) 
+@BUILD_TESTS_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) $(LIBS)
+
 @HAVE_SHARED_CONDITIONAL_FALSE@libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES) 
 @HAVE_SHARED_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) $(LIBS)
 
 @NOT_UNAME_CYGWIN_FALSE@libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES) 
 @NOT_UNAME_CYGWIN_FALSE@	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) $(LIBS)
+
+@BUILD_TESTS_CONDITIONAL_FALSE@libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES) 
+@BUILD_TESTS_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD) $(LIBS)
 
 @HAVE_SHARED_CONDITIONAL_FALSE@libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES) 
 @HAVE_SHARED_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD) $(LIBS)
@@ -896,6 +951,10 @@ h5repack$(EXEEXT): $(h5repack_OBJECTS) $(h5repack_DEPENDENCIES) $(EXTRA_h5repack
 	@rm -f h5repack$(EXEEXT)
 	$(AM_V_CCLD)$(h5repack_LINK) $(h5repack_OBJECTS) $(h5repack_LDADD) $(LIBS)
 
+h5repackgentest$(EXEEXT): $(h5repackgentest_OBJECTS) $(h5repackgentest_DEPENDENCIES) $(EXTRA_h5repackgentest_DEPENDENCIES) 
+	@rm -f h5repackgentest$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(h5repackgentest_OBJECTS) $(h5repackgentest_LDADD) $(LIBS)
+
 h5repacktst$(EXEEXT): $(h5repacktst_OBJECTS) $(h5repacktst_DEPENDENCIES) $(EXTRA_h5repacktst_DEPENDENCIES) 
 	@rm -f h5repacktst$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(h5repacktst_OBJECTS) $(h5repacktst_LDADD) $(LIBS)
@@ -920,6 +979,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_parse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_refs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_verify.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repackgentest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repacktst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5repack_detect_szip.Po@am__quote@
 
@@ -1139,6 +1199,13 @@ h5repacktst.log: h5repacktst$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+h5repackgentest.log: h5repackgentest$(EXEEXT)
+	@p='h5repackgentest$(EXEEXT)'; \
+	b='h5repackgentest'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .sh.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -1331,16 +1398,16 @@ uninstall-am: uninstall-binPROGRAMS
 
 help:
 	@$(top_srcdir)/bin/makehelp
-
 # The h5repack.sh script needs h5repacktst to run first.
-h5repack.sh.chkexe_: h5repacktst.chkexe_
+@BUILD_TESTS_CONDITIONAL_TRUE@h5repack.sh.chkexe_: h5repacktst.chkexe_
 
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@  # Build it as shared library if configure is enabled for shared library.
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@  # Build it as shared library if configure is enabled for shared library.
 
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES)
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD)
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES)
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD)
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES)
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD)
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES)
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD)
+
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)
@@ -1376,7 +1443,7 @@ all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
 # make install-doc doesn't do anything outside of doc directory, but
 # Makefiles should recognize it.
 # UPDATE: docs no longer reside in this build tree, so this target
-# is depreciated.
+# is deprecated.
 install-doc uninstall-doc:
 	@echo "Nothing to be done."
 
@@ -1537,7 +1604,7 @@ build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
 	    echo "**** Hint ****";                                            \
 	    echo "Parallel test files reside in the current directory"        \
 	         "by default.";                                               \
-	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "Set HDF5_PARAPREFIX to use another directory. e.g.,";       \
 	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
 	    echo "    export HDF5_PARAPREFIX";                                \
 	    echo "    make check";                                            \

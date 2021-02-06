@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,12 +17,11 @@
 
 /* number of members in an array */
 #ifndef NELMTS
-#    define NELMTS(X)    (sizeof(X)/sizeof(X[0]))
+#define NELMTS(X) (sizeof(X) / sizeof(X[0]))
 #endif
 
 static int verify_layout(hid_t pid, pack_info_t *obj);
 static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter);
-
 
 /*-------------------------------------------------------------------------
  * Function: h5repack_verify
@@ -39,135 +38,135 @@ static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *fil
 int
 h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options)
 {
-    int          ret_value  = 0;    /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    hid_t        fidin      = -1;   /* file ID for input file*/
-    hid_t        fidout     = -1;   /* file ID for output file*/
-    hid_t        did        = -1;   /* dataset ID */
-    hid_t        pid        = -1;   /* dataset creation property list ID */
-    hid_t        sid        = -1;   /* space ID */
-    hid_t        tid        = -1;   /* type ID */
-    int          ok         = 1;    /* step results */
-    unsigned int i;
-    trav_table_t *travt = NULL;
+    hid_t         fidin  = H5I_INVALID_HID; /* file ID for input file*/
+    hid_t         fidout = H5I_INVALID_HID; /* file ID for output file*/
+    hid_t         did    = H5I_INVALID_HID; /* dataset ID */
+    hid_t         pid    = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t         sid    = H5I_INVALID_HID; /* space ID */
+    hid_t         tid    = H5I_INVALID_HID; /* type ID */
+    int           ok     = 1;               /* step results */
+    unsigned int  i;
+    trav_table_t *travt     = NULL;
+    int           ret_value = 0;
 
     /* open the output file */
-    if((fidout = H5Fopen(out_fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 )
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fopen failed on <%s>", out_fname);
+    if ((fidout = H5Fopen(out_fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Fopen failed on <%s>", out_fname);
 
-    for(i = 0; i < options->op_tbl->nelems; i++) {
-        char *name = options->op_tbl->objs[i].path;
-        pack_info_t *obj = &options->op_tbl->objs[i];
+    for (i = 0; i < options->op_tbl->nelems; i++) {
+        char *       name = options->op_tbl->objs[i].path;
+        pack_info_t *obj  = &options->op_tbl->objs[i];
 
-       /*-------------------------------------------------------------------------
-        * open
-        *-------------------------------------------------------------------------
-        */
-        if((did = H5Dopen2(fidout, name, H5P_DEFAULT)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed on <%s>", name);
-        if((sid = H5Dget_space(did)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
-        if((pid = H5Dget_create_plist(did)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist failed");
-        if((tid = H5Dget_type(did)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_type failed");
+        /*-------------------------------------------------------------------------
+         * open
+         *-------------------------------------------------------------------------
+         */
+        if ((did = H5Dopen2(fidout, name, H5P_DEFAULT)) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed on <%s>", name);
+        if ((sid = H5Dget_space(did)) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
+        if ((pid = H5Dget_create_plist(did)) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "H5Dget_create_plist failed");
+        if ((tid = H5Dget_type(did)) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "H5Dget_type failed");
 
-       /*-------------------------------------------------------------------------
-        * filter check
-        *-------------------------------------------------------------------------
-        */
-        if(verify_filters(pid, tid, obj->nfilters, obj->filter) <= 0)
+        /*-------------------------------------------------------------------------
+         * filter check
+         *-------------------------------------------------------------------------
+         */
+        if (verify_filters(pid, tid, obj->nfilters, obj->filter) <= 0)
             ok = 0;
 
-       /*-------------------------------------------------------------------------
-        * layout check
-        *-------------------------------------------------------------------------
-        */
-        if((obj->layout != -1) && (verify_layout(pid, obj) == 0))
+        /*-------------------------------------------------------------------------
+         * layout check
+         *-------------------------------------------------------------------------
+         */
+        if ((obj->layout != -1) && (verify_layout(pid, obj) == 0))
             ok = 0;
 
-       /*-------------------------------------------------------------------------
-        * close
-        *-------------------------------------------------------------------------
-        */
-        if(H5Pclose(pid) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+        /*-------------------------------------------------------------------------
+         * close
+         *-------------------------------------------------------------------------
+         */
+        if (H5Pclose(pid) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
         if (H5Sclose(sid) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
+            H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
         if (H5Dclose(did) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+            H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
         if (H5Tclose(tid) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+            H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
     }
 
-   /*-------------------------------------------------------------------------
-    * check for the "all" objects option
-    *-------------------------------------------------------------------------
-    */
+    /*-------------------------------------------------------------------------
+     * check for the "all" objects option
+     *-------------------------------------------------------------------------
+     */
 
-    if(options->all_filter == 1 || options->all_layout == 1) {
+    if (options->all_filter == 1 || options->all_layout == 1) {
         /* Initialize indexing options */
         h5trav_set_index(sort_by, sort_order);
         /* init table */
         trav_table_init(&travt);
 
         /* get the list of objects in the file */
-        if(h5trav_gettable(fidout, travt) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5trav_gettable failed");
+        if (h5trav_gettable(fidout, travt) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "h5trav_gettable failed");
 
-        for(i = 0; i < travt->nobjs; i++) {
+        for (i = 0; i < travt->nobjs; i++) {
             char *name = travt->objs[i].name;
 
-            if(travt->objs[i].type == H5TRAV_TYPE_DATASET) {
-               /*-------------------------------------------------------------------------
-                * open
-                *-------------------------------------------------------------------------
-                */
-                if((did = H5Dopen2(fidout, name, H5P_DEFAULT)) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed on <%s>", name);
-                if((sid = H5Dget_space(did)) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
-                if((pid = H5Dget_create_plist(did)) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist failed");
-                if((tid = H5Dget_type(did)) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_type failed");
+            if (travt->objs[i].type == H5TRAV_TYPE_DATASET) {
+                /*-------------------------------------------------------------------------
+                 * open
+                 *-------------------------------------------------------------------------
+                 */
+                if ((did = H5Dopen2(fidout, name, H5P_DEFAULT)) < 0)
+                    H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed on <%s>", name);
+                if ((sid = H5Dget_space(did)) < 0)
+                    H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
+                if ((pid = H5Dget_create_plist(did)) < 0)
+                    H5TOOLS_GOTO_ERROR((-1), "H5Dget_create_plist failed");
+                if ((tid = H5Dget_type(did)) < 0)
+                    H5TOOLS_GOTO_ERROR((-1), "H5Dget_type failed");
 
-               /*-------------------------------------------------------------------------
-                * filter check
-                *-------------------------------------------------------------------------
-                */
-                if(options->all_filter == 1) {
-                    if(verify_filters(pid, tid, options->n_filter_g, options->filter_g) <= 0)
+                /*-------------------------------------------------------------------------
+                 * filter check
+                 *-------------------------------------------------------------------------
+                 */
+                if (options->all_filter == 1) {
+                    if (verify_filters(pid, tid, options->n_filter_g, options->filter_g) <= 0)
                         ok = 0;
                 }
 
-               /*-------------------------------------------------------------------------
-                * layout check
-                *-------------------------------------------------------------------------
-                */
-                if(options->all_layout == 1) {
+                /*-------------------------------------------------------------------------
+                 * layout check
+                 *-------------------------------------------------------------------------
+                 */
+                if (options->all_layout == 1) {
                     pack_info_t pack;
 
                     init_packobject(&pack);
                     pack.layout = options->layout_g;
-                    pack.chunk = options->chunk_g;
-                    if(verify_layout(pid, &pack) == 0)
+                    pack.chunk  = options->chunk_g;
+                    if (verify_layout(pid, &pack) == 0)
                         ok = 0;
                 }
 
-               /*-------------------------------------------------------------------------
-                * close
-                *-------------------------------------------------------------------------
-                */
+                /*-------------------------------------------------------------------------
+                 * close
+                 *-------------------------------------------------------------------------
+                 */
                 if (H5Pclose(pid) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
                 if (H5Sclose(sid) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
                 if (H5Dclose(did) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
                 if (H5Tclose(tid) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
             } /* if */
-        } /* i */
+        }     /* i */
 
         /* free table */
         trav_table_free(travt);
@@ -177,7 +176,8 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
     ret_value = ok;
 
 done:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(pid);
         H5Sclose(sid);
         H5Dclose(did);
@@ -186,7 +186,8 @@ done:
         H5Fclose(fidout);
         if (travt)
             trav_table_free(travt);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return ret_value;
 } /* h5repack_verify() */
@@ -206,13 +207,14 @@ done:
  *-------------------------------------------------------------------------
  */
 
-int verify_layout(hid_t pid, pack_info_t *obj)
+int
+verify_layout(hid_t pid, pack_info_t *obj)
 {
-    hsize_t      chsize[64];     /* chunk size in elements */
-    H5D_layout_t layout;         /* layout */
-    int          nfilters;       /* number of filters */
-    int          rank;           /* rank */
-    int          i;              /* index */
+    hsize_t      chsize[64]; /* chunk size in elements */
+    H5D_layout_t layout;     /* layout */
+    int          nfilters;   /* number of filters */
+    int          rank;       /* rank */
+    int          i;          /* index */
 
     /* check if we have filters in the input object */
     if ((nfilters = H5Pget_nfilters(pid)) < 0)
@@ -229,8 +231,8 @@ int verify_layout(hid_t pid, pack_info_t *obj)
     if (obj->layout != layout)
         return 0;
 
-    if (layout==H5D_CHUNKED) {
-        if ((rank = H5Pget_chunk(pid, NELMTS(chsize), chsize/*out*/)) < 0)
+    if (layout == H5D_CHUNKED) {
+        if ((rank = H5Pget_chunk(pid, NELMTS(chsize), chsize /*out*/)) < 0)
             return -1;
         if (obj->chunk.rank != rank)
             return 0;
@@ -254,108 +256,109 @@ int verify_layout(hid_t pid, pack_info_t *obj)
  *-------------------------------------------------------------------------
  */
 
-int h5repack_cmp_pl(const char *fname1, const char *fname2)
+int
+h5repack_cmp_pl(const char *fname1, const char *fname2)
 {
-    int           ret_value = 1;    /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    hid_t         fid1 =-1;         /* file ID */
-    hid_t         fid2 =-1;         /* file ID */
-    hid_t         dset1 =-1;        /* dataset ID */
-    hid_t         dset2 =-1;        /* dataset ID */
-    hid_t         gid =-1;          /* group ID */
-    hid_t         dcpl1 =-1;        /* dataset creation property list ID */
-    hid_t         dcpl2 =-1;        /* dataset creation property list ID */
-    hid_t         gcplid =-1;       /* group creation property list */
-    unsigned      crt_order_flag1;  /* group creation order flag */
-    unsigned      crt_order_flag2;  /* group creation order flag */
-    trav_table_t  *trav = NULL;
+    hid_t         fid1   = H5I_INVALID_HID; /* file ID */
+    hid_t         fid2   = H5I_INVALID_HID; /* file ID */
+    hid_t         dset1  = H5I_INVALID_HID; /* dataset ID */
+    hid_t         dset2  = H5I_INVALID_HID; /* dataset ID */
+    hid_t         gid    = H5I_INVALID_HID; /* group ID */
+    hid_t         dcpl1  = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t         dcpl2  = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t         gcplid = H5I_INVALID_HID; /* group creation property list */
+    unsigned      crt_order_flag1;          /* group creation order flag */
+    unsigned      crt_order_flag2;          /* group creation order flag */
+    trav_table_t *trav = NULL;
     unsigned int  i;
+    int           ret_value = 1;
 
-   /*-------------------------------------------------------------------------
-    * open the files
-    *-------------------------------------------------------------------------
-    */
+    /*-------------------------------------------------------------------------
+     * open the files
+     *-------------------------------------------------------------------------
+     */
     /* Open the files */
     if ((fid1 = H5Fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_fopen failed <%s>: %s", fname1, H5FOPENERROR);
+        H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname1, H5FOPENERROR);
     if ((fid2 = H5Fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_fopen failed <%s>: %s", fname2, H5FOPENERROR);
+        H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname2, H5FOPENERROR);
 
-   /*-------------------------------------------------------------------------
-    * get file table list of objects
-    *-------------------------------------------------------------------------
-    */
+    /*-------------------------------------------------------------------------
+     * get file table list of objects
+     *-------------------------------------------------------------------------
+     */
     /* Initialize indexing options */
     h5trav_set_index(sort_by, sort_order);
     /* init table */
     trav_table_init(&trav);
-    if(h5trav_gettable(fid1, trav) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5trav_gettable failed");
+    if (h5trav_gettable(fid1, trav) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "h5trav_gettable failed");
 
-   /*-------------------------------------------------------------------------
-    * traverse the suppplied object list
-    *-------------------------------------------------------------------------
-    */
-    for(i = 0; i < trav->nobjs; i++) {
-        if(trav->objs[i].type == H5TRAV_TYPE_GROUP) {
+    /*-------------------------------------------------------------------------
+     * traverse the suppplied object list
+     *-------------------------------------------------------------------------
+     */
+    for (i = 0; i < trav->nobjs; i++) {
+        if (trav->objs[i].type == H5TRAV_TYPE_GROUP) {
             if ((gid = H5Gopen2(fid1, trav->objs[i].name, H5P_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gopen2 failed on first <%s>", trav->objs[i].name);
+                H5TOOLS_GOTO_ERROR((-1), "H5Gopen2 failed on first <%s>", trav->objs[i].name);
             if ((gcplid = H5Gget_create_plist(gid)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gget_create_plist failed");
+                H5TOOLS_GOTO_ERROR((-1), "H5Gget_create_plist failed");
             if (H5Pget_link_creation_order(gcplid, &crt_order_flag1) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_link_creation_order failed");
+                H5TOOLS_GOTO_ERROR((-1), "H5Pget_link_creation_order failed");
             if (H5Pclose(gcplid) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+                H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
             if (H5Gclose(gid) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gclose failed");
+                H5TOOLS_GOTO_ERROR((-1), "H5Gclose failed");
 
             if ((gid = H5Gopen2(fid2, trav->objs[i].name, H5P_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gopen2 failed on second <%s>", trav->objs[i].name);
+                H5TOOLS_GOTO_ERROR((-1), "H5Gopen2 failed on second <%s>", trav->objs[i].name);
             if ((gcplid = H5Gget_create_plist(gid)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gget_create_plist failed");
+                H5TOOLS_GOTO_ERROR((-1), "H5Gget_create_plist failed");
             if (H5Pget_link_creation_order(gcplid, &crt_order_flag2) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_link_creation_order failed");
+                H5TOOLS_GOTO_ERROR((-1), "H5Pget_link_creation_order failed");
             if (H5Pclose(gcplid) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+                H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
             if (H5Gclose(gid) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gclose failed");
+                H5TOOLS_GOTO_ERROR((-1), "H5Gclose failed");
 
             if (crt_order_flag1 != crt_order_flag2)
-                HGOTO_ERROR(0, H5E_tools_min_id_g, "property lists failed for <%s> are different", trav->objs[i].name);
+                H5TOOLS_GOTO_ERROR(0, "property lists failed for <%s> are different", trav->objs[i].name);
         }
-        else if(trav->objs[i].type == H5TRAV_TYPE_DATASET) {
-            if((dset1 = H5Dopen2(fid1, trav->objs[i].name, H5P_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed on first <%s>", trav->objs[i].name);
-            if((dset2 = H5Dopen2(fid2, trav->objs[i].name, H5P_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed on second <%s>", trav->objs[i].name);
-            if((dcpl1 = H5Dget_create_plist(dset1)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist failed");
-            if((dcpl2 = H5Dget_create_plist(dset2)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist failed");
+        else if (trav->objs[i].type == H5TRAV_TYPE_DATASET) {
+            if ((dset1 = H5Dopen2(fid1, trav->objs[i].name, H5P_DEFAULT)) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed on first <%s>", trav->objs[i].name);
+            if ((dset2 = H5Dopen2(fid2, trav->objs[i].name, H5P_DEFAULT)) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed on second <%s>", trav->objs[i].name);
+            if ((dcpl1 = H5Dget_create_plist(dset1)) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Dget_create_plist failed");
+            if ((dcpl2 = H5Dget_create_plist(dset2)) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Dget_create_plist failed");
 
-           /*-------------------------------------------------------------------------
-            * compare the property lists
-            *-------------------------------------------------------------------------
-            */
-            if((ret_value = H5Pequal(dcpl1, dcpl2)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pequal failed");
+            /*-------------------------------------------------------------------------
+             * compare the property lists
+             *-------------------------------------------------------------------------
+             */
+            if ((ret_value = H5Pequal(dcpl1, dcpl2)) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Pequal failed");
 
-            if(ret_value == 0)
-                HGOTO_ERROR(0, H5E_tools_min_id_g, "property lists failed for <%s> are different", trav->objs[i].name);
+            if (ret_value == 0)
+                H5TOOLS_GOTO_ERROR(0, "property lists failed for <%s> are different", trav->objs[i].name);
 
-           /*-------------------------------------------------------------------------
-            * close
-            *-------------------------------------------------------------------------
-            */
-            if(H5Pclose(dcpl1) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
-            if(H5Pclose(dcpl2) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
-            if(H5Dclose(dset1) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
-            if(H5Dclose(dset2) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+            /*-------------------------------------------------------------------------
+             * close
+             *-------------------------------------------------------------------------
+             */
+            if (H5Pclose(dcpl1) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
+            if (H5Pclose(dcpl2) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
+            if (H5Dclose(dset1) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
+            if (H5Dclose(dset2) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
         } /*if*/
-    } /*for*/
+    }     /*for*/
 
 done:
     H5E_BEGIN_TRY
@@ -368,13 +371,13 @@ done:
         H5Fclose(fid2);
         H5Pclose(gcplid);
         H5Gclose(gid);
-        if(trav)
+        if (trav)
             trav_table_free(trav);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return ret_value;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: verify_filters
@@ -390,27 +393,25 @@ done:
  *-------------------------------------------------------------------------
  */
 
-static
-int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
+static int
+verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
 {
-    int           nfilters_dcpl;  /* number of filters in DCPL*/
-    unsigned      filt_flags;     /* filter flags */
-    H5Z_filter_t  filtn;          /* filter identification number */
-    unsigned      cd_values[20];  /* filter client data values */
-    size_t        cd_nelmts;      /* filter client number of values */
-    char          f_name[256];    /* filter name */
-    size_t        size;           /* type size */
-    int           i;              /* index */
-    unsigned      j;              /* index */
+    int          nfilters_dcpl; /* number of filters in DCPL*/
+    unsigned     filt_flags;    /* filter flags */
+    H5Z_filter_t filtn;         /* filter identification number */
+    unsigned     cd_values[20]; /* filter client data values */
+    size_t       cd_nelmts;     /* filter client number of values */
+    char         f_name[256];   /* filter name */
+    size_t       size;          /* type size */
+    int          i;             /* index */
+    unsigned     j;             /* index */
 
     /* get information about filters */
-    if((nfilters_dcpl = H5Pget_nfilters(pid)) < 0)
+    if ((nfilters_dcpl = H5Pget_nfilters(pid)) < 0)
         return -1;
 
     /* if we do not have filters and the requested filter is NONE, return 1 */
-    if(!nfilters_dcpl &&
-        nfilters == 1 &&
-        filter[0].filtn == H5Z_FILTER_NONE)
+    if (!nfilters_dcpl && nfilters == 1 && filter[0].filtn == H5Z_FILTER_NONE)
         return 1;
 
     /* else the numbers of filters must match */
@@ -424,8 +425,8 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
 
     for (i = 0; i < nfilters_dcpl; i++) {
         cd_nelmts = NELMTS(cd_values);
-        filtn = H5Pget_filter2(pid, (unsigned)i, &filt_flags, &cd_nelmts,
-            cd_values, sizeof(f_name), f_name, NULL);
+        filtn = H5Pget_filter2(pid, (unsigned)i, &filt_flags, &cd_nelmts, cd_values, sizeof(f_name), f_name,
+                               NULL);
 
         /* filter ID */
         if (filtn < 0)
@@ -436,7 +437,7 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
         /* compare client data values. some filters do return local values */
         switch (filtn) {
             case H5Z_FILTER_NONE:
-            break;
+                break;
 
             case H5Z_FILTER_SHUFFLE:
                 /* 1 private client value is returned by DCPL */
@@ -444,7 +445,7 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
                     return 0;
 
                 /* get dataset's type size */
-                if((size = H5Tget_size(tid)) <= 0)
+                if ((size = H5Tget_size(tid)) <= 0)
                     return -1;
 
                 /* the private client value holds the dataset's type size */

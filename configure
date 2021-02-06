@@ -642,6 +642,12 @@ HAVE_SHARED_CONDITIONAL_FALSE
 HAVE_SHARED_CONDITIONAL_TRUE
 fortran_linux_linker_option
 SEARCH
+BUILD_TOOLS_CONDITIONAL_FALSE
+BUILD_TOOLS_CONDITIONAL_TRUE
+BUILD_TESTS_PARALLEL_CONDITIONAL_FALSE
+BUILD_TESTS_PARALLEL_CONDITIONAL_TRUE
+BUILD_TESTS_CONDITIONAL_FALSE
+BUILD_TESTS_CONDITIONAL_TRUE
 BUILD_HDF5_HL_CONDITIONAL_FALSE
 BUILD_HDF5_HL_CONDITIONAL_TRUE
 BUILD_FORTRAN_CONDITIONAL_FALSE
@@ -665,6 +671,12 @@ CONFIG_MODE
 CONFIG_USER
 CONFIG_DATE
 H5_VERSION
+examplesdir
+JNI_LDFLAGS
+HAVE_LIBHDFS
+ROS3_VFD_CONDITIONAL_FALSE
+ROS3_VFD_CONDITIONAL_TRUE
+ROS3_VFD
 DIRECT_VFD_CONDITIONAL_FALSE
 DIRECT_VFD_CONDITIONAL_TRUE
 ADD_PARALLEL_FILES
@@ -673,6 +685,10 @@ CLEARFILEBUF
 INSTRUMENT_LIBRARY
 TRACE_API
 DEBUG_PKG
+OPTIMIZATION
+PROFILING
+DEV_WARNINGS
+SYMBOLS
 HAVE_PTHREAD
 BUILD_SHARED_SZIP_CONDITIONAL_FALSE
 BUILD_SHARED_SZIP_CONDITIONAL_TRUE
@@ -708,6 +724,8 @@ EGREP
 GREP
 SED
 LIBTOOL
+HDF5_TOOLS
+HDF5_TESTS
 FORTRAN_SHARED_CONDITIONAL_FALSE
 FORTRAN_SHARED_CONDITIONAL_TRUE
 H5_FORTRAN_SHARED
@@ -771,6 +789,7 @@ ac_ct_CC
 LDFLAGS
 CFLAGS
 CC
+CLANG_SANITIZE_CHECKS
 UNAME_INFO
 enable_static
 enable_shared
@@ -796,9 +815,11 @@ AM_CXXFLAGS
 AM_FCFLAGS
 AM_CFLAGS
 H5_LDFLAGS
+H5_ECXXFLAGS
 H5_CXXFLAGS
 H5_FCFLAGS
 H5_CPPFLAGS
+H5_ECFLAGS
 H5_CFLAGS
 CPPFLAGS
 host_os
@@ -882,12 +903,15 @@ ac_user_opts='
 enable_option_checking
 enable_silent_rules
 enable_maintainer_mode
+enable_sanitize_checks
 enable_dependency_tracking
 enable_unsupported
 enable_fortran
 enable_fortran2003
 enable_cxx
 enable_hl
+enable_tests
+enable_tools
 enable_shared
 enable_static
 with_pic
@@ -905,6 +929,10 @@ with_zlib
 with_szlib
 enable_threadsafe
 with_pthread
+enable_symbols
+enable_developer_warnings
+enable_profiling
+enable_optimization
 enable_debug
 enable_codestack
 enable_metadata_trace_file
@@ -915,6 +943,9 @@ enable_using_memchecker
 enable_parallel
 with_mpe
 enable_direct_vfd
+enable_ros3_vfd
+with_libhdfs
+with_examplesdir
 with_default_plugindir
 enable_dconv_exception
 enable_dconv_accuracy
@@ -1563,6 +1594,12 @@ Optional Features:
   --enable-maintainer-mode
                           enable make rules and dependencies not useful (and
                           sometimes confusing) to the casual installer
+  --enable-sanitize-checks=address
+                          (clang/clang++ compilers only) Enable sanitize
+                          checks. Address is useful for detecting issues
+                          dealing with memory. See AddressSanitizer in
+                          config/sanitizer/README.md for more information.
+                          [default=none]
   --enable-dependency-tracking
                           do not reject slow dependency extractors
   --disable-dependency-tracking
@@ -1573,6 +1610,8 @@ Optional Features:
                           specify --enable-fortran [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
   --enable-hl             Enable the high level library [default=yes]
+  --enable-tests          Compile the HDF5 tests [default=yes]
+  --enable-tools          Compile the HDF5 tools [default=yes]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -1586,6 +1625,38 @@ Optional Features:
   --enable-threadsafe     Enable thread-safe capability. Not compatible with
                           the high-level library, Fortran, or C++ wrappers.
                           [default=no]
+  --enable-symbols=(yes|no|<custom>)
+                          Add debug symbols to the library (e.g.: build with
+                          -g). This is independent of the build mode and
+                          optimization level. The custom string allows special
+                          settings like -ggdb, etc. to be used. [default=yes
+                          if debug build, otherwise no]
+  --enable-developer-warnings
+                          Determines whether developer warnings will be
+                          emitted. These are usually performance suggestions
+                          (e.g. -Wsuggest-attribute) and do not flag poor code
+                          quality. [default=no]
+  --enable-profiling=(yes|no|<custom>)
+                          Enable profiling flags (e.g.: -pg). This can be set
+                          independently from the build mode. The custom
+                          setting can be used to pass alternative profiling
+                          flags (e.g.: -P for using Prof with gcc).
+                          [default=no]
+  --enable-optimization=(high|debug|none|<custom>)
+                          Enable optimization flags/settings (e.g.: -O3). This
+                          can be set independently from the build mode.
+                          Optimizations for a given compiler can be specified
+                          at several levels: High, with aggressive
+                          optimizations turned on; debug, with optimizations
+                          that are unlikely to interfere with debugging or
+                          profiling; and none, with no optimizations at all.
+                          See the compiler-specific config/*-flags file for
+                          more details. Alternatively, optimization options
+                          can be specified directly by specifying them as a
+                          string value. These custom optimzation flags will
+                          completely replace all other optimization flags.
+                          [default depends on build mode: debug=debug,
+                          production=high, clean=none]
   --enable-debug=all      Turn on debugging in all packages. One may also
                           specify a comma-separated list of package names
                           without the leading H5 or the word no. The default
@@ -1606,12 +1677,14 @@ Optional Features:
                           Enable this option if a memory allocation and/or
                           bounds checking tool will be used on the HDF5
                           library. Enabling this causes the library to be more
-                          picky about it's memory operations and also disables
-                          the library's free space manager code. Default=no.
+                          picky about its memory operations and also disables
+                          the library's free space manager code. [default=no]
   --enable-parallel       Search for MPI-IO and MPI support files
   --enable-direct-vfd     Build the direct I/O virtual file driver (VFD). This
                           is based on the POSIX (sec2) VFD and requires the
                           open() call to take the O_DIRECT flag. [default=no]
+  --enable-ros3-vfd       Build the Read-Only S3 virtual file driver (VFD).
+                          [default=no]
   --enable-dconv-exception
                           if exception handling functions is checked during
                           data conversions [default=yes]
@@ -1655,6 +1728,11 @@ Optional Packages:
   --with-pthread=DIR      Specify alternative path to Pthreads library when
                           thread-safe capability is built
   --with-mpe=DIR          Use MPE instrumentation [default=no]
+  --with-libhdfs=DIR      Provide libhdfs library to enable HDFS virtual file
+                          driver (VFD) [default=no]
+  --with-examplesdir=location
+                          Specify path for examples
+                          [default="DATAROOTDIR/hdf5_examples"]
   --with-default-plugindir=location
                           Specify default location for plugins
                           [default="/usr/local/hdf5/lib/plugin"]
@@ -3686,16 +3764,45 @@ fi
 AM_BACKSLASH='\'
 
 
-## AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
-## for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE
-## is *not* included here, these files will be rebuilt if out of date.
-## This is a problem because if users try to build on a machine with
-## the wrong versions of autoconf and automake, these files will be
-## rebuilt with the wrong versions and bad things can happen.
-## Also, CVS doesn't preserve dependencies between timestamps, so
-## Makefiles will often think rebuilding needs to occur when it doesn't.
-## Developers should './configure --enable-maintainer-mode' to turn on
-## rebuild rules.
+## AM_MAINTAINER_MODE determines the behavior of "rebuild rules" that contain
+## dependencies for Makefile.in files, configure, src/H5config.h, etc. If
+## AM_MAINTAINER_MODE is enabled, these files will be rebuilt if out of date.
+## When disabled, the autotools build files can get out of sync and the build
+## system will not complain or try to regenerate downstream files.
+##
+## The AM_MAINTAINER_MODE macro also determines whether the
+## --(enable|disable)-maintainer-mode configure option is available. When the
+## macro is present, with or without a parameter, the option will be added
+## to the generated configure script.
+##
+## In summary:
+##
+##  AM_MAINTAINER_MODE([enable])
+##      - Build dependencies ON by default
+##      - Configure option exists
+##
+##  AM_MAINTAINER_MODE([disable])
+##      - Build dependencies OFF by default
+##      - Configure option exists
+##
+##  AM_MAINTAINER_MODE
+##      - Build dependencies OFF by default
+##      - Configure option exists
+##
+##  No AM_MAINTAINER_MODE macro
+##      - Build dependencies ON by default
+##      - No configure option to control build dependencies
+##
+## The biggest concern for us is that version control systems like git
+## usually don't preserve dependencies between timestamps, so the build
+## system will often think that upstream build files like Makefile.am are
+## dirty and that rebuilding needs to occur when it doesn't. This is a problem
+## in release branches where we provide the autotools-generated files. Users
+## who don't have autoconf, automake, etc. will then have difficulty building
+## release branches checked out from git.
+##
+## By default, maintainer mode is enabled in development branches and disabled
+## in release branches.
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
 $as_echo_n "checking whether to enable maintainer-specific portions of Makefiles... " >&6; }
@@ -3826,6 +3933,11 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
+##
+## H5_ECFLAGS (and company) are for warnings that should be treated as errors.
+##
+
+
 
 
 
@@ -3970,13 +4082,13 @@ fi
 ## turning on debug or profiling flags for the compiler.  The search order
 ## is:
 ##
-##	CPU-VENDOR-OS
-##	VENDOR-OS
-##	CPU-OS
-##	CPU-VENDOR
-##	OS
-##	VENDOR
-##	CPU
+##    CPU-VENDOR-OS
+##    VENDOR-OS
+##    CPU-OS
+##    CPU-VENDOR
+##    OS
+##    VENDOR
+##    CPU
 ##
 ## If the `OS' ends with a version number then remove it. For instance,
 ## `freebsd3.1' would become `freebsd'
@@ -3987,6 +4099,9 @@ case $host_os in
     ;;
   freebsd*)
     host_os_novers=freebsd
+    ;;
+  netbsd*)
+    host_os_novers=netbsd
     ;;
   solaris*)
     host_os_novers=solaris
@@ -4042,6 +4157,61 @@ $as_echo "no" >&6; }
   hname="`echo $hname | cut -d. -f2-99`"
   test "$hname_tmp" = "$hname" && break
 done
+
+##
+## Enable/disable sanitizer checks for clang compilers, initially address sanitizer
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for clang sanitizer checks" >&5
+$as_echo_n "checking for clang sanitizer checks... " >&6; }
+# Check whether --enable-sanitize-checks was given.
+if test "${enable_sanitize_checks+set}" = set; then :
+  enableval=$enable_sanitize_checks; CLANG_SANITIZE_CHECKS=$enableval
+fi
+
+
+# Set default
+if test "X-$CLANG_SANITIZE_CHECKS" = X- ; then
+  CLANG_SANITIZE_CHECKS=none
+fi
+
+if test "X$CC_BASENAME" = "Xclang"; then
+
+
+  # There are several sanitizer tools.  At present we are testing
+  # and describing only -fsanitizer=address with autotools.
+  case "X-$CLANG_SANITIZE_CHECKS" in
+    X-no|X-none)
+      CLANG_SANITIZE_CHECKS=none
+      CLANG_SANITIZE_LIST=
+      ;;
+    *)
+      CLANG_SANITIZE_LIST=$CLANG_SANITIZE_CHECKS
+      ;;
+  esac
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CLANG_SANITIZE_CHECKS" >&5
+$as_echo "$CLANG_SANITIZE_CHECKS" >&6; }
+
+  # Other tools can be added to the list of checks
+  # The clang compiler doesn't support some of them; they should be
+  # checked before adding them to the list in the help message.
+  # The sanitizers/sanitizers.cmake file lists these options:
+  # address, memory, memoryWithOrigins, undefined, thread, leak,
+  # 'address;undefined'.  Which and which combinations of these are
+  #  supported varies by compiler version, but unsupported options
+  # or combinations will result in configure errors reported in config.log.
+  # Comma separated lists of sanitize options wil be entered intact in
+  # one -fsanitize=<list> flag.  Space separated lists will be entered in
+  # separate -fsanitize=<item> flags.
+  # NOTE: No sanity checking done here!
+  if test -n "$CLANG_SANITIZE_LIST"; then
+    H5_CFLAGS="$H5_CFLAGS -fno-omit-frame-pointer"
+    H5_CXXFLAGS="$H5_CXXFLAGS -fno-omit-frame-pointer"
+    for sanitizer in `echo $CLANG_SANITIZE_LIST`; do
+      H5_CFLAGS="$H5_CFLAGS -fsanitize=${sanitizer}"
+      H5_CXXFLAGS="$H5_CXXFLAGS -fsanitize=${sanitizer}"
+    done
+  fi
+fi
 
 ## ----------------------------------------------------------------------
 ## Some built-in configure checks can only see CFLAGS (not AM_CFLAGS), so
@@ -6473,12 +6643,9 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
   HAVE_SIZEOF_FORTRAN="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic SIZEOF" >&5
 $as_echo_n "checking if Fortran compiler supports intrinsic SIZEOF... " >&6; }
+  TEST_SRC="`sed -n '/PROGRAM PROG_FC_SIZEOF/,/END PROGRAM PROG_FC_SIZEOF/p' $srcdir/m4/aclocal_fc.f90`"
   cat > conftest.$ac_ext <<_ACEOF
-
-   PROGRAM main
-     i = sizeof(x)
-   END PROGRAM
-
+$TEST_SRC
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -6497,15 +6664,9 @@ rm -f core conftest.err conftest.$ac_objext \
   HAVE_C_SIZEOF_FORTRAN="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic C_SIZEOF" >&5
 $as_echo_n "checking if Fortran compiler supports intrinsic C_SIZEOF... " >&6; }
+  TEST_SRC="`sed -n '/PROGRAM PROG_FC_C_SIZEOF/,/END PROGRAM PROG_FC_C_SIZEOF/p' $srcdir/m4/aclocal_fc.f90`"
   cat > conftest.$ac_ext <<_ACEOF
-
-   PROGRAM main
-     USE ISO_C_BINDING
-     INTEGER(C_INT) :: a
-     INTEGER(C_SIZE_T) :: result
-     result = C_SIZEOF(a)
-   END PROGRAM
-
+$TEST_SRC
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -6524,14 +6685,9 @@ rm -f core conftest.err conftest.$ac_objext \
   HAVE_STORAGE_SIZE_FORTRAN="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic STORAGE_SIZE" >&5
 $as_echo_n "checking if Fortran compiler supports intrinsic STORAGE_SIZE... " >&6; }
+  TEST_SRC="`sed -ne '/PROGRAM PROG_FC_STORAGE_SIZE/,/END PROGRAM PROG_FC_STORAGE_SIZE/p' $srcdir/m4/aclocal_fc.f90`"
   cat > conftest.$ac_ext <<_ACEOF
-
-   PROGRAM main
-     INTEGER :: a
-     INTEGER :: result
-     result = STORAGE_SIZE(a)
-   END PROGRAM
-
+$TEST_SRC
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -6593,35 +6749,22 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     ## Checking if the compiler supports the required Fortran 2003 features and
     ## disable Fortran 2003 if it does not.
 
+   HAVE_F2003_REQUIREMENTS="no"
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
 $as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HDF... " >&6; }
-    HAVE_FORTRAN_2003="no"
-    HAVE_F2003_REQUIREMENTS="no"
-    cat > conftest.$ac_ext <<_ACEOF
-      program main
-
-
-        USE iso_c_binding
-        IMPLICIT NONE
-        TYPE(C_PTR) :: ptr
-        TYPE(C_FUNPTR) :: funptr
-        CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
-
-        ptr = C_LOC(ichr(1:1))
-
-
-      end
+   TEST_SRC="`sed -n '/PROG_FC_HAVE_F2003_REQUIREMENTS/,/END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS/p' $srcdir/m4/aclocal_fc.f90`"
+   cat > conftest.$ac_ext <<_ACEOF
+$TEST_SRC
 _ACEOF
-if ac_fn_fc_try_link "$LINENO"; then :
+if ac_fn_fc_try_compile "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-        HAVE_F2003_REQUIREMENTS=yes
+            HAVE_F2003_REQUIREMENTS="yes"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
     if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
@@ -6689,7 +6832,7 @@ fi
 ## We need to check for a C++ compiler unconditionally, since
 ## AC_PROG_CXX defines some macros that Automake 1.9.x uses and will
 ## miss even if c++ is not enabled.
-  ac_ext=cpp
+ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -7106,7 +7249,7 @@ else
 fi
 
 
-  ac_ext=cpp
+ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -7238,7 +7381,7 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-	## this is checked for when AC_HEADER_STDC is done
+    ## this is checked for when AC_HEADER_STDC is done
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if c++ interface enabled" >&5
 $as_echo_n "checking if c++ interface enabled... " >&6; }
@@ -7253,6 +7396,9 @@ if test "X$HDF_CXX" = "Xyes"; then
   echo "yes"
   HDF5_INTERFACES="$HDF5_INTERFACES c++"
 
+  ## Expose the compiler for *.in files
+
+
   ## Change to the C++ language
   ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7261,18 +7407,16 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-  # Checking if C++ needs old style header files in includes
+  ## Checking if C++ needs old style header files in includes
 
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX needs old style header files in includes" >&5
 $as_echo_n "checking if $CXX needs old style header files in includes... " >&6; }
+  TEST_SRC="`(echo \"#define OLD_HEADER_FILENAME 1\"; cat $srcdir/config/cmake_ext_mod/HDFCXXTests.cpp)`"
+
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-#include <iostream>
-
-int main(void) { return 0; }
-
+$TEST_SRC
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -7287,23 +7431,15 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
 
-  # Checking if C++ can handle namespaces
+  ## Checking if C++ can handle namespaces
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle namespaces" >&5
 $as_echo_n "checking if $CXX can handle namespaces... " >&6; }
+  TEST_SRC="`(echo \"#define HDF_NO_NAMESPACE 1\"; cat $srcdir/config/cmake_ext_mod/HDFCXXTests.cpp)`"
+
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-namespace H5 {
-int fnord;
-}
-
-int main(void) {
-   using namespace H5;
-   fnord = 37;
-   return 0;
-}
-
+$TEST_SRC
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -7311,49 +7447,47 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_NAMESPACE"
+     CXXFLAGS="${CXXFLAGS} -DHDF_NO_NAMESPACE"
+     AM_CXXFLAGS="${AM_CXXFLAGS} -DHDF_NO_NAMESPACE"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
 
-  # Checking if C++ has offsetof extension
+  ## if C++ can handle static cast
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle static cast" >&5
+$as_echo_n "checking if $CXX can handle static cast... " >&6; }
+  TEST_SRC="`(echo \"#define NO_STATIC_CAST 1\"; cat $srcdir/config/cmake_ext_mod/HDFCXXTests.cpp)`"
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$TEST_SRC
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
+    AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+
+  ## Checking if C++ has offsetof extension,
+  ## note: this test has to be the last of the C++ tests because it sets a definition
+  ## which would be used in the other tests, causing them to fail.
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX has offsetof extension" >&5
 $as_echo_n "checking if $CXX has offsetof extension... " >&6; }
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  TEST_SRC="`(echo \"#define CXX_HAVE_OFFSETOF 1\"; cat $srcdir/config/cmake_ext_mod/HDFCXXTests.cpp)`"
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-  #include <stdio.h>
-  #include <stddef.h>
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-
-    struct index_st
-    {
-      unsigned char type;
-      unsigned char num;
-      unsigned int len;
-    };
-    typedef struct index_st index_t;
-    int x,y;
-    x = offsetof(struct index_st, len);
-    y = offsetof(index_t, num)
-
-  ;
-  return 0;
-}
+$TEST_SRC
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -7364,35 +7498,6 @@ $as_echo "#define CXX_HAVE_OFFSETOF 1" >>confdefs.h
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-
-  # if C++ can handle static cast
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle static cast" >&5
-$as_echo_n "checking if $CXX can handle static cast... " >&6; }
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int main(void) {
-   float test_float;
-   int test_int;
-   test_float = 37.0;
-   test_int = static_cast <int> (test_float);
-   return 0;
-}
-
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-    CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
-    AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -7501,7 +7606,6 @@ fi
 ## Check which archiving tool to use. This needs to be done before
 ## the AM_PROG_LIBTOOL macro.
 ##
-
 if test -z "$AR"; then
   for ac_prog in ar xar
 do
@@ -7661,36 +7765,36 @@ fi
 ## The following variables are used to distinguish between building a
 ## serial and parallel library.
 ##
-##    HAVE_PARALLEL	-- defined in H5config.h if we are building
-##			   a parallel library even if configure wasn't
-##			   able to find some header file or library that
-##			   might be required. This is defined if the
-##			   user explicitly states
-##			   that a parallel library is being built by supplying
-##			   the `--enable-parallel' configure switch.
+##    HAVE_PARALLEL    -- defined in H5config.h if we are building
+##               a parallel library even if configure wasn't
+##               able to find some header file or library that
+##               might be required. This is defined if the
+##               user explicitly states
+##               that a parallel library is being built by supplying
+##               the `--enable-parallel' configure switch.
 ##
-##    PARALLEL		-- This variable is set to a non-null value if
-##			   we're building a parallel version of the library.
+##    PARALLEL        -- This variable is set to a non-null value if
+##               we're building a parallel version of the library.
 ##
-##    RUNSERIAL	        -- This is a command which will be prepended to
-##			   the executable name to run the executable using
-##			   a single process. For serial versions of the
-##			   library this will normally be empty. For parallel
-##			   versions it might be something like `mpiexec -n 1'.
-##			   The value of this variable is substituted in *.in
-##			   files.
+##    RUNSERIAL            -- This is a command which will be prepended to
+##               the executable name to run the executable using
+##               a single process. For serial versions of the
+##               library this will normally be empty. For parallel
+##               versions it might be something like `mpiexec -n 1'.
+##               The value of this variable is substituted in *.in
+##               files.
 ##
-##    RUNPARALLEL	-- This is a command which will be prepended to
-##			   the executable name to run the executable on
-##			   multiple processors. For the serial library the
-##			   value will normally be the empty string. For
-##			   parallel library it should be something like
-##			   "mpiexec -n \$\${NPROCS:=6}" where NPROCS will
-##			   eventually contain the number of processors on which
-##			   to run the executable (the double dollarsigns are to
-##			   protect the expansion until make executes the
-##			   command).  The value of this variable is
-##			   substituted in *.in files.
+##    RUNPARALLEL    -- This is a command which will be prepended to
+##               the executable name to run the executable on
+##               multiple processors. For the serial library the
+##               value will normally be the empty string. For
+##               parallel library it should be something like
+##               "mpiexec -n \$\${NPROCS:=6}" where NPROCS will
+##               eventually contain the number of processors on which
+##               to run the executable (the double dollarsigns are to
+##               protect the expansion until make executes the
+##               command).  The value of this variable is
+##               substituted in *.in files.
 ##
 
 
@@ -7750,6 +7854,52 @@ else
   FORTRAN_SHARED_CONDITIONAL_FALSE=
 fi
 
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building tests
+##
+
+## This needs to be exposed for the library info file.
+
+
+## Default is to build tests
+HDF5_TESTS=yes
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if building tests is disabled" >&5
+$as_echo_n "checking if building tests is disabled... " >&6; }
+
+# Check whether --enable-tests was given.
+if test "${enable_tests+set}" = set; then :
+  enableval=$enable_tests; HDF5_TESTS=$enableval
+fi
+
+
+if test "X$HDF5_TESTS" = "Xno"; then
+  echo "Building HDF5 tests is disabled"
+fi
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building tools
+##
+
+## This needs to be exposed for the library info file.
+
+
+## Default is to build tests and tools
+HDF5_TOOLS=yes
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if building tools is disabled" >&5
+$as_echo_n "checking if building tools is disabled... " >&6; }
+
+# Check whether --enable-tools was given.
+if test "${enable_tools+set}" = set; then :
+  enableval=$enable_tools; HDF5_TOOLS=$enableval
+fi
+
+
+if test "X$HDF5_TOOLS" = "Xno"; then
+  echo "Building HDF5 tools is disabled"
+fi
 
 ## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
@@ -22292,8 +22442,8 @@ if test "X$STATIC_EXEC" = "Xyes"; then
   echo "yes"
   ## Issue a warning if -static flag is not supported.
   if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
-      echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
-      LT_STATIC_EXEC=""
+    echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+    LT_STATIC_EXEC=""
   else
     LT_STATIC_EXEC="-all-static"
   fi
@@ -24962,7 +25112,6 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
@@ -24979,11 +25128,17 @@ fi
 
 
 ## ----------------------------------------------------------------------
-## Is the dmalloc present? It has a header file `dmalloc.h' and a library
-## `-ldmalloc' and their locations might be specified with the `--with-dmalloc'
-## command-line switch. The value is an include path and/or a library path.
-## If the library path is specified then it must be preceded by a comma.
+## Is dmalloc (debug malloc library) requested? It has a header file
+## `dmalloc.h' and a library `-ldmalloc' and their locations might be
+## specified with the `--with-dmalloc' command-line switch. The value
+## is an include path and/or a library path. If the library path is
+## specified then it must be preceded by a comma.
 ##
+
+
+## Default is not present
+HAVE_DMALLOC=no
+
 
 # Check whether --with-dmalloc was given.
 if test "${with_dmalloc+set}" = set; then :
@@ -24993,8 +25148,8 @@ else
 fi
 
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_DMALLOC="yes"
     for ac_header in dmalloc.h
 do :
@@ -25071,7 +25226,7 @@ fi
       as_fn_error $? "couldn't find dmalloc library" "$LINENO" 5
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_DMALLOC="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dmalloc library" >&5
 $as_echo_n "checking for dmalloc library... " >&6; }
@@ -25203,8 +25358,8 @@ else
 fi
 
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_ZLIB="yes"
     for ac_header in zlib.h
 do :
@@ -25289,7 +25444,7 @@ fi
 
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_ZLIB="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for zlib" >&5
 $as_echo_n "checking for zlib... " >&6; }
@@ -25423,7 +25578,7 @@ $as_echo "#define HAVE_FILTER_DEFLATE 1" >>confdefs.h
   if test "X$EXTERNAL_FILTERS" != "X"; then
     EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
   fi
-  EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
 fi
 
 
@@ -25443,8 +25598,8 @@ else
 fi
 
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_SZLIB="yes"
     for ac_header in szlib.h
 do :
@@ -25521,7 +25676,7 @@ fi
       as_fn_error $? "couldn't find szlib library" "$LINENO" 5
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_SZLIB="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for szlib" >&5
 $as_echo_n "checking for szlib... " >&6; }
@@ -25553,27 +25708,13 @@ $as_echo "suppressed" >&6; }
       AM_CPPFLAGS="$AM_CPPFLAGS -I$szlib_inc"
     fi
 
-    for ac_header in szlib.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "szlib.h" "ac_cv_header_szlib_h" "$ac_includes_default"
-if test "x$ac_cv_header_szlib_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_SZLIB_H 1
-_ACEOF
- HAVE_SZLIB_H="yes"
-else
-  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS" unset HAVE_SZLIB
-fi
-
-done
-
 
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
     fi
 
-    if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+    if test "x$HAVE_SZLIB" = "xyes"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SZ_BufftoBuffCompress in -lsz" >&5
 $as_echo_n "checking for SZ_BufftoBuffCompress in -lsz... " >&6; }
 if ${ac_cv_lib_sz_SZ_BufftoBuffCompress+:} false; then :
@@ -25626,9 +25767,28 @@ _ACEOF
   LIBS="-lsz $LIBS"
 
 else
-  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB
 fi
 
+      if test -n "$HAVE_SZLIB"; then
+        for ac_header in szlib.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "szlib.h" "ac_cv_header_szlib_h" "$ac_includes_default"
+if test "x$ac_cv_header_szlib_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SZLIB_H 1
+_ACEOF
+ HAVE_SZLIB_H="yes"
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS" unset HAVE_SZLIB
+fi
+
+done
+
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled." >&5
+$as_echo "Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled." >&6; }
+      fi
     fi
 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
@@ -25648,7 +25808,7 @@ $as_echo_n "checking for szlib encoder... " >&6; }
   if test -z "$LD_LIBRARY_PATH"; then
     export LD_LIBRARY_PATH="$szlib_lib"
   else
-    export LD_LIBRARY_PATH="$szlib_lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$szlib_lib"
   fi
 
    LL_PATH="$LD_LIBRARY_PATH"
@@ -25665,16 +25825,29 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-        #include <szlib.h>
+                #include "szlib.h"
 
-        int main(void)
-        {
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+
                 /* SZ_encoder_enabled returns 1 if encoder is present */
-            if(SZ_encoder_enabled() == 1)
-                exit(0);
-            else
-                exit(1);
-        }
+                if(SZ_encoder_enabled() == 1)
+                    exit(0);
+                else
+                    exit(1);
+
+  ;
+  return 0;
+}
 
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
@@ -25685,6 +25858,7 @@ fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
+
 
 fi
 
@@ -25708,13 +25882,13 @@ $as_echo "no" >&6; }
     if test "X$EXTERNAL_FILTERS" != "X"; then
       EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
+      EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
   fi
   if test ${hdf5_cv_szlib_can_encode} = "no"; then
     if test "X$EXTERNAL_FILTERS" != "X"; then
       EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
+      EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
   fi
 fi
 
@@ -25818,6 +25992,11 @@ rm -f confcache
 ## Enable thread-safe version of library.  It requires Pthreads support
 ## on POSIX systems.
 ##
+
+
+## Default is no thread-safety
+THREADSAFE=no
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread safe support" >&5
 $as_echo_n "checking for thread safe support... " >&6; }
 # Check whether --enable-threadsafe was given.
@@ -25846,7 +26025,7 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## --enable-threadsafe is also incompatible with --enable-fortran, unless
+## --enable-threadsafe is also incompatible with --enable-fortran unless
 ## --enable-unsupported has been specified on the configure line.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
@@ -25877,7 +26056,7 @@ $as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
 
 
     ## ----------------------------------------------------------------------
-    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## Is the Pthreads library present?  It has a header file `pthread.h' and
     ## a library `-lpthread' and their locations might be specified with the
     ## `--with-pthread' command-line switch.  The value is an include path
     ## and/or a library path.  If the library path is specified then it must
@@ -26176,6 +26355,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 
   #include <sys/time.h>
   #include <time.h>
+
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26252,7 +26432,7 @@ esac
 
 
 ## ----------------------------------------------------------------------
-## Does the struct stat have the st_blocks field?  This field is not Posix.
+## Does the struct stat have the st_blocks field? This field is not POSIX.
 ##
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for st_blocks in struct stat" >&5
 $as_echo_n "checking for st_blocks in struct stat... " >&6; }
@@ -26404,7 +26584,9 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 $as_echo_n "checking for TIOCGWINSZ... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
+
 #include <sys/ioctl.h>
+
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26437,7 +26619,9 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 $as_echo_n "checking for TIOCGETD... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
+
 #include <sys/ioctl.h>
+
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26849,7 +27033,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 int
 main ()
 {
- const char *fname = __FUNCTION__;
+
   ;
   return 0;
 }
@@ -26925,17 +27109,30 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-     #include <stdio.h>
-     #include <stdlib.h>
-     #include <string.h>
+            #include <stdio.h>
+            #include <stdlib.h>
+            #include <string.h>
 
-     int main(void)
-     {
-	char *s = malloc(128);
-	long long x = (long long)1048576 * (long long)1048576;
-	sprintf(s,"%${hdf5_cv_printf_ll}d",x);
-	exit(strcmp(s,"1099511627776"));
-     }
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+
+            char *s = malloc(128);
+            long long x = (long long)1048576 * (long long)1048576;
+            sprintf(s,"%${hdf5_cv_printf_ll}d",x);
+            exit(strcmp(s,"1099511627776"));
+
+  ;
+  return 0;
+}
 
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
@@ -27013,6 +27210,200 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
+
+## ----------------------------------------------------------------------
+## Check if the compiler should include symbols
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking enable debugging symbols" >&5
+$as_echo_n "checking enable debugging symbols... " >&6; }
+# Check whether --enable-symbols was given.
+if test "${enable_symbols+set}" = set; then :
+  enableval=$enable_symbols; SYMBOLS=$enableval
+fi
+
+
+## Set default
+if test "X-$SYMBOLS" = X- ; then
+  if test "X-$CONFIG_MODE" = "X-development" ; then
+    SYMBOLS=yes
+  else
+    SYMBOLS=no
+  fi
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
+case "X-$SYMBOLS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $SYMBOLS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $SYMBOLS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $SYMBOLS_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_SYMBOLS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_SYMBOLS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_SYMBOLS_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $SYMBOLS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $SYMBOLS"
+    H5_FCFLAGS="$H5_FCFLAGS $SYMBOLS"
+    SYMBOLS="custom ($SYMBOLS)"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $SYMBOLS" >&5
+$as_echo "$SYMBOLS" >&6; }
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if developer warnings should be turned on
+## These are warnings that provide suggestions like gcc's -Wsuggest-attribute.
+## They do not indicate code problems.
+##
+## Note that developers don't need to build with these regularly. They
+## are just handy to check once in a while (before releases, etc.).
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking enable developer warnings" >&5
+$as_echo_n "checking enable developer warnings... " >&6; }
+# Check whether --enable-developer-warnings was given.
+if test "${enable_developer_warnings+set}" = set; then :
+  enableval=$enable_developer_warnings; DEV_WARNINGS=$enableval
+fi
+
+
+## Set default
+if test "X-$DEV_WARNINGS" = X- ; then
+  DEV_WARNINGS=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
+case "X-$DEV_WARNINGS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $DEVELOPER_WARNING_CFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_DEVELOPER_WARNING_CFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  *)
+    as_fn_error $? "Unrecognized value: $DEV_WARNINGS" "$LINENO" 5
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if the compiler should use profiling flags/settings
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking profiling" >&5
+$as_echo_n "checking profiling... " >&6; }
+# Check whether --enable-profiling was given.
+if test "${enable_profiling+set}" = set; then :
+  enableval=$enable_profiling; PROFILING=$enableval
+fi
+
+
+## Default is no profiling
+if test "X-$PROFILING" = X- ; then
+    PROFILING=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
+case "X-$PROFILING" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $PROFILE_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROFILE_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $PROFILE_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  X-no)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $PROFILING"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROFILING"
+    H5_FCFLAGS="$H5_FCFLAGS $PROFILING"
+    PROFILING="custom ($PROFILING)"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PROFILING" >&5
+$as_echo "$PROFILING" >&6; }
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if the compiler should use a particular optimization setting
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking optimization level" >&5
+$as_echo_n "checking optimization level... " >&6; }
+# Check whether --enable-optimization was given.
+if test "${enable_optimization+set}" = set; then :
+  enableval=$enable_optimization; OPTIMIZATION=$enableval
+fi
+
+
+## Set the default optimization level. This depends on the compiler mode.
+if test "X-$OPTIMIZATION" = X- ; then
+  case "X-$CONFIG_MODE" in
+  X-debug)
+    OPTIMIZATION=debug
+    ;;
+  X-production)
+    OPTIMIZATION=high
+    ;;
+  X-clean)
+    OPTIMIZATION=none
+    ;;
+  esac
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
+case "X-$OPTIMIZATION" in
+  X-high)
+    H5_CFLAGS="$H5_CFLAGS $HIGH_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $HIGH_OPT_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $HIGH_OPT_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: high" >&5
+$as_echo "high" >&6; }
+    ;;
+  X-debug)
+    H5_CFLAGS="$H5_CFLAGS $DEBUG_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DEBUG_OPT_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DEBUG_OPT_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: debug" >&5
+$as_echo "debug" >&6; }
+    ;;
+  X-none)
+    H5_CFLAGS="$H5_CFLAGS $NO_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_OPT_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_OPT_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: none" >&5
+$as_echo "none" >&6; }
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $OPTIMIZATION"
+    H5_CXXFLAGS="$H5_CXXFLAGS $OPTIMIZATION"
+    H5_FCFLAGS="$H5_FCFLAGS $OPTIMIZATION"
+    OPTIMIZATION="custom ($OPTIMIZATION)"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $OPTIMIZATION" >&5
+$as_echo "$OPTIMIZATION" >&6; }
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags
@@ -27232,7 +27623,6 @@ esac
 ##     more scrupulous with it's memory operations.  Enabling this also
 ##     disables the library's free space manager code.
 ##
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether a memory checking tool will be used" >&5
 $as_echo_n "checking whether a memory checking tool will be used... " >&6; }
 # Check whether --enable-using-memchecker was given.
@@ -27241,19 +27631,29 @@ if test "${enable_using_memchecker+set}" = set; then :
 fi
 
 
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
+## Set the default level.
+if test "X-$USINGMEMCHECKER" = X- ; then
+  USINGMEMCHECKER=no
+fi
+
 case "X-$USINGMEMCHECKER" in
   X-yes)
-      USINGMEMCHECKER=yes
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
 
 $as_echo "#define USING_MEMCHECKER 1" >>confdefs.h
 
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
     ;;
-  *)
-      USINGMEMCHECKER=no
+  X-no)
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
+    ;;
+  *)
+      as_fn_error $? "Unrecognized value: $USINGMEMCHECKER" "$LINENO" 5
     ;;
 esac
 
@@ -27405,7 +27805,7 @@ int
 main ()
 {
  MPI_Init(0, (void *)0);
-		      MPI_File_open(0, (void *)0, 0, 0, (void *)0);
+            MPI_File_open(0, (void *)0, 0, 0, (void *)0);
   ;
   return 0;
 }
@@ -27416,7 +27816,7 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-		    as_fn_error $? "unable to link a simple MPI-IO C program" "$LINENO" 5
+            as_fn_error $? "unable to link a simple MPI-IO C program" "$LINENO" 5
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -27429,17 +27829,11 @@ ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
-
+      TEST_SRC="`sed -n '/PROGRAM FC_MPI_CHECK/,/END PROGRAM FC_MPI_CHECK/p' $srcdir/m4/aclocal_fc.f90`"
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether a simple MPI-IO Fortran program can be linked" >&5
 $as_echo_n "checking whether a simple MPI-IO Fortran program can be linked... " >&6; }
       cat > conftest.$ac_ext <<_ACEOF
-
-          PROGRAM main
-          USE mpi
-          INTEGER :: comm, amode, info, fh, ierror
-          CHARACTER(LEN=1) :: filename
-          CALL MPI_File_open( comm, filename, amode, info, fh, ierror)
-          END
+$TEST_SRC
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -27476,12 +27870,16 @@ esac
 
 ## ----------------------------------------------------------------------
 ## Print some other parallel information and do some sanity checks.
+## Needs to be done outside of the PARALLEL block since the serial
+## build also needs to have values defined.
 ##
  ADD_PARALLEL_FILES="no"
 
 if test -n "$PARALLEL"; then
-  ## The 'testpar' directory should participate in the build
-  TESTPARALLEL=testpar
+  if test "X$HDF5_TESTS" = "Xyes"; then
+    ## The 'testpar' directory should participate in the build
+    TESTPARALLEL=testpar
+  fi
 
   ## We are building a parallel library
 
@@ -27521,7 +27919,9 @@ $as_echo_n "checking for MPI_Comm_c2f and MPI_Comm_f2c functions... " >&6; }
 
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <mpi.h>
+
+    #include <mpi.h>
+
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -27542,7 +27942,7 @@ if ac_fn_c_try_link "$LINENO"; then :
 
 $as_echo "#define HAVE_MPI_MULTI_LANG_Comm 1" >>confdefs.h
 
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+                 { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -27577,7 +27977,7 @@ if ac_fn_c_try_link "$LINENO"; then :
 
 $as_echo "#define HAVE_MPI_MULTI_LANG_Info 1" >>confdefs.h
 
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -27864,8 +28264,9 @@ fi
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
-## Check these regardless. If the checks are moved inside the main
-## direct VFD block, the output is nested.
+
+## Default is no direct VFD
+DIRECT_VFD=no
 
 if ${hdf5_cv_direct_io+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -27925,6 +28326,7 @@ else
 $as_echo "no" >&6; }
 fi
 
+## Direct VFD files are not built if not required.
  if test "X$DIRECT_VFD" = "Xyes"; then
   DIRECT_VFD_CONDITIONAL_TRUE=
   DIRECT_VFD_CONDITIONAL_FALSE='#'
@@ -27932,6 +28334,548 @@ else
   DIRECT_VFD_CONDITIONAL_TRUE='#'
   DIRECT_VFD_CONDITIONAL_FALSE=
 fi
+
+
+## ----------------------------------------------------------------------
+## Check if Read-Only S3 virtual file driver is enabled by --enable-ros3-vfd
+##
+
+
+## Default is no Read-Only S3 VFD
+ROS3_VFD=no
+
+# Check whether --enable-ros3-vfd was given.
+if test "${enable_ros3_vfd+set}" = set; then :
+  enableval=$enable_ros3_vfd; ROS3_VFD=$enableval
+else
+  ROS3_VFD=no
+fi
+
+
+if test "X$ROS3_VFD" = "Xyes"; then
+    for ac_header in curl/curl.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "curl/curl.h" "ac_cv_header_curl_curl_h" "$ac_includes_default"
+if test "x$ac_cv_header_curl_curl_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_CURL_CURL_H 1
+_ACEOF
+
+else
+  unset ROS3_VFD
+fi
+
+done
+
+    for ac_header in openssl/evp.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "openssl/evp.h" "ac_cv_header_openssl_evp_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_evp_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_OPENSSL_EVP_H 1
+_ACEOF
+
+else
+  unset ROS3_VFD
+fi
+
+done
+
+    for ac_header in openssl/hmac.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "openssl/hmac.h" "ac_cv_header_openssl_hmac_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_hmac_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_OPENSSL_HMAC_H 1
+_ACEOF
+
+else
+  unset ROS3_VFD
+fi
+
+done
+
+    for ac_header in openssl/sha.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "openssl/sha.h" "ac_cv_header_openssl_sha_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_sha_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_OPENSSL_SHA_H 1
+_ACEOF
+
+else
+  unset ROS3_VFD
+fi
+
+done
+
+    if test "X$ROS3_VFD" = "Xyes"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for curl_global_init in -lcurl" >&5
+$as_echo_n "checking for curl_global_init in -lcurl... " >&6; }
+if ${ac_cv_lib_curl_curl_global_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcurl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char curl_global_init ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return curl_global_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_curl_curl_global_init=yes
+else
+  ac_cv_lib_curl_curl_global_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_curl_curl_global_init" >&5
+$as_echo "$ac_cv_lib_curl_curl_global_init" >&6; }
+if test "x$ac_cv_lib_curl_curl_global_init" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCURL 1
+_ACEOF
+
+  LIBS="-lcurl $LIBS"
+
+else
+  unset ROS3_VFD
+fi
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_sha256 in -lcrypto" >&5
+$as_echo_n "checking for EVP_sha256 in -lcrypto... " >&6; }
+if ${ac_cv_lib_crypto_EVP_sha256+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char EVP_sha256 ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return EVP_sha256 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_crypto_EVP_sha256=yes
+else
+  ac_cv_lib_crypto_EVP_sha256=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_EVP_sha256" >&5
+$as_echo "$ac_cv_lib_crypto_EVP_sha256" >&6; }
+if test "x$ac_cv_lib_crypto_EVP_sha256" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCRYPTO 1
+_ACEOF
+
+  LIBS="-lcrypto $LIBS"
+
+else
+  unset ROS3_VFD
+fi
+
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if the Read-Only S3 virtual file driver (VFD) is enabled" >&5
+$as_echo_n "checking if the Read-Only S3 virtual file driver (VFD) is enabled... " >&6; }
+    if test "X$ROS3_VFD" = "Xyes"; then
+
+$as_echo "#define HAVE_ROS3_VFD 1" >>confdefs.h
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+        ROS3_VFD=no
+        as_fn_error $? "The Read-Only S3 VFD was requested but cannot be built.
+                      Please check that openssl and cURL are available on your
+                      system, and/or re-configure without option
+                      --enable-ros3-vfd." "$LINENO" 5
+    fi
+else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if the Read-Only S3 virtual file driver (VFD) is enabled" >&5
+$as_echo_n "checking if the Read-Only S3 virtual file driver (VFD) is enabled... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ROS3_VFD=no
+
+fi
+
+## Read-only S3 files are not built if not required.
+ if test "X$ROS3_VFD" = "Xyes"; then
+  ROS3_VFD_CONDITIONAL_TRUE=
+  ROS3_VFD_CONDITIONAL_FALSE='#'
+else
+  ROS3_VFD_CONDITIONAL_TRUE='#'
+  ROS3_VFD_CONDITIONAL_FALSE=
+fi
+
+
+
+## ----------------------------------------------------------------------
+## Is libhdfs (Hadoop Distributed File System) present?
+## It might be specified with the `--with-libhdfs' command-line switch.
+## If found, enables the HDFS VFD.
+##
+
+
+# Check whether --with-libhdfs was given.
+if test "${with_libhdfs+set}" = set; then :
+  withval=$with_libhdfs;
+else
+  withval=no
+fi
+
+
+case $withval in
+  no)
+    HAVE_LIBHDFS="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libhdfs" >&5
+$as_echo_n "checking for libhdfs... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+    ;;
+  *)
+    HAVE_LIBHDFS="yes"
+    case "$withval" in
+      *,*)
+        libhdfs_inc="`echo $withval |cut -f1 -d,`"
+        libhdfs_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      yes)
+        libhdfs_inc="$HADOOP_HOME/include"
+        libhdfs_lib="$HADOOP_HOME/lib"
+        ;;
+      *)
+        if test -n "$withval"; then
+          libhdfs_inc="$withval/include"
+          libhdfs_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    if test -n "$libhdfs_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$libhdfs_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$libhdfs_inc"
+    fi
+    for ac_header in hdfs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "hdfs.h" "ac_cv_header_hdfs_h" "$ac_includes_default"
+if test "x$ac_cv_header_hdfs_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_HDFS_H 1
+_ACEOF
+
+else
+  unset HAVE_LIBHDFS
+fi
+
+done
+
+
+    if test "x$HAVE_LIBHDFS" = "xyes"; then
+            JNI_LDFLAGS=""
+      if test $JAVA_HOME != ""
+      then
+        JNI_LDFLAGS="-L$JAVA_HOME/jre/lib/$OS_ARCH -L$JAVA_HOME/jre/lib/$OS_ARCH/server"
+      fi
+      ldflags_bak=$LDFLAGS
+      LDFLAGS="$LDFLAGS $JNI_LDFLAGS"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for JNI_GetCreatedJavaVMs in -ljvm" >&5
+$as_echo_n "checking for JNI_GetCreatedJavaVMs in -ljvm... " >&6; }
+if ${ac_cv_lib_jvm_JNI_GetCreatedJavaVMs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ljvm  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char JNI_GetCreatedJavaVMs ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return JNI_GetCreatedJavaVMs ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_jvm_JNI_GetCreatedJavaVMs=yes
+else
+  ac_cv_lib_jvm_JNI_GetCreatedJavaVMs=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_jvm_JNI_GetCreatedJavaVMs" >&5
+$as_echo "$ac_cv_lib_jvm_JNI_GetCreatedJavaVMs" >&6; }
+if test "x$ac_cv_lib_jvm_JNI_GetCreatedJavaVMs" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBJVM 1
+_ACEOF
+
+  LIBS="-ljvm $LIBS"
+
+fi
+
+      LDFLAGS=$ldflags_bak
+
+      if test -n "$libhdfs_lib"; then
+        ## Hadoop distribution hides libraries down one level in 'lib/native'
+        libhdfs_lib="$libhdfs_lib/native"
+        LDFLAGS="$LDFLAGS -L$libhdfs_lib $JNI_LDFLAGS"
+        AM_LDFLAGS="$AM_LDFLAGS -L$libhdfs_lib $JNI_LDFLAGS"
+      fi
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for hdfsConnect in -lhdfs" >&5
+$as_echo_n "checking for hdfsConnect in -lhdfs... " >&6; }
+if ${ac_cv_lib_hdfs_hdfsConnect+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lhdfs  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char hdfsConnect ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return hdfsConnect ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_hdfs_hdfsConnect=yes
+else
+  ac_cv_lib_hdfs_hdfsConnect=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_hdfs_hdfsConnect" >&5
+$as_echo "$ac_cv_lib_hdfs_hdfsConnect" >&6; }
+if test "x$ac_cv_lib_hdfs_hdfsConnect" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBHDFS 1
+_ACEOF
+
+  LIBS="-lhdfs $LIBS"
+
+else
+  unset HAVE_LIBHDFS
+fi
+
+    fi
+
+    if test -z "$HAVE_LIBHDFS"; then
+      as_fn_error $? "Set to use libhdfs library, but could not find or use
+                    libhdfs. Please verify that the path to HADOOP_HOME is
+                    valid, and/or reconfigure without --with-libhdfs." "$LINENO" 5
+    fi
+    ;;
+esac
+
+if test "x$HAVE_LIBHDFS" = "xyes"; then
+
+$as_echo "#define HAVE_LIBHDFS 1" >>confdefs.h
+
+fi
+
+## Checkpoint the cache
+cat >confcache <<\_ACEOF
+# This file is a shell script that caches the results of configure
+# tests run on this system so they can be shared between configure
+# scripts and configure runs, see configure's option --config-cache.
+# It is not useful on other systems.  If it contains results you don't
+# want to keep, you may remove or edit it.
+#
+# config.status only pays attention to the cache file if you give it
+# the --recheck option to rerun configure.
+#
+# `ac_cv_env_foo' variables (set or unset) will be overridden when
+# loading this file, other *unset* `ac_cv_foo' will be assigned the
+# following values.
+
+_ACEOF
+
+# The following way of writing the cache mishandles newlines in values,
+# but we know of no workaround that is simple, portable, and efficient.
+# So, we kill variables containing newlines.
+# Ultrix sh set writes to stderr and can't be redirected directly,
+# and sets the high bit in the cache file unless we assign to the vars.
+(
+  for ac_var in `(set) 2>&1 | sed -n 's/^\([a-zA-Z_][a-zA-Z0-9_]*\)=.*/\1/p'`; do
+    eval ac_val=\$$ac_var
+    case $ac_val in #(
+    *${as_nl}*)
+      case $ac_var in #(
+      *_cv_*) { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: cache variable $ac_var contains a newline" >&5
+$as_echo "$as_me: WARNING: cache variable $ac_var contains a newline" >&2;} ;;
+      esac
+      case $ac_var in #(
+      _ | IFS | as_nl) ;; #(
+      BASH_ARGV | BASH_SOURCE) eval $ac_var= ;; #(
+      *) { eval $ac_var=; unset $ac_var;} ;;
+      esac ;;
+    esac
+  done
+
+  (set) 2>&1 |
+    case $as_nl`(ac_space=' '; set) 2>&1` in #(
+    *${as_nl}ac_space=\ *)
+      # `set' does not quote correctly, so add quotes: double-quote
+      # substitution turns \\\\ into \\, and sed turns \\ into \.
+      sed -n \
+	"s/'/'\\\\''/g;
+	  s/^\\([_$as_cr_alnum]*_cv_[_$as_cr_alnum]*\\)=\\(.*\\)/\\1='\\2'/p"
+      ;; #(
+    *)
+      # `set' quotes correctly as required by POSIX, so do not add quotes.
+      sed -n "/^[_$as_cr_alnum]*_cv_[_$as_cr_alnum]*=/p"
+      ;;
+    esac |
+    sort
+) |
+  sed '
+     /^ac_cv_env_/b end
+     t clear
+     :clear
+     s/^\([^=]*\)=\(.*[{}].*\)$/test "${\1+set}" = set || &/
+     t end
+     s/^\([^=]*\)=\(.*\)$/\1=${\1=\2}/
+     :end' >>confcache
+if diff "$cache_file" confcache >/dev/null 2>&1; then :; else
+  if test -w "$cache_file"; then
+    if test "x$cache_file" != "x/dev/null"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: updating cache $cache_file" >&5
+$as_echo "$as_me: updating cache $cache_file" >&6;}
+      if test ! -f "$cache_file" || test -h "$cache_file"; then
+	cat confcache >"$cache_file"
+      else
+        case $cache_file in #(
+        */* | ?:*)
+	  mv -f confcache "$cache_file"$$ &&
+	  mv -f "$cache_file"$$ "$cache_file" ;; #(
+        *)
+	  mv -f confcache "$cache_file" ;;
+	esac
+      fi
+    fi
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: not updating unwritable cache $cache_file" >&5
+$as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
+  fi
+fi
+rm -f confcache
+
+## ----------------------------------------------------------------------
+## Use custom examples path.
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for custom examples path definition" >&5
+$as_echo_n "checking for custom examples path definition... " >&6; }
+
+# Check whether --with-examplesdir was given.
+if test "${with_examplesdir+set}" = set; then :
+  withval=$with_examplesdir;
+else
+  withval="${datarootdir}/hdf5_examples"
+fi
+
+
+if test "X$withval" = "X"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: default" >&5
+$as_echo "default" >&6; }
+    examplesdir="${datarootdir}/hdf5_examples"
+else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $withval" >&5
+$as_echo "$withval" >&6; }
+    examplesdir=$withval
+fi
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define EXAMPLESDIR "$examplesdir"
+_ACEOF
 
 
 ## ----------------------------------------------------------------------
@@ -28849,7 +29793,7 @@ else
   BUILD_CXX_CONDITIONAL_FALSE=
 fi
 
- if test -n "$TESTPARALLEL"; then
+ if test "X$PARALLEL" = "Xyes"; then
   BUILD_PARALLEL_CONDITIONAL_TRUE=
   BUILD_PARALLEL_CONDITIONAL_FALSE='#'
 else
@@ -28873,6 +29817,29 @@ else
   BUILD_HDF5_HL_CONDITIONAL_FALSE=
 fi
 
+ if test "X$HDF5_TESTS" = "Xyes"; then
+  BUILD_TESTS_CONDITIONAL_TRUE=
+  BUILD_TESTS_CONDITIONAL_FALSE='#'
+else
+  BUILD_TESTS_CONDITIONAL_TRUE='#'
+  BUILD_TESTS_CONDITIONAL_FALSE=
+fi
+
+ if test -n "$TESTPARALLEL"; then
+  BUILD_TESTS_PARALLEL_CONDITIONAL_TRUE=
+  BUILD_TESTS_PARALLEL_CONDITIONAL_FALSE='#'
+else
+  BUILD_TESTS_PARALLEL_CONDITIONAL_TRUE='#'
+  BUILD_TESTS_PARALLEL_CONDITIONAL_FALSE=
+fi
+
+ if test "X$HDF5_TOOLS" = "Xyes"; then
+  BUILD_TOOLS_CONDITIONAL_TRUE=
+  BUILD_TOOLS_CONDITIONAL_FALSE='#'
+else
+  BUILD_TOOLS_CONDITIONAL_TRUE='#'
+  BUILD_TOOLS_CONDITIONAL_FALSE=
+fi
 
 
 ## ----------------------------------------------------------------------
@@ -30769,7 +31736,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/h5dump_plugin.sh tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/Makefile tools/h5ls/h5ls_plugin.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/h5diff_plugin.sh tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile tools/perform/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
+ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile testpar/testpflush.sh tools/Makefile tools/h5dump/Makefile tools/h5dump/h5dump_plugin.sh tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/Makefile tools/h5ls/h5ls_plugin.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/h5diff_plugin.sh tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/libtest/Makefile tools/misc/Makefile tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile tools/perform/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh bin/h5cc bin/Makefile c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
 
 
 cat >confcache <<\_ACEOF
@@ -30954,6 +31921,10 @@ if test -z "${DIRECT_VFD_CONDITIONAL_TRUE}" && test -z "${DIRECT_VFD_CONDITIONAL
   as_fn_error $? "conditional \"DIRECT_VFD_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${ROS3_VFD_CONDITIONAL_TRUE}" && test -z "${ROS3_VFD_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"ROS3_VFD_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${BUILD_ALL_CONDITIONAL_TRUE}" && test -z "${BUILD_ALL_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_ALL_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -30972,6 +31943,18 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_HDF5_HL_CONDITIONAL_TRUE}" && test -z "${BUILD_HDF5_HL_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_HDF5_HL_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_TESTS_CONDITIONAL_TRUE}" && test -z "${BUILD_TESTS_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_TESTS_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_TESTS_PARALLEL_CONDITIONAL_TRUE}" && test -z "${BUILD_TESTS_PARALLEL_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_TESTS_PARALLEL_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_TOOLS_CONDITIONAL_TRUE}" && test -z "${BUILD_TOOLS_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_TOOLS_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_SHARED_CONDITIONAL_TRUE}" && test -z "${HAVE_SHARED_CONDITIONAL_FALSE}"; then
@@ -32053,6 +33036,7 @@ do
     "test/testlinks_env.sh") CONFIG_FILES="$CONFIG_FILES test/testlinks_env.sh" ;;
     "test/test_plugin.sh") CONFIG_FILES="$CONFIG_FILES test/test_plugin.sh" ;;
     "testpar/Makefile") CONFIG_FILES="$CONFIG_FILES testpar/Makefile" ;;
+    "testpar/testpflush.sh") CONFIG_FILES="$CONFIG_FILES testpar/testpflush.sh" ;;
     "tools/Makefile") CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
     "tools/h5dump/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5dump/Makefile" ;;
     "tools/h5dump/h5dump_plugin.sh") CONFIG_FILES="$CONFIG_FILES tools/h5dump/h5dump_plugin.sh" ;;
@@ -32076,8 +33060,8 @@ do
     "tools/h5copy/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5copy/Makefile" ;;
     "tools/h5copy/testh5copy.sh") CONFIG_FILES="$CONFIG_FILES tools/h5copy/testh5copy.sh" ;;
     "tools/lib/Makefile") CONFIG_FILES="$CONFIG_FILES tools/lib/Makefile" ;;
+    "tools/libtest/Makefile") CONFIG_FILES="$CONFIG_FILES tools/libtest/Makefile" ;;
     "tools/misc/Makefile") CONFIG_FILES="$CONFIG_FILES tools/misc/Makefile" ;;
-    "tools/misc/h5cc") CONFIG_FILES="$CONFIG_FILES tools/misc/h5cc" ;;
     "tools/misc/testh5mkgrp.sh") CONFIG_FILES="$CONFIG_FILES tools/misc/testh5mkgrp.sh" ;;
     "tools/misc/testh5repart.sh") CONFIG_FILES="$CONFIG_FILES tools/misc/testh5repart.sh" ;;
     "tools/h5stat/testh5stat.sh") CONFIG_FILES="$CONFIG_FILES tools/h5stat/testh5stat.sh" ;;
@@ -32086,6 +33070,8 @@ do
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
     "examples/run-c-ex.sh") CONFIG_FILES="$CONFIG_FILES examples/run-c-ex.sh" ;;
     "examples/testh5cc.sh") CONFIG_FILES="$CONFIG_FILES examples/testh5cc.sh" ;;
+    "bin/h5cc") CONFIG_FILES="$CONFIG_FILES bin/h5cc" ;;
+    "bin/Makefile") CONFIG_FILES="$CONFIG_FILES bin/Makefile" ;;
     "c++/Makefile") CONFIG_FILES="$CONFIG_FILES c++/Makefile" ;;
     "c++/src/Makefile") CONFIG_FILES="$CONFIG_FILES c++/src/Makefile" ;;
     "c++/src/h5c++") CONFIG_FILES="$CONFIG_FILES c++/src/h5c++" ;;
@@ -33728,7 +34714,7 @@ $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
 
-chmod 755 tools/misc/h5cc
+chmod 755 bin/h5cc
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi
@@ -33745,14 +34731,14 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 
-  ### libtool does not pass the correct argument linking (-WL,-Wl,,) for the NAG Fortran compiler
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
   ### on Linux (other OSs have not been tested).
   ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
   ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
   case "`uname`" in
     Linux*)
       if test "X$FC_BASENAME" = "Xnagfor"; then
-        cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,-Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+         cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,-Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       fi
       ;;
   esac

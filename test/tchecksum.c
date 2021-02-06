@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,14 +30,13 @@
 /**********/
 /* Macros */
 /**********/
-#define BUF_LEN 3093    /* No particular value */
+#define BUF_LEN 3093 /* No particular value */
 
 /*******************/
 /* Local variables */
 /*******************/
 uint8_t large_buf[BUF_LEN];
 
-
 /****************************************************************
 **
 **  test_chksum_size_one(): Checksum 1 byte buffer
@@ -46,8 +45,8 @@ uint8_t large_buf[BUF_LEN];
 static void
 test_chksum_size_one(void)
 {
-    uint8_t buf[1] = {23};      /* Buffer to checksum */
-    uint32_t chksum;    /* Checksum value */
+    uint8_t  buf[1] = {23}; /* Buffer to checksum */
+    uint32_t chksum;        /* Checksum value */
 
     /* Buffer w/real data */
     chksum = H5_checksum_fletcher32(buf, sizeof(buf));
@@ -71,7 +70,6 @@ test_chksum_size_one(void)
     VERIFY(chksum, 0x8ba9414b, "H5_checksum_lookup3");
 } /* test_chksum_size_one() */
 
-
 /****************************************************************
 **
 **  test_chksum_size_two(): Checksum 2 byte buffer
@@ -80,8 +78,8 @@ test_chksum_size_one(void)
 static void
 test_chksum_size_two(void)
 {
-    uint8_t buf[2] = {23, 187};         /* Buffer to checksum */
-    uint32_t chksum;                    /* Checksum value */
+    uint8_t  buf[2] = {23, 187}; /* Buffer to checksum */
+    uint32_t chksum;             /* Checksum value */
 
     /* Buffer w/real data */
     chksum = H5_checksum_fletcher32(buf, sizeof(buf));
@@ -105,7 +103,6 @@ test_chksum_size_two(void)
     VERIFY(chksum, 0x62cd61b3, "H5_checksum_lookup3");
 } /* test_chksum_size_two() */
 
-
 /****************************************************************
 **
 **  test_chksum_size_three(): Checksum 3 byte buffer
@@ -114,8 +111,8 @@ test_chksum_size_two(void)
 static void
 test_chksum_size_three(void)
 {
-    uint8_t buf[3] = {23, 187, 98};     /* Buffer to checksum */
-    uint32_t chksum;                    /* Checksum value */
+    uint8_t  buf[3] = {23, 187, 98}; /* Buffer to checksum */
+    uint32_t chksum;                 /* Checksum value */
 
     /* Buffer w/real data */
     chksum = H5_checksum_fletcher32(buf, sizeof(buf));
@@ -139,7 +136,6 @@ test_chksum_size_three(void)
     VERIFY(chksum, 0x6bd0060f, "H5_checksum_lookup3");
 } /* test_chksum_size_three() */
 
-
 /****************************************************************
 **
 **  test_chksum_size_four(): Checksum 4 byte buffer
@@ -148,8 +144,8 @@ test_chksum_size_three(void)
 static void
 test_chksum_size_four(void)
 {
-    uint8_t buf[4] = {23, 187, 98, 217};/* Buffer to checksum */
-    uint32_t chksum;                    /* Checksum value */
+    uint8_t  buf[4] = {23, 187, 98, 217}; /* Buffer to checksum */
+    uint32_t chksum;                      /* Checksum value */
 
     /* Buffer w/real data */
     chksum = H5_checksum_fletcher32(buf, sizeof(buf));
@@ -173,7 +169,6 @@ test_chksum_size_four(void)
     VERIFY(chksum, 0x049396b8, "H5_checksum_lookup3");
 } /* test_chksum_size_four() */
 
-
 /****************************************************************
 **
 **  test_chksum_large(): Checksum larger buffer
@@ -182,11 +177,11 @@ test_chksum_size_four(void)
 static void
 test_chksum_large(void)
 {
-    uint32_t chksum;            /* Checksum value */
-    size_t u;                   /* Local index variable */
+    uint32_t chksum; /* Checksum value */
+    size_t   u;      /* Local index variable */
 
     /* Initialize buffer w/known data */
-    for(u = 0; u < BUF_LEN; u++)
+    for (u = 0; u < BUF_LEN; u++)
         large_buf[u] = u * 3;
 
     /* Buffer w/real data */
@@ -211,7 +206,6 @@ test_chksum_large(void)
     VERIFY(chksum, 0x930c7afc, "H5_checksum_lookup3");
 } /* test_chksum_large() */
 
-
 /****************************************************************
 **
 **  test_checksum(): Main checksum testing routine.
@@ -224,15 +218,14 @@ test_checksum(void)
     MESSAGE(5, ("Testing checksum algorithms\n"));
 
     /* Various checks for fletcher32 checksum algorithm */
-    test_chksum_size_one();		/* Test buffer w/only 1 byte */
-    test_chksum_size_two();		/* Test buffer w/only 2 bytes */
-    test_chksum_size_three();		/* Test buffer w/only 3 bytes */
-    test_chksum_size_four();		/* Test buffer w/only 4 bytes */
-    test_chksum_large();		/* Test buffer w/larger # of bytes */
+    test_chksum_size_one();   /* Test buffer w/only 1 byte */
+    test_chksum_size_two();   /* Test buffer w/only 2 bytes */
+    test_chksum_size_three(); /* Test buffer w/only 3 bytes */
+    test_chksum_size_four();  /* Test buffer w/only 4 bytes */
+    test_chksum_large();      /* Test buffer w/larger # of bytes */
 
 } /* test_checksum() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	cleanup_checksum
  *
@@ -250,4 +243,3 @@ cleanup_checksum(void)
 {
     /* no file to clean */
 }
-

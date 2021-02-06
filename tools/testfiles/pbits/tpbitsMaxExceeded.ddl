@@ -12,6 +12,16 @@ usage: h5dump [OPTIONS] files
      -b B, --binary=B     Binary file output, of form B
      -O F, --ddl=F        Output ddl text into file F
                           Use blank(empty) filename F to suppress ddl display
+     --s3-cred=<cred>     Supply S3 authentication information to "ros3" vfd.
+                          <cred> :: "(<aws-region>,<access-id>,<access-key>)"
+                          If absent or <cred> -> "(,,)", no authentication.
+                          Has no effect if filedriver is not "ros3".
+     --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.
+                          For use with "--filedriver=hdfs"
+                          <attrs> :: (<namenode name>,<namenode port>,
+                                      <kerberos cache path>,<username>,
+                                      <buffer size>)
+                          Any absent attribute will use a default value.
 --------------- Object Options ---------------
      -a P, --attribute=P  Print the specified attribute
                           If an attribute name contains a slash (/), escape the
@@ -55,7 +65,7 @@ usage: h5dump [OPTIONS] files
      -D U, --xml-dtd=U    Use the DTD or schema at U
      -X S, --xml-ns=S     (XML Schema) Use qualified names n the XML
                           ":": no namespace, default: "hdf5:"
-                          E.g., to dump a file called `-f', use h5dump -- -f
+                          E.g., to dump a file called "-f", use h5dump -- -f
 
 --------------- Subsetting Options ---------------
  Subsetting is available by using the following options with a dataset
@@ -133,4 +143,3 @@ usage: h5dump [OPTIONS] files
 
       h5dump -d /foo -f family fam%05d.h5
 
-h5dump error: Too many masks requested (max. 8). Mask list(0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1)
