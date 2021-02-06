@@ -6022,6 +6022,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         if (udata->chunk_in_cache) {
             HDassert(H5F_addr_defined(chunk_rec->chunk_addr));
+            HDassert(ent);
             HDassert(H5F_addr_defined(ent->chunk_block.offset));
 
             H5_CHECKED_ASSIGN(nbytes, size_t, shared_fo->layout.u.chunk.size, uint32_t);
