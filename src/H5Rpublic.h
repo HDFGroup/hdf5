@@ -46,13 +46,13 @@
  * the datatype message header.
  */
 typedef enum {
-    H5R_BADTYPE         = (-1), /* Invalid reference type           */
-    H5R_OBJECT1         = 0,    /* Backward compatibility (object)  */
-    H5R_DATASET_REGION1 = 1,    /* Backward compatibility (region)  */
-    H5R_OBJECT2         = 2,    /* Object reference                 */
-    H5R_DATASET_REGION2 = 3,    /* Region reference                 */
-    H5R_ATTR            = 4,    /* Attribute Reference              */
-    H5R_MAXTYPE         = 5     /* Highest type (invalid)           */
+    H5R_BADTYPE         = (-1), /**< Invalid reference type           */
+    H5R_OBJECT1         = 0,    /**< Backward compatibility (object)  */
+    H5R_DATASET_REGION1 = 1,    /**< Backward compatibility (region)  */
+    H5R_OBJECT2         = 2,    /**< Object reference                 */
+    H5R_DATASET_REGION2 = 3,    /**< Region reference                 */
+    H5R_ATTR            = 4,    /**< Attribute Reference              */
+    H5R_MAXTYPE         = 5     /**< Highest type (invalid)           */
 } H5R_type_t;
 
 /* Deprecated types are kept for backward compatibility with previous versions */
@@ -236,7 +236,7 @@ H5_DLL herr_t H5Rdestroy(H5R_ref_t *ref_ptr);
  *
  * \param[in] ref_ptr  Pointer to reference
  *
- * \return Returns a valid reference type if successful; otherwise returns #H5R_UNKNOWN.
+ * \return Returns a valid reference type if successful; otherwise returns #H5R_BADTYPE .
  *
  * \details Given a reference, \p ref_ptr, H5Rget_type() returns the
  *          type of the reference.
@@ -245,9 +245,9 @@ H5_DLL herr_t H5Rdestroy(H5R_ref_t *ref_ptr);
  *
  *          #H5R_OBJECT2 Object reference version 2
  *          #H5R_DATASET_REGION2 Region reference version 2
- *          #H5R_ATTRIBUTE   Attribute reference
+ *          #H5R_ATTR   Attribute reference
  *
- *          Note that #H5R_OBJECT1 and #H5R_DATASET REGION1 can never be
+ *          Note that #H5R_OBJECT1 and #H5R_DATASET_REGION1 can never be
  *          associated to an H5R_ref_t reference and can therefore never be
  *          returned through that function.
  *
@@ -540,12 +540,12 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  * \details H5Rget_obj_name() retrieves the object name for the object,
  *          region or attribute reference pointed to by \p ref_ptr.
  *
- *          The parameter \p rapl id is a reference access property list
+ *          The parameter \p rapl_id is a reference access property list
  *          identifier for the reference. The access property list can
  *          be used to access external files that the reference points to
  *          (through a file access property list).
  *
- *          Up to size characters of the name are returned in name; additional
+ *          Up to size characters of the name are returned in \p name; additional
  *          characters, if any, are not returned to the user application. If
  *          the length of the name, which determines the required value of
  *          \p size, is unknown, a preliminary call to H5Rget_obj_name() call
@@ -553,8 +553,8 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *          object name. That value can then be passed in for \p size in the
  *          second call to H5Rget_obj_name(), which will retrieve the actual
  *          name. If there is no name associated with the object identifier
- *          or if the name is #NULL, H5Rget_obj_name() returns the size of
- *          the name buffer (the size does not include the #NULL terminator).
+ *          or if the name is NULL, H5Rget_obj_name() returns the size of
+ *          the name buffer (the size does not include the \c \0 terminator).
  *
  *          If \p ref_ptr is an object reference, \p name will be returned with
  *          a name for the referenced object. If \p ref_ptr is a dataset region

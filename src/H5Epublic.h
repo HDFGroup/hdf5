@@ -155,11 +155,41 @@ typedef herr_t (*H5E_auto2_t)(hid_t estack, void *client_data);
 /* Public API functions */
 H5_DLL hid_t   H5Eregister_class(const char *cls_name, const char *lib_name, const char *version);
 H5_DLL herr_t  H5Eunregister_class(hid_t class_id);
+
 H5_DLL herr_t  H5Eclose_msg(hid_t err_id);
 H5_DLL hid_t   H5Ecreate_msg(hid_t cls, H5E_type_t msg_type, const char *msg);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Creates a new empty error stack
+ *
+ * \return \hid_ti{error stack}
+ *
+ * \details H5Ecreate_stack() creates a new empty error stack and returns the
+ *          new stack’s identifier. Use H5Eclose_stack to close the error stack
+ *          identifier returned by this function.
+ *
+ * \since 1.8.0
+ */
 H5_DLL hid_t   H5Ecreate_stack(void);
 H5_DLL hid_t   H5Eget_current_stack(void);
 H5_DLL herr_t  H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Closes an error stack handle
+ *
+ * \estack_id{stack_id}
+ *
+ * \return \herr_t
+ *
+ * \details H5Eclose_stack() closes the error stack handle \p stack_id
+ *          and releases its resources. #H5E_DEFAULT cannot be closed.
+ *
+ * \since 1.8.0
+ */
 H5_DLL herr_t  H5Eclose_stack(hid_t stack_id);
 H5_DLL ssize_t H5Eget_class_name(hid_t class_id, char *name, size_t size);
 H5_DLL herr_t  H5Eset_current_stack(hid_t err_stack_id);

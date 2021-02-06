@@ -3352,7 +3352,7 @@ H5_DLL hid_t H5Pget_driver(hid_t plist_id);
  *          struct. Driver-specific versions of that struct are defined
  *          for each low-level driver in the relevant source code file
  *          H5FD*.c. For example, the struct used for the MULTI driver is
- *          #H5FD_multi_fapl_t defined in H5FDmulti.c.
+ *          \c H5FD_multi_fapl_t defined in H5FDmulti.c.
  *
  *          If no driver-specific properties have been registered,
  *          H5Pget_driver_info() returns NULL.

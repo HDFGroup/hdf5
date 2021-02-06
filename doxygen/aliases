@@ -67,6 +67,13 @@ ALIASES += file_type_id{1}="\param[in] \1 Datatype (in-file) identifier"
 ALIASES += mem_type_id{1}="\param[in] \1 Datatype (in-memory) identifier"
 
 ################################################################################
+# Errors
+################################################################################
+
+ALIASES += estack_id="\param[in] estack_id Error stack identifier"
+ALIASES += estack_id{1}="\param[in] \1 Error stack identifier"
+
+################################################################################
 # Files
 ################################################################################
 
