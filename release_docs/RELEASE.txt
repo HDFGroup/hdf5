@@ -48,6 +48,13 @@ New Features
 
     Configuration:
     -------------
+    - On macOS, Universal Binaries can now be built, allowing native execution on
+      both Intel and Apple Silicon (ARM) based Macs.
+
+      To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+
+      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+
     - CMake option to build the HDF filter plugins project as an external project
 
         The HDF filter plugins project is a collection of registered compression
