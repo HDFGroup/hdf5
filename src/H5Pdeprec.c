@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:	H5Pdeprec.c
  *		October 11 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5P interface.  These
  *              functions are here for compatibility purposes and may be
@@ -29,58 +29,48 @@
 /* Module Setup */
 /****************/
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg   */
+#define H5P_PACKAGE /*suppress error about including H5Ppkg   */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5P__init_deprec_interface
-
+#define H5_INTERFACE_INIT_FUNC H5P__init_deprec_interface
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* Files		  	        */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Ppkg.h"		/* Property lists		  	*/
-
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5Fprivate.h" /* Files		  	        */
+#include "H5Iprivate.h" /* IDs			  		*/
+#include "H5Ppkg.h"     /* Property lists		  	*/
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Package Typedefs */
 /********************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
 /*******************/
 
-
-
 /*--------------------------------------------------------------------------
 NAME
    H5P__init_deprec_interface -- Initialize interface-specific information
@@ -101,7 +91,6 @@ H5P__init_deprec_interface(void)
     FUNC_LEAVE_NOAPI(H5P_init())
 } /* H5P__init_deprec_interface() */
 
-
 /*--------------------------------------------------------------------------
 NAME
    H5P__term_deprec_interface -- Terminate interface
@@ -126,7 +115,7 @@ H5P__term_deprec_interface(void)
 } /* H5P__term_deprec_interface() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5Pregister1
@@ -250,7 +239,7 @@ H5P__term_deprec_interface(void)
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
         The 'set' callback function may be useful to range check the value being
-    set for the property or may perform some tranformation/translation of the
+    set for the property or may perform some transformation/translation of the
     value set.  The 'get' callback would then [probably] reverse the
     transformation, etc.  A single 'get' or 'set' callback could handle
     multiple properties by performing different actions based on the property
@@ -267,51 +256,51 @@ H5P__term_deprec_interface(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value,
-    H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
-    H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
-    H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t prp_create,
+             H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
+             H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
 {
-    H5P_genclass_t *pclass;         /* Property list class to modify */
-    H5P_genclass_t *orig_pclass;    /* Original property class */
-    herr_t ret_value;               /* Return value */
+    H5P_genclass_t *pclass;      /* Property list class to modify */
+    H5P_genclass_t *orig_pclass; /* Original property class */
+    herr_t          ret_value;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE10("e", "i*sz*xxxxxxx", cls_id, name, size, def_value, prp_create,
-             prp_set, prp_get, prp_delete, prp_copy, prp_close);
+    H5TRACE10("e", "i*sz*xxxxxxx", cls_id, name, size, def_value, prp_create, prp_set, prp_get, prp_delete,
+              prp_copy, prp_close);
 
     /* Check arguments. */
-    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
+    if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
-    if(!name || !*name)
+    if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid class name");
-    if(size > 0 && def_value == NULL)
+    if (size > 0 && def_value == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "properties >0 size must have default");
 
     /* Create the new property list class */
     orig_pclass = pclass;
-    if((ret_value = H5P_register(&pclass, name, size, def_value, prp_create, prp_set, prp_get, prp_delete, prp_copy, NULL, prp_close)) < 0)
+    if ((ret_value = H5P_register(&pclass, name, size, def_value, prp_create, prp_set, prp_get, prp_delete,
+                                  prp_copy, NULL, prp_close)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in class");
 
     /* Check if the property class changed and needs to be substituted in the ID */
-    if(pclass != orig_pclass) {
-        H5P_genclass_t *old_pclass;     /* Old property class */
+    if (pclass != orig_pclass) {
+        H5P_genclass_t *old_pclass; /* Old property class */
 
         /* Substitute the new property class in the ID */
-        if(NULL == (old_pclass = (H5P_genclass_t *)H5I_subst(cls_id, pclass)))
+        if (NULL == (old_pclass = (H5P_genclass_t *)H5I_subst(cls_id, pclass)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to substitute property class in ID")
         HDassert(old_pclass == orig_pclass);
 
         /* Close the previous class */
-        if(H5P_close_class(orig_pclass) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "unable to close original property class after substitution")
+        if (H5P_close_class(orig_pclass) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL,
+                        "unable to close original property class after substitution")
     } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* H5Pregister1() */
+} /* H5Pregister1() */
 
-
 /*--------------------------------------------------------------------------
  NAME
     H5Pinsert1
@@ -431,7 +420,7 @@ done:
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
         The 'set' callback function may be useful to range check the value being
-    set for the property or may perform some tranformation/translation of the
+    set for the property or may perform some transformation/translation of the
     value set.  The 'get' callback would then [probably] reverse the
     transformation, etc.  A single 'get' or 'set' callback could handle
     multiple properties by performing different actions based on the property
@@ -452,32 +441,31 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
-    H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
-    H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
-    H5P_prp_close_func_t prp_close)
+H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_set_func_t prp_set,
+           H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
+           H5P_prp_close_func_t prp_close)
 {
-    H5P_genplist_t	*plist;    /* Property list to modify */
-    herr_t ret_value;           /* return value */
+    H5P_genplist_t *plist;     /* Property list to modify */
+    herr_t          ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE9("e", "i*sz*xxxxxx", plist_id, name, size, value, prp_set, prp_get,
-             prp_delete, prp_copy, prp_close);
+    H5TRACE9("e", "i*sz*xxxxxx", plist_id, name, size, value, prp_set, prp_get, prp_delete, prp_copy,
+             prp_close);
 
     /* Check arguments. */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    if(!name || !*name)
+    if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name")
-    if(size > 0 && value == NULL)
+    if (size > 0 && value == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "properties >0 size must have default")
 
     /* Create the new property list class */
-    if((ret_value = H5P_insert(plist, name, size, value, prp_set, prp_get, prp_delete, prp_copy, NULL, prp_close)) < 0)
+    if ((ret_value = H5P_insert(plist, name, size, value, prp_set, prp_get, prp_delete, prp_copy, NULL,
+                                prp_close)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* H5Pinsert1() */
+} /* H5Pinsert1() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-

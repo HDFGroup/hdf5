@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -49,11 +49,6 @@ include $(top_srcdir)/config/commence.am
 
 # Conditionals.  These conditionals are defined during configure
 # Define each variable to empty if it is not used to placate pmake
-if BUILD_PARALLEL_CONDITIONAL
-   TESTPARALLEL_DIR =testpar
-else
-   TESTPARALLEL_DIR=
-endif
 if BUILD_CXX_CONDITIONAL
    CXX_DIR =c++
 else
@@ -69,9 +64,24 @@ if BUILD_HDF5_HL_CONDITIONAL
 else
    HDF5_HL_DIR=
 endif
+if BUILD_TESTS_CONDITIONAL
+   TESTSERIAL_DIR =test
+else
+   TESTSERIAL_DIR=
+endif
+if BUILD_TESTS_PARALLEL_CONDITIONAL
+   TESTPARALLEL_DIR =testpar
+else
+   TESTPARALLEL_DIR=
+endif
+if BUILD_TOOLS_CONDITIONAL
+   TOOLS_DIR =tools
+else
+   TOOLS_DIR=
+endif
 
-SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
-          $(HDF5_HL_DIR)
+SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) . \
+          $(CXX_DIR) $(FORTRAN_DIR) $(HDF5_HL_DIR) 
 DIST_SUBDIRS = src test testpar tools . c++ fortran hl examples
 
 # Some files generated during configure that should be cleaned

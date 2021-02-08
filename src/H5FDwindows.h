@@ -6,14 +6,14 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Scott Wegner <swegner@hdfgroup.org>
- *				Based on code by Robb Matzke
+ * Programmer:  Scott Wegner
+ *		Based on code by Robb Matzke
  *              Thursday, May 24 2007
  *
  * Purpose:	The public header file for the windows driver.
@@ -24,7 +24,7 @@
 #include "H5Ipublic.h"
 #include "H5FDsec2.h"
 
-#define H5FD_WINDOWS	(H5FD_windows_init())
+#define H5FD_WINDOWS (H5FD_windows_init())
 
 #ifdef __cplusplus
 extern "C" {

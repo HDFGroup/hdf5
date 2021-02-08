@@ -1,25 +1,34 @@
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2                           
+#if defined (__GNUC__)                                            
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 402                    
 #pragma GCC diagnostic ignored "-Wconversion"                     
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"  
 #pragma GCC diagnostic ignored "-Wlarger-than="                   
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"             
 #pragma GCC diagnostic ignored "-Wnested-externs"                 
 #pragma GCC diagnostic ignored "-Wold-style-definition"           
+#pragma GCC diagnostic ignored "-Wredundant-decls"                
 #pragma GCC diagnostic ignored "-Wsign-compare"                   
 #pragma GCC diagnostic ignored "-Wsign-conversion"                
+#pragma GCC diagnostic ignored "-Wstrict-overflow"                
 #pragma GCC diagnostic ignored "-Wstrict-prototypes"              
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=const"        
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"         
 #pragma GCC diagnostic ignored "-Wswitch-default"                 
 #pragma GCC diagnostic ignored "-Wunused-function"                
 #pragma GCC diagnostic ignored "-Wunused-macros"                  
 #pragma GCC diagnostic ignored "-Wunused-parameter"               
+#endif                                                            
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 600                    
+#pragma GCC diagnostic ignored "-Wnull-dereference"               
+#endif                                                            
 #elif defined __SUNPRO_CC                                         
 #pragma disable_warn                                              
 #elif defined _MSC_VER                                            
 #pragma warning(push, 1)                                          
 #endif                                                            
-#line 2 "H5LTanalyze.c"
+#line 2 "hl/src/H5LTanalyze.c"
 
-#line 4 "H5LTanalyze.c"
+#line 4 "hl/src/H5LTanalyze.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -47,7 +56,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 37
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -85,6 +94,7 @@ typedef int16_t flex_int16_t;
 typedef uint16_t flex_uint16_t;
 typedef int32_t flex_int32_t;
 typedef uint32_t flex_uint32_t;
+typedef uint64_t flex_uint64_t;
 #else
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
@@ -92,6 +102,7 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
+#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -121,8 +132,6 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
-
-#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -394,7 +403,7 @@ static void yy_fatal_error (yyconst char msg[]  );
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	H5LTyyleng = (size_t) (yy_cp - yy_bp); \
+	H5LTyyleng = (yy_size_t) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
@@ -863,7 +872,7 @@ goto find_rule; \
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *H5LTyytext;
-#line 1 "H5LTanalyze.l"
+#line 1 "hl/src/H5LTanalyze.l"
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
@@ -872,11 +881,16 @@ char *H5LTyytext;
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#line 15 "H5LTanalyze.l"
+/* NOTE!
+ *
+ * If you make any changes to H5LTanalyze.l, please run bin/genparser to
+ * recreate the output files.
+ */
+#line 21 "hl/src/H5LTanalyze.l"
 #include <stdlib.h>
 #include <string.h>
 #include <hdf5.h>
@@ -930,7 +944,7 @@ extern hbool_t is_opq_tag;
 hbool_t        first_quote = 1;
 
 
-#line 915 "H5LTanalyze.c"
+#line 920 "hl/src/H5LTanalyze.c"
 
 #define INITIAL 0
 #define TAG_STRING 1
@@ -1012,7 +1026,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( H5LTyytext, H5LTyyleng, 1, H5LTyyout )) {} } while (0)
+#define ECHO fwrite( H5LTyytext, H5LTyyleng, 1, H5LTyyout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -1023,7 +1037,7 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		yy_size_t n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( H5LTyyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -1105,10 +1119,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 71 "H5LTanalyze.l"
+#line 77 "hl/src/H5LTanalyze.l"
 
 
-#line 1093 "H5LTanalyze.c"
+#line 1098 "hl/src/H5LTanalyze.c"
 
 	if ( !(yy_init) )
 		{
@@ -1178,6 +1192,7 @@ yy_match:
 yy_find_action:
 		yy_current_state = *--(yy_state_ptr);
 		(yy_lp) = yy_accept[yy_current_state];
+goto find_rule; /* Shut up GCC warning -Wall */
 find_rule: /* we branch to this label when backing up */
 		for ( ; ; ) /* until we find what rule we matched */
 			{
@@ -1202,293 +1217,293 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 73 "H5LTanalyze.l"
+#line 79 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_I8BE_TOKEN);}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 74 "H5LTanalyze.l"
+#line 80 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_I8LE_TOKEN);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 75 "H5LTanalyze.l"
+#line 81 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_I16BE_TOKEN);}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 76 "H5LTanalyze.l"
+#line 82 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_I16LE_TOKEN);}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 77 "H5LTanalyze.l"
+#line 83 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_I32BE_TOKEN);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 78 "H5LTanalyze.l"
+#line 84 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_I32LE_TOKEN);}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 79 "H5LTanalyze.l"
+#line 85 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_I64BE_TOKEN);}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 80 "H5LTanalyze.l"
+#line 86 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_I64LE_TOKEN);}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 82 "H5LTanalyze.l"
+#line 88 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_U8BE_TOKEN);}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 83 "H5LTanalyze.l"
+#line 89 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_U8LE_TOKEN);}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 84 "H5LTanalyze.l"
+#line 90 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_U16BE_TOKEN);}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 85 "H5LTanalyze.l"
+#line 91 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_U16LE_TOKEN);}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 86 "H5LTanalyze.l"
+#line 92 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_U32BE_TOKEN);}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 87 "H5LTanalyze.l"
+#line 93 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_U32LE_TOKEN);}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 88 "H5LTanalyze.l"
+#line 94 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_U64BE_TOKEN);}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 89 "H5LTanalyze.l"
+#line 95 "hl/src/H5LTanalyze.l"
 {return hid(H5T_STD_U64LE_TOKEN);}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 91 "H5LTanalyze.l"
+#line 97 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_CHAR_TOKEN);}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 92 "H5LTanalyze.l"
+#line 98 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_SCHAR_TOKEN);}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 93 "H5LTanalyze.l"
+#line 99 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_UCHAR_TOKEN);}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 94 "H5LTanalyze.l"
+#line 100 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_SHORT_TOKEN);}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 95 "H5LTanalyze.l"
+#line 101 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_USHORT_TOKEN);}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 96 "H5LTanalyze.l"
+#line 102 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_INT_TOKEN);}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 97 "H5LTanalyze.l"
+#line 103 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_UINT_TOKEN);}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 98 "H5LTanalyze.l"
+#line 104 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_LONG_TOKEN);}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 99 "H5LTanalyze.l"
+#line 105 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_ULONG_TOKEN);}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 100 "H5LTanalyze.l"
+#line 106 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_LLONG_TOKEN);}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 101 "H5LTanalyze.l"
+#line 107 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_ULLONG_TOKEN);}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 103 "H5LTanalyze.l"
+#line 109 "hl/src/H5LTanalyze.l"
 {return hid(H5T_IEEE_F32BE_TOKEN);}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 104 "H5LTanalyze.l"
+#line 110 "hl/src/H5LTanalyze.l"
 {return hid(H5T_IEEE_F32LE_TOKEN);}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 105 "H5LTanalyze.l"
+#line 111 "hl/src/H5LTanalyze.l"
 {return hid(H5T_IEEE_F64BE_TOKEN);}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 106 "H5LTanalyze.l"
+#line 112 "hl/src/H5LTanalyze.l"
 {return hid(H5T_IEEE_F64LE_TOKEN);}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 107 "H5LTanalyze.l"
+#line 113 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_FLOAT_TOKEN);}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 108 "H5LTanalyze.l"
+#line 114 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_DOUBLE_TOKEN);}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 109 "H5LTanalyze.l"
+#line 115 "hl/src/H5LTanalyze.l"
 {return hid(H5T_NATIVE_LDOUBLE_TOKEN);}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 111 "H5LTanalyze.l"
+#line 117 "hl/src/H5LTanalyze.l"
 {return token(H5T_STRING_TOKEN);}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 112 "H5LTanalyze.l"
+#line 118 "hl/src/H5LTanalyze.l"
 {return token(STRSIZE_TOKEN);}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 113 "H5LTanalyze.l"
+#line 119 "hl/src/H5LTanalyze.l"
 {return token(STRPAD_TOKEN);}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 114 "H5LTanalyze.l"
+#line 120 "hl/src/H5LTanalyze.l"
 {return token(CSET_TOKEN);}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 115 "H5LTanalyze.l"
+#line 121 "hl/src/H5LTanalyze.l"
 {return token(CTYPE_TOKEN);}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 116 "H5LTanalyze.l"
-{return token(H5T_STR_NULLTERM_TOKEN);} 
+#line 122 "hl/src/H5LTanalyze.l"
+{return token(H5T_STR_NULLTERM_TOKEN);}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 117 "H5LTanalyze.l"
-{return token(H5T_STR_NULLPAD_TOKEN);} 
+#line 123 "hl/src/H5LTanalyze.l"
+{return token(H5T_STR_NULLPAD_TOKEN);}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 118 "H5LTanalyze.l"
-{return token(H5T_STR_SPACEPAD_TOKEN);} 
+#line 124 "hl/src/H5LTanalyze.l"
+{return token(H5T_STR_SPACEPAD_TOKEN);}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 119 "H5LTanalyze.l"
+#line 125 "hl/src/H5LTanalyze.l"
 {return token(H5T_CSET_ASCII_TOKEN);}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 120 "H5LTanalyze.l"
+#line 126 "hl/src/H5LTanalyze.l"
 {return token(H5T_CSET_UTF8_TOKEN);}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 121 "H5LTanalyze.l"
+#line 127 "hl/src/H5LTanalyze.l"
 {return token(H5T_C_S1_TOKEN);}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 122 "H5LTanalyze.l"
+#line 128 "hl/src/H5LTanalyze.l"
 {return token(H5T_FORTRAN_S1_TOKEN);}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 123 "H5LTanalyze.l"
+#line 129 "hl/src/H5LTanalyze.l"
 {return token(H5T_VARIABLE_TOKEN);}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 125 "H5LTanalyze.l"
+#line 131 "hl/src/H5LTanalyze.l"
 {return token(H5T_COMPOUND_TOKEN);}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 126 "H5LTanalyze.l"
+#line 132 "hl/src/H5LTanalyze.l"
 {return token(H5T_ENUM_TOKEN);}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 127 "H5LTanalyze.l"
+#line 133 "hl/src/H5LTanalyze.l"
 {return token(H5T_ARRAY_TOKEN);}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 128 "H5LTanalyze.l"
+#line 134 "hl/src/H5LTanalyze.l"
 {return token(H5T_VLEN_TOKEN);}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 130 "H5LTanalyze.l"
+#line 136 "hl/src/H5LTanalyze.l"
 {return token(H5T_OPAQUE_TOKEN);}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 131 "H5LTanalyze.l"
+#line 137 "hl/src/H5LTanalyze.l"
 {return token(OPQ_SIZE_TOKEN);}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 132 "H5LTanalyze.l"
+#line 138 "hl/src/H5LTanalyze.l"
 {return token(OPQ_TAG_TOKEN);}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 134 "H5LTanalyze.l"
-{    
-                        if( is_str_size || (is_enum && is_enum_memb) || 
+#line 140 "hl/src/H5LTanalyze.l"
+{
+                        if( is_str_size || (is_enum && is_enum_memb) ||
                             is_opq_size || (asindex>-1 && arr_stack[asindex].is_dim) ||
                             (csindex>-1 && cmpd_stack[csindex].is_field) ) {
                             H5LTyylval.ival = atoi(H5LTyytext);
-                            return NUMBER; 
+                            return NUMBER;
                         } else
                             REJECT;
                  }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 144 "H5LTanalyze.l"
+#line 150 "hl/src/H5LTanalyze.l"
 {
                     /*if it's first quote, and is a compound field name or an enum symbol*/
-                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field)) 
+                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field))
                         && first_quote) {
                         first_quote = 0;
                         BEGIN TAG_STRING;
@@ -1500,7 +1515,7 @@ YY_RULE_SETUP
 case 57:
 /* rule 57 can match eol */
 YY_RULE_SETUP
-#line 154 "H5LTanalyze.l"
+#line 160 "hl/src/H5LTanalyze.l"
 {
 #ifdef H5_HAVE_WIN32_API
                     H5LTyylval.sval = _strdup(H5LTyytext);
@@ -1513,52 +1528,52 @@ YY_RULE_SETUP
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 164 "H5LTanalyze.l"
+#line 170 "hl/src/H5LTanalyze.l"
 {return token('{');}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 165 "H5LTanalyze.l"
+#line 171 "hl/src/H5LTanalyze.l"
 {return token('}');}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 166 "H5LTanalyze.l"
+#line 172 "hl/src/H5LTanalyze.l"
 {return token('[');}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 167 "H5LTanalyze.l"
+#line 173 "hl/src/H5LTanalyze.l"
 {return token(']');}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 168 "H5LTanalyze.l"
+#line 174 "hl/src/H5LTanalyze.l"
 {return token(':');}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 169 "H5LTanalyze.l"
+#line 175 "hl/src/H5LTanalyze.l"
 {return token(';');}
 	YY_BREAK
 case 64:
 /* rule 64 can match eol */
 YY_RULE_SETUP
-#line 170 "H5LTanalyze.l"
+#line 176 "hl/src/H5LTanalyze.l"
 ;
 	YY_BREAK
 case 65:
 /* rule 65 can match eol */
 YY_RULE_SETUP
-#line 171 "H5LTanalyze.l"
+#line 177 "hl/src/H5LTanalyze.l"
 { return 0; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 173 "H5LTanalyze.l"
+#line 179 "hl/src/H5LTanalyze.l"
 ECHO;
 	YY_BREAK
-#line 1543 "H5LTanalyze.c"
+#line 1549 "hl/src/H5LTanalyze.c"
 			case YY_STATE_EOF(INITIAL):
 			case YY_STATE_EOF(TAG_STRING):
 				yyterminate();
@@ -1851,7 +1866,7 @@ static int yy_get_next_buffer (void)
 	if ( ! yy_is_jam )
 		*(yy_state_ptr)++ = yy_current_state;
 
-		return yy_is_jam ? 0 : yy_current_state;
+	return yy_is_jam ? 0 : yy_current_state;
 }
 
     static void yyunput (int c, register char * yy_bp )
@@ -1939,7 +1954,7 @@ static int yy_get_next_buffer (void)
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( H5LTyywrap( ) )
-						return EOF;
+						return 0;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -2075,6 +2090,10 @@ static void H5LTyy_load_buffer_state  (void)
 	H5LTyyfree((void *) b  );
 }
 
+#ifndef __cplusplus
+extern int isatty (int );
+#endif /* __cplusplus */
+    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a H5LTyyrestart() or at EOF.
@@ -2279,8 +2298,8 @@ YY_BUFFER_STATE H5LTyy_scan_string (yyconst char * yystr )
 
 /** Setup the input buffer state to scan the given bytes. The next call to H5LTyylex() will
  * scan from a @e copy of @a bytes.
- * @param yybytes the byte buffer to scan
- * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
+ * @param bytes the byte buffer to scan
+ * @param len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
@@ -2288,8 +2307,7 @@ YY_BUFFER_STATE H5LTyy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_
 {
 	YY_BUFFER_STATE b;
 	char *buf;
-	yy_size_t n;
-	int i;
+	yy_size_t n, i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -2527,14 +2545,14 @@ void H5LTyyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 173 "H5LTanalyze.l"
+#line 179 "hl/src/H5LTanalyze.l"
 
 
 int my_yyinput(char *buf, int max_size)
 {
    int ret;
-    
-   memcpy(buf, myinput, input_len); 
+
+   memcpy(buf, myinput, input_len);
    ret = (int)input_len;
    return ret;
 }

@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -21,12 +21,14 @@ add_test (
     COMMAND    ${CMAKE_COMMAND}
         -E remove
             PTcppexampleFL.h5
+            ptExampleFL.txt
 )
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME HL_CPP_ex_ptExampleFL COMMAND $<TARGET_FILE:ptExampleFL>)
+  add_test (NAME HL_CPP_ex_ptExampleFL COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:ptExampleFL>)
 else ()
   add_test (NAME HL_CPP_ex_ptExampleFL COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:ptExampleFL>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"

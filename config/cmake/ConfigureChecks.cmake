@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -20,7 +20,7 @@ include (${HDF_RESOURCES_EXT_DIR}/ConfigureChecks.cmake)
 #-----------------------------------------------------------------------------
 option (HDF5_Enable_Clear_File_Buffers "Securely clear file buffers before writing to file" ON)
 if (HDF5_Enable_Clear_File_Buffers)
-  set (H5_CLEAR_MEMORY 1)
+  set (${HDF_PREFIX}_CLEAR_MEMORY 1)
 endif ()
 MARK_AS_ADVANCED (HDF5_Enable_Clear_File_Buffers)
 
@@ -29,7 +29,7 @@ MARK_AS_ADVANCED (HDF5_Enable_Clear_File_Buffers)
 #-----------------------------------------------------------------------------
 option (HDF5_STRICT_FORMAT_CHECKS "Whether to perform strict file format checks" OFF)
 if (HDF5_STRICT_FORMAT_CHECKS)
-  set (H5_STRICT_FORMAT_CHECKS 1)
+  set (${HDF_PREFIX}_STRICT_FORMAT_CHECKS 1)
 endif ()
 MARK_AS_ADVANCED (HDF5_STRICT_FORMAT_CHECKS)
 
@@ -38,7 +38,7 @@ MARK_AS_ADVANCED (HDF5_STRICT_FORMAT_CHECKS)
 #-----------------------------------------------------------------------------
 option (HDF5_METADATA_TRACE_FILE "Enable metadata trace file collection" OFF)
 if (HDF5_METADATA_TRACE_FILE)
-  set (H5_METADATA_TRACE_FILE 1)
+  set (${HDF_PREFIX}_METADATA_TRACE_FILE 1)
 endif ()
 MARK_AS_ADVANCED (HDF5_METADATA_TRACE_FILE)
 
@@ -47,10 +47,10 @@ MARK_AS_ADVANCED (HDF5_METADATA_TRACE_FILE)
 # conversions.  If not, some hard conversions will still be prefered even
 # though the data may be wrong (for example, some compilers don't
 # support denormalized floating values) to maximize speed.
-#
+#-----------------------------------------------------------------------------
 option (HDF5_WANT_DATA_ACCURACY "IF data accuracy is guaranteed during data conversions" ON)
 if (HDF5_WANT_DATA_ACCURACY)
-  set (H5_WANT_DATA_ACCURACY 1)
+  set (${HDF_PREFIX}_WANT_DATA_ACCURACY 1)
 endif ()
 MARK_AS_ADVANCED (HDF5_WANT_DATA_ACCURACY)
 
@@ -59,19 +59,19 @@ MARK_AS_ADVANCED (HDF5_WANT_DATA_ACCURACY)
 # checked and data conversion exceptions are returned.  This is mainly
 # for the speed optimization of hard conversions.  Soft conversions can
 # actually benefit little.
-#
+#-----------------------------------------------------------------------------
 option (HDF5_WANT_DCONV_EXCEPTION "exception handling functions is checked during data conversions" ON)
 if (HDF5_WANT_DCONV_EXCEPTION)
-  set (H5_WANT_DCONV_EXCEPTION 1)
+  set (${HDF_PREFIX}_WANT_DCONV_EXCEPTION 1)
 endif ()
 MARK_AS_ADVANCED (HDF5_WANT_DCONV_EXCEPTION)
 
 # ----------------------------------------------------------------------
 # Check if they would like the function stack support compiled in
-#
+#-----------------------------------------------------------------------------
 option (HDF5_ENABLE_CODESTACK "Enable the function stack tracing (for developer debugging)." OFF)
 if (HDF5_ENABLE_CODESTACK)
-  set (H5_HAVE_CODESTACK 1)
+  set (${HDF_PREFIX}_HAVE_CODESTACK 1)
 endif ()
 MARK_AS_ADVANCED (HDF5_ENABLE_CODESTACK)
 
@@ -84,49 +84,50 @@ if (HDF5_ENABLE_HSIZET)
 endif ()
 
 # so far we have no check for this
-set (H5_HAVE_TMPFILE 1)
+set (${HDF_PREFIX}_HAVE_TMPFILE 1)
 
 # TODO --------------------------------------------------------------------------
 # Should the Default Virtual File Driver be compiled?
 # This is hard-coded now but option should added to match configure
-#
-set (H5_DEFAULT_VFD H5FD_SEC2)
+#-----------------------------------------------------------------------------
+set (${HDF_PREFIX}_DEFAULT_VFD H5FD_SEC2)
 
-if (NOT DEFINED "H5_DEFAULT_PLUGINDIR")
+if (NOT DEFINED "${HDF_PREFIX}_DEFAULT_PLUGINDIR")
   if (WINDOWS)
-    set (H5_DEFAULT_PLUGINDIR "%ALLUSERSPROFILE%\\\\hdf5\\\\lib\\\\plugin")
+    set (${HDF_PREFIX}_DEFAULT_PLUGINDIR "%ALLUSERSPROFILE%\\\\hdf5\\\\lib\\\\plugin")
   else ()
-    set (H5_DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin")
+    set (${HDF_PREFIX}_DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin")
   endif ()
 endif ()
 
 if (WINDOWS)
-  set (H5_HAVE_WINDOWS 1)
+  set (${HDF_PREFIX}_HAVE_WINDOWS 1)
   # ----------------------------------------------------------------------
   # Set the flag to indicate that the machine has window style pathname,
   # that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
   # (This flag should be _unset_ for all machines, except for Windows)
-  set (H5_HAVE_WINDOW_PATH 1)
+  #-----------------------------------------------------------------------
+  set (${HDF_PREFIX}_HAVE_WINDOW_PATH 1)
 endif ()
 
 # ----------------------------------------------------------------------
 # END of WINDOWS Hard code Values
 # ----------------------------------------------------------------------
 
-CHECK_FUNCTION_EXISTS (difftime          H5_HAVE_DIFFTIME)
+CHECK_FUNCTION_EXISTS (difftime          ${HDF_PREFIX}_HAVE_DIFFTIME)
 
 # Find the library containing clock_gettime()
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   CHECK_FUNCTION_EXISTS (clock_gettime CLOCK_GETTIME_IN_LIBC)
   CHECK_LIBRARY_EXISTS (rt clock_gettime "" CLOCK_GETTIME_IN_LIBRT)
   CHECK_LIBRARY_EXISTS (posix4 clock_gettime "" CLOCK_GETTIME_IN_LIBPOSIX4)
   if (CLOCK_GETTIME_IN_LIBC)
-    set (H5_HAVE_CLOCK_GETTIME 1)
+    set (${HDF_PREFIX}_HAVE_CLOCK_GETTIME 1)
   elseif (CLOCK_GETTIME_IN_LIBRT)
-    set (H5_HAVE_CLOCK_GETTIME 1)
+    set (${HDF_PREFIX}_HAVE_CLOCK_GETTIME 1)
     list (APPEND LINK_LIBS rt)
   elseif (CLOCK_GETTIME_IN_LIBPOSIX4)
-    set (H5_HAVE_CLOCK_GETTIME 1)
+    set (${HDF_PREFIX}_HAVE_CLOCK_GETTIME 1)
     list (APPEND LINK_LIBS posix4)
   endif ()
 endif ()
@@ -168,6 +169,21 @@ if (NOT WINDOWS)
   endif ()
 endif ()
 
+#-----------------------------------------------------------------------------
+#  Check if ROS3 driver can be built
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
+  if (HDF5_ENABLE_ROS3_VFD)
+    find_package(CURL REQUIRED)
+    find_package(OpenSSL REQUIRED)
+    if (${CURL_FOUND} AND ${OPENSSL_FOUND})
+      set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
+      list (APPEND LINK_LIBS ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
+      INCLUDE_DIRECTORIES (${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+    else ()
+      message (STATUS "The Read-Only S3 VFD was requested but cannot be built.\nPlease check that openssl and cURL are available on your\nsystem, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
+    endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Macro to determine the various conversion capabilities
@@ -215,8 +231,8 @@ endmacro ()
 # is 0x004733ce17af227f, not the same as the library's conversion to 0x004733ce17af2282.
 # The machine's conversion gets the correct value.  We define the macro and disable
 # this kind of test until we figure out what algorithm they use.
-#
-H5ConversionTests (H5_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your system converts long double to (unsigned) long values with special algorithm")
+#-----------------------------------------------------------------------------
+H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your system converts long double to (unsigned) long values with special algorithm")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine is using a special algorithm
 # to convert some values of '(unsigned) long' to 'long double' values.
@@ -224,8 +240,8 @@ H5ConversionTests (H5_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your system converts
 # when the bit sequences are 003fff..., 007fff..., 00ffff..., 01ffff...,
 # ..., 7fffff..., the compiler uses a unknown algorithm.  We define a
 # macro and skip the test for now until we know about the algorithm.
-#
-H5ConversionTests (H5_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can convert (unsigned) long to long double values with special algorithm")
+#-----------------------------------------------------------------------------
+H5ConversionTests (${HDF_PREFIX}_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can convert (unsigned) long to long double values with special algorithm")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # 'long double' to '(unsigned) long long' values.  (This flag should be set for
@@ -234,32 +250,17 @@ H5ConversionTests (H5_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can conve
 # start to go wrong on these two machines.  Adjusting it higher to
 # 0x4351ccf385ebc8a0dfcc... or 0x4351ccf385ebc8a0ffcc... will make the converted
 # values wildly wrong.  This test detects this wrong behavior and disable the test.
-#
-H5ConversionTests (H5_LDOUBLE_TO_LLONG_ACCURATE "Checking IF correctly converting long double to (unsigned) long long values")
+#-----------------------------------------------------------------------------
+H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LLONG_ACCURATE "Checking IF correctly converting long double to (unsigned) long long values")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # '(unsigned) long long' to 'long double' values.  (This flag should be set for
 # all machines, except for Mac OS 10.4, when the bit sequences are 003fff...,
 # 007fff..., 00ffff..., 01ffff..., ..., 7fffff..., the converted values are twice
 # as big as they should be.
-#
-H5ConversionTests (H5_LLONG_TO_LDOUBLE_CORRECT "Checking IF correctly converting (unsigned) long long to long double values")
+#-----------------------------------------------------------------------------
+H5ConversionTests (${HDF_PREFIX}_LLONG_TO_LDOUBLE_CORRECT "Checking IF correctly converting (unsigned) long long to long double values")
 # ----------------------------------------------------------------------
 # Check if pointer alignments are enforced
-#
-H5ConversionTests (H5_NO_ALIGNMENT_RESTRICTIONS "Checking IF alignment restrictions are strictly enforced")
-
-# -----------------------------------------------------------------------
-# wrapper script variables
-#
-set (prefix ${CMAKE_INSTALL_PREFIX})
-set (exec_prefix "\${prefix}")
-set (libdir "${exec_prefix}/lib")
-set (includedir "\${prefix}/include")
-set (host_os ${CMAKE_HOST_SYSTEM_NAME})
-set (CC ${CMAKE_C_COMPILER})
-set (CXX ${CMAKE_CXX_COMPILER})
-set (FC ${CMAKE_Fortran_COMPILER})
-foreach (LINK_LIB ${LINK_LIBS})
-  set (LIBS "${LIBS} -l${LINK_LIB}")
-endforeach ()
+#-----------------------------------------------------------------------------
+H5ConversionTests (${HDF_PREFIX}_NO_ALIGNMENT_RESTRICTIONS "Checking IF alignment restrictions are strictly enforced")

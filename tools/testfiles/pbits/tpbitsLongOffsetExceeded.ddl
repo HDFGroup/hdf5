@@ -23,4 +23,3 @@ DATASET "/DS32BITS" {
    }
 }
 }
-h5dump error: Packed Bit offset+length value(33) too large. Max is 32

@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -15,6 +15,8 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
   # SOVERSION passed in ARGN when shared
   if (${libtype} MATCHES "SHARED")
     set (PACKAGE_SOVERSION ${HDF5_${libpackage}_PACKAGE_SOVERSION})
+    set (PACKAGE_COMPATIBILITY ${H5_${libpackage}_SOVERS_INTERFACE}.0.0)
+    set (PACKAGE_CURRENT ${H5_${libpackage}_SOVERS_INTERFACE}.${H5_${libpackage}_SOVERS_MINOR}.0)
     if (WIN32)
       set (LIBHDF_VERSION ${HDF5_PACKAGE_VERSION_MAJOR})
     else ()
@@ -26,6 +28,11 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
     else ()
         set_target_properties (${libtarget} PROPERTIES SOVERSION ${LIBHDF_VERSION})
     endif ()
+    if (CMAKE_C_OSX_CURRENT_VERSION_FLAG)
+      set_property(TARGET ${libtarget} APPEND PROPERTY
+          LINK_FLAGS "${CMAKE_C_OSX_CURRENT_VERSION_FLAG}${PACKAGE_CURRENT} ${CMAKE_C_OSX_COMPATIBILITY_VERSION_FLAG}${PACKAGE_COMPATIBILITY}"
+      )
+    endif ()
   endif ()
   HDF_SET_LIB_OPTIONS (${libtarget} ${LIB_OUT_NAME} ${libtype})
 
@@ -34,7 +41,6 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
     option (HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path" OFF)
     if (HDF5_BUILD_WITH_INSTALL_NAME)
       set_target_properties (${libtarget} PROPERTIES
-          LINK_FLAGS "-current_version ${HDF5_PACKAGE_VERSION} -compatibility_version ${HDF5_PACKAGE_VERSION}"
           INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
           BUILD_WITH_INSTALL_RPATH ${HDF5_BUILD_WITH_INSTALL_NAME}
       )

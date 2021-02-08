@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,7 +26,6 @@
 #include "H5VarLenType.h"
 
 namespace H5 {
-
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType default constructor
@@ -48,7 +47,7 @@ VarLenType::VarLenType(const hid_t existing_id) : DataType(existing_id) {}
 ///\brief       Copy constructor: makes a copy of the original VarLenType object.
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const VarLenType& original) : DataType(original) {}
+VarLenType::VarLenType(const VarLenType &original) : DataType(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType overloaded constructor
@@ -61,13 +60,11 @@ VarLenType::VarLenType(const VarLenType& original) : DataType(original) {}
 //              constructor.
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const DataType* base_type) : DataType()
+VarLenType::VarLenType(const DataType *base_type) : DataType()
 {
     id = H5Tvlen_create(base_type->getId());
-    if (id < 0)
-    {
-        throw DataTypeIException("VarLenType constructor",
-                "H5Tvlen_create returns negative value");
+    if (id < 0) {
+        throw DataTypeIException("VarLenType constructor", "H5Tvlen_create returns negative value");
     }
 }
 
@@ -85,7 +82,7 @@ VarLenType::VarLenType(const DataType* base_type) : DataType()
 //              improve usability.
 //              -BMR, Sept 2017
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const H5Location& loc, const char *type_name) : DataType()
+VarLenType::VarLenType(const H5Location &loc, const char *type_name) : DataType()
 {
     id = p_opentype(loc, type_name);
 }
@@ -104,7 +101,7 @@ VarLenType::VarLenType(const H5Location& loc, const char *type_name) : DataType(
 //              improve usability.
 //              -BMR, Sept 2017
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const H5Location& loc, const H5std_string& type_name) : DataType()
+VarLenType::VarLenType(const H5Location &loc, const H5std_string &type_name) : DataType()
 {
     id = p_opentype(loc, type_name.c_str());
 }
@@ -116,7 +113,8 @@ VarLenType::VarLenType(const H5Location& loc, const H5std_string& type_name) : D
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Sept 2017
 //--------------------------------------------------------------------------
-DataType* VarLenType::decode() const
+DataType *
+VarLenType::decode() const
 {
     hid_t encoded_vltype_id = H5I_INVALID_HID;
     try {
@@ -127,7 +125,7 @@ DataType* VarLenType::decode() const
     }
     VarLenType *encoded_vltype = new VarLenType;
     encoded_vltype->p_setId(encoded_vltype_id);
-    return(encoded_vltype);
+    return (encoded_vltype);
 }
 
 //--------------------------------------------------------------------------
@@ -137,4 +135,4 @@ DataType* VarLenType::decode() const
 //--------------------------------------------------------------------------
 VarLenType::~VarLenType() {}
 
-} // end namespace
+} // namespace H5

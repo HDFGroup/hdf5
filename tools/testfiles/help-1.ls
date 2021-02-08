@@ -20,7 +20,7 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
    --no-dangling-links
                    Must be used with --follow-symlinks option;
                    otherwise, h5ls shows error message and returns an exit
-                   code of 1. 
+                   code of 1.
                    Check for any symbolic links (soft links or external links)
                    that do not resolve to an existing object (dataset, group,
                    or named datatype).
@@ -37,6 +37,15 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
    -V, --version   Print version number and exit
    --vfd=DRIVER    Use the specified virtual file driver
    -x, --hexdump   Show raw data in hexadecimal format
+   --s3-cred=C     Supply S3 authentication information to "ros3" vfd.
+                   Accepts tuple of "(<aws-region>,<access-id>,<access-key>)".
+                   If absent or C->"(,,)", defaults to no-authentication.
+                   Has no effect if vfd flag not set to "ros3".
+   --hdfs-attrs=A  Supply configuration information to Hadoop VFD.
+                   Accepts tuple of (<namenode name>,<namenode port>,
+                   ...<kerberos cache path>,<username>,<buffer size>)
+                   If absent or A == '(,,,,)', all default values are used.
+                   Has no effect if vfd flag is not 'hdfs'.
 
   file/OBJECT
     Each object consists of an HDF5 file name optionally followed by a

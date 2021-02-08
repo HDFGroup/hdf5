@@ -16,6 +16,18 @@ The contents of this directory are:
     README.txt              - This file
     @HDF5_PACKAGE_NAME@-@HDF5_PACKAGE_VERSION@-@BINARY_SYSTEM_NAME@.@BINARY_INSTALL_ENDING@    - HDF5 Install Package
 
+This binary was built with the ZLIB and SZIP/Libaec external libraries and are
+included for convenience.  Libaec is an unrestricted open-source replacement for SZIP
+(version 1.0.4, Encoder ENABLED).
+
+The official ZLIB and SZIP/Libaec pages are at:
+
+    ZLIB: https://git.savannah.gnu.org/cgit/gzip.git/
+        https://git.savannah.gnu.org/cgit/gzip.git/tree/COPYING
+    SZIP/Libaec: https://gitlab.dkrz.de/k202009/libaec
+        https://gitlab.dkrz.de/k202009/libaec/-/blob/master/Copyright.txt
+
+
 Installation
 ===========================================================================
 1. Execute @HDF5_PACKAGE_NAME@-@HDF5_PACKAGE_VERSION@-@BINARY_SYSTEM_NAME@.@BINARY_INSTALL_ENDING@
@@ -27,15 +39,16 @@ After Installation
 The examples folder, HDF5Examples, located in the
 HDF5 install folder, can be built and tested with CMake and the supplied
 HDF518_Examples.cmake file. The HDF518_Examples.cmake expects HDF5 to have
-been installed in the default location with above compilers. Also, the CMake 
+been installed in the default location with above compilers (see the
+libhdf5.settings file in the lib install folder). Also, the CMake
 utility should be installed.
 
 To test the installation with the examples;
     Create a directory to run the examples.
     Copy HDF5Examples folder to this directory.
+    Copy CTestScript.cmake to this directory.
     Copy HDF518_Examples.cmake to this directory.
     Copy HDF5_Examples_options.cmake to this directory.
-    Copy CTestScript.cmake to this directory.
     The default source folder is defined as "HDF5Examples". It can be changed
         with the CTEST_SOURCE_NAME script option.
     The default installation folder is defined as "@CMAKE_INSTALL_PREFIX@".
@@ -61,9 +74,6 @@ For more information see USING_CMake_Examples.txt in the install folder.
 ===========================================================================
 
 Documentation for this release can be found at the following URL:
-    http://www.hdfgroup.org/HDF5/doc/.
-
-See the HDF5 home page for further details:
-    http://hdfgroup.org/HDF5/
+    https://portal.hdfgroup.org/display/support
 
 Bugs should be reported to help@hdfgroup.org.

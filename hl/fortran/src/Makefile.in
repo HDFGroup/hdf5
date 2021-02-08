@@ -22,7 +22,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -424,11 +424,11 @@ AMTAR = @AMTAR@
 # AM_CFLAGS is an automake construct which should be used by Makefiles 
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
-AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
+AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@ @H5_ECFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_srcdir)/hl/src -I$(top_builddir)/hl/src \
 	-I$(top_srcdir)/fortran/src -I$(top_builddir)/fortran/src
-AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@ @H5_ECXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@ -I$(top_builddir)/fortran/src \
 	$(F9XMODFLAG)$(top_builddir)/fortran/src
@@ -444,6 +444,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_VERSION = @CC_VERSION@
 CFLAGS = @CFLAGS@
+CLANG_SANITIZE_CHECKS = @CLANG_SANITIZE_CHECKS@
 CLEARFILEBUF = @CLEARFILEBUF@
 CODESTACK = @CODESTACK@
 CONFIG_DATE = @CONFIG_DATE@
@@ -462,6 +463,7 @@ DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
+DEV_WARNINGS = @DEV_WARNINGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
@@ -489,6 +491,8 @@ GREP = @GREP@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
+H5_ECFLAGS = @H5_ECFLAGS@
+H5_ECXXFLAGS = @H5_ECXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
 H5_LDFLAGS = @H5_LDFLAGS@
@@ -496,9 +500,12 @@ H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
+HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -514,6 +521,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTRUMENT = @INSTRUMENT@
 INSTRUMENT_LIBRARY = @INSTRUMENT_LIBRARY@
+JNI_LDFLAGS = @JNI_LDFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -535,6 +543,7 @@ NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJECT_NAMELEN_DEFAULT_F = @OBJECT_NAMELEN_DEFAULT_F@
 OBJEXT = @OBJEXT@
+OPTIMIZATION = @OPTIMIZATION@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -547,8 +556,10 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PARALLEL = @PARALLEL@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PERL = @PERL@
+PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
+ROS3_VFD = @ROS3_VFD@
 RUNPARALLEL = @RUNPARALLEL@
 RUNSERIAL = @RUNSERIAL@
 R_INTEGER = @R_INTEGER@
@@ -562,6 +573,7 @@ STATIC_EXEC = @STATIC_EXEC@
 STATIC_SHARED = @STATIC_SHARED@
 STRICT_FORMAT_CHECKS = @STRICT_FORMAT_CHECKS@
 STRIP = @STRIP@
+SYMBOLS = @SYMBOLS@
 TESTPARALLEL = @TESTPARALLEL@
 THREADSAFE = @THREADSAFE@
 TIME = @TIME@
@@ -603,6 +615,7 @@ docdir = $(exec_prefix)/doc
 dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
+examplesdir = @examplesdir@
 exec_prefix = @exec_prefix@
 fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
@@ -691,26 +704,26 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 # See libtool versioning documentation online.
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
-LT_VERS_INTERFACE = 13
-LT_VERS_REVISION = 2
-LT_VERS_AGE = 3
+LT_VERS_INTERFACE = 14
+LT_VERS_REVISION = 0
+LT_VERS_AGE = 4
 LT_CXX_VERS_INTERFACE = 16
-LT_CXX_VERS_REVISION = 0
+LT_CXX_VERS_REVISION = 1
 LT_CXX_VERS_AGE = 0
 LT_F_VERS_INTERFACE = 10
-LT_F_VERS_REVISION = 6
+LT_F_VERS_REVISION = 7
 LT_F_VERS_AGE = 0
 LT_HL_VERS_INTERFACE = 12
-LT_HL_VERS_REVISION = 2
+LT_HL_VERS_REVISION = 3
 LT_HL_VERS_AGE = 2
 LT_HL_CXX_VERS_INTERFACE = 12
-LT_HL_CXX_VERS_REVISION = 2
+LT_HL_CXX_VERS_REVISION = 3
 LT_HL_CXX_VERS_AGE = 1
 LT_HL_F_VERS_INTERFACE = 10
-LT_HL_F_VERS_REVISION = 5
+LT_HL_F_VERS_REVISION = 6
 LT_HL_F_VERS_AGE = 0
 LT_TOOLS_VERS_INTERFACE = 10
-LT_TOOLS_VERS_REVISION = 7
+LT_TOOLS_VERS_REVISION = 8
 LT_TOOLS_VERS_AGE = 0
 
 # Our main target, the high-level fortran library
@@ -732,11 +745,11 @@ libhdf5hl_fortran_la_SOURCES = H5DSfc.c H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c \
 # HDF5 HL Fortran library depends on HDF5 Library. 
 libhdf5hl_fortran_la_LIBADD = $(LIBH5_HL) $(LIBH5F)
 
-# Automake needs to be taught how to build lib, dyn, progs, and tests targets.
+# Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
 # EXTRA_TEST variables are supplied to allow the user to force targets to
-# be built at certain times. 
+# be built at certain times.
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
@@ -1171,7 +1184,8 @@ install-dvi: install-dvi-am
 install-dvi-am:
 
 install-exec-am: install-libLTLIBRARIES
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-am
 
 install-html-am:
@@ -1213,7 +1227,7 @@ ps-am:
 
 uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 
-.MAKE: check-am install-am install-strip
+.MAKE: check-am install-am install-exec-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
 	check-am clean clean-generic clean-libLTLIBRARIES \
@@ -1222,8 +1236,8 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 	distclean-libtool distclean-local distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-data-local install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am \
+	install-dvi-am install-exec install-exec-am install-exec-hook \
+	install-html install-html-am install-info install-info-am \
 	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
@@ -1246,6 +1260,20 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 
 help:
 	@$(top_srcdir)/bin/makehelp
+
+# The name of the lib file doesn't follow the same pattern as the other hl lib
+# files, namely libhdf5_hl_*.  Add a symlink with the compliant name to the
+# actual lib file.
+install-exec-hook:
+	cd $(DESTDIR)$(libdir) && \
+	    if test -f libhdf5hl_fortran.a -a \
+	    ! -f libhdf5_hl_fortran.a; then \
+	        $(LN_S) libhdf5hl_fortran.a libhdf5_hl_fortran.a; \
+	    fi; \
+	    if test -f libhdf5hl_fortran.so -a \
+	    ! -f libhdf5_hl_fortran.so; then \
+	        $(LN_S) libhdf5hl_fortran.so libhdf5_hl_fortran.so; \
+	    fi;
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules
@@ -1278,6 +1306,7 @@ H5DSff.lo:          $(srcdir)/H5DSff.f90
 H5LTff.lo:          $(srcdir)/H5LTff.f90
 H5IMff.lo:          $(srcdir)/H5IMff.f90
 H5TBff.lo:          $(srcdir)/H5TBff.f90
+
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)
@@ -1313,7 +1342,7 @@ all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
 # make install-doc doesn't do anything outside of doc directory, but
 # Makefiles should recognize it.
 # UPDATE: docs no longer reside in this build tree, so this target
-# is depreciated.
+# is deprecated.
 install-doc uninstall-doc:
 	@echo "Nothing to be done."
 
@@ -1474,7 +1503,7 @@ build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
 	    echo "**** Hint ****";                                            \
 	    echo "Parallel test files reside in the current directory"        \
 	         "by default.";                                               \
-	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "Set HDF5_PARAPREFIX to use another directory. e.g.,";       \
 	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
 	    echo "    export HDF5_PARAPREFIX";                                \
 	    echo "    make check";                                            \

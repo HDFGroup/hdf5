@@ -1,63 +1,87 @@
-cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_H5LS)
-
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
+cmake_minimum_required (VERSION 3.12)
+project (HDF5_TOOLS_H5LS C)
 
 #-----------------------------------------------------------------------------
 # Add the h5ls executable
 #-----------------------------------------------------------------------------
-add_executable (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
-TARGET_C_PROPERTIES (h5ls STATIC " " " ")
-target_link_libraries (h5ls  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
-set_target_properties (h5ls PROPERTIES FOLDER tools)
-set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5ls")
+if (NOT ONLY_SHARED_LIBS)
+  add_executable (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
+  target_include_directories (h5ls PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_compile_options(h5ls PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  #target_compile_definitions(h5ls PRIVATE H5_TOOLS_DEBUG)
+  TARGET_C_PROPERTIES (h5ls STATIC)
+  target_link_libraries (h5ls PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (h5ls PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5ls")
 
-set (H5_DEP_EXECUTABLES h5ls)
+  set (H5_DEP_EXECUTABLES h5ls)
+endif ()
 
 if (BUILD_SHARED_LIBS)
   add_executable (h5ls-shared ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
-  TARGET_C_PROPERTIES (h5ls-shared SHARED " " " ")
-  target_link_libraries (h5ls-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  target_include_directories (h5ls-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_compile_options(h5ls-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  #target_compile_definitions(h5ls-shared PRIVATE H5_TOOLS_DEBUG)
+  TARGET_C_PROPERTIES (h5ls-shared SHARED)
+  target_link_libraries (h5ls-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5ls-shared PROPERTIES FOLDER tools)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5ls-shared")
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5ls-shared)
 endif ()
 
-if (BUILD_TESTING)
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5LS_SRC_FORMAT h5ls)
+  else ()
+    clang_format (HDF5_H5LS_SRC_FORMAT h5ls-shared)
+  endif ()
+endif ()
 
+if (BUILD_TESTING)
   #-----------------------------------------------------------------------------
   # If plugin library tests can be tested
   #-----------------------------------------------------------------------------
-  set (HDF5_TOOL_PLUGIN_LIB_CORENAME         "dynlibls")
-  set (HDF5_TOOL_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TOOL_PLUGIN_LIB_CORENAME}")
-  set (HDF5_TOOL_PLUGIN_LIB_TARGET           ${HDF5_TOOL_PLUGIN_LIB_CORENAME})
-  add_definitions (${HDF_EXTRA_C_FLAGS})
-  INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
+  if (BUILD_SHARED_LIBS)
+    set (H5LS_TOOL_PLUGIN_LIB_CORENAME         "dynlibls")
+    set (H5LS_TOOL_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${H5LS_TOOL_PLUGIN_LIB_CORENAME}")
+    set (H5LS_TOOL_PLUGIN_LIB_TARGET           ${H5LS_TOOL_PLUGIN_LIB_CORENAME})
 
-  add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_ls.c)
-  TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED " " " ")
-  target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-  H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
+    add_library (${H5LS_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_ls.c)
+    target_include_directories (${H5LS_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    TARGET_C_PROPERTIES (${H5LS_TOOL_PLUGIN_LIB_TARGET} SHARED)
+    target_link_libraries (${H5LS_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
+    H5_SET_LIB_OPTIONS (${H5LS_TOOL_PLUGIN_LIB_TARGET} ${H5LS_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
 
-  # make plugins dir
-  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
-  #-----------------------------------------------------------------------------
-  # Copy plugin library to a plugins folder
-  #-----------------------------------------------------------------------------
-  add_custom_command (
-      TARGET     ${HDF5_TOOL_PLUGIN_LIB_TARGET}
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different
-          "$<TARGET_FILE:${HDF5_TOOL_PLUGIN_LIB_TARGET}>"
-          "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${HDF5_TOOL_PLUGIN_LIB_TARGET}>"
-  )
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_H5LS_PLUGIN_FORMAT ${H5LS_TOOL_PLUGIN_LIB_TARGET})
+    endif ()
 
-  include (CMakeTests.cmake)
+    # make plugins dir
+    file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
+
+    #-----------------------------------------------------------------------------
+    # Copy plugin library to a plugins folder
+    #-----------------------------------------------------------------------------
+    add_custom_command (
+        TARGET     ${H5LS_TOOL_PLUGIN_LIB_TARGET}
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different
+            "$<TARGET_FILE:${H5LS_TOOL_PLUGIN_LIB_TARGET}>"
+            "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${H5LS_TOOL_PLUGIN_LIB_TARGET}>"
+    )
+  endif ()
+
+  if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
+    include (CMakeTests.cmake)
+  endif ()
 
 endif ()
 

@@ -22,7 +22,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -104,8 +104,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = h5copy$(EXEEXT)
-check_PROGRAMS = $(am__EXEEXT_1)
-TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
+check_PROGRAMS =
+TESTS =
 subdir = tools/h5copy
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
@@ -118,7 +118,6 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testh5copy.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 = h5copygentest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 h5copy_SOURCES = h5copy.c
 h5copy_OBJECTS = h5copy.$(OBJEXT)
@@ -131,10 +130,6 @@ am__v_lt_1 =
 h5copy_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5copy_LDFLAGS) $(LDFLAGS) -o $@
-am_h5copygentest_OBJECTS = h5copygentest.$(OBJEXT)
-h5copygentest_OBJECTS = $(am_h5copygentest_OBJECTS)
-h5copygentest_LDADD = $(LDADD)
-h5copygentest_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -169,8 +164,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = h5copy.c $(h5copygentest_SOURCES)
-DIST_SOURCES = h5copy.c $(h5copygentest_SOURCES)
+SOURCES = h5copy.c
+DIST_SOURCES = h5copy.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -380,8 +375,11 @@ am__set_TESTS_bases = \
 RECHECK_LOGS = $(TEST_LOGS)
 AM_RECURSIVE_TARGETS = check recheck
 TEST_SUITE_LOG = test-suite.log
-LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
-LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
+am__test_logs1 = $(TESTS:=.log)
+am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
+TEST_LOGS = $(am__test_logs2:.sh.log=.log)
+SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
+SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
 am__set_b = \
   case '$@' in \
     */*) \
@@ -392,11 +390,6 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
-am__test_logs1 = $(TESTS:=.log)
-am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
-TEST_LOGS = $(am__test_logs2:.sh.log=.log)
-SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
-SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/testh5copy.sh.in \
 	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/mkinstalldirs \
 	$(top_srcdir)/bin/test-driver $(top_srcdir)/config/commence.am \
@@ -411,12 +404,12 @@ AMTAR = @AMTAR@
 # AM_CFLAGS is an automake construct which should be used by Makefiles 
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
-AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
+AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@ @H5_ECFLAGS@
 
 # Include src and tools/lib directories
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_srcdir)/tools/lib
-AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@ @H5_ECXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
@@ -431,6 +424,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_VERSION = @CC_VERSION@
 CFLAGS = @CFLAGS@
+CLANG_SANITIZE_CHECKS = @CLANG_SANITIZE_CHECKS@
 CLEARFILEBUF = @CLEARFILEBUF@
 CODESTACK = @CODESTACK@
 CONFIG_DATE = @CONFIG_DATE@
@@ -449,6 +443,7 @@ DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
+DEV_WARNINGS = @DEV_WARNINGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
@@ -476,6 +471,8 @@ GREP = @GREP@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
+H5_ECFLAGS = @H5_ECFLAGS@
+H5_ECXXFLAGS = @H5_ECXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
 H5_LDFLAGS = @H5_LDFLAGS@
@@ -483,9 +480,12 @@ H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
+HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -501,6 +501,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTRUMENT = @INSTRUMENT@
 INSTRUMENT_LIBRARY = @INSTRUMENT_LIBRARY@
+JNI_LDFLAGS = @JNI_LDFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -522,6 +523,7 @@ NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJECT_NAMELEN_DEFAULT_F = @OBJECT_NAMELEN_DEFAULT_F@
 OBJEXT = @OBJEXT@
+OPTIMIZATION = @OPTIMIZATION@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -534,8 +536,10 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PARALLEL = @PARALLEL@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PERL = @PERL@
+PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
+ROS3_VFD = @ROS3_VFD@
 RUNPARALLEL = @RUNPARALLEL@
 RUNSERIAL = @RUNSERIAL@
 R_INTEGER = @R_INTEGER@
@@ -549,6 +553,7 @@ STATIC_EXEC = @STATIC_EXEC@
 STATIC_SHARED = @STATIC_SHARED@
 STRICT_FORMAT_CHECKS = @STRICT_FORMAT_CHECKS@
 STRIP = @STRIP@
+SYMBOLS = @SYMBOLS@
 TESTPARALLEL = @TESTPARALLEL@
 THREADSAFE = @THREADSAFE@
 TIME = @TIME@
@@ -590,6 +595,7 @@ docdir = $(exec_prefix)/doc
 dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
+examplesdir = @examplesdir@
 exec_prefix = @exec_prefix@
 fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
@@ -676,27 +682,20 @@ TRACE = perl $(top_srcdir)/bin/trace
 # Temporary files.  *.h5 are generated by h5dumpgentest.  They should
 # copied to the testfiles/ directory if update is required.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5
-
-# Test programs and scripts
-TEST_PROG = h5copygentest
-TEST_SCRIPT = testh5copy.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5copy$(EXEEXT)
 
 # Add h5copy specific linker flags here
 h5copy_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
-# source file for the test file generator
-h5copygentest_SOURCES = h5copygentest.c
-
 # All programs depend on the hdf5 and h5tools libraries
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 
-# Automake needs to be taught how to build lib, dyn, progs, and tests targets.
+# Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
 # EXTRA_TEST variables are supplied to allow the user to force targets to
-# be built at certain times. 
+# be built at certain times.
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
@@ -811,10 +810,6 @@ h5copy$(EXEEXT): $(h5copy_OBJECTS) $(h5copy_DEPENDENCIES) $(EXTRA_h5copy_DEPENDE
 	@rm -f h5copy$(EXEEXT)
 	$(AM_V_CCLD)$(h5copy_LINK) $(h5copy_OBJECTS) $(h5copy_LDADD) $(LIBS)
 
-h5copygentest$(EXEEXT): $(h5copygentest_OBJECTS) $(h5copygentest_DEPENDENCIES) $(EXTRA_h5copygentest_DEPENDENCIES) 
-	@rm -f h5copygentest$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(h5copygentest_OBJECTS) $(h5copygentest_LDADD) $(LIBS)
-
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -822,7 +817,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5copy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5copygentest.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1033,13 +1027,6 @@ recheck: all $(check_PROGRAMS) $(check_SCRIPTS)
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
-h5copygentest.log: h5copygentest$(EXEEXT)
-	@p='h5copygentest$(EXEEXT)'; \
-	b='h5copygentest'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .sh.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -1229,6 +1216,15 @@ uninstall-am: uninstall-binPROGRAMS
 
 help:
 	@$(top_srcdir)/bin/makehelp
+
+# Test programs and scripts
+@BUILD_TESTS_CONDITIONAL_TRUE@	TEST_PROG=h5copygentest
+@BUILD_TESTS_CONDITIONAL_TRUE@	TEST_SCRIPT=testh5copy.sh
+# source file for the test file generator
+@BUILD_TESTS_CONDITIONAL_TRUE@	h5copygentest_SOURCES=h5copygentest.c
+@BUILD_TESTS_CONDITIONAL_FALSE@	TEST_PROG=
+@BUILD_TESTS_CONDITIONAL_FALSE@	TEST_SCRIPT=
+
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)
@@ -1264,7 +1260,7 @@ all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
 # make install-doc doesn't do anything outside of doc directory, but
 # Makefiles should recognize it.
 # UPDATE: docs no longer reside in this build tree, so this target
-# is depreciated.
+# is deprecated.
 install-doc uninstall-doc:
 	@echo "Nothing to be done."
 
@@ -1425,7 +1421,7 @@ build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
 	    echo "**** Hint ****";                                            \
 	    echo "Parallel test files reside in the current directory"        \
 	         "by default.";                                               \
-	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "Set HDF5_PARAPREFIX to use another directory. e.g.,";       \
 	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
 	    echo "    export HDF5_PARAPREFIX";                                \
 	    echo "    make check";                                            \

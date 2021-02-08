@@ -6,30 +6,33 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5MM.c
- *			Jul 10 1997
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:     H5MM.c
+ *              Jul 10 1997
+ *              Robb Matzke
  *
- * Purpose:		Memory management functions.
- *
- * Modifications:
+ * Purpose:     Memory management functions
  *
  *-------------------------------------------------------------------------
  */
 
+/****************/
+/* Module Setup */
+/****************/
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5MMprivate.h"
+/***********/
+/* Headers */
+/***********/
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5MMprivate.h" /* Memory management			*/
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_malloc
  *
@@ -40,10 +43,9 @@
  *              difficult to check as a return value. This is still
  *              considered an error condition since allocations of zero
  *              bytes usually indicate problems.
- *  
- * Return:  Success:    Pointer new memory
  *
- *          Failure:	NULL
+ * Return:      Success:    Pointer to new memory
+ *              Failure:    NULL
  *
  * Programmer:  Quincey Koziol
  *              Nov  8 2003
@@ -53,14 +55,14 @@
 void *
 H5MM_malloc(size_t size)
 {
-    void *ret_value;
+    void *ret_value = NULL;
 
     HDassert(size);
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(size)
+    if (size)
         ret_value = HDmalloc(size);
     else
         ret_value = NULL;
@@ -68,7 +70,6 @@ H5MM_malloc(size_t size)
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5MM_malloc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_calloc
  *
@@ -82,9 +83,8 @@ H5MM_malloc(size_t size)
  *              bytes usually indicate problems.
  *
  *
- * Return:  Success:    Pointer new memory
- *
- *          Failure:	NULL
+ * Return:      Success:    Pointer to new memory
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *              Nov  8 2003
@@ -94,14 +94,14 @@ H5MM_malloc(size_t size)
 void *
 H5MM_calloc(size_t size)
 {
-    void *ret_value;
+    void *ret_value = NULL;
 
     HDassert(size);
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(size)
+    if (size)
         ret_value = HDcalloc((size_t)1, size);
     else
         ret_value = NULL;
@@ -109,7 +109,6 @@ H5MM_calloc(size_t size)
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5MM_calloc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_realloc
  *
@@ -123,10 +122,9 @@ H5MM_calloc(size_t size)
  *              Note that the (NULL, 0) combination is undefined behavior
  *              in the C standard.
  *
- * Return:  Success:    Ptr to new memory if size > 0
- *                      NULL if size is zero
- *
- *          Failure:    NULL (input buffer is unchanged on failure)
+ * Return:      Success:    Ptr to new memory if size > 0
+ *                          NULL if size is zero
+ *              Failure:    NULL (input buffer is unchanged on failure)
  *
  * Programmer:  Robb Matzke
  *              Jul 10 1997
@@ -136,14 +134,14 @@ H5MM_calloc(size_t size)
 void *
 H5MM_realloc(void *mem, size_t size)
 {
-    void *ret_value;
+    void *ret_value = NULL;
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(mem || size);
 
-    if(NULL == mem && 0 == size) {  
+    if (NULL == mem && 0 == size) {
         /* Not defined in the standard, return NULL */
         ret_value = NULL;
     }
@@ -151,14 +149,13 @@ H5MM_realloc(void *mem, size_t size)
         ret_value = HDrealloc(mem, size);
 
         /* Some platforms do not return NULL if size is zero. */
-        if(0 == size)
+        if (0 == size)
             ret_value = NULL;
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_realloc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_xstrdup
  *
@@ -166,23 +163,21 @@ H5MM_realloc(void *mem, size_t size)
  *              NULL is an acceptable value for the input string.
  *
  * Return:      Success:    Pointer to a new string (NULL if s is NULL).
- *
- *              Failure:    abort()
+ *              Failure:    NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 10 1997
  *-------------------------------------------------------------------------
  */
 char *
 H5MM_xstrdup(const char *s)
 {
-    char	*ret_value = NULL;
+    char *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if(s) {
-        if(NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
+    if (s) {
+        if (NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         HDstrcpy(ret_value, s);
     } /* end if */
@@ -191,7 +186,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_xstrdup() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_strdup
  *
@@ -202,48 +196,43 @@ done:
  *              an error will be raised.
  *
  * Return:      Success:    Pointer to a new string
- *
- *              Failure:    abort()
+ *              Failure:    NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 10 1997
  *-------------------------------------------------------------------------
  */
 char *
 H5MM_strdup(const char *s)
 {
-    char	*ret_value;
+    char *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if(!s)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "null string")
-    if(NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if (!s)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "null string")
+    if (NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDstrcpy(ret_value, s);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_strdup() */
 
-
 /*-------------------------------------------------------------------------
- * Function:	H5MM_xfree
+ * Function:    H5MM_xfree
  *
- * Purpose:	Just like free(3) except null pointers are allowed as
- *		arguments, and the return value (always NULL) can be
- *		assigned to the pointer whose memory was just freed:
+ * Purpose:     Just like free(3) except null pointers are allowed as
+ *              arguments, and the return value (always NULL) can be
+ *              assigned to the pointer whose memory was just freed:
  *
- *			thing = H5MM_xfree (thing);
+ *              thing = H5MM_xfree (thing);
  *
- * Return:	Success:	NULL
+ * Return:      Success:    NULL
+ *              Failure:    never fails
  *
- *		Failure:	never fails
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
+ * Programmer:  Robb Matzke
+ *              Jul 10 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -253,7 +242,7 @@ H5MM_xfree(void *mem)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(mem)
+    if (mem)
         HDfree(mem);
 
     FUNC_LEAVE_NOAPI(NULL);

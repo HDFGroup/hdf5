@@ -15,4 +15,3 @@ DATASET "/DS08BITS" {
    }
 }
 }
-h5dump error: Packed Bit offset+length value(9) too large. Max is 8

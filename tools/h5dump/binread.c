@@ -7,7 +7,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -27,9 +27,9 @@
 
 */
 
-#define NELMTS     6
-#define TYPE       int
-#define FORMAT     "%d "
+#define NELMTS 6
+#define TYPE   int
+#define FORMAT "%d "
 
 /*-------------------------------------------------------------------------
  * Function: usage
@@ -45,7 +45,7 @@
  *-------------------------------------------------------------------------
  */
 static void
-usage (void)
+usage(void)
 {
     fprintf(stderr, "usage: binread FILE_NAME\n");
 }
@@ -59,13 +59,13 @@ usage (void)
  */
 
 int
-main (int argc, const char *argv[])
+main(int argc, const char *argv[])
 {
-    FILE  *stream;
+    FILE * stream;
     size_t numread;
     TYPE   buf[NELMTS];
     size_t i, nelmts = NELMTS;
-    char  *fname=NULL;
+    char * fname = NULL;
 
     if (argc != 2) {
         usage();
@@ -74,12 +74,12 @@ main (int argc, const char *argv[])
 
     fname = strdup(argv[1]);
 
-    if((stream = fopen(fname, "rb")) != NULL) {
-        numread = fread(buf, sizeof( TYPE ), nelmts, stream);
+    if ((stream = fopen(fname, "rb")) != NULL) {
+        numread = fread(buf, sizeof(TYPE), nelmts, stream);
         printf("Number of items read = %llu\n", (unsigned long long)numread);
 
         for (i = 0; i < nelmts; i++) {
-            printf(FORMAT,buf[i]);
+            printf(FORMAT, buf[i]);
         }
         printf("\n");
 
@@ -92,4 +92,3 @@ main (int argc, const char *argv[])
 
     return 0;
 }
-

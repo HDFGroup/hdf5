@@ -1,0 +1,474 @@
+***********************************************************************
+*                       COMPILER WARNINGS OPTIONS
+***********************************************************************
+
+                     Table of Contents
+
+Section I:    Managing Warnings
+Section II:   Default Warnings
+Section III:  All Warnings
+Section IV:   Group 0 Warnings
+Section V:    Group 1 Warnings
+Section VI:   Group 2 Warnings
+Section VII:  Group 3 Warnings
+Section VIII: Group 4 Warnings
+Section IX:   Disable Warnings
+
+************************************************************************
+
+
+========================================================================
+I. Managing Warnings
+========================================================================
+Compiler warnings are managed by setting the compiler flags variables.
+
+Autotools uses the H5_CFLAGS and H5_CXXFLAGS, both variables set the flags nearly
+  identical, along with H5_FCFLAGS for Fortran. Autotools uses the type
+  and version of the compiler to determine which warning flags are used.
+  However, there is an option, enable-developer-warnings, to enable extra
+  flags for developers.
+
+CMake uses the CMAKE_C_FLAGS and CMAKE_CXX_FLAGS, both sets are nearly
+  identical, along with CMAKE_Fortran_FLAGS for Fortran. CMake has a
+  minimum set of flags for GNU type compilers and for MSVC compilers. In
+  addition, CMake breaks the list of flags into groups. The groups for
+  GNU are roughly associated with the version of the compiler, while
+  the MSVC groups are associated with the warning levels for the
+  Microsoft compilers. The CMake option for enabling extra developer
+  warnings is HDF5_ENABLE_DEV_WARNINGS.
+
+Custom settings can be used by setting;
+  Environment variables H5_CFLAGS and H5_CXXFLAGS for Autotools
+  CMake defines CMAKE_C_FLAGS and CMAKE_CXX_FLAGS for CMake
+
+
+========================================================================
+II. Default Warnings
+========================================================================
+
+--------------------------------------------------
+Autotools UNIX warnings added to H5_CFLAGS
+--------------------------------------------------
+    -std=c99
+
+   the following warning switches should not raise warnings by the current code
+    -pedantic
+    -Wall
+    -Wextra
+    -Wbad-function-cast
+    -Wc++-compat
+    -Wcast-align
+    -Wcast-qual
+    -Wconversion
+    -Wdeclaration-after-statement
+    -Wdisabled-optimization
+    -Wfloat-equal
+    -Wformat=2
+    -Winit-self
+    -Winvalid-pch
+    -Wmissing-declarations
+    -Wmissing-include-dirs
+    -Wmissing-prototypes
+    -Wnested-externs
+    -Wold-style-definition
+    -Wpacked
+    -Wpointer-arith
+    -Wredundant-decls
+    -Wshadow
+    -Wstrict-prototypes
+    -Wswitch-default
+    -Wswitch-enum
+    -Wundef
+    -Wunused-macros
+    -Wunsafe-loop-optimizations
+    -Wwrite-strings
+
+   enable-developer-warnings=ON
+        -Winline
+        -Waggregate-return
+        -Wmissing-format-attribute
+        -Wmissing-noreturn
+   enable-developer-warnings=OFF
+        -Wno-inline
+        -Wno-aggregate-return
+        -Wno-missing-format-attribute
+        -Wno-missing-noreturn
+
+IF GCC <= 4.3
+    -Wno-long-long
+    -Wvolatile-register-var
+    -Wstrict-overflow
+
+IF GCC <= 4.4
+    -Wno-long-long
+    -Wvolatile-register-var
+    -Wstrict-overflow
+    -Wlogical-op
+    -Wvla
+
+IF GCC <= 4.5
+    -Wno-long-long
+    -Wvolatile-register-var
+    -Wstrict-overflow
+    -Wlogical-op
+    -Wvla
+    -Wlarger-than=2048
+    -Wsync-nand
+    -Wframe-larger-than=16384
+    -Wpacked-bitfield-compat
+
+IF GCC <= 4.6
+    -Wno-long-long
+    -Wlogical-op
+    -Wvla
+    -Wlarger-than=2048
+    -Wsync-nand
+    -Wframe-larger-than=16384
+    -Wpacked-bitfield-compat
+    -Wstrict-aliasing
+    -Wstrict-overflow=5
+    -Wjump-misses-init
+    -Wunsuffixed-float-constants
+
+IF GCC <= 4.7
+    -Wno-long-long
+    -Wlogical-op
+    -Wvla
+    -Wlarger-than=2048
+    -Wsync-nand
+    -Wframe-larger-than=16384
+    -Wpacked-bitfield-compat
+    -Wstrict-aliasing
+    -Wstrict-overflow=5
+    -Wjump-misses-init
+    -Wunsuffixed-float-constants
+    -Wdouble-promotion
+    -Wtrampolines
+   enable-developer-warnings=ON:
+        -Wsuggest-attribute=const
+   enable-developer-warnings=OFF:
+        -Wno-suggest-attribute=const
+
+IF GCC <= 4.8
+    -Wlogical-op
+    -Wvla
+    -Wlarger-than=2048
+    -Wsync-nand
+    -Wframe-larger-than=16384
+    -Wpacked-bitfield-compat
+    -Wstrict-overflow=5
+    -Wjump-misses-init
+    -Wunsuffixed-float-constants
+    -Wdouble-promotion
+    -Wtrampolines
+    -Wstack-usage=8192
+    -Wvector-operation-performance
+   enable-developer-warnings=ON:
+        -Wsuggest-attribute=const
+        -Wsuggest-attribute=pure
+        -Wsuggest-attribute=noreturn
+   enable-developer-warnings=OFF:
+        -Wno-suggest-attribute=const
+        -Wno-suggest-attribute=pure
+        -Wno-suggest-attribute=noreturn
+
+IF GCC <= 4.9
+    -Wlogical-op
+    -Wvla
+    -Wlarger-than=2048
+    -Wsync-nand
+    -Wframe-larger-than=16384
+    -Wpacked-bitfield-compat
+    -Wstrict-overflow=5
+    -Wjump-misses-init
+    -Wdouble-promotion
+    -Wtrampolines
+    -Wstack-usage=8192
+    -Wvector-operation-performance
+   enable-developer-warnings=ON:
+        -Wsuggest-attribute=const
+        -Wsuggest-attribute=pure
+        -Wsuggest-attribute=noreturn
+        -Wsuggest-attribute=format
+   enable-developer-warnings=OFF:
+        -Wno-suggest-attribute=const
+        -Wno-suggest-attribute=pure
+        -Wno-suggest-attribute=noreturn
+        -Wno-suggest-attribute=format
+
+IF GCC < 5
+    -Wlogical-op
+    -Wvla
+    -Wlarger-than=2048
+    -Wsync-nand
+    -Wframe-larger-than=16384
+    -Wpacked-bitfield-compat
+    -Wstrict-overflow=5
+    -Wjump-misses-init
+    -Wunsuffixed-float-constants
+    -Wdouble-promotion
+    -Wtrampolines
+    -Wstack-usage=8192
+    -Wvector-operation-performance
+    -Wdate-time
+   enable-developer-warnings=ON:
+        -Wsuggest-attribute=const
+        -Wsuggest-attribute=pure
+        -Wsuggest-attribute=noreturn
+        -Wsuggest-attribute=format
+   enable-developer-warnings=OFF:
+        -Wno-suggest-attribute=const
+        -Wno-suggest-attribute=pure
+        -Wno-suggest-attribute=noreturn
+        -Wno-suggest-attribute=format
+
+IF GCC < 6
+    -Wlogical-op
+    -Wvla
+    -Wlarger-than=2048
+    -Wsync-nand
+    -Wframe-larger-than=16384
+    -Wpacked-bitfield-compat
+    -Wstrict-overflow=5
+    -Wjump-misses-init
+    -Wunsuffixed-float-constants
+    -Wdouble-promotion
+    -Wtrampolines
+    -Wstack-usage=8192
+    -Wvector-operation-performance
+    -Wdate-time
+    -Warray-bounds=2
+    -Wc99-c11-compat
+   enable-developer-warnings=ON:
+        -Wsuggest-attribute=const
+        -Wsuggest-attribute=pure
+        -Wsuggest-attribute=noreturn
+        -Wsuggest-attribute=format
+   enable-developer-warnings=OFF:
+        -Wno-suggest-attribute=const
+        -Wno-suggest-attribute=pure
+        -Wno-suggest-attribute=noreturn
+        -Wno-suggest-attribute=format
+
+IF GCC < 7
+    -Wlogical-op
+    -Wvla
+    -Wlarger-than=2048
+    -Wsync-nand
+    -Wframe-larger-than=16384
+    -Wpacked-bitfield-compat
+    -Wstrict-overflow=5
+    -Wjump-misses-init
+    -Wunsuffixed-float-constants
+    -Wdouble-promotion
+    -Wtrampolines
+    -Wstack-usage=8192
+    -Wvector-operation-performance
+    -Wdate-time
+    -Warray-bounds=2
+    -Wc99-c11-compat
+    -Wnull-dereference
+    -Wunused-const-variable
+    -Wduplicated-cond -Whsa
+   enable-developer-warnings=ON:
+        -Wsuggest-attribute=const
+        -Wsuggest-attribute=pure
+        -Wsuggest-attribute=noreturn
+        -Wsuggest-attribute=format
+   enable-developer-warnings=OFF:
+        -Wno-suggest-attribute=const
+        -Wno-suggest-attribute=pure
+        -Wno-suggest-attribute=noreturn
+        -Wno-suggest-attribute=format
+
+
+--------------------------------------------
+CMake warnings added to CMAKE_C_FLAGS
+--------------------------------------------
+
+IF GNU GCC
+    -pedantic
+    -Wall
+    -Wextra
+    -Wbad-function-cast
+    -Wc++-compat
+    -Wcast-align
+    -Wcast-qual
+    -Wconversion
+    -Wdeclaration-after-statement
+    -Wdisabled-optimization
+    -Wfloat-equal
+    -Wformat=2
+    -Winit-self
+    -Winvalid-pch
+    -Wmissing-declarations
+    -Wmissing-include-dirs
+    -Wmissing-prototypes
+    -Wnested-externs
+    -Wold-style-definition
+    -Wpacked
+    -Wpointer-arith
+    -Wredundant-decls
+    -Wshadow
+    -Wstrict-prototypes
+    -Wswitch-default
+    -Wswitch-enum
+    -Wundef
+    -Wunused-macros
+    -Wunsafe-loop-optimizations
+    -Wwrite-strings
+
+    -fmessage-length=0
+   HDF5_ENABLE_DEV_WARNINGS=ON
+        -Winline
+        -Waggregate-return
+   HDF5_ENABLE_DEV_WARNINGS=OFF
+        -Wno-unused-parameter
+        -Wno-inline
+        -Wno-aggregate-return
+
+
+========================================================================
+III. All Warnings in CMake
+========================================================================
+
+Default: HDF5_ENABLE_DEV_WARNINGS:BOOL=OFF
+    For Visual Studio:
+        /W3
+
+HDF5_ENABLE_ALL_WARNINGS:BOOL=ON
+    For Visual Studio:
+        /Wall
+        /wd4668
+
+    For GNU GCC
+        Group 0 flags
+        Group 1 flags
+        Group 2 flags
+
+
+========================================================================
+IV. Group 0 Warnings in CMake
+========================================================================
+
+Default: HDF5_ENABLE_GROUPZERO_WARNINGS:BOOL=OFF
+
+HDF5_ENABLE_GROUPZERO_WARNINGS:BOOL=ON
+    For Visual Studio
+        /W1
+
+    For GNU GCC
+        Default Warnings
+
+
+========================================================================
+V. Group 1 Warnings in CMake
+========================================================================
+
+Default: HDF5_ENABLE_GROUPONE_WARNINGS:BOOL=OFF
+
+HDF5_ENABLE_GROUPONE_WARNINGS:BOOL=ON
+    For Visual Studio
+        /W2
+
+    For GNU GCC
+      IF GCC >= 4.3
+        -Wlogical-op
+        -Wvla
+        -Wlarger-than=2048
+      IF GCC >= 4.4
+        -Wsync-nand
+        -Wframe-larger-than=16384
+        -Wpacked-bitfield-compat
+      IF GCC >= 4.5
+        -Wstrict-overflow=5
+        -Wjump-misses-init
+        -Wunsuffixed-float-constants
+
+
+========================================================================
+VI. Group 2 Warnings in CMake
+========================================================================
+
+Default: HDF5_ENABLE_GROUPTWO_WARNINGS:BOOL=OFF
+
+HDF5_ENABLE_GROUPTWO_WARNINGS:BOOL=ON
+    For Visual Studio
+        /W3
+
+    For GNU GCC
+      IF GCC >= 4.6
+        -Wdouble-promotion
+        -Wtrampolines
+       enable-developer-warnings=ON:
+            -Wsuggest-attribute=const
+       enable-developer-warnings=OFF:
+            -Wno-suggest-attribute=const
+      IF GCC >= 4.7
+        -Wstack-usage=8192
+        -Wvector-operation-performance
+       enable-developer-warnings=ON:
+            -Wsuggest-attribute=pure
+            -Wsuggest-attribute=noreturn
+       enable-developer-warnings=OFF:
+            -Wno-suggest-attribute=pure
+            -Wno-suggest-attribute=noreturn
+      IF GCC >= 4.8
+       enable-developer-warnings=ON:
+            -Wsuggest-attribute=format
+       enable-developer-warnings=OFF:
+            -Wno-suggest-attribute=format
+      IF GCC >= 4.8
+        -Wdate-time
+
+
+========================================================================
+VII. Group 3 Warnings in CMake
+========================================================================
+
+Default: HDF5_ENABLE_GROUPTHREE_WARNINGS:BOOL=OFF
+
+HDF5_ENABLE_GROUPTHREE_WARNINGS:BOOL=ON
+    For Visual Studio
+        /W4
+
+    For GNU GCC
+        IF GCC >= 5.1
+            -Warray-bounds=2
+            -Wc99-c11-compat
+
+
+========================================================================
+VIII. Group 4 Warnings in CMake
+========================================================================
+
+Default: HDF5_ENABLE_GROUPFOUR_WARNINGS:BOOL=OFF
+
+HDF5_ENABLE_GROUPFOUR_WARNINGS:BOOL=ON
+    For GNU GCC
+        IF GCC >= 6.0
+            -Wnull-dereference
+            -Wunused-const-variable
+            -Wduplicated-cond
+            -Whsa
+
+
+========================================================================
+IX. Disable Warnings in CMake
+========================================================================
+
+Default: HDF5_DISABLE_COMPILER_WARNINGS:BOOL=OFF
+
+HDF5_DISABLE_COMPILER_WARNINGS:BOOL=ON
+    For Visual Studio
+        HDF5_WARNINGS_BLOCKED:BOOL=ON
+        /W0
+
+    For GNU GCC
+        -w
+
+
+========================================================================
+For further assistance, send email to help@hdfgroup.org
+========================================================================
+

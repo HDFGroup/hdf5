@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
@@ -42,6 +42,9 @@ fi
 # Figure out Intel C compiler flags
 . $srcdir/config/intel-flags
 
+# Figure out Clang C compiler flags
+. $srcdir/config/clang-flags
+
 # Use default Fortran 90 compiler according to what C compiler is used.
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
@@ -49,7 +52,7 @@ if test "X-" = "X-$FC"; then
             FC=gfortran
             FC_BASENAME=gfortran
             ;;
-	pgcc*)
+        pgcc*)
             FC=pgf90
             FC_BASENAME=pgf90
             ;;
@@ -60,6 +63,11 @@ if test "X-" = "X-$FC"; then
         mpicc*)
             FC=mpif90
             FC_BASENAME=mpif90
+            ;;
+        clang*)
+            # clang has no fortran compiler. Use gfortran.
+            FC=gfortran
+            FC_BASENAME=gfortran
             ;;
     esac
 else
@@ -98,11 +106,13 @@ else
             echo "compiler '$FC' is $fc_version_info"
             $RM $tmpfile
 	    ;;
-
          *)
             ;;
     esac
 fi
+
+# Figure out GNU FC compiler flags
+. $srcdir/config/gnu-fflags
 
 # Figure out PGI FC compiler flags
 . $srcdir/config/pgi-fflags
@@ -119,10 +129,10 @@ case $FC_BASENAME in
     #
     f95)
         # Set required flag for compiling C stubs
-        H5_CFLAGS="$H5_CFLAGS" 
+        H5_CFLAGS="$H5_CFLAGS"
 
         F9XSUFFIXFLAG=""
-# We force compiler to use upper case for external names 
+# We force compiler to use upper case for external names
 # (just in case since this should be a default EIP)
         H5_FCFLAGS="$H5_FCFLAGS"
         FSEARCH_DIRS=""
@@ -173,6 +183,12 @@ if test -z "$CXX"; then
   CXX_BASENAME=g++
 fi
 
+# Figure out GNU CXX compiler flags
+. $srcdir/config/gnu-cxxflags
+
+# Figure out Clang CXX compiler flags
+. $srcdir/config/clang-cxxflags
+
 # compiler version strings
 
 # check if the compiler_version_info is already set
@@ -200,6 +216,11 @@ case $CC in
     *icc*)
         cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
             sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
+    *clang*)
+        cc_version_info="`$CC $CFLAGS $H5_CFLAGS --version 2>&1 |\
+            grep 'clang version' | sed 's/.*clang version \([-a-z0-9\.]*\).*/\1/'`"
         ;;
 
     *)
@@ -295,6 +316,11 @@ case $CXX in
             sed 's/^\([a-z]* \)/ built with \1/1'`
         cxx_version_info=`echo $cxx_version_info`
         ;; 
+
+    *clang++*)
+        cxx_version_info="`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
+            grep 'clang version' | sed 's/.*clang version \([-a-z0-9\.]*\).*/\1/'`"
+        ;;
 
     *)
         echo "No match to get cxx_version_info for $CXX"

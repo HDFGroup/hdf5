@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,20 +33,11 @@
 extern "C" {
 #endif
 
-enum H5C_cache_incr_mode
-{
-    H5C_incr__off,
-    H5C_incr__threshold
-};
+enum H5C_cache_incr_mode { H5C_incr__off, H5C_incr__threshold };
 
-enum H5C_cache_flash_incr_mode
-{
-     H5C_flash_incr__off,
-     H5C_flash_incr__add_space
-};
+enum H5C_cache_flash_incr_mode { H5C_flash_incr__off, H5C_flash_incr__add_space };
 
-enum H5C_cache_decr_mode
-{
+enum H5C_cache_decr_mode {
     H5C_decr__off,
     H5C_decr__threshold,
     H5C_decr__age_out,

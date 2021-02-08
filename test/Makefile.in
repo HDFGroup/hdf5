@@ -22,7 +22,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -177,10 +177,11 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) \
 	flush1$(EXEEXT) flush2$(EXEEXT) app_ref$(EXEEXT) enum$(EXEEXT) \
 	set_extent$(EXEEXT) ttsafe$(EXEEXT) getname$(EXEEXT) \
-	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
-	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
-	freespace$(EXEEXT) mf$(EXEEXT) btree2$(EXEEXT) fheap$(EXEEXT) \
-	file_image$(EXEEXT) unregister$(EXEEXT)
+	vfd$(EXEEXT) ros3$(EXEEXT) s3comms$(EXEEXT) hdfs$(EXEEXT) \
+	ntypes$(EXEEXT) dangle$(EXEEXT) dtransform$(EXEEXT) \
+	reserved$(EXEEXT) cross_read$(EXEEXT) freespace$(EXEEXT) \
+	mf$(EXEEXT) btree2$(EXEEXT) fheap$(EXEEXT) file_image$(EXEEXT) \
+	unregister$(EXEEXT)
 @HAVE_SHARED_CONDITIONAL_TRUE@am__EXEEXT_2 = plugin$(EXEEXT)
 am__EXEEXT_3 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
@@ -375,6 +376,10 @@ gheap_SOURCES = gheap.c
 gheap_OBJECTS = gheap.$(OBJEXT)
 gheap_LDADD = $(LDADD)
 gheap_DEPENDENCIES = libh5test.la $(LIBHDF5)
+hdfs_SOURCES = hdfs.c
+hdfs_OBJECTS = hdfs.$(OBJEXT)
+hdfs_LDADD = $(LDADD)
+hdfs_DEPENDENCIES = libh5test.la $(LIBHDF5)
 hyperslab_SOURCES = hyperslab.c
 hyperslab_OBJECTS = hyperslab.$(OBJEXT)
 hyperslab_LDADD = $(LDADD)
@@ -431,6 +436,14 @@ reserved_SOURCES = reserved.c
 reserved_OBJECTS = reserved.$(OBJEXT)
 reserved_LDADD = $(LDADD)
 reserved_DEPENDENCIES = libh5test.la $(LIBHDF5)
+ros3_SOURCES = ros3.c
+ros3_OBJECTS = ros3.$(OBJEXT)
+ros3_LDADD = $(LDADD)
+ros3_DEPENDENCIES = libh5test.la $(LIBHDF5)
+s3comms_SOURCES = s3comms.c
+s3comms_OBJECTS = s3comms.$(OBJEXT)
+s3comms_LDADD = $(LDADD)
+s3comms_DEPENDENCIES = libh5test.la $(LIBHDF5)
 set_extent_SOURCES = set_extent.c
 set_extent_OBJECTS = set_extent.$(OBJEXT)
 set_extent_LDADD = $(LDADD)
@@ -465,7 +478,7 @@ testmeta_LDADD = $(LDADD)
 testmeta_DEPENDENCIES = libh5test.la $(LIBHDF5)
 am_ttsafe_OBJECTS = ttsafe.$(OBJEXT) ttsafe_dcreate.$(OBJEXT) \
 	ttsafe_error.$(OBJEXT) ttsafe_cancel.$(OBJEXT) \
-	ttsafe_acreate.$(OBJEXT)
+	ttsafe_acreate.$(OBJEXT) ttsafe_attr_vlen.$(OBJEXT)
 ttsafe_OBJECTS = $(am_ttsafe_OBJECTS)
 ttsafe_LDADD = $(LDADD)
 ttsafe_DEPENDENCIES = libh5test.la $(LIBHDF5)
@@ -527,11 +540,11 @@ SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 	gen_idx.c gen_new_array.c gen_new_fill.c gen_new_group.c \
 	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
 	gen_nullspace.c gen_sizes_lheap.c gen_udlinks.c getname.c \
-	gheap.c hyperslab.c istore.c lheap.c links.c links_env.c mf.c \
-	mount.c mtime.c ntypes.c objcopy.c ohdr.c plugin.c pool.c \
-	reserved.c set_extent.c space_overflow.c stab.c \
-	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c unregister.c vfd.c
+	gheap.c hdfs.c hyperslab.c istore.c lheap.c links.c \
+	links_env.c mf.c mount.c mtime.c ntypes.c objcopy.c ohdr.c \
+	plugin.c pool.c reserved.c ros3.c s3comms.c set_extent.c \
+	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
+	testmeta.c $(ttsafe_SOURCES) unlink.c unregister.c vfd.c
 DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	$(am__libdynlib2_la_SOURCES_DIST) \
 	$(am__libdynlib3_la_SOURCES_DIST) \
@@ -545,12 +558,12 @@ DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	gen_deflate.c gen_file_image.c gen_filters.c gen_idx.c \
 	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
 	gen_new_super.c gen_noencoder.c gen_nullspace.c \
-	gen_sizes_lheap.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
-	ntypes.c objcopy.c ohdr.c plugin.c pool.c reserved.c \
-	set_extent.c space_overflow.c stab.c tcheck_version.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
-	unregister.c vfd.c
+	gen_sizes_lheap.c gen_udlinks.c getname.c gheap.c hdfs.c \
+	hyperslab.c istore.c lheap.c links.c links_env.c mf.c mount.c \
+	mtime.c ntypes.c objcopy.c ohdr.c plugin.c pool.c reserved.c \
+	ros3.c s3comms.c set_extent.c space_overflow.c stab.c \
+	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	$(ttsafe_SOURCES) unlink.c unregister.c vfd.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -794,10 +807,10 @@ AMTAR = @AMTAR@
 # AM_CFLAGS is an automake construct which should be used by Makefiles 
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
-AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
+AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@ @H5_ECFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_builddir)/src
-AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@ @H5_ECXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
@@ -812,6 +825,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_VERSION = @CC_VERSION@
 CFLAGS = @CFLAGS@
+CLANG_SANITIZE_CHECKS = @CLANG_SANITIZE_CHECKS@
 CLEARFILEBUF = @CLEARFILEBUF@
 CODESTACK = @CODESTACK@
 CONFIG_DATE = @CONFIG_DATE@
@@ -830,6 +844,7 @@ DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
+DEV_WARNINGS = @DEV_WARNINGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
@@ -857,6 +872,8 @@ GREP = @GREP@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
+H5_ECFLAGS = @H5_ECFLAGS@
+H5_ECXXFLAGS = @H5_ECXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
 H5_LDFLAGS = @H5_LDFLAGS@
@@ -864,9 +881,12 @@ H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
+HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -882,6 +902,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTRUMENT = @INSTRUMENT@
 INSTRUMENT_LIBRARY = @INSTRUMENT_LIBRARY@
+JNI_LDFLAGS = @JNI_LDFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -903,6 +924,7 @@ NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJECT_NAMELEN_DEFAULT_F = @OBJECT_NAMELEN_DEFAULT_F@
 OBJEXT = @OBJEXT@
+OPTIMIZATION = @OPTIMIZATION@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -915,8 +937,10 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PARALLEL = @PARALLEL@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PERL = @PERL@
+PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
+ROS3_VFD = @ROS3_VFD@
 RUNPARALLEL = @RUNPARALLEL@
 RUNSERIAL = @RUNSERIAL@
 R_INTEGER = @R_INTEGER@
@@ -930,6 +954,7 @@ STATIC_EXEC = @STATIC_EXEC@
 STATIC_SHARED = @STATIC_SHARED@
 STRICT_FORMAT_CHECKS = @STRICT_FORMAT_CHECKS@
 STRIP = @STRIP@
+SYMBOLS = @SYMBOLS@
 TESTPARALLEL = @TESTPARALLEL@
 THREADSAFE = @THREADSAFE@
 TIME = @TIME@
@@ -971,6 +996,7 @@ docdir = $(exec_prefix)/doc
 dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
+examplesdir = @examplesdir@
 exec_prefix = @exec_prefix@
 fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
@@ -1083,10 +1109,11 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 accum.h5 \
 	unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5 \
 	objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 \
 	tcheck_version_*.out tcheck_version_*.err efc[0-5].h5 \
-	log_vfd_out.log new_multi_file_v16-r.h5 \
-	new_multi_file_v16-s.h5 split_get_file_image_test-m.h5 \
-	split_get_file_image_test-r.h5 file_image_core_test.h5.copy \
-	unregister_filter_1.h5 unregister_filter_2.h5
+	log_vfd_out.log log_ros3_out.log log_s3comms_out.log \
+	new_multi_file_v16-r.h5 new_multi_file_v16-s.h5 \
+	split_get_file_image_test-m.h5 split_get_file_image_test-r.h5 \
+	file_image_core_test.h5.copy unregister_filter_1.h5 \
+	unregister_filter_2.h5
 
 # Test script for error_test and err_compat
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh \
@@ -1107,7 +1134,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \
-           getname vfd ntypes dangle dtransform reserved cross_read \
+           getname vfd ros3 s3comms hdfs ntypes dangle dtransform reserved cross_read \
            freespace mf btree2 fheap file_image unregister
 
 
@@ -1140,7 +1167,7 @@ LDADD = libh5test.la $(LIBHDF5)
 
 # List the source files for tests that have more than one
 ttsafe_SOURCES = ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
-               ttsafe_acreate.c
+               ttsafe_acreate.c ttsafe_attr_vlen.c
 
 VFD_LIST = sec2 stdio core core_paged split multi family \
 	$(am__append_4)
@@ -1155,11 +1182,11 @@ testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 # Temporary files.
 DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
 
-# Automake needs to be taught how to build lib, dyn, progs, and tests targets.
+# Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
 # EXTRA_TEST variables are supplied to allow the user to force targets to
-# be built at certain times. 
+# be built at certain times.
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
@@ -1462,6 +1489,10 @@ gheap$(EXEEXT): $(gheap_OBJECTS) $(gheap_DEPENDENCIES) $(EXTRA_gheap_DEPENDENCIE
 	@rm -f gheap$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(gheap_OBJECTS) $(gheap_LDADD) $(LIBS)
 
+hdfs$(EXEEXT): $(hdfs_OBJECTS) $(hdfs_DEPENDENCIES) $(EXTRA_hdfs_DEPENDENCIES) 
+	@rm -f hdfs$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(hdfs_OBJECTS) $(hdfs_LDADD) $(LIBS)
+
 hyperslab$(EXEEXT): $(hyperslab_OBJECTS) $(hyperslab_DEPENDENCIES) $(EXTRA_hyperslab_DEPENDENCIES) 
 	@rm -f hyperslab$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(hyperslab_OBJECTS) $(hyperslab_LDADD) $(LIBS)
@@ -1517,6 +1548,14 @@ pool$(EXEEXT): $(pool_OBJECTS) $(pool_DEPENDENCIES) $(EXTRA_pool_DEPENDENCIES)
 reserved$(EXEEXT): $(reserved_OBJECTS) $(reserved_DEPENDENCIES) $(EXTRA_reserved_DEPENDENCIES) 
 	@rm -f reserved$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(reserved_OBJECTS) $(reserved_LDADD) $(LIBS)
+
+ros3$(EXEEXT): $(ros3_OBJECTS) $(ros3_DEPENDENCIES) $(EXTRA_ros3_DEPENDENCIES) 
+	@rm -f ros3$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(ros3_OBJECTS) $(ros3_LDADD) $(LIBS)
+
+s3comms$(EXEEXT): $(s3comms_OBJECTS) $(s3comms_DEPENDENCIES) $(EXTRA_s3comms_DEPENDENCIES) 
+	@rm -f s3comms$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(s3comms_OBJECTS) $(s3comms_LDADD) $(LIBS)
 
 set_extent$(EXEEXT): $(set_extent_OBJECTS) $(set_extent_DEPENDENCIES) $(EXTRA_set_extent_DEPENDENCIES) 
 	@rm -f set_extent$(EXEEXT)
@@ -1616,6 +1655,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getname.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5test.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hdfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hyperslab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/istore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lheap.Po@am__quote@
@@ -1630,6 +1670,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reserved.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ros3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s3comms.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_extent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/space_overflow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stab.Po@am__quote@
@@ -1659,6 +1701,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_acreate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_attr_vlen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_cancel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_dcreate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_error.Po@am__quote@
@@ -2125,6 +2168,27 @@ vfd.log: vfd$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+ros3.log: ros3$(EXEEXT)
+	@p='ros3$(EXEEXT)'; \
+	b='ros3'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+s3comms.log: s3comms$(EXEEXT)
+	@p='s3comms$(EXEEXT)'; \
+	b='s3comms'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+hdfs.log: hdfs$(EXEEXT)
+	@p='hdfs$(EXEEXT)'; \
+	b='hdfs'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 ntypes.log: ntypes$(EXEEXT)
 	@p='ntypes$(EXEEXT)'; \
 	b='ntypes'; \
@@ -2416,6 +2480,7 @@ timings _timings: testmeta
 
 # The flush1 test must run before the flush2 test
 flush2.chkexe_: flush1.chkexe_
+
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)
@@ -2451,7 +2516,7 @@ all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
 # make install-doc doesn't do anything outside of doc directory, but
 # Makefiles should recognize it.
 # UPDATE: docs no longer reside in this build tree, so this target
-# is depreciated.
+# is deprecated.
 install-doc uninstall-doc:
 	@echo "Nothing to be done."
 
@@ -2612,7 +2677,7 @@ build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
 	    echo "**** Hint ****";                                            \
 	    echo "Parallel test files reside in the current directory"        \
 	         "by default.";                                               \
-	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "Set HDF5_PARAPREFIX to use another directory. e.g.,";       \
 	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
 	    echo "    export HDF5_PARAPREFIX";                                \
 	    echo "    make check";                                            \

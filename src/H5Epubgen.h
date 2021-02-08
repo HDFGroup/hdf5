@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -60,7 +60,7 @@ extern "C" {
 H5_DLLVAR hid_t H5E_DATASET_g;       /* Dataset */
 H5_DLLVAR hid_t H5E_FUNC_g;          /* Function entry/exit */
 H5_DLLVAR hid_t H5E_STORAGE_g;       /* Data storage */
-H5_DLLVAR hid_t H5E_FILE_g;          /* File accessibilty */
+H5_DLLVAR hid_t H5E_FILE_g;          /* File accessibility */
 H5_DLLVAR hid_t H5E_SOHM_g;          /* Shared Object Header Messages */
 H5_DLLVAR hid_t H5E_SYM_g;           /* Symbol table */
 H5_DLLVAR hid_t H5E_PLUGIN_g;        /* Plugin for dynamically loaded library */
@@ -225,7 +225,7 @@ H5_DLLVAR hid_t H5E_NONE_MINOR_g;    /* No error */
 #define H5E_OPENERROR        (H5OPEN H5E_OPENERROR_g)
 H5_DLLVAR hid_t H5E_OPENERROR_g;     /* Can't open directory or file */
 
-/* File accessibilty errors */
+/* File accessibility errors */
 #define H5E_FILEEXISTS       (H5OPEN H5E_FILEEXISTS_g)
 #define H5E_FILEOPEN         (H5OPEN H5E_FILEOPEN_g)
 #define H5E_CANTCREATE       (H5OPEN H5E_CANTCREATE_g)

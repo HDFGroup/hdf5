@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -75,6 +75,15 @@ $SRC_H5STAT_TESTFILES/h5stat_newgrat.h5
 $SRC_H5STAT_TESTFILES/h5stat_threshold.h5
 "
 
+LIST_ERR_TEST_FILES="
+$SRC_H5STAT_TESTFILES/h5stat_err1_links.err
+$SRC_H5STAT_TESTFILES/h5stat_err1_dims.err
+$SRC_H5STAT_TESTFILES/h5stat_err1_numattrs.err
+$SRC_H5STAT_TESTFILES/h5stat_err2_numattrs.err
+$SRC_H5STAT_TESTFILES/h5stat_notexist.err
+$SRC_H5STAT_TESTFILES/h5stat_nofile.err
+"
+
 LIST_OTHER_TEST_FILES="
 $SRC_H5STAT_TESTFILES/h5stat_help1.ddl
 $SRC_H5STAT_TESTFILES/h5stat_help2.ddl
@@ -92,17 +101,13 @@ $SRC_H5STAT_TESTFILES/h5stat_tsohm.ddl
 $SRC_H5STAT_TESTFILES/h5stat_newgrat.ddl
 $SRC_H5STAT_TESTFILES/h5stat_newgrat-UG.ddl
 $SRC_H5STAT_TESTFILES/h5stat_newgrat-UA.ddl
-$SRC_H5STAT_TESTFILES/h5stat_err1_links.ddl
 $SRC_H5STAT_TESTFILES/h5stat_links1.ddl
 $SRC_H5STAT_TESTFILES/h5stat_links2.ddl
 $SRC_H5STAT_TESTFILES/h5stat_links3.ddl
 $SRC_H5STAT_TESTFILES/h5stat_links4.ddl
 $SRC_H5STAT_TESTFILES/h5stat_links5.ddl
-$SRC_H5STAT_TESTFILES/h5stat_err1_dims.ddl
 $SRC_H5STAT_TESTFILES/h5stat_dims1.ddl
 $SRC_H5STAT_TESTFILES/h5stat_dims2.ddl
-$SRC_H5STAT_TESTFILES/h5stat_err1_numattrs.ddl
-$SRC_H5STAT_TESTFILES/h5stat_err2_numattrs.ddl
 $SRC_H5STAT_TESTFILES/h5stat_numattrs1.ddl
 $SRC_H5STAT_TESTFILES/h5stat_numattrs2.ddl
 $SRC_H5STAT_TESTFILES/h5stat_numattrs3.ddl
@@ -112,7 +117,7 @@ $SRC_H5STAT_TESTFILES/h5stat_numattrs4.ddl
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_ERR_TEST_FILES $LIST_OTHER_TEST_FILES"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -176,8 +181,9 @@ TESTING() {
 #
 TOOLTEST() {
    expect="$TESTDIR/$1"
+   expect_err="$TESTDIR/`basename $1 .ddl`.err"
    actual="$TESTDIR/`basename $1 .ddl`.out"
-   actual_err="$TESTDIR/`basename $1 .ddl`.err"
+   actual_err="$TESTDIR/`basename $1 .ddl`.out.err"
    actual_sav=${actual}-sav
    actual_err_sav=${actual_err}-sav
    shift
@@ -194,14 +200,17 @@ TOOLTEST() {
    STDOUT_FILTER $actual
    cp $actual_err $actual_err_sav
    STDERR_FILTER $actual_err
-   cat $actual_err >> $actual
 
    if [ ! -f $expect ]; then
-      # Create the expect file if it doesn't yet exist.
-      echo " CREATED"
-      cp $actual $expect
-      echo "    Expected result (*.ddl) missing"
-      nerrors="`expr $nerrors + 1`"
+      # Compare error files if the expect file doesn't exist.
+      if $CMP $expect_err $actual_err; then
+         echo " PASSED"
+      else
+         echo "*FAILED*"
+         echo "    Expected result (*.err) differs from actual result (*.out.err)"
+         nerrors="`expr $nerrors + 1`"
+         test yes = "$verbose" && $DIFF $expect_err $actual_err |sed 's/^/    /'
+      fi
    elif $CMP $expect $actual; then
       echo " PASSED"
    else

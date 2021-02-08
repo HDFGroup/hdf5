@@ -4,7 +4,7 @@
 0. Use Build Scripts
 --------------------
 The HDF Group is accumulating build scripts to handle building parallel HDF5
-on various platforms (Cray, IBM, SGI, etc...). These scripts are being
+on various platforms (Cray, IBM, SGI, etc...). These scripts are being 
 maintained and updated continuously for current and future systems. The reader
 is strongly encouraged to consult the repository at,
 
@@ -82,22 +82,19 @@ This allows for >2GB sized files on Linux systems and is only available with
 Linux kernels 2.4 and greater.
 
 
-2.3. Unix HPC Clusters (for v1.8 and later)
+2.3. Hopper (Cray XE6) (for v1.8 and later)
 -------------------------
 
-The following steps are generic instructions for building HDF5 on 
-several current HPC systems.  The exact commands and scripts to use
-will vary according to the scheduling software on the individual 
-system.  Consult the system documentation to determine the details.
+The following steps are for building HDF5 for the Hopper compute
+nodes.  They would probably work for other Cray systems but have
+not been verified.
 
 Obtain the HDF5 source code:
     https://portal.hdfgroup.org/display/support/Downloads
 
-In general HDF5 can be built on a login/front-end node provided it is 
-installed on a file system accessible by all compute nodes.  If parallel
-tests run by "make check" or "make check-p" will be run on compute 
-nodes in a batch job, the HDF5 build directory should also exist on a 
-file system accessible by all compute nodes.
+The entire build process should be done on a MOM node in an interactive allocation and on a file system accessible by all compute nodes.
+Request an interactive allocation with qsub:
+qsub -I -q debug -l mppwidth=8
 
 - create a build directory build-hdf5:
   mkdir build-hdf5; cd build-hdf5/
@@ -105,12 +102,12 @@ file system accessible by all compute nodes.
 - configure HDF5:
   RUNSERIAL="aprun -q -n 1" RUNPARALLEL="aprun -q -n 6" FC=ftn CC=cc /path/to/source/configure --enable-fortran --enable-parallel --disable-shared
 
-  RUNSERIAL and RUNPARALLEL tells the library how it should launch programs that are part of the build procedure. Note that the command names and the specific options will vary according to the batch system.
+  RUNSERIAL and RUNPARALLEL tell the library how it should launch programs that are part of the build procedure.
 
 - Compile HDF5: 
   gmake
 
-- Check HDF5:  on most systems this should be run as a batch job on compute nodes.
+- Check HDF5
   gmake check
 
 - Install HDF5
@@ -120,8 +117,8 @@ The build will be in build-hdf5/hdf5/ (or whatever you specify in --prefix).
 To compile other HDF5 applications use the wrappers created by the build (build-hdf5/hdf5/bin/h5pcc or h5fc)
 
 
-3. Detailed explanation
------------------------
+3. Detail explanation
+---------------------
 
 3.1. Installation steps (Uni/Multiple processes modes)
 -----------------------
@@ -158,12 +155,16 @@ to run a parallel application on one processor and on many processors. If the
 compiler is `mpicc' and the user hasn't specified values for RUNSERIAL and
 RUNPARALLEL then configure chooses `mpiexec' from the same directory as `mpicc':
 
-    RUNSERIAL:    /usr/local/mpi/bin/mpiexec -np 1
-    RUNPARALLEL:  /usr/local/mpi/bin/mpiexec -np $${NPROCS:=6}
+    RUNSERIAL:    mpiexec -n 1
+    RUNPARALLEL:  mpiexec -n $${NPROCS:=6}
 
 The `$${NPROCS:=6}' will be substituted with the value of the NPROCS
 environment variable at the time `make check' is run (or the value 6).
 
+Note that some MPI implementations (e.g. OpenMPI 4.0) disallow oversubscribing
+nodes by default so you'll have to either set NPROCS equal to the number of
+processors available (or fewer) or redefine RUNPARALLEL with appropriate
+flag(s) (--oversubscribe in OpenMPI).
 
 4. Parallel test suite
 ----------------------

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,20 +21,16 @@ char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 /*
  *  Functions from t.c
  */
-#   define nh5_fixname_c              H5_FC_FUNC_(h5_fixname_c, H5_FIXNAME_C)
-#   define nh5_cleanup_c              H5_FC_FUNC_(h5_cleanup_c, H5_CLEANUP_C)
-#   define nh5_exit_c                 H5_FC_FUNC_(h5_exit_c, H5_EXIT_C)
-#   define nh5_env_nocleanup_c        H5_FC_FUNC_(h5_env_nocleanup_c, H5_ENV_NOCLEANUP_C)
+#define nh5_fixname_c       H5_FC_FUNC_(h5_fixname_c, H5_FIXNAME_C)
+#define nh5_cleanup_c       H5_FC_FUNC_(h5_cleanup_c, H5_CLEANUP_C)
+#define nh5_exit_c          H5_FC_FUNC_(h5_exit_c, H5_EXIT_C)
+#define nh5_env_nocleanup_c H5_FC_FUNC_(h5_env_nocleanup_c, H5_ENV_NOCLEANUP_C)
 
-H5_FCTESTDLL int_f nh5_fixname_c
-(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_name, size_t_f *full_namelen);
+H5_FCTESTDLL int_f nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_name,
+                                 size_t_f *full_namelen);
 
-H5_FCTESTDLL int_f nh5_cleanup_c
-(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl);
+H5_FCTESTDLL int_f nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl);
 
-H5_FCTESTDLL H5_ATTR_NORETURN void nh5_exit_c
-(int_f *status);
+H5_FCTESTDLL H5_ATTR_NORETURN void nh5_exit_c(int_f *status);
 
-H5_FCTESTDLL void nh5_env_nocleanup_c
-(int_f *status);
-
+H5_FCTESTDLL void nh5_env_nocleanup_c(int_f *status);

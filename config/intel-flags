@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
@@ -16,6 +16,20 @@
 # Intel icc compiler or a derivative.  It is careful not to do anything
 # if the compiler is not Intel; otherwise `cc_flags_set' is set to `yes'
 #
+
+#
+# Prepend `$srcdir/config/intel-warnings/` to the filename suffix(es) given as
+# subroutine argument(s), remove comments starting with # and ending
+# at EOL, replace spans of whitespace (including newlines) with spaces,
+# and re-emit the file(s) thus filtered on the standard output stream.
+#
+load_intel_arguments()
+{
+    set -- $(for arg; do
+        sed 's,#.*$,,' $srcdir/config/intel-warnings/${arg}
+    done)
+    IFS=' ' echo "$*"
+}
 
 # Get the compiler version in a way that works for icc
 # icc unless a compiler version is already known
@@ -66,45 +80,63 @@ if test "X-icc" = "X-$cc_vendor"; then
 
     # General
     # Default to C99 standard.
-    H5_CFLAGS="${H5_CFLAGS:--std=c99 $arch}"
+    H5_CFLAGS="$H5_CFLAGS $arch -std=c99"
 
-    # Production is set to default; see settings for specific version further down
-    PROD_CFLAGS="-O" 
-    PROD_CPPFLAGS=
+    # Production
+    PROD_CFLAGS=
 
     # Debug
-    DEBUG_CFLAGS="-Wcheck -Wall -g -O0"
-    DEBUG_CPPFLAGS=
+    # NDEBUG is handled explicitly in configure
+    DEBUG_CFLAGS=
 
-    # Profile
+    # Symbols
+    SYMBOLS_CFLAGS="-g"
+    NO_SYMBOLS_CFLAGS="-Wl,-s"
+
+    # Profiling
     # Use this for profiling with gprof
-    PROFILE_CFLAGS="-g -p"
-    PROFILE_CPPFLAGS=
+    PROFILE_CFLAGS="-p"
 
-    # Flags are set
+    # Optimization
+    HIGH_OPT_CFLAGS="-O3"
+    DEBUG_OPT_CFLAGS="-O0"
+    NO_OPT_CFLAGS="-O0"
+
+    ############
+    # Warnings #
+    ############
+
+    ###########
+    # General #
+    ###########
+
+    H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments general)"
+
+    #############################
+    # Version-specific warnings #
+    #############################
+
+case "$cc_vendor-$cc_version" in
+    icc-1[5-6]*)
+        H5_CFLAGS="$H5_CFLAGS -Wcomment -Wdeprecated -Wextra-tokens -Wformat -Wformat-security -Wmain -Wmissing-declarations -Wmissing-prototypes -Wp64 -Wpointer-arith -Wreturn-type -Wshadow -Wstrict-prototypes -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function -Wunused-variable -Wwrite-strings"
+        ;;
+    icc-10*)
+        HIGH_OPT_CFLAGS="-O1"
+        ;;
+    icc-8.0*)
+        # v8.0 -O3 infinite loops when compiling test/tselect.c. Use -O2.
+        HIGH_OPT_CFLAGS="-O2"
+        ;;
+    icc-*)
+        ;;
+esac
+
+    #################
+    # Flags are set #
+    #################
     cc_flags_set=yes
 
 fi
-
-# Version specific ICC flags
-#
-# Please follow the pattern below by adding new versions at the top, copying
-# the information from the previous version and adding modifications to that.
-# The default at the bottom will apply if no earlier version matches.
-case "$cc_vendor-$cc_version" in
-    icc-10*)
-        PROD_CFLAGS="-O1 -Wl,-s"
-        ;;
-    icc-8.0*)
-	# v8.0 -O3 infinite loops when compiling test/tselect.c. Use -O2.
-	PROD_CFLAGS="-O2 -Wl,-s"
-	;;
-    icc-*)
-        # -s became obsolete; we also fixed bugs that allow us to enable higher level
-        # of optimization starting with 1.8.7
-        PROD_CFLAGS="-O3"
-        ;;
-esac
 
 # Clear cc info if no flags set
 if test "X-$cc_flags_set" = "X-"; then

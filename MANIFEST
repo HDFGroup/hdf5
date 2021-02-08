@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -31,13 +31,20 @@
 ./m4/ltversion.m4                       _DO_NOT_DISTRIBUTE_
 ./m4/lt~obsolete.m4                     _DO_NOT_DISTRIBUTE_
 ./m4/ltoptions.m4                       _DO_NOT_DISTRIBUTE_
-./m4/aclocal_cxx.m4
-./m4/aclocal_fc.m4
+./m4/aclocal_cxx.m4                     _DO_NOT_DISTRIBUTE_
+./m4/aclocal_fc.m4                      _DO_NOT_DISTRIBUTE_
+./m4/aclocal_fc.f90
 ./README.txt
 ./aclocal.m4
 ./acsite.m4
 ./configure
 ./configure.ac
+
+./.clang-format
+./.github/CODEOWNERS  _DO_NOT_DISTRIBUTE_
+./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
+./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
+./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
 
 ./bin/COPYING
 ./bin/bbrelease       _DO_NOT_DISTRIBUTE_
@@ -58,8 +65,12 @@
 ./bin/deploy
 ./bin/distdep
 ./bin/errors                 _DO_NOT_DISTRIBUTE_
+./bin/format_source
+./bin/format_source_patch
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
-./bin/genltanalyze           _DO_NOT_DISTRIBUTE_
+./bin/genparser              _DO_NOT_DISTRIBUTE_
+./bin/h5cc.in
+./bin/h5redeploy.in
 ./bin/h5vers
 ./bin/install-sh
 ./bin/iostats
@@ -68,6 +79,8 @@
 ./bin/make_err
 ./bin/make_overflow
 ./bin/make_vers
+./bin/Makefile.am
+./bin/Makefile.in
 ./bin/makehelp
 ./bin/pkgscrpts/hdf5-1.8.16-1-x86_64-szip.spec
 ./bin/pkgscrpts/make1816TarFiles.pl       _DO_NOT_DISTRIBUTE_
@@ -84,11 +97,23 @@
 ./bin/runtest                       _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/snapshot_version              _DO_NOT_DISTRIBUTE_
+./bin/switch_maint_mode             _DO_NOT_DISTRIBUTE_
 ./bin/test-driver
 ./bin/pkgscrpts/testbinaries.sh     _DO_NOT_DISTRIBUTE_
 ./bin/timekeeper                    _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
+./bin/batch/ctestP.lsf.in.cmake
+./bin/batch/ctestP.sl.in.cmake
+./bin/batch/ctestS.lsf.in.cmake
+./bin/batch/ctestS.sl.in.cmake
+./bin/batch/knl_ctestP.sl.in.cmake
+./bin/batch/knl_ctestS.sl.in.cmake
+./bin/batch/knl_H5detect.sl.in.cmake
+./bin/batch/ctest.qsub.in.cmake
+./bin/batch/ray_ctestP.lsf.in.cmake
+./bin/batch/ray_ctestS.lsf.in.cmake
+./bin/batch/raybsub
 
 ./config/COPYING
 ./config/BlankForm
@@ -97,24 +122,66 @@
 ./config/cce-flags
 ./config/commence.am
 ./config/conclude.am
-./config/cygwin
 ./config/examples.am
 ./config/freebsd
+./config/gnu-cxxflags
 ./config/gnu-fflags
 ./config/gnu-flags
+./config/cygwin
 ./config/ibm-aix
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
 ./config/linux-gnu
 ./config/linux-gnuaout
+./config/linux-gnueabihf
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/lt_vers.am
 ./config/Makefile.am.blank
+./config/netbsd
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
+
+#warnings files for both autotools and CMake
+./config/clang-cxxflags
+./config/clang-flags
+./config/clang-warnings/developer-general
+./config/clang-warnings/error-general
+./config/clang-warnings/general
+./config/clang-warnings/no-developer-general
+./config/gnu-warnings/4.8-4.last
+./config/gnu-warnings/4.8
+./config/gnu-warnings/4.9
+./config/gnu-warnings/5
+./config/gnu-warnings/6
+./config/gnu-warnings/7
+./config/gnu-warnings/8
+./config/gnu-warnings/9
+./config/gnu-warnings/cxx-general
+./config/gnu-warnings/cxx-4.9
+./config/gnu-warnings/cxx-5
+./config/gnu-warnings/cxx-error-5
+./config/gnu-warnings/cxx-error-general
+./config/gnu-warnings/developer-4.8
+./config/gnu-warnings/developer-7
+./config/gnu-warnings/developer-8
+./config/gnu-warnings/developer-general
+./config/gnu-warnings/error-5
+./config/gnu-warnings/error-8
+./config/gnu-warnings/error-general
+./config/gnu-warnings/general
+./config/gnu-warnings/gfort-general
+./config/gnu-warnings/gfort-4.8
+./config/gnu-warnings/gfort-5
+./config/gnu-warnings/gfort-6
+./config/gnu-warnings/gfort-8
+./config/gnu-warnings/no-developer-4.8
+./config/gnu-warnings/no-developer-8
+./config/gnu-warnings/no-developer-general
+./config/intel-warnings/ifort-general
+./config/intel-warnings/general
 
 ./config/site-specific/BlankForm
 
@@ -460,7 +527,10 @@
 ./release_docs/INSTALL_CMake.txt
 ./release_docs/INSTALL_Cygwin.txt
 ./release_docs/INSTALL_parallel
+./release_docs/INSTALL_Warnings.txt
 ./release_docs/INSTALL_Windows.txt
+./release_docs/README_HDF5_CMake
+./release_docs/README_HPC
 ./release_docs/RELEASE.txt
 ./release_docs/USING_HDF5_CMake.txt
 ./release_docs/USING_HDF5_VS.txt
@@ -577,6 +647,8 @@
 ./src/H5FDdirect.h
 ./src/H5FDfamily.c
 ./src/H5FDfamily.h
+./src/H5FDhdfs.c
+./src/H5FDhdfs.h
 ./src/H5FDint.c
 ./src/H5FDlog.c
 ./src/H5FDlog.h
@@ -586,9 +658,13 @@
 ./src/H5FDmpio.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
+./src/H5FDros3.c
+./src/H5FDros3.h
 ./src/H5FDpkg.h
 ./src/H5FDprivate.h
 ./src/H5FDpublic.h
+./src/H5FDs3comms.h
+./src/H5FDs3comms.c
 ./src/H5FDsec2.c
 ./src/H5FDsec2.h
 ./src/H5FDspace.c
@@ -916,6 +992,7 @@
 ./test/group_old.h5
 ./test/h5test.c
 ./test/h5test.h
+./test/hdfs.c
 ./test/hyperslab.c
 ./test/istore.c
 ./test/le_data.h5
@@ -935,7 +1012,9 @@
 ./test/objcopy.c
 ./test/plugin.c
 ./test/reserved.c
+./test/ros3.c
 ./test/pool.c
+./test/s3comms.c
 ./test/set_extent.c
 # ====distribute this for now. See HDFFV-8236====
 ./test/space_overflow.c
@@ -984,6 +1063,7 @@
 ./test/ttsafe.c
 ./test/ttsafe.h
 ./test/ttsafe_acreate.c
+./test/ttsafe_attr_vlen.c
 ./test/ttsafe_cancel.c
 ./test/ttsafe_dcreate.c
 ./test/ttsafe_error.c
@@ -1025,6 +1105,7 @@
 ./testpar/t_span_tree.c
 ./testpar/t_init_term.c
 ./testpar/testpar.h
+./testpar/testpflush.sh.in
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 
@@ -1133,6 +1214,7 @@
 ./tools/h5repack/dynlib_vrpk.c
 ./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack_plugin.sh.in
+./tools/h5repack/h5repackgentest.c
 ./tools/h5repack/h5repacktst.c
 ./tools/h5repack/testh5repack_detect_szip.c
 
@@ -1143,6 +1225,11 @@
 ./tools/h5ls/h5ls.c
 ./tools/h5ls/h5ls_plugin.sh.in
 ./tools/h5ls/testh5ls.sh.in
+
+# h5ls test error files
+./tools/h5ls/errfiles/nosuchfile.err
+./tools/h5ls/errfiles/textlinksrc-nodangle-1.err
+./tools/h5ls/errfiles/tgroup-1.err
 
 # h5copy sources
 ./tools/h5copy/Makefile.am
@@ -1180,12 +1267,14 @@
 ./tools/lib/io_timer.c
 ./tools/lib/io_timer.h
 
+./tools/libtest/Makefile.am
+./tools/libtest/Makefile.in
+./tools/libtest/h5tools_test_utils.c
+
 ./tools/misc/Makefile.am
 ./tools/misc/Makefile.in
-./tools/misc/h5cc.in
 ./tools/misc/h5debug.c
 ./tools/misc/h5mkgrp.c
-./tools/misc/h5redeploy.in
 ./tools/misc/h5repart.c
 ./tools/misc/h5repart_gentest.c
 ./tools/misc/repart_test.c
@@ -1205,10 +1294,10 @@
 ./tools/h5stat/testh5stat.sh.in
 ./tools/h5stat/testfiles/h5stat_dims1.ddl
 ./tools/h5stat/testfiles/h5stat_dims2.ddl
-./tools/h5stat/testfiles/h5stat_err1_dims.ddl
-./tools/h5stat/testfiles/h5stat_err1_links.ddl
-./tools/h5stat/testfiles/h5stat_err1_numattrs.ddl
-./tools/h5stat/testfiles/h5stat_err2_numattrs.ddl
+./tools/h5stat/testfiles/h5stat_err1_dims.err
+./tools/h5stat/testfiles/h5stat_err1_links.err
+./tools/h5stat/testfiles/h5stat_err1_numattrs.err
+./tools/h5stat/testfiles/h5stat_err2_numattrs.err
 ./tools/h5stat/testfiles/h5stat_filters.ddl
 ./tools/h5stat/testfiles/h5stat_filters-d.ddl
 ./tools/h5stat/testfiles/h5stat_filters-dT.ddl
@@ -1238,6 +1327,8 @@
 ./tools/h5stat/testfiles/h5stat_threshold.h5
 ./tools/h5stat/testfiles/h5stat_tsohm.ddl
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
+./tools/h5stat/testfiles/h5stat_notexist.err
+./tools/h5stat/testfiles/h5stat_nofile.err
 
 # h5dump test files
 ./tools/testfiles/charsets.h5
@@ -1544,11 +1635,8 @@
 ./tools/h5dump/errfiles/tall-2A.err
 ./tools/h5dump/errfiles/tall-2A0.err
 ./tools/h5dump/errfiles/tall-2B.err
-./tools/h5dump/errfiles/tarray1_big.err
 ./tools/h5dump/errfiles/tattr-3.err
-./tools/h5dump/errfiles/tattrregR.err
 ./tools/h5dump/errfiles/tcomp-3.err
-./tools/h5dump/errfiles/tdataregR.err
 ./tools/h5dump/errfiles/tdset-2.err
 ./tools/h5dump/errfiles/texceedsubblock.err
 ./tools/h5dump/errfiles/texceedsubcount.err
@@ -1806,6 +1894,7 @@
 ./tools/h5diff/testfiles/h5diff_172.txt
 ./tools/h5diff/testfiles/h5diff_18.txt
 ./tools/h5diff/testfiles/h5diff_18_1.txt
+./tools/h5diff/testfiles/h5diff_19.txt
 ./tools/h5diff/testfiles/h5diff_20.txt
 ./tools/h5diff/testfiles/h5diff_21.txt
 ./tools/h5diff/testfiles/h5diff_22.txt
@@ -1833,7 +1922,6 @@
 ./tools/h5diff/testfiles/h5diff_600.txt
 ./tools/h5diff/testfiles/h5diff_601.txt
 ./tools/h5diff/testfiles/h5diff_601_ERR.err
-./tools/h5diff/testfiles/h5diff_601_ERR.txt
 ./tools/h5diff/testfiles/h5diff_603.txt
 ./tools/h5diff/testfiles/h5diff_604.txt
 ./tools/h5diff/testfiles/h5diff_605.txt
@@ -1940,21 +2028,12 @@
 ./tools/h5diff/testfiles/h5diff_452.txt
 ./tools/h5diff/testfiles/h5diff_453.txt
 ./tools/h5diff/testfiles/h5diff_454.txt
-./tools/h5diff/testfiles/h5diff_454_ERR.err
-./tools/h5diff/testfiles/h5diff_454_ERR.txt
+./tools/h5diff/testfiles/dangling_link.err
 ./tools/h5diff/testfiles/h5diff_455.txt
-./tools/h5diff/testfiles/h5diff_455_ERR.err
-./tools/h5diff/testfiles/h5diff_455_ERR.txt
 ./tools/h5diff/testfiles/h5diff_456.txt
 ./tools/h5diff/testfiles/h5diff_457.txt
-./tools/h5diff/testfiles/h5diff_457_ERR.err
-./tools/h5diff/testfiles/h5diff_457_ERR.txt
 ./tools/h5diff/testfiles/h5diff_458.txt
-./tools/h5diff/testfiles/h5diff_458_ERR.err
-./tools/h5diff/testfiles/h5diff_458_ERR.txt
 ./tools/h5diff/testfiles/h5diff_459.txt
-./tools/h5diff/testfiles/h5diff_459_ERR.err
-./tools/h5diff/testfiles/h5diff_459_ERR.txt
 ./tools/h5diff/testfiles/h5diff_465.txt
 ./tools/h5diff/testfiles/h5diff_466.txt
 ./tools/h5diff/testfiles/h5diff_467.txt
@@ -2044,6 +2123,7 @@
 ./tools/h5diff/testfiles/tudfilter.h5
 ./tools/h5diff/testfiles/tudfilter2.h5
 ./tools/h5diff/testfiles/h5diff_ud.txt
+./tools/h5diff/testfiles/h5diff_udfail.err
 ./tools/h5diff/testfiles/h5diff_udfail.txt
 ./tools/h5diff/testfiles/diff_strings1.h5
 ./tools/h5diff/testfiles/diff_strings2.h5
@@ -2057,10 +2137,23 @@
 ./tools/h5repack/testfiles/h5repack_early.h5
 ./tools/h5repack/testfiles/h5repack_ext.bin
 ./tools/h5repack/testfiles/h5repack_ext.h5
+./tools/h5repack/testfiles/h5repack_f32le.h5
+./tools/h5repack/testfiles/h5repack_f32le_ex-0.dat
+./tools/h5repack/testfiles/h5repack_f32le_ex.h5
 ./tools/h5repack/testfiles/h5repack_fill.h5
 ./tools/h5repack/testfiles/h5repack_filters.h5
 ./tools/h5repack/testfiles/h5repack_fletcher.h5
 ./tools/h5repack/testfiles/h5repack_hlink.h5
+./tools/h5repack/testfiles/h5repack_int32le_1d.h5
+./tools/h5repack/testfiles/h5repack_int32le_1d_ex-0.dat
+./tools/h5repack/testfiles/h5repack_int32le_1d_ex-1.dat
+./tools/h5repack/testfiles/h5repack_int32le_1d_ex.h5
+./tools/h5repack/testfiles/h5repack_int32le_2d.h5
+./tools/h5repack/testfiles/h5repack_int32le_2d_ex-0.dat
+./tools/h5repack/testfiles/h5repack_int32le_2d_ex.h5
+./tools/h5repack/testfiles/h5repack_int32le_3d.h5
+./tools/h5repack/testfiles/h5repack_int32le_3d_ex-0.dat
+./tools/h5repack/testfiles/h5repack_int32le_3d_ex.h5
 ./tools/h5repack/testfiles/h5repack.info
 ./tools/h5repack/testfiles/h5repack_layout.h5
 ./tools/h5repack/testfiles/h5repack_layouto.h5
@@ -2077,6 +2170,12 @@
 ./tools/h5repack/testfiles/h5repack_shuffle.h5
 ./tools/h5repack/testfiles/h5repack_soffset.h5
 ./tools/h5repack/testfiles/h5repack_szip.h5
+./tools/h5repack/testfiles/h5repack_uint8be.h5
+./tools/h5repack/testfiles/h5repack_uint8be_ex-0.dat
+./tools/h5repack/testfiles/h5repack_uint8be_ex-1.dat
+./tools/h5repack/testfiles/h5repack_uint8be_ex-2.dat
+./tools/h5repack/testfiles/h5repack_uint8be_ex-3.dat
+./tools/h5repack/testfiles/h5repack_uint8be_ex.h5
 ./tools/h5repack/testfiles/ublock.bin
 ./tools/h5repack/testfiles/crtorder.tordergr.h5.ddl
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
@@ -2123,6 +2222,7 @@
 ./tools/h5copy/testfiles/h5copy_extlinks_src.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_trg.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_src.out.ls
+./tools/h5copy/testfiles/h5copy_misc1.err
 ./tools/h5copy/testfiles/h5copy_misc1.out
 ./tools/h5copy/testfiles/h5copy_plugin_fail_ERR.out.h5.txt
 ./tools/h5copy/testfiles/h5copy_plugin_test.out.h5.txt
@@ -2274,7 +2374,7 @@
 ./hl/tools/gif2h5/writehdf.c
 ./hl/tools/gif2h5/h52gifgentst.c
 ./hl/tools/gif2h5/h52giftest.sh.in
-./hl/tools/gif2h5/testfiles/REAMDE
+./hl/tools/gif2h5/testfiles/README
 ./hl/tools/gif2h5/testfiles/ex_image2.h5
 ./hl/tools/gif2h5/testfiles/image1.gif
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
@@ -2326,17 +2426,32 @@
 ./hl/c++/test/Makefile.in
 
 # CMake-specific Files
+./config/toolchain/build32.cmake
+./config/toolchain/clang.cmake
+./config/toolchain/crayle.cmake
+./config/toolchain/GCC.cmake
+./config/toolchain/intel.cmake
+./config/toolchain/mingw64.cmake
+./config/toolchain/PGI.cmake
+
 ./config/cmake/cacheinit.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
+./config/cmake/fileCompareTest.cmake
+./config/cmake/FindHDFS.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
 ./config/cmake/hdf5-config.cmake.in
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDFCompilerFlags.cmake
+./config/cmake/HDFCXXCompilerFlags.cmake
+./config/cmake/HDFFortranCompilerFlags.cmake
 ./config/cmake/HDF5Macros.cmake
+./config/cmake/HDF5PluginMacros.cmake
+./config/cmake/HDF5PluginCache.cmake
+./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/libh5cc.in
 ./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in
@@ -2346,6 +2461,7 @@
 ./config/cmake/README.txt.cmake.in
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
+./config/cmake/wait_H5Tinit.cmake
 
 ./config/cmake_ext_mod/ConfigureChecks.cmake
 ./config/cmake_ext_mod/CTestCustom.cmake
@@ -2359,6 +2475,7 @@
 ./config/cmake_ext_mod/HDFLibMacros.cmake
 ./config/cmake_ext_mod/HDFMacros.cmake
 ./config/cmake_ext_mod/HDFTests.c
+./config/cmake_ext_mod/HDFUseCXX.cmake
 ./config/cmake_ext_mod/HDFUseFortran.cmake
 ./config/cmake_ext_mod/NSIS.InstallOptions.ini.in
 ./config/cmake_ext_mod/NSIS.template.in
@@ -2375,6 +2492,7 @@
 ./CMakeLists.txt
 ./CMakeFilters.cmake
 ./CMakeInstallation.cmake
+./CMakePlugins.cmake
 ./CTestConfig.cmake
 ./UserMacros.cmake
 ./c++/CMakeLists.txt
@@ -2383,6 +2501,7 @@
 ./c++/src/CMakeLists.txt
 ./c++/test/CMakeLists.txt
 ./c++/test/CMakeTests.cmake
+./c++/test/CMakeVFDTests.cmake
 ./examples/CMakeLists.txt
 ./examples/CMakeTests.cmake
 ./examples/run-all-ex.sh
@@ -2419,8 +2538,10 @@
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
+./test/CMakeVFDTests.cmake
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
+./testpar/CMakeVFDTests.cmake
 ./tools/CMakeLists.txt
 ./tools/h5copy/CMakeLists.txt
 ./tools/h5copy/CMakeTests.cmake
@@ -2430,6 +2551,7 @@
 ./tools/h5dump/CMakeTests.cmake
 ./tools/h5dump/CMakeTestsPBITS.cmake
 ./tools/h5dump/CMakeTestsXML.cmake
+./tools/h5dump/CMakeVFDTests.cmake
 ./tools/h5import/CMakeLists.txt
 ./tools/h5import/CMakeTests.cmake
 ./tools/h5jam/CMakeLists.txt
@@ -2438,11 +2560,15 @@
 ./tools/h5ls/CMakeTests.cmake
 ./tools/h5repack/CMakeLists.txt
 ./tools/h5repack/CMakeTests.cmake
+./tools/h5repack/CMakeVFDTests.cmake
 ./tools/h5stat/CMakeLists.txt
 ./tools/h5stat/CMakeTests.cmake
 ./tools/lib/CMakeLists.txt
+./tools/libtest/CMakeLists.txt
+./tools/libtest/CMakeTests.cmake
 ./tools/misc/CMakeLists.txt
-./tools/misc/CMakeTests.cmake
+./tools/misc/CMakeTestsMkgrp.cmake
+./tools/misc/CMakeTestsRepart.cmake
 ./tools/perform/CMakeLists.txt
 ./tools/perform/CMakeTests.cmake
 
@@ -2452,3 +2578,17 @@
 ./config/cmake/scripts/CTestScript.cmake
 ./config/cmake/scripts/HDF5config.cmake
 ./config/cmake/scripts/HDF5options.cmake
+
+# CMake-specific Sanitizer Scripts
+./config/sanitizer/code-coverage.cmake
+./config/sanitizer/formatting.cmake
+./config/sanitizer/sanitizers.cmake
+./config/sanitizer/tools.cmake
+./config/sanitizer/LICENSE
+./config/sanitizer/README.md
+
+# CMake-specific HPC Scripts
+./config/cmake/scripts/HPC/sbatch-HDF5options.cmake
+./config/cmake/scripts/HPC/bsub-HDF5options.cmake
+./config/cmake/scripts/HPC/qsub-HDF5options.cmake
+./config/cmake/scripts/HPC/raybsub-HDF5options.cmake

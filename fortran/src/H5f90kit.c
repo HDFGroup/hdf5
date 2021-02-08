@@ -14,13 +14,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  ******
-*/
+ */
 
 #include <ctype.h>
 #include <stddef.h>
@@ -45,17 +45,17 @@ char *
 HD5f2cstring(_fcd fdesc, size_t len)
 /******/
 {
-    char       *cstr;   /* C string to return */
-    char       *str;    /* Pointer to FORTRAN string */
-    int         i;      /* Local index variable */
+    char *cstr; /* C string to return */
+    char *str;  /* Pointer to FORTRAN string */
+    int   i;    /* Local index variable */
 
     /* Search for the end of the string */
     str = _fcdtocp(fdesc);
-    for(i = (int)len - 1; i >= 0 && HDisspace((int)str[i]) && str[i] == ' '; i--)
+    for (i = (int)len - 1; i >= 0 && HDisspace((int)str[i]) && str[i] == ' '; i--)
         /*EMPTY*/;
 
     /* Allocate C string */
-    if(NULL == (cstr = (char *)HDmalloc((size_t)(i + 2))))
+    if (NULL == (cstr = (char *)HDmalloc((size_t)(i + 2))))
         return NULL;
 
     /* Copy text from FORTRAN to C string */
@@ -65,7 +65,7 @@ HD5f2cstring(_fcd fdesc, size_t len)
     cstr[i + 1] = '\0';
 
     return cstr;
-}   /* HD5f2cstring */
+} /* HD5f2cstring */
 
 /****if* H5f90kit/HD5packFstring
  * NAME
@@ -91,15 +91,14 @@ void
 HD5packFstring(char *src, char *dest, size_t dst_len)
 /******/
 {
-    size_t src_len=HDstrlen(src);
+    size_t src_len = HDstrlen(src);
 
     /* Copy over the string information, up to the length of the src */
     /* (Don't copy the NUL terminator from the C string to the FORTRAN string */
-    HDmemcpy(dest,src,MIN(src_len,dst_len));
+    HDmemcpy(dest, src, MIN(src_len, dst_len));
 
     /* Pad out any remaining space in the FORTRAN string with ' 's */
-    if(src_len<dst_len)
-        HDmemset(&dest[src_len],' ',dst_len-src_len);
+    if (src_len < dst_len)
+        HDmemset(&dest[src_len], ' ', dst_len - src_len);
 
-}   /* HD5packFstring */
-
+} /* HD5packFstring */

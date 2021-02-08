@@ -21,3 +21,14 @@ Usage: h5stat [OPTIONS] file
                            information for small # of attributes.  N is an integer greater
                            than 0.  The default threshold is 10.
      -S, --summary         Print summary of file space information
+     --enable-error-stack  Prints messages from the HDF5 error stack as they occur
+     --s3-cred=<cred>      Access file on S3, using provided credential
+                           <cred> :: (region,id,key)
+                           If <cred> == "(,,)", no authentication is used.
+     --hdfs-attrs=<attrs>  Access a file on HDFS with given configuration
+                           attributes.
+                           <attrs> :: (<namenode name>,<namenode port>,
+                                       <kerberos cache path>,<username>,
+                                       <buffer size>)
+                           If an attribute is empty, a default value will be
+                           used.

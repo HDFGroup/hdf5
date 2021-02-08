@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -36,9 +36,9 @@
 
 namespace H5 {
 #ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
+using std::cerr;
+using std::endl;
+#endif // H5_NO_STD
 
 //--------------------------------------------------------------------------
 // Function:    Group default constructor
@@ -53,7 +53,7 @@ Group::Group() : H5Object(), CommonFG(), id(H5I_INVALID_HID) {}
 ///\param       original - IN: Original group to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group(const Group& original) : H5Object(), CommonFG(), id(original.id)
+Group::Group(const Group &original) : H5Object(), CommonFG(), id(original.id)
 {
     incRefCount(); // increment number of references to this id
 }
@@ -64,9 +64,10 @@ Group::Group(const Group& original) : H5Object(), CommonFG(), id(original.id)
 ///\return      Id of this group
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-hid_t Group::getLocId() const
+hid_t
+Group::getLocId() const
 {
-    return(getId());
+    return (getId());
 }
 
 //--------------------------------------------------------------------------
@@ -92,7 +93,7 @@ Group::Group(const hid_t existing_id) : H5Object(), CommonFG(), id(existing_id)
 ///             is a datatype that has been named by DataType::commit.
 // Programmer   Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type) : H5Object(), id(H5I_INVALID_HID)
+Group::Group(const H5Location &loc, const void *ref, H5R_type_t ref_type) : H5Object(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, "constructor - by dereference");
 }
@@ -128,9 +129,10 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type) : H5Ob
 //              IdComponent::getId now becomes pure virtual function.
 // Programmer   Binh-Minh Ribler - May, 2008
 //--------------------------------------------------------------------------
-hid_t Group::getId() const
+hid_t
+Group::getId() const
 {
-    return(id);
+    return (id);
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -146,13 +148,14 @@ hid_t Group::getId() const
 //              Then the object's id is reset to the new id.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Group::p_setId(const hid_t new_id)
+void
+Group::p_setId(const hid_t new_id)
 {
     // handling references to this old id
     try {
         close();
     }
-    catch (Exception& close_error) {
+    catch (Exception &close_error) {
         throw GroupIException("Group::p_setId", close_error.getDetailMsg());
     }
     // reset object's id to the given id
@@ -167,13 +170,12 @@ void Group::p_setId(const hid_t new_id)
 ///\exception   H5::GroupIException
 // March 2005
 //--------------------------------------------------------------------------
-void Group::close()
+void
+Group::close()
 {
-    if (p_valid_id(id))
-    {
+    if (p_valid_id(id)) {
         herr_t ret_value = H5Gclose(id);
-        if(ret_value < 0)
-        {
+        if (ret_value < 0) {
             throw GroupIException("Group::close", "H5Gclose failed");
         }
         // reset the id
@@ -189,7 +191,8 @@ void Group::close()
 ///\exception   H5::GroupIException
 // December 2000
 //--------------------------------------------------------------------------
-void Group::throwException(const H5std_string& func_name, const H5std_string& msg) const
+void
+Group::throwException(const H5std_string &func_name, const H5std_string &msg) const
 {
     throw GroupIException(inMemFunc(func_name.c_str()), msg);
 }
@@ -209,9 +212,9 @@ Group::~Group()
     try {
         close();
     }
-    catch (Exception& close_error) {
+    catch (Exception &close_error) {
         cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
 }
 
-} // end namespace
+} // namespace H5

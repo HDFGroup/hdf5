@@ -6,7 +6,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -16,10 +16,11 @@
 !//////////////////////////////////////////////////////////
 
 PROGRAM parallel_test
-  USE hdf5
+  USE HDF5
+  USE MPI
+  USE TH5_MISC 
   
   IMPLICIT NONE
-  INCLUDE 'mpif.h'
 
   INTEGER :: mpierror                             ! MPI hdferror flag
   INTEGER :: hdferror                             ! HDF hdferror flag

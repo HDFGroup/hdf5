@@ -14,6 +14,7 @@ CONTENTS
 
         2. Quick installation
         2.1. Windows and Cygwin
+        2.2. RedStorm (Cray XT3)
 
         3. HDF5 dependencies
         3.1. Make
@@ -95,6 +96,13 @@ CONTENTS
 2.1. Windows and Cygwin
         Users of Microsoft Windows should see the INSTALL_Windows files for
         detailed instructions.  INSTALL_Cygwin also exists for those platforms.
+
+2.2. RedStorm (Cray XT3)
+        Users of the Red Storm machine, after reading this file, should read
+        the Red Storm section in the INSTALL_parallel file for specific
+        instructions for the Red Storm machine.  The same instructions would
+        probably work for other Cray XT3 systems, but they have not been
+        verified.
 
 
 3. HDF5 dependencies
@@ -416,6 +424,12 @@ CONTENTS
         parallelism on a distributed multi-processor system.  Read the
         file INSTALL_parallel for detailed information.
 
+        The threadsafe and C++ interfaces are not compatible
+        with the parallel option.
+        Unless --enable-unsupported has been specified on the configure line,
+        the following options must be disabled:
+            --enable-threadsafe, --enable-cxx
+
 4.3.11. Threadsafe capability
         The HDF5 Library can be configured to be thread-safe (on a very
         large scale) with the `--enable-threadsafe' flag to the configure
@@ -424,6 +438,13 @@ CONTENTS
         For further information, see:
 
            https://portal.hdfgroup.org/display/knowledge/Questions+about+thread-safety+and+concurrent+access
+
+        The high-level, C++ and Fortran interfaces are not compatible
+        with the thread-safety option because the lock is not hoisted
+        into the higher-level API calls.
+        Unless --enable-unsupported has been specified on the configure line,
+        the following options must be disabled:
+            --enable-hl, --enable-cxx, --enable-fortran
 
 4.3.12. Backward compatibility
         The 1.8 version of the HDF5 Library can be configured to operate

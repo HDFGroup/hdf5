@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -43,7 +43,7 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \
-           getname vfd ntypes dangle dtransform reserved cross_read \
+           getname vfd ros3 s3comms hdfs ntypes dangle dtransform reserved cross_read \
            freespace mf btree2 fheap file_image unregister
 
 # List programs to be built when testing here. error_test and err_compat are
@@ -111,7 +111,7 @@ LDADD=libh5test.la $(LIBHDF5)
 
 # List the source files for tests that have more than one
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
-               ttsafe_acreate.c
+               ttsafe_acreate.c ttsafe_attr_vlen.c
 
 VFD_LIST = sec2 stdio core core_paged split multi family
 if DIRECT_VFD_CONDITIONAL
@@ -157,8 +157,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 tcheck_version_*.out \
-    tcheck_version_*.err efc[0-5].h5 log_vfd_out.log \
-    new_multi_file_v16-r.h5 new_multi_file_v16-s.h5 \
+    tcheck_version_*.err efc[0-5].h5 log_vfd_out.log log_ros3_out.log \
+    log_s3comms_out.log new_multi_file_v16-r.h5 new_multi_file_v16-s.h5 \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5
 

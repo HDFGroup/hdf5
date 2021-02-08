@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -25,15 +25,16 @@ EXIT_FAILURE=1
 DUMPER=h5dump                     # The tool name
 DUMPER_BIN=`pwd`/$DUMPER          # The path of the tool binary
 
-H5DIFF=../h5diff/h5diff           # The h5diff tool name 
+H5DIFF=../h5diff/h5diff           # The h5diff tool name
 H5DIFF_BIN=`pwd`/$H5DIFF          # The path of the h5diff  tool binary
 
-H5IMPORT=../h5import/h5import     # The h5import tool name 
+H5IMPORT=../h5import/h5import     # The h5import tool name
 H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 
 RM='rm -rf'
 CMP='cmp'
 DIFF='diff -c'
+GREP='grep'
 CP='cp'
 DIRNAME='dirname'
 LS='ls'
@@ -367,11 +368,8 @@ ${SRC_H5DUMP_ERRORFILES}/tall-1.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A0.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2B.err
-${SRC_H5DUMP_ERRORFILES}/tarray1_big.err
 ${SRC_H5DUMP_ERRORFILES}/tattr-3.err
-${SRC_H5DUMP_ERRORFILES}/tattrregR.err
 ${SRC_H5DUMP_ERRORFILES}/tcomp-3.err
-${SRC_H5DUMP_ERRORFILES}/tdataregR.err
 ${SRC_H5DUMP_ERRORFILES}/tdset-2.err
 ${SRC_H5DUMP_ERRORFILES}/texceedsubblock.err
 ${SRC_H5DUMP_ERRORFILES}/texceedsubcount.err
@@ -486,7 +484,6 @@ TOOLTEST() {
     STDOUT_FILTER $actual
     cp $actual_err $actual_err_sav
     STDERR_FILTER $actual_err
-    cat $actual_err >> $actual
 
   if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -530,7 +527,6 @@ TOOLTEST2() {
       cd $TESTDIR
       $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
-    cat $actual_err >> $actual
 
     if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -589,7 +585,6 @@ TOOLTEST2A() {
       cd $TESTDIR
       $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
-    cat $actual_err >> $actual
 
     if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -656,7 +651,6 @@ TOOLTEST2B() {
       cd $TESTDIR
       $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
-    cat $actual_err >> $actual
 
     if [ ! -f $expectdata ]; then
     # Create the expect data file if it doesn't yet exist.
@@ -713,7 +707,6 @@ TOOLTEST3() {
         -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
         -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
      $actual_err > $actual_ext
-    cat $actual_ext >> $actual
 
     if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -755,7 +748,7 @@ TOOLTEST4() {
     TESTING $DUMPER $@
     (
       cd $TESTDIR
-      $RUNSERIAL $DUMPER_BIN "$@"
+      $ENVCMD $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.
@@ -772,7 +765,6 @@ TOOLTEST4() {
         -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
         -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
      $actual_err > $actual_ext
-    #cat $actual_ext >> $actual
 
     if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -838,7 +830,6 @@ TOOLTEST5() {
         -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
         -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
      $actual_err > $actual_ext
-    #cat $actual_ext >> $actual
 
     if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -882,7 +873,6 @@ TOOLTEST_HELP() {
       cd $TESTDIR
       $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
-    cat $actual_err >> $actual
 
     if [ ! -f $expectdata ]; then
     # Create the expect data file if it doesn't yet exist.
@@ -903,6 +893,78 @@ TOOLTEST_HELP() {
      rm -f $actual $actual_err
     fi
 
+}
+
+# Call the h5dump tool and grep for a value
+# txttype ERRTXT greps test error output, otherwise greps test output
+GREPTEST()
+{
+    txttype=$1
+    expectdata=$2
+    actual=$TESTDIR/$3
+    actual_err="$TESTDIR/`basename $3 .ddl`.oerr"
+    shift
+    shift
+    shift
+
+    # Run test.
+    TESTING $DUMPER -p $@
+    (
+      cd $TESTDIR
+      $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
+    ) >$actual 2>$actual_err
+    if [ "$txttype" = "ERRTXT" ]; then
+        $GREP "$expectdata" $actual_err > /dev/null
+    else
+        $GREP "$expectdata" $actual > /dev/null
+    fi
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+}
+
+# Call the h5dump tool and grep for a value but disables plugin filter loading
+# txttype ERRTXT greps test error output, otherwise greps test output
+GREPTEST2()
+{
+    txttype=$1
+    expectdata=$2
+    actual=$TESTDIR/$3
+    actual_err="$TESTDIR/`basename $3 .ddl`.oerr"
+    shift
+    shift
+    shift
+
+    # Run test.
+    TESTING $DUMPER -p $@
+    (
+      cd $TESTDIR
+      $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
+    ) >$actual 2>$actual_err
+    if [ "$txttype" = "ERRTXT" ]; then
+        $GREP "$expectdata" $actual_err > /dev/null
+    else
+        $GREP "$expectdata" $actual > /dev/null
+    fi
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
 }
 
 # Print a "SKIP" message
@@ -1107,7 +1169,7 @@ TOOLTEST tvlenstr_array.ddl --enable-error-stack tvlenstr_array.h5
 # test for files with array data
 TOOLTEST tarray1.ddl --enable-error-stack tarray1.h5
 # # added for bug# 2092 - tarray1_big.h
-TOOLTEST4 tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
+TOOLTEST tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
 TOOLTEST tarray2.ddl --enable-error-stack tarray2.h5
 TOOLTEST tarray3.ddl --enable-error-stack tarray3.h5
 TOOLTEST tarray4.ddl --enable-error-stack tarray4.h5
@@ -1291,7 +1353,7 @@ IMPORTTEST out1.bin -c out3.h5import -o out1.h5
 DIFFTEST   tbinary.h5 out1.h5 /integer /integer
 # Same but use h5dump as input to h5import
 IMPORTTEST out1.bin -c tbin1.ddl -o out1D.h5
-DIFFTEST   tbinary.h5 out1D.h5 /integer /integer
+#DIFFTEST   tbinary.h5 out1D.h5 /integer /integer
 
 TOOLTEST   tbin2.ddl --enable-error-stack -b BE -d float  -o out2.bin  tbinary.h5
 
@@ -1301,7 +1363,7 @@ IMPORTTEST out3.bin -c out3.h5import -o out3.h5
 DIFFTEST   tbinary.h5 out3.h5 /integer /integer
 # Same but use h5dump as input to h5import
 IMPORTTEST out3.bin -c tbin3.ddl -o out3D.h5
-DIFFTEST   tbinary.h5 out3D.h5 /integer /integer
+#DIFFTEST   tbinary.h5 out3D.h5 /integer /integer
 
 TOOLTEST   tbin4.ddl --enable-error-stack -d double  -b FILE -o out4.bin    tbinary.h5
 
@@ -1314,9 +1376,9 @@ fi
 
 # test for dataset region references
 TOOLTEST  tdatareg.ddl --enable-error-stack tdatareg.h5
-TOOLTEST4 tdataregR.ddl --enable-error-stack -R tdatareg.h5
+TOOLTEST  tdataregR.ddl --enable-error-stack -R tdatareg.h5
 TOOLTEST  tattrreg.ddl --enable-error-stack tattrreg.h5
-TOOLTEST4 tattrregR.ddl --enable-error-stack -R tattrreg.h5
+TOOLTEST  tattrregR.ddl --enable-error-stack -R tattrreg.h5
 TOOLTEST2 tbinregR.exp --enable-error-stack -d /Dataset1 -s 0 -R -y -o tbinregR.txt    tdatareg.h5
 
 # Clean up text output files
@@ -1353,7 +1415,7 @@ TOOLTEST4 textlinkfar.ddl --enable-error-stack textlinkfar.h5
 TOOLTEST4 textlink.ddl --enable-error-stack textlink.h5
 
 # test for error stack display (BZ2048)
-TOOLTEST5 filter_fail.ddl --enable-error-stack filter_fail.h5
+GREPTEST2 ERRTXT "is not registered" filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
 TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1 tall.h5
