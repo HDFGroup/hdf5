@@ -64,6 +64,55 @@ New Features
 
         (ADB - 2020/12/10, OESS-98)
 
+    - FreeBSD Autotools configuration now defaults to 'cc' and 'c++' compilers
+
+      On FreeBSD, the autotools defaulted to 'gcc' as the C compiler and did
+      not process C++ options. Since FreeBSD 10, the default compiler has
+      been clang (via 'cc').
+
+      The default compilers have been set to 'cc' for C and 'c++' for C++,
+      which will pick up clang and clang++ respectively on FreeBSD 10+.
+      Additionally, clang options are now set correctly for both C and C++
+      and g++ options will now be set if that compiler is being used (an
+      omission from the former functionality).
+
+      (DER - 2020/11/28, HDFFV-11193)
+
+    - Fixed POSIX problems when building w/ gcc on Solaris
+
+      When building on Solaris using gcc, the POSIX symbols were not
+      being set correctly, which could lead to issues like clock_gettime()
+      not being found.
+
+      The standard is now set to gnu99 when building with gcc on Solaris,
+      which allows POSIX things to be #defined and linked correctly. This
+      differs slightly from the gcc norm, where we set the standard to c99
+      and manually set POSIX #define symbols.
+
+      (DER - 2020/11/25, HDFFV-11191)
+
+    - Added a configure-time option to consider certain compiler warnings
+      as errors
+
+      A new configure-time option was added that converts some compiler warnings
+      to errors. This is mainly intended for library developers and currently
+      only works for gcc and clang. The warnings that are considered errors
+      will appear in the generated libhdf5.settings file. These warnings apply
+      to C and C++ code and will appear in "H5 C Flags" and H5 C++ Flags",
+      respectively. They will NOT be exported to h5cc, etc.
+
+      The default is OFF. Building with this option may fail when compiling
+      on operating systems and with compiler versions not commonly used by
+      the library developers. Compilation may also fail when headers not
+      under the control of the library developers (e.g., mpi.h, hdfs.h) raise
+      warnings.
+
+      Autotools:    --enable-warnings-as-errors
+
+      CMake:        HDF5_ENABLE_WARNINGS_AS_ERRORS
+
+      (DER - 2020/11/23, HDFFV-11189)
+
     - Autotools and CMake target added to produce doxygen generated documentation
 
         The default is OFF or disabled.
@@ -116,15 +165,22 @@ New Features
 
     Library:
     --------
-    - 
+    - Improved performance of H5Sget_select_elem_pointlist
+
+        Modified library to cache the point after the last block of points
+        retrieved by H5Sget_select_elem_pointlist, so a subsequent call to the
+        same function to retrieve the next block of points from the list can
+        proceed immediately without needing to iterate over the point list.
+
+        (NAF - 2021/01/19)
 
     Fortran Library:
     ----------------
-    - 
+    -
 
     C++ Library:
     ------------
-    - 
+    -
 
     Java Library:
     ----------------
@@ -140,11 +196,18 @@ New Features
 
     Tools:
     ------
-    - 
+    - h5repack added help text for user-defined filters.
+
+        Added help text line that states the valid values of the filter flag
+        for user-defined filters;
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
+
+        (ADB - 2021/01/14, HDFFV-11099)
+
 
     High-Level APIs:
     ---------------
-    - 
+    -
 
     C Packet Table API
     ------------------
@@ -181,8 +244,21 @@ Bug Fixes since HDF5-1.10.7 release
 
         (PGT,ADB - 2020/12/29, HDFFV-10865)
 
+
     Configuration
     -------------
+    - Reclassify CMake messages, to allow new modes and --log-level option
+
+      CMake message commands have a mode argument. By default, STATUS mode
+      was chosen for any non-error message. CMake version 3.15 added additional
+      modes, NOTICE, VERBOSE, DEBUG and TRACE. All message commands with a mode
+      of STATUS were reviewed and most were reclassified as VERBOSE. The new
+      mode was protected by a check for a CMake version of at least 3.15. If CMake
+      version 3.17 or above is used, the user can use the command line option
+      of "--log-level" to further restrict which message commands are displayed.
+
+      (ADB - 2021/01/11, HDFFV-11144)
+
     - Fixes Autotools determination of the stat struct having an st_blocks field
 
       A missing parenthesis in an autoconf macro prevented building the test
@@ -192,39 +268,45 @@ Bug Fixes since HDF5-1.10.7 release
       CMake. This #define is only used in the tests and does not affect the
       HDF5 C library.
 
-      (DER - 2021/07/01, HDFFV-11201)
+      (DER - 2021/01/07, HDFFV-11201)
 
-    Performance
-    -------------
-    -
-
-    Fortran
-    --------
-    -
 
     Tools
     -----
+    - Fixed tools argument parsing.
+
+        Tools parsing used the length of the option from the long array to match
+        the option from the command line. This incorrectly matched a shorter long
+        name option that was happened to be a subset of another long option.
+        Changed to match whole names.
+
+        (ADB - 2021/01/19, HDFFV-11106)
+
+
+    Fortran API
+    -----------
     -
 
-    High-Level APIs:
+
+    High-Level Library
     ------
     -
 
-    Fortran High-Level APIs:
-    ------
-    -
 
     Documentation
     -------------
     -
 
+
     F90 APIs
     --------
     -
 
+
     C++ APIs
     --------
     -
+
 
     Testing
     -------
@@ -363,15 +445,21 @@ The following platforms are not supported but have been tested for this release.
     # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
     (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
 
-    Fedora32 5.8.18-200.fc32.x86_64
-    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
-                                     GNU Fortran (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
-                                     clang version 10.0.1 (Fedora 10.0.1-3.fc32)
+    Fedora33 5.10.10-200.fc33.x86_64
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+                                     GNU Fortran (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+                                     clang version 11.0.0 (Fedora 11.0.0-2.fc33)
                                      (cmake and autotools)
 
-    Ubuntu20.10 -5.8.0-29-generic-x86_64
-    #31-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+    Ubuntu20.10 5.8.0-41-generic-x86_64
+    #46-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
                                      GNU Fortran (GCC) 10.2.0-13ubuntu1
+                                     (cmake and autotools)
+
+    SUSE15sp2 5.3.18-22-default
+    #1 SMP x86_64  GNU/Linux         GNU gcc (SUSE Linux) 7.5.0
+                                     GNU Fortran (SUSE Linux) 7.5.0
+                                     clang version 7.0.1 (tags/RELEASE_701/final 349238)
                                      (cmake and autotools)
 
     Mac OS X El Capitan 10.11.6   Apple clang version 7.3.0 from Xcode 7.3

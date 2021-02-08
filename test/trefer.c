@@ -532,7 +532,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hssize_t        hssize_ret;                           /* hssize_t return value */
     htri_t          tri_ret;                              /* htri_t return value */
     herr_t          ret;                                  /* Generic return value */
-    haddr_t         addr = HADDR_UNDEF;                   /* test for undefined reference */
+    haddr_t         addr[2] = {HADDR_UNDEF, 0};           /* test for undefined reference */
     hid_t           dset_NA;                              /* Dataset id for undefined reference */
     hid_t           space_NA;                             /* Dataspace id for undefined reference */
     hsize_t         dims_NA[1] = {1};                     /* Dims array for undefined reference */
@@ -1297,14 +1297,14 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
 static void
 test_reference_obj_deleted(void)
 {
-    hid_t fid1;                    /* HDF5 File IDs        */
-    hid_t dataset,                 /* Dataset ID            */
-        dset2;                     /* Dereferenced dataset ID */
-    hid_t      sid1;               /* Dataspace ID            */
-    hobj_ref_t oref;               /* Object Reference to test */
-    H5O_type_t obj_type;           /* Object type */
-    haddr_t    addr = HADDR_UNDEF; /* test for undefined reference */
-    herr_t     ret;                /* Generic return value        */
+    hid_t fid1;                            /* HDF5 File IDs */
+    hid_t dataset,                         /* Dataset ID */
+        dset2;                             /* Dereferenced dataset ID */
+    hid_t      sid1;                       /* Dataspace ID */
+    hobj_ref_t oref;                       /* Object Reference to test */
+    H5O_type_t obj_type;                   /* Object type */
+    haddr_t    addr[2] = {HADDR_UNDEF, 0}; /* test for undefined reference */
+    herr_t     ret;                        /* Generic return value */
 
     /* Create file */
     fid1 = H5Fcreate(FILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
