@@ -55,8 +55,8 @@
  *
  * The HDF5 C++ API is included with the HDF5 source code and can
  * be obtained from
- * <a href="https://support.hdfgroup.org/HDF5/release/obtainsrc.html">
- * https://support.hdfgroup.org/HDF5/release/obtainsrc.html</a>.
+ * <a href="https://portal.hdfgroup.org/display/support/Downloads">
+ *  * https://portal.hdfgroup.org/display/support/Downloads</a>.
  *
  * Please refer to the release_docs/INSTALL file under the top directory
  * of the HDF5 source code for information about installing, building,
