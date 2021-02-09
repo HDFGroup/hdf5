@@ -153,27 +153,128 @@ typedef herr_t (*H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc, void *cl
 typedef herr_t (*H5E_auto2_t)(hid_t estack, void *client_data);
 
 /* Public API functions */
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Registers a client library or application program to the HDF5 error API
+ *
+ * \param[in] cls_name Name of the error class
+ * \param[in] lib_name Name of the client library or application to which the error class belongs
+ * \param[in] version Version of the client library or application to which the
+              error class belongs. Can be \c NULL.
+ * \return Returns a class identifier on success; otherwise returns H5I_INVALID_ID.
+ *
+ * \details H5Eregister_class() registers a client library or application
+ *          program to the HDF5 error API so that the client library or
+ *          application program can report errors together with the HDF5
+ *          library. It receives an identifier for this error class for further
+ *          error operations. The library name and version number will be
+ *          printed out in the error message as a preamble.
+ *
+ * \since 1.8.0
+ */
 H5_DLL hid_t   H5Eregister_class(const char *cls_name, const char *lib_name, const char *version);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Removes an error class
+ *
+ * \param[in] class_id Error class identifier.
+ * \return \herr_t
+ *
+ * \details H5Eunregister_class() removes the error class specified by \p
+ *          class_id. All the major and minor errors in this class will also be
+ *          closed.
+ *
+ * \since 1.8.0
+ */
 H5_DLL herr_t  H5Eunregister_class(hid_t class_id);
-
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Closes an error message
+ *
+ * \param[in] err_id An error message identifier
+ * \return \herr_t
+ *
+ * \details H5Eclose_msg() closes an error message identifier, which can be
+ *          either a major or minor message.
+ *
+ * \since 1.8.0
+ */
 H5_DLL herr_t  H5Eclose_msg(hid_t err_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Adds a major error message to an error class
+ *
+ * \param[in] cls An error class identifier
+ * \param[in] msg_type The type of the error message
+ * \param[in] msg Major error message
+ * \return \herr_t
+ *
+ * \details H5Ecreate_msg() adds an error message to an error class defined by
+ *          client library or application program. The error message can be
+ *          either major or minor as indicated by the parameter \p msg_type.
+ *
+ *          Use H5Eclose_msg() to close the message identifier returned by this
+ *          function.
+ *
+ * \since 1.8.0
+ */
 H5_DLL hid_t   H5Ecreate_msg(hid_t cls, H5E_type_t msg_type, const char *msg);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
  *
- * \brief Creates a new empty error stack
+ * \brief Creates a new, empty error stack
  *
  * \return \hid_ti{error stack}
  *
  * \details H5Ecreate_stack() creates a new empty error stack and returns the
- *          new stack’s identifier. Use H5Eclose_stack to close the error stack
+ *          new stack’s identifier. Use H5Eclose_stack() to close the error stack
  *          identifier returned by this function.
  *
  * \since 1.8.0
  */
 H5_DLL hid_t   H5Ecreate_stack(void);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Returns a copy of the current error stack
+ *
+ * \return \hid_ti{error stack}
+ *
+ * \details H5Eget_current_stack() copies the current error stack and returns an
+ *          error stack identifier for the new copy.
+ *
+ * \since 1.8.0
+ */
 H5_DLL hid_t   H5Eget_current_stack(void);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Appends one error stack to another, optionally closing the source
+ *        stack.
+ *
+ * \estack_id{dst_stack_id}
+ * \estack_id{src_stack_id}
+ * \param[in] close_source_stack Flag to indicate whether to close the source stack
+ * \return \herr_t
+ *
+ * \details H5Eappend_stack() appends the messages from error stack
+ *          \p src_stack_id to the error stack \p dst_stack_id.
+ *          If \p close_source_stack is \c TRUE, the source error stack
+ *          will be closed.
+ *
+ * \since 1.8.0
+ */
 H5_DLL herr_t  H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack);
 /**
  * --------------------------------------------------------------------------
