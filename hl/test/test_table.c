@@ -1274,7 +1274,7 @@ test_table(hid_t fid, int do_write)
         /* write the new longitude and latitude information to all the records */
         nfields  = 2;
         start    = 0;
-        nrecords = NRECORDS;
+        nrecords = NRECORDS_ADD;
         if (H5TBwrite_fields_index(fid, "table12", nfields, field_index_pos, start, nrecords,
                                    sizeof(position_t), field_offset_pos, field_sizes_pos, position_in) < 0)
             goto out;
