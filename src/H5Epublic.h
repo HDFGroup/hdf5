@@ -201,6 +201,27 @@ H5_DLL herr_t  H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t 
 H5_DLL herr_t  H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data);
 H5_DLL herr_t  H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data);
 H5_DLL herr_t  H5Eclear2(hid_t err_stack);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Determines the type of error stack
+ *
+ * \estack_id{err_stack}
+ * \param[out] is_stack A flag indicating which error stack \c typedef the
+ *                      specified error stack conforms to
+ *
+ * \return \herr_t
+ *
+ * \details H5Eauto_is_v2() determines whether the error auto reporting function
+ *          for an error stack conforms to the #H5E_auto2_t \c typedef or the
+ *          #H5E_auto1_t \c typedef.
+ *
+ *          The \p is_stack parameter is set to 1 if the error stack conforms to
+ *          #H5E_auto2_t and 0 if it conforms to #H5E_auto1_t.
+ *
+ * \since 1.8.0
+ */
 H5_DLL herr_t  H5Eauto_is_v2(hid_t err_stack, unsigned *is_stack);
 H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size);
 H5_DLL ssize_t H5Eget_num(hid_t error_stack_id);
