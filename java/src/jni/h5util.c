@@ -1069,39 +1069,47 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
                             switch (obj_type) {
                                 case H5O_TYPE_DATASET:
-                                    if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                                        if ((new_obj_sid = H5Ropen_region(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                    if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >=
+                                        0) {
+                                        if ((new_obj_sid =
+                                                 H5Ropen_region(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                             if (expand_data) {
-                                                if (H5S_SEL_ERROR == (region_type = H5Sget_select_type(new_obj_id)))
+                                                if (H5S_SEL_ERROR ==
+                                                    (region_type = H5Sget_select_type(new_obj_id)))
                                                     H5_LIBRARY_ERROR(ENVONLY);
 
                                                 if (H5S_SEL_POINTS == region_type) {
-                                                    if (h5str_dump_region_points_data(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                                    if (h5str_dump_region_points_data(
+                                                            ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                                 }
                                                 else {
-                                                    if (h5str_dump_region_blocks_data(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                                    if (h5str_dump_region_blocks_data(
+                                                            ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                                 }
                                             }
                                             else {
                                                 h5str_sprint_reference(ENVONLY, out_str, container, ref_vp);
 
-                                                if (H5S_SEL_ERROR == (region_type = H5Sget_select_type(new_obj_id)))
+                                                if (H5S_SEL_ERROR ==
+                                                    (region_type = H5Sget_select_type(new_obj_id)))
                                                     H5_LIBRARY_ERROR(ENVONLY);
 
                                                 if (H5S_SEL_POINTS == region_type) {
                                                     if (!h5str_append(out_str, " REGION_TYPE POINT"))
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-                                                    if (h5str_dump_region_points(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                                    if (h5str_dump_region_points(ENVONLY, out_str,
+                                                                                 new_obj_sid, new_obj_id) < 0)
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                                 }
                                                 else {
                                                     if (!h5str_append(out_str, " REGION_TYPE BLOCK"))
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-                                                    if (h5str_dump_region_blocks(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                                    if (h5str_dump_region_blocks(ENVONLY, out_str,
+                                                                                 new_obj_sid, new_obj_id) < 0)
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                                 }
                                             }
@@ -1122,46 +1130,45 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                 case H5O_TYPE_MAP:
                                 case H5O_TYPE_UNKNOWN:
                                 case H5O_TYPE_NTYPES:
-                                default:
-                                    {
-                                        /* Object references -- show the type and OID of the referenced object. */
-                                        H5O_info2_t oi;
-                                        char *      obj_tok_str = NULL;
-                                        if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                                            H5Oget_info3(new_obj_id, &oi, H5O_INFO_BASIC);
-                                            H5Otoken_to_str(new_obj_id, &oi.token, &obj_tok_str);
-                                            if (H5Dclose(new_obj_id) < 0)
-                                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                                        }
-                                        else
+                                default: {
+                                    /* Object references -- show the type and OID of the referenced object. */
+                                    H5O_info2_t oi;
+                                    char *      obj_tok_str = NULL;
+                                    if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >=
+                                        0) {
+                                        H5Oget_info3(new_obj_id, &oi, H5O_INFO_BASIC);
+                                        H5Otoken_to_str(new_obj_id, &oi.token, &obj_tok_str);
+                                        if (H5Dclose(new_obj_id) < 0)
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-
-                                        if (NULL == (this_str = (char *)HDmalloc(14)))
-                                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                                                "h5str_sprintf: failed to allocate string buffer");
-                                        if (HDsprintf(this_str, "%u-", (unsigned)oi.type) < 0)
-                                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
-                                        if (!h5str_append(out_str, this_str))
-                                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                                        HDfree(this_str);
-                                        this_str = NULL;
-
-                                        /* Print OID */
-                                        {
-                                            char *token_str;
-
-                                            H5Otoken_to_str(tid, &oi.token, &token_str);
-
-                                            if (NULL == (this_str = (char *)HDmalloc(64 + strlen(token_str) + 1)))
-                                                H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                                                    "h5str_sprintf: failed to allocate string buffer");
-                                            if (HDsprintf(this_str, "%lu:%s", oi.fileno, token_str) < 0)
-                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
-
-                                            H5free_memory(token_str);
-                                        }
                                     }
-                                    break;
+                                    else
+                                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+                                    if (NULL == (this_str = (char *)HDmalloc(14)))
+                                        H5_OUT_OF_MEMORY_ERROR(
+                                            ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                                    if (HDsprintf(this_str, "%u-", (unsigned)oi.type) < 0)
+                                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                                    if (!h5str_append(out_str, this_str))
+                                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                    HDfree(this_str);
+                                    this_str = NULL;
+
+                                    /* Print OID */
+                                    {
+                                        char *token_str;
+
+                                        H5Otoken_to_str(tid, &oi.token, &token_str);
+
+                                        if (NULL == (this_str = (char *)HDmalloc(64 + strlen(token_str) + 1)))
+                                            H5_OUT_OF_MEMORY_ERROR(
+                                                ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                                        if (HDsprintf(this_str, "%lu:%s", oi.fileno, token_str) < 0)
+                                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+
+                                        H5free_memory(token_str);
+                                    }
+                                } break;
                             } /* end switch */
                         }
                         else
@@ -1175,11 +1182,13 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                         H5_LIBRARY_ERROR(ENVONLY);
 
                                     if (H5S_SEL_POINTS == region_type) {
-                                        if (h5str_dump_region_points_data(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                        if (h5str_dump_region_points_data(ENVONLY, out_str, new_obj_sid,
+                                                                          new_obj_id) < 0)
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                     }
                                     else {
-                                        if (h5str_dump_region_blocks_data(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                        if (h5str_dump_region_blocks_data(ENVONLY, out_str, new_obj_sid,
+                                                                          new_obj_id) < 0)
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                     }
                                 }
@@ -1193,14 +1202,16 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                         if (!h5str_append(out_str, " REGION_TYPE POINT"))
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-                                        if (h5str_dump_region_points(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                        if (h5str_dump_region_points(ENVONLY, out_str, new_obj_sid,
+                                                                     new_obj_id) < 0)
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                     }
                                     else {
                                         if (!h5str_append(out_str, " REGION_TYPE BLOCK"))
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-                                        if (h5str_dump_region_blocks(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                        if (h5str_dump_region_blocks(ENVONLY, out_str, new_obj_sid,
+                                                                     new_obj_id) < 0)
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                     }
                                 }
@@ -1222,39 +1233,47 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                     break;
 
                                 case H5O_TYPE_DATASET:
-                                    if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                                        if ((new_obj_sid = H5Ropen_region(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                    if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >=
+                                        0) {
+                                        if ((new_obj_sid =
+                                                 H5Ropen_region(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                             if (expand_data) {
-                                                if (H5S_SEL_ERROR == (region_type = H5Sget_select_type(new_obj_id)))
+                                                if (H5S_SEL_ERROR ==
+                                                    (region_type = H5Sget_select_type(new_obj_id)))
                                                     H5_LIBRARY_ERROR(ENVONLY);
 
                                                 if (H5S_SEL_POINTS == region_type) {
-                                                    if (h5str_dump_region_points_data(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                                    if (h5str_dump_region_points_data(
+                                                            ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                                 }
                                                 else {
-                                                    if (h5str_dump_region_blocks_data(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                                    if (h5str_dump_region_blocks_data(
+                                                            ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                                 }
                                             }
                                             else {
                                                 h5str_sprint_reference(ENVONLY, out_str, container, ref_vp);
 
-                                                if (H5S_SEL_ERROR == (region_type = H5Sget_select_type(new_obj_id)))
+                                                if (H5S_SEL_ERROR ==
+                                                    (region_type = H5Sget_select_type(new_obj_id)))
                                                     H5_LIBRARY_ERROR(ENVONLY);
 
                                                 if (H5S_SEL_POINTS == region_type) {
                                                     if (!h5str_append(out_str, " REGION_TYPE POINT"))
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-                                                    if (h5str_dump_region_points(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                                    if (h5str_dump_region_points(ENVONLY, out_str,
+                                                                                 new_obj_sid, new_obj_id) < 0)
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                                 }
                                                 else {
                                                     if (!h5str_append(out_str, " REGION_TYPE BLOCK"))
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-                                                    if (h5str_dump_region_blocks(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                                    if (h5str_dump_region_blocks(ENVONLY, out_str,
+                                                                                 new_obj_sid, new_obj_id) < 0)
                                                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                                 }
                                             }
@@ -1295,11 +1314,13 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                         H5_LIBRARY_ERROR(ENVONLY);
 
                                     if (H5S_SEL_POINTS == region_type) {
-                                        if (h5str_dump_region_points_data(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                        if (h5str_dump_region_points_data(ENVONLY, out_str, new_obj_sid,
+                                                                          new_obj_id) < 0)
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                     }
                                     else {
-                                        if (h5str_dump_region_blocks_data(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
+                                        if (h5str_dump_region_blocks_data(ENVONLY, out_str, new_obj_sid,
+                                                                          new_obj_id) < 0)
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                     }
                                 } /* end else to if (h5tools_is_zero(... */
@@ -1598,10 +1619,7 @@ h5str_dump_region_blocks_data(JNIEnv *env, h5str_t *str, hid_t region, hid_t reg
     /*
      * This function fails if the region does not have blocks.
      */
-    H5E_BEGIN_TRY
-    {
-        nblocks = H5Sget_select_hyper_nblocks(region);
-    }
+    H5E_BEGIN_TRY { nblocks = H5Sget_select_hyper_nblocks(region); }
     H5E_END_TRY;
 
     if (nblocks < 0)
@@ -1658,10 +1676,7 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_i
     /*
      * This function fails if the region does not have blocks.
      */
-    H5E_BEGIN_TRY
-    {
-        nblocks = H5Sget_select_hyper_nblocks(region);
-    }
+    H5E_BEGIN_TRY { nblocks = H5Sget_select_hyper_nblocks(region); }
     H5E_END_TRY;
 
     if (nblocks < 0)
@@ -1818,10 +1833,7 @@ h5str_dump_region_points_data(JNIEnv *env, h5str_t *str, hid_t region_space, hid
     /*
      * This function fails if the region does not have points.
      */
-    H5E_BEGIN_TRY
-    {
-        npoints = H5Sget_select_elem_npoints(region_space);
-    }
+    H5E_BEGIN_TRY { npoints = H5Sget_select_elem_npoints(region_space); }
     H5E_END_TRY;
 
     if (npoints < 0)
@@ -1881,10 +1893,7 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_i
     /*
      * This function fails if the region does not have points.
      */
-    H5E_BEGIN_TRY
-    {
-        npoints = H5Sget_select_elem_npoints(region);
-    }
+    H5E_BEGIN_TRY { npoints = H5Sget_select_elem_npoints(region); }
     H5E_END_TRY;
 
     if (npoints < 0)
@@ -2880,15 +2889,15 @@ done:
 static int
 h5str_dump_region_attribute(JNIEnv *env, h5str_t *str, hid_t region_id)
 {
-    int      ret_value    = SUCCEED;
-    hid_t    atype        = H5I_INVALID_HID;
-    hid_t    type_id      = H5I_INVALID_HID;
-    hid_t    region_space = H5I_INVALID_HID;
-    hsize_t  total_size[H5S_MAX_RANK]; /* total size of dataset*/
-    size_t   i;                        /* counter  */
-    int      sndims;                   /* rank of dataspace */
-    hsize_t  p_nelmts;                 /* total selected elmts */
-    hsize_t  alloc_size;
+    int     ret_value    = SUCCEED;
+    hid_t   atype        = H5I_INVALID_HID;
+    hid_t   type_id      = H5I_INVALID_HID;
+    hid_t   region_space = H5I_INVALID_HID;
+    hsize_t total_size[H5S_MAX_RANK]; /* total size of dataset*/
+    size_t  i;                        /* counter  */
+    int     sndims;                   /* rank of dataspace */
+    hsize_t p_nelmts;                 /* total selected elmts */
+    hsize_t alloc_size;
 
     unsigned char *buf = NULL; /* buffer for raw data */
 
