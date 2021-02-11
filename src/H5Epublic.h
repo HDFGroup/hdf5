@@ -368,7 +368,7 @@ H5_DLL herr_t  H5Eset_current_stack(hid_t err_stack_id);
  * \brief Pushes a new error record onto an error stack
  *
  * \estack_id{err_stack}. If the identifier is #H5E_DEFAULT, the error record
-                         will be pushed to the current stack.
+ *                        will be pushed to the current stack.
  * \param[in] file Name of the file in which the error was detected
  * \param[in] func Name of the function in which the error was detected
  * \param[in] line Line number in the file where the error was detected
@@ -663,29 +663,258 @@ H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size
 typedef hid_t H5E_major_t;
 typedef hid_t H5E_minor_t;
 
-/* Information about an error element of error stack. */
+/**
+ * Information about an error element of error stack.
+ */
 typedef struct H5E_error1_t {
-    H5E_major_t maj_num;   /*major error number                 */
-    H5E_minor_t min_num;   /*minor error number                 */
-    const char *func_name; /*function in which error occurred   */
-    const char *file_name; /*file in which error occurred       */
-    unsigned    line;      /*line in file where error occurs    */
-    const char *desc;      /*optional supplied description      */
+    H5E_major_t maj_num;   /**< major error number                 */
+    H5E_minor_t min_num;   /**< minor error number                 */
+    const char *func_name; /**< function in which error occurred   */
+    const char *file_name; /**< file in which error occurred       */
+    unsigned    line;      /**< line in file where error occurs    */
+    const char *desc;      /**< optional supplied description      */
 } H5E_error1_t;
 
 /* Error stack traversal callback function pointers */
+//! [H5E_walk1_t_snip]
+/**
+ * \brief Callback function for H5Ewalk1()
+ *
+ * \param[in] n Indexed error position in the stack
+ * \param[in] err_desc Pointer to a data structure describing the error
+ * \param[in] client_data Pointer to client data in the format expected by the
+ *                        user-defined function
+ * \return \herr_t
+ */
 typedef herr_t (*H5E_walk1_t)(int n, H5E_error1_t *err_desc, void *client_data);
+//! [H5E_walk1_t_snip]
+
+//! [H5E_auto1_t_snip]
+/**
+ * \brief Callback function for H5Eset_auto1()
+ *
+ * \param[in] client_data Pointer to client data in the format expected by the
+ *                        user-defined function
+ * \return \herr_t
+ */
 typedef herr_t (*H5E_auto1_t)(void *client_data);
+//! [H5E_auto1_t_snip]
 
 /* Function prototypes */
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Clears the error stack for the current thread
+ *
+ * \return \herr_t
+ *
+ * \details H5Eclear1() clears the error stack for the current thread.\n
+ *          The stack is also cleared whenever an API function is called, with
+ *          certain exceptions (for instance, H5Eprint1()).
+ *
+ * \deprecated 1.8.0 Function H5Eclear() renamed to H5Eclear1() and deprecated
+ *                   in this release.
+ */
 H5_DLL herr_t H5Eclear1(void);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Returns the current settings for the automatic error stack traversal
+ *        function and its data
+ *
+ * \param[out] func Current setting for the function to be called upon an error
+ *                  condition
+ * \param[out] client_data Current setting for the data passed to the error
+ *                         function
+ * \return \herr_t
+ *
+ * \details H5Eget_auto1() returns the current settings for the automatic error
+ *          stack traversal function, \p func, and its data,
+ *          \p client_data. Either or both arguments may be \c NULL, in which case the
+ *          value is not returned.
+ *
+ *          The library initializes its default error stack traversal functions
+ *          to H5Eprint1() and H5Eprint2(). A call to H5Eget_auto2() returns
+ *          H5Eprint2() or the user-defined function passed in through
+ *          H5Eset_auto2(). A call to H5Eget_auto1() returns H5Eprint1() or the
+ *          user-defined function passed in through H5Eset_auto1(). However, if
+ *          the application passes in a user-defined function through
+ *          H5Eset_auto1(), it should call H5Eget_auto1() to query the traversal
+ *          function. If the application passes in a user-defined function
+ *          through H5Eset_auto2(), it should call H5Eget_auto2() to query the
+ *          traversal function.
+ *
+ *          Mixing the new style and the old style functions will cause a
+ *          failure. For example, if the application sets a user-defined
+ *          old-style traversal function through H5Eset_auto1(), a call to
+ *          H5Eget_auto2() will fail and will indicate that the application has
+ *          mixed H5Eset_auto1() and H5Eget_auto2(). On the other hand, mixing
+ *          H5Eset_auto2() and H5Eget_auto1() will also cause a failure. But if
+ *          the traversal functions are the library’s default H5Eprint1() or
+ *          H5Eprint2(), mixing H5Eset_auto1() and H5Eget_auto2() or mixing
+ *          H5Eset_auto2() and H5Eget_auto1() does not fail.
+ *
+ * \deprecated 1.8.0 Function H5Eget_auto() renamed to H5Eget_auto1() and
+ *                   deprecated in this release.
+ */
 H5_DLL herr_t H5Eget_auto1(H5E_auto1_t *func, void **client_data);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Pushes a new error record onto the error stack
+ *
+ * \param[in] file Name of the file in which the error was detected
+ * \param[in] func Name of the function in which the error was detected
+ * \param[in] line Line number in the file where the error was detected
+ * \param[in] maj Major error identifier
+ * \param[in] min Minor error identifier
+ * \param[in] str Error description string
+ * \return \herr_t
+ *
+ * \details H5Epush1() pushes a new error record onto the error stack for the
+ *          current thread.\n
+ *          The error has major and minor numbers \p maj_num
+ *          and \p min_num, the function \p func where the error was detected, the
+ *          name of the file \p file where the error was detected, the line \p line
+ *          within that file, and an error description string \p str.\n
+ *          The function name, filename, and error description strings must be statically
+ *          allocated.
+ *
+ * \since 1.4.0
+ * \deprecated 1.8.0 Function H5Epush() renamed to H5Epush1() and
+ *                   deprecated in this release.
+ */
 H5_DLL herr_t H5Epush1(const char *file, const char *func, unsigned line, H5E_major_t maj, H5E_minor_t min,
                        const char *str);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Prints the current error stack in a default manner
+ *
+ * \param[in] stream File pointer, or \c NULL for \c stderr
+ * \return \herr_t
+ *
+ * \details H5Eprint1() prints prints the error stack for the current thread
+ *          on the specified stream, \p stream. Even if the error stack is empty, a
+ *          one-line message of the following form will be printed:
+ *          \code{.unparsed}
+ *          HDF5-DIAG: Error detected in thread 0.
+ *          \endcode
+ *          H5Eprint1() is a convenience function for H5Ewalk1() with a function
+ *          that prints error messages. Users are encouraged to write their own
+ *          more specific error handlers.
+ *
+ * \deprecated 1.8.0 Function H5Eprint() renamed to H5Eprint1() and
+ *                   deprecated in this release.
+ */
 H5_DLL herr_t H5Eprint1(FILE *stream);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Turns automatic error printing on or off
+ *
+ * \param[in] func Function to be called upon an error condition
+ * \param[in] client_data Data passed to the error function
+ * \return \herr_t
+ *
+ * \details H5Eset_auto1() turns on or off automatic printing of errors. When
+ *          turned on (non-null \p func pointer), any API function which returns
+ *          an error indication will first call \p func, passing it \p
+ *          client_data as an argument.
+ *
+ *          \p func, a function conforming to the #H5E_auto1_t prototype, is
+ *          defined in the H5Epublic.h source code file as:
+ *          \snippet this H5E_auto1_t_snip
+ *
+ *          When the library is first initialized, the auto printing function is
+ *          set to H5Eprint1() (cast appropriately) and \p client_data is the
+ *          standard error stream pointer, \c stderr.
+ *
+ *          Automatic stack traversal is always in the #H5E_WALK_DOWNWARD
+ *          direction.
+ *
+ * \deprecated 1.8.0 Function H5Eset_auto() renamed to H5Eset_auto1() and
+ *                   deprecated in this release.
+ */
 H5_DLL herr_t H5Eset_auto1(H5E_auto1_t func, void *client_data);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Walks the current error stack, calling the specified function
+ *
+ * \param[in] direction Direction in which the error stack is to be walked
+ * \param[in] func Function to be called for each error encountered
+ * \param[in] client_data Data to be passed to \p func
+ * \return \herr_t
+ *
+ * \details H5Ewalk1() walks the error stack for the current thread and calls
+ *          the function specified in \p func for each error along the way.
+ *
+ *          \p direction specifies whether the stack is walked from the inside
+ *          out or the outside in. A value of #H5E_WALK_UPWARD means to begin
+ *          with the most specific error and end at the API; a value of
+ *          #H5E_WALK_DOWNWARD means to start at the API and end at the
+ *          innermost function where the error was first detected.
+ *
+ *          \p func, a function conforming to the #H5E_walk1_t prototype, will
+ *          be called for each error in the error stack. Its arguments will
+ *          include an index number \c n (beginning at zero regardless of stack
+ *          traversal direction), an error stack entry \c err_desc, and the \c
+ *          client_data pointer passed to H5Eprint(). The #H5E_walk1_t prototype
+ *          is as follows:
+ *          \snippet this H5E_walk1_t_snip
+ *
+ * \deprecated 1.8.0 Function H5Ewalk() renamed to H5Ewalk1() and
+ *                   deprecated in this release.
+ */
 H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Returns a character string describing an error specified by a major
+ *        error number
+ *
+ * \param[in] maj Major error number
+ * \return \herr_t
+ *
+ * \details Given a major error number, H5Eget_major() returns a constant
+ *          character string that describes the error.
+ *
+ * \attention This function returns a dynamically allocated string (\c char
+ *            array). An application calling this function must free the memory
+ *            associated with the return value to prevent a memory leak.
+ *
+ * \deprecated 1.8.0 Function deprecated in this release.
+ */
 H5_DLL char * H5Eget_major(H5E_major_t maj);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Returns a character string describing an error specified by a minor
+ *        error number
+ *
+ * \param[in] min Minor error number
+ * \return \herr_t
+ *
+ * \details Given a minor error number, H5Eget_minor() returns a constant
+ *          character string that describes the error.
+ *
+ * \attention In the Release 1.8.x series, H5Eget_minor() returns a string of
+ *            dynamic allocated \c char array. An application calling this
+ *            function from an HDF5 library of Release 1.8.0 or later must free
+ *            the memory associated with the return value to prevent a memory
+ *            leak. This is a change from the 1.6.x release series.
+ *
+ * \deprecated 1.8.0 Function deprecated and return type changed in this release.
+ */
 H5_DLL char * H5Eget_minor(H5E_minor_t min);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
