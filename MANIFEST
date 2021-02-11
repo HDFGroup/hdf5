@@ -3428,6 +3428,7 @@
 ./java/test/testfiles/JUnit-TestH5Pvirtual.txt
 ./java/test/testfiles/JUnit-TestH5PL.txt
 ./java/test/testfiles/JUnit-TestH5R.txt
+./java/test/testfiles/JUnit-TestH5Rref.txt
 ./java/test/testfiles/JUnit-TestH5Sbasic.txt
 ./java/test/testfiles/JUnit-TestH5S.txt
 ./java/test/testfiles/JUnit-TestH5Tparams.txt
@@ -3468,6 +3469,7 @@
 ./java/test/TestH5Pvirtual.java
 ./java/test/TestH5PL.java
 ./java/test/TestH5R.java
+./java/test/TestH5Ref.java
 ./java/test/TestH5Sbasic.java
 ./java/test/TestH5S.java
 ./java/test/TestH5Tparams.java

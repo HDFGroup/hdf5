@@ -43,7 +43,7 @@ extern size_t h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t t
                             size_t out_buf_offset);
 extern void   h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, hid_t container, void *ref_p);
 extern size_t h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *in_buf,
-                            size_t in_buf_len, int expand_data);
+                            int expand_data);
 extern void   h5str_array_free(char **strs, size_t len);
 extern int    h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order);
 extern int    h5str_dump_region_blocks_data(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);

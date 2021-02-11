@@ -384,8 +384,6 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
  * Programmer: Jacob Smith
  *             2017-11-10
  *
- * Changes: None.
- *
  *****************************************************************************
  */
 herr_t

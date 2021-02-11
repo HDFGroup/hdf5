@@ -195,9 +195,9 @@ public class TestH5D {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
     }
 
-    private final void _openH5file(String name, long dapl) {
+    private final void _openH5file(String filename, String dsetname, long dapl) {
        try {
-           H5fid = H5.H5Fopen(H5_FILE,
+           H5fid = H5.H5Fopen(filename,
                    HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
        }
        catch (Throwable err) {
@@ -206,7 +206,7 @@ public class TestH5D {
        }
        assertTrue("TestH5D._openH5file: H5.H5Fopen: ",H5fid >= 0);
        try {
-           H5did = H5.H5Dopen(H5fid, name, dapl);
+           H5did = H5.H5Dopen(H5fid, dsetname, dapl);
        }
        catch (Throwable err) {
            err.printStackTrace();
