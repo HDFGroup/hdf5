@@ -58,6 +58,7 @@ noinst_JAVA = \
     TestH5Lbasic.java \
     TestH5Lcreate.java \
     TestH5R.java \
+    TestH5Rref.java \
     TestH5P.java \
     TestH5PData.java \
     TestH5Pfapl.java \

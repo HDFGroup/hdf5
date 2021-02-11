@@ -25,7 +25,7 @@ import org.junit.runners.Suite;
         TestH5Tparams.class, TestH5Tbasic.class, TestH5T.class,
         TestH5Dparams.class, TestH5D.class, TestH5Dplist.class,
         TestH5Lparams.class, TestH5Lbasic.class, TestH5Lcreate.class,
-        TestH5R.class,
+        TestH5R.class, TestH5Rref.class,
         TestH5P.class, TestH5PData.class, TestH5Pfapl.class, TestH5Pvirtual.class, TestH5Plist.class,
         TestH5Pfapls3.class, TestH5Pfaplhdfs.class,
         TestH5A.class,
