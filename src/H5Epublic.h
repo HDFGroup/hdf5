@@ -26,18 +26,22 @@
 /* Value for the default error stack */
 #define H5E_DEFAULT (hid_t)0
 
-/* Different kinds of error information */
+/**
+ * Different kinds of error information
+ */
 typedef enum H5E_type_t { H5E_MAJOR, H5E_MINOR } H5E_type_t;
 
-/* Information about an error; element of error stack */
+/**
+ * Information about an error; element of error stack
+ */
 typedef struct H5E_error2_t {
-    hid_t       cls_id;    /*class ID                           */
-    hid_t       maj_num;   /*major error ID		     */
-    hid_t       min_num;   /*minor error number		     */
-    unsigned    line;      /*line in file where error occurs    */
-    const char *func_name; /*function in which error occurred   */
-    const char *file_name; /*file in which error occurred       */
-    const char *desc;      /*optional supplied description      */
+    hid_t       cls_id;    /**< class ID                           */
+    hid_t       maj_num;   /**< major error ID		     */
+    hid_t       min_num;   /**< minor error number		     */
+    unsigned    line;      /**< line in file where error occurs    */
+    const char *func_name; /**< function in which error occurred   */
+    const char *file_name; /**< file in which error occurred       */
+    const char *desc;      /**< optional supplied description      */
 } H5E_error2_t;
 
 /* When this header is included from a private header, don't make calls to H5open() */
@@ -292,15 +296,94 @@ H5_DLL herr_t  H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t c
  * \since 1.8.0
  */
 H5_DLL herr_t  H5Eclose_stack(hid_t stack_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Retrieves error class name
+ *
+ * \param[in] class_id Error class identifier
+ * \param[out] name Buffer for the error class name
+ * \param[in] size The maximum number of characters the class name to be returned
+ *            by this function in\p name.
+ * \return Returns non-negative value as on success; otherwise returns negative value.
+ *
+ * \details H5Eget_class_name() retrieves the name of the error class specified
+ *          by the class identifier. If non-NULL pointer is passed in for \p
+ *          name and \p size is greater than zero, the class name of \p size
+ *          long is returned. The length of the error class name is also
+ *          returned. If NULL is passed in as \p name, only the length of class
+ *          name is returned. If zero is returned, it means no name. The user is
+ *          responsible for allocating sufficient buffer space for the name.
+ *
+ * \since 1.8.0
+ */
 H5_DLL ssize_t H5Eget_class_name(hid_t class_id, char *name, size_t size);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Replaces the current error stack
+ *
+ * \estack_id{err_stack_id}
+ *
+ * \return \herr_t
+ *
+ * \details H5Eset_current_stack() replaces the content of the current error
+ *          stack with a copy of the content of the error stack specified by
+ *          \p err_stack_id, and it closes the error stack specified by
+ *          \p err_stack_id.
+ *
+ * \since 1.8.0
+ */
 H5_DLL herr_t  H5Eset_current_stack(hid_t err_stack_id);
 H5_DLL herr_t  H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid_t cls_id,
                         hid_t maj_id, hid_t min_id, const char *msg, ...);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Deletes specified number of error messages from the error stack
+ *
+ * \estack_id{err_stack}
+ * \param[in] count The number of error messages to be deleted from the top
+ *                  of error stack
+ * \return \herr_t
+ *
+ * \details H5Epop() deletes the number of error records specified in \p count
+ *          from the top of the error stack specified by \p err_stack (including
+ *          major, minor messages and description). The number of error messages
+ *          to be deleted is specified by \p count.
+ *
+ * \since 1.8.0
+ */
 H5_DLL herr_t  H5Epop(hid_t err_stack, size_t count);
 H5_DLL herr_t  H5Eprint2(hid_t err_stack, FILE *stream);
 H5_DLL herr_t  H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t func, void *client_data);
 H5_DLL herr_t  H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data);
 H5_DLL herr_t  H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Clears the specified error stack or the error stack for the current thread
+ *
+ * \estack_id{err_stack}
+ * \return \herr_t
+ *
+ * \details H5Eclear2() clears the error stack specified by \p err_stack, or, if
+ *          \p err_stack is set to #H5E_DEFAULT, the error stack for the current
+ *          thread.
+ *
+ *          \p err_stack is an error stack identifier, such as that returned by
+ *          H5Eget_current_stack().
+ *
+ *          The current error stack is also cleared whenever an API function is
+ *          called, with certain exceptions (for instance, H5Eprint1() or
+ *          H5Eprint2()).
+ *
+ * \since 1.8.0
+ */
 H5_DLL herr_t  H5Eclear2(hid_t err_stack);
 /**
  * --------------------------------------------------------------------------
@@ -325,7 +408,22 @@ H5_DLL herr_t  H5Eclear2(hid_t err_stack);
  */
 H5_DLL herr_t  H5Eauto_is_v2(hid_t err_stack, unsigned *is_stack);
 H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size);
-H5_DLL ssize_t H5Eget_num(hid_t error_stack_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief Retrieves the number of error messages in an error stack
+ *
+ * \estack_id{error_stack_id}
+ * \return Returns a non-negative value on success; otherwise returns a negative value.
+ *
+ * \details H5Eget_num() retrieves the number of error records in the error
+ *          stack specified by \p error_stack_id (including major, minor
+ *          messages and description).
+ *
+ * \since 1.8.0
+ */
+ H5_DLL ssize_t H5Eget_num(hid_t error_stack_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
