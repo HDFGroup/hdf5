@@ -81,7 +81,7 @@ static herr_t H5O__dtype_debug(H5F_t *f, const void *_mesg, FILE *stream, int in
         if (H5T__upgrade_version((DT), (VERS)) < 0)                                                          \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade " CLASS " encoding version")         \
         *(IOF) |= H5O_DECODEIO_DIRTY;                                                                        \
-    } /* end if */
+    }  /* end if */
 #endif /* H5_STRICT_FORMAT_CHECKS */
 
 /* This message derives from H5O message class */
@@ -579,8 +579,10 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 done:
     if (ret_value < 0)
         if (dt != NULL) {
-            if (dt->shared != NULL)
+            if (dt->shared != NULL) {
+                HDassert(!dt->shared->owned_vol_obj);
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
+            } /* end if */
             dt = H5FL_FREE(H5T_t, dt);
         } /* end if */
 

@@ -247,7 +247,8 @@ H5F__close_cb(H5VL_object_t *file_vol_obj, void **request)
     if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
-    /* Free the VOL object */
+    /* Free the VOL object; it is unnecessary to unwrap the VOL
+     * object before freeing it, as the object was not wrapped */
     if (H5VL_free_object(file_vol_obj) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
 
@@ -1320,6 +1321,8 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
 
 done:
     if (!ret_value && f) {
+        HDassert(NULL == f->vol_obj);
+
         if (!shared) {
             /* Attempt to clean up some of the shared file structures */
             if (f->shared->efc)
@@ -1331,11 +1334,6 @@ done:
 
             f->shared = H5FL_FREE(H5F_shared_t, f->shared);
         }
-
-        /* Free VOL object */
-        if (f->vol_obj)
-            if (H5VL_free_object(f->vol_obj) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "unable to free VOL object")
 
         f = H5FL_FREE(H5F_t, f);
     }
@@ -1603,9 +1601,21 @@ H5F__dest(H5F_t *f, hbool_t flush)
     /* Free the non-shared part of the file */
     f->open_name   = (char *)H5MM_xfree(f->open_name);
     f->actual_name = (char *)H5MM_xfree(f->actual_name);
-    if (f->vol_obj && H5VL_free_object(f->vol_obj) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
-    f->vol_obj = NULL;
+    if (f->vol_obj) {
+        void *vol_wrap_ctx = NULL;
+
+        /* If a VOL wrapping context is available, retrieve it
+         * and unwrap file VOL object
+         */
+        if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get VOL object wrap context")
+        if (vol_wrap_ctx && (NULL == H5VL_object_unwrap(f->vol_obj)))
+            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't unwrap VOL object")
+
+        if (H5VL_free_object(f->vol_obj) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
+        f->vol_obj = NULL;
+    }
     if (H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     f->shared = NULL;
@@ -2622,8 +2632,8 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
     hid_t new_fapl_id = H5I_INVALID_HID; /* ID for duplicated FAPL */
 #ifdef H5_HAVE_SYMLINK
     /* This has to be declared here to avoid unfreed resources on errors */
-    char *realname = NULL; /* Fully resolved path name of file */
-#endif                     /* H5_HAVE_SYMLINK */
+    char *realname = NULL;      /* Fully resolved path name of file */
+#endif                          /* H5_HAVE_SYMLINK */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC

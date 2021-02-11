@@ -15,7 +15,9 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set (CMAKE_C_FLAGS "${CMAKE_C99_STANDARD_COMPILE_OPTION} ${CMAKE_C_FLAGS}")
 set (CMAKE_C_FLAGS "${CMAKE_C_SANITIZER_FLAGS} ${CMAKE_C_FLAGS}")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_SANITIZER_FLAGS} ${CMAKE_CXX_FLAGS}")
-message (STATUS "Warnings Configuration: default: ${CMAKE_C_FLAGS} : ${CMAKE_CXX_FLAGS}")
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+  message (VERBOSE "Warnings Configuration: default: ${CMAKE_C_FLAGS} : ${CMAKE_CXX_FLAGS}")
+endif ()
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
@@ -28,6 +30,20 @@ if (CMAKE_COMPILER_IS_GNUCC)
   else ()
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstdarg-opt")
+    endif ()
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0)
+      #-----------------------------------------------------------------------------
+      # Option to allow the user to enable build extended diagnostics
+      #
+      # This should NOT be on by default as it can cause process issues.
+      #-----------------------------------------------------------------------------
+      option (HDF5_ENABLE_BUILD_DIAGS "Enable color and URL extended diagnostic messages" OFF)
+      if (HDF5_ENABLE_BUILD_DIAGS)
+        message (STATUS "... default color and URL extended diagnostic messages enabled")
+      else ()
+        message (STATUS "... disable color and URL extended diagnostic messages")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-urls=never -fno-diagnostics-color")
+      endif ()
     endif ()
   endif ()
 endif ()
@@ -127,7 +143,9 @@ if (NOT MSVC AND NOT MINGW)
     elseif (CMAKE_C_COMPILER_ID STREQUAL "PGI")
       list (APPEND HDF5_CMAKE_C_FLAGS "-Minform=inform")
     endif ()
-    message (STATUS "CMAKE_C_FLAGS_GENERAL=${HDF5_CMAKE_C_FLAGS}")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "CMAKE_C_FLAGS_GENERAL=${HDF5_CMAKE_C_FLAGS}")
+    endif ()
   endif ()
 
   #-----------------------------------------------------------------------------
