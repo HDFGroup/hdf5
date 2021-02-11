@@ -3469,7 +3469,7 @@
 ./java/test/TestH5Pvirtual.java
 ./java/test/TestH5PL.java
 ./java/test/TestH5R.java
-./java/test/TestH5Ref.java
+./java/test/TestH5Rref.java
 ./java/test/TestH5Sbasic.java
 ./java/test/TestH5S.java
 ./java/test/TestH5Tparams.java
