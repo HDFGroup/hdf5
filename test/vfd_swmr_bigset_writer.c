@@ -16,6 +16,7 @@
  *
  * 1 the two major indices for extensible, chunked datasets: the
  *   extensible array and the version-2 B-tree, with VFD SWMR active.
+ *   The maximal dimension can be either fixed or unlimited.
  *
  * 2 reading and writing virtual datasets with source datasets residing
  *   in the same HDF5 file
@@ -209,11 +210,12 @@ newmat(unsigned rows, unsigned cols)
 static void
 usage(const char *progname)
 {
-	fprintf(stderr, "usage: %s [-S] [-W] [-a steps] [-b] [-c cols]\n"
+	fprintf(stderr, "usage: %s [-F] [-M] [-S] [-V] [-W] [-a steps] [-b] [-c cols]\n"
                 "    [-d dims]\n"
                 "    [-n iterations] [-r rows] [-s datasets]\n"
                 "    [-u milliseconds]\n"
 		"\n"
+                "-F:                   fix maximal dimensions for the chunked datasets\n"
 		"-M:	               use virtual datasets and many source\n"
                 "                      files\n"
 		"-S:	               do not use VFD SWMR\n"
@@ -276,6 +278,7 @@ state_init(state_t *s, int argc, char **argv)
     while ((ch = getopt(argc, argv, "FMSVWa:bc:d:n:qr:s:u:")) != -1) {
         switch (ch) {
         case 'F':
+            /* The flag to indicate whether the maximal dimension of the chunked datasets is fixed or unlimited */
             s->fixed_array = true;
             break;
         case 'M':
