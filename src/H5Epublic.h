@@ -647,7 +647,7 @@ H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size
  *
  * \since 1.8.0
  */
- H5_DLL ssize_t H5Eget_num(hid_t error_stack_id);
+H5_DLL ssize_t H5Eget_num(hid_t error_stack_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
@@ -893,7 +893,7 @@ H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client
  *
  * \deprecated 1.8.0 Function deprecated in this release.
  */
-H5_DLL char* H5Eget_major(H5E_major_t maj);
+H5_DLL char *H5Eget_major(H5E_major_t maj);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -915,7 +915,7 @@ H5_DLL char* H5Eget_major(H5E_major_t maj);
  *
  * \deprecated 1.8.0 Function deprecated and return type changed in this release.
  */
-H5_DLL char* H5Eget_minor(H5E_minor_t min);
+H5_DLL char *H5Eget_minor(H5E_minor_t min);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus
