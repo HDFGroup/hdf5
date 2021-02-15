@@ -30,10 +30,12 @@ extern char *gen_name(int);
 /* Prototypes for the test routines */
 void tts_is_threadsafe(void);
 #ifdef H5_HAVE_THREADSAFE
+#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
 void tts_rec_rw_lock_smoke_check_1(void);
 void tts_rec_rw_lock_smoke_check_2(void);
 void tts_rec_rw_lock_smoke_check_3(void);
 void tts_rec_rw_lock_smoke_check_4(void);
+#endif /* H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX */
 void tts_dcreate(void);
 void tts_error(void);
 void tts_cancel(void);
@@ -41,10 +43,12 @@ void tts_acreate(void);
 void tts_attr_vlen(void);
 
 /* Prototypes for the cleanup routines */
+#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
 void cleanup_rec_rw_lock_smoke_check_1(void);
 void cleanup_rec_rw_lock_smoke_check_2(void);
 void cleanup_rec_rw_lock_smoke_check_3(void);
 void cleanup_rec_rw_lock_smoke_check_4(void);
+#endif /* H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX */
 void cleanup_dcreate(void);
 void cleanup_error(void);
 void cleanup_cancel(void);

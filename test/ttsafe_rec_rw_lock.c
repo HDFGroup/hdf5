@@ -11,7 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
 
 /********************************************************************
  *
@@ -37,6 +36,8 @@
 
 /* Include library header files */
 #include "H5ACprivate.h"
+
+#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
 
 #ifdef H5_HAVE_THREADSAFE
 
