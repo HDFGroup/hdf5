@@ -2536,7 +2536,7 @@ parsePathInfo(struct path_info *path, char *temp)
 
     token = HDstrtok(temp, delimiter);
     if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) {
-        (void)HDfprintf(stderr, err1);
+        (void)HDfprintf(stderr, "%s", err1);
         return (-1);
     }
     HDstrcpy(path->group[i++], token);
@@ -2546,7 +2546,7 @@ parsePathInfo(struct path_info *path, char *temp)
         if (token == NULL)
             break;
         if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) {
-            (void)HDfprintf(stderr, err1);
+            (void)HDfprintf(stderr, "%s", err1);
             return (-1);
         }
         HDstrcpy(path->group[i++], token);

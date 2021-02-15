@@ -173,7 +173,7 @@ H5C__json_write_log_message(H5C_log_json_udata_t *json_udata)
 
     /* Write the log message and flush */
     n_chars = HDstrlen(json_udata->message);
-    if ((int)n_chars != HDfprintf(json_udata->outfile, json_udata->message))
+    if ((int)n_chars != HDfprintf(json_udata->outfile, "%s", json_udata->message))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
     HDmemset((void *)(json_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 

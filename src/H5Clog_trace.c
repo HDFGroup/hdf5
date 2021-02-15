@@ -168,7 +168,7 @@ H5C__trace_write_log_message(H5C_log_trace_udata_t *trace_udata)
 
     /* Write the log message and flush */
     n_chars = HDstrlen(trace_udata->message);
-    if ((int)n_chars != HDfprintf(trace_udata->outfile, trace_udata->message))
+    if ((int)n_chars != HDfprintf(trace_udata->outfile, "%s", trace_udata->message))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
     HDmemset((void *)(trace_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 
