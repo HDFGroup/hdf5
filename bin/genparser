@@ -219,13 +219,15 @@ perl -0777 -pi -e 's/int H5LTyyparse/hid_t H5LTyyparse/igs' ${path_to_hl_src}/H5
 #
 # Note that the GCC pragmas did not exist until gcc 4.2. Earlier versions
 # will simply ignore them, but we want to avoid those warnings.
+#
+# Note also that although clang defines __GNUC__, it doesn't support every
+# warning that GCC does.
 for f in ${path_to_hl_src}/H5LTparse.c ${path_to_hl_src}/H5LTanalyze.c
 do
     echo '#if defined (__GNUC__)                                            ' >> tmp.out
     echo '#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 402                    ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wconversion"                     ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"  ' >> tmp.out
-    echo '#pragma GCC diagnostic ignored "-Wlarger-than="                   ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wmissing-prototypes"             ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wnested-externs"                 ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wold-style-definition"           ' >> tmp.out
@@ -234,8 +236,11 @@ do
     echo '#pragma GCC diagnostic ignored "-Wsign-conversion"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wstrict-overflow"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wstrict-prototypes"              ' >> tmp.out
+    echo '#if !defined (__clang__)                                          ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wlarger-than="                   ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wsuggest-attribute=const"        ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"         ' >> tmp.out
+    echo '#endif                                                            ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wswitch-default"                 ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wunused-function"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wunused-macros"                  ' >> tmp.out
