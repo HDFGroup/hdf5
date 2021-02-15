@@ -162,7 +162,7 @@ const H5D_chunk_ops_t H5D_COPS_FARRAY[1] = {{
     H5D__farray_idx_reset,              /* reset */
     H5D__farray_idx_dump,               /* dump */
     H5D__farray_idx_dest,               /* destroy */
-    NULL                                /* close */
+    H5D__farray_idx_dest                /* close (same as destroy) */
 }};
 
 

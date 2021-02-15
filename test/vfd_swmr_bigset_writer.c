@@ -16,6 +16,7 @@
  *
  * 1 the two major indices for extensible, chunked datasets: the
  *   extensible array and the version-2 B-tree, with VFD SWMR active.
+ *   The maximal dimension can be either fixed or unlimited.
  *
  * 2 reading and writing virtual datasets with source datasets residing
  *   in the same HDF5 file
@@ -133,6 +134,7 @@ typedef struct {
         enum {vds_off, vds_single, vds_multi} vds;
         bool use_vfd_swmr;
         bool writer;
+        bool fixed_array;
         hsize_t chunk_dims[RANK];
         hsize_t one_dee_max_dims[RANK];
 } state_t;
@@ -159,6 +161,7 @@ state_initializer(void)
     , .vds = vds_off
     , .use_vfd_swmr = true
     , .writer = true
+    , .fixed_array = false
     , .one_dee_max_dims = {ROWS, H5S_UNLIMITED}
     , .chunk_dims = {ROWS, COLS}
     , .update_interval = (struct timespec){
@@ -170,7 +173,7 @@ static void state_init(state_t *, int, char **);
 
 static const hid_t badhid = H5I_INVALID_HID;
 
-static const hsize_t two_dee_max_dims[RANK] = {H5S_UNLIMITED, H5S_UNLIMITED};
+static hsize_t two_dee_max_dims[RANK];
 
 static uint32_t
 matget(const mat_t *mat, unsigned i, unsigned j)
@@ -207,11 +210,12 @@ newmat(unsigned rows, unsigned cols)
 static void
 usage(const char *progname)
 {
-	fprintf(stderr, "usage: %s [-S] [-W] [-a steps] [-b] [-c cols]\n"
+	fprintf(stderr, "usage: %s [-F] [-M] [-S] [-V] [-W] [-a steps] [-b] [-c cols]\n"
                 "    [-d dims]\n"
                 "    [-n iterations] [-r rows] [-s datasets]\n"
                 "    [-u milliseconds]\n"
 		"\n"
+                "-F:                   fixed maximal dimension for the chunked datasets\n"
 		"-M:	               use virtual datasets and many source\n"
                 "                      files\n"
 		"-S:	               do not use VFD SWMR\n"
@@ -271,8 +275,12 @@ state_init(state_t *s, int argc, char **argv)
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
     esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
 
-    while ((ch = getopt(argc, argv, "MSVWa:bc:d:n:qr:s:u:")) != -1) {
+    while ((ch = getopt(argc, argv, "FMSVWa:bc:d:n:qr:s:u:")) != -1) {
         switch (ch) {
+        case 'F':
+            /* The flag to indicate whether the maximal dimension of the chunked datasets is fixed or unlimited */
+            s->fixed_array = true;
+            break;
         case 'M':
             s->vds = vds_multi;
             break;
@@ -370,11 +378,26 @@ state_init(state_t *s, int argc, char **argv)
     s->chunk_dims[0] = s->rows;
     s->chunk_dims[1] = s->cols;
     s->one_dee_max_dims[0] = s->rows;
-    s->one_dee_max_dims[1] = H5S_UNLIMITED;
+    if(s->fixed_array) {
+        s->one_dee_max_dims[1] = s->cols * s->nsteps;
+        two_dee_max_dims[0] = s->rows * s->nsteps;
+        two_dee_max_dims[1] = s->cols * s->nsteps;
+    } else {
+        s->one_dee_max_dims[1] = H5S_UNLIMITED;
+        two_dee_max_dims[0] = two_dee_max_dims[1] = H5S_UNLIMITED;
+    }
 
     if (s->vds != vds_off) {
         const hsize_t half_chunk_dims[RANK] = {s->rows / 2, s->cols / 2};
-        const hsize_t half_max_dims[RANK] = {s->rows / 2, H5S_UNLIMITED};
+        hsize_t half_max_dims[RANK];
+
+        if(s->fixed_array) {
+            half_max_dims[0] = s->rows / 2;
+            half_max_dims[1] = (s->cols * s->nsteps) / 2;
+        } else {
+            half_max_dims[0] = s->rows / 2;
+            half_max_dims[1] = H5S_UNLIMITED;
+        }
 
         if ((s->quadrant_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
             errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed",
