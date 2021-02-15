@@ -215,7 +215,7 @@ usage(const char *progname)
                 "    [-n iterations] [-r rows] [-s datasets]\n"
                 "    [-u milliseconds]\n"
 		"\n"
-                "-F:                   fix maximal dimensions for the chunked datasets\n"
+                "-F:                   fixed maximal dimension for the chunked datasets\n"
 		"-M:	               use virtual datasets and many source\n"
                 "                      files\n"
 		"-S:	               do not use VFD SWMR\n"
