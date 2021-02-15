@@ -276,7 +276,7 @@ H5_DLL herr_t H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_ele
 /* Operations on hyperslab selections */
 H5_DLL herr_t  H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[],
                                     const hsize_t *stride, const hsize_t count[], const hsize_t *block);
-H5_DLL herr_t  H5S_combine_hyperslab(H5S_t *old_space, H5S_seloper_t op, const hsize_t start[],
+H5_DLL herr_t  H5S_combine_hyperslab(const H5S_t *old_space, H5S_seloper_t op, const hsize_t start[],
                                      const hsize_t *stride, const hsize_t count[], const hsize_t *block,
                                      H5S_t **new_space);
 H5_DLL herr_t  H5S_hyper_add_span_element(H5S_t *space, unsigned rank, const hsize_t *coords);

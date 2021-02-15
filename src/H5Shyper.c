@@ -10273,7 +10273,7 @@ done:
     Specify a hyperslab to combine with the current hyperslab selection, and
     store the result in the new hyperslab selection.
  USAGE
-    herr_t H5S_combine_hyperslab(new_space, old_space, op, start, stride, count, block)
+    herr_t H5S_combine_hyperslab(old_space, op, start, stride, count, block, new_space)
         H5S_t *old_space;            IN: The old space the selection is performed on
         H5S_seloper_t op;            IN: Operation to perform on current selection
         const hsize_t start[];       IN: Offset of start of hyperslab
@@ -10297,7 +10297,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_combine_hyperslab(H5S_t *old_space, H5S_seloper_t op, const hsize_t start[], const hsize_t *stride,
+H5S_combine_hyperslab(const H5S_t *old_space, H5S_seloper_t op, const hsize_t start[], const hsize_t *stride,
                       const hsize_t count[], const hsize_t *block, H5S_t **new_space)
 {
     unsigned u;                   /* Local index variable */
