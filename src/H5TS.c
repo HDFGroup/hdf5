@@ -737,6 +737,7 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
     return ret_value;
 } /* H5TS_create_thread */
 
+#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_alloc_pt_rec_entry_count
@@ -1586,5 +1587,6 @@ H5TS_pt_rec_rw_lock_print_stats(const char *header_str, H5TS_pt_rec_rw_lock_stat
     return (ret_value);
 
 } /* H5TS_pt_rec_rw_lock_print_stats() */
+#endif /* H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX */
 
 #endif /* H5_HAVE_THREADSAFE */

@@ -527,6 +527,7 @@ H5_DLL herr_t H5TS_cancel_count_dec(void);
 H5_DLL H5TS_thread_t H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata);
 
 /* recursive R/W lock related function declarations */
+#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
 H5_DLL H5TS_pt_rec_entry_count_t *H5TS_alloc_pt_rec_entry_count(hbool_t write_lock);
 H5_DLL void                       H5TS_free_pt_rec_entry_count(void *target_ptr);
 H5_DLL herr_t                     H5TS_pt_rec_rw_lock_init(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, int policy);
@@ -538,10 +539,7 @@ H5_DLL herr_t                     H5TS_pt_rec_rw_lock_get_stats(H5TS_pt_rec_rw_l
                                                                 H5TS_pt_rec_rw_lock_stats_t *stats_ptr);
 H5_DLL herr_t                     H5TS_pt_rec_rw_lock_reset_stats(H5TS_pt_rec_rw_lock_t *rw_lock_ptr);
 H5_DLL herr_t H5TS_pt_rec_rw_lock_print_stats(const char *header_str, H5TS_pt_rec_rw_lock_stats_t *stats_ptr);
-
-#if defined c_plusplus || defined __cplusplus
-}
-#endif /* c_plusplus || __cplusplus */
+#endif
 
 #else /* H5_HAVE_THREADSAFE */
 

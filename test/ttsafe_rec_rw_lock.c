@@ -11,6 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
+
 /********************************************************************
  *
  * Test the correctness of the recursive R/W lock in the HDF5 library
@@ -1302,4 +1304,7 @@ cleanup_rec_rw_lock_smoke_check_4(void)
     /* nothing to do */
     return;
 }
+
+#endif /* H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX */
+
 #endif /*H5_HAVE_THREADSAFE*/
