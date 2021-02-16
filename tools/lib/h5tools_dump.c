@@ -329,7 +329,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, h5tools_cont
  * Purpose: Print some values from an attribute referenced by object reference.
  *
  * Description:
- *      This is a special case subfunction to dump aa attribute references.
+ *      This is a special case subfunction to dump an attribute reference.
  *
  * Return:
  *      The function returns False if the last dimension has been reached, otherwise True
