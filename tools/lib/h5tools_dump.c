@@ -329,7 +329,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, h5tools_cont
  * Purpose: Print some values from an attribute referenced by object reference.
  *
  * Description:
- *      This is a special case subfunction to dump aa attribute references.
+ *      This is a special case subfunction to dump an attribute reference.
  *
  * Return:
  *      The function returns False if the last dimension has been reached, otherwise True
@@ -446,6 +446,9 @@ done:
         H5TOOLS_ERROR(dimension_break, "H5Tclose failed");
 
     if (H5Tclose(atype) < 0)
+        H5TOOLS_ERROR(dimension_break, "H5Tclose failed");
+
+    if (H5Sclose(region_space) < 0)
         H5TOOLS_ERROR(dimension_break, "H5Tclose failed");
 
     ctx->indent_level--;
