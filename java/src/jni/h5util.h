@@ -41,7 +41,7 @@ extern void   h5str_resize(h5str_t *str, size_t new_len);
 extern char * h5str_append(h5str_t *str, const char *cstr);
 extern size_t h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_buf,
                             size_t out_buf_offset);
-extern void   h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, hid_t container, void *ref_p);
+extern void   h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p);
 extern size_t h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *in_buf,
                             int expand_data);
 extern void   h5str_array_free(char **strs, size_t len);

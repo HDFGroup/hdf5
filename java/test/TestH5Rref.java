@@ -139,7 +139,7 @@ public class TestH5Rref {
             fail("testH5Rget_object: H5Sget_simple_extent_ndims: " + err);
         }
         refbuf = new byte[ndims][HDF5Constants.H5R_REF_BUF_SIZE];
-        // Read the refence from the dataset.
+        // Read the reference from the dataset.
         try {
             H5.H5Dread(H5did, HDF5Constants.H5T_STD_REF,
                         HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
@@ -214,7 +214,7 @@ public class TestH5Rref {
             fail("testH5Rget_obj_type3: H5Sget_simple_extent_ndims: " + err);
         }
         refbuf = new byte[ndims][HDF5Constants.H5R_REF_BUF_SIZE];
-        // Read the refence from the dataset.
+        // Read the reference from the dataset.
         try {
             H5.H5Dread(H5did, HDF5Constants.H5T_STD_REF,
                         HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
@@ -291,7 +291,7 @@ public class TestH5Rref {
           fail("testH5Rget_region_dataset: H5Sget_simple_extent_ndims: " + err);
       }
       refbuf = new byte[ndims][HDF5Constants.H5R_REF_BUF_SIZE];
-      // Read the refence from the dataset.
+      // Read the reference from the dataset.
       try {
           H5.H5Dread(H5did, HDF5Constants.H5T_STD_REF,
                       HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
@@ -308,7 +308,10 @@ public class TestH5Rref {
               try {
                   loc_id = H5.H5Ropen_object(refbuf[i], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                   assertTrue(loc_id >= 0);
-                  if (!byteArrayCheck(refbuf[i])) {
+                  boolean regionzero = byteArrayCheck(refbuf[i]);
+                  if (i > 1)
+                      assertTrue(regionzero);
+                  else {
                       try {
                           loc_sid = H5.H5Ropen_region(refbuf[i], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                           assertTrue(loc_sid >= 0);
@@ -316,6 +319,10 @@ public class TestH5Rref {
                           try {
                               int reg_ndims = H5.H5Sget_simple_extent_ndims(loc_sid);
                               region_type = H5.H5Sget_select_type(loc_sid);
+                              if (i == 1)
+                                  assertTrue(region_type == HDF5Constants.H5S_SEL_POINTS);
+                              else
+                                  assertTrue(region_type == HDF5Constants.H5S_SEL_HYPERSLABS);
                               if (region_type == HDF5Constants.H5S_SEL_POINTS) {
                                   long reg_npoints = H5.H5Sget_select_elem_npoints(loc_sid);
                                   // Coordinates for get point selection
@@ -430,7 +437,7 @@ public class TestH5Rref {
           fail("testH5Rget_region_attribute: H5Sget_simple_extent_ndims: " + err);
       }
       refbuf = new byte[ndims][HDF5Constants.H5R_REF_BUF_SIZE];
-      // Read the refence from the dataset.
+      // Read the reference from the dataset.
       try {
           H5.H5Dread(H5did, HDF5Constants.H5T_STD_REF,
                       HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,

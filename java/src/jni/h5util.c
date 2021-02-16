@@ -645,13 +645,11 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, hid_t container, void *ref_p)
+h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
 {
     ssize_t          buf_size;
     char *           ref_name = NULL;
     const H5R_ref_t *ref_vp   = (H5R_ref_t *)ref_p;
-
-    UNUSED(container);
 
     if (!h5str_append(out_str, " \""))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -1090,7 +1088,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                 }
                                             }
                                             else {
-                                                h5str_sprint_reference(ENVONLY, out_str, container, ref_vp);
+                                                h5str_sprint_reference(ENVONLY, out_str, ref_vp);
 
                                                 if (H5S_SEL_ERROR ==
                                                     (region_type = H5Sget_select_type(new_obj_id)))
@@ -1193,7 +1191,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                     }
                                 }
                                 else {
-                                    h5str_sprint_reference(ENVONLY, out_str, container, ref_vp);
+                                    h5str_sprint_reference(ENVONLY, out_str, ref_vp);
 
                                     if (H5S_SEL_ERROR == (region_type = H5Sget_select_type(new_obj_id)))
                                         H5_LIBRARY_ERROR(ENVONLY);
@@ -1254,7 +1252,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                 }
                                             }
                                             else {
-                                                h5str_sprint_reference(ENVONLY, out_str, container, ref_vp);
+                                                h5str_sprint_reference(ENVONLY, out_str, ref_vp);
 
                                                 if (H5S_SEL_ERROR ==
                                                     (region_type = H5Sget_select_type(new_obj_id)))

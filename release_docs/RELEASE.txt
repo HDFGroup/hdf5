@@ -185,7 +185,7 @@ New Features
         HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
         pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
         or tool folder. All sources can be formatted by executing the format target;
-          make format
+        make format
 
         (ADB - 2020/08/24)
 
@@ -787,6 +787,14 @@ Bug Fixes since HDF5-1.12.0 release
 
     Java Library:
     ----------------
+    - JNI utility function does not handle new references.
+
+        The JNI utility function for converting reference data to string did
+        not use the new APIs. In addition to fixing that function, added new
+        java tests for using the new APIs.
+
+        (ADB - 2021/02/16, HDFFV-11212)
+
     - The H5FArray.java class, in which virtually the entire execution time
         is spent using the HDFNativeData method that converts from an array
         of bytes to an array of the destination Java type.
