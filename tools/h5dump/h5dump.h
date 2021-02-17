@@ -78,8 +78,8 @@ typedef struct {
     int display_packed_bits;    /* print 1-8 byte numbers as packed bits */
     int include_attrs;          /* Display attributes */
 } dump_opt_t;
-dump_opt_t dump_opts = {TRUE, FALSE, TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE,
-                        FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE};
+dump_opt_t dump_opts = {TRUE,  FALSE, TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE,
+                        FALSE, TRUE,  FALSE, FALSE, FALSE, FALSE, TRUE};
 
 #define PACKED_BITS_MAX      8                       /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX (8 * sizeof(long long)) /* Maximum bits size of integer types of packed-bits */
