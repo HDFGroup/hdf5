@@ -12,12 +12,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Thursday, September 28, 2000
+ * Programmer:    Quincey Koziol
+ *        Thursday, September 28, 2000
  *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5S package.  Source files outside the H5S package should
- *		include H5Sprivate.h instead.
+ * Purpose:    This file contains declarations which are visible only within
+ *        the H5S package.  Source files outside the H5S package should
+ *        include H5Sprivate.h instead.
  */
 #ifndef H5S_PACKAGE
 #error "Do not include this file outside the H5S package!"
@@ -96,10 +96,10 @@ struct H5S_pnt_node_t {
 typedef struct {
     H5S_pnt_node_t *head; /* Pointer to head of point list */
 
-    hsize_t last_idx;     /* Index of the point after the last returned from H5S__get_select_elem_pointlist() */
+    hsize_t last_idx /* Index of the point after the last returned from H5S__get_select_elem_pointlist() */
     H5S_pnt_node_t *last_idx_pnt; /* Point after the last returned from H5S__get_select_elem_pointlist().
-        * If we ever add a way to remove points or add points in the middle of
-        * the pointlist we will need to invalidate these fields. */
+                                   * If we ever add a way to remove points or add points in the middle of
+                                   * the pointlist we will need to invalidate these fields. */
 } H5S_pnt_list_t;
 
 /* Information about new-style hyperslab spans */

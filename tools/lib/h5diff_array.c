@@ -786,10 +786,9 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                             /* check object type */
                             if (obj1_type == obj2_type) {
                                 if (obj1_type == H5O_TYPE_DATASET) {
-                                    if ((obj1_id = H5Rdereference(container1_id, H5R_OBJECT,
-                                                                   _mem1)) >= 0) {
-                                        if ((obj2_id = H5Rdereference(container2_id, H5R_OBJECT,
-                                                                       _mem2)) >= 0) {
+                                    if ((obj1_id = H5Rdereference(container1_id, H5R_OBJECT, _mem1)) >= 0) {
+                                        if ((obj2_id = H5Rdereference(container2_id, H5R_OBJECT, _mem2)) >=
+                                            0) {
                                             /* compare */
                                             nfound = diff_datasetid(obj1_id, obj2_id, opts->obj_name[0],
                                                                     opts->obj_name[1], &ref_opts);
@@ -849,10 +848,8 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
 
                     H5TOOLS_DEBUG("H5T_REFERENCE - H5T_STD_REF_DSETREG");
 
-                    if ((obj1_id = H5Rdereference(container1_id, H5R_DATASET_REGION, _mem1)) >=
-                        0) {
-                        if ((obj2_id = H5Rdereference(container2_id, H5R_DATASET_REGION,
-                                                       _mem2)) >= 0) {
+                    if ((obj1_id = H5Rdereference(container1_id, H5R_DATASET_REGION, _mem1)) >= 0) {
+                        if ((obj2_id = H5Rdereference(container2_id, H5R_DATASET_REGION, _mem2)) >= 0) {
                             if ((region1_id = H5Rget_region(container1_id, H5R_DATASET_REGION, _mem1)) >= 0) {
                                 if ((region2_id = H5Rget_region(container2_id, H5R_DATASET_REGION, _mem2)) >=
                                     0) {

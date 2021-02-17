@@ -1643,8 +1643,8 @@ main(int argc, const char *argv[])
 
     /* Check for filename given */
     if (fname) {
-        hid_t       fcpl;
-        H5F_info_t  finfo;
+        hid_t      fcpl;
+        H5F_info_t finfo;
 
         HDprintf("Filename: %s\n", fname);
 
