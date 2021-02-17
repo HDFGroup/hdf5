@@ -473,8 +473,6 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
     hbool_t        iszero1;
     hbool_t        iszero2;
     hsize_t        nfound = 0; /* differences found */
-    double         per;
-    hbool_t        both_zero;
     diff_err_t     ret_value = opts->err_stat;
 
     H5TOOLS_START_DEBUG("ph:%d elemtno:%d - errstat:%d", opts->print_header, elemtno, opts->err_stat);
