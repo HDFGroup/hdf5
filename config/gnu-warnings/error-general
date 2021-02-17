@@ -12,15 +12,12 @@
 -Werror=packed
 -Werror=pointer-sign
 -Werror=pointer-to-int-cast
+-Werror=redundant-decls
 -Werror=strict-prototypes
 -Werror=switch
 #
 #-Werror=discarded-qualifiers
 #
-# NOTE: hl/src/H5LTparse.c file is not compatible with these warnings as errors
-#       -Werror=redundant-decls
-#
--Wredundant-decls
 #
 # NOTE: File Driver files are not compatible with these warnings as errors
 #     H5FDdirect.c,H5FDmpio.c,H5FDros3.c,
@@ -62,7 +59,7 @@
 #     jni/h5util.c
 #       -Werror=format(-overflow)
 #
--Wformat
+-Werror=format
 #
 #
 #Examples and tests do not use the same set of extensive warning flags as libraries

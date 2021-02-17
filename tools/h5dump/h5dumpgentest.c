@@ -22,7 +22,7 @@
  */
 
 #include "hdf5.h"
-#include "H5private.h"
+#include "h5test.h"
 #include "h5tools.h"
 
 #define FILE1      "tgroup.h5"
@@ -259,6 +259,7 @@ typedef struct s1_t {
 #define F51_MAX_NAME_LEN ((64 * 1024) + 1024)
 
 /* "File 64" macros */
+#define F64_FILE          "tarray8.h5"
 #define F64_DATASET       "DS1"
 #define F64_DIM0          1
 #define F64_ARRAY_BUF_LEN (4 * 1024)
@@ -355,16 +356,13 @@ typedef struct s1_t {
 
 /* "File 82" macros */
 /* Name of dataset to create in datafile                              */
-#define F82_DATASETNAME  "CompoundComplex1D"
-#define F82_DATASETNAME2 "CompoundComplex2D"
-#define F82_DATASETNAME3 "CompoundComplex3D"
-#define F82_DATASETNAME4 "CompoundComplex4D"
+#define F82_DATASETNAME "CompoundComplex1D"
 /* Dataset dimensions                                                 */
 #define F82_DIM32 32
 #define F82_RANK  1
-#define F82_RANK2 2
-#define F82_RANK3 3
-#define F82_RANK4 4
+/* #define F82_RANK2          2 */
+/* #define F82_RANK3          3 */
+/* #define F82_RANK4          4 */
 
 /* "File 83" macros */
 /* Name of dataset to create in datafile                              */
@@ -424,11 +422,24 @@ gent_group(void)
 static void
 gent_dataset(void)
 {
-    hid_t   fid, dataset, space;
-    hsize_t dims[2];
-    int     dset1[10][20];
-    double  dset2[30][20];
-    int     i, j;
+    hid_t    fid, dataset, space;
+    hsize_t  dims[2];
+    int **   dset1      = NULL;
+    int *    dset1_data = NULL;
+    double **dset2      = NULL;
+    double * dset2_data = NULL;
+    int      i, j;
+
+    /* Set up data arrays */
+    dset1_data = (int *)HDcalloc(10 * 20, sizeof(int));
+    dset1      = (int **)HDcalloc(10, sizeof(dset1_data));
+    for (i = 0; i < 10; i++)
+        dset1[i] = dset1_data + (i * 20);
+
+    dset2_data = (double *)HDcalloc(30 * 20, sizeof(double));
+    dset2      = (double **)HDcalloc(30, sizeof(dset2_data));
+    for (i = 0; i < 30; i++)
+        dset2[i] = dset2_data + (i * 20);
 
     fid = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -442,7 +453,7 @@ gent_dataset(void)
         for (j = 0; j < 20; j++)
             dset1[i][j] = j + i;
 
-    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1_data);
     H5Sclose(space);
     H5Dclose(dataset);
 
@@ -456,11 +467,16 @@ gent_dataset(void)
         for (j = 0; j < 20; j++)
             dset2[i][j] = 0.0001F * (float)j + (float)i;
 
-    H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+    H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_data);
 
     H5Sclose(space);
     H5Dclose(dataset);
     H5Fclose(fid);
+
+    HDfree(dset1);
+    HDfree(dset1_data);
+    HDfree(dset2);
+    HDfree(dset2_data);
 }
 
 static void
@@ -1747,8 +1763,16 @@ gent_str(void)
         int  a[8][10];
         char s[12][33];
     } compound_t;
-    compound_t comp1[3][6];
-    hsize_t    mdims[2];
+
+    compound_t **comp1      = NULL;
+    compound_t * comp1_data = NULL;
+    hsize_t      mdims[2];
+
+    /* Set up data array */
+    comp1_data = (compound_t *)HDcalloc(3 * 6, sizeof(compound_t));
+    comp1      = (compound_t **)HDcalloc(3, sizeof(comp1_data));
+    for (i = 0; i < 3; i++)
+        comp1[i] = comp1_data + (i * 6);
 
     fid = H5Fcreate(FILE13, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -1837,7 +1861,7 @@ gent_str(void)
         }
 
     dataset = H5Dcreate2(fid, "/comp1", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Dwrite(dataset, f_type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, comp1);
+    H5Dwrite(dataset, f_type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, comp1_data);
 
     H5Tclose(f_type);
     H5Tclose(f_type2);
@@ -1845,6 +1869,9 @@ gent_str(void)
     H5Dclose(dataset);
 
     H5Fclose(fid);
+
+    HDfree(comp1);
+    HDfree(comp1_data);
 }
 
 /*

@@ -16,6 +16,7 @@
  * Jacob Smith 2017-11-10
  */
 
+#include "h5tools.h"
 #include "h5tools_utils.h"
 #include "h5test.h"
 

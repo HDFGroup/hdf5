@@ -57,9 +57,25 @@ if test "X-" = "X-$f9x_flags_set"; then
   FCFLAGS="$FCFLAGS ${F9XSUFFIXFLAG}"
   H5_FCFLAGS="$H5_FCFLAGS ${F9XSUFFIXFLAG}"
   FSEARCH_DIRS="-I./ -I../src"
-  DEBUG_FCFLAGS="-g"
-  PROD_FCFLAGS="-O"
-  PROFILE_FCFLAGS="-g -pg"
+
+  # Produciton
+  PROD_FCFLAGS=
+
+  # Debug
+  DEBUG_FCFLAGS=
+
+  # Symbols
+  SYMBOLS_FCFLAGS="-g"
+  NO_SYMBOLS_FCFLAGS=
+
+  # Profiling
+  PROFILE_FCFLAGS="-pg"
+
+  # Optimization
+  HIGH_OPT_FCFLAGS="-O"
+  DEBUG_OPT_FCFLAGS=
+  NO_OPT_FCFLAGS=
+
   f9x_flags_set=yes
 fi
 
@@ -89,13 +105,30 @@ case $CC_BASENAME in
     ;;
 
   *)
+    # Undetermined compiler
+    # Use very generic flags
     H5_CFLAGS="$H5_CFLAGS -ansi"
-    DEBUG_CFLAGS="-g"
-    DEBUG_CPPFLAGS=
-    PROD_CFLAGS="-O"
-    PROD_CPPFLAGS=
+
+    # Produciton
+    PROD_CFLAGS=
+
+    # Debug
+    DEBUG_CFLAGS=
+
+    # Symbols
+    SYMBOLS_CFLAGS="-g"
+    NO_SYMBOLS_CFLAGS=
+
+    # Profiling
     PROFILE_CFLAGS="-pg"
-    PROFILE_CPPFLAGS=
+
+    # Optimization
+    HIGH_OPT_CFLAGS="-O"
+    DEBUG_OPT_CFLAGS=
+    NO_OPT_CFLAGS=
+
+    # Flags are set
+    cc_flags_set=yes
     ;;
 esac
 

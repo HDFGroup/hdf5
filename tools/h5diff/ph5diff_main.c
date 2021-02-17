@@ -31,7 +31,7 @@ static void ph5diff_worker(int);
  * Return: An exit status of 0 means no differences were found, 1 means some
  *   differences were found.
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 9, 2003
  *

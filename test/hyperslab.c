@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke <matzke@llnl.gov>
+/* Programmer:    Robb Matzke
  *        Friday, October 10, 1997
  *
  * Purpose:    Hyperslab operations are rather complex, so this file
@@ -257,7 +257,7 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
         }                         /* end for */
     }                             /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(dst);
 
@@ -526,7 +526,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
         }                     /* end for */
     }                         /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -644,7 +644,7 @@ test_multifill(size_t nx)
         } /* end if */
     }     /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -730,7 +730,7 @@ test_endian(size_t nx)
         }     /* end for */
     }         /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -827,7 +827,7 @@ test_transpose(size_t nx, size_t ny)
         }     /* end for */
     }         /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -916,7 +916,7 @@ test_sub_super(size_t nx, size_t ny)
             } /* end if */
         }     /* end for */
     }         /* end for */
-    PASSED()
+    PASSED();
 
     /*
      * Test replicating pixels to produce an image twice as large in each
@@ -974,7 +974,7 @@ test_sub_super(size_t nx, size_t ny)
         }     /* end for */
     }         /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(full);
     HDfree(half);
