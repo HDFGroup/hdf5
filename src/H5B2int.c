@@ -139,7 +139,7 @@ H5B2__split1(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
              unsigned idx)
 {
     const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
+    haddr_t             left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF;          /* Addresses of left & right child nodes */
     void *              left_child = NULL, *right_child = NULL; /* Pointers to child nodes */
     uint16_t *          left_nrec, *right_nrec;                 /* Pointers to child # of records */
     uint8_t *           left_native, *right_native;             /* Pointers to childs' native records */
@@ -424,7 +424,7 @@ herr_t
 H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, unsigned idx)
 {
     const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
+    haddr_t             left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF;          /* Addresses of left & right child nodes */
     void *              left_child = NULL, *right_child = NULL; /* Pointers to child nodes */
     uint16_t *          left_nrec, *right_nrec;                 /* Pointers to child # of records */
     uint8_t *           left_native, *right_native;             /* Pointers to childs' native records */
@@ -699,8 +699,8 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                     *right_node_ptrs     = NULL;                /* Pointers to childs' node pointer info */
     H5B2_node_ptr_t *   middle_node_ptrs = NULL;                /* Pointers to childs' node pointer info */
     const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    haddr_t             middle_addr;                            /* Address of middle child node */
+    haddr_t             left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF;          /* Addresses of left & right child nodes */
+    haddr_t             middle_addr = HADDR_UNDEF;                        /* Address of middle child node */
     void *              left_child = NULL, *right_child = NULL; /* Pointers to child nodes */
     void *              middle_child = NULL;                    /* Pointers to middle child node */
     uint16_t *          left_nrec, *right_nrec;                 /* Pointers to child # of records */
@@ -1123,7 +1123,7 @@ H5B2__merge2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
              unsigned idx)
 {
     const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
+    haddr_t             left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF;          /* Addresses of left & right child nodes */
     void *              left_child = NULL, *right_child = NULL; /* Pointers to left & right child nodes */
     uint16_t *          left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
     uint8_t *           left_native, *right_native; /* Pointers to left & right children's native records */
@@ -1298,8 +1298,8 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
              unsigned idx)
 {
     const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    haddr_t             middle_addr;                            /* Address of middle child node */
+    haddr_t             left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF;          /* Addresses of left & right child nodes */
+    haddr_t             middle_addr = HADDR_UNDEF;                        /* Address of middle child node */
     void *              left_child = NULL, *right_child = NULL; /* Pointers to left & right child nodes */
     void *              middle_child = NULL;                    /* Pointer to middle child node */
     uint16_t *          left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
@@ -1933,7 +1933,7 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, const H5B2_node_ptr_t
 
     /* If the node is in the cache, check for retargeting its parent */
     if (node_status & H5AC_ES__IN_CACHE) {
-        void ** parent_ptr;          /* Pointer to child node's parent */
+        void ** parent_ptr = NULL;   /* Pointer to child node's parent */
         hbool_t update_deps = FALSE; /* Whether to update flush dependencies */
 
         /* Get child node pointer */

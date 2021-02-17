@@ -986,7 +986,7 @@ done:
 herr_t
 H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
 {
-    size_t path1_len;           /* length of path1 */
+    size_t path1_len = 0;       /* length of path1 */
     size_t path2_len;           /* length of path2 */
     herr_t ret_value = SUCCEED; /* Return value */
 

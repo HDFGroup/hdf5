@@ -722,7 +722,7 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL, H5EA_get(const H5EA_t *ea, hsize_t 
     /* Local variables */
     H5EA_hdr_t *hdr = ea->hdr; /* Header for EA */
     void *thing = NULL; /* Pointer to the array metadata containing the array index we are interested in */
-    H5EA__unprotect_func_t thing_unprot_func; /* Function pointer for unprotecting the array metadata */
+    H5EA__unprotect_func_t thing_unprot_func = NULL; /* Function pointer for unprotecting the array metadata */
 
     /*
      * Check arguments.

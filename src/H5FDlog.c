@@ -484,8 +484,8 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
-    H5_timer_t open_timer; /* Timer for open() call */
-    H5_timer_t stat_timer; /* Timer for stat() call */
+    H5_timer_t open_timer = {{0}, {0}, {0}, FALSE}; /* Timer for open() call */
+    H5_timer_t stat_timer = {{0}, {0}, {0}, FALSE}; /* Timer for stat() call */
     h5_stat_t  sb;
     H5FD_t *   ret_value = NULL; /* Return value */
 
@@ -678,7 +678,7 @@ static herr_t
 H5FD__log_close(H5FD_t *_file)
 {
     H5FD_log_t *file = (H5FD_log_t *)_file;
-    H5_timer_t  close_timer;         /* Timer for close() call */
+    H5_timer_t  close_timer = {{0}, {0}, {0}, FALSE};   /* Timer for close() call */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1177,7 +1177,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     H5FD_log_t *  file      = (H5FD_log_t *)_file;
     size_t        orig_size = size; /* Save the original size for later */
     haddr_t       orig_addr = addr;
-    H5_timer_t    read_timer; /* Timer for read operation */
+    H5_timer_t    read_timer = {{0}, {0}, {0}, FALSE}; /* Timer for read operation */
     H5_timevals_t read_times; /* Elapsed time for read operation */
 #ifndef H5_HAVE_PREADWRITE
     H5_timer_t    seek_timer; /* Timer for seek operation */
@@ -1391,7 +1391,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
     H5FD_log_t *  file      = (H5FD_log_t *)_file;
     size_t        orig_size = size; /* Save the original size for later */
     haddr_t       orig_addr = addr;
-    H5_timer_t    write_timer; /* Timer for write operation */
+    H5_timer_t    write_timer = {{0}, {0}, {0}, FALSE}; /* Timer for write operation */
     H5_timevals_t write_times; /* Elapsed time for write operation */
 #ifndef H5_HAVE_PREADWRITE
     H5_timer_t    seek_timer; /* Timer for seek operation */
@@ -1612,8 +1612,8 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
 
     /* Extend the file to make sure it's large enough */
     if (!H5F_addr_eq(file->eoa, file->eof)) {
-        H5_timer_t    trunc_timer; /* Timer for truncate operation */
-        H5_timevals_t trunc_times; /* Elapsed time for truncate operation */
+        H5_timer_t    trunc_timer = {{0}, {0}, {0}, FALSE}; /* Timer for truncate operation */
+        H5_timevals_t trunc_times;       /* Elapsed time for truncate operation */
 
         /* Start timer for truncate operation */
         if (file->fa.flags & H5FD_LOG_TIME_TRUNCATE) {

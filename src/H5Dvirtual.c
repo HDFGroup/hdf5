@@ -2383,7 +2383,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage, cons
     hssize_t select_nelmts;              /* Number of elements in selection */
     hsize_t  bounds_start[H5S_MAX_RANK]; /* Selection bounds start */
     hsize_t  bounds_end[H5S_MAX_RANK];   /* Selection bounds end */
-    int      rank;
+    int      rank = 0;
     hbool_t  bounds_init = FALSE; /* Whether bounds_start, bounds_end, and rank are valid */
     size_t   i, j, k;             /* Local index variables */
     herr_t   ret_value = SUCCEED; /* Return value */
