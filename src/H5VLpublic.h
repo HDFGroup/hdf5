@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -361,8 +361,8 @@ H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_t
 #endif
 
 /* Semi-public headers mainly for VOL connector authors */
-#include "H5VLconnector.h" /* VOL connector author routines */
+#include "H5VLconnector.h"          /* VOL connector author routines */
 #include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
-#include "H5VLnative.h" /* Native VOL connector macros, for VOL connector authors */
+#include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
 
 #endif /* _H5VLpublic_H */

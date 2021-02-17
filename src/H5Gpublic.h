@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -589,7 +589,7 @@ H5_DLL herr_t H5Gclose_async(const char *app_file, const char *app_func, unsigne
 
 /* Macros for types of objects in a group (see H5G_obj_t definition) */
 #define H5G_NTYPES      256 /* Max possible number of types	*/
-#define H5G_NLIBTYPES   8 /* Number of internal types	*/
+#define H5G_NLIBTYPES   8   /* Number of internal types	*/
 #define H5G_NUSERTYPES  (H5G_NTYPES - H5G_NLIBTYPES)
 #define H5G_USERTYPE(X) (8 + (X)) /* User defined types		*/
 

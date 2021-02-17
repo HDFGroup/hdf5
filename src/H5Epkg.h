@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -73,7 +73,7 @@ typedef struct {
     H5E_auto1_t func1_default; /* The saved library's default function - old style. */
     H5E_auto2_t func2_default; /* The saved library's default function - new style. */
 } H5E_auto_op_t;
-#else /* H5_NO_DEPRECATED_SYMBOLS */
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
 typedef struct {
     H5E_auto2_t func2; /* Only the new style callback function is available. */
 } H5E_auto_op_t;
@@ -85,7 +85,7 @@ typedef struct {
     union {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         H5E_walk1_t func1; /* Old-style callback, NO error stack param. */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif                     /* H5_NO_DEPRECATED_SYMBOLS */
         H5E_walk2_t func2; /* New-style callback, with error stack param. */
     } u;
 } H5E_walk_op_t;

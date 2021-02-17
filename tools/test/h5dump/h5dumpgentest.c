@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -274,8 +274,8 @@ typedef struct s1_t {
 
 /* File 65 macros */
 #define STRATEGY         H5F_FSPACE_STRATEGY_NONE /* File space handling strategy */
-#define THRESHOLD10      10 /* Free-space section threshold */
-#define FSPACE_PAGE_SIZE 8192 /* File space page size */
+#define THRESHOLD10      10                       /* Free-space section threshold */
+#define FSPACE_PAGE_SIZE 8192                     /* File space page size */
 
 /* "FILE66" macros and for FILE69, FILE87 */
 #define F66_XDIM       8

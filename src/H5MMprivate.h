@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -49,8 +49,8 @@ H5_DLL void * H5MM_xfree_const(const void *mem);
 H5_DLL void * H5MM_memcpy(void *dest, const void *src, size_t n);
 H5_DLL herr_t H5MM_get_alloc_stats(H5_alloc_stats_t *stats);
 #if defined   H5_MEMORY_ALLOC_SANITY_CHECK
-H5_DLL void H5MM_sanity_check_all(void);
-H5_DLL void H5MM_final_sanity_check(void);
+H5_DLL void   H5MM_sanity_check_all(void);
+H5_DLL void   H5MM_final_sanity_check(void);
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 #endif /* _H5MMprivate_H */

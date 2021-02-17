@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -617,7 +617,7 @@ test_direct(void)
 #ifndef H5_HAVE_DIRECT
     SKIPPED();
     return 0;
-#else /*H5_HAVE_DIRECT*/
+#else  /*H5_HAVE_DIRECT*/
 
     /* Set property list and file name for Direct driver.  Set memory alignment boundary
      * and file block size to 512 which is the minimum for Linux 2.6. */
@@ -2183,7 +2183,7 @@ test_ros3(void)
 #ifndef H5_HAVE_ROS3_VFD
     SKIPPED();
     return 0;
-#else /* H5_HAVE_ROS3_VFD */
+#else  /* H5_HAVE_ROS3_VFD */
 
     /* Set property list and file name for ROS3 driver. */
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)

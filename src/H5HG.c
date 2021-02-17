@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -548,7 +548,7 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
         HDmemset(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f) + size, 0,
                  need - (H5HG_SIZEOF_OBJHDR(f) + size));
 #endif /* OLD_WAY */
-    } /* end if */
+    }  /* end if */
     heap_flags |= H5AC__DIRTIED_FLAG;
 
     /* Return value */

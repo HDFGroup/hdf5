@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -339,7 +339,7 @@ typedef struct H5T_shared_t {
     size_t      size;     /*total size of an instance of this type     */
     unsigned    version;  /* Version of object header message to encode this object with */
     hbool_t
-        force_conv; /* Set if this type always needs to be converted and H5T__conv_noop cannot be called */
+                   force_conv; /* Set if this type always needs to be converted and H5T__conv_noop cannot be called */
     struct H5T_t * parent;        /*parent type for derived datatypes	     */
     H5VL_object_t *owned_vol_obj; /* Vol object owned by this type (free on close) */
     union {

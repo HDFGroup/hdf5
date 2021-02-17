@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -375,7 +375,7 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
                   "\n",
                   earray_stats.stored.data_blk_size, state->data_blk_size);
         TEST_ERROR
-    } /* end if */
+    }  /* end if */
 #endif /* NOT_YET */
     if (earray_stats.stored.nsuper_blks != state->nsuper_blks) {
         HDfprintf(stdout,
@@ -391,7 +391,7 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
                   "\n",
                   earray_stats.stored.super_blk_size, state->super_blk_size);
         TEST_ERROR
-    } /* end if */
+    }  /* end if */
 #endif /* NOT_YET */
 
     /* All tests passed */
@@ -757,7 +757,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
 
         PASSED();
     }
-#else /* NDEBUG */
+#else  /* NDEBUG */
     SKIPPED();
     HDputs("    Not tested when assertions are disabled");
 #endif /* NDEBUG */

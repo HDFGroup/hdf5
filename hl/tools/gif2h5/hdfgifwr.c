@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -73,7 +73,7 @@ static unsigned long cur_accum = 0;
 static int           cur_bits  = 0;
 
 #define MAXCODE(n_bits) ((1 << (n_bits)) - 1)
-#define XV_BITS         12 /* BITS was already defined on some systems */
+#define XV_BITS         12   /* BITS was already defined on some systems */
 #define HSIZE           5003 /* 80% occupancy */
 
 typedef unsigned char char_type;

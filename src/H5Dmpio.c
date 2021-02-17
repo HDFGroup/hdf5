@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -427,7 +427,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space, co
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
         H5CX_test_set_mpio_coll_rank0_bcast(TRUE);
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
-    } /* end if */
+    }  /* end if */
 
     /* Set the return value, based on the global cause */
     ret_value = global_cause[0] > 0 ? FALSE : TRUE;
@@ -846,7 +846,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         else
             temp_not_link_io = TRUE;
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
-    } /* end else */
+    }  /* end else */
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     {

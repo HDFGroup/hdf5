@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -47,7 +47,7 @@ typedef struct H5Z_object_t {
 #ifdef H5_HAVE_PARALLEL
     hbool_t
         sanity_checked; /* Whether the sanity check for collectively calling H5Zunregister has been done */
-#endif /* H5_HAVE_PARALLEL */
+#endif                  /* H5_HAVE_PARALLEL */
 } H5Z_object_t;
 
 /* Enumerated type for dataset creation prelude callbacks */
@@ -181,7 +181,7 @@ next:
                 } /* end for */
             }     /* end for */
         }         /* end if */
-#endif /* H5Z_DEBUG */
+#endif            /* H5Z_DEBUG */
 
         /* Free the table of filters */
         if (H5Z_table_g) {
@@ -255,11 +255,11 @@ H5Zregister(const void *cls)
         /* Set cls_real to point to the translated structure */
         cls_real = &cls_new;
 
-#else /* H5_NO_DEPRECATED_SYMBOLS */
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
         /* Deprecated symbols not allowed, throw an error */
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class_t version number");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-    } /* end if */
+    }  /* end if */
 
     if (cls_real->id < 0 || cls_real->id > H5Z_FILTER_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number")
@@ -327,7 +327,7 @@ H5Z_register(const H5Z_class2_t *cls)
 #ifdef H5Z_DEBUG
         HDmemset(H5Z_stat_table_g + i, 0, sizeof(H5Z_stats_t));
 #endif /* H5Z_DEBUG */
-    } /* end if */
+    }  /* end if */
     /* Filter already registered */
     else {
         /* Replace old contents */
@@ -587,7 +587,7 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_PARA
     H5F_t *f = (H5F_t *)obj_ptr; /* File object for operations */
 #ifdef H5_HAVE_PARALLEL
     H5Z_object_t *object = (H5Z_object_t *)key;
-#endif /* H5_HAVE_PARALLEL */
+#endif                     /* H5_HAVE_PARALLEL */
     int ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -632,7 +632,7 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_PARA
             if (H5P_USER_TRUE == coll_md_read)
                 H5CX_set_coll_metadata_read(TRUE);
         } /* end if */
-#endif /* H5_HAVE_PARALLEL */
+#endif    /* H5_HAVE_PARALLEL */
 
         /* Call the flush routine for mounted file hierarchies */
         if (H5F_flush_mounts((H5F_t *)obj_ptr) < 0)

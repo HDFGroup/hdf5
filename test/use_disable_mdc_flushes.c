@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,9 +33,9 @@ const char *progname_g = "use_disable_mdc_flushes"; /* program name */
 
 /* these two definitions must match each other */
 #define UC_DATATYPE   H5T_NATIVE_SHORT /* use case HDF5 data type */
-#define UC_CTYPE      short /* use case C data type */
-#define UC_RANK       3 /* use case dataset rank */
-#define Chunksize_DFT 256 /* chunksize default */
+#define UC_CTYPE      short            /* use case C data type */
+#define UC_RANK       3                /* use case dataset rank */
+#define Chunksize_DFT 256              /* chunksize default */
 #define Hgoto_error(val)                                                                                     \
     {                                                                                                        \
         ret_value = val;                                                                                     \

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -263,8 +263,8 @@ BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -,
 #ifndef NDEBUG
     H5EA__test_ctx_t *ctx = (H5EA__test_ctx_t *)_ctx; /* Callback context to destroy */
 #endif                                                /* NDEBUG */
-    uint64_t *     elmt = (uint64_t *)_elmt;     /* Convenience pointer to native elements */
-    const uint8_t *raw  = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
+    uint64_t *     elmt = (uint64_t *)_elmt;          /* Convenience pointer to native elements */
+    const uint8_t *raw  = (const uint8_t *)_raw;      /* Convenience pointer to raw elements */
 
     /* Sanity checks */
     HDassert(raw);

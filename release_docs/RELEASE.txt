@@ -48,6 +48,32 @@ New Features
 
     Configuration:
     -------------
+    - On macOS, Universal Binaries can now be built, allowing native execution on
+      both Intel and Apple Silicon (ARM) based Macs.
+
+      To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+
+      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+
+    - Added a configure-time option to control certain compiler warnings
+      diagnostics
+
+      A new configure-time option was added that allows some compiler warnings
+      diagnostics to have the default operation. This is mainly intended for
+      library developers and currently only works for gcc 10 and above. The
+      diagnostics flags apply to C, C++ and Fortran compilers and will appear
+      in "H5 C Flags", H5 C++ Flags" and H5 Fortran Flags, respectively. They
+      will NOT be exported to h5cc, etc.
+
+      The default is OFF, which will disable the warnings URL and color attributes
+      for the warnings output. ON will not add the flags and allow default behavior.
+
+      Autotools:    --enable-diags
+
+      CMake:        HDF5_ENABLE_BUILD_DIAGS
+
+      (ADB - 2021/02/05, HDFFV-11213)
+
     - CMake option to build the HDF filter plugins project as an external project
 
         The HDF filter plugins project is a collection of registered compression
@@ -670,6 +696,15 @@ Bug Fixes since HDF5-1.12.0 release
 ==================================
     Library
     -------
+    - Fixed issue with MPI communicator and info object not being
+      copied into new FAPL retrieved from H5F_get_access_plist
+
+        Added logic to copy the MPI communicator and info object into
+        the output FAPL. MPI communicator is retrieved from the VFD, while
+        the MPI info object is retrieved from the file's original FAPL.
+
+        (JTH - 2021/02/15, HDFFV-11109)
+
     - Fixed problems with vlens and refs inside compound using
       H5VLget_file_type()
 
@@ -1063,15 +1098,21 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP ppc64 GNU/Linux           IBM XL C/C++ for Linux, V13.1
     (ostrich)                        and IBM XL Fortran for Linux, V15.1
 
-    Fedora32 5.8.18-200.fc32.x86_64
-    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
-                                     GNU Fortran (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
-                                     clang version 10.0.1 (Fedora 10.0.1-3.fc32)
+    Fedora33 5.10.10-200.fc33.x86_64
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+                                     GNU Fortran (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+                                     clang version 11.0.0 (Fedora 11.0.0-2.fc33)
                                      (cmake and autotools)
 
-    Ubuntu20.10 -5.8.0-29-generic-x86_64
-    #31-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+    Ubuntu20.10 5.8.0-41-generic-x86_64
+    #46-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
                                      GNU Fortran (GCC) 10.2.0-13ubuntu1
+                                     (cmake and autotools)
+
+    SUSE15sp2 5.3.18-22-default
+    #1 SMP x86_64  GNU/Linux         GNU gcc (SUSE Linux) 7.5.0
+                                     GNU Fortran (SUSE Linux) 7.5.0
+                                     clang version 7.0.1 (tags/RELEASE_701/final 349238)
                                      (cmake and autotools)
 
 

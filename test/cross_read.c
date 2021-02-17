@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -275,7 +275,7 @@ check_file(char *filename)
     TESTING("dataset of LE FLOAT with Deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += check_data_f(DATASETNAME16, fid);
-#else /*H5_HAVE_FILTER_DEFLATE*/
+#else  /*H5_HAVE_FILTER_DEFLATE*/
     SKIPPED();
     HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_DEFLATE*/
@@ -283,7 +283,7 @@ check_file(char *filename)
     TESTING("dataset of BE FLOAT with Deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += check_data_f(DATASETNAME17, fid);
-#else /*H5_HAVE_FILTER_DEFLATE*/
+#else  /*H5_HAVE_FILTER_DEFLATE*/
     SKIPPED();
     HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_DEFLATE*/
@@ -291,7 +291,7 @@ check_file(char *filename)
     TESTING("dataset of LE FLOAT with Szip filter");
 #ifdef H5_HAVE_FILTER_SZIP
     nerrors += check_data_f(DATASETNAME18, fid);
-#else /*H5_HAVE_FILTER_SZIP*/
+#else  /*H5_HAVE_FILTER_SZIP*/
     SKIPPED();
     HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_SZIP*/
@@ -299,7 +299,7 @@ check_file(char *filename)
     TESTING("dataset of BE FLOAT with Szip filter");
 #ifdef H5_HAVE_FILTER_SZIP
     nerrors += check_data_f(DATASETNAME19, fid);
-#else /*H5_HAVE_FILTER_SZIP*/
+#else  /*H5_HAVE_FILTER_SZIP*/
     SKIPPED();
     HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_SZIP*/

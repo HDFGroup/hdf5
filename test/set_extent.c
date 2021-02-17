@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -243,11 +243,11 @@ do_ranks(hid_t fapl, hbool_t new_format)
 #ifdef H5_HAVE_FILTER_DEFLATE
             if (H5Pset_deflate(dcpl, 9) < 0)
                 TEST_ERROR
-#else /* H5_HAVE_FILTER_DEFLATE */
+#else     /* H5_HAVE_FILTER_DEFLATE */
             if (H5Pclose(dcpl) < 0)
                 TEST_ERROR
             continue;
-#endif /* H5_HAVE_FILTER_DEFLATE */
+#endif    /* H5_HAVE_FILTER_DEFLATE */
         } /* end if */
 
         if (config & CONFIG_FILL) {
