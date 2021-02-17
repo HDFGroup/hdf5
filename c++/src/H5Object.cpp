@@ -42,7 +42,10 @@ namespace H5 {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // userAttrOpWrpr interfaces between the user's function and the
 // C library function H5Aiterate2
-extern "C" herr_t
+extern "C"
+{
+
+static herr_t
 userAttrOpWrpr(H5_ATTR_UNUSED hid_t loc_id, const char *attr_name, H5_ATTR_UNUSED const H5A_info_t *ainfo, void *op_data)
 {
     H5std_string       s_attr_name = H5std_string(attr_name);
@@ -53,14 +56,16 @@ userAttrOpWrpr(H5_ATTR_UNUSED hid_t loc_id, const char *attr_name, H5_ATTR_UNUSE
 
 // userVisitOpWrpr interfaces between the user's function and the
 // C library function H5Ovisit3
-extern "C" herr_t
-userVisitOpWrpr(H5_ATTR_UNUSED hid_t obj_id, const char *attr_name, const H5O_info2_t *obj_info, void *op_data)
+static herr_t
+userVisitOpWrpr (H5_ATTR_UNUSED hid_t obj_id, const char *attr_name, const H5O_info2_t *obj_info, void *op_data)
 {
     H5std_string    s_attr_name = H5std_string(attr_name);
     UserData4Visit *myData      = reinterpret_cast<UserData4Visit *>(op_data);
     int             status      = myData->op(*myData->obj, s_attr_name, obj_info, myData->opData);
     return status;
 }
+
+} // extern "C"
 
 //--------------------------------------------------------------------------
 // Function:    H5Object default constructor (protected)
