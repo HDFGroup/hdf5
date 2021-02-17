@@ -449,7 +449,7 @@ done:
         H5TOOLS_ERROR(dimension_break, "H5Tclose failed");
 
     if (H5Sclose(region_space) < 0)
-        H5TOOLS_ERROR(dimension_break, "H5Tclose failed");
+        H5TOOLS_ERROR(dimension_break, "H5Sclose failed");
 
     ctx->indent_level--;
     ctx->need_prefix = TRUE;
