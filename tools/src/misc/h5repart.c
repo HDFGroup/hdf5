@@ -97,7 +97,7 @@ static off_t
 get_size(const char *progname, int *argno, int argc, char *argv[])
 {
     off_t retval = -1;
-    char *suffix;
+    char *suffix = NULL;
 
     if (isdigit((int)(argv[*argno][2]))) {
         retval = HDstrtol(argv[*argno] + 2, &suffix, 10);
