@@ -94,8 +94,8 @@ struct H5S_pnt_node_t {
 
 /* Information about point selection list */
 typedef struct {
-    H5S_pnt_node_t *head;         /* Pointer to head of point list */
-    hsize_t         last_idx;     /* Index of the point after the last returned from H5S__get_select_elem_pointlist() */
+    H5S_pnt_node_t *head; /* Pointer to head of point list */
+    hsize_t last_idx; /* Index of the point after the last returned from H5S__get_select_elem_pointlist() */
     H5S_pnt_node_t *last_idx_pnt; /* Point after the last returned from H5S__get_select_elem_pointlist().
                                    * If we ever add a way to remove points or add points in the middle of
                                    * the pointlist we will need to invalidate these fields. */
