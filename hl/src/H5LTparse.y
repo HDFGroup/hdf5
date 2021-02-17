@@ -35,13 +35,13 @@ struct cmpd_info {
 };
 
 /*stack for nested compound type*/
-struct cmpd_info cmpd_stack[STACK_SIZE] = {
+struct cmpd_info H5_cmpd_stack[STACK_SIZE] = {
     {0, 0, 1}, {0, 0, 1}, {0, 0, 1}, {0, 0, 1},
     {0, 0, 1}, {0, 0, 1}, {0, 0, 1}, {0, 0, 1},
     {0, 0, 1}, {0, 0, 1}, {0, 0, 1}, {0, 0, 1},
     {0, 0, 1}, {0, 0, 1}, {0, 0, 1}, {0, 0, 1} };
 
-int csindex = -1;                /*pointer to the top of compound stack*/
+int H5_csindex = -1;                /*pointer to the top of compound stack*/
 
 /*structure for array type information*/
 struct arr_info {
@@ -50,23 +50,22 @@ struct arr_info {
     hbool_t             is_dim;                 /*flag to lexer for dimension*/
 };
 /*stack for nested array type*/
-struct arr_info arr_stack[STACK_SIZE];
-int asindex = -1;               /*pointer to the top of array stack*/ 
+struct arr_info H5_arr_stack[STACK_SIZE];
+int H5_asindex = -1;                       /*pointer to the top of array stack*/ 
 
-hbool_t     is_str_size = 0;        /*flag to lexer for string size*/
-hbool_t     is_str_pad = 0;         /*flag to lexer for string padding*/
-H5T_str_t   str_pad;                /*variable for string padding*/
-H5T_cset_t  str_cset;               /*variable for string character set*/
-hbool_t     is_variable = 0;        /*variable for variable-length string*/
-size_t      str_size;               /*variable for string size*/
-   
-hid_t       enum_id;                /*type ID*/
-hbool_t     is_enum = 0;            /*flag to lexer for enum type*/
-hbool_t     is_enum_memb = 0;       /*flag to lexer for enum member*/
-char*       enum_memb_symbol;       /*enum member symbol string*/
+hbool_t            H5_is_str_size = 0;     /*flag to lexer for string size*/
+static H5T_str_t   str_pad;                /*variable for string padding*/
+static H5T_cset_t  H5_str_cset;            /*variable for string character set*/
+static hbool_t     is_variable = 0;        /*variable for variable-length string*/
+static size_t      str_size;               /*variable for string size*/
 
-hbool_t is_opq_size = 0;            /*flag to lexer for opaque type size*/
-hbool_t is_opq_tag = 0;             /*flag to lexer for opaque type tag*/
+static hid_t       enum_id;                /*type ID*/
+hbool_t            H5_is_enum = 0;         /*flag to lexer for enum type*/
+hbool_t            H5_is_enum_memb = 0;    /*flag to lexer for enum member*/
+static char*       enum_memb_symbol;       /*enum member symbol string*/
+
+hbool_t H5_is_opq_size = 0;                /*flag to lexer for opaque type size*/
+hbool_t H5_is_opq_tag = 0;                 /*flag to lexer for opaque type tag*/
 
 %}
 %union {
@@ -102,7 +101,7 @@ hbool_t is_opq_tag = 0;             /*flag to lexer for opaque type tag*/
 %token <ival> '{' '}' '[' ']' '"' ':' ';' 
 
 %%
-start   :       { memset(arr_stack, 0, STACK_SIZE*sizeof(struct arr_info)); /*initialize here?*/ }
+start   :       { memset(H5_arr_stack, 0, STACK_SIZE*sizeof(struct arr_info)); /*initialize here?*/ }
         |       ddl_type  { return $<hid>$;}
         ;
 ddl_type        :       atomic_type
@@ -156,31 +155,31 @@ fp_type         :       H5T_IEEE_F32BE_TOKEN { $<hid>$ = H5Tcopy(H5T_IEEE_F32BE)
                 ;
 
 compound_type   :       H5T_COMPOUND_TOKEN
-                            { csindex++; cmpd_stack[csindex].id = H5Tcreate(H5T_COMPOUND, 1); /*temporarily set size to 1*/ } 
+                            { H5_csindex++; H5_cmpd_stack[H5_csindex].id = H5Tcreate(H5T_COMPOUND, 1); /*temporarily set size to 1*/ } 
                         '{' memb_list '}'     
-                            { $<hid>$ = cmpd_stack[csindex].id; 
-                              cmpd_stack[csindex].id = 0;
-                              cmpd_stack[csindex].first_memb = 1; 
-                              csindex--;
+                            { $<hid>$ = H5_cmpd_stack[H5_csindex].id; 
+                              H5_cmpd_stack[H5_csindex].id = 0;
+                              H5_cmpd_stack[H5_csindex].first_memb = 1; 
+                              H5_csindex--;
                             }
                 ;
 memb_list       :       
                 |       memb_list memb_def
                 ;
-memb_def        :       ddl_type { cmpd_stack[csindex].is_field = 1; /*notify lexer a compound member is parsed*/ } 
+memb_def        :       ddl_type { H5_cmpd_stack[H5_csindex].is_field = 1; /*notify lexer a compound member is parsed*/ } 
                         '"' field_name '"' field_offset ';'
                         {   
                             size_t origin_size, new_size;
-                            hid_t dtype_id = cmpd_stack[csindex].id;
+                            hid_t dtype_id = H5_cmpd_stack[H5_csindex].id;
 
                             /*Adjust size and insert member, consider both member size and offset.*/
-                            if(cmpd_stack[csindex].first_memb) { /*reclaim the size 1 temporarily set*/
+                            if(H5_cmpd_stack[H5_csindex].first_memb) { /*reclaim the size 1 temporarily set*/
                                 new_size = H5Tget_size($<hid>1) + $<ival>6;
                                 H5Tset_size(dtype_id, new_size);
                                 /*member name is saved in yylval.sval by lexer*/
                                 H5Tinsert(dtype_id, $<sval>4, $<ival>6, $<hid>1);
 
-                                cmpd_stack[csindex].first_memb = 0;
+                                H5_cmpd_stack[H5_csindex].first_memb = 0;
                             } else {
                                 origin_size = H5Tget_size(dtype_id);
                                 
@@ -198,7 +197,7 @@ memb_def        :       ddl_type { cmpd_stack[csindex].is_field = 1; /*notify le
                                 free($<sval>4);
                                 $<sval>4 = NULL;
                             }
-                            cmpd_stack[csindex].is_field = 0;
+                            H5_cmpd_stack[H5_csindex].is_field = 0;
                             H5Tclose($<hid>1);
                              
                             new_size = H5Tget_size(dtype_id);
@@ -218,23 +217,23 @@ field_offset    :       /*empty*/
                 ;
 offset          :       NUMBER
                 ;
-array_type      :       H5T_ARRAY_TOKEN { asindex++; /*pushd onto the stack*/ }
+array_type      :       H5T_ARRAY_TOKEN { H5_asindex++; /*pushd onto the stack*/ }
                         '{' dim_list ddl_type '}'
                         { 
-                          $<hid>$ = H5Tarray_create2($<hid>5, arr_stack[asindex].ndims, arr_stack[asindex].dims);
-                          arr_stack[asindex].ndims = 0;
-                          asindex--;
+                          $<hid>$ = H5Tarray_create2($<hid>5, H5_arr_stack[H5_asindex].ndims, H5_arr_stack[H5_asindex].dims);
+                          H5_arr_stack[H5_asindex].ndims = 0;
+                          H5_asindex--;
                           H5Tclose($<hid>5);
                         }            
                 ;
 dim_list        :
                 |       dim_list dim
                 ;
-dim             :       '[' { arr_stack[asindex].is_dim = 1; /*notice lexer of dimension size*/ }
-                        dimsize { unsigned ndims = arr_stack[asindex].ndims;
-                                  arr_stack[asindex].dims[ndims] = (hsize_t)yylval.ival; 
-                                  arr_stack[asindex].ndims++;
-                                  arr_stack[asindex].is_dim = 0; 
+dim             :       '[' { H5_arr_stack[H5_asindex].is_dim = 1; /*notice lexer of dimension size*/ }
+                        dimsize { unsigned ndims = H5_arr_stack[H5_asindex].ndims;
+                                  H5_arr_stack[H5_asindex].dims[ndims] = (hsize_t)yylval.ival; 
+                                  H5_arr_stack[H5_asindex].ndims++;
+                                  H5_arr_stack[H5_asindex].is_dim = 0; 
                                 } 
                         ']'
                 ;
@@ -247,18 +246,18 @@ vlen_type       :       H5T_VLEN_TOKEN '{' ddl_type '}'
 
 opaque_type     :       H5T_OPAQUE_TOKEN
                         '{' 
-                            OPQ_SIZE_TOKEN { is_opq_size = 1; } opaque_size ';'
+                            OPQ_SIZE_TOKEN { H5_is_opq_size = 1; } opaque_size ';'
                             {   
                                 size_t size = (size_t)yylval.ival;
                                 $<hid>$ = H5Tcreate(H5T_OPAQUE, size);
-                                is_opq_size = 0;    
+                                H5_is_opq_size = 0;    
                             }
-                            OPQ_TAG_TOKEN { is_opq_tag = 1; } '"' opaque_tag '"' ';'
+                            OPQ_TAG_TOKEN { H5_is_opq_tag = 1; } '"' opaque_tag '"' ';'
                             {  
                                 H5Tset_tag($<hid>7, yylval.sval);
                                 free(yylval.sval);
                                 yylval.sval = NULL;
-                                is_opq_tag = 0;
+                                H5_is_opq_tag = 0;
                             }                             
                         '}' { $<hid>$ = $<hid>7; }
                 ;
@@ -268,13 +267,13 @@ opaque_tag      :       STRING
                 ;
 string_type     :       H5T_STRING_TOKEN 
                         '{' 
-                            STRSIZE_TOKEN { is_str_size = 1; } strsize ';'
+                            STRSIZE_TOKEN { H5_is_str_size = 1; } strsize ';'
                             {  
                                 if($<ival>5 == H5T_VARIABLE_TOKEN)
                                     is_variable = 1;
                                 else 
                                     str_size = yylval.ival;
-                                is_str_size = 0; 
+                                H5_is_str_size = 0; 
                             }
                             STRPAD_TOKEN strpad ';'
                             {
@@ -288,9 +287,9 @@ string_type     :       H5T_STRING_TOKEN
                             CSET_TOKEN cset ';'
                             {  
                                 if($<ival>13 == H5T_CSET_ASCII_TOKEN)
-                                    str_cset = H5T_CSET_ASCII;
+                                    H5_str_cset = H5T_CSET_ASCII;
                                 else if($<ival>13 == H5T_CSET_UTF8_TOKEN)
-                                    str_cset = H5T_CSET_UTF8;
+                                    H5_str_cset = H5T_CSET_UTF8;
                             }
                             CTYPE_TOKEN ctype ';'
                             {
@@ -312,7 +311,7 @@ string_type     :       H5T_STRING_TOKEN
                                 
                                 /*set string padding and character set*/
                                 H5Tset_strpad(str_id, str_pad);
-                                H5Tset_cset(str_id, str_cset);
+                                H5Tset_cset(str_id, H5_str_cset);
 
                                 $<hid>$ = str_id; 
                             }
@@ -332,15 +331,15 @@ ctype           :       H5T_C_S1_TOKEN         {$<hid>$ = H5T_C_S1_TOKEN;}
                 ;
 
 enum_type       :       H5T_ENUM_TOKEN '{' integer_type ';' 
-                            { is_enum = 1; enum_id = H5Tenum_create($<hid>3); H5Tclose($<hid>3); }
+                            { H5_is_enum = 1; enum_id = H5Tenum_create($<hid>3); H5Tclose($<hid>3); }
                         enum_list '}'
-                            { is_enum = 0; /*reset*/ $<hid>$ = enum_id; }
+                            { H5_is_enum = 0; /*reset*/ $<hid>$ = enum_id; }
                 ;
 enum_list       :
                 |       enum_list enum_def
                 ;
 enum_def        :       '"' enum_symbol '"' {
-                                                is_enum_memb = 1; /*indicate member of enum*/
+                                                H5_is_enum_memb = 1; /*indicate member of enum*/
 #ifdef H5_HAVE_WIN32_API
                                                 enum_memb_symbol = _strdup(yylval.sval); 
 #else /* H5_HAVE_WIN32_API */
@@ -361,7 +360,7 @@ enum_def        :       '"' enum_symbol '"' {
                                 H5T_order_t super_order = H5Tget_order(super);
                                 H5T_order_t native_order = H5Tget_order(native);
  
-                                if(is_enum && is_enum_memb) { /*if it's an enum member*/
+                                if(H5_is_enum && H5_is_enum_memb) { /*if it's an enum member*/
                                     /*To handle machines of different endianness*/
                                     if(H5Tequal(native, H5T_NATIVE_SCHAR) || H5Tequal(native, H5T_NATIVE_UCHAR)) {
                                         if(super_order != native_order)
@@ -385,7 +384,7 @@ enum_def        :       '"' enum_symbol '"' {
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &llong_val);
                                     }
 
-                                    is_enum_memb = 0; 
+                                    H5_is_enum_memb = 0; 
                                     if(enum_memb_symbol) free(enum_memb_symbol);
                                 }
 

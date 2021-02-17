@@ -898,7 +898,7 @@ char *H5LTyytext;
 #include <hdf5.h>
 #include "H5LTparse.h"
 
-int my_yyinput(char *, int);
+static int my_yyinput(char *, int);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r=my_yyinput(b, ms))
 #define token(x)        (int)x
@@ -920,8 +920,8 @@ struct cmpd_info {
     hbool_t         is_field;
     hbool_t         first_memb;
 };
-extern struct cmpd_info cmpd_stack[STACK_SIZE];
-extern int csindex;
+extern struct cmpd_info H5_cmpd_stack[STACK_SIZE];
+extern int H5_csindex;
 
 /*variables for array type*/
 struct arr_info {
@@ -929,21 +929,21 @@ struct arr_info {
     int                 ndim;
     hbool_t             is_dim;
 };
-extern struct arr_info arr_stack[STACK_SIZE];
-extern int asindex;
+extern struct arr_info H5_arr_stack[STACK_SIZE];
+extern int H5_asindex;
 
 /*variables for enumerate type*/
-extern hbool_t     is_enum;
-extern hbool_t     is_enum_memb;
+extern hbool_t     H5_is_enum;
+extern hbool_t     H5_is_enum_memb;
 
 /*variables for string type*/
-extern hbool_t is_str_size;
+extern hbool_t H5_is_str_size;
 
 /*variables for opaque type*/
-extern hbool_t is_opq_size;
-extern hbool_t is_opq_tag;
+extern hbool_t H5_is_opq_size;
+extern hbool_t H5_is_opq_tag;
 
-hbool_t        first_quote = 1;
+static hbool_t first_quote = 1;
 
 
 #line 920 "hl/src/H5LTanalyze.c"
@@ -1491,9 +1491,9 @@ case 55:
 YY_RULE_SETUP
 #line 140 "hl/src/H5LTanalyze.l"
 {
-                        if( is_str_size || (is_enum && is_enum_memb) ||
-                            is_opq_size || (asindex>-1 && arr_stack[asindex].is_dim) ||
-                            (csindex>-1 && cmpd_stack[csindex].is_field) ) {
+                        if( H5_is_str_size || (H5_is_enum && H5_is_enum_memb) ||
+                            H5_is_opq_size || (H5_asindex>-1 && H5_arr_stack[H5_asindex].is_dim) ||
+                            (H5_csindex>-1 && H5_cmpd_stack[H5_csindex].is_field) ) {
                             H5LTyylval.ival = atoi(H5LTyytext);
                             return NUMBER;
                         } else
@@ -1505,7 +1505,7 @@ YY_RULE_SETUP
 #line 150 "hl/src/H5LTanalyze.l"
 {
                     /*if it's first quote, and is a compound field name or an enum symbol*/
-                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field))
+                    if((H5_is_opq_tag || H5_is_enum || (H5_csindex>-1 && H5_cmpd_stack[H5_csindex].is_field))
                         && first_quote) {
                         first_quote = 0;
                         BEGIN TAG_STRING;
@@ -2550,7 +2550,7 @@ void H5LTyyfree (void * ptr )
 #line 179 "hl/src/H5LTanalyze.l"
 
 
-int my_yyinput(char *buf, int max_size)
+static int my_yyinput(char *buf, int max_size)
 {
    int ret;
 
