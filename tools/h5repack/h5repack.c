@@ -73,10 +73,12 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
     int k, n;
 
     HDmemset(options, 0, sizeof(pack_opt_t));
-    options->min_comp = 0;
-    options->verbose  = verbose;
-    options->latest   = latest;
-    options->layout_g = H5D_LAYOUT_ERROR;
+    options->min_comp  = 0;
+    options->verbose   = verbose;
+    options->latest    = latest;
+    options->layout_g  = H5D_LAYOUT_ERROR;
+    options->fin_fapl  = H5P_DEFAULT;
+    options->fout_fapl = H5P_DEFAULT;
 
     for (n = 0; n < H5_REPACK_MAX_NFILTERS; n++) {
         options->filter_g[n].filtn     = -1;
