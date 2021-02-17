@@ -210,7 +210,7 @@ H5_mpi_comm_free(MPI_Comm *comm)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "comm pointer cannot be NULL")
 
     /* Free the communicator */
-    if (MPI_COMM_NULL != *comm)
+    if (MPI_COMM_WORLD != *comm && MPI_COMM_NULL != *comm)
         MPI_Comm_free(comm);
 
     *comm = MPI_COMM_NULL;
