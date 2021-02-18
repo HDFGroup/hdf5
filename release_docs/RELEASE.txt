@@ -3,6 +3,7 @@ HDF5 version 1.12.1-4 currently under development
 
 
 INTRODUCTION
+============
 
 This document describes the new features introduced in the HDF5 1.12.0 release.
 It contains information on the platforms tested and known problems in this
@@ -276,7 +277,7 @@ New Features
         (QAK - 2020/03/25)
 
     Java Library:
-    ----------------
+    -------------
     - Added new H5S functions.
 
         H5Sselect_copy, H5Sselect_shape_same, H5Sselect_adjust,
@@ -309,12 +310,12 @@ New Features
         (ADB - 2020/08/05, HDFFV-9984)
 
 
-Support for new platforms, languages and compilers.
-=======================================
+Support for new platforms, languages and compilers
+==================================================
     -
 
 Bug Fixes since HDF5-1.12.0 release
-==================================
+===================================
     Library
     -------
     - Fixed problems with vlens and refs inside compound using
@@ -408,8 +409,16 @@ Bug Fixes since HDF5-1.12.0 release
         (QAK - 2020/05/07)
 
 
-    Java Library:
-    ----------------
+    Java Library
+    ------------
+    - JNI utility function does not handle new references.
+
+        The JNI utility function for converting reference data to string did
+        not use the new APIs. In addition to fixing that function, added new
+        java tests for using the new APIs.
+
+        (ADB - 2021/02/16, HDFFV-11212)
+
     - The H5FArray.java class, in which virtually the entire execution time
         is spent using the HDFNativeData method that converts from an array
         of bytes to an array of the destination Java type.
@@ -477,8 +486,8 @@ Bug Fixes since HDF5-1.12.0 release
         (QAK - 2020/06/05)
 
 
-    Fortran High-Level APIs:
-    ------
+    Fortran High-Level APIs
+    -----------------------
     -
 
 
