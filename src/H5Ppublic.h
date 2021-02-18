@@ -6935,12 +6935,12 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  * \return  \herr_t
  *
  * \details H5Pregister1() registers a new property with a property list
- *          class. The property will exist in all property list objects 
- *          of that class after this routine is finished.  The name of 
- *          the property must not already exist.  The default property 
- *          value must be provided and all new property lists created 
- *          with this property will have the property value set to the 
- *          default provided.  Any of the callback routines may be set 
+ *          class. The property will exist in all property list objects
+ *          of that class after this routine is finished.  The name of
+ *          the property must not already exist.  The default property
+ *          value must be provided and all new property lists created
+ *          with this property will have the property value set to the
+ *          default provided.  Any of the callback routines may be set
  *          to NULL if they are not needed.
  *
  *          Zero-sized properties are allowed and do not store any data in
@@ -7150,21 +7150,21 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *          still closed.
  *
  * \note \Bold{Programming Note for C++ Developers Using C Functions:}
- * If a C routine that takes a function pointer as an argument is called 
+ * If a C routine that takes a function pointer as an argument is called
  * from within C++ code, the C routine should be returned from normally.
- * Examples of this kind of routine include callbacks such as 
- * H5P_SET_ELINK_CB and H5P_SET_TYPE_CONV_CB and functions such as 
+ * Examples of this kind of routine include callbacks such as
+ * H5P_SET_ELINK_CB and H5P_SET_TYPE_CONV_CB and functions such as
  * H5T_CONVERT and H5E_WALK2.
- * Exiting the routine in its normal fashion allows the HDF5 C library to 
- * clean up its work properly. In other words, if the C++ application jumps 
+ * Exiting the routine in its normal fashion allows the HDF5 C library to
+ * clean up its work properly. In other words, if the C++ application jumps
  * out of the routine back to the C++ “catch” statement, the library is not
- * given the opportunity to close any temporary data structures that were 
- * set up when the routine was called. The C++ application should save some 
- * state as the routine is started so that any problem that occurs might be 
+ * given the opportunity to close any temporary data structures that were
+ * set up when the routine was called. The C++ application should save some
+ * state as the routine is started so that any problem that occurs might be
  * diagnosed.
  *
  * \deprecated As of HDF5-1.8 this function was deprecated in favor of H5Pregister2()
- *             or the macro H5Pregister(). 
+ *             or the macro H5Pregister().
  *
  */
 
@@ -7385,20 +7385,20 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
  *          have any necessary setup already performed on it.
  *
  * \note \Bold{Programming Note for C++ Developers Using C Functions:}
- * If a C routine that takes a function pointer as an argument is called 
+ * If a C routine that takes a function pointer as an argument is called
  * from within C++ code, the C routine should be returned from normally.
- * Examples of this kind of routine include callbacks such as 
- * H5P_SET_ELINK_CB and H5P_SET_TYPE_CONV_CB and functions such as 
+ * Examples of this kind of routine include callbacks such as
+ * H5P_SET_ELINK_CB and H5P_SET_TYPE_CONV_CB and functions such as
  * H5T_CONVERT and H5E_WALK2.
- * Exiting the routine in its normal fashion allows the HDF5 C library to 
- * clean up its work properly. In other words, if the C++ application jumps 
+ * Exiting the routine in its normal fashion allows the HDF5 C library to
+ * clean up its work properly. In other words, if the C++ application jumps
  * out of the routine back to the C++ “catch” statement, the library is not
- * given the opportunity to close any temporary data structures that were 
- * set up when the routine was called. The C++ application should save some 
- * state as the routine is started so that any problem that occurs might be 
+ * given the opportunity to close any temporary data structures that were
+ * set up when the routine was called. The C++ application should save some
+ * state as the routine is started so that any problem that occurs might be
  * diagnosed.
  * \deprecated As of HDF5-1.8 this function was deprecated in favor of H5Pinsert2()
- *             or the macro H5Pinsert(). 
+ *             or the macro H5Pinsert().
  *
  */
 H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
@@ -7441,11 +7441,11 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *va
  *          reliant on local context.
  *
  *
- * \since 1.10.0 
+ * \since 1.10.0
  * \deprecated  As of HDF5-1.12 this function has been deprecated in favor of H5Pencode2()
- *              or the macro H5Pencode(). 
+ *              or the macro H5Pencode().
  *
- */						 
+ */
 H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
 /**
  * \ingroup OCPL
@@ -7456,9 +7456,9 @@ H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
  *       Also, it is not in a deprecated file. Is that okay?
  *
  * \plist_id{plist_id}
- * \param[in] filter        Sequence number within the filter pipeline of 
+ * \param[in] filter        Sequence number within the filter pipeline of
  *                          the filter for which information is sought
- * \param[out] flags        Bit vector specifying certain general properties 
+ * \param[out] flags        Bit vector specifying certain general properties
  *                          of the filter
  * \param[in,out] cd_nelmts Number of elements in \p cd_values
  * \param[out] cd_values    Auxiliary data for the filter
@@ -7505,11 +7505,11 @@ H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int
 /**
  * \ingroup OCPL
  *
- * \brief Returns information about the specified filter 
+ * \brief Returns information about the specified filter
  *
  * \plist_id{plist_id}
  * \param[in] id            Filter identifier
- * \param[out] flags        Bit vector specifying certain general properties 
+ * \param[out] flags        Bit vector specifying certain general properties
  *                          of the filter
  * \param[in,out] cd_nelmts Number of elements in \p cd_values
  * \param[out] cd_values    Auxiliary data for the filter
@@ -7518,65 +7518,65 @@ H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int
  *
  *
  * \return Returns a non-negative value if successful;  Otherwise returns
- *         a negative value. 
+ *         a negative value.
  *
  * \details H5Pget_filter_by_id1() returns information about a filter, specified
  *          in \p id, a filter identifier.
  *
- *          \p plist_id must be a dataset or group creation property list and 
- *          \p id must be in the associated filter pipeline. 
- *          The \p id and \p flags parameters are used in the same 
+ *          \p plist_id must be a dataset or group creation property list and
+ *          \p id must be in the associated filter pipeline.
+ *          The \p id and \p flags parameters are used in the same
  *          manner as described in the discussion of H5Pset_filter().
  *          Aside from the fact that they are used for output, the parameters
- *          \p cd_nelmts and \p cd_values[] are used in the same manner as 
- *          described in the discussion of H5Pset_filter(). 
- *          On input, the \p cd_nelmts parameter indicates the number of entries 
- *          in the \p cd_values[] array allocated by the calling program; 
+ *          \p cd_nelmts and \p cd_values[] are used in the same manner as
+ *          described in the discussion of H5Pset_filter().
+ *          On input, the \p cd_nelmts parameter indicates the number of entries
+ *          in the \p cd_values[] array allocated by the calling program;
  *          on exit it contains the number of values defined by the filter.
- *          On input, the \p namelen parameter indicates the number of characters 
- *          allocated for the filter name by the calling program in the array 
- *          \p name[]. On exit \p name[] contains the name of the filter with one 
+ *          On input, the \p namelen parameter indicates the number of characters
+ *          allocated for the filter name by the calling program in the array
+ *          \p name[]. On exit \p name[] contains the name of the filter with one
  *          character of the name in each element of the array.
- *          If the filter specified in \p id is not set for the property 
+ *          If the filter specified in \p id is not set for the property
  *          list, an error will be returned and this function will fail.
- *          
+ *
  *
  * \version 1.8.5 Function extended to work with group creation property
  *                lists.
- * \version 1.8.0 Function H5Pget_filter_by_id() renamed to H5Pget_filter_by_id1() 
+ * \version 1.8.0 Function H5Pget_filter_by_id() renamed to H5Pget_filter_by_id1()
  *                and deprecated in this release.
  * \version 1.6.0 Function introduced in this release.
  * \deprecated As of HDF5-1.8 this function was deprecated in favor of H5Pget_filter_by_id2()
- *             or the macro H5Pget_filter_by_id(). 
- */							   
-H5_DLL herr_t       H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*/,
-                                         size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
-                                         char name[] /*out*/);
+ *             or the macro H5Pget_filter_by_id().
+ */
+H5_DLL herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*/,
+                                   size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
+                                   char name[] /*out*/);
 /**
  * \ingroup FCPL
  *
- * \brief Retrieves the version information of various objects 
+ * \brief Retrieves the version information of various objects
  *        for a file creation property list(deprecated)
  *
  * \plist_id
  * \param[out]  boot     Pointer to location to return super block version number
  * \param[out]  freelist Pointer to location to return global freelist version number
  * \param[out]  stab     Pointer to location to return symbol table version number
- * \param[out]  shhdr    Pointer to location to return shared object header version 
+ * \param[out]  shhdr    Pointer to location to return shared object header version
  *                       number
  *
  * \return \herr_t
  *
- * \details H5Pget_version() retrieves the version information of various objects 
- *          for a file creation property list. Any pointer parameters which are 
+ * \details H5Pget_version() retrieves the version information of various objects
+ *          for a file creation property list. Any pointer parameters which are
  *          passed as NULL are not queried.
  *
  * \version 1.6.4 boot, freelist, stab, shhdr parameter types changed to unsigned.
  * \deprecated Deprecated in favor of the function H5Fget_info()
  *
- */										 
-H5_DLL herr_t       H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsigned *freelist /*out*/,
-                                   unsigned *stab /*out*/, unsigned *shhdr /*out*/);
+ */
+H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsigned *freelist /*out*/,
+                             unsigned *stab /*out*/, unsigned *shhdr /*out*/);
 /**
  * \ingroup FCPL
  *
@@ -7594,26 +7594,26 @@ H5_DLL herr_t       H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsig
  * \details Maps to the function H5Pset_file_space_strategy().
  * \todo The code is in H5Pdeprecate.c, need to figure out when it was released and when it was deprecated.
  *
- */								   
-H5_DLL herr_t       H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
+ */
+H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
 /**
  * \ingroup FCPL
  *
- * \brief Retrieves the file space handling strategy, and threshold value for 
+ * \brief Retrieves the file space handling strategy, and threshold value for
  *        a file creation property list
  *
  * \fcpl_id{plist_id}
  * \param[out] strategy  Pointer to the file space handling strategy
  * \param[out] threshold Pointer to the free-space section size threshold value
- * 
+ *
  *  \return \herr_t
  *
  * \details Maps to the function H5Pget_file_space_strategy()
  *
- * \todo The code is in H5Pdeprecate.c, need to figure out when it was released and when it was deprecated.  
+ * \todo The code is in H5Pdeprecate.c, need to figure out when it was released and when it was deprecated.
  *
- */						
-H5_DLL herr_t       H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
+ */
+H5_DLL herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus
