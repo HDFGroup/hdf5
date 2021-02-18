@@ -2672,7 +2672,7 @@ H5_DLL herr_t H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsig
 /**
  * \ingroup FCPL
  *
- * \brief Retrieves number of shared object header message indexes in file
+ * \brief Retrieves the number of shared object header message indexes in file
  *        creation property list
  *
  * \fcpl_id{plist_id}
@@ -5762,23 +5762,23 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  * \param[out] expression  Pointer to memory where the transform expression will be copied
  * \param[in]  size        Number of bytes of the transform expression to copy to
  *
- * \return Success: size of the transform expression. Failure: a negative value.
+ * \return Success: the size of the transform expression. Failure: a negative value.
  *
  * \details H5Pget_data_transform() retrieves the data transform expression previously set in the dataset
  * transfer property list \p plist_id by H5Pset_data_transform().
  *
- *          H5Pget_data_transform() can be used to both retrieve the transform expression and to query its
+ *          H5Pget_data_transform() can be used to both retrieve the transform expression and query its
  * size.
  *
  *          If \p expression is non-NULL, up to \p size bytes of the data transform expression are written to
- * the buffer. If \p expression is NULL, \p size is ignored and the function does not write anything to the
+ * the buffer. If \p expression is NULL, \p size is ignored, and the function does not write anything to the
  *          buffer. The function always returns the size of the data transform expression.
  *
  *          If 0 is returned for the size of the expression, no data transform expression exists for the
  * property list.
  *
- *          If an error occurs, the buffer pointed to by \p expression is unchanged and the function returns a
- * negative value.
+ *          If an error occurs, the buffer pointed to by \p expression is unchanged, and the function returns
+ * a negative value.
  *
  * \par Example
  *      An example snippet from examples/h5_dtransform.c:
@@ -5914,7 +5914,7 @@ H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_fun
  *          the ratio \p right is used when the splitting node is the right-most node at its level; and
  *          the ratio \p middle is used for all other cases.
  *
- *          A node which is the only node at its level in the tree uses the ratio \p right when it splits.
+ *          A node that is the only node at its level in the tree uses the ratio \p right when it splits.
  *
  *          All ratios are real numbers between 0 and 1, inclusive.
  *
