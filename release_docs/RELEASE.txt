@@ -3,6 +3,7 @@ HDF5 version 1.10.8-1 currently under development
 
 
 INTRODUCTION
+============
 
 This document describes the differences between this release and the previous
 HDF5 release. It contains information on the platforms tested and known
@@ -209,7 +210,7 @@ New Features
     -
 
     Java Library:
-    ----------------
+    -------------
     - Added new H5S functions.
 
         H5Sselect_copy, H5Sselect_shape_same, H5Sselect_adjust,
@@ -232,33 +233,33 @@ New Features
 
 
     High-Level APIs:
-    ---------------
+    ----------------
     -
 
-    C Packet Table API
-    ------------------
+    C Packet Table API:
+    -------------------
     -
 
-    Internal header file
-    --------------------
+    Internal header file:
+    ---------------------
     -
 
-    Documentation
-    -------------
+    Documentation:
+    --------------
     -
 
-Support for new platforms, languages and compilers.
-=======================================
+Support for new platforms, languages and compilers
+==================================================
     -
 
 Bug Fixes since HDF5-1.10.7 release
-==================================
+===================================
     Library
     -------
     -
 
-    Java Library:
-    ----------------
+    Java Library
+    ------------
     - The H5FArray.java class, in which virtually the entire execution time
         is spent using the HDFNativeData method that converts from an array
         of bytes to an array of the destination Java type.
@@ -315,7 +316,7 @@ Bug Fixes since HDF5-1.10.7 release
 
 
     High-Level Library
-    ------
+    ------------------
     -
 
 
