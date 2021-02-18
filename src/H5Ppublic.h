@@ -5764,18 +5764,21 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  *
  * \return Success: size of the transform expression. Failure: a negative value.
  *
- * \details H5Pget_data_transform() retrieves the data transform expression previously set in the dataset transfer
- *          property list \p plist_id by H5Pset_data_transform().
+ * \details H5Pget_data_transform() retrieves the data transform expression previously set in the dataset
+ * transfer property list \p plist_id by H5Pset_data_transform().
  *
- *          H5Pget_data_transform() can be used to both retrieve the transform expression and to query its size.
+ *          H5Pget_data_transform() can be used to both retrieve the transform expression and to query its
+ * size.
  *
- *          If \p expression is non-NULL, up to \p size bytes of the data transform expression are written to the
- *          buffer. If \p expression is NULL, \p size is ignored and the function does not write anything to the
+ *          If \p expression is non-NULL, up to \p size bytes of the data transform expression are written to
+ * the buffer. If \p expression is NULL, \p size is ignored and the function does not write anything to the
  *          buffer. The function always returns the size of the data transform expression.
  *
- *          If 0 is returned for the size of the expression, no data transform expression exists for the property list.
+ *          If 0 is returned for the size of the expression, no data transform expression exists for the
+ * property list.
  *
- *          If an error occurs, the buffer pointed to by \p expression is unchanged and the function returns a negative value.
+ *          If an error occurs, the buffer pointed to by \p expression is unchanged and the function returns a
+ * negative value.
  *
  * \par Example
  *      An example snippet from examples/h5_dtransform.c:
@@ -5784,7 +5787,7 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  * \since 1.8.0
  *
  */
-H5_DLL ssize_t   H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size);
+H5_DLL ssize_t H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size);
 /**
  *
  * \ingroup  DXPL
@@ -5826,7 +5829,7 @@ H5_DLL H5Z_EDC_t H5Pget_edc_check(hid_t plist_id);
  * \since 1.6.0
  *
  */
-H5_DLL herr_t    H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
+H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
 /**
  *
  * \ingroup  DXPL
@@ -5842,10 +5845,11 @@ H5_DLL herr_t    H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
  *
  * \details H5Pget_preserve() checks the status of the dataset transfer property list.
  *
- * \version 1.6.0 The flag parameter was changed from INTEGER to LOGICAL to better match the C API. (Fortran 90)
+ * \version 1.6.0 The flag parameter was changed from INTEGER to LOGICAL to better match the C API. (Fortran
+ * 90)
  *
  */
-H5_DLL int       H5Pget_preserve(hid_t plist_id);
+H5_DLL int H5Pget_preserve(hid_t plist_id);
 /**
  *
  * \ingroup DXPL
@@ -5869,7 +5873,7 @@ H5_DLL int       H5Pget_preserve(hid_t plist_id);
  *          Please refer to the function H5Pset_type_conv_cb() for more details.
  *
  */
-H5_DLL herr_t    H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data);
+H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data);
 /**
  *
  * \ingroup DXPL
@@ -5878,9 +5882,9 @@ H5_DLL herr_t    H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, 
  *
  * \param[in]  plist_id   Identifier for the dataset transfer property list
  * \param[out] alloc_func User's allocate routine, or NULL for system malloc
- * \param[out] alloc_info Extra parameter for user’s allocation routine. Contents are ignored if preceding parameter is NULL
- * \param[out] free_func  User's free routine, or NULL for system free
- * \param[out] free_info  Extra parameter for user’s free routine. Contents are ignored if preceding parameter is NULL
+ * \param[out] alloc_info Extra parameter for user’s allocation routine. Contents are ignored if preceding
+ * parameter is NULL \param[out] free_func  User's free routine, or NULL for system free \param[out] free_info
+ * Extra parameter for user’s free routine. Contents are ignored if preceding parameter is NULL
  *
  * \return Returns a non-negative value if successful; otherwise returns a negative value.
  *
@@ -5888,8 +5892,8 @@ H5_DLL herr_t    H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, 
  *          returning the parameters set by that function.
  *
  */
-H5_DLL herr_t    H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
-                                         H5MM_free_t *free_func, void **free_info);
+H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
+                                      H5MM_free_t *free_func, void **free_info);
 /**
  *
  * \ingroup DXPL
@@ -5915,8 +5919,8 @@ H5_DLL herr_t    H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_
  *          All ratios are real numbers between 0 and 1, inclusive.
  *
  */
-H5_DLL herr_t    H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right);
-H5_DLL herr_t    H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);
+H5_DLL herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right);
+H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);
 /**
  * \ingroup DXPL
  *
