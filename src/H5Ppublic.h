@@ -5743,7 +5743,7 @@ H5_DLL herr_t H5Pget_btree_ratios(hid_t plist_id, double *left /*out*/, double *
  * \param[out] tconv     Address of the pointer to application-allocated type conversion buffer
  * \param[out] bkg       Address of the pointer to application-allocated background buffer
  *
- * \return Returns buffer size, in bytes, if successful; otherwise \e 0 on failure.
+ * \return Returns buffer size, in bytes, if successful; otherwise 0 on failure.
  *
  * \details H5Pget_buffer() reads values previously set with H5Pset_buffer().
  *
@@ -5816,7 +5816,7 @@ H5_DLL H5Z_EDC_t H5Pget_edc_check(hid_t plist_id);
  * \param[in]   fapl_id Dataset transfer property list identifier
  * \param[out]  size    Number of I/O vectors to accumulate in memory for I/O operations
  *
- * \return Returns a non-negative value if successful; otherwise returns a negative value.
+ * \return \herr_t
  *
  * \details H5Pget_hyper_vector_size() retrieves the number of I/O vectors to be accumulated in
  *          memory before being issued to the lower levels of the HDF5 library for reading or
@@ -5836,7 +5836,7 @@ H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
  *
  * \brief Checks status of the dataset transfer property list (\b DEPRECATED)
  *
- * \deprecated{H5Pget_preserve is deprecated as it is no longer useful; compound datatype
+ * \deprecated{H5Pget_preserve() is deprecated as it is no longer useful; compound datatype
  *        field preservation is now core functionality in the HDF5 library.}
  *
  * \param[in]   plist_id Identifier for the dataset transfer property list
@@ -5860,7 +5860,7 @@ H5_DLL int H5Pget_preserve(hid_t plist_id);
  * \param[out] op           User-defined type conversion callback function
  * \param[out] operate_data User-defined input data for the callback function
  *
- * \return Returns a non-negative value if successful; otherwise returns a negative value.
+ * \return \herr_t
  *
  * \details H5Pget_type_conv_cb() gets the user-defined datatype conversion callback
  *          function \p op in the dataset transfer property list \p dxpl_id.
@@ -5886,7 +5886,7 @@ H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, voi
  * parameter is NULL \param[out] free_func  User's free routine, or NULL for system free \param[out] free_info
  * Extra parameter for user’s free routine. Contents are ignored if preceding parameter is NULL
  *
- * \return Returns a non-negative value if successful; otherwise returns a negative value.
+ * \return \herr_t
  *
  * \details H5Pget_vlen_mem_manager() is the companion function to H5Pset_vlen_mem_manager(),
  *          returning the parameters set by that function.
@@ -5905,7 +5905,7 @@ H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_fun
  * \param[in] middle   The B-tree split ratio for all other nodes
  * \param[in] right    The B-tree split ratio for right-most nodes and lone nodes
  *
- * \return Returns a non-negative value if successful; otherwise returns a negative value.
+ * \return \herr_t
  *
  * \details H5Pset_btree_ratios() sets the B-tree split ratios for a dataset transfer property list.
  *          The split ratios determine what percent of children go in the first node when a node splits.
