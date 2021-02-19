@@ -607,11 +607,11 @@ herr_t
 H5B2__swap_leaf(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, unsigned *internal_flags_ptr,
                 unsigned idx, void *swap_loc)
 {
-    const H5AC_class_t *child_class;         /* Pointer to child node's class info */
-    haddr_t             child_addr;          /* Address of child node */
-    void *              child = NULL;        /* Pointer to child node */
-    uint8_t *           child_native;        /* Pointer to child's native records */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    const H5AC_class_t *child_class;              /* Pointer to child node's class info */
+    haddr_t             child_addr = HADDR_UNDEF; /* Address of child node */
+    void *              child      = NULL;        /* Pointer to child node */
+    uint8_t *           child_native;             /* Pointer to child's native records */
+    herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
