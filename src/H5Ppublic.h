@@ -114,18 +114,45 @@ extern "C" {
 //! [H5P_cls_create_func_t_snip]
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
 //! [H5P_cls_create_func_t_snip]
+
 //! [H5P_cls_copy_func_t_snip]
 typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, void *copy_data);
 //! [H5P_cls_copy_func_t_snip]
+
 //! [H5P_cls_close_func_t_snip]
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
 //! [H5P_cls_close_func_t_snip]
 
 /* Define property list callback function pointer types */
 //! [H5P_prp_cb1_t_snip]
+/**
+ * \brief Callback function for H5Pregister2(),H5Pregister1(),H5Pinsert2(),H5Pinsert1()
+ *
+ * \param[in]     name  The name of the property
+ * \param[in]     size  The size of the property in bytes
+ * \param[in,out] value The value for the property
+ * \return \herr_t
+ *
+ * \details The H5P_prp_cb1_t() describes the parameters used by the
+ *          property create,copy and close callback functions.
+ */
 typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
 //! [H5P_prp_cb1_t_snip]
+
 //! [H5P_prp_cb2_t_snip]
+/**
+ * \brief Callback function for H5Pregister2(),H5Pregister1(),H5Pinsert2(),H5Pinsert1()
+ *
+ * \plist_id(prop_id)
+ * \param[in]     name  The name of the property
+ * \param[in]     size  The size of the property in bytes
+ * \param[in]     value The value for the property
+ * \return \herr_t
+ *
+ * \details The H5P_prp_cb2_t() describes the parameters used by the
+ *          property set ,copy and delete callback functions.
+ */
+
 typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, void *value);
 //! [H5P_prp_cb2_t_snip]
 typedef H5P_prp_cb1_t H5P_prp_create_func_t;
@@ -1582,15 +1609,11 @@ H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_da
  *          property is being closed. The #H5P_prp_close_func_t callback
  *          function is defined as follows:
  *
- *          \snippet this H5P_prp_cb2_t_snip
+ *          \snippet this H5P_prp_cb1_t_snip
  *
  *          The parameters to the callback function are defined as follows:
  *
  *          <table>
- *           <tr>
- *            <td>\ref hid_t \c prop_id</td>
- *            <td>IN: The identifier of the property list being closed</td>
- *           </tr>
  *           <tr>
  *            <td>\Code{const char * name}</td>
  *            <td>IN: The name of the property in the list</td>
@@ -6911,16 +6934,289 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
 #define H5P_NO_CLASS H5P_ROOT
 
 /* Typedefs */
+/**
+ * \ingroup GPLOA
+ *
+ * \brief Registers a permanent property with a property list class
+ *
+ * \plistcls_id{cls_id}
+ * \param[in] name       Name of property to register
+ * \param[in] size       Size of property in bytes
+ * \param[in] def_value  Default value for property in newly created
+ *                       property lists
+ * \param[in] prp_create Callback routine called when a property list is
+ *                       being created and the property value will be
+ *                       initialized
+ * \param[in] prp_set    Callback routine called before a new value is
+ *                       copied into the property's value
+ * \param[in] prp_get    Callback routine called when a property value is
+ *                       retrieved from the property
+ * \param[in] prp_del    Callback routine called when a property is deleted
+ *                       from a property list
+ * \param[in] prp_copy   Callback routine called when a property is copied
+ *                       from a property list
+ * \param[in] prp_close  Callback routine called when a property list is
+ *                       being closed and the property value will be
+ *                       disposed of
+ *
+ * \return  \herr_t
+ *
+ * \deprecated As of HDF5-1.8 this function was deprecated in favor of H5Pregister2()
+ *             or the macro H5Pregister().
+ *
+ * \details H5Pregister1() registers a new property with a property list
+ *          class. The property will exist in all property list objects
+ *          of that class after this routine is finished.  The name of
+ *          the property must not already exist.  The default property
+ *          value must be provided and all new property lists created
+ *          with this property will have the property value set to the
+ *          default provided.  Any of the callback routines may be set
+ *          to NULL if they are not needed.
+ *
+ *          Zero-sized properties are allowed and do not store any data in
+ *          the property list. These may be used as flags to indicate the
+ *          presence or absence of a particular piece of information. The
+ *          default pointer for a zero-sized property may be set to NULL.
+ *          The property \p prp_create and \p prp_close callbacks are called for
+ *          zero-sized properties, but the \p prp_set and \p prp_get callbacks are
+ *          never called.
+ *
+ *          The \p prp_create routine is called when a new property list with
+ *          this property is being created. The #H5P_prp_create_func_t
+ *          callback function is defined as #H5P_prp_cb1_t.
+ *
+ *          The \p prp_create routine may modify the value to be set and those
+ *          changes will be stored as the initial value of the property.
+ *          If the \p prp_create routine returns a negative value, the new
+ *          property value is not copied into the property and the
+ *          \p prp_create routine returns an error value.
+ *
+ *          The \p prp_set routine is called before a new value is copied into
+ *          the property. The #H5P_prp_set_func_t callback function is defined
+ *          as #H5P_prp_cb2_t.
+ *
+ *          The \p prp_set routine may modify the value pointer to be set and
+ *          those changes will be used when setting the property's value.
+ *          If the \p prp_set routine returns a negative value, the new property
+ *          value is not copied into the property and the \p prp_set routine
+ *          returns an error value. The \p prp_set routine will not be called
+ *          for the initial value; only the \p prp_create routine will be called.
+ *
+ *          \b Note: The \p prp_set callback function may be useful to range
+ *          check the value being set for the property or may perform some
+ *          transformation or translation of the value set. The \p prp_get
+ *          callback would then reverse the transformation or translation.
+ *          A single \p prp_get or \p prp_set callback could handle multiple
+ *          properties by performing different actions based on the property
+ *          name or other properties in the property list.
+ *
+ *          The \p prp_get routine is called when a value is retrieved from a
+ *          property value. The #H5P_prp_get_func_t callback function is
+ *          defined as #H5P_prp_cb2_t.
+ *
+ *          The \p prp_get routine may modify the value to be returned from the
+ *          query and those changes will be returned to the calling routine.
+ *          If the \p prp_set routine returns a negative value, the query
+ *          routine returns an error value.
+ *
+ *          The \p prp_del routine is called when a property is being
+ *          deleted from a property list. The #H5P_prp_delete_func_t
+ *          callback function is defined as #H5P_prp_cb2_t.
+ *
+ *          The \p prp_del routine may modify the value passed in, but the
+ *          value is not used by the library when the \p prp_del routine
+ *          returns. If the \p prp_del routine returns a negative value,
+ *          the property list deletion routine returns an error value but
+ *          the property is still deleted.
+ *
+ *          The \p prp_copy routine is called when a new property list with
+ *          this property is being created through a \p prp_copy operation.
+ *          The #H5P_prp_copy_func_t callback function is defined as #H5P_prp_cb1_t.
+ *
+ *          The \p prp_copy routine may modify the value to be set and those
+ *          changes will be stored as the new value of the property. If
+ *          the \p prp_copy routine returns a negative value, the new
+ *          property value is not copied into the property and the \p prp_copy
+ *          routine returns an error value.
+ *
+ *          The \p prp_close routine is called when a property list with this
+ *          property is being closed. The #H5P_prp_close_func_t callback
+ *          function is defined as #H5P_prp_cb1_t.
+ *
+ *          The \p prp_close routine may modify the value passed in, but the
+ *          value is not used by the library when the \p prp_close routine returns.
+ *          If the \p prp_close routine returns a negative value, the property
+ *          list close routine returns an error value but the property list is
+ *          still closed.
+ *
+ *          The #H5P_prp_cb1_t is as follows:
+ *          \snippet this H5P_prp_cb1_t_snip
+ *
+ *          The #H5P_prp_cb2_t is as follows:
+ *          \snippet this H5P_prp_cb2_t_snip
+ *
+ *
+ * \cpp_c_api_note
+ *
+ */
 
 /* Function prototypes */
 H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value,
                            H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
                            H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del,
                            H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close);
+/**
+ * \ingroup GPLOA
+ *
+ * \brief Registers a temporary property with a property list
+ *
+ * \plist_id
+ * \param[in] name       Name of property to create
+ * \param[in] size       Size of property in bytes
+ * \param[in] value      Initial value for the property
+ * \param[in] prp_set    Callback routine called before a new value is copied
+ *                       into the property's value
+ * \param[in] prp_get    Callback routine called when a property value is
+ *                       retrieved from the property
+ * \param[in] prp_delete Callback routine called when a property is deleted
+ *                       from a property list
+ * \param[in] prp_copy   Callback routine called when a property is copied
+ *                       from an existing property list
+ * \param[in] prp_close  Callback routine called when a property list is
+ *                       being closed and the property value will be disposed
+ *                       of
+ *
+ * \return \herr_t
+ *
+ * \deprecated As of HDF5-1.8 this function was deprecated in favor of H5Pinsert2()
+ *             or the macro H5Pinsert().
+ *
+ * \details H5Pinsert1() creates a new property in a property
+ *          list. The property will exist only in this property list and
+ *          copies made from it.
+ *
+ *          The initial property value must be provided in \p value and
+ *          the property value will be set accordingly.
+ *
+ *          The name of the property must not already exist in this list,
+ *          or this routine will fail.
+ *
+ *          The \p prp_set and \p prp_get callback routines may be set to NULL
+ *          if they are not needed.
+ *
+ *          Zero-sized properties are allowed and do not store any data
+ *          in the property list. The default value of a zero-size
+ *          property may be set to NULL. They may be used to indicate the
+ *          presence or absence of a particular piece of information.
+ *
+ *          The \p prp_set routine is called before a new value is copied
+ *          into the property. The #H5P_prp_set_func_t callback function
+ *          is defined as #H5P_prp_cb2_t.
+ *          The \p prp_set routine may modify the value pointer to be set and
+ *          those changes will be used when setting the property's value.
+ *          If the \p prp_set routine returns a negative value, the new property
+ *          value is not copied into the property and the \p  set routine
+ *          returns an error value. The \p prp_set routine will be called for
+ *          the initial value.
+ *
+ *          \b Note: The \p prp_set callback function may be useful to range
+ *          check the value being set for the property or may perform some
+ *          transformation or translation of the value set. The \p prp_get
+ *          callback would then reverse the transformation or translation.
+ *          A single \p prp_get or \p prp_set callback could handle multiple
+ *          properties by performing different actions based on the
+ *          property name or other properties in the property list.
+ *
+ *          The \p prp_get routine is called when a value is retrieved from
+ *          a property value. The #H5P_prp_get_func_t callback function
+ *          is defined as #H5P_prp_cb2_t.
+ *
+ *          The \p prp_get routine may modify the value to be returned from
+ *          the query and those changes will be preserved. If the \p prp_get
+ *          routine returns a negative value, the query routine returns
+ *          an error value.
+ *
+ *          The \p prp_delete routine is called when a property is being
+ *          deleted from a property list. The #H5P_prp_delete_func_t
+ *          callback function is defined as #H5P_prp_cb2_t.
+ *
+ *          The \p prp_copy routine is called when a new property list with
+ *          this property is being created through a \p prp_copy operation.
+ *          The #H5P_prp_copy_func_t callback function is defined as #H5P_prp_cb1_t.
+ *
+ *          The \p prp_copy routine may modify the value to be set and those
+ *          changes will be stored as the new value of the property. If the
+ *          \p prp_copy routine returns a negative value, the new property value
+ *          is not copied into the property and the prp_copy routine returns an
+ *          error value.
+ *
+ *          The \p prp_close routine is called when a property list with this
+ *          property is being closed.
+ *          The #H5P_prp_close_func_t callback function is defined as #H5P_prp_cb1_t.
+ *
+ *          The \p prp_close routine may modify the value passed in, the
+ *          value is not used by the library when the close routine
+ *          returns. If the \p prp_close routine returns a negative value,
+ *          the property list \p prp_close routine returns an error value
+ *          but the property list is still closed.
+ *
+ *          \b Note: There is no \p prp_create callback routine for temporary
+ *          property list objects; the initial value is assumed to
+ *          have any necessary setup already performed on it.
+ *
+ *          The #H5P_prp_cb1_t is as follows:
+ *          \snippet this H5P_prp_cb1_t_snip
+ *
+ *          The #H5P_prp_cb2_t is as follows:
+ *          \snippet this H5P_prp_cb2_t_snip
+
+ * \cpp_c_api_note
+ */
 H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
                          H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
                          H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
                          H5P_prp_close_func_t prp_close);
+/**
+ * \ingroup GPLO
+ *
+ * \brief Encodes the property values in a property list into a binary
+ *        buffer
+ *
+ * \plist_id
+ * \param[out] buf    Buffer into which the property list will be encoded.
+ *                    If the provided buffer is NULL, the size of the
+ *                    buffer required is returned through \p nalloc; the
+ *                    function does nothing more.
+ * \param[out] nalloc The size of the required buffer
+ *
+ * \return \herr_t
+ *
+ * \details H5Pencode1() encodes the property list \p plist_id into the
+ *          binary buffer \p buf.
+ *
+ *          If the required buffer size is unknown, \p buf can be passed
+ *          in as NULL and the function will set the required buffer size
+ *          in \p nalloc. The buffer can then be created and the property
+ *          list encoded with a subsequent H5Pencode1() call.
+ *
+ *          If the buffer passed in is not big enough to hold the encoded
+ *          properties, the H5Pencode1() call can be expected to fail with
+ *          a segmentation fault.
+ *
+ *          Properties that do not have encode callbacks will be skipped.
+ *          There is currently no mechanism to register an encode callback for
+ *          a user-defined property, so user-defined properties cannot currently
+ *          be encoded.
+ *
+ *          Some properties cannot be encoded, particularly properties that are
+ *          reliant on local context.
+ *
+ *
+ * \since 1.10.0
+ * \deprecated  As of HDF5-1.12 this function has been deprecated in favor of H5Pencode2()
+ *              or the macro H5Pencode().
+ *
+ */
 H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
 /**
  * \ingroup OCPL
@@ -6931,14 +7227,14 @@ H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
  *       Also, it is not in a deprecated file. Is that okay?
  *
  * \plist_id{plist_id}
- * \param[in] filter Sequence number within the filter pipeline of the filter
- *                   for which information is sought
- * \param[out] flags Bit vector specifying certain general properties of
- *                the filter
+ * \param[in] filter        Sequence number within the filter pipeline of
+ *                          the filter for which information is sought
+ * \param[out] flags        Bit vector specifying certain general properties
+ *                          of the filter
  * \param[in,out] cd_nelmts Number of elements in \p cd_values
- * \param[out] cd_values Auxiliary data for the filter
- * \param[in] namelen Anticipated number of characters in \p name
- * \param[out] name Name of the filter
+ * \param[out] cd_values    Auxiliary data for the filter
+ * \param[in] namelen       Anticipated number of characters in \p name
+ * \param[out] name         Name of the filter
  *
  * \return Returns the filter identifier if successful;  Otherwise returns
  *         a negative value. See: #H5Z_filter_t
@@ -6977,13 +7273,124 @@ H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
 H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int *flags /*out*/,
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                    char name[]);
-H5_DLL herr_t       H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*/,
-                                         size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
-                                         char name[] /*out*/);
-H5_DLL herr_t       H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsigned *freelist /*out*/,
-                                   unsigned *stab /*out*/, unsigned *shhdr /*out*/);
-H5_DLL herr_t       H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
-H5_DLL herr_t       H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
+/**
+ * \ingroup OCPL
+ *
+ * \brief Returns information about the specified filter
+ *
+ * \plist_id{plist_id}
+ * \param[in] id            Filter identifier
+ * \param[out] flags        Bit vector specifying certain general properties
+ *                          of the filter
+ * \param[in,out] cd_nelmts Number of elements in \p cd_values
+ * \param[out] cd_values    Auxiliary data for the filter
+ * \param[in] namelen       Anticipated number of characters in \p name
+ * \param[out] name         Name of the filter
+ *
+ *
+ * \return Returns a non-negative value if successful;  Otherwise returns
+ *         a negative value.
+ *
+ * \deprecated As of HDF5-1.8 this function was deprecated in favor of H5Pget_filter_by_id2()
+ *             or the macro H5Pget_filter_by_id().
+ *
+ * \details H5Pget_filter_by_id1() returns information about a filter, specified
+ *          in \p id, a filter identifier.
+ *
+ *          \p plist_id must be a dataset or group creation property list and
+ *          \p id must be in the associated filter pipeline.
+ *
+ *          The \p id and \p flags parameters are used in the same
+ *          manner as described in the discussion of H5Pset_filter().
+ *
+ *          Aside from the fact that they are used for output, the parameters
+ *          \p cd_nelmts and \p cd_values[] are used in the same manner as
+ *          described in the discussion of H5Pset_filter().
+ *          On input, the \p cd_nelmts parameter indicates the number of entries
+ *          in the \p cd_values[] array allocated by the calling program;
+ *          on exit it contains the number of values defined by the filter.
+ *
+ *          On input, the \p namelen parameter indicates the number of characters
+ *          allocated for the filter name by the calling program in the array
+ *          \p name[]. On exit \p name[] contains the name of the filter with one
+ *          character of the name in each element of the array.
+ *
+ *          If the filter specified in \p id is not set for the property
+ *          list, an error will be returned and this function will fail.
+ *
+ *
+ * \version 1.8.5 Function extended to work with group creation property
+ *                lists.
+ * \version 1.8.0 Function H5Pget_filter_by_id() renamed to H5Pget_filter_by_id1()
+ *                and deprecated in this release.
+ * \version 1.6.0 Function introduced in this release.
+ */
+H5_DLL herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*/,
+                                   size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
+                                   char name[] /*out*/);
+/**
+ * \ingroup FCPL
+ *
+ * \brief Retrieves the version information of various objects
+ *        for a file creation property list(deprecated)
+ *
+ * \plist_id
+ * \param[out]  boot     Pointer to location to return super block version number
+ * \param[out]  freelist Pointer to location to return global freelist version number
+ * \param[out]  stab     Pointer to location to return symbol table version number
+ * \param[out]  shhdr    Pointer to location to return shared object header version
+ *                       number
+ *
+ * \return \herr_t
+ *
+ * \deprecated Deprecated in favor of the function H5Fget_info()
+ *
+ * \details H5Pget_version() retrieves the version information of various objects
+ *          for a file creation property list. Any pointer parameters which are
+ *          passed as NULL are not queried.
+ *
+ * \version 1.6.4 \p boot, \p freelist, \p stab, \p shhdr parameter types changed to unsigned.
+ *
+ */
+H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsigned *freelist /*out*/,
+                             unsigned *stab /*out*/, unsigned *shhdr /*out*/);
+/**
+ * \ingroup FCPL
+ *
+ * \brief Sets the file space handling strategy and the free-space section
+ *        size threshold.
+ *
+ * \fcpl_id{plist_id}
+ * \param[in] strategy  The file space handling strategy to be used. See:
+ *                      #H5F_fspace_strategy_t
+ * \param[in] threshold The smallest free-space section size that the free
+ *                      space manager will track
+ *
+ * \return \herr_t
+ *
+ * \details Maps to the function H5Pset_file_space_strategy().
+ * \todo The code is in H5Pdeprecate.c, need to figure out when it was released and when it was deprecated.
+ *
+ */
+H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
+/**
+ * \ingroup FCPL
+ *
+ * \brief Retrieves the file space handling strategy, and threshold value for
+ *        a file creation property list
+ *
+ * \fcpl_id{plist_id}
+ * \param[out] strategy  Pointer to the file space handling strategy
+ * \param[out] threshold Pointer to the free-space section size threshold value
+ *
+ *  \return \herr_t
+ *
+ * \details Maps to the function H5Pget_file_space_strategy()
+ *
+ * \todo The code is in H5Pdeprecate.c, need to figure out when it was released and when it was deprecated.
+ *
+ */
+H5_DLL herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus
