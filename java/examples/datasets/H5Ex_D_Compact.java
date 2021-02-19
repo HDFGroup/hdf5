@@ -60,10 +60,10 @@ public class H5Ex_D_Compact {
     }
 
     private static void writeCompact() {
-        long file_id = -1;
-        long filespace_id = -1;
-        long dataset_id = -1;
-        long dcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long filespace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM_X, DIM_Y };
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
@@ -163,10 +163,10 @@ public class H5Ex_D_Compact {
     }
 
     private static void readCompact() {
-        long file_id = -1;
-        long filespace_id = -1;
-        long dataset_id = -1;
-        long dcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long filespace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Open file and dataset using the default properties.

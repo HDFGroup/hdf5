@@ -39,11 +39,11 @@ public class TestH5G {
     private static final String[] GROUPS = { "/G1", "/G1/G11", "/G1/G12",
             "/G1/G11/G111", "/G1/G11/G112", "/G1/G11/G113", "/G1/G11/G114" };
     private static final String[] GROUPS2 = { "/G1", "/G1/G14", "/G1/G12", "/G1/G13", "/G1/G11"};
-    long H5fid = -1;
-    long H5fid2 = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5fid2 = HDF5Constants.H5I_INVALID_HID;
 
     private final long _createGroup(long fid, String name) {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         try {
             gid = H5.H5Gcreate(fid, name, HDF5Constants.H5P_DEFAULT,
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
@@ -58,8 +58,8 @@ public class TestH5G {
     }
 
     private final long _createGroup2(long fid, String name) {
-        long gid = -1;
-        long gcpl = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
+        long gcpl = HDF5Constants.H5I_INVALID_HID;
         try {
             gcpl = H5.H5Pcreate(HDF5Constants.H5P_GROUP_CREATE); //create gcpl
         }
@@ -92,12 +92,12 @@ public class TestH5G {
     }
 
     private final long _openGroup(long fid, String name) {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         try {
             gid = H5.H5Gopen(fid, name, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
-            gid = -1;
+            gid = HDF5Constants.H5I_INVALID_HID;
             err.printStackTrace();
             fail("H5.H5Gopen: " + err);
         }
@@ -134,7 +134,7 @@ public class TestH5G {
         assertTrue("TestH5G.createH5file: H5.H5Fcreate: ", H5fid > 0);
         assertTrue("TestH5G.createH5file: H5.H5Fcreate: ", H5fid2 > 0);
 
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
 
         for (int i = 0; i < GROUPS.length; i++) {
             gid = _createGroup(H5fid, GROUPS[i]);
@@ -165,7 +165,7 @@ public class TestH5G {
 
     @Test
     public void testH5Gopen() {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         for (int i = 0; i < GROUPS.length; i++) {
             try {
                 gid = H5.H5Gopen(H5fid, GROUPS[i], HDF5Constants.H5P_DEFAULT);
@@ -185,8 +185,8 @@ public class TestH5G {
 
     @Test
     public void testH5Gget_create_plist() {
-        long gid = -1;
-        long pid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
+        long pid = HDF5Constants.H5I_INVALID_HID;
 
         for (int i = 0; i < GROUPS.length; i++) {
             try {

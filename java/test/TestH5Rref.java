@@ -87,6 +87,9 @@ public class TestH5Rref {
             try {H5.H5Sclose(H5dsid);} catch (Exception ex) {}
         if (H5fid > 0)
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
+        H5fid = HDF5Constants.H5I_INVALID_HID;
+        H5dsid = HDF5Constants.H5I_INVALID_HID;
+        H5did = HDF5Constants.H5I_INVALID_HID;
         System.out.println();
     }
 

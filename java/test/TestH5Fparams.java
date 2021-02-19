@@ -105,7 +105,7 @@ public class TestH5Fparams {
 
     @Test
     public void testH5Fcreate() {
-        long fid = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
         File file = null;
 
         try {
@@ -132,7 +132,7 @@ public class TestH5Fparams {
 
     @Test
     public void testH5Fflush_global() {
-        long fid = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC,
@@ -158,7 +158,7 @@ public class TestH5Fparams {
 
     @Test
     public void testH5Fflush_local() {
-        long fid = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC,
@@ -184,7 +184,7 @@ public class TestH5Fparams {
 
     @Test
     public void testH5Fget_info() {
-        long fid = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             try {
@@ -215,7 +215,7 @@ public class TestH5Fparams {
 
     @Ignore//(expected = HDF5FunctionArgumentException.class)
     public void testH5Fset_libver_bounds_invalidlow() throws Throwable {
-        long fid = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             try {
@@ -234,7 +234,7 @@ public class TestH5Fparams {
 
     @Ignore//(expected = HDF5FunctionArgumentException.class)
     public void testH5Fset_libver_bounds_invalidhigh() throws Throwable {
-        long fid = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             try {

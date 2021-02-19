@@ -33,9 +33,9 @@ public class TestH5Fswmr {
     @Rule public TestName testname = new TestName();
     private static final String H5_FILE = "testswmr.h5";
 
-    long H5fid = -1;
-    long H5fapl = -1;
-    long H5fcpl = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5fapl = HDF5Constants.H5I_INVALID_HID;
+    long H5fcpl = HDF5Constants.H5I_INVALID_HID;
 
     private final void _deleteFile(String filename) {
         File file = new File(filename);
@@ -63,15 +63,15 @@ public class TestH5Fswmr {
     public void deleteH5file() throws HDF5LibraryException {
         if (H5fapl > 0) {
             try {H5.H5Pclose(H5fapl);} catch (Exception ex) {}
-            H5fapl = -1;
+            H5fapl = HDF5Constants.H5I_INVALID_HID;
         }
         if (H5fcpl > 0) {
             try {H5.H5Pclose(H5fcpl);} catch (Exception ex) {}
-            H5fcpl = -1;
+            H5fcpl = HDF5Constants.H5I_INVALID_HID;
         }
        if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
+            H5fid = HDF5Constants.H5I_INVALID_HID;
         }
         _deleteFile(H5_FILE);
         System.out.println();

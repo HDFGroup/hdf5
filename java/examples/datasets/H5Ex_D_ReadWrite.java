@@ -32,9 +32,9 @@ public class H5Ex_D_ReadWrite {
     private static final int RANK = 2;
 
     private static void WriteDataset() {
-        long file_id = -1;
-        long filespace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long filespace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM_X, DIM_Y };
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
@@ -109,8 +109,8 @@ public class H5Ex_D_ReadWrite {
     }
 
     private static void ReadDataset() {
-        long file_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Open file using the default properties.

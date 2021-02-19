@@ -40,10 +40,10 @@ public class H5Ex_D_FillValue {
     private static final int FILLVAL = 99;
 
     private static void fillValue() {
-        long file_id = -1;
-        long dcpl_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM_X, DIM_Y };
         long[] extdims = { EDIM_X, EDIM_Y };
         long[] chunk_dims = { CHUNK_X, CHUNK_Y };
