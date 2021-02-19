@@ -6348,7 +6348,7 @@ gent_ldouble_scalar(void)
     hid_t       tid;
     hid_t       sid;
     hsize_t     dims[1] = {6};
-    long double buf[6] = { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0 };
+    long double buf[6]  = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
 
     if ((fid = H5Fcreate(FILE88, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
