@@ -683,7 +683,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
     haddr_t       search_addr;       /* Address of current page */
     hsize_t       num_touched_pages; /* Number of pages accessed */
     size_t        access_size = 0;
-    hbool_t       bypass_pb = FALSE;   /* Whether to bypass page buffering */
+    hbool_t       bypass_pb   = FALSE; /* Whether to bypass page buffering */
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -984,7 +984,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
     haddr_t       search_addr;       /* Address of current page */
     hsize_t       num_touched_pages; /* Number of pages accessed */
     size_t        access_size = 0;
-    hbool_t       bypass_pb = FALSE;   /* Whether to bypass page buffering */
+    hbool_t       bypass_pb   = FALSE; /* Whether to bypass page buffering */
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 

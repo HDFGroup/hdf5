@@ -3151,8 +3151,8 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 herr_t
 H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata)
 {
-    H5D_rdcc_ent_t *     ent = NULL; /* Cache entry */
-    H5O_storage_chunk_t *sc  = &(dset->shared->layout.storage.u.chunk);
+    H5D_rdcc_ent_t *     ent       = NULL; /* Cache entry */
+    H5O_storage_chunk_t *sc        = &(dset->shared->layout.storage.u.chunk);
     unsigned             idx       = 0;       /* Index of chunk in cache, if present */
     hbool_t              found     = FALSE;   /* In cache? */
     herr_t               ret_value = SUCCEED; /* Return value */
