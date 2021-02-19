@@ -1,4 +1,4 @@
-/*! \mainpage HDF5 C-API Reference
+/*! \mainpage_old notitle
  *
  * The HDF5 C-API provides applications with fine-grained control over all
  * aspects HDF5 functionality. This functionality is grouped into the following
