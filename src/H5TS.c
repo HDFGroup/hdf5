@@ -31,12 +31,15 @@ typedef struct H5TS_cancel_struct {
 /* Global variable definitions */
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_once_t H5TS_first_init_g;
+H5TS_key_t H5TS_errstk_key_g = TLS_OUT_OF_INDEXES;
+H5TS_key_t H5TS_funcstk_key_g = TLS_OUT_OF_INDEXES;
+H5TS_key_t H5TS_cancel_key_g = TLS_OUT_OF_INDEXES;
 #else /* H5_HAVE_WIN_THREADS */
 H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
-#endif /* H5_HAVE_WIN_THREADS */
 H5TS_key_t H5TS_errstk_key_g;
 H5TS_key_t H5TS_funcstk_key_g;
 H5TS_key_t H5TS_cancel_key_g;
+#endif /* H5_HAVE_WIN_THREADS */
 
 
 /*--------------------------------------------------------------------------
@@ -422,10 +425,16 @@ H5TS_win32_process_exit(void)
     DeleteCriticalSection(&H5_g.init_lock.CriticalSection);
 
     /* Clean up per-process thread local storage */
-    TlsFree(H5TS_errstk_key_g);
+    if (H5TS_errstk_key_g != TLS_OUT_OF_INDEXES)
+    {
+        TlsFree(H5TS_errstk_key_g);
+    }
 
 #ifdef H5_HAVE_CODESTACK
-    TlsFree(H5TS_funcstk_key_g);
+    if (H5TS_funcstk_key_g != TLS_OUT_OF_INDEXES)
+    {
+        TlsFree(H5TS_funcstk_key_g);
+    }
 #endif /* H5_HAVE_CODESTACK */
 
     return;
@@ -461,14 +470,22 @@ H5TS_win32_thread_exit(void)
      */
 
     /* Clean up per-thread thread local storage */
-    lpvData = TlsGetValue(H5TS_errstk_key_g);
-    if(lpvData)
-        LocalFree((HLOCAL)lpvData);
+    if (H5TS_errstk_key_g != TLS_OUT_OF_INDEXES)
+    {
+        if (lpvData = TlsGetValue(H5TS_errstk_key_g))
+        {
+            LocalFree((HLOCAL)lpvData);
+        }
+    }
 
 #ifdef H5_HAVE_CODESTACK
-    lpvData = TlsGetValue(H5TS_funcstk_key_g);
-    if(lpvData)
-        LocalFree((HLOCAL)lpvData);
+    if (H5TS_funcstk_key_g != TLS_OUT_OF_INDEXES)
+    {
+        if (lpvData = TlsGetValue(H5TS_funcstk_key_g))
+        {
+            LocalFree((HLOCAL)lpvData);
+        }
+    }
 #endif /* H5_HAVE_CODESTACK */
 
     return ret_value;
