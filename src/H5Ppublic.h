@@ -2695,7 +2695,7 @@ H5_DLL herr_t H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsig
 /**
  * \ingroup FCPL
  *
- * \brief Retrieves number of shared object header message indexes in file
+ * \brief Retrieves the number of shared object header message indexes in file
  *        creation property list
  *
  * \fcpl_id{plist_id}
@@ -5756,6 +5756,24 @@ H5_DLL herr_t H5Pset_virtual_view(hid_t dapl_id, H5D_vds_view_t view);
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pget_btree_ratios(hid_t plist_id, double *left /*out*/, double *middle /*out*/,
                                   double *right /*out*/);
+/**
+ *
+ * \ingroup  DXPL
+ *
+ * \brief Reads buffer settings
+ *
+ * \param[in]  plist_id  Identifier for the dataset transfer property list
+ * \param[out] tconv     Address of the pointer to application-allocated type conversion buffer
+ * \param[out] bkg       Address of the pointer to application-allocated background buffer
+ *
+ * \return Returns buffer size, in bytes, if successful; otherwise 0 on failure.
+ *
+ * \details H5Pget_buffer() reads values previously set with H5Pset_buffer().
+ *
+ * \version 1.6.0 The return type changed from \p hsize_t to \p size_t.
+ * \version 1.4.0 The return type changed to \p hsize_t.
+ *
+ */
 H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*out*/);
 /**
  *
@@ -5763,45 +5781,169 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  *
  * \brief Retrieves a data transform expression
  *
- * \param[in]  plist_id   Identifier of the property list or class
- * \param[out] expression Pointer to memory where the transform expression
- *                        will be copied
- * \param[in]  size       Number of bytes of the transform expression to copy to
+ * \param[in]  plist_id    Identifier of the property list or class
+ * \param[out] expression  Pointer to memory where the transform expression will be copied
+ * \param[in]  size        Number of bytes of the transform expression to copy to
  *
- * \return Returns the size of the transform expression if successful;
- *         otherwise returns a negative value.
+ * \return Success: the size of the transform expression. Failure: a negative value.
  *
- * \details H5Pget_data_transform() retrieves the data transform
- *          expression previously set in the dataset transfer property
- *          list \p plist_id by H5Pset_data_transform().
+ * \details H5Pget_data_transform() retrieves the data transform expression previously set in the dataset
+ * transfer property list \p plist_id by H5Pset_data_transform().
  *
- *          H5Pget_data_transform() can be used to both retrieve the
- *          transform expression and to query its size.
+ *          H5Pget_data_transform() can be used to both retrieve the transform expression and query its
+ * size.
  *
- *          If \p expression is non-NULL, up to \p size bytes of the data
- *          transform expression are written to the buffer. If
- *          \p expression is NULL, \p size is ignored and the function
- *          does not write anything to the buffer. The function always
- *          returns the size of the data transform expression.
+ *          If \p expression is non-NULL, up to \p size bytes of the data transform expression are written to
+ * the buffer. If \p expression is NULL, \p size is ignored, and the function does not write anything to the
+ *          buffer. The function always returns the size of the data transform expression.
  *
- *          If 0 is returned for the size of the expression, no data
- *          transform expression exists for the property list.
+ *          If 0 is returned for the size of the expression, no data transform expression exists for the
+ * property list.
  *
- *          If an error occurs, the buffer pointed to by \p expression is
- *          unchanged and the function returns a negative value.
+ *          If an error occurs, the buffer pointed to by \p expression is unchanged, and the function returns
+ * a negative value.
+ *
+ * \par Example
+ *      An example snippet from examples/h5_dtransform.c:
+ *      \snippet h5_dtransform.c H5Pget_data_transform_snip
  *
  * \since 1.8.0
  *
  */
-H5_DLL ssize_t   H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size);
+H5_DLL ssize_t H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size);
+/**
+ *
+ * \ingroup  DXPL
+ *
+ * \brief Determines whether error-detection is enabled for dataset reads
+ *
+ * \param[in]  plist_id Dataset transfer property list identifier
+ *
+ * \return Returns \p H5Z_ENABLE_EDC or \p H5Z_DISABLE_EDC if successful;
+ *         otherwise returns a negative value.
+ *
+ * \details H5Pget_edc_check() queries the dataset transfer property
+ *          list \p plist to determine whether error detection is enabled for
+ *          data read operations.
+ *
+ * \since 1.6.0
+ *
+ */
 H5_DLL H5Z_EDC_t H5Pget_edc_check(hid_t plist_id);
-H5_DLL herr_t    H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
-H5_DLL int       H5Pget_preserve(hid_t plist_id);
-H5_DLL herr_t    H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data);
-H5_DLL herr_t    H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
-                                         H5MM_free_t *free_func, void **free_info);
-H5_DLL herr_t    H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right);
-H5_DLL herr_t    H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);
+/**
+ *
+ * \ingroup  DXPL
+ *
+ * \brief Retrieves number of I/O vectors to be read/written in hyperslab I/O
+ *
+ * \param[in]   fapl_id Dataset transfer property list identifier
+ * \param[out]  size    Number of I/O vectors to accumulate in memory for I/O operations
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_hyper_vector_size() retrieves the number of I/O vectors to be accumulated in
+ *          memory before being issued to the lower levels of the HDF5 library for reading or
+ *          writing the actual data.
+ *
+ *          The number of I/O vectors set in the dataset transfer property list \p fapl_id is
+ *          returned in \p size. Unless the default value is in use, \p size was
+ *          previously set with a call to H5Pset_hyper_vector_size().
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
+/**
+ *
+ * \ingroup  DXPL
+ *
+ * \brief Checks status of the dataset transfer property list (\b DEPRECATED)
+ *
+ * \deprecated{H5Pget_preserve() is deprecated as it is no longer useful; compound datatype
+ *        field preservation is now core functionality in the HDF5 library.}
+ *
+ * \param[in]   plist_id Identifier for the dataset transfer property list
+ *
+ * \return Returns 1 or 0 if successful; otherwise returns a negative value.
+ *
+ * \details H5Pget_preserve() checks the status of the dataset transfer property list.
+ *
+ * \version 1.6.0 The flag parameter was changed from INTEGER to LOGICAL to better match the C API. (Fortran
+ * 90)
+ *
+ */
+H5_DLL int H5Pget_preserve(hid_t plist_id);
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Gets user-defined datatype conversion callback function
+ *
+ * \param[in] dxpl_id       Dataset transfer property list identifier
+ * \param[out] op           User-defined type conversion callback function
+ * \param[out] operate_data User-defined input data for the callback function
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_type_conv_cb() gets the user-defined datatype conversion callback
+ *          function \p op in the dataset transfer property list \p dxpl_id.
+ *
+ *          The parameter \p operate_data is a pointer to user-defined input data for the callback function.
+ *
+ *          The callback function \p op defines the actions an application is to take
+ *          when there is an exception during datatype conversion.
+ *
+ *          Please refer to the function H5Pset_type_conv_cb() for more details.
+ *
+ */
+H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data);
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Gets the memory manager for variable-length datatype allocation in H5Dread() and H5Dvlen_reclaim()
+ *
+ * \param[in]  plist_id   Identifier for the dataset transfer property list
+ * \param[out] alloc_func User's allocate routine, or NULL for system malloc
+ * \param[out] alloc_info Extra parameter for user’s allocation routine. Contents are ignored if preceding
+ * parameter is NULL \param[out] free_func  User's free routine, or NULL for system free \param[out] free_info
+ * Extra parameter for user’s free routine. Contents are ignored if preceding parameter is NULL
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_vlen_mem_manager() is the companion function to H5Pset_vlen_mem_manager(),
+ *          returning the parameters set by that function.
+ *
+ */
+H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
+                                      H5MM_free_t *free_func, void **free_info);
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Sets B-tree split ratios for a dataset transfer property list
+ *
+ * \param[in] plist_id The dataset transfer property list identifier
+ * \param[in] left     The B-tree split ratio for left-most nodes
+ * \param[in] middle   The B-tree split ratio for all other nodes
+ * \param[in] right    The B-tree split ratio for right-most nodes and lone nodes
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_btree_ratios() sets the B-tree split ratios for a dataset transfer property list.
+ *          The split ratios determine what percent of children go in the first node when a node splits.
+ *
+ *          The ratio \p left is used when the splitting node is the left-most node at its level in the tree;
+ *          the ratio \p right is used when the splitting node is the right-most node at its level; and
+ *          the ratio \p middle is used for all other cases.
+ *
+ *          A node that is the only node at its level in the tree uses the ratio \p right when it splits.
+ *
+ *          All ratios are real numbers between 0 and 1, inclusive.
+ *
+ */
+H5_DLL herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right);
+H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);
 /**
  * \ingroup DXPL
  *
