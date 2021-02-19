@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5StrType_H
-#define __H5StrType_H
+#ifndef H5StrType_H
+#define H5StrType_H
 
 namespace H5 {
 
@@ -78,4 +78,4 @@ class H5_DLLCPP StrType : public AtomType {
 }; // end of StrType
 } // namespace H5
 
-#endif // __H5StrType_H
+#endif // H5StrType_H

@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5ArrayType_H
-#define __H5ArrayType_H
+#ifndef H5ArrayType_H
+#define H5ArrayType_H
 
 namespace H5 {
 
@@ -69,4 +69,4 @@ class H5_DLLCPP ArrayType : public DataType {
 }; // end of ArrayType
 } // namespace H5
 
-#endif // __H5ArrayType_H
+#endif // H5ArrayType_H

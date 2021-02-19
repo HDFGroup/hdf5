@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5S package!"
 #endif
 
-#ifndef _H5Spkg_H
-#define _H5Spkg_H
+#ifndef H5Spkg_H
+#define H5Spkg_H
 
 /* Get package's private header */
 #include "H5Sprivate.h"

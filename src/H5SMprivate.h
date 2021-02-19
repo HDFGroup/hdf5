@@ -18,8 +18,8 @@
  * Purpose:	This file contains private declarations for the H5SM
  *              shared object header messages module.
  */
-#ifndef _H5SMprivate_H
-#define _H5SMprivate_H
+#ifndef H5SMprivate_H
+#define H5SMprivate_H
 
 #include "H5Oprivate.h" /* Object headers			*/
 #include "H5Pprivate.h" /* Property lists			*/

@@ -18,8 +18,8 @@
  *		H5AC package.  Including this header means that the source file
  *		is part of the H5AC package.
  */
-#ifndef _H5ACmodule_H
-#define _H5ACmodule_H
+#ifndef H5ACmodule_H
+#define H5ACmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_CACHE
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5ACmodule_H */
+#endif /* H5ACmodule_H */

@@ -18,8 +18,8 @@
  *		H5B2 package.  Including this header means that the source file
  *		is part of the H5B2 package.
  */
-#ifndef _H5B2module_H
-#define _H5B2module_H
+#ifndef H5B2module_H
+#define H5B2module_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_BTREE
 #define H5_MY_PKG_INIT NO
 
-#endif /* _H5B2module_H */
+#endif /* H5B2module_H */

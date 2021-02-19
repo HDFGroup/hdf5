@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Attribute_H
-#define __H5Attribute_H
+#ifndef H5Attribute_H
+#define H5Attribute_H
 
 namespace H5 {
 
@@ -104,4 +104,4 @@ class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
 }; // end of Attribute
 } // namespace H5
 
-#endif // __H5Attribute_H
+#endif // H5Attribute_H

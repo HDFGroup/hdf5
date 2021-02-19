@@ -14,8 +14,8 @@
  * This file contains public declarations for the H5TS (threadsafety) module.
  */
 
-#ifndef _H5TSpublic_H
-#define _H5TSpublic_H
+#ifndef H5TSpublic_H
+#define H5TSpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h" /* Generic Functions                    */
@@ -49,4 +49,4 @@ H5_DLL herr_t H5TSmutex_get_attempt_count(unsigned int *count);
 }
 #endif
 
-#endif /* _H5TSpublic_H */
+#endif /* H5TSpublic_H */

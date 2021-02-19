@@ -19,8 +19,8 @@
 
  ***************************************************************************/
 
-#ifndef _h5cpputil_h
-#define _h5cpputil_h
+#ifndef H5cpputil_H
+#define H5cpputil_H
 
 #include "h5test.h"
 

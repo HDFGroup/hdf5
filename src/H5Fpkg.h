@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5F package!"
 #endif
 
-#ifndef _H5Fpkg_H
-#define _H5Fpkg_H
+#ifndef H5Fpkg_H
+#define H5Fpkg_H
 
 /* Get package's private header */
 #include "H5Fprivate.h"
@@ -481,4 +481,4 @@ H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */
 
-#endif /* _H5Fpkg_H */
+#endif /* H5Fpkg_H */

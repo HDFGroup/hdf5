@@ -18,8 +18,8 @@
  *		H5Z package.  Including this header means that the source file
  *		is part of the H5Z package.
  */
-#ifndef _H5Zmodule_H
-#define _H5Zmodule_H
+#ifndef H5Zmodule_H
+#define H5Zmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -96,4 +96,4 @@
  *
  */
 
-#endif /* _H5Zmodule_H */
+#endif /* H5Zmodule_H */

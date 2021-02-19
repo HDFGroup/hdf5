@@ -23,8 +23,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5ACprivate_H
-#define _H5ACprivate_H
+#ifndef H5ACprivate_H
+#define H5ACprivate_H
 
 #include "H5ACpublic.h" /*public prototypes            */
 

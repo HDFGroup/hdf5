@@ -18,8 +18,8 @@
  *		H5RS package.  Including this header means that the source file
  *		is part of the H5RS package.
  */
-#ifndef _H5RSmodule_H
-#define _H5RSmodule_H
+#ifndef H5RSmodule_H
+#define H5RSmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_RS
 #define H5_MY_PKG_INIT NO
 
-#endif /* _H5RSmodule_H */
+#endif /* H5RSmodule_H */

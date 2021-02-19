@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5DataType_H
-#define __H5DataType_H
+#ifndef H5DataType_H
+#define H5DataType_H
 
 namespace H5 {
 
@@ -183,4 +183,4 @@ class H5_DLLCPP DataType : public H5Object {
 }; // end of DataType
 } // namespace H5
 
-#endif // __H5DataType_H
+#endif // H5DataType_H

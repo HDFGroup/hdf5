@@ -15,8 +15,8 @@
  *		H5 package.  Including this header means that the source file
  *		is part of the H5 package.
  */
-#ifndef _H5module_H
-#define _H5module_H
+#ifndef H5module_H
+#define H5module_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -31,4 +31,4 @@
  * \todo Describe concisely what the functions in this module are about.
  */
 
-#endif /* _H5module_H */
+#endif /* H5module_H */

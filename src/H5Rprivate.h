@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5R module
  */
-#ifndef _H5Rprivate_H
-#define _H5Rprivate_H
+#ifndef H5Rprivate_H
+#define H5Rprivate_H
 
 #include "H5Rpublic.h"
 
@@ -39,4 +39,4 @@
 /* Library Private Prototypes */
 /******************************/
 
-#endif /* _H5Rprivate_H */
+#endif /* H5Rprivate_H */

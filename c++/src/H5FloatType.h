@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5FloatType_H
-#define __H5FloatType_H
+#ifndef H5FloatType_H
+#define H5FloatType_H
 
 namespace H5 {
 
@@ -84,4 +84,4 @@ class H5_DLLCPP FloatType : public AtomType {
 }; // end of FloatType
 } // namespace H5
 
-#endif // __H5FloatType_H
+#endif // H5FloatType_H

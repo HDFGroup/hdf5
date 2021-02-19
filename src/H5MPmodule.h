@@ -18,8 +18,8 @@
  *		H5MP package.  Including this header means that the source file
  *		is part of the H5MP package.
  */
-#ifndef _H5MPmodule_H
-#define _H5MPmodule_H
+#ifndef H5MPmodule_H
+#define H5MPmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_RESOURCE
 #define H5_MY_PKG_INIT NO
 
-#endif /* _H5MPmodule_H */
+#endif /* H5MPmodule_H */

@@ -22,8 +22,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5MMpublic_H
-#define _H5MMpublic_H
+#ifndef H5MMpublic_H
+#define H5MMpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -39,4 +39,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5MMpublic_H */
+#endif /* H5MMpublic_H */

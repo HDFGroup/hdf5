@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5B package!"
 #endif
 
-#ifndef _H5Bpkg_H
-#define _H5Bpkg_H
+#ifndef H5Bpkg_H
+#define H5Bpkg_H
 
 /* Get package's private header */
 #include "H5Bprivate.h"

@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5ST module
  */
-#ifndef _H5STprivate_H
-#define _H5STprivate_H
+#ifndef H5STprivate_H
+#define H5STprivate_H
 
 #ifdef LATER
 #include "H5STpublic.h"
@@ -60,4 +60,4 @@ H5_DLL herr_t       H5ST_delete(H5ST_tree_t *root, H5ST_ptr_t p);
 H5_DLL herr_t H5ST_dump(H5ST_tree_t *tree);
 #endif /* H5ST_DEBUG */
 
-#endif /* _H5STprivate_H */
+#endif /* H5STprivate_H */

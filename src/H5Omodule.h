@@ -18,8 +18,8 @@
  *		H5O package.  Including this header means that the source file
  *		is part of the H5O package.
  */
-#ifndef _H5Omodule_H
-#define _H5Omodule_H
+#ifndef H5Omodule_H
+#define H5Omodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -35,4 +35,4 @@
  * \todo Describe concisely what the functions in this module are about.
  *
  */
-#endif /* _H5Omodule_H */
+#endif /* H5Omodule_H */

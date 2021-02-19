@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5PropList_H
-#define __H5PropList_H
+#ifndef H5PropList_H
+#define H5PropList_H
 
 namespace H5 {
 
@@ -144,4 +144,4 @@ class H5_DLLCPP PropList : public IdComponent {
 }; // end of PropList
 } // namespace H5
 
-#endif // __H5PropList_H
+#endif // H5PropList_H

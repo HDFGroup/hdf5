@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5f90i_H
-#define _H5f90i_H
+#ifndef H5f90i_H
+#define H5f90i_H
 
 /*
  * Include generated header.  This header defines integer types,
@@ -36,4 +36,4 @@ typedef char *_fcd;
 
 #endif
 
-#endif /* _H5f90i_H */
+#endif /* H5f90i_H */

@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5B2private_H
-#define _H5B2private_H
+#ifndef H5B2private_H
+#define H5B2private_H
 
 /* Private headers needed by this file */
 #include "H5ACprivate.h" /* Metadata cache                   */
@@ -149,4 +149,4 @@ H5_DLL herr_t  H5B2_patch_file(H5B2_t *fa, H5F_t *f);
 /* Statistics routines */
 H5_DLL herr_t H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info);
 
-#endif /* _H5B2private_H */
+#endif /* H5B2private_H */

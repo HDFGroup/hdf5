@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5DataSet_H
-#define __H5DataSet_H
+#ifndef H5DataSet_H
+#define H5DataSet_H
 
 namespace H5 {
 
@@ -153,4 +153,4 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 }; // end of DataSet
 } // namespace H5
 
-#endif // __H5DataSet_H
+#endif // H5DataSet_H

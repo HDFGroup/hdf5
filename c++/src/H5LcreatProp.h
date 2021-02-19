@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5LinkCreatPropList_H
-#define __H5LinkCreatPropList_H
+#ifndef H5LinkCreatPropList_H
+#define H5LinkCreatPropList_H
 
 namespace H5 {
 
@@ -77,4 +77,4 @@ class H5_DLLCPP LinkCreatPropList : public PropList {
 }; // end of LinkCreatPropList
 } // namespace H5
 
-#endif // __H5LinkCreatPropList_H
+#endif // H5LinkCreatPropList_H

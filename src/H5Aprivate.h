@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5D module
  */
-#ifndef _H5Aprivate_H
-#define _H5Aprivate_H
+#ifndef H5Aprivate_H
+#define H5Aprivate_H
 
 /* Include package's public header */
 #include "H5Apublic.h"
@@ -78,4 +78,4 @@ H5_DLL herr_t H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index
                                     H5_iter_order_t order, hsize_t skip, hsize_t *last_attr,
                                     const H5A_attr_iter_op_t *attr_op, void *op_data);
 
-#endif /* _H5Aprivate_H */
+#endif /* H5Aprivate_H */

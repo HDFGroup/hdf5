@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5MF package!"
 #endif
 
-#ifndef _H5MFpkg_H
-#define _H5MFpkg_H
+#ifndef H5MFpkg_H
+#define H5MFpkg_H
 
 /* Get package's private header */
 #include "H5MFprivate.h"
@@ -207,4 +207,4 @@ H5_DLL herr_t H5MF__sects_dump(H5F_t *f, FILE *stream);
 #ifdef H5MF_TESTING
 #endif /* H5MF_TESTING */
 
-#endif /* _H5MFpkg_H */
+#endif /* H5MFpkg_H */

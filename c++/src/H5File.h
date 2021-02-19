@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5File_H
-#define __H5File_H
+#ifndef H5File_H
+#define H5File_H
 
 namespace H5 {
 
@@ -136,4 +136,4 @@ class H5_DLLCPP H5File : public Group {
 }; // end of H5File
 } // namespace H5
 
-#endif // __H5File_H
+#endif // H5File_H

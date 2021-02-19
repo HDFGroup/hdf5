@@ -20,8 +20,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5PBprivate_H
-#define _H5PBprivate_H
+#ifndef H5PBprivate_H
+#define H5PBprivate_H
 
 /* Include package's public header */
 #ifdef NOT_YET

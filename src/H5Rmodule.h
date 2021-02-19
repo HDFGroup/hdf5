@@ -14,8 +14,8 @@
  *          H5R package.  Including this header means that the source file
  *          is part of the H5R package.
  */
-#ifndef _H5Rmodule_H
-#define _H5Rmodule_H
+#ifndef H5Rmodule_H
+#define H5Rmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -32,4 +32,4 @@
  *          HDF5 referenced objects.
  */
 
-#endif /* _H5Rmodule_H */
+#endif /* H5Rmodule_H */

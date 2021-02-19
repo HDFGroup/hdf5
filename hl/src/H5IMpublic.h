@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5IMpublic_H
-#define _H5IMpublic_H
+#ifndef H5IMpublic_H
+#define H5IMpublic_H
 
 #ifdef __cplusplus
 extern "C" {
