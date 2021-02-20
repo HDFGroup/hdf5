@@ -91,8 +91,10 @@ main(void)
     if (H5DSattach_scale(did, dsid, DIM1) < 0)
         goto out;
 
-    /* close DS id */
+    /* close DS ids */
     if (H5Dclose(dsid) < 0)
+        goto out;
+    if (H5Dclose(did) < 0)
         goto out;
 
     /* close file */

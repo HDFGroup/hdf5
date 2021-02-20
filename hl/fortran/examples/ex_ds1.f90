@@ -180,8 +180,9 @@ PROGRAM example_ds
 
   WRITE(*,'(/,5X,A,I0,2A,/)') 'Dimension Scale Label for dimension ', DIM2, ' is ... ', label(1:label_len)
 
- ! close DS id
+ ! close DS ids
   CALL H5Dclose_f(dsid, err)
+  CALL H5Dclose_f(did, err)
 
  ! close file
   CALL H5Fclose_f(fid, err)
