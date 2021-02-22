@@ -48,6 +48,32 @@ New Features
 
     Configuration:
     -------------
+    - On macOS, Universal Binaries can now be built, allowing native execution on
+      both Intel and Apple Silicon (ARM) based Macs.
+
+      To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+
+      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+
+    - Added a configure-time option to control certain compiler warnings
+      diagnostics
+
+      A new configure-time option was added that allows some compiler warnings
+      diagnostics to have the default operation. This is mainly intended for
+      library developers and currently only works for gcc 10 and above. The
+      diagnostics flags apply to C, C++ and Fortran compilers and will appear
+      in "H5 C Flags", H5 C++ Flags" and H5 Fortran Flags, respectively. They
+      will NOT be exported to h5cc, etc.
+
+      The default is OFF, which will disable the warnings URL and color attributes
+      for the warnings output. ON will not add the flags and allow default behavior.
+
+      Autotools:    --enable-diags
+
+      CMake:        HDF5_ENABLE_BUILD_DIAGS
+
+      (ADB - 2021/02/05, HDFFV-11213)
+
     - CMake option to build the HDF filter plugins project as an external project
 
         The HDF filter plugins project is a collection of registered compression
