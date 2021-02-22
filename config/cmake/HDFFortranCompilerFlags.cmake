@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -45,6 +45,14 @@ endif ()
 #-----------------------------------------------------------------------------
 # HDF5 library compile options
 #-----------------------------------------------------------------------------
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 10.0)
+  if (HDF5_ENABLE_BUILD_DIAGS)
+    message (STATUS "... default color and URL extended diagnostic messages enabled")
+  else ()
+    message (STATUS "... disable color and URL extended diagnostic messages")
+    set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fdiagnostics-urls=never -fno-diagnostics-color")
+  endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # CDash is configured to only allow 3000 warnings, so

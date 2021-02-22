@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -297,9 +297,9 @@ H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
                                          * H5AC__NO_FLAGS_SET or
                                          * H5AC__READ_ONLY_FLAG
                                          */
-    haddr_t  dblock_addr;               /* Direct block address */
+    haddr_t  dblock_addr = HADDR_UNDEF; /* Direct block address */
     size_t   dblock_size;               /* Direct block size */
-    unsigned dblock_cache_flags;        /* Flags for unprotecting direct block */
+    unsigned dblock_cache_flags = 0;    /* Flags for unprotecting direct block */
     hsize_t  obj_off;                   /* Object's offset in heap */
     size_t   obj_len;                   /* Object's length in heap */
     size_t   blk_off;                   /* Offset of object in block */
@@ -545,9 +545,9 @@ done:
 herr_t
 H5HF__man_remove(H5HF_hdr_t *hdr, const uint8_t *id)
 {
-    H5HF_free_section_t *sec_node = NULL;     /* Pointer to free space section for block */
-    H5HF_indirect_t *    iblock   = NULL;     /* Pointer to indirect block */
-    hbool_t              did_protect;         /* Whether we protected the indirect block or not */
+    H5HF_free_section_t *sec_node    = NULL;  /* Pointer to free space section for block */
+    H5HF_indirect_t *    iblock      = NULL;  /* Pointer to indirect block */
+    hbool_t              did_protect = FALSE; /* Whether we protected the indirect block or not */
     hsize_t              obj_off;             /* Object's offset in heap */
     size_t               obj_len;             /* Object's length in heap */
     size_t               dblock_size;         /* Direct block size */

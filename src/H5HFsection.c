@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -2475,7 +2475,7 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_
 
             /* Add an indirect section for each indirect block in the row */
             for (v = 0; v < row_entries; v++) {
-                hbool_t did_protect; /* Whether we protected the indirect block or not */
+                hbool_t did_protect = FALSE; /* Whether we protected the indirect block or not */
 
                 /* Try to get the child section's indirect block, if it's available */
                 if (sect->sect_info.state == H5FS_SECT_LIVE) {

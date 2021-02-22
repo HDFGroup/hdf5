@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -76,10 +76,10 @@ static int H5I__id_dump_cb(void *_item, void *_key, void *_udata);
 static int
 H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
-    H5I_id_info_t *info   = (H5I_id_info_t *)_item; /* Pointer to the ID node */
-    H5I_type_t     type   = *(H5I_type_t *)_udata;  /* User data */
-    H5G_name_t *   path   = NULL;                   /* Path to file object */
-    const void *   object = NULL;                   /* Pointer to VOL connector object */
+    H5I_id_info_t *   info   = (H5I_id_info_t *)_item; /* Pointer to the ID node */
+    H5I_type_t        type   = *(H5I_type_t *)_udata;  /* User data */
+    const H5G_name_t *path   = NULL;                   /* Path to file object */
+    const void *      object = NULL;                   /* Pointer to VOL connector object */
 
     FUNC_ENTER_STATIC_NOERR
 

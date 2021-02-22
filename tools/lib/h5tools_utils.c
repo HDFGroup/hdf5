@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -196,7 +196,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
         /* long command line option */
         int        i;
         const char ch      = '=';
-        char *     arg     = &argv[opt_ind][2];
+        char *     arg     = HDstrdup(&argv[opt_ind][2]);
         size_t     arg_len = 0;
 
         opt_arg = strchr(&argv[opt_ind][2], ch);
@@ -253,6 +253,8 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
         opt_ind++;
         sp = 1;
+
+        HDfree(arg);
     }
     else {
         register char *cp; /* pointer into current token */

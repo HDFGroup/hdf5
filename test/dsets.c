@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -4042,7 +4042,7 @@ test_nbit_compound_2(hid_t file)
             power               = HDpow(2.0F, (double)(precision[1] - 1));
             orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
             power               = HDpow(2.0F, (double)(precision[2] - 1));
-            orig_data[i][j].a.s = (short)(-((long long)HDrandom() % (long long)power) << offset[2]);
+            orig_data[i][j].a.s = (short)(-(((long long)HDrandom() % (long long)power) << offset[2]));
             orig_data[i][j].a.f = float_val[i][j];
 
             power             = HDpow(2.0F, (double)precision[3]);
@@ -4058,7 +4058,7 @@ test_nbit_compound_2(hid_t file)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
                     power = HDpow(2.0F, (double)(precision[0] - 1));
                     orig_data[i][j].d[m][n].i =
-                        (int)(-((long long)HDrandom() % (long long)power) << offset[0]);
+                        (int)(-(((long long)HDrandom() % (long long)power) << offset[0]));
                     power = HDpow(2.0F, (double)(precision[1] - 1));
                     orig_data[i][j].d[m][n].c =
                         (char)(((long long)HDrandom() % (long long)power) << offset[1]);

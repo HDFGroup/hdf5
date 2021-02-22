@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -682,8 +682,8 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
     haddr_t       offset;
     haddr_t       search_addr;       /* Address of current page */
     hsize_t       num_touched_pages; /* Number of pages accessed */
-    size_t        access_size;
-    hbool_t       bypass_pb = FALSE;   /* Whether to bypass page buffering */
+    size_t        access_size = 0;
+    hbool_t       bypass_pb   = FALSE; /* Whether to bypass page buffering */
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -983,8 +983,8 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
     haddr_t       offset;
     haddr_t       search_addr;       /* Address of current page */
     hsize_t       num_touched_pages; /* Number of pages accessed */
-    size_t        access_size;
-    hbool_t       bypass_pb = FALSE;   /* Whether to bypass page buffering */
+    size_t        access_size = 0;
+    hbool_t       bypass_pb   = FALSE; /* Whether to bypass page buffering */
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 

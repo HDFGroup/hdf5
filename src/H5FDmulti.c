@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1823,8 +1823,8 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
 {
     H5FD_multi_t *     file    = (H5FD_multi_t *)_file;
     int                nerrors = 0;
-    H5FD_mem_t         out_mt;
-    static const char *func = "H5FD_multi_unlock"; /* Function Name for error reporting */
+    H5FD_mem_t         out_mt  = H5FD_MEM_DEFAULT;
+    static const char *func    = "H5FD_multi_unlock"; /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);

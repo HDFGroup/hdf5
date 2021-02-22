@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -2215,7 +2215,7 @@ herr_t
 H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char *src_dset_name,
                hid_t src_space_id)
 {
-    H5P_genplist_t *           plist;                      /* Property list pointer */
+    H5P_genplist_t *           plist = NULL;               /* Property list pointer */
     H5O_layout_t               virtual_layout;             /* Layout information for setting virtual info */
     H5S_t *                    vspace;                     /* Virtual dataset space selection */
     H5S_t *                    src_space;                  /* Source dataset space selection */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -553,10 +553,10 @@ done:
 herr_t
 H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsigned *obj_hidden)
 {
-    void *      obj_ptr;                  /* Pointer to object for ID */
-    H5G_name_t *obj_path;                 /* Pointer to group hier. path for obj */
-    hbool_t     api_ctx_pushed = FALSE;   /* Whether API context pushed */
-    herr_t      ret_value      = SUCCEED; /* Return value */
+    void *            obj_ptr;                  /* Pointer to object for ID */
+    const H5G_name_t *obj_path;                 /* Pointer to group hier. path for obj */
+    hbool_t           api_ctx_pushed = FALSE;   /* Whether API context pushed */
+    herr_t            ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
