@@ -11,33 +11,43 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:     Header file for writing external HDF5 plugins.
+ * This file contains public declarations for the H5TS (threadsafety) developer
+ *      support routines.
  */
 
-#ifndef _H5PLextern_H
-#define _H5PLextern_H
+#ifndef _H5TSdevelop_H
+#define _H5TSdevelop_H
 
 /* Include package's public header */
-#include "H5PLpublic.h"
+/* #include "H5TSpublic.h" */
 
-/* plugins always export */
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5PLUGIN_DLL __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5PLUGIN_DLL __attribute__((visibility("default")))
-#else
-#define H5PLUGIN_DLL
-#endif
+/*****************/
+/* Public Macros */
+/*****************/
+
+/*******************/
+/* Public Typedefs */
+/*******************/
+
+/********************/
+/* Public Variables */
+/********************/
+
+/*********************/
+/* Public Prototypes */
+/*********************/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5PLUGIN_DLL H5PL_type_t H5PLget_plugin_type(void);
-H5PLUGIN_DLL const void *H5PLget_plugin_info(void);
+/* HDF5 global library lock routines */
+H5_DLL herr_t H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired);
+H5_DLL herr_t H5TSmutex_release(unsigned int *lock_count);
+H5_DLL herr_t H5TSmutex_get_attempt_count(unsigned int *count);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _H5PLextern_H */
+#endif /* _H5TSdevelop_H */

@@ -23,6 +23,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "hdf5dev.h"
 
 /* not used yet
 #define UBTXT1 "u0.txt"

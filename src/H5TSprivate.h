@@ -25,8 +25,9 @@
 #define H5TSprivate_H_
 
 #ifdef H5_HAVE_THREADSAFE
-/* Public headers needed by this file */
-#include "H5TSpublic.h" /* Public API prototypes */
+/* Include package's public headers */
+/* #include "H5TSpublic.h" */
+#include "H5TSdevelop.h"
 
 #ifdef H5_HAVE_WIN_THREADS
 

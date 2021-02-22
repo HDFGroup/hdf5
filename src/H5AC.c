@@ -43,7 +43,6 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* Files                                    */
-#include "H5FDprivate.h" /* File drivers                             */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5SLprivate.h" /* Skip Lists                               */

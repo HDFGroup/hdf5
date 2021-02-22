@@ -33,6 +33,7 @@
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5ACprivate.h" /* Metadata cache                           */
 #include "H5Bprivate.h"  /* B-trees                                  */
+#include "H5FDprivate.h" /* File drivers                             */
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5FOprivate.h" /* File objects                             */
 #include "H5FSprivate.h" /* File free space                          */

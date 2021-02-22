@@ -284,7 +284,7 @@ H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app
      */
     ev->op_info.app_file_name = app_file;
     ev->op_info.app_func_name = app_func;
-    ev->op_info.app_line_num = app_line;
+    ev->op_info.app_line_num  = app_line;
 
     /* Set the event's operation counter */
     ev->op_info.op_ins_count = es->op_counter++;

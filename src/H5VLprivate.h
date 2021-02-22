@@ -16,6 +16,11 @@
 /* Include package's public header */
 #include "H5VLpublic.h" /* Generic Functions                    */
 
+/* Include connector author public header(s) */
+#include "H5VLconnector.h"          /* VOL connector author routines */
+#include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
+#include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
+
 /* Private headers needed by this file */
 
 /**************************/

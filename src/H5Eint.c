@@ -777,7 +777,7 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
          */
         estack->slot[estack->nused].func_name = func;
         estack->slot[estack->nused].file_name = file;
-        estack->slot[estack->nused].line = line;
+        estack->slot[estack->nused].line      = line;
         if (NULL == (estack->slot[estack->nused].desc = H5MM_xstrdup(desc)))
             HGOTO_DONE(FAIL)
         estack->nused++;

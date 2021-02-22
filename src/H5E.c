@@ -986,7 +986,7 @@ H5E__get_current_stack(void)
          */
         new_error->func_name = current_error->func_name;
         new_error->file_name = current_error->file_name;
-        new_error->line = current_error->line;
+        new_error->line      = current_error->line;
         if (NULL == (new_error->desc = H5MM_xstrdup(current_error->desc)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     } /* end for */
@@ -1107,7 +1107,7 @@ H5E__set_current_stack(H5E_t *estack)
          */
         current_error->func_name = new_error->func_name;
         current_error->file_name = new_error->file_name;
-        current_error->line = new_error->line;
+        current_error->line      = new_error->line;
         if (NULL == (current_error->desc = H5MM_xstrdup(new_error->desc)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end for */
@@ -1764,7 +1764,7 @@ H5E__append_stack(H5E_t *dst_stack, const H5E_t *src_stack)
          */
         dst_error->func_name = src_error->func_name;
         dst_error->file_name = src_error->file_name;
-        dst_error->line = src_error->line;
+        dst_error->line      = src_error->line;
         if (NULL == (dst_error->desc = H5MM_xstrdup(src_error->desc)))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
