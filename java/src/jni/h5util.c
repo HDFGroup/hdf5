@@ -236,7 +236,7 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                 case sizeof(long double): {
                     long double tmp_ldouble = 0.0;
 
-                    sscanf(token, "%Lf", &tmp_ldouble);
+                    sscanf(token, "%Lg", &tmp_ldouble);
                     HDmemcpy(cptr, &tmp_ldouble, sizeof(long double));
                     break;
                 }
