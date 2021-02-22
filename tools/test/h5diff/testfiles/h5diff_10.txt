@@ -155,7 +155,6 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
   Each of START, STRIDE, COUNT, and BLOCK must be a comma-separated list of integers with
   one integer for each dimension of the dataset.
 
-
  Exit code:
   0 if no differences, 1 if differences found, 2 if error
 
