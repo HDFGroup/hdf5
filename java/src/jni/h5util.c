@@ -1113,9 +1113,9 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
         case H5T_REFERENCE: {
             if (H5Tequal(tid, H5T_STD_REF)) {
-                hid_t      new_obj_id  = H5I_INVALID_HID;
-                H5O_type_t obj_type    = -1; /* Object type */
-                H5R_type_t ref_type;         /* Reference type */
+                hid_t      new_obj_id = H5I_INVALID_HID;
+                H5O_type_t obj_type   = -1; /* Object type */
+                H5R_type_t ref_type;        /* Reference type */
 
                 H5R_ref_t *ref_vp = (H5R_ref_t *)cptr;
 
