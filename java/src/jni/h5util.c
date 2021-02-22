@@ -62,7 +62,7 @@ static hid_t  h5str_get_big_endian_type(hid_t type);
 static htri_t h5str_detect_vlen(hid_t tid);
 static htri_t h5str_detect_vlen_str(hid_t tid);
 static int    h5str_dump_simple_data(JNIEnv *env, FILE *stream, hid_t container, hid_t type, void *_mem,
-                                       hsize_t nelmts);
+                                     hsize_t nelmts);
 static int    h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,
                                       hsize_t block_nelmts);
 static int    render_bin_output_region_data_blocks(FILE *stream, hid_t region_id, hid_t container, int ndims,
@@ -704,7 +704,8 @@ done:
 } /* h5str_sprint_reference */
 
 int
-h5str_region_dataset(JNIEnv *env, h5str_t *out_str, H5R_ref_t *ref_vp, int expand_data) {
+h5str_region_dataset(JNIEnv *env, h5str_t *out_str, H5R_ref_t *ref_vp, int expand_data)
+{
     hid_t        new_obj_id  = H5I_INVALID_HID;
     hid_t        new_obj_sid = H5I_INVALID_HID;
     H5S_sel_type region_type;
@@ -1112,9 +1113,9 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
         case H5T_REFERENCE: {
             if (H5Tequal(tid, H5T_STD_REF)) {
-                hid_t        new_obj_id  = H5I_INVALID_HID;
-                H5O_type_t   obj_type    = -1; /* Object type */
-                H5R_type_t   ref_type;         /* Reference type */
+                hid_t      new_obj_id  = H5I_INVALID_HID;
+                H5O_type_t obj_type    = -1; /* Object type */
+                H5R_type_t ref_type;         /* Reference type */
 
                 H5R_ref_t *ref_vp = (H5R_ref_t *)cptr;
 
@@ -1501,8 +1502,8 @@ h5str_dump_region_blocks_data(JNIEnv *env, h5str_t *str, hid_t region_space, hid
         alloc_size = (hsize_t)nblocks * (hsize_t)ndims * 2 * (hsize_t)sizeof(ptdata[0]);
         if (alloc_size == (hsize_t)((size_t)alloc_size)) {
             if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
-                H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                    "h5str_dump_region_blocks_data: failed to allocate region block buffer");
+                H5_OUT_OF_MEMORY_ERROR(
+                    ENVONLY, "h5str_dump_region_blocks_data: failed to allocate region block buffer");
 
             if (H5Sget_select_hyper_blocklist(region_space, (hsize_t)0, (hsize_t)nblocks, ptdata) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1715,7 +1716,8 @@ h5str_dump_region_points_data(JNIEnv *env, h5str_t *str, hid_t region_space, hid
             if (alloc_size == (hsize_t)((size_t)alloc_size)) {
                 if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
                     H5_OUT_OF_MEMORY_ERROR(
-                        ENVONLY, "h5str_dump_region_points_data: failed to allocate region point data buffer");
+                        ENVONLY,
+                        "h5str_dump_region_points_data: failed to allocate region point data buffer");
 
                 if (H5Sget_select_elem_pointlist(region_space, (hsize_t)0, (hsize_t)npoints, ptdata) < 0) {
                     H5_LIBRARY_ERROR(ENVONLY);
@@ -1729,8 +1731,8 @@ h5str_dump_region_points_data(JNIEnv *env, h5str_t *str, hid_t region_space, hid
                     H5_LIBRARY_ERROR(ENVONLY);
                 }
 
-                if (h5str_print_region_data_points(ENVONLY, region_space, region_id, str, ndims, type_id, npoints,
-                                                ptdata) < 0)
+                if (h5str_print_region_data_points(ENVONLY, region_space, region_id, str, ndims, type_id,
+                                                   npoints, ptdata) < 0)
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
             }
         }
@@ -2350,8 +2352,8 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
                     if ((region_id = H5Ropen_object((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                         continue;
                     else {
-                        if ((region_space =
-                                 H5Ropen_region((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                        if ((region_space = H5Ropen_region((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >=
+                            0) {
                             if (!h5str_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
                                 region_type = H5Sget_select_type(region_space);
                                 if (region_type == H5S_SEL_POINTS)
@@ -3061,7 +3063,7 @@ h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order
     unsigned       i;                        /* counters  */
     hsize_t        total_size[H5S_MAX_RANK]; /* total size of dataset*/
     hsize_t        p_nelmts;                 /* total selected elmts */
-    unsigned char *buf        = NULL;        /* buffer for raw data */
+    unsigned char *buf = NULL;               /* buffer for raw data */
 
     /* VL data special information */
     unsigned int vl_data = 0; /* contains VL datatypes */
@@ -3874,7 +3876,7 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5export_1attribute(JNIEnv *env, jclass clss, jstring file_export_name, jstring file_name,
-                                      jstring object_path, jint binary_order)
+                                        jstring object_path, jint binary_order)
 {
     const char *file_export = NULL;
     const char *object_name = NULL;

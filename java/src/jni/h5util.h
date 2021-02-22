@@ -119,6 +119,6 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *, jclass, j
  * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V
  */
 JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5export_1attribute(JNIEnv *, jclass, jstring, jstring, jstring,
-                                                             jint);
+                                                               jint);
 
 #endif /* H5UTIL_H__ */
