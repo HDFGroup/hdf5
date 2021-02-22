@@ -29,17 +29,44 @@ fi
 
 # Try solaris native compiler flags
 if test "X-" = "X-$cc_flags_set"; then
-  H5_CFLAGS="$H5_CFLAGS -erroff=%none -DBSD_COMP"
-  # -g produces rather slow code. "-g -O" produces much faster code with some
-  # loss of debugger functions such as not able to print local variables.
-  DEBUG_CFLAGS="-g -O"
-  DEBUG_CPPFLAGS=
-  PROD_CFLAGS="-O -s"
-  PROD_CPPFLAGS=
-  PROFILE_CFLAGS=-xpg
-  PROFILE_CPPFLAGS=
+  # HDF5 must be built with a C99 compiler on Solaris
+  # -erroff=%none turns on all warnings
+  H5_CFLAGS="$H5_CFLAGS -xc99=all -erroff=%none"
+
+  # Production
+  # NDEBUG is handled explicitly by the configure script
+  PROD_CFLAGS=
+
+  # Debug
+  # NDEBUG is handled explicitly by the configure script
+  # -g is hanled by the symbols flags
+  DEBUG_CFLAGS=
+
+  # Symbols
+  # -g produces output for dbx, NOT gdb. You can use "gdb on" from
+  # inside gdb to use gdb commands if you need to debug.
+  # If you want a LOT of debugging information (at the expense of
+  # really slow code), try using -g3. That will even let you debug
+  # into macros.
+  # -s strips symbols, as in gcc
+  NO_SYMBOLS_CFLAGS="-s"
+  SYMBOLS_CFLAGS="-g"
+
+  # Profile
+  # This produces profiling output for gprof. If you want to use
+  # the Solaris profiler, use -xprofile instead.
+  PROFILE_CFLAGS="-xpg"
+
+  # Optimization
+  # -O has switched to -xO{1|2|3|4|5}. -xO3 is probably a good compromise
+  # for the daily tests, but you might want to switch to -xO2 or lower
+  # if you are actively debugging.
+  HIGH_OPT_CFLAGS="-xO5"
+  DEBUG_OPT_CFLAGS="-xO3"
+  NO_OPT_CFLAGS=
+
   cc_flags_set=yes
-# Special linking flag is needed to build with Fortran on Solaris 5.9
+    # Special linking flag is needed to build with Fortran on Solaris 5.9
     system_version="`uname -r`"
     case "$system_version" in
 	5.9*)
@@ -50,10 +77,6 @@ if test "X-" = "X-$cc_flags_set"; then
 	    ;;
     esac
 
-  # Turn off optimization flag for SUNpro compiler versions 4.x which
-  # have an optimization bug.  Version 5.0 works.
-  ($CC -V 2>&1) | grep -s 'cc: .* C 4\.' >/dev/null 2>&1 \
-       && PROD_CFLAGS="`echo $PROD_CFLAGS | sed -e 's/-O//'`"
 fi
 
 LIBS="$LIBS"
@@ -69,11 +92,32 @@ if test "X-" = "X-$f9x_flags_set"; then
   FSEARCH_DIRS=""
 
   H5_FCFLAGS="$H5_FCFLAGS"
+
+  # TODO: Revisit these flags.
+
+  # Production
+  # NDEBUG is handled explicitly by the configure script
+  PROD_FCFLAGS=
+
+  # Debug
+  # NDEBUG is handled explicitly by the configure script
+  # -g is hanled by the symbols flags
+  DEBUG_FCFLAGS=
+
+  # Symbols
+  NO_SYMBOLS_FCFLAGS=
+  SYMBOLS_FCFLAGS="-g"
+
+  # Profile
+  PROFILE_FCFLAGS=
+
+  # Optimization
   # -g produces rather slow code. "-g -O" produces much faster code with some
   # loss of debugger functions such as not able to print local variables.
-  DEBUG_FCFLAGS="-g -O"
-  PROD_FCFLAGS="-O2"
-  PROFILE_FCFLAGS=""
+  HIGH_OPT_FCFLAGS="-O2"
+  DEBUG_OPT_FCFLAGS="-O"
+  NO_OPT_FCFLAGS=
+
   f9x_flags_set=yes
 fi
 
@@ -106,14 +150,30 @@ fi
 if test -z "$cxx_flags_set"; then
   H5_CXXFLAGS="$H5_CXXFLAGS -instances=static"
   H5_CPPFLAGS="$H5_CPPFLAGS -LANG:std"
+
+  # Production
+  # NDEBUG is handled explicitly by the configure script
+  PROD_CXXFLAGS=
+
+  # Debug
+  # NDEBUG is handled explicitly by the configure script
+  # -g is hanled by the symbols flags
+  DEBUG_CXXFLAGS=
+
+  # Symbols
+  NO_SYMBOLS_CXXFLAGS="-s"
+  SYMBOLS_CXXFLAGS="-g"
+
+  # Profile
+  PROFILE_CXXFLAGS="-xpg"
+
+  # Optimization
   # -g produces rather slow code. "-g -O" produces much faster code with some
   # loss of debugger functions such as not able to print local variables.
-  DEBUG_CXXFLAGS="-g -O"
-  DEBUG_CPPFLAGS=
-  PROD_CXXFLAGS="-O -s"
-  PROD_CPPFLAGS=
-  PROFILE_CXXFLAGS=-xpg
-  PROFILE_CPPFLAGS=
+  HIGH_OPT_CXXFLAGS="-O"
+  DEBUG_OPT_CXXFLAGS="-O"
+  NO_OPT_CXXFLAGS=
+
   cxx_flags_set=yes
 fi
 
@@ -154,5 +214,4 @@ case $CXX in
         echo "No match to get cxx_version_info for $CXX"
         ;;
 esac
-
 

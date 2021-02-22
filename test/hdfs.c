@@ -608,10 +608,10 @@ test_hdfs_fapl(void)
      * test-local variables *
      ************************/
 
-    hid_t fapl_id = -1;             /* file access property list ID */
-    hid_t driver_id = -1;           /* ID for this VFD              */
-    unsigned long driver_flags = 0; /* VFD feature flags            */
-    H5FD_hdfs_fapl_t hdfs_fa_0 = {
+    hid_t            fapl_id      = -1; /* file access property list ID */
+    hid_t            driver_id    = -1; /* ID for this VFD              */
+    unsigned long    driver_flags = 0;  /* VFD feature flags            */
+    H5FD_hdfs_fapl_t hdfs_fa_0    = {
         1,    /* version*/
         "",   /* node name */
         9000, /* node port */
@@ -694,10 +694,10 @@ test_vfd_open(void)
     struct test_condition {
         const char *message;
         const char *url;
-        unsigned flags;
-        int which_fapl;
-        haddr_t maxaddr;
-        hbool_t might_use_other_driver;
+        unsigned    flags;
+        int         which_fapl;
+        haddr_t     maxaddr;
+        hbool_t     might_use_other_driver;
     };
 
     /************************
@@ -786,11 +786,11 @@ test_vfd_open(void)
             FALSE,
         },
     };
-    unsigned i = 0;
+    unsigned i                        = 0;
     unsigned failing_conditions_count = 10;
-    H5FD_t *fd = NULL;
-    hid_t fapl_hdfs = -1;
-    hid_t fapl_unconfigured = -1;
+    H5FD_t * fd                       = NULL;
+    hid_t    fapl_hdfs                = -1;
+    hid_t    fapl_unconfigured        = -1;
 
     TESTING("HDFS VFD-level open");
 
@@ -808,8 +808,8 @@ test_vfd_open(void)
     /* all the test cases that will _not_ open
      */
     for (i = 0; i < failing_conditions_count; i++) {
-        struct test_condition T = failing_conditions[i];
-        hid_t fapl_id = H5P_DEFAULT;
+        struct test_condition T       = failing_conditions[i];
+        hid_t                 fapl_id = H5P_DEFAULT;
 
         fd = NULL;
 
@@ -933,7 +933,7 @@ test_eof_eoa(void)
      ************************/
 
     H5FD_t *fd_shakespeare = NULL;
-    hid_t fapl_id = -1;
+    hid_t   fapl_id        = -1;
 
     TESTING("HDFS eof/eoa gets and sets");
 
@@ -1016,10 +1016,10 @@ error:
 static int
 test_H5FDread_without_eoa_set_fails(void)
 {
-    char buffer[HDFS_TEST_MAX_BUF_SIZE];
-    unsigned int i = 0;
-    H5FD_t *file_shakespeare = NULL;
-    hid_t fapl_id = -1;
+    char         buffer[HDFS_TEST_MAX_BUF_SIZE];
+    unsigned int i                = 0;
+    H5FD_t *     file_shakespeare = NULL;
+    hid_t        fapl_id          = -1;
 
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
 

@@ -787,7 +787,7 @@ if (HDF5_GENERATE_HEADERS)
     )
     message(STATUS ${SCRIPT_OUTPUT})
   else ()
-    message (STATUS "Cannot generate headers - perl not found")
+    message (WARNING "Cannot generate headers - perl not found")
   endif ()
 endif ()
 
@@ -905,7 +905,8 @@ else ()
   )
   if (BUILD_SHARED_LIBS)
     add_custom_command (
-        OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1
+        OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+                   ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
         COMMAND    ${CMAKE_COMMAND}
@@ -1117,7 +1118,7 @@ set (_PKG_CONFIG_REQUIRES)
 set (_PKG_CONFIG_REQUIRES_PRIVATE)
 
 configure_file (
-    ${HDF_RESOURCES_DIR}/libhdf5.pc.in
+    ${HDF_CONFIG_DIR}/libhdf5.pc.in
     ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}-${HDF5_PACKAGE_VERSION}.pc
     @ONLY
 )

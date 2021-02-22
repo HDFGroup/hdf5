@@ -1,6 +1,7 @@
 HDF5 version 1.8.23-1 currently under development
 ================================================================================
 
+
 INTRODUCTION
 ============
 
@@ -48,55 +49,167 @@ New Features
 
     Configuration:
     -------------
+    - On macOS, Universal Binaries can now be built, allowing native execution on
+      both Intel and Apple Silicon (ARM) based Macs.
+
+      To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+
+      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+
+    - Added a configure-time option to control certain compiler warnings
+      diagnostics
+
+      A new configure-time option was added that allows some compiler warnings
+      diagnostics to have the default operation. This is mainly intended for
+      library developers and currently only works for gcc 10 and above. The
+      diagnostics flags apply to C, C++ and Fortran compilers and will appear
+      in "H5 C Flags", H5 C++ Flags" and H5 Fortran Flags, respectively. They
+      will NOT be exported to h5cc, etc.
+
+      The default is OFF, which will disable the warnings URL and color attributes
+      for the warnings output. ON will not add the flags and allow default behavior.
+
+      Autotools:    --enable-diags
+
+      CMake:        HDF5_ENABLE_BUILD_DIAGS
+
+      (ADB - 2021/02/05, HDFFV-11213)
+
+    - FreeBSD Autotools configuration now defaults to 'cc' and 'c++' compilers
+
+      On FreeBSD, the autotools defaulted to 'gcc' as the C compiler and did
+      not process C++ options. Since FreeBSD 10, the default compiler has
+      been clang (via 'cc').
+
+      The default compilers have been set to 'cc' for C and 'c++' for C++,
+      which will pick up clang and clang++ respectively on FreeBSD 10+.
+      Additionally, clang options are now set correctly for both C and C++
+      and g++ options will now be set if that compiler is being used (an
+      omission from the former functionality).
+
+      (DER - 2021/02/16, HDFFV-11193)
+
+    - Fixed POSIX problems when building w/ gcc on Solaris
+
+      When building on Solaris using gcc, the POSIX symbols were not
+      being set correctly, which could lead to issues like clock_gettime()
+      not being found.
+
+      The standard is now set to gnu99 when building with gcc on Solaris,
+      which allows POSIX things to be #defined and linked correctly. This
+      differs slightly from the gcc norm, where we set the standard to c99
+      and manually set POSIX #define symbols.
+
+      (DER - 2021/02/16, HDFFV-11191)
+
+    - Added a configure-time option to consider certain compiler warnings
+      as errors
+
+      A new configure-time option was added that converts some compiler warnings
+      to errors. This is mainly intended for library developers and currently
+      only works for gcc and clang. The warnings that are considered errors
+      will appear in the generated libhdf5.settings file. These warnings apply
+      to C and C++ code and will appear in "H5 C Flags" and H5 C++ Flags",
+      respectively. They will NOT be exported to h5cc, etc.
+
+      The default is OFF. Building with this option may fail when compiling
+      on operating systems and with compiler versions not commonly used by
+      the library developers. Compilation may also fail when headers not
+      under the control of the library developers (e.g., mpi.h, hdfs.h) raise
+      warnings.
+
+      Autotools:    --enable-warnings-as-errors
+
+      CMake:        HDF5_ENABLE_WARNINGS_AS_ERRORS
+
+      (DER - 2021/02/16, HDFFV-11189)
+
+
+    Library:
+    --------
     - None
 
 
-    Library
-    -------
-    - None
-
-
-    Parallel Library
+    Fortran Library:
     ----------------
     - None
 
 
-    Tools
-    -----
+    C++ Library:
+    ------------
     - None
 
 
-    High-Level APIs
+    Parallel Library:
+    ----------------
+    - None
+
+
+    Tools:
+    ------
+    - h5repack added help text for user-defined filters.
+
+        Added help text line that states the valid values of the filter flag
+        for user-defined filters;
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
+
+        (ADB - 2021/02/16, HDFFV-11099)
+
+    - h5repack added options to control how external links are handled.
+
+      Currently h5repack preserves external links and cannot copy and merge
+      data from the external files. Two options, merge and prune, were added to
+      control how to merge data from an external link into the resulting file.
+       --merge             Follow external soft link recursively and merge data.
+       --prune             Do not follow external soft links and remove link.
+       --merge --prune     Follow external link, merge data and remove dangling link.
+
+      (ADB - 2021/02/16, HDFFV-9984)
+
+
+    High-Level APIs:
     ---------------
     - None
 
 
-    Fortran API
-    -----------
-    - None
-
-
-    C++ API
-    -------
-    - None
-
-
-    High-Level APIs
-    ---------------
+    Documentation
+    -------------
     - None
 
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
+    - None
 
 
 
-Bug Fixes since HDF5-1.8.21
+Bug Fixes since HDF5-1.8.22
 ===========================
 
     Configuration
     -------------
-    - None
+    - Reclassify CMake messages, to allow new modes and --log-level option
+
+      CMake message commands have a mode argument. By default, STATUS mode
+      was chosen for any non-error message. CMake version 3.15 added additional
+      modes, NOTICE, VERBOSE, DEBUG and TRACE. All message commands with a mode
+      of STATUS were reviewed and most were reclassified as VERBOSE. The new
+      mode was protected by a check for a CMake version of at least 3.15. If CMake
+      version 3.17 or above is used, the user can use the command line option
+      of "--log-level" to further restrict which message commands are displayed.
+
+      (ADB - 2021/02/16, HDFFV-11144)
+
+    - Fixes Autotools determination of the stat struct having an st_blocks field
+
+      A missing parenthesis in an autoconf macro prevented building the test
+      code used to determine if the stat struct contains the st_blocks field.
+      Now that the test functions correctly, the H5_HAVE_STAT_ST_BLOCKS #define
+      found in H5pubconf.h will be defined correctly on both the Autotools and
+      CMake. This #define is only used in the tests and does not affect the
+      HDF5 C library.
+
+      (DER - 2021/02/16, HDFFV-11201)
 
 
     Library
@@ -105,13 +218,68 @@ Bug Fixes since HDF5-1.8.21
 
 
     Performance
-    -------------
+    -----------
     - None
 
 
     Tools
     -----
-    - None
+    - Fixed tools argument parsing.
+
+        Tools parsing used the length of the option from the long array to match
+        the option from the command line. This incorrectly matched a shorter long
+        name option that was happened to be a subset of another long option.
+        Changed to match whole names.
+
+        (ADB - 2021/02/16, HDFFV-11106)
+
+    - The tools library was updated by standardizing the error stack process.
+
+      General sequence is:
+          h5tools_setprogname(PROGRAMNAME);
+          h5tools_setstatus(EXIT_SUCCESS);
+          h5tools_init();
+          ... process the command-line (check for error-stack enable) ...
+          h5tools_error_report();
+          ... (do work) ...
+          h5diff_exit(ret);
+
+      (ADB - 2021/02/16, HDFFV-11066)
+
+    - h5diff fixed a command line parsing error.
+
+      h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
+      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+
+      (ADB - 2021/02/16, HDFFV-10897)
+
+    - h5diff added a command line option to ignore attributes.
+
+      h5diff would ignore all objects with a supplied path if the exclude-path argument is used.
+      Adding the exclude-attribute argument will only eclude attributes, with the supplied path,
+      from comparision.
+
+      (ADB - 2021/02/16, HDFFV-5935)
+
+    - h5diff added another level to the verbose argument to print filenames.
+
+      Added verbose level 3 that is level 2 plus the filenames. The levels are:
+          0 : Identical to '-v' or '--verbose'
+          1 : All level 0 information plus one-line attribute status summary
+          2 : All level 1 information plus extended attribute status report
+          3 : All level 2 information plus file names
+
+      (ADB - 2021/02/16, HDFFV-10005)
+
+    - h5repack was fixed to repack the reference attributes properly.
+      The code line that checks if the update of reference inside a compound
+      datatype is misplaced outside the code block loop that carries out the
+      check. In consequence, the next attribute that is not the reference
+      type was repacked again as the reference type and caused the failure of
+      repacking. The fix is to move the corresponding code line to the correct
+      code block.
+
+      (KY -2021/02/16, HDFFV-11014)
 
 
     Fortran API
@@ -143,7 +311,7 @@ Supported Platforms
 
     Linux 2.6.32-573.18.1.el6     IBM XL C/C++ V13.1
     #1 SMP ppc64 GNU/Linux        IBM XL Fortran V15.1
-    (ostrich)                     
+    (ostrich)
 
     Linux 3.10.0-327.10.1.el7     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:

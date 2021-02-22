@@ -136,9 +136,25 @@ case $FC_BASENAME in
 # (just in case since this should be a default EIP)
         H5_FCFLAGS="$H5_FCFLAGS"
         FSEARCH_DIRS=""
-        DEBUG_FCFLAGS="-g"
-        PROD_FCFLAGS="-O"
-        PROFILE_FCFLAGS="-g -pg"
+
+        # Production
+        PROD_FCFLAGS=
+
+        # Debug
+        DEBUG_FCFLAGS=
+
+        # Symbols
+        SYMBOLS_FCFLAGS="-g"
+        NO_SYMBOLS_FCFLAGS="-s"
+
+        # Profiling
+        PROFILE_FCFLAGS="-pg"
+
+        # Optimization
+        HIGH_OPT_FCFLAGS="-O"
+        DEBUG_OPT_FCFLAGS=
+        NO_OPT_FCFLAGS=
+
         f9x_flags_set=yes
         ;;
 #

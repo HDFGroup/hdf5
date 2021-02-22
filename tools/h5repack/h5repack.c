@@ -73,10 +73,12 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
     int k, n;
 
     HDmemset(options, 0, sizeof(pack_opt_t));
-    options->min_comp = 0;
-    options->verbose  = verbose;
-    options->latest   = latest;
-    options->layout_g = H5D_LAYOUT_ERROR;
+    options->min_comp  = 0;
+    options->verbose   = verbose;
+    options->latest    = latest;
+    options->layout_g  = H5D_LAYOUT_ERROR;
+    options->fin_fapl  = H5P_DEFAULT;
+    options->fout_fapl = H5P_DEFAULT;
 
     for (n = 0; n < H5_REPACK_MAX_NFILTERS; n++) {
         options->filter_g[n].filtn     = -1;
@@ -521,6 +523,8 @@ done:
              */
             if (TRUE == h5tools_detect_vlen(wtype_id))
                 H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
+
+            /* Free buf */
             HDfree(buf);
         }
 
@@ -699,7 +703,7 @@ check_options(pack_opt_t *options)
     }
 
     if (options->ublock_filename == NULL && options->ublock_size != 0)
-        H5TOOLS_GOTO_ERROR((-1), "file name missing for user block", options->ublock_filename);
+        H5TOOLS_GOTO_ERROR((-1), "file name missing for user block");
 
     /*------------------------------------------------------------------------
      * Verify alignment options; threshold is zero default but alignment not
@@ -741,7 +745,8 @@ check_objects(const char *fname, pack_opt_t *options)
      * open the file
      *-------------------------------------------------------------------------
      */
-    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0)) < 0)
+    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, options->fin_fapl,
+                             (options->fin_fapl == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname, H5FOPENERROR);
 
     /*-------------------------------------------------------------------------

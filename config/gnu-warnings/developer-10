@@ -1,0 +1,6 @@
+# New warning
+-Warith-conversion
+
+# Enable static analysis of program flow
+-fanalyzer
+-fdiagnostics-path-format=none

@@ -132,6 +132,7 @@
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
+./config/libhdf5.pc.in
 ./config/linux-gnu
 ./config/linux-gnuaout
 ./config/linux-gnueabihf
@@ -151,6 +152,7 @@
 ./config/clang-warnings/error-general
 ./config/clang-warnings/general
 ./config/clang-warnings/no-developer-general
+./config/clang-warnings/noerror-general
 ./config/gnu-warnings/4.8-4.last
 ./config/gnu-warnings/4.8
 ./config/gnu-warnings/4.9
@@ -159,14 +161,19 @@
 ./config/gnu-warnings/7
 ./config/gnu-warnings/8
 ./config/gnu-warnings/9
+./config/gnu-warnings/9.3
 ./config/gnu-warnings/cxx-general
+./config/gnu-warnings/cxx-4.8
 ./config/gnu-warnings/cxx-4.9
 ./config/gnu-warnings/cxx-5
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
+./config/gnu-warnings/cxx-noerror-5
+./config/gnu-warnings/cxx-noerror-general
 ./config/gnu-warnings/developer-4.8
 ./config/gnu-warnings/developer-7
 ./config/gnu-warnings/developer-8
+./config/gnu-warnings/developer-10
 ./config/gnu-warnings/developer-general
 ./config/gnu-warnings/error-5
 ./config/gnu-warnings/error-8
@@ -180,6 +187,9 @@
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
+./config/gnu-warnings/noerror-5
+./config/gnu-warnings/noerror-8
+./config/gnu-warnings/noerror-general
 ./config/intel-warnings/ifort-general
 ./config/intel-warnings/general
 
@@ -2122,11 +2132,14 @@
 ./tools/h5diff/testfiles/h5diff_8639.txt
 ./tools/h5diff/testfiles/tudfilter.h5
 ./tools/h5diff/testfiles/tudfilter2.h5
+./tools/h5diff/testfiles/h5diff_eps.txt
+./tools/h5diff/testfiles/h5diff_eps1.h5
+./tools/h5diff/testfiles/h5diff_eps2.h5
 ./tools/h5diff/testfiles/h5diff_ud.txt
 ./tools/h5diff/testfiles/h5diff_udfail.err
 ./tools/h5diff/testfiles/h5diff_udfail.txt
-./tools/h5diff/testfiles/diff_strings1.h5
-./tools/h5diff/testfiles/diff_strings2.h5
+./tools/h5diff/testfiles/h5diff_strings1.h5
+./tools/h5diff/testfiles/h5diff_strings2.h5
 ./tools/h5diff/testfiles/h5diff_vlstr.txt
 
 #test files for h5repack
@@ -2453,7 +2466,6 @@
 ./config/cmake/HDF5PluginCache.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/libh5cc.in
-./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml
