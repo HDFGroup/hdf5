@@ -5807,6 +5807,7 @@ H5Pset_vol_implicit_async(hid_t fapl_id, hbool_t allow_implicit_async)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", fapl_id, allow_implicit_async);
 
     /* Verify that the property list is the correct class */
     if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
@@ -5857,6 +5858,7 @@ H5Pget_vol_implicit_async(hid_t fapl_id, hbool_t *implicit_async_allowed /*out*/
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", fapl_id, implicit_async_allowed);
 
     /* Verify that the property list is the correct class */
     if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
