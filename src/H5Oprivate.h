@@ -994,7 +994,7 @@ H5_DLL herr_t H5O_are_mdc_flushes_disabled(H5O_loc_t *oloc, hbool_t *are_disable
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
                                   H5O_copy_t *cpy_info, hbool_t inc_depth, H5O_type_t *obj_type,
                                   void **udata);
-H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, H5T_t *dt_src, void *buf_src,
+H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, const H5T_t *dt_src, void *buf_src,
                                   size_t nbytes_src, H5F_t *file_dst, void *buf_dst, H5O_copy_t *cpy_info);
 
 /* Debugging routines */
