@@ -1170,7 +1170,7 @@
   ADD_H5_TEST (err_attr_dspace 1 err_attr_dspace.h5)
 
   # test to verify HDFFV-9407: long double full precision
-  ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lg t128bit_float.h5)
+#  ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lg t128bit_float.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
