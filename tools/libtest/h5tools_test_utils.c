@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -613,7 +613,7 @@ test_populate_ros3_fa(void)
 
     hbool_t show_progress = FALSE;
     int     bad_version   = 0xf87a; /* arbitrarily wrong version number */
-#endif /* H5_HAVE_ROS3_VFD */
+#endif                              /* H5_HAVE_ROS3_VFD */
 
     TESTING("programmatic ros3 fapl population");
 
@@ -1028,7 +1028,7 @@ test_set_configured_fapl(void)
         "",   /* user name             */
         2048, /* stream buffer size    */
     };
-#endif /* H5_HAVE_LIBHDFS */
+#endif                    /* H5_HAVE_LIBHDFS */
     unsigned n_cases = 7; /* number of common testcases */
     testcase cases[] = {
         {
@@ -1279,7 +1279,7 @@ main(void)
 
 #ifdef _H5TEST_
     h5reset(); /* h5test? */
-#endif /* _H5TEST_ */
+#endif         /* _H5TEST_ */
 
     HDfprintf(stdout, "Testing h5tools_utils corpus.\n");
 

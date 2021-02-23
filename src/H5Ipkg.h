@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -98,10 +98,10 @@ H5_DLLVAR int H5I_next_type_g;
 /* Package Private Prototypes */
 /******************************/
 
-H5_DLL int            H5I__destroy_type(H5I_type_t type);
-H5_DLL void *         H5I__remove_verify(hid_t id, H5I_type_t type);
-H5_DLL int            H5I__inc_type_ref(H5I_type_t type);
-H5_DLL int            H5I__get_type_ref(H5I_type_t type);
+H5_DLL int   H5I__destroy_type(H5I_type_t type);
+H5_DLL void *H5I__remove_verify(hid_t id, H5I_type_t type);
+H5_DLL int   H5I__inc_type_ref(H5I_type_t type);
+H5_DLL int   H5I__get_type_ref(H5I_type_t type);
 H5_DLL H5I_id_info_t *H5I__find_id(hid_t id);
 
 /* Testing functions */

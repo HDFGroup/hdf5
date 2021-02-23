@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -5165,7 +5165,7 @@ run_int_fp_conv(const char *name)
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
 #if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
-#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
+#else  /* H5_LLONG_TO_LDOUBLE_CORRECT */
     {
         char str[256]; /*hello string        */
 
@@ -5177,7 +5177,7 @@ run_int_fp_conv(const char *name)
 #endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
 #if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
-#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
+#else  /* H5_LLONG_TO_LDOUBLE_CORRECT */
     {
         char str[256]; /*hello string        */
 

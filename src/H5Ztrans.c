@@ -6,19 +6,19 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "H5Zmodule.h" /* This source code file is part of the H5Z module */
 
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5VMprivate.h" /* H5VM_array_fill			*/
-#include "H5Zpkg.h"      /* Data filters				*/
+#include "H5private.h"   /* Generic Functions                   */
+#include "H5Eprivate.h"  /* Error handling                      */
+#include "H5Iprivate.h"  /* IDs                                 */
+#include "H5MMprivate.h" /* Memory management                   */
+#include "H5VMprivate.h" /* H5VM_array_fill                     */
+#include "H5Zpkg.h"      /* Data filters                                */
 
 /* Token types */
 typedef enum {
@@ -994,12 +994,12 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_xform_eval
- * Purpose: 	If the transform is trivial, this function applies it.
- * 		Otherwise, it calls H5Z__xform_eval_full to do the full
- * 		transform.
+ * Purpose:     If the transform is trivial, this function applies it.
+ *              Otherwise, it calls H5Z__xform_eval_full to do the full
+ *              transform.
  * Return:      SUCCEED if transform applied successfully, FAIL otherwise
  * Programmer:  Leon Arber
- * 		5/1/04
+ *              5/1/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1033,7 +1033,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void *array, size_t array_size
 #if CHAR_MIN >= 0
         else if (array_type == H5T_NATIVE_SCHAR)
             H5Z_XFORM_DO_OP5(signed char, array_size)
-#else /* CHAR_MIN >= 0 */
+#else  /* CHAR_MIN >= 0 */
         else if (array_type == H5T_NATIVE_UCHAR)
             H5Z_XFORM_DO_OP5(unsigned char, array_size)
 #endif /* CHAR_MIN >= 0 */
@@ -1110,8 +1110,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Z__xform_eval_full
  *
- * Purpose: 	Does a full evaluation of the parse tree contained in tree
- * 		and applies this transform to array.
+ * Purpose:     Does a full evaluation of the parse tree contained in tree
+ *              and applies this transform to array.
  *
  * Notes:       In the case of a polynomial data transform (ie, the left and right
  *              subtree are both of type H5Z_XFORM_SYMBOL), the convention is
@@ -1121,7 +1121,7 @@ done:
  * Return:      Nothing
  *
  * Programmer:  Leon Arber
- * 		5/1/04
+ *              5/1/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1753,7 +1753,7 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
  * Function: H5Z_xform_extract_xform_str
  *
  * Purpose: Extracts the pointer to the data transform strings from the
- * 		data transform property.`
+ *              data transform property.`
  * Return:
  *          Pointer to a copy of the string in the data_xform property.
  *

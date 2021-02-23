@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -2465,7 +2465,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
                         HDfprintf(stdout, "%d:%s: Bad data in read req reply.\n", world_mpi_rank, FUNC);
                     }
 
-#if 0 /* This has been useful debugging code -- keep it for now. */
+#if 0  /* This has been useful debugging code -- keep it for now. */
                 if ( mssg.req != READ_REQ_REPLY_CODE ) {
 
                 HDfprintf(stdout,
@@ -6880,7 +6880,7 @@ main(int argc, char **argv)
     H5open();
 
     express_test = do_express_test();
-#if 0 /* JRM */
+#if 0  /* JRM */
     express_test = 0;
 #endif /* JRM */
     if (express_test) {

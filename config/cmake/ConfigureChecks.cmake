@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -165,14 +165,18 @@ if (NOT WINDOWS)
         add_definitions ("-D_GNU_SOURCE")
       else ()
         set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
-        message (STATUS "${msg}... no")
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "${msg}... no")
+        endif ()
         file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
               "Test TEST_DIRECT_VFD_WORKS Run failed with the following output and exit code:\n ${OUTPUT}\n"
         )
       endif ()
     else ()
       set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
-      message (STATUS "${msg}... no")
+      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+        message (VERBOSE "${msg}... no")
+      endif ()
       file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
           "Test TEST_DIRECT_VFD_WORKS Compile failed with the following output:\n ${OUTPUT}\n"
       )
@@ -192,7 +196,7 @@ option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
       list (APPEND LINK_LIBS ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
       INCLUDE_DIRECTORIES (${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
     else ()
-      message (STATUS "The Read-Only S3 VFD was requested but cannot be built.\nPlease check that openssl and cURL are available on your\nsystem, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
+      message (WARNING "The Read-Only S3 VFD was requested but cannot be built.\nPlease check that openssl and cURL are available on your\nsystem, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
     endif ()
 endif ()
 
@@ -209,7 +213,7 @@ if (H5FD_ENABLE_MIRROR_VFD)
        ${HDF_PREFIX}_HAVE_FORK)
       set (${HDF_PREFIX}_HAVE_MIRROR_VFD 1)
   else()
-    message(STATUS "The socket-based Mirror VFD was requested but cannot be built. System prerequisites are not met.")
+    message(WARNING "The socket-based Mirror VFD was requested but cannot be built. System prerequisites are not met.")
   endif()
 endif()
 
@@ -235,7 +239,6 @@ endif ()
 #-----------------------------------------------------------------------------
 macro (H5ConversionTests TEST msg)
   if (NOT DEFINED ${TEST})
-   # message (STATUS "===> ${TEST}")
     TRY_RUN (${TEST}_RUN   ${TEST}_COMPILE
         ${CMAKE_BINARY_DIR}
         ${HDF_RESOURCES_DIR}/ConversionTests.c
@@ -245,17 +248,23 @@ macro (H5ConversionTests TEST msg)
     if (${TEST}_COMPILE)
       if (${TEST}_RUN MATCHES 0)
         set (${TEST} 1 CACHE INTERNAL ${msg})
-        message (STATUS "${msg}... yes")
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "${msg}... yes")
+        endif ()
       else ()
         set (${TEST} "" CACHE INTERNAL ${msg})
-        message (STATUS "${msg}... no")
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "${msg}... no")
+        endif ()
         file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
               "Test ${TEST} Run failed with the following output and exit code:\n ${OUTPUT}\n"
         )
       endif ()
     else ()
       set (${TEST} "" CACHE INTERNAL ${msg})
-      message (STATUS "${msg}... no")
+      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+        message (VERBOSE "${msg}... no")
+      endif ()
       file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
           "Test ${TEST} Compile failed with the following output:\n ${OUTPUT}\n"
       )

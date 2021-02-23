@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -147,11 +147,8 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t t
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* Set up VOL object */
-    if (NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate top object structure")
-    new_obj->connector = vol_obj->connector;
-    new_obj->connector->nrefs++;
-    new_obj->data = data;
+    if (NULL == (new_obj = H5VL_create_object(data, vol_obj->connector)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't create VOL object for committed datatype")
 
     /* Set the committed type object to the VOL connector pointer in the H5T_t struct */
     dt->vol_obj = new_obj;
@@ -301,11 +298,8 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* Setup VOL object */
-    if (NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate top object structure")
-    new_obj->connector = vol_obj->connector;
-    new_obj->connector->nrefs++;
-    new_obj->data = dt;
+    if (NULL == (new_obj = H5VL_create_object(dt, vol_obj->connector)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't create VOL object for committed datatype")
 
     /* Set the committed type object to the VOL connector pointer in the H5T_t struct */
     type->vol_obj = new_obj;
@@ -976,8 +970,11 @@ H5T_open(const H5G_loc_t *loc)
 done:
     if (ret_value == NULL) {
         if (dt) {
-            if (shared_fo == NULL) /* Need to free shared fo */
+            if (shared_fo == NULL) { /* Need to free shared fo */
+                if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
+            } /* end if */
 
             H5O_loc_free(&(dt->oloc));
             H5G_name_free(&(dt->path));

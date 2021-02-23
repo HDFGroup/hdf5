@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -84,19 +84,19 @@ typedef int H5VL_class_value_t;
  *          (Used for various queries, etc)
  */
 typedef enum H5VL_subclass_t {
-    H5VL_SUBCLS_NONE,                  /**< Operations outside of a subclass */
-    H5VL_SUBCLS_INFO,                  /**< 'Info' subclass */
-    H5VL_SUBCLS_WRAP,                  /**< 'Wrap' subclass */
-    H5VL_SUBCLS_ATTR,                  /**< 'Attribute' subclass */
-    H5VL_SUBCLS_DATASET,               /**< 'Dataset' subclass */
-    H5VL_SUBCLS_DATATYPE,              /**< 'Named datatype' subclass */
-    H5VL_SUBCLS_FILE,                  /**< 'File' subclass */
-    H5VL_SUBCLS_GROUP,                 /**< 'Group' subclass */
-    H5VL_SUBCLS_LINK,                  /**< 'Link' subclass */
-    H5VL_SUBCLS_OBJECT,                /**< 'Object' subclass */
-    H5VL_SUBCLS_REQUEST,               /**< 'Request' subclass */
-    H5VL_SUBCLS_BLOB,                  /**< 'Blob' subclass */
-    H5VL_SUBCLS_TOKEN                  /**< 'Token' subclass */
+    H5VL_SUBCLS_NONE,     /**< Operations outside of a subclass */
+    H5VL_SUBCLS_INFO,     /**< 'Info' subclass */
+    H5VL_SUBCLS_WRAP,     /**< 'Wrap' subclass */
+    H5VL_SUBCLS_ATTR,     /**< 'Attribute' subclass */
+    H5VL_SUBCLS_DATASET,  /**< 'Dataset' subclass */
+    H5VL_SUBCLS_DATATYPE, /**< 'Named datatype' subclass */
+    H5VL_SUBCLS_FILE,     /**< 'File' subclass */
+    H5VL_SUBCLS_GROUP,    /**< 'Group' subclass */
+    H5VL_SUBCLS_LINK,     /**< 'Link' subclass */
+    H5VL_SUBCLS_OBJECT,   /**< 'Object' subclass */
+    H5VL_SUBCLS_REQUEST,  /**< 'Request' subclass */
+    H5VL_SUBCLS_BLOB,     /**< 'Blob' subclass */
+    H5VL_SUBCLS_TOKEN     /**< 'Token' subclass */
 } H5VL_subclass_t;
 
 /********************/

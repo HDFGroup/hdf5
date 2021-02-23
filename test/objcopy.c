@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -4495,7 +4495,7 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
 #ifndef H5_HAVE_FILTER_DEFLATE
     SKIPPED();
     HDputs("    Deflation filter not available");
-#else /* H5_HAVE_FILTER_DEFLATE */
+#else  /* H5_HAVE_FILTER_DEFLATE */
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++)
         for (j = 0; j < DIM_SIZE_2; j++)
@@ -4920,7 +4920,7 @@ test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
 #ifndef H5_HAVE_FILTER_DEFLATE
     SKIPPED();
     HDputs("    Deflation filter not available");
-#else /* H5_HAVE_FILTER_DEFLATE */
+#else  /* H5_HAVE_FILTER_DEFLATE */
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++)
         for (j = 0; j < DIM_SIZE_2; j++)
@@ -7274,7 +7274,7 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 #ifndef H5_HAVE_FILTER_DEFLATE
     SKIPPED();
     HDputs("    Deflation filter not available");
-#else /* H5_HAVE_FILTER_DEFLATE */
+#else  /* H5_HAVE_FILTER_DEFLATE */
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
         for (j = 0; j < DIM_SIZE_2; j++) {

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1279,7 +1279,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                 }
                 nfound += diff_ldouble_element(mem1, mem2, elemtno, opts);
             } /*H5T_NATIVE_LDOUBLE*/
-#endif /* H5_SIZEOF_LONG_DOUBLE */
+#endif        /* H5_SIZEOF_LONG_DOUBLE */
 
             break; /* H5T_FLOAT class */
 

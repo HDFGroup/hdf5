@@ -29,13 +29,13 @@
 #include "H5FDdrvr_module.h"
 #endif /* H5_HAVE_LIBHDFS */
 
-#include "H5private.h"      /* Generic Functions        */
-#include "H5Eprivate.h"     /* Error handling           */
-#include "H5FDprivate.h"    /* File drivers             */
-#include "H5FDhdfs.h"       /* hdfs file driver         */
-#include "H5FLprivate.h"    /* Free Lists               */
-#include "H5Iprivate.h"     /* IDs                      */
-#include "H5MMprivate.h"    /* Memory management        */
+#include "H5private.h"   /* Generic Functions        */
+#include "H5Eprivate.h"  /* Error handling           */
+#include "H5FDprivate.h" /* File drivers             */
+#include "H5FDhdfs.h"    /* hdfs file driver         */
+#include "H5FLprivate.h" /* Free Lists               */
+#include "H5Iprivate.h"  /* IDs                      */
+#include "H5MMprivate.h" /* Memory management        */
 
 #ifdef H5_HAVE_LIBHDFS
 

@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -156,7 +156,7 @@ static const H5T_ref_class_t H5T_ref_dsetreg_disk_g = {
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
+H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 {
     htri_t ret_value = FALSE; /* Indicate success, but no location change */
 
@@ -179,6 +179,13 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
             /* Mark this type as being stored in memory */
             dt->shared->u.atomic.u.r.loc = H5T_LOC_MEMORY;
+
+            /* Release owned file */
+            if (dt->shared->owned_vol_obj) {
+                if (H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+                    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
+                dt->shared->owned_vol_obj = NULL;
+            } /* end if */
 
             /* Reset file ID (since this reference is in memory) */
             dt->shared->u.atomic.u.r.file = file; /* file is NULL */
@@ -219,6 +226,10 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
             /* Set file pointer (since this reference is on disk) */
             dt->shared->u.atomic.u.r.file = file;
+
+            /* dt now owns a reference to file */
+            if (H5T_own_vol_obj(dt, file) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "can't give ownership of VOL object")
 
             if (dt->shared->u.atomic.u.r.rtype == H5R_OBJECT1) {
                 H5F_t *f;
@@ -586,10 +597,10 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
                    H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, size_t dst_size,
                    void H5_ATTR_UNUSED *bg_buf)
 {
-    H5F_t *         src_f     = NULL;
-    hid_t           file_id   = H5I_INVALID_HID;
-    H5R_ref_priv_t *dst_ref   = (H5R_ref_priv_t *)dst_buf;
-    H5R_ref_priv_t  tmp_ref;             /* Temporary reference to decode into */
+    H5F_t *         src_f   = NULL;
+    hid_t           file_id = H5I_INVALID_HID;
+    H5R_ref_priv_t *dst_ref = (H5R_ref_priv_t *)dst_buf;
+    H5R_ref_priv_t  tmp_ref; /* Temporary reference to decode into */
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC

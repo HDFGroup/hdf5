@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -246,8 +246,8 @@ H5G_mkroot(H5F_t *f, hbool_t create_root)
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to verify symbol table")
             } /* end if */
 #endif        /* H5_STRICT_FORMAT_CHECKS */
-        } /* end if */
-    }     /* end else */
+        }     /* end if */
+    }         /* end else */
 
     /* Cache the root group's symbol table information in the root group symbol
      * table entry.  It will have been allocated by now if it needs to be

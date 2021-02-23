@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -200,7 +200,7 @@ H5FD_mpio_init(void)
 {
 #ifdef H5FDmpio_DEBUG
     static int H5FD_mpio_Debug_inited = 0;
-#endif /* H5FDmpio_DEBUG */
+#endif                                       /* H5FDmpio_DEBUG */
     const char *s;                           /* String for environment variables */
     hid_t       ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -229,7 +229,7 @@ H5FD_mpio_init(void)
             } /* end while */
         }     /* end if */
         H5FD_mpio_Debug_inited++;
-    } /* end if */
+    }  /* end if */
 #endif /* H5FDmpio_DEBUG */
 
     /* Set return value */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -262,6 +262,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "            Required values: filter_number, filter_flag, cd_value_count, value1\n");
     PRINTVALSTREAM(rawoutstream, "            Optional values: value2 to valueN\n");
+    PRINTVALSTREAM(rawoutstream, "            filter_flag: 1 is OPTIONAL or 0 is MANDATORY\n");
     PRINTVALSTREAM(rawoutstream, "        NONE (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    LAYT - is a string with the format:\n");

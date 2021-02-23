@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -84,8 +84,9 @@
 #define H5F_OBJ_DATATYPE (0x0008u) /**< Named datatype objects */
 #define H5F_OBJ_ATTR     (0x0010u) /**< Attribute objects */
 #define H5F_OBJ_ALL      (H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR)
-#define H5F_OBJ_LOCAL    (0x0020u) /**< Restrict search to objects opened through current file ID
-                                        (as opposed to objects opened through any file ID accessing this file) */
+#define H5F_OBJ_LOCAL                                                                                        \
+    (0x0020u) /**< Restrict search to objects opened through current file ID                                 \
+                   (as opposed to objects opened through any file ID accessing this file) */
 
 #define H5F_FAMILY_DEFAULT (hsize_t)0
 
@@ -987,8 +988,9 @@ H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
  *    </tr>
  *    <tr>
  *      <td><em>hbool_t</em> <code>open_trace_file</code> </td>
- *      <td>OUT: Boolean field indicating whether the <code>trace_file_name</code> field should be used to open
- *        a trace file for the cache. This field will always be set to <code>0</code> in this context.</td>
+ *      <td>OUT: Boolean field indicating whether the <code>trace_file_name</code> field should be used to
+ *        open a trace file for the cache. This field will always be set to <code>0</code> in this
+ *        context.</td>
  *    </tr>
  *    <tr>
  *      <td><em>hbool_t</em> <code>close_trace_file</code> </td>
@@ -996,8 +998,8 @@ H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
  *        will always be set to <code>0</code> in this context.</td></tr>
  *    <tr>
  *      <td><em>char*</em><code>trace_file_name</code> </td>
- *      <td>OUT: Full path name of the trace file to be opened if the <code>open_trace_file</code> field is set
- *        to <code>1</code>. This field will always be set to the empty string in this context.</td></tr>
+ *      <td>OUT: Full path name of the trace file to be opened if the <code>open_trace_file</code> field is
+ *        set to <code>1</code>. This field will always be set to the empty string in this context.</td></tr>
  *    <tr>
  *      <td><em>hbool_t</em> <code>evictions_enabled</code> </td>
  *      <td>OUT: Boolean flag indicating whether metadata cache entry evictions are
@@ -1041,10 +1043,10 @@ H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
  *  <table>
  *    <tr>
  *      <td><em>enum H5C_cache_incr_mode</em> <code>incr_mode</code> </td>
- *      <td>OUT: Enumerated value indicating the operational mode of the automatic cache size increase code. At
- *        present, only the following values are legal:<p>\c H5C_incr__off: Automatic cache size increase is
- *        disabled.</p><p>\c H5C_incr__threshold: Automatic cache size increase is enabled using the hit rate
- *        threshold algorithm.</p></td>
+ *      <td>OUT: Enumerated value indicating the operational mode of the automatic cache size increase code.
+ *        At present, only the following values are legal:<p>\c H5C_incr__off: Automatic cache size increase
+ *        is disabled.</p><p>\c H5C_incr__threshold: Automatic cache size increase is enabled using the hit
+ *        rate threshold algorithm.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>double</em> <code>lower_hr_threshold</code> </td>
@@ -1070,8 +1072,8 @@ H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
  *      <td><em>enum H5C_cache_flash_incr_mode</em> <code>flash_incr_mode</code> </td>
  *      <td>OUT: Enumerated value indicating the operational mode of the flash cache size increase code. At
  *        present, only the following values are legal:<p>\c H5C_flash_incr__off: Flash cache size increase is
- *        disabled.</p><p>\c H5C_flash_incr__add_space: Flash cache size increase is enabled using the add space
- *        algorithm.</p></td>
+ *        disabled.</p><p>\c H5C_flash_incr__add_space: Flash cache size increase is enabled using the add
+ *        space algorithm.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>double</em> <code>flash_threshold</code> </td>
@@ -1082,8 +1084,8 @@ H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
  *    <tr>
  *      <td><em>double</em> <code>flash_multiple</code> </td>
  *      <td>OUT: The factor by which the size of the triggering entry / entry size increase is multiplied to
- *        obtain the initial cache size increment. This increment may be reduced to reflect existing free space
- *        in the cache and the <code>max_size</code> field above.</td>
+ *        obtain the initial cache size increment. This increment may be reduced to reflect existing free
+ *        space in the cache and the <code>max_size</code> field above.</td>
  *    </tr>
  * </table>
  *
@@ -1094,13 +1096,13 @@ H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
  *    </tr>
  *    <tr>
  *      <td><em>enum H5C_cache_decr_mode</em> <code>decr_mode</code> </td>
- *      <td>OUT: Enumerated value indicating the operational mode of the automatic cache size decrease code. At
- *        present, the following values are legal:<p>H5C_decr__off: Automatic cache size decrease is disabled,
- *        and the remaining decrement fields are ignored.</p><p>H5C_decr__threshold: Automatic cache size
- *        decrease is enabled using the hit rate threshold algorithm.</p><p>H5C_decr__age_out: Automatic cache
- *        size decrease is enabled using the ageout algorithm.</p><p>H5C_decr__age_out_with_threshold:
- *        Automatic cache size decrease is enabled using the ageout with hit rate threshold
- *          algorithm</p></td>
+ *      <td>OUT: Enumerated value indicating the operational mode of the automatic cache size decrease code.
+ *        At present, the following values are legal:<p>H5C_decr__off: Automatic cache size decrease is
+ *        disabled, and the remaining decrement fields are ignored.</p><p>H5C_decr__threshold: Automatic
+ *        cache size decrease is enabled using the hit rate threshold algorithm.</p><p>H5C_decr__age_out:
+ *        Automatic cache size decrease is enabled using the ageout algorithm.</p>
+ *        <p>H5C_decr__age_out_with_threshold: Automatic cache size decrease is enabled using the ageout
+ *        with hit rate threshold algorithm</p></td>
  *    </tr>
  *    <tr><td><em>double</em> <code>upper_hr_threshold</code> </td>
  *      <td>OUT: Upper hit rate threshold. This value is only used if the decr_mode is either
@@ -1143,7 +1145,8 @@ H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
  *    <tr><td><em>int</em> <code>dirty_bytes_threshold</code> </td>
  *      <td>OUT: Threshold number of bytes of dirty metadata generation for triggering synchronizations of the
  *        metadata caches serving the target file in the parallel case.<p>Synchronization occurs whenever the
- *        number of bytes of dirty metadata created since the last synchronization exceeds this limit.</p></td>
+ *        number of bytes of dirty metadata created since the last synchronization exceeds this
+ *        limit.</p></td>
  *    </tr>
  *  </table>
  *
@@ -1179,59 +1182,59 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  *    <tr>
  *      <td><em>hbool_t</em> <code>rpt_fcn_enabled</code></td>
  *      <td>IN: Boolean flag indicating whether the adaptive cache resize report function is enabled. This
- *        field should almost always be set to disabled (<code>0</code>). Since resize algorithm activity is reported
- *        via stdout, it MUST be set to disabled (<code>0</code>) on Windows machines.<p>The report function is not
- *          supported code, and can be expected to change between versions of the library. Use it at your own
- *          risk.</p></td>
+ *        field should almost always be set to disabled (<code>0</code>). Since resize algorithm activity is
+ *        reported via stdout, it MUST be set to disabled (<code>0</code>) on Windows machines.<p>The report
+ *        function is not supported code, and can be expected to change between versions of the library. Use
+ *        it at your own risk.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>hbool_t</em> <code>open_trace_File</code></td>
  *      <td>IN: Boolean field indicating whether the <code>trace_file_name</code> field should be used to open
- *        a trace file for the cache.<p>The trace file is a debuging feature that allows the capture of top level
- *          metadata cache requests for purposes of debugging and/or optimization. This field should normally be set
- *          to <code>0</code>, as trace file collection imposes considerable overhead.</p><p>This field should only be
- *          set to <code>1</code> when the <code>trace_file_name</code> contains the full path of the desired trace
- *          file, and either there is no open trace file on the cache, or the <code>close_trace_file</code> field is
- *          also <code>1</code>.</p><p>The trace file feature is unsupported unless used at the direction of The HDF
- *          Group. It is intended to allow The HDF Group to collect a trace of cache activity in cases of occult
- *          failures and/or poor performance seen in the field, so as to aid in reproduction in the lab. If you use it
- *          absent the direction of The HDF Group, you are on your
- *          own.</p></td>
+ *        a trace file for the cache.<p>The trace file is a debuging feature that allows the capture of top
+ *        level metadata cache requests for purposes of debugging and/or optimization. This field should
+ *        <p>This field should only normally be set to <code>0</code>, as trace file collection imposes
+ *        considerable overhead.</p> be set to <code>1</code> when the <code>trace_file_name</code> contains
+ *        the full path of the desired trace file, and either there is no open trace file on the cache, or the
+ *        <code>close_trace_file</code> field is also <code>1</code>.</p><p>The trace file feature is
+ *        unsupported unless used at the direction of The HDF Group. It is intended to allow The HDF Group to
+ *        collect a trace of cache activity in cases of occult failures and/or poor performance seen in the
+ *        field, so as to aid in reproduction in the lab. If you use it absent the direction of The HDF Group,
+ *        you are on your own.</p></td>
  *    </tr>
  *    <tr><td><em>hbool_t</em> <code>close_trace_file</code></td>
  *      <td>IN: Boolean field indicating whether the current trace file (if any) should be closed.<p>See the
- *          above comments on the <code>open_trace_file</code> field. This field should be set to <code>0</code> unless
- *          there is an open trace file on the cache that you wish to close.</p><p>The trace file feature is
- *          unsupported unless used at the direction of The HDF Group. It is intended to allow The HDF Group to collect
- *          a trace of cache activity in cases of occult failures and/or poor performance seen in the field, so as to
- *          aid in reproduction in the lab. If you use it absent the direction of The HDF Group, you are on your
- *          own.</p></td>
+ *        above comments on the <code>open_trace_file</code> field. This field should be set to
+ *        <code>0</code> unless there is an open trace file on the cache that you wish to close.</p><p>The
+ *        trace file feature is unsupported unless used at the direction of The HDF Group. It is intended to
+ *        allow The HDF Group to collect a trace of cache activity in cases of occult failures and/or poor
+ *        performance seen in the field, so as to aid in reproduction in the lab. If you use it absent the
+ *        direction of The HDF Group, you are on your own.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>char</em> <code>trace_file_name[]</code></td>
  *      <td>IN: Full path of the trace file to be opened if the <code>open_trace_file</code> field is set
- *        to <code>1</code>.<p>In the parallel case, an ascii representation of the mpi rank of the process will be
- *          appended to the file name to yield a unique trace file name for each process.</p><p>The length of the path
- *          must not exceed #H5AC__MAX_TRACE_FILE_NAME_LEN characters.</p><p>The trace file feature is
- *          unsupported unless used at the direction of The HDF Group. It is intended to allow The HDF Group to collect
- *          a trace of cache activity in cases of occult failures and/or poor performance seen in the field, so as to
- *          aid in reproduction in the lab. If you use it absent the direction of The HDF Group, you are on your
- *          own.</p></td>
+ *        to <code>1</code>.<p>In the parallel case, an ascii representation of the mpi rank of the process
+ *        will be appended to the file name to yield a unique trace file name for each process.</p><p>The
+ *        length of the path must not exceed #H5AC__MAX_TRACE_FILE_NAME_LEN characters.</p><p>The trace file
+ *        feature is unsupported unless used at the direction of The HDF Group. It is intended to allow The
+ *        HDF Group to collect a trace of cache activity in cases of occult failures and/or poor performance
+ *        seen in the field, so as to aid in reproduction in the lab. If you use it absent the direction of
+ *        The HDF Group, you are on your own.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>hbool_t</em> <code>evictions_enabled</code></td>
  *      <td>IN: A boolean flag indicating whether evictions from the metadata cache are enabled. This flag is
- *        initially set to enabled (<code>1</code>).<p>In rare circumstances, the raw data throughput requirements
- *          may be so high that the user wishes to postpone metadata writes so as to reserve I/O throughput for raw
- *          data. The <code>evictions_enabled</code> field exists to allow this. However, this is an extreme step, and
- *          you have no business doing it unless you have read the User Guide section on metadata caching, and have
- *          considered all other options carefully.</p><p>The <code>evictions_enabled</code> field may not be set to
- *          disabled (<code>0</code>) unless all adaptive cache resizing code is disabled via
- *          the <code>incr_mode</code>, <code>flash_incr_mode</code>, and <code>decr_mode</code> fields.</p><p>When
- *          this flag is set to disabled (<code>0</code>), the metadata cache will not attempt to evict entries to make
- *          space for new entries, and thus will grow without bound.</p><p>Evictions will be re-enabled when this field
- *          is set back to <code>1</code>. This should be done as soon as
- *          possible.</p></td>
+ *        initially set to enabled (<code>1</code>).<p>In rare circumstances, the raw data throughput
+ *        requirements may be so high that the user wishes to postpone metadata writes so as to reserve I/O
+ *        throughput for raw data. The <code>evictions_enabled</code> field exists to allow this. However,
+ *        this is an extreme step, and you have no business doing it unless you have read the User Guide
+ *        section on metadata caching, and have considered all other options carefully.</p><p>The
+ *        <code>evictions_enabled</code> field may not be set to disabled (<code>0</code>) unless all adaptive
+ *        cache resizing code is disabled via the <code>incr_mode</code>, <code>flash_incr_mode</code>, and
+ *        <code>decr_mode</code> fields.</p><p>When this flag is set to disabled (<code>0</code>), the
+ *        metadata cache will not attempt to evict entries to make space for new entries, and thus will grow
+ *        without bound.</p><p>Evictions will be re-enabled when this field is set back to <code>1</code>.
+ *        This should be done as soon as possible.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>hbool_t</em> <code>set_initial_size</code></td>
@@ -1241,24 +1244,24 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  *    <tr>
  *      <td><em>size_t</em> <code>initial_size</code></td>
  *      <td>IN: If <code>set_initial_size</code> is set to <code>1</code>, then <code>initial_size</code> must
- *        contain the desired initial size in bytes. This value must lie in the closed interval <code>[min_size,
- *          max_size]</code>. (see below)</td>
+ *        contain the desired initial size in bytes. This value must lie in the closed interval
+ *        <code>[min_size, max_size]</code>. (see below)</td>
  *    </tr>
  *    <tr><td><em>double</em> <code>min_clean_fraction</code></td>
  *      <td>IN: This field specifies the minimum fraction of the cache that must be kept either clean or
- *        empty.<p>The value must lie in the interval [0.0, 1.0]. 0.01 is a good place to start in the serial case.
- *          In the parallel case, a larger value is needed --
- *          see <a href="/display/HDF5/Metadata+Caching+in+HDF5">Metadata Caching in HDF5</a> in the collection
- *          "Advanced Topics in HDF5."</p></td>
+ *        empty.<p>The value must lie in the interval [0.0, 1.0]. 0.01 is a good place to start in the serial
+ *        case. In the parallel case, a larger value is needed -- see <a
+ *        href="/display/HDF5/Metadata+Caching+in+HDF5">Metadata Caching in HDF5</a> in the collection
+ *        "Advanced Topics in HDF5."</p></td>
  *    </tr>
  *    <tr><td><em>size_t</em> <code>max_size</code></td>
- *      <td>IN: Upper bound (in bytes) on the range of values that the adaptive cache resize code can select as
- *        the maximum cache size.</td>
+ *      <td>IN: Upper bound (in bytes) on the range of values that the adaptive cache resize code can select
+ *        as the maximum cache size.</td>
  *    </tr>
  *    <tr>
  *      <td><em>size_t</em> <code>min_size</code></td>
- *      <td>IN: Lower bound (in bytes) on the range of values that the adaptive cache resize code can select as
- *        the maximum cache size.</td>
+ *      <td>IN: Lower bound (in bytes) on the range of values that the adaptive cache resize code can select
+ *        as the maximum cache size.</td>
  *    </tr>
  *    <tr><td><em>long int</em> <code>epoch_length</code></td>
  *      <td>IN: Number of cache accesses between runs of the adaptive cache resize code. 50,000 is a good
@@ -1271,27 +1274,25 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  *    <tr>
  *      <td><em>enum H5C_cache_incr_mode</em> <code>incr_mode</code></td>
  *      <td>IN: Enumerated value indicating the operational mode of the automatic cache size increase code. At
- *        present, only two values are legal:<p>\c H5C_incr__off: Automatic cache size increase is disabled, and the
- *          remaining increment fields are ignored.</p><p>\c H5C_incr__threshold: Automatic cache size increase is enabled
- *          using the hit rate threshold
- *          algorithm.</p></td>
+ *        present, only two values are legal:<p>\c H5C_incr__off: Automatic cache size increase is disabled,
+ *        and the remaining increment fields are ignored.</p><p>\c H5C_incr__threshold: Automatic cache size
+ *        increase is enabled using the hit rate threshold algorithm.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>double</em> <code>lower_hr_threshold</code></td>
  *      <td>IN: Hit rate threshold used by the hit rate threshold cache size increment algorithm.<p>When the
- *          hit rate over an epoch is below this threshold and the cache is full, the maximum size of the cache is
- *          multiplied by increment (below), and then clipped as necessary to stay within max_size, and possibly
- *          max_increment.</p><p>This field must lie in the interval [0.0, 1.0]. 0.8 or 0.9 is a good starting
- *          point.</p></td>
+ *        hit rate over an epoch is below this threshold and the cache is full, the maximum size of the
+ *        cache is multiplied by increment (below), and then clipped as necessary to stay within max_size, and
+ *        possibly max_increment.</p><p>This field must lie in the interval [0.0, 1.0]. 0.8 or 0.9 is a good
+ *        starting point.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>double</em> <code>increment</code></td>
  *      <td>IN: Factor by which the hit rate threshold cache size increment algorithm multiplies the current
- *        maximum cache size to obtain a tentative new cache size.<p>The actual cache size increase will be clipped
- *          to satisfy the max_size specified in the general configuration, and possibly max_increment below.</p><p>The
- *          parameter must be greater than or equal to 1.0 -- 2.0 is a reasonable value.</p><p>If you set it to 1.0,
- *          you will effectively disable cache size
- *          increases.</p></td>
+ *        maximum cache size to obtain a tentative new cache size.<p>The actual cache size increase will be
+ *        clipped to satisfy the max_size specified in the general configuration, and possibly max_increment
+ *        below.</p><p>The parameter must be greater than or equal to 1.0 -- 2.0 is a reasonable
+ *        value.</p><p>If you set it to 1.0, you will effectively disable cache size increases.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>hbool_t</em> <code>apply_max_increment</code></td>
@@ -1307,21 +1308,21 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  *      <td><em>enum H5C_cache_flash_incr_mode</em> <code>flash_incr_mode</code></td>
  *      <td>IN: Enumerated value indicating the operational mode of the flash cache size increase code. At
  *        present, only the following values are legal:<p>\c H5C_flash_incr__off: Flash cache size increase is
- *          disabled.</p><p>\c H5C_flash_incr__add_space: Flash cache size increase is enabled using the add space
- *          algorithm.</p></td>
+ *        disabled.</p><p>\c H5C_flash_incr__add_space: Flash cache size increase is enabled using the add
+ *        space algorithm.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>double</em> <code>flash_threshold</code></td>
  *      <td>IN: The factor by which the current maximum cache size is multiplied to obtain the minimum size
- *        entry / entry size increase which may trigger a flash cache size increase.<p>At present, this value must
- *          lie in the range [0.1, 1.0].</p></td>
+ *        entry / entry size increase which may trigger a flash cache size increase.<p>At present, this value
+ *        must lie in the range [0.1, 1.0].</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>double</em> <code>flash_multiple</code></td>
  *      <td>IN: The factor by which the size of the triggering entry / entry size increase is multiplied to
- *        obtain the initial cache size increment. This increment may be reduced to reflect existing free space in
- *        the cache and the <code>max_size</code> field above.<p>At present, this field must lie in the range [0.1,
- *          10.0].</p></td>
+ *        obtain the initial cache size increment. This increment may be reduced to reflect existing free
+ *        space in the cache and the <code>max_size</code> field above.<p>At present, this field must lie in
+ *        the range [0.1, 10.0].</p></td>
  *    </tr>
  *  </table>
  *
@@ -1331,31 +1332,30 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  *      <td><em>enum H5C_cache_decr_mode</em> <code>decr_mode</code></td>
  *      <td>IN: Enumerated value indicating the operational mode of the automatic cache size decrease code. At
  *        present, the following values are legal:<p>\c H5C_decr__off: Automatic cache size decrease is
- *          disabled.</p><p>\c H5C_decr__threshold: Automatic cache size decrease is enabled using the hit rate threshold
- *          algorithm.</p><p>\c H5C_decr__age_out: Automatic cache size decrease is enabled using the ageout
- *          algorithm.</p><p>\c H5C_decr__age_out_with_threshold: Automatic cache size decrease is enabled using the
- *          ageout with hit rate threshold
- *          algorithm</p></td>
+ *        disabled.</p><p>\c H5C_decr__threshold: Automatic cache size decrease is enabled using the hit
+ *        rate threshold algorithm.</p><p>\c H5C_decr__age_out: Automatic cache size decrease is enabled using
+ *        the ageout algorithm.</p><p>\c H5C_decr__age_out_with_threshold: Automatic cache size decrease is
+ * enabled using the ageout with hit rate threshold algorithm</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>double</em> <code>upper_hr_threshold</code></td>
  *      <td>IN: Hit rate threshold for the hit rate threshold and ageout with hit rate threshold cache size
- *        decrement algorithms.<p>When \c decr_mode is \c H5C_decr__threshold, and the hit rate over a given epoch exceeds
- *          the supplied threshold, the current maximum cache size is multiplied by decrement to obtain a tentative new
- *          (and smaller) maximum cache size.</p><p>When \c decr_mode is \c H5C_decr__age_out_with_threshold, there is no
- *          attempt to find and evict aged out entries unless the hit rate in the previous epoch exceeded the supplied
- *          threshold.</p><p>This field must lie in the interval [0.0, 1.0].</p><p>For \c H5C_incr__threshold, .9995 or
- *          .99995 is a good place to start.</p><p>For \c H5C_decr__age_out_with_threshold, .999 might be more
- *          useful.</p></td>
+ *        decrement algorithms.<p>When \c decr_mode is \c H5C_decr__threshold, and the hit rate over a given
+ *        epoch exceeds the supplied threshold, the current maximum cache size is multiplied by decrement to
+ *        obtain a tentative new (and smaller) maximum cache size.</p><p>When \c decr_mode is \c
+ *        H5C_decr__age_out_with_threshold, there is no attempt to find and evict aged out entries unless the
+ *        hit rate in the previous epoch exceeded the supplied threshold.</p><p>This field must lie in the
+ *        interval [0.0, 1.0].</p><p>For \c H5C_incr__threshold, .9995 or .99995 is a good place to
+ *        start.</p><p>For \c H5C_decr__age_out_with_threshold, .999 might be more useful.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>double</em> <code>decrement</code></td>
  *      <td>IN: In the hit rate threshold cache size decrease algorithm, this parameter contains the factor by
- *        which the current max cache size is multiplied to produce a tentative new cache size.<p>The actual cache
- *          size decrease will be clipped to satisfy the min_size specified in the general configuration, and possibly
- *          max_decrement below.</p><p>The parameter must be be in the interval [0.0, 1.0].</p><p>If you set it to 1.0,
- *          you will effectively disable cache size decreases. 0.9 is a reasonable starting
- *          point.</p></td>
+ *        which the current max cache size is multiplied to produce a tentative new cache size.<p>The actual
+ *        cache size decrease will be clipped to satisfy the min_size specified in the general configuration,
+ *        and possibly max_decrement below.</p><p>The parameter must be be in the interval
+ *        [0.0, 1.0].</p><p>If you set it to 1.0, you will effectively disable cache size decreases. 0.9 is a
+ *        reasonable starting point.</p></td>
  *    </tr>
  *    <tr>
  *      <td><em>hbool_t</em> <code>apply_max_decrement</code></td>
@@ -1370,8 +1370,8 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  *    <tr>
  *      <td><em>int</em> <code>epochs_before_eviction</code></td>
  *      <td>IN: In the ageout based cache size reduction algorithms, this field contains the minimum number of
- *        epochs an entry must remain unaccessed in cache before the cache size reduction algorithm tries to evict
- *        it. 3 is a reasonable value.</td>
+ *        epochs an entry must remain unaccessed in cache before the cache size reduction algorithm tries to
+ *        evict it. 3 is a reasonable value.</td>
  *    </tr>
  *    <tr>
  *      <td><em>hbool_t</em> <code>apply_empty_reserve</code></td>
@@ -1380,10 +1380,10 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  *    </tr>
  *    <tr>
  *      <td><em>double</em> <code>empty_reserve</code></td>
- *      <td>IN: Empty reserve as a fraction of maximum cache size if applicable.<p>When so directed, the ageout
- *          based algorithms will not decrease the maximum cache size unless the empty reserve can be met.</p><p>The
- *          parameter must lie in the interval [0.0, 1.0]. 0.1 or 0.05 is a good place to
- *          start.</p></td>
+ *      <td>IN: Empty reserve as a fraction of maximum cache size if applicable.<p>When so directed, the
+ *        ageout based algorithms will not decrease the maximum cache size unless the empty reserve can be
+ *        met.</p><p>The parameter must lie in the interval [0.0, 1.0]. 0.1 or 0.05 is a good place to
+ *        start.</p></td>
  *    </tr>
  *  </table>
  *
@@ -1392,12 +1392,12 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  *    <tr>
  *      <td><em>int</em> <code>dirty_bytes_threshold</code></td>
  *      <td>IN: Threshold number of bytes of dirty metadata generation for triggering synchronizations of the
- *        metadata caches serving the target file in the parallel case.<p>Synchronization occurs whenever the number
- *          of bytes of dirty metadata created since the last synchronization exceeds this limit.</p><p>This field only
- *          applies to the parallel case. While it is ignored elsewhere, it can still draw a value out of bounds
- *          error.</p><p>It must be consistant across all caches on any given file.</p><p>By default, this field is set
- *          to 256 KB. It shouldn't be more than half the current maximum cache size times the minimum clean
- *          fraction.</p></td>
+ *        metadata caches serving the target file in the parallel case.<p>Synchronization occurs whenever the
+ *        number of bytes of dirty metadata created since the last synchronization exceeds this
+ *        limit.</p><p>This field only applies to the parallel case. While it is ignored elsewhere, it can
+ *        still draw a value out of bounds error.</p><p>It must be consistant across all caches on any given
+ *        file.</p><p>By default, this field is set to 256 KB. It shouldn't be more than half the current
+ *        maximum cache size times the minimum clean fraction.</p></td>
  *    </tr>
  *  </table>
  *
@@ -1639,7 +1639,8 @@ H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *file_info);
  *          <tr><td>18</td><td>Fixed array data block</td></tr>
  *          <tr><td>19</td><td>Fixed array data block page</td></tr>
  *          <tr><td>20</td><td>File's superblock (version 2)</td></tr>
- *          <tr><td colspan=2><sup>*</sup> All entries are of version 0 (zero) unless indicated otherwise.</td></tr>
+ *          <tr><td colspan=2><sup>*</sup> All entries are of version 0 (zero) unless indicated
+ *          otherwise.</td></tr>
  *          </table>
  *
  * \note   On a system that is not atomic, the library might possibly read inconsistent
@@ -1926,8 +1927,7 @@ H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
  *
  * \since 1.10.0
  */
-H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
-                                        hbool_t *is_currently_logging);
+H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled, hbool_t *is_currently_logging);
 /**
  * \ingroup SWMR
  *

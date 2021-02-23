@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -65,7 +65,7 @@ extern "C" {
  *
  * \see H5Acreate(), H5Aopen()
  */
-H5_DLL herr_t  H5Aclose(hid_t attr_id);
+H5_DLL herr_t H5Aclose(hid_t attr_id);
 /* --------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -113,8 +113,8 @@ H5_DLL herr_t  H5Aclose(hid_t attr_id);
  * \see H5Aclose()
  *
  */
-H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id,
-                          hid_t aapl_id);
+H5_DLL hid_t H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id,
+                        hid_t aapl_id);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -162,8 +162,8 @@ H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hi
  * \since 1.8.0
  *
  */
-H5_DLL hid_t   H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id,
-                                 hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id);
+H5_DLL hid_t H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id,
+                               hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -194,7 +194,7 @@ H5_DLL hid_t   H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char 
  *
  * \see H5Aclose(), H5Acreate()
  */
-H5_DLL hid_t   H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
+H5_DLL hid_t H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -240,8 +240,8 @@ H5_DLL hid_t   H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
  * \since 1.8.0
  *
  */
-H5_DLL hid_t   H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
-                              hsize_t n, hid_t aapl_id, hid_t lapl_id);
+H5_DLL hid_t H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
+                            hsize_t n, hid_t aapl_id, hid_t lapl_id);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -283,8 +283,8 @@ H5_DLL hid_t   H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx
  * \since 1.8.0
  *
  */
-H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
-                               hid_t lapl_id);
+H5_DLL hid_t H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
+                             hid_t lapl_id);
 /*-------------------------------------------------------------------------- */
 /**
  * \ingroup H5A
@@ -311,8 +311,8 @@ H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *a
  *
  * \see H5Awrite()
  *
-*/
-H5_DLL herr_t  H5Aread(hid_t attr_id, hid_t type_id, void *buf);
+ */
+H5_DLL herr_t H5Aread(hid_t attr_id, hid_t type_id, void *buf);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A

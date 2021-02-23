@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -117,8 +117,8 @@ extern H5TS_once_t H5TS_first_init_g; /* Library initialization */
 extern H5TS_key_t  H5TS_errstk_key_g; /* Error stacks */
 #ifdef H5_HAVE_CODESTACK
 extern H5TS_key_t H5TS_funcstk_key_g; /* Function stacks */
-#endif /* H5_HAVE_CODESTACK */
-extern H5TS_key_t H5TS_apictx_key_g; /* API contexts */
+#endif                                /* H5_HAVE_CODESTACK */
+extern H5TS_key_t H5TS_apictx_key_g;  /* API contexts */
 
 /* Library-scope routines */
 /* (Only used within H5private.h macros) */

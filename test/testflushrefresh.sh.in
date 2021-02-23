@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -82,7 +82,7 @@ fi
 # different, occasionally the wrong file is deleted, interrupting the flow of
 # the test.  Running each of these tests in its own directory should eliminate
 # the problem.
-mkdir flushrefresh_test
+mkdir -p flushrefresh_test
 cp flushrefresh flushrefresh_test
 
 # With the --disable-shared option, flushrefresh is built in the test directory,
@@ -90,7 +90,7 @@ cp flushrefresh flushrefresh_test
 # the test directory.  test/flushrefresh should always be copied,
 # .libs/flushrefresh should be copied only if it exists.
 if [ -f .libs/flushrefresh ]; then
-    mkdir flushrefresh_test/.libs
+    mkdir -p flushrefresh_test/.libs
     for FILE in .libs/flushrefresh*; do
         case "$FILE" in
             *.o) continue ;;    ## don't copy the .o files
@@ -156,6 +156,12 @@ until [ $verification_done -eq 1 ]; do
     echo "all flush verification complete" > $endsignal
   else
     ./flushrefresh $param1 $param2
+
+    # Check for core dump
+    if [ $? -gt 0 ]; then
+        nerrors=`expr $nerrors + 1`
+    fi
+
     echo "verification flush process done" > $endsignal
   fi
 
@@ -195,6 +201,12 @@ if [ $timedout -eq 0 ]; then
       echo "all refresh verification complete" > $endsignal
     else
       ./flushrefresh $param1
+
+      # Check for core dump
+      if [ $? -gt 0 ]; then
+          nerrors=`expr $nerrors + 1`
+      fi
+
       echo "refresh verifiction process done" > $endsignal
     fi
 

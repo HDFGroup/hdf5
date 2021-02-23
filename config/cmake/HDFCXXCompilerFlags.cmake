@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -14,7 +14,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_SANITIZER_FLAGS} ${CMAKE_CXX_FLAGS}")
-message (STATUS "Warnings Configuration: CXX default:  ${CMAKE_CXX_FLAGS}")
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+  message (VERBOSE "Warnings Configuration: CXX default:  ${CMAKE_CXX_FLAGS}")
+endif ()
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
@@ -27,6 +29,14 @@ if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
   else ()
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
       set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstdarg-opt")
+    endif ()
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
+      if (HDF5_ENABLE_BUILD_DIAGS)
+        message (STATUS "... default color and URL extended diagnostic messages enabled")
+      else ()
+        message (STATUS "... disable color and URL extended diagnostic messages")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-urls=never -fno-diagnostics-color")
+      endif ()
     endif ()
   endif ()
 endif ()
@@ -89,14 +99,20 @@ if (NOT MSVC AND NOT MINGW)
           AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
         # add the general CXX flags for g++ compiler versions 4.8 and above.
         ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-general")
-        ADD_H5_FLAGS (H5_CXXFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-error-general")
+        if (HDF5_ENABLE_WARNINGS_AS_ERRORS)
+          ADD_H5_FLAGS (H5_CXXFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-error-general")
+        else ()
+          ADD_H5_FLAGS (H5_CXXFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-noerror-general")
+        endif ()
       endif ()
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
       ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/clang-warnings/general")
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
       list (APPEND HDF5_CMAKE_CXX_FLAGS "-Minform=inform")
     endif ()
-    message (STATUS "CMAKE_CXX_FLAGS_GENERAL=${HDF5_CMAKE_CXX_FLAGS}")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "CMAKE_CXX_FLAGS_GENERAL=${HDF5_CMAKE_CXX_FLAGS}")
+    endif ()
   endif ()
 
   #-----------------------------------------------------------------------------
@@ -152,7 +168,11 @@ if (NOT MSVC AND NOT MINGW)
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
       # autotools always add the C flags with the CXX flags
       ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-5")
-      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-error-5")
+      if (HDF5_ENABLE_WARNINGS_AS_ERRORS)
+        ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-error-5")
+      else ()
+        ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-noerror-5")
+      endif ()
     endif ()
 
     # Append more extra warning flags that only gcc 6.x+ know about
@@ -177,7 +197,11 @@ if (NOT MSVC AND NOT MINGW)
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
       # autotools always add the C flags with the CXX flags
       ADD_H5_FLAGS (H5_CXXFLAGS3 "${HDF5_SOURCE_DIR}/config/gnu-warnings/8")
-      #ADD_H5_FLAGS (H5_CXXFLAGS3 "${HDF5_SOURCE_DIR}/config/gnu-warnings/error-8")
+      #if (HDF5_ENABLE_WARNINGS_AS_ERRORS)
+      #  ADD_H5_FLAGS (H5_CXXFLAGS3 "${HDF5_SOURCE_DIR}/config/gnu-warnings/error-8")
+      #else ()
+      #  ADD_H5_FLAGS (H5_CXXFLAGS3 "${HDF5_SOURCE_DIR}/config/gnu-warnings/noerror-8")
+      #endif ()
       if (HDF5_ENABLE_DEV_WARNINGS)
         # autotools always add the C flags with the CXX flags
         ADD_H5_FLAGS (H5_CXXFLAGS3 "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-8")

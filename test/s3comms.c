@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -291,7 +291,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
     if ((long)(actual) == (long)(expected)) {                                                                \
         JSERR_LONG((expected), (actual), (reason))                                                           \
         goto error;                                                                                          \
-    } /* JSVERIFY_NOT */
+    }  /* JSVERIFY_NOT */
 #endif /* JSVERIFY_NOT unused */
 
 /*----------------------------------------------------------------------------
@@ -348,7 +348,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
     if ((long)(actual) == (long)(expected)) {                                                                \
         JSERR_LONG((expected), (actual), (reason))                                                           \
         goto error;                                                                                          \
-    } /* JSVERIFY_NOT */
+    }  /* JSVERIFY_NOT */
 #endif /* JSVERIFY_NOT unused */
 
 /*----------------------------------------------------------------------------
@@ -1290,7 +1290,7 @@ test_HMAC_SHA256(void)
                 HDfprintf(stdout, "ERROR:\n!!! \"%s\"\n != \"%s\"\n", cases[i].exp, dest);
                 TEST_ERROR;
             }
-#else /* VERBOSE not defined */
+#else  /* VERBOSE not defined */
             /* simple pass/fail test
              */
             JSVERIFY(0, HDstrncmp(cases[i].exp, dest, HDstrlen(cases[i].exp)), NULL);

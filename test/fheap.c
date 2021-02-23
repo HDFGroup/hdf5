@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -9423,13 +9423,14 @@ test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    unsigned           row;        /* Current row in indirect block */
-    h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
-    size_t             obj_size;   /* Size of object */
-    size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
-    fheap_heap_state_t state;      /* State of fractal heap */
-    unsigned           u;          /* Local index variable */
+    unsigned         num_first_indirect_rows;      /* Number of rows (of direct blocks) in each of the */
+                                                   /* first indirect blocks */
+    unsigned           row;                        /* Current row in indirect block */
+    h5_stat_size_t     empty_size;                 /* Size of a file with an empty heap */
+    size_t             obj_size;                   /* Size of object */
+    size_t             fill_size;                  /* Size of objects for "bulk" filled blocks */
+    fheap_heap_state_t state;                      /* State of fractal heap */
+    unsigned           u;                          /* Local index variable */
     /* Test description */
     const char *base_desc = "filling direct blocks and skipping row of non-root indirect blocks, then "
                             "backfill and extend, then remove all objects %s";
@@ -9554,7 +9555,8 @@ test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -9699,8 +9701,9 @@ test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    unsigned           row;        /* Current row in indirect block */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned           row;                     /* Current row in indirect block */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -9861,7 +9864,8 @@ test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     unsigned           max_dblock_rows; /* Max. # of rows (of direct blocks) in the root indirect block */
     h5_stat_size_t     empty_size;      /* Size of a file with an empty heap */
     size_t             obj_size;        /* Size of object */
@@ -10016,7 +10020,8 @@ test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     unsigned           max_dblock_rows; /* Max. # of rows (of direct blocks) in the root indirect block */
     h5_stat_size_t     empty_size;      /* Size of a file with an empty heap */
     size_t             obj_size;        /* Size of object */
@@ -10472,7 +10477,8 @@ test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(h
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -10624,7 +10630,8 @@ test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -10780,7 +10787,8 @@ test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -10943,7 +10951,8 @@ test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_s
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size;                    /* Size of a file with an empty heap */
     size_t             obj_size;                      /* Size of object */
     size_t             fill_size;                     /* Size of objects for "bulk" filled blocks */
@@ -11110,7 +11119,8 @@ test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -11272,7 +11282,8 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_blo
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -11454,7 +11465,8 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -11673,7 +11685,8 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_star
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -11872,7 +11885,8 @@ test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -12402,7 +12416,8 @@ test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     H5HF_t *         fh = NULL;                    /* Fractal heap wrapper */
     haddr_t          fh_addr;                      /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                     /* Structure to retain heap IDs */
-    unsigned           num_first_indirect_rows;    /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned
+                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -14937,7 +14952,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     h5_stat_size_t   empty_size;                   /* Size of a file with an empty heap */
 #ifdef NOT_YET
     h5_stat_size_t file_size;                /* Size of file currently */
-#endif /* NOT_YET */
+#endif                                       /* NOT_YET */
     unsigned char      heap_id[HEAP_ID_LEN]; /* Heap ID for object */
     size_t             obj_size;             /* Size of object */
     size_t             robj_size;            /* Size of object read */
@@ -15110,7 +15125,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     h5_stat_size_t   empty_size;                   /* Size of a file with an empty heap */
 #ifdef NOT_YET
     h5_stat_size_t file_size;                 /* Size of file currently */
-#endif /* NOT_YET */
+#endif                                        /* NOT_YET */
     unsigned char      heap_id1[HEAP_ID_LEN]; /* Heap ID for object #1 */
     unsigned char      heap_id2[HEAP_ID_LEN]; /* Heap ID for object #2 */
     size_t             obj_size;              /* Size of object */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -486,7 +486,7 @@ H5VM_hyper_copy(unsigned n, const hsize_t *_size, const hsize_t *dst_size, const
 #ifdef NO_INLINED_CODE
     dst_start = H5VM_hyper_stride(n, size, dst_size, dst_offset, dst_stride);
     src_start = H5VM_hyper_stride(n, size, src_size, src_offset, src_stride);
-#else /* NO_INLINED_CODE */
+#else  /* NO_INLINED_CODE */
     /* in-line version of two calls to H5VM_hyper_stride() */
     {
         hsize_t dst_acc; /*accumulator				*/
