@@ -52,8 +52,10 @@ void *      edata;
 /* Local Prototypes */
 /********************/
 
-static int    h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj, int expand_data);
-static int    h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj, int expand_data);
+static int    h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj,
+                                       int expand_data);
+static int    h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj,
+                                       int expand_data);
 static int    h5str_dump_region_attribute(JNIEnv *env, h5str_t *str, hid_t region_id);
 static int    h5str_is_zero(const void *_mem, size_t size);
 static hid_t  h5str_get_native_type(hid_t type);
@@ -244,8 +246,9 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
 #endif
 
                 default:
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
-                                    "h5str_convert: floating-point datatype size didn't match any of expected sizes");
+                    H5_BAD_ARGUMENT_ERROR(
+                        ENVONLY,
+                        "h5str_convert: floating-point datatype size didn't match any of expected sizes");
                     break;
             }
 
@@ -363,8 +366,9 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
 #endif
 
                 default:
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
-                                          "h5str_convert: integer datatype size didn't match any of expected sizes");
+                    H5_BAD_ARGUMENT_ERROR(
+                        ENVONLY,
+                        "h5str_convert: integer datatype size didn't match any of expected sizes");
                     break;
             }
 
@@ -828,8 +832,9 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 #endif
 
                 default:
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
-                                    "h5str_sprintf: floating-point datatype size didn't match any of expected sizes");
+                    H5_BAD_ARGUMENT_ERROR(
+                        ENVONLY,
+                        "h5str_sprintf: floating-point datatype size didn't match any of expected sizes");
                     break;
             }
 
@@ -889,7 +894,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         HDmemcpy(&tmp_uchar, cptr, sizeof(unsigned char));
 
                         if (NULL == (this_str = (char *)HDmalloc(7)))
-                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                                                   "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hhu", tmp_uchar) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -898,7 +904,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         HDmemcpy(&tmp_char, cptr, sizeof(char));
 
                         if (NULL == (this_str = (char *)HDmalloc(7)))
-                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                                                   "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hhd", tmp_char) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -915,7 +922,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         HDmemcpy(&tmp_ushort, cptr, sizeof(unsigned short));
 
                         if (NULL == (this_str = (char *)HDmalloc(9)))
-                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                                                   "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hu", tmp_ushort) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -924,7 +932,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         HDmemcpy(&tmp_short, cptr, sizeof(short));
 
                         if (NULL == (this_str = (char *)HDmalloc(9)))
-                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                                                   "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hd", tmp_short) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -941,7 +950,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         HDmemcpy(&tmp_uint, cptr, sizeof(unsigned int));
 
                         if (NULL == (this_str = (char *)HDmalloc(14)))
-                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                                                   "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%u", tmp_uint) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -1657,8 +1667,8 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
         if ((type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 
-        if (h5str_print_region_data_points(ENVONLY, region_space, region_id, str, ndims, type_id, npoints, ptdata)
-                < 0)
+        if (h5str_print_region_data_points(ENVONLY, region_space, region_id, str, ndims, type_id, npoints,
+                                           ptdata) < 0)
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
     }
     else {
