@@ -70,6 +70,8 @@
  * \ingroup H5P
  * \defgroup OCPPL Object Copy Properties
  * \ingroup H5P
+ * \defgroup GACPL General Access Properties
+ * \ingroup H5P
  */
 
 #endif /* _H5Pmodule_H */
