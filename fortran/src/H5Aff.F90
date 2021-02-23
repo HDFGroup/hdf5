@@ -230,8 +230,9 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE h5acreate_aysnc_f(loc_id, name, type_id, space_id, attr_id, &
-       es_id, hdferr, acpl_id, aapl_id)
+       es_id, hdferr, acpl_id, aapl_id, file, func, line )
     IMPLICIT NONE
+    INTEGER, PARAMETER :: CHR_MAX=256      ! longest file name allowed on linux, 63 for func names
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Attribute name
     INTEGER(HID_T), INTENT(IN) :: type_id  ! Attribute datatype identifier
@@ -241,17 +242,28 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code:
                                            ! 0 on success and -1 on failure
 !*****
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: acpl_id ! Attribute creation property list identifier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: aapl_id ! Attribute access property list identifier
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: acpl_id ! Attribute creation property list identifier
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id ! Attribute access property list identifier
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER, INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: acpl_id_default
     INTEGER(HID_T) :: aapl_id_default
+    ! character(:), allocatable :: file_de
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+    
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
     INTERFACE
-       INTEGER(HID_T) FUNCTION H5Acreate_async(loc_id, name, type_id, &
+       INTEGER(HID_T) FUNCTION H5Acreate_async(file, func, line, loc_id, name, type_id, &
             space_id, acpl_id_default, aapl_id_default, es_id) BIND(C,NAME='H5Acreate_async')
-         IMPORT :: C_CHAR
+         IMPORT :: C_CHAR, C_INT
          IMPORT :: HID_T
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: func
+         INTEGER(C_INT), INTENT(IN), VALUE :: line
          INTEGER(HID_T), INTENT(IN), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(HID_T), INTENT(IN), VALUE :: type_id
@@ -266,9 +278,13 @@ CONTAINS
     aapl_id_default = H5P_DEFAULT_F
     IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
     IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
+    IF (PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF (PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF (PRESENT(line)) line_default = INT(line, C_INT)
 
     c_name = TRIM(name)//C_NULL_CHAR
-    attr_id = h5acreate_async(loc_id, c_name, type_id, space_id, &
+    attr_id = h5acreate_async(file_default, func_default, line_default, &
+         loc_id, c_name, type_id, space_id, &
          acpl_id_default, aapl_id_default, es_id)
 
     hdferr = 0
