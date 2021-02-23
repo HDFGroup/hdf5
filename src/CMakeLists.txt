@@ -1387,6 +1387,7 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
   set (DOXYGEN_MACRO_EXPANSION YES)
   set (DOXYGEN_OUTPUT_DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs)
+  set (DOXYGEN_EXAMPLES_DIRECTORY ${HDF5_DOXYGEN_DIR}/examples)
 
   # Replace variables inside @@ with the current values
   configure_file(${HDF5_DOXYGEN_DIR}/Doxyfile.in Doxyfile @ONLY)
