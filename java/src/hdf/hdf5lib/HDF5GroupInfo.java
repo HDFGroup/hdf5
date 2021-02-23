@@ -41,6 +41,7 @@ public class HDF5GroupInfo {
     long mtime;
     int linklen;
 
+    /** */
     public HDF5GroupInfo() {
         fileno = new long[2];
         objno = new long[2];
@@ -88,27 +89,32 @@ public class HDF5GroupInfo {
         linklen = 0;
     }
 
-    /* accessors */
+    /** fileno accessors */
     public long[] getFileno() {
         return fileno;
     }
 
+    /** accessors */
     public long[] getObjno() {
         return objno;
     }
 
+    /** accessors */
     public int getType() {
         return type;
     }
 
+    /** accessors */
     public int getNlink() {
         return nlink;
     }
 
+    /** accessors */
     public long getMtime() {
         return mtime;
     }
 
+    /** accessors */
     public int getLinklen() {
         return linklen;
     }

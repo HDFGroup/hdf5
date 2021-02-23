@@ -367,8 +367,7 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
 
                 default:
                     H5_BAD_ARGUMENT_ERROR(
-                        ENVONLY,
-                        "h5str_convert: integer datatype size didn't match any of expected sizes");
+                        ENVONLY, "h5str_convert: integer datatype size didn't match any of expected sizes");
                     break;
             }
 
@@ -2934,124 +2933,6 @@ done:
     return ret_value;
 } /* end h5str_dump_simple_dset */
 
-int
-h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order)
-{
-    hid_t          f_space = H5I_INVALID_HID; /* file data space */
-    hsize_t        alloc_size;
-    int            ndims;                    /* rank of dataspace */
-    unsigned       i;                        /* counters  */
-    hsize_t        total_size[H5S_MAX_RANK]; /* total size of dataset*/
-    hsize_t        p_nelmts;                 /* total selected elmts */
-    unsigned char *buf = NULL;               /* buffer for raw data */
-
-    /* VL data special information */
-    unsigned int vl_data = 0; /* contains VL datatypes */
-    hid_t        p_type  = H5I_INVALID_HID;
-    hid_t        f_type  = H5I_INVALID_HID;
-
-    int ret_value = FAIL;
-
-    if (attr_id < 0)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5str_dump_simple_mem: attr ID < 0");
-
-    if ((f_type = H5Aget_type(attr_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    switch (binary_order) {
-        case 1: {
-            if ((p_type = h5str_get_native_type(f_type)) < 0)
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-
-            break;
-        }
-
-        case 2: {
-            if ((p_type = h5str_get_little_endian_type(f_type)) < 0)
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-
-            break;
-        }
-
-        case 3: {
-            if ((p_type = h5str_get_big_endian_type(f_type)) < 0)
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-
-            break;
-        }
-
-        default: {
-            if ((p_type = H5Tcopy(f_type)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-
-            break;
-        }
-    }
-
-    if ((f_space = H5Aget_space(attr_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if ((ndims = H5Sget_simple_extent_ndims(f_space)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (H5Sget_simple_extent_dims(f_space, total_size, NULL) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    /* Calculate the number of elements we're going to print */
-    p_nelmts = 1;
-
-    if (ndims > 0) {
-        for (i = 0; i < (size_t)ndims; i++)
-            p_nelmts *= total_size[i];
-    } /* end if */
-
-    if (p_nelmts > 0) {
-        /* Check if we have VL data in the dataset's datatype */
-        if (h5str_detect_vlen(p_type) != 0)
-            vl_data = 1;
-
-        alloc_size = p_nelmts * H5Tget_size(p_type);
-        if (alloc_size > 0) {
-            if (NULL != (buf = (unsigned char *)HDmalloc((size_t)alloc_size))) {
-                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_mem: failed to allocate sm_buf");
-
-                /* Read the data */
-                if (H5Aread(attr_id, p_type, buf) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
-
-                if (binary_order == 99) {
-                    if (h5str_dump_simple_data(ENVONLY, stream, attr_id, p_type, buf, alloc_size) < 0)
-                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                }
-                else {
-                    if (h5str_render_bin_output(stream, attr_id, p_type, buf, alloc_size) < 0)
-                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                }
-
-                /* Reclaim any VL memory, if necessary */
-                if (vl_data) {
-                    if (H5Treclaim(p_type, f_space, H5P_DEFAULT, buf) < 0)
-                        H5_LIBRARY_ERROR(ENVONLY);
-                }
-            }
-        }
-    }
-
-    ret_value = SUCCEED;
-
-done:
-    if (buf)
-        HDfree(buf);
-    if (f_space >= 0)
-        H5Sclose(f_space);
-    if (p_type >= 0)
-        H5Tclose(p_type);
-    if (f_type >= 0)
-        H5Tclose(f_type);
-
-    return ret_value;
-} /* end h5str_dump_simple_mem */
-
 htri_t
 H5Tdetect_variable_str(hid_t tid)
 {
@@ -3748,74 +3629,6 @@ done:
     if (file_id >= 0)
         H5Fclose(file_id);
 } /* end Java_hdf_hdf5lib_H5_H5export_1dataset */
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5export_attribute
- * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V
- */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5export_1attribute(JNIEnv *env, jclass clss, jstring file_export_name, jstring file_name,
-                                        jstring object_path, jint binary_order)
-{
-    const char *file_export = NULL;
-    const char *object_name = NULL;
-    const char *fileName    = NULL;
-    jboolean    isCopy;
-    herr_t      ret_val = FAIL;
-    hid_t       file_id = H5I_INVALID_HID;
-    hid_t       attr_id = H5I_INVALID_HID;
-    FILE *      stream  = NULL;
-
-    UNUSED(clss);
-
-    if (NULL == file_export_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5export_attribute: file_export_name is NULL");
-
-    if (NULL == file_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5export_attribute: file_name is NULL");
-
-    if (NULL == object_path)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5export_attribute: object_path is NULL");
-
-    PIN_JAVA_STRING(ENVONLY, file_name, fileName, NULL, "H5export_attribute: file name not pinned");
-
-    if ((file_id = H5Fopen(fileName, (unsigned)H5F_ACC_RDWR, (hid_t)H5P_DEFAULT)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    PIN_JAVA_STRING(ENVONLY, object_path, object_name, &isCopy, "H5export_attribute: object_path not pinned");
-
-    if ((attr_id = H5Aopen(file_id, object_name, H5P_DEFAULT)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    PIN_JAVA_STRING(ENVONLY, file_export_name, file_export, NULL,
-                    "H5export_attribute: file_export name not pinned");
-
-    if (NULL == (stream = HDfopen(file_export, "w+")))
-        H5_JNI_FATAL_ERROR(ENVONLY, "HDfopen failed");
-
-    if ((ret_val = h5str_dump_simple_mem(ENVONLY, stream, attr_id, binary_order)) < 0)
-        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_mem failed");
-
-    if (stream) {
-        HDfclose(stream);
-        stream = NULL;
-    }
-
-done:
-    if (stream)
-        HDfclose(stream);
-    if (file_export)
-        UNPIN_JAVA_STRING(ENVONLY, file_export_name, file_export);
-    if (object_name)
-        UNPIN_JAVA_STRING(ENVONLY, object_path, object_name);
-    if (fileName)
-        UNPIN_JAVA_STRING(ENVONLY, file_name, fileName);
-    if (attr_id >= 0)
-        H5Aclose(attr_id);
-    if (file_id >= 0)
-        H5Fclose(file_id);
-} /* end Java_hdf_hdf5lib_H5_H5export_1attribute */
 
 #ifdef __cplusplus
 }

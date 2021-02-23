@@ -46,9 +46,6 @@ extern size_t h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_
                             int expand_data);
 extern void   h5str_array_free(char **strs, size_t len);
 extern int    h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order);
-extern int    h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order);
-extern int    h5str_dump_region_blocks_data(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
-extern int    h5str_dump_region_points_data(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
 
 extern htri_t H5Tdetect_variable_str(hid_t tid);
 
@@ -112,13 +109,5 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max(JNIEnv *, jcla
  */
 JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *, jclass, jstring, jstring, jstring,
                                                              jint);
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5export_attribute
- * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V
- */
-JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5export_1attribute(JNIEnv *, jclass, jstring, jstring, jstring,
-                                                               jint);
 
 #endif /* H5UTIL_H__ */
