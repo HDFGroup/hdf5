@@ -231,7 +231,7 @@ typedef struct H5O_copy_t {
 #define H5O_FSINFO_ID      0x0017 /* File space info message.  */
 #define H5O_MDCI_MSG_ID    0x0018 /* Metadata Cache Image Message */
 #define H5O_UNKNOWN_ID     0x0019 /* Placeholder message ID for unknown message.  */
-                                  /* (this should never exist in a file) */
+/* (this should never exist in a file) */
 /*
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
  *      in H5O.c when creating a new message type.  Also bump the value of

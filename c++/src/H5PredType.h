@@ -435,7 +435,7 @@ class H5_DLLCPP PredType : public AtomType {
 #if H5_SIZEOF_UINT_FAST64_T != 0
     static PredType *NATIVE_UINT_FAST64_;
 #endif /* H5_SIZEOF_UINT_FAST64_T */
-       // End of Declaration of pointers
+    // End of Declaration of pointers
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
