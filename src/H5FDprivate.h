@@ -15,8 +15,8 @@
  * Programmer:  Robb Matzke
  *              Monday, July 26, 1999
  */
-#ifndef _H5FDprivate_H
-#define _H5FDprivate_H
+#ifndef H5FDprivate_H
+#define H5FDprivate_H
 
 /* Include package's public header */
 #include "H5FDpublic.h"

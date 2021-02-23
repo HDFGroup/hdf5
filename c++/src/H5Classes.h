@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Classes_H
-#define __H5Classes_H
+#ifndef H5Classes_H
+#define H5Classes_H
 
 namespace H5 {
 class Exception;
@@ -43,4 +43,4 @@ class H5File;
 class Attribute;
 class H5Library;
 } // namespace H5
-#endif // __H5Classes_H
+#endif // H5Classes_H
