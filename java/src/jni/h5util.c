@@ -1711,30 +1711,28 @@ h5str_dump_region_points_data(JNIEnv *env, h5str_t *str, hid_t region_space, hid
             H5_LIBRARY_ERROR(ENVONLY);
 
         /* Print point information */
-        if (npoints > 0) {
-            alloc_size = (hsize_t)npoints * (hsize_t)ndims * (hsize_t)sizeof(ptdata[0]);
-            if (alloc_size == (hsize_t)((size_t)alloc_size)) {
-                if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
-                    H5_OUT_OF_MEMORY_ERROR(
-                        ENVONLY,
-                        "h5str_dump_region_points_data: failed to allocate region point data buffer");
+        alloc_size = (hsize_t)npoints * (hsize_t)ndims * (hsize_t)sizeof(ptdata[0]);
+        if (alloc_size == (hsize_t)((size_t)alloc_size)) {
+            if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
+                H5_OUT_OF_MEMORY_ERROR(
+                    ENVONLY,
+                    "h5str_dump_region_points_data: failed to allocate region point data buffer");
 
-                if (H5Sget_select_elem_pointlist(region_space, (hsize_t)0, (hsize_t)npoints, ptdata) < 0) {
-                    H5_LIBRARY_ERROR(ENVONLY);
-                }
-
-                if ((dtype = H5Dget_type(region_id)) < 0) {
-                    H5_LIBRARY_ERROR(ENVONLY);
-                }
-
-                if ((type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0) {
-                    H5_LIBRARY_ERROR(ENVONLY);
-                }
-
-                if (h5str_print_region_data_points(ENVONLY, region_space, region_id, str, ndims, type_id,
-                                                   npoints, ptdata) < 0)
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            if (H5Sget_select_elem_pointlist(region_space, (hsize_t)0, (hsize_t)npoints, ptdata) < 0) {
+                H5_LIBRARY_ERROR(ENVONLY);
             }
+
+            if ((dtype = H5Dget_type(region_id)) < 0) {
+                H5_LIBRARY_ERROR(ENVONLY);
+            }
+
+            if ((type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0) {
+                H5_LIBRARY_ERROR(ENVONLY);
+            }
+
+            if (h5str_print_region_data_points(ENVONLY, region_space, region_id, str, ndims, type_id,
+                                            npoints, ptdata) < 0)
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
         }
     }
 
@@ -1758,6 +1756,7 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     hsize_t  alloc_size;
     hsize_t *ptdata = NULL;
     char     tmp_str[256];
+    int      i;
     int      ndims     = -1;
     int      ret_value = FAIL;
 
@@ -1776,46 +1775,42 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Print point information */
-    if (npoints > 0) {
-        int i;
+    alloc_size = (hsize_t)npoints * (hsize_t)ndims * (hsize_t)sizeof(ptdata[0]);
+    if (alloc_size == (hsize_t)((size_t)alloc_size)) {
+        if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                                "h5str_dump_region_points: failed to allocate region point buffer");
 
-        alloc_size = (hsize_t)npoints * (hsize_t)ndims * (hsize_t)sizeof(ptdata[0]);
-        if (alloc_size == (hsize_t)((size_t)alloc_size)) {
-            if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
-                H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                       "h5str_dump_region_points: failed to allocate region point buffer");
+        if (H5Sget_select_elem_pointlist(region_space, (hsize_t)0, (hsize_t)npoints, ptdata) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
 
-            if (H5Sget_select_elem_pointlist(region_space, (hsize_t)0, (hsize_t)npoints, ptdata) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
+        if (!h5str_append(str, " {"))
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-            if (!h5str_append(str, " {"))
+        for (i = 0; i < npoints; i++) {
+            int j;
+
+            if (!h5str_append(str, " "))
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-            for (i = 0; i < npoints; i++) {
-                int j;
+            for (j = 0; j < ndims; j++) {
+                tmp_str[0] = '\0';
 
-                if (!h5str_append(str, " "))
+                if (HDsprintf(tmp_str, "%s%lu", j ? "," : "(", (unsigned long)(ptdata[i * ndims + j])) <
+                    0)
+                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_points: HDsprintf failure");
+
+                if (!h5str_append(str, tmp_str))
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            } /* end for (j = 0; j < ndims; j++) */
 
-                for (j = 0; j < ndims; j++) {
-                    tmp_str[0] = '\0';
-
-                    if (HDsprintf(tmp_str, "%s%lu", j ? "," : "(", (unsigned long)(ptdata[i * ndims + j])) <
-                        0)
-                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_points: HDsprintf failure");
-
-                    if (!h5str_append(str, tmp_str))
-                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                } /* end for (j = 0; j < ndims; j++) */
-
-                if (!h5str_append(str, ") "))
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-            } /* end for (i = 0; i < npoints; i++) */
-
-            if (!h5str_append(str, " }"))
+            if (!h5str_append(str, ") "))
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-        } /* end if (alloc_size == (hsize_t)((size_t) alloc_size)) */
-    }     /* end if (npoints > 0) */
+        } /* end for (i = 0; i < npoints; i++) */
+
+        if (!h5str_append(str, " }"))
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    } /* end if (alloc_size == (hsize_t)((size_t) alloc_size)) */
 
     ret_value = SUCCEED;
 
