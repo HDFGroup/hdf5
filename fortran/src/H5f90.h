@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5f90_H
-#define _H5f90_H
+#ifndef H5f90_H
+#define H5f90_H
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -27,4 +27,4 @@
 
 #define H5_MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-#endif /* _H5f90_H */
+#endif /* H5f90_H */

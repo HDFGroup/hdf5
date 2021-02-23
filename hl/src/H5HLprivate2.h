@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5HLprivate2_H
-#define _H5HLprivate2_H
+#ifndef H5HLprivate2_H
+#define H5HLprivate2_H
 
 /* Public HDF5 header */
 #include "hdf5.h"
@@ -23,4 +23,4 @@
 /* HDF5 private functions */
 #include "H5private.h"
 
-#endif /* _H5HLprivate2_H */
+#endif /* H5HLprivate2_H */

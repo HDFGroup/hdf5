@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5ACpublic_H
-#define _H5ACpublic_H
+#ifndef H5ACpublic_H
+#define H5ACpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
