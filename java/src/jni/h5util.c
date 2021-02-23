@@ -52,8 +52,8 @@ void *      edata;
 /* Local Prototypes */
 /********************/
 
-static int    h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
-static int    h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
+static int    h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj, int expand_data);
+static int    h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj, int expand_data);
 static int    h5str_dump_region_attribute(JNIEnv *env, h5str_t *str, hid_t region_id);
 static int    h5str_is_zero(const void *_mem, size_t size);
 static hid_t  h5str_get_native_type(hid_t type);
@@ -182,13 +182,14 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
     H5T_class_t    tclass      = H5T_NO_CLASS;
     const char     delimiter[] = " ," H5_COMPOUND_BEGIN_INDICATOR H5_COMPOUND_END_INDICATOR
         H5_ARRAY_BEGIN_INDICATOR H5_ARRAY_END_INDICATOR H5_VLEN_BEGIN_INDICATOR H5_VLEN_END_INDICATOR;
-    size_t                                                                      typeSize = 0;
-    hid_t                                                                       mtid     = H5I_INVALID_HID;
-    char *                                                                      this_str = NULL;
-    char *                                                                      token;
-    char *                                                                      cptr = NULL;
-    int                                                                         n;
-    size_t                                                                      retVal = 0;
+
+    size_t retVal   = 0;
+    size_t typeSize = 0;
+    hid_t  mtid     = H5I_INVALID_HID;
+    char * this_str = NULL;
+    char * cptr     = NULL;
+    char * token;
+    int    n;
 
     if (!in_str)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "h5str_convert: in_str is NULL");
@@ -243,9 +244,8 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
 #endif
 
                 default:
-                    H5_BAD_ARGUMENT_ERROR(
-                        ENVONLY,
-                        "h5str_convert: floating-point datatype size didn't match any of expected sizes");
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                    "h5str_convert: floating-point datatype size didn't match any of expected sizes");
                     break;
             }
 
@@ -363,8 +363,8 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
 #endif
 
                 default:
-                    H5_BAD_ARGUMENT_ERROR(
-                        ENVONLY, "h5str_convert: integer datatype size didn't match any of expected sizes");
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "h5str_convert: integer datatype size didn't match any of expected sizes");
                     break;
             }
 
@@ -654,14 +654,14 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
     int ret_value = FAIL;
 
     if (!h5str_append(out_str, " \""))
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        H5_LIBRARY_ERROR(ENVONLY);
     buf_size = H5Rget_file_name(ref_vp, NULL, 0);
     if (buf_size) {
         ref_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
         if (H5Rget_file_name(ref_vp, ref_name, buf_size + 1) >= 0) {
             ref_name[buf_size] = '\0';
             if (!h5str_append(out_str, ref_name))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
         }
         HDfree(ref_name);
         ref_name = NULL;
@@ -673,7 +673,7 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
         if (H5Rget_obj_name(ref_vp, H5P_DEFAULT, ref_name, buf_size + 1) >= 0) {
             ref_name[buf_size] = '\0';
             if (!h5str_append(out_str, ref_name))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
         }
         HDfree(ref_name);
         ref_name = NULL;
@@ -686,14 +686,14 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
             if (H5Rget_attr_name(ref_vp, ref_name, buf_size + 1) >= 0) {
                 ref_name[buf_size] = '\0';
                 if (!h5str_append(out_str, ref_name))
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                    H5_LIBRARY_ERROR(ENVONLY);
             }
             HDfree(ref_name);
             ref_name = NULL;
         }
     }
     if (!h5str_append(out_str, "\""))
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        H5_LIBRARY_ERROR(ENVONLY);
 
     ret_value = SUCCEED;
 done:
@@ -712,40 +712,23 @@ h5str_region_dataset(JNIEnv *env, h5str_t *out_str, H5R_ref_t *ref_vp, int expan
 
     int ret_value = FAIL;
 
-    if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-        if ((new_obj_sid = H5Ropen_region(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-            if ((region_type = H5Sget_select_type(new_obj_sid)) > H5S_SEL_ERROR) {
-                if (expand_data) {
-                    if (H5S_SEL_POINTS == region_type) {
-                        if (h5str_dump_region_points_data(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                    }
-                    else if (H5S_SEL_HYPERSLABS == region_type) {
-                        if (h5str_dump_region_blocks_data(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                    }
-                }
-                else {
-                    h5str_sprint_reference(ENVONLY, out_str, ref_vp);
-                    if (H5S_SEL_POINTS == region_type) {
-                        if (!h5str_append(out_str, " REGION_TYPE POINT"))
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        ret_value = SUCCEED; /* An uncreated region is a valid state */
+        goto done;
+    }
 
-                        if (h5str_dump_region_points(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                    }
-                    else if (H5S_SEL_HYPERSLABS == region_type) {
-                        if (!h5str_append(out_str, " REGION_TYPE BLOCK"))
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if ((new_obj_sid = H5Ropen_region(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-                        if (h5str_dump_region_blocks(ENVONLY, out_str, new_obj_sid, new_obj_id) < 0)
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                    }
-                }
-            }
+    if ((region_type = H5Sget_select_type(new_obj_sid)) > H5S_SEL_ERROR) {
+        if (H5S_SEL_POINTS == region_type) {
+            if (h5str_dump_region_points(ENVONLY, out_str, new_obj_sid, new_obj_id, expand_data) < 0)
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
         }
-        else
-            H5_LIBRARY_ERROR(ENVONLY);
+        else if (H5S_SEL_HYPERSLABS == region_type) {
+            if (h5str_dump_region_blocks(ENVONLY, out_str, new_obj_sid, new_obj_id, expand_data) < 0)
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        }
     }
 
     ret_value = SUCCEED;
@@ -845,9 +828,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 #endif
 
                 default:
-                    H5_BAD_ARGUMENT_ERROR(
-                        ENVONLY,
-                        "h5str_sprintf: floating-point datatype size didn't match any of expected sizes");
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                    "h5str_sprintf: floating-point datatype size didn't match any of expected sizes");
                     break;
             }
 
@@ -907,8 +889,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         HDmemcpy(&tmp_uchar, cptr, sizeof(unsigned char));
 
                         if (NULL == (this_str = (char *)HDmalloc(7)))
-                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                                   "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hhu", tmp_uchar) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -917,8 +898,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         HDmemcpy(&tmp_char, cptr, sizeof(char));
 
                         if (NULL == (this_str = (char *)HDmalloc(7)))
-                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                                   "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hhd", tmp_char) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -935,8 +915,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         HDmemcpy(&tmp_ushort, cptr, sizeof(unsigned short));
 
                         if (NULL == (this_str = (char *)HDmalloc(9)))
-                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                                   "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hu", tmp_ushort) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -945,8 +924,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         HDmemcpy(&tmp_short, cptr, sizeof(short));
 
                         if (NULL == (this_str = (char *)HDmalloc(9)))
-                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                                   "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hd", tmp_short) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -963,8 +941,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         HDmemcpy(&tmp_uint, cptr, sizeof(unsigned int));
 
                         if (NULL == (this_str = (char *)HDmalloc(14)))
-                            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                                   "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%u", tmp_uint) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -1058,7 +1035,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                 H5_LIBRARY_ERROR(ENVONLY);
 
             if (!h5str_append(out_str, H5_COMPOUND_BEGIN_INDICATOR))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
 
             for (i = 0; i < (unsigned)n; i++) {
                 offset = H5Tget_member_offset(tid, i);
@@ -1071,7 +1048,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
                 if ((i + 1) < (unsigned)n)
                     if (!h5str_append(out_str, ", "))
-                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                        H5_LIBRARY_ERROR(ENVONLY);
 
                 if (H5Tclose(mtid) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
@@ -1079,7 +1056,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
             }
 
             if (!h5str_append(out_str, H5_COMPOUND_END_INDICATOR))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
 
             break;
         }
@@ -1089,7 +1066,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
             if (H5Tenum_nameof(tid, cptr, enum_name, sizeof enum_name) >= 0) {
                 if (!h5str_append(out_str, enum_name))
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                    H5_LIBRARY_ERROR(ENVONLY);
             }
             else {
                 size_t i;
@@ -1154,7 +1131,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                     if (HDsprintf(this_str, "%u-", (unsigned)oi.type) < 0)
                                         H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                                     if (!h5str_append(out_str, this_str))
-                                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                        H5_LIBRARY_ERROR(ENVONLY);
                                     HDfree(this_str);
                                     this_str = NULL;
 
@@ -1245,7 +1222,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
             int     rank = 0;
 
             if (!h5str_append(out_str, H5_ARRAY_BEGIN_INDICATOR))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
 
             if ((mtid = H5Tget_super(tid)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1268,11 +1245,11 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
                 if ((i + 1) < total_elmts)
                     if (!h5str_append(out_str, ", "))
-                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                        H5_LIBRARY_ERROR(ENVONLY);
             }
 
             if (!h5str_append(out_str, H5_ARRAY_END_INDICATOR))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
 
             if (H5Tclose(mtid) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1293,7 +1270,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                 H5_LIBRARY_ERROR(ENVONLY);
 
             if (!h5str_append(out_str, H5_VLEN_BEGIN_INDICATOR))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
 
             for (i = 0; i < (unsigned)vl_buf->len; i++) {
                 if (!h5str_sprintf(ENVONLY, out_str, container, mtid, &(((char *)vl_buf->p)[i * baseSize]),
@@ -1302,11 +1279,11 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
                 if ((i + 1) < (unsigned)vl_buf->len)
                     if (!h5str_append(out_str, ", "))
-                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                        H5_LIBRARY_ERROR(ENVONLY);
             }
 
             if (!h5str_append(out_str, H5_VLEN_END_INDICATOR))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
 
             if (H5Tclose(mtid) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1348,7 +1325,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
     if (this_str) {
         if (!h5str_append(out_str, this_str))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            H5_LIBRARY_ERROR(ENVONLY);
 
         HDfree(this_str);
         this_str = NULL;
@@ -1454,7 +1431,7 @@ h5str_print_region_data_blocks(JNIEnv *env, hid_t region_id, h5str_t *str, int n
 
             if (numindex + 1 < numelem)
                 if (!h5str_append(str, ", "))
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                    H5_LIBRARY_ERROR(ENVONLY);
         } /* end for (jndx = 0; jndx < numelem; jndx++, region_elmtno++, ctx.cur_elmt++) */
     }     /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
 
@@ -1478,7 +1455,7 @@ done:
 } /* end h5str_print_region_data_blocks */
 
 int
-h5str_dump_region_blocks_data(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t region_id)
+h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t region_id, int expand_data)
 {
     hssize_t nblocks;
     hsize_t  alloc_size;
@@ -1487,94 +1464,46 @@ h5str_dump_region_blocks_data(JNIEnv *env, h5str_t *str, hid_t region_space, hid
     hid_t    type_id   = H5I_INVALID_HID;
     int      ndims     = -1;
     int      ret_value = FAIL;
-
-    /*
-     * This function fails if the region does not have blocks.
-     */
-    H5E_BEGIN_TRY { nblocks = H5Sget_select_hyper_nblocks(region_space); }
-    H5E_END_TRY;
-
-    if (nblocks > 0) {
-        if ((ndims = H5Sget_simple_extent_ndims(region_space)) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
-
-        /* Print block information */
-        alloc_size = (hsize_t)nblocks * (hsize_t)ndims * 2 * (hsize_t)sizeof(ptdata[0]);
-        if (alloc_size == (hsize_t)((size_t)alloc_size)) {
-            if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
-                H5_OUT_OF_MEMORY_ERROR(
-                    ENVONLY, "h5str_dump_region_blocks_data: failed to allocate region block buffer");
-
-            if (H5Sget_select_hyper_blocklist(region_space, (hsize_t)0, (hsize_t)nblocks, ptdata) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-
-            if ((dtype = H5Dget_type(region_id)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-
-            if ((type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-
-            if (h5str_print_region_data_blocks(ENVONLY, region_id, str, ndims, type_id, nblocks, ptdata) < 0)
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-        } /* if (alloc_size == (hsize_t)((size_t)alloc_size)) */
-    }
-    ret_value = SUCCEED;
-
-done:
-    if (type_id >= 0)
-        H5Tclose(type_id);
-    if (dtype >= 0)
-        H5Tclose(dtype);
-    if (ptdata)
-        HDfree(ptdata);
-
-    return ret_value;
-} /* end h5str_dump_region_blocks_data */
-
-static int
-h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t region_id)
-{
-    hssize_t nblocks;
-    hsize_t  alloc_size;
-    hsize_t *ptdata = NULL;
+    int      i;
     char     tmp_str[256];
-    int      ndims     = -1;
-    int      ret_value = FAIL;
 
-    UNUSED(region_id);
-
-    /*
-     * This function fails if the region does not have blocks.
-     */
-    H5E_BEGIN_TRY { nblocks = H5Sget_select_hyper_nblocks(region_space); }
-    H5E_END_TRY;
-
-    if (nblocks < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
+    if ((nblocks = H5Sget_select_hyper_nblocks(region_space)) <= 0) {
+        ret_value = SUCCEED;
+        goto done;
+    }
     if ((ndims = H5Sget_simple_extent_ndims(region_space)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Print block information */
     alloc_size = (hsize_t)nblocks * (hsize_t)ndims * 2 * (hsize_t)sizeof(ptdata[0]);
-    if (alloc_size == (hsize_t)((size_t)alloc_size)) {
-        int i;
+    if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_region_blocks: failed to allocate region block buffer");
 
-        if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                   "h5str_dump_region_blocks: failed to allocate region block buffer");
+    if (H5Sget_select_hyper_blocklist(region_space, (hsize_t)0, (hsize_t)nblocks, ptdata) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-        if (H5Sget_select_hyper_blocklist(region_space, (hsize_t)0, (hsize_t)nblocks, ptdata) < 0)
+    if (expand_data) {
+        if ((dtype = H5Dget_type(region_id)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+
+        if ((type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+
+        if (h5str_print_region_data_blocks(ENVONLY, region_id, str, ndims, type_id, nblocks, ptdata) < 0)
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    }
+    else {
+        if (!h5str_append(str, " REGION_TYPE BLOCK"))
             H5_LIBRARY_ERROR(ENVONLY);
 
         if (!h5str_append(str, " {"))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            H5_LIBRARY_ERROR(ENVONLY);
 
         for (i = 0; i < nblocks; i++) {
             int j;
 
             if (!h5str_append(str, " "))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
 
             /* Start coordinates and opposite corner */
             for (j = 0; j < ndims; j++) {
@@ -1584,7 +1513,7 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_blocks: HDsprintf failure");
 
                 if (!h5str_append(str, tmp_str))
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                    H5_LIBRARY_ERROR(ENVONLY);
             }
 
             for (j = 0; j < ndims; j++) {
@@ -1595,22 +1524,25 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_blocks: HDsprintf failure");
 
                 if (!h5str_append(str, tmp_str))
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                    H5_LIBRARY_ERROR(ENVONLY);
             }
 
             if (!h5str_append(str, ") "))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
 
             tmp_str[0] = '\0';
         }
 
         if (!h5str_append(str, " }"))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-    } /* if (alloc_size == (hsize_t)((size_t)alloc_size)) */
-
+            H5_LIBRARY_ERROR(ENVONLY);
+    }
     ret_value = SUCCEED;
 
 done:
+    if (type_id >= 0)
+        H5Tclose(type_id);
+    if (dtype >= 0)
+        H5Tclose(dtype);
     if (ptdata)
         HDfree(ptdata);
 
@@ -1673,7 +1605,7 @@ h5str_print_region_data_points(JNIEnv *env, hid_t region_space, hid_t region_id,
 
         if (jndx + 1 < (size_t)npoints)
             if (!h5str_append(str, ", "))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                H5_LIBRARY_ERROR(ENVONLY);
     } /* end for (jndx = 0; jndx < npoints; jndx++, elmtno++) */
 
     ret_value = SUCCEED;
@@ -1690,52 +1622,75 @@ done:
 } /* end h5str_print_region_data_points */
 
 int
-h5str_dump_region_points_data(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t region_id)
+h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t region_id, int expand_data)
 {
-    hssize_t npoints;
     hsize_t  alloc_size;
+    hssize_t npoints   = -1;
     hsize_t *ptdata    = NULL;
     hid_t    dtype     = H5I_INVALID_HID;
     hid_t    type_id   = H5I_INVALID_HID;
     int      ndims     = -1;
     int      ret_value = FAIL;
+    int      i;
+    char     tmp_str[256];
 
-    /*
-     * This function fails if the region does not have points.
-     */
-    H5E_BEGIN_TRY { npoints = H5Sget_select_elem_npoints(region_space); }
-    H5E_END_TRY;
+    if ((npoints = H5Sget_select_elem_npoints(region_space)) <= 0) {
+        ret_value = SUCCEED;
+        goto done;
+    }
+    if ((ndims = H5Sget_simple_extent_ndims(region_space)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-    if (npoints > 0) {
-        if ((ndims = H5Sget_simple_extent_ndims(region_space)) < 0)
+    /* Print point information */
+    alloc_size = (hsize_t)npoints * (hsize_t)ndims * (hsize_t)sizeof(ptdata[0]);
+    if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                               "h5str_dump_region_points: failed to allocate region point data buffer");
+
+    if (H5Sget_select_elem_pointlist(region_space, (hsize_t)0, (hsize_t)npoints, ptdata) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (expand_data) {
+        if ((dtype = H5Dget_type(region_id)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 
-        /* Print point information */
-        alloc_size = (hsize_t)npoints * (hsize_t)ndims * (hsize_t)sizeof(ptdata[0]);
-        if (alloc_size == (hsize_t)((size_t)alloc_size)) {
-            if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
-                H5_OUT_OF_MEMORY_ERROR(
-                    ENVONLY,
-                    "h5str_dump_region_points_data: failed to allocate region point data buffer");
+        if ((type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
 
-            if (H5Sget_select_elem_pointlist(region_space, (hsize_t)0, (hsize_t)npoints, ptdata) < 0) {
-                H5_LIBRARY_ERROR(ENVONLY);
-            }
-
-            if ((dtype = H5Dget_type(region_id)) < 0) {
-                H5_LIBRARY_ERROR(ENVONLY);
-            }
-
-            if ((type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0) {
-                H5_LIBRARY_ERROR(ENVONLY);
-            }
-
-            if (h5str_print_region_data_points(ENVONLY, region_space, region_id, str, ndims, type_id,
-                                            npoints, ptdata) < 0)
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-        }
+        if (h5str_print_region_data_points(ENVONLY, region_space, region_id, str, ndims, type_id, npoints, ptdata)
+                < 0)
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
     }
+    else {
+        if (!h5str_append(str, " REGION_TYPE POINT"))
+            H5_LIBRARY_ERROR(ENVONLY);
 
+        if (!h5str_append(str, " {"))
+            H5_LIBRARY_ERROR(ENVONLY);
+
+        for (i = 0; i < npoints; i++) {
+            int j;
+
+            if (!h5str_append(str, " "))
+                H5_LIBRARY_ERROR(ENVONLY);
+
+            for (j = 0; j < ndims; j++) {
+                tmp_str[0] = '\0';
+
+                if (HDsprintf(tmp_str, "%s%lu", j ? "," : "(", (unsigned long)(ptdata[i * ndims + j])) < 0)
+                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_points: HDsprintf failure");
+
+                if (!h5str_append(str, tmp_str))
+                    H5_LIBRARY_ERROR(ENVONLY);
+            } /* end for (j = 0; j < ndims; j++) */
+
+            if (!h5str_append(str, ") "))
+                H5_LIBRARY_ERROR(ENVONLY);
+        } /* end for (i = 0; i < npoints; i++) */
+
+        if (!h5str_append(str, " }"))
+            H5_LIBRARY_ERROR(ENVONLY);
+    }
     ret_value = SUCCEED;
 
 done:
@@ -1743,78 +1698,6 @@ done:
         H5Tclose(type_id);
     if (dtype >= 0)
         H5Tclose(dtype);
-    if (ptdata)
-        HDfree(ptdata);
-
-    return ret_value;
-} /* end h5str_dump_region_points_data */
-
-static int
-h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t region_id)
-{
-    hssize_t npoints;
-    hsize_t  alloc_size;
-    hsize_t *ptdata = NULL;
-    char     tmp_str[256];
-    int      i;
-    int      ndims     = -1;
-    int      ret_value = FAIL;
-
-    UNUSED(region_id);
-
-    /*
-     * This function fails if the region does not have points.
-     */
-    H5E_BEGIN_TRY { npoints = H5Sget_select_elem_npoints(region_space); }
-    H5E_END_TRY;
-
-    if (npoints < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if ((ndims = H5Sget_simple_extent_ndims(region_space)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    /* Print point information */
-    alloc_size = (hsize_t)npoints * (hsize_t)ndims * (hsize_t)sizeof(ptdata[0]);
-    if (alloc_size == (hsize_t)((size_t)alloc_size)) {
-        if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                "h5str_dump_region_points: failed to allocate region point buffer");
-
-        if (H5Sget_select_elem_pointlist(region_space, (hsize_t)0, (hsize_t)npoints, ptdata) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
-
-        if (!h5str_append(str, " {"))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-
-        for (i = 0; i < npoints; i++) {
-            int j;
-
-            if (!h5str_append(str, " "))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-
-            for (j = 0; j < ndims; j++) {
-                tmp_str[0] = '\0';
-
-                if (HDsprintf(tmp_str, "%s%lu", j ? "," : "(", (unsigned long)(ptdata[i * ndims + j])) <
-                    0)
-                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_points: HDsprintf failure");
-
-                if (!h5str_append(str, tmp_str))
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-            } /* end for (j = 0; j < ndims; j++) */
-
-            if (!h5str_append(str, ") "))
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-        } /* end for (i = 0; i < npoints; i++) */
-
-        if (!h5str_append(str, " }"))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-    } /* end if (alloc_size == (hsize_t)((size_t) alloc_size)) */
-
-    ret_value = SUCCEED;
-
-done:
     if (ptdata)
         HDfree(ptdata);
 
@@ -2346,28 +2229,20 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
                     mem = ((unsigned char *)_mem) + block_index * size;
                     if ((region_id = H5Ropen_object((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                         continue;
-                    else {
-                        if ((region_space = H5Ropen_region((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >=
-                            0) {
-                            if (!h5str_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
-                                region_type = H5Sget_select_type(region_space);
-                                if (region_type == H5S_SEL_POINTS)
-                                    ret_value = render_bin_output_region_points(stream, region_space,
-                                                                                region_id, container);
-                                else
-                                    ret_value = render_bin_output_region_blocks(stream, region_space,
-                                                                                region_id, container);
-                            }
-                            H5Sclose(region_space);
-                        } /* end if (region_space >= 0) */
-                        H5Dclose(region_id);
-                    }
-
-                    if ((region_type = H5Sget_select_type(region_space)) < 0) {
+                    if ((region_space = H5Ropen_region((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                        if (!h5str_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
+                            region_type = H5Sget_select_type(region_space);
+                            if (region_type == H5S_SEL_POINTS)
+                                ret_value = render_bin_output_region_points(stream, region_space, region_id,
+                                                                            container);
+                            else if (region_type == H5S_SEL_HYPERSLABS)
+                                ret_value = render_bin_output_region_blocks(stream, region_space, region_id,
+                                                                            container);
+                        }
                         H5Sclose(region_space);
-                        H5Dclose(region_id);
-                        continue;
-                    }
+                    } /* end if (region_space >= 0) */
+                    H5Dclose(region_id);
+
                     if (ret_value < 0)
                         break;
                 }
@@ -2823,7 +2698,7 @@ h5str_dump_region_attribute(JNIEnv *env, h5str_t *str, hid_t region_id)
 
                 if ((i < p_nelmts - 1) && (bytes_in > 0)) {
                     if (!h5str_append(str, ", "))
-                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                        H5_LIBRARY_ERROR(ENVONLY);
                 }
             }
 
