@@ -101,7 +101,7 @@ if (BUILD_TESTING)
   # --------------------------------------------------------------------
   if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
     add_executable (h5dumpgentest ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)
-    target_include_directories (h5dumpgentest PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (h5dumpgentest PRIVATE "${HDF5_SRC_DIR};${HDF5_TEST_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     TARGET_C_PROPERTIES (h5dumpgentest STATIC)
     target_link_libraries (h5dumpgentest PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)

@@ -187,7 +187,7 @@ main(int argc, char *argv[])
         goto error;
     }
     else if (mpi_rank == 0) {
-        PASSED()
+        PASSED();
     }
 
     /* Check the case where the file was not flushed.  This should give an error
@@ -201,7 +201,7 @@ main(int argc, char *argv[])
     h5_fixname(FILENAME[1], fapl_id2, name, sizeof(name));
     if (check_test_file(name, fapl_id2)) {
         if (mpi_rank == 0)
-            PASSED()
+            PASSED();
     }
     else {
         H5_FAILED()

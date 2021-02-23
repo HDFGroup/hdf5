@@ -18,24 +18,31 @@
 #
 # See BlankForm in this directory for details.
 
-# The default compiler is `gcc'
+# The default compiler is 'cc'
 if test "X-" = "X-$CC"; then
-  CC=gcc
-  CC_BASENAME=gcc
+  CC=cc
+  CC_BASENAME=cc
 fi
 
-# Figure out C compiler flags
+# Figure out clang C compiler flags
+. $srcdir/config/clang-flags
+
+# Figure out GNU C compiler flags
 . $srcdir/config/gnu-flags
 
 # Figure out Intel C compiler flags
 . $srcdir/config/intel-flags
 
 # The default Fortran 90 compiler
+# No default Fortran compiler for clang. flang exists on
+# FreeBSD as a port, but this is tied to an ancient LLVM
+# and lacks Fortran 2003 features which causes configure
+# to fail.
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
         gcc*|pgcc*)
-            FC=gfortran40
-            FC_BASENAME=gfortran40
+            FC=gfortran
+            FC_BASENAME=gfortran
             ;;
         icc*)
             FC=ifort
@@ -54,3 +61,16 @@ fi
 # Figure out Intel F90 compiler flags
 . $srcdir/config/intel-fflags
 
+# The default C++ compiler
+
+# The default compiler is 'c++'.
+if test -z "$CXX"; then
+  CXX=c++
+  CXX_BASENAME=c++
+fi
+
+# Figure out Clang CXX compiler flags
+. $srcdir/config/clang-cxxflags
+
+# Figure out GNU CXX compiler flags
+. $srcdir/config/gnu-cxxflags

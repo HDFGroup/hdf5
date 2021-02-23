@@ -9,6 +9,9 @@ usage: h5repack [OPTIONS] file1 file2
    --enable-error-stack    Prints messages from the HDF5 error stack as they
                            occur
    -L, --latest            Use latest version of file format
+   --merge                 Follow external soft link recursively and merge data
+   --prune                 Do not follow external soft links and remove link
+   --merge --prune         Follow external link, merge data and remove dangling link
    -c L1, --compact=L1     Maximum number of links in header messages
    -d L2, --indexed=L2     Minimum number of links in the indexed format
    -s S[:F], --ssize=S[:F] Shared object header message minimum size
@@ -67,6 +70,7 @@ usage: h5repack [OPTIONS] file1 file2
         UD=<filter_number,filter_flag,cd_value_count,value1[,value2,...,valueN]>
             Required values: filter_number, filter_flag, cd_value_count, value1
             Optional values: value2 to valueN
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
         NONE (no parameter)
 
     LAYT - is a string with the format:
