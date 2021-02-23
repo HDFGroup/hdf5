@@ -4010,13 +4010,13 @@ H5_DLL herr_t H5Pset_meta_block_size(hid_t fapl_id, hsize_t size);
  * \b Example: The first example illustrates the case in setting the number of read attempts for a file
  *             opened with SWMR access.
  *
- * \snippet H5Pset_meta_block_size.c SWMR Access
+ * \snippet H5Pset_metadata_read_attempts.c SWMR Access
  *
  * \b Example: The second example illustrates the case in setting the number of
  *             read attempts for a file opened with non-SWMR access. The value
  *             set in the file access property list does not have any effect.
  *
- * \snippet H5Pset_meta_block_size.c non-SWMR Access
+ * \snippet H5Pset_metadata_read_attempts.c non-SWMR Access
  *
  * \note \b Motivation: On a system that is not atomic, the library might
  *       possibly read inconsistent metadata with checksum when performing
@@ -4109,7 +4109,7 @@ H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);
  * \b Example: The example below illustrates the usage of this routine to set
  *             the callback function to invoke when an object flush occurs.
  *
- * \include H5P_set_object_flush_cb.c
+ * \include H5Pset_object_flush_cb.c
  *
  * \since 1.10.0
  */
