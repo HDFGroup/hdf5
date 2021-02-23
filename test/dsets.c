@@ -3760,7 +3760,7 @@ test_nbit_compound_2(hid_t file)
             power               = HDpow(2.0F, (double)(precision[1] - 1));
             orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
             power               = HDpow(2.0F, (double)(precision[2] - 1));
-            orig_data[i][j].a.s = (short)(-((long long)HDrandom() % (long long)power) << offset[2]);
+            orig_data[i][j].a.s = (short)(-(((long long)HDrandom() % (long long)power) << offset[2]));
             orig_data[i][j].a.f = float_val[i][j];
 
             power             = HDpow(2.0F, (double)precision[3]);
@@ -3776,7 +3776,7 @@ test_nbit_compound_2(hid_t file)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
                     power = HDpow(2.0F, (double)(precision[0] - 1));
                     orig_data[i][j].d[m][n].i =
-                        (int)(-((long long)HDrandom() % (long long)power) << offset[0]);
+                        (int)(-(((long long)HDrandom() % (long long)power) << offset[0]));
                     power = HDpow(2.0F, (double)(precision[1] - 1));
                     orig_data[i][j].d[m][n].c =
                         (char)(((long long)HDrandom() % (long long)power) << offset[1]);
