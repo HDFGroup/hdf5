@@ -336,20 +336,6 @@ h5unimplemented(JNIEnv *env, const char *message)
     return H5JNIErrorClass(env, message, "java/lang/UnsupportedOperationException");
 } /* end h5unimplemented() */
 
-/*
- *  indicate that assert statement fails
- *  Create and throw an 'AssertionError'
- *
- *  Note:  This routine never returns from the 'throw',
- *  and the Java native method immediately raises the
- *  exception.
- */
-jboolean
-h5assertion(JNIEnv *env, const char *message)
-{
-    return H5JNIErrorClass(env, message, "java/lang/AssertionError");
-} /* end h5assertion() */
-
 /*  h5raiseException().  This routine is called to generate
  *  an arbitrary Java exception with a particular message.
  *
