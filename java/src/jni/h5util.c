@@ -210,9 +210,9 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
         if (HDsprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH) < 0)
-            H5_ASSERTION_ERROR(ENVONLY, "h5str_convert: HDsprintf failure");
+            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_convert: HDsprintf failure");
         if (HDsprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH) < 0)
-            H5_ASSERTION_ERROR(ENVONLY, "h5str_convert: HDsprintf failure");
+            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_convert: HDsprintf failure");
     } /* end if */
 
     switch (tclass) {
@@ -780,9 +780,9 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
         if (HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH) < 0)
-            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
         if (HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%%su", H5_PRINTF_LL_WIDTH) < 0)
-            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
     } /* end if */
     switch (tclass) {
         case H5T_FLOAT: {
@@ -796,7 +796,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                     if (HDsprintf(this_str, "%g", tmp_float) < 0)
-                        H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
 
                     break;
                 }
@@ -810,7 +810,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                     if (HDsprintf(this_str, "%g", tmp_double) < 0)
-                        H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
 
                     break;
                 }
@@ -824,7 +824,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                     if (HDsprintf(this_str, "%Lg", tmp_ldouble) < 0)
-                        H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
 
                     break;
                 }
@@ -897,7 +897,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                    "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hhu", tmp_uchar) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
                     else {
                         HDmemcpy(&tmp_char, cptr, sizeof(char));
@@ -907,7 +907,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                    "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hhd", tmp_char) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
 
                     break;
@@ -925,7 +925,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                    "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hu", tmp_ushort) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
                     else {
                         HDmemcpy(&tmp_short, cptr, sizeof(short));
@@ -935,7 +935,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                    "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hd", tmp_short) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
 
                     break;
@@ -953,7 +953,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                    "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%u", tmp_uint) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
                     else {
                         HDmemcpy(&tmp_int, cptr, sizeof(int));
@@ -963,7 +963,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                    "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%d", tmp_int) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
 
                     break;
@@ -981,7 +981,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                    "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%lu", tmp_ulong) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
                     else {
                         HDmemcpy(&tmp_long, cptr, sizeof(long));
@@ -991,7 +991,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                    "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%ld", tmp_long) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
 
                     break;
@@ -1010,7 +1010,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                    "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, fmt_ullong, tmp_ullong) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
                     else {
                         HDmemcpy(&tmp_llong, cptr, sizeof(long long));
@@ -1020,7 +1020,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                    "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, fmt_llong, tmp_llong) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
 
                     break;
@@ -1085,12 +1085,12 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
                 if (1 == typeSize) {
                     if (HDsprintf(this_str, "%#02x", ucptr[0]) < 0)
-                        H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                 }
                 else {
                     for (i = 0; i < typeSize; i++)
                         if (HDsprintf(this_str, "%s%02x", i ? ":" : "", ucptr[i]) < 0)
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                 }
             }
 
@@ -1138,7 +1138,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                         H5_OUT_OF_MEMORY_ERROR(
                                             ENVONLY, "h5str_sprintf: failed to allocate string buffer");
                                     if (HDsprintf(this_str, "%u-", (unsigned)oi.type) < 0)
-                                        H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                                     if (!h5str_append(out_str, this_str))
                                         H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
                                     HDfree(this_str);
@@ -1154,7 +1154,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                             H5_OUT_OF_MEMORY_ERROR(
                                                 ENVONLY, "h5str_sprintf: failed to allocate string buffer");
                                         if (HDsprintf(this_str, "%lu:%s", oi.fileno, token_str) < 0)
-                                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
 
                                         H5free_memory(token_str);
                                     }
@@ -1320,12 +1320,12 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
             if (1 == typeSize) {
                 if (HDsprintf(this_str, "%#02x", ucptr[0]) < 0)
-                    H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
             }
             else {
                 for (i = 0; i < typeSize; i++)
                     if (HDsprintf(this_str, "%s%02x", i ? ":" : "", ucptr[i]) < 0)
-                        H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
             }
 
             break;
@@ -1525,7 +1525,7 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
                 tmp_str[0] = '\0';
 
                 if (HDsprintf(tmp_str, "%s%lu", j ? "," : "(", (unsigned long)ptdata[i * 2 * ndims + j]) < 0)
-                    H5_ASSERTION_ERROR(ENVONLY, "h5str_dump_region_blocks: HDsprintf failure");
+                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_blocks: HDsprintf failure");
 
                 if (!h5str_append(str, tmp_str))
                     H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
@@ -1536,7 +1536,7 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
 
                 if (HDsprintf(tmp_str, "%s%lu", j ? "," : ")-(",
                               (unsigned long)ptdata[i * 2 * ndims + j + ndims]) < 0)
-                    H5_ASSERTION_ERROR(ENVONLY, "h5str_dump_region_blocks: HDsprintf failure");
+                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_blocks: HDsprintf failure");
 
                 if (!h5str_append(str, tmp_str))
                     H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
@@ -1699,7 +1699,7 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
                 tmp_str[0] = '\0';
 
                 if (HDsprintf(tmp_str, "%s%lu", j ? "," : "(", (unsigned long)(ptdata[i * ndims + j])) < 0)
-                    H5_ASSERTION_ERROR(ENVONLY, "h5str_dump_region_points: HDsprintf failure");
+                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_points: HDsprintf failure");
 
                 if (!h5str_append(str, tmp_str))
                     H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
@@ -2998,24 +2998,24 @@ h5str_dump_simple_data(JNIEnv *env, FILE *stream, hid_t container, hid_t type, v
 
         if ((i > 0) && (bytes_in > 0)) {
             if (HDfprintf(stream, ", ") < 0)
-                H5_ASSERTION_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
+                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
 
             if (line_count >= H5TOOLS_TEXT_BLOCK) {
                 line_count = 0;
 
                 if (HDfprintf(stream, "\n") < 0)
-                    H5_ASSERTION_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
+                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
             }
         }
 
         if (HDfprintf(stream, "%s", buffer.s) < 0)
-            H5_ASSERTION_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
+            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
 
         h5str_free(&buffer);
     } /* end for (i = 0; i < nelmts... */
 
     if (HDfprintf(stream, "\n") < 0)
-        H5_ASSERTION_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
+        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
 
 done:
     if (buffer.s)
@@ -3319,7 +3319,7 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full(JNIEnv *env, jclass clss, jlong loc_
 
     if ((ret_val = H5Gget_obj_info_full(gid, oName, (int *)otarr, (int *)ltarr, fnos, tokens, indexType,
                                         indexOrder)) < 0)
-        H5_ASSERTION_ERROR(ENVONLY, "H5Gget_obj_info_full: retrieval of object info failed");
+        H5_JNI_FATAL_ERROR(ENVONLY, "H5Gget_obj_info_full: retrieval of object info failed");
 
     for (i = 0; i < n; i++) {
         fnoP[i] = (jlong)fnos[i];
@@ -3409,7 +3409,7 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max(JNIEnv *env, jclass clss, jlong loc_i
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Gget_obj_info_max: failed to allocate buffer for object tokens");
 
     if ((ret_val = H5Gget_obj_info_max((hid_t)loc_id, oName, (int *)otarr, (int *)ltarr, tokens, maxnum)) < 0)
-        H5_ASSERTION_ERROR(ENVONLY, "H5Gget_obj_info_max: retrieval of object info failed");
+        H5_JNI_FATAL_ERROR(ENVONLY, "H5Gget_obj_info_max: retrieval of object info failed");
 
     for (i = 0; i < n; i++) {
         if (oName[i]) {
@@ -3617,7 +3617,7 @@ Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *env, jclass clss, jstring file_exp
                     "H5export_dataset: file_export name not pinned");
 
     if (NULL == (stream = HDfopen(file_export, "w+")))
-        H5_ASSERTION_ERROR(ENVONLY, "HDfopen failed");
+        H5_JNI_FATAL_ERROR(ENVONLY, "HDfopen failed");
 
     if ((ret_val = h5str_dump_simple_dset(ENVONLY, stream, dataset_id, binary_order)) < 0)
         H5_ASSERTION_ERROR(ENVONLY, "h5str_dump_simple_dset failed");
