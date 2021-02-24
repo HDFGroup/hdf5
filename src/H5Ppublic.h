@@ -3260,8 +3260,8 @@ H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, siz
  *            <td>#H5FD_SEC2</td>
  *            <td>This driver uses POSIX file-system functions like read and
  *                write to perform I/O to a single, permanent file on local disk
- *                with no system buffering. This driver is POSIX-compliant and is
- *                the default file driver for all systems.</td>
+ *                with no system buffering. This driver is POSIX-compliant and
+ *                is the default file driver for all systems.</td>
  *            <td>H5Pset_fapl_sec2()</td>
  *           </tr>
  *           <tr>
@@ -3299,8 +3299,9 @@ H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, siz
  *            <td>#H5FD_CORE</td>
  *            <td>With this driver, an application can work with a file in
  *                memory for faster reads and writes. File contents are kept in
- *                memory until the file is closed. At closing, the memory version
- *                of the file can be written back to disk or abandoned.</td>
+ *                memory until the file is closed. At closing, the memory
+ *                version of the file can be written back to disk or abandoned.
+ *            </td>
  *            <td>H5Pset_fapl_core()</td>
  *           </tr>
  *           <tr>
@@ -3309,7 +3310,8 @@ H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, siz
  *            <td>With this driver, the HDF5 file’s address space is partitioned
  *                into pieces and sent to separate storage files using an
  *                underlying driver of the user’s choice. This driver is for
- *                systems that do not support files larger than 2 gigabytes.</td>
+ *                systems that do not support files larger than 2 gigabytes.
+ *            </td>
  *            <td>H5Pset_fapl_family()</td>
  *           </tr>
  *           <tr>
@@ -3736,7 +3738,72 @@ H5_DLL herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size
  */
 H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info);
 H5_DLL herr_t H5Pset_elink_file_cache_size(hid_t plist_id, unsigned efc_size);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Controls the library's behavior of evicting metadata associated with
+ *        a closed object
+ *
+ * \fapl_id
+ * \param[in] evict_on_close Whether the HDF5 object should be evicted on close
+ *
+ * \return \herr_t
+ *
+ * \details The library's metadata cache is fairly conservative about holding
+ *          on to HDF5 object metadata(object headers, chunk index structures,
+ *          etc.), which can cause the cache size to grow, resulting in memory
+ *          pressure on an application or system. When enabled, the "evict on
+ *          close" property will cause all metadata for an object to be evicted
+ *          from the cache as long as metadata is not referenced by any other
+ *          open object.
+ *
+ *          This function only applies to file access property lists.
+ *
+ *          The default library behavior is to not evict on object or file
+ *          close.
+ *
+ *          When applied to a file access property list, any subsequently opened
+ *          object will inherit the "evict on close" property and will have
+ *          its metadata evicted when the object is closed.
+ *
+ * \version 1.10.1 C function introduced with this release.
+ *
+ */
 H5_DLL herr_t H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets offset property for low-level access to a file in a family of
+ *        files
+ *
+ * \fapl_id
+ * \param[in] offset Offset in bytes within the HDF5 file
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_family_offset() sets the offset property in the file access
+ *          property list \p fapl_id so that the user application can
+ *          retrieve a file handle for low-level access to a particular member
+ *          of a family of files. The file handle is retrieved with a separate
+ *          call to H5Fget_vfd_handle() (or, in special circumstances, to
+ *          \p H5FDget_vfd_handle; see -- <em> Virtual File Layer </em>
+ *          and -- <em> List of VFL Functions </em> in
+ *          [HDF5 Technical Notes]
+ *          (https://portal.hdfgroup.org/display/HDF5/Tech+Notes)).
+ *
+ *          The value of \p offset is an offset in bytes from the beginning of
+ *          the HDF5 file, identifying a user-determined location within the
+ *          HDF5 file.
+ *          The file handle the user application is seeking is for the specific
+ *          member-file in the associated family of files to which this offset
+ *          is mapped.
+ *
+ *          Use of this function is only appropriate for an HDF5 file written as
+ *          a family of files with the \p FAMILY file driver.
+ *
+ * \version 1.6.0 Function introduced in this release.
+ *
+ */
 H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
 /**
  * \ingroup FAPL
@@ -3799,9 +3866,456 @@ H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
  *
  */
 H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets an initial file image in a memory buffer
+ *
+ * \fapl_id
+ * \param[in] buf_ptr Pointer to the initial file image, or
+ *                    NULL if no initial file image is desired
+ * \param[in] buf_len Size of the supplied buffer, or
+ *                    0 (zero) if no initial image is desired
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_file_image() allows an application to provide a file image
+ *          to be used as the initial contents of a file.
+ *          Calling H5Pset_file_image()makes a copy of the buffer specified in
+ *          \p buf_ptr of size \p buf_len.
+ *
+ *          \a Motivation: H5Pset_file_image() and other elements of HDF5 are
+ *          used to load an image of an HDF5 file into system memory and open
+ *          that image as a regular HDF5 file. An application can then use the
+ *          file without the overhead of disk I/O.
+ *
+ *          \a Recommended  \a Reading: This function is part of the file image
+ *          operations feature set. It is highly recommended to study the guide
+ *          [<em>HDF5 File Image Operations</em>]
+ *          (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations
+ *          ) before using this feature set. See the “See Also” section below
+ *          for links to other elements of HDF5 file image operations.
+ *
+ * \see
+ *    \li H5LTopen_file_image()
+ *    \li H5Fget_file_image()
+ *    \li H5Pget_file_image()
+ *    \li H5Pset_file_image_callbacks()
+ *    \li H5Pget_file_image_callbacks()
+ *
+ *    \li [HDF5 File Image Operations]
+ *        (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations)
+ *        in [Advanced Topics in HDF5]
+ *        (https://portal.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5)
+ *
+ *    \li Within H5Pset_file_image_callbacks():
+ *    \li Callback \p struct  \p H5_file_image_callbacks_t
+ *    \li Callback \p enum   \p H5_file_image_op_t
+ *
+ * \version 1.8.13 Fortran subroutine added in this release.
+ * \version 1.8.9  C function introduced in this release.
+ *
+ */
 H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the callbacks for working with file images
+ *
+ * \warning **Motivation:** H5Pset_file_image_callbacks() and other elements
+ *          of HDF5 are used to load an image of an HDF5 file into system
+ *          memory and open that image as a regular HDF5 file. An application
+ *          can then use the file without the overhead of disk I/O. \n
+ *          **Recommended Reading:** This function is part of the file
+ *          image operations feature set. It is highly recommended to study
+ *          the guide [HDF5 File Image Operations]
+ *          (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations
+ *          ) before using this feature set. See the “See Also” section below
+ *          for links to other elements of HDF5 file image operations.
+ *
+ * \fapl_id
+ * \param[in/out] callbacks_ptr Pointer to the instance of the
+ *                \p H5_file_image_callbacks_t struct
+ *
+ * \return \herr_t \n
+ *         **Failure Modes**: Due to interactions between this function and
+ *         H5P_SET_FILE_IMAGE and H5P_GET_FILE_IMAGE,
+ *         H5P_SET_FILE_IMAGE_CALLBACKS will fail if a file image has
+ *         already been set in the target file access property list, fapl_id.
+ *
+ * \details H5Pset_file_image_callbacks() sets callback functions for working
+ *          with file images in memory.
+ *
+ *          H5Pset_file_image_callbacks() allows an application to control the
+ *          management of file image buffers through user defined callbacks.
+ *          These callbacks can be used in the management of file image buffers
+ *          in property lists and with certain file drivers.
+ *
+ *          H5Pset_file_image_callbacks() must be used before any file image has
+ *          been set in the file access property list. Once a file image has
+ *          been set, the function will fail.
+ *
+ *          The callback routines set up by H5Pset_file_image_callbacks() are
+ *          invoked when a new file image buffer is allocated, when an existing
+ *          file image buffer is copied or resized, or when a file image buffer
+ *          is released from use.
+ *
+ *          Some file drivers allow the use of user-defined callback functions
+ *          for allocating, freeing, and copying the driver’s internal buffer,
+ *          potentially allowing optimizations such as avoiding large \p malloc
+ *          and \p memcpy operations, or to perform detailed logging.
+ *
+ *          From the perspective of the HDF5 library, the operations of the
+ *          \p image_malloc, \p image_memcpy, \p image_realloc, and
+ *          \p image_free callbacks must be identical to those of the
+ *          corresponding C standard library calls (\p malloc, \p memcpy,
+ *          \p realloc, and \p free). While the operations must be identical,
+ *          the file image callbacks have more parameters. The return values
+ *          of \p image_malloc and \p image_realloc are identical to the return
+ *          values of \p malloc and \p realloc. The return values of
+ *          \p image_memcpy and \p image_free differ from the return values of
+ *          \p memcpy and \p free in that the return values of \p image_memcpy
+ *          and \p image_free can also indicate failure.
+ *
+ *          The callbacks and their parameters, along with a struct and
+ *          an \p ENUM required for their use, are described below.
+ *
+ *          <b>Callback struct and \p ENUM:</b>
+ *
+ *          The callback functions set up by H5Pset_file_image_callbacks() use a
+ *          struct and an \p ENUM that are defined as follows
+ *
+ *          The struct \p **H5_file_image_callbacks_t** serves as a container
+ *          for the callback functions and a pointer to user-supplied data.
+ *          The struct is defined as follows:
+ *
+ * \code{.c}
+ *     typedef struct
+ *     {
+ *         void *(*image_malloc)(size_t size, H5_file_image_op_t file_image_op,
+ *                               void *udata);
+ *         void *(*image_memcpy)(void *dest, const void *src, size_t size,
+ *                               H5_file_image_op_t file_image_op, void *udata);
+ *         void *(*image_realloc)(void *ptr, size_t size,
+ *                                H5_file_image_op_t file_image_op,
+ *                                void *udata);
+ *         herr_t (*image_free)(void *ptr, H5_file_image_op_t file_image_op,
+ *                              void *udata);
+ *         void *(*udata_copy)(void *udata);
+ *         herr_t (*udata_free)(void *udata);
+ *         void *udata;
+ *     } H5_file_image_callbacks_t;
+ * \endcode
+ * \n
+ *
+ * \details Elements of the \p ENUM \p **H5_file_image_op_t** are used by the
+ *          callbacks to invoke certain operations on file images. The ENUM is
+ *          defined as follows:
+ *
+ * ~~~~~~~~~~~~~~~{.c}
+ *     typedef enum
+ *     {
+ *         H5_FILE_IMAGE_OP_PROPERTY_LIST_SET,
+ *         H5_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
+ *         H5_FILE_IMAGE_OP_PROPERTY_LIST_GET,
+ *         H5_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
+ *         H5_FILE_IMAGE_OP_FILE_OPEN,
+ *         H5_FILE_IMAGE_OP_FILE_RESIZE,
+ *         H5_FILE_IMAGE_OP_FILE_CLOSE
+ *     } H5_file_image_op_t;
+ * ~~~~~~~~~~~~~~~
+ * \n
+ *
+ * \details The elements of the \p H5_file_image_op_t \p ENUM are used in the
+ *          callbacks for the following purposes:
+ * <table>
+ *   <tr>
+ *     <td>H5_FILE_IMAGE_OP_PROPERTY_LIST_SET</td>
+ *     <td>Passed to the \p image_malloc and \p image_memcpy callbacks when a
+ *         file image buffer is to be copied while being set in a file
+ *         access property list (FAPL)</td>
+ *   </tr>
+ *   <tr>
+ *     <td>H5_FILE_IMAGE_OP_PROPERTY_LIST_COPY</td>
+ *     <td>Passed to the \p image_malloc and \p image_memcpy callbacks
+ *         when a file image buffer is to be copied
+ *         when a FAPL is copied
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>H5_FILE_IMAGE_OP_PROPERTY_LIST_GET</td>
+ *     <td>Passed to the \p image_malloc and \p image_memcpy callbacks
+ *         when a file image buffer is to be copied while being
+ *         retrieved from a FAPL
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>H5_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE</td>
+ *     <td>Passed to the \p image_free callback when a file image
+ *         buffer is to be released during a FAPL close operation
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>H5_FILE_IMAGE_OP_FILE_OPEN</td>
+ *     <td>Passed to the \p image_malloc and \p image_memcpy callbackswhen a
+ *         file image buffer is to be copied during a file open operation \n
+ *         While the file image being opened will typically be copied from a
+ *         FAPL, this need not always be the case. For example, the core file
+ *         driver, also known as the memory file driver, takes its initial
+ *         image from a file.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>H5_FILE_IMAGE_OP_FILE_RESIZE</td>
+ *     <td>Passed to the \p image_realloc callback when a file driver needs to
+ *         resize an image buffer
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>H5_FILE_IMAGE_OP_FILE_CLOSE</td>
+ *     <td>Passed to the \p image_free callback when an image buffer is to
+ *         be released during a file close operation
+ *     </td>
+ *   </tr>
+ * </table>
+ * \n
+ * \details **Callback functions:** \n
+ *          The \p **image_malloc** callback contains a pointer to a function
+ *          that must appear to HDF5 to have functionality identical to that of
+ *          the standard C library \p malloc() call.
+ *
+ *          Signature in \p H5_file_image_callbacks_t: \n
+ *          \a void *(*image_malloc) ( \a size_t size,
+ *                                     \a H5_file_image_op_t *file_image_op,
+ *                                     \a void *udata )
+ *
+ *          Parameters:
+ * <table>
+ *   <tr>
+ *     <td>\a size_t size</td>
+ *     <td>IN: Size in bytes of the file image buffer to allocate</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a H5_file_image_op_t *file_image_op</td>
+ *     <td>IN: A value from H5_file_image_op_t indicating the operation being
+ *        performed on the file image when this callback is invoked</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a void *udata</td>
+ *     <td>IN: Value passed in in the H5P_SET_FILE_IMAGE_CALLBACKS parameter
+ *         \p udata</td>
+ *   </tr>
+ * </table>
+ * \n
+ * \details The \p **image_memcpy** callback contains a pointer to a function
+ *          that must appear to HDF5 to have functionality identical to that
+ *          of the standard C library \p memcopy() call, except that it returns
+ *          a \p NULL on failure. (The \p memcpy C Library routine is defined
+ *          to return the \p dest parameter in all cases.)
+ *
+ *          Setting \p image_memcpy to \p NULL indicates that HDF5 should invoke
+ *          the standard C library \p memcpy() routine when copying buffers.
+ *
+ *          Signature in \p H5_file_image_callbacks_t: \n
+ *          \a void *(*image_memcpy) ( \a void *dest, \a const void *src,
+ *                                     \a size_t size,
+ *                                     \a H5_file_image_op_t *file_image_op,
+ *                                     \a void *udata )
+ *
+ * \details Parameters:
+ * <table>
+ *   <tr>
+ *     <td>\a void *dest</td>
+ *     <td>IN: Address of the destination buffer</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a const  \a void *src</td>
+ *     <td>IN: Address of the source buffer</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a size_t size</td>
+ *     <td>IN: Size in bytes of the file image buffer to copy</td>
+ *   </tr>
+ *    <tr>
+ *     <td>\a H5_file_image_op_t *file_image_op</td>
+ *     <td>IN: A value from \p H5_file_image_op_t indicating the operation being
+ *         performed on the file image when this callback is invoked</td>
+ *   </tr>
+ *    <tr>
+ *     <td>\a void *udata</td>
+ *     <td>IN: Value passed in in the \p H5Pset_file_image_callbacks parameter
+ *         \p udata
+ *     </td>
+ *   </tr>
+ * </table>
+ * \n
+ * \details The \p **image_realloc** callback contains a pointer to a function
+ *          that must appear to HDF5 to have functionality identical to that
+ *          of the standard C library \p realloc() call.
+ *
+ *          Setting \p image_realloc to \p NULL indicates that HDF5 should
+ *          invoke the standard C library \p realloc() routine when resizing
+ *          file image buffers.
+ *
+ *          Signature in \p H5_file_image_callbacks_t: \n
+ *          \a void *(*image_realloc) ( \a void *ptr, \a size_t size, \a
+ *          H5_file_image_op_t *file_image_op, \a void *udata )
+ *
+ *          Parameters:
+ * <table>
+ *   <tr>
+ *     <td>\a void *ptr</td>
+ *     <td>IN: Pointer to the buffer being reallocated</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a size_t size</td>
+ *     <td>IN: Desired size in bytes of the file image buffer after reallocation
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a H5_file_image_op_t *file_image_op</td>
+ *     <td>IN: A value from \p H5_file_image_op_t indicating the operation being
+ *         performed on the file image when this callback is invoked</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a void *udata</td>
+ *     <td>IN: Value passed in in the \p H5Pset_file_image_callbacks parameter
+ *         udata</td>
+ *   </tr>
+ * </table>
+ * \n
+ * \details The \p **image_free** callback contains a pointer to a function that
+ *          must appear to HDF5 to have functionality identical to that of the
+ *          standard C library \p free() call, except that it will return
+ *          \p 0 (\p SUCCEED) on success and \p -1 (\p FAIL) on failure.
+ *
+ *          Setting \p image_free to \p NULL indicates that HDF5 should invoke
+ *          the standard C library \p free() routine when releasing file image
+ *          buffers.
+ *
+ *          Signature in \p H5_file_image_callbacks_t: \n
+ *          \a herr_t (*image_free) (\a void *ptr,
+ *                                   \a H5_file_image_op_t *file_image_op,
+ *                                   \a void *udata )
+ *
+ *          Parameters:
+ * <table>
+ *   <tr>
+ *     <td>\a void *ptr</td>
+ *     <td>IN: Pointer to the buffer being released</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a H5_file_image_op_t *file_image_op</td>
+ *     <td>IN: A value from \p H5_file_image_op_t indicating the operation being
+ *         performed on the file image when this callback is invoked</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a void *udata</td>
+ *     <td>IN: Value passed in in the \p H5Pset_file_image_callbacks parameter
+ *         \p udata</td>
+ *   </tr>
+ * </table>
+ * \n
+ * \details The \p **udata_copy** callback contains a pointer to a function
+ *          that, from the perspective of HDF5, allocates a buffer of suitable
+ *          size, copies the contents of the supplied \p udata into the new
+ *          buffer, and returns the address of the new buffer. The function
+ *          returns NULL on failure. This function is necessary if a non-NULL
+ *          \p udata parameter is supplied, so that property lists containing
+ *          the image callbacks can be copied. If the \p udata parameter below
+ *          is \p NULL, then this parameter should be \p NULL as well.
+ *
+ *          Signature in \p H5_file_image_callbacks_t: \n
+ *          \a void *(*udata_copy) ( \a void *udata )
+ *
+ *          Parameters:
+ * <table>
+ *   <tr>
+ *     <td>\a void *udata</td>
+ *     <td>IN: Value passed in in the \p H5Pset_file_image_callbacks parameter
+ *         \p udata</td>
+ *   </tr>
+ * </table>
+ * \n
+ * \details The \p **udata_free** callback contains a pointer to a function
+ *          that, from the perspective of HDF5, frees a user data block. This
+ *          function is necessary if a non-NULL udata parameter is supplied so
+ *          that property lists containing image callbacks can be discarded
+ *          without a memory leak. If the udata parameter below is \p NULL,
+ *          this parameter should be \p NULL as well.
+ *
+ *          Signature in \p H5_file_image_callbacks_t: \n
+ *          \a herr_t (*udata_free) ( \a void *udata )
+ *
+ *          Parameters:
+ * <table>
+ *   <tr>
+ *     <td>\a void *udata</td>
+ *     <td>IN: Value passed in in the \p H5Pset_file_image_callbacks parameter
+ *         \p udata</td>
+ *   </tr>
+ * </table>
+ * \n
+ * \details \p **udata**, the final field in the \p H5_file_image_callbacks_t
+ *          struct, provides a pointer to user-defined data. This pointer will
+ *          be passed to the \p image_malloc, \p image_memcpy,\p image_realloc,
+ *          and \p image_free callbacks. Define udata as \p NULL if no
+ *          user-defined data is provided.
+ *
+ * \version 1.8.9  C function introduced in this release.
+ *
+ */
 H5_DLL herr_t H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the file locking property values
+ *
+ * \fapl_id
+ * \param[in] use_file_locking Toggle to specify file locking (or not)
+ * \param[in] ignore_when_disabled Toggle to ignore when disabled (or not)
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_file_locking() overrides the default file locking flag
+ *          setting that was set when the library was configured.
+ *
+ *          This setting can be overridden by the HDF5_USE_FILE_LOCKING
+ *          environment variable.
+ *
+ *          File locking is used when creating/opening a file to prevent
+ *          problematic file accesses.
+ *
+ * \version 1.10.7  Function introduced in this release.
+ *
+ */
 H5_DLL herr_t H5Pset_file_locking(hid_t fapl_id, hbool_t use_file_locking, hbool_t ignore_when_disabled);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets garbage collecting references flag
+ *
+ * \fapl_id
+ * \param[in] gc_ref Flag setting reference garbage collection to on (1) or off (0)
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_gc_references() sets the flag for garbage collecting
+ *          references for the file.
+ *
+ *          Dataset region references and other reference types use space in an
+ *          HDF5 file's global heap. If garbage collection is on and the user
+ *          passes in an uninitialized value in a reference structure, the heap
+ *          might get corrupted. When garbage collection is off, however, and
+ *          the user re-uses a reference, the previous heap block will be
+ *          orphaned and not returned to the free heap space.
+ *
+ *          When garbage collection is on, the user must initialize the
+ *          reference structures to 0 or risk heap corruption.
+ *
+ *          The default value for garbage collecting references is off.
+ *
+ */
 H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
 /**
  * \ingroup FAPL
@@ -3884,10 +4398,11 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *            <td>\p low=#H5F_LIBVER_V18<br />
  *                \p high=#H5F_LIBVER_V18</td>
  *            <td>
- *             \li The library will create objects with the latest format versions
- *                 available to library release 1.8.x.
+ *             \li The library will create objects with the latest format
+ *                 versions available to library release 1.8.x.
  *             \li API calls that create objects or features that are available
- *                 to versions of the library greater than 1.8.x release will fail.
+ *                 to versions of the library greater than 1.8.x release will
+ *                 fail.
  *             \li Earlier versions of the library may not be able to access
  *                 objects created with this setting.</td>
  *           </tr>
@@ -3895,14 +4410,15 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *            <td>\p low=#H5F_LIBVER_V18<br />
  *                \p high=#H5F_LIBVER_V110</td>
  *            <td>
- *              \li The library will create objects with the latest format versions
- *                  available to library release 1.8.x.
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.8.x.
  *              \li The library will allow objects to be created with the latest
  *                  format versions available to library release 1.10.x.
- *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper limit
- *                  on the format versions to use.  For example, if a newer format
- *                  version is required to support a feature e.g. virtual dataset,
- *                  this setting will allow the object to be created.
+ *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                  limit on the format versions to use.  For example, if a
+ *                  newer format version is required to support a feature e.g.
+ *                  virtual dataset, this setting will allow the object to be
+ *                  created.
  *              \li Earlier versions of the library may not be able to access
  *                  objects created with this setting.</td>
  *           </tr>
@@ -3911,32 +4427,446 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *                \p high=#H5F_LIBVER_V110
  *             </td>
  *             <td>
- *              \li The library will create objects with the latest format versions
- *                  available to library release 1.10.x.
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.10.x.
  *              \li The library will allow objects to be created with the latest
  *                  format versions available to library release 1.10.x.
- *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper limit
- *                  on the format versions to use. For example, if a newer format
- *                  version is required to support a feature e.g. virtual dataset,
- *                  this setting will allow the object to be created.
+ *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                  limit on the format versions to use. For example, if a
+ *                  newer format version is required to support a feature e.g.
+ *                  virtual dataset, this setting will allow the object to be
+ *                  created.
  *              \li This setting allows users to take advantage of the latest
- *                  features and performance enhancements in the library. However,
- *                  objects written with this setting may be accessible to a smaller
- *                  range of library versions than would be the case if low is set
- *                  to #H5F_LIBVER_EARLIEST.
- *              \li Earlier versions of the library may not be able to access objects created with this
+ *                  features and performance enhancements in the library.
+ *                  However, objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this
  * setting.
  *            </td>
  *           </tr>
  *          </table>
  *
- * \version 1.10.2 #H5F_LIBVER_V18 added to the enumerated defines in #H5F_libver_t.
+ * \version 1.10.2 #H5F_LIBVER_V18 added to the enumerated defines in
+ *                 #H5F_libver_t.
  *
  * \since 1.8.0
  *
  */
 H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_t high);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Set the initial metadata cache configuration in the indicated File
+ *        Access Property List to the supplied value
+ *
+ * \fapl_id{plist_id}
+ * \param[in] config_ptr  Pointer to the instance of \p H5AC_cache_config_t
+ *            containing the desired configuration
+ *
+ * \return \herr_t
+ *
+ *  The fields of the \p H5AC_cache_config_t structure are discussed below:
+ * <table>
+ *   <tr>
+ *     <th colspan="2" align="left">General configuration section:</th>
+ *   </tr>
+ *   <tr>
+ *     <td>\a int version</td>
+ *     <td>IN: Integer field indicating the the version of the
+ *         H5AC_cache_config_t in use. This field should be set to
+ *         H5AC__CURR_CACHE_CONFIG_VERSION (defined in H5ACpublic.h).</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a hbool_t rpt_fcn_enabled  </td>
+ *     <td>IN: Boolean flag indicating whether the adaptive cache resize report
+ *         function is enabled. This field should almost always be set to
+ *         disabled (0). Since resize algorithm activity is reported via stdout,
+ *         it MUST be set to disabled (0) on Windows machines.\n
+ *         The report function is not supported code, and can be expected to
+ *         change between versions of the library. Use it at your own risk.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a hbool_t open_trace_file</td>
+ *     <td> IN: Boolean field indicating whether the \p trace_file_name
+ *         field should be used to open a trace file for the cache. \n
+ *         The trace file is a debugging feature that allows the capture of
+ *         top level metadata cache requests for purposes of debugging and/or
+ *         optimization. This field should normally be set to 0, as trace file
+ *         collection imposes considerable overhead. \n
+ *         This field should only be set to 1 when the \p trace_file_name
+ *         contains the full path of the desired trace file, and either
+ *         there is no open trace file on the cache, or the \p close_trace_file
+ *         field is also 1. \n
+ *         The trace file feature is unsupported unless used at the direction
+ *         of The HDF Group. It is intended to allow The HDF Group to collect a
+ *         trace of cache activity in cases of occult failures and/or poor
+ *         performance seen in the field, so as to aid in reproduction in the
+ *         lab. If you use it absent the direction of The HDF Group, you are on
+ *         your own.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a hbool_t close_trace_file</td>
+ *     <td>IN: Boolean field indicating whether the current trace file (if any)
+ *         should be closed. \n
+ *         See the above comments on the \p open_trace_file field. This field
+ *         should be set to 0 unless there is an open trace file on the cache
+ *         that you wish to close. \n
+ *         The trace file feature is unsupported unless used at the direction
+ *         of The HDF Group. It is intended to allow The HDF Group to collect
+ *         a trace of cache activity in cases of occult failures and/or poor
+ *         performance seen in the field, so as to aid in reproduction in the
+ *         lab. If you use it absent the direction of The HDF Group, you are on
+ *         your own.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a char trace_file_name[]</td>
+ *     <td>IN: Full path of the trace file to be opened if the
+ *         \p open_trace_file field is set to 1. \n
+ *         In the parallel case, an ascii representation of the MPI rank of the
+ *         process will be appended to the file name to yield a unique trace
+ *         file name for each process. \n
+ *         The length of the path must not exceed
+ *         \p H5AC__MAX_TRACE_FILE_NAME_LEN characters. \n
+ *         The trace file feature is unsupported unless used at the direction
+ *         of The HDF Group. It is intended to allow The HDF Group to collect
+ *         a trace of cache activity in cases of occult failures and/or poor
+ *         performance seen in the field, so as to aid in reproduction
+ *         in the lab. If you use it absent the direction of The HDF Group,
+ *         you are on your own.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a hbool_t evictions_enabled</td>
+ *     <td>IN: A boolean flag indicating whether evictions from the metadata
+ *         cache are enabled. This flag is initially set to enabled (1).\n
+ *         In rare circumstances, the raw data throughput requirements may be
+ *         so high that the user wishes to postpone metadata writes so as to
+ *         reserve I/O throughput for raw data. The \p evictions_enabled field
+ *         exists to allow this. However, this is an extreme step, and you have
+ *         no business doing it unless you have read the User Guide section on
+ *         metadata caching, and have considered all other options carefully.\n
+ *         The \p evictions_enabled field may not be set to disabled (0) unless
+ *         all adaptive cache resizing code is disabled via the \p incr_mode,
+ *         \p flash_incr_mode, and \p decr_mode fields.\n
+ *         When this flag is set to disabled (\p 0), the metadata cache will
+ *         not attempt to evict entries to make space for new entries, and thus
+ *         will grow without bound.\n
+ *         Evictions will be re-enabled when this field is set back to \p 1.
+ *         This should be done as soon as possible.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a hbool_t set_initial_size</td>
+ *     <td>IN: Boolean flag indicating whether the cache should be created with
+ *         a user specified initial size.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a size_t initial_size</td>
+ *     <td>IN: If \p set_initial_size is set to 1, \p initial_size must contain
+ *        the desired initial size in bytes. This value must lie in the closed
+ *        interval [ \p min_size, \p max_size ]. (see below)
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a double min_clean_fraction</td>
+ *     <td>IN: This field specifies the minimum fraction of the cache that must
+ *         be kept either clean or empty. \n
+ *         The value must lie in the interval [0.0, 1.0]. 0.01 is a good place
+ *         to start in the serial case. In the parallel case, a larger value is
+ *         needed -- see the overview of the metadata cache in the “Metadata
+ *         Caching in HDF5” section of the -- <em>HDF5 User’s Guide</em> for
+ *         details.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a size_t max_size </td>
+ *     <td>IN: Upper bound (in bytes) on the range of values that the adaptive
+ *         cache resize code can select as the maximum cache size.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a size_t min_size </td>
+ *     <td>IN: Lower bound (in bytes) on the range of values that the adaptive
+ *         cache resize code can select as the mininum cache size
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a long int epoch_length</td>
+ *     <td>IN: Number of cache accesses between runs of the adaptive cache
+ *         resize code. 50,000 is a good starting number
+ *     </td>
+ *   </tr>
+ * </table>
+ *
+ *
+ * <table>
+ *   <tr>
+ *     <th colspan="2" align="left">Increment configuration section:</th>
+ *   </tr>
+ *   <tr>
+ *     <td>\a enum \a H5C_cache_incr_mode incr_mode  </td>
+ *     <td>IN: Enumerated value indicating the operational mode of the
+ *         automatic cache size increase code. At present, only two
+ *         values are legal: \n
+ *         H5C_incr__off: Automatic cache size increase is disabled,
+ *         and the remaining increment fields are ignored. \n
+ *         H5C_incr__threshold: Automatic cache size increase is enabled
+ *         using the hit rate threshold algorithm.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a double lower_hr_threshold  </td>
+ *     <td>IN: Hit rate threshold used by the hit rate threshold cache
+ *         size increment algorithm. \n
+ *         When the hit rate over an epoch is below this threshold and the
+ *         cache is full, the maximum size of the cache is multiplied by
+ *         increment (below), and then clipped as necessary to stay within
+ *         max_size, and possibly max_increment. \n
+ *         This field must lie in the interval [0.0, 1.0]. 0.8 or 0.9
+ *         is a good place to start.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a double increment  </td>
+ *     <td>IN: Factor by which the hit rate threshold cache size increment
+ *         algorithm multiplies the current cache max size to obtain a
+ *         tentative new cache size. \n
+ *         The actual cache size increase will be clipped to satisfy the
+ *         max_size specified in the general configuration, and possibly
+ *         max_increment below. \n
+ *         The parameter must be greater than or equal to 1.0 -- 2.0
+ *         is a reasonable value. \n
+ *         If you set it to 1.0, you will effectively disable cache
+ *         size increases.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a hbool_t apply_max_increment  </td>
+ *     <td>IN: Boolean flag indicating whether an upper limit should be
+ *         applied to the size of cache size increases.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a size_t max_increment</td>
+ *     <td>IN: Maximum number of bytes by which cache size can be increased
+ *         in a single step -- if applicable.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a enum H5C_cache_flash_incr_mode flash_incr_mode</td>
+ *     <td>IN: Enumerated value indicating the operational mode of the
+ *         flash cache size increase code. At present, only the following
+ *         values are legal: \n
+ *         H5C_flash_incr__off: Flash cache size increase is disabled.\n
+ *         H5C_flash_incr__add_space: Flash cache size increase is
+ *         enabled using the add space algorithm.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a double flash_threshold</td>
+ *     <td>IN: The factor by which the current maximum cache size is
+ *         multiplied to obtain the minimum size entry / entry size
+ *         increase which may trigger a flash cache size increase. \n
+ *         At present, this value must lie in the range [0.1, 1.0].
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a double flash_multiple</td>
+ *     <td>IN: The factor by which the size of the triggering entry / entry
+ *         size increase is multiplied to obtain the initial cache size
+ *         increment. This increment may be reduced to reflect existing
+ *         free space in the cache and the max_size field above.\n
+ *         The parameter must lie in the interval [0.0, 1.0]. 0.1 or 0.05
+ *         is a good place to start. \n
+ *         At present, this field must lie in the range [0.1, 10.0].
+ *     </td>
+ *   </tr>
+ * </table>
+ *
+ * <table>
+ *   <tr>
+ *     <th colspan="2" align="left">Decrement configuration section:</th>
+ *   </tr>
+ *   <tr>
+ *     <td>\a enum \a H5C_cache_decr_mode decr_mode</td>
+ *     <td>IN: Enumerated value indicating the operational mode of the
+ *         automatic cache size decrease code. At present, the following
+ *         values are legal:\n
+ *         H5C_decr__off: Automatic cache size decrease is disabled.\n
+ *         H5C_decr__threshold: Automatic cache size decrease is enabled
+ *         using the hit rate threshold algorithm. \n
+ *         H5C_decr__age_out: Automatic cache size decrease is enabled
+ *         using the ageout algorithm. \n
+ *         H5C_decr__age_out_with_threshold: Automatic cache size decrease
+ *         is enabled using the ageout with hit rate threshold algorithm.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a double upper_hr_threshold</td>
+ *     <td>IN: Hit rate threshold for the hit rate threshold and ageout with
+ *         hit rate threshold cache size decrement algorithms. \n
+ *         When decr_mode is H5C_decr__threshold, and the hit rate over a
+ *         given epoch exceeds the supplied threshold, the current maximum
+ *         cache size is multiplied by decrement to obtain a tentative new
+ *         (and smaller) maximum cache size. \n
+ *         When decr_mode is H5C_decr__age_out_with_threshold, there is
+ *         no attempt to find and evict aged out entries unless the hit
+ *         rate in the previous epoch exceeded the supplied threshold. \n
+ *         This field must lie in the interval [0.0, 1.0]. \n
+ *         For H5C_incr__threshold, .9995 or .99995 is a good place to start. \n
+ *         For H5C_decr__age_out_with_threshold, .999 might be more useful.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a double decrement</td>
+ *     <td> IN: In the hit rate threshold cache size decrease algorithm, this
+ *         parameter contains the factor by which the current max cache size
+ *         is multiplied to produce a tentative new cache size. \n
+ *         The actual cache size decrease will be clipped to satisfy the
+ *         min_size specified in the general configuration, and possibly
+ *         max_decrement below. \n
+ *         The parameter must be be in the interval [0.0, 1.0]. \n
+ *         If you set it to 1.0, you will effectively disable cache size
+ *         decreases. 0.9 is a reasonable starting point.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a hbool_t apply_max_decrement</td>
+ *     <td>IN: Boolean flag indicating whether an upper limit should be
+ *         applied to the size of cache size decreases.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a size_t max_decrement</td>
+ *     <td>IN: Maximum number of bytes by which the maximum cache size can be
+ *         decreased in any single step -- if applicable.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a int epochs_before_eviction</td>
+ *     <td>IN: In the ageout based cache size reduction algorithms, this field
+ *         contains the minimum number of epochs an entry must remain
+ *         unaccessed in cache before the cache size reduction algorithm tries
+ *         to evict it. 3 is a reasonable value.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a hbool_t apply_empty_reserve</td>
+ *     <td>IN: Boolean flag indicating whether the ageout based decrement
+ *         algorithms will maintain a empty reserve when decreasing cache size.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a double empty_reserve</td>
+ *     <td>IN: Empty reserve as a fraction of maximum cache size if applicable.
+ *
+ *         When so directed, the ageout based algorithms will not decrease the
+ *         maximum cache size unless the empty reserve can be met.\n
+ *         The parameter must lie in the interval [0.0, 1.0]. 0.1 or 0.05 is a
+ *         good place to start.
+ *     </td>
+ *   </tr>
+ * </table>
+ *
+ * <table>
+ *   <tr>
+ *     <th colspan="2" align="left">Parallel configuration section:</th>
+ *   </tr>
+ *   <tr>
+ *     <td>\a int dirty_bytes_threshold  </td>
+ *     <td>IN: Threshold number of bytes of dirty metadata generation for
+ *         triggering synchronizations of the metadata caches serving the target
+ *         file in the parallel case.\n
+ *         Synchronization occurs whenever the number of bytes of dirty metadata
+ *         created since the last synchronization exceeds this limit.\n
+ *         This field only applies to the parallel case. While it is ignored
+ *         elsewhere, it can still draw a value out of bounds error.\n
+ *         It must be consistant across all caches on any given file.\n
+ *         By default, this field is set to 256 KB. It shouldn't be more than
+ *         half the current max cache size times the min clean fraction.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td>\a int metadata_write_strategy  </td>
+ *     <td>IN: Desired metadata write strategy. The valid values for this field
+ *         are: \n
+ *         \p H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY: Specifies
+ *         that only process zero is allowed to write dirty metadata to disk.\n
+ *         \p H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED: Specifies that
+ *         process zero still makes the decisions as to what entries should be
+ *         flushed, but the actual flushes are distributed across the processes
+ *         in the computation to the extent possible. \n
+ *         The \p src/H5ACpublic.h include file in the HDF5 library has detailed
+ *         information on each strategy.
+ *     </td>
+ *   </tr>
+ * </table>
+ *
+ * \details H5Pset_mdc_config() attempts to set the initial metadata cache
+ *          configuration to the supplied value.  It will fail if an invalid
+ *          configuration is detected.  This configuration is used when the file
+ *          is opened.
+ *
+ *          See the overview of the metadata cache in the special topics section
+ *          of the user manual for details on what is being configured. If you
+ *          have not read and understood that documentation, you really should
+ *          not be using this API call.
+ *
+ * \version 1.8.0 Function added to this release.
+ *
+ */
 H5_DLL herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets metadata cache logging options
+ *
+ * \fapl_id{plist_id}
+ * \param[in] is_enabled  Whether logging is enabled
+ * \param[in] location Location of log in UTF-8/ASCII (file path/name)
+ *            (On Windows, this must be ASCII)
+ * \param[in] start_on_access  Whether the logging will begin as soon as the
+ *            file is opened or created
+ *
+ * \return \herr_t
+ *
+ * \details The metadata cache is a central part of the HDF5 library through
+ *          which all file metadata reads and writes take place. File metadata
+ *          is normally invisible to the user and is used by the library for
+ *          purposes such as locating and indexing data. File metadata should
+ *          not be confused with user metadata, which consists of attributes
+ *          created by users and attached to HDF5 objects such as datasets via
+ *          H5A API calls.
+ *
+ *          Due to the complexity of the cache, a trace/logging feature has
+ *          been created that can be used by HDF5 developers for debugging and
+ *          performance analysis. The functions that control this functionality
+ *          will normally be of use to a very limited number of developers
+ *          outside of The HDF Group. The functions have been documented to
+ *          help users create logs that can be sent with bug reports.
+ *
+ *          Control of the log functionality is straightforward. Logging is
+ *          enabled via the H5Pset_mdc_log_options() function,
+ *          which will modify the file access property list used to open or
+ *          create a file. This function has a flag that determines whether
+ *          logging begins at file open or starts in a paused state. Log
+ *          messages can then be controlled via the H5Fstart_mdc_logging()
+ *          and H5Fstop_mdc_logging() function.
+ *
+ *          H5Pget_mdc_log_options() can be used to examine a file access
+ *          property list, and H5Fget_mdc_logging_status() will return the
+ *          current state of the logging flags.
+ *
+ *          The log format is described in [<em>Metadata Cache Logging</em>]
+ *          (https://portal.hdfgroup.org/display/HDF5/Fine-tuning+the+Metadata+Cache).
+ *
+ * \version 1.10.0 C function introduced with this release.
+ *
+ */
 H5_DLL herr_t H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location,
                                      hbool_t start_on_access);
 H5_DLL herr_t H5Pset_meta_block_size(hid_t fapl_id, hsize_t size);
@@ -5763,8 +6693,10 @@ H5_DLL herr_t H5Pget_btree_ratios(hid_t plist_id, double *left /*out*/, double *
  * \brief Reads buffer settings
  *
  * \param[in]  plist_id  Identifier for the dataset transfer property list
- * \param[out] tconv     Address of the pointer to application-allocated type conversion buffer
- * \param[out] bkg       Address of the pointer to application-allocated background buffer
+ * \param[out] tconv     Address of the pointer to application-allocated type
+ *                       conversion buffer
+ * \param[out] bkg       Address of the pointer to application-allocated
+ *                       background buffer
  *
  * \return Returns buffer size, in bytes, if successful; otherwise 0 on failure.
  *
@@ -5782,26 +6714,32 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  * \brief Retrieves a data transform expression
  *
  * \param[in]  plist_id    Identifier of the property list or class
- * \param[out] expression  Pointer to memory where the transform expression will be copied
- * \param[in]  size        Number of bytes of the transform expression to copy to
+ * \param[out] expression  Pointer to memory where the transform expression will
+ *                         be copied
+ * \param[in]  size        Number of bytes of the transform expression to copy
+ *                         to
  *
- * \return Success: the size of the transform expression. Failure: a negative value.
+ * \return Success: the size of the transform expression. Failure: a negative
+ *         value.
  *
- * \details H5Pget_data_transform() retrieves the data transform expression previously set in the dataset
- * transfer property list \p plist_id by H5Pset_data_transform().
+ * \details H5Pget_data_transform() retrieves the data transform expression
+ *          previously set in the dataset transfer property list \p plist_id
+ *          by H5Pset_data_transform().
  *
- *          H5Pget_data_transform() can be used to both retrieve the transform expression and query its
- * size.
+ *          H5Pget_data_transform() can be used to both retrieve the transform
+ *          expression and query its size.
  *
- *          If \p expression is non-NULL, up to \p size bytes of the data transform expression are written to
- * the buffer. If \p expression is NULL, \p size is ignored, and the function does not write anything to the
- *          buffer. The function always returns the size of the data transform expression.
+ *          If \p expression is non-NULL, up to \p size bytes of the data
+ *          transform expression are written to the buffer. If \p expression
+ *          is NULL, \p size is ignored, and the function does not write
+ *          anything to the buffer. The function always returns the size of
+ *          the data transform expression.
  *
- *          If 0 is returned for the size of the expression, no data transform expression exists for the
- * property list.
+ *          If 0 is returned for the size of the expression, no data transform
+ *          expression exists for the property list.
  *
- *          If an error occurs, the buffer pointed to by \p expression is unchanged, and the function returns
- * a negative value.
+ *          If an error occurs, the buffer pointed to by \p expression is
+ *          unchanged, and the function returns a negative value.
  *
  * \par Example
  *      An example snippet from examples/h5_dtransform.c:
@@ -5859,17 +6797,19 @@ H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
  *
  * \brief Checks status of the dataset transfer property list (\b DEPRECATED)
  *
- * \deprecated{H5Pget_preserve() is deprecated as it is no longer useful; compound datatype
- *        field preservation is now core functionality in the HDF5 library.}
+ * \deprecated{H5Pget_preserve() is deprecated as it is no longer useful;
+ *            compound datatype field preservation is now core functionality
+ *            in the HDF5 library.}
  *
  * \param[in]   plist_id Identifier for the dataset transfer property list
  *
  * \return Returns 1 or 0 if successful; otherwise returns a negative value.
  *
- * \details H5Pget_preserve() checks the status of the dataset transfer property list.
+ * \details H5Pget_preserve() checks the status of the dataset transfer
+ *          property list.
  *
- * \version 1.6.0 The flag parameter was changed from INTEGER to LOGICAL to better match the C API. (Fortran
- * 90)
+ * \version 1.6.0 The flag parameter was changed from INTEGER to LOGICAL to
+ *                better match the C API. (Fortran 90)
  *
  */
 H5_DLL int H5Pget_preserve(hid_t plist_id);
@@ -5885,13 +6825,15 @@ H5_DLL int H5Pget_preserve(hid_t plist_id);
  *
  * \return \herr_t
  *
- * \details H5Pget_type_conv_cb() gets the user-defined datatype conversion callback
- *          function \p op in the dataset transfer property list \p dxpl_id.
+ * \details H5Pget_type_conv_cb() gets the user-defined datatype conversion
+ *          callback function \p op in the dataset transfer property list
+ *          \p dxpl_id.
  *
- *          The parameter \p operate_data is a pointer to user-defined input data for the callback function.
+ *          The parameter \p operate_data is a pointer to user-defined input
+ *          data for the callback function.
  *
- *          The callback function \p op defines the actions an application is to take
- *          when there is an exception during datatype conversion.
+ *          The callback function \p op defines the actions an application is
+ *          to take when there is an exception during datatype conversion.
  *
  *          Please refer to the function H5Pset_type_conv_cb() for more details.
  *
@@ -5905,14 +6847,18 @@ H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, voi
  *
  * \param[in]  plist_id   Identifier for the dataset transfer property list
  * \param[out] alloc_func User's allocate routine, or NULL for system malloc
- * \param[out] alloc_info Extra parameter for user’s allocation routine. Contents are ignored if preceding
- * parameter is NULL \param[out] free_func  User's free routine, or NULL for system free \param[out] free_info
- * Extra parameter for user’s free routine. Contents are ignored if preceding parameter is NULL
+ * \param[out] alloc_info Extra parameter for user’s allocation routine.
+ *             Contents are ignored if preceding
+ * parameter is NULL \param[out] free_func  User's free routine, or NULL for
+ * system free \param[out] free_info
+ * Extra parameter for user’s free routine. Contents are ignored if preceding
+ * parameter is NULL
  *
  * \return \herr_t
  *
- * \details H5Pget_vlen_mem_manager() is the companion function to H5Pset_vlen_mem_manager(),
- *          returning the parameters set by that function.
+ * \details H5Pget_vlen_mem_manager() is the companion function to
+ *          H5Pset_vlen_mem_manager(), returning the parameters set by
+ *          that function.
  *
  */
 H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
@@ -5926,18 +6872,23 @@ H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_fun
  * \param[in] plist_id The dataset transfer property list identifier
  * \param[in] left     The B-tree split ratio for left-most nodes
  * \param[in] middle   The B-tree split ratio for all other nodes
- * \param[in] right    The B-tree split ratio for right-most nodes and lone nodes
+ * \param[in] right    The B-tree split ratio for right-most nodes and lone
+ *                     nodes
  *
  * \return \herr_t
  *
- * \details H5Pset_btree_ratios() sets the B-tree split ratios for a dataset transfer property list.
- *          The split ratios determine what percent of children go in the first node when a node splits.
+ * \details H5Pset_btree_ratios() sets the B-tree split ratios for a dataset
+ *          transfer property list. The split ratios determine what percent of
+ *          children go in the first node when a node splits.
  *
- *          The ratio \p left is used when the splitting node is the left-most node at its level in the tree;
- *          the ratio \p right is used when the splitting node is the right-most node at its level; and
+ *          The ratio \p left is used when the splitting node is the left-most
+ *          node at its level in the tree;
+ *          the ratio \p right is used when the splitting node is the right-most
+ *          node at its level; and
  *          the ratio \p middle is used for all other cases.
  *
- *          A node that is the only node at its level in the tree uses the ratio \p right when it splits.
+ *          A node that is the only node at its level in the tree uses the
+ *          ratio \p right when it splits.
  *
  *          All ratios are real numbers between 0 and 1, inclusive.
  *
@@ -7056,7 +8007,8 @@ H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
  *
- * \todo Link removed to "Copying Committed Datatypes with H5Ocopy" in Advanced Topics in HDF5
+ * \todo Link removed to "Copying Committed Datatypes with H5Ocopy" in Advanced
+ *       Topics in HDF5
  * \todo Programming Note for C++ Developers Using C Functions:
  *
  * \since 1.8.9
@@ -7103,8 +8055,8 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *
  * \return  \herr_t
  *
- * \deprecated As of HDF5-1.8 this function was deprecated in favor of H5Pregister2()
- *             or the macro H5Pregister().
+ * \deprecated As of HDF5-1.8 this function was deprecated in favor of
+ *             H5Pregister2() or the macro H5Pregister().
  *
  * \details H5Pregister1() registers a new property with a property list
  *          class. The property will exist in all property list objects
@@ -7120,8 +8072,8 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *          presence or absence of a particular piece of information. The
  *          default pointer for a zero-sized property may be set to NULL.
  *          The property \p prp_create and \p prp_close callbacks are called for
- *          zero-sized properties, but the \p prp_set and \p prp_get callbacks are
- *          never called.
+ *          zero-sized properties, but the \p prp_set and \p prp_get callbacks
+ *          are never called.
  *
  *          The \p prp_create routine is called when a new property list with
  *          this property is being created. The #H5P_prp_create_func_t
@@ -7142,7 +8094,8 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *          If the \p prp_set routine returns a negative value, the new property
  *          value is not copied into the property and the \p prp_set routine
  *          returns an error value. The \p prp_set routine will not be called
- *          for the initial value; only the \p prp_create routine will be called.
+ *          for the initial value; only the \p prp_create routine will be
+ *          called.
  *
  *          \b Note: The \p prp_set callback function may be useful to range
  *          check the value being set for the property or may perform some
@@ -7173,7 +8126,8 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *
  *          The \p prp_copy routine is called when a new property list with
  *          this property is being created through a \p prp_copy operation.
- *          The #H5P_prp_copy_func_t callback function is defined as #H5P_prp_cb1_t.
+ *          The #H5P_prp_copy_func_t callback function is defined as
+ *          #H5P_prp_cb1_t.
  *
  *          The \p prp_copy routine may modify the value to be set and those
  *          changes will be stored as the new value of the property. If
@@ -7186,10 +8140,10 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *          function is defined as #H5P_prp_cb1_t.
  *
  *          The \p prp_close routine may modify the value passed in, but the
- *          value is not used by the library when the \p prp_close routine returns.
- *          If the \p prp_close routine returns a negative value, the property
- *          list close routine returns an error value but the property list is
- *          still closed.
+ *          value is not used by the library when the \p prp_close routine
+ *          returns. If the \p prp_close routine returns a negative value, the
+ *          property list close routine returns an error value but the property
+ *          list is still closed.
  *
  *          The #H5P_prp_cb1_t is as follows:
  *          \snippet this H5P_prp_cb1_t_snip
@@ -7230,8 +8184,8 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
  *
  * \return \herr_t
  *
- * \deprecated As of HDF5-1.8 this function was deprecated in favor of H5Pinsert2()
- *             or the macro H5Pinsert().
+ * \deprecated As of HDF5-1.8 this function was deprecated in favor of
+ *             H5Pinsert2() or the macro H5Pinsert().
  *
  * \details H5Pinsert1() creates a new property in a property
  *          list. The property will exist only in this property list and
@@ -7284,7 +8238,8 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
  *
  *          The \p prp_copy routine is called when a new property list with
  *          this property is being created through a \p prp_copy operation.
- *          The #H5P_prp_copy_func_t callback function is defined as #H5P_prp_cb1_t.
+ *          The #H5P_prp_copy_func_t callback function is defined as
+ *          #H5P_prp_cb1_t.
  *
  *          The \p prp_copy routine may modify the value to be set and those
  *          changes will be stored as the new value of the property. If the
@@ -7294,7 +8249,8 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
  *
  *          The \p prp_close routine is called when a property list with this
  *          property is being closed.
- *          The #H5P_prp_close_func_t callback function is defined as #H5P_prp_cb1_t.
+ *          The #H5P_prp_close_func_t callback function is defined as
+ *          #H5P_prp_cb1_t.
  *
  *          The \p prp_close routine may modify the value passed in, the
  *          value is not used by the library when the close routine
@@ -7355,8 +8311,8 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *va
  *
  *
  * \since 1.10.0
- * \deprecated  As of HDF5-1.12 this function has been deprecated in favor of H5Pencode2()
- *              or the macro H5Pencode().
+ * \deprecated  As of HDF5-1.12 this function has been deprecated in favor of
+ *              H5Pencode2() or the macro H5Pencode().
  *
  */
 H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
@@ -7433,8 +8389,8 @@ H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int
  * \return Returns a non-negative value if successful;  Otherwise returns
  *         a negative value.
  *
- * \deprecated As of HDF5-1.8 this function was deprecated in favor of H5Pget_filter_by_id2()
- *             or the macro H5Pget_filter_by_id().
+ * \deprecated As of HDF5-1.8 this function was deprecated in favor of
+ *             H5Pget_filter_by_id2() or the macro H5Pget_filter_by_id().
  *
  * \details H5Pget_filter_by_id1() returns information about a filter, specified
  *          in \p id, a filter identifier.
@@ -7452,10 +8408,10 @@ H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int
  *          in the \p cd_values[] array allocated by the calling program;
  *          on exit it contains the number of values defined by the filter.
  *
- *          On input, the \p namelen parameter indicates the number of characters
- *          allocated for the filter name by the calling program in the array
- *          \p name[]. On exit \p name[] contains the name of the filter with one
- *          character of the name in each element of the array.
+ *          On input, the \p namelen parameter indicates the number of
+ *          characters allocated for the filter name by the calling program
+ *          in the array \p name[]. On exit \p name[] contains the name of the
+ *          filter with one character of the name in each element of the array.
  *
  *          If the filter specified in \p id is not set for the property
  *          list, an error will be returned and this function will fail.
@@ -7463,8 +8419,8 @@ H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int
  *
  * \version 1.8.5 Function extended to work with group creation property
  *                lists.
- * \version 1.8.0 Function H5Pget_filter_by_id() renamed to H5Pget_filter_by_id1()
- *                and deprecated in this release.
+ * \version 1.8.0 Function H5Pget_filter_by_id() renamed to
+ *                H5Pget_filter_by_id1() and deprecated in this release.
  * \version 1.6.0 Function introduced in this release.
  */
 H5_DLL herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*/,
@@ -7491,7 +8447,8 @@ H5_DLL herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int
  *          for a file creation property list. Any pointer parameters which are
  *          passed as NULL are not queried.
  *
- * \version 1.6.4 \p boot, \p freelist, \p stab, \p shhdr parameter types changed to unsigned.
+ * \version 1.6.4 \p boot, \p freelist, \p stab, \p shhdr parameter types
+ *                changed to unsigned.
  *
  */
 H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsigned *freelist /*out*/,
@@ -7511,7 +8468,8 @@ H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsigned *f
  * \return \herr_t
  *
  * \details Maps to the function H5Pset_file_space_strategy().
- * \todo The code is in H5Pdeprecate.c, need to figure out when it was released and when it was deprecated.
+ * \todo The code is in H5Pdeprecate.c, need to figure out when it was
+ *       released and when it was deprecated.
  *
  */
 H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
@@ -7529,7 +8487,8 @@ H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, 
  *
  * \details Maps to the function H5Pget_file_space_strategy()
  *
- * \todo The code is in H5Pdeprecate.c, need to figure out when it was released and when it was deprecated.
+ * \todo The code is in H5Pdeprecate.c, need to figure out when it was released
+ *       and when it was deprecated.
  *
  */
 H5_DLL herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
