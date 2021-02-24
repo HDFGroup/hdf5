@@ -306,9 +306,9 @@ extern jboolean h5raiseException(JNIEnv *env, const char *, const char *);
         goto done;                                                                                           \
     } while (0)
 
-#define H5_ASSERTION_ERROR(env, message)                                                                 \
+#define H5_ASSERTION_ERROR(env, message)                                                                     \
     do {                                                                                                     \
-        h5assertion(env, message);                                                                         \
+        h5assertion(env, message);                                                                           \
         goto done;                                                                                           \
     } while (0)
 
