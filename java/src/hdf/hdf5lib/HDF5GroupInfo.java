@@ -41,7 +41,8 @@ public class HDF5GroupInfo {
     long mtime;
     int linklen;
 
-    /** */
+    /** Container for the information reported about an HDF5 Object
+      * from the H5Gget_obj_info() method */
     public HDF5GroupInfo() {
         fileno = new long[2];
         objno = new long[2];
