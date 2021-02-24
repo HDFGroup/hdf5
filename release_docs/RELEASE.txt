@@ -318,6 +318,15 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Fixed issue with MPI communicator and info object not being
+      copied into new FAPL retrieved from H5F_get_access_plist
+
+        Added logic to copy the MPI communicator and info object into
+        the output FAPL. MPI communicator is retrieved from the VFD, while
+        the MPI info object is retrieved from the file's original FAPL.
+
+        (JTH - 2021/02/15, HDFFV-11109)
+
     - Fixed problems with vlens and refs inside compound using
       H5VLget_file_type()
 
