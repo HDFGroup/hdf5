@@ -1476,7 +1476,13 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     int      i;
     char     tmp_str[256];
 
-    if ((nblocks = H5Sget_select_hyper_nblocks(region_space)) <= 0) {
+    /*
+     * This function fails if the region does not have blocks.
+     */
+    H5E_BEGIN_TRY { nblocks = H5Sget_select_hyper_nblocks(region_space); }
+    H5E_END_TRY;
+
+    if (nblocks <= 0) {
         ret_value = SUCCEED;
         goto done;
     }
@@ -1643,7 +1649,13 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     int      i;
     char     tmp_str[256];
 
-    if ((npoints = H5Sget_select_elem_npoints(region_space)) <= 0) {
+    /*
+     * This function fails if the region does not have points.
+     */
+    H5E_BEGIN_TRY { npoints = H5Sget_select_elem_npoints(region_space); }
+    H5E_END_TRY;
+
+    if (npoints <= 0) {
         ret_value = SUCCEED;
         goto done;
     }
