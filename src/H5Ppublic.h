@@ -3922,16 +3922,16 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *
  * \brief Sets the callbacks for working with file images
  *
- * \warning **Motivation:** H5Pset_file_image_callbacks() and other elements
- *          of HDF5 are used to load an image of an HDF5 file into system
- *          memory and open that image as a regular HDF5 file. An application
- *          can then use the file without the overhead of disk I/O. \n
- *          **Recommended Reading:** This function is part of the file
- *          image operations feature set. It is highly recommended to study
- *          the guide [HDF5 File Image Operations]
- *          (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations
- *          ) before using this feature set. See the “See Also” section below
- *          for links to other elements of HDF5 file image operations.
+ * \attention **Motivation:** H5Pset_file_image_callbacks() and other elements
+ *            of HDF5 are used to load an image of an HDF5 file into system
+ *            memory and open that image as a regular HDF5 file. An application
+ *            can then use the file without the overhead of disk I/O.\n
+ *            **Recommended Reading:** This function is part of the file
+ *            image operations feature set. It is highly recommended to study
+ *            the guide [HDF5 File Image Operations]
+ *            (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations
+ *            ) before using this feature set. See the “See Also” section below
+ *            for links to other elements of HDF5 file image operations.
  *
  * \fapl_id
  * \param[in/out] callbacks_ptr Pointer to the instance of the
