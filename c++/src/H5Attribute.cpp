@@ -41,7 +41,7 @@ namespace H5 {
 using std::cerr;
 using std::endl;
 
-class H5_DLLCPP H5Object; // forward declaration for UserData4Aiterate
+class H5Object; // forward declaration for UserData4Aiterate
 
 //--------------------------------------------------------------------------
 // Function:    Attribute default constructor
