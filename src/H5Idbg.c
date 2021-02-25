@@ -94,7 +94,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
             object = H5VL_object_data(vol_obj);
             if (H5_VOL_NATIVE == vol_obj->connector->cls->value)
-                path = H5G_nameof((const H5G_t *)object);
+                path = H5G_nameof((H5G_t *)object);
             break;
         }
 
@@ -114,7 +114,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             object = (void *)H5T_get_actual_type((H5T_t *)dt); /* Casting away const OK - QAK */
             H5_GCC_DIAG_ON("cast-qual")
 
-            path = H5T_nameof((const H5T_t *)object);
+            path = H5T_nameof((H5T_t *)object);
             break;
         }
 

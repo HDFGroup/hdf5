@@ -122,7 +122,7 @@ H5_DLL herr_t      H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
 H5_DLL H5T_t *           H5T_decode(size_t buf_size, const unsigned char *buf);
 H5_DLL herr_t            H5T_debug(const H5T_t *dt, FILE *stream);
 H5_DLL struct H5O_loc_t *H5T_oloc(H5T_t *dt);
-H5_DLL H5G_name_t *H5T_nameof(const H5T_t *dt);
+H5_DLL H5G_name_t *H5T_nameof(H5T_t *dt);
 H5_DLL htri_t      H5T_is_immutable(const H5T_t *dt);
 H5_DLL htri_t      H5T_is_named(const H5T_t *dt);
 H5_DLL herr_t      H5T_convert_committed_datatype(H5T_t *dt, H5F_t *f);
