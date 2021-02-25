@@ -20,8 +20,8 @@
 #error "Do not include this file outside the H5VL package!"
 #endif
 
-#ifndef _H5VLpkg_H
-#define _H5VLpkg_H
+#ifndef H5VLpkg_H
+#define H5VLpkg_H
 
 /* Get package's private header */
 #include "H5VLprivate.h" /* Generic Functions                    */
@@ -72,4 +72,4 @@ H5_DLL herr_t  H5VL__term_opt_operation(void);
 H5_DLL herr_t H5VL__reparse_def_vol_conn_variable_test(void);
 #endif /* H5VL_TESTING */
 
-#endif /* _H5VLpkg_H */
+#endif /* H5VLpkg_H */

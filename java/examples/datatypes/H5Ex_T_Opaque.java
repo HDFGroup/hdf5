@@ -32,10 +32,10 @@ public class H5Ex_T_Opaque {
     private static final int RANK = 1;
 
     private static void CreateDataset() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long datatype_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long datatype_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         byte[] dset_data = new byte[DIM0 * LEN];
         byte[] str_data = { 'O', 'P', 'A', 'Q', 'U', 'E' };
@@ -138,11 +138,11 @@ public class H5Ex_T_Opaque {
     }
 
     private static void ReadDataset() {
-        long file_id = -1;
-        long datatype_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long type_len = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long datatype_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long type_len = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         byte[] dset_data;
         String tag_name = null;

@@ -41,7 +41,7 @@ DISTCLEANFILES=H5pubconf.h
 
 # library sources
 libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
-		H5timer.c H5trace.c \
+        H5timer.c H5trace.c \
         H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c H5Atest.c \
         H5AC.c H5ACdbg.c H5ACproxy_entry.c \
         H5B.c H5Bcache.c H5Bdbg.c \

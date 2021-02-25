@@ -1196,7 +1196,7 @@ static herr_t
 H5FD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
 {
     /* Shut compiler up */
-    _f = _f;
+    (void)_f;
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {

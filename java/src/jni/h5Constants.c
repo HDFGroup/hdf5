@@ -1404,7 +1404,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1DIRECT(JNIEnv *env, jclass cls)
 #ifdef H5_HAVE_DIRECT
     return H5FD_DIRECT;
 #else
-    return -1;
+    return H5I_INVALID_HID;
 #endif
 }
 JNIEXPORT jlong JNICALL
@@ -1418,7 +1418,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1HDFS(JNIEnv *env, jclass cls)
 #ifdef H5_HAVE_LIBHDFS
     return H5FD_HDFS;
 #else
-    return -1;
+    return H5I_INVALID_HID;
 #endif
 }
 JNIEXPORT jlong JNICALL
@@ -1447,7 +1447,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1ROS3(JNIEnv *env, jclass cls)
 #ifdef H5_HAVE_ROS3_VFD
     return H5FD_ROS3;
 #else
-    return -1;
+    return H5I_INVALID_HID;
 #endif
 }
 JNIEXPORT jlong JNICALL
@@ -1461,7 +1461,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1WINDOWS(JNIEnv *env, jclass cls)
 #ifdef H5_HAVE_WINDOWS
     return H5FD_DIRECT;
 #else
-    return -1;
+    return H5I_INVALID_HID;
 #endif
 }
 JNIEXPORT jint JNICALL

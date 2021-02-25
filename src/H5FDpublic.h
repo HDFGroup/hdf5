@@ -15,8 +15,8 @@
  * Programmer:  Robb Matzke
  *              Monday, July 26, 1999
  */
-#ifndef _H5FDpublic_H
-#define _H5FDpublic_H
+#ifndef H5FDpublic_H
+#define H5FDpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"  /* Generic Functions */

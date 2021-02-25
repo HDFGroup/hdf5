@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5D package!"
 #endif
 
-#ifndef _H5Dpkg_H
-#define _H5Dpkg_H
+#ifndef H5Dpkg_H
+#define H5Dpkg_H
 
 /* Get package's private header */
 #include "H5Dprivate.h"

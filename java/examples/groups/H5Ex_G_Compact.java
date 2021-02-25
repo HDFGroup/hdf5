@@ -60,9 +60,9 @@ public class H5Ex_G_Compact {
     }
 
     public static void CreateGroup() {
-        long file_id = -1;
-        long group_id = -1;
-        long fapl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long group_id = HDF5Constants.H5I_INVALID_HID;
+        long fapl_id = HDF5Constants.H5I_INVALID_HID;
         H5G_info_t ginfo;
         long size;
 

@@ -14,8 +14,8 @@
  * Purpose:     Header file for writing external HDF5 plugins.
  */
 
-#ifndef _H5PLextern_H
-#define _H5PLextern_H
+#ifndef H5PLextern_H
+#define H5PLextern_H
 
 /* Include package's public header */
 #include "H5PLpublic.h"
@@ -40,4 +40,4 @@ H5PLUGIN_DLL const void *H5PLget_plugin_info(void);
 }
 #endif
 
-#endif /* _H5PLextern_H */
+#endif /* H5PLextern_H */

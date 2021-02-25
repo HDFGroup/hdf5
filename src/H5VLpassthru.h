@@ -14,8 +14,8 @@
  * Purpose:	The public header file for the pass-through VOL connector.
  */
 
-#ifndef _H5VLpassthru_H
-#define _H5VLpassthru_H
+#ifndef H5VLpassthru_H
+#define H5VLpassthru_H
 
 /* Public headers needed by this file */
 #include "H5VLpublic.h" /* Virtual Object Layer                 */
@@ -44,4 +44,4 @@ H5_DLL hid_t H5VL_pass_through_register(void);
 }
 #endif
 
-#endif /* _H5VLpassthru_H */
+#endif /* H5VLpassthru_H */

@@ -22,8 +22,8 @@
 #error "Do not include this file outside the H5ES package!"
 #endif
 
-#ifndef _H5ESpkg_H
-#define _H5ESpkg_H
+#ifndef H5ESpkg_H
+#define H5ESpkg_H
 
 /* Get package's private header */
 #include "H5ESprivate.h"
@@ -98,4 +98,4 @@ H5_DLL H5ES_event_t *H5ES__event_new(H5VL_t *connector, void *token);
 H5_DLL herr_t        H5ES__event_free(H5ES_event_t *ev);
 H5_DLL herr_t        H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el);
 
-#endif /* _H5ESpkg_H */
+#endif /* H5ESpkg_H */

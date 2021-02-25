@@ -15,8 +15,8 @@
  *      support routines.
  */
 
-#ifndef _H5TSdevelop_H
-#define _H5TSdevelop_H
+#ifndef H5TSdevelop_H
+#define H5TSdevelop_H
 
 /* Include package's public header */
 /* #include "H5TSpublic.h" */
@@ -50,4 +50,4 @@ H5_DLL herr_t H5TSmutex_get_attempt_count(unsigned int *count);
 }
 #endif
 
-#endif /* _H5TSdevelop_H */
+#endif /* H5TSdevelop_H */

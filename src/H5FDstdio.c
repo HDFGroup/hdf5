@@ -347,7 +347,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     assert(sizeof(file_offset_t) >= sizeof(size_t));
 
     /* Quiet compiler */
-    fapl_id = fapl_id;
+    (void)fapl_id;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -588,7 +588,7 @@ static herr_t
 H5FD_stdio_query(const H5FD_t *_f, unsigned long /*OUT*/ *flags)
 {
     /* Quiet the compiler */
-    _f = _f;
+    (void)_f;
 
     /* Set the VFL feature flags that this driver supports.
      *
@@ -633,8 +633,8 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
     haddr_t       addr;
 
     /* Quiet compiler */
-    type    = type;
-    dxpl_id = dxpl_id;
+    (void)type;
+    (void)dxpl_id;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -672,7 +672,7 @@ H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
     H5Eclear2(H5E_DEFAULT);
 
     /* Quiet compiler */
-    type = type;
+    (void)type;
 
     return file->eoa;
 } /* end H5FD_stdio_get_eoa() */
@@ -702,7 +702,7 @@ H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, haddr_t addr)
     H5Eclear2(H5E_DEFAULT);
 
     /* Quiet the compiler */
-    type = type;
+    (void)type;
 
     file->eoa = addr;
 
@@ -733,13 +733,13 @@ H5FD_stdio_get_eof(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
     const H5FD_stdio_t *file = (const H5FD_stdio_t *)_file;
 
     /* Quiet the compiler */
-    type = type;
+    (void)type;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
     /* Quiet the compiler */
-    type = type;
+    (void)type;
 
     return (file->eof);
 } /* end H5FD_stdio_get_eof() */
@@ -763,7 +763,7 @@ H5FD_stdio_get_handle(H5FD_t *_file, hid_t /*UNUSED*/ fapl, void **file_handle)
     static const char *func = "H5FD_stdio_get_handle"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
-    fapl = fapl;
+    (void)fapl;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -801,8 +801,8 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl
     static const char *func = "H5FD_stdio_read"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
-    type    = type;
-    dxpl_id = dxpl_id;
+    (void)type;
+    (void)dxpl_id;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -903,8 +903,8 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
     static const char *func = "H5FD_stdio_write"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
-    dxpl_id = dxpl_id;
-    type    = type;
+    (void)dxpl_id;
+    (void)type;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -991,7 +991,7 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t closing)
     static const char *func = "H5FD_stdio_flush"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
-    dxpl_id = dxpl_id;
+    (void)dxpl_id;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1035,8 +1035,8 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t /*UNUSED*/ 
     static const char *func = "H5FD_stdio_truncate"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
-    dxpl_id = dxpl_id;
-    closing = closing;
+    (void)dxpl_id;
+    (void)closing;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);

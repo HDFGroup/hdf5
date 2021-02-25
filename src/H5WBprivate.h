@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5WBprivate_H
-#define _H5WBprivate_H
+#ifndef H5WBprivate_H
+#define H5WBprivate_H
 
 /* Include package's public header */
 /* #include "H5WBpublic.h" */
@@ -55,4 +55,4 @@ H5_DLL void *  H5WB_actual(H5WB_t *wb, size_t need);
 H5_DLL void *  H5WB_actual_clear(H5WB_t *wb, size_t need);
 H5_DLL herr_t  H5WB_unwrap(H5WB_t *wb);
 
-#endif /* _H5WBprivate_H */
+#endif /* H5WBprivate_H */

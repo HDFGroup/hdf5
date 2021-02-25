@@ -122,10 +122,10 @@ public class H5Ex_D_Shuffle {
     }
 
     private static void writeShuffle() {
-        long file_id = -1;
-        long filespace_id = -1;
-        long dataset_id = -1;
-        long dcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long filespace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM_X, DIM_Y };
         long[] chunk_dims = { CHUNK_X, CHUNK_Y };
         int[][] dset_data = new int[DIM_X][DIM_Y];
@@ -229,9 +229,9 @@ public class H5Ex_D_Shuffle {
     }
 
     private static void readShuffle() {
-        long file_id = -1;
-        long dataset_id = -1;
-        long dcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Open an existing file.

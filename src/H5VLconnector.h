@@ -14,8 +14,8 @@
  * This file contains public declarations for authoring VOL connectors.
  */
 
-#ifndef _H5VLconnector_H
-#define _H5VLconnector_H
+#ifndef H5VLconnector_H
+#define H5VLconnector_H
 
 /* Public headers needed by this file */
 #include "H5public.h"   /* Generic Functions                    */
@@ -602,4 +602,4 @@ H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, 
 }
 #endif
 
-#endif /* _H5VLconnector_H */
+#endif /* H5VLconnector_H */

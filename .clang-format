@@ -1,10 +1,10 @@
 ---
 Language:        Cpp
 BasedOnStyle:  LLVM
-AlignConsecutiveMacros: true
 AlignConsecutiveAssignments: true
 #llvm11: AlignConsecutiveBitFields: false
 AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
 #llvm10-11: AlignOperands:   true - Align
 #llvm11: AllowShortEnumsOnASingleLine: true
 AlwaysBreakAfterReturnType: AllDefinitions

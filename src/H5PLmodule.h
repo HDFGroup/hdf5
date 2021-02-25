@@ -16,8 +16,8 @@
  *          is part of the H5PL package.
  */
 
-#ifndef _H5PLmodule_H
-#define _H5PLmodule_H
+#ifndef H5PLmodule_H
+#define H5PLmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -32,4 +32,4 @@
  * \todo Describe what programmatically controlling dynamically loaded plugins (H5PL) is all about
  */
 
-#endif /* _H5PLmodule_H */
+#endif /* H5PLmodule_H */

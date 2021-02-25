@@ -101,9 +101,9 @@ public class H5Ex_T_Commit {
     }
 
     private static void CreateDataType() {
-        long file_id = -1;
-        long strtype_id = -1;
-        long filetype_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long strtype_id = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id = HDF5Constants.H5I_INVALID_HID;
         Sensor_Datatype datatypes = new Sensor_Datatype();
         // Create a new file using default properties.
         try {
@@ -183,9 +183,9 @@ public class H5Ex_T_Commit {
     }
 
     private static void ReadDataType() {
-        long file_id = -1;
-        long typeclass_id = -1;
-        long filetype_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long typeclass_id = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id = HDF5Constants.H5I_INVALID_HID;
 
         // Open an existing file.
         try {
