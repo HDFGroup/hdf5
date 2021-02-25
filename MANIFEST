@@ -224,9 +224,12 @@
 ./doxygen/dox/H5Ovisit.dox
 ./doxygen/dox/H5Sencode.dox
 ./doxygen/dox/mainpage.dox
+./doxygen/dox/maybe_metadata_reads.dox
 ./doxygen/dox/rm-template.dox
 ./doxygen/examples/H5Fclose.c
 ./doxygen/examples/H5Fcreate.c
+./doxygen/examples/H5Pset_metadata_read_attempts.c
+./doxygen/examples/H5Pset_object_flush_cb.c
 ./doxygen/examples/hello_hdf5.c
 ./doxygen/img/HDFG-logo.png
 

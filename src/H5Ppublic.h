@@ -3939,11 +3939,253 @@ H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_
 H5_DLL herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location,
                                      hbool_t start_on_access);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the minimum metadata block size
+ *
+ * \fapl_id{fapl_id}
+ * \param[in] size Minimum size, in bytes, of metadata block allocations
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_meta_block_size() sets the minimum size, in bytes, of
+ *          metadata block allocations when #H5FD_FEAT_AGGREGATE_METADATA is set by a VFL
+ *          driver.
+
+ *          Each raw metadata block is initially allocated to be of the given size.
+ *          Specific metadata objects (e.g., object headers, local heaps, B-trees) are then
+ *          sub-allocated from this block.
+ *
+ *          The default setting is 2048 bytes, meaning that the library will
+ *          attempt to aggregate metadata in at least 2K blocks in the file.
+ *          Setting the value to zero (\Code{0}) with this function will turn
+ *          off metadata aggregation, even if the VFL driver attempts to use the
+ *          metadata aggregation strategy.
+ *
+ *          Metadata aggregation reduces the number of small data objects in the file that
+ *          would otherwise be required for metadata. The aggregated block of metadata is
+ *          usually written in a single write action and always in a contiguous block,
+ *          potentially significantly improving library and application performance.
+ *
+ * \since 1.4.0
+ */
 H5_DLL herr_t H5Pset_meta_block_size(hid_t fapl_id, hsize_t size);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the number of read attempts in a file access property list
+ *
+ * \fapl_id{plist_id}
+ * \param[in] attempts The number of read attempts. Must be a value greater than \Code{0}
+ *
+ * \return \herr_t
+ *
+ * \return Failure Modes:
+ *         - When the user sets the number of read attempts to \Code{0}.
+ *         - When the input property list is not a file access property list.
+ *         - When the library is unable to set the number of read attempts in the file access property list.
+ *
+ * \details H5Pset_metadata_read_attempts() sets the number of reads that the
+ *          library will try when reading checksummed metadata in an HDF5 file opened
+ *          with SWMR access. When reading such metadata, the library will compare the
+ *          checksum computed for the metadata just read with the checksum stored within
+ *          the piece of checksum. When performing SWMR operations on a file, the
+ *          checksum check might fail when the library reads data on a system that is not
+ *          atomic. To remedy such situations, the library will repeatedly read the piece
+ *          of metadata until the check passes or finally fails the read when the allowed
+ *          number of attempts is reached.
+ *
+ *          The number of read attempts used by the library will depend on how the file is
+ *          opened and whether the user sets the number of read attempts via this routine:
+
+ *          - For a file opened with SWMR access:
+ *            - If the user sets the number of attempts to \Code{N}, the library will use \Code{N}.
+ *            - If the user does not set the number of attempts, the library will use the
+ *              default for SWMR access (\Code{100}).
+ *          - For a file opened with non-SWMR access, the library will always use the default
+ *            for non-SWMR access (\Code{1}). The value set via this routine does not have any effect
+ *            during non-SWMR access.
+ *
+ * \b Example: The first example illustrates the case in setting the number of read attempts for a file
+ *             opened with SWMR access.
+ *
+ * \snippet H5Pset_metadata_read_attempts.c SWMR Access
+ *
+ * \b Example: The second example illustrates the case in setting the number of
+ *             read attempts for a file opened with non-SWMR access. The value
+ *             set in the file access property list does not have any effect.
+ *
+ * \snippet H5Pset_metadata_read_attempts.c non-SWMR Access
+ *
+ * \note \b Motivation: On a system that is not atomic, the library might
+ *       possibly read inconsistent metadata with checksum when performing
+ *       single-writer/multiple-reader (SWMR) operations for an HDF5 file. Upon
+ *       encountering such situations, the library will try reading the metadata
+ *       again to obtain consistent data. This routine provides the means to set
+ *       the number of read attempts other than the library default.
+ *
+ * \since 1.10.0
+ */
 H5_DLL herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Specifies type of data to be accessed via the \Code{MULTI} driver,
+ *        enabling more direct access
+ *
+ * \fapl_id{fapl_id}
+ * \param[in] type Type of data to be accessed
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_multi_type() sets the \Emph{type of data} property in the file
+ *          access property list \p fapl_id. This setting enables a user
+ *          application to specify the type of data the application wishes to
+ *          access so that the application can retrieve a file handle for
+ *          low-level access to the particular member of a set of \Code{MULTI}
+ *          files in which that type of data is stored. The file handle is
+ *          retrieved with a separate call to H5Fget_vfd_handle() (or, in special
+ *          circumstances, to H5FDget_vfd_handle(); see \Emph{Virtual File Layer} and
+ *          \Emph{List of VFL Functions} in \Emph{HDF5 Technical Notes}).
+ *
+ * \todo Link to Virtual File Layer and List of VFL Functions pages once HDF5 Technical
+ *       Notes section is created
+ *
+ * The type of data specified in \p type may be one of the following:
+ *
+ * <table>
+ *   <tr>
+ *     <td>#H5FD_MEM_SUPER</td>	<td>Super block data</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5FD_MEM_BTREE</td>	<td>B-tree data</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5FD_MEM_DRAW</td>	<td>Dataset raw data</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5FD_MEM_GHEAP</td>	<td>Global heap data</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5FD_MEM_LHEAP</td>	<td>Local Heap data</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5FD_MEM_OHDR</td>	<td>Object header data</td>
+ *   </tr>
+ * </table>
+ *
+ * This function is for use only when accessing an HDF5 file written as a set of
+ * files with the \Code{MULTI} file driver.
+ *
+ * \since 1.6.0
+ */
 H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets a callback function to invoke when an object flush occurs in the file
+ *
+ * \fapl_id{plist_id}
+ * \op{func}
+ * \op_data_in{udata}
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_object_flush_cb() sets the callback function to invoke in the
+ *          file access property list \p plist_id whenever an object flush occurs in
+ *          the file. Library objects are group, dataset, and committed
+ *          datatype.
+ *
+ *          The callback function \p func must conform to the prototype defined below:
+ *          \code
+ *          typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *user_data)
+ *          \endcode
+ *
+ *          The parameters of the callback function, per the above prototypes, are defined as follows:
+ *            - \Code{object_id} is the identifier of the object which has just been flushed.
+ *            - \Code{user_data} is the user-defined input data for the callback function.
+ *
+ * \b Example: The example below illustrates the usage of this routine to set
+ *             the callback function to invoke when an object flush occurs.
+ *
+ * \include H5Pset_object_flush_cb.c
+ *
+ * \since 1.10.0
+ */
 H5_DLL herr_t H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *udata);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the maximum size of the data sieve buffer
+ *
+ * \fapl_id{fapl_id}
+ * \param[in] size Maximum size, in bytes, of data sieve buffer
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_sieve_buf_size() sets \p size, the maximum size in bytes of the
+ *          data sieve buffer, which is used by file drivers that are capable of
+ *          using data sieving.
+ *
+ *          The data sieve buffer is used when performing I/O on datasets in the
+ *          file. Using a buffer which is large enough to hold several pieces of
+ *          the dataset being read in for hyperslab selections boosts
+ *          performance by quite a bit.
+ *
+ *          The default value is set to 64KB, indicating that file I/O for raw
+ *          data reads and writes will occur in at least 64KB blocks. Setting
+ *          the value to zero (\Code{0}) with this API function will turn off
+ *          the data sieving, even if the VFL driver attempts to use that
+ *          strategy.
+ *
+ *          Internally, the library checks the storage sizes of the datasets in
+ *          the file. It picks the smaller one between the size from the file
+ *          access property and the size of the dataset to allocate the sieve
+ *          buffer for the dataset in order to save memory usage.
+ *
+ * \version 1.6.0 The \p size parameter has changed from type \Code{hsize_t} to \Code{size_t}.
+ *
+ * \since 1.4.0
+ */
 H5_DLL herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the size of a contiguous block reserved for small data
+ *
+ * \fapl_id{fapl_id}
+ * \param[in] size Maximum size, in bytes, of the small data block.
+                   The default size is \Code{2048}.
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_small_data_block_size() reserves blocks of \p size bytes for the
+ *          contiguous storage of the raw data portion of \Emph{small} datasets. The
+ *          HDF5 library then writes the raw data from small datasets to this
+ *          reserved space, thus reducing unnecessary discontinuities within
+ *          blocks of meta data and improving I/O performance.
+ *
+ *          A small data block is actually allocated the first time a qualifying
+ *          small dataset is written to the file. Space for the raw data portion
+ *          of this small dataset is suballocated within the small data block.
+ *          The raw data from each subsequent small dataset is also written to
+ *          the small data block until it is filled; additional small data
+ *          blocks are allocated as required.
+ *
+ *          The HDF5 library employs an algorithm that determines whether I/O
+ *          performance is likely to benefit from the use of this mechanism with
+ *          each dataset as storage space is allocated in the file. A larger
+ *          \p size will result in this mechanism being employed with larger
+ *          datasets.
+ *
+ *          The small data block size is set as an allocation property in the
+ *          file access property list identified by \p fapl_id.
+ *
+ *          Setting \p size to zero (\Code{0}) disables the small data block mechanism.
+ *
+ * \since 1.4.4
+ */
 H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
 /**
  * \ingroup FAPL
@@ -3966,7 +4208,94 @@ H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
 H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
 
 #ifdef H5_HAVE_PARALLEL
+/**
+ * \ingroup GACPL
+ *
+ * \brief Sets metadata I/O mode for read operations to collective or independent (default)
+ *
+ * \gacpl_id
+ * \param[in] is_collective Boolean value indicating whether metadata reads are collective
+ *                          (\Code{1}) or independent (\Code{0}).
+ *                          Default mode: Independent (\Code{0})
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_all_coll_metadata_ops() sets the metadata I/O mode for read
+ *          operations in the access property list \p plist_id.
+ *
+ *          When engaging in parallel I/O, all metadata write operations must be
+ *          collective. If \p is_collective is \Code{1}, this property specifies
+ *          that the HDF5 library will perform all metadata read operations
+ *          collectively; if \p is_collective is \Code{0}, such operations may
+ *          be performed independently.
+ *
+ *          Users must be aware that several HDF5 operations can potentially
+ *          issue metadata reads. These include opening a dataset, datatype, or
+ *          group; reading an attribute; or issuing a \Emph{get info} call such
+ *          as getting information for a group with H5Fget_info(). Collective
+ *          I/O requirements must be kept in mind when issuing such calls in the
+ *          context of parallel I/O.
+ *
+ *          If this property is collective on a file access property list that
+ *          is used in creating or opening a file, then the HDF5 library will
+ *          assume that all metadata read operations issued on that file
+ *          identifier will be issued collectively from all ranks irrespective
+ *          of the individual setting of a particular operation. If this
+ *          assumption is not adhered to, corruption will be introduced in the
+ *          metadata cache and HDF5’s behavior will be undefined.
+ *
+ *          Alternatively, a user may wish to avoid setting this property
+ *          globally on the file access property list, and individually set it
+ *          on particular object access property lists (dataset, group, link,
+ *          datatype, attribute access property lists) for certain operations.
+ *          This will indicate that only the operations issued with such an
+ *          access property list will be called collectively and other
+ *          operations may potentially be called independently. There are,
+ *          however, several HDF5 operations that can issue metadata reads but
+ *          have no property list in their function signatures to allow passing
+ *          the collective requirement property. For those operations, the only
+ *          option is to set the global collective requirement property on the
+ *          file access property list; otherwise the metadata reads that can be
+ *          triggered from those operations will be done independently by each
+ *          process.
+ *
+ *          Functions that do not accommodate an access property list but that
+ *          might issue metadata reads are listed in \ref maybe_metadata_reads.
+ *
+ * \attention As noted above, corruption will be introduced into the metadata
+ *            cache and HDF5 library behavior will be undefined when both of the following
+ *            conditions exist:
+ *              - A file is created or opened with a file access property list in which the
+ *                collective metadata I/O property is set to \Code{1}.
+ *              - Any function is called that triggers an independent metadata read while the
+ *                file remains open with that file access property list.
+ *
+ * \attention An approach that avoids this corruption risk is described above.
+ *
+ * \sa_metadata_ops
+ *
+ * \since 1.10.0
+ */
 H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective);
+/**
+ * \ingroup GACPL
+ *
+ * \brief Retrieves metadata read mode setting
+ *
+ * \gacpl_id
+ * \param[out] is_collective Pointer to a buffer containing the Boolean value indicating whether metadata
+ *                           reads are collective (\Code{>0}) or independent (\Code{0}).
+ *                           Default mode: Independent (\Code{0})
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_all_coll_metadata_ops() retrieves the collective metadata read setting from the access
+ *          property list \p plist_id into \p is_collective.
+ *
+ * \sa_metadata_ops
+ *
+ * \since 1.10.0
+ */
 H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
 H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
 H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
