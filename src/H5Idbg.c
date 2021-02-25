@@ -103,7 +103,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
             object = H5VL_object_data(vol_obj);
             if (H5_VOL_NATIVE == vol_obj->connector->cls->value)
-                path = H5D_nameof((const H5D_t *)object);
+                path = H5D_nameof((H5D_t *)object);
             break;
         }
 
