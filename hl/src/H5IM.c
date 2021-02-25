@@ -160,7 +160,8 @@ H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_palette(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo, H5_ATTR_UNUSED void *op_data)
+find_palette(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo,
+             H5_ATTR_UNUSED void *op_data)
 {
     int ret = H5_ITER_CONT;
 

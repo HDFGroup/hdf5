@@ -1297,7 +1297,8 @@ out:
  */
 
 static herr_t
-find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5L_info2_t *linfo, void *op_data)
+find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5L_info2_t *linfo,
+             void *op_data)
 {
     /* Define a default zero value for return. This will cause the iterator to continue if
      * the dataset is not found yet.
@@ -1837,7 +1838,8 @@ H5LTset_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_attr(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo, void *op_data)
+find_attr(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo,
+          void *op_data)
 {
     int ret = H5_ITER_CONT;
 
