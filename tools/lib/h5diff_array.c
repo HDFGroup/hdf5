@@ -3362,48 +3362,66 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
             hsize_t curr_pos = idx;
 
             parallel_print("[ ");
-            H5TOOLS_DEBUG("do calc_acc_pos[%ld] nelmts:%d - errstat:%d", i, opts->hs_nelmts, opts->err_stat);
+            H5TOOLS_DEBUG("do calc_acc_pos[%ld] nelmts:%d - errstat:%d", idx, opts->hs_nelmts,
+                          opts->err_stat);
 
             if (opts->sset[0] != NULL) {
                 /* Subsetting is used - calculate total position */
-                hsize_t elmnt_cnt = 1;
-                hsize_t dim_cnt   = 0;   /* previous dim size */
-                hsize_t str_cnt   = 0;   /* previous dim stride */
-                hsize_t curr_idx  = idx; /* calculated running position */
-                hsize_t str_idx   = 0;
-                hsize_t blk_idx   = 0;
-                hsize_t cnt_idx   = 0;
-                hsize_t hs_idx    = 0;
-                j                 = opts->rank - 1;
+                hsize_t prev_dim_size = 0; /* previous dim size */
+                hsize_t prev_str      = 0; /* previouw stride idx*/
+                hsize_t str_cnt       = 0; /* stride multiplier*/
+                hsize_t curr_idx      = 0; /* calculated running position */
+                hsize_t str_idx       = 0;
+                hsize_t blk_idx       = 0;
+                hsize_t cnt_idx       = 0;
+                hsize_t dim_size      = 0; /* current dim size */
+                hsize_t elmnt_cnt     = 1;
+                hsize_t next_idx      = idx;
+                hsize_t data_idx      = 0;
+                j                     = opts->rank - 1;
+                H5TOOLS_DEBUG("...begin:%ld=> opts->rank:%ld (idx:%ld)", j, opts->rank, idx);
                 do {
-                    cnt_idx = opts->sset[0]->count.data[j]; /* Count value for current dim */
-                    H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - count:%ld", j,
-                                  curr_pos, curr_idx, cnt_idx);
-                    blk_idx = opts->sset[0]->block.data[j]; /* Block value for current dim */
-                    H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - block:%ld", j,
-                                  curr_pos, curr_idx, blk_idx);
-                    hs_idx = cnt_idx * blk_idx; /* hyperslab area value for current dim */
-                    H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - hs:%ld", j, curr_pos,
-                                  curr_idx, hs_idx);
-                    str_idx = opts->sset[0]->stride.data[j]; /* Stride value for current dim */
-                    H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - stride:%ld", j,
-                                  curr_pos, curr_idx, str_idx);
-                    elmnt_cnt *= opts->dims[j]; /* Total number of elements in dimension */
-                    H5TOOLS_DEBUG("... sset loop:%d with elmnt_cnt:%ld", j, elmnt_cnt);
-                    if (str_idx > blk_idx)
-                        curr_idx += dim_cnt * (str_idx - blk_idx); /* */
-                    else if (curr_idx >= hs_idx)
-                        curr_idx += dim_cnt * str_cnt;
-                    H5TOOLS_DEBUG("... sset loop:%d with idx:%ld (curr_idx:%ld) - stride:%ld", j, idx,
-                                  curr_idx, str_idx);
-                    dim_cnt = elmnt_cnt; /* */
-                    if (str_idx > blk_idx)
-                        str_cnt = str_idx - blk_idx; /* */
-                    else
-                        str_cnt = str_idx; /* */
-                    H5TOOLS_DEBUG("... sset loop:%d with dim_cnt:%ld - str_cnt:%ld", j, dim_cnt, str_cnt);
+                    curr_idx = next_idx;                      /* New current data position */
+                    cnt_idx  = opts->sset[0]->count.data[j];  /* Count value for current dim */
+                    blk_idx  = opts->sset[0]->block.data[j];  /* Block value for current dim */
+                    str_idx  = opts->sset[0]->stride.data[j]; /* Stride value for current dim */
+                    H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - c:%ld b:%ld s:%ld", j,
+                                  curr_pos, curr_idx, cnt_idx, blk_idx, str_idx);
+                    dim_size = opts->dims[j]; /* Current dimension size */
+                    // elmnt_cnt *= dim_size;    /* Total number of elements in dimension */
+                    H5TOOLS_DEBUG("... sset loop:%d with elmnt_cnt:%ld - (prev_dim_size:%ld - dim_size:%ld) "
+                                  "- str_cnt:%ld",
+                                  j, elmnt_cnt, prev_dim_size, dim_size, str_cnt);
+                    data_idx = elmnt_cnt * dim_size;
+                    H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (data_idx:%ld)", j, curr_pos, data_idx);
+                    for (i = 0; i < cnt_idx; i++) {
+                        H5TOOLS_DEBUG("... ... data loop:%d with cnt_idx:%ld - str_cnt:%ld (curr_idx:%ld - "
+                                      "data_idx:%ld)",
+                                      i, cnt_idx, str_cnt, curr_idx, data_idx);
+                        if (curr_idx >= data_idx) {
+                            /* get to next block */
+                            data_idx += str_idx * dim_size;
+                            /* get next block */
+                            str_cnt++;
+                            H5TOOLS_DEBUG(
+                                "... ... data loop:%d with cnt_idx:%ld - str_cnt:%ld - data_idx:%ld", i,
+                                cnt_idx, str_cnt, data_idx);
+                        }
+                        H5TOOLS_DEBUG("... ... end data loop:%d with dim_cnt:%ld - str_cnt:%ld - "
+                                      "(curr_idx:%ld - data_idx:%ld)",
+                                      i, dim_size, str_cnt, curr_idx, data_idx);
+                    }
+                    next_idx += dim_size * str_cnt; // + prev_dim_size;
+                    H5TOOLS_DEBUG("... sset loop:%d with curr_idx:%ld (next_idx:%ld)", j, curr_idx, next_idx);
+                    str_cnt       = 0;
+                    prev_str      = str_idx;
+                    prev_dim_size = dim_size;
+                    H5TOOLS_DEBUG("... end sset loop:%d with prev_dim_size:%ld (curr_idx:%ld - data_idx:%ld) "
+                                  "- str_cnt:%ld",
+                                  j, prev_dim_size, curr_idx, data_idx, str_cnt);
+                    elmnt_cnt *= dim_size; /* Total number of elements in dimension */
                     j--;
-                } while (curr_idx >= elmnt_cnt && j >= 0);
+                } while (next_idx >= elmnt_cnt && j >= 0);
                 curr_pos = curr_idx; /* New current position */
                 H5TOOLS_DEBUG("pos loop:%d,%d with  elmnt_cnt:%ld - curr_pos:%ld", i, j, elmnt_cnt, curr_pos);
             } /* if (opts->sset[0] != NULL) */

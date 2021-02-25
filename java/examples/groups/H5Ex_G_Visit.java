@@ -47,7 +47,7 @@ public class H5Ex_G_Visit {
 
     private void VisitGroup() throws Exception {
 
-        long file_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             // Open file

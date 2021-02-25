@@ -58,7 +58,7 @@ public class H5Ex_G_Iterate {
     }
 
     private static void do_iterate() {
-        long file_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
 
         // Open a file using default properties.
         try {
