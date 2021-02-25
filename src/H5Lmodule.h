@@ -18,8 +18,8 @@
  *		H5L package.  Including this header means that the source file
  *		is part of the H5L package.
  */
-#ifndef _H5Lmodule_H
-#define _H5Lmodule_H
+#ifndef H5Lmodule_H
+#define H5Lmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -37,4 +37,4 @@
  * \ingroup H5L
  */
 
-#endif /* _H5Lmodule_H */
+#endif /* H5Lmodule_H */

@@ -18,8 +18,8 @@
  *		H5CX package.  Including this header means that the source file
  *		is part of the H5CX package.
  */
-#ifndef _H5CXmodule_H
-#define _H5CXmodule_H
+#ifndef H5CXmodule_H
+#define H5CXmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_CONTEXT
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5CXmodule_H */
+#endif /* H5CXmodule_H */

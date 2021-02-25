@@ -583,10 +583,10 @@ H5_timer_get_time_string(double seconds)
     char *s; /* output string */
 
     /* Used when the time is greater than 59 seconds */
-    double days;
-    double hours;
-    double minutes;
-    double remainder_sec;
+    double days          = 0.0;
+    double hours         = 0.0;
+    double minutes       = 0.0;
+    double remainder_sec = 0.0;
 
     /* Extract larger time units from count of seconds */
     if (seconds > (double)60.0F) {

@@ -246,8 +246,8 @@ main(int argc, char *argv[])
     haddr_t        extra[10];
     uint8_t        sig[H5F_SIGNATURE_LEN];
     size_t         u;
-    H5E_auto2_t    func;
-    void *         edata;
+    H5E_auto2_t    func           = NULL;
+    void *         edata          = NULL;
     hbool_t        api_ctx_pushed = FALSE; /* Whether API context pushed */
     herr_t         status         = SUCCEED;
     int            exit_value     = 0;

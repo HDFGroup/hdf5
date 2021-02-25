@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Exception_H
-#define __H5Exception_H
+#ifndef H5Exception_H
+#define H5Exception_H
 
 #include <string>
 
@@ -176,4 +176,4 @@ class H5_DLLCPP IdComponentException : public Exception {
 }; // end of IdComponentException
 } // namespace H5
 
-#endif // __H5Exception_H
+#endif // H5Exception_H
