@@ -866,8 +866,8 @@ done:
 static herr_t
 H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
 {
-    uint64_t  enc_value; /* Property value to encode */
-    uint8_t **pp = (uint8_t **)_pp;
+    uint64_t  enc_value = 0; /* Property value to encode */
+    uint8_t **pp        = (uint8_t **)_pp;
     unsigned  enc_size; /* Size of encoded property */
 
     FUNC_ENTER_STATIC_NOERR
@@ -966,8 +966,8 @@ H5P__decode_chunk_cache_nslots(const void **_pp, void *_value)
 static herr_t
 H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
 {
-    uint64_t  enc_value; /* Property value to encode */
-    uint8_t **pp = (uint8_t **)_pp;
+    uint64_t  enc_value = 0; /* Property value to encode */
+    uint8_t **pp        = (uint8_t **)_pp;
     unsigned  enc_size; /* Size of encoded property */
 
     FUNC_ENTER_STATIC_NOERR

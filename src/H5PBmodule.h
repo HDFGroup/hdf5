@@ -18,8 +18,8 @@
  *		H5PB package.  Including this header means that the source file
  *		is part of the H5PB package.
  */
-#ifndef _H5PBmodule_H
-#define _H5PBmodule_H
+#ifndef H5PBmodule_H
+#define H5PBmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_RESOURCE
 #define H5_MY_PKG_INIT NO
 
-#endif /* _H5PBmodule_H */
+#endif /* H5PBmodule_H */

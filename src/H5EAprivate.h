@@ -23,8 +23,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5EAprivate_H
-#define _H5EAprivate_H
+#ifndef H5EAprivate_H
+#define H5EAprivate_H
 
 /* Include package's public header */
 #ifdef NOT_YET
@@ -155,4 +155,4 @@ H5_DLL herr_t H5EA_get_stats(const H5EA_t *ea, H5EA_stat_t *stats);
 #ifdef H5EA_DEBUGGING
 #endif /* H5EA_DEBUGGING */
 
-#endif /* _H5EAprivate_H */
+#endif /* H5EAprivate_H */

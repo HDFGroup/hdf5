@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5HFprivate_H
-#define _H5HFprivate_H
+#ifndef H5HFprivate_H
+#define H5HFprivate_H
 
 /* Private headers needed by this file */
 #include "H5Fprivate.h" /* File access				*/
@@ -138,4 +138,4 @@ H5_DLL void H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_intern
 H5_DLL herr_t H5HF_iblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                                 haddr_t hdr_addr, unsigned nrows);
 
-#endif /* _H5HFprivate_H */
+#endif /* H5HFprivate_H */

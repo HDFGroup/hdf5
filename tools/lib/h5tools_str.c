@@ -705,8 +705,17 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     long double templdouble;
 
                     HDmemcpy(&templdouble, vp, sizeof(long double));
-                    h5tools_str_append(str, OPT(info->fmt_double, "%Lf"), templdouble);
+                    h5tools_str_append(str, "%Lg", templdouble);
 #endif
+                }
+                else {
+                    size_t i;
+
+                    for (i = 0; i < nsize; i++) {
+                        if (i)
+                            h5tools_str_append(str, ":");
+                        h5tools_str_append(str, OPT(info->fmt_raw, "%02x"), ucp_vp[i]);
+                    }
                 }
                 break;
 

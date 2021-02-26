@@ -18,8 +18,8 @@
  *		H5D package.  Including this header means that the source file
  *		is part of the H5D package.
  */
-#ifndef _H5Dmodule_H
-#define _H5Dmodule_H
+#ifndef H5Dmodule_H
+#define H5Dmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -40,4 +40,4 @@
  *          which is obtained by either creating or opening the dataset.
  */
 
-#endif /* _H5Dmodule_H */
+#endif /* H5Dmodule_H */

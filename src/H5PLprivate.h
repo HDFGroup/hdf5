@@ -14,8 +14,8 @@
  * This file contains private information about the H5PL module
  */
 
-#ifndef _H5PLprivate_H
-#define _H5PLprivate_H
+#ifndef H5PLprivate_H
+#define H5PLprivate_H
 
 /* Include package's public header */
 #include "H5PLpublic.h"
@@ -68,4 +68,4 @@ typedef herr_t (*H5PL_iterate_t)(H5PL_type_t plugin_type, const void *plugin_inf
 H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, const H5PL_key_t *key);
 H5_DLL herr_t      H5PL_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_data);
 
-#endif /* _H5PLprivate_H */
+#endif /* H5PLprivate_H */
