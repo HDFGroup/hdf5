@@ -120,10 +120,24 @@ endif
 # --enable-build-all at configure time.
 # The gen_old_* files can only be compiled with older versions of the library
 # so do not appear in this list.
+# Add the two VFD SWMR demo programs and build it as needed.
 BUILD_ALL_PROGS=gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
     gen_nullspace gen_udlinks space_overflow gen_filespace gen_specmetaread \
-    gen_sizes_lheap gen_file_image gen_plist gen_bad_offset gen_bounds
+    gen_sizes_lheap gen_file_image gen_plist gen_bad_offset gen_bounds \
+    vfd_swmr_gaussians vfd_swmr_credel
+
+# VFD SWMR demo: vfd_swmr_gaussians needs the curses library
+vfd_swmr_gaussians_LDFLAGS=$(AM_LDFLAGS) @CURSES_LIBS@
+vfd_swmr_gaussians=$(AM_CFLAGS) @CURSES_LIBS@
+
+# Writer for VFD SWMR demo
+w_vfd_swmr_gaussians: vfd_swmr_gaussians
+	@test -e w_vfd_swmr_gaussians || ln -s vfd_swmr_gaussians w_vfd_swmr_gaussians
+
+# Reader for VFD SWMR demo
+r_vfd_swmr_gaussians: vfd_swmr_gaussians
+	@test -e r_vfd_swmr_gaussians || ln -s vfd_swmr_gaussians r_vfd_swmr_gaussians
 
 if BUILD_ALL_CONDITIONAL
   noinst_PROGRAMS=$(BUILD_ALL_PROGS)

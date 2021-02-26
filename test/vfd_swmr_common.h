@@ -19,6 +19,7 @@
 /***********/
 
 #include <stdarg.h>
+#include <unistd.h> /* For demo */
 #include "h5test.h"
 
 /**********/
@@ -34,6 +35,11 @@
 
 /* The message sent by writer that the file open is done--releasing the file lock */
 #define VFD_SWMR_WRITER_MESSAGE "VFD_SWMR_WRITER_MESSAGE"
+
+/* For demo */
+#ifndef __arraycount
+#define __arraycount(__a) (sizeof(__a) / sizeof((__a)[0]))
+#endif
 
 /************/
 /* Typedefs */
@@ -87,6 +93,9 @@ H5TEST_DLL void esnprintf(char *, size_t, const char *, ...)
     H5_ATTR_FORMAT(printf, 3, 4);
 
 H5TEST_DLL int fetch_env_ulong(const char *, unsigned long, unsigned long *);
+
+/* For demo */
+H5TEST_DLL size_t strlcpy(char *, const char *, size_t);
 
 #ifdef __cplusplus
 }
