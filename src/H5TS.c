@@ -75,24 +75,27 @@ H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 #endif
 
 /* Thread-local keys, used by other interfaces */
+/* Error stack */
 #ifdef H5_HAVE_WIN_THREADS
-H5TS_key_t H5TS_errstk_key_g; /* Error stack */
-#else
 H5TS_key_t H5TS_errstk_key_g = TLS_OUT_OF_INDEXES;
+#else
+H5TS_key_t H5TS_errstk_key_g;
 #endif
 
 #ifdef H5_HAVE_CODESTACK
+/* Function stack */
 #ifdef H5_HAVE_WIN_THREADS
-H5TS_key_t H5TS_funcstk_key_g; /* Function stack */
-#else
 H5TS_key_t H5TS_funcstk_key_g = TLS_OUT_OF_INDEXES;
+#else
+H5TS_key_t H5TS_funcstk_key_g;
 #endif
 #endif /* H5_HAVE_CODESTACK */
 
+/* API context */
 #ifdef H5_HAVE_WIN_THREADS
-H5TS_key_t H5TS_apictx_key_g;  /* API context */
-#else
 H5TS_key_t H5TS_apictx_key_g = TLS_OUT_OF_INDEXES;
+#else
+H5TS_key_t H5TS_apictx_key_g;
 #endif
 
 /*******************/
@@ -100,10 +103,11 @@ H5TS_key_t H5TS_apictx_key_g = TLS_OUT_OF_INDEXES;
 /*******************/
 
 /* Thread-local keys, used in this module */
+/* Thread cancellation state */
 #ifdef H5_HAVE_WIN_THREADS
-static H5TS_key_t H5TS_cancel_key_s; /* Thread cancellation state */
-#else
 static H5TS_key_t H5TS_cancel_key_s = TLS_OUT_OF_INDEXES;
+#else
+static H5TS_key_t H5TS_cancel_key_s;
 #endif
 
 #ifndef H5_HAVE_WIN_THREADS
