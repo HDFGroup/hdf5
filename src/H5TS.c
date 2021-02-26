@@ -71,7 +71,7 @@ static herr_t H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count);
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_once_t H5TS_first_init_g;
 #else
-H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
+H5TS_once_t       H5TS_first_init_g = PTHREAD_ONCE_INIT;
 #endif
 
 /* Thread-local keys, used by other interfaces */
@@ -79,7 +79,7 @@ H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_key_t H5TS_errstk_key_g = TLS_OUT_OF_INDEXES;
 #else
-H5TS_key_t  H5TS_errstk_key_g;
+H5TS_key_t        H5TS_errstk_key_g;
 #endif
 
 #ifdef H5_HAVE_CODESTACK
@@ -95,7 +95,7 @@ H5TS_key_t H5TS_funcstk_key_g;
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_key_t H5TS_apictx_key_g = TLS_OUT_OF_INDEXES;
 #else
-H5TS_key_t  H5TS_apictx_key_g;
+H5TS_key_t        H5TS_apictx_key_g;
 #endif
 
 /*******************/
@@ -107,7 +107,7 @@ H5TS_key_t  H5TS_apictx_key_g;
 #ifdef H5_HAVE_WIN_THREADS
 static H5TS_key_t H5TS_cancel_key_s = TLS_OUT_OF_INDEXES;
 #else
-static H5TS_key_t  H5TS_cancel_key_s;
+static H5TS_key_t H5TS_cancel_key_s;
 #endif
 
 #ifndef H5_HAVE_WIN_THREADS
