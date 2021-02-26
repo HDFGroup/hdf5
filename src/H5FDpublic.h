@@ -18,7 +18,6 @@
 #ifndef _H5FDpublic_H
 #define _H5FDpublic_H
 
-#include "H5queue.h"
 #include "H5public.h"
 #include "H5Fpublic.h"		/*for H5F_close_degree_t */
 

@@ -39,6 +39,7 @@
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Pprivate.h"         /* Property lists                           */
+#include "H5queue.h"
 
 /****************/
 /* Local Macros */
