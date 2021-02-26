@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -376,10 +375,10 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oget_native_info_by_name_dataset() {
-    	H5O_native_info_t native_info = null;
+        H5O_native_info_t native_info = null;
 
         try {
-        	native_info = H5.H5Oget_native_info_by_name(H5fid, "DS1", HDF5Constants.H5P_DEFAULT);
+            native_info = H5.H5Oget_native_info_by_name(H5fid, "DS1", HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -393,10 +392,10 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oget_native_info_by_name_hardlink() {
-    	H5O_native_info_t native_info = null;
+        H5O_native_info_t native_info = null;
 
         try {
-        	native_info = H5.H5Oget_native_info_by_name(H5fid, "L1", HDF5Constants.H5P_DEFAULT);
+            native_info = H5.H5Oget_native_info_by_name(H5fid, "L1", HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -410,10 +409,10 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oget_native_info_by_name_group() {
-    	H5O_native_info_t native_info = null;
+        H5O_native_info_t native_info = null;
 
         try {
-        	native_info = H5.H5Oget_native_info_by_name(H5fid, "G1", HDF5Constants.H5P_DEFAULT);
+            native_info = H5.H5Oget_native_info_by_name(H5fid, "G1", HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -427,10 +426,10 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oget_native_info_by_name_datatype() {
-    	H5O_native_info_t native_info = null;
+        H5O_native_info_t native_info = null;
 
         try {
-        	native_info = H5.H5Oget_native_info_by_name(H5fid, "DT1", HDF5Constants.H5P_DEFAULT);
+            native_info = H5.H5Oget_native_info_by_name(H5fid, "DT1", HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -486,7 +485,7 @@ public class TestH5Obasic {
         try {H5.H5Oclose(oid);} catch (Exception ex) {}
 
         try {
-        	native_info = H5.H5Oget_native_info_by_idx(H5fid, "/", HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC, 0, HDF5Constants.H5P_DEFAULT);
+            native_info = H5.H5Oget_native_info_by_idx(H5fid, "/", HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC, 0, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -525,7 +524,7 @@ public class TestH5Obasic {
         try {H5.H5Oclose(oid);} catch (Exception ex) {}
 
         try {
-        	native_info = H5.H5Oget_native_info_by_idx(H5fid, "/", HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC, 3, HDF5Constants.H5P_DEFAULT);
+            native_info = H5.H5Oget_native_info_by_idx(H5fid, "/", HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC, 3, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             err.printStackTrace();

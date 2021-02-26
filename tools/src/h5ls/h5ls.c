@@ -530,7 +530,10 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
             h5tools_str_append(buffer, "native hbool_t");
         }
         else {
-            return print_int_type(buffer, type, ind);
+            if (H5T_FLOAT == H5Tget_class(type))
+                return print_float_type(buffer, type, ind);
+            else
+                return print_int_type(buffer, type, ind);
         }
     }
     else {
