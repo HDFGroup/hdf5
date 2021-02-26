@@ -302,7 +302,7 @@ H5Pset_fapl_stdio(hid_t fapl_id)
     if (0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
 
-            return H5Pset_driver(fapl_id, H5FD_STDIO, NULL);
+    return H5Pset_driver(fapl_id, H5FD_STDIO, NULL);
 } /* end H5Pset_fapl_stdio() */
 
 /*-------------------------------------------------------------------------
@@ -353,14 +353,15 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 
     /* Check arguments */
     if (!name || !*name)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, "invalid file name",
-                    NULL); if (0 == maxaddr || HADDR_UNDEF == maxaddr)
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADRANGE, "bogus maxaddr",
-                        NULL); if (ADDR_OVERFLOW(maxaddr))
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_OVERFLOW, "maxaddr too large", NULL);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, "invalid file name", NULL);
+    if (0 == maxaddr || HADDR_UNDEF == maxaddr)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADRANGE, "bogus maxaddr", NULL);
+    if (ADDR_OVERFLOW(maxaddr))
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_OVERFLOW, "maxaddr too large", NULL);
 
-            /* Tentatively open file in read-only mode, to check for existence */
-            if (flags & H5F_ACC_RDWR) f = fopen(name, "rb+");
+    /* Tentatively open file in read-only mode, to check for existence */
+    if (flags & H5F_ACC_RDWR)
+        f = fopen(name, "rb+");
     else
         f = fopen(name, "rb");
 
@@ -393,12 +394,11 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     if (!f)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_CANTOPENFILE, "fopen failed", NULL);
 
-            /* Build the return value */
-            if (NULL == (file = (H5FD_stdio_t *)calloc((size_t)1, sizeof(H5FD_stdio_t))))
-        {
-            fclose(f);
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL);
-        } /* end if */
+    /* Build the return value */
+    if (NULL == (file = (H5FD_stdio_t *)calloc((size_t)1, sizeof(H5FD_stdio_t)))) {
+        fclose(f);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL);
+    } /* end if */
     file->fp           = f;
     file->op           = H5FD_STDIO_OP_SEEK;
     file->pos          = HADDR_UNDEF;
@@ -498,7 +498,7 @@ H5FD_stdio_close(H5FD_t *_file)
     if (fclose(file->fp) < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_CLOSEERROR, "fclose failed", -1);
 
-            free(file);
+    free(file);
 
     return 0;
 } /* end H5FD_stdio_close() */
@@ -771,7 +771,7 @@ H5FD_stdio_get_handle(H5FD_t *_file, hid_t /*UNUSED*/ fapl, void **file_handle)
     if (*file_handle == NULL)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "get handle failed", -1);
 
-            return 0;
+    return 0;
 } /* end H5FD_stdio_get_handle() */
 
 /*-------------------------------------------------------------------------
@@ -808,12 +808,13 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl
 
     /* Check for overflow */
     if (HADDR_UNDEF == addr)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed",
-                    -1); if (REGION_OVERFLOW(addr, size))
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
+    if (REGION_OVERFLOW(addr, size))
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
 
-            /* Check easy cases */
-            if (0 == size) return 0;
+    /* Check easy cases */
+    if (0 == size)
+        return 0;
     if ((haddr_t)addr >= file->eof) {
         memset(buf, 0, size);
         return 0;
@@ -910,20 +911,19 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF == addr)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed",
-                    -1); if (REGION_OVERFLOW(addr, size))
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
+    if (REGION_OVERFLOW(addr, size))
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
 
-            /* Seek to the correct file position. */
-            if ((file->op != H5FD_STDIO_OP_WRITE && file->op != H5FD_STDIO_OP_SEEK) || file->pos != addr)
-        {
-            if (file_fseek(file->fp, (file_offset_t)addr, SEEK_SET) < 0) {
-                file->op  = H5FD_STDIO_OP_UNKNOWN;
-                file->pos = HADDR_UNDEF;
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
-            }
-            file->pos = addr;
+    /* Seek to the correct file position. */
+    if ((file->op != H5FD_STDIO_OP_WRITE && file->op != H5FD_STDIO_OP_SEEK) || file->pos != addr) {
+        if (file_fseek(file->fp, (file_offset_t)addr, SEEK_SET) < 0) {
+            file->op  = H5FD_STDIO_OP_UNKNOWN;
+            file->pos = HADDR_UNDEF;
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
         }
+        file->pos = addr;
+    }
 
     /* Write the buffer.  On successful return, the file position will be
      * advanced by the number of bytes read.  On failure, the file position is
@@ -1001,9 +1001,9 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t closing)
             if (fflush(file->fp) < 0)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fflush failed", -1);
 
-                    /* Reset last file I/O information */
-                    file->pos = HADDR_UNDEF;
-            file->op = H5FD_STDIO_OP_UNKNOWN;
+            /* Reset last file I/O information */
+            file->pos = HADDR_UNDEF;
+            file->op  = H5FD_STDIO_OP_UNKNOWN;
         } /* end if */
     }     /* end if */
 
@@ -1085,8 +1085,8 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t /*UNUSED*/ 
                             "unable to truncate/extend file properly", -1);
 #endif /* H5_HAVE_WIN32_API */
 
-                    /* Update the eof value */
-                    file->eof = file->eoa;
+            /* Update the eof value */
+            file->eof = file->eoa;
 
             /* Reset last file I/O information */
             file->pos = HADDR_UNDEF;
@@ -1150,7 +1150,7 @@ H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
 
 #endif /* H5_HAVE_FLOCK */
 
-            return 0;
+    return 0;
 } /* end H5FD_stdio_lock() */
 
 /*-------------------------------------------------------------------------
@@ -1184,17 +1184,16 @@ H5FD_stdio_unlock(H5FD_t *_file)
     if (fflush(file->fp) < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fflush failed", -1);
 
-            /* Place a non-blocking lock on the file */
-            if (flock(file->fd, LOCK_UN) < 0)
-        {
-            if (file->ignore_disabled_file_locks && ENOSYS == errno)
-                /* When errno is set to ENOSYS, the file system does not support
-                 * locking, so ignore it.
-                 */
-                errno = 0;
-            else
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTUNLOCKFILE, "file unlock failed", -1);
-        } /* end if */
+    /* Place a non-blocking lock on the file */
+    if (flock(file->fd, LOCK_UN) < 0) {
+        if (file->ignore_disabled_file_locks && ENOSYS == errno)
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it.
+             */
+            errno = 0;
+        else
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTUNLOCKFILE, "file unlock failed", -1);
+    } /* end if */
 
 #endif /* H5_HAVE_FLOCK */
 
