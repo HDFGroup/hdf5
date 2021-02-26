@@ -70,30 +70,30 @@ static herr_t H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count);
 /* Global variable definitions */
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_once_t H5TS_first_init_g;
-#else  /* H5_HAVE_WIN_THREADS */
+#else
 H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
-#endif /* H5_HAVE_WIN_THREADS */
+#endif
 
 /* Thread-local keys, used by other interfaces */
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_key_t H5TS_errstk_key_g; /* Error stack */
-#else  /* H5_HAVE_WIN_THREADS */
+#else
 H5TS_key_t H5TS_errstk_key_g = TLS_OUT_OF_INDEXES;
-#endif /* H5_HAVE_WIN_THREADS */
+#endif
 
 #ifdef H5_HAVE_CODESTACK
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_key_t H5TS_funcstk_key_g; /* Function stack */
-#else  /* H5_HAVE_WIN_THREADS */
+#else
 H5TS_key_t H5TS_funcstk_key_g = TLS_OUT_OF_INDEXES;
-#endif /* H5_HAVE_WIN_THREADS */
-#endif                         /* H5_HAVE_CODESTACK */
+#endif
+#endif /* H5_HAVE_CODESTACK */
 
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_key_t H5TS_apictx_key_g;  /* API context */
-#else  /* H5_HAVE_WIN_THREADS */
+#else
 H5TS_key_t H5TS_apictx_key_g = TLS_OUT_OF_INDEXES;
-#endif /* H5_HAVE_WIN_THREADS */
+#endif
 
 /*******************/
 /* Local Variables */
@@ -102,9 +102,9 @@ H5TS_key_t H5TS_apictx_key_g = TLS_OUT_OF_INDEXES;
 /* Thread-local keys, used in this module */
 #ifdef H5_HAVE_WIN_THREADS
 static H5TS_key_t H5TS_cancel_key_s; /* Thread cancellation state */
-#else  /* H5_HAVE_WIN_THREADS */
+#else
 static H5TS_key_t H5TS_cancel_key_s = TLS_OUT_OF_INDEXES;
-#endif /* H5_HAVE_WIN_THREADS */
+#endif
 
 #ifndef H5_HAVE_WIN_THREADS
 
