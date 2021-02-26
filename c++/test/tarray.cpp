@@ -85,7 +85,7 @@ test_array_compound_array()
     // Initialize array data to write
     for (idxi = 0; idxi < SPACE1_DIM1; idxi++)
         for (idxj = 0; idxj < ARRAY1_DIM1; idxj++) {
-            wdata[idxi][idxj].i = idxi * 10 + idxj;
+            wdata[idxi][idxj].i = static_cast<int>(idxi * 10 + idxj);
             for (idxk = 0; idxk < ARRAY1_DIM1; idxk++) {
                 float temp                = idxi * 10.0 + idxj * 2.5 + idxk;
                 wdata[idxi][idxj].f[idxk] = temp;
@@ -387,7 +387,7 @@ test_array_info()
     // Initialize array data to write
     for (idxi = 0; idxi < SPACE1_DIM1; idxi++)
         for (idxj = 0; idxj < ARRAY1_DIM1; idxj++) {
-            wdata[idxi][idxj].i = idxi * 10 + idxj;
+            wdata[idxi][idxj].i = static_cast<int>(idxi * 10 + idxj);
             for (idxk = 0; idxk < ARRAY1_DIM1; idxk++) {
                 float temp                = idxi * 10.0 + idxj * 2.5 + idxk;
                 wdata[idxi][idxj].f[idxk] = temp;
