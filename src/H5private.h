@@ -164,6 +164,13 @@
 #include <dirent.h>
 #endif
 
+/* BSD-style queues
+ *
+ * We use a private copy of netBSD's queues instead of including sys/queue.h
+ * due to irreconcilable differences between different queue implementations.
+ */
+#include "H5queue.h"
+
 /* Define the default VFD for this platform.
  * Since the removal of the Windows VFD, this is sec2 for all platforms.
  */
