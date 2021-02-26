@@ -203,6 +203,7 @@
 ./config/site-specific/BlankForm
 
 ./doc/code-conventions.md
+./doc/hdf5-branching.md
 
 ./doxygen/aliases
 ./doxygen/Doxyfile.in
