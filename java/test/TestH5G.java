@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -325,7 +324,7 @@ public class TestH5G {
             int names_found = 0;
             try {
                 names_found = H5.H5Gget_obj_info_all(gid, null, objNames, objTypes, lnkTypes,
-                		objTokens, HDF5Constants.H5_INDEX_NAME);
+                        objTokens, HDF5Constants.H5_INDEX_NAME);
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -366,7 +365,7 @@ public class TestH5G {
             int names_found = 0;
             try {
                 names_found = H5.H5Gget_obj_info_all(gid, null, objNames, objTypes, lnkTypes,
-                		objTokens, HDF5Constants.H5_INDEX_NAME);
+                        objTokens, HDF5Constants.H5_INDEX_NAME);
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -401,7 +400,7 @@ public class TestH5G {
         int names_found = 0;
         try {
             names_found = H5.H5Gget_obj_info_max(gid, objNames, objTypes, lnkTypes,
-            		objTokens, groups_max_size);
+                    objTokens, groups_max_size);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -432,7 +431,7 @@ public class TestH5G {
         int names_found = 0;
         try {
             names_found = H5.H5Gget_obj_info_max(gid, objNames, objTypes, lnkTypes,
-            		objTokens, groups_max_size);
+                    objTokens, groups_max_size);
         }
         catch (Throwable err) {
             err.printStackTrace();
