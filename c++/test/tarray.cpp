@@ -182,7 +182,7 @@ test_array_compound_array()
         // Check the array dimensions
         for (ii = 0; ii < ndims; ii++)
             if (rdims1[ii] != tdims1[ii]) {
-                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%zd, tdims1[%d]=z%d\n",
+                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%lld, tdims1[%d]=%lld\n",
                               ii, rdims1[ii], ii, tdims1[ii]);
                 continue;
             } // end if
@@ -200,7 +200,7 @@ test_array_compound_array()
         // Check the array dimensions
         for (ii = 0; ii < ndims; ii++)
             if (rdims1[ii] != tdims1[ii]) {
-                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%zd, tdims1[%d]=%zd\n",
+                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%lld, tdims1[%d]=%lld\n",
                               ii, rdims1[ii], ii, tdims1[ii]);
                 continue;
             } // end if
@@ -250,7 +250,7 @@ test_array_compound_array()
         // Check the array dimensions
         for (ii = 0; ii < ndims; ii++)
             if (rdims1[ii] != tdims1[ii]) {
-                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%zd, tdims1[%d]=%zd\n",
+                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%lld, tdims1[%d]=%lld\n",
                               ii, rdims1[ii], ii, tdims1[ii]);
                 continue;
             } // end if
@@ -267,7 +267,7 @@ test_array_compound_array()
             for (idxj = 0; idxj < ARRAY1_DIM1; idxj++) {
                 if (wdata[idxi][idxj].i != rdata[idxi][idxj].i) {
                     TestErrPrintf(
-                        "Array data information doesn't match!, wdata[%d][%d].i=%d, rdata[%d][%d].i=%d\n",
+                        "Array data information doesn't match!, wdata[%lld][%lld].i=%d, rdata[%lld][%lld].i=%d\n",
                         idxi, idxj, wdata[idxi][idxj].i, idxi, idxj, rdata[idxi][idxj].i);
                     continue;
                 } // end if
@@ -459,7 +459,7 @@ test_array_info()
             for (ii = 0; ii < ndims; ii++)
                 if (rdims1[ii] != tdims1[ii]) {
                     TestErrPrintf(
-                        "Array dimension information doesn't match!, rdims1[%d]=%zd, tdims1[%d]=z%d\n", ii,
+                        "Array dimension information doesn't match!, rdims1[%d]=%llu, tdims1[%d]=z%llu\n", ii,
                         rdims1[ii], ii, tdims1[ii]);
                     continue;
                 } // end if

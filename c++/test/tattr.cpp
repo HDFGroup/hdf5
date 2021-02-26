@@ -173,7 +173,7 @@ test_attr_basic_write()
         // Verify values read in
         for (i = 0; i < ATTR1_DIM1; i++)
             if (attr_data1[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n", __LINE__,
+                TestErrPrintf("%d: attribute data different: attr_data1[%llu]=%d,read_data1[%llu]=%d\n", __LINE__,
                               i, attr_data1[i], i, read_data1[i]);
 
         // Create two more attributes for this dataset, but only write to one.
@@ -189,7 +189,7 @@ test_attr_basic_write()
         // Verify values read in
         for (i = 0; i < ATTR1_DIM1; i++)
             if (attr_data1a[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1a[%d]=%d,read_data1[%d]=%d\n",
+                TestErrPrintf("%d: attribute data different: attr_data1a[%llu]=%d,read_data1[%llu]=%d\n",
                               __LINE__, i, attr_data1a[i], i, read_data1[i]);
 
         // Close both attributes
@@ -452,7 +452,7 @@ test_attr_rename()
         // Verify values read in
         for (i = 0; i < ATTR1_DIM1; i++)
             if (attr_data1[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n", __LINE__,
+                TestErrPrintf("%d: attribute data different: attr_data1[%llu]=%d,read_data1[%llu%d\n", __LINE__,
                               i, attr_data1[i], i, read_data1[i]);
 
         // Close attribute
@@ -476,7 +476,7 @@ test_attr_rename()
         // Verify values read in
         for (i = 0; i < ATTR1_DIM1; i++)
             if (attr_data1a[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1a[%d]=%d,read_data1[%d]=%d\n",
+                TestErrPrintf("%d: attribute data different: attr_data1a[%llu]=%d,read_data1[%llu]=%d\n",
                               __LINE__, i, attr_data1a[i], i, read_data1[i]);
 
         // Close attribute
@@ -541,7 +541,7 @@ test_attr_basic_read()
         // Verify values read in
         for (i = 0; i < ATTR1_DIM1; i++)
             if (attr_data1[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",
+                TestErrPrintf("%d: attribute data different: attr_data1[%llu]=%d, read_data1[%llu]=%d\n",
                               __LINE__, i, attr_data1[i], i, read_data1[i]);
 
         /*
@@ -573,7 +573,7 @@ test_attr_basic_read()
             for (j = 0; j < ATTR2_DIM2; j++)
                 if (attr_data2[i][j] != read_data2[i][j]) {
                     TestErrPrintf(
-                        "%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",
+                        "%d: attribute data different: attr_data2[%llu][%llu]=%d, read_data2[%llu][%llu]=%d\n",
                         __LINE__, i, j, attr_data2[i][j], i, j, read_data2[i][j]);
                 }
         PASSED();
@@ -777,13 +777,13 @@ test_attr_compound_read()
             for (jj = 0; jj < ATTR4_DIM2; jj++)
                 if (HDmemcmp(&attr_data4[ii][jj], &read_data4[ii][jj], sizeof(struct attr4_struct))) {
                     TestErrPrintf(
-                        "%d:attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",
+                        "%d:attribute data different: attr_data4[%llu][%llu].i=%d, read_data4[%llu][%llu].i=%d\n",
                         __LINE__, ii, jj, attr_data4[ii][jj].i, ii, jj, read_data4[ii][jj].i);
                     TestErrPrintf(
-                        "%d:attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",
+                        "%d:attribute data different: attr_data4[%llu][%llu].d=%f, read_data4[%llu][%llu].d=%f\n",
                         __LINE__, ii, jj, attr_data4[ii][jj].d, ii, jj, read_data4[ii][jj].d);
                     TestErrPrintf(
-                        "%d:attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",
+                        "%d:attribute data different: attr_data4[%llu][%llu].c=%c, read_data4[%llu][%llu].c=%c\n",
                         __LINE__, ii, jj, attr_data4[ii][jj].c, ii, jj, read_data4[ii][jj].c);
                 } /* end if */
 
@@ -1048,7 +1048,7 @@ test_attr_mult_read()
         hsize_t dims[ATTR_MAX_DIMS]; // Attribute dimensions
         int     ndims = space.getSimpleExtentDims(dims);
         if ((long)dims[0] != (long)ATTR1_DIM1)
-            TestErrPrintf("%d:attribute dimensions different: dims[0]=%d, should be %d\n", __LINE__,
+            TestErrPrintf("%d:attribute dimensions different: dims[0]=%d, should be %llu\n", __LINE__,
                           (int)dims[0], ATTR1_DIM1);
 
         /* Verify Datatype */
@@ -1076,7 +1076,7 @@ test_attr_mult_read()
         // Verify values read in
         for (i = 0; i < ATTR1_DIM1; i++)
             if (attr_data1[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n", __LINE__,
+                TestErrPrintf("%d: attribute data different: attr_data1[%llu]=%d,read_data1[%llu]=%d\n", __LINE__,
                               i, attr_data1[i], i, read_data1[i]);
 
         // Verify Name
@@ -1132,7 +1132,7 @@ test_attr_mult_read()
             for (j = 0; j < ATTR2_DIM2; j++)
                 if (attr_data2[i][j] != read_data2[i][j])
                     TestErrPrintf(
-                        "%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",
+                        "%d: attribute data different: attr_data2[%llu][%llu]=%d, read_data2[%llu][%llu]=%d\n",
                         __LINE__, i, j, attr_data2[i][j], i, j, read_data2[i][j]);
 
         // Verify Name
@@ -1186,8 +1186,8 @@ test_attr_mult_read()
             for (j = 0; j < ATTR3_DIM2; j++)
                 for (k = 0; k < ATTR3_DIM3; k++)
                     if (attr_data3[i][j][k] != read_data3[i][j][k])
-                        TestErrPrintf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, "
-                                      "read_data3[%d][%d][%d]=%f\n",
+                        TestErrPrintf("%d: attribute data different: attr_data3[%llu][%llu][%llu]=%f, "
+                                      "read_data3[%llu][%llu][%llu]=%f\n",
                                       __LINE__, i, j, k, attr_data3[i][j][k], i, j, k, read_data3[i][j][k]);
 
         // Verify Name
