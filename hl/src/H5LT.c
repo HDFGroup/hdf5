@@ -1309,6 +1309,10 @@ find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
     if (name == NULL)
         return ret;
 
+    /* Shut the compiler up */
+    (void)loc_id;
+    (void)linfo;
+
     /* Define a positive value for return value if the dataset was found. This will
      * cause the iterator to immediately return that positive value,
      * indicating short-circuit success
