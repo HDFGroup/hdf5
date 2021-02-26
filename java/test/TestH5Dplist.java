@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -42,10 +41,10 @@ public class TestH5Dplist {
     private static final int NDIMS = 2;
     private static final int FILLVAL = 99;
     private static final int RANK = 2;
-    long H5fid = -1;
-    long H5dsid = -1;
-    long H5did = -1;
-    long H5dcpl_id = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid = HDF5Constants.H5I_INVALID_HID;
+    long H5did = HDF5Constants.H5I_INVALID_HID;
+    long H5dcpl_id = HDF5Constants.H5I_INVALID_HID;
     long[] H5dims = { DIM_X, DIM_Y };
     long[] H5extdims = { EDIM_X, EDIM_Y };
     long[] H5chunk_dims = { CHUNK_X, CHUNK_Y };
