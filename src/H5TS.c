@@ -70,33 +70,33 @@ static herr_t H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count);
 /* Global variable definitions */
 H5TS_once_t H5TS_first_init_g
 #ifndef H5_HAVE_WIN_THREADS
-= PTHREAD_ONCE_INIT
+    = PTHREAD_ONCE_INIT
 #endif
-;
+    ;
 
 /* Thread-local keys, used by other interfaces */
 /* Error stack */
 H5TS_key_t H5TS_errstk_key_g
 #ifdef H5_HAVE_WIN_THREADS
-= TLS_OUT_OF_INDEXES
+    = TLS_OUT_OF_INDEXES
 #endif
-;
+    ;
 
 #ifdef H5_HAVE_CODESTACK
 /* Function stack */
 H5TS_key_t H5TS_funcstk_key_g
 #ifdef H5_HAVE_WIN_THREADS
-= TLS_OUT_OF_INDEXES
+    = TLS_OUT_OF_INDEXES
 #endif
-;
+    ;
 #endif /* H5_HAVE_CODESTACK */
 
 /* API context */
 H5TS_key_t H5TS_apictx_key_g
 #ifdef H5_HAVE_WIN_THREADS
-= TLS_OUT_OF_INDEXES
+    = TLS_OUT_OF_INDEXES
 #endif
-;
+    ;
 
 /*******************/
 /* Local Variables */
