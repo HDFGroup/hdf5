@@ -20,15 +20,17 @@
 /* public LT prototypes			*/
 #include "H5DSpublic.h"
 
-/* attribute type of a DS dataset */
+/* attribute type of a DS dataset when old references are used*/
 typedef struct ds_list_t {
-#ifdef H5_DIMENSION_SCALES_WITH_NEW_REF
-    H5R_ref_t    ref;
-#else
     hobj_ref_t   ref;     /* object reference  */
-#endif
     unsigned int dim_idx; /* dimension index of the dataset */
 } ds_list_t;
+
+/* attribute type of a DS dataset when new references are used*/
+typedef struct nds_list_t {
+    H5R_ref_t    ref;
+    unsigned int dim_idx; /* dimension index of the dataset */
+} nds_list_t;
 
 /*-------------------------------------------------------------------------
  * private functions
