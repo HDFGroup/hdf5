@@ -11,7 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 package hdf.hdf5lib;
 
 import hdf.hdf5lib.exceptions.HDF5Exception;
