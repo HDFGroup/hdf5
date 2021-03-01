@@ -1,6 +1,5 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -58,6 +57,7 @@ noinst_JAVA = \
     TestH5Lbasic.java \
     TestH5Lcreate.java \
     TestH5R.java \
+    TestH5Rref.java \
     TestH5P.java \
     TestH5PData.java \
     TestH5Pfapl.java \
