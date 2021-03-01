@@ -345,9 +345,6 @@ H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flag
         if (p + fill->size - 1 > p_end)
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "fill size exceeds buffer size")
 
-        if ((size_t)fill->size > p_size)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "destination buffer too small")
-
         /* Get the datatype message  */
         if ((exists = H5O_msg_exists_oh(open_oh, H5O_DTYPE_ID)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read object header")
