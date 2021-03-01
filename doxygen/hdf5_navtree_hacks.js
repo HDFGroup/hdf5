@@ -21,12 +21,12 @@ function generate_autotoc() {
         levelTag--;
       var cur_id = current.attr("id");
 
-      indices[levelTag-1]+=1;  
+      indices[levelTag-1]+=1;
       var prefix = indices[0];
       if (levelTag >1) {
         prefix+="."+indices[1];
       }
-        
+
       // Uncomment to add number prefixes
       // current.html(prefix + "   " + current.html());
       for(var l = levelTag; l < 2; ++l){
@@ -63,7 +63,7 @@ function getNode(o, po)
 }
 
 // Overloaded to adjust the size of the navtree wrt the toc
-function resizeHeight() 
+function resizeHeight()
 {
   var header  = $("#top");
   var sidenav = $("#side-nav");
@@ -155,7 +155,7 @@ function checkChildrenData(node) {
 }
 
 // Modified to:
-// 1 - remove the root node 
+// 1 - remove the root node
 // 2 - remove the section/subsection children
 function createIndent(o,domNode,node,level)
 {
@@ -217,26 +217,26 @@ function selectAndHighlight(hash,n)
 
 
 $(document).ready(function() {
-  
+
   generate_autotoc();
-  
+
   (function (){ // wait until the first "selected" element has been created
     try {
-      
+
       // this line will triger an exception if there is no #selected element, i.e., before the tree structure is complete.
       document.getElementById("selected").className = "item selected";
-      
+
       // ok, the default tree has been created, we can keep going...
-      
+
       // expand the "Chapters" node
       if(window.location.href.indexOf('unsupported')==-1)
         expandNode(global_navtree_object, global_navtree_object.node.children[0].children[2], true, true);
       else
         expandNode(global_navtree_object, global_navtree_object.node.children[0].children[1], true, true);
-      
-      // Hide the root node "Eigen"
+
+      // Hide the root node "HDF5"
       $(document.getElementsByClassName('index.html')[0]).parent().parent().css({display:"none"});
-      
+
     } catch (err) {
       setTimeout(arguments.callee, 10);
     }
@@ -244,4 +244,3 @@ $(document).ready(function() {
 
   $(window).on("load", resizeHeight);
 });
-

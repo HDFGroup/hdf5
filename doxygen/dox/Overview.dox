@@ -11,7 +11,7 @@ and you should also consult the documentation sets of the many outstanding
 community projects.
 
 For a first contact with HDF5, the best place is to have a look at the \link
-GettingStarted getting started \endlink page that show you how to write and
+GettingStarted getting started \endlink page that shows you how to write and
 compile your first program with HDF5.
 
 The \b main \b documentation is organized by documentation flavor. Most

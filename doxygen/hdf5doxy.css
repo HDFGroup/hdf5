@@ -1,5 +1,5 @@
 
-/******** Eigen specific CSS code ************/
+/******** HDF5 specific CSS code ************/
 
 /**** Styles removing elements ****/
 
@@ -23,7 +23,7 @@ p, dl.warning, dl.attention, dl.note
 
 li {
   max-width:55em;
-  text-align:justify;  
+  text-align:justify;
 }
 
 img {
@@ -43,7 +43,7 @@ pre.fragment {
 
 
 
-/* Common style for all Eigen's tables */
+/* Common style for all HDF5's tables */
 
 table.example, table.manual, table.manual-vl, table.manual-hl {
     max-width:100%;
@@ -52,7 +52,7 @@ table.example, table.manual, table.manual-vl, table.manual-hl {
     border-width: 1px;
     border-color: #cccccc;
     font-size: 1em;
-    
+
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
     -moz-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
     -webkit-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
@@ -64,7 +64,7 @@ table.example th, table.manual th, table.manual-vl th, table.manual-hl th {
   padding-right: 1em;
   color: #555555;
   background-color: #F4F4E5;
-  
+
   background-image: -webkit-gradient(linear,center top,center bottom,from(#FFFFFF), color-stop(0.3,#FFFFFF), color-stop(0.30,#FFFFFF), color-stop(0.98,#F4F4E5), to(#ECECDE));
   background-image: -moz-linear-gradient(center top, #FFFFFF 0%, #FFFFFF 30%, #F4F4E5 98%, #ECECDE);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFFFFF', endColorstr='#F4F4E5');
@@ -195,7 +195,7 @@ div.warningbox {
   border-width: 3px;
 }
 
-/**** old Eigen's styles ****/
+/**** old HDF5's styles ****/
 
 
 table.tutorial_code td {
@@ -205,7 +205,7 @@ table.tutorial_code td {
 }
 
 
-/* Whenever doxygen meets a '\n' or a '<BR/>', it will put 
+/* Whenever doxygen meets a '\n' or a '<BR/>', it will put
  * the text containing the character into a <p class="starttd">.
  * This little hack together with table.tutorial_code td.note
  * aims at fixing this issue. */
@@ -220,7 +220,7 @@ div.eimainmenu {
 }
 
 /* center version number on main page */
-h3.version { 
+h3.version {
   text-align:     center;
 }
 

@@ -1,7 +1,7 @@
 /** \page RM Reference Manual
 
-The HDF5 C-API provides applications with fine-grained control over all
-aspects HDF5 functionality. This functionality is grouped into the following
+The HDF5 C-API provides applications with fine-grained control over all aspects
+of HDF5 functionality. This functionality is grouped into the following
 \Emph{modules}:
 
 \li \ref H5A "Attributes" — Management of HDF5 attributes (\ref H5A)
