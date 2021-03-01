@@ -1137,7 +1137,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_HTML_HEADER=hdf5_header.html
   DOXYGEN_HTML_FOOTER=hdf5_footer.html
   DOXYGEN_HTML_EXTRA_STYLESHEET=hdf5doxy.css
-  DOXYGEN_HTML_EXTRA_FILES=hdf5_navtree_hacks.js
+  DOXYGEN_HTML_EXTRA_FILES='hdf5_navtree_hacks.js img/ftv2node.png img/ftv2pnode.png'
 
   DX_INIT_DOXYGEN([HDF5], [../doxygen/Doxyfile], [hdf5lib_docs])
 
