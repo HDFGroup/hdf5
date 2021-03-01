@@ -20,7 +20,9 @@
 /***********/
 
 #include <err.h>    /* for err(3) */
-#if defined(__APPLE__) && defined(__MACH__)
+
+/* Only need the pthread solution if sigtimedwai(2) isn't available */
+#ifndef H5_HAVE_SIGTIMEDWAIT
 #include <pthread.h>
 #endif
 
@@ -181,7 +183,7 @@ strsignal(int signum)
 }
 #endif
 
-#if defined(__APPLE__) && defined(__MACH__)
+#ifndef H5_HAVE_SIGTIMEDWAIT
 
 typedef struct timer_params_t {
     struct timespec *tick;
@@ -228,7 +230,7 @@ timer_function(void *arg)
 
     return NULL;
 }
-#endif
+#endif /* H5_HAVE_SIGTIMEDWAIT */
 
 /* Wait for any signal to occur and then return.  Wake periodically
  * during the wait to perform API calls: in this way, the
@@ -254,10 +256,10 @@ await_signal(hid_t fid)
 
     dbgf(1, "waiting for signal\n");
 
-#if defined(__APPLE__) && defined(__MACH__)
+#ifndef H5_HAVE_SIGTIMEDWAIT
     {
-        /* MacOS does not have sigtimedwait(2), so use an alternative.
-         * XXX: Replace with configure macros later.
+        /* Use an alternative scheme for platforms like MacOS that do not have
+         * sigtimedwait(2)
          */
         timer_params_t params;
         int rc;
@@ -308,7 +310,7 @@ await_signal(hid_t fid)
         } else if (rc == -1)
             err(EXIT_FAILURE, "%s: sigtimedwait", __func__);
     }
-#endif
+#endif /* H5_HAVE_SIGTIMEDWAIT */
 }
 
 /* Revised support routines that can be used for all VFD SWMR integration tests
