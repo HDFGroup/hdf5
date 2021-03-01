@@ -1876,28 +1876,6 @@ test_async_vol_props(void)
     /* Retrieve the file access property for testing */
     fapl_id = h5_fileaccess();
 
-    /* Test 'implicit async allowed' property */
-
-    /* Test query w/NULL for implicit async allowed parameter */
-    if (H5Pget_vol_implicit_async(fapl_id, NULL) < 0)
-        FAIL_STACK_ERROR;
-
-    /* Query default value */
-    implicit_async_allowed = (hbool_t)-1;
-    if (H5Pget_vol_implicit_async(fapl_id, &implicit_async_allowed) < 0)
-        FAIL_STACK_ERROR;
-    if (implicit_async_allowed)
-        TEST_ERROR
-
-    /* Set & query the value */
-    if (H5Pset_vol_implicit_async(fapl_id, TRUE) < 0)
-        TEST_ERROR;
-    implicit_async_allowed = FALSE;
-    if (H5Pget_vol_implicit_async(fapl_id, &implicit_async_allowed) < 0)
-        TEST_ERROR;
-    if (!implicit_async_allowed)
-        TEST_ERROR
-
     /* Test 'async supported' property */
 
     /* Test query w/NULL for async_supported parameter */
