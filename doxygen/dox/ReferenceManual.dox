@@ -20,6 +20,10 @@ of HDF5 functionality. This functionality is grouped into the following
 \li \ref H5P "Property Lists" — Management of property lists to control HDF5 library behavior (\ref H5P)
 \li \ref H5R "References" — Management of references to specific objects and data regions in an HDF5 file (\ref H5R)
 \li \ref H5VL "Virtual Object Layer" — Management of the Virtual Object Layer (\ref H5VL)
+\li \ref ASYNC "Asynchronous Functions" - Functions with asynchronous variants (\ref ASYNC)
+
+\par Deprecated Functions
+     <a href="./deprecated.html">See here.</a>
 
 Here are a few simple rules to follow:
 

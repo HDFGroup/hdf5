@@ -39,6 +39,12 @@ ALIASES += op_data_in="\param[in] op_data User-defined callback function context
 ALIASES += op_data_in{1}="\param[in] \1 User-defined callback function context"
 
 ################################################################################
+# Asynchronous
+################################################################################
+
+ALIASES += async_variant_of{1}="Asynchronous version of \1()"
+
+################################################################################
 # Attributes
 ################################################################################
 
