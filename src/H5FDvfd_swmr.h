@@ -34,5 +34,4 @@ H5_DLL herr_t H5Pset_fapl_vfd_swmr(hid_t fapl_id);
 }
 #endif
 
-#endif
-
+#endif /* H5FDswmr_H */

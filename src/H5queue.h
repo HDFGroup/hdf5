@@ -31,8 +31,8 @@
  *	@(#)queue.h	8.5 (Berkeley) 8/20/94
  */
 
-#ifndef	_H5queue_H_
-#define	_H5queue_H_
+#ifndef	H5queue_H_
+#define	H5queue_H_
 
 /* This is a copy of netBSD's sys/queue.h header for use in HDF5. We've copied
  * it here instead of using the system's version to avoid incompatibilities.
@@ -679,4 +679,4 @@ struct {								\
 	        ((struct type *)(void *)				\
 		((char *)((head)->sqh_last) - offsetof(struct type, field))))
 
-#endif	/* _H5queue_H_ */
+#endif	/* H5queue_H_ */
