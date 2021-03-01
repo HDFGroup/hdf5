@@ -18,5 +18,5 @@ H5Pget_metadata_read_attempts(fapl, &attempts);
  *  The value returned in "attempts" will be 20 as set.
  */
 
-/* Close the property list */	    
+/* Close the property list */
 H5Pclose(fapl);

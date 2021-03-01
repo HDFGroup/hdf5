@@ -35,7 +35,7 @@ H5Pget_object_flush_cb(fapl, &ret_cb, &ret_counter);
 static herr_t
 flush_cb(hid_t obj_id, void *_udata)
 {
-    unsigned *flush_ct = (unsigned*)_udata;
+    unsigned *flush_ct = (unsigned *)_udata;
     ++(*flush_ct);
     return 0;
 }

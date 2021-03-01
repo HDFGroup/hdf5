@@ -11,7 +11,7 @@ H5Pget_metadata_read_attempts(file_fapl, &attempts);
  *  The value returned in "attempts" will be 1 (default for non-SWMR access).
  */
 
-/* Close the property list */	    
+/* Close the property list */
 H5Pclose(file_fapl);
 
 /* Close the file */
@@ -36,7 +36,7 @@ H5Pget_metadata_read_attempts(file_fapl, &attempts);
  *  The value returned in "attempts" will be 1 (default for non-SWMR access).
  */
 
-/* Close the property lists */	    
+/* Close the property lists */
 H5Pclose(file_fapl);
 H5Pclose(fapl);
 

@@ -3537,7 +3537,7 @@ H5_DLL herr_t H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size);
  *          H5Pset_metadata_read_attempts():
  *
  *          <ul>
- *          
+ *
  *          <li>If the number of attempts is set to N, the value
  *          returned will be N.
  *          <li>If the number of attempts is not set, the value returned
@@ -3689,7 +3689,8 @@ H5_DLL herr_t H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func, void 
  * \since 1.10.1
  */
 H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size,
-    unsigned *min_meta_perc, unsigned *min_raw_perc);
+                                      unsigned *min_meta_perc,
+                                      unsigned *min_raw_perc);
 /**
  * \ingroup FAPL
  *
@@ -3991,7 +3992,7 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_
  * \brief Sets the number of files that can be held open in an external
  *        link open file cache
  *
- * \par Motivation 
+ * \par Motivation
  * \parblock
  * The <em>external link open file cache</em> holds files open after
  * they have been accessed via an external link. This cache reduces
@@ -4046,7 +4047,8 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_
  *          close all files in the graph, even if cycles are present.
  * \par Example
  * \parblock
- * The following code sets up an external link open file cache that will hold open up to 8 files reached through external links:
+ * The following code sets up an external link open file cache that will
+ * hold open up to 8 files reached through external links:
  *
  * \code
  * status = H5Pset_elink_file_cache_size(fapl_id, 8);
