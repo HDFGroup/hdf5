@@ -21,6 +21,11 @@
 
 #include <err.h>    /* for err(3) */
 
+/* Only need the pthread solution if sigtimedwai(2) isn't available */
+#ifndef H5_HAVE_SIGTIMEDWAIT
+#include <pthread.h>
+#endif
+
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 #include "swmr_common.h"
@@ -178,6 +183,55 @@ strsignal(int signum)
 }
 #endif
 
+#ifndef H5_HAVE_SIGTIMEDWAIT
+
+typedef struct timer_params_t {
+    struct timespec *tick;
+    hid_t fid;
+} timer_params_t;
+
+pthread_mutex_t timer_mutex;
+hbool_t timer_stop = FALSE;
+
+static void *
+timer_function(void *arg)
+{
+    timer_params_t *params = (timer_params_t *)arg;
+    sigset_t sleepset;
+    hbool_t done = FALSE;
+
+    /* Ignore any signals */
+    sigfillset(&sleepset);
+    pthread_sigmask(SIG_SETMASK, &sleepset, NULL);
+
+    for (;;) {
+        estack_state_t es;
+
+        nanosleep(params->tick, NULL);
+
+        /* Check the mutex */
+        pthread_mutex_lock(&timer_mutex);
+        done = timer_stop;
+        pthread_mutex_unlock(&timer_mutex);
+        if (done)
+            break;
+
+        /* Avoid deadlock with peer: periodically enter the API so that
+         * tick processing occurs and data is flushed so that the peer
+         * can see it.
+         *
+         * The call we make will fail, but that's ok,
+         * so squelch errors.
+         */
+        es = disable_estack();
+        (void)H5Aexists_by_name(params->fid, "nonexistent", "nonexistent", H5P_DEFAULT);
+        restore_estack(es);
+    }
+
+    return NULL;
+}
+#endif /* H5_HAVE_SIGTIMEDWAIT */
+
 /* Wait for any signal to occur and then return.  Wake periodically
  * during the wait to perform API calls: in this way, the
  * VFD SWMR tick number advances and recent changes do not languish
@@ -186,8 +240,8 @@ strsignal(int signum)
 void
 await_signal(hid_t fid)
 {
-    sigset_t sleepset;
     struct timespec tick = {.tv_sec = 0, .tv_nsec = 1000000000 / 100};
+    sigset_t sleepset;
 
     if (sigfillset(&sleepset) == -1) {
         err(EXIT_FAILURE, "%s.%d: could not initialize signal mask",
@@ -202,7 +256,37 @@ await_signal(hid_t fid)
 
     dbgf(1, "waiting for signal\n");
 
+#ifndef H5_HAVE_SIGTIMEDWAIT
+    {
+        /* Use an alternative scheme for platforms like MacOS that do not have
+         * sigtimedwait(2)
+         */
+        timer_params_t params;
+        int rc;
+        pthread_t timer;
+
+        params.tick = &tick;
+        params.fid = fid;
+
+        pthread_mutex_init(&timer_mutex, NULL);
+
+        pthread_create(&timer, NULL, timer_function, &params);
+
+        rc = sigwait(&sleepset, NULL);
+
+        if (rc != -1) {
+            fprintf(stderr, "Received signal, wrapping things up.\n");
+            pthread_mutex_lock(&timer_mutex);
+            timer_stop = TRUE;
+            pthread_mutex_unlock(&timer_mutex);
+            pthread_join(timer, NULL);
+        }
+        else
+            err(EXIT_FAILURE, "%s: sigtimedwait", __func__);
+    }
+#else
     for (;;) {
+        /* Linux and other systems */
         const int rc = sigtimedwait(&sleepset, NULL, &tick);
 
         if (rc != -1) {
@@ -226,6 +310,7 @@ await_signal(hid_t fid)
         } else if (rc == -1)
             err(EXIT_FAILURE, "%s: sigtimedwait", __func__);
     }
+#endif /* H5_HAVE_SIGTIMEDWAIT */
 }
 
 /* Revised support routines that can be used for all VFD SWMR integration tests

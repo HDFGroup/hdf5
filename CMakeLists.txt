@@ -816,7 +816,12 @@ if (HDF5_ENABLE_THREADSAFE)
   if (Threads_FOUND)
     set (H5_HAVE_THREADSAFE 1)
   endif ()
+else()
+  # Always check for pthreads for VFD SWMR (for now)
+  set (THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package (Threads REQUIRED)
 endif ()
+
 
 #-----------------------------------------------------------------------------
 # Option to build the map API

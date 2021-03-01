@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _VFD_SWMR_COMMON_H
-#define _VFD_SWMR_COMMON_H
+#ifndef VFD_SWMR_COMMON_H
+#define VFD_SWMR_COMMON_H
 
 /***********/
 /* Headers */
@@ -94,4 +94,4 @@ H5TEST_DLL int fetch_env_ulong(const char *, unsigned long, unsigned long *);
 
 extern int verbosity;
 
-#endif /* _SWMR_COMMON_H */
+#endif /* SWMR_COMMON_H */

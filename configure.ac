@@ -1750,84 +1750,78 @@ esac
 
 if test "X$THREADSAFE" = "Xyes"; then
     AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
+fi
 
-    ## ----------------------------------------------------------------------
-    ## Is the Pthreads library present?  It has a header file `pthread.h' and
-    ## a library `-lpthread' and their locations might be specified with the
-    ## `--with-pthread' command-line switch.  The value is an include path
-    ## and/or a library path.  If the library path is specified then it must
-    ## be preceded by a comma.
-    ##
-    ## Thread-safety in HDF5 only uses Pthreads via configure, so the
-    ## default is "check", though this only has an effect when
-    ## --enable-threadsafe is specified.
-    AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
-    AC_ARG_WITH([pthread],
-                [AS_HELP_STRING([--with-pthread=DIR],
-                                [Specify alternative path to Pthreads library when
-                                thread-safe capability is built.])],,
-                [withval=check])
+## ----------------------------------------------------------------------
+## Is the Pthreads library present?  It has a header file `pthread.h' and
+## a library `-lpthread' and their locations might be specified with the
+## `--with-pthread' command-line switch.  The value is an include path
+## and/or a library path.  If the library path is specified then it must
+## be preceded by a comma.
+AC_SUBST([HAVE_PTHREAD])
 
+AC_ARG_WITH([pthread],
+            [AS_HELP_STRING([--with-pthread=DIR],
+                            [Specify alternative path to Pthreads library when
+                            thread-safe capability is built.])],,
+            [withval=check])
+
+case "$withval" in
+  check | yes)
+    AC_CHECK_HEADERS([pthread.h],,)
+    AC_CHECK_LIB([pthread], [pthread_self])
+    ;;
+  no)
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
     case "$withval" in
-      check | yes)
-        AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-        if test "x$HAVE_PTHREAD" = "xyes"; then
-          AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
-        fi
-        ;;
-      no)
-        AC_MSG_ERROR([Must use Pthreads with thread safety])
+      *,*)
+        pthread_inc="`echo $withval | cut -f1 -d,`"
+        pthread_lib="`echo $withval | cut -f2 -d, -s`"
         ;;
       *)
-        case "$withval" in
-          *,*)
-            pthread_inc="`echo $withval | cut -f1 -d,`"
-            pthread_lib="`echo $withval | cut -f2 -d, -s`"
-            ;;
-          *)
-            if test -n "$withval"; then
-              pthread_inc="$withval/include"
-              pthread_lib="$withval/lib"
-            fi
-            ;;
-        esac
-
-        if test -n "$pthread_inc"; then
-          saved_CPPFLAGS="$CPPFLAGS"
-          saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-          CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-          AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
-          AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
-        else
-          AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-        fi
-
-        if test "x$HAVE_PTHREAD" = "xyes"; then
-          if test -n "$pthread_lib"; then
-            saved_LDFLAGS="$LDFLAGS"
-            saved_AM_LDFLAGS="$AM_LDFLAGS"
-            LDFLAGS="$LDFLAGS -L$pthread_lib"
-            AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-            AC_CHECK_LIB([pthread], [pthread_self],,
-                         [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
-          else
-            AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
-          fi
+        if test -n "$withval"; then
+          pthread_inc="$withval/include"
+          pthread_lib="$withval/lib"
         fi
         ;;
     esac
 
-    ## ----------------------------------------------------------------------
-    ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
-    ## is supported on this system
-    ##
-    ## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
-    ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
-    ## supported a priori. POSIX.1-2001 requires that a conformant
-    ## system need only support one of SYSTEM or PROCESS scopes.
-    ##
-    ## For cross-compiling, we've added a pessimistic 'no'. You can
-    ## hand-hack the config file if you know otherwise.
+    if test -n "$pthread_inc"; then
+      saved_CPPFLAGS="$CPPFLAGS"
+      saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS -I$pthread_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
+      AC_CHECK_HEADERS([pthread.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS";])
+    else
+      AC_CHECK_HEADERS([pthread.h])
+    fi
+
+    if test -n "$pthread_lib"; then
+      saved_LDFLAGS="$LDFLAGS"
+      saved_AM_LDFLAGS="$AM_LDFLAGS"
+      LDFLAGS="$LDFLAGS -L$pthread_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+      AC_CHECK_LIB([pthread], [pthread_self],,[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS";])
+    else
+      AC_CHECK_LIB([pthread], [pthread_self])
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
+## is supported on this system
+##
+## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
+## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
+## supported a priori. POSIX.1-2001 requires that a conformant
+## system need only support one of SYSTEM or PROCESS scopes.
+##
+## For cross-compiling, we've added a pessimistic 'no'. You can
+## hand-hack the config file if you know otherwise.
+if test "x$HAVE_PTHREAD" = "xyes"; then
     AC_MSG_CHECKING([Pthreads supports system scope])
     AC_CACHE_VAL([hdf5_cv_system_scope_threads],
       [AC_RUN_IFELSE(
@@ -1964,7 +1958,7 @@ AC_CHECK_FUNCS([alarm clock_gettime difftime fcntl flock fork frexpf])
 AC_CHECK_FUNCS([frexpl gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
-AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
+AC_CHECK_FUNCS([sigtimedwait snprintf srandom strdup symlink system])
 AC_CHECK_FUNCS([strtoll strtoull])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
 AC_CHECK_FUNCS([roundf lroundf llroundf round lround llround])
