@@ -6356,7 +6356,7 @@ gent_ldouble_scalar(void)
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
         goto error;
 
-    if ((tid = H5Tarray_create(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
+    if ((tid = H5Tarray_create2(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
         goto error;
 
     if (H5Tget_size(tid) == 0)
