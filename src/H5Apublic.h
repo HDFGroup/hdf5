@@ -794,10 +794,10 @@ H5_DLL herr_t H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t 
  * \ingroup ASYNC
  * \async_variant_of{H5Acreate_by_name}
  */
-H5_DLL hid_t  H5Acreate_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
-                                      hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id,
-                                      hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id,
-                                      hid_t es_id);
+H5_DLL hid_t H5Acreate_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
+                                     hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id,
+                                     hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id,
+                                     hid_t es_id);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
