@@ -3498,7 +3498,107 @@ H5_DLL herr_t H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
 H5_DLL herr_t H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr /*out*/);
 H5_DLL herr_t H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location,
                                      size_t *location_size, hbool_t *start_on_access);
-H5_DLL herr_t H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size /*out*/);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Returns the current metadata block size setting
+ *
+ * \fapl_id{fapl_id}
+ * \param[out] size Minimum size, in bytes, of metadata block allocations
+ *
+ * \return \herr_t
+ *
+ * \details Returns the current minimum size, in bytes, of new
+ *          metadata block allocations. This setting is retrieved from the
+ *          file access property list \p fapl_id.
+ *
+ *          This value is set by H5Pset_meta_block_size() and is
+ *          retrieved from the file access property list \p fapl_id.
+ *
+ * \since 1.4.0
+ */
+H5_DLL herr_t H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves the number of read attempts from a file access
+ *        property list
+ *
+ * \fapl_id{plist_id}
+ * \param[out] attempts The number of read attempts
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_metadata_read_attempts() retrieves the number of read
+ *          attempts that is set in the file access property list \p plist_id.
+ *
+ *          For a default file access property list, the value retrieved
+ *          will depend on whether the user sets the number of attempts via
+ *          H5Pset_metadata_read_attempts():
+ *
+ *          <ul>
+ *          
+ *          <li>If the number of attempts is set to N, the value
+ *          returned will be N.
+ *          <li>If the number of attempts is not set, the value returned
+ *          will be the default for non-SWMR access (1). SWMR is short
+ *          for single-writer/multiple-reader.
+ *          </ul>
+ *
+ *          For the file access property list of a specified HDF5 file,
+ *          the value retrieved will depend on how the file is opened
+ *          and whether the user sets the number of read attempts via
+ *          H5Pset_metadata_read_attempts():
+ *
+ *          <ul>
+ *          <li>For a file opened with SWMR access:
+ *
+ *          <ul>
+ *              <li> If the number of attempts is set to N, the value
+ *              returned will be N.
+ *              <li> If the number of attempts is not set, the value
+ *              returned will be the default for SWMR access (100).
+ *          </ul>
+ *          <li>For a file opened without SWMR access, the value
+ *          retrieved will always be the default for non-SWMR access
+ *          (1). The value set via H5Pset_metadata_read_attempts() does
+ *          not have any effect on non-SWMR access.
+ *          </ul>
+ *
+ * \par Failure Modes
+ * \parblock
+ *
+ * When the input property list is not a file access property list.
+ *
+ * When the library is unable to retrieve the number of read attempts from
+ * the file access property list.
+ *
+ * \endparblock
+ *
+ * \par Examples
+ * \parblock
+ *
+ * The first example illustrates the two cases for retrieving the number
+ * of read attempts from a default file access property list.
+ *
+ * \include H5Pget_metadata_read_attempts.1.c
+ *
+ * The second example illustrates the two cases for retrieving the
+ * number of read attempts from the file access property list of a file
+ * opened with SWMR acccess.
+ *
+ * \include H5Pget_metadata_read_attempts.2.c
+ *
+ * The third example illustrates the two cases for retrieving the number
+ * of read attempts from the file access property list of a file opened
+ * with non-SWMR acccess.
+ *
+ * \include H5Pget_metadata_read_attempts.3.c
+ *
+ * \endparblock
+ *
+ * \since 1.10.0
+ */
 H5_DLL herr_t H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts);
 /**
  * \ingroup FAPL
@@ -3533,10 +3633,102 @@ H5_DLL herr_t H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts);
  *
  */
 H5_DLL herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves the object flush property values from the file access property list
+ *
+ * \fapl_id{plist_id}
+ * \param[in] func The user-defined callback function
+ * \param[in] udata The user-defined input data for the callback function
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_object_flush_cb() gets the user-defined callback
+ *          function that is set in the file access property list
+ *          \p fapl_id and stored in the parameter \p func. The callback is
+ *          invoked whenever an object flush occurs in the file. This
+ *          routine also obtains the user-defined input data that is
+ *          passed along to the callback function in the parameter
+ *          \p udata.
+ *
+ * \par Example
+ * \parblock
+ * The example below illustrates the usage of this routine to obtain the
+ * object flush property values.
+ *
+ * \include H5Pget_object_flush_cb.c
+ * \endparblock
+ *
+ * \since 1.10.0
+ */
 H5_DLL herr_t H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func, void **udata);
-H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned *min_meta_per,
-                                      unsigned *min_raw_per);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves the maximum size for the page buffer and the minimum
+          percentage for metadata and raw data pages
+ *
+ * \fapl_id{plist_id}
+ * \param[out] buf_size Maximum size, in bytes, of the page buffer
+ * \param[out] min_meta_perc Minimum metadata percentage to keep in the
+ *             page buffer before allowing pages containing metadata to
+ *             be evicted
+ *
+ * \param[out] min_raw_perc Minimum raw data percentage to keep in the
+ *             page buffer before allowing pages containing raw data to
+ *             be evicted
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_page_buffer_size() retrieves \p buf_size, the maximum
+ *          size in bytes of the page buffer, \p min_meta_perc, the
+ *          minimum metadata percentage, and \p min_raw_perc, the
+ *          minimum raw data percentage.
+ *
+ * \since 1.10.1
+ */
+H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size,
+    unsigned *min_meta_perc, unsigned *min_raw_perc);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Returns maximum data sieve buffer size
+ *
+ * \fapl_id{fapl_id}
+ * \param[in] size Maximum size, in bytes, of data sieve buffer
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_sieve_buf_size() retrieves, size, the current maximum
+ *          size of the data sieve buffer.
+ *
+ *          This value is set by H5Pset_sieve_buf_size() and is retrieved
+ *          from the file access property list fapl_id.
+ *
+ * \version 1.6.0 The \p size parameter has changed from type \c hsize_t
+ *                to \c size_t
+ * \since 1.4.0
+ */
 H5_DLL herr_t H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size /*out*/);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves the current small data block size setting
+ *
+ * \fapl_id{fapl_id}
+ * \param[out] size Maximum size, in bytes, of the small data block
+ *
+ * \result \herr_t
+ *
+ * \details H5Pget_small_data_block_size() retrieves the current setting
+ *          for the size of the small data block.
+ *
+ *          If the returned value is zero (0), the small data block
+ *          mechanism has been disabled for the file.
+ *
+ * \since 1.4.4
+ */
 H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size /*out*/);
 /**
  * \ingroup FAPL
@@ -3707,6 +3899,64 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignme
  */
 H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts, size_t rdcc_nslots, size_t rdcc_nbytes,
                            double rdcc_w0);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets write tracking information for core driver, #H5FD_CORE
+ *
+ * \fapl_id{fapl_id}
+ * \param[in] is_enabled Boolean value specifying whether feature is
+                         enabled
+ * \param[in] page_size Positive integer specifying size, in bytes, of
+ *                      write aggregation pages Value of 1 (one) enables
+ *                      tracking with no paging.
+ *
+ * \return \herr_t
+ *
+ * \details When a file is created or opened for writing using the core
+ *          virtual file driver (VFD) with the backing store option
+ *          turned on, the core driver can be configured to track
+ *          changes to the file and write out only the modified bytes.
+ *
+ *          This write tracking feature is enabled and disabled with \p
+ *          is_enabled. The default setting is that write tracking is
+ *          disabled, or off.
+ *
+ *          To avoid a large number of small writes, changes can
+ *          be aggregated into pages of a user-specified size, \p
+ *          page_size.
+ *
+ *          Setting \p page_size to 1 enables tracking with no page
+ *          aggregation.
+ *
+ *          The backing store option is set via the function
+ *          H5Pset_fapl_core.
+ *
+ * \attention
+ * \parblock
+ *            This function is only for use with the core VFD and must
+ *            be used after the call to H5Pset_fapl_core(). It is an error
+ *            to use this function with any other VFD.
+ *
+ *            It is an error to use this function when the backing store
+ *            flag has not been set using H5Pset_fapl_core().
+ *
+ *            This function only applies to the backing store write
+ *            operation which typically occurs when the file is flushed
+ *            or closed. This function has no relationship to the
+ *            increment parameter passed to H5Pset_fapl_core().
+ *
+ *            For optimum performance, the \p page_size parameter should be
+ *            a power of two.
+ *
+ *            It is an error to set the page size to 0.
+ * \endparblock
+ *
+ * \version 1.8.14 C function modified in this release to return error
+ *                 if \p page_size is set to 0 (zero).
+ * \since 1.8.13
+ *
+ */
 H5_DLL herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size_t page_size);
 /**
  * \ingroup FAPL
@@ -3735,6 +3985,76 @@ H5_DLL herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size
  *
  */
 H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the number of files that can be held open in an external
+ *        link open file cache
+ *
+ * \par Motivation 
+ * \parblock
+ * The <em>external link open file cache</em> holds files open after
+ * they have been accessed via an external link. This cache reduces
+ * the number of times such files are opened when external links are
+ * accessed repeatedly and can siginificantly improves performance in
+ * certain heavy-use situations and when low-level file opens or closes
+ * are expensive.
+ *
+ * H5Pset_elink_file_cache_size() sets the number of files
+ * that will be held open in an external link open file
+ * cache. H5Pget_elink_file_cache_size() retrieves the size of an existing
+ * cache; and H5Fclear_elink_file_cache() clears an existing cache without
+ * closing it.
+ * \endparblock
+ *
+ * \fapl_id{plist_id}
+ * \param[in] efc_size External link open file cache size in number of files
+ *                     <em>Default setting is 0 (zero).</em>
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_elink_file_cache_size() specifies the number of files
+ *          that will be held open in an external link open file cache.
+ *
+ *          The default external link open file cache size is 0 (zero),
+ *          meaning that files accessed via an external link are not
+ *          held open. Setting the cache size to a positive integer
+ *          turns on the cache; setting the size back to zero turns it
+ *          off.
+ *
+ *          With this property set, files are placed in the external
+ *          link open file cache cache when they are opened via an
+ *          external link. Files are then held open until either
+ *          they are evicted from the cache or the parent file is
+ *          closed. This property setting can improve performance when
+ *          external links are repeatedly accessed.
+ *
+ *          When the cache is full, files will be evicted using a least
+ *          recently used (LRU) scheme; the file which has gone the
+ *          longest time without being accessed through the parent file
+ *          will be evicted and closed if nothing else is holding that
+ *          file open.
+ *
+ *          Files opened through external links inherit the parent
+ *          file’s file access property list by default, and therefore
+ *          inherit the parent file’s external link open file cache
+ *          setting.
+ *
+ *          When child files contain external links of their own, the
+ *          caches can form a graph of cached external files. Closing
+ *          the last external reference to such a graph will recursively
+ *          close all files in the graph, even if cycles are present.
+ * \par Example
+ * \parblock
+ * The following code sets up an external link open file cache that will hold open up to 8 files reached through external links:
+ *
+ * \code
+ * status = H5Pset_elink_file_cache_size(fapl_id, 8);
+ * \endcode
+ * \endparblock
+ *
+ * \since 1.8.7
+ */
 H5_DLL herr_t H5Pset_elink_file_cache_size(hid_t plist_id, unsigned efc_size);
 H5_DLL herr_t H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close);
 H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
