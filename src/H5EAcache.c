@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -555,9 +555,9 @@ BEGIN_FUNC(STATIC, ERR, herr_t, SUCCEED, FAIL,
             default:
 #ifdef NDEBUG
                 H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
+#else     /* NDEBUG */
                 HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
+#endif    /* NDEBUG */
         } /* end switch */
     }     /* end if */
     else
@@ -939,10 +939,10 @@ BEGIN_FUNC(STATIC, ERR, herr_t, SUCCEED, FAIL,
         default:
 #ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
+#else  /* NDEBUG */
             HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+    }  /* end switch */
 
     CATCH
 
@@ -1346,10 +1346,10 @@ BEGIN_FUNC(STATIC, ERR, herr_t, SUCCEED, FAIL,
         default:
 #ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
+#else  /* NDEBUG */
             HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+    }  /* end switch */
 
     CATCH
 
@@ -1750,10 +1750,10 @@ BEGIN_FUNC(STATIC, ERR, herr_t, SUCCEED, FAIL,
         default:
 #ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
+#else  /* NDEBUG */
             HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+    }  /* end switch */
 
     CATCH
 
@@ -2125,10 +2125,10 @@ BEGIN_FUNC(STATIC, ERR, herr_t, SUCCEED, FAIL,
         default:
 #ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
+#else  /* NDEBUG */
             HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+    }  /* end switch */
 
     CATCH
 

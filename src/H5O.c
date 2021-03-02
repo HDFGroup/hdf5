@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1188,7 +1188,9 @@ H5Oget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    /* clang-format off */
     H5TRACE9("e", "*s*sIui*sxIuii", app_file, app_func, app_line, loc_id, name, oinfo, fields, lapl_id, es_id);
+    /* clang-format on */
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)

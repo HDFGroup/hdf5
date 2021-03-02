@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -115,6 +115,7 @@
 #define FILE85     "tgrpnullspace.h5"
 #define FILE86     "err_attr_dspace.h5"
 #define FILE87     "tintsnodata.h5"
+#define FILE88     "tldouble_scalar.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -274,8 +275,8 @@ typedef struct s1_t {
 
 /* File 65 macros */
 #define STRATEGY         H5F_FSPACE_STRATEGY_NONE /* File space handling strategy */
-#define THRESHOLD10      10 /* Free-space section threshold */
-#define FSPACE_PAGE_SIZE 8192 /* File space page size */
+#define THRESHOLD10      10                       /* Free-space section threshold */
+#define FSPACE_PAGE_SIZE 8192                     /* File space page size */
 
 /* "FILE66" macros and for FILE69, FILE87 */
 #define F66_XDIM       8
@@ -6305,6 +6306,57 @@ gent_ldouble(void)
         goto error;
 
     if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
+        goto error;
+
+    if (H5Tget_size(tid) == 0)
+        goto error;
+
+    if ((did = H5Dcreate2(fid, "dset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        goto error;
+
+    if (H5Sclose(sid) < 0)
+        goto error;
+    if (H5Tclose(tid) < 0)
+        goto error;
+    if (H5Dclose(did) < 0)
+        goto error;
+    if (H5Fclose(fid) < 0)
+        goto error;
+
+    return 0;
+
+error:
+    HDprintf("error !\n");
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: gent_ldouble_scalar
+ *
+ * Purpose: make file with a long double scalar dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+gent_ldouble_scalar(void)
+{
+    hid_t       fid;
+    hid_t       did;
+    hid_t       tid;
+    hid_t       sid;
+    hsize_t     dims[1] = {6};
+    long double buf[6]  = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+
+    if ((fid = H5Fcreate(FILE88, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if ((sid = H5Screate(H5S_SCALAR)) < 0)
+        goto error;
+
+    if ((tid = H5Tarray_create2(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
         goto error;
 
     if (H5Tget_size(tid) == 0)

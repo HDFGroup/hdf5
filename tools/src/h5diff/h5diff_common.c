@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -76,7 +76,6 @@ check_options(diff_opt_t *opts)
     }
 }
 
-#if TRILABS_227
 /*-------------------------------------------------------------------------
  * Function:    parse_hsize_list
  *
@@ -192,7 +191,6 @@ parse_subset_params(const char *dset)
 
     return s;
 }
-#endif
 
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
@@ -480,11 +478,9 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
      * TRILABS_227 is complete except for an issue with printing indices
      * the following calls will enable subsetting
      */
-#if TRILABS_227
     opts->sset[0] = parse_subset_params(*objname1);
 
     opts->sset[1] = parse_subset_params(*objname2);
-#endif
 
     H5TOOLS_ENDDEBUG("");
 }
@@ -822,19 +818,27 @@ usage(void)
     /*
      * TRILABS_227 is complete except for an issue with printing indices
      * the following will be needed for subsetting
+     */
     PRINTVALSTREAM(rawoutstream, " Subsetting options:\n");
-    PRINTVALSTREAM(rawoutstream, "  Subsetting is available by using the fcompact form of subsetting, as
-    follows:\n"); PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]\n");
-    PRINTVALSTREAM(rawoutstream, "  It is not required to use all parameters, but until the last parameter
-    value used,\n"); PRINTVALSTREAM(rawoutstream, "  all of the semicolons (;) are required, even when a
-    parameter value is not specified. Example:\n"); PRINTVALSTREAM(rawoutstream, "    obj1
-    /foo/mydataset[START;;COUNT;BLOCK]\n"); PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START]\n");
-    PRINTVALSTREAM(rawoutstream, "  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1
-    in\n"); PRINTVALSTREAM(rawoutstream, "  each dimension. START is optional and will default to 0 in each
-    dimension.\n"); PRINTVALSTREAM(rawoutstream, "  Each of START, STRIDE, COUNT, and BLOCK must be a
-    comma-separated list of integers with\n"); PRINTVALSTREAM(rawoutstream, "  one integer for each dimension
-    of the dataset.\n"); PRINTVALSTREAM(rawoutstream, "\n");
-   */
+    PRINTVALSTREAM(rawoutstream,
+                   "  Subsetting is available by using the fcompact form of subsetting, as follows:\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  It is not required to use all parameters, but until the last parameter value used,\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "  all of the semicolons (;) are required, even when a parameter value is not specified. Example:\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;;COUNT;BLOCK]\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START]\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  each dimension. START is optional and will default to 0 in each dimension.\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "  Each of START, STRIDE, COUNT, and BLOCK must be a comma-separated list of integers with\n");
+    PRINTVALSTREAM(rawoutstream, "  one integer for each dimension of the dataset.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Exit code:\n");
     PRINTVALSTREAM(rawoutstream, "  0 if no differences, 1 if differences found, 2 if error\n");
     PRINTVALSTREAM(rawoutstream, "\n");

@@ -6,7 +6,7 @@
 ! * This file is part of HDF5.  The full HDF5 copyright notice, including     *
 ! * terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -180,8 +180,9 @@ PROGRAM example_ds
 
   WRITE(*,'(/,5X,A,I0,2A,/)') 'Dimension Scale Label for dimension ', DIM2, ' is ... ', label(1:label_len)
 
- ! close DS id
+ ! close DS ids
   CALL H5Dclose_f(dsid, err)
+  CALL H5Dclose_f(did, err)
 
  ! close file
   CALL H5Fclose_f(fid, err)

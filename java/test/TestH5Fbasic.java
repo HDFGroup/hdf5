@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -35,7 +34,7 @@ public class TestH5Fbasic {
     @Rule public TestName testname = new TestName();
     private static final String H5_FILE = "testFb.h5";
     private static final String TXT_FILE = "testFb.txt";
-    long H5fid = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
 
     private final void _deleteFile(String filename) {
         File file = new File(filename);
@@ -90,7 +89,7 @@ public class TestH5Fbasic {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Fopen_read_only() throws Throwable {
-        long fid = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
@@ -125,8 +124,8 @@ public class TestH5Fbasic {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Freopen_closed() throws Throwable {
-        long fid = -1;
-        long fid2 = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
+        long fid2 = HDF5Constants.H5I_INVALID_HID;
 
         try {
             fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
@@ -148,8 +147,8 @@ public class TestH5Fbasic {
 
     @Test
     public void testH5Freopen() {
-        long fid = -1;
-        long fid2 = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
+        long fid2 = HDF5Constants.H5I_INVALID_HID;
 
         try {
             fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
@@ -182,7 +181,7 @@ public class TestH5Fbasic {
 
     @Test
     public void testH5Fclose() {
-        long fid = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
@@ -202,7 +201,7 @@ public class TestH5Fbasic {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Fclose_twice() throws Throwable {
-        long fid = -1;
+        long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,

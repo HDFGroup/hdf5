@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5HP module
  */
-#ifndef _H5HPprivate_H
-#define _H5HPprivate_H
+#ifndef H5HPprivate_H
+#define H5HPprivate_H
 
 /**************************************/
 /* Public headers needed by this file */
@@ -65,4 +65,4 @@ H5_DLL herr_t  H5HP_incr(H5HP_t *heap, unsigned amt, void *obj);
 H5_DLL herr_t  H5HP_decr(H5HP_t *heap, unsigned amt, void *obj);
 H5_DLL herr_t  H5HP_close(H5HP_t *heap);
 
-#endif /* _H5HPprivate_H */
+#endif /* H5HPprivate_H */

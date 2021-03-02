@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1290,7 +1290,7 @@ H5DreadVL_asstr(JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid
     for (i = 0; i < (size_t)n; i++) {
         h5str.s[0] = '\0';
 
-        if (!h5str_sprintf(ENVONLY, &h5str, did, tid, &(((char *)readBuf)[i * typeSize]), typeSize, 0))
+        if (!h5str_sprintf(ENVONLY, &h5str, did, tid, &(((char *)readBuf)[i * typeSize]), 0))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
         if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, h5str.s)))
@@ -1669,8 +1669,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref(JNIEnv *env, jclass clss, jlong dataset_id
     for (i = 0; i < n; i++) {
         h5str.s[0] = '\0';
 
-        if (!h5str_sprintf(ENVONLY, &h5str, (hid_t)dataset_id, (hid_t)mem_type_id, (void *)&ref_data[i], 0,
-                           0))
+        if (!h5str_sprintf(ENVONLY, &h5str, (hid_t)dataset_id, (hid_t)mem_type_id, (void *)&ref_data[i], 0))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
         if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, h5str.s)))

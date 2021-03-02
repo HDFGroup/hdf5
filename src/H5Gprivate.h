@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5Gprivate_H
-#define _H5Gprivate_H
+#ifndef H5Gprivate_H
+#define H5Gprivate_H
 
 /* Include package's public header */
 #include "H5Gpublic.h"
@@ -167,16 +167,16 @@ typedef herr_t (*H5G_traverse_t)(H5G_loc_t *grp_loc /*in*/, const char *name,
 typedef enum H5G_link_iterate_op_type_t {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     H5G_LINK_OP_OLD, /* "Old" application callback */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-    H5G_LINK_OP_NEW /* "New" application callback */
+#endif               /* H5_NO_DEPRECATED_SYMBOLS */
+    H5G_LINK_OP_NEW  /* "New" application callback */
 } H5G_link_iterate_op_type_t;
 
 typedef struct {
     H5G_link_iterate_op_type_t op_type;
     union {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-        H5G_iterate_t op_old; /* "Old" application callback for each link */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+        H5G_iterate_t op_old;  /* "Old" application callback for each link */
+#endif                         /* H5_NO_DEPRECATED_SYMBOLS */
         H5L_iterate2_t op_new; /* "New" application callback for each link */
     } op_func;
 } H5G_link_iterate_t;
@@ -291,4 +291,4 @@ H5_DLL herr_t H5G_root_loc(H5F_t *f, H5G_loc_t *loc);
 H5_DLL herr_t H5G_root_free(H5G_t *grp);
 H5_DLL H5G_t *H5G_rootof(H5F_t *f);
 
-#endif /* _H5Gprivate_H */
+#endif /* H5Gprivate_H */

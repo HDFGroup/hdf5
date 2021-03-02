@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -2429,7 +2429,7 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_
 #ifdef H5_HAVE_PARALLEL
         } /* end else */
 #endif    /* H5_HAVE_PARALLEL */
-    } /* end else */
+    }     /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3151,9 +3151,9 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 herr_t
 H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata)
 {
-    H5D_rdcc_ent_t *     ent = NULL; /* Cache entry */
-    H5O_storage_chunk_t *sc  = &(dset->shared->layout.storage.u.chunk);
-    unsigned             idx;                 /* Index of chunk in cache, if present */
+    H5D_rdcc_ent_t *     ent       = NULL; /* Cache entry */
+    H5O_storage_chunk_t *sc        = &(dset->shared->layout.storage.u.chunk);
+    unsigned             idx       = 0;       /* Index of chunk in cache, if present */
     hbool_t              found     = FALSE;   /* In cache? */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -4267,18 +4267,18 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
                                               coordinates) */
     hsize_t max_unalloc[H5O_LAYOUT_NDIMS]; /* Last chunk in each dimension that is unallocated (in scaled
                                               coordinates) */
-    hsize_t             scaled[H5O_LAYOUT_NDIMS]; /* Offset of current chunk (in scaled coordinates) */
-    size_t              orig_chunk_size;          /* Original size of chunk in bytes */
-    size_t              chunk_size;               /* Actual size of chunk in bytes, possibly filtered */
-    unsigned            filter_mask = 0;          /* Filter mask for chunks that have them */
-    const H5O_layout_t *layout      = &(dset->shared->layout);           /* Dataset layout */
-    const H5O_pline_t * pline       = &(dset->shared->dcpl_cache.pline); /* I/O pipeline info */
-    const H5O_pline_t   def_pline   = H5O_CRT_PIPELINE_DEF;              /* Default pipeline */
-    const H5O_fill_t *  fill        = &(dset->shared->dcpl_cache.fill);  /* Fill value info */
-    H5D_fill_value_t    fill_status;                                     /* The fill value status */
-    hbool_t             should_fill     = FALSE; /* Whether fill values should be written */
-    void *              unfilt_fill_buf = NULL;  /* Unfiltered fill value buffer */
-    void **             fill_buf        = NULL;  /* Pointer to the fill buffer to use for a chunk */
+    hsize_t            scaled[H5O_LAYOUT_NDIMS]; /* Offset of current chunk (in scaled coordinates) */
+    size_t             orig_chunk_size;          /* Original size of chunk in bytes */
+    size_t             chunk_size;               /* Actual size of chunk in bytes, possibly filtered */
+    unsigned           filter_mask = 0;          /* Filter mask for chunks that have them */
+    H5O_layout_t *     layout      = &(dset->shared->layout);           /* Dataset layout */
+    const H5O_pline_t *pline       = &(dset->shared->dcpl_cache.pline); /* I/O pipeline info */
+    const H5O_pline_t  def_pline   = H5O_CRT_PIPELINE_DEF;              /* Default pipeline */
+    const H5O_fill_t * fill        = &(dset->shared->dcpl_cache.fill);  /* Fill value info */
+    H5D_fill_value_t   fill_status;                                     /* The fill value status */
+    hbool_t            should_fill     = FALSE; /* Whether fill values should be written */
+    void *             unfilt_fill_buf = NULL;  /* Unfiltered fill value buffer */
+    void **            fill_buf        = NULL;  /* Pointer to the fill buffer to use for a chunk */
 #ifdef H5_HAVE_PARALLEL
     hbool_t blocks_written = FALSE; /* Flag to indicate that chunk was actually written */
     hbool_t using_mpi =
@@ -4427,7 +4427,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
             /* Check for the chunk expanding too much to encode in a 32-bit value */
             if (orig_chunk_size > ((size_t)0xffffffff))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
-#endif /* H5_SIZEOF_SIZE_T > 4 */
+#endif    /* H5_SIZEOF_SIZE_T > 4 */
         } /* end if */
     }     /* end if */
 
@@ -4629,7 +4629,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
 #ifdef H5_HAVE_PARALLEL
                 } /* end else */
 #endif            /* H5_HAVE_PARALLEL */
-            } /* end if */
+            }     /* end if */
 
             /* Insert the chunk record into the index */
             if (need_insert && ops->insert)

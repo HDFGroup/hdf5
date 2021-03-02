@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -164,7 +164,7 @@ H5_now(void)
         HDgettimeofday(&now_tv, NULL);
         now = now_tv.tv_sec;
     }
-#else /* H5_HAVE_GETTIMEOFDAY */
+#else  /* H5_HAVE_GETTIMEOFDAY */
     now = HDtime(NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
@@ -202,8 +202,8 @@ H5_now_usec(void)
         HDgettimeofday(&now_tv, NULL);
         now = (uint64_t)(now_tv.tv_sec * (1000 * 1000)) + (uint64_t)now_tv.tv_usec;
     }
-#else /* H5_HAVE_GETTIMEOFDAY */
-    now = (uint64_t)(HDtime(NULL) * (1000 * 1000));
+#else  /* H5_HAVE_GETTIMEOFDAY */
+    now       = (uint64_t)(HDtime(NULL) * (1000 * 1000));
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     return (now);
@@ -583,10 +583,10 @@ H5_timer_get_time_string(double seconds)
     char *s; /* output string */
 
     /* Used when the time is greater than 59 seconds */
-    double days;
-    double hours;
-    double minutes;
-    double remainder_sec;
+    double days          = 0.0;
+    double hours         = 0.0;
+    double minutes       = 0.0;
+    double remainder_sec = 0.0;
 
     /* Extract larger time units from count of seconds */
     if (seconds > (double)60.0F) {

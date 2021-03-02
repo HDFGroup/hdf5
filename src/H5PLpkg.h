@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,8 +21,8 @@
 #error "Do not include this file outside the H5PL package!"
 #endif
 
-#ifndef _H5PLpkg_H
-#define _H5PLpkg_H
+#ifndef H5PLpkg_H
+#define H5PLpkg_H
 
 /* Include private header file */
 #include "H5PLprivate.h" /* Filter functions                */
@@ -158,4 +158,4 @@ H5_DLL herr_t H5PL__path_table_iterate(H5PL_iterate_type_t iter_type, H5PL_itera
 H5_DLL herr_t H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params,
                                               hbool_t *found /*out*/, const void **plugin_info /*out*/);
 
-#endif /* _H5PLpkg_H */
+#endif /* H5PLpkg_H */

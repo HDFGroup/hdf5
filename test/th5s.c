@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -102,8 +102,8 @@ struct space4_struct {
 #define CONFIG_8  1
 #define CONFIG_16 2
 #define CONFIG_32 3
-#define POWER8    256 /* 2^8 */
-#define POWER16   65536 /* 2^16 */
+#define POWER8    256        /* 2^8 */
+#define POWER16   65536      /* 2^16 */
 #define POWER32   4294967296 /* 2^32 */
 
 /****************************************************************

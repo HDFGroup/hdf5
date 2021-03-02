@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -521,7 +521,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
-#else /* NDEBUG */
+#else  /* NDEBUG */
             HDassert(0 && "Invalid action?!?");
 #endif /* NDEBUG */
             break;
@@ -529,7 +529,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
-#else /* NDEBUG */
+#else  /* NDEBUG */
             HDassert(0 && "Invalid action?!?");
 #endif /* NDEBUG */
             break;
@@ -605,10 +605,10 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
         default:
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "unknown notify action from metadata cache")
-#else /* NDEBUG */
+#else  /* NDEBUG */
             HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+    }  /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

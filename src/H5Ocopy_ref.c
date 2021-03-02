@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -63,7 +63,7 @@ static herr_t H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_
 static herr_t H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t *dst_oloc,
                                            H5G_loc_t *dst_root_loc, void *buf_dst, size_t ref_count,
                                            H5O_copy_t *cpy_info);
-static herr_t H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, H5T_t *dt_src,
+static herr_t H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt_src,
                                            const void *buf_src, size_t nbytes_src, H5O_loc_t *dst_oloc,
                                            H5G_loc_t *dst_root_loc, void *buf_dst, size_t ref_count,
                                            H5O_copy_t *cpy_info);
@@ -284,7 +284,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, H5T_t *dt_src, const void *buf_src,
+H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt_src, const void *buf_src,
                              size_t nbytes_src, H5O_loc_t *dst_oloc, H5G_loc_t *dst_root_loc, void *buf_dst,
                              size_t ref_count, H5O_copy_t *cpy_info)
 {
@@ -423,7 +423,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, H5T_t *dt_src, void *buf_src, size_t nbytes_src,
+H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, const H5T_t *dt_src, void *buf_src, size_t nbytes_src,
                     H5F_t *file_dst, void *buf_dst, H5O_copy_t *cpy_info)
 {
     H5O_loc_t dst_oloc;     /* Copied object object location */

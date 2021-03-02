@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -3883,7 +3883,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     hssize_t          i;
     FILE *            out                 = H5_debug_g.trace;
     static hbool_t    is_first_invocation = TRUE;
-    H5_timer_t        function_timer;
+    H5_timer_t        function_timer      = {{0}, {0}, {0}, FALSE};
     H5_timevals_t     function_times;
     static H5_timer_t running_timer;
     H5_timevals_t     running_times;

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -155,6 +155,9 @@ PropList::PropList(const hid_t plist_id) : IdComponent()
         case H5I_ERROR_STACK:
         case H5I_NTYPES:
         case H5I_UNINIT:
+        case H5I_MAP:
+        case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         default:
             id = H5P_DEFAULT;
             break;

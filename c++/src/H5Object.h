@@ -7,13 +7,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Object_H
-#define __H5Object_H
+#ifndef H5Object_H
+#define H5Object_H
 
 namespace H5 {
 
@@ -132,4 +132,4 @@ class H5_DLLCPP H5Object : public H5Location {
 }; // end of H5Object
 } // namespace H5
 
-#endif // __H5Object_H
+#endif // H5Object_H

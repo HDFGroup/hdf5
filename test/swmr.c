@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -2351,7 +2351,7 @@ test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t H5_ATTR_UNUSE
     return 0;
 } /* test_start_swmr_write_concur() */
 
-#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+#else  /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
 static int
 test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
@@ -6508,7 +6508,7 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t H5_ATTR_UNUSED new_for
     return 0;
 } /* test_refresh_concur() */
 
-#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+#else  /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
 static int
 test_refresh_concur(hid_t in_fapl, hbool_t new_format)

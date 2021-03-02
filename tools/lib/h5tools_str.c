@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -705,8 +705,17 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     long double templdouble;
 
                     HDmemcpy(&templdouble, vp, sizeof(long double));
-                    h5tools_str_append(str, OPT(info->fmt_double, "%Lf"), templdouble);
+                    h5tools_str_append(str, "%Lg", templdouble);
 #endif
+                }
+                else {
+                    size_t i;
+
+                    for (i = 0; i < nsize; i++) {
+                        if (i)
+                            h5tools_str_append(str, ":");
+                        h5tools_str_append(str, OPT(info->fmt_raw, "%02x"), ucp_vp[i]);
+                    }
                 }
                 break;
 
@@ -932,7 +941,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
                     }
                 } /* end if (sizeof(long long) == nsize) */
-#endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
+#endif            /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
                 break;
 
             case H5T_COMPOUND:
@@ -1268,7 +1277,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         for (x = 0; x < ctx->indent_level + 1; x++)
                             h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
                     } /* end if */
-#endif /* LATER */
+#endif                /* LATER */
 
                     ctx->indent_level++;
 

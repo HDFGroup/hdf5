@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -96,7 +96,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
 #ifdef FILLVAL_WORKS
     symbol_t fillval; /* Dataset fill value */
 #endif                /* FILLVAL_WORKS */
-    unsigned u, v; /* Local index variable */
+    unsigned u, v;    /* Local index variable */
 
     HDassert(filename);
     HDassert(index_type);

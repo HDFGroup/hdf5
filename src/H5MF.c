@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1202,7 +1202,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 #ifdef H5MF_ALLOC_DEBUG_MORE
         HDfprintf(stderr, "%s: After H5FS_sect_add()\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-    } /* end if */
+    }  /* end if */
     else {
         htri_t         merged; /* Whether node was merged */
         H5MF_sect_ud_t udata;  /* User data for callback */
@@ -1369,7 +1369,7 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
             HDfprintf(stderr, "%s: H5MF__aggr_try_extend = %t\n", FUNC, ret_value);
-#endif /* H5MF_ALLOC_DEBUG_MORE */
+#endif    /* H5MF_ALLOC_DEBUG_MORE */
         } /* end if */
 
         /* If no extension so far, try to extend into a free-space section */
@@ -1395,7 +1395,7 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
                                 "error extending block in free space manager")
 #ifdef H5MF_ALLOC_DEBUG_MORE
                 HDfprintf(stderr, "%s: Try to H5FS_sect_try_extend = %t\n", FUNC, ret_value);
-#endif /* H5MF_ALLOC_DEBUG_MORE */
+#endif        /* H5MF_ALLOC_DEBUG_MORE */
             } /* end if */
 
             /* For paged aggregation and a metadata block: try to extend into page end threshold */
@@ -1406,7 +1406,7 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
                     ret_value = TRUE;
 #ifdef H5MF_ALLOC_DEBUG_MORE
                 HDfprintf(stderr, "%s: Try to extend into the page end threshold = %t\n", FUNC, ret_value);
-#endif /* H5MF_ALLOC_DEBUG_MORE */
+#endif        /* H5MF_ALLOC_DEBUG_MORE */
             } /* end if */
         }     /* end if */
     }         /* allow_extend */
@@ -2944,7 +2944,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                                 HDassert(fs_stat.serial_sect_count > 0);
                                 HDassert(fs_stat.alloc_sect_size > 0);
                                 HDassert(fs_stat.alloc_sect_size == fs_stat.sect_size);
-#endif /* NDEBUG */
+#endif                        /* NDEBUG */
                             } /* end if */
                             else {
                                 HDassert(!H5F_addr_defined(fs_stat.addr));
@@ -3081,16 +3081,16 @@ done:
 herr_t
 H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 {
-    H5F_mem_page_t sm_fshdr_fs_type;                /* small fs hdr fsm */
-    H5F_mem_page_t sm_fssinfo_fs_type;              /* small fs sinfo fsm */
-    H5F_mem_page_t lg_fshdr_fs_type;                /* large fs hdr fsm */
-    H5F_mem_page_t lg_fssinfo_fs_type;              /* large fs sinfo fsm */
-    H5FS_t *       sm_hdr_fspace   = NULL;          /* ptr to sm FSM hdr alloc FSM */
-    H5FS_t *       sm_sinfo_fspace = NULL;          /* ptr to sm FSM sinfo alloc FSM */
-    H5FS_t *       lg_hdr_fspace   = NULL;          /* ptr to lg FSM hdr alloc FSM */
-    H5FS_t *       lg_sinfo_fspace = NULL;          /* ptr to lg FSM sinfo alloc FSM */
-    haddr_t        eoa_fsm_fsalloc;                 /* eoa after file space allocation */
-                                                    /* for self referential FSMs */
+    H5F_mem_page_t sm_fshdr_fs_type;                          /* small fs hdr fsm */
+    H5F_mem_page_t sm_fssinfo_fs_type;                        /* small fs sinfo fsm */
+    H5F_mem_page_t lg_fshdr_fs_type   = H5F_MEM_PAGE_DEFAULT; /* large fs hdr fsm */
+    H5F_mem_page_t lg_fssinfo_fs_type = H5F_MEM_PAGE_DEFAULT; /* large fs sinfo fsm */
+    H5FS_t *       sm_hdr_fspace      = NULL;                 /* ptr to sm FSM hdr alloc FSM */
+    H5FS_t *       sm_sinfo_fspace    = NULL;                 /* ptr to sm FSM sinfo alloc FSM */
+    H5FS_t *       lg_hdr_fspace      = NULL;                 /* ptr to lg FSM hdr alloc FSM */
+    H5FS_t *       lg_sinfo_fspace    = NULL;                 /* ptr to lg FSM sinfo alloc FSM */
+    haddr_t        eoa_fsm_fsalloc;                           /* eoa after file space allocation */
+                                                              /* for self referential FSMs */
     hbool_t     continue_alloc_fsm = FALSE;         /* Continue allocating addr and sect_addr for FSMs */
     H5AC_ring_t orig_ring          = H5AC_RING_INV; /* Original ring value */
     herr_t      ret_value          = SUCCEED;       /* Return value */

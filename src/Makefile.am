@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -41,7 +41,7 @@ DISTCLEANFILES=H5pubconf.h
 
 # library sources
 libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
-		H5timer.c H5trace.c \
+        H5timer.c H5trace.c \
         H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c H5Atest.c \
         H5AC.c H5ACdbg.c H5ACproxy_entry.c \
         H5B.c H5Bcache.c H5Bdbg.c \

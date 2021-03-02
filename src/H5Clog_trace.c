@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -168,7 +168,7 @@ H5C__trace_write_log_message(H5C_log_trace_udata_t *trace_udata)
 
     /* Write the log message and flush */
     n_chars = HDstrlen(trace_udata->message);
-    if ((int)n_chars != HDfprintf(trace_udata->outfile, trace_udata->message))
+    if ((int)n_chars != HDfprintf(trace_udata->outfile, "%s", trace_udata->message))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
     HDmemset((void *)(trace_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 

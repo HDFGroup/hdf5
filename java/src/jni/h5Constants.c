@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1403,7 +1403,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1DIRECT(JNIEnv *env, jclass cls)
 #ifdef H5_HAVE_DIRECT
     return H5FD_DIRECT;
 #else
-    return -1;
+    return H5I_INVALID_HID;
 #endif
 }
 JNIEXPORT jlong JNICALL
@@ -1417,7 +1417,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1HDFS(JNIEnv *env, jclass cls)
 #ifdef H5_HAVE_LIBHDFS
     return H5FD_HDFS;
 #else
-    return -1;
+    return H5I_INVALID_HID;
 #endif
 }
 JNIEXPORT jlong JNICALL
@@ -1446,7 +1446,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1ROS3(JNIEnv *env, jclass cls)
 #ifdef H5_HAVE_ROS3_VFD
     return H5FD_ROS3;
 #else
-    return -1;
+    return H5I_INVALID_HID;
 #endif
 }
 JNIEXPORT jlong JNICALL
@@ -1460,7 +1460,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1WINDOWS(JNIEnv *env, jclass cls)
 #ifdef H5_HAVE_WINDOWS
     return H5FD_DIRECT;
 #else
-    return -1;
+    return H5I_INVALID_HID;
 #endif
 }
 JNIEXPORT jint JNICALL

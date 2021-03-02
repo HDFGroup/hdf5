@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,16 +14,16 @@
 /*
  * This file contains public declarations for the HDF5 module.
  */
-#ifndef _H5public_H
-#define _H5public_H
+#ifndef H5public_H
+#define H5public_H
 
 /* Include files for public use... */
 /*
  * Since H5pubconf.h is a generated header file, it is messy to try
- * to put a #ifndef _H5pubconf_H ... #endif guard in it.
+ * to put a #ifndef H5pubconf_H ... #endif guard in it.
  * HDF5 has set an internal rule that it is being included here.
  * Source files should NOT include H5pubconf.h directly but include
- * it via H5public.h.  The #ifndef _H5public_H guard above would
+ * it via H5public.h.  The #ifndef H5public_H guard above would
  * prevent repeated include.
  */
 #include "H5pubconf.h" /* From configure */
@@ -95,9 +95,9 @@ extern "C" {
 #define H5_NO_EXPAND(x) (x)
 
 /* Version numbers */
-#define H5_VERS_MAJOR      1 /* For major interface/format changes       */
+#define H5_VERS_MAJOR      1  /* For major interface/format changes       */
 #define H5_VERS_MINOR      13 /* For minor interface/format changes       */
-#define H5_VERS_RELEASE    0 /* For tweaks, bug-fixes, or development    */
+#define H5_VERS_RELEASE    0  /* For tweaks, bug-fixes, or development    */
 #define H5_VERS_SUBRELEASE "" /* For pre-releases like snap0          */
 /* Empty string for real releases.           */
 #define H5_VERS_INFO "HDF5 library version: 1.13.0" /* Full version string */
@@ -179,15 +179,15 @@ typedef long long ssize_t;
  */
 #if H5_SIZEOF_INT64_T >= 8
 #elif H5_SIZEOF_INT >= 8
-typedef int int64_t;
+typedef int           int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 8
-typedef long int64_t;
+typedef long               int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
 #elif H5_SIZEOF_LONG_LONG >= 8
-typedef long long int64_t;
+typedef long long          int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_LONG_LONG
 #else
@@ -202,12 +202,12 @@ typedef long long int64_t;
 #define UINT64_MAX ((uint64_t)-1)
 #endif
 #elif H5_SIZEOF_INT >= 8
-typedef unsigned uint64_t;
+typedef unsigned      uint64_t;
 #define UINT64_MAX UINT_MAX
 #undef H5_SIZEOF_UINT64_T
 #define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 8
-typedef unsigned long uint64_t;
+typedef unsigned long      uint64_t;
 #define UINT64_MAX ULONG_MAX
 #undef H5_SIZEOF_UINT64_T
 #define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
@@ -292,15 +292,15 @@ typedef unsigned long long haddr_t;
  */
 #if H5_SIZEOF_UINT32_T >= 4
 #elif H5_SIZEOF_SHORT >= 4
-typedef short uint32_t;
+typedef short         uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_SHORT
 #elif H5_SIZEOF_INT >= 4
-typedef unsigned int uint32_t;
+typedef unsigned int       uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 4
-typedef unsigned long uint32_t;
+typedef unsigned long      uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_LONG
 #else
@@ -849,4 +849,4 @@ H5_DLL void *H5resize_memory(void *mem, size_t size);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5public_H */
+#endif /* H5public_H */

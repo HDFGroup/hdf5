@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -262,10 +262,23 @@ done:
  *  exception.
  */
 jboolean
-h5outOfMemory(JNIEnv *env, const char *functName)
+h5outOfMemory(JNIEnv *env, const char *message)
 {
-    return H5JNIErrorClass(env, functName, "java/lang/OutOfMemoryError");
+    return H5JNIErrorClass(env, message, "java/lang/OutOfMemoryError");
 } /* end h5outOfMemory() */
+
+/*
+ *  Create and throw an 'AssertionError'
+ *
+ *  Note:  This routine never returns from the 'throw',
+ *  and the Java native method immediately raises the
+ *  exception.
+ */
+jboolean
+h5assertion(JNIEnv *env, const char *message)
+{
+    return H5JNIErrorClass(env, message, "java/lang/AssertionError");
+} /* end h5assertion() */
 
 /*
  *  A fatal error in a JNI call
@@ -276,9 +289,9 @@ h5outOfMemory(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5JNIFatalError(JNIEnv *env, const char *functName)
+h5JNIFatalError(JNIEnv *env, const char *message)
 {
-    return H5JNIErrorClass(env, functName, "java/lang/InternalError");
+    return H5JNIErrorClass(env, message, "java/lang/InternalError");
 } /* end h5JNIFatalError() */
 
 /*
@@ -290,9 +303,9 @@ h5JNIFatalError(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5nullArgument(JNIEnv *env, const char *functName)
+h5nullArgument(JNIEnv *env, const char *message)
 {
-    return H5JNIErrorClass(env, functName, "java/lang/NullPointerException");
+    return H5JNIErrorClass(env, message, "java/lang/NullPointerException");
 } /* end h5nullArgument() */
 
 /*
@@ -304,9 +317,9 @@ h5nullArgument(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5badArgument(JNIEnv *env, const char *functName)
+h5badArgument(JNIEnv *env, const char *message)
 {
-    return H5JNIErrorClass(env, functName, "java/lang/IllegalArgumentException");
+    return H5JNIErrorClass(env, message, "java/lang/IllegalArgumentException");
 } /* end h5badArgument() */
 
 /*
@@ -318,9 +331,9 @@ h5badArgument(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5unimplemented(JNIEnv *env, const char *functName)
+h5unimplemented(JNIEnv *env, const char *message)
 {
-    return H5JNIErrorClass(env, functName, "java/lang/UnsupportedOperationException");
+    return H5JNIErrorClass(env, message, "java/lang/UnsupportedOperationException");
 } /* end h5unimplemented() */
 
 /*  h5raiseException().  This routine is called to generate

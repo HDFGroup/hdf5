@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -6486,7 +6486,7 @@ test_int_float_except(void)
     hid_t  dxpl;     /* Dataset transfer property list */
     except_info_t e; /* Exception information */
     unsigned      u; /* Local index variables */
-#endif /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
+#endif               /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
 
     TESTING("exceptions for int <-> float conversions");
 
@@ -6602,7 +6602,7 @@ test_int_float_except(void)
         TEST_ERROR
 
     PASSED();
-#else /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
+#else  /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
     SKIPPED();
     HDputs("    Test skipped due to int or float not 4 bytes.");
 #endif /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */

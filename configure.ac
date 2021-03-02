@@ -7,14 +7,13 @@
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
 ## terms governing use, modification, and redistribution, is contained in
 ## the COPYING file, which can be found at the root of the source code
-## distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+## distribution tree, or in https://www.hdfgroup.org/licenses.
 ## If you do not have access to either file, you may request a copy from
 ## help@hdfgroup.org.
 
 ## ----------------------------------------------------------------------
 ## Initialize configure.
 ##
-AC_REVISION($Id: configure.ac 22697 2012-08-19 14:35:47Z hdftest $)
 AC_PREREQ([2.69])
 
 ## AC_INIT takes the name of the package, the version number, and an
@@ -2156,6 +2155,51 @@ AC_ARG_ENABLE([debug],
 AC_ARG_ENABLE([production],
               [AS_HELP_STRING([--enable-production], [OPTION CHANGE: use --enable-build-mode=production])],
               [AC_MSG_ERROR([--enable-production is no longer supported, use --enable-build-mode=production instead.])])
+
+
+## ----------------------------------------------------------------------
+## Check if the compiler should include build diagnostics
+##
+AC_MSG_CHECKING([enable build diagnostics])
+AC_ARG_ENABLE([diags],
+              [AS_HELP_STRING([--enable-diags=(yes|no|<custom>)],
+                              [Allow default enhanced diagnostics to the build.
+                               This is independent of the build mode and optimization
+                               level.
+                               [default=no]
+                               ])],
+              [DIAGS=$enableval])
+
+## Set default
+if test "X-$DIAGS" = X- ; then
+  DIAGS=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([DIAGS])
+
+case "X-$DIAGS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $DIAGS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DIAGS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DIAGS_FCFLAGS"
+    AC_MSG_RESULT([yes])
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_DIAGS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_DIAGS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_DIAGS_FCFLAGS"
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $DIAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DIAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DIAGS"
+    DIAGS="custom ($DIAGS)"
+    AC_MSG_RESULT([$DIAGS])
+    ;;
+esac
 
 
 ## ----------------------------------------------------------------------

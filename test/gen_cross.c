@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -925,7 +925,7 @@ create_deflate_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR
 
-#else /* H5_HAVE_FILTER_DEFLATE */
+#else  /* H5_HAVE_FILTER_DEFLATE */
     const char *not_supported = "Deflate filter is not enabled. Can't create the dataset.";
 
     HDputs(not_supported);
@@ -1328,7 +1328,7 @@ main(void)
     /* Create a dataset of FLOAT with szip filter */
     if (create_szip_dsets_float(file, filespace, memspace) < 0)
         TEST_ERROR;
-#else /* H5_HAVE_FILTER_SZIP */
+#else  /* H5_HAVE_FILTER_SZIP */
     HDputs("Szip filter is not enabled. Can't create the dataset.");
 #endif /* H5_HAVE_FILTER_SZIP */
 

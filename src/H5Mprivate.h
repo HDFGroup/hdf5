@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5M module
  */
-#ifndef _H5Mprivate_H
-#define _H5Mprivate_H
+#ifndef H5Mprivate_H
+#define H5Mprivate_H
 
 /* Include package's public header */
 #include "H5Mpublic.h"
@@ -75,4 +75,4 @@ H5_DLL herr_t H5M_init(void);
 /* Library Private Prototypes */
 /******************************/
 
-#endif /* _H5Mprivate_H */
+#endif /* H5Mprivate_H */
