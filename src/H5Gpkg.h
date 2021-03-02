@@ -30,12 +30,12 @@
 #include "H5Gprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5B2private.h" /* v2 B-trees				*/
+#include "H5B2private.h" /* v2 B-trees                */
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5HFprivate.h" /* Fractal heaps			*/
-#include "H5HLprivate.h" /* Local Heaps				*/
-#include "H5Oprivate.h"  /* Object headers		  	*/
-#include "H5SLprivate.h" /* Skip lists				*/
+#include "H5HFprivate.h" /* Fractal heaps            */
+#include "H5HLprivate.h" /* Local Heaps                */
+#include "H5Oprivate.h"  /* Object headers              */
+#include "H5SLprivate.h" /* Skip lists                */
 
 /**************************/
 /* Package Private Macros */
@@ -66,10 +66,10 @@
  * symbol table entry.
  */
 typedef enum H5G_cache_type_t {
-    H5G_CACHED_ERROR   = -1, /*force enum to be signed		     */
+    H5G_CACHED_ERROR   = -1, /*force enum to be signed             */
     H5G_NOTHING_CACHED = 0,  /*nothing is cached, must be 0               */
     H5G_CACHED_STAB    = 1,  /*symbol table, `stab'                       */
-    H5G_CACHED_SLINK   = 2,  /*symbolic link				     */
+    H5G_CACHED_SLINK   = 2,  /*symbolic link                     */
 
     H5G_NCACHED /*THIS MUST BE LAST                          */
 } H5G_cache_type_t;
@@ -88,7 +88,7 @@ typedef union H5G_cache_t {
     } stab;
 
     struct {
-        size_t lval_offset; /*link value offset		     */
+        size_t lval_offset; /*link value offset             */
     } slink;
 } H5G_cache_t;
 
@@ -157,7 +157,7 @@ typedef struct {
 typedef struct H5G_bt_common_t {
     /* downward */
     const char *name; /*points to temporary memory         */
-    H5HL_t *    heap; /*symbol table heap		     */
+    H5HL_t *    heap; /*symbol table heap             */
 } H5G_bt_common_t;
 
 /*
@@ -204,10 +204,10 @@ typedef struct H5G_bt_lkp_t {
  */
 typedef struct H5G_bt_it_it_t {
     /* downward */
-    H5HL_t *          heap;    /*symbol table heap 			     */
-    hsize_t           skip;    /*initial entries to skip		     */
-    H5G_lib_iterate_t op;      /*iteration operator			     */
-    void *            op_data; /*user-defined operator data		     */
+    H5HL_t *          heap;    /*symbol table heap                  */
+    hsize_t           skip;    /*initial entries to skip             */
+    H5G_lib_iterate_t op;      /*iteration operator                 */
+    void *            op_data; /*user-defined operator data             */
 
     /* upward */
     hsize_t *final_ent; /*final entry looked at                      */
