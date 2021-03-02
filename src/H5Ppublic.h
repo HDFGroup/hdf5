@@ -3766,7 +3766,7 @@ H5_DLL herr_t H5Pset_elink_file_cache_size(hid_t plist_id, unsigned efc_size);
  *          object will inherit the "evict on close" property and will have
  *          its metadata evicted when the object is closed.
  *
- * \version 1.10.1 C function introduced with this release.
+ * \since 1.10.1
  *
  */
 H5_DLL herr_t H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close);
@@ -3786,7 +3786,7 @@ H5_DLL herr_t H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close);
  *          retrieve a file handle for low-level access to a particular member
  *          of a family of files. The file handle is retrieved with a separate
  *          call to H5Fget_vfd_handle() (or, in special circumstances, to
- *          \p H5FDget_vfd_handle; see -- <em> Virtual File Layer </em>
+ *          H5FDget_vfd_handle(); see -- <em> Virtual File Layer </em>
  *          and -- <em> List of VFL Functions </em> in
  *          [HDF5 Technical Notes]
  *          (https://portal.hdfgroup.org/display/HDF5/Tech+Notes)).
@@ -3799,9 +3799,9 @@ H5_DLL herr_t H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close);
  *          is mapped.
  *
  *          Use of this function is only appropriate for an HDF5 file written as
- *          a family of files with the \p FAMILY file driver.
+ *          a family of files with the \c FAMILY file driver.
  *
- * \version 1.6.0 Function introduced in this release.
+ * \since 1.6.0
  *
  */
 H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
@@ -3884,12 +3884,14 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *          Calling H5Pset_file_image()makes a copy of the buffer specified in
  *          \p buf_ptr of size \p buf_len.
  *
- *          \a Motivation: H5Pset_file_image() and other elements of HDF5 are
+ *          \par Motivation:
+ *          H5Pset_file_image() and other elements of HDF5 are
  *          used to load an image of an HDF5 file into system memory and open
  *          that image as a regular HDF5 file. An application can then use the
  *          file without the overhead of disk I/O.
  *
- *          \a Recommended  \a Reading: This function is part of the file image
+ *          \par Recommended Reading:
+ *          This function is part of the file image
  *          operations feature set. It is highly recommended to study the guide
  *          [<em>HDF5 File Image Operations</em>]
  *          (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations
@@ -3909,11 +3911,11 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *        (https://portal.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5)
  *
  *    \li Within H5Pset_file_image_callbacks():
- *    \li Callback \p struct  \p H5_file_image_callbacks_t
- *    \li Callback \p enum   \p H5_file_image_op_t
+ *    \li Callback #H5FD_file_image_callbacks_t
+ *    \li Callback #H5FD_file_image_op_t
  *
  * \version 1.8.13 Fortran subroutine added in this release.
- * \version 1.8.9  C function introduced in this release.
+ * \since 1.8.9
  *
  */
 H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
@@ -3922,7 +3924,7 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *
  * \brief Sets the callbacks for working with file images
  *
- * \attention **Motivation:** H5Pset_file_image_callbacks() and other elements
+ * \note      **Motivation:** H5Pset_file_image_callbacks() and other elements
  *            of HDF5 are used to load an image of an HDF5 file into system
  *            memory and open that image as a regular HDF5 file. An application
  *            can then use the file without the overhead of disk I/O.\n
@@ -3934,14 +3936,14 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *            for links to other elements of HDF5 file image operations.
  *
  * \fapl_id
- * \param[in/out] callbacks_ptr Pointer to the instance of the
- *                \p H5_file_image_callbacks_t struct
+ * \param[in,out] callbacks_ptr Pointer to the instance of the
+ *                #H5FD_file_image_callbacks_t structure
  *
  * \return \herr_t \n
  *         **Failure Modes**: Due to interactions between this function and
- *         H5P_SET_FILE_IMAGE and H5P_GET_FILE_IMAGE,
- *         H5P_SET_FILE_IMAGE_CALLBACKS will fail if a file image has
- *         already been set in the target file access property list, fapl_id.
+ *         H5Pset_file_image() and H5Pget_file_image(),
+ *         H5Pset_file_image_callbacks() will fail if a file image has
+ *         already been set in the target file access property list, \p fapl_id.
  *
  * \details H5Pset_file_image_callbacks() sets callback functions for working
  *          with file images in memory.
@@ -3962,307 +3964,128 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *
  *          Some file drivers allow the use of user-defined callback functions
  *          for allocating, freeing, and copying the driver’s internal buffer,
- *          potentially allowing optimizations such as avoiding large \p malloc
- *          and \p memcpy operations, or to perform detailed logging.
+ *          potentially allowing optimizations such as avoiding large \c malloc
+ *          and \c memcpy operations, or to perform detailed logging.
  *
  *          From the perspective of the HDF5 library, the operations of the
- *          \p image_malloc, \p image_memcpy, \p image_realloc, and
- *          \p image_free callbacks must be identical to those of the
- *          corresponding C standard library calls (\p malloc, \p memcpy,
- *          \p realloc, and \p free). While the operations must be identical,
+ *          \ref H5FD_file_image_callbacks_t.image_malloc "image_malloc",
+ *          \ref H5FD_file_image_callbacks_t.image_memcpy "image_memcpy",
+ *          \ref H5FD_file_image_callbacks_t.image_realloc "image_realloc", and
+ *          \ref H5FD_file_image_callbacks_t.image_free "image_free" callbacks
+ *          must be identical to those of the
+ *          corresponding C standard library calls (\c malloc, \c memcpy,
+ *          \c realloc, and \c free). While the operations must be identical,
  *          the file image callbacks have more parameters. The return values
- *          of \p image_malloc and \p image_realloc are identical to the return
- *          values of \p malloc and \p realloc. The return values of
- *          \p image_memcpy and \p image_free differ from the return values of
- *          \p memcpy and \p free in that the return values of \p image_memcpy
- *          and \p image_free can also indicate failure.
+ *          of \ref H5FD_file_image_callbacks_t.image_malloc "image_malloc" and
+ *          \ref H5FD_file_image_callbacks_t.image_realloc "image_realloc" are identical to
+ *          the return values of \c malloc and \c realloc. The return values of
+ *          \ref H5FD_file_image_callbacks_t.image_malloc "image_malloc" and
+ *          \ref H5FD_file_image_callbacks_t.image_free "image_free" differ from the return
+ *          values of \c memcpy and \c free in that the return values of
+ *          \ref H5FD_file_image_callbacks_t.image_memcpy "image_memcpy" and
+ *          \ref H5FD_file_image_callbacks_t.image_free "image_free" can also indicate failure.
  *
  *          The callbacks and their parameters, along with a struct and
- *          an \p ENUM required for their use, are described below.
+ *          an \c ENUM required for their use, are described below.
  *
- *          <b>Callback struct and \p ENUM:</b>
+ *          <b>Callback struct and \c ENUM:</b>
  *
- *          The callback functions set up by H5Pset_file_image_callbacks() use a
- *          struct and an \p ENUM that are defined as follows
+ *          The callback functions set up by H5Pset_file_image_callbacks() use
+ *          a struct and an \c ENUM that are defined as follows
  *
- *          The struct \p **H5_file_image_callbacks_t** serves as a container
+ *          The struct #H5FD_file_image_callbacks_t serves as a container
  *          for the callback functions and a pointer to user-supplied data.
  *          The struct is defined as follows:
+ *          \snippet H5FDpublic.h H5FD_file_image_callbacks_t_snip
  *
- * \code{.c}
- *     typedef struct
- *     {
- *         void *(*image_malloc)(size_t size, H5_file_image_op_t file_image_op,
- *                               void *udata);
- *         void *(*image_memcpy)(void *dest, const void *src, size_t size,
- *                               H5_file_image_op_t file_image_op, void *udata);
- *         void *(*image_realloc)(void *ptr, size_t size,
- *                                H5_file_image_op_t file_image_op,
- *                                void *udata);
- *         herr_t (*image_free)(void *ptr, H5_file_image_op_t file_image_op,
- *                              void *udata);
- *         void *(*udata_copy)(void *udata);
- *         herr_t (*udata_free)(void *udata);
- *         void *udata;
- *     } H5_file_image_callbacks_t;
- * \endcode
- * \n
- *
- * \details Elements of the \p ENUM \p **H5_file_image_op_t** are used by the
+ *          Elements of the #H5FD_file_image_op_t are used by the
  *          callbacks to invoke certain operations on file images. The ENUM is
  *          defined as follows:
+ *          \snippet H5FDpublic.h H5FD_file_image_op_t_snip
  *
- * ~~~~~~~~~~~~~~~{.c}
- *     typedef enum
- *     {
- *         H5_FILE_IMAGE_OP_PROPERTY_LIST_SET,
- *         H5_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
- *         H5_FILE_IMAGE_OP_PROPERTY_LIST_GET,
- *         H5_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
- *         H5_FILE_IMAGE_OP_FILE_OPEN,
- *         H5_FILE_IMAGE_OP_FILE_RESIZE,
- *         H5_FILE_IMAGE_OP_FILE_CLOSE
- *     } H5_file_image_op_t;
- * ~~~~~~~~~~~~~~~
- * \n
+ *          The elements of the #H5FD_file_image_op_t are used in the following
+ *          callbacks:
  *
- * \details The elements of the \p H5_file_image_op_t \p ENUM are used in the
- *          callbacks for the following purposes:
- * <table>
- *   <tr>
- *     <td>H5_FILE_IMAGE_OP_PROPERTY_LIST_SET</td>
- *     <td>Passed to the \p image_malloc and \p image_memcpy callbacks when a
- *         file image buffer is to be copied while being set in a file
- *         access property list (FAPL)</td>
- *   </tr>
- *   <tr>
- *     <td>H5_FILE_IMAGE_OP_PROPERTY_LIST_COPY</td>
- *     <td>Passed to the \p image_malloc and \p image_memcpy callbacks
- *         when a file image buffer is to be copied
- *         when a FAPL is copied
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>H5_FILE_IMAGE_OP_PROPERTY_LIST_GET</td>
- *     <td>Passed to the \p image_malloc and \p image_memcpy callbacks
- *         when a file image buffer is to be copied while being
- *         retrieved from a FAPL
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>H5_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE</td>
- *     <td>Passed to the \p image_free callback when a file image
- *         buffer is to be released during a FAPL close operation
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>H5_FILE_IMAGE_OP_FILE_OPEN</td>
- *     <td>Passed to the \p image_malloc and \p image_memcpy callbackswhen a
- *         file image buffer is to be copied during a file open operation \n
- *         While the file image being opened will typically be copied from a
- *         FAPL, this need not always be the case. For example, the core file
- *         driver, also known as the memory file driver, takes its initial
- *         image from a file.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>H5_FILE_IMAGE_OP_FILE_RESIZE</td>
- *     <td>Passed to the \p image_realloc callback when a file driver needs to
- *         resize an image buffer
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>H5_FILE_IMAGE_OP_FILE_CLOSE</td>
- *     <td>Passed to the \p image_free callback when an image buffer is to
- *         be released during a file close operation
- *     </td>
- *   </tr>
- * </table>
- * \n
- * \details **Callback functions:** \n
- *          The \p **image_malloc** callback contains a pointer to a function
- *          that must appear to HDF5 to have functionality identical to that of
- *          the standard C library \p malloc() call.
+ *          - The \ref H5FD_file_image_callbacks_t.image_malloc "image_malloc" callback
+ *          contains a pointer to a function that must appear to HDF5 to have
+ *          functionality identical to that of the standard C library \c malloc() call.
  *
- *          Signature in \p H5_file_image_callbacks_t: \n
- *          \a void *(*image_malloc) ( \a size_t size,
- *                                     \a H5_file_image_op_t *file_image_op,
- *                                     \a void *udata )
- *
- *          Parameters:
- * <table>
- *   <tr>
- *     <td>\a size_t size</td>
- *     <td>IN: Size in bytes of the file image buffer to allocate</td>
- *   </tr>
- *   <tr>
- *     <td>\a H5_file_image_op_t *file_image_op</td>
- *     <td>IN: A value from H5_file_image_op_t indicating the operation being
- *        performed on the file image when this callback is invoked</td>
- *   </tr>
- *   <tr>
- *     <td>\a void *udata</td>
- *     <td>IN: Value passed in in the H5P_SET_FILE_IMAGE_CALLBACKS parameter
- *         \p udata</td>
- *   </tr>
- * </table>
- * \n
- * \details The \p **image_memcpy** callback contains a pointer to a function
+ *          - Signature in #H5FD_file_image_callbacks_t:
+ *          \snippet H5FDpublic.h image_malloc_snip
+ *          \n
+ *          - The \ref H5FD_file_image_callbacks_t.image_memcpy "image_memcpy"
+ *          callback contains a pointer to a function
  *          that must appear to HDF5 to have functionality identical to that
- *          of the standard C library \p memcopy() call, except that it returns
- *          a \p NULL on failure. (The \p memcpy C Library routine is defined
+ *          of the standard C library \c memcopy() call, except that it returns
+ *          a \p NULL on failure. (The \c memcpy C Library routine is defined
  *          to return the \p dest parameter in all cases.)
  *
- *          Setting \p image_memcpy to \p NULL indicates that HDF5 should invoke
- *          the standard C library \p memcpy() routine when copying buffers.
+ *          - Setting \ref H5FD_file_image_callbacks_t.image_memcpy "image_memcpy"
+ *          to \c NULL indicates that HDF5 should invoke
+ *          the standard C library \c memcpy() routine when copying buffers.
  *
- *          Signature in \p H5_file_image_callbacks_t: \n
- *          \a void *(*image_memcpy) ( \a void *dest, \a const void *src,
- *                                     \a size_t size,
- *                                     \a H5_file_image_op_t *file_image_op,
- *                                     \a void *udata )
+ *          - Signature in #H5FD_file_image_callbacks_t:
+ *          \snippet H5FDpublic.h image_memcpy_snip
+ *          \n
+ *          - The \ref H5FD_file_image_callbacks_t.image_realloc "image_realloc" callback
+ *          contains a pointer to a function that must appear to HDF5 to have
+ *          functionality identical to that of the standard C library \c realloc() call.
  *
- * \details Parameters:
- * <table>
- *   <tr>
- *     <td>\a void *dest</td>
- *     <td>IN: Address of the destination buffer</td>
- *   </tr>
- *   <tr>
- *     <td>\a const  \a void *src</td>
- *     <td>IN: Address of the source buffer</td>
- *   </tr>
- *   <tr>
- *     <td>\a size_t size</td>
- *     <td>IN: Size in bytes of the file image buffer to copy</td>
- *   </tr>
- *    <tr>
- *     <td>\a H5_file_image_op_t *file_image_op</td>
- *     <td>IN: A value from \p H5_file_image_op_t indicating the operation being
- *         performed on the file image when this callback is invoked</td>
- *   </tr>
- *    <tr>
- *     <td>\a void *udata</td>
- *     <td>IN: Value passed in in the \p H5Pset_file_image_callbacks parameter
- *         \p udata
- *     </td>
- *   </tr>
- * </table>
- * \n
- * \details The \p **image_realloc** callback contains a pointer to a function
- *          that must appear to HDF5 to have functionality identical to that
- *          of the standard C library \p realloc() call.
- *
- *          Setting \p image_realloc to \p NULL indicates that HDF5 should
- *          invoke the standard C library \p realloc() routine when resizing
+ *          - Setting \ref H5FD_file_image_callbacks_t.image_realloc "image_realloc"
+ *          to \p NULL indicates that HDF5 should
+ *          invoke the standard C library \c realloc() routine when resizing
  *          file image buffers.
  *
- *          Signature in \p H5_file_image_callbacks_t: \n
- *          \a void *(*image_realloc) ( \a void *ptr, \a size_t size, \a
- *          H5_file_image_op_t *file_image_op, \a void *udata )
+ *          - Signature in #H5FD_file_image_callbacks_t:
+ *          \snippet H5FDpublic.h image_realloc_snip
+ *          \n
+ *          - The \ref H5FD_file_image_callbacks_t.image_free "image_free" callback contains
+ *          a pointer to a function that must appear to HDF5 to have functionality
+ *          identical to that of the standard C library \c free() call, except
+ *          that it will return \c 0 (\c SUCCEED) on success and \c -1 (\c FAIL) on failure.
  *
- *          Parameters:
- * <table>
- *   <tr>
- *     <td>\a void *ptr</td>
- *     <td>IN: Pointer to the buffer being reallocated</td>
- *   </tr>
- *   <tr>
- *     <td>\a size_t size</td>
- *     <td>IN: Desired size in bytes of the file image buffer after reallocation
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a H5_file_image_op_t *file_image_op</td>
- *     <td>IN: A value from \p H5_file_image_op_t indicating the operation being
- *         performed on the file image when this callback is invoked</td>
- *   </tr>
- *   <tr>
- *     <td>\a void *udata</td>
- *     <td>IN: Value passed in in the \p H5Pset_file_image_callbacks parameter
- *         udata</td>
- *   </tr>
- * </table>
- * \n
- * \details The \p **image_free** callback contains a pointer to a function that
- *          must appear to HDF5 to have functionality identical to that of the
- *          standard C library \p free() call, except that it will return
- *          \p 0 (\p SUCCEED) on success and \p -1 (\p FAIL) on failure.
- *
- *          Setting \p image_free to \p NULL indicates that HDF5 should invoke
- *          the standard C library \p free() routine when releasing file image
+ *          - Setting \ref H5FD_file_image_callbacks_t.image_free "image_free"
+ *          to \c NULL indicates that HDF5 should invoke
+ *          the standard C library \c free() routine when releasing file image
  *          buffers.
  *
- *          Signature in \p H5_file_image_callbacks_t: \n
- *          \a herr_t (*image_free) (\a void *ptr,
- *                                   \a H5_file_image_op_t *file_image_op,
- *                                   \a void *udata )
- *
- *          Parameters:
- * <table>
- *   <tr>
- *     <td>\a void *ptr</td>
- *     <td>IN: Pointer to the buffer being released</td>
- *   </tr>
- *   <tr>
- *     <td>\a H5_file_image_op_t *file_image_op</td>
- *     <td>IN: A value from \p H5_file_image_op_t indicating the operation being
- *         performed on the file image when this callback is invoked</td>
- *   </tr>
- *   <tr>
- *     <td>\a void *udata</td>
- *     <td>IN: Value passed in in the \p H5Pset_file_image_callbacks parameter
- *         \p udata</td>
- *   </tr>
- * </table>
- * \n
- * \details The \p **udata_copy** callback contains a pointer to a function
+ *          - Signature in #H5FD_file_image_callbacks_t:
+ *          \snippet H5FDpublic.h image_free_snip
+ *          \n
+ *          - The  \ref H5FD_file_image_callbacks_t.udata_copy "udata_copy"
+ *          callback contains a pointer to a function
  *          that, from the perspective of HDF5, allocates a buffer of suitable
  *          size, copies the contents of the supplied \p udata into the new
  *          buffer, and returns the address of the new buffer. The function
  *          returns NULL on failure. This function is necessary if a non-NULL
  *          \p udata parameter is supplied, so that property lists containing
  *          the image callbacks can be copied. If the \p udata parameter below
- *          is \p NULL, then this parameter should be \p NULL as well.
+ *          is \c NULL, then this parameter should be \c NULL as well.
  *
- *          Signature in \p H5_file_image_callbacks_t: \n
- *          \a void *(*udata_copy) ( \a void *udata )
- *
- *          Parameters:
- * <table>
- *   <tr>
- *     <td>\a void *udata</td>
- *     <td>IN: Value passed in in the \p H5Pset_file_image_callbacks parameter
- *         \p udata</td>
- *   </tr>
- * </table>
- * \n
- * \details The \p **udata_free** callback contains a pointer to a function
+ *          - Signature in #H5FD_file_image_callbacks_t:
+ *          \snippet H5FDpublic.h udata_copy_snip
+ *          \n
+ *          - The \ref H5FD_file_image_callbacks_t.udata_free "udata_free"
+ *          callback contains a pointer to a function
  *          that, from the perspective of HDF5, frees a user data block. This
  *          function is necessary if a non-NULL udata parameter is supplied so
  *          that property lists containing image callbacks can be discarded
- *          without a memory leak. If the udata parameter below is \p NULL,
- *          this parameter should be \p NULL as well.
+ *          without a memory leak. If the udata parameter below is \c NULL,
+ *          this parameter should be \c NULL as well.
  *
- *          Signature in \p H5_file_image_callbacks_t: \n
- *          \a herr_t (*udata_free) ( \a void *udata )
+ *          - Signature in #H5FD_file_image_callbacks_t:
+ *          \snippet H5FDpublic.h udata_free_snip
  *
- *          Parameters:
- * <table>
- *   <tr>
- *     <td>\a void *udata</td>
- *     <td>IN: Value passed in in the \p H5Pset_file_image_callbacks parameter
- *         \p udata</td>
- *   </tr>
- * </table>
- * \n
- * \details \p **udata**, the final field in the \p H5_file_image_callbacks_t
+ *          - \p **udata**, the final field in the #H5FD_file_image_callbacks_t
  *          struct, provides a pointer to user-defined data. This pointer will
- *          be passed to the \p image_malloc, \p image_memcpy,\p image_realloc,
- *          and \p image_free callbacks. Define udata as \p NULL if no
- *          user-defined data is provided.
+ *          be passed to the
+ *          \ref H5FD_file_image_callbacks_t.image_malloc "image_malloc",
+ *          \ref H5FD_file_image_callbacks_t.image_memcpy "image_memcpy",
+ *          \ref H5FD_file_image_callbacks_t.image_realloc "image_realloc", and
+ *          \ref H5FD_file_image_callbacks_t.image_free "image_free" callbacks.
+ *          Define udata as \c NULL if no user-defined data is provided.
  *
- * \version 1.8.9  C function introduced in this release.
+ * \since 1.8.9
  *
  */
 H5_DLL herr_t H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
@@ -4280,13 +4103,13 @@ H5_DLL herr_t H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbac
  * \details H5Pset_file_locking() overrides the default file locking flag
  *          setting that was set when the library was configured.
  *
- *          This setting can be overridden by the HDF5_USE_FILE_LOCKING
+ *          This setting can be overridden by the \c HDF5_USE_FILE_LOCKING
  *          environment variable.
  *
  *          File locking is used when creating/opening a file to prevent
  *          problematic file accesses.
  *
- * \version 1.10.7  Function introduced in this release.
+ * \since 1.10.7
  *
  */
 H5_DLL herr_t H5Pset_file_locking(hid_t fapl_id, hbool_t use_file_locking, hbool_t ignore_when_disabled);
@@ -4467,344 +4290,52 @@ H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_
  *
  * \return \herr_t
  *
- *  The fields of the \p H5AC_cache_config_t structure are discussed below:
- * <table>
- *   <tr>
- *     <th colspan="2" align="left">General configuration section:</th>
- *   </tr>
- *   <tr>
- *     <td>\a int version</td>
- *     <td>IN: Integer field indicating the the version of the
- *         H5AC_cache_config_t in use. This field should be set to
- *         H5AC__CURR_CACHE_CONFIG_VERSION (defined in H5ACpublic.h).</td>
- *   </tr>
- *   <tr>
- *     <td>\a hbool_t rpt_fcn_enabled  </td>
- *     <td>IN: Boolean flag indicating whether the adaptive cache resize report
- *         function is enabled. This field should almost always be set to
- *         disabled (0). Since resize algorithm activity is reported via stdout,
- *         it MUST be set to disabled (0) on Windows machines.\n
- *         The report function is not supported code, and can be expected to
- *         change between versions of the library. Use it at your own risk.</td>
- *   </tr>
- *   <tr>
- *     <td>\a hbool_t open_trace_file</td>
- *     <td> IN: Boolean field indicating whether the \p trace_file_name
- *         field should be used to open a trace file for the cache. \n
- *         The trace file is a debugging feature that allows the capture of
- *         top level metadata cache requests for purposes of debugging and/or
- *         optimization. This field should normally be set to 0, as trace file
- *         collection imposes considerable overhead. \n
- *         This field should only be set to 1 when the \p trace_file_name
- *         contains the full path of the desired trace file, and either
- *         there is no open trace file on the cache, or the \p close_trace_file
- *         field is also 1. \n
- *         The trace file feature is unsupported unless used at the direction
- *         of The HDF Group. It is intended to allow The HDF Group to collect a
- *         trace of cache activity in cases of occult failures and/or poor
- *         performance seen in the field, so as to aid in reproduction in the
- *         lab. If you use it absent the direction of The HDF Group, you are on
- *         your own.</td>
- *   </tr>
- *   <tr>
- *     <td>\a hbool_t close_trace_file</td>
- *     <td>IN: Boolean field indicating whether the current trace file (if any)
- *         should be closed. \n
- *         See the above comments on the \p open_trace_file field. This field
- *         should be set to 0 unless there is an open trace file on the cache
- *         that you wish to close. \n
- *         The trace file feature is unsupported unless used at the direction
- *         of The HDF Group. It is intended to allow The HDF Group to collect
- *         a trace of cache activity in cases of occult failures and/or poor
- *         performance seen in the field, so as to aid in reproduction in the
- *         lab. If you use it absent the direction of The HDF Group, you are on
- *         your own.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a char trace_file_name[]</td>
- *     <td>IN: Full path of the trace file to be opened if the
- *         \p open_trace_file field is set to 1. \n
- *         In the parallel case, an ascii representation of the MPI rank of the
- *         process will be appended to the file name to yield a unique trace
- *         file name for each process. \n
- *         The length of the path must not exceed
- *         \p H5AC__MAX_TRACE_FILE_NAME_LEN characters. \n
- *         The trace file feature is unsupported unless used at the direction
- *         of The HDF Group. It is intended to allow The HDF Group to collect
- *         a trace of cache activity in cases of occult failures and/or poor
- *         performance seen in the field, so as to aid in reproduction
- *         in the lab. If you use it absent the direction of The HDF Group,
- *         you are on your own.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a hbool_t evictions_enabled</td>
- *     <td>IN: A boolean flag indicating whether evictions from the metadata
- *         cache are enabled. This flag is initially set to enabled (1).\n
- *         In rare circumstances, the raw data throughput requirements may be
- *         so high that the user wishes to postpone metadata writes so as to
- *         reserve I/O throughput for raw data. The \p evictions_enabled field
- *         exists to allow this. However, this is an extreme step, and you have
- *         no business doing it unless you have read the User Guide section on
- *         metadata caching, and have considered all other options carefully.\n
- *         The \p evictions_enabled field may not be set to disabled (0) unless
- *         all adaptive cache resizing code is disabled via the \p incr_mode,
- *         \p flash_incr_mode, and \p decr_mode fields.\n
- *         When this flag is set to disabled (\p 0), the metadata cache will
- *         not attempt to evict entries to make space for new entries, and thus
- *         will grow without bound.\n
- *         Evictions will be re-enabled when this field is set back to \p 1.
- *         This should be done as soon as possible.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a hbool_t set_initial_size</td>
- *     <td>IN: Boolean flag indicating whether the cache should be created with
- *         a user specified initial size.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a size_t initial_size</td>
- *     <td>IN: If \p set_initial_size is set to 1, \p initial_size must contain
- *        the desired initial size in bytes. This value must lie in the closed
- *        interval [ \p min_size, \p max_size ]. (see below)
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a double min_clean_fraction</td>
- *     <td>IN: This field specifies the minimum fraction of the cache that must
- *         be kept either clean or empty. \n
- *         The value must lie in the interval [0.0, 1.0]. 0.01 is a good place
- *         to start in the serial case. In the parallel case, a larger value is
- *         needed -- see the overview of the metadata cache in the “Metadata
- *         Caching in HDF5” section of the -- <em>HDF5 User’s Guide</em> for
- *         details.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a size_t max_size </td>
- *     <td>IN: Upper bound (in bytes) on the range of values that the adaptive
- *         cache resize code can select as the maximum cache size.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a size_t min_size </td>
- *     <td>IN: Lower bound (in bytes) on the range of values that the adaptive
- *         cache resize code can select as the mininum cache size
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a long int epoch_length</td>
- *     <td>IN: Number of cache accesses between runs of the adaptive cache
- *         resize code. 50,000 is a good starting number
- *     </td>
- *   </tr>
- * </table>
+ *  \details The fields of the \p H5AC_cache_config_t structure are discussed
+ *           below:
+ *           General configuration section:
+ *           \par General configuration section:
+ *           \snippet H5ACpublic.h H5AC_cache_config_t_general_snip
+ *           - \ref H5AC_cache_config_t.version "version"
+ *           - \ref H5AC_cache_config_t.rpt_fcn_enabled "rpt_fcn_enabled"
+ *           - \ref H5AC_cache_config_t.open_trace_file "open_trace_file"
+ *           - \ref H5AC_cache_config_t.close_trace_file "close_trace_file"
+ *           - \ref H5AC_cache_config_t.trace_file_name "trace_file_name"
+ *           - \ref H5AC_cache_config_t.evictions_enabled "evictions_enabled"
+ *           - \ref H5AC_cache_config_t.set_initial_size "set_initial_size"
+ *           - \ref H5AC_cache_config_t.initial_size "initial_size"
+ *           - \ref H5AC_cache_config_t.min_clean_fraction "min_clean_fraction"
+ *           - \ref H5AC_cache_config_t.max_size "max_size"
+ *           - \ref H5AC_cache_config_t.min_size "min_size"
+ *           - \ref H5AC_cache_config_t.epoch_length "epoch_length"
  *
+ *           \par Increment configuration section:
+ *           \snippet H5ACpublic.h H5AC_cache_config_t_incr_snip
+ *           - \ref H5AC_cache_config_t.incr_mode "incr_mode"
+ *           - \ref H5AC_cache_config_t.lower_hr_threshold "lower_hr_threshold"
+ *           - \ref H5AC_cache_config_t.increment "increment"
+ *           - \ref H5AC_cache_config_t.apply_max_increment
+ *                  "apply_max_increment"
+ *           - \ref H5AC_cache_config_t.max_increment "max_increment"
+ *           - \ref H5AC_cache_config_t.flash_incr_mode "flash_incr_mode"
+ *           - \ref H5AC_cache_config_t.flash_threshold "flash_threshold"
+ *           - \ref H5AC_cache_config_t.flash_multiple "flash_multiple"
  *
- * <table>
- *   <tr>
- *     <th colspan="2" align="left">Increment configuration section:</th>
- *   </tr>
- *   <tr>
- *     <td>\a enum \a H5C_cache_incr_mode incr_mode  </td>
- *     <td>IN: Enumerated value indicating the operational mode of the
- *         automatic cache size increase code. At present, only two
- *         values are legal: \n
- *         H5C_incr__off: Automatic cache size increase is disabled,
- *         and the remaining increment fields are ignored. \n
- *         H5C_incr__threshold: Automatic cache size increase is enabled
- *         using the hit rate threshold algorithm.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a double lower_hr_threshold  </td>
- *     <td>IN: Hit rate threshold used by the hit rate threshold cache
- *         size increment algorithm. \n
- *         When the hit rate over an epoch is below this threshold and the
- *         cache is full, the maximum size of the cache is multiplied by
- *         increment (below), and then clipped as necessary to stay within
- *         max_size, and possibly max_increment. \n
- *         This field must lie in the interval [0.0, 1.0]. 0.8 or 0.9
- *         is a good place to start.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a double increment  </td>
- *     <td>IN: Factor by which the hit rate threshold cache size increment
- *         algorithm multiplies the current cache max size to obtain a
- *         tentative new cache size. \n
- *         The actual cache size increase will be clipped to satisfy the
- *         max_size specified in the general configuration, and possibly
- *         max_increment below. \n
- *         The parameter must be greater than or equal to 1.0 -- 2.0
- *         is a reasonable value. \n
- *         If you set it to 1.0, you will effectively disable cache
- *         size increases.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a hbool_t apply_max_increment  </td>
- *     <td>IN: Boolean flag indicating whether an upper limit should be
- *         applied to the size of cache size increases.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a size_t max_increment</td>
- *     <td>IN: Maximum number of bytes by which cache size can be increased
- *         in a single step -- if applicable.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a enum H5C_cache_flash_incr_mode flash_incr_mode</td>
- *     <td>IN: Enumerated value indicating the operational mode of the
- *         flash cache size increase code. At present, only the following
- *         values are legal: \n
- *         H5C_flash_incr__off: Flash cache size increase is disabled.\n
- *         H5C_flash_incr__add_space: Flash cache size increase is
- *         enabled using the add space algorithm.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a double flash_threshold</td>
- *     <td>IN: The factor by which the current maximum cache size is
- *         multiplied to obtain the minimum size entry / entry size
- *         increase which may trigger a flash cache size increase. \n
- *         At present, this value must lie in the range [0.1, 1.0].
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a double flash_multiple</td>
- *     <td>IN: The factor by which the size of the triggering entry / entry
- *         size increase is multiplied to obtain the initial cache size
- *         increment. This increment may be reduced to reflect existing
- *         free space in the cache and the max_size field above.\n
- *         The parameter must lie in the interval [0.0, 1.0]. 0.1 or 0.05
- *         is a good place to start. \n
- *         At present, this field must lie in the range [0.1, 10.0].
- *     </td>
- *   </tr>
- * </table>
+ *          \par Decrement configuration section:
+ *          \snippet H5ACpublic.h H5AC_cache_config_t_decr_snip
+ *          - \ref H5AC_cache_config_t.decr_mode "decr_mode"
+ *          - \ref H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold"
+ *          - \ref H5AC_cache_config_t.decrement "decrement"
+ *          - \ref H5AC_cache_config_t.apply_max_decrement "apply_max_decrement"
+ *          - \ref H5AC_cache_config_t.max_decrement "max_decrement"
+ *          - \ref H5AC_cache_config_t.epochs_before_eviction
+ *                 "epochs_before_eviction"
+ *          - \ref H5AC_cache_config_t.apply_empty_reserve "apply_empty_reserve"
+ *          - \ref H5AC_cache_config_t.empty_reserve "empty_reserve"
  *
- * <table>
- *   <tr>
- *     <th colspan="2" align="left">Decrement configuration section:</th>
- *   </tr>
- *   <tr>
- *     <td>\a enum \a H5C_cache_decr_mode decr_mode</td>
- *     <td>IN: Enumerated value indicating the operational mode of the
- *         automatic cache size decrease code. At present, the following
- *         values are legal:\n
- *         H5C_decr__off: Automatic cache size decrease is disabled.\n
- *         H5C_decr__threshold: Automatic cache size decrease is enabled
- *         using the hit rate threshold algorithm. \n
- *         H5C_decr__age_out: Automatic cache size decrease is enabled
- *         using the ageout algorithm. \n
- *         H5C_decr__age_out_with_threshold: Automatic cache size decrease
- *         is enabled using the ageout with hit rate threshold algorithm.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a double upper_hr_threshold</td>
- *     <td>IN: Hit rate threshold for the hit rate threshold and ageout with
- *         hit rate threshold cache size decrement algorithms. \n
- *         When decr_mode is H5C_decr__threshold, and the hit rate over a
- *         given epoch exceeds the supplied threshold, the current maximum
- *         cache size is multiplied by decrement to obtain a tentative new
- *         (and smaller) maximum cache size. \n
- *         When decr_mode is H5C_decr__age_out_with_threshold, there is
- *         no attempt to find and evict aged out entries unless the hit
- *         rate in the previous epoch exceeded the supplied threshold. \n
- *         This field must lie in the interval [0.0, 1.0]. \n
- *         For H5C_incr__threshold, .9995 or .99995 is a good place to start. \n
- *         For H5C_decr__age_out_with_threshold, .999 might be more useful.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a double decrement</td>
- *     <td> IN: In the hit rate threshold cache size decrease algorithm, this
- *         parameter contains the factor by which the current max cache size
- *         is multiplied to produce a tentative new cache size. \n
- *         The actual cache size decrease will be clipped to satisfy the
- *         min_size specified in the general configuration, and possibly
- *         max_decrement below. \n
- *         The parameter must be be in the interval [0.0, 1.0]. \n
- *         If you set it to 1.0, you will effectively disable cache size
- *         decreases. 0.9 is a reasonable starting point.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a hbool_t apply_max_decrement</td>
- *     <td>IN: Boolean flag indicating whether an upper limit should be
- *         applied to the size of cache size decreases.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a size_t max_decrement</td>
- *     <td>IN: Maximum number of bytes by which the maximum cache size can be
- *         decreased in any single step -- if applicable.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a int epochs_before_eviction</td>
- *     <td>IN: In the ageout based cache size reduction algorithms, this field
- *         contains the minimum number of epochs an entry must remain
- *         unaccessed in cache before the cache size reduction algorithm tries
- *         to evict it. 3 is a reasonable value.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a hbool_t apply_empty_reserve</td>
- *     <td>IN: Boolean flag indicating whether the ageout based decrement
- *         algorithms will maintain a empty reserve when decreasing cache size.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a double empty_reserve</td>
- *     <td>IN: Empty reserve as a fraction of maximum cache size if applicable.
- *
- *         When so directed, the ageout based algorithms will not decrease the
- *         maximum cache size unless the empty reserve can be met.\n
- *         The parameter must lie in the interval [0.0, 1.0]. 0.1 or 0.05 is a
- *         good place to start.
- *     </td>
- *   </tr>
- * </table>
- *
- * <table>
- *   <tr>
- *     <th colspan="2" align="left">Parallel configuration section:</th>
- *   </tr>
- *   <tr>
- *     <td>\a int dirty_bytes_threshold  </td>
- *     <td>IN: Threshold number of bytes of dirty metadata generation for
- *         triggering synchronizations of the metadata caches serving the target
- *         file in the parallel case.\n
- *         Synchronization occurs whenever the number of bytes of dirty metadata
- *         created since the last synchronization exceeds this limit.\n
- *         This field only applies to the parallel case. While it is ignored
- *         elsewhere, it can still draw a value out of bounds error.\n
- *         It must be consistant across all caches on any given file.\n
- *         By default, this field is set to 256 KB. It shouldn't be more than
- *         half the current max cache size times the min clean fraction.
- *     </td>
- *   </tr>
- *   <tr>
- *     <td>\a int metadata_write_strategy  </td>
- *     <td>IN: Desired metadata write strategy. The valid values for this field
- *         are: \n
- *         \p H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY: Specifies
- *         that only process zero is allowed to write dirty metadata to disk.\n
- *         \p H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED: Specifies that
- *         process zero still makes the decisions as to what entries should be
- *         flushed, but the actual flushes are distributed across the processes
- *         in the computation to the extent possible. \n
- *         The \p src/H5ACpublic.h include file in the HDF5 library has detailed
- *         information on each strategy.
- *     </td>
- *   </tr>
- * </table>
+ *          \par Parallel configuration section:
+ *          \snippet H5ACpublic.h H5AC_cache_config_t_parallel_snip
+ *          - \ref H5AC_cache_config_t.dirty_bytes_threshold "dirty_bytes_threshold"
+ *          - \ref H5AC_cache_config_t.metadata_write_strategy "metadata_write_strategy"
  *
  * \details H5Pset_mdc_config() attempts to set the initial metadata cache
  *          configuration to the supplied value.  It will fail if an invalid
@@ -4816,7 +4347,7 @@ H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_
  *          have not read and understood that documentation, you really should
  *          not be using this API call.
  *
- * \version 1.8.0 Function added to this release.
+ * \since 1.8.0
  *
  */
 H5_DLL herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr);
@@ -4864,7 +4395,7 @@ H5_DLL herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
  *          The log format is described in [<em>Metadata Cache Logging</em>]
  *          (https://portal.hdfgroup.org/display/HDF5/Fine-tuning+the+Metadata+Cache).
  *
- * \version 1.10.0 C function introduced with this release.
+ * \since 1.10.0
  *
  */
 H5_DLL herr_t H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location,
