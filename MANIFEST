@@ -56,7 +56,6 @@
 ./m4/ax_prog_javah.m4
 ./m4/ax_try_compile_java.m4
 ./m4/ax_try_run_java.m4
-./m4/ax_with_curses.m4
 
 ./bin/COPYING
 ./bin/bbrelease         _DO_NOT_DISTRIBUTE_

@@ -418,22 +418,3 @@ fetch_env_ulong(const char *varname, unsigned long limit, unsigned long *valp)
     *valp = ul;
     return 1;
 }
-
-/*
- *  For demo credel.c: need to write up description
- */
-size_t
-strlcpy(char *dst, const char *src, size_t size)
-{
-    char *d;
-    const char *s;
-
-    for (d = dst, s = src; (s - src) < (int)size; d++, s++) {
-        *d = *s;
-        if (*s == '\0')
-            return (size_t) (s - src);
-    }
-
-    dst[size - 1] = '\0';
-    return size;
-}

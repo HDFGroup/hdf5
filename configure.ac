@@ -1439,15 +1439,6 @@ case "X-$withval" in
 esac
 
 ## ----------------------------------------------------------------------
-## Check if the CURSES library is present.
-## This is required to build one of the VFD SWMR demo program.
-##
-AX_WITH_CURSES
-if test "x$ax_cv_curses" != xyes; then
-    AC_MSG_ERROR([A curses library is required to build the VFD SWMR demo: vfd_swmr_gaussians])
-fi
-
-## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
 ## At this point it's unset (no external filters by default) but it
 ## will be filled in during the deflate (zlib) and szip processing
@@ -3736,7 +3727,6 @@ AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
-
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
