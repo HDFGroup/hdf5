@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -21,7 +20,9 @@ import java.io.Serializable;
  */
 public class H5_ih_info_t implements Serializable {
     private static final long serialVersionUID = -142238015615462707L;
+    /** */
     public long     index_size;     /* btree and/or list */
+    /** */
     public long     heap_size;
 
     H5_ih_info_t (long index_size, long heap_size)
