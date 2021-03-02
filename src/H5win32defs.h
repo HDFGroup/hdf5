@@ -174,6 +174,7 @@ extern "C" {
     H5_DLL const wchar_t *H5_get_utf16_str(const char *s);
     H5_DLL int Wopen_utf8(const char *path, int oflag, ...);
     H5_DLL int Wremove_utf8(const char *path);
+    H5_DLL int H5_get_win32_times(H5_timevals_t* tvs);
 
     /* Round functions only needed for VS2012 and earlier.
      * They are always built to ensure they don't go stale and
