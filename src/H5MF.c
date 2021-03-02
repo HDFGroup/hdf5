@@ -150,7 +150,7 @@ defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr,
 {
     lower_defree_t *df;
 
-    if ((df = malloc(sizeof(*df))) == NULL)
+    if ((df = H5MM_malloc(sizeof(*df))) == NULL)
         return FAIL;
 
     df->alloc_type = alloc_type;
@@ -204,7 +204,7 @@ H5MF_process_deferred_frees(H5F_t *f, const uint64_t tick_num)
         SIMPLEQ_REMOVE_HEAD(&defrees, link);
         if (H5MF__xfree_impl(f, df->alloc_type, df->addr, df->size) < 0)
             err = FAIL;
-        free(df);
+        H5MM_xfree(df);
     }
 
     if (err != SUCCEED) {
