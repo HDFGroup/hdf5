@@ -276,7 +276,7 @@ H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
     file->api_elapsed_nbuckets = file->config.max_lag + 1;
 
     file->api_elapsed_ticks =
-        calloc(file->api_elapsed_nbuckets, sizeof(*file->api_elapsed_ticks));
+        H5MM_calloc(file->api_elapsed_nbuckets * sizeof(*file->api_elapsed_ticks));
 
     if (file->api_elapsed_ticks == NULL) {
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
@@ -437,7 +437,7 @@ swmr_reader_close(H5FD_vfd_swmr_t *file)
                 "%s: %" PRIu32 " ticks elapsed in API %" PRIu64 " times",
                 __func__, i, file->api_elapsed_ticks[i]);
         }
-        free(file->api_elapsed_ticks);
+        H5MM_xfree(file->api_elapsed_ticks);
     }
 
     /* Close the metadata file */
@@ -589,7 +589,7 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
             return NULL;
         }
 
-        if ((config = malloc(sizeof(*config))) == NULL) {
+        if ((config = H5MM_malloc(sizeof(*config))) == NULL) {
             HERROR(H5E_ARGS, H5E_BADTYPE, "could not allocate config");
             return NULL;
         }
@@ -600,7 +600,7 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
 
         equal_configs = HDmemcmp(&self->config, config, sizeof(*config)) == 0;
 
-        free(config);
+        H5MM_xfree(config);
 
         if (equal_configs)
             return _self;
