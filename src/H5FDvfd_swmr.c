@@ -64,7 +64,7 @@ typedef struct H5FD_vfd_swmr_t {
                                                 /* and to FALSE otherwise.    */
                                                 /* Used for sanity checking.  */
     H5F_vfd_swmr_config_t config;
-    bool writer;                            /* True iff configured to write.
+    hbool_t writer;                         /* True iff configured to write.
                                              * All methods on a write-mode
                                              * SWMR VFD instance are passed
                                              * to the lower VFD instance.
@@ -263,7 +263,7 @@ static herr_t
 H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
 {
     h5_retry_t retry;
-    bool do_try;                             /* more tries remain */
+    hbool_t do_try;                         /* more tries remain */
     herr_t      ret_value = SUCCEED;
     FUNC_ENTER_STATIC
 
@@ -555,7 +555,7 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
         H5FD_vfd_swmr_t *other = (H5FD_vfd_swmr_t *)_other;
         H5P_genplist_t *plist;
         H5F_vfd_swmr_config_t *config;
-        bool equal_configs;
+        hbool_t equal_configs;
 
         if (H5FD_cmp(self->hdf5_file_lf, other->hdf5_file_lf) != 0)
             return _other;
@@ -843,7 +843,7 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
     target_page = addr / fs_page_size;
 
     entry = vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page,
-        false);
+        FALSE);
 
     if (entry == NULL) {
          /* Cannot find addr in index, read from the underlying hdf5 file */
@@ -1083,7 +1083,7 @@ done:
 static herr_t
 H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *file, hbool_t open)
 {
-    bool do_try;
+    hbool_t do_try;
     h5_retry_t retry;
     H5FD_vfd_swmr_md_header md_header;      /* Metadata file header, take 1 */
     H5FD_vfd_swmr_md_header md_header_two;  /* Metadata file header, take 2 */

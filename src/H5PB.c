@@ -89,7 +89,7 @@ static herr_t H5PB__create_new_page(H5PB_t *pb_ptr, haddr_t addr, size_t size,
 
 static void H5PB__deallocate_page(H5PB_entry_t *entry_ptr);
 
-static herr_t H5PB__evict_entry(H5F_shared_t *, H5PB_entry_t *, bool, bool);
+static herr_t H5PB__evict_entry(H5F_shared_t *, H5PB_entry_t *, hbool_t, hbool_t);
 
 static herr_t H5PB__flush_entry(H5F_shared_t *, H5PB_t *, H5PB_entry_t *);
 
@@ -760,7 +760,7 @@ H5PB_dest(H5F_shared_t *shared)
                                     "Can't flush entry")
                 }
 
-                if ( H5PB__evict_entry(shared, evict_ptr, TRUE, true) < 0 )
+                if ( H5PB__evict_entry(shared, evict_ptr, TRUE, TRUE) < 0 )
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                 "forced eviction failed")
@@ -1453,13 +1453,13 @@ done:
  * this routine performs an O(n) copy of index entries.
  */
 static int
-shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, bool only_mark)
+shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, hbool_t only_mark)
 {
     ptrdiff_t i;
     H5FD_vfd_swmr_idx_entry_t *entry;
 
     entry = vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx,
-        shared->mdf_idx_entries_used, page, false);
+        shared->mdf_idx_entries_used, page, FALSE);
 
     if (entry == NULL)
         return 0;
@@ -1471,7 +1471,7 @@ shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, bool only_mark)
     }
 
     if (only_mark) {
-        entry->garbage = true;
+        entry->garbage = TRUE;
         return 0;
     }
 
@@ -1590,11 +1590,11 @@ H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "mark entry clean failed")
 
-        if ( H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0 )
+        if ( H5PB__evict_entry(shared, entry_ptr, TRUE, FALSE) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
 
-        HDassert(!shared->vfd_swmr_writer || vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, false) == NULL);
+        HDassert(!shared->vfd_swmr_writer || vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, FALSE) == NULL);
     }
 
 done:
@@ -1924,7 +1924,7 @@ H5PB_vfd_swmr__release_delayed_writes(H5F_shared_t *shared)
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "flush of mpmde failed")
 
-            if ( H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0 )
+            if ( H5PB__evict_entry(shared, entry_ptr, TRUE, FALSE) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                             "eviction of mpmde failed")
@@ -2003,7 +2003,7 @@ H5PB_vfd_swmr__release_tick_list(H5F_shared_t *shared)
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                                 "flush of mpmde failed")
 
-                if ( H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0 )
+                if ( H5PB__evict_entry(shared, entry_ptr, TRUE, FALSE) < 0 )
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                 "eviction of mpmde failed")
@@ -2217,7 +2217,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         /* see if the shadow index already contains an entry for *entry. */
 
         ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx,
-            shared->mdf_idx_entries_used, target_page, false);
+            shared->mdf_idx_entries_used, target_page, FALSE);
 
         if ( ie_ptr == NULL ) { /* alloc new entry in the metadata file index*/
             uint32_t new_index_entry_index;
@@ -2245,8 +2245,8 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
             /* ie_ptr->clean                initialized below */
             /* ie_ptr->tick_of_last_flush   initialized below */
             ie_ptr->delayed_flush        = entry->delay_write_until;
-            ie_ptr->moved_to_lower_file  = false;
-            ie_ptr->garbage              = false;
+            ie_ptr->moved_to_lower_file  = FALSE;
+            ie_ptr->garbage              = FALSE;
             ie_ptr->length               = (uint32_t)entry->size;
 
         } else {
@@ -2271,7 +2271,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         ie_ptr->entry_ptr            = entry->image_ptr;
         ie_ptr->tick_of_last_change  = tick_num;
         HDassert(entry->is_dirty);
-        ie_ptr->clean                = false;
+        ie_ptr->clean                = FALSE;
         ie_ptr->tick_of_last_flush = 0;
     }
 
@@ -3147,8 +3147,8 @@ H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, bool force,
-    bool only_mark)
+H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force,
+    hbool_t only_mark)
 {
     H5PB_t *pb_ptr = shared->pb_ptr;
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -3643,7 +3643,7 @@ H5PB__make_space(H5F_shared_t *shared, H5PB_t *pb_ptr, H5FD_mem_t inserted_type)
 
             evict_ptr = search_ptr;
             search_ptr = search_ptr->prev;
-            if ( H5PB__evict_entry(shared, evict_ptr, FALSE, false) < 0 )
+            if ( H5PB__evict_entry(shared, evict_ptr, FALSE, FALSE) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "Can't evict entry")
@@ -4108,7 +4108,7 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
                         HDassert( ! ( entry_ptr->is_dirty ) );
 
                         if ( H5PB__evict_entry(shared, entry_ptr, 
-                                               TRUE, false) < 0 )
+                                               TRUE, FALSE) < 0 )
 
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                         "forced eviction failed (1)")
@@ -4692,7 +4692,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
 
             entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
             entry_ptr->image_ptr = new_image;
-            entry_ptr->is_mpmde = true;
+            entry_ptr->is_mpmde = TRUE;
             entry_ptr->size = size;
 
             if (entry_ptr->modified_this_tick)
@@ -4769,7 +4769,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
      * already present.
      */
     if (pb_ptr->vfd_swmr_writer && !entry_ptr->modified_this_tick) {
-        entry_ptr->modified_this_tick = true;
+        entry_ptr->modified_this_tick = TRUE;
         H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
     }
 
@@ -4924,7 +4924,7 @@ H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "mark entry clean failed")
 
-                    if (H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0)
+                    if (H5PB__evict_entry(shared, entry_ptr, TRUE, FALSE) < 0)
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "forced eviction failed (1)")

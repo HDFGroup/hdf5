@@ -412,7 +412,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
     haddr_t md_addr;                        /* Address in the metadata file */
     uint32_t i;                             /* Local index variable */
     herr_t ret_value = SUCCEED;             /* Return value */
-    bool queue_was_nonempty;
+    hbool_t queue_was_nonempty;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -612,7 +612,7 @@ H5F_vfd_swmr_writer__delay_write(H5F_shared_t *shared, uint64_t page,
         ie_ptr = NULL;
     } else {
         ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx,
-            shared->mdf_idx_entries_used, page, false);
+            shared->mdf_idx_entries_used, page, FALSE);
     }
 
     if (ie_ptr == NULL)
@@ -678,7 +678,7 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
      * tick so as to avoid attempts to flush entries on the page buffer 
      * tick list that were modified during the current tick.
      */
-    if ( H5F_vfd_swmr_writer_end_of_tick(f, true) < 0 )
+    if ( H5F_vfd_swmr_writer_end_of_tick(f, TRUE) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
                     "H5F_vfd_swmr_writer_end_of_tick() failed.")
@@ -789,7 +789,7 @@ clean_shadow_index(H5F_t *f, uint32_t nentries,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, bool wait_for_reader)
+H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
 {
     H5F_shared_t *shared = f->shared;
     uint32_t idx_entries_added = 0;
@@ -798,7 +798,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, bool wait_for_reader)
     uint32_t idx_ent_not_in_tl = 0;
     uint32_t idx_ent_not_in_tl_flushed = 0;
     herr_t ret_value = SUCCEED;              /* Return value */
-    bool incr_tick = false;
+    hbool_t incr_tick = FALSE;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -810,7 +810,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, bool wait_for_reader)
             wait_for_reader))
         goto update_eot;
 
-    incr_tick = true;
+    incr_tick = TRUE;
 
     /* 1) If requested, flush all raw data to the HDF5 file.
      *
@@ -1047,7 +1047,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
+H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
 {
     uint64_t tmp_tick_num = 0;
     H5FD_vfd_swmr_idx_entry_t * tmp_mdf_idx;
@@ -1940,7 +1940,7 @@ H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "HDnanosleep() failed.")
         
-    if ( H5F_vfd_swmr_writer_end_of_tick(f, false) < 0 )
+    if ( H5F_vfd_swmr_writer_end_of_tick(f, FALSE) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
                     "H5F_vfd_swmr_writer_end_of_tick() failed.")
@@ -1952,7 +1952,7 @@ done:
 } /* H5F__vfd_swmr_writer__wait_a_tick() */
 
 herr_t
-H5F_vfd_swmr_process_eot_queue(bool entering_api)
+H5F_vfd_swmr_process_eot_queue(hbool_t entering_api)
 {
     struct timespec now;
     eot_queue_entry_t *first_head, *head;
@@ -1981,7 +1981,7 @@ H5F_vfd_swmr_process_eot_queue(bool entering_api)
         if (timespeccmp(&head->end_of_tick, &shared->end_of_tick, <)) {
             H5F_vfd_swmr_update_entry_eot(head);
         } else if (shared->vfd_swmr_writer) {
-            if (H5F_vfd_swmr_writer_end_of_tick(f, false) < 0)
+            if (H5F_vfd_swmr_writer_end_of_tick(f, FALSE) < 0)
                 HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL,
                             "end of tick error for VFD SWMR writer");
         } else if (H5F_vfd_swmr_reader_end_of_tick(f, entering_api) < 0) {
