@@ -909,7 +909,8 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
      * is John's hack to allow the library to find the superblock
      * signature.
      */
-    if (H5_checksum_metadata(buf, entry->length, 0) != entry->chksum) {
+    if (file->pb_configured && entry->length == init_size
+            && H5_checksum_metadata(buf, entry->length, 0) != entry->chksum) {
         H5FD_vfd_swmr_md_header tmp_header;
 
         if (H5FD__vfd_swmr_header_deserialize(file, &tmp_header) != TRUE) {
