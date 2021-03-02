@@ -427,8 +427,7 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acqui
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired)
-{
+H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired){
     FUNC_ENTER_API_NAMECHECK_ONLY
 
         FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))}
