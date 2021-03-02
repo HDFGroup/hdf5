@@ -315,7 +315,7 @@ static void *
 H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                      unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_fill_t *   fill      = NULL;           /* Decoded fill value message */
+    H5O_fill_t *   fill      = NULL; /* Decoded fill value message */
     htri_t         exists    = FALSE;
     H5T_t *        dt        = NULL;
     const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
