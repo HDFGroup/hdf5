@@ -865,7 +865,7 @@ test_vfd_open(void)
         if (T.which_fapl == FAPL_FILE_ACCESS)
             _fapl_id = fapl_file_access;
         else if (T.which_fapl == FAPL_ROS3_ANON)
-            _(void) fapl_id;
+            _fapl_id = fapl_id;
 
         H5E_BEGIN_TRY { fd = H5FDopen(T.url, T.flags, _fapl_id, T.maxaddr); }
         H5E_END_TRY;
