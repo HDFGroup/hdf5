@@ -829,10 +829,10 @@ H5MF__sect_large_can_merge(const H5FS_section_info_t *_sect1,
     HDassert(sect2);
     HDassert(sect1->sect_info.type == sect2->sect_info.type);   /* Checks "MERGE_SYM" flag */
     if (!H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr)) {
-        fprintf(stderr, "%s.%d: sect1->sect_info.addr %" PRIuHADDR
+        HDfprintf(stderr, "%s.%d: sect1->sect_info.addr %" PRIuHADDR
             ", sect2->sect_info.addr %" PRIuHADDR "\n", __func__, __LINE__,
             sect1->sect_info.addr, sect2->sect_info.addr);
-        fprintf(stderr, "%s.%d: sect1->sect_info.size %" PRIuHSIZE
+        HDfprintf(stderr, "%s.%d: sect1->sect_info.size %" PRIuHSIZE
             ", sect2->sect_info.size %" PRIuHSIZE "\n", __func__, __LINE__,
             sect1->sect_info.size, sect2->sect_info.size);
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't merge")

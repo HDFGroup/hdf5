@@ -1515,7 +1515,7 @@ shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, bool only_mark)
     if (shared->mdf_idx_entries_used > i + 1) {
         const size_t ntocopy =
             (size_t)(shared->mdf_idx_entries_used - (i + 1));
-        memmove(&shared->mdf_idx[i],
+        HDmemmove(&shared->mdf_idx[i],
                 &shared->mdf_idx[i + 1],
                 ntocopy * sizeof(shared->mdf_idx[i + 1]));
     }
@@ -1629,7 +1629,7 @@ H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
 
-        assert(!shared->vfd_swmr_writer || vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, false) == NULL);
+        HDassert(!shared->vfd_swmr_writer || vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, false) == NULL);
     }
 
 done:
@@ -2266,7 +2266,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
                     "\n\nmax mdf index len (%" PRIu32 ") exceeded.\n\n",
                     shared->mdf_idx_len);
                 HDfprintf(stderr, "tick = %" PRIu64 ".\n", tick_num);
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
 
             ie_ptr = idx + new_index_entry_index;
@@ -2305,7 +2305,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
 
         ie_ptr->entry_ptr            = entry->image_ptr;
         ie_ptr->tick_of_last_change  = tick_num;
-        assert(entry->is_dirty);
+        HDassert(entry->is_dirty);
         ie_ptr->clean                = false;
         ie_ptr->tick_of_last_flush = 0;
     }
@@ -4725,7 +4725,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
 
             for (iter_page = page + 1; iter_page < last_page; iter_page++) {
                 H5PB__SEARCH_INDEX(pb_ptr, iter_page, overlap, FAIL)
-                assert(overlap == NULL);
+                HDassert(overlap == NULL);
             }
             if (new_image == NULL) {
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,

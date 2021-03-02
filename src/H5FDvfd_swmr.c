@@ -477,7 +477,7 @@ H5FD_vfd_swmr_close(H5FD_t *_file)
 
     if (file->hdf5_file_lf != NULL) {
         if (file->hdf5_file_lf->exc_owner != NULL) {
-            assert(file->hdf5_file_lf->exc_owner == &file->pub);
+            HDassert(file->hdf5_file_lf->exc_owner == &file->pub);
             file->hdf5_file_lf->exc_owner = NULL;
         }
 
@@ -562,7 +562,7 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
 {
     H5FD_vfd_swmr_t *self = (H5FD_vfd_swmr_t *)_self;
 
-    assert(_self->driver_id == H5FD_VFD_SWMR_g);
+    HDassert(_self->driver_id == H5FD_VFD_SWMR_g);
 
     if (_self->cls == _other->cls) {
         H5FD_vfd_swmr_t *other = (H5FD_vfd_swmr_t *)_other;
@@ -598,7 +598,7 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
            return NULL;
         }
 
-        equal_configs = memcmp(&self->config, config, sizeof(*config)) == 0;
+        equal_configs = HDmemcmp(&self->config, config, sizeof(*config)) == 0;
 
         free(config);
 
@@ -1263,13 +1263,13 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file,
     FUNC_ENTER_STATIC
 
     /* Set file pointer to the beginning the file */
-    if (lseek(file->md_fd, H5FD_MD_HEADER_OFF, SEEK_SET) < 0) {
+    if (HDlseek(file->md_fd, H5FD_MD_HEADER_OFF, SEEK_SET) < 0) {
         HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
                     "unable to seek in metadata file");
     }
 
     /* Read the header */
-    nread = read(file->md_fd, image, H5FD_MD_HEADER_SIZE);
+    nread = HDread(file->md_fd, image, H5FD_MD_HEADER_SIZE);
 
     /* Try again if a signal interrupted the read. */
     if (nread == -1 && errno == EINTR)
@@ -1287,7 +1287,7 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file,
         HGOTO_DONE(FALSE);
 
     /* Verify magic number */
-    if (memcmp(image, H5FD_MD_HEADER_MAGIC, H5_SIZEOF_MAGIC) != 0)
+    if (HDmemcmp(image, H5FD_MD_HEADER_MAGIC, H5_SIZEOF_MAGIC) != 0)
         HGOTO_DONE(FALSE);
 
     /* Verify stored and computed checksums are equal */
@@ -1371,12 +1371,12 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file,
     }
 
     /* We may seek past EOF.  That's ok, the read(2) will catch that. */
-    if (lseek(file->md_fd, (HDoff_t)md_header->index_offset, SEEK_SET) < 0){
+    if (HDlseek(file->md_fd, (HDoff_t)md_header->index_offset, SEEK_SET) < 0){
         HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL,
                     "unable to seek in metadata file");
     }
 
-    nread = read(file->md_fd, image, md_header->index_length);
+    nread = HDread(file->md_fd, image, md_header->index_length);
 
     /* Try again if a signal interrupted the read. */
     if (nread == -1 && errno == EINTR)
@@ -1423,7 +1423,7 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file,
      * read bad magic.  It's possible to recover by
      * re-reading the header.
      */
-    if (memcmp(image, H5FD_MD_INDEX_MAGIC, H5_SIZEOF_MAGIC) != 0)
+    if (HDmemcmp(image, H5FD_MD_INDEX_MAGIC, H5_SIZEOF_MAGIC) != 0)
         HGOTO_DONE(FALSE);
 
     /* Verify stored and computed checksums are equal */
@@ -1521,7 +1521,7 @@ H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t reload_hdr_and_index,
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
     herr_t ret_value = SUCCEED;                       /* Return value  */
 
-    assert(index == NULL || num_entries_ptr != NULL);
+    HDassert(index == NULL || num_entries_ptr != NULL);
 
     FUNC_ENTER_NOAPI(FAIL)
 

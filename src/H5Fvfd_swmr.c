@@ -183,7 +183,7 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         md_size = (hsize_t)shared->vfd_swmr_config.md_pages_reserved * 
                   shared->fs_page_size;
 
-        assert(shared->fs_page_size >= H5FD_MD_HEADER_SIZE);
+        HDassert(shared->fs_page_size >= H5FD_MD_HEADER_SIZE);
 
         /* Allocate an entire page from the shadow file for the header. */
         if ((hdr_addr = H5MV_alloc(f, shared->fs_page_size)) == HADDR_UNDEF){
@@ -246,7 +246,7 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL,
                         "unable to load/decode metadata file");
 
-        assert(shared->tick_num != 0);
+        HDassert(shared->tick_num != 0);
         vfd_swmr_reader_did_increase_tick_to(shared->tick_num);
 
         hlog_fast(tick, "%s first tick %" PRIu64,
@@ -349,7 +349,7 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
         }
         hlog_fast(shadow_defrees, "Emptied deferred shadow frees.");
 
-        assert(TAILQ_EMPTY(&shared->shadow_defrees));
+        HDassert(TAILQ_EMPTY(&shared->shadow_defrees));
     } else { /* For file flush */
         /* Update end_of_tick */
         if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(shared, TRUE) < 0)
@@ -441,7 +441,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
         HDqsort(index, num_entries, sizeof(*index), H5F__idx_entry_cmp);
         /* Assert that no HDF5 page offsets are duplicated. */
         for (i = 1; i < num_entries; i++)
-            assert(index[i - 1].hdf5_page_offset < index[i].hdf5_page_offset);
+            HDassert(index[i - 1].hdf5_page_offset < index[i].hdf5_page_offset);
     }
 
     /* For each non-null entry_ptr in the index:
@@ -749,8 +749,8 @@ clean_shadow_index(H5F_t *f, uint32_t nentries,
 
         if (ie->clean && ie->tick_of_last_flush + max_lag < tick_num) {
 
-            assert(!ie->garbage);
-            assert(ie->entry_ptr == NULL);
+            HDassert(!ie->garbage);
+            HDassert(ie->entry_ptr == NULL);
 
             hlog_fast(shadow_index_reclaim,
                 "Reclaiming shadow index slot %" PRIu32
@@ -1142,7 +1142,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
     /* This is ok if we're entering the API, but it should
      * not happen if we're exiting the API.
      */
-    assert(entering_api || tmp_tick_num <
+    HDassert(entering_api || tmp_tick_num <
            shared->tick_num + shared->vfd_swmr_config.max_lag);
 
     if (!entering_api) {
@@ -1244,7 +1244,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                      * case where the new entry is *longer*, because the
                      * extension could overlap with a second entry.
                      */
-                    assert(oent->length == nent->length);
+                    HDassert(oent->length == nent->length);
 
                     hlog_fast(shadow_index_update,
                         "shadow page for slot %" PRIu32 " lower page %" PRIu64
@@ -1447,7 +1447,7 @@ H5F_vfd_swmr_update_entry_eot(eot_queue_entry_t *entry)
         entry->tick_num, (intmax_t)entry->end_of_tick.tv_sec,
         entry->end_of_tick.tv_nsec);
 
-    assert(entry->vfd_swmr_writer == shared->vfd_swmr_writer);
+    HDassert(entry->vfd_swmr_writer == shared->vfd_swmr_writer);
     entry->tick_num = shared->tick_num;
     entry->end_of_tick = shared->end_of_tick;
 
