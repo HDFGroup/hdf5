@@ -352,6 +352,9 @@
 /* Define to 1 if you have the `sigsetjmp' function. */
 #cmakedefine H5_HAVE_SIGSETJMP @H5_HAVE_SIGSETJMP@
 
+/* Define to 1 if you have the `sigtimedwait' function. */
+#cmakedefine H5_HAVE_SIGTIMEDWAIT @H5_HAVE_SIGTIMEDWAIT@
+
 /* Define to 1 if you have the `snprintf' function. */
 #cmakedefine H5_HAVE_SNPRINTF @H5_HAVE_SNPRINTF@
 

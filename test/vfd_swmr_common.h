@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _VFD_SWMR_COMMON_H
-#define _VFD_SWMR_COMMON_H
+#ifndef VFD_SWMR_COMMON_H
+#define VFD_SWMR_COMMON_H
 
 /***********/
 /* Headers */
@@ -103,4 +103,4 @@ H5TEST_DLL size_t strlcpy(char *, const char *, size_t);
 
 extern int verbosity;
 
-#endif /* _SWMR_COMMON_H */
+#endif /* SWMR_COMMON_H */

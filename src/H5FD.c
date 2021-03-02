@@ -54,6 +54,11 @@
 /* Package Typedefs */
 /********************/
 
+/* H5FD wrapper for VFD SWMR. Allows use as a BSD TAILQ element. */
+typedef struct H5FD_wrap_t {
+    TAILQ_ENTRY(H5FD_wrap_t) link;      /* Linkage for list of all VFDs. */
+    H5FD_t *file;                       /* Pointer to wrapped VFD struct */
+} H5FD_wrap_t;
 
 /********************/
 /* Local Prototypes */
@@ -92,7 +97,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  */
 static unsigned long H5FD_file_serial_no_g;
 
-static TAILQ_HEAD(_all_vfds, H5FD_t) all_vfds = TAILQ_HEAD_INITIALIZER(all_vfds);
+static TAILQ_HEAD(_all_vfds, H5FD_wrap_t) all_vfds = TAILQ_HEAD_INITIALIZER(all_vfds);
 
 /* File driver ID class */
 static const H5I_class_t H5I_VFL_CLS[1] = {{
@@ -726,18 +731,19 @@ H5FD_dedup(H5FD_t *self, H5FD_t *other, hid_t fapl)
 H5FD_t *
 H5FD_deduplicate(H5FD_t *file, hid_t fapl)
 {
-    H5FD_t *deduped = file, *item;
+    H5FD_t *deduped = file;
+    H5FD_wrap_t *item;
 
     TAILQ_FOREACH(item, &all_vfds, link) {
         /* skip "self" */
-        if (item == file)
+        if (item->file == file)
             continue;
 
         /* skip files with exclusive owners, for now */
-        if (item->exc_owner != NULL)
+        if (item->file->exc_owner != NULL)
             continue;
 
-        if ((deduped = H5FD_dedup(item, file, fapl)) != file)
+        if ((deduped = H5FD_dedup(item->file, file, fapl)) != file)
             goto finish;
     }
 
@@ -746,10 +752,10 @@ H5FD_deduplicate(H5FD_t *file, hid_t fapl)
      * return NULL to indicate the conflict.
      */
     TAILQ_FOREACH(item, &all_vfds, link) {
-        if (item == file || item->exc_owner == NULL)
+        if (item->file == file || item->file->exc_owner == NULL)
             continue;
 
-        if (H5FDcmp(file, item) == 0) {
+        if (H5FDcmp(file, item->file) == 0) {
             deduped = NULL;
             break;
         }
@@ -784,6 +790,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5P_genplist_t      *plist;                 /* Property list pointer */
     unsigned long       driver_flags = 0;       /* File-inspecific driver feature flags */
     H5FD_file_image_info_t file_image_info;     /* Initial file image */
+    H5FD_wrap_t *swmr_wrapper = NULL;           /* H5FD wrapper for SWMR queue */
     H5FD_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -862,7 +869,11 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* (This will be changed later, when the superblock is located) */
     file->base_addr = 0;
 
-    TAILQ_INSERT_TAIL(&all_vfds, file, link);
+    /* Create and insert a SWMR wrapper for the file */
+    if(NULL == (swmr_wrapper = H5MM_calloc(sizeof(H5FD_wrap_t))))
+        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "unable to allocate file wrap struct")
+    swmr_wrapper->file = file;
+    TAILQ_INSERT_TAIL(&all_vfds, swmr_wrapper, link);
 
     /* Set return value */
     ret_value = file;
@@ -923,7 +934,8 @@ herr_t
 H5FD_close(H5FD_t *file)
 {
     const H5FD_class_t *driver;
-    H5FD_t *item;
+    H5FD_wrap_t *item;
+    H5FD_wrap_t *delete_me = NULL;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -938,10 +950,14 @@ H5FD_close(H5FD_t *file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
 
     TAILQ_FOREACH(item, &all_vfds, link) {
-        if (item->exc_owner == file)
-            item->exc_owner = NULL;
+        if (item->file->exc_owner == file)
+            item->file->exc_owner = NULL;
+        if (item->file == file)
+            delete_me = item;
     }
-    TAILQ_REMOVE(&all_vfds, file, link);
+    HDassert(delete_me);
+    TAILQ_REMOVE(&all_vfds, delete_me, link);
+    H5MM_xfree(delete_me);
 
     /* Dispatch to the driver for actual close. If the driver fails to
      * close the file then the file will be in an unusable state.

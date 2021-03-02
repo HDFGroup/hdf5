@@ -9,8 +9,8 @@
  *
  * See COPYING at the top of the HDF5 distribution for license terms.
  */
-#ifndef	_HLOG_H
-#define	_HLOG_H
+#ifndef	HLOG_H
+#define	HLOG_H
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -135,4 +135,4 @@ void hlog_always(struct hlog_outlet *, const char *, ...)
 void hlog_impl(struct hlog_outlet *, const char *, ...)
     _printflike(2,3);
 
-#endif	/* _HLOG_H */
+#endif	/* HLOG_H */
