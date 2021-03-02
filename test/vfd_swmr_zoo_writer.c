@@ -12,7 +12,6 @@
  */
 
 #include <err.h>
-#include <libgen.h> /* basename(3) */
 
 #define H5C_FRIEND              /* suppress error about including H5Cpkg */
 #define H5F_FRIEND              /* suppress error about including H5Fpkg */
@@ -23,7 +22,6 @@
 #include "H5retry_private.h"
 #include "H5Cpkg.h"
 #include "H5Fpkg.h"
-// #include "H5Iprivate.h"
 #include "H5HGprivate.h"
 #include "H5VLprivate.h"
 
@@ -225,7 +223,7 @@ main(int argc, char **argv)
     const char *seedvar = "H5_ZOO_STEP_SEED";
     bool use_vfd_swmr = true;
     bool print_estack = false;
-    const char *progname = basename(argv[0]);
+    const char *progname = HDbasename(argv[0]);
     const char *personality = strstr(progname, "vfd_swmr_zoo_");
     estack_state_t es;
     char step = 'b';
