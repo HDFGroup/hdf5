@@ -1984,7 +1984,7 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
      * process of adding entries, and some callers may not update
      * _entries_used immediately.
      */ 
-    memcpy(new_mdf_idx, old_mdf_idx, sizeof(new_mdf_idx[0]) * old_mdf_idx_len);
+    H5MM_memcpy(new_mdf_idx, old_mdf_idx, sizeof(new_mdf_idx[0]) * old_mdf_idx_len);
 
     shared->writer_index_offset = idx_addr;
     ret_value = shared->mdf_idx = new_mdf_idx;
