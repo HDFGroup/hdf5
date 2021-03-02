@@ -13,8 +13,6 @@
 
 #include <err.h>
 #include <libgen.h>
-#include <time.h> /* nanosleep(2) */
-#include <unistd.h> /* getopt(3) */
 
 #define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 

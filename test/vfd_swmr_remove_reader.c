@@ -28,7 +28,6 @@
 /***********/
 
 #include <err.h>    /* errx(3) */
-#include <stdlib.h> /* EXIT_FAILURE */
 
 #include "h5test.h"
 #include "vfd_swmr_common.h"
