@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5P module
  */
-#ifndef _H5Pprivate_H
-#define _H5Pprivate_H
+#ifndef H5Pprivate_H
+#define H5Pprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5P_genplist_t H5P_genplist_t;
@@ -203,4 +203,4 @@ H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
 H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist, H5D_fill_value_t *status);
 H5_DLL herr_t H5P_get_fill_value(H5P_genplist_t *plist, const struct H5T_t *type, void *value);
 
-#endif /* _H5Pprivate_H */
+#endif /* H5Pprivate_H */

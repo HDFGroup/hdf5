@@ -298,7 +298,7 @@ done:
  *
  *              Failure:        0 if N is zero
  *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, April  8, 1998
  *
  *-------------------------------------------------------------------------

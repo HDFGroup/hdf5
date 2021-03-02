@@ -20,8 +20,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5PBprivate_H
-#define _H5PBprivate_H
+#ifndef H5PBprivate_H
+#define H5PBprivate_H
 
 /* Include package's public header */
 #ifdef NOT_YET
@@ -98,4 +98,4 @@ H5_DLL herr_t H5PB_get_stats(const H5PB_t *page_buf, unsigned accesses[2], unsig
                              unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
 H5_DLL herr_t H5PB_print_stats(const H5PB_t *page_buf);
 
-#endif /* !_H5PBprivate_H */
+#endif /* H5PBprivate_H */

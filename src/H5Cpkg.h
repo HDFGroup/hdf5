@@ -33,8 +33,8 @@
 #error "Do not include this file outside the H5C package!"
 #endif
 
-#ifndef _H5Cpkg_H
-#define _H5Cpkg_H
+#ifndef H5Cpkg_H
+#define H5Cpkg_H
 
 /* Get package's private header */
 #include "H5Cprivate.h"
@@ -5092,5 +5092,5 @@ H5_DLL herr_t H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry);
 H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, haddr_t tag, hbool_t status);
 #endif /* H5C_TESTING */
 
-#endif /* _H5Cpkg_H */
+#endif /* H5Cpkg_H */
 /* clang-format on */

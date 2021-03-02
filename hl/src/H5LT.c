@@ -1297,7 +1297,8 @@ out:
  */
 
 static herr_t
-find_dataset(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *op_data)
+find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5L_info2_t *linfo,
+             void *op_data)
 {
     /* Define a default zero value for return. This will cause the iterator to continue if
      * the dataset is not found yet.
@@ -1307,10 +1308,6 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *op_d
     /* check the arguments */
     if (name == NULL)
         return ret;
-
-    /* Shut the compiler up */
-    loc_id = loc_id;
-    linfo  = linfo;
 
     /* Define a positive value for return value if the dataset was found. This will
      * cause the iterator to immediately return that positive value,
@@ -1841,17 +1838,14 @@ H5LTset_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data)
+find_attr(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo,
+          void *op_data)
 {
     int ret = H5_ITER_CONT;
 
     /* check the arguments */
     if (name == NULL)
         return H5_ITER_CONT;
-
-    /* Shut compiler up */
-    loc_id = loc_id;
-    ainfo  = ainfo;
 
     /* Define a positive value for return value if the attribute was found. This will
      * cause the iterator to immediately return that positive value,

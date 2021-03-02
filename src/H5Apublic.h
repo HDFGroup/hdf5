@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5A module.
  */
-#ifndef _H5Apublic_H
-#define _H5Apublic_H
+#ifndef H5Apublic_H
+#define H5Apublic_H
 
 /* Public headers needed by this file */
 #include "H5Ipublic.h" /* IDs			  		*/
@@ -112,4 +112,4 @@ H5_DLL herr_t H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, 
 }
 #endif
 
-#endif /* _H5Apublic_H */
+#endif /* H5Apublic_H */
