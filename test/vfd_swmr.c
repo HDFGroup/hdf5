@@ -1237,6 +1237,10 @@ test_reader_md_concur(void)
         if(HDclose(child_pfd[0]) < 0)
             HDexit(EXIT_FAILURE);
 
+        /* Free unused configuration */
+        if(config_writer)
+            HDfree(config_writer);
+
         /* 
          * Case A: reader
          *  --verify an empty index 
@@ -2167,6 +2171,10 @@ test_disable_enable_eot_concur(void)
         if(HDclose(child_pfd[0]) < 0)
             HDexit(EXIT_FAILURE);
 
+        /* Free unused configuration */
+        if(config_writer)
+            HDfree(config_writer);
+
         /* 
          *  Open the file 3 times as VFD SWMR reader
          *  Enable and disable EOT for a file
@@ -2439,6 +2447,10 @@ test_file_end_tick_concur(void)
         /* Close unused read end for reader pipe */
         if(HDclose(child_pfd[0]) < 0)
             HDexit(EXIT_FAILURE);
+
+        /* Free unused configuration */
+        if(config_writer)
+            HDfree(config_writer);
 
         /* 
          *  Open the file 3 times as VFD SWMR reader
