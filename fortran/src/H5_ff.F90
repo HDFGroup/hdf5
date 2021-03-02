@@ -76,6 +76,13 @@ MODULE H5LIB
   INTEGER, PARAMETER :: H5E_HID_FLAGS_LEN = 1
   INTEGER(HID_T), DIMENSION(1:H5E_HID_FLAGS_LEN) :: H5E_hid_flags
   !
+  ! H5ES flags declaration
+  !
+  INTEGER, PARAMETER :: H5ES_FLAGS_LEN = 3
+  INTEGER, DIMENSION(1:H5ES_FLAGS_LEN) :: H5ES_flags
+  INTEGER, PARAMETER :: H5ES_HID_FLAGS_LEN = 1
+  INTEGER(HID_T), DIMENSION(1:H5ES_HID_FLAGS_LEN) :: H5ES_hid_flags
+  !
   ! H5FD flags declaration
   !
   INTEGER, PARAMETER :: H5FD_FLAGS_LEN = 11
@@ -191,6 +198,8 @@ CONTAINS
             i_H5D_size_flags,&
             i_H5E_flags, &
             i_H5E_hid_flags, &
+            i_H5ES_flags, &
+            i_H5ES_hid_flags, &
             i_H5F_flags, &
             i_H5FD_flags, &
             i_H5FD_hid_flags, &
@@ -212,6 +221,7 @@ CONTAINS
          IMPORT :: HID_T, SIZE_T, HSIZE_T, HADDR_T
          IMPORT :: H5D_FLAGS_LEN, H5D_SIZE_FLAGS_LEN, &
               H5E_FLAGS_LEN, H5E_HID_FLAGS_LEN, &
+              H5ES_FLAGS_LEN, H5ES_HID_FLAGS_LEN, &
               H5F_FLAGS_LEN, H5G_FLAGS_LEN, H5FD_FLAGS_LEN, &
               H5FD_HID_FLAGS_LEN, H5I_FLAGS_LEN, H5L_FLAGS_LEN, &
               H5O_FLAGS_LEN, H5P_FLAGS_LEN, H5P_FLAGS_INT_LEN, &
@@ -222,6 +232,8 @@ CONTAINS
          INTEGER(SIZE_T) , DIMENSION(1:H5D_SIZE_FLAGS_LEN)        :: i_H5D_size_flags
          INTEGER         , DIMENSION(1:H5E_FLAGS_LEN)             :: i_H5E_flags
          INTEGER(HID_T)  , DIMENSION(1:H5E_HID_FLAGS_LEN)         :: i_H5E_hid_flags
+         INTEGER         , DIMENSION(1:H5ES_FLAGS_LEN)            :: i_H5ES_flags
+         INTEGER(HID_T)  , DIMENSION(1:H5ES_HID_FLAGS_LEN)        :: i_H5ES_hid_flags
          INTEGER         , DIMENSION(1:H5F_FLAGS_LEN)             :: i_H5F_flags
          INTEGER         , DIMENSION(1:H5G_FLAGS_LEN)             :: i_H5G_flags
          INTEGER         , DIMENSION(1:H5FD_FLAGS_LEN)            :: i_H5FD_flags
@@ -305,6 +317,8 @@ CONTAINS
          H5D_size_flags, &
          H5E_flags, &
          H5E_hid_flags, &
+         H5ES_flags, &
+         H5ES_hid_flags, &
          H5F_flags, &
          H5FD_flags, &
          H5FD_hid_flags, &
@@ -423,6 +437,18 @@ CONTAINS
     H5E_MINOR_F         = H5E_flags(2)
     H5E_WALK_UPWARD_F   = H5E_flags(3)
     H5E_WALK_DOWNWARD_F = H5E_flags(4)
+    !
+    ! H5ES flags
+    !
+    H5ES_NONE_F = H5ES_hid_flags(1)
+
+    H5ES_WAIT_FOREVER_F = HUGE(H5ES_WAIT_FOREVER_F)
+    H5ES_WAIT_NONE_F = 0_C_INT64_T
+
+    H5ES_STATUS_IN_PROGRESS_F = H5ES_flags(1)
+    H5ES_STATUS_SUCCEED_F     = H5ES_flags(2)
+    H5ES_STATUS_FAIL_F        = H5ES_flags(3)
+
     !
     ! H5FD flags
     !

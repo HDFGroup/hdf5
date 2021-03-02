@@ -171,32 +171,14 @@ CONTAINS
 
     INTEGER(HID_T) :: acpl_id_default
     INTEGER(HID_T) :: aapl_id_default
-    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
-    INTERFACE
-       INTEGER(HID_T) FUNCTION H5Acreate2(loc_id, name, type_id, &
-            space_id, acpl_id_default, aapl_id_default) BIND(C,NAME='H5Acreate2')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T
-         INTEGER(HID_T), INTENT(IN), VALUE :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(HID_T), INTENT(IN), VALUE :: type_id
-         INTEGER(HID_T), INTENT(IN), VALUE :: space_id
-         INTEGER(HID_T), INTENT(IN), VALUE :: acpl_id_default
-         INTEGER(HID_T), INTENT(IN), VALUE :: aapl_id_default
-       END FUNCTION H5Acreate2
-    END INTERFACE
 
     acpl_id_default = H5P_DEFAULT_F
     aapl_id_default = H5P_DEFAULT_F
     IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
     IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
 
-    c_name = TRIM(name)//C_NULL_CHAR
-    attr_id = h5acreate2(loc_id, c_name, type_id, space_id, &
-         acpl_id_default, aapl_id_default)
-
-    hdferr = 0
-    IF(attr_id.LT.0) hdferr = -1
+    CALL h5acreate_aysnc_f(loc_id, name, type_id, space_id, attr_id, &
+         H5ES_NONE_F, hdferr, acpl_id, aapl_id)
 
   END SUBROUTINE h5acreate_f
 
