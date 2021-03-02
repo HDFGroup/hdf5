@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5IntType_H
-#define __H5IntType_H
+#ifndef H5IntType_H
+#define H5IntType_H
 
 namespace H5 {
 
@@ -66,4 +66,4 @@ class H5_DLLCPP IntType : public AtomType {
 }; // end of IntType
 } // namespace H5
 
-#endif // __H5IntType_H
+#endif // H5IntType_H

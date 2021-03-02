@@ -23,8 +23,8 @@
  * the H5VLconnector.h header easier to understand.
  */
 
-#ifndef _H5VLconnector_passthru_H
-#define _H5VLconnector_passthru_H
+#ifndef H5VLconnector_passthru_H
+#define H5VLconnector_passthru_H
 
 /* Public headers needed by this file */
 #include "H5public.h"   /* Generic Functions                    */
@@ -233,4 +233,4 @@ H5_DLL herr_t H5VLoptional(void *obj, hid_t connector_id, int op_type, hid_t dxp
 }
 #endif
 
-#endif /* _H5VLconnector_passthru_H */
+#endif /* H5VLconnector_passthru_H */

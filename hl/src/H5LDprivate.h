@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5LDprivate_H
-#define _H5LDprivate_H
+#ifndef H5LDprivate_H
+#define H5LDprivate_H
 
 /* High-level library internal header file */
 #include "H5HLprivate2.h"
@@ -50,4 +50,4 @@ H5_HLDLL int  H5LD_construct_vector(char *fields, H5LD_memb_t *listv[], hid_t pa
 }
 #endif
 
-#endif /* end _H5LDprivate_H */
+#endif /* end H5LDprivate_H */

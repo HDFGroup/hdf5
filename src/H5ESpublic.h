@@ -14,8 +14,8 @@
  * This file contains public declarations for the H5ES (event set) module.
  */
 
-#ifndef _H5ESpublic_H
-#define _H5ESpublic_H
+#ifndef H5ESpublic_H
+#define H5ESpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h" /* Generic Functions                    */
@@ -52,4 +52,4 @@ extern "C" {
 }
 #endif
 
-#endif /* _H5ESpublic_H */
+#endif /* H5ESpublic_H */

@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5D module.
  */
-#ifndef _H5Dpublic_H
-#define _H5Dpublic_H
+#ifndef H5Dpublic_H
+#define H5Dpublic_H
 
 /* System headers needed by this file */
 
@@ -204,4 +204,4 @@ H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, voi
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Dpublic_H */
+#endif /* H5Dpublic_H */

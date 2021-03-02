@@ -22,8 +22,8 @@
 #error "Do not include this file outside the H5FA package!"
 #endif
 
-#ifndef _H5FApkg_H
-#define _H5FApkg_H
+#ifndef H5FApkg_H
+#define H5FApkg_H
 
 /* Get package's private header */
 #include "H5FAprivate.h"
@@ -299,4 +299,4 @@ H5_DLL herr_t H5FA__get_cparam_test(const H5FA_t *ea, H5FA_create_t *cparam);
 H5_DLL int    H5FA__cmp_cparam_test(const H5FA_create_t *cparam1, const H5FA_create_t *cparam2);
 #endif /* H5FA_TESTING */
 
-#endif /* _H5FApkg_H */
+#endif /* H5FApkg_H */

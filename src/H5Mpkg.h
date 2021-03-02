@@ -20,8 +20,8 @@
 #error "Do not include this file outside the H5M package!"
 #endif
 
-#ifndef _H5Mpkg_H
-#define _H5Mpkg_H
+#ifndef H5Mpkg_H
+#define H5Mpkg_H
 
 /* Get package's private header */
 #include "H5Mprivate.h"
@@ -44,4 +44,4 @@
 /* Package Private Prototypes */
 /******************************/
 
-#endif /*_H5Dpkg_H*/
+#endif /*H5Dpkg_H*/
