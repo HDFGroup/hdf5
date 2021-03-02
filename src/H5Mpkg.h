@@ -44,4 +44,4 @@
 /* Package Private Prototypes */
 /******************************/
 
-#endif /*_H5Dpkg_H*/
+#endif /*H5Dpkg_H*/

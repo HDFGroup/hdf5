@@ -458,4 +458,4 @@ H5_DLL hbool_t H5AC_get_serialization_in_progress(H5F_t *f);
 H5_DLL hbool_t H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring);
 #endif /* NDEBUG */ /* end debugging functions */
 
-#endif /* !_H5ACprivate_H */
+#endif /* H5ACprivate_H */
