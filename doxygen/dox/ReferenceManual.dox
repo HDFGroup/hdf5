@@ -20,16 +20,21 @@ of HDF5 functionality. This functionality is grouped into the following
 \li \ref H5P "Property Lists" — Management of property lists to control HDF5 library behavior (\ref H5P)
 \li \ref H5R "References" — Management of references to specific objects and data regions in an HDF5 file (\ref H5R)
 \li \ref H5VL "Virtual Object Layer" — Management of the Virtual Object Layer (\ref H5VL)
-\li \ref ASYNC "Asynchronous Functions" - Functions with asynchronous variants (\ref ASYNC)
+
+\par Asynchronous Functions
+     A subset of functions has \ref ASYNC "asynchronous variants".
+
+\par API Versioning
+     See \ref api-compat-macros
 
 \par Deprecated Functions
-     <a href="./deprecated.html">See here.</a>
+     A list of deprecated functions can be found <a href="./deprecated.html">here</a>.
 
-Here are a few simple rules to follow:
-
-\li \Bold{Handle discipline:} If you acquire a handle (by creation or copy), \Emph{you own it!} (..., i.e., you have to close it.)
-\li \Bold{Dynamic memory allocation:} ...
-\li \Bold{Use of locations:} Identifier + name combo
+\par Etiquette
+     Here are a few simple rules to follow:
+     \li \Bold{Handle discipline:} If you acquire a handle (by creation or copy), \Emph{you own it!} (..., i.e., you have to close it.)
+     \li \Bold{Dynamic memory allocation:} ...
+     \li \Bold{Use of locations:} Identifier + name combo
 
 \attention \Bold{C++ Developers using HDF5 C-API functions beware:}\n
       If a C routine that takes a function pointer as an argument is called from
@@ -43,4 +48,8 @@ Here are a few simple rules to follow:
       routine was called. The C++ application should save some state as the
       routine is started so that any problem that occurs might be diagnosed.
 
- */
+
+\par ToDo List
+     There is plenty of <a href="./todo.html">unfinished business</a>.
+
+*/
