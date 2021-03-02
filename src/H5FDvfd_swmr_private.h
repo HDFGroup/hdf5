@@ -13,7 +13,6 @@
 #define _H5FDvfd_swmr_private_H
 
 #include "H5queue.h"   /* for TAILQ_* */
-#include "hlog.h"   /* for TAILQ_* */
 
 /* Forward declaration */
 struct H5F_t;
@@ -63,11 +62,6 @@ extern unsigned int vfd_swmr_api_entries_g;
 typedef TAILQ_HEAD(eot_queue, eot_queue_entry) eot_queue_t;
 
 extern eot_queue_t eot_queue_g;
-
-HLOG_OUTLET_DECL(swmr);
-HLOG_OUTLET_DECL(pbwr);
-HLOG_OUTLET_DECL(shadow_index_reclaim);
-HLOG_OUTLET_DECL(mdc_invalidation);
 
 /***************************************/
 /* Library-private Function Prototypes */

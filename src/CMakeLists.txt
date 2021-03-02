@@ -12,7 +12,6 @@ set (H5_SOURCES
     ${HDF5_SRC_DIR}/H5system.c
     ${HDF5_SRC_DIR}/H5timer.c
     ${HDF5_SRC_DIR}/H5trace.c
-    ${HDF5_SRC_DIR}/hlog.c
 )
 
 set (H5_HDRS
@@ -816,7 +815,6 @@ set (H5_PUBLIC_HEADERS
 
 set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5private.h
-    ${HDF5_SRC_DIR}/hlog.h
 
     ${HDF5_SRC_DIR}/H5Apkg.h
     ${HDF5_SRC_DIR}/H5Aprivate.h

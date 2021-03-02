@@ -103,12 +103,6 @@ static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file,
     H5FD_vfd_swmr_md_index *md_index, const H5FD_vfd_swmr_md_header *md_header);
 static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *, hbool_t);
 
-HLOG_OUTLET_SHORT_DEFN(index_motion, swmr);
-HLOG_OUTLET_SHORT_DEFN(swmr_stats, swmr);
-HLOG_OUTLET_SHORT_DEFN(swmr_read, swmr);
-HLOG_OUTLET_SHORT_DEFN(swmr_read_exception, swmr_read);
-HLOG_OUTLET_MEDIUM_DEFN(swmr_read_err, swmr_read_exception, HLOG_OUTLET_S_ON);
-
 static const H5FD_class_t H5FD_vfd_swmr_g = {
     "vfd_swmr",                 /* name                 */
     MAXADDR,                    /* maxaddr              */
@@ -430,15 +424,8 @@ swmr_reader_close(H5FD_vfd_swmr_t *file)
 {
     vfd_swmr_reader_did_increase_tick_to(0);
 
-    if (file->api_elapsed_ticks != NULL) {
-        uint32_t i;
-        for (i = 0; i < file->api_elapsed_nbuckets; i++) {
-            hlog_fast(swmr_stats,
-                "%s: %" PRIu32 " ticks elapsed in API %" PRIu64 " times",
-                __func__, i, file->api_elapsed_ticks[i]);
-        }
+    if (file->api_elapsed_ticks != NULL)
         H5MM_xfree(file->api_elapsed_ticks);
-    }
 
     /* Close the metadata file */
     if(file->md_fd >= 0 && HDclose(file->md_fd) < 0) {
@@ -858,10 +845,6 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
     entry = vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page,
         false);
 
-    hlog_fast(swmr_read, "%s: enter type %d addr %" PRIuHADDR " size %zu "
-        "file %s", __func__, type, addr, size,
-        (entry == NULL) ? "lower" : "shadow");
-
     if (entry == NULL) {
          /* Cannot find addr in index, read from the underlying hdf5 file */
         if(H5FD_read(file->hdf5_file_lf, type, addr, size, buf) < 0) {
@@ -926,30 +909,13 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
      * is John's hack to allow the library to find the superblock
      * signature.
      */
-    if (!file->pb_configured) {
-        hlog_fast(swmr_read_exception,
-            "%s: skipping checksum, page buffer not configured", __func__);
-    } else if (entry->length != init_size) {
-        hlog_fast(swmr_read_exception,
-            "%s: skipping checksum, buffer size != entry size", __func__);
-    } else if (H5_checksum_metadata(buf, entry->length, 0) != entry->chksum) {
+    if (H5_checksum_metadata(buf, entry->length, 0) != entry->chksum) {
         H5FD_vfd_swmr_md_header tmp_header;
-
-        hlog_fast(swmr_read_err, "%s: bad checksum", __func__);
-        hlog_fast(swmr_read_err, "addr %" PRIuHADDR " page %" PRIuHADDR
-            " len %zu type %d ...", addr, addr / fs_page_size, init_size, type);
-        hlog_fast(swmr_read_err, "... index[%" PRId64 "] lower pgno %" PRIu64
-            " shadow pgno %" PRIu64 " len %" PRIu32 " sum %" PRIx32,
-            (int64_t)(entry - index), entry->hdf5_page_offset,
-            entry->md_file_page_offset, entry->length, entry->chksum);
 
         if (H5FD__vfd_swmr_header_deserialize(file, &tmp_header) != TRUE) {
             HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL,
                 "checksum error in shadow file entry; could not load header");
         }
-
-        hlog_fast(swmr_read_err, "... header tick last read %" PRIu64
-            " latest %" PRIu64, file->md_header.tick_num, tmp_header.tick_num);
 
         HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL,
             "checksum error in shadow file entry");
@@ -1145,11 +1111,8 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *file, hbool_t open)
         if (rc != TRUE)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not read header");
 
-        if (md_header.index_offset != last_index_offset) {
-            hlog_fast(index_motion, "index offset changed %" PRIu64 "\n",
-                md_header.index_offset);
+        if (md_header.index_offset != last_index_offset)
             last_index_offset = md_header.index_offset;
-        }
 
         if (open)
             ; // ignore tick number on open

@@ -45,8 +45,6 @@
 #include "H5PBpkg.h"            /* File access				*/
 
 
-#include "hlog.h"
-
 /****************/
 /* Local Macros */
 /****************/
@@ -142,17 +140,6 @@ H5FL_DEFINE_STATIC(H5PB_t);
 
 /* Declare a free list to manage the H5PB_entry_t struct */
 H5FL_DEFINE_STATIC(H5PB_entry_t);
-
-HLOG_OUTLET_DECL(pagebuffer);
-HLOG_OUTLET_SHORT_DEFN(pagebuffer, all);
-HLOG_OUTLET_SHORT_DEFN(pb_access_sizes, pagebuffer);
-HLOG_OUTLET_SHORT_DEFN(pbflush, pagebuffer);
-HLOG_OUTLET_SHORT_DEFN(pbflush_entry, pbflush);
-HLOG_OUTLET_SHORT_DEFN(pbio, pagebuffer);
-HLOG_OUTLET_SHORT_DEFN(pbrd, pbio);
-HLOG_OUTLET_SHORT_DEFN(pbwr, pbio);
-HLOG_OUTLET_SHORT_DEFN(lengthen_pbentry, pagebuffer);
-HLOG_OUTLET_SHORT_DEFN(pbrm, pagebuffer);
 
 
 /*-------------------------------------------------------------------------
@@ -862,19 +849,11 @@ H5PB_flush(H5F_shared_t *shared)
 
                 flush_ptr = entry_ptr;
                 entry_ptr = entry_ptr->ht_next;
-                hlog_fast(pbflush, "%s: visiting %zu-byte page %" PRIu64,
-                    __func__, flush_ptr->size, flush_ptr->page);
 
                 if ( flush_ptr->is_dirty ) {
 
-                    if (flush_ptr->delay_write_until != 0) {
-                        hlog_fast(pbflush, "%s: delaying %zu-byte page %" PRIu64
-                              " until %" PRIu64 " (now %" PRIu64 ")",
-                              __func__, flush_ptr->size, flush_ptr->page,
-                              flush_ptr->delay_write_until,
-                              shared->tick_num);
+                    if (flush_ptr->delay_write_until != 0)
                         continue;
-                    }
 
                     if ( H5PB__flush_entry(shared, pb_ptr, flush_ptr) < 0 )
 
@@ -967,20 +946,10 @@ H5PB_log_access_by_size_counts(const H5PB_t *pb)
     const size_t nslots = NELMTS(pb->access_size_count);
     size_t i, lo, hi;
 
-    hlog_fast(pb_access_sizes, "page buffer %p metadata accesses by size:",
-        (const void *)pb);
-
     for (lo = 0, hi = pb->page_size, i = 0;
          i < nslots - 1;
          i++, lo = hi + 1, hi *= 2) {
-        hlog_fast(pb_access_sizes,
-            "%16" PRIu64 " accesses %8zu - %8zu bytes long",
-            pb->access_size_count[i], lo, hi);
     }
-
-    hlog_fast(pb_access_sizes,
-        "%16" PRIu64 " accesses %8zu -  greater bytes long",
-        pb->access_size_count[i], lo);
 }
 
 
@@ -1178,10 +1147,6 @@ H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
     /* Sanity checks */
     HDassert(shared);
-
-    hlog_fast(pbrd, "%s %p type %d %" PRIuHADDR " size %zu",
-        __func__, (void *)shared, type, addr, size);
-
 
     pb_ptr = shared->pb_ptr;
 
@@ -2333,9 +2298,6 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         H5PB__SEARCH_INDEX(pb_ptr, ie_ptr->hdf5_page_offset, entry, FAIL);
 
         if (entry == NULL || !entry->is_dirty) {
-            hlog_fast(shadow_index_reclaim,
-                "Marking shadow index slot %" PRIu32 " clean at tick %" PRIu64,
-                i, tick_num);
             idx_ent_not_in_tl_flushed++;
             ie_ptr->clean = TRUE;
             ie_ptr->tick_of_last_flush = tick_num;
@@ -2521,9 +2483,6 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
     size_t suffix_size = 0;             /* size of suffix */
 
     FUNC_ENTER_NOAPI(FAIL)
-
-    hlog_fast(pbwr, "%s %p type %d addr %" PRIuHADDR " size %zu",
-        __func__, (void *)shared, type, addr, size);
 
     pb_ptr = shared->pb_ptr;
 
@@ -3337,10 +3296,6 @@ H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *pb_ptr, H5PB_entry_t *const entr
     HDassert(entry_ptr->is_dirty);
     HDassert((pb_ptr->vfd_swmr_writer) || (!(entry_ptr->is_mpmde)));
     HDassert(0 == entry_ptr->delay_write_until);
-
-    hlog_fast(pbflush_entry,
-        "%s: flushing %zu-byte page %" PRIu64 " @ %" PRIuHADDR,
-        __func__, entry_ptr->size, entry_ptr->page, entry_ptr->addr);
 
     /* Retrieve the 'eoa' for the file */
     if ( HADDR_UNDEF == (eoa = H5FD_get_eoa(shared->lf, entry_ptr->mem_type)) )
@@ -4717,11 +4672,6 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
             uint64_t iter_page;
             uint64_t last_page = page +
                 roundup(size, pb_ptr->page_size) / pb_ptr->page_size;
-
-            hlog_fast(lengthen_pbentry,
-                "lengthening page %" PRIu64 " from %zu bytes to %zu, "
-                "last page %" PRIu64 "\n", page, entry_ptr->size, size,
-                last_page);
 
             for (iter_page = page + 1; iter_page < last_page; iter_page++) {
                 H5PB__SEARCH_INDEX(pb_ptr, iter_page, overlap, FAIL)
