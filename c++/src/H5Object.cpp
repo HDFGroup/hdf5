@@ -57,8 +57,7 @@ userAttrOpWrpr(H5_ATTR_UNUSED hid_t loc_id, const char *attr_name, H5_ATTR_UNUSE
 // userVisitOpWrpr interfaces between the user's function and the
 // C library function H5Ovisit3
 static herr_t
-userVisitOpWrpr(H5_ATTR_UNUSED hid_t obj_id, const char *attr_name, const H5O_info_t *obj_info,
-                void *op_data)
+userVisitOpWrpr(H5_ATTR_UNUSED hid_t obj_id, const char *attr_name, const H5O_info_t *obj_info, void *op_data)
 {
     H5std_string    s_attr_name = H5std_string(attr_name);
     UserData4Visit *myData      = reinterpret_cast<UserData4Visit *>(op_data);
