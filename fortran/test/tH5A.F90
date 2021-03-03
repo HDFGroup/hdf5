@@ -260,8 +260,6 @@ CONTAINS
                       attr3_id, error)
      CALL check("h5acreate_f",error,total_error)
 
- 
-     
      !
      ! Create dataset REAL attribute.
      !
