@@ -1916,39 +1916,25 @@ H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
     struct timespec req;
     struct timespec rem;
     uint64_t tick_in_nsec;
-    H5F_shared_t *shared = f->shared;
+    H5F_shared_t *shared;
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_STATIC
 
+    HDassert(f);
+    shared = f->shared;
     HDassert(shared->vfd_swmr);
     HDassert(shared->vfd_swmr_writer);
 
     tick_in_nsec = shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
-    req.tv_nsec = (long)(tick_in_nsec % nanosecs_per_second);
-    req.tv_sec = (time_t)(tick_in_nsec / nanosecs_per_second);
 
-    result = HDnanosleep(&req, &rem);
+    H5_nanosleep(tick_in_nsec);
 
-    while ( result == -1 ) {
-
-        req = rem;
-        result = HDnanosleep(&req, &rem);
-    }
-
-    if ( result != 0 )
-
-        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "HDnanosleep() failed.")
-        
-    if ( H5F_vfd_swmr_writer_end_of_tick(f, FALSE) < 0 )
-
-        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
-                    "H5F_vfd_swmr_writer_end_of_tick() failed.")
+    if (H5F_vfd_swmr_writer_end_of_tick(f, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "H5F_vfd_swmr_writer_end_of_tick() failed")
     
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5F__vfd_swmr_writer__wait_a_tick() */
 
 herr_t

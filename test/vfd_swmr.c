@@ -824,19 +824,13 @@ error:
     return 1;
 } /* test_writer_create_open_flush() */
 
-/* Sleep for `tenths` tenths of a second.
- *
- * This routine may quietly perform a too-short sleep if an error occurs
- * in nanosleep(2).
- */
+/* Sleep for `tenths` tenths of a second */
 static void
 decisleep(uint32_t tenths)
 {
-    struct timespec delay = {.tv_sec = tenths / 10,
-                             .tv_nsec = tenths * 100 * 1000 * 1000};
+    uint64_t nsec = tenths * 100 * 1000 * 1000;
 
-    while (HDnanosleep(&delay, &delay) == -1 && errno == EINTR)
-        ; // do nothing
+    H5_nanosleep(nsec);
 }
 
 
