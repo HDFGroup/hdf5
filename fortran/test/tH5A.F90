@@ -240,14 +240,6 @@ CONTAINS
                       attr2_id, error)
      CALL check("h5acreate_f",error,total_error)
 
-
-     !
-     ! Create dataset DOUBLE attribute.
-     !
-     CALL h5acreate_f(dset_id, aname3, atype3_id, aspace2_id, &
-                      attr3_id, error)
-     CALL check("h5acreate_f",error,total_error)
-
      !
      ! Create dataset DOUBLE attribute.
      !
@@ -257,6 +249,18 @@ CONTAINS
                       file=__FILE__, func="attribute_test", line=__LINE__)
 
      CALL check("h5acreate_f",error,total_error)
+
+     CALL h5adelete_f(dset_id, TRIM(aname3)//"_async", error)
+     CALL check("h5adelete_f",error,total_error)
+
+     !
+     ! Create dataset DOUBLE attribute.
+     !
+     CALL h5acreate_f(dset_id, aname3, atype3_id, aspace2_id, &
+                      attr3_id, error)
+     CALL check("h5acreate_f",error,total_error)
+
+ 
      
      !
      ! Create dataset REAL attribute.

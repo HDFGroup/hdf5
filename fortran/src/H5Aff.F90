@@ -210,7 +210,7 @@ CONTAINS
 !  Jan 27 2021
 !
 ! SOURCE
-  SUBROUTINE h5acreate_aysnc_f(loc_id, name, type_id, space_id, attr_id, &
+  SUBROUTINE h5acreate_async_f(loc_id, name, type_id, space_id, attr_id, &
        es_id, hdferr, acpl_id, aapl_id, file, func, line )
     IMPLICIT NONE
     INTEGER, PARAMETER :: CHR_MAX=256      ! longest file name allowed on linux, 63 for func names
@@ -248,7 +248,7 @@ CONTAINS
          hdferr, acpl_id, aapl_id, &
          es_id, file_default, func_default, line_default)
 
-  END SUBROUTINE h5acreate_aysnc_f
+  END SUBROUTINE h5acreate_async_f
 
 !
 !****s* H5A/h5acreate_common_f
