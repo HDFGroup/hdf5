@@ -177,11 +177,10 @@ CONTAINS
     IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
     IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
 
-    CALL h5acreate_aysnc_f(loc_id, name, type_id, space_id, attr_id, &
-         H5ES_NONE_F, hdferr, acpl_id, aapl_id)
+    CALL h5acreate_common_f(loc_id, name, type_id, space_id, attr_id, &
+         hdferr, acpl_id, aapl_id)
 
   END SUBROUTINE h5acreate_f
-
 !
 !****s* H5A/h5acreate_async_f
 !
@@ -236,8 +235,88 @@ CONTAINS
     CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
     CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
     INTEGER(KIND=C_INT) :: line_default = 0
+
+    acpl_id_default = H5P_DEFAULT_F
+    aapl_id_default = H5P_DEFAULT_F
+    IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
+    IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
+    IF (PRESENT(file)) file_default = file
+    IF (PRESENT(func)) func_default = func
+    IF (PRESENT(line)) line_default = line
+
+    CALL h5acreate_common_f(loc_id, name, type_id, space_id, attr_id, &
+         hdferr, acpl_id, aapl_id, &
+         es_id, file_default, func_default, line_default)
+
+  END SUBROUTINE h5acreate_aysnc_f
+
+!
+!****s* H5A/h5acreate_common_f
+!
+! NAME
+!  h5acreate_common_f
+!
+! PURPOSE
+!  Generic H5Acreate_f wrapper
+!
+! INPUTS
+!  loc_id 	 - identifier of an object (group, dataset,
+!                  or named datatype) attribute is attached to
+!  name 	 - attribute name
+!  type_id 	 - attribute datatype identifier
+!  space_id 	 - attribute dataspace identifier
+!  es_id         - event stack identifier
+!
+! OUTPUTS
+!  attr_id 	 - attribute identifier
+!  hdferr 	 - Returns 0 if successful and -1 if fails
+! OPTIONAL PARAMETERS
+!  acpl_id 	 - Attribute creation property list identifier
+!  appl_id 	 - Attribute access property list identifier
+!
+! AUTHOR
+!  M. Breitenfeld
+!  Jan 27 2021
+!
+! SOURCE
+  SUBROUTINE h5acreate_common_f(loc_id, name, type_id, space_id, attr_id, &
+      hdferr, acpl_id, aapl_id, es_id, file, func, line )
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: loc_id   ! Object identifier
+    CHARACTER(LEN=*), INTENT(IN)  :: name     ! Attribute name
+    INTEGER(HID_T)  , INTENT(IN)  :: type_id  ! Attribute datatype identifier
+    INTEGER(HID_T)  , INTENT(IN)  :: space_id ! Attribute dataspace identifier
+    INTEGER(HID_T)  , INTENT(OUT) :: attr_id  ! Attribute identifier
+    INTEGER         , INTENT(OUT) :: hdferr   ! Error code:
+                                              !  0 on success and -1 on failure
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: acpl_id ! Attribute creation property list identifier
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: aapl_id ! Attribute access property list identifier
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: es_id   ! Event stack
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+!*****
+    INTEGER(HID_T) :: acpl_id_default
+    INTEGER(HID_T) :: aapl_id_default
+    CHARACTER(:,KIND=C_CHAR), ALLOCATABLE ::  file_default
+    CHARACTER(:,KIND=C_CHAR), ALLOCATABLE ::  func_default
+    INTEGER(KIND=C_INT) :: line_default = 0
     
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Acreate2(loc_id, name, type_id, &
+            space_id, acpl_id_default, aapl_id_default) BIND(C,NAME='H5Acreate2')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         INTEGER(HID_T), INTENT(IN), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+         INTEGER(HID_T), INTENT(IN), VALUE :: type_id
+         INTEGER(HID_T), INTENT(IN), VALUE :: space_id
+         INTEGER(HID_T), INTENT(IN), VALUE :: acpl_id_default
+         INTEGER(HID_T), INTENT(IN), VALUE :: aapl_id_default
+       END FUNCTION H5Acreate2
+    END INTERFACE
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Acreate_async(file, func, line, loc_id, name, type_id, &
             space_id, acpl_id_default, aapl_id_default, es_id) BIND(C,NAME='H5Acreate_async')
@@ -260,19 +339,42 @@ CONTAINS
     aapl_id_default = H5P_DEFAULT_F
     IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
     IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
-    IF (PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF (PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
-    IF (PRESENT(line)) line_default = INT(line, C_INT)
 
     c_name = TRIM(name)//C_NULL_CHAR
-    attr_id = h5acreate_async(file_default, func_default, line_default, &
-         loc_id, c_name, type_id, space_id, &
-         acpl_id_default, aapl_id_default, es_id)
+
+    IF (PRESENT(es_id))THEN ! async
+
+       IF (PRESENT(file))THEN
+          ALLOCATE(CHARACTER(LEN=LEN_TRIM(file)+1) :: file_default)
+          file_default = TRIM(file)//C_NULL_CHAR
+       ELSE
+          ALLOCATE(CHARACTER(LEN=1) :: file_default)
+          file_default = C_NULL_CHAR
+       ENDIF
+       IF (PRESENT(func))THEN
+          ALLOCATE(CHARACTER(LEN=LEN_TRIM(func)+1) :: func_default)
+          func_default = TRIM(func)//C_NULL_CHAR
+       ELSE
+          ALLOCATE(CHARACTER(LEN=1) :: func_default)
+          func_default = C_NULL_CHAR
+       ENDIF
+       IF (PRESENT(line)) line_default = INT(line, C_INT)
+
+       attr_id = h5acreate_async(file_default, func_default, line_default, &
+            loc_id, c_name, type_id, space_id, &
+            acpl_id_default, aapl_id_default, es_id)
+
+       DEALLOCATE(file_default, func_default)
+
+    ELSE
+       attr_id = h5acreate2(loc_id, c_name, type_id, space_id, &
+         acpl_id_default, aapl_id_default)
+    ENDIF
 
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
 
-  END SUBROUTINE h5acreate_aysnc_f
+  END SUBROUTINE h5acreate_common_f
 
 !
 !****s* H5A/h5aopen_name_f
