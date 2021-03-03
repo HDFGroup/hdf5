@@ -3119,7 +3119,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
      *
      * While this problem is quire solvable, the required time and
      * resources are lacking at present.  Hence, for now, we don't
-     * allow the get file image operation to be perfomed on files
+     * allow the get file image operation to be performed on files
      * opened with the family file driver.
      *
      * Observe that the following test only looks at the top level
