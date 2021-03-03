@@ -17,8 +17,8 @@
  * NOTE:    This is an experimental API. Everything in the H5M package
  *          is subject to revision in a future release.
  */
-#ifndef _H5Mpublic_H
-#define _H5Mpublic_H
+#ifndef H5Mpublic_H
+#define H5Mpublic_H
 
 /* System headers needed by this file */
 
@@ -115,4 +115,4 @@ H5_DLL herr_t H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hi
 }
 #endif
 
-#endif /* _H5Mpublic_H */
+#endif /* H5Mpublic_H */

@@ -78,8 +78,8 @@ sub print_startprotect ($$) {
     $file =~ s/(\w*)\.h/$1/;
 
     # Print the ifdef info
-    print $fh "\n#ifndef _${file}_H\n";
-    print $fh "#define _${file}_H\n";
+    print $fh "\n#ifndef ${file}_H\n";
+    print $fh "#define ${file}_H\n";
 }
 
 ##############################################################################

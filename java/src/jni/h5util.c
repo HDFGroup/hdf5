@@ -657,14 +657,14 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
     int ret_value = FAIL;
 
     if (!h5str_append(out_str, " \""))
-        H5_LIBRARY_ERROR(ENVONLY);
+        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
     buf_size = H5Rget_file_name(ref_vp, NULL, 0);
     if (buf_size) {
         ref_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
         if (H5Rget_file_name(ref_vp, ref_name, buf_size + 1) >= 0) {
             ref_name[buf_size] = '\0';
             if (!h5str_append(out_str, ref_name))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
         }
         HDfree(ref_name);
         ref_name = NULL;
@@ -676,7 +676,7 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
         if (H5Rget_obj_name(ref_vp, H5P_DEFAULT, ref_name, buf_size + 1) >= 0) {
             ref_name[buf_size] = '\0';
             if (!h5str_append(out_str, ref_name))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
         }
         HDfree(ref_name);
         ref_name = NULL;
@@ -689,14 +689,14 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
             if (H5Rget_attr_name(ref_vp, ref_name, buf_size + 1) >= 0) {
                 ref_name[buf_size] = '\0';
                 if (!h5str_append(out_str, ref_name))
-                    H5_LIBRARY_ERROR(ENVONLY);
+                    H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
             }
             HDfree(ref_name);
             ref_name = NULL;
         }
     }
     if (!h5str_append(out_str, "\""))
-        H5_LIBRARY_ERROR(ENVONLY);
+        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
     ret_value = SUCCEED;
 done:
@@ -1044,7 +1044,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                 H5_LIBRARY_ERROR(ENVONLY);
 
             if (!h5str_append(out_str, H5_COMPOUND_BEGIN_INDICATOR))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
             for (i = 0; i < (unsigned)n; i++) {
                 offset = H5Tget_member_offset(tid, i);
@@ -1057,7 +1057,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
                 if ((i + 1) < (unsigned)n)
                     if (!h5str_append(out_str, ", "))
-                        H5_LIBRARY_ERROR(ENVONLY);
+                        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
                 if (H5Tclose(mtid) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
@@ -1065,7 +1065,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
             }
 
             if (!h5str_append(out_str, H5_COMPOUND_END_INDICATOR))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
             break;
         }
@@ -1075,7 +1075,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
             if (H5Tenum_nameof(tid, cptr, enum_name, sizeof enum_name) >= 0) {
                 if (!h5str_append(out_str, enum_name))
-                    H5_LIBRARY_ERROR(ENVONLY);
+                    H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
             }
             else {
                 size_t i;
@@ -1140,7 +1140,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                     if (HDsprintf(this_str, "%u-", (unsigned)oi.type) < 0)
                                         H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                                     if (!h5str_append(out_str, this_str))
-                                        H5_LIBRARY_ERROR(ENVONLY);
+                                        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
                                     HDfree(this_str);
                                     this_str = NULL;
 
@@ -1190,7 +1190,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                             } /* end switch */
                         }
                         else
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: H5R_OBJECT2 failed");
+                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: H5R_OBJECT2 failed");
                         break;
                     case H5R_DATASET_REGION2:
                         if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
@@ -1231,7 +1231,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
             int     rank = 0;
 
             if (!h5str_append(out_str, H5_ARRAY_BEGIN_INDICATOR))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
             if ((mtid = H5Tget_super(tid)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1254,11 +1254,11 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
                 if ((i + 1) < total_elmts)
                     if (!h5str_append(out_str, ", "))
-                        H5_LIBRARY_ERROR(ENVONLY);
+                        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
             }
 
             if (!h5str_append(out_str, H5_ARRAY_END_INDICATOR))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
             if (H5Tclose(mtid) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1279,7 +1279,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                 H5_LIBRARY_ERROR(ENVONLY);
 
             if (!h5str_append(out_str, H5_VLEN_BEGIN_INDICATOR))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
             for (i = 0; i < (unsigned)vl_buf->len; i++) {
                 if (!h5str_sprintf(ENVONLY, out_str, container, mtid, &(((char *)vl_buf->p)[i * baseSize]),
@@ -1288,11 +1288,11 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
                 if ((i + 1) < (unsigned)vl_buf->len)
                     if (!h5str_append(out_str, ", "))
-                        H5_LIBRARY_ERROR(ENVONLY);
+                        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
             }
 
             if (!h5str_append(out_str, H5_VLEN_END_INDICATOR))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
             if (H5Tclose(mtid) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1334,7 +1334,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
     if (this_str) {
         if (!h5str_append(out_str, this_str))
-            H5_LIBRARY_ERROR(ENVONLY);
+            H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
         HDfree(this_str);
         this_str = NULL;
@@ -1440,7 +1440,7 @@ h5str_print_region_data_blocks(JNIEnv *env, hid_t region_id, h5str_t *str, int n
 
             if (numindex + 1 < numelem)
                 if (!h5str_append(str, ", "))
-                    H5_LIBRARY_ERROR(ENVONLY);
+                    H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
         } /* end for (jndx = 0; jndx < numelem; jndx++, region_elmtno++, ctx.cur_elmt++) */
     }     /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
 
@@ -1509,16 +1509,16 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     }
     else {
         if (!h5str_append(str, " REGION_TYPE BLOCK"))
-            H5_LIBRARY_ERROR(ENVONLY);
+            H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
         if (!h5str_append(str, " {"))
-            H5_LIBRARY_ERROR(ENVONLY);
+            H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
         for (i = 0; i < nblocks; i++) {
             int j;
 
             if (!h5str_append(str, " "))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
             /* Start coordinates and opposite corner */
             for (j = 0; j < ndims; j++) {
@@ -1528,7 +1528,7 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_blocks: HDsprintf failure");
 
                 if (!h5str_append(str, tmp_str))
-                    H5_LIBRARY_ERROR(ENVONLY);
+                    H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
             }
 
             for (j = 0; j < ndims; j++) {
@@ -1539,17 +1539,17 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_blocks: HDsprintf failure");
 
                 if (!h5str_append(str, tmp_str))
-                    H5_LIBRARY_ERROR(ENVONLY);
+                    H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
             }
 
             if (!h5str_append(str, ") "))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
             tmp_str[0] = '\0';
         }
 
         if (!h5str_append(str, " }"))
-            H5_LIBRARY_ERROR(ENVONLY);
+            H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
     }
     ret_value = SUCCEED;
 
@@ -1620,7 +1620,7 @@ h5str_print_region_data_points(JNIEnv *env, hid_t region_space, hid_t region_id,
 
         if (jndx + 1 < (size_t)npoints)
             if (!h5str_append(str, ", "))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
     } /* end for (jndx = 0; jndx < npoints; jndx++, elmtno++) */
 
     ret_value = SUCCEED;
@@ -1684,16 +1684,16 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     }
     else {
         if (!h5str_append(str, " REGION_TYPE POINT"))
-            H5_LIBRARY_ERROR(ENVONLY);
+            H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
         if (!h5str_append(str, " {"))
-            H5_LIBRARY_ERROR(ENVONLY);
+            H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
         for (i = 0; i < npoints; i++) {
             int j;
 
             if (!h5str_append(str, " "))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
             for (j = 0; j < ndims; j++) {
                 tmp_str[0] = '\0';
@@ -1702,15 +1702,15 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_points: HDsprintf failure");
 
                 if (!h5str_append(str, tmp_str))
-                    H5_LIBRARY_ERROR(ENVONLY);
+                    H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
             } /* end for (j = 0; j < ndims; j++) */
 
             if (!h5str_append(str, ") "))
-                H5_LIBRARY_ERROR(ENVONLY);
+                H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
         } /* end for (i = 0; i < npoints; i++) */
 
         if (!h5str_append(str, " }"))
-            H5_LIBRARY_ERROR(ENVONLY);
+            H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
     }
     ret_value = SUCCEED;
 
@@ -2719,7 +2719,7 @@ h5str_dump_region_attribute(JNIEnv *env, h5str_t *str, hid_t region_id)
 
                 if ((i < p_nelmts - 1) && (bytes_in > 0)) {
                     if (!h5str_append(str, ", "))
-                        H5_LIBRARY_ERROR(ENVONLY);
+                        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
                 }
             }
 
@@ -3620,7 +3620,7 @@ Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *env, jclass clss, jstring file_exp
         H5_JNI_FATAL_ERROR(ENVONLY, "HDfopen failed");
 
     if ((ret_val = h5str_dump_simple_dset(ENVONLY, stream, dataset_id, binary_order)) < 0)
-        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_dset failed");
+        H5_ASSERTION_ERROR(ENVONLY, "h5str_dump_simple_dset failed");
 
     if (stream) {
         HDfclose(stream);

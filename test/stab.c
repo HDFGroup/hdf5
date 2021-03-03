@@ -1273,7 +1273,7 @@ old_api(hid_t fapl)
     PASSED();
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
     /* Shut compiler up */
-    fapl = fapl;
+    (void)fapl;
 
     SKIPPED();
     HDputs("    Deprecated API symbols not enabled");
