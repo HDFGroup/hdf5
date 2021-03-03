@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5P package!"
 #endif
 
-#ifndef _H5Ppkg_H
-#define _H5Ppkg_H
+#ifndef H5Ppkg_H
+#define H5Ppkg_H
 
 /* Get package's private header */
 #include "H5Pprivate.h"
@@ -203,4 +203,4 @@ H5_DLL hid_t  H5P_open_class_path_test(const char *path);
 H5_DLL herr_t H5P_reset_external_file_test(hid_t dcpl_id);
 #endif /* H5P_TESTING */
 
-#endif /* _H5Ppkg_H */
+#endif /* H5Ppkg_H */

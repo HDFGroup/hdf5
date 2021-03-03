@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5I package!"
 #endif
 
-#ifndef _H5Ipkg_H
-#define _H5Ipkg_H
+#ifndef H5Ipkg_H
+#define H5Ipkg_H
 
 /* Get package's private header */
 #include "H5Iprivate.h"
@@ -69,4 +69,4 @@
 H5_DLL ssize_t H5I_get_name_test(hid_t id, char *name /*out*/, size_t size, hbool_t *cached);
 #endif /* H5I_TESTING */
 
-#endif /*_H5Ipkg_H*/
+#endif /*H5Ipkg_H*/

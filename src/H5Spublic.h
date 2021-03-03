@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5S module.
  */
-#ifndef _H5Spublic_H
-#define _H5Spublic_H
+#ifndef H5Spublic_H
+#define H5Spublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -132,4 +132,4 @@ H5_DLL H5S_sel_type H5Sget_select_type(hid_t spaceid);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Spublic_H */
+#endif /* H5Spublic_H */

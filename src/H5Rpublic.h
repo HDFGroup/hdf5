@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5R module.
  */
-#ifndef _H5Rpublic_H
-#define _H5Rpublic_H
+#ifndef H5Rpublic_H
+#define H5Rpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -80,4 +80,4 @@ H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *_re
 }
 #endif
 
-#endif /* _H5Rpublic_H */
+#endif /* H5Rpublic_H */

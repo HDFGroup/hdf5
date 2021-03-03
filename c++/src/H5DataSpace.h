@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5DataSpace_H
-#define __H5DataSpace_H
+#ifndef H5DataSpace_H
+#define H5DataSpace_H
 
 namespace H5 {
 
@@ -36,7 +36,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
     // Creates a DataSpace object using an existing dataspace id.
     DataSpace(const hid_t space_id);
 
-    // Copy constructor: makes a copy of the original DataSpace object.
+    // Copy constructor - same as the original DataSpace.
     DataSpace(const DataSpace &original);
 
     // Assignment operator
@@ -155,4 +155,4 @@ class H5_DLLCPP DataSpace : public IdComponent {
 }; // end of DataSpace
 } // namespace H5
 
-#endif // __H5DataSpace_H
+#endif // H5DataSpace_H

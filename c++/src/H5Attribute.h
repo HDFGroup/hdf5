@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Attribute_H
-#define __H5Attribute_H
+#ifndef H5Attribute_H
+#define H5Attribute_H
 
 namespace H5 {
 
@@ -28,7 +28,7 @@ namespace H5 {
 //  Inheritance: multiple H5Location/AbstractDs
 class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
   public:
-    // Copy constructor: makes a copy of an existing Attribute object.
+    // Copy constructor: same as the original Attribute.
     Attribute(const Attribute &original);
 
     // Default constructor
@@ -124,4 +124,4 @@ class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
 }; // end of Attribute
 } // namespace H5
 
-#endif // __H5Attribute_H
+#endif // H5Attribute_H

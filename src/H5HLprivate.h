@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5HLprivate_H
-#define _H5HLprivate_H
+#ifndef H5HLprivate_H
+#define H5HLprivate_H
 
 /* Include package's public header */
 #include "H5HLpublic.h"

@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5EnumType_H
-#define __H5EnumType_H
+#ifndef H5EnumType_H
+#define H5EnumType_H
 
 namespace H5 {
 
@@ -23,6 +23,7 @@ namespace H5 {
 */
 //  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP EnumType : public DataType {
+
   public:
     // Creates an empty enumeration datatype based on a native signed
     // integer type, whose size is given by size.
@@ -78,7 +79,7 @@ class H5_DLLCPP EnumType : public DataType {
     // Creates an enumeration datatype using an existing id
     EnumType(const hid_t existing_id);
 
-    // Copy constructor: makes a copy of the original EnumType object.
+    // Copy constructor: same as the original EnumType.
     EnumType(const EnumType &original);
 
     virtual ~EnumType();
@@ -86,4 +87,4 @@ class H5_DLLCPP EnumType : public DataType {
 }; // end of EnumType
 } // namespace H5
 
-#endif // __H5EnumType_H
+#endif // H5EnumType_H

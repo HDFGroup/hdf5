@@ -22,13 +22,13 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Opublic_H
-#define _H5Opublic_H
+#ifndef H5Opublic_H
+#define H5Opublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions			*/
-#include "H5Ipublic.h" /* IDs			  		*/
-#include "H5Lpublic.h" /* Links		  		*/
+#include "H5public.h"  /* Generic Functions            */
+#include "H5Ipublic.h" /* IDs                          */
+#include "H5Lpublic.h" /* Links                        */
 
 /*****************/
 /* Public Macros */
@@ -204,4 +204,4 @@ typedef struct H5O_stat_t {
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Opublic_H */
+#endif /* H5Opublic_H */

@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5PTprivate_H
-#define _H5PTprivate_H
+#ifndef H5PTprivate_H
+#define H5PTprivate_H
 
 /* High-level library internal header file */
 #include "H5HLprivate2.h"
