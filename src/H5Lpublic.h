@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Lpublic_H
-#define _H5Lpublic_H
+#ifndef H5Lpublic_H
+#define H5Lpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"  /* Generic Functions            */
@@ -206,4 +206,4 @@ H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hi
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Lpublic_H */
+#endif /* H5Lpublic_H */

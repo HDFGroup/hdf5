@@ -18,8 +18,8 @@
  *		H5FA package.  Including this header means that the source file
  *		is part of the H5FA package.
  */
-#ifndef _H5FAmodule_H
-#define _H5FAmodule_H
+#ifndef H5FAmodule_H
+#define H5FAmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_FARRAY
 #define H5_MY_PKG_INIT NO
 
-#endif /* _H5FAmodule_H */
+#endif /* H5FAmodule_H */

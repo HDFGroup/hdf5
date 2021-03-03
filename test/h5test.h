@@ -17,8 +17,8 @@
  *
  * Purpose:     Test support stuff.
  */
-#ifndef _H5TEST_H
-#define _H5TEST_H
+#ifndef H5TEST_H
+#define H5TEST_H
 
 /*
  * Include required headers.  This file tests internal library functions,

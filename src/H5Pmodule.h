@@ -18,8 +18,8 @@
  *		H5P package.  Including this header means that the source file
  *		is part of the H5P package.
  */
-#ifndef _H5Pmodule_H
-#define _H5Pmodule_H
+#ifndef H5Pmodule_H
+#define H5Pmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_PLIST
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5Pmodule_H */
+#endif /* H5Pmodule_H */

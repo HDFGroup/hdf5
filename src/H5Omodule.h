@@ -18,8 +18,8 @@
  *		H5O package.  Including this header means that the source file
  *		is part of the H5O package.
  */
-#ifndef _H5Omodule_H
-#define _H5Omodule_H
+#ifndef H5Omodule_H
+#define H5Omodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_OHDR
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5Omodule_H */
+#endif /* H5Omodule_H */

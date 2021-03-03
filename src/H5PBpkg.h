@@ -15,8 +15,8 @@
 #error "Do not include this file outside the H5PB package!"
 #endif
 
-#ifndef _H5PBpkg_H
-#define _H5PBpkg_H
+#ifndef H5PBpkg_H
+#define H5PBpkg_H
 
 /* Get package's private header */
 #include "H5PBprivate.h"
@@ -50,4 +50,4 @@ typedef struct H5PB_entry_t {
 /* Package Private Prototypes */
 /******************************/
 
-#endif /* _H5PBpkg_H */
+#endif /* H5PBpkg_H */

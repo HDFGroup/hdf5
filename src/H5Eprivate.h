@@ -14,8 +14,8 @@
 /*
  *  Header file for error values, etc.
  */
-#ifndef _H5Eprivate_H
-#define _H5Eprivate_H
+#ifndef H5Eprivate_H
+#define H5Eprivate_H
 
 #include "H5Epublic.h"
 
@@ -114,12 +114,18 @@ typedef struct H5E_t H5E_t;
 #define HSYS_DONE_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
         int myerrno = errno;                                                                                 \
+        /* Other projects may rely on the description format to get the errno and any changes should be      \
+         * considered as an API change                                                                       \
+         */                                                                                                  \
         HDONE_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
                     HDstrerror(myerrno));                                                                    \
     }
 #define HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
         int myerrno = errno;                                                                                 \
+        /* Other projects may rely on the description format to get the errno and any changes should be      \
+         * considered as an API change                                                                       \
+         */                                                                                                  \
         HGOTO_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
                     HDstrerror(myerrno));                                                                    \
     }
@@ -203,4 +209,4 @@ H5_DLL herr_t H5E_printf_stack(H5E_t *estack, const char *file, const char *func
 H5_DLL herr_t H5E_clear_stack(H5E_t *estack);
 H5_DLL herr_t H5E_dump_api_stack(hbool_t is_api);
 
-#endif /* _H5Eprivate_H */
+#endif /* H5Eprivate_H */
