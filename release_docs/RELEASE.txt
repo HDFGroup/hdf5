@@ -697,6 +697,14 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Remove underscores on header file guards
+
+        Header file guards used a variety of underscores at the beginning the define.
+
+        Removed all leading (some trailing) underscores from header file guards.
+
+        (ADB - 2021/03/03, #361)
+
     - Fixed issue with MPI communicator and info object not being
       copied into new FAPL retrieved from H5F_get_access_plist
 

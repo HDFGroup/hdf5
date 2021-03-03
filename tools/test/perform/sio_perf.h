@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SIO_PERF_H__
-#define SIO_PERF_H__
+#ifndef SIO_PERF_H
+#define SIO_PERF_H
 
 #ifndef STANDALONE
 #include "io_timer.h"
@@ -101,4 +101,4 @@ extern void do_sio(parameters param, results *res);
 }
 #endif /* __cplusplus */
 
-#endif /* PIO_PERF_H__ */
+#endif /* SIO_PERF_H */

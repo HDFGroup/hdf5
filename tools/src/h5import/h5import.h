@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef H5IMPORT_H__
-#define H5IMPORT_H__
+#ifndef H5IMPORT_H
+#define H5IMPORT_H
 
 /*
  * state table tokens
@@ -189,4 +189,4 @@ void help(char *);
 hid_t createOutputDataType(struct Input *in);
 hid_t createInputDataType(struct Input *in);
 
-#endif /* H5IMPORT_H__ */
+#endif /* H5IMPORT_H */
