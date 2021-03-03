@@ -815,6 +815,8 @@ set (H5_PUBLIC_HEADERS
 
 set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5private.h
+    ${HDF5_SRC_DIR}/H5queue.h
+    ${HDF5_SRC_DIR}/H5retry_private.h
 
     ${HDF5_SRC_DIR}/H5Apkg.h
     ${HDF5_SRC_DIR}/H5Aprivate.h
