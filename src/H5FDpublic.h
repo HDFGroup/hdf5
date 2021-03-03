@@ -334,33 +334,33 @@ struct H5FD_t {
 //! [H5FD_file_image_op_t_snip]
 typedef enum {
     H5FD_FILE_IMAGE_OP_NO_OP,
-    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, /**< Passed to the \p image_malloc
-    *         and \p image_memcpy callbacks when a
-    *         file image buffer is to be copied while being set in a file
-    *         access property list (FAPL)*/
-    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, /**< Passed to the \p image_malloc
-    *         and \p image_memcpy callbacks
-    *         when a file image buffer is to be copied
-    *         when a FAPL is copied*/
-    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET, /**<Passed to the \p image_malloc
-    *         and \p image_memcpy callbacks
-    *         when a file image buffer is to be copied while being
-    *         retrieved from a FAPL*/
-    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE, /**<Passed to the \p image_free
-    *         callback when a file image
-    *         buffer is to be released during a FAPL close operation*/
-    H5FD_FILE_IMAGE_OP_FILE_OPEN, /**<Passed to the \p image_malloc and
-    *         \p image_memcpy callbackswhen a
-    *         file image buffer is to be copied during a file open operation \n
-    *         While the file image being opened will typically be copied from a
-    *         FAPL, this need not always be the case. For example, the core file
-    *         driver, also known as the memory file driver, takes its initial
-    *         image from a file.*/
-    H5FD_FILE_IMAGE_OP_FILE_RESIZE, /**<Passed to the \p image_realloc callback
-    *         when a file driver needs to resize an image buffer*/
-    H5FD_FILE_IMAGE_OP_FILE_CLOSE /**<Passed to the \p image_free
-    *         callback when an image buffer is to
-    *         be released during a file close operation*/
+    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
+    /**< Passed to the \p image_malloc and \p image_memcpy callbacks when a
+     * file image buffer is to be copied while being set in a file access
+     * property list (FAPL)*/
+    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
+    /**< Passed to the \p image_malloc and \p image_memcpy callbacks
+     * when a file image buffer is to be copied when a FAPL is copied*/
+    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
+    /**<Passed to the \p image_malloc and \p image_memcpy callbacks when
+     * a file image buffer is to be copied while being retrieved from a FAPL*/
+    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
+    /**<Passed to the \p image_free callback when a file image
+     * buffer is to be released during a FAPL close operation*/
+    H5FD_FILE_IMAGE_OP_FILE_OPEN,
+    /**<Passed to the \p image_malloc and
+     * \p image_memcpy callbackswhen a
+     * file image buffer is to be copied during a file open operation \n
+     * While the file image being opened will typically be copied from a
+     * FAPL, this need not always be the case. For example, the core file
+     * driver, also known as the memory file driver, takes its initial
+     * image from a file.*/
+    H5FD_FILE_IMAGE_OP_FILE_RESIZE,
+    /**<Passed to the \p image_realloc callback when a file driver needs
+     * to resize an image buffer*/
+    H5FD_FILE_IMAGE_OP_FILE_CLOSE
+    /**<Passed to the \p image_free callback when an image buffer is to
+     * be released during a file close operation*/
 } H5FD_file_image_op_t;
 //! [H5FD_file_image_op_t_snip]
 
