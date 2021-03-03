@@ -75,7 +75,7 @@
 
 /* Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the
  * parent file. */
-#define H5F_ACC_DEFAULT (H5CHECK H5OPEN 0xffffu) /*ignore setting on lapl     */
+#define H5F_ACC_DEFAULT (H5CHECK H5OPEN 0xffffu) /* ignore setting on lapl     */
 
 /* Flags for H5Fget_obj_count() & H5Fget_obj_ids() calls */
 #define H5F_OBJ_FILE     (0x0001u) /* File objects */

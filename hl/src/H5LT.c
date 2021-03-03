@@ -1297,7 +1297,7 @@ out:
  */
 
 static herr_t
-find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5L_info2_t *linfo,
+find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5L_info_t *linfo,
              void *op_data)
 {
     /* Define a default zero value for return. This will cause the iterator to continue if

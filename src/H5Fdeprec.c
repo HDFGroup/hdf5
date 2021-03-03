@@ -34,12 +34,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fpkg.h"      /* File access				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5SMprivate.h" /* Shared object header messages        */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Fpkg.h"      /* File access                              */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5SMprivate.h" /* Shared object header messages            */
 
 /****************/
 /* Local Macros */
@@ -75,16 +75,12 @@
  * Function:    H5Fget_info1
  *
  * Purpose:     Gets general information about the file, including:
- *		1. Get storage size for superblock extension if there is one.
+ *              1. Get storage size for superblock extension if there is one.
  *              2. Get the amount of btree and heap storage for entries
  *                 in the SOHM table if there is one.
- *		3. The amount of free space tracked in the file.
+ *              3. The amount of free space tracked in the file.
  *
- * Return:      Success:        non-negative on success
- *              Failure:        Negative
- *
- * Programmer:  Vailin Choi
- *              July 11, 2007
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
