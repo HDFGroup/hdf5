@@ -95,8 +95,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
     H5O_layout_t * mesg       = NULL;
     uint8_t *      heap_block = NULL;
     unsigned       u;
-    const uint8_t *p_end      = p + p_size - 1; /* End of the p buffer */
-    void *         ret_value  = NULL;           /* Return value */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void *         ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_STATIC
 
