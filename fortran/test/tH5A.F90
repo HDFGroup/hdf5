@@ -252,7 +252,7 @@ CONTAINS
      ! Create dataset DOUBLE attribute.
      !
      es_id = H5ES_NONE_F
-     CALL h5acreate_async_f(dset_id, aname3, atype3_id, aspace2_id, &
+     CALL h5acreate_async_f(dset_id, TRIM(aname3)//_async, atype3_id, aspace2_id, &
                       attr3_id, es_id, error, &
                       file=__FILE__, func="attribute_test", line=__LINE__)
 
