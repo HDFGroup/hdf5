@@ -41,8 +41,6 @@ pre.fragment {
   padding: 3px 5px 3px 5px;
 }
 
-
-
 /* Common style for all HDF5's tables */
 
 table.example, table.manual, table.manual-vl, table.manual-hl {
@@ -232,4 +230,22 @@ td.width20em p.endtd {
 /* needed for huge screens */
 .ui-resizable-e {
   background-repeat: repeat-y;
+}
+
+/* Style external links -- nav-tree is different */
+
+#nav-tree .label a {
+  padding:2px 16px 2px 2px;
+}
+
+a {
+  outline: none;
+  text-decoration: none;
+  padding: 2px 1px 0;
+}
+
+a[href*="http"] {
+  background: url('https://mdn.mozillademos.org/files/12982/external-link-52.png') no-repeat 100% 0;
+  background-size: 12px 12px;
+  padding-right: 16px;
 }
