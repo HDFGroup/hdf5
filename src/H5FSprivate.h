@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5FSprivate_H
-#define _H5FSprivate_H
+#ifndef H5FSprivate_H
+#define H5FSprivate_H
 
 /* Include package's public header */
 #include "H5FSpublic.h"
@@ -218,4 +218,4 @@ H5_DLL herr_t H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stre
 H5_DLL herr_t H5FS_sect_debug(const H5FS_t *fspace, const H5FS_section_info_t *sect, FILE *stream, int indent,
                               int fwidth);
 
-#endif /* _H5FSprivate_H */
+#endif /* H5FSprivate_H */

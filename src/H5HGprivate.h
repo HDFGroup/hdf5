@@ -15,8 +15,8 @@
  * Programmer:  Robb Matzke
  *              Friday, March 27, 1998
  */
-#ifndef _H5HGprivate_H
-#define _H5HGprivate_H
+#ifndef H5HGprivate_H
+#define H5HGprivate_H
 
 /* Include package's public header */
 #include "H5HGpublic.h"
@@ -68,4 +68,4 @@ H5_DLL size_t  H5HG_get_free_size(const H5HG_heap_t *h);
 /* Debugging functions */
 H5_DLL herr_t H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth);
 
-#endif /* _H5HGprivate_H */
+#endif /* H5HGprivate_H */

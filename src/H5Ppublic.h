@@ -15,8 +15,8 @@
  * This file contains function prototypes for each exported function in the
  * H5P module.
  */
-#ifndef _H5Ppublic_H
-#define _H5Ppublic_H
+#ifndef H5Ppublic_H
+#define H5Ppublic_H
 
 /* System headers needed by this file */
 
@@ -451,4 +451,4 @@ H5_DLL herr_t       H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsign
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Ppublic_H */
+#endif /* H5Ppublic_H */

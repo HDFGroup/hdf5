@@ -4098,8 +4098,8 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 #else /* H5_NO_DEPRECATED_SYMBOLS */
     /* Shut compiler up */
-    fcpl = fcpl;
-    fapl = fapl;
+    (void)fcpl;
+    (void)fapl;
 
     /* Output message about test being skipped */
     MESSAGE(5, ("Skipping Test On Deprecated Attribute Routines\n"));

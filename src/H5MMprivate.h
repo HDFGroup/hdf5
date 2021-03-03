@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5MMprivate_H
-#define _H5MMprivate_H
+#ifndef H5MMprivate_H
+#define H5MMprivate_H
 
 #include "H5MMpublic.h"
 
@@ -41,4 +41,4 @@ H5_DLL char *H5MM_xstrdup(const char *s);
 H5_DLL char *H5MM_strdup(const char *s);
 H5_DLL void *H5MM_xfree(void *mem);
 
-#endif /* _H5MMprivate_H */
+#endif /* H5MMprivate_H */

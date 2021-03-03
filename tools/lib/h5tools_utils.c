@@ -208,8 +208,6 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
         arg[arg_len] = 0;
 
         for (i = 0; l_opts && l_opts[i].name; i++) {
-            size_t len = HDstrlen(l_opts[i].name);
-
             if (HDstrcmp(arg, l_opts[i].name) == 0) {
                 /* we've found a matching long command line flag */
                 opt_opt = l_opts[i].shortval;

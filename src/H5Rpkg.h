@@ -19,8 +19,8 @@
 #error "Do not include this file outside the H5R package!"
 #endif
 
-#ifndef _H5Rpkg_H
-#define _H5Rpkg_H
+#ifndef H5Rpkg_H
+#define H5Rpkg_H
 
 /* Get package's private header */
 #include "H5Rprivate.h"
@@ -50,4 +50,4 @@ H5_DLL herr_t H5R__term_deprec_interface(void);
 H5_DLL herr_t H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref,
                                H5O_type_t *obj_type);
 
-#endif /* _H5Rpkg_H */
+#endif /* H5Rpkg_H */

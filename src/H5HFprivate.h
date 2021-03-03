@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5HFprivate_H
-#define _H5HFprivate_H
+#ifndef H5HFprivate_H
+#define H5HFprivate_H
 
 /* Include package's public header */
 #include "H5HFpublic.h"
@@ -126,4 +126,4 @@ H5_DLL herr_t H5HF_size(const H5HF_t *fh, hid_t dxpl_id, hsize_t *heap_size /*ou
 H5_DLL herr_t H5HF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth);
 #endif /* H5HF_DEBUGGING */
 
-#endif /* _H5HFprivate_H */
+#endif /* H5HFprivate_H */
