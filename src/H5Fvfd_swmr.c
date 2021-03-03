@@ -1502,10 +1502,14 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_shared_t *shared,
     FUNC_ENTER_STATIC
 
     /* Get current time in struct timespec */
-    if ( HDclock_gettime(CLOCK_MONOTONIC, &curr) < 0 )
-
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, \
-                    "can't get time via clock_gettime")
+#ifdef H5_HAVE_WIN32_API
+        if (timespec_get(&curr, TIME_UTC) != TIME_UTC)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via timespec_get");
+#else
+        if (HDclock_gettime(CLOCK_MONOTONIC, &curr) < 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
+        }
+#endif
 
     /* Convert curr to nsecs */
     curr_nsecs = curr.tv_sec * nanosecs_per_second + curr.tv_nsec;
@@ -1952,10 +1956,14 @@ H5F_vfd_swmr_process_eot_queue(hbool_t entering_api)
         H5F_t *f = head->vfd_swmr_file;
         H5F_shared_t *shared = f->shared;
 
+#ifdef H5_HAVE_WIN32_API
+        if(timespec_get(&now, TIME_UTC) != TIME_UTC)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via timespec_get");
+#else
         if(HDclock_gettime(CLOCK_MONOTONIC, &now) < 0) {
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, FAIL,
-                        "can't get time via clock_gettime");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
         }
+#endif
         if(timespeccmp(&now, &head->end_of_tick, <))
             break;
         /* If the H5F_shared_t is labeled with a later EOT time than
