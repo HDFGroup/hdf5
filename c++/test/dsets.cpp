@@ -163,8 +163,7 @@ test_create(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
+        delete dataset;
         return -1;
     }
     // catch all other exceptions
@@ -172,8 +171,7 @@ test_create(H5File &file)
         issue_fail_msg("test_create", __LINE__, __FILE__);
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
+        delete dataset;
         return -1;
     }
 } // test_create
@@ -253,8 +251,7 @@ test_simple_io(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (tconv_buf)
-            delete[] tconv_buf;
+        delete[] tconv_buf;
         return -1;
     }
 } // test_simple_io
@@ -696,10 +693,8 @@ test_compression(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
-        if (tconv_buf)
-            delete[] tconv_buf;
+        delete dataset;
+        delete[] tconv_buf;
         return -1;
     }
 } // test_compression
@@ -889,8 +884,7 @@ test_multiopen(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (space != NULL)
-            delete space;
+        delete space;
         return -1;
     }
 } // test_multiopen
@@ -968,8 +962,7 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "bitfield_1: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
+            delete dset;
             return -1;
         }
 
@@ -1000,8 +993,7 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "bitfield_2: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
+            delete dset;
             throw E; // propagate the exception
         }
 
@@ -1035,10 +1027,8 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "opaque_1: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
-            if (optype != NULL)
-                delete optype;
+            delete dset;
+            delete optype;
             throw E; // propagate the exception
         }
 
@@ -1071,10 +1061,8 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "opaque_2: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
-            if (optype != NULL)
-                delete optype;
+            delete dset;
+            delete optype;
             throw E; // propagate the exception
         }
 

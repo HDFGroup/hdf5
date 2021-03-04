@@ -180,8 +180,7 @@ test_compound_2()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_2()
 
 /*-------------------------------------------------------------------------
@@ -291,8 +290,7 @@ test_compound_3()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_3()
 
 /*-------------------------------------------------------------------------
@@ -411,8 +409,7 @@ test_compound_4()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_4()
 
 /*-------------------------------------------------------------------------
@@ -508,8 +505,7 @@ test_compound_5()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_5()
 
 /*-------------------------------------------------------------------------

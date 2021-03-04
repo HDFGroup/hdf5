@@ -68,8 +68,7 @@ FileCreatPropList::getConstant()
 void
 FileCreatPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------

@@ -72,8 +72,7 @@ DSetAccPropList::getConstant()
 void
 DSetAccPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
