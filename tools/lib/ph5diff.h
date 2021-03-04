@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _PH5DIFF_H__
-#define _PH5DIFF_H__
+#ifndef PH5DIFF_H
+#define PH5DIFF_H
 
 /* Send from manager to workers */
 #define MPI_TAG_ARGS      1
@@ -40,4 +40,4 @@ struct diffs_found {
     int     not_cmp;
 };
 
-#endif /* _PH5DIFF_H__ */
+#endif /* PH5DIFF_H */

@@ -688,10 +688,10 @@ done:
 static H5SL_node_t *
 H5SL_insert_common(H5SL_t *slist, void *item, const void *key)
 {
-    H5SL_node_t *x;           /* Current node to examine */
-    H5SL_node_t *prev;        /* Node before the new node */
-    uint32_t     hashval = 0; /* Hash value for key */
-    H5SL_node_t *ret_value;   /* Return value */
+    H5SL_node_t *x;                /* Current node to examine */
+    H5SL_node_t *prev;             /* Node before the new node */
+    uint32_t     hashval   = 0;    /* Hash value for key */
+    H5SL_node_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1316,9 +1316,9 @@ done:
 void *
 H5SL_search(H5SL_t *slist, const void *key)
 {
-    H5SL_node_t *x;           /* Current node to examine */
-    uint32_t     hashval = 0; /* Hash value for key */
-    void *       ret_value;   /* Return value */
+    H5SL_node_t *x;                /* Current node to examine */
+    uint32_t     hashval   = 0;    /* Hash value for key */
+    void *       ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1614,9 +1614,9 @@ done:
 H5SL_node_t *
 H5SL_find(H5SL_t *slist, const void *key)
 {
-    H5SL_node_t *x;           /* Current node to examine */
-    uint32_t     hashval = 0; /* Hash value for key */
-    H5SL_node_t *ret_value;   /* Return value */
+    H5SL_node_t *x;                /* Current node to examine */
+    uint32_t     hashval   = 0;    /* Hash value for key */
+    H5SL_node_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

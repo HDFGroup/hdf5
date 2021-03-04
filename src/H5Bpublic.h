@@ -23,8 +23,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Bpublic_H
-#define _H5Bpublic_H
+#ifndef H5Bpublic_H
+#define H5Bpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"

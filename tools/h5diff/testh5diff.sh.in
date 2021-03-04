@@ -311,6 +311,7 @@ $SRC_H5DIFF_TESTFILES/h5diff_708.txt
 $SRC_H5DIFF_TESTFILES/h5diff_709.txt
 $SRC_H5DIFF_TESTFILES/h5diff_710.txt
 $SRC_H5DIFF_TESTFILES/h5diff_80.txt
+$SRC_H5DIFF_TESTFILES/h5diff_830.txt
 $SRC_H5DIFF_TESTFILES/h5diff_90.txt
 $SRC_H5DIFF_TESTFILES/h5diff_8625.txt
 $SRC_H5DIFF_TESTFILES/h5diff_8639.txt
@@ -1130,6 +1131,10 @@ TOOLTEST h5diff_644.txt -v --use-system-epsilon -d 5 h5diff_basic1.h5 h5diff_bas
 TOOLTEST h5diff_645.txt -v -p 0.05 --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
 TOOLTEST h5diff_646.txt -v --use-system-epsilon -p 0.05 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
 
+# ##############################################################################
+# # dataset subsets
+# ##############################################################################
+#TRILABS_227 TOOLTEST h5diff_830.txt --enable-error-stack -v h5diff_dset1.h5 h5diff_dset2.h5 /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;]
 
 # ##############################################################################
 # # END

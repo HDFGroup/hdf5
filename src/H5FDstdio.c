@@ -1064,7 +1064,7 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
     return 0;
 } /* end H5FD_stdio_truncate() */
 
-#ifdef _H5private_H
+#ifdef H5private_H
 /*
  * This is not related to the functionality of the driver code.
  * It is added here to trigger warning if HDF5 private definitions are included

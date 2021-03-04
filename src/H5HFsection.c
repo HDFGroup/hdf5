@@ -2432,7 +2432,7 @@ H5HF_sect_indirect_init_rows(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t
 
             /* Add an indirect section for each indirect block in the row */
             for (v = 0; v < row_entries; v++) {
-                hbool_t did_protect; /* Whether we protected the indirect block or not */
+                hbool_t did_protect = FALSE; /* Whether we protected the indirect block or not */
 
                 /* Try to get the child section's indirect block, if it's available */
                 if (sect->sect_info.state == H5FS_SECT_LIVE) {

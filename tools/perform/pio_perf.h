@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef PIO_PERF_H__
-#define PIO_PERF_H__
+#ifndef PIO_PERF_H
+#define PIO_PERF_H
 
 #ifndef STANDALONE
 #include "io_timer.h"
@@ -97,4 +97,4 @@ extern results do_pio(parameters param);
 }
 #endif /* __cplusplus */
 
-#endif /* PIO_PERF_H__ */
+#endif /* PIO_PERF_H */

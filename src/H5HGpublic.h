@@ -15,8 +15,8 @@
  * Programmer:  Robb Matzke
  *              Friday, March 27, 1998
  */
-#ifndef _H5HGpublic_H
-#define _H5HGpublic_H
+#ifndef H5HGpublic_H
+#define H5HGpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"

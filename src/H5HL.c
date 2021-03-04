@@ -1096,7 +1096,7 @@ H5HL_get_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t *size)
 {
     H5HL_cache_prfx_ud_t prfx_udata;          /* User data for protecting local heap prefix */
     H5HL_prfx_t *        prfx = NULL;         /* Local heap prefix */
-    H5HL_t *             heap;                /* Heap data structure */
+    H5HL_t *             heap = NULL;         /* Heap data structure */
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1148,7 +1148,7 @@ H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
 {
     H5HL_cache_prfx_ud_t prfx_udata;          /* User data for protecting local heap prefix */
     H5HL_prfx_t *        prfx = NULL;         /* Local heap prefix */
-    H5HL_t *             heap;                /* Heap data structure */
+    H5HL_t *             heap = NULL;         /* Heap data structure */
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

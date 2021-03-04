@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef H5DIFFCOMMON_H__
-#define H5DIFFCOMMON_H__
+#ifndef H5DIFFCOMMON_H
+#define H5DIFFCOMMON_H
 
 #include "h5tools.h"
 /* Name of tool */
@@ -32,4 +32,4 @@ void print_info(diff_opt_t *opts);
 }
 #endif
 
-#endif /* H5DIFFCOMMON_H__ */
+#endif /* H5DIFFCOMMON_H */

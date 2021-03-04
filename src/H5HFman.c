@@ -227,14 +227,14 @@ H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, H5HF_operato
 {
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to query */
     H5AC_protect_t dblock_access;       /* Access method for direct block */
-    haddr_t        dblock_addr;         /* Direct block address */
-    size_t         dblock_size;         /* Direct block size */
-    unsigned       dblock_cache_flags;  /* Flags for unprotecting direct block */
-    hsize_t        obj_off;             /* Object's offset in heap */
-    size_t         obj_len;             /* Object's length in heap */
-    size_t         blk_off;             /* Offset of object in block */
-    uint8_t *      p;                   /* Temporary pointer to obj info in block */
-    herr_t         ret_value = SUCCEED; /* Return value */
+    haddr_t  dblock_addr = HADDR_UNDEF; /* Direct block address */
+    size_t   dblock_size;               /* Direct block size */
+    unsigned dblock_cache_flags = 0;    /* Flags for unprotecting direct block */
+    hsize_t  obj_off;                   /* Object's offset in heap */
+    size_t   obj_len;                   /* Object's length in heap */
+    size_t   blk_off;                   /* Offset of object in block */
+    uint8_t *p;                         /* Temporary pointer to obj info in block */
+    herr_t   ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -476,9 +476,9 @@ done:
 herr_t
 H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 {
-    H5HF_free_section_t *sec_node = NULL;     /* Pointer to free space section for block */
-    H5HF_indirect_t *    iblock   = NULL;     /* Pointer to indirect block */
-    hbool_t              did_protect;         /* Whether we protected the indirect block or not */
+    H5HF_free_section_t *sec_node    = NULL;  /* Pointer to free space section for block */
+    H5HF_indirect_t *    iblock      = NULL;  /* Pointer to indirect block */
+    hbool_t              did_protect = FALSE; /* Whether we protected the indirect block or not */
     hsize_t              obj_off;             /* Object's offset in heap */
     size_t               obj_len;             /* Object's length in heap */
     size_t               dblock_size;         /* Direct block size */

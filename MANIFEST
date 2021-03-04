@@ -1981,6 +1981,7 @@
 ./tools/h5diff/testfiles/h5diff_80.txt
 ./tools/h5diff/testfiles/h5diff_800.txt
 ./tools/h5diff/testfiles/h5diff_801.txt
+./tools/h5diff/testfiles/h5diff_830.txt
 ./tools/h5diff/testfiles/h5diff_90.txt
 ./tools/h5diff/testfiles/h5diff_100.txt
 ./tools/h5diff/testfiles/h5diff_101.txt
