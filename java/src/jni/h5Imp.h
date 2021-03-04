@@ -13,8 +13,8 @@
 #include <jni.h>
 /* Header for class hdf_hdf5lib_H5_H5 */
 
-#ifndef _Included_hdf_hdf5lib_H5_H5
-#define _Included_hdf_hdf5lib_H5_H5
+#ifndef Included_hdf_hdf5lib_H5_H5
+#define Included_hdf_hdf5lib_H5_H5
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,4 +82,4 @@ JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5is_1library_1threadsafe(JNIEnv 
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_hdf_hdf5lib_H5_H5 */
+#endif /* Included_hdf_hdf5lib_H5_H5 */

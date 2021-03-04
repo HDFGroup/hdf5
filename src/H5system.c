@@ -698,8 +698,8 @@ H5_make_time(struct tm *tm)
      * VS 2015 is removed, with _get_timezone replacing it.
      */
     long timezone = 0;
-#endif                /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
-    time_t ret_value; /* Return value */
+#endif                    /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+    time_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1337,7 +1337,7 @@ done:
 herr_t
 H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
 {
-    size_t path1_len;           /* length of path1 */
+    size_t path1_len = 0;       /* length of path1 */
     size_t path2_len;           /* length of path2 */
     herr_t ret_value = SUCCEED; /* Return value */
 

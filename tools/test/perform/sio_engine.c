@@ -783,7 +783,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
 
     /* Allocate data verification buffer */
     if (NULL == (buffer2 = (char *)malloc(linear_buf_size))) {
-        HDfprintf(stderr, "malloc for data verification buffer size (%Zu) failed\n", linear_buf_size);
+        HDfprintf(stderr, "malloc for data verification buffer size (%zu) failed\n", linear_buf_size);
         GOTOERROR(FAIL);
     } /* end if */
 

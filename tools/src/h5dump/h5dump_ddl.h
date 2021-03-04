@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef H5DUMP_DDL_H__
-#define H5DUMP_DDL_H__
+#ifndef H5DUMP_DDL_H
+#define H5DUMP_DDL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,4 +50,4 @@ void handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED *data, in
 }
 #endif
 
-#endif /* !H5DUMP_DDL_H__ */
+#endif /* H5DUMP_DDL_H */

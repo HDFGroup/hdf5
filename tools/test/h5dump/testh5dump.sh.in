@@ -140,7 +140,7 @@ $SRC_H5DUMP_TESTFILES/thyperslab.h5
 $SRC_H5DUMP_TESTFILES/tintsattrs.h5
 $SRC_H5DUMP_TESTFILES/tints4dims.h5
 $SRC_H5DUMP_TESTFILES/tlarge_objname.h5
-#$SRC_H5DUMP_TESTFILES/tldouble.h5
+$SRC_H5DUMP_TESTFILES/tldouble.h5
 $SRC_H5DUMP_TESTFILES/tlonglinks.h5
 $SRC_H5DUMP_TESTFILES/tloop.h5
 $SRC_H5DUMP_TESTFILES/tmulti-b.h5
@@ -284,7 +284,7 @@ $SRC_H5DUMP_TESTFILES/tints4dimsCountEq.ddl
 $SRC_H5DUMP_TESTFILES/tints4dimsStride2.ddl
 $SRC_H5DUMP_TESTFILES/tintsattrs.ddl
 $SRC_H5DUMP_TESTFILES/tlarge_objname.ddl
-#$SRC_H5DUMP_TESTFILES/tldouble.ddl
+$SRC_H5DUMP_TESTFILES/tldouble.ddl
 $SRC_H5DUMP_TESTFILES/tlonglinks.ddl
 $SRC_H5DUMP_TESTFILES/tloop-1.ddl
 $SRC_H5DUMP_TESTFILES/tmulti.ddl
@@ -1433,7 +1433,7 @@ TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1
 TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
 
 # test to verify HDFFV-9407: long double full precision
-GREPTEST OUTTXT "1.123456789012345" t128bit_float.ddl -m %.35Lf t128bit_float.h5
+#GREPTEST OUTTXT "1.123456789012345" t128bit_float.ddl -m %.35Lf t128bit_float.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

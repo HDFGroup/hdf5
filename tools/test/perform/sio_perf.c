@@ -872,9 +872,9 @@ report_parameters(struct options *opts)
     HDfprintf(output, "\n");
 
     if (opts->page_size) {
-        HDfprintf(output, "Page Aggregation Enabled. Page size = %ld\n", opts->page_size);
+        HDfprintf(output, "Page Aggregation Enabled. Page size = %zu\n", opts->page_size);
         if (opts->page_buffer_size)
-            HDfprintf(output, "Page Buffering Enabled. Page Buffer size = %ld\n", opts->page_buffer_size);
+            HDfprintf(output, "Page Buffering Enabled. Page Buffer size = %zu\n", opts->page_buffer_size);
         else
             HDfprintf(output, "Page Buffering Disabled\n");
     }

@@ -210,7 +210,7 @@ H5FD_splitter_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     H5FD_SPLITTER_LOG_CALL(FUNC);
 
