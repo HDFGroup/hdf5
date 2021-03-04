@@ -403,16 +403,17 @@ should be useful.
 
 \subsection gconfig General Configuration
 
-The \c version field is intended to allow \THG to change the \c \c
+The \c version field is intended to allow \THG to change the \c
 H5AC_cache_config_t structure without breaking old code. For now, this field
 should always be set to \c H5AC__CURR_CACHE_CONFIG_VERSION, even when you are
 getting the current configuration data from the cache. The library needs the
 version number to know where fields are located with reference to the supplied
 base address.
 
-The \c rpt_fcn_enabled field is a boolean flag that allows you to turn on and
-off the resize reporting function that reports the activities of the adaptive
-cache resize code at the end of each epoch -- assuming that it is enabled.
+The \ref H5AC_cache_config_t.rpt_fcn_enabled "rpt_fcn_enabled" field is a
+boolean flag that allows you to turn on and off the resize reporting function
+that reports the activities of the adaptive cache resize code at the end of each
+epoch -- assuming that it is enabled.
 
 The report function is unsupported, so you are on your own if you use it. Since
 it dumps status data to stdout, you should not attempt to use it with Windows
@@ -434,36 +435,44 @@ At present we do not have a playback utility for trace files, although I imagine
 that we will write one quickly when and if we need it.
 
 To enable the trace file, you load the full path of the desired trace file into
-\c trace_file_name, and set \c open_trace_file to \c TRUE. In the parallel case,
-an ASCII representation of the rank of each process is appended to the supplied
-trace file name to create a unique trace file name for that process.
+\ref H5AC_cache_config_t.trace_file_name "trace_file_name", and set \ref
+H5AC_cache_config_t.open_trace_file "open_trace_file" to \c TRUE. In the
+parallel case, an ASCII representation of the rank of each process is appended
+to the supplied trace file name to create a unique trace file name for that
+process.
 
-To close an open trace file, set close_trace_file to \c TRUE.
+To close an open trace file, set \ref H5AC_cache_config_t.close_trace_file
+"close_trace_file" to \c TRUE.
 
 It must be emphasized that you are on your own if you play with the trace file
 feature absent a request from \THG. Needless to say, the trace file feature is
 disabled by default. If you enable it, you will take a large performance hit and
 generate huge trace files.
 
-The \c evictions_enabled field is a boolean flag allowing the user to disable
-the eviction of entries from the metadata cache. Under normal operation
-conditions, this field will always be set to \c TRUE.
+The \ref H5AC_cache_config_t.evictions_enabled "evictions_enabled" field is a
+boolean flag allowing the user to disable the eviction of entries from the
+metadata cache. Under normal operation conditions, this field will always be set
+to \c TRUE.
 
 In rare circumstances, the raw data throughput requirements may be so high that
 the user wishes to postpone metadata writes so as to reserve I/O throughput for
-raw data. The \c evictions_enabled field exists to allow this -- although the user
-is to be warned that the metadata cache will grow without bound while evictions
-are disabled. Thus evictions should be re-enabled as soon as possible, and it
-may be wise to monitor cache size and statistics (to see how to enable
-statistics, see the debugging facilities section below).
+raw data. The \ref H5AC_cache_config_t.evictions_enabled "evictions_enabled"
+field exists to allow this -- although the user is to be warned that the
+metadata cache will grow without bound while evictions are disabled. Thus
+evictions should be re-enabled as soon as possible, and it may be wise to
+monitor cache size and statistics (to see how to enable statistics, see the
+debugging facilities section below).
 
 Evictions may only be disabled when the automatic cache resize code is disabled
-as well. Thus to disable evictions, not only must the user set the
-evictions_enabled field to \c FALSE, but he must also set \c incr_mode to \c
-H5C_incr__off, set \c flash_incr_mode to \c H5C_flash_incr__off, and set
-\c decr_mode to \c H5C_decr__off.
+as well. Thus to disable evictions, not only must the user set the \ref
+H5AC_cache_config_t.evictions_enabled "evictions_enabled" field to \c FALSE, but
+he must also set \ref H5AC_cache_config_t.incr_mode "incr_mode" to
+#H5C_incr__off, set \ref H5AC_cache_config_t.flash_incr_mode "flash_incr_mode"
+to #H5C_flash_incr__off, and set \ref H5AC_cache_config_t.decr_mode "decr_mode"
+to #H5C_decr__off.
 
-To re-enable evictions, just set \c evictions_enabled back to \c TRUE.
+To re-enable evictions, just set \ref H5AC_cache_config_t.evictions_enabled
+"evictions_enabled" back to \c TRUE.
 
 Before passing on to other subjects, it is worth re-iterating that disabling
 evictions is an extreme step. Before attempting it, you might consider setting a
@@ -471,38 +480,50 @@ large cache size manually, and flushing the cache just before high raw data
 throughput is required. This may yield the desired results without the risks
 inherent in disabling evictions.
 
-The \c set_initial_size and \c initial_size fields allow you to specify an
-initial maximum cache size. If \c set_initial_size is \c TRUE, \c initial_size
-must lie in the interval \Code{[min_size, max_size]} (see below for a discussion
-of the \c min_size and \c max_size fields).
+The \ref H5AC_cache_config_t.set_initial_size "set_initial_size" and \ref
+H5AC_cache_config_t.initial_size "initial_size" fields allow you to specify an
+initial maximum cache size. If \ref H5AC_cache_config_t.set_initial_size
+"set_initial_size" is \c TRUE, \ref H5AC_cache_config_t.initial_size
+"initial_size" must lie in the interval [\ref H5AC_cache_config_t.min_size
+"min_size", \ref H5AC_cache_config_t.max_size "max_size"] (see below for a
+discussion of the \ref H5AC_cache_config_t.min_size "min_size" and \ref
+H5AC_cache_config_t.max_size "max_size" fields).
 
-If you disable the adaptive cache resizing code (done by setting \c incr_mode to
-\c H5C_incr__off, \c flash_incr_mode to \c H5C_flash_incr__off, and \c decr_mode to
-\c H5C_decr__off), you can use these fields to control maximum cache size manually,
-as the maximum cache size will remain at the initial size.
+If you disable the adaptive cache resizing code (done by setting \ref
+H5AC_cache_config_t.incr_mode "incr_mode" to #H5C_incr__off, \ref
+H5AC_cache_config_t.flash_incr_mode "flash_incr_mode" to #H5C_flash_incr__off,
+and \ref H5AC_cache_config_t.decr_mode "decr_mode" to #H5C_decr__off), you can
+use these fields to control maximum cache size manually, as the maximum cache
+size will remain at the initial size.
 
-Note, that the maximum cache size is only modified when \c set_initial_size is
-\c TRUE. This allows the use of configurations specified at compile time to
-change resize configuration without altering the current maximum size of the
-cache. Without this feature, an additional call would be required to get the
-current maximum cache size so as to set the \c initial_size to the current
-maximum cache size, and thereby avoid changing it.
+Note, that the maximum cache size is only modified when \ref
+H5AC_cache_config_t.set_initial_size "set_initial_size" is \c TRUE. This allows
+the use of configurations specified at compile time to change resize
+configuration without altering the current maximum size of the cache. Without
+this feature, an additional call would be required to get the current maximum
+cache size so as to set the \ref H5AC_cache_config_t.initial_size "initial_size"
+to the current maximum cache size, and thereby avoid changing it.
 
-The \c min_clean_fraction sets the current minimum clean size as a fraction of
-the current max cache size. While this field was originally used only in the
-parallel version of the library, it now applies to the serial version as
-well. Its value must lie in the range \Code{[0.0, 1.0]}. 0.01 is reasonable in
-the serial case, and 0.3 in the parallel.
+The \ref H5AC_cache_config_t.min_clean_fraction "min_clean_fraction" sets the
+current minimum clean size as a fraction of the current max cache size. While
+this field was originally used only in the parallel version of the library, it
+now applies to the serial version as well. Its value must lie in the range
+\Code{[0.0, 1.0]}. 0.01 is reasonable in the serial case, and 0.3 in the
+parallel.
 
 A potential interaction, discovered at release 1.8.3, between the enforcement of
-the min_clean_fraction and the adaptive cache resize code can severely degrade
-performance. While this interaction is easily dealt with in the serial case by
-setting \c min_clean_fraction to 0.01, the problem is more difficult in the
-parallel case. Please see the Interactions section below for further details.
+the \ref H5AC_cache_config_t.min_clean_fraction "min_clean_fraction" and the
+adaptive cache resize code can severely degrade performance. While this
+interaction is easily dealt with in the serial case by setting \ref
+H5AC_cache_config_t.min_clean_fraction "min_clean_fraction" to 0.01, the problem
+is more difficult in the parallel case. Please see the Interactions section
+below for further details.
 
-The \c max_size and \c min_size fields specify the range of maximum sizes that
-may be set for the cache by the automatic resize code. min_size must be less
-than or equal to \c max_size, and both must lie in the range
+The \ref H5AC_cache_config_t.max_size "max_size" and \ref
+H5AC_cache_config_t.min_size "min_size" fields specify the range of maximum
+sizes that may be set for the cache by the automatic resize code. \ref
+H5AC_cache_config_t.min_size "min_size" must be less than or equal to
+\ref H5AC_cache_config_t.max_size "max_size", and both must lie in the range
 \Code{[H5C__MIN_MAX_CACHE_SIZE, H5C__MAX_MAX_CACHE_SIZE]} -- currently [1 KB,
 128 MB]. If you routinely run a cache size in the top half of this range, you
 should increase the hash table size. To do this, modify the \c
@@ -517,53 +538,64 @@ defined in \c H5Cprivate.h. 50000 is a reasonable value.
 
 \subsection increment Increment Configuration
 
-The \c incr_mode field specifies the cache size increment algorithm used. Its
-value must be a member of the \ref H5C_cache_incr_mode enum type -- currently
-either #H5C_incr__off or #H5C_incr__threshold (note the double underscores after
-\c "incr"). This type is defined in H5Cpublic.h.
+The \ref H5AC_cache_config_t.incr_mode "incr_mode" field specifies the cache
+size increment algorithm used. Its value must be a member of the \ref
+H5C_cache_incr_mode enum type -- currently either #H5C_incr__off or
+#H5C_incr__threshold (note the double underscores after \c "incr"). This type is
+defined in H5Cpublic.h.
 
-If \c incr_mode is set to #H5C_incr__off, regular automatic cache size increases
-are disabled, and the \c lower_hr_threshold, \c increment, \c
-apply_max_increment, and \c max_increment fields are ignored.
+If \ref H5AC_cache_config_t.incr_mode "incr_mode" is set to #H5C_incr__off,
+regular automatic cache size increases are disabled, and the \ref
+H5AC_cache_config_t.lower_hr_threshold "lower_hr_threshold", \ref
+H5AC_cache_config_t.increment "increment", \ref
+H5AC_cache_config_t.apply_max_increment "apply_max_increment", and \ref
+H5AC_cache_config_t.max_increment "max_increment", fields are ignored.
 
-The \c flash_incr_mode field specifies the flash cache size increment algorithm
-used. Its value must be a member of the \ref H5C_cache_flash_incr_mode enum type --
-currently either #H5C_flash_incr__off or #H5C_flash_incr__add_space (note the
-double underscores after \c "incr"). This type is defined in H5Cpublic.h.
+The \ref H5AC_cache_config_t.flash_incr_mode "flash_incr_mode" field specifies
+the flash cache size increment algorithm used. Its value must be a member of the
+\ref H5C_cache_flash_incr_mode enum type -- currently either
+#H5C_flash_incr__off or #H5C_flash_incr__add_space (note the double underscores
+after \c "incr"). This type is defined in H5Cpublic.h.
 
-If \c flash_incr_mode is set to #H5C_flash_incr__off, flash cache size increases
-are disabled, and the \c flash_multiple, and \c flash_threshold, fields are ignored.
+If \ref H5AC_cache_config_t.flash_incr_mode "flash_incr_mode" is set to
+#H5C_flash_incr__off, flash cache size increases are disabled, and the \ref
+H5AC_cache_config_t.flash_multiple "flash_multiple", and \ref
+H5AC_cache_config_t.flash_threshold "flash_threshold", fields are ignored.
 
 \subsubsection hrtcsic Hit Rate Threshold Cache Size Increase Configuration
 
-If \c incr_mode is #H5C_incr__threshold, the cache size is increased via the hit
-rate threshold algorithm. The remaining fields in the section are then used as
-follows:
+If \ref H5AC_cache_config_t.incr_mode "incr_mode" is #H5C_incr__threshold, the
+cache size is increased via the hit rate threshold algorithm. The remaining
+fields in the section are then used as follows:
 
-\c lower_hr_threshold is the threshold below which the hit rate must fall to
-trigger an increase. The value must lie in the range \Code{[0.0 - 1.0]}. In my
-tests, a relatively high value seems to work best -- 0.9 for example.
+\ref H5AC_cache_config_t.lower_hr_threshold "lower_hr_threshold" is the
+threshold below which the hit rate must fall to trigger an increase. The value
+must lie in the range \Code{[0.0 - 1.0]}. In my tests, a relatively high value
+seems to work best -- 0.9 for example.
 
-\c increment is the factor by which the old maximum cache size is multiplied to
-obtain an initial new maximum cache size when an increment is needed. The actual
-change in size may be smaller as required by \c max_size (above) and \c
+\ref H5AC_cache_config_t.increment "increment" is the factor by which the old
+maximum cache size is multiplied to obtain an initial new maximum cache size
+when an increment is needed. The actual change in size may be smaller as
+required by \ref H5AC_cache_config_t.max_size "max_size" (above) and \c
 max_increment (discussed below). increment must be greater than or equal to
 1.0. If you set it to 1.0, you will effectively turn off the increment code. 2.0
 is a reasonable value.
 
-\c apply_max_increment and \c max_increment allow the user to specify a maximum
-increment. If \c apply_max_increment is \c TRUE, the cache size will never be
-increased by more than the number of bytes specified in \c max_increment in any
-single increase.
+\ref H5AC_cache_config_t.apply_max_increment "apply_max_increment" and \ref
+H5AC_cache_config_t.max_increment "max_increment" allow the user to specify a
+maximum increment. If \ref H5AC_cache_config_t.apply_max_increment
+"apply_max_increment" is \c TRUE, the cache size will never be increased by more
+than the number of bytes specified in \ref H5AC_cache_config_t.max_increment
+"max_increment" in any single increase.
 
 \subsubsection fcsic Flash Cache Size Increase Configuration
 
-If \c flash_incr_mode is set to #H5C_flash_incr__add_space, flash cache size
-increases are enabled. The size of the cache will be increased under the
-following circumstances:
+If \ref H5AC_cache_config_t.flash_incr_mode "flash_incr_mode" is set to
+#H5C_flash_incr__add_space, flash cache size increases are enabled. The size of
+the cache will be increased under the following circumstances:
 
-Let \c t be the current maximum cache size times the value of the \c
-flash_threshold field.
+Let \c t be the current maximum cache size times the value of the \ref
+H5AC_cache_config_t.flash_threshold "flash_threshold" field.
 
 Let \c x be either the size of the newly inserted entry, the size of the newly
 loaded entry, or the number of bytes added to the size of the entry under
@@ -574,92 +606,110 @@ we proceed as follows:
 
 Let \c space_needed equal \c x less the amount of free space in the cache.
 
-Further, let \c increment equal \c space_needed times the value of the \c
-flash_multiple field. If \c increment plus the current cache size is greater
-than \c max_size (discussed above), reduce \c increment so that \c increment
-plus the current cache size is equal to \c max_size.
+Further, let \ref H5AC_cache_config_t.increment "increment" equal \c
+space_needed times the value of the \ref H5AC_cache_config_t.flash_multiple
+"flash_multiple" field. If \ref H5AC_cache_config_t.increment "increment" plus
+the current cache size is greater than \ref H5AC_cache_config_t.max_size
+"max_size" (discussed above), reduce \ref H5AC_cache_config_t.increment
+"increment" so that \ref H5AC_cache_config_t.increment "increment" plus the
+current cache size is equal to \ref H5AC_cache_config_t.max_size "max_size".
 
-If the increment is greater than zero, increase the current cache size by \c
-increment. To avoid confusing the other cache size increment or decrement
-algorithms, start a new epoch. Note, however, that we do not cycle the epoch
-markers if some variant of the age out algorithm is in use.
+If the increment is greater than zero, increase the current cache size by \ref
+H5AC_cache_config_t.increment "increment". To avoid confusing the other cache
+size increment or decrement algorithms, start a new epoch. Note, however, that
+we do not cycle the epoch markers if some variant of the age out algorithm is in
+use.
 
-The use of the \c flash_threshold field is discussed above. It must be a
-floating-point value in the range of \Code{[0.1, 1.0]}. 0.25 is a reasonable
-value.
+The use of the \ref H5AC_cache_config_t.flash_threshold "flash_threshold" field
+is discussed above. It must be a floating-point value in the range of
+\Code{[0.1, 1.0]}. 0.25 is a reasonable value.
 
-The use of the \c flash_multiple field is also discussed above. It must be a
-floating-point value in the range of \Code{[0.1, 10.0]}. 1.4 is a reasonable
-value.
+The use of the \ref H5AC_cache_config_t.flash_multiple "flash_multiple" field is
+also discussed above. It must be a floating-point value in the range of
+\Code{[0.1, 10.0]}. 1.4 is a reasonable value.
 
 \subsection decrement Decrement Configuration
 
-The \c decr_mode field specifies the cache size decrement algorithm used. Its
-value must be a member of the \ref H5C_cache_decr_mode enum type -- currently
-either #H5C_decr__off, #H5C_decr__threshold, #H5C_decr__age_out, or
-#H5C_decr__age_out_with_threshold (note the double underscores after
-\c "decr"). This type is defined in H5Cpublic.h.
+The \ref H5AC_cache_config_t.decr_mode "decr_mode" field specifies the cache
+size decrement algorithm used. Its value must be a member of the \ref
+H5C_cache_decr_mode enum type -- currently either #H5C_decr__off,
+#H5C_decr__threshold, #H5C_decr__age_out, or #H5C_decr__age_out_with_threshold
+(note the double underscores after \c "decr"). This type is defined in
+H5Cpublic.h.
 
-If \c decr_mode is set to #H5C_decr__off, automatic cache size decreases are
-disabled, and the remaining fields in the cache size decrease control section
-are ignored.
+If \ref H5AC_cache_config_t.decr_mode "decr_mode" is set to #H5C_decr__off,
+automatic cache size decreases are disabled, and the remaining fields in the
+cache size decrease control section are ignored.
 
 \subsubsection hrtcsdc Hit Rate Threshold Cache Size Decrease Configuration
 
-If \c decr_mode is #H5C_decr__threshold, the cache size is decreased by the
-threshold algorithm, and the remaining fields of the decrement section are used
-as follows:
+If \ref H5AC_cache_config_t.decr_mode "decr_mode" is #H5C_decr__threshold, the
+cache size is decreased by the threshold algorithm, and the remaining fields of
+the decrement section are used as follows:
 
-\c upper_hr_threshold is the threshold above which the hit rate must rise to
-trigger cache size reduction. It must be in the range \Code{[0.0, 1.0]}. In my
-synthetic tests, very high values like .9995 or .99995 seemed to work best.
+\ref H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold" is the
+threshold above which the hit rate must rise to trigger cache size reduction. It
+must be in the range \Code{[0.0, 1.0]}. In my synthetic tests, very high values
+like .9995 or .99995 seemed to work best.
 
-\c decrement is the factor by which the current maximum cache size is multiplied
-to obtain a tentative new maximum cache size. It must lie in the range
-\Code{[0.0, 1.0]}. Relatively large values like .9 seem to work best in my
-synthetic tests. Note that the actual size reduction may be smaller as required
-by \c min_size and \c max_decrement (discussed below). \c apply_max_decrement
-and \c max_decrement allow the user to specify a maximum decrement. If \c
-apply_max_decrement is \c TRUE, the cache size will never be reduced by more
-than \c max_decrement bytes in any single reduction.
+\ref H5AC_cache_config_t.decrement "decrement" is the factor by which the
+current maximum cache size is multiplied to obtain a tentative new maximum cache
+size. It must lie in the range \Code{[0.0, 1.0]}. Relatively large values like
+.9 seem to work best in my synthetic tests. Note that the actual size reduction
+may be smaller as required by \ref H5AC_cache_config_t.min_size "min_size" and
+\ref H5AC_cache_config_t.max_decrement "max_decrement" (discussed below).  \ref
+H5AC_cache_config_t.apply_max_decrement "apply_max_decrement" and \ref
+H5AC_cache_config_t.max_decrement "max_decrement" allow the user to specify a
+maximum decrement. If \ref H5AC_cache_config_t.apply_max_decrement
+"apply_max_decrement" is \c TRUE, the cache size will never be reduced by more
+than \ref H5AC_cache_config_t.max_decrement "max_decrement" bytes in any single
+reduction.
 
 With the hit rate threshold cache size decrement algorithm, the remaining fields
 in the section are ignored.
 
 \subsubsection acsr Ageout Cache Size Reduction
 
-If \c decr_mode is #H5C_decr__age_out the cache size is decreased by the ageout
-algorithm, and the remaining fields of the decrement section are used as
-follows:
+If \ref H5AC_cache_config_t.decr_mode "decr_mode" is #H5C_decr__age_out the
+cache size is decreased by the ageout algorithm, and the remaining fields of the
+decrement section are used as follows:
 
-\c epochs_before_eviction is the number of epochs an entry must reside
-unaccessed in the cache before it is evicted. This value must lie in the range
-\Code{[1, H5C__MAX_EPOCH_MARKERS]}. \c H5C__MAX_EPOCH_MARKERS is defined in
-H5Cprivate.h, and is currently set to 10.
+\ref H5AC_cache_config_t.epochs_before_eviction "epochs_before_eviction" is the
+number of epochs an entry must reside unaccessed in the cache before it is
+evicted. This value must lie in the range \Code{[1, H5C__MAX_EPOCH_MARKERS]}. \c
+H5C__MAX_EPOCH_MARKERS is defined in H5Cprivate.h, and is currently set to 10.
 
-\c apply_max_decrement and \c max_decrement are used as in section 2.4.3.1.
+\ref H5AC_cache_config_t.apply_max_decrement "apply_max_decrement" and \ref
+H5AC_cache_config_t.max_decrement "max_decrement" are used as in section
+2.4.3.1.
 
-\c apply_empty_reserve and \c empty_reserve allow the user to specify a minimum
-empty reserve as discussed in section 2.3.2.2. An empty reserve of 0.05 or 0.1
-seems to work well.
+\ref H5AC_cache_config_t.apply_empty_reserve "apply_emty_reserve" and \ref
+H5AC_cache_config_t.empty_reserve "empty_reserve" allow the user to specify a
+minimum empty reserve as discussed in section 2.3.2.2. An empty reserve of 0.05
+or 0.1 seems to work well.
 
-The \c decrement and \c upper_hr_threshold fields are ignored in this case.
+The \ref H5AC_cache_config_t.decrement "decrement" and \ref
+H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold" fields are ignored
+in this case.
 
 \subsubsection awhrtcsr Ageout With Hit Rate Threshold Cache Size Reduction
 
-If \c decr_mode is #H5C_decr__age_out_with_threshold, the cache size is
-decreased by the ageout with hit rate threshold algorithm, and the fields of
-decrement section are used as per the Ageout algorithm (see 5.3.2) with the
-exception of \c upper_hr_threshold.
+If \ref H5AC_cache_config_t.decr_mode "decr_mode" is
+#H5C_decr__age_out_with_threshold, the cache size is decreased by the ageout
+with hit rate threshold algorithm, and the fields of decrement section are used
+as per the Ageout algorithm (see 5.3.2) with the exception of \ref
+H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold".
 
-Here, \c upper_hr_threshold is the threshold above which the hit rate must rise
-to trigger cache size reduction. It must be in the range \Code{[0.0, 1.0]}. In my
-synthetic tests, high values like .999 seemed to work well.
+Here, \ref H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold" is the
+threshold above which the hit rate must rise to trigger cache size reduction. It
+must be in the range \Code{[0.0, 1.0]}. In my synthetic tests, high values like
+.999 seemed to work well.
 
 \subsection parallel Parallel Configuration
 
 This section is a catch-all for parallel specific configuration data. At
-present, it has only one field -- \c dirty_bytes_threshold.
+present, it has only one field --
+\ref H5AC_cache_config_t.dirty_bytes_threshold "dirty_bytes_threshold".
 
 In PHDF5, all operations that modify metadata must be executed collectively. We
 used to think that this was enough to ensure consistency across the metadata
@@ -680,20 +730,23 @@ set of dirty entries upon sync point entry and exit.)
 
 The different caches know when to synchronize by counting the number of bytes of
 dirty metadata created by the collective operations modifying metadata. Whenever
-this count exceeds the value specified in the \c dirty_bytes_threshold, they all
+this count exceeds the value specified in the \ref
+H5AC_cache_config_t.dirty_bytes_threshold "dirty_bytes_threshold", they all
 enter the sync point, and process 0 flushes down to its minimum clean size and
 sends the list of newly cleaned entries to the other caches.
 
-Needless to say, the value of the \c dirty_bytes_threshold field must be
-consistent across all the caches operating on a given file.
+Needless to say, the value of the \ref H5AC_cache_config_t.dirty_bytes_threshold
+"dirty_bytes_threshold" field must be consistent across all the caches operating
+on a given file.
 
 All dirty metadata can also by flushed under programmatic control via the
 H5Fflush() call. This call must be collective and will reset the dirty data
 counts on each metadata cache.
 
-Absent calls to H5Fflush(), dirty metadata will only be flushed when the \c
-dirty_bytes_threshold is exceeded, and then only down to the \c
-min_clean_fraction. Thus, if a program does all its metadata modifications in
+Absent calls to H5Fflush(), dirty metadata will only be flushed when the \ref
+H5AC_cache_config_t.dirty_bytes_threshold "dirty_bytes_threshold" is exceeded,
+and then only down to the H5AC_cache_config_t.min_clean_fraction
+"min_clean_fraction". Thus, if a program does all its metadata modifications in
 one phase, and then doesn't modify metadata thereafter, a residue of dirty
 metadata will be frozen in the metadata caches for the remainder of the
 computation -- effectively reducing the sizes of the caches.
@@ -708,9 +761,10 @@ call to H5Fflush() immediately after the metadata modification phase.
 \subsection interactions Interactions
 
 Evictions may not be disabled unless the automatic cache resize code is disabled
-as well (by setting \c decr_mode to #H5C_decr__off, \c flash_decr_mode to
-#H5C_flash_incr__add_space, and \c incr_mode to #H5C_incr__off) -- thus placing
-the cache size under the direct control of the user program.
+as well (by setting \ref H5AC_cache_config_t.decr_mode "decr_mode" to
+#H5C_decr__off, \c flash_decr_mode to #H5C_flash_incr__add_space, and \ref
+H5AC_cache_config_t.incr_mode "incr_mode" to #H5C_incr__off) -- thus placing the
+cache size under the direct control of the user program.
 
 There is no logical necessity for this restriction. It is imposed because it
 simplifies testing greatly and because I can't see any reason why one would want
@@ -721,48 +775,56 @@ reason to do so.
 At present, there are two interactions between the increment and decrement
 sections of the configuration.
 
-If \c incr_mode is #H5C_incr__threshold, and \c decr_mode is either
-#H5C_decr__threshold or #H5C_decr__age_out_with_threshold, then \c
-lower_hr_threshold must be strictly less than \c upper_hr_threshold.
+If \ref H5AC_cache_config_t.incr_mode "incr_mode" is #H5C_incr__threshold, and
+\ref H5AC_cache_config_t.decr_mode "decr_mode" is either #H5C_decr__threshold or
+#H5C_decr__age_out_with_threshold, then \ref
+H5AC_cache_config_t.lower_hr_threshold "lower_hr_threshold" must be strictly
+less than \ref H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold".
 
 Also, if the flash cache size increment code is enabled and is triggered, it
 will restart the current epoch without calling any other cache size increment or
 decrement code.
 
 In both the serial and parallel cases, there is the potential for an interaction
-between the \c min_clean_fraction and the cache size increment code that can
-severely degrade performance. Specifically, if the \c min_clean_fraction is
-large enough, it is possible that keeping the specified fraction of the cache
-clean may generate enough flushes to seriously degrade performance even though
-the hit rate is excellent.
+between the \ref H5AC_cache_config_t.min_clean_fraction "min_clean_fraction" and
+the cache size increment code that can severely degrade
+performance. Specifically, if the \ref H5AC_cache_config_t.min_clean_fraction
+"min_clean_fraction" is large enough, it is possible that keeping the specified
+fraction of the cache clean may generate enough flushes to seriously degrade
+performance even though the hit rate is excellent.
 
-In the serial case, this is easily dealt with by selecting a very small \c
-min_clean_fraction -- 0.01 for example -- as this still avoids the "metadata
-blizzard" phenomenon that appears when the cache fills with dirty metadata and
-must then flush all of it before evicting an entry to make space for a new
-entry.
+In the serial case, this is easily dealt with by selecting a very small \ref
+H5AC_cache_config_t.min_clean_fraction "min_clean_fraction" -- 0.01 for example
+-- as this still avoids the "metadata blizzard" phenomenon that appears when the
+cache fills with dirty metadata and must then flush all of it before evicting an
+entry to make space for a new entry.
 
-The problem is more difficult in the parallel case, as the \c min_clean_fraction
-is used to ensure that the cache contains clean entries that can be evicted to
-make space for new entries when metadata writes are forbidden -- i.e. between
-sync points.
+The problem is more difficult in the parallel case, as the \ref
+H5AC_cache_config_t.min_clean_fraction "min_clean_fraction" is used to ensure
+that the cache contains clean entries that can be evicted to make space for new
+entries when metadata writes are forbidden -- i.e. between sync points.
 
 This issue was discovered shortly before release 1.8.3 and an automated solution
 has not been implemented. Should it become an issue for an application, try
 manually setting the cache size to ~1.5 times the maximum working set size for
-the application, and leave \c min_clean_fraction set to 0.3.
+the application, and leave \ref H5AC_cache_config_t.min_clean_fraction
+"min_clean_fraction" set to 0.3.
 
 You can approximate the working set size of your application via repeated calls
 to H5Fget_mdc_size() and H5Fget_mdc_hit_rate() while running your program with
 the cache resize code enabled. The maximum value returned by H5Fget_mdc_size()
 should be a reasonable approximation -- particularly if the associated hit rate
 is good. In the parallel case, there is also an interaction between \c
-min_clean_fraction and \c dirty_bytes_threshold. Absent calls to H5Fflush()
-(discussed above), the upper bound on the amount of dirty data in the metadata
-caches will oscillate between (1 - \c min_clean_fraction) times current maximum
-cache size, and that value plus the \c dirty_bytes_threshold. Needless to say,
-it will be best if the \c min_size, \c min_clean_fraction, and the \c
-dirty_bytes_threshold are chosen so that the cache can't fill with dirty data.
+min_clean_fraction and \ref H5AC_cache_config_t.dirty_bytes_threshold
+"dirty_bytes_threshold". Absent calls to H5Fflush() (discussed above), the upper
+bound on the amount of dirty data in the metadata caches will oscillate between
+(1 - \ref H5AC_cache_config_t.min_clean_fraction "min_clean_fraction") times
+current maximum cache size, and that value plus the \ref
+H5AC_cache_config_t.dirty_bytes_threshold "dirty_bytes_threshold". Needless to
+say, it will be best if the \ref H5AC_cache_config_t.min_size "min_size", \ref
+H5AC_cache_config_t.min_clean_fraction "min_clean_fraction", and the \ref
+H5AC_cache_config_t.dirty_bytes_threshold "dirty_bytes_threshold"
+are chosen so that the cache can't fill with dirty data.
 
 \subsection defaults Default Metadata Cache Configuration
 
@@ -847,7 +909,7 @@ The default configuration for the parallel case is as follows:
 The default serial configuration should be adequate for most serial HDF5 users.
 
 The same may not be true for the default parallel configuration due to the
-interaction between the \c min_clean_fraction and the cache size increase code. See
+interaction between the \ref H5AC_cache_config_t.min_clean_fraction "min_clean_fraction" and the cache size increase code. See
 the Interactions section for further details.
 
 Should you need to change the default configuration, it can be found in
@@ -889,7 +951,7 @@ Note that none of this should be viewed as supported -- it is described here on
 the off chance that you want to use it, but you are on your own if you do. Also,
 there are no promises as to consistency between versions.
 
-As mentioned above, you can use the \c rpt_fcn_enabled field of the
+As mentioned above, you can use the \ref H5AC_cache_config_t.rpt_fcn_enabled "rpt_fcn_enabled" field of the
 configuration structure to enable the default reporting function
 (H5C_def_auto_resize_rpt_fcn() in H5C.c). If this function doesn't work for you,
 you will have to write your own. In particular, remember that it uses \c stdout,
