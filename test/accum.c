@@ -2100,10 +2100,10 @@ test_swmr_write_big(hbool_t newest_format)
     uint8_t *wbuf2 = NULL, *rbuf = NULL; /* Buffers for reading & writing */
     uint8_t  wbuf[1024];                 /* Buffer for reading & writing */
     unsigned u;                          /* Local index variable */
-    pid_t pid;                      /* Process ID */
-    int     status;                 /* Status returned from child process */
-    char *  driver         = NULL;  /* VFD string (from env variable) */
-    hbool_t api_ctx_pushed = FALSE; /* Whether API context pushed */
+    pid_t    pid;                        /* Process ID */
+    int      status;                     /* Status returned from child process */
+    char *   driver         = NULL;      /* VFD string (from env variable) */
+    hbool_t  api_ctx_pushed = FALSE;     /* Whether API context pushed */
 
     if (newest_format)
         TESTING("SWMR write of large metadata: with latest format")
