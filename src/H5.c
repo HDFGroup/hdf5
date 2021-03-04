@@ -807,9 +807,6 @@ H5__debug_mask(const char *s)
             s++;
         } /* end if-else */
     }     /* end while */
-
-    return;
-
 } /* end H5__debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL
