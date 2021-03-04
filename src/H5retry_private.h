@@ -9,8 +9,8 @@
  * help@hdfgroup.org.
  */
 
-#ifndef _H5retry_private_H
-#define _H5retry_private_H
+#ifndef H5retry_private_H
+#define H5retry_private_H
 
 /*
  * Data types and functions for retry loops.
@@ -111,4 +111,4 @@ h5_retry_tries(struct h5_retry_t *r)
     return r->maxtries - r->tries;
 }
 
-#endif /* _H5retry_private_H */
+#endif /* H5retry_private_H */

@@ -13,7 +13,6 @@
 #define H5FDvfd_swmr_private_H
 
 #include "H5queue.h"   /* for TAILQ_* */
-#include "hlog.h"   /* for TAILQ_* */
 
 /* Forward declaration */
 struct H5F_t;
@@ -64,11 +63,6 @@ typedef TAILQ_HEAD(eot_queue, eot_queue_entry) eot_queue_t;
 
 extern eot_queue_t eot_queue_g;
 
-HLOG_OUTLET_DECL(swmr);
-HLOG_OUTLET_DECL(pbwr);
-HLOG_OUTLET_DECL(shadow_index_reclaim);
-HLOG_OUTLET_DECL(mdc_invalidation);
-
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
@@ -80,10 +74,10 @@ H5_DLL herr_t H5F_update_vfd_swmr_metadata_file(struct H5F_t *f,
 H5_DLL herr_t H5F_vfd_swmr_writer__delay_write(struct H5F_shared_t *, uint64_t,
     uint64_t *);
 H5_DLL herr_t H5F_vfd_swmr_writer__prep_for_flush_or_close(struct H5F_t *f);
-herr_t H5F_vfd_swmr_process_eot_queue(bool);
-H5_DLL herr_t H5F_vfd_swmr_writer_end_of_tick(struct H5F_t *f, bool);
+herr_t H5F_vfd_swmr_process_eot_queue(hbool_t);
+H5_DLL herr_t H5F_vfd_swmr_writer_end_of_tick(struct H5F_t *f, hbool_t);
 H5_DLL herr_t H5F_vfd_swmr_writer__dump_index(struct H5F_shared_t *);
-H5_DLL herr_t H5F_vfd_swmr_reader_end_of_tick(struct H5F_t *f, bool);
+H5_DLL herr_t H5F_vfd_swmr_reader_end_of_tick(struct H5F_t *f, hbool_t);
 
 H5_DLL herr_t H5F_vfd_swmr_remove_entry_eot(struct H5F_t *f);
 H5_DLL herr_t H5F_vfd_swmr_insert_entry_eot(struct H5F_t *f);

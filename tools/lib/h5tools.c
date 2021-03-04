@@ -16,8 +16,6 @@
  *          amongst the various HDF5 tools.
  */
 
-#include <libgen.h>
-
 #include "h5tools.h"
 #include "h5tools_dump.h"
 #include "h5tools_ref.h"

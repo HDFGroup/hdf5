@@ -20,7 +20,6 @@
 *************************************************************/
 
 #include <err.h>
-#include <libgen.h>
 
 #include "h5test.h"
 
@@ -151,8 +150,8 @@ swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
         HDfprintf(stderr, "temporary string allocation failed\n");
         return -1;
     }
-    dname = dirname(tname[0]);
-    bname = basename(tname[1]);
+    dname = HDdirname(tname[0]);
+    bname = HDbasename(tname[1]);
     snprintf(config.md_file_path, sizeof(config.md_file_path),
         "%s/%s.shadow", dname, bname);
     free(tname[0]);

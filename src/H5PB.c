@@ -45,8 +45,6 @@
 #include "H5PBpkg.h"            /* File access				*/
 
 
-#include "hlog.h"
-
 /****************/
 /* Local Macros */
 /****************/
@@ -91,7 +89,7 @@ static herr_t H5PB__create_new_page(H5PB_t *pb_ptr, haddr_t addr, size_t size,
 
 static void H5PB__deallocate_page(H5PB_entry_t *entry_ptr);
 
-static herr_t H5PB__evict_entry(H5F_shared_t *, H5PB_entry_t *, bool, bool);
+static herr_t H5PB__evict_entry(H5F_shared_t *, H5PB_entry_t *, hbool_t, hbool_t);
 
 static herr_t H5PB__flush_entry(H5F_shared_t *, H5PB_t *, H5PB_entry_t *);
 
@@ -142,17 +140,6 @@ H5FL_DEFINE_STATIC(H5PB_t);
 
 /* Declare a free list to manage the H5PB_entry_t struct */
 H5FL_DEFINE_STATIC(H5PB_entry_t);
-
-HLOG_OUTLET_DECL(pagebuffer);
-HLOG_OUTLET_SHORT_DEFN(pagebuffer, all);
-HLOG_OUTLET_SHORT_DEFN(pb_access_sizes, pagebuffer);
-HLOG_OUTLET_SHORT_DEFN(pbflush, pagebuffer);
-HLOG_OUTLET_SHORT_DEFN(pbflush_entry, pbflush);
-HLOG_OUTLET_SHORT_DEFN(pbio, pagebuffer);
-HLOG_OUTLET_SHORT_DEFN(pbrd, pbio);
-HLOG_OUTLET_SHORT_DEFN(pbwr, pbio);
-HLOG_OUTLET_SHORT_DEFN(lengthen_pbentry, pagebuffer);
-HLOG_OUTLET_SHORT_DEFN(pbrm, pagebuffer);
 
 
 /*-------------------------------------------------------------------------
@@ -773,7 +760,7 @@ H5PB_dest(H5F_shared_t *shared)
                                     "Can't flush entry")
                 }
 
-                if ( H5PB__evict_entry(shared, evict_ptr, TRUE, true) < 0 )
+                if ( H5PB__evict_entry(shared, evict_ptr, TRUE, TRUE) < 0 )
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                 "forced eviction failed")
@@ -862,19 +849,11 @@ H5PB_flush(H5F_shared_t *shared)
 
                 flush_ptr = entry_ptr;
                 entry_ptr = entry_ptr->ht_next;
-                hlog_fast(pbflush, "%s: visiting %zu-byte page %" PRIu64,
-                    __func__, flush_ptr->size, flush_ptr->page);
 
                 if ( flush_ptr->is_dirty ) {
 
-                    if (flush_ptr->delay_write_until != 0) {
-                        hlog_fast(pbflush, "%s: delaying %zu-byte page %" PRIu64
-                              " until %" PRIu64 " (now %" PRIu64 ")",
-                              __func__, flush_ptr->size, flush_ptr->page,
-                              flush_ptr->delay_write_until,
-                              shared->tick_num);
+                    if (flush_ptr->delay_write_until != 0)
                         continue;
-                    }
 
                     if ( H5PB__flush_entry(shared, pb_ptr, flush_ptr) < 0 )
 
@@ -967,20 +946,10 @@ H5PB_log_access_by_size_counts(const H5PB_t *pb)
     const size_t nslots = NELMTS(pb->access_size_count);
     size_t i, lo, hi;
 
-    hlog_fast(pb_access_sizes, "page buffer %p metadata accesses by size:",
-        (const void *)pb);
-
     for (lo = 0, hi = pb->page_size, i = 0;
          i < nslots - 1;
          i++, lo = hi + 1, hi *= 2) {
-        hlog_fast(pb_access_sizes,
-            "%16" PRIu64 " accesses %8zu - %8zu bytes long",
-            pb->access_size_count[i], lo, hi);
     }
-
-    hlog_fast(pb_access_sizes,
-        "%16" PRIu64 " accesses %8zu -  greater bytes long",
-        pb->access_size_count[i], lo);
 }
 
 
@@ -1178,10 +1147,6 @@ H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
     /* Sanity checks */
     HDassert(shared);
-
-    hlog_fast(pbrd, "%s %p type %d %" PRIuHADDR " size %zu",
-        __func__, (void *)shared, type, addr, size);
-
 
     pb_ptr = shared->pb_ptr;
 
@@ -1488,13 +1453,13 @@ done:
  * this routine performs an O(n) copy of index entries.
  */
 static int
-shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, bool only_mark)
+shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, hbool_t only_mark)
 {
     ptrdiff_t i;
     H5FD_vfd_swmr_idx_entry_t *entry;
 
     entry = vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx,
-        shared->mdf_idx_entries_used, page, false);
+        shared->mdf_idx_entries_used, page, FALSE);
 
     if (entry == NULL)
         return 0;
@@ -1506,7 +1471,7 @@ shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, bool only_mark)
     }
 
     if (only_mark) {
-        entry->garbage = true;
+        entry->garbage = TRUE;
         return 0;
     }
 
@@ -1515,7 +1480,7 @@ shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, bool only_mark)
     if (shared->mdf_idx_entries_used > i + 1) {
         const size_t ntocopy =
             (size_t)(shared->mdf_idx_entries_used - (i + 1));
-        memmove(&shared->mdf_idx[i],
+        HDmemmove(&shared->mdf_idx[i],
                 &shared->mdf_idx[i + 1],
                 ntocopy * sizeof(shared->mdf_idx[i + 1]));
     }
@@ -1625,11 +1590,11 @@ H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "mark entry clean failed")
 
-        if ( H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0 )
+        if ( H5PB__evict_entry(shared, entry_ptr, TRUE, FALSE) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
 
-        assert(!shared->vfd_swmr_writer || vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, false) == NULL);
+        HDassert(!shared->vfd_swmr_writer || vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, FALSE) == NULL);
     }
 
 done:
@@ -1959,7 +1924,7 @@ H5PB_vfd_swmr__release_delayed_writes(H5F_shared_t *shared)
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "flush of mpmde failed")
 
-            if ( H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0 )
+            if ( H5PB__evict_entry(shared, entry_ptr, TRUE, FALSE) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                             "eviction of mpmde failed")
@@ -2038,7 +2003,7 @@ H5PB_vfd_swmr__release_tick_list(H5F_shared_t *shared)
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                                 "flush of mpmde failed")
 
-                if ( H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0 )
+                if ( H5PB__evict_entry(shared, entry_ptr, TRUE, FALSE) < 0 )
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                 "eviction of mpmde failed")
@@ -2252,7 +2217,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         /* see if the shadow index already contains an entry for *entry. */
 
         ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx,
-            shared->mdf_idx_entries_used, target_page, false);
+            shared->mdf_idx_entries_used, target_page, FALSE);
 
         if ( ie_ptr == NULL ) { /* alloc new entry in the metadata file index*/
             uint32_t new_index_entry_index;
@@ -2266,7 +2231,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
                     "\n\nmax mdf index len (%" PRIu32 ") exceeded.\n\n",
                     shared->mdf_idx_len);
                 HDfprintf(stderr, "tick = %" PRIu64 ".\n", tick_num);
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
 
             ie_ptr = idx + new_index_entry_index;
@@ -2280,8 +2245,8 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
             /* ie_ptr->clean                initialized below */
             /* ie_ptr->tick_of_last_flush   initialized below */
             ie_ptr->delayed_flush        = entry->delay_write_until;
-            ie_ptr->moved_to_lower_file  = false;
-            ie_ptr->garbage              = false;
+            ie_ptr->moved_to_lower_file  = FALSE;
+            ie_ptr->garbage              = FALSE;
             ie_ptr->length               = (uint32_t)entry->size;
 
         } else {
@@ -2305,8 +2270,8 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
 
         ie_ptr->entry_ptr            = entry->image_ptr;
         ie_ptr->tick_of_last_change  = tick_num;
-        assert(entry->is_dirty);
-        ie_ptr->clean                = false;
+        HDassert(entry->is_dirty);
+        ie_ptr->clean                = FALSE;
         ie_ptr->tick_of_last_flush = 0;
     }
 
@@ -2333,9 +2298,6 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         H5PB__SEARCH_INDEX(pb_ptr, ie_ptr->hdf5_page_offset, entry, FAIL);
 
         if (entry == NULL || !entry->is_dirty) {
-            hlog_fast(shadow_index_reclaim,
-                "Marking shadow index slot %" PRIu32 " clean at tick %" PRIu64,
-                i, tick_num);
             idx_ent_not_in_tl_flushed++;
             ie_ptr->clean = TRUE;
             ie_ptr->tick_of_last_flush = tick_num;
@@ -2521,9 +2483,6 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
     size_t suffix_size = 0;             /* size of suffix */
 
     FUNC_ENTER_NOAPI(FAIL)
-
-    hlog_fast(pbwr, "%s %p type %d addr %" PRIuHADDR " size %zu",
-        __func__, (void *)shared, type, addr, size);
 
     pb_ptr = shared->pb_ptr;
 
@@ -3188,8 +3147,8 @@ H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, bool force,
-    bool only_mark)
+H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force,
+    hbool_t only_mark)
 {
     H5PB_t *pb_ptr = shared->pb_ptr;
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -3337,10 +3296,6 @@ H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *pb_ptr, H5PB_entry_t *const entr
     HDassert(entry_ptr->is_dirty);
     HDassert((pb_ptr->vfd_swmr_writer) || (!(entry_ptr->is_mpmde)));
     HDassert(0 == entry_ptr->delay_write_until);
-
-    hlog_fast(pbflush_entry,
-        "%s: flushing %zu-byte page %" PRIu64 " @ %" PRIuHADDR,
-        __func__, entry_ptr->size, entry_ptr->page, entry_ptr->addr);
 
     /* Retrieve the 'eoa' for the file */
     if ( HADDR_UNDEF == (eoa = H5FD_get_eoa(shared->lf, entry_ptr->mem_type)) )
@@ -3688,7 +3643,7 @@ H5PB__make_space(H5F_shared_t *shared, H5PB_t *pb_ptr, H5FD_mem_t inserted_type)
 
             evict_ptr = search_ptr;
             search_ptr = search_ptr->prev;
-            if ( H5PB__evict_entry(shared, evict_ptr, FALSE, false) < 0 )
+            if ( H5PB__evict_entry(shared, evict_ptr, FALSE, FALSE) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "Can't evict entry")
@@ -4153,7 +4108,7 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
                         HDassert( ! ( entry_ptr->is_dirty ) );
 
                         if ( H5PB__evict_entry(shared, entry_ptr, 
-                                               TRUE, false) < 0 )
+                                               TRUE, FALSE) < 0 )
 
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                         "forced eviction failed (1)")
@@ -4718,14 +4673,9 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
             uint64_t last_page = page +
                 roundup(size, pb_ptr->page_size) / pb_ptr->page_size;
 
-            hlog_fast(lengthen_pbentry,
-                "lengthening page %" PRIu64 " from %zu bytes to %zu, "
-                "last page %" PRIu64 "\n", page, entry_ptr->size, size,
-                last_page);
-
             for (iter_page = page + 1; iter_page < last_page; iter_page++) {
                 H5PB__SEARCH_INDEX(pb_ptr, iter_page, overlap, FAIL)
-                assert(overlap == NULL);
+                HDassert(overlap == NULL);
             }
             if (new_image == NULL) {
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,
@@ -4742,7 +4692,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
 
             entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
             entry_ptr->image_ptr = new_image;
-            entry_ptr->is_mpmde = true;
+            entry_ptr->is_mpmde = TRUE;
             entry_ptr->size = size;
 
             if (entry_ptr->modified_this_tick)
@@ -4819,7 +4769,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
      * already present.
      */
     if (pb_ptr->vfd_swmr_writer && !entry_ptr->modified_this_tick) {
-        entry_ptr->modified_this_tick = true;
+        entry_ptr->modified_this_tick = TRUE;
         H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
     }
 
@@ -4974,7 +4924,7 @@ H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "mark entry clean failed")
 
-                    if (H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0)
+                    if (H5PB__evict_entry(shared, entry_ptr, TRUE, FALSE) < 0)
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "forced eviction failed (1)")

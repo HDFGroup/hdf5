@@ -18,7 +18,6 @@
 /* Headers */
 /***********/
 
-#include <stdarg.h>
 #include "h5test.h"
 
 /**********/

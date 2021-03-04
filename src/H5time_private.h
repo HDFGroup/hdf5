@@ -73,8 +73,8 @@
  *      @(#)time.h      8.5 (Berkeley) 5/4/95
  */
 
-#ifndef _H5time_private_H
-#define _H5time_private_H
+#ifndef H5time_private_H
+#define H5time_private_H
 
 #ifdef __NetBSD__
 #include <sys/time.h>
@@ -106,4 +106,4 @@
 #define timespec2ns(x) (((uint64_t)(x)->tv_sec) * 1000000000UL + (uint64_t)(x)->tv_nsec)
 #endif
 
-#endif /* _H5time_private_H */
+#endif /* H5time_private_H */

@@ -64,7 +64,7 @@ typedef struct H5FD_vfd_swmr_t {
                                                 /* and to FALSE otherwise.    */
                                                 /* Used for sanity checking.  */
     H5F_vfd_swmr_config_t config;
-    bool writer;                            /* True iff configured to write.
+    hbool_t writer;                         /* True iff configured to write.
                                              * All methods on a write-mode
                                              * SWMR VFD instance are passed
                                              * to the lower VFD instance.
@@ -102,12 +102,6 @@ static htri_t H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *,
 static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file,
     H5FD_vfd_swmr_md_index *md_index, const H5FD_vfd_swmr_md_header *md_header);
 static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *, hbool_t);
-
-HLOG_OUTLET_SHORT_DEFN(index_motion, swmr);
-HLOG_OUTLET_SHORT_DEFN(swmr_stats, swmr);
-HLOG_OUTLET_SHORT_DEFN(swmr_read, swmr);
-HLOG_OUTLET_SHORT_DEFN(swmr_read_exception, swmr_read);
-HLOG_OUTLET_MEDIUM_DEFN(swmr_read_err, swmr_read_exception, HLOG_OUTLET_S_ON);
 
 static const H5FD_class_t H5FD_vfd_swmr_g = {
     "vfd_swmr",                 /* name                 */
@@ -269,14 +263,14 @@ static herr_t
 H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
 {
     h5_retry_t retry;
-    bool do_try;                             /* more tries remain */
+    hbool_t do_try;                         /* more tries remain */
     herr_t      ret_value = SUCCEED;
     FUNC_ENTER_STATIC
 
     file->api_elapsed_nbuckets = file->config.max_lag + 1;
 
     file->api_elapsed_ticks =
-        calloc(file->api_elapsed_nbuckets, sizeof(*file->api_elapsed_ticks));
+        H5MM_calloc(file->api_elapsed_nbuckets * sizeof(*file->api_elapsed_ticks));
 
     if (file->api_elapsed_ticks == NULL) {
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
@@ -430,15 +424,8 @@ swmr_reader_close(H5FD_vfd_swmr_t *file)
 {
     vfd_swmr_reader_did_increase_tick_to(0);
 
-    if (file->api_elapsed_ticks != NULL) {
-        uint32_t i;
-        for (i = 0; i < file->api_elapsed_nbuckets; i++) {
-            hlog_fast(swmr_stats,
-                "%s: %" PRIu32 " ticks elapsed in API %" PRIu64 " times",
-                __func__, i, file->api_elapsed_ticks[i]);
-        }
-        free(file->api_elapsed_ticks);
-    }
+    if (file->api_elapsed_ticks != NULL)
+        H5MM_xfree(file->api_elapsed_ticks);
 
     /* Close the metadata file */
     if(file->md_fd >= 0 && HDclose(file->md_fd) < 0) {
@@ -477,7 +464,7 @@ H5FD_vfd_swmr_close(H5FD_t *_file)
 
     if (file->hdf5_file_lf != NULL) {
         if (file->hdf5_file_lf->exc_owner != NULL) {
-            assert(file->hdf5_file_lf->exc_owner == &file->pub);
+            HDassert(file->hdf5_file_lf->exc_owner == &file->pub);
             file->hdf5_file_lf->exc_owner = NULL;
         }
 
@@ -562,13 +549,13 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
 {
     H5FD_vfd_swmr_t *self = (H5FD_vfd_swmr_t *)_self;
 
-    assert(_self->driver_id == H5FD_VFD_SWMR_g);
+    HDassert(_self->driver_id == H5FD_VFD_SWMR_g);
 
     if (_self->cls == _other->cls) {
         H5FD_vfd_swmr_t *other = (H5FD_vfd_swmr_t *)_other;
         H5P_genplist_t *plist;
         H5F_vfd_swmr_config_t *config;
-        bool equal_configs;
+        hbool_t equal_configs;
 
         if (H5FD_cmp(self->hdf5_file_lf, other->hdf5_file_lf) != 0)
             return _other;
@@ -589,7 +576,7 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
             return NULL;
         }
 
-        if ((config = malloc(sizeof(*config))) == NULL) {
+        if ((config = H5MM_malloc(sizeof(*config))) == NULL) {
             HERROR(H5E_ARGS, H5E_BADTYPE, "could not allocate config");
             return NULL;
         }
@@ -598,9 +585,9 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
            return NULL;
         }
 
-        equal_configs = memcmp(&self->config, config, sizeof(*config)) == 0;
+        equal_configs = HDmemcmp(&self->config, config, sizeof(*config)) == 0;
 
-        free(config);
+        H5MM_xfree(config);
 
         if (equal_configs)
             return _self;
@@ -856,11 +843,7 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
     target_page = addr / fs_page_size;
 
     entry = vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page,
-        false);
-
-    hlog_fast(swmr_read, "%s: enter type %d addr %" PRIuHADDR " size %zu "
-        "file %s", __func__, type, addr, size,
-        (entry == NULL) ? "lower" : "shadow");
+        FALSE);
 
     if (entry == NULL) {
          /* Cannot find addr in index, read from the underlying hdf5 file */
@@ -926,30 +909,14 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
      * is John's hack to allow the library to find the superblock
      * signature.
      */
-    if (!file->pb_configured) {
-        hlog_fast(swmr_read_exception,
-            "%s: skipping checksum, page buffer not configured", __func__);
-    } else if (entry->length != init_size) {
-        hlog_fast(swmr_read_exception,
-            "%s: skipping checksum, buffer size != entry size", __func__);
-    } else if (H5_checksum_metadata(buf, entry->length, 0) != entry->chksum) {
+    if (file->pb_configured && entry->length == init_size
+            && H5_checksum_metadata(buf, entry->length, 0) != entry->chksum) {
         H5FD_vfd_swmr_md_header tmp_header;
-
-        hlog_fast(swmr_read_err, "%s: bad checksum", __func__);
-        hlog_fast(swmr_read_err, "addr %" PRIuHADDR " page %" PRIuHADDR
-            " len %zu type %d ...", addr, addr / fs_page_size, init_size, type);
-        hlog_fast(swmr_read_err, "... index[%" PRId64 "] lower pgno %" PRIu64
-            " shadow pgno %" PRIu64 " len %" PRIu32 " sum %" PRIx32,
-            (int64_t)(entry - index), entry->hdf5_page_offset,
-            entry->md_file_page_offset, entry->length, entry->chksum);
 
         if (H5FD__vfd_swmr_header_deserialize(file, &tmp_header) != TRUE) {
             HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL,
                 "checksum error in shadow file entry; could not load header");
         }
-
-        hlog_fast(swmr_read_err, "... header tick last read %" PRIu64
-            " latest %" PRIu64, file->md_header.tick_num, tmp_header.tick_num);
 
         HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL,
             "checksum error in shadow file entry");
@@ -1117,7 +1084,7 @@ done:
 static herr_t
 H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *file, hbool_t open)
 {
-    bool do_try;
+    hbool_t do_try;
     h5_retry_t retry;
     H5FD_vfd_swmr_md_header md_header;      /* Metadata file header, take 1 */
     H5FD_vfd_swmr_md_header md_header_two;  /* Metadata file header, take 2 */
@@ -1145,11 +1112,8 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *file, hbool_t open)
         if (rc != TRUE)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not read header");
 
-        if (md_header.index_offset != last_index_offset) {
-            hlog_fast(index_motion, "index offset changed %" PRIu64 "\n",
-                md_header.index_offset);
+        if (md_header.index_offset != last_index_offset)
             last_index_offset = md_header.index_offset;
-        }
 
         if (open)
             ; // ignore tick number on open
@@ -1263,13 +1227,13 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file,
     FUNC_ENTER_STATIC
 
     /* Set file pointer to the beginning the file */
-    if (lseek(file->md_fd, H5FD_MD_HEADER_OFF, SEEK_SET) < 0) {
+    if (HDlseek(file->md_fd, H5FD_MD_HEADER_OFF, SEEK_SET) < 0) {
         HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
                     "unable to seek in metadata file");
     }
 
     /* Read the header */
-    nread = read(file->md_fd, image, H5FD_MD_HEADER_SIZE);
+    nread = HDread(file->md_fd, image, H5FD_MD_HEADER_SIZE);
 
     /* Try again if a signal interrupted the read. */
     if (nread == -1 && errno == EINTR)
@@ -1287,7 +1251,7 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file,
         HGOTO_DONE(FALSE);
 
     /* Verify magic number */
-    if (memcmp(image, H5FD_MD_HEADER_MAGIC, H5_SIZEOF_MAGIC) != 0)
+    if (HDmemcmp(image, H5FD_MD_HEADER_MAGIC, H5_SIZEOF_MAGIC) != 0)
         HGOTO_DONE(FALSE);
 
     /* Verify stored and computed checksums are equal */
@@ -1371,12 +1335,12 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file,
     }
 
     /* We may seek past EOF.  That's ok, the read(2) will catch that. */
-    if (lseek(file->md_fd, (HDoff_t)md_header->index_offset, SEEK_SET) < 0){
+    if (HDlseek(file->md_fd, (HDoff_t)md_header->index_offset, SEEK_SET) < 0){
         HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL,
                     "unable to seek in metadata file");
     }
 
-    nread = read(file->md_fd, image, md_header->index_length);
+    nread = HDread(file->md_fd, image, md_header->index_length);
 
     /* Try again if a signal interrupted the read. */
     if (nread == -1 && errno == EINTR)
@@ -1423,7 +1387,7 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file,
      * read bad magic.  It's possible to recover by
      * re-reading the header.
      */
-    if (memcmp(image, H5FD_MD_INDEX_MAGIC, H5_SIZEOF_MAGIC) != 0)
+    if (HDmemcmp(image, H5FD_MD_INDEX_MAGIC, H5_SIZEOF_MAGIC) != 0)
         HGOTO_DONE(FALSE);
 
     /* Verify stored and computed checksums are equal */
@@ -1521,7 +1485,7 @@ H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t reload_hdr_and_index,
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
     herr_t ret_value = SUCCEED;                       /* Return value  */
 
-    assert(index == NULL || num_entries_ptr != NULL);
+    HDassert(index == NULL || num_entries_ptr != NULL);
 
     FUNC_ENTER_NOAPI(FAIL)
 

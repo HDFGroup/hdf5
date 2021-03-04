@@ -1040,26 +1040,6 @@ Wflock(int fd, int operation) {
     return 0;
 } /* end Wflock() */
 
-
- /*--------------------------------------------------------------------------
-  * Function:    Wnanosleep
-  *
-  * Purpose:     Sleep for a given # of nanoseconds (Windows version)
-  *
-  * Return:      SUCCEED/FAIL
-  *
-  * Programmer:  Dana Robinson
-  *              Fall 2016
-  *--------------------------------------------------------------------------
-  */
-int
-Wnanosleep(const struct timespec *req, struct timespec *rem)
-{
-    /* XXX: Currently just a placeholder */
-    return 0;
-
-} /* end Wnanosleep() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
@@ -1439,15 +1419,13 @@ done:
  *
  * Purpose:     Sleep for a given # of nanoseconds
  *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              October 01, 2016
+ * Return:      void
  *--------------------------------------------------------------------------
  */
 void
 H5_nanosleep(uint64_t nanosec)
 {
+#ifndef H5_HAVE_WIN32_API
     const uint64_t nanosec_per_sec = 1000 * 1000 * 1000;
     struct timespec sleeptime;  /* Struct to hold time to sleep */
 
@@ -1476,6 +1454,20 @@ H5_nanosleep(uint64_t nanosec)
     }
 
     FUNC_LEAVE_NOAPI_VOID
+#else
+    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1000.0);
+    DWORD ignore;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Windows can't sleep at a ns resolution. Best we can do is ~1 ms. We
+     * don't care about the return value since the second parameter
+     * (bAlertable) is FALSE, so it will always be zero.
+     */
+    ignore = SleepEx(dwMilliseconds, FALSE);
+
+    FUNC_LEAVE_NOAPI_VOID
+#endif /* H5_HAVE_WIN32_API */
 } /* end H5_nanosleep() */
 
 #ifdef H5_HAVE_WIN32_API

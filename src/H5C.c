@@ -1325,13 +1325,7 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
         entry_ptr = entry_ptr->pi_next;
     }
 
-    if (!found) {
-        hlog_fast(mdc_invalidation, "no MDC match for page %" PRIu64
-            " length %" PRIu32 " tick %" PRIu64, page, length, tick);
-    }
-
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C_evict_or_refresh_all_entries_in_page() */

@@ -824,19 +824,13 @@ error:
     return 1;
 } /* test_writer_create_open_flush() */
 
-/* Sleep for `tenths` tenths of a second.
- *
- * This routine may quietly perform a too-short sleep if an error occurs
- * in nanosleep(2).
- */
+/* Sleep for `tenths` tenths of a second */
 static void
 decisleep(uint32_t tenths)
 {
-    struct timespec delay = {.tv_sec = tenths / 10,
-                             .tv_nsec = tenths * 100 * 1000 * 1000};
+    uint64_t nsec = tenths * 100 * 1000 * 1000;
 
-    while (nanosleep(&delay, &delay) == -1 && errno == EINTR)
-        ; // do nothing
+    H5_nanosleep(nsec);
 }
 
 
@@ -948,7 +942,7 @@ test_writer_md(void)
         decisleep(my_config->tick_len);
 
         /* Create a chunked dataset */
-        sprintf(dname, "dset %d", i);
+        HDsprintf(dname, "dset %d", i);
         if((did = H5Dcreate2(fid, dname, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
 
@@ -981,7 +975,7 @@ test_writer_md(void)
         decisleep(my_config->tick_len);
 
         /* Open the dataset */
-        sprintf(dname, "dset %d", i);
+        HDsprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
 
@@ -1015,7 +1009,7 @@ test_writer_md(void)
         decisleep(my_config->tick_len);
 
         /* Open the dataset */
-        sprintf(dname, "dset %d", i);
+        HDsprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
 
@@ -1236,6 +1230,10 @@ test_reader_md_concur(void)
         /* Close unused read end for reader pipe */
         if(HDclose(child_pfd[0]) < 0)
             HDexit(EXIT_FAILURE);
+
+        /* Free unused configuration */
+        if(config_writer)
+            HDfree(config_writer);
 
         /* 
          * Case A: reader
@@ -1499,7 +1497,7 @@ test_reader_md_concur(void)
         decisleep(config_writer->tick_len);
 
         /* Create a chunked dataset */
-        sprintf(dname, "dset %d", i);
+        HDsprintf(dname, "dset %d", i);
         if((did = H5Dcreate2(fid_writer, dname, H5T_NATIVE_INT, sid, 
                              H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
@@ -1577,7 +1575,7 @@ test_reader_md_concur(void)
         decisleep(config_writer->tick_len);
 
         /* Open the dataset */
-        sprintf(dname, "dset %d", i);
+        HDsprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid_writer, dname, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
 
@@ -1632,7 +1630,7 @@ test_reader_md_concur(void)
         decisleep(config_writer->tick_len);
 
         /* Open the dataset */
-        sprintf(dname, "dset %d", i);
+        HDsprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid_writer, dname, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
 
@@ -1686,7 +1684,7 @@ test_reader_md_concur(void)
         decisleep(config_writer->tick_len);
 
         /* Open the dataset */
-        sprintf(dname, "dset %d", i);
+        HDsprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid_writer, dname, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
 
@@ -2167,6 +2165,10 @@ test_disable_enable_eot_concur(void)
         if(HDclose(child_pfd[0]) < 0)
             HDexit(EXIT_FAILURE);
 
+        /* Free unused configuration */
+        if(config_writer)
+            HDfree(config_writer);
+
         /* 
          *  Open the file 3 times as VFD SWMR reader
          *  Enable and disable EOT for a file
@@ -2439,6 +2441,10 @@ test_file_end_tick_concur(void)
         /* Close unused read end for reader pipe */
         if(HDclose(child_pfd[0]) < 0)
             HDexit(EXIT_FAILURE);
+
+        /* Free unused configuration */
+        if(config_writer)
+            HDfree(config_writer);
 
         /* 
          *  Open the file 3 times as VFD SWMR reader
@@ -3059,7 +3065,7 @@ test_shadow_index_lookup(void)
     char vector[8];
     unsigned seed = 1;
     unsigned i, j, failj = UINT_MAX;
-    bool have_failj = false;
+    hbool_t have_failj = FALSE;
     unsigned long tmpl;
     char *ostate;
     const char *seedvar = "H5_SHADOW_INDEX_SEED";
@@ -3073,7 +3079,7 @@ test_shadow_index_lookup(void)
         nerrors = 1;
         goto out;
     case 0:
-        seed = (unsigned int)time(NULL);
+        seed = (unsigned int)HDtime(NULL);
         break;
     default:
         seed = (unsigned int)tmpl;
@@ -3089,55 +3095,55 @@ test_shadow_index_lookup(void)
         break;
     default:
         failj = (unsigned int)tmpl;
-        have_failj = true;
+        have_failj = TRUE;
         break;
     }
 
     ostate = initstate(seed, vector, _arraycount(vector));
 
-    size[5] = (uint32_t)(1024 + random() % (16 * 1024 * 1024 - 1024));
+    size[5] = (uint32_t)(1024 + HDrandom() % (16 * 1024 * 1024 - 1024));
 
     for (i = 0; i < _arraycount(size); i++) {
         uint32_t cursize = size[i];
         const uint64_t modulus = UINT64_MAX / MAX(1, cursize);
         uint64_t pageno;
 
-        assert(modulus > 1); // so that modulus - 1 > 0, below
+        HDassert(modulus > 1); // so that modulus - 1 > 0, below
 
-        idx = (cursize == 0) ? NULL : calloc(cursize,  sizeof(*idx));
+        idx = (cursize == 0) ? NULL : HDcalloc(cursize,  sizeof(*idx));
         if (idx == NULL && cursize != 0) {
-            fprintf(stderr, "couldn't allocate %" PRIu32 " indices\n",
+            HDfprintf(stderr, "couldn't allocate %" PRIu32 " indices\n",
                 cursize);
-            exit(EXIT_FAILURE);
+            HDexit(EXIT_FAILURE);
         }
-        for (pageno = (uint64_t)random() % modulus, j = 0;
+        for (pageno = (uint64_t)HDrandom() % modulus, j = 0;
              j < cursize;
-             j++, pageno += 1 + (uint64_t)random() % (modulus - 1)) {
+             j++, pageno += 1 + (uint64_t)HDrandom() % (modulus - 1)) {
             idx[j].hdf5_page_offset = pageno;
         }
         for (j = 0; j < cursize; j++) {
             H5FD_vfd_swmr_idx_entry_t *found;
 
             found = vfd_swmr_pageno_to_mdf_idx_entry(idx, cursize,
-                idx[j].hdf5_page_offset, false);
+                idx[j].hdf5_page_offset, FALSE);
             if ((have_failj && failj == j) || found != &idx[j])
                 break;
         }
         if (j < cursize) {
-            printf("\nshadow-index entry %d lookup, pageno %" PRIu64
+            HDprintf("\nshadow-index entry %d lookup, pageno %" PRIu64
                    ", index size %" PRIu32 ", seed %u", j,
                    idx[j].hdf5_page_offset, cursize, seed);
             nerrors++;
         }
         if (idx != NULL)
-            free(idx);
+            HDfree(idx);
     }
     (void)setstate(ostate);
 out:
     if (nerrors == 0)
         PASSED();
     else
-        printf(" FAILED\n");
+        HDprintf(" FAILED\n");
     return nerrors;
 }
 
