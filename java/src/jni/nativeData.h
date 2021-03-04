@@ -13,8 +13,8 @@
 #include <jni.h>
 /* Header for class hdf_hdf5lib_HDFNativeData */
 
-#ifndef _Included_hdf_hdf5lib_HDFNativeData
-#define _Included_hdf_hdf5lib_HDFNativeData
+#ifndef Included_hdf_hdf5lib_HDFNativeData
+#define Included_hdf_hdf5lib_HDFNativeData
 
 #ifdef __cplusplus
 extern "C" {
@@ -97,4 +97,4 @@ JNIEXPORT jbyteArray JNICALL Java_hdf_hdf5lib_HDFNativeData_byteToByte__B(JNIEnv
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_hdf_hdf5lib_HDFNativeData */
+#endif /* Included_hdf_hdf5lib_HDFNativeData */

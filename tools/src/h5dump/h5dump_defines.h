@@ -10,8 +10,8 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef H5DUMP_DEFINES_H__
-#define H5DUMP_DEFINES_H__
+#ifndef H5DUMP_DEFINES_H
+#define H5DUMP_DEFINES_H
 
 #define H5DUMP_MAX_RANK H5S_MAX_RANK
 
@@ -50,4 +50,4 @@
 #define H5_SZIP_MSB_OPTION_MASK 16
 #define H5_SZIP_RAW_OPTION_MASK 128
 
-#endif /* !H5DUMP_DEFINES_H__ */
+#endif /* H5DUMP_DEFINES_H */

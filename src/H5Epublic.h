@@ -32,8 +32,8 @@ typedef enum H5E_type_t { H5E_MAJOR, H5E_MINOR } H5E_type_t;
 /* Information about an error; element of error stack */
 typedef struct H5E_error2_t {
     hid_t       cls_id;    /*class ID                           */
-    hid_t       maj_num;   /*major error ID		     */
-    hid_t       min_num;   /*minor error number		     */
+    hid_t       maj_num;   /*major error ID             */
+    hid_t       min_num;   /*minor error number             */
     unsigned    line;      /*line in file where error occurs    */
     const char *func_name; /*function in which error occurred   */
     const char *file_name; /*file in which error occurred       */
@@ -61,12 +61,12 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * trying something that's likely or expected to fail.  The code to try can
  * be nested between calls to H5Eget_auto() and H5Eset_auto(), but it's
  * easier just to use this macro like:
- * 	H5E_BEGIN_TRY {
- *	    ...stuff here that's likely to fail...
+ *     H5E_BEGIN_TRY {
+ *        ...stuff here that's likely to fail...
  *      } H5E_END_TRY;
  *
  * Warning: don't break, return, or longjmp() from the body of the loop or
- *	    the error reporting won't be properly restored!
+ *        the error reporting won't be properly restored!
  *
  * These two macros still use the old API functions for backward compatibility
  * purpose.
@@ -124,10 +124,10 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
 /*  And return after pushing error onto stack */
 #define H5Epush_ret(func, cls, maj, min, str, ret)                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, cls, maj, min, str);                                 \
         return (ret);                                                                                        \
-    }
+    } while (0)
 
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in
  * And goto a label after pushing error onto stack.

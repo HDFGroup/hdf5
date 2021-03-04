@@ -420,4 +420,4 @@ H5_DLL herr_t H5S__get_diminfo_status_test(hid_t space_id, H5S_diminfo_valid_t *
 H5_DLL htri_t H5S__internal_consistency_test(hid_t space_id);
 #endif /* H5S_TESTING */
 
-#endif /*_H5Spkg_H*/
+#endif /*H5Spkg_H*/
