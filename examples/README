@@ -15,3 +15,30 @@ installed.  Compile scripts from other locations can be used by setting an
 environment variable prefix to the path of the directory containing the bin 
 directory with the compile scripts h5cc, h5fc, etc.  For example, export 
 prefix=/usr/local/hdf5 to use h5cc, h5fc, etc. in /usr/local/hdf5/bin.  
+
+***************************************************************************************
+Instruction for compiling and running the two VFD SWMR demo programs in this directory:
+
+credel.c:
+=========
+To compile:
+    h5cc -o credel credel.c nbcompat.c
+
+To run:
+    ./credel -v (on one window)
+    h5ls --vfd=swmr --poll=100 -r -d ./credel.h5 (on another window)
+
+vfd_swmr_gaussians.c
+====================
+To compile:
+    h5cc -o gaussians ./gaussians.c ./nbcompat.c -lcurses
+To link as writer:
+    ln -s gaussians wgaussians
+To link as reader:
+    ln -s gaussians rgaussians
+
+To run standalone:
+    ./gaussians
+To run as writer and reader:
+    ./wgaussians (on one window)
+    ./rgaussians (on another window)
