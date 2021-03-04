@@ -21,8 +21,8 @@
 #include <string.h>
 #include "H5private.h"
 
-#ifndef _Included_h5jni
-#define _Included_h5jni
+#ifndef Included_h5jni
+#define Included_h5jni
 
 #ifdef __cplusplus
 #define ENVPTR (env)
@@ -266,9 +266,10 @@ extern jboolean h5JNIFatalError(JNIEnv *env, const char *);
 extern jboolean h5nullArgument(JNIEnv *env, const char *);
 extern jboolean h5badArgument(JNIEnv *env, const char *);
 extern jboolean h5outOfMemory(JNIEnv *env, const char *);
+extern jboolean h5assertion(JNIEnv *env, const char *);
+extern jboolean h5unimplemented(JNIEnv *env, const char *);
 extern jboolean h5libraryError(JNIEnv *env);
 extern jboolean h5raiseException(JNIEnv *env, const char *, const char *);
-extern jboolean h5unimplemented(JNIEnv *env, const char *functName);
 
 /*
  * The following macros are to facilitate immediate cleanup+return
@@ -304,6 +305,18 @@ extern jboolean h5unimplemented(JNIEnv *env, const char *functName);
         goto done;                                                                                           \
     } while (0)
 
+#define H5_ASSERTION_ERROR(env, message)                                                                     \
+    do {                                                                                                     \
+        h5assertion(env, message);                                                                           \
+        goto done;                                                                                           \
+    } while (0)
+
+#define H5_UNIMPLEMENTED(env, message)                                                                       \
+    do {                                                                                                     \
+        h5unimplemented(env, message);                                                                       \
+        goto done;                                                                                           \
+    } while (0)
+
 #define H5_LIBRARY_ERROR(env)                                                                                \
     do {                                                                                                     \
         h5libraryError(env);                                                                                 \
@@ -313,12 +326,6 @@ extern jboolean h5unimplemented(JNIEnv *env, const char *functName);
 #define H5_RAISE_EXCEPTION(env, message, exception)                                                          \
     do {                                                                                                     \
         h5raiseException(env, message, exception);                                                           \
-        goto done;                                                                                           \
-    } while (0)
-
-#define H5_UNIMPLEMENTED(env, message)                                                                       \
-    do {                                                                                                     \
-        h5unimplemented(env, message);                                                                       \
         goto done;                                                                                           \
     } while (0)
 
@@ -334,4 +341,4 @@ extern jobject create_H5G_info_t(JNIEnv *env, H5G_info_t group_info);
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_h5jni */
+#endif /* Included_h5jni */

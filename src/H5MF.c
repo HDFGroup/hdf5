@@ -3026,7 +3026,7 @@ done:
  *		On entry to this function, the raw data settle routine
  *		(H5MF_settle_raw_data_fsm()) should have:
  *
- *              1) Freed the aggregators.
+ *      1) Freed the aggregators.
  *
  *		2) Freed all file space allocated to the free space managers.
  *
@@ -3062,12 +3062,12 @@ done:
  *		1) Verify that the free space manager(s) involved in file
  *		   space allocation for free space managers are still floating.
  *
- *              2) Free the aggregators.
+ *      2) Free the aggregators.
  *
- *              3) Reduce the EOA to the extent possible, and make note
+ *      3) Reduce the EOA to the extent possible, and make note
  *		   of the resulting value.  This value will be stored
  *		   in the fsinfo superblock extension message and be used
- *                 in the subsequent file open.
+ *         in the subsequent file open.
  *
  *		4) Re-allocate space for any free space manager(s) that:
  *
@@ -3101,8 +3101,8 @@ done:
  *		   severe time pressure at the moment, the above brute
  *		   force solution is attractive.
  *
- *              5) Make note of the EOA -- used for sanity checking on
- *                 FSM shutdown.
+ *      5) Make note of the EOA -- used for sanity checking on
+ *         FSM shutdown.
  *
  * Return:	SUCCEED/FAIL
  *
@@ -3114,16 +3114,16 @@ done:
 herr_t
 H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 {
-    H5F_mem_page_t sm_fshdr_fs_type;       /* small fs hdr fsm */
-    H5F_mem_page_t sm_fssinfo_fs_type;     /* small fs sinfo fsm */
-    H5F_mem_page_t lg_fshdr_fs_type;       /* large fs hdr fsm */
-    H5F_mem_page_t lg_fssinfo_fs_type;     /* large fs sinfo fsm */
-    H5FS_t *       sm_hdr_fspace   = NULL; /* ptr to sm FSM hdr alloc FSM */
-    H5FS_t *       sm_sinfo_fspace = NULL; /* ptr to sm FSM sinfo alloc FSM */
-    H5FS_t *       lg_hdr_fspace   = NULL; /* ptr to lg FSM hdr alloc FSM */
-    H5FS_t *       lg_sinfo_fspace = NULL; /* ptr to lg FSM sinfo alloc FSM */
-    haddr_t        eoa_pre_fsm_fsalloc;    /* eoa pre file space allocation */
-                                           /* for self referential FSMs */
+    H5F_mem_page_t sm_fshdr_fs_type;                          /* small fs hdr fsm */
+    H5F_mem_page_t sm_fssinfo_fs_type;                        /* small fs sinfo fsm */
+    H5F_mem_page_t lg_fshdr_fs_type   = H5F_MEM_PAGE_DEFAULT; /* large fs hdr fsm */
+    H5F_mem_page_t lg_fssinfo_fs_type = H5F_MEM_PAGE_DEFAULT; /* large fs sinfo fsm */
+    H5FS_t *       sm_hdr_fspace      = NULL;                 /* ptr to sm FSM hdr alloc FSM */
+    H5FS_t *       sm_sinfo_fspace    = NULL;                 /* ptr to sm FSM sinfo alloc FSM */
+    H5FS_t *       lg_hdr_fspace      = NULL;                 /* ptr to lg FSM hdr alloc FSM */
+    H5FS_t *       lg_sinfo_fspace    = NULL;                 /* ptr to lg FSM sinfo alloc FSM */
+    haddr_t        eoa_pre_fsm_fsalloc;                       /* eoa pre file space allocation */
+                                                              /* for self referential FSMs */
     haddr_t eoa_post_fsm_fsalloc;          /* eoa post file space allocation */
                                            /* for self referential FSMs */
     H5AC_ring_t orig_ring = H5AC_RING_INV; /* Original ring value */

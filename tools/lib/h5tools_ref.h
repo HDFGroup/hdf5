@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef H5TOOLS_REF_H__
-#define H5TOOLS_REF_H__
+#ifndef H5TOOLS_REF_H
+#define H5TOOLS_REF_H
 
 #include "hdf5.h"
 

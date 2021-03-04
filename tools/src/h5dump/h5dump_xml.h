@@ -10,8 +10,8 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef H5DUMP_XML_H__
-#define H5DUMP_XML_H__
+#ifndef H5DUMP_XML_H
+#define H5DUMP_XML_H
 
 extern const char *xmlnsprefix;
 
@@ -34,4 +34,4 @@ void   xml_dump_data(hid_t, int, struct subset_t *, int);
 }
 #endif
 
-#endif /* !H5DUMP_XML_H__ */
+#endif /* H5DUMP_XML_H */

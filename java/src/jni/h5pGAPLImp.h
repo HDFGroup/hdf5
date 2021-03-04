@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _Included_hdf_hdf5lib_H5_H5PGAPL
-#define _Included_hdf_hdf5lib_H5_H5PGAPL
+#ifndef Included_hdf_hdf5lib_H5_H5PGAPL
+#define Included_hdf_hdf5lib_H5_H5PGAPL
 
 #include <jni.h>
 
@@ -23,4 +23,4 @@ extern "C" {
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_hdf_hdf5lib_H5_H5PGAPL */
+#endif /* Included_hdf_hdf5lib_H5_H5PGAPL */

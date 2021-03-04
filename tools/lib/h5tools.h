@@ -17,8 +17,8 @@
  *
  * Purpose:     Support functions for the various tools.
  */
-#ifndef H5TOOLS_H__
-#define H5TOOLS_H__
+#ifndef H5TOOLS_H
+#define H5TOOLS_H
 
 #include "hdf5.h"
 #include "h5tools_error.h"
@@ -684,4 +684,4 @@ H5TOOLS_DLL hbool_t h5tools_render_region_element(FILE *stream, const h5tool_for
 }
 #endif
 
-#endif /* H5TOOLS_H__ */
+#endif /* H5TOOLS_H */

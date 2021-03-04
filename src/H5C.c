@@ -2140,7 +2140,7 @@ done:
  * Function:    H5C_pin_protected_entry()
  *
  * Purpose:    Pin a protected cache entry.  The entry must be protected
- *         at the time of call, and must be unpinned.
+ *             at the time of call, and must be unpinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2226,8 +2226,8 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
 #ifdef H5_HAVE_PARALLEL
     hbool_t coll_access = FALSE; /* whether access to the cache entry is done collectively */
 #endif                           /* H5_HAVE_PARALLEL */
-    hbool_t            write_permitted;
-    hbool_t            was_loaded = FALSE; /* Whether the entry was loaded as a result of the protect */
+    hbool_t            write_permitted = FALSE;
+    hbool_t            was_loaded      = FALSE; /* Whether the entry was loaded as a result of the protect */
     size_t             empty_space;
     void *             thing;
     H5C_cache_entry_t *entry_ptr;

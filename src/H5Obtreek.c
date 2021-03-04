@@ -198,7 +198,7 @@ static size_t
 H5O_btreek_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
                 const void H5_ATTR_UNUSED *_mesg)
 {
-    size_t ret_value;
+    size_t ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

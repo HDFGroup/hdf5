@@ -1943,6 +1943,7 @@
 ./tools/testfiles/tintsnodata.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
+./tools/testfiles/tldouble.ddl
 ./tools/testfiles/tldouble.h5
 ./tools/testfiles/tlonglinks.ddl
 ./tools/testfiles/tlonglinks.h5
@@ -2452,6 +2453,7 @@
 ./tools/test/h5diff/testfiles/h5diff_80.txt
 ./tools/test/h5diff/testfiles/h5diff_800.txt
 ./tools/test/h5diff/testfiles/h5diff_801.txt
+./tools/test/h5diff/testfiles/h5diff_830.txt
 ./tools/test/h5diff/testfiles/h5diff_90.txt
 ./tools/test/h5diff/testfiles/h5diff_100.txt
 ./tools/test/h5diff/testfiles/h5diff_101.txt

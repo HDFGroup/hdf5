@@ -1964,7 +1964,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
             buffer[buffer_i] = 0;
 
         /* collect a line from file */
-        line_buffer = fgets(line_buffer, 128, file);
+        line_buffer = HDfgets(line_buffer, 128, file);
         if (line_buffer == NULL)
             goto done; /* end of file */
 
@@ -2063,9 +2063,9 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
 #endif
 
 #ifdef H5_HAVE_WIN32_API
-    ret = HDsnprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE"));
+    ret = HDsnprintf(awspath, 117, "%s/.aws/", HDgetenv("USERPROFILE"));
 #else
-    ret = HDsnprintf(awspath, 117, "%s/.aws/", getenv("HOME"));
+    ret = HDsnprintf(awspath, 117, "%s/.aws/", HDgetenv("HOME"));
 #endif
     if (ret < 0 || (size_t)ret >= 117)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTCOPY, FAIL, "unable to format home-aws path")

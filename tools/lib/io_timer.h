@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef IO_TIMER__
-#define IO_TIMER__
+#ifndef IO_TIMER
+#define IO_TIMER
 
 #include "hdf5.h"
 
@@ -88,4 +88,4 @@ H5TOOLS_DLL double     io_time_get(io_time_t *pt, timer_type t);
 }
 #endif /* __cplusplus */
 
-#endif /* IO_TIMER__ */
+#endif /* IO_TIMER */
