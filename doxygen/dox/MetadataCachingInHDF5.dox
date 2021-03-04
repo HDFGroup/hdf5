@@ -1,5 +1,7 @@
 /** \page TNMDC Metadata Caching in HDF5
 
+\todo Revise this!
+
 \section intro Introduction
 
 In the 1.6.4 release, we introduced a re-implementation of the metadata
