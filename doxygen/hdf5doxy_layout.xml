@@ -9,6 +9,7 @@
     <tab type="user" url="https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide" title="Application Developer's Guide" />
     <tab type="user" url="https://portal.hdfgroup.org/display/HDF5/HDF5+Glossary" title="Glossary" />
     <tab type="user" url="@ref RM" title="Reference Manual" />
+    <tab type="user" url="@ref TN" title="Technical Notes" />
     <tab type="user" url="https://portal.hdfgroup.org/display/HDF5/Design+Specifications" title="Specifications" />
     <tab type="user" url="@ref About" title="About" />
   </navindex>
