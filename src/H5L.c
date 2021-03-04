@@ -1763,7 +1763,7 @@ H5Literate2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
 
     /* Iterate over links synchronously */
     if ((ret_value = H5L__iterate_api_common(group_id, idx_type, order, idx_p, op, op_data, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "asynchronous link iteration failed")
+        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "synchronous link iteration failed")
 
 done:
     FUNC_LEAVE_API(ret_value)

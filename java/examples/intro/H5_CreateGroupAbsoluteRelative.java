@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -27,10 +26,10 @@ public class H5_CreateGroupAbsoluteRelative {
     private static String GROUPNAME_B = "GroupB";
 
     private static void CreateGroupAbsoluteAndRelative() {
-        long file_id = -1;
-        long group1_id = -1;
-        long group2_id = -1;
-        long group3_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long group1_id = HDF5Constants.H5I_INVALID_HID;
+        long group2_id = HDF5Constants.H5I_INVALID_HID;
+        long group3_id = HDF5Constants.H5I_INVALID_HID;
 
         // Create a new file using default properties.
         try {

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -147,11 +146,11 @@ public class TestH5PL {
 
     @Ignore
     public void TestH5PLdlopen() {
-        long file_id = -1;
-        long filespace_id = -1;
-        long dataset_id = -1;
-        long fapl_id = -1;
-        long dcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long filespace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long fapl_id = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
         try {
             int[]  cd_values = {9, 0, 0, 0};
             int[] libversion = {0, 0, 0};

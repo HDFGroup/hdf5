@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -31,9 +30,9 @@ public class H5Ex_G_Intermediate {
 
     private void CreateGroup() throws Exception {
 
-        long file_id = -1;
-        long group_id = -1;
-        long gcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long group_id = HDF5Constants.H5I_INVALID_HID;
+        long gcpl_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             // Create a new file_id using the default properties.

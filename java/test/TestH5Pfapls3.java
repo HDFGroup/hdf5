@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -34,11 +33,11 @@ import org.junit.rules.TestName;
 public class TestH5Pfapls3 {
     @Rule public TestName testname = new TestName();
 
-    long fapl_id = -1;
-    long plapl_id = -1;
-    long dapl_id = -1;
-    long plist_id = -1;
-    long btplist_id = -1;
+    long fapl_id = HDF5Constants.H5I_INVALID_HID;
+    long plapl_id = HDF5Constants.H5I_INVALID_HID;
+    long dapl_id = HDF5Constants.H5I_INVALID_HID;
+    long plist_id = HDF5Constants.H5I_INVALID_HID;
+    long btplist_id = HDF5Constants.H5I_INVALID_HID;
 
     @Before
     public void createFileAccess() throws NullPointerException, HDF5Exception
