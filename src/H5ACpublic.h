@@ -445,12 +445,12 @@ extern "C" {
 typedef struct H5AC_cache_config_t {
     /* general configuration fields: */
     //! [H5AC_cache_config_t_general_snip]
-    int      version;
+    int version;
     /**<IN: Integer field indicating the the version of the H5AC_cache_config_t
      * in use. This field should be set to #H5AC__CURR_CACHE_CONFIG_VERSION
      * (defined in H5ACpublic.h). */
 
-    hbool_t  rpt_fcn_enabled;
+    hbool_t rpt_fcn_enabled;
     /**<IN: Boolean flag indicating whether the adaptive cache resize report
      * function is enabled. This field should almost always be set to disabled
      * (0). Since resize algorithm activity is reported via stdout, it MUST be
@@ -458,7 +458,7 @@ typedef struct H5AC_cache_config_t {
      * The report function is not supported code, and can be expected to change
      * between versions of the library. Use it at your own risk. */
 
-    hbool_t  open_trace_file;
+    hbool_t open_trace_file;
     /**<IN: Boolean field indicating whether the
      * \ref H5AC_cache_config_t.trace_file_name "trace_file_name"
      * field should be used to open a trace file for the cache.\n
@@ -478,7 +478,8 @@ typedef struct H5AC_cache_config_t {
      * failures and/or poor performance seen in the field, so as to aid
      * in reproduction in the lab. If you use it absent the direction
      * of The HDF Group, you are on your own. */
-    hbool_t  close_trace_file;
+
+    hbool_t close_trace_file;
     /**<IN: Boolean field indicating whether the current trace file
      *(if any) should be closed.\n
      * See the above comments on the \ref H5AC_cache_config_t.open_trace_file
@@ -489,7 +490,8 @@ typedef struct H5AC_cache_config_t {
      * of cache activity in cases of occult failures and/or poor performance
      * seen in the field, so as to aid in reproduction in the lab. If you use
      * it absent the direction of The HDF Group, you are on your own. */
-    char     trace_file_name[H5AC__MAX_TRACE_FILE_NAME_LEN + 1];
+
+    char trace_file_name[H5AC__MAX_TRACE_FILE_NAME_LEN + 1];
     /**<IN: Full path of the trace file to be opened if the
      * \ref H5AC_cache_config_t.open_trace_file "open_trace_file" field is set
      * to 1.\n
@@ -504,7 +506,7 @@ typedef struct H5AC_cache_config_t {
      * seen in the field, so as to aid in reproduction in the lab. If you use
      * it absent the direction of The HDF Group, you are on your own. */
 
-    hbool_t  evictions_enabled;
+    hbool_t evictions_enabled;
     /**<IN: A boolean flag indicating whether evictions from the metadata cache
      * are enabled. This flag is initially set to enabled (1).\n
      * In rare circumstances, the raw data throughput quirements may be so high
@@ -524,17 +526,17 @@ typedef struct H5AC_cache_config_t {
      * Evictions will be re-enabled when this field is set back to \c 1.
      * This should be done as soon as possible. */
 
-    hbool_t  set_initial_size;
+    hbool_t set_initial_size;
     /**<IN: Boolean flag indicating whether the cache should be created
      * with a user specified initial size. */
 
-    size_t   initial_size;
+    size_t initial_size;
     /**<IN: If \ref H5AC_cache_config_t.set_initial_size "set_initial_size"
      * is set to 1, \p initial_size must contain he desired initial size in
      * bytes. This value must lie in the closed interval
      * [ \p min_size, \p max_size ]. (see below) */
 
-    double   min_clean_fraction;
+    double min_clean_fraction;
     /**<IN: This field specifies the minimum fraction of the cache
      * that must be kept either clean or empty.\n
      * The value must lie in the interval [0.0, 1.0]. 0.01 is a good place to
@@ -543,27 +545,27 @@ typedef struct H5AC_cache_config_t {
      * “Metadata Caching in HDF5” section of the -- <em>HDF5 User’s Guide</em>
      * for details. */
 
-    size_t   max_size;
+    size_t max_size;
     /**<IN: Upper bound (in bytes) on the range of values that the
      * adaptive cache resize code can select as the maximum cache size. */
 
-    size_t   min_size;
+    size_t min_size;
     /**<IN: Lower bound (in bytes) on the range of values that the
      * adaptive cache resize code can select as the mininum cache * size. */
 
-    long int epoch_length;/**<IN: Number of cache accesses between runs of the
-                           * adaptive cache resize code. 50,000 is a good
-                           * starting number. */
+    long int epoch_length;
+    /**<IN: Number of cache accesses between runs of the adaptive cache resize code. 50,000 is a good
+     * starting number. */
     //! [H5AC_cache_config_t_general_snip]
 
     /* size increase control fields: */
     //! [H5AC_cache_config_t_incr_snip]
-    enum H5C_cache_incr_mode       incr_mode;
+    enum H5C_cache_incr_mode incr_mode;
     /**<IN: Enumerated value indicating the operational mode of the automatic
      * cache size increase code. At present, only two values listed in
      * #H5C_cache_incr_mode are legal. */
 
-    double                         lower_hr_threshold;
+    double lower_hr_threshold;
     /**<IN: Hit rate threshold used by the hit rate threshold cache size
      * increment algorithm.\n
      * When the hit rate over an epoch is below this threshold and the cache
@@ -573,7 +575,7 @@ typedef struct H5AC_cache_config_t {
      * This field must lie in the interval [0.0, 1.0]. 0.8 or 0.9 is a good
      * place to start. */
 
-    double                         increment;
+    double increment;
     /**<IN: Factor by which the hit rate threshold cache size increment
      * algorithm multiplies the current cache max size to obtain a tentative
      * new cache size.\n
@@ -585,10 +587,11 @@ typedef struct H5AC_cache_config_t {
      * If you set it to 1.0, you will effectively disable cache size increases.
      */
 
-    hbool_t                        apply_max_increment;
+    hbool_t apply_max_increment;
     /**<IN: Boolean flag indicating whether an upper limit should be applied to
      * the size of cache size increases. */
-    size_t                         max_increment;
+
+    size_t max_increment;
     /**<IN: Maximum number of bytes by which cache size can be increased in a
      * single step -- if applicable. */
 
@@ -596,7 +599,8 @@ typedef struct H5AC_cache_config_t {
     /**<IN: Enumerated value indicating the operational mode of the flash cache
      * size increase code. At present, only two listed  values in
      * #H5C_cache_flash_incr_mode are legal.*/
-    double                         flash_multiple;
+
+    double flash_multiple;
     /**<IN: The factor by which the size of the triggering entry / entry size
      * increase is multiplied to obtain the initial cache size increment. This
      * increment may be reduced to reflect existing free space in the cache and
@@ -605,23 +609,21 @@ typedef struct H5AC_cache_config_t {
      * place to start.\n
      * At present, this field must lie in the range [0.1, 10.0]. */
 
-    double                         flash_threshold;
+    double flash_threshold;
     /**<IN: The factor by which the current maximum cache size is multiplied to
      * obtain the minimum size entry / entry size increase which may trigger a
      * flash cache size increase. \n
      * At present, this value must lie in the range [0.1, 1.0]. */
-    
     //! [H5AC_cache_config_t_incr_snip]
 
     /* size decrease control fields: */
     //! [H5AC_cache_config_t_decr_snip]
-    
     enum H5C_cache_decr_mode decr_mode;
     /**<IN: Enumerated value indicating the operational mode of the tomatic
      * cache size decrease code. At present, the values listed in
      * #H5C_cache_decr_mode are legal.*/
 
-    double                   upper_hr_threshold;
+    double upper_hr_threshold;
     /**<IN: Hit rate threshold for the hit rate threshold and ageout with hit
      * rate threshold cache size decrement algorithms.\n
      * When \p decr_mode is #H5C_decr__threshold, and the hit rate over a given
@@ -635,7 +637,7 @@ typedef struct H5AC_cache_config_t {
      * For #H5C_incr__threshold, .9995 or .99995 is a good place to start.\n
      * For #H5C_decr__age_out_with_threshold, .999 might be more useful.*/
 
-    double                   decrement;
+    double decrement;
     /**<IN: In the hit rate threshold cache size decrease algorithm, this
      * parameter contains the factor by which the current max cache size is
      * multiplied to produce a tentative new cache size.\n
@@ -647,28 +649,28 @@ typedef struct H5AC_cache_config_t {
      * If you set it to 1.0, you will effectively
      * disable cache size decreases. 0.9 is a reasonable starting point. */
 
-    hbool_t                  apply_max_decrement;
+    hbool_t apply_max_decrement;
     /**<IN: Boolean flag indicating ether an upper limit should be applied to
      * the size of cache size decreases. */
-    size_t                   max_decrement;
+
+    size_t max_decrement;
     /**<IN: Maximum number of bytes by which the maximum cache size can be
      * decreased in any single step -- if applicable.*/
 
-    int                      epochs_before_eviction;
+    int epochs_before_eviction;
     /**<IN: In the ageout based cache size reduction algorithms, this field contains the minimum
      * number of epochs an entry must remain unaccessed in cache before the cache size reduction
      * algorithm tries to evict it. 3 is a reasonable value. */
 
-    hbool_t                  apply_empty_reserve;
+    hbool_t apply_empty_reserve;
     /**<IN: Boolean flag indicating whether the ageout based decrement algorithms will maintain a empty
      * reserve when decreasing cache size. */
-     
-    double                   empty_reserve;
+
+    double empty_reserve;
     /**<IN: Empty reserve as a fraction maximum cache size if applicable.\n
      * When so directed, the ageout based algorithms will not decrease the maximum cache size unless
      * the empty reserve can be met.\n
      * The parameter must lie in the interval  [0.0, 1.0]. 0.1 or 0.05 is a good place to  start. */
-    
     //! [H5AC_cache_config_t_decr_snip]
 
     /* parallel configuration fields: */
@@ -684,7 +686,7 @@ typedef struct H5AC_cache_config_t {
      * By default, this field is set to 256 KB. It shouldn't be more than
      * half the current max cache size times the min clean fraction. */
 
-    int    metadata_write_strategy;
+    int metadata_write_strategy;
     /**<IN: Desired metadata write strategy. The valid values for this field are:\n
      * #H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY: Specifies tha only process
      * zero is allowed to write dirty metadata to disk.\n
@@ -692,8 +694,7 @@ typedef struct H5AC_cache_config_t {
      * makes the decisions as to what entries should be flushed, but the actual flushes are distributed
      * across the  processes in the computation to the extent possible.\n
      * The src/H5ACpublic.h include file in the HDF5 library has detailed information on each strategy. */
-     //! [H5AC_cache_config_t_parallel_snip]
-
+    //! [H5AC_cache_config_t_parallel_snip]
 } H5AC_cache_config_t;
 
 /****************************************************************************
