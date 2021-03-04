@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef PIO_STANDALONE_H__
-#define PIO_PERF_H__
+#ifndef PIO_STANDALONE_H
+#define PIO_STANDALONE_H
 
 /* Header file for building h5perf by standalone mode.
  * Created: Christian Chilan, 2005/5/18.
