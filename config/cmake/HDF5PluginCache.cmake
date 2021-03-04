@@ -20,7 +20,7 @@ set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:h5repack-shared> CACHE STRING "hdf5 h5
 
 set (H5PL_ALLOW_EXTERNAL_SUPPORT "${HDF5_ALLOW_EXTERNAL_SUPPORT}" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
 
-set (H5PL_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/h5plugin.git" CACHE STRING "Use plugins from HDF repository" FORCE)
+set (H5PL_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "Use plugins from HDF repository" FORCE)
 set (H5PL_GIT_BRANCH "master" CACHE STRING "" FORCE)
 
 set (H5PL_TGZ_NAME "${PLUGIN_TGZ_NAME}" CACHE STRING "Use plugins from compressed file" FORCE)
