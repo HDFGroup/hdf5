@@ -1,0 +1,11 @@
+/** \page About About
+
+The implementation of this documentation set is based on the fantastic work of the
+<a href="https://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen project</a>.
+Please refer to their <a href="https://gitlab.com/libeigen/eigen">GitLab repository</a>
+and the online version of their
+<a href="http://eigen.tuxfamily.org/dox/">Doxygen-based documentation</a>.
+Not only does Eigen set a standard as a piece of software, but also as an example
+of <em>documentation done right</em>.
+
+*/

@@ -249,6 +249,11 @@ extern "C" {
  *
  */
 H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Oopen}
+ */
 H5_DLL hid_t H5Oopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t lapl_id, hid_t es_id);
 
@@ -332,6 +337,11 @@ H5_DLL hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
  */
 H5_DLL hid_t H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                             hsize_t n, hid_t lapl_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Oopen_by_idx}
+ */
 H5_DLL hid_t H5Oopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                                   const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                                   hsize_t n, hid_t lapl_id, hid_t es_id);
@@ -553,6 +563,11 @@ H5_DLL herr_t H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
  */
 H5_DLL herr_t H5Oget_info_by_name3(hid_t loc_id, const char *name, H5O_info2_t *oinfo, unsigned fields,
                                    hid_t lapl_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Oget_info_by_name}
+ */
 H5_DLL herr_t H5Oget_info_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
                                         hid_t loc_id, const char *name, H5O_info2_t *oinfo /*out*/,
                                         unsigned fields, hid_t lapl_id, hid_t es_id);
@@ -980,6 +995,11 @@ H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
  */
 H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
                       hid_t ocpypl_id, hid_t lcpl_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Ocopy}
+ */
 H5_DLL herr_t H5Ocopy_async(const char *app_file, const char *app_func, unsigned app_line, hid_t src_loc_id,
                             const char *src_name, hid_t dst_loc_id, const char *dst_name, hid_t ocpypl_id,
                             hid_t lcpl_id, hid_t es_id);
@@ -1522,6 +1542,11 @@ H5_DLL herr_t H5Ovisit_by_name3(hid_t loc_id, const char *obj_name, H5_index_t i
  *
  */
 H5_DLL herr_t H5Oclose(hid_t object_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Oclose}
+ */
 H5_DLL herr_t H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t object_id,
                              hid_t es_id);
 
@@ -1572,6 +1597,11 @@ H5_DLL herr_t H5Oclose_async(const char *app_file, const char *app_func, unsigne
  *
  */
 H5_DLL herr_t H5Oflush(hid_t obj_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Oflush}
+ */
 H5_DLL herr_t H5Oflush_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
                              hid_t es_id);
 /**
@@ -1599,6 +1629,11 @@ H5_DLL herr_t H5Oflush_async(const char *app_file, const char *app_func, unsigne
  *
  */
 H5_DLL herr_t H5Orefresh(hid_t oid);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Orefresh}
+ */
 H5_DLL herr_t H5Orefresh_async(const char *app_file, const char *app_func, unsigned app_line, hid_t oid,
                                hid_t es_id);
 

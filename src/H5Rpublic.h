@@ -333,22 +333,8 @@ H5_DLL hid_t H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5R
- *
- * \brief Asynchronous version of H5Ropen_object()
- *
- * \app_file
- * \app_func
- * \app_line
- * \param[out] ref_ptr  Pointer to reference to open
- * \rapl_id
- * \oapl_id
- * \es_id
- *
- * \return \hid_t{object}
- *
- * \see H5Ropen_object()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Ropen}
  */
 H5_DLL hid_t H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_line,
                                   H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
@@ -388,22 +374,8 @@ H5_DLL hid_t H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5R
- *
- * \brief Asynchronous version of H5Ropen_region()
- *
- * \app_file
- * \app_func
- * \app_line
- * \param[in] ref_ptr  Pointer to reference to open
- * \rapl_id
- * \oapl_id
- * \es_id
- *
- * \return \hid_t{dataspace}
- *
- * \see H5Ropen_region()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Ropen_region}
  */
 H5_DLL hid_t H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_line,
                                   H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
@@ -440,22 +412,8 @@ H5_DLL hid_t H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5R
- *
- * \brief Asynchronous version of H5Ropen_attr()
- *
- * \app_file
- * \app_func
- * \app_line
- * \param[in] ref_ptr  Pointer to reference to open
- * \rapl_id
- * \aapl_id
- * \es_id
- *
- * \return \hid_t{attribute}
- *
- * \see H5Ropen_attr()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Ropen_attr}
  */
 H5_DLL hid_t H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line,
                                 H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, hid_t es_id);

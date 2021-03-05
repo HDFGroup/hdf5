@@ -203,26 +203,8 @@ H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
- *
- * \brief Asynchronous version of H5Dcreate2()
- *
- * \app_file
- * \app_func
- * \app_line
- * \fgdta_loc_id
- * \param[in] name      Name of the dataset to create
- * \type_id
- * \space_id
- * \lcpl_id
- * \dcpl_id
- * \dapl_id
- * \es_id
- *
- * \return \hid_t{dataset}
- *
- * \see H5Dcreate2()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dcreate}
  */
 H5_DLL hid_t H5Dcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                              const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
@@ -325,22 +307,8 @@ H5_DLL hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
- *
- * \brief Asynchronous version of H5Dopen2()
- *
- * \app_file
- * \app_func
- * \app_line
- * \fgdta_loc_id
- * \param[in] name      Name of the dataset to open
- * \dapl_id
- * \es_id
- *
- * \return \hid_t{dataset}
- *
- * \see H5Dopen2()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dopen}
  */
 H5_DLL hid_t H5Dopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t dapl_id, hid_t es_id);
@@ -370,24 +338,17 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
- *
- * \brief Asynchronous version of H5Dget_space()
- *
- * \app_file
- * \app_func
- * \app_line
- * \dset_id
- * \es_id
- *
- * \return \hid_t{dataspace}
- *
- * \see H5Dget_space()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dget_space}
  */
 H5_DLL hid_t H5Dget_space_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
                                 hid_t es_id);
 
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5D
+ * \todo Document this function!
+ */
 H5_DLL herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation);
 
 /**
@@ -795,25 +756,8 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
- *
- * \brief Asynchronous version of H5Dread()
- *
- * \app_file
- * \app_func
- * \app_line
- * \dset_id                 Identifier of the dataset to read from
- * \param[in] mem_type_id   Identifier of the memory datatype
- * \param[in] mem_space_id  Identifier of the memory dataspace
- * \param[in] file_space_id Identifier of the dataset's dataspace in the file
- * \param[in] dxpl_id       Identifier of a transfer property list
- * \param[out] buf          Buffer to receive data read from file
- * \es_id
- *
- * \return \herr_t
- *
- * \see H5Dread()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dread}
  */
 H5_DLL herr_t H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
                             hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
@@ -932,25 +876,8 @@ H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
- *
- * \brief Asynchronous version of H5Dwrite()
- *
- * \app_file
- * \app_func
- * \app_line
- * \param[in] dset_id        Identifier of the dataset to read from
- * \param[in] mem_type_id    Identifier of the memory datatype
- * \param[in] mem_space_id   Identifier of the memory dataspace
- * \param[in] file_space_id  Identifier of the dataset's dataspace in the file
- * \dxpl_id
- * \param[out] buf           Buffer with data to be written to the file
- * \es_id
- *
- * \return \herr_t
- *
- * \see H5Dwrite()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dwrite}
  */
 H5_DLL herr_t H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
                              hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
@@ -1292,22 +1219,8 @@ H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
- *
- * \brief Asynchronous version of H5Dset_extent()
- *
- * \app_file
- * \app_func
- * \app_line
- * \dset_id
- * \param[in] size[]   Array containing the new magnitude of each dimension
- *                     of the dataset
- * \es_id
- *
- * \return \herr_t
- *
- * \see H5Dset_extent()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dset_extent}
  */
 H5_DLL herr_t H5Dset_extent_async(const char *app_file, const char *app_func, unsigned app_line,
                                   hid_t dset_id, const hsize_t size[], hid_t es_id);
@@ -1536,20 +1449,8 @@ H5_DLL herr_t H5Dclose(hid_t dset_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5D
- *
- * \brief Asynchronous version of H5Dclose()
- *
- * \app_file
- * \app_func
- * \app_line
- * \dset_id
- * \es_id
- *
- * \return \herr_t
- *
- * \see H5Dclose()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dclose}
  */
 H5_DLL herr_t H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
                              hid_t es_id);

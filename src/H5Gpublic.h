@@ -120,24 +120,8 @@ H5_DLL hid_t H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcp
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Asynchronous version of H5Gcreate2()
- *
- * \app_file
- * \app_func
- * \app_line
- * \fgdta_loc_id
- * \param[in] name      Name of the group to create
- * \lcpl_id
- * \gcpl_id
- * \gapl_id
- * \es_id
- *
- * \return \hid_t{group}
- *
- * \see H5Gcreate2()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Gcreate}
  */
 H5_DLL hid_t H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                              const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t es_id);
@@ -223,22 +207,8 @@ H5_DLL hid_t H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Asynchronous version of H5Gopen2()
- *
- * \app_file
- * \app_func
- * \app_line
- * \fgdta_loc_id
- * \param[in] name      Name of the group to open
- * \gapl_id
- * \es_id
- *
- * \return \hid_t{group}
- *
- * \see H5Gopen2()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Gopen}
  */
 H5_DLL hid_t H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t gapl_id, hid_t es_id);
@@ -296,21 +266,8 @@ H5_DLL herr_t H5Gget_info(hid_t loc_id, H5G_info_t *ginfo);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Asynchronous version of H5Gget_info()
- *
- * \app_file
- * \app_func
- * \app_line
- * \fgdta_loc_id
- * \param[out] ginfo Struct in which group information is returned
- * \es_id
- *
- * \return \hid_t{group}
- *
- * \see H5Gget_info()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Gget_info}
  */
 H5_DLL herr_t H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                                 H5G_info_t *ginfo /*out*/, hid_t es_id);
@@ -351,23 +308,8 @@ H5_DLL herr_t H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *gi
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Asynchronous version of H5Gget_info_by_name()
- *
- * \app_file
- * \app_func
- * \app_line
- * \fgdta_loc_id
- * \param[in] name      Name of the group to query
- * \param[out] ginfo Struct in which group information is returned
- * \lapl_id
- * \es_id
- *
- * \return \herr_t
- *
- * \see H5Gget_info_by_name()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Gget_info_by_name}
  */
 H5_DLL herr_t H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
                                         hid_t loc_id, const char *name, H5G_info_t *ginfo /*out*/,
@@ -423,29 +365,8 @@ H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Asynchronous version of H5Gcreate2()
- *
- * \app_file
- * \app_func
- * \app_line
- * \fgdta_loc_id
- * \param[in] group_name Name of the group to query
- * \param[in] idx_type   Transient index identifying object
- * \param[in] order      Transient index identifying object
- * \param[in] n          Position in the index of the group to query
- * \param[out] ginfo     Struct in which group information is returned
- * \lapl_id
- * \es_id
- *
- * \return Returns
- *      \li The size of the object name if successful, or
- *      \li 0 if no name is associated with the group identifier, or
- *      \li negative value, if failure occurred
- *
- * \see H5Gcreate2()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Gget_info_by_idx}
  */
 H5_DLL herr_t H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned app_line,
                                        hid_t loc_id, const char *group_name, H5_index_t idx_type,
@@ -532,20 +453,8 @@ H5_DLL herr_t H5Gclose(hid_t group_id);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Asynchronous version of H5Gcreate2()
- *
- * \app_file
- * \app_func
- * \app_line
- * \group_id
- * \es_id
- *
- * \return \herr_t
- *
- * \see H5Gcreate2()
- *
+ * \ingroup ASYNC
+ * \async_variant_of{H5Gclose}
  */
 H5_DLL herr_t H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id,
                              hid_t es_id);
