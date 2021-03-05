@@ -1087,7 +1087,6 @@ test_array_free_custom(void *_mem, void *info)
         HDfree(mem);
     } /* end if */
 
-    return;
 } /* end test_array_free_custom() */
 
 /*-------------------------------------------------------------------------

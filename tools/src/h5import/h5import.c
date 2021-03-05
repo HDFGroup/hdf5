@@ -5097,7 +5097,6 @@ help(char *name)
     (void)HDfprintf(stdout, "\t  data-set will be compressed using GZIP and a compression level \n");
     (void)HDfprintf(stdout, "\t  of 7.\n");
     (void)HDfprintf(stdout, "\t  The dataset will be stored at \"/Second-set\"\n\n");
-    return;
 }
 
 void
@@ -5107,5 +5106,4 @@ usage(char *name)
     (void)HDfprintf(stdout, "\t%s <infile> -c[onfig] <configfile> \
   [<infile> -c[config] <configfile>...] -o[utfile] <outfile> \n\n",
                     name);
-    return;
 }
