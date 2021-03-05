@@ -3210,8 +3210,6 @@ check_flush_cache__empty_cache(H5F_t *file_ptr)
                         "flush with flags = 0x10 failed on empty cache.\n")
     }
 
-    return;
-
 } /* check_flush_cache__empty_cache() */
 
 /*-------------------------------------------------------------------------
@@ -4413,8 +4411,6 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
         check_flush_cache__pe_multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
     }
 
-    return;
-
 } /* check_flush_cache__multi_entry() */
 
 /*-------------------------------------------------------------------------
@@ -4598,8 +4594,6 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
         u++;
     }
-
-    return;
 
 } /* check_flush_cache__multi_entry_test() */
 
@@ -4793,8 +4787,6 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
         u++;
     }
-
-    return;
 
 } /* check_flush_cache__pe_multi_entry_test() */
 
@@ -7991,8 +7983,6 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
     /* finally finish up with the flush ops eviction test */
     check_flush_cache__flush_op_eviction_test(file_ptr);
 
-    return;
-
 } /* check_flush_cache__flush_ops() */
 
 /*-------------------------------------------------------------------------
@@ -8393,8 +8383,6 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
         i++;
     }
-
-    return;
 
 } /* check_flush_cache__flush_op_test() */
 
@@ -10546,8 +10534,6 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
         reset_entries();
     }
 
-    return;
-
 } /* check_flush_cache__flush_op_eviction_test() */
 
 /*-------------------------------------------------------------------------
@@ -12171,8 +12157,6 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
         }
     }
 
-    return;
-
 } /* check_flush_cache__single_entry() */
 
 /*-------------------------------------------------------------------------
@@ -12311,8 +12295,6 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
             entry_ptr->destroyed    = FALSE;
         }
     }
-
-    return;
 
 } /* check_flush_cache__single_entry_test() */
 
@@ -12488,8 +12470,6 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
             entry_ptr->destroyed    = FALSE;
         }
     }
-
-    return;
 
 } /* check_flush_cache__pinned_single_entry_test() */
 
@@ -13638,8 +13618,6 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
 
     /* put the entry back where it started from */
     move_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, TRUE);
-
-    return;
 
 } /* check_move_entry__run_test() */
 
@@ -27297,7 +27275,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
 
         /* Fill out the rest of the cache with entries */
         /* Verify expected status of entries after each insertion */
-        for (entry_idx = entry_idx; entry_idx < 50; entry_idx++) {
+        for (; entry_idx < 50; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -27431,7 +27409,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
          * After each insertion, verify the expected status of the
          * entries in the cache.
          */
-        for (entry_idx = entry_idx; entry_idx < 100; entry_idx++) {
+        for (; entry_idx < 100; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -33243,7 +33221,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
 
         /* Fill out the rest of the cache with entries */
         /* Verify expected status of entries after each insertion */
-        for (entry_idx = entry_idx; entry_idx < 50; entry_idx++) {
+        for (; entry_idx < 50; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -33304,7 +33282,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     if (pass) {
 
         /* Insert 50 more entries (indices 50-99) into the cache.  */
-        for (entry_idx = entry_idx; entry_idx < 100; entry_idx++) {
+        for (; entry_idx < 100; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -33880,8 +33858,6 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    return;
-
 } /* cedds__expunge_dirty_entry_in_flush_test() */
 
 /*-------------------------------------------------------------------------
@@ -34239,8 +34215,6 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
     if (pass)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
-
-    return;
 
 } /* cedds__H5C_make_space_in_cache() */
 
@@ -34638,8 +34612,6 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    return;
-
 } /* cedds__H5C__autoadjust__ageout__evict_aged_out_entries() */
 
 /*-------------------------------------------------------------------------
@@ -35015,8 +34987,6 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
     if (pass)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
-
-    return;
 
 } /* cedds__H5C_flush_invalidate_cache__bucket_scan() */
 
@@ -35480,8 +35450,6 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    return;
-
 } /* check_stats__smoke_check_1() */
 
 #endif /* H5C_COLLECT_CACHE_STATS */
@@ -35888,8 +35856,6 @@ takedown_cache(H5F_t *file_ptr, hbool_t dump_stats, hbool_t dump_detailed_stats)
             }
         }
     }
-
-    return;
 
 } /* takedown_cache() */
 

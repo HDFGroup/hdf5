@@ -12,8 +12,8 @@
 
 /* Header for class hdf_hdf5lib_H5_H5_H5P */
 
-#ifndef _Included_hdf_hdf5lib_H5_H5P
-#define _Included_hdf_hdf5lib_H5_H5P
+#ifndef Included_hdf_hdf5lib_H5_H5P
+#define Included_hdf_hdf5lib_H5_H5P
 
 #include <jni.h>
 
@@ -210,4 +210,4 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5__1H5Pclose_1class(JNIEnv *, jclass, j
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_hdf_hdf5lib_H5_H5P */
+#endif /* Included_hdf_hdf5lib_H5_H5P */

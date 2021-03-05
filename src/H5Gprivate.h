@@ -29,9 +29,9 @@
 #include "H5Gpublic.h"
 
 /* Private headers needed by this file */
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Bprivate.h"  /* B-trees				*/
-#include "H5Fprivate.h"  /* File access				*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Bprivate.h"  /* B-trees                */
+#include "H5Fprivate.h"  /* File access                */
 #include "H5RSprivate.h" /* Reference-counted strings            */
 
 /*
@@ -42,7 +42,7 @@
     ((sizeof_size) +     /*offset of name into heap              */                                          \
      (sizeof_addr) +     /*address of object header              */                                          \
      4 +                 /*entry type                            */                                          \
-     4 +                 /*reserved				*/                                                                    \
+     4 +                 /*reserved                */                                                        \
      H5G_SIZEOF_SCRATCH) /*scratch pad space                     */
 #define H5G_SIZEOF_ENTRY_FILE(F) H5G_SIZEOF_ENTRY(H5F_SIZEOF_ADDR(F), H5F_SIZEOF_SIZE(F))
 

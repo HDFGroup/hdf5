@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _SWMR_COMMON_H
-#define _SWMR_COMMON_H
+#ifndef SWMR_COMMON_H
+#define SWMR_COMMON_H
 
 /***********/
 /* Headers */
@@ -75,4 +75,4 @@ H5TEST_DLL int            print_metadata_retries_info(hid_t fid);
 }
 #endif
 
-#endif /* _SWMR_COMMON_H */
+#endif /* SWMR_COMMON_H */

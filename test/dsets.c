@@ -6977,6 +6977,7 @@ error:
 static herr_t
 test_filter_delete(hid_t file)
 {
+#ifdef H5_HAVE_FILTER_DEFLATE
     H5Z_filter_t filtn;                    /* filter identification number */
     hid_t        dsid          = -1;       /* dataset ID */
     hid_t        sid           = -1;       /* dataspace ID */
@@ -6988,6 +6989,7 @@ test_filter_delete(hid_t file)
     unsigned     flags;                    /* flags for filter */
     herr_t       ret;                      /* generic return value */
     int          i;
+#endif
 
     TESTING("filter deletion");
 
@@ -7089,9 +7091,7 @@ test_filter_delete(hid_t file)
         goto error;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
+
     return SUCCEED;
 
 error:
@@ -7104,6 +7104,10 @@ error:
     }
     H5E_END_TRY;
     return FAIL;
+#else
+    SKIPPED();
+    return SUCCEED;
+#endif
 } /* end test_filter_delete() */
 
 /*-------------------------------------------------------------------------

@@ -6548,7 +6548,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -6734,7 +6733,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -6994,7 +6992,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -10921,7 +10918,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
         return (0);
 
     /* Assignment to eliminate unused parameter warning. */
-    cd_values = cd_values;
+    (void)cd_values;
 
     if (flags & H5Z_FLAG_REVERSE) { /*read*/
         /* Subtract the original value with MULTIPLIER */
