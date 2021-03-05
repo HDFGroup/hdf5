@@ -124,10 +124,10 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
 /*  And return after pushing error onto stack */
 #define H5Epush_ret(func, cls, maj, min, str, ret)                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, cls, maj, min, str);                                 \
         return (ret);                                                                                        \
-    }
+    } while (0)
 
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in
  * And goto a label after pushing error onto stack.
