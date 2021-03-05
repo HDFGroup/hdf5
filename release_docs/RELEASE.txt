@@ -262,7 +262,7 @@ New Features
         semi would work, but was not mandatory. This change was made to allow
         clang-format to correctly format the source code.
 
-        (SAM - 2021/03-03)
+        (SAM - 2021/03/03)
 
     - Improved performance of H5Sget_select_elem_pointlist
 
