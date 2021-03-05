@@ -547,16 +547,14 @@ done
 # read and written by VFD SWMR.
 #
 if [ ${do_zoo:-no} = yes ]; then
-	[ -e ./fifo ] && rm -f ./fifo
-	mkfifo -m 0600 ./fifo
 	rm -f ./shared_tick_num
 	echo launch vfd_swmr_zoo_writer
-	STDIN_PATH="./fifo" catch_out_err_and_rc vfd_swmr_zoo_writer \
-	    ../vfd_swmr_zoo_writer -m 1000 -q &
+	catch_out_err_and_rc vfd_swmr_zoo_writer \
+	    ../vfd_swmr_zoo_writer -l 5 -m 1000 -q &
 	pid_writer=$!
 
-	STDOUT_PATH="./fifo" catch_out_err_and_rc vfd_swmr_zoo_reader \
-	    ../vfd_swmr_zoo_reader -q -W &
+	catch_out_err_and_rc vfd_swmr_zoo_reader \
+	    ../vfd_swmr_zoo_reader -l 10 -q -W &
 	pid_reader=$!
 
 	# Wait for the reader to finish before signalling the
@@ -564,7 +562,6 @@ if [ ${do_zoo:-no} = yes ]; then
 	# reader will find the shadow file when it opens
 	# the .h5 file.
 	wait $pid_reader
-	kill -USR1 $(cat vfd_swmr_zoo_writer.pid)
 	wait $pid_writer
 
 	# Collect exit code of the reader
@@ -580,7 +577,6 @@ if [ ${do_zoo:-no} = yes ]; then
 	fi
 
 	# Clean up output files
-	rm -f ./fifo
 	rm -f vfd_swmr_zoo_writer.{out,rc}
 	rm -f vfd_swmr_zoo_reader.*.{out,rc}
 fi
