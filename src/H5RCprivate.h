@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5RC module
  */
-#ifndef _H5RCprivate_H
-#define _H5RCprivate_H
+#ifndef H5RCprivate_H
+#define H5RCprivate_H
 
 /**************************************/
 /* Public headers needed by this file */
@@ -56,4 +56,4 @@ typedef struct H5RC_t {
 H5_DLL H5RC_t *H5RC_create(void *s, H5RC_free_func_t free_func);
 H5_DLL herr_t  H5RC_decr(H5RC_t *rc);
 
-#endif /* _H5RSprivate_H */
+#endif /* H5RSprivate_H */

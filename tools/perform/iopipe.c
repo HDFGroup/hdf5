@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, March 12, 1998
  */
 
@@ -53,8 +53,6 @@
  *
  * Programmer:  Robb Matzke
  *              Thursday, March 12, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -105,8 +103,6 @@ print_stats(const char *prefix, struct timeval *r_start, struct timeval *r_stop,
  * Programmer:  Robb Matzke
  *              Thursday, March 12, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -138,8 +134,6 @@ synchronize(void)
  *
  * Programmer:  Robb Matzke
  *              Thursday, March 12, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

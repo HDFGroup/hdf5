@@ -365,9 +365,9 @@ H5FD_log_fapl_get(H5FD_t *_file)
 static void *
 H5FD_log_fapl_copy(const void *_old_fa)
 {
-    const H5FD_log_fapl_t *old_fa = (const H5FD_log_fapl_t *)_old_fa;
-    H5FD_log_fapl_t *      new_fa = NULL; /* New FAPL info */
-    void *                 ret_value;     /* Return value */
+    const H5FD_log_fapl_t *old_fa    = (const H5FD_log_fapl_t *)_old_fa;
+    H5FD_log_fapl_t *      new_fa    = NULL; /* New FAPL info */
+    void *                 ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -458,7 +458,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     struct timeval stat_timeval_diff;
 #endif /* H5_HAVE_GETTIMEOFDAY */
     h5_stat_t sb;
-    H5FD_t *  ret_value; /* Return value */
+    H5FD_t *  ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

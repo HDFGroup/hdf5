@@ -18,14 +18,14 @@
  * Purpose:     Hyperslab selection dataspace I/O functions.
  */
 
-#define H5S_PACKAGE /*suppress error about including H5Spkg	  */
+#define H5S_PACKAGE /*suppress error about including H5Spkg      */
 
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling			*/
-#include "H5FLprivate.h" /* Free Lists				*/
-#include "H5Iprivate.h"  /* ID Functions				*/
-#include "H5Spkg.h"      /* Dataspace functions			*/
-#include "H5VMprivate.h" /* Vector functions			*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Eprivate.h"  /* Error handling            */
+#include "H5FLprivate.h" /* Free Lists                */
+#include "H5Iprivate.h"  /* ID Functions                */
+#include "H5Spkg.h"      /* Dataspace functions            */
+#include "H5VMprivate.h" /* Vector functions            */
 
 /* Local datatypes */
 
@@ -216,13 +216,13 @@ H5S_hyper_print_diminfo(FILE *f, const H5S_t *space)
 #endif /* H5S_HYPER_DEBUG */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_hyper_iter_init
+ * Function:    H5S_hyper_iter_init
  *
- * Purpose:	Initializes iteration information for hyperslab span tree selection.
+ * Purpose:    Initializes iteration information for hyperslab span tree selection.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:    non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, February 24, 2001
  *
  * Notes:       If the 'elmt_size' parameter is set to zero, the regular
@@ -409,14 +409,14 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
 } /* H5S_hyper_iter_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_hyper_iter_coords
+ * Function:    H5S_hyper_iter_coords
  *
- * Purpose:	Retrieve the current coordinates of iterator for current
+ * Purpose:    Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:    non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, April 22, 2003
  *
  * Modifications:
@@ -496,14 +496,14 @@ H5S_hyper_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 } /* H5S_hyper_iter_coords() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_hyper_iter_block
+ * Function:    H5S_hyper_iter_block
  *
- * Purpose:	Retrieve the current block of iterator for current
+ * Purpose:    Retrieve the current block of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:    non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, June 2, 2003
  *
  * Notes:       This routine assumes that the iterator is always located at
@@ -549,13 +549,13 @@ H5S_hyper_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 } /* H5S_hyper_iter_block() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_hyper_iter_nelmts
+ * Function:    H5S_hyper_iter_nelmts
  *
- * Purpose:	Return number of elements left to process in iterator
+ * Purpose:    Return number of elements left to process in iterator
  *
- * Return:	non-negative number of elements on success, zero on failure
+ * Return:    non-negative number of elements on success, zero on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  * Modifications:
@@ -629,15 +629,15 @@ done:
 } /* H5S_hyper_iter_has_next_block() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_hyper_iter_next
+ * Function:    H5S_hyper_iter_next
  *
- * Purpose:	Moves a hyperslab iterator to the beginning of the next sequence
+ * Purpose:    Moves a hyperslab iterator to the beginning of the next sequence
  *      of elements to read.  Handles walking off the end in all dimensions.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:    Success:    non-negative
+ *        Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, September 8, 2000
  *
  * Modifications:
@@ -745,10 +745,10 @@ H5S_hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
-        H5S_hyper_span_t * curr_span; /* Current hyperslab span node */
-        H5S_hyper_span_t **ispan;     /* Iterator's hyperslab span nodes */
-        hsize_t *          abs_arr;   /* Absolute hyperslab span position */
-        int                curr_dim;  /* Temporary rank holder */
+        H5S_hyper_span_t * curr_span = NULL; /* Current hyperslab span node */
+        H5S_hyper_span_t **ispan;            /* Iterator's hyperslab span nodes */
+        hsize_t *          abs_arr;          /* Absolute hyperslab span position */
+        int                curr_dim;         /* Temporary rank holder */
 
         /* Set the rank of the fastest changing dimension */
         ndims    = iter->rank;
@@ -848,15 +848,15 @@ H5S_hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 } /* H5S_hyper_iter_next() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_hyper_iter_next_block
+ * Function:    H5S_hyper_iter_next_block
  *
- * Purpose:	Moves a hyperslab iterator to the beginning of the next sequence
+ * Purpose:    Moves a hyperslab iterator to the beginning of the next sequence
  *      of elements to read.  Handles walking off the end in all dimensions.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:    Success:    non-negative
+ *        Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, June 3, 2003
  *
  * Modifications:
@@ -946,10 +946,10 @@ H5S_hyper_iter_next_block(H5S_sel_iter_t *iter)
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
-        H5S_hyper_span_t * curr_span; /* Current hyperslab span node */
-        H5S_hyper_span_t **ispan;     /* Iterator's hyperslab span nodes */
-        hsize_t *          abs_arr;   /* Absolute hyperslab span position */
-        int                curr_dim;  /* Temporary rank holder */
+        H5S_hyper_span_t * curr_span = NULL; /* Current hyperslab span node */
+        H5S_hyper_span_t **ispan;            /* Iterator's hyperslab span nodes */
+        hsize_t *          abs_arr;          /* Absolute hyperslab span position */
+        int                curr_dim;         /* Temporary rank holder */
 
         /* Set the rank of the fastest changing dimension */
         ndims    = iter->rank;
@@ -3189,11 +3189,11 @@ H5S_hyper_is_regular(const H5S_t *space)
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
- * 	Robb Matzke, 1998-08-25
- *	The fields which are freed are set to NULL to prevent them from being
- *	freed again later.  This fixes some allocation problems where
- *	changing the hyperslab selection of one data space causes a core dump
- *	when closing some other data space.
+ *     Robb Matzke, 1998-08-25
+ *    The fields which are freed are set to NULL to prevent them from being
+ *    freed again later.  This fixes some allocation problems where
+ *    changing the hyperslab selection of one data space causes a core dump
+ *    when closing some other data space.
 --------------------------------------------------------------------------*/
 static herr_t
 H5S_hyper_release(H5S_t *space)
@@ -4053,14 +4053,14 @@ done:
 } /* H5S_hyper_adjust_u() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_hyper_project_scalar
+ * Function:    H5S_hyper_project_scalar
  *
- * Purpose:	Projects a single element hyperslab selection into a scalar
+ * Purpose:    Projects a single element hyperslab selection into a scalar
  *              dataspace
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:    non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -4123,14 +4123,14 @@ done:
 } /* H5S_hyper_project_scalar() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_hyper_project_simple_lower
+ * Function:    H5S_hyper_project_simple_lower
  *
- * Purpose:	Projects a hyperslab selection onto/into a simple dataspace
+ * Purpose:    Projects a hyperslab selection onto/into a simple dataspace
  *              of a lower rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:    non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -4169,14 +4169,14 @@ H5S_hyper_project_simple_lower(const H5S_t *base_space, H5S_t *new_space)
 } /* H5S_hyper_project_simple_lower() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_hyper_project_simple_higher
+ * Function:    H5S_hyper_project_simple_higher
  *
- * Purpose:	Projects a hyperslab selection onto/into a simple dataspace
+ * Purpose:    Projects a hyperslab selection onto/into a simple dataspace
  *              of a higher rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:    non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -4258,14 +4258,14 @@ done:
 } /* H5S_hyper_project_simple_higher() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_hyper_project_simple
+ * Function:    H5S_hyper_project_simple
  *
- * Purpose:	Projects a hyperslab selection onto/into a simple dataspace
+ * Purpose:    Projects a hyperslab selection onto/into a simple dataspace
  *              of a different rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:    non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -6119,13 +6119,13 @@ done:
 #ifndef NEW_HYPERSLAB_API
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_generate_hyperlab
+ * Function:    H5S_generate_hyperlab
  *
- * Purpose:	Generate hyperslab information from H5S_select_hyperslab()
+ * Purpose:    Generate hyperslab information from H5S_select_hyperslab()
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol (split from HS_select_hyperslab()).
+ * Programmer:    Quincey Koziol (split from HS_select_hyperslab()).
  *              Tuesday, September 12, 2000
  *
  * Modifications:
@@ -6363,13 +6363,13 @@ done:
 } /* end H5S_generate_hyperslab() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_select_hyperslab
+ * Function:    H5S_select_hyperslab
  *
- * Purpose:	Internal version of H5Sselect_hyperslab().
+ * Purpose:    Internal version of H5Sselect_hyperslab().
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, January 10, 2001
  *
  *-------------------------------------------------------------------------
@@ -6689,14 +6689,14 @@ done:
 #else /* NEW_HYPERSLAB_API */  /* Works */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_operate_hyperslab
+ * Function:    H5S_operate_hyperslab
  *
- * Purpose:	Combines two hyperslabs with an operation, putting the
+ * Purpose:    Combines two hyperslabs with an operation, putting the
  *              result into a third hyperslab selection
  *
- * Return:	non-negative on success/NULL on failure
+ * Return:    non-negative on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, October 30, 2001
  *
  * Modifications:
@@ -6895,13 +6895,13 @@ done:
 } /* end H5S_operate_hyperslab() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_generate_hyperlab
+ * Function:    H5S_generate_hyperlab
  *
- * Purpose:	Generate hyperslab information from H5S_select_hyperslab()
+ * Purpose:    Generate hyperslab information from H5S_select_hyperslab()
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol (split from HS_select_hyperslab()).
+ * Programmer:    Quincey Koziol (split from HS_select_hyperslab()).
  *              Tuesday, September 12, 2000
  *
  * Modifications:
@@ -6964,13 +6964,13 @@ done:
 } /* end H5S_generate_hyperslab() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_select_hyperslab
+ * Function:    H5S_select_hyperslab
  *
- * Purpose:	Internal version of H5Sselect_hyperslab().
+ * Purpose:    Internal version of H5Sselect_hyperslab().
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, January 10, 2001
  *
  * Modifications:
@@ -7346,13 +7346,13 @@ done:
 } /* end H5Scombine_hyperslab() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_combine_select
+ * Function:    H5S_combine_select
  *
- * Purpose:	Internal version of H5Scombine_select().
+ * Purpose:    Internal version of H5Scombine_select().
  *
- * Return:	New dataspace on success/NULL on failure
+ * Return:    New dataspace on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, October 30, 2001
  *
  * Modifications:
@@ -7474,13 +7474,13 @@ done:
 } /* end H5Scombine_select() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_select_select
+ * Function:    H5S_select_select
  *
- * Purpose:	Internal version of H5Sselect_select().
+ * Purpose:    Internal version of H5Sselect_select().
  *
- * Return:	New dataspace on success/NULL on failure
+ * Return:    New dataspace on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, October 30, 2001
  *
  * Modifications:

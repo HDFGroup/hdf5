@@ -30,7 +30,7 @@
 
 /* Private headers needed by this header */
 #include "H5private.h"  /* Generic Functions            */
-#include "H5Fprivate.h" /* File access                */
+#include "H5Fprivate.h" /* File access                  */
 
 #define H5C_DO_SANITY_CHECKS         0
 #define H5C_DO_EXTREME_SANITY_CHECKS 0

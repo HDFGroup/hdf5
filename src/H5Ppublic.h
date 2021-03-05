@@ -39,11 +39,11 @@
 
 /* When this header is included from a private HDF5 header, don't make calls to H5open() */
 #undef H5OPEN
-#ifndef _H5private_H
+#ifndef H5private_H
 #define H5OPEN H5open(),
-#else /* _H5private_H */
+#else /* H5private_H */
 #define H5OPEN
-#endif /* _H5private_H */
+#endif /* H5private_H */
 
 /*
  * The library's property list classes

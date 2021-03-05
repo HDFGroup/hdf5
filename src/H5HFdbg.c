@@ -615,10 +615,10 @@ herr_t
 H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
                   haddr_t hdr_addr, unsigned nrows)
 {
-    H5HF_hdr_t *     hdr    = NULL;       /* Fractal heap header info */
-    H5HF_indirect_t *iblock = NULL;       /* Fractal heap direct block info */
-    hbool_t          did_protect;         /* Whether we protected the indirect block or not */
-    herr_t           ret_value = SUCCEED; /* Return value */
+    H5HF_hdr_t *     hdr         = NULL;    /* Fractal heap header info */
+    H5HF_indirect_t *iblock      = NULL;    /* Fractal heap direct block info */
+    hbool_t          did_protect = FALSE;   /* Whether we protected the indirect block or not */
+    herr_t           ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

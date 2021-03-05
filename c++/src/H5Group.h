@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __Group_H
-#define __Group_H
+#ifndef Group_H
+#define Group_H
 
 namespace H5 {
 
@@ -80,4 +80,4 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 }; // end of Group
 } // namespace H5
 
-#endif // __Group_H
+#endif // Group_H

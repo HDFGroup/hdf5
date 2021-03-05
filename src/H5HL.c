@@ -101,7 +101,7 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p /*out*/)
 {
     H5HL_t *     heap = NULL;         /* Heap created */
     H5HL_prfx_t *prfx = NULL;         /* Heap prefix */
-    hsize_t      total_size;          /* Total heap size on disk	*/
+    hsize_t      total_size;          /* Total heap size on disk    */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -178,15 +178,15 @@ done:
 } /* end H5HL_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_dblk_realloc
+ * Function:    H5HL_dblk_realloc
  *
- * Purpose:	Reallocate data block for heap
+ * Purpose:    Reallocate data block for heap
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		Oct 12 2008
+ * Programmer:    Quincey Koziol
+ *        Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -720,7 +720,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 
     /*
      * If no free chunk was large enough, then allocate more space and
-     * add it to the free list.	 If the heap ends with a free chunk, we
+     * add it to the free list.     If the heap ends with a free chunk, we
      * can extend that free chunk.  Otherwise we'll have to make another
      * free chunk.  If the heap must expand, we double its size.
      */
@@ -855,7 +855,7 @@ done:
  * Function:    H5HL_remove
  *
  * Purpose:     Removes an object or part of an object from the heap at
- *              address ADDR of file F.	 The object (or part) to remove
+ *              address ADDR of file F.     The object (or part) to remove
  *              begins at byte OFFSET from the beginning of the heap and
  *              continues for SIZE bytes.
  *
@@ -966,7 +966,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 
     /*
      * The amount which is being removed must be large enough to
-     * hold the free list data.	 If not, the freed chunk is forever
+     * hold the free list data.     If not, the freed chunk is forever
      * lost.
      */
     if (size < H5HL_SIZEOF_FREE(f)) {
@@ -1095,8 +1095,8 @@ herr_t
 H5HL_get_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t *size)
 {
     H5HL_cache_prfx_ud_t prfx_udata;          /* User data for protecting local heap prefix */
-    H5HL_prfx_t *        prfx = NULL;         /* Local heap prefix */
-    H5HL_t *             heap;                /* Heap data structure */
+    H5HL_prfx_t *        prfx      = NULL;    /* Local heap prefix */
+    H5HL_t *             heap      = NULL;    /* Heap data structure */
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1147,8 +1147,8 @@ herr_t
 H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
 {
     H5HL_cache_prfx_ud_t prfx_udata;          /* User data for protecting local heap prefix */
-    H5HL_prfx_t *        prfx = NULL;         /* Local heap prefix */
-    H5HL_t *             heap;                /* Heap data structure */
+    H5HL_prfx_t *        prfx      = NULL;    /* Local heap prefix */
+    H5HL_t *             heap      = NULL;    /* Heap data structure */
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

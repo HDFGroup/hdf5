@@ -4809,7 +4809,7 @@ done:
 H5P_genclass_t *
 H5P_get_class_parent(const H5P_genclass_t *pclass)
 {
-    H5P_genclass_t *ret_value; /* return value */
+    H5P_genclass_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
