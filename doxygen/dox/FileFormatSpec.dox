@@ -1,0 +1,5 @@
+/** \page FMT HDF5 File Format Specification Version 3.0
+
+\htmlinclude H5.format.html
+
+*/

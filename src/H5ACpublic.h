@@ -442,6 +442,32 @@ extern "C" {
 #define H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY 0
 #define H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED    1
 
+/**
+ * H5AC_cache_config_t is a public structure intended for use in public APIs.
+ * At least in its initial incarnation, it is basically a copy of \c struct
+ * \c H5C_auto_size_ctl_t, minus the \c report_fcn field, and plus the
+ * \c dirty_bytes_threshold field.
+ *
+ * The \c report_fcn field is omitted, as including it would require us to make
+ * \c H5C_t structure public.
+ *
+ * The \c dirty_bytes_threshold field does not appear in \c H5C_auto_size_ctl_t,
+ * as synchronization between caches on different processes is handled at the \c
+ * H5AC level, not at the level of \c H5C.  Note however that there is
+ * considerable interaction between this value and the other fields in this
+ * structure.
+ *
+ * Similarly, the \c open_trace_file, \c close_trace_file, and \c
+ * trace_file_name fields do not appear in \c H5C_auto_size_ctl_t, as most trace
+ * file issues are handled at the \c H5AC level.  The one exception is storage
+ * of the pointer to the trace file, which is handled by \c H5C.
+ *
+ * The structure is in H5ACpublic.h as we may wish to allow different
+ * configuration options for metadata and raw data caches.
+ */
+
+//! [H5AC_cache_config_t_snip]
+
 typedef struct H5AC_cache_config_t {
     /* general configuration fields: */
     //! [H5AC_cache_config_t_general_snip]
@@ -554,8 +580,8 @@ typedef struct H5AC_cache_config_t {
      * adaptive cache resize code can select as the mininum cache * size. */
 
     long int epoch_length;
-    /**<IN: Number of cache accesses between runs of the adaptive cache resize code. 50,000 is a good
-     * starting number. */
+    /**<IN: Number of cache accesses between runs of the adaptive cache resize
+     * code. 50,000 is a good starting number. */
     //! [H5AC_cache_config_t_general_snip]
 
     /* size increase control fields: */
@@ -658,105 +684,107 @@ typedef struct H5AC_cache_config_t {
      * decreased in any single step -- if applicable.*/
 
     int epochs_before_eviction;
-    /**<IN: In the ageout based cache size reduction algorithms, this field contains the minimum
-     * number of epochs an entry must remain unaccessed in cache before the cache size reduction
-     * algorithm tries to evict it. 3 is a reasonable value. */
+    /**<IN: In the ageout based cache size reduction algorithms, this field
+     * contains the minimum number of epochs an entry must remain unaccessed in
+     * cache before the cache size reduction algorithm tries to evict it. 3 is a
+     * reasonable value. */
 
     hbool_t apply_empty_reserve;
-    /**<IN: Boolean flag indicating whether the ageout based decrement algorithms will maintain a empty
-     * reserve when decreasing cache size. */
+    /**<IN: Boolean flag indicating whether the ageout based decrement
+     * algorithms will maintain a empty reserve when decreasing cache size. */
 
     double empty_reserve;
-    /**<IN: Empty reserve as a fraction maximum cache size if applicable.\n
-     * When so directed, the ageout based algorithms will not decrease the maximum cache size unless
-     * the empty reserve can be met.\n
-     * The parameter must lie in the interval  [0.0, 1.0]. 0.1 or 0.05 is a good place to  start. */
+    /**<IN: Empty reserve as a fraction maximum cache size if applicable.\n When
+     * so directed, the ageout based algorithms will not decrease the maximum
+     * cache size unless the empty reserve can be met.\n The parameter must lie
+     * in the interval [0.0, 1.0]. 0.1 or 0.05 is a good place to start. */
     //! [H5AC_cache_config_t_decr_snip]
 
     /* parallel configuration fields: */
     //! [H5AC_cache_config_t_parallel_snip]
     size_t dirty_bytes_threshold;
-    /**<IN: Threshold number of bytes of dirty metadata generation for triggering synchronizations of the
-     * metadata caches serving the target file in the parallel case.\n
-     * Synchronization occurs whenever the number of bytes of dirty metadata created since the last
-     * synchronization exceeds this limit.\n
-     * This field only applies to the parallel case. While it is ignored
-     * elsewhere, it can still draw a value out of bounds error.\n
-     * It must be consistant across all caches on any given file.\n
-     * By default, this field is set to 256 KB. It shouldn't be more than
-     * half the current max cache size times the min clean fraction. */
+    /**<IN: Threshold number of bytes of dirty metadata generation for
+     * triggering synchronizations of the metadata caches serving the target
+     * file in the parallel case.\n Synchronization occurs whenever the number
+     * of bytes of dirty metadata created since the last synchronization exceeds
+     * this limit.\n This field only applies to the parallel case. While it is
+     * ignored elsewhere, it can still draw a value out of bounds error.\n It
+     * must be consistant across all caches on any given file.\n By default,
+     * this field is set to 256 KB. It shouldn't be more than half the current
+     * max cache size times the min clean fraction. */
 
     int metadata_write_strategy;
-    /**<IN: Desired metadata write strategy. The valid values for this field are:\n
-     * #H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY: Specifies tha only process
-     * zero is allowed to write dirty metadata to disk.\n
-     * #H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED: Specifies that process zero still
-     * makes the decisions as to what entries should be flushed, but the actual flushes are distributed
-     * across the  processes in the computation to the extent possible.\n
-     * The src/H5ACpublic.h include file in the HDF5 library has detailed information on each strategy. */
+    /**<IN: Desired metadata write strategy. The valid values for this field
+     * are:\n #H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY: Specifies tha only
+     * process zero is allowed to write dirty metadata to disk.\n
+     * #H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED: Specifies that process zero
+     * still makes the decisions as to what entries should be flushed, but the
+     * actual flushes are distributed across the processes in the computation to
+     * the extent possible.\n The src/H5ACpublic.h include file in the HDF5
+     * library has detailed information on each strategy. */
     //! [H5AC_cache_config_t_parallel_snip]
 } H5AC_cache_config_t;
 
-/****************************************************************************
- *
- * structure H5AC_cache_image_config_t
- *
- * H5AC_cache_image_ctl_t is a public structure intended for use in public
- * APIs.  At least in its initial incarnation, it is a copy of struct
- * H5C_cache_image_ctl_t.
- *
- * The fields of the structure are discussed individually below:
- *
- * version: Integer field containing the version number of this version
- *      of the H5C_image_ctl_t structure.  Any instance of
- *      H5C_image_ctl_t passed to the cache must have a known
- *      version number, or an error will be flagged.
- *
- * generate_image:  Boolean flag indicating whether a cache image should
- *      be created on file close.
- *
- * save_resize_status:    Boolean flag indicating whether the cache image
- *    should include the adaptive cache resize configuration and status.
- *    Note that this field is ignored at present.
- *
- * entry_ageout:    Integer field indicating the maximum number of
- *    times a prefetched entry can appear in subsequent cache images.
- *    This field exists to allow the user to avoid the buildup of
- *    infrequently used entries in long sequences of cache images.
- *
- *    The value of this field must lie in the range
- *    H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE (-1) to
- *    H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX (100).
- *
- *    H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE means that no limit
- *    is imposed on number of times a prefeteched entry can appear
- *    in subsequent cache images.
- *
- *    A value of 0 prevents prefetched entries from being included
- *    in cache images.
- *
- *    Positive integers restrict prefetched entries to the specified
- *    number of appearances.
- *
- *    Note that the number of subsequent cache images that a prefetched
- *    entry has appeared in is tracked in an 8 bit field.  Thus, while
- *    H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX can be increased from its
- *    current value, any value in excess of 255 will be the functional
- *    equivalent of H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE.
- *
- ****************************************************************************/
+//! [H5AC_cache_config_t_snip]
 
 #define H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION 1
 
 #define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE -1
 #define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX  100
 
+/**
+ * H5AC_cache_image_config_t is a public structure intended for use in public
+ * APIs.  At least in its initial incarnation, it is a copy of \c struct \c
+ * H5C_cache_image_ctl_t.
+ */
+
+//! [H5AC_cache_image_config_t_snip]
+
 typedef struct H5AC_cache_image_config_t {
     int     version;
+    /**< Integer field containing the version number of this version of the \c
+      *  H5C_image_ctl_t structure.  Any instance of \c H5C_image_ctl_t passed
+      *  to the cache must have a known version number, or an error will be
+      *  flagged.
+      */
     hbool_t generate_image;
+    /**< Boolean flag indicating whether a cache image should be created on file
+     *   close.
+     */
     hbool_t save_resize_status;
+    /**< Boolean flag indicating whether the cache image should include the
+      *  adaptive cache resize configuration and status.  Note that this field
+      *  is ignored at present.
+     */
     int     entry_ageout;
+    /**< Integer field indicating the maximum number of times a
+     *   prefetched entry can appear in subsequent cache images.  This field
+     *   exists to allow the user to avoid the buildup of infrequently used
+     *   entries in long sequences of cache images.
+     *
+     *   The value of this field must lie in the range \ref
+     *   H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE (-1) to \ref
+     *   H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX (100).
+     *
+     *   \ref H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE means that no limit is
+     *   imposed on number of times a prefeteched entry can appear in subsequent
+     *   cache images.
+     *
+     *   A value of 0 prevents prefetched entries from being included in cache
+     *   images.
+     *
+     *   Positive integers restrict prefetched entries to the specified number
+     *   of appearances.
+     *
+     *   Note that the number of subsequent cache images that a prefetched entry
+     *   has appeared in is tracked in an 8 bit field.  Thus, while \ref
+     *   H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX can be increased from its current
+     *   value, any value in excess of 255 will be the functional equivalent of
+     *   \ref H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE.
+     */
 } H5AC_cache_image_config_t;
+
+//! [H5AC_cache_image_config_t_snip]
 
 #ifdef __cplusplus
 }

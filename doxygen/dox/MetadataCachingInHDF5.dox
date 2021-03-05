@@ -388,7 +388,7 @@ From the user perspective, all the cache configuration data for a given file is
 contained in an instance of the \ref H5AC_cache_config_t structure -- the definition
 of which is given below:
 
-\snippet H5ACpublic.h H5AC_cache_config_t_general_snip
+\snippet H5ACpublic.h H5AC_cache_config_t_snip
 
 This structure is defined in \c H5ACpublic.h. Each field is discussed below and in
 the associated header comment.
