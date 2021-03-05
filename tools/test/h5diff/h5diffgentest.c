@@ -5009,8 +5009,6 @@ error:
         H5Tclose(tid2);
     }
     H5E_END_TRY;
-
-    return;
 }
 
 static hid_t
@@ -8058,8 +8056,6 @@ error:
         H5Fclose(fid2);
     }
     H5E_END_TRY;
-
-    return;
 }
 
 /*-------------------------------------------------------------------------
