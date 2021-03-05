@@ -298,7 +298,7 @@ static const H5VL_class_t fake_vol_g = {
     NULL /* optional     */
 };
 
-static herr_t fake_async_get_cap_flags(void *info, unsigned *cap_flags);
+static herr_t fake_async_get_cap_flags(const void *info, unsigned *cap_flags);
 
 #define FAKE_ASYNC_VOL_NAME  "fake_async"
 #define FAKE_ASYNC_VOL_VALUE ((H5VL_class_value_t)503)
@@ -517,7 +517,7 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_t get_type, hid
  *-------------------------------------------------------------------------
  */
 static herr_t
-fake_async_get_cap_flags(void H5_ATTR_UNUSED *info, unsigned *cap_flags)
+fake_async_get_cap_flags(const void H5_ATTR_UNUSED *info, unsigned *cap_flags)
 {
     *cap_flags = fake_async_vol_g.cap_flags;
 
@@ -1867,19 +1867,18 @@ test_async_vol_props(void)
     hid_t                    fapl_id = H5I_INVALID_HID;
     hid_t                    vol_id  = H5I_INVALID_HID;
     H5VL_pass_through_info_t passthru_info;
-    hbool_t                  async_supported        = FALSE;
-    hbool_t                  implicit_async_allowed = FALSE;
-    char *                   conn_env_str           = NULL;
+    unsigned                 cap_flags    = 0;
+    char *                   conn_env_str = NULL;
 
     TESTING("Async VOL props");
 
     /* Retrieve the file access property for testing */
     fapl_id = h5_fileaccess();
 
-    /* Test 'async supported' property */
+    /* Test 'capability flags' property */
 
-    /* Test query w/NULL for async_supported parameter */
-    if (H5Pget_vol_async(fapl_id, NULL) < 0)
+    /* Test query w/NULL for cap_flags parameter */
+    if (H5Pget_vol_cap_flags(fapl_id, NULL) < 0)
         FAIL_STACK_ERROR;
 
     /* Override possible environment variable & re-initialize default VOL connector */
@@ -1893,12 +1892,14 @@ test_async_vol_props(void)
             TEST_ERROR
     } /* end if */
 
-    /* Test query w/default VOL, which should fail, since native connector
+    /* Test query w/default VOL, which should indicate no async, since native connector
      * doesn't support async.
      */
-    if (H5Pget_vol_async(fapl_id, &async_supported) < 0)
+    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
-    if (async_supported)
+    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) > 0)
+        TEST_ERROR
+    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) == 0)
         TEST_ERROR
 
     /* Close FAPL */
@@ -1919,10 +1920,12 @@ test_async_vol_props(void)
     fapl_id = h5_fileaccess();
 
     /* Test query w/fake async VOL, which should succeed */
-    async_supported = FALSE;
-    if (H5Pget_vol_async(fapl_id, &async_supported) < 0)
+    cap_flags = 0;
+    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
-    if (!async_supported)
+    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+        TEST_ERROR
+    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR
 
     /* Reset environment variable & re-init default connector */
@@ -1943,10 +1946,12 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/fake async VOL, which should succeed */
-    async_supported = FALSE;
-    if (H5Pget_vol_async(fapl_id, &async_supported) < 0)
+    cap_flags = 0;
+    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
-    if (!async_supported)
+    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+        TEST_ERROR
+    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR
 
     /* Stack the [internal] passthrough VOL connector on top of the fake async connector */
@@ -1956,10 +1961,12 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/passthru -> fake async VOL, which should succeed */
-    async_supported = FALSE;
-    if (H5Pget_vol_async(fapl_id, &async_supported) < 0)
+    cap_flags = 0;
+    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
-    if (!async_supported)
+    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+        TEST_ERROR
+    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR
 
     /* Unregister the fake async VOL ID */

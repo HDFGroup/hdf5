@@ -3945,26 +3945,30 @@ H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_i
 /**
  * \ingroup FAPL
  *
- * \brief Query if the VOL connector that will be used with this file access
- *              property list (FAPL) supports asynchronous operations.
+ * \brief Query the capability flags for the VOL connector that will be used
+ *              with this file access property list (FAPL).
  *
  * \fapl_id{plist_id}
- * \param[out]  async_supported  Flag to indicate if asynchronous operations are supported
+ * \param[out]  cap_flags  Flags that indicate the VOL connector capabilities
  *
  * \return \herr_t
  *
- * \details H5Pget_vol_async() queries the current VOL connector information
- *          for a FAPL to determine if asynchronous operations will be
- *          supported by a file open or create operation that uses this FAPL.
+ * \details H5Pget_vol_cap_flags() queries the current VOL connector information
+ *              for a FAPL to retrieve the capability flags for the VOL
+ *              connector stack, as will be used by a file open or create
+ *              operation that uses this FAPL.
  *
- * \note Note: This routine supports the use of the HDF5_VOL_CONNECTOR environment
+ * \note This routine supports the use of the HDF5_VOL_CONNECTOR environment
  *       variable to override the VOL connector set programmatically for the
  *       FAPL (with H5Pset_vol).
+ *
+ * \note The H5VL_CAP_FLAG_ASYNC flag can be checked to see if asynchronous
+ *              operations are supported by the VOL connector stack.
  *
  * \since 1.13.0
  *
  */
-H5_DLL herr_t H5Pget_vol_async(hid_t plist_id, hbool_t *async_supported);
+H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective);
