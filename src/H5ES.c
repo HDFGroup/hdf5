@@ -510,6 +510,46 @@ done:
 } /* end H5ESget_err_info() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5ESfree_err_info
+ *
+ * Purpose:     Convenience routine to free 1+ H5ES_err_info_t structs.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, March 5, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[])
+{
+    size_t u;                   /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (0 == num_err_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "err_info array size is 0")
+    if (NULL == err_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL err_info array pointer")
+
+    /* Iterate over array, releasing error information */
+    for (u = 0; u < num_err_info; u++) {
+        H5MM_xfree(err_info[u].api_name);
+        H5MM_xfree(err_info[u].api_args);
+        H5MM_xfree(err_info[u].app_file_name);
+        H5MM_xfree(err_info[u].app_func_name);
+        if (H5I_dec_app_ref(err_info[u].err_stack_id) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "can't close error stack for err_info #%zu", u)
+    } /* end for */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESfree_err_info() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5ESregister_insert_func
  *
  * Purpose:     Registers a callback to invoke when a new operation is inserted

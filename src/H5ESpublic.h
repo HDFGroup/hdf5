@@ -50,30 +50,38 @@ typedef enum H5ES_status_t {
 
 /* Information about operations in an event set */
 typedef struct H5ES_op_info_t {
+    /* API call info */
+    char *api_name;        /* Name of HDF5 API routine called */
+    char *api_args;        /* "Argument string" for arguments to HDF5 API routine called */
+
+    /* Application info */
+    char *app_file_name;   /* Name of source file where the HDF5 API routine was called */
+    char *app_func_name;   /* Name of function where the HDF5 API routine was called */
+    unsigned app_line_num; /* Line # of source file where the HDF5 API routine was called */
+
     /* Operation info */
-    const char *api_name;      /* Name of HDF5 API routine called */
-    char *      api_args;      /* "Argument string" for arguments to HDF5 API routine called */
-    const char *app_file_name; /* Name of source file where the HDF5 API routine was called */
-    const char *app_func_name; /* Name of function where the HDF5 API routine was called */
-    unsigned    app_line_num;  /* Line # of source file where the HDF5 API routine was called */
-    uint64_t    op_ins_count;  /* Counter of operation's insertion into event set */
-    uint64_t    op_ins_ts;     /* Timestamp for when the operation was inserted into the event set */
-    uint64_t    op_exec_ts;    /* Timestamp for when the operation began execution */
-    uint64_t    op_exec_time;  /* Execution time for operation */
+    uint64_t op_ins_count; /* Counter of operation's insertion into event set */
+    uint64_t op_ins_ts;    /* Timestamp for when the operation was inserted into the event set */
+    uint64_t op_exec_ts;   /* Timestamp for when the operation began execution */
+    uint64_t op_exec_time; /* Execution time for operation */
 } H5ES_op_info_t;
 
 /* Information about failed operations in event set */
 typedef struct H5ES_err_info_t {
+    /* API call info */
+    char *api_name;        /* Name of HDF5 API routine called */
+    char *api_args;        /* "Argument string" for arguments to HDF5 API routine called */
+
+    /* Application info */
+    char *app_file_name;   /* Name of source file where the HDF5 API routine was called */
+    char *app_func_name;   /* Name of function where the HDF5 API routine was called */
+    unsigned app_line_num; /* Line # of source file where the HDF5 API routine was called */
+
     /* Operation info */
-    const char *api_name;      /* Name of HDF5 API routine called */
-    char *      api_args;      /* "Argument string" for arguments to HDF5 API routine called */
-    const char *app_file_name; /* Name of source file where the HDF5 API routine was called */
-    const char *app_func_name; /* Name of function where the HDF5 API routine was called */
-    unsigned    app_line_num;  /* Line # of source file where the HDF5 API routine was called */
-    uint64_t    op_ins_count;  /* Counter of operation's insertion into event set */
-    uint64_t    op_ins_ts;     /* Timestamp for when the operation was inserted into the event set */
-    uint64_t    op_exec_ts;    /* Timestamp for when the operation began execution */
-    uint64_t    op_exec_time;  /* Execution time for operation */
+    uint64_t op_ins_count; /* Counter of operation's insertion into event set */
+    uint64_t op_ins_ts;    /* Timestamp for when the operation was inserted into the event set */
+    uint64_t op_exec_ts;   /* Timestamp for when the operation began execution */
+    uint64_t op_exec_time; /* Execution time for operation */
 
     /* Error info */
     hid_t err_stack_id; /* ID for error stack from failed operation */
@@ -129,6 +137,7 @@ H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
 H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
 H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[],
                                size_t *err_cleared);
+H5_DLL herr_t H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[]);
 H5_DLL herr_t H5ESregister_insert_func(hid_t es_id, H5ES_event_insert_func_t func, void *ctx);
 H5_DLL herr_t H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t func, void *ctx);
 H5_DLL herr_t H5ESclose(hid_t es_id);

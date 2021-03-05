@@ -4878,7 +4878,8 @@ H5P__copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
     /* If not, get the information required to do an H5Pinsert2 with the property into the destination list */
     else {
         /* Get the pointer to the source property */
-        prop = H5P__find_prop_plist(src_plist, name);
+        if (NULL == (prop = H5P__find_prop_plist(src_plist, name)))
+            HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist")
 
         /* Create property object from parameters */
         if (NULL ==
