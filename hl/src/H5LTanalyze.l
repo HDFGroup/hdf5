@@ -18,11 +18,13 @@
  */
 
 %{
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <hdf5.h>
 #include "H5LTparse.h"
 
+static char *trim_quotes(const char *);
 int my_yyinput(char *, int);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r=my_yyinput(b, ms))
@@ -108,8 +110,7 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
                  }
 
 ["][^\"]+["]     {
-                    H5LTyylval.sval = strndup(yytext + 1, strlen(yytext) - 2);
-                    BEGIN INITIAL;
+                    H5LTyylval.sval = trim_quotes(yytext);
                     return STRING;
                  }
 
@@ -123,6 +124,25 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
 "\n"             { return 0; }
 
 %%
+
+/* Allocate a copy of `quoted` with the double quote character at
+ * the beginning and the one at the end both removed.  The caller is
+ * responsible for free()ing the copy.
+ */
+static char *
+trim_quotes(const char *quoted)
+{
+    size_t len = strlen(quoted);
+    char *trimmed;
+
+    assert(quoted[0] == '"' && quoted[len - 1] == '"');
+
+    trimmed = strdup(quoted + 1);
+    trimmed[len - 2] = '\0';
+
+    return trimmed;
+}
+
 int my_yyinput(char *buf, int max_size)
 {
    int ret;
