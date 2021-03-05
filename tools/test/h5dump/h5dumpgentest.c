@@ -160,7 +160,7 @@ const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
     "dynlibud",                      /* Filter name for debugging    */
     NULL,                            /* The "can apply" callback        */
     NULL,                            /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlibud, /* The actual filter function    */
+    H5Z_filter_dynlibud,             /* The actual filter function    */
 }};
 
 /* A UD link traversal function.  Shouldn't actually be called. */

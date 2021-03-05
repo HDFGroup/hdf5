@@ -34,7 +34,7 @@ const H5Z_class2_t FILTER_INFO[1] = {{
     "test filter plugin 2",     /* Filter name for debugging        */
     NULL,                       /* The "can apply" callback         */
     NULL,                       /* The "set local" callback         */
-    (H5Z_func_t)mult_div_value, /* The actual filter function       */
+    mult_div_value,             /* The actual filter function       */
 }};
 
 H5PL_type_t

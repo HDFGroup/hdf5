@@ -33,7 +33,7 @@ const H5Z_class2_t H5Z_DYNLIB1[1] = {{
     "dynlib1",                      /* Filter name for debugging    */
     NULL,                           /* The "can apply" callback        */
     NULL,                           /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlib1, /* The actual filter function    */
+    H5Z_filter_dynlib1,             /* The actual filter function    */
 }};
 
 H5PL_type_t
