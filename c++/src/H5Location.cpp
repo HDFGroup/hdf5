@@ -346,7 +346,7 @@ H5Location::getComment(const char *name, size_t buf_size) const
 {
     // Initialize string to "", so that if there is no comment, the returned
     // string will be empty
-    H5std_string comment("");
+    H5std_string comment;
 
     // Preliminary call to get the comment's length
     ssize_t comment_len = H5Oget_comment_by_name(getId(), name, NULL, (size_t)0, H5P_DEFAULT);
@@ -1819,7 +1819,7 @@ H5Location::getLinkval(const char *name, size_t size) const
     H5L_info2_t  linkinfo;
     char *       value_C; // value in C string
     size_t       val_size = size;
-    H5std_string value    = "";
+    H5std_string value;
     herr_t       ret_value;
 
     // if user doesn't provide buffer size, determine it
