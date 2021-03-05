@@ -31,8 +31,29 @@
  *	@(#)queue.h	8.5 (Berkeley) 8/20/94
  */
 
-#ifndef	_SYS_QUEUE_H_
-#define	_SYS_QUEUE_H_
+#ifndef	H5queue_H_
+#define	H5queue_H_
+
+/* This is a copy of netBSD's sys/queue.h header for use in HDF5. We've copied
+ * it here instead of using the system's version to avoid incompatibilities.
+ * The exception is MacOS, where other system headers make use of sys/queue.h
+ * (this may also be an issue on FreeBSD, et al.).
+ *
+ * The deprecated and unwise circular queue macros have been removed from
+ * this file to discourage their use.
+ */
+
+
+/* On MacOS, sys/file.h (needed for flock(3)) includes sys.queue.h, so we
+ * can't just use an alternative BSD queue implementation without running
+ * into symbol redefinition errors.
+ *
+ * Unfortunately, MacOS is missing SIMPLEQ, so we have to handle that
+ * separately later in the file.
+ */
+#if defined(__APPLE__)
+#include <sys/queue.h>
+#else
 
 /*
  * This file defines five types of data structures: singly-linked lists,
@@ -296,106 +317,6 @@ struct {								\
 } while (/*CONSTCOND*/0)
 
 /*
- * Simple queue definitions.
- */
-#define	SIMPLEQ_HEAD(name, type)					\
-struct name {								\
-	struct type *sqh_first;	/* first element */			\
-	struct type **sqh_last;	/* addr of last next element */		\
-}
-
-#define	SIMPLEQ_HEAD_INITIALIZER(head)					\
-	{ NULL, &(head).sqh_first }
-
-#define	SIMPLEQ_ENTRY(type)						\
-struct {								\
-	struct type *sqe_next;	/* next element */			\
-}
-
-/*
- * Simple queue access methods.
- */
-#define	SIMPLEQ_FIRST(head)		((head)->sqh_first)
-#define	SIMPLEQ_END(head)		NULL
-#define	SIMPLEQ_EMPTY(head)		((head)->sqh_first == SIMPLEQ_END(head))
-#define	SIMPLEQ_NEXT(elm, field)	((elm)->field.sqe_next)
-
-#define	SIMPLEQ_FOREACH(var, head, field)				\
-	for ((var) = ((head)->sqh_first);				\
-	    (var) != SIMPLEQ_END(head);					\
-	    (var) = ((var)->field.sqe_next))
-
-#define	SIMPLEQ_FOREACH_SAFE(var, head, field, next)			\
-	for ((var) = ((head)->sqh_first);				\
-	    (var) != SIMPLEQ_END(head) &&				\
-	    ((next = ((var)->field.sqe_next)), 1);			\
-	    (var) = (next))
-
-/*
- * Simple queue functions.
- */
-#define	SIMPLEQ_INIT(head) do {						\
-	(head)->sqh_first = NULL;					\
-	(head)->sqh_last = &(head)->sqh_first;				\
-} while (/*CONSTCOND*/0)
-
-#define	SIMPLEQ_INSERT_HEAD(head, elm, field) do {			\
-	if (((elm)->field.sqe_next = (head)->sqh_first) == NULL)	\
-		(head)->sqh_last = &(elm)->field.sqe_next;		\
-	(head)->sqh_first = (elm);					\
-} while (/*CONSTCOND*/0)
-
-#define	SIMPLEQ_INSERT_TAIL(head, elm, field) do {			\
-	(elm)->field.sqe_next = NULL;					\
-	*(head)->sqh_last = (elm);					\
-	(head)->sqh_last = &(elm)->field.sqe_next;			\
-} while (/*CONSTCOND*/0)
-
-#define	SIMPLEQ_INSERT_AFTER(head, listelm, elm, field) do {		\
-	if (((elm)->field.sqe_next = (listelm)->field.sqe_next) == NULL)\
-		(head)->sqh_last = &(elm)->field.sqe_next;		\
-	(listelm)->field.sqe_next = (elm);				\
-} while (/*CONSTCOND*/0)
-
-#define	SIMPLEQ_REMOVE_HEAD(head, field) do {				\
-	if (((head)->sqh_first = (head)->sqh_first->field.sqe_next) == NULL) \
-		(head)->sqh_last = &(head)->sqh_first;			\
-} while (/*CONSTCOND*/0)
-
-#define SIMPLEQ_REMOVE_AFTER(head, elm, field) do {			\
-	if (((elm)->field.sqe_next = (elm)->field.sqe_next->field.sqe_next) \
-	    == NULL)							\
-		(head)->sqh_last = &(elm)->field.sqe_next;		\
-} while (/*CONSTCOND*/0)
-
-#define	SIMPLEQ_REMOVE(head, elm, type, field) do {			\
-	if ((head)->sqh_first == (elm)) {				\
-		SIMPLEQ_REMOVE_HEAD((head), field);			\
-	} else {							\
-		struct type *curelm = (head)->sqh_first;		\
-		while (curelm->field.sqe_next != (elm))			\
-			curelm = curelm->field.sqe_next;		\
-		if ((curelm->field.sqe_next =				\
-			curelm->field.sqe_next->field.sqe_next) == NULL) \
-			    (head)->sqh_last = &(curelm)->field.sqe_next; \
-	}								\
-} while (/*CONSTCOND*/0)
-
-#define	SIMPLEQ_CONCAT(head1, head2) do {				\
-	if (!SIMPLEQ_EMPTY((head2))) {					\
-		*(head1)->sqh_last = (head2)->sqh_first;		\
-		(head1)->sqh_last = (head2)->sqh_last;		\
-		SIMPLEQ_INIT((head2));					\
-	}								\
-} while (/*CONSTCOND*/0)
-
-#define	SIMPLEQ_LAST(head, type, field)					\
-	(SIMPLEQ_EMPTY((head)) ?						\
-		NULL :							\
-	        ((struct type *)(void *)				\
-		((char *)((head)->sqh_last) - offsetof(struct type, field))))
-
-/*
  * Tail queue definitions.
  */
 #define	_TAILQ_HEAD(name, type, qual)					\
@@ -656,192 +577,106 @@ struct {								\
 	        ((struct type *)(void *)				\
 		((char *)((head)->stqh_last) - offsetof(struct type, field))))
 
-
-#ifndef _KERNEL
-/*
- * Circular queue definitions. Do not use. We still keep the macros
- * for compatibility but because of pointer aliasing issues their use
- * is discouraged!
- */
+#endif /* defined(__APPLE__) */
 
 /*
- * __launder_type():  We use this ugly hack to work around the the compiler
- * noticing that two types may not alias each other and elide tests in code.
- * We hit this in the CIRCLEQ macros when comparing 'struct name *' and
- * 'struct type *' (see CIRCLEQ_HEAD()).  Modern compilers (such as GCC
- * 4.8) declare these comparisons as always false, causing the code to
- * not run as designed.
- *
- * This hack is only to be used for comparisons and thus can be fully const.
- * Do not use for assignment.
- *
- * If we ever choose to change the ABI of the CIRCLEQ macros, we could fix
- * this by changing the head/tail sentinal values, but see the note above
- * this one.
+ * Simple queue definitions.
  */
-static __inline const void * __launder_type(const void *);
-static __inline const void *
-__launder_type(const void *__x)
-{
-	__asm __volatile("" : "+r" (__x));
-	return __x;
-}
-
-#if defined(QUEUEDEBUG)
-#define QUEUEDEBUG_CIRCLEQ_HEAD(head, field)				\
-	if ((head)->cqh_first != CIRCLEQ_ENDC(head) &&			\
-	    (head)->cqh_first->field.cqe_prev != CIRCLEQ_ENDC(head))	\
-		QUEUEDEBUG_ABORT("CIRCLEQ head forw %p %s:%d", (head),	\
-		      __FILE__, __LINE__);				\
-	if ((head)->cqh_last != CIRCLEQ_ENDC(head) &&			\
-	    (head)->cqh_last->field.cqe_next != CIRCLEQ_ENDC(head))	\
-		QUEUEDEBUG_ABORT("CIRCLEQ head back %p %s:%d", (head),	\
-		      __FILE__, __LINE__);
-#define QUEUEDEBUG_CIRCLEQ_ELM(head, elm, field)			\
-	if ((elm)->field.cqe_next == CIRCLEQ_ENDC(head)) {		\
-		if ((head)->cqh_last != (elm))				\
-			QUEUEDEBUG_ABORT("CIRCLEQ elm last %p %s:%d",	\
-			    (elm), __FILE__, __LINE__);			\
-	} else {							\
-		if ((elm)->field.cqe_next->field.cqe_prev != (elm))	\
-			QUEUEDEBUG_ABORT("CIRCLEQ elm forw %p %s:%d",	\
-			    (elm), __FILE__, __LINE__);			\
-	}								\
-	if ((elm)->field.cqe_prev == CIRCLEQ_ENDC(head)) {		\
-		if ((head)->cqh_first != (elm))				\
-			QUEUEDEBUG_ABORT("CIRCLEQ elm first %p %s:%d",	\
-			    (elm), __FILE__, __LINE__);			\
-	} else {							\
-		if ((elm)->field.cqe_prev->field.cqe_next != (elm))	\
-			QUEUEDEBUG_ABORT("CIRCLEQ elm prev %p %s:%d",	\
-			    (elm), __FILE__, __LINE__);			\
-	}
-#define QUEUEDEBUG_CIRCLEQ_POSTREMOVE(elm, field)			\
-	(elm)->field.cqe_next = (void *)1L;				\
-	(elm)->field.cqe_prev = (void *)1L;
-#else
-#define QUEUEDEBUG_CIRCLEQ_HEAD(head, field)
-#define QUEUEDEBUG_CIRCLEQ_ELM(head, elm, field)
-#define QUEUEDEBUG_CIRCLEQ_POSTREMOVE(elm, field)
-#endif
-
-#define	CIRCLEQ_HEAD(name, type)					\
+#define	SIMPLEQ_HEAD(name, type)					\
 struct name {								\
-	struct type *cqh_first;		/* first element */		\
-	struct type *cqh_last;		/* last element */		\
+	struct type *sqh_first;	/* first element */			\
+	struct type **sqh_last;	/* addr of last next element */		\
 }
 
-#define	CIRCLEQ_HEAD_INITIALIZER(head)					\
-	{ CIRCLEQ_END(&head), CIRCLEQ_END(&head) }
+#define	SIMPLEQ_HEAD_INITIALIZER(head)					\
+	{ NULL, &(head).sqh_first }
 
-#define	CIRCLEQ_ENTRY(type)						\
+#define	SIMPLEQ_ENTRY(type)						\
 struct {								\
-	struct type *cqe_next;		/* next element */		\
-	struct type *cqe_prev;		/* previous element */		\
+	struct type *sqe_next;	/* next element */			\
 }
 
 /*
- * Circular queue functions.
+ * Simple queue access methods.
  */
-#define	CIRCLEQ_INIT(head) do {						\
-	(head)->cqh_first = CIRCLEQ_END(head);				\
-	(head)->cqh_last = CIRCLEQ_END(head);				\
-} while (/*CONSTCOND*/0)
+#define	SIMPLEQ_FIRST(head)		((head)->sqh_first)
+#define	SIMPLEQ_END(head)		NULL
+#define	SIMPLEQ_EMPTY(head)		((head)->sqh_first == SIMPLEQ_END(head))
+#define	SIMPLEQ_NEXT(elm, field)	((elm)->field.sqe_next)
 
-#define	CIRCLEQ_INSERT_AFTER(head, listelm, elm, field) do {		\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	QUEUEDEBUG_CIRCLEQ_ELM((head), (listelm), field)		\
-	(elm)->field.cqe_next = (listelm)->field.cqe_next;		\
-	(elm)->field.cqe_prev = (listelm);				\
-	if ((listelm)->field.cqe_next == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_last = (elm);				\
-	else								\
-		(listelm)->field.cqe_next->field.cqe_prev = (elm);	\
-	(listelm)->field.cqe_next = (elm);				\
-} while (/*CONSTCOND*/0)
+#define	SIMPLEQ_FOREACH(var, head, field)				\
+	for ((var) = ((head)->sqh_first);				\
+	    (var) != SIMPLEQ_END(head);					\
+	    (var) = ((var)->field.sqe_next))
 
-#define	CIRCLEQ_INSERT_BEFORE(head, listelm, elm, field) do {		\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	QUEUEDEBUG_CIRCLEQ_ELM((head), (listelm), field)		\
-	(elm)->field.cqe_next = (listelm);				\
-	(elm)->field.cqe_prev = (listelm)->field.cqe_prev;		\
-	if ((listelm)->field.cqe_prev == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_first = (elm);				\
-	else								\
-		(listelm)->field.cqe_prev->field.cqe_next = (elm);	\
-	(listelm)->field.cqe_prev = (elm);				\
-} while (/*CONSTCOND*/0)
-
-#define	CIRCLEQ_INSERT_HEAD(head, elm, field) do {			\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	(elm)->field.cqe_next = (head)->cqh_first;			\
-	(elm)->field.cqe_prev = CIRCLEQ_END(head);			\
-	if ((head)->cqh_last == CIRCLEQ_ENDC(head))			\
-		(head)->cqh_last = (elm);				\
-	else								\
-		(head)->cqh_first->field.cqe_prev = (elm);		\
-	(head)->cqh_first = (elm);					\
-} while (/*CONSTCOND*/0)
-
-#define	CIRCLEQ_INSERT_TAIL(head, elm, field) do {			\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	(elm)->field.cqe_next = CIRCLEQ_END(head);			\
-	(elm)->field.cqe_prev = (head)->cqh_last;			\
-	if ((head)->cqh_first == CIRCLEQ_ENDC(head))			\
-		(head)->cqh_first = (elm);				\
-	else								\
-		(head)->cqh_last->field.cqe_next = (elm);		\
-	(head)->cqh_last = (elm);					\
-} while (/*CONSTCOND*/0)
-
-#define	CIRCLEQ_REMOVE(head, elm, field) do {				\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	QUEUEDEBUG_CIRCLEQ_ELM((head), (elm), field)			\
-	if ((elm)->field.cqe_next == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_last = (elm)->field.cqe_prev;		\
-	else								\
-		(elm)->field.cqe_next->field.cqe_prev =			\
-		    (elm)->field.cqe_prev;				\
-	if ((elm)->field.cqe_prev == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_first = (elm)->field.cqe_next;		\
-	else								\
-		(elm)->field.cqe_prev->field.cqe_next =			\
-		    (elm)->field.cqe_next;				\
-	QUEUEDEBUG_CIRCLEQ_POSTREMOVE((elm), field)			\
-} while (/*CONSTCOND*/0)
-
-#define	CIRCLEQ_FOREACH(var, head, field)				\
-	for ((var) = ((head)->cqh_first);				\
-		(var) != CIRCLEQ_ENDC(head);				\
-		(var) = ((var)->field.cqe_next))
-
-#define	CIRCLEQ_FOREACH_REVERSE(var, head, field)			\
-	for ((var) = ((head)->cqh_last);				\
-		(var) != CIRCLEQ_ENDC(head);				\
-		(var) = ((var)->field.cqe_prev))
+#define	SIMPLEQ_FOREACH_SAFE(var, head, field, next)			\
+	for ((var) = ((head)->sqh_first);				\
+	    (var) != SIMPLEQ_END(head) &&				\
+	    ((next = ((var)->field.sqe_next)), 1);			\
+	    (var) = (next))
 
 /*
- * Circular queue access methods.
+ * Simple queue functions.
  */
-#define	CIRCLEQ_FIRST(head)		((head)->cqh_first)
-#define	CIRCLEQ_LAST(head)		((head)->cqh_last)
-/* For comparisons */
-#define	CIRCLEQ_ENDC(head)		(__launder_type(head))
-/* For assignments */
-#define	CIRCLEQ_END(head)		((void *)(head))
-#define	CIRCLEQ_NEXT(elm, field)	((elm)->field.cqe_next)
-#define	CIRCLEQ_PREV(elm, field)	((elm)->field.cqe_prev)
-#define	CIRCLEQ_EMPTY(head)						\
-    (CIRCLEQ_FIRST(head) == CIRCLEQ_ENDC(head))
+#define	SIMPLEQ_INIT(head) do {						\
+	(head)->sqh_first = NULL;					\
+	(head)->sqh_last = &(head)->sqh_first;				\
+} while (/*CONSTCOND*/0)
 
-#define CIRCLEQ_LOOP_NEXT(head, elm, field)				\
-	(((elm)->field.cqe_next == CIRCLEQ_ENDC(head))			\
-	    ? ((head)->cqh_first)					\
-	    : (elm->field.cqe_next))
-#define CIRCLEQ_LOOP_PREV(head, elm, field)				\
-	(((elm)->field.cqe_prev == CIRCLEQ_ENDC(head))			\
-	    ? ((head)->cqh_last)					\
-	    : (elm->field.cqe_prev))
-#endif /* !_KERNEL */
+#define	SIMPLEQ_INSERT_HEAD(head, elm, field) do {			\
+	if (((elm)->field.sqe_next = (head)->sqh_first) == NULL)	\
+		(head)->sqh_last = &(elm)->field.sqe_next;		\
+	(head)->sqh_first = (elm);					\
+} while (/*CONSTCOND*/0)
 
-#endif	/* !_SYS_QUEUE_H_ */
+#define	SIMPLEQ_INSERT_TAIL(head, elm, field) do {			\
+	(elm)->field.sqe_next = NULL;					\
+	*(head)->sqh_last = (elm);					\
+	(head)->sqh_last = &(elm)->field.sqe_next;			\
+} while (/*CONSTCOND*/0)
+
+#define	SIMPLEQ_INSERT_AFTER(head, listelm, elm, field) do {		\
+	if (((elm)->field.sqe_next = (listelm)->field.sqe_next) == NULL)\
+		(head)->sqh_last = &(elm)->field.sqe_next;		\
+	(listelm)->field.sqe_next = (elm);				\
+} while (/*CONSTCOND*/0)
+
+#define	SIMPLEQ_REMOVE_HEAD(head, field) do {				\
+	if (((head)->sqh_first = (head)->sqh_first->field.sqe_next) == NULL) \
+		(head)->sqh_last = &(head)->sqh_first;			\
+} while (/*CONSTCOND*/0)
+
+#define SIMPLEQ_REMOVE_AFTER(head, elm, field) do {			\
+	if (((elm)->field.sqe_next = (elm)->field.sqe_next->field.sqe_next) \
+	    == NULL)							\
+		(head)->sqh_last = &(elm)->field.sqe_next;		\
+} while (/*CONSTCOND*/0)
+
+#define	SIMPLEQ_REMOVE(head, elm, type, field) do {			\
+	if ((head)->sqh_first == (elm)) {				\
+		SIMPLEQ_REMOVE_HEAD((head), field);			\
+	} else {							\
+		struct type *curelm = (head)->sqh_first;		\
+		while (curelm->field.sqe_next != (elm))			\
+			curelm = curelm->field.sqe_next;		\
+		if ((curelm->field.sqe_next =				\
+			curelm->field.sqe_next->field.sqe_next) == NULL) \
+			    (head)->sqh_last = &(curelm)->field.sqe_next; \
+	}								\
+} while (/*CONSTCOND*/0)
+
+#define	SIMPLEQ_CONCAT(head1, head2) do {				\
+	if (!SIMPLEQ_EMPTY((head2))) {					\
+		*(head1)->sqh_last = (head2)->sqh_first;		\
+		(head1)->sqh_last = (head2)->sqh_last;		\
+		SIMPLEQ_INIT((head2));					\
+	}								\
+} while (/*CONSTCOND*/0)
+
+#define	SIMPLEQ_LAST(head, type, field)					\
+	(SIMPLEQ_EMPTY((head)) ?						\
+		NULL :							\
+	        ((struct type *)(void *)				\
+		((char *)((head)->sqh_last) - offsetof(struct type, field))))
+
+#endif	/* H5queue_H_ */

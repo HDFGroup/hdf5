@@ -22,9 +22,6 @@
  *-------------------------------------------------------------------------
  */
 
-#include "H5queue.h"
-#include "hlog.h"
-
 /****************/
 /* Module Setup */
 /****************/
@@ -45,8 +42,6 @@
 #include "H5MFpkg.h"		/* File memory management		*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
-
-#include "hlog.h"
 
 /****************/
 /* Local Macros */
@@ -118,6 +113,9 @@ static herr_t H5MF__close_delete_fstype(H5F_t *f, H5F_mem_page_t type);
 /* Callbacks */
 static herr_t H5MF__sects_cb(H5FS_section_info_t *_sect, void *_udata);
 
+/* VFD SWMR */
+static herr_t H5MF__defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type,
+        haddr_t addr, hsize_t size);
 
 /*********************/
 /* Package Variables */
@@ -135,58 +133,38 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Local Variables */
 /*******************/
 
-HLOG_OUTLET_DECL(h5mf);
-HLOG_OUTLET_SHORT_DEFN(h5mf, all);
-HLOG_OUTLET_SHORT_DEFN(h5mf_defer, h5mf);
-HLOG_OUTLET_SHORT_DEFN(h5mf_free, h5mf);
-HLOG_OUTLET_SHORT_DEFN(h5mf_alloc, h5mf);
-HLOG_OUTLET_MEDIUM_DEFN(noisy_h5mf_alloc, h5mf_alloc, HLOG_OUTLET_S_OFF);
-HLOG_OUTLET_SHORT_DEFN(h5mf_extend, h5mf);
-HLOG_OUTLET_SHORT_DEFN(h5mf_shrink, h5mf);
-
 static herr_t
-defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr,
+H5MF__defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr,
     hsize_t size)
 {
-    lower_defree_t *df;
+    lower_defree_t *df = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    if ((df = malloc(sizeof(*df))) == NULL)
-        return FAIL;
+    FUNC_ENTER_STATIC
+
+    if ((df = H5MM_malloc(sizeof(*df))) == NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate buffer")
 
     df->alloc_type = alloc_type;
     df->addr = addr;
     df->size = size;
     df->free_after_tick = shared->tick_num + shared->vfd_swmr_config.max_lag;
 
-    hlog_fast(h5mf_defer,
-        "%s.%d: deferred free at %" PRIuHADDR ", %" PRIuHSIZE
-        " bytes until tick %" PRIu64, __FILE__, __LINE__, addr, size,
-        df->free_after_tick);
-
     SIMPLEQ_INSERT_TAIL(&shared->lower_defrees, df, link);
 
-    return SUCCEED;
-}
-
-static uint64_t
-H5MF_total_deferred_frees(H5F_shared_t *shared)
-{
-    lower_defree_t *df;
-    uint64_t total = 0;
-
-    SIMPLEQ_FOREACH(df, &shared->lower_defrees, link)
-        total += df->size;
-
-    return total;
-}
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF__defer_free() */
 
 herr_t
 H5MF_process_deferred_frees(H5F_t *f, const uint64_t tick_num)
 {
     lower_defree_t *df;
-    herr_t err = SUCCEED;
     H5F_shared_t *shared = f->shared;
     lower_defree_queue_t defrees = SIMPLEQ_HEAD_INITIALIZER(defrees);
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Have to empty the queue before processing it because we
      * could re-enter this routine through H5MF__xfree_impl.  If
@@ -198,25 +176,19 @@ H5MF_process_deferred_frees(H5F_t *f, const uint64_t tick_num)
     while ((df = SIMPLEQ_FIRST(&defrees)) != NULL) {
         if (tick_num <= df->free_after_tick)
             break;
-        hlog_fast(h5mf_defer,
-            "%s.%d: processing free at %" PRIuHADDR ", %" PRIuHSIZE " bytes",
-            __FILE__, __LINE__, df->addr, df->size);
         SIMPLEQ_REMOVE_HEAD(&defrees, link);
+
+        /* Record errors here, but keep trying to free */
         if (H5MF__xfree_impl(f, df->alloc_type, df->addr, df->size) < 0)
-            err = FAIL;
-        free(df);
+            ret_value = FAIL;
+        H5MM_xfree(df);
     }
 
-    if (err != SUCCEED) {
-        hlog_fast(h5mf_defer, "%s.%d: error: dropped entries on the floor",
-            __FILE__, __LINE__);
-    }
-
-    /* Save remaining entries for processing, later. */
+    /* Save remaining entries for processing, later */
     SIMPLEQ_CONCAT(&shared->lower_defrees, &defrees);
 
-    return err;
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_process_deferred_frees() */
 
 
 /*-------------------------------------------------------------------------
@@ -883,11 +855,6 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, HADDR_UNDEF)
 
-    hlog_fast(h5mf_alloc,
-        "%s: enter %p type %u size %" PRIuHSIZE " tick %" PRIu64,
-        __func__, (void *)f->shared, (unsigned)alloc_type, size,
-        f->shared->vfd_swmr_writer ? f->shared->tick_num : 0);
-
     /* check arguments */
     HDassert(f);
     HDassert(f->shared);
@@ -901,8 +868,6 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
             "could not process deferrals")
     }
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
-
-    hlog_fast(noisy_h5mf_alloc, "%s: Check 1.0", __func__);
 
     /* Set the ring type in the API context */
     if(H5MF__fsm_type_is_self_referential(f->shared, fs_type))
@@ -937,8 +902,6 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
     /* If no space is found from the free-space manager, continue further action */
     if(!H5F_addr_defined(ret_value)) {
 
-        hlog_fast(noisy_h5mf_alloc, "%s: Check 2.0", __func__);
-
         if(f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE) {
             HDassert(f->shared->fs_page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
             if(HADDR_UNDEF == (ret_value = H5MF__alloc_pagefs(f, alloc_type, size)))
@@ -951,16 +914,11 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
     } /* end if */
     HDassert(H5F_addr_defined(ret_value));
 
-    hlog_fast(noisy_h5mf_alloc, "%s: Check 3.0", FUNC);
-
 done:
     /* Reset the ring in the API context */
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);
 
-    hlog_fast(h5mf_alloc,
-        "%s: leave %p type %u addr %" PRIuHADDR " size %" PRIuHSIZE,
-        __func__, (void *)f->shared, (unsigned)alloc_type, ret_value, size);
 #ifdef H5MF_ALLOC_DEBUG_DUMP
 H5MF__sects_dump(f, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
@@ -1190,12 +1148,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 
-    hlog_fast(h5mf_free, "%s: Entering - alloc_type %u addr %" PRIuHADDR
-        " size %" PRIuHSIZE " tick %" PRIu64,
-        __func__, (unsigned)alloc_type, addr, size,
-        f->shared->vfd_swmr_writer ? f->shared->tick_num : 0);
-
-    /* check arguments */
+    /* Check arguments */
     HDassert(f);
     if(!H5F_addr_defined(addr) || 0 == size)
         HGOTO_DONE(SUCCEED)
@@ -1207,7 +1160,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
          * file starts to close.
          */
         ret_value = H5MF__xfree_impl(f, alloc_type, addr, size);
-    } else if (defer_free(f->shared, alloc_type, addr, size) < 0)
+    } else if (H5MF__defer_free(f->shared, alloc_type, addr, size) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "could not defer")
     else if (H5MF_process_deferred_frees(f, f->shared->tick_num) < 0) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL,
@@ -1227,10 +1180,6 @@ H5MF__xfree_inner_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t si
     H5AC_ring_t orig_ring = H5AC_RING_INV;  /* Original ring value */
     H5AC_ring_t fsm_ring;               /* Ring of FSM */
     herr_t ret_value = SUCCEED;         /* Return value */
-
-    hlog_fast(h5mf_free,
-        "%s: enter %p type %u addr %" PRIuHADDR " size %" PRIuHSIZE,
-        __func__, (void *)f->shared, (unsigned)alloc_type, addr, size);
 
     FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
 
@@ -1272,25 +1221,16 @@ H5MF__xfree_inner_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t si
          *  space is at the end of the file
          */
 
-        hlog_fast(h5mf_free, "%s: fs_addr %" PRIuHADDR, __func__,
-            f->shared->fs_addr[fs_type]);
-
         if(!H5F_addr_defined(f->shared->fs_addr[fs_type])) {
             htri_t status;          /* "can absorb" status for section into */
-
-            hlog_fast(h5mf_free, "%s: Trying to avoid starting up free space manager", __func__);
 
             /* Try to shrink the file or absorb the block into a block aggregator */
             if((status = H5MF_try_shrink(f, alloc_type, addr, size)) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check for absorbing block")
             else if(status > 0)
                 HGOTO_DONE(SUCCEED)
-	    else if(size < f->shared->fs_threshold) {
-                hlog_fast(h5mf_free, "%s: dropping addr %" PRIuHADDR
-                    " size %" PRIuHSIZE " on the floor!",
-                    __func__, addr, size);
-		HGOTO_DONE(SUCCEED)
-	    }
+            else if(size < f->shared->fs_threshold)
+                HGOTO_DONE(SUCCEED)
         }
 
         /* If we are deleting the free space manager, leave now, to avoid
@@ -1304,8 +1244,6 @@ H5MF__xfree_inner_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t si
          */
         if(f->shared->fs_state[fs_type] == H5F_FS_STATE_DELETING ||
 	        !H5F_HAVE_FREE_SPACE_MANAGER(f)) {
-            hlog_fast(h5mf_free, "%s: dropping addr %" PRIuHADDR
-                " size %" PRIuHSIZE " on the floor!", __func__, addr, size);
             HGOTO_DONE(SUCCEED)
         }
 
@@ -1326,14 +1264,11 @@ H5MF__xfree_inner_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t si
     if(size >= f->shared->fs_threshold) {
 	HDassert(f->shared->fs_man[fs_type]);
 
-        hlog_fast(h5mf_free, "%s: Before H5FS_sect_add()", __func__);
-
         /* Add to the free space for the file */
         if(H5MF__add_sect(f, alloc_type, f->shared->fs_man[fs_type], node) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't add section to file free space")
         node = NULL;
 
-        hlog_fast(h5mf_free, "%s: After H5FS_sect_add()", __func__);
     } else {
         htri_t merged;          /* Whether node was merged */
         H5MF_sect_ud_t udata; 	/* User data for callback */
@@ -1361,9 +1296,6 @@ done:
     if(node)
         if(H5MF__sect_free((H5FS_section_info_t *)node) < 0)
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
-
-    hlog_fast(h5mf_free,
-        "%s: %p leave %d", __func__, (void *)f->shared, ret_value);
 
 #ifdef H5MF_ALLOC_DEBUG_DUMP
 H5MF__sects_dump(f, stderr);
@@ -1460,10 +1392,6 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size,
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 
-    hlog_fast(h5mf_extend, "%s: Entering: alloc_type %u addr %" PRIuHADDR
-        " size %" PRIuHSIZE " extra_requested %" PRIuHSIZE, __func__,
-        (unsigned)alloc_type, addr, size, extra_requested);
-
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
@@ -1511,9 +1439,6 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size,
         if((ret_value = H5F__try_extend(f, map_type, end, extra_requested + frag_size)) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending file")
 
-        hlog_fast(h5mf_extend, "%s: extended %s", __func__,
-            htri_to_string(ret_value));
-
         /* If extending at EOA succeeds: */
         /*   for paged aggregation, put the fragment into the large-sized free-space manager */
         if(ret_value == TRUE && H5F_PAGED_AGGR(f) && frag_size) {
@@ -1547,9 +1472,6 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size,
             aggr = (map_type == H5FD_MEM_DRAW) ?  &(f->shared->sdata_aggr) : &(f->shared->meta_aggr);
             if((ret_value = H5MF__aggr_try_extend(f, aggr, map_type, end, extra_requested)) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending aggregation block")
-
-            hlog_fast(h5mf_extend, "%s: H5MF__aggr_try_extend %s", __func__,
-                htri_to_string(ret_value));
         }
 
         /* If no extension so far, try to extend into a free-space section */
@@ -1572,8 +1494,6 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size,
                 if((ret_value = H5FS_sect_try_extend(f, f->shared->fs_man[fs_type], addr, size, extra_requested, H5FS_ADD_RETURNED_SPACE, &udata)) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending block in free space manager")
 
-                hlog_fast(h5mf_extend, "%s: Try to H5FS_sect_try_extend %s",
-                    __func__, htri_to_string(ret_value));
             }
 
             /* For paged aggregation and a metadata block: try to extend into page end threshold */
@@ -1582,8 +1502,6 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size,
 
                 if(frag_size <= H5F_PGEND_META_THRES(f) && extra_requested <= frag_size)
                     ret_value = TRUE;
-
-                hlog_fast(h5mf_extend, "%s: Try to extend into the page end threshold %s", __func__, htri_to_string(ret_value));
             }
         }
     }
@@ -1592,9 +1510,6 @@ done:
     /* Reset the ring in the API context */
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);
-
-
-    hlog_fast(h5mf_extend, "%s: Leaving: ret_value %s", __func__, htri_to_string(ret_value));
 
 #ifdef H5MF_ALLOC_DEBUG_DUMP
 H5MF__sects_dump(f, stderr);
@@ -1630,9 +1545,6 @@ H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     htri_t ret_value = FALSE;               /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
-
-    hlog_fast(h5mf_shrink, "%s: Entering - alloc_type %u addr %" PRIuHADDR
-        " size %" PRIuHSIZE, __func__, (unsigned)alloc_type, addr, size);
 
     /* check arguments */
     HDassert(f);
@@ -1686,9 +1598,6 @@ done:
     if(node && H5MF__sect_free((H5FS_section_info_t *)node) < 0)
         HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
 
-    hlog_fast(h5mf_shrink, "%s: Leaving, ret_value %d", __func__,
-        ret_value);
-
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5MF_try_shrink() */
 
@@ -1712,14 +1621,9 @@ H5MF_close(H5F_t *f)
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 
-    hlog_fast(h5mf, "%s: entering", __func__);
-
     /* check args */
     HDassert(f);
     HDassert(f->shared);
-
-    hlog_fast(h5mf, "%s: total deferred frees %" PRIu64, __func__,
-        H5MF_total_deferred_frees(f->shared));
 
     if(H5F_PAGED_AGGR(f)) {
         if((ret_value = H5MF__close_pagefs(f)) < 0)
@@ -1730,8 +1634,6 @@ H5MF_close(H5F_t *f)
     } /* end else */
 
 done:
-    hlog_fast(h5mf, "%s: leaving", __func__);
-
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5MF_close() */
 

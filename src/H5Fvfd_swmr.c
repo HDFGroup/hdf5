@@ -48,7 +48,6 @@
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5Tprivate.h"         /* Datatypes                                */
-#include "hlog.h"
 
 /****************/
 /* Local Macros */
@@ -85,18 +84,6 @@ unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          * on the 0->1 and 1->0
                                          * transitions.
                                          */
-HLOG_OUTLET_SHORT_DEFN(swmr, all);
-HLOG_OUTLET_SHORT_DEFN(eot, swmr);
-HLOG_OUTLET_SHORT_DEFN(eotq, eot);
-HLOG_OUTLET_SHORT_DEFN(shadow_defrees, swmr);
-HLOG_OUTLET_MEDIUM_DEFN(noisy_shadow_defrees, shadow_defrees,
-    HLOG_OUTLET_S_OFF);
-HLOG_OUTLET_SHORT_DEFN(shadow_index_enlarge, swmr);
-HLOG_OUTLET_SHORT_DEFN(shadow_index_reclaim, swmr);
-HLOG_OUTLET_SHORT_DEFN(shadow_index_update, swmr);
-HLOG_OUTLET_SHORT_DEFN(tick, swmr);
-HLOG_OUTLET_SHORT_DEFN(mdc_invalidation, swmr);
-
 /*
  *  The head of the end of tick queue (EOT queue) for files opened in either
  *  VFD SWMR write or VFD SWMR read mode
@@ -183,7 +170,7 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         md_size = (hsize_t)shared->vfd_swmr_config.md_pages_reserved * 
                   shared->fs_page_size;
 
-        assert(shared->fs_page_size >= H5FD_MD_HEADER_SIZE);
+        HDassert(shared->fs_page_size >= H5FD_MD_HEADER_SIZE);
 
         /* Allocate an entire page from the shadow file for the header. */
         if ((hdr_addr = H5MV_alloc(f, shared->fs_page_size)) == HADDR_UNDEF){
@@ -246,11 +233,8 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL,
                         "unable to load/decode metadata file");
 
-        assert(shared->tick_num != 0);
+        HDassert(shared->tick_num != 0);
         vfd_swmr_reader_did_increase_tick_to(shared->tick_num);
-
-        hlog_fast(tick, "%s first tick %" PRIu64,
-            __func__, shared->tick_num);
 
 #if 0 /* JRM */
         HDfprintf(stderr, 
@@ -347,9 +331,8 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
             TAILQ_REMOVE(&shared->shadow_defrees, curr, link);
             H5FL_FREE(shadow_defree_t, curr);
         }
-        hlog_fast(shadow_defrees, "Emptied deferred shadow frees.");
 
-        assert(TAILQ_EMPTY(&shared->shadow_defrees));
+        HDassert(TAILQ_EMPTY(&shared->shadow_defrees));
     } else { /* For file flush */
         /* Update end_of_tick */
         if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(shared, TRUE) < 0)
@@ -371,9 +354,6 @@ shadow_range_defer_free(H5F_shared_t *shared, uint64_t offset, uint32_t length)
     shadow_defree->offset = offset;
     shadow_defree->length = length;
     shadow_defree->tick_num = shared->tick_num;
-
-    if (TAILQ_EMPTY(&shared->shadow_defrees))
-        hlog_fast(shadow_defrees, "Adding first deferred shadow free."); 
 
     TAILQ_INSERT_HEAD(&shared->shadow_defrees, shadow_defree, link);
     return 0;
@@ -432,7 +412,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
     haddr_t md_addr;                        /* Address in the metadata file */
     uint32_t i;                             /* Local index variable */
     herr_t ret_value = SUCCEED;             /* Return value */
-    bool queue_was_nonempty;
+    hbool_t queue_was_nonempty;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -441,7 +421,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
         HDqsort(index, num_entries, sizeof(*index), H5F__idx_entry_cmp);
         /* Assert that no HDF5 page offsets are duplicated. */
         for (i = 1; i < num_entries; i++)
-            assert(index[i - 1].hdf5_page_offset < index[i].hdf5_page_offset);
+            HDassert(index[i - 1].hdf5_page_offset < index[i].hdf5_page_offset);
     }
 
     /* For each non-null entry_ptr in the index:
@@ -473,10 +453,6 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
         if((md_addr = H5MV_alloc(f, index[i].length)) == HADDR_UNDEF)
             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
                         "error in allocating space from the metadata file")
-
-        hlog_fast(noisy_shadow_defrees,
-            "shadow index %" PRIu32 " page offset %" PRIu64 " -> %" PRIuHADDR,
-            i, index[i].md_file_page_offset * shared->fs_page_size, md_addr);
 
         HDassert(md_addr % shared->fs_page_size == 0);
 
@@ -558,20 +534,12 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
                 "unable to flush clean entry");
         }
 
-        hlog_fast(noisy_shadow_defrees,
-            "released %" PRIu32 " bytes at %" PRIu64,
-            shadow_defree->length, shadow_defree->offset);
-
         TAILQ_REMOVE(&shared->shadow_defrees, shadow_defree, link);
 
         H5FL_FREE(shadow_defree_t, shadow_defree);
     }
 
-    if (queue_was_nonempty && TAILQ_EMPTY(&shared->shadow_defrees))
-        hlog_fast(shadow_defrees, "Removed last deferred shadow free.");
-
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5F_update_vfd_swmr_metadata_file() */
@@ -644,7 +612,7 @@ H5F_vfd_swmr_writer__delay_write(H5F_shared_t *shared, uint64_t page,
         ie_ptr = NULL;
     } else {
         ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx,
-            shared->mdf_idx_entries_used, page, false);
+            shared->mdf_idx_entries_used, page, FALSE);
     }
 
     if (ie_ptr == NULL)
@@ -710,7 +678,7 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
      * tick so as to avoid attempts to flush entries on the page buffer 
      * tick list that were modified during the current tick.
      */
-    if ( H5F_vfd_swmr_writer_end_of_tick(f, true) < 0 )
+    if ( H5F_vfd_swmr_writer_end_of_tick(f, TRUE) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
                     "H5F_vfd_swmr_writer_end_of_tick() failed.")
@@ -740,21 +708,10 @@ clean_shadow_index(H5F_t *f, uint32_t nentries,
     for (i = j = ndeleted = 0; i < nentries; i++) {
         ie = &idx[i];
 
-        if (ie->clean) {
-            hlog_fast(shadow_index_reclaim,
-                "Visiting clean shadow index slot %" PRIu32
-                " lower page %" PRIu64 " last flush %" PRIu64 " ticks ago",
-                i, ie->hdf5_page_offset, tick_num - ie->tick_of_last_flush);
-        }
-
         if (ie->clean && ie->tick_of_last_flush + max_lag < tick_num) {
 
-            assert(!ie->garbage);
-            assert(ie->entry_ptr == NULL);
-
-            hlog_fast(shadow_index_reclaim,
-                "Reclaiming shadow index slot %" PRIu32
-                " lower page %" PRIu64, i, ie->hdf5_page_offset);
+            HDassert(!ie->garbage);
+            HDassert(ie->entry_ptr == NULL);
 
             if (ie->md_file_page_offset != 0) {
                 if (shadow_image_defer_free(shared, ie) == -1)
@@ -832,7 +789,7 @@ clean_shadow_index(H5F_t *f, uint32_t nentries,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, bool wait_for_reader)
+H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
 {
     H5F_shared_t *shared = f->shared;
     uint32_t idx_entries_added = 0;
@@ -841,7 +798,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, bool wait_for_reader)
     uint32_t idx_ent_not_in_tl = 0;
     uint32_t idx_ent_not_in_tl_flushed = 0;
     herr_t ret_value = SUCCEED;              /* Return value */
-    bool incr_tick = false;
+    hbool_t incr_tick = FALSE;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -853,7 +810,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, bool wait_for_reader)
             wait_for_reader))
         goto update_eot;
 
-    incr_tick = true;
+    incr_tick = TRUE;
 
     /* 1) If requested, flush all raw data to the HDF5 file.
      *
@@ -992,9 +949,6 @@ update_eot:
     if(H5F_vfd_swmr_insert_entry_eot(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
 
-    hlog_fast(eot, "%s leave tick %" PRIu64 " idx len %" PRIu32,
-        __func__, shared->tick_num, shared->mdf_idx_entries_used);
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1093,7 +1047,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
+H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
 {
     uint64_t tmp_tick_num = 0;
     H5FD_vfd_swmr_idx_entry_t * tmp_mdf_idx;
@@ -1119,10 +1073,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
     HDassert(!shared->vfd_swmr_writer);
     HDassert(file);
 
-    hlog_fast(eot, "%s enter file %p index len %" PRIu32 " used %" PRIu32,
-        __func__, (void *)file,
-        shared->mdf_idx_len, shared->mdf_idx_entries_used);
-
     /* 1) Direct the VFD SWMR reader VFD to load the current header
      *    from the metadata file, and report the current tick.
      *
@@ -1135,14 +1085,10 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, \
                     "error in retrieving tick_num from driver")
 
-    hlog_fast(tick,
-        "%s last tick %" PRIu64 " new tick %" PRIu64,
-        __func__, shared->tick_num, tmp_tick_num);
-
     /* This is ok if we're entering the API, but it should
      * not happen if we're exiting the API.
      */
-    assert(entering_api || tmp_tick_num <
+    HDassert(entering_api || tmp_tick_num <
            shared->tick_num + shared->vfd_swmr_config.max_lag);
 
     if (!entering_api) {
@@ -1244,14 +1190,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                      * case where the new entry is *longer*, because the
                      * extension could overlap with a second entry.
                      */
-                    assert(oent->length == nent->length);
-
-                    hlog_fast(shadow_index_update,
-                        "shadow page for slot %" PRIu32 " lower page %" PRIu64
-                        " moved, %" PRIu64 " -> %" PRIu64, i,
-                        oent->hdf5_page_offset,
-                        oent->md_file_page_offset,
-                        nent->md_file_page_offset);
+                    HDassert(oent->length == nent->length);
 
                     /* the page has been altered -- evict it and 
                      * any contained metadata cache entries.
@@ -1274,10 +1213,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                 * for several ticks, we can probably omit this.  However,
                 * lets not worry about this for the first cut.
                 */
-                hlog_fast(shadow_index_update,
-                    "writer removed shadow index slot %" PRIu32
-                    " for page %" PRIu64, i, oent->hdf5_page_offset);
-
                 change[nchanges].pgno = oent->hdf5_page_offset;
                 change[nchanges].length = oent->length;
                 nchanges++;
@@ -1287,10 +1222,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
             } else { /* oent->hdf5_page_offset >
                       * nent->hdf5_page_offset
                       */
-
-                hlog_fast(shadow_index_update,
-                    "writer added shadow index slot %" PRIu32
-                    " for page %" PRIu64, j, nent->hdf5_page_offset);
 
                 /* The page has been added to the index. */
                 change[nchanges].pgno = nent->hdf5_page_offset;
@@ -1303,9 +1234,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
 
         for (; j < new_mdf_idx_entries_used; j++) {
             const H5FD_vfd_swmr_idx_entry_t *nent = &new_mdf_idx[j];
-            hlog_fast(shadow_index_update,
-                "writer added shadow index slot %" PRIu32
-                " for page %" PRIu64, j, nent->hdf5_page_offset);
             change[nchanges].pgno = nent->hdf5_page_offset;
             change[nchanges].length = nent->length;
             nchanges++;
@@ -1320,11 +1248,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
              * index.  Evict it from the page buffer and also evict any 
              * contained metadata cache entries
              */
-
-            hlog_fast(shadow_index_update,
-                "writer removed shadow index slot %" PRIu32
-                " for page %" PRIu64, i, oent->hdf5_page_offset);
-
             change[nchanges].pgno = oent->hdf5_page_offset;
             change[nchanges].length = oent->length;
             nchanges++;
@@ -1339,10 +1262,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
             }
         }
         for (i = 0; i < nchanges; i++) {
-            hlog_fast(mdc_invalidation,
-                "invalidating MDC entries at page %" PRIu64
-                " length %" PRIu32 " tick %" PRIu64,
-                change[i].pgno, change[i].length, tmp_tick_num);
             if (H5C_evict_or_refresh_all_entries_in_page(f,
                     change[i].pgno, change[i].length,
                     tmp_tick_num) < 0) {
@@ -1387,16 +1306,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
 
 done:
 
-    hlog_fast(eot, "%s exit tick %" PRIu64
-        " len %" PRIu32 " -> %" PRIu32
-        " used %" PRIu32 " -> %" PRIu32
-        " added %" PRIu32 " removed %" PRIu32 " moved %" PRIu32 " %s",
-        __func__, shared->tick_num,
-        shared->old_mdf_idx_len, shared->mdf_idx_len,
-        shared->old_mdf_idx_entries_used, shared->mdf_idx_entries_used,
-        entries_added, entries_removed, entries_moved,
-        (ret_value == SUCCEED) ? "success" : "failure");
-
     if (change != NULL)
         free(change);
 
@@ -1414,12 +1323,6 @@ insert_eot_entry(eot_queue_entry_t *entry_ptr)
         if (timespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, <=))
             break;
     }
-
-    hlog_fast(eotq, "%s: entry %p after %p file %p "
-        "tick %" PRIu64 " ending %jd.%09ld", __func__,
-        (void *)entry_ptr, (void *)prec_ptr, (void *)entry_ptr->vfd_swmr_file,
-        entry_ptr->tick_num, (intmax_t)entry_ptr->end_of_tick.tv_sec,
-        entry_ptr->end_of_tick.tv_nsec);
 
     /* Insert the entry onto the EOT queue */
     if (prec_ptr != NULL)
@@ -1441,19 +1344,9 @@ H5F_vfd_swmr_update_entry_eot(eot_queue_entry_t *entry)
 
     TAILQ_REMOVE(&eot_queue_g, entry, link);
 
-    hlog_fast(eotq, "%s: updating entry %p file %p "
-        "tick %" PRIu64 " ending %jd.%09ld", __func__,
-        (void *)entry, (void *)entry->vfd_swmr_file,
-        entry->tick_num, (intmax_t)entry->end_of_tick.tv_sec,
-        entry->end_of_tick.tv_nsec);
-
-    assert(entry->vfd_swmr_writer == shared->vfd_swmr_writer);
+    HDassert(entry->vfd_swmr_writer == shared->vfd_swmr_writer);
     entry->tick_num = shared->tick_num;
     entry->end_of_tick = shared->end_of_tick;
-
-    hlog_fast(eotq, "%s: ... to tick %" PRIu64 " ending %jd.%09ld", __func__,
-        entry->tick_num, (intmax_t)entry->end_of_tick.tv_sec,
-        entry->end_of_tick.tv_nsec);
 
     insert_eot_entry(entry);
 }
@@ -1487,11 +1380,6 @@ H5F_vfd_swmr_remove_entry_eot(H5F_t *f)
     }
 
     if (curr != NULL) {
-        hlog_fast(eotq, "%s: entry %p file %p "
-            "tick %" PRIu64 " ending %jd.%09ld", __func__,
-            (void *)curr, (void *)curr->vfd_swmr_file, curr->tick_num,
-            (intmax_t)curr->end_of_tick.tv_sec,
-            curr->end_of_tick.tv_nsec);
         TAILQ_REMOVE(&eot_queue_g, curr, link);
         curr = H5FL_FREE(eot_queue_entry_t, curr);
     }
@@ -1614,10 +1502,14 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_shared_t *shared,
     FUNC_ENTER_STATIC
 
     /* Get current time in struct timespec */
-    if ( HDclock_gettime(CLOCK_MONOTONIC, &curr) < 0 )
-
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, \
-                    "can't get time via clock_gettime")
+#ifdef H5_HAVE_WIN32_API
+        if (timespec_get(&curr, TIME_UTC) != TIME_UTC)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via timespec_get");
+#else
+        if (HDclock_gettime(CLOCK_MONOTONIC, &curr) < 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
+        }
+#endif
 
     /* Convert curr to nsecs */
     curr_nsecs = curr.tv_sec * nanosecs_per_second + curr.tv_nsec;
@@ -1631,9 +1523,6 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_shared_t *shared,
     if ( incr_tick_num ) {
 
         shared->tick_num++;
-
-        hlog_fast(tick, "%s tick %" PRIu64 " -> %" PRIu64,
-            __func__, shared->tick_num - 1, shared->tick_num);
 
         if ( H5PB_vfd_swmr__set_tick(shared) < 0 )
 
@@ -1951,8 +1840,6 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
 
     FUNC_ENTER_NOAPI(NULL)
 
-    hlog_fast(shadow_index_enlarge, "Enlarging shadow index.");
-
     old_mdf_idx = shared->mdf_idx;
     old_mdf_idx_len = shared->mdf_idx_len;
 
@@ -1984,7 +1871,7 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
      * process of adding entries, and some callers may not update
      * _entries_used immediately.
      */ 
-    memcpy(new_mdf_idx, old_mdf_idx, sizeof(new_mdf_idx[0]) * old_mdf_idx_len);
+    H5MM_memcpy(new_mdf_idx, old_mdf_idx, sizeof(new_mdf_idx[0]) * old_mdf_idx_len);
 
     shared->writer_index_offset = idx_addr;
     ret_value = shared->mdf_idx = new_mdf_idx;
@@ -2033,43 +1920,29 @@ H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
     struct timespec req;
     struct timespec rem;
     uint64_t tick_in_nsec;
-    H5F_shared_t *shared = f->shared;
+    H5F_shared_t *shared;
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_STATIC
 
+    HDassert(f);
+    shared = f->shared;
     HDassert(shared->vfd_swmr);
     HDassert(shared->vfd_swmr_writer);
 
     tick_in_nsec = shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
-    req.tv_nsec = (long)(tick_in_nsec % nanosecs_per_second);
-    req.tv_sec = (time_t)(tick_in_nsec / nanosecs_per_second);
 
-    result = HDnanosleep(&req, &rem);
+    H5_nanosleep(tick_in_nsec);
 
-    while ( result == -1 ) {
-
-        req = rem;
-        result = HDnanosleep(&req, &rem);
-    }
-
-    if ( result != 0 )
-
-        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "HDnanosleep() failed.")
-        
-    if ( H5F_vfd_swmr_writer_end_of_tick(f, false) < 0 )
-
-        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
-                    "H5F_vfd_swmr_writer_end_of_tick() failed.")
+    if (H5F_vfd_swmr_writer_end_of_tick(f, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "H5F_vfd_swmr_writer_end_of_tick() failed")
     
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5F__vfd_swmr_writer__wait_a_tick() */
 
 herr_t
-H5F_vfd_swmr_process_eot_queue(bool entering_api)
+H5F_vfd_swmr_process_eot_queue(hbool_t entering_api)
 {
     struct timespec now;
     eot_queue_entry_t *first_head, *head;
@@ -2083,10 +1956,14 @@ H5F_vfd_swmr_process_eot_queue(bool entering_api)
         H5F_t *f = head->vfd_swmr_file;
         H5F_shared_t *shared = f->shared;
 
+#ifdef H5_HAVE_WIN32_API
+        if(timespec_get(&now, TIME_UTC) != TIME_UTC)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via timespec_get");
+#else
         if(HDclock_gettime(CLOCK_MONOTONIC, &now) < 0) {
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, FAIL,
-                        "can't get time via clock_gettime");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
         }
+#endif
         if(timespeccmp(&now, &head->end_of_tick, <))
             break;
         /* If the H5F_shared_t is labeled with a later EOT time than
@@ -2098,7 +1975,7 @@ H5F_vfd_swmr_process_eot_queue(bool entering_api)
         if (timespeccmp(&head->end_of_tick, &shared->end_of_tick, <)) {
             H5F_vfd_swmr_update_entry_eot(head);
         } else if (shared->vfd_swmr_writer) {
-            if (H5F_vfd_swmr_writer_end_of_tick(f, false) < 0)
+            if (H5F_vfd_swmr_writer_end_of_tick(f, FALSE) < 0)
                 HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL,
                             "end of tick error for VFD SWMR writer");
         } else if (H5F_vfd_swmr_reader_end_of_tick(f, entering_api) < 0) {

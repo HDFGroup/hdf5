@@ -154,6 +154,13 @@
 #endif
 
 /*
+ * Needed for dirname and basename on POSIX systems
+ */
+#ifdef H5_HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
+
+/*
  * Dynamic library handling.  These are needed for dynamically loading I/O
  * filters and VFDs.
  */
@@ -163,6 +170,13 @@
 #ifdef H5_HAVE_DIRENT_H
 #include <dirent.h>
 #endif
+
+/* BSD-style queues
+ *
+ * We use a private copy of netBSD's queues instead of including sys/queue.h
+ * due to irreconcilable differences between different queue implementations.
+ */
+#include "H5queue.h"
 
 /* Define the default VFD for this platform.
  * Since the removal of the Windows VFD, this is sec2 for all platforms.
@@ -727,6 +741,9 @@ typedef struct {
 #ifndef HDatoll
     #define HDatoll(S)   atoll(S)
 #endif /* HDatol */
+#ifndef HDbasename
+    #define HDbasename(P)   basename(P)
+#endif /* HDbasename */
 #ifndef HDbind
     #define HDbind(A,B,C)   bind((A),(B),(C)) /* mirror VFD */
 #endif /* HDbind */
@@ -803,6 +820,9 @@ typedef struct {
         #define HDdifftime(X,Y)    ((double)(X)-(double)(Y))
     #endif /* H5_HAVE_DIFFTIME */
 #endif /* HDdifftime */
+#ifndef HDdirname
+    #define HDdirname(P)   dirname(P)
+#endif /* HDdirname */
 #ifndef HDdiv
     #define HDdiv(X,Y)    div(X,Y)
 #endif /* HDdiv */

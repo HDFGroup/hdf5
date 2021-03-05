@@ -26,9 +26,6 @@
 #ifndef _H5Fpkg_H
 #define _H5Fpkg_H
 
-/* BSD queue macros */
-#include "H5queue.h"
-
 /* Get package's private header */
 #include "H5Fprivate.h"
 
