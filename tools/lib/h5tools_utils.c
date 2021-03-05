@@ -1075,7 +1075,6 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t
 {
     const char *ccred[3];
     unsigned    nelems     = 0;
-    char *      start      = NULL;
     char *      s3cred_src = NULL;
     char **     s3cred     = NULL;
     herr_t      ret_value  = SUCCEED;
