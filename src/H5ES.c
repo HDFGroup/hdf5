@@ -541,7 +541,7 @@ H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[])
         H5MM_xfree(err_info[u].api_args);
         H5MM_xfree(err_info[u].app_file_name);
         H5MM_xfree(err_info[u].app_func_name);
-        if (H5I_dec_app_ref(err_info[u].err_stack_id) < 0)
+        if (H5I_dec_app_ref(err_info[u].err_stack_id) < 0) 
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "can't close error stack for err_info #%zu", u)
     } /* end for */
 

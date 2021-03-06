@@ -136,7 +136,7 @@ H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
 H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
 H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
 H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[],
-                               size_t *err_cleared);
+                               size_t *err_cleared); 
 H5_DLL herr_t H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[]);
 H5_DLL herr_t H5ESregister_insert_func(hid_t es_id, H5ES_event_insert_func_t func, void *ctx);
 H5_DLL herr_t H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t func, void *ctx);
