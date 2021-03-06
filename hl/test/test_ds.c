@@ -473,8 +473,6 @@ create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int fulldi
     return SUCCEED;
 
 error:
-    HDfree(buf);
-
     return FAIL;
 }
 
