@@ -1,8 +1,18 @@
 /** \page SPEC Specifications
 
-\li \ref DDLBNF112 "DDL in BNF for HDF5 1.12 and above"
+\section DDL
+
 \li \ref DDLBNF110 "DDL in BNF through HDF5 1.10"
+\li \ref DDLBNF112 "DDL in BNF for HDF5 1.12 and above"
+
+\section File Format
+
+\li \ref FMT1 "HDF5 File Format Specification Version 1.1"
+\li \ref FMT2 "HDF5 File Format Specification Version 2.0"
 \li \ref FMT "HDF5 File Format Specification Version 3.0"
+
+\section Other
+
 \li <a href="https://portal.hdfgroup.org/display/HDF5/Design+Specifications"> Other Specifications</a>
 
 */
