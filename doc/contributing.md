@@ -56,7 +56,7 @@ no existing tests should be broken.  See "Building and testing your contribution
 	* HDF5 has a commitment to remaining *machine-independent*; data created on one platform/environment/architecture **must** remain readable by HDF5 on another. 
 	* For binary compatibilty no changes are allowed to public APIs and data structures in the maintenance releases; new APIs can be added.
 
-* **New features are documented** - Any new features should be have proper documentation; see "Check list" section below.
+* **New features are documented** - Any new features should be have proper documentation; talk to us if you have any questions.
 # Testing your changes <A NAME="testing"></A>
 
 There are several ways to test your changes before creating a pull request:
@@ -64,10 +64,11 @@ There are several ways to test your changes before creating a pull request:
 ## Testing with Autotools <A NAME="autotools"></A>
 
 Here is a list of commands (assuming you are building in place)
-* `./autogen.sh` - run the script in the top source directory to created `configure` 
-* `./configure`  - run configure using appropriate flags; to see the flags run `./configure --help`.
-* `make`         - builds hDF5 libraries and tests
-* `make check`   - runs tests
+* `./autogen.sh`	- run the script in the top source directory to created `configure` 
+* `./configure`		- run configure using appropriate flags; to see the flags run `./configure --help`.
+* `make`		- build hDF5 libraries and tests
+* `make check`		- run tests
+* `make install`	- run tests
 
 ## Testing with CMake <A NAME="cmake"></A>
 ....
