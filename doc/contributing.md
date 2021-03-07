@@ -32,7 +32,7 @@ The process for contributing code to HDF5 is as follows:
 * Make the desired changes to the HDF5 software.
 	* New features should always go to develop branch and later merged to appropriate maintenance branches
 	* Bug fixes should go to all appropriate branches (develop and maintenance). 
-* Build and test your changes. See the section on building and testing below. Detailed instaructions can be found in INSTALL files in the release_docs directory.
+* Build and test your changes. See the section on building and testing below. Detailed instructions can be found in INSTALL files in the release_docs directory.
 * Push your changes to GitHub.
 * Issues a pull request and address any code formatting and testing issues reported.
 
