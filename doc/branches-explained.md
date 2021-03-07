@@ -4,7 +4,7 @@ This document desribes current HDF5 branches.
 
 Branches are tested nightly and testing results are available at https://cdash-internal.hdfgroup.org/ and https://cdash.hdfgroup.org/. Commits that break daily testing should be fixed by 3:00 pm Central time or reverted.  We encourgae code contributors to check the status of their commits. If you have any questions, please conrtact lrknox@hdfgroup.org.
  
-## `Develop`
+## `develop`
 Develop is the main branch whose source code always reflects a state with the latest delivered development changes for the next major release of HDF5. 
 This is also considered the integration branch, as **all** new features are integrated into this branch from respective feature branches. 
 
@@ -16,12 +16,12 @@ with the latest delivered development changes for the next **maintenance** relea
 **Some** new features will be integrated into a release maintenance branch, depending on whether or not those features can be 
 introduced in minor releases.  Maintenance branches are removed when a release-line is retired from support.
 
-## `Feature/*`
+## `feature/*`
 Feature branches are temporary branches used to develop new features in HDF5.
 Feature branches branch off of develop and exist as long as the feature is under development. 
 When the feature, the branch is merged back into develop, as well as any support branches in which the change will be included, and then the feature branch is removed.
 
-## `Release/*`
+## `release/*`
 Release branches are used to prepare a new production release. They are primarily used to allow for last minute dotting of is and crossing of ts 
 (things like setting the release version, finalizing release notes, et cetera) and do not include new development. 
 They are created from maintenance branch at the time of the maintenance release and have 
