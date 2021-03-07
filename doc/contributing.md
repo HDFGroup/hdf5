@@ -1,12 +1,12 @@
-# How to contribute to HDF5
+# How to contribute to HDF5 (Draft)
 
 The HDF Group encourges community members to contribute to the HDF5 project. We accept and are very grateful for any type of contribuitons 
-from small typos and bugs fixes to new features. The HDF Group is committed to work with the code contributors and make contribution process simple and enjoable.
+from small typos and bug fixes to new features. The HDF Group is committed to work with the code contributors and make contribution process simple and enjoable.
 
-This document describes guiding principles for the HDF5 code contribtors and does not pretend to address any possible 
+This document describes guiding principles for the HDF5 code contributors and does not pretend to address any possible 
 contribution. If in doubt, please do not hesitate to ask us for guidance. 
 ***Note that no contribution may be accepted unless the donor agrees with the HDF Group software license terms
-found in COPYING file in the top source directory of every branch.***
+found in the COPYING file in the top source directory of every branch.***
 
 
 > We will assume that you are familiar with `git` and `GitHub`.  If not, you may go through the GitHub tutorial found at [https://guides.github.com/activities/hello-world/](https://guides.github.com/activities/hello-world/).  This tutorial should only take around 10 minutes.
@@ -30,9 +30,9 @@ The process for contributing code to HDF5 is as follows:
 
 * Fork [HDF5](https://github.com/HDFGroup/hdf5) repository.
 * Make the desired changes to the HDF5 software.
-	* New features should always go to develop branch and later merged to appropriate maintenance branches
+	* New features should always go to develop branch first and later should be merged to the appropriate maintenance branches.
 	* Bug fixes should go to all appropriate branches (develop and maintenance). 
-* Build and test your changes. See the section on building and testing below. Detailed instructions can be found in INSTALL files in the release_docs directory.
+* Build and test your changes. See the section on building and testing below. Detailed instructions can be found in the `INSTALL*` files in the `release_docs` directory.
 * Push your changes to GitHub.
 * Issues a pull request and address any code formatting and testing issues reported.
 
@@ -46,17 +46,20 @@ We appreciate every contribution we receive, but we do not accept them all.  Tho
 * **Pull request has a clear purpose** - What does the pull request address? How does it benefit the HDF5 community? 
 If the pull request does not have a clear purpose and benifits it will not be accepted. 
 
-* **The code is documented** - The HDF5 developers must understand not only *what* a change is doing, but *how* it is doing it.  Documenting the code makes it easier for us to understand the workflow of your patch and will help to maintaine the code in the future. 
+* **The pull request is documented** - The HDF5 developers must understand not only *what* a change is doing, but *how* it is doing it.  Documenting the code makes it easier for us to understand your patch and will help to maintaine the code in the future. 
 
-* **The code passes HDF5 regression testing** - Any issue fixed or functionality add should be accompanied by corresponding tests. We do not expect you to perform comprehensive testing across a multitude of platforms, but at the very least your code should **compile** and 
-no existing tests should be broken.  See "Building and testing your contribution" below for more information.
+* **The pull request passes HDF5 regression testing** - Any issue fixed or functionality added should be accompanied by the corresponding tests and pass HDF5 regression testing run by The HDF Group. We do not expect you to perform comprehensive testing across a multitude of platforms before we accept the pull request. If the pull request does not pass regression testsi after the merge, The HDF Group developers will work with you on the fixes. 
+See "Building and testing your contribution" below for information on how to test your code before creating a pull request. GitHub actions will also run tests and report any issues found.
 
-* **They do not compromise the principles behind HDF5** - HDF5 has a 100% commitment to backwards compatibility.  
-	* Any file ever created with HDF5 must be readable by any future version of HDF5.  The HDF5 data model and file format are **well** defined.  If the purpose of your patch  is to modify the data model or file format, **please** discuss this with us first. File format changes and features required those changes can be introduced only in the new major releases. 
+* **The pul request does not compromise the principles behind HDF5** - HDF5 has a 100% commitment to backwards compatibility.  
+	* Any file ever created with HDF5 must be readable by any future version of HDF5.
+  The HDF5 data model and file format are **well** defined.  If the purpose of your patch  is to modify the data model or file format,
+ **please** discuss this with us first. File format changes and features required those changes can be introduced only in a new major release. 
 	* HDF5 has a commitment to remaining *machine-independent*; data created on one platform/environment/architecture **must** remain readable by HDF5 on another. 
 	* For binary compatibilty no changes are allowed to public APIs and data structures in the maintenance releases; new APIs can be added.
 
 * **New features are documented** - Any new features should be have proper documentation; talk to us if you have any questions.
+
 # Building and testing your contribution <A NAME="testing"></A>
 
 There are several ways to test your changes before creating a pull request:
@@ -66,12 +69,13 @@ There are several ways to test your changes before creating a pull request:
 Here is a list of commands (assuming you are building in place)
 * `./autogen.sh`	- run the script in the top source directory to created `configure` 
 * `./configure`		- run configure using appropriate flags; to see the flags run `./configure --help`.
-* `make`		- build hDF5 libraries and tests
+* `make`		- build HDF5 libraries and tests
 * `make check`		- run tests
-* `make install`	- run tests
+* `make install`	- install
+* `make check-install`	- check installation
 
 ## Testing with CMake <A NAME="cmake"></A>
-....
+.... (under construction)....
 
 
 # Checklist <A NAME="checklist"></A>
@@ -84,9 +88,11 @@ Please make sure that you check the items applicable to your pull request:
   * [ ] Document new function in the corresponding public header file using Doxygen
   * [ ] Document new functionality for the HDF5 community (the level of documentation depends on the feature; ask us what would be appropriate)
 * Code 
+  * [ ] Does the pull request follow HDF5 best practices (naming convensions, code portability, code structure)? <<TODO: link to the document>>
   * [ ] Does the pull request have necessary tests?
   * [ ] Is the new code documented well enough for future maintenance?
   * [ ] If new feature is added, does it affect HDF5 library perfromance?
+  * [ ] If changes were done to autotools build were they added to CMake and vice versa??
 
 We want as many contributions as we can get, and are here to help!  Feel free to reach out to us if you have any questions!
 
