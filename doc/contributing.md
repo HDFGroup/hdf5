@@ -57,7 +57,7 @@ no existing tests should be broken.  See "Building and testing your contribution
 	* For binary compatibilty no changes are allowed to public APIs and data structures in the maintenance releases; new APIs can be added.
 
 * **New features are documented** - Any new features should be have proper documentation; talk to us if you have any questions.
-# Testing your changes <A NAME="testing"></A>
+# Building and testing your contribution <A NAME="testing"></A>
 
 There are several ways to test your changes before creating a pull request:
 
@@ -87,7 +87,6 @@ Please make sure that you check the items applicable to your pull request:
   * [ ] Does the pull request have necessary tests?
   * [ ] Is the new code documented well enough for future maintenance?
   * [ ] If new feature is added, does it affect HDF5 library perfromance?
-  * [ ] Is new code documented?
 
 We want as many contributions as we can get, and are here to help!  Feel free to reach out to us if you have any questions!
 
