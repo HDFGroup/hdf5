@@ -18,8 +18,8 @@
  *		H5S package.  Including this header means that the source file
  *		is part of the H5S package.
  */
-#ifndef _H5Smodule_H
-#define _H5Smodule_H
+#ifndef H5Smodule_H
+#define H5Smodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_DATASPACE
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5Smodule_H */
+#endif /* H5Smodule_H */

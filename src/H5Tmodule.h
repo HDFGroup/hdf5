@@ -18,8 +18,8 @@
  *		H5T package.  Including this header means that the source file
  *		is part of the H5T package.
  */
-#ifndef _H5Tmodule_H
-#define _H5Tmodule_H
+#ifndef H5Tmodule_H
+#define H5Tmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_DATATYPE
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5Tmodule_H */
+#endif /* H5Tmodule_H */

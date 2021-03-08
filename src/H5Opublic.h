@@ -22,13 +22,13 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Opublic_H
-#define _H5Opublic_H
+#ifndef H5Opublic_H
+#define H5Opublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions			*/
-#include "H5Ipublic.h" /* IDs			  		*/
-#include "H5Lpublic.h" /* Links		  		*/
+#include "H5public.h"  /* Generic Functions            */
+#include "H5Ipublic.h" /* IDs                          */
+#include "H5Lpublic.h" /* Links                        */
 
 /*****************/
 /* Public Macros */
@@ -95,7 +95,7 @@
 /* Types of objects in file */
 typedef enum H5O_type_t {
     H5O_TYPE_UNKNOWN = -1,   /* Unknown object type        */
-    H5O_TYPE_GROUP,          /* Object is a group        */
+    H5O_TYPE_GROUP,          /* Object is a group          */
     H5O_TYPE_DATASET,        /* Object is a dataset        */
     H5O_TYPE_NAMED_DATATYPE, /* Object is a named data type    */
     H5O_TYPE_NTYPES          /* Number of different object types (must be last!) */
@@ -245,4 +245,4 @@ typedef struct H5O_stat_t {
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Opublic_H */
+#endif /* H5Opublic_H */

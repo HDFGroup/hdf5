@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5S module.
  */
-#ifndef _H5Spublic_H
-#define _H5Spublic_H
+#ifndef H5Spublic_H
+#define H5Spublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -140,4 +140,4 @@ H5_DLL hid_t    H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_spa
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Spublic_H */
+#endif /* H5Spublic_H */

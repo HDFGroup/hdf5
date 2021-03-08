@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1599,7 +1599,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
         } break;
         case H5T_ARRAY: {
             int     k, ndims;
-            hsize_t dims[H5S_MAX_RANK], temp_nelmts, nelmts;
+            hsize_t dims[H5S_MAX_RANK], temp_nelmts, nelmts = 0;
             hid_t   memb = H5I_INVALID_HID;
 
             H5TOOLS_DEBUG("H5T_ARRAY");

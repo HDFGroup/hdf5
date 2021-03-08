@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -872,9 +872,9 @@ report_parameters(struct options *opts)
     HDfprintf(output, "\n");
 
     if (opts->page_size) {
-        HDfprintf(output, "Page Aggregation Enabled. Page size = %ld\n", opts->page_size);
+        HDfprintf(output, "Page Aggregation Enabled. Page size = %zu\n", opts->page_size);
         if (opts->page_buffer_size)
-            HDfprintf(output, "Page Buffering Enabled. Page Buffer size = %ld\n", opts->page_buffer_size);
+            HDfprintf(output, "Page Buffering Enabled. Page Buffer size = %zu\n", opts->page_buffer_size);
         else
             HDfprintf(output, "Page Buffering Disabled\n");
     }

@@ -11,7 +11,7 @@ use warnings;
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -38,7 +38,7 @@ sub print_copyright ($) {
     print $fh " * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n";
     print $fh " * terms governing use, modification, and redistribution, is contained in    *\n";
     print $fh " * the COPYING file, which can be found at the root of the source code       *\n";
-    print $fh " * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *\n";
+    print $fh " * distribution tree, or in https://www.hdfgroup.org/licenses.               *\n";
     print $fh " * If you do not have access to either file, you may request a copy from     *\n";
     print $fh " * help\@hdfgroup.org.                                                        *\n";
     print $fh " * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */\n";
@@ -64,8 +64,8 @@ sub print_startprotect ($$) {
     $file =~ s/(\w*)\.h/$1/;
 
     # Print the ifdef info
-    print $fh "\n#ifndef _${file}_H\n";
-    print $fh "#define _${file}_H\n";
+    print $fh "\n#ifndef ${file}_H\n";
+    print $fh "#define ${file}_H\n";
 }
 
 ##############################################################################

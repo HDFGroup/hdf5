@@ -7,13 +7,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Location_H
-#define __H5Location_H
+#ifndef H5Location_H
+#define H5Location_H
 
 #include "H5Classes.h" // constains forward class declarations
 
@@ -321,4 +321,4 @@ class H5_DLLCPP H5Location : public IdComponent {
 }; // end of H5Location
 } // namespace H5
 
-#endif // __H5Location_H
+#endif // H5Location_H

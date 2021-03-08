@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -196,7 +196,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
         /* long command line option */
         int        i;
         const char ch      = '=';
-        char *     arg     = &argv[opt_ind][2];
+        char *     arg     = HDstrdup(&argv[opt_ind][2]);
         size_t     arg_len = 0;
 
         opt_arg = strchr(&argv[opt_ind][2], ch);
@@ -208,8 +208,6 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
         arg[arg_len] = 0;
 
         for (i = 0; l_opts && l_opts[i].name; i++) {
-            size_t len = HDstrlen(l_opts[i].name);
-
             if (HDstrcmp(arg, l_opts[i].name) == 0) {
                 /* we've found a matching long command line flag */
                 opt_opt = l_opts[i].shortval;
@@ -253,6 +251,8 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
         opt_ind++;
         sp = 1;
+
+        HDfree(arg);
     }
     else {
         register char *cp; /* pointer into current token */
@@ -1079,12 +1079,14 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t
     ccred[1] = (const char *)s3cred[1];
     ccred[2] = (const char *)s3cred[2];
 
-    if (h5tools_populate_ros3_fapl(fapl_config_out, ccred) < 0)
+    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
 
 done:
-    HDfree(s3cred);
-    HDfree(s3cred_src);
+    if (s3cred)
+        HDfree(s3cred);
+    if (s3cred_src)
+        HDfree(s3cred_src);
 
     return ret_value;
 }

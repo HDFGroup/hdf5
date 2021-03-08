@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -357,14 +357,14 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
 done:
     H5E_BEGIN_TRY
     {
-        H5Pclose(fcpl_in);
-        H5Pclose(gcpl_in);
         H5Pclose(fcpl);
+        H5Pclose(options->fout_fapl);
+        options->fout_fapl = H5P_DEFAULT;
+        H5Pclose(gcpl_in);
         H5Gclose(grp_in);
-        H5Fclose(fidin);
+        H5Pclose(fcpl_in);
         H5Fclose(fidout);
         H5Fclose(fidin);
-        H5Fclose(fidout);
     }
     H5E_END_TRY;
     if (travt)

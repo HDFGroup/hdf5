@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef H5DUMP_XML_H__
-#define H5DUMP_XML_H__
+#ifndef H5DUMP_XML_H
+#define H5DUMP_XML_H
 
 extern const char *xmlnsprefix;
 
@@ -34,4 +34,4 @@ void   xml_dump_data(hid_t, int, struct subset_t *, int);
 }
 #endif
 
-#endif /* !H5DUMP_XML_H__ */
+#endif /* H5DUMP_XML_H */
