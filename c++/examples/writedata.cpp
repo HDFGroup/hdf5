@@ -20,11 +20,7 @@
  *  file is closed. Program reopens the file and reads and displays the result.
  */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cout;
 using std::endl;
 
