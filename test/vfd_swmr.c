@@ -1082,8 +1082,7 @@ error:
     return 1;
 } /* test_writer__md() */
 
-
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK))
+#ifndef H5_HAVE_UNISTD_H
 
 static unsigned
 test_reader_md_concur(void)
@@ -1091,7 +1090,7 @@ test_reader_md_concur(void)
     /* Output message about test being performed */
     TESTING("Verify the metadata file for VFD SWMR reader");
     SKIPPED();
-    HDputs("    Test skipped due to fork, waitpid, or flock not defined.");
+    HDputs("    Test skipped (unistd.h not present)");
     return 0;
 
 } /* test_reader_md_concur() */
@@ -1102,7 +1101,7 @@ test_multiple_file_opens_concur(void)
     /* Output message about test being performed */
     TESTING("EOT queue entries when opening files concurrently with VFD SWMR");
     SKIPPED();
-    HDputs("    Test skipped due to fork, waitpid, or flock not defined.");
+    HDputs("    Test skipped (unistd.h not present)");
     return 0;
 
 }  /* test_multiple_file_opens_concur() */
@@ -1113,12 +1112,23 @@ test_disable_enable_eot_concur(void)
     /* Output message about test being performed */
     TESTING("Verify concurrent H5Fvfd_swmr_enable/disable_end_of_tick()");
     SKIPPED();
-    HDputs("    Test skipped due to fork, waitpid, or flock not defined.");
+    HDputs("    Test skipped (unistd.h not present)");
     return 0;
 
 } /* test_disable_enble_eot_concur() */
 
-#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK) */
+static unsigned
+test_file_end_tick_concur(void)
+
+    /* Output message about test being performed */
+    TESTING("Verify concurrent H5Fvfd_swmr_end_tick()");
+    SKIPPED();
+    HDputs("    Test skipped (unistd.h not present)");
+    return 0;
+
+} /* test_disable_enble_eot_concur() */
+
+#else /* H5_HAVE_UNISTD_H */
 
 /*-------------------------------------------------------------------------
  * Function:    test_reader_md_concur()
@@ -2610,7 +2620,7 @@ error:
     return 1;
 } /* test_file_end_tick_concur() */
 
-#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 
 /*-------------------------------------------------------------------------

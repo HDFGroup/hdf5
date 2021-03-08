@@ -19,18 +19,18 @@
 /* Headers */
 /***********/
 
-#include <err.h>    /* for err(3) */
-
-/* Only need the pthread solution if sigtimedwai(2) isn't available */
-#ifndef H5_HAVE_SIGTIMEDWAIT
-#include <pthread.h>
-#endif
-
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 #include "swmr_common.h"
 
-static const hid_t badhid = H5I_INVALID_HID;
+#ifndef H5_HAVE_WIN32_API
+
+#include <err.h>
+
+/* Only need the pthread solution if sigtimedwait(2) isn't available */
+#ifndef H5_HAVE_SIGTIMEDWAIT
+#include <pthread.h>
+#endif
 
 int verbosity = 2;
 
@@ -43,17 +43,19 @@ int verbosity = 2;
  * greater than the duration `ival`, then record the current time at
  * `last` and return true.  Otherwise, return false.
  */
-bool
+hbool_t
 below_speed_limit(struct timespec *last, const struct timespec *ival)
 {
     struct timespec now;
-    bool result;
+    hbool_t result;
 
-    assert(0 <= last->tv_nsec && last->tv_nsec < 1000000000L);
-    assert(0 <= ival->tv_nsec && ival->tv_nsec < 1000000000L);
+    HDassert(0 <= last->tv_nsec && last->tv_nsec < 1000000000L);
+    HDassert(0 <= ival->tv_nsec && ival->tv_nsec < 1000000000L);
 
-    if (clock_gettime(CLOCK_MONOTONIC, &now) == -1)
-        err(EXIT_FAILURE, "%s: clock_gettime", __func__);
+    if (HDclock_gettime(CLOCK_MONOTONIC, &now) == -1) {
+        HDfprintf(stderr, "%s: clock_gettime", __func__);
+        HDexit(EXIT_FAILURE);
+    }
 
     if (now.tv_sec - last->tv_sec > ival->tv_sec)
         result = true;
@@ -78,10 +80,12 @@ evsnprintf(char *buf, size_t bufsz, const char *fmt, va_list ap)
 
     rc = vsnprintf(buf, bufsz, fmt, ap);
 
-    if (rc < 0)
+    if (rc < 0) {
         err(EXIT_FAILURE, "%s: vsnprintf", __func__);
-    else if ((size_t)rc >= bufsz)
+    }
+    else if ((size_t)rc >= bufsz) {
         errx(EXIT_FAILURE, "%s: buffer too small", __func__);
+    }
 }
 
 /* Like snprintf(3), but abort the program with an error message on
@@ -244,8 +248,8 @@ await_signal(hid_t fid)
     sigset_t sleepset;
 
     if (sigfillset(&sleepset) == -1) {
-        err(EXIT_FAILURE, "%s.%d: could not initialize signal mask",
-            __func__, __LINE__);
+        HDfprintf(stderr, "%s.%d: could not initialize signal mask", __func__, __LINE__);
+        HDexit(EXIT_FAILURE);
     }
 
     /* Avoid deadlock: flush the file before waiting for the reader's
@@ -275,14 +279,14 @@ await_signal(hid_t fid)
         rc = sigwait(&sleepset, NULL);
 
         if (rc != -1) {
-            fprintf(stderr, "Received signal, wrapping things up.\n");
+            HDfprintf(stderr, "Received signal, wrapping things up.\n");
             pthread_mutex_lock(&timer_mutex);
             timer_stop = TRUE;
             pthread_mutex_unlock(&timer_mutex);
             pthread_join(timer, NULL);
         }
         else
-            err(EXIT_FAILURE, "%s: sigtimedwait", __func__);
+            err(EXIT_FAILURE, "%s: sigwait", __func__);
     }
 #else
     for (;;) {
@@ -322,7 +326,7 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
 {
     va_list ap;
     
-    memset(config, 0, sizeof(H5F_vfd_swmr_config_t));
+    HDmemset(config, 0, sizeof(H5F_vfd_swmr_config_t));
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->pb_expansion_threshold = 0; 
@@ -333,10 +337,10 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
     config->flush_raw_data = flush_raw_data;
     config->md_pages_reserved = md_pages_reserved;
 
-    va_start(ap, md_file_fmtstr);
+    HDva_start(ap, md_file_fmtstr);
     evsnprintf(config->md_file_path, sizeof(config->md_file_path),
         md_file_fmtstr, ap);
-    va_end(ap);
+    HDva_end(ap);
 
 } /* init_vfd_swmr_config() */
 
@@ -351,40 +355,33 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
 hid_t
 vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_pages, H5F_vfd_swmr_config_t *config)
 {
-    hid_t fapl;
+    hid_t fapl = H5I_INVALID_HID;
 
     /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0) {
-        warnx("h5_fileaccess");
-        return badhid;
-    }
+    if((fapl = h5_fileaccess()) < 0)
+        return H5I_INVALID_HID;
 
     if(use_latest_format) {
-        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
-            warnx("H5Pset_libver_bounds");
-            return badhid;
-        }
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            return H5I_INVALID_HID;
     }
 
     /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl, 4096, only_meta_pages ? 100 : 0, 0) < 0) {
-        warnx("H5Pset_page_buffer_size");
-        return badhid;
-    }
+    if(H5Pset_page_buffer_size(fapl, 4096, only_meta_pages ? 100 : 0, 0) < 0)
+        return H5I_INVALID_HID;
 
     /*
      * Set up to open the file with VFD SWMR configured.
      */
     /* Enable VFD SWMR configuration */
-    if(use_vfd_swmr && H5Pset_vfd_swmr_config(fapl, config) < 0) {
-        warnx("H5Pset_vfd_swmr_config");
-        return badhid;
-    }
+    if(use_vfd_swmr && H5Pset_vfd_swmr_config(fapl, config) < 0)
+        return H5I_INVALID_HID;
 
     return fapl;
 
 } /* vfd_swmr_create_fapl() */
 
+#endif /* H5_HAVE_WIN32_API */
 
 /* Fetch a variable from the environment and parse it for unsigned long
  * content.  Return 0 if the variable is not present, -1 if it is present
@@ -398,21 +395,21 @@ fetch_env_ulong(const char *varname, unsigned long limit, unsigned long *valp)
     unsigned long ul;
     char *tmp;
 
-    if ((tmp = getenv(varname)) == NULL)
+    if ((tmp = HDgetenv(varname)) == NULL)
         return 0;
 
     errno = 0;
-    ul = strtoul(tmp, &end, 0);
+    ul = HDstrtoul(tmp, &end, 0);
     if (ul == ULONG_MAX && errno != 0) {
-        fprintf(stderr, "could not parse %s: %s\n", varname, strerror(errno));
+        HDfprintf(stderr, "could not parse %s: %s\n", varname, HDstrerror(errno));
         return -1;
     }
     if (end == tmp || *end != '\0') {
-        fprintf(stderr, "could not parse %s\n", varname);
+        HDfprintf(stderr, "could not parse %s\n", varname);
         return -1;
     }
     if (ul > limit) {
-        fprintf(stderr, "%s (%lu) out of range\n", varname, ul);
+        HDfprintf(stderr, "%s (%lu) out of range\n", varname, ul);
         return -1;
     }
     *valp = ul;
