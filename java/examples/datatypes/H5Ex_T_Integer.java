@@ -33,9 +33,9 @@ public class H5Ex_T_Integer {
     private static final int RANK = 2;
 
     private static void CreateDataset() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0, DIM1 };
         int[][] dset_data = new int[DIM0][DIM1];
 
@@ -116,9 +116,9 @@ public class H5Ex_T_Integer {
     }
 
     private static void ReadDataset() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0, DIM1 };
         int[][] dset_data;
 

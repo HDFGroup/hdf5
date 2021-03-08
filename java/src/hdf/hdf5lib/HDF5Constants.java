@@ -45,10 +45,15 @@ public class HDF5Constants {
     public static final int H5_SZIP_ALLOW_K13_OPTION_MASK = H5_SZIP_ALLOW_K13_OPTION_MASK();
     /** Special parameters for szip compression */
     public static final int H5_SZIP_CHIP_OPTION_MASK = H5_SZIP_CHIP_OPTION_MASK();
+    /** indices on links, unknown index type */
     public static final int H5_INDEX_UNKNOWN = H5_INDEX_UNKNOWN();
+    /** indices on links, index on names */
     public static final int H5_INDEX_NAME = H5_INDEX_NAME();
+    /** indices on links, index on creation order */
     public static final int H5_INDEX_CRT_ORDER = H5_INDEX_CRT_ORDER();
+    /** indices on links, number of indices defined */
     public static final int H5_INDEX_N = H5_INDEX_N();
+    /** */
     public static final int H5_ITER_UNKNOWN = H5_ITER_UNKNOWN();
     public static final int H5_ITER_INC = H5_ITER_INC();
     public static final int H5_ITER_DEC = H5_ITER_DEC();

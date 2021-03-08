@@ -144,7 +144,7 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             fi
         fi
     done
-    if [ "$IS_DARWIN" = "yes" ]; then 
+    if [ "$IS_DARWIN" = "yes" ]; then
        (cd testlibs; \
          install_name_tool -add_rpath @loader_path libhdf5_java.dylib; \
          exist_path=` otool -l libhdf5_java.dylib | grep libhdf5 | grep -v java | awk '{print $2}'`; \
@@ -246,6 +246,8 @@ COPY_DATAFILES_TO_BLDDIR()
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateL2.hdf
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateO1.hdf
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateO2.hdf
+    $CP -f $TOOLS_TESTFILES/tdatareg.h5 $BLDDIR/trefer_reg.h5
+    $CP -f $TOOLS_TESTFILES/tattrreg.h5 $BLDDIR/trefer_attr.h5
 }
 
 CLEAN_DATAFILES_AND_BLDDIR()

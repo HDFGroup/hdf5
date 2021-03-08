@@ -38,7 +38,7 @@ public class TestH5Obasic {
     private static long H5la_l1 = -1;
     private static long H5la_dt1 = -1;
     private static long H5la_g1 = -1;
-    long H5fid = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
 
     @Before
     public void openH5file()
@@ -66,7 +66,7 @@ public class TestH5Obasic {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Oopen_not_exists() throws Throwable {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
 
         oid = H5.H5Oopen(H5fid, "Never_created", HDF5Constants.H5P_DEFAULT);
 
@@ -75,7 +75,7 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oget_info_dataset() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         H5O_info_t obj_info = null;
 
         try {
@@ -93,7 +93,7 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oget_info_hardlink() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         H5O_info_t obj_info = null;
         try {
             oid = H5.H5Oopen(H5fid, "L1", HDF5Constants.H5P_DEFAULT);
@@ -110,7 +110,7 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oget_info_group() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         H5O_info_t obj_info = null;
         try {
             oid = H5.H5Oopen(H5fid, "G1", HDF5Constants.H5P_DEFAULT);
@@ -127,7 +127,7 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oget_info_datatype() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         H5O_info_t obj_info = null;
         try {
             oid = H5.H5Oopen(H5fid, "DT1", HDF5Constants.H5P_DEFAULT);
@@ -257,7 +257,7 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oget_info_by_idx_n3() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         H5O_info_t obj_info = null;
         try {
             oid = H5.H5Oopen(H5fid, "L1", HDF5Constants.H5P_DEFAULT);
@@ -409,7 +409,7 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oopen_by_idx_n0() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         H5O_info_t obj_info = null;
         try {
             try {
@@ -447,7 +447,7 @@ public class TestH5Obasic {
 
     @Test
     public void testH5Oopen_by_idx_n3() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         H5O_info_t obj_info = null;
         try {
             try {

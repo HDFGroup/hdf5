@@ -62,6 +62,7 @@
 #define H5S_SELECT_INFO_ENC_SIZE_8    0x08 /* 8 bytes: 64 bits */
 #define H5S_SELECT_INFO_ENC_SIZE_BITS (H5S_SELECT_INFO_ENC_SIZE_4 | H5S_SELECT_INFO_ENC_SIZE_8)
 
+#define H5S_UINT16_MAX 0x0000FFFF       /* 2^16 - 1 = 65,535                            */
 #define H5S_UINT32_MAX 0xFFFFFFFF       /* 2^32 - 1 = 4,294,967,295                     */
 #define H5S_UINT64_MAX ((hsize_t)(-1L)) /* 2^64 - 1 = 18,446,744,073,709,551,615 */
 
