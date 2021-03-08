@@ -2,12 +2,12 @@
 
 \todo Revise this & break it up!
 
-\section intro Introduction
+\section intro110 Introduction
 
 This document contains the data description language (DDL) for an HDF5 file. The
 description is in Backus-Naur Form (BNF).
 
-\section expo Explanation of Symbols
+\section expo110 Explanation of Symbols
 
 This section contains a brief explanation of the symbols used in the DDL.
 
@@ -23,7 +23,7 @@ This section contains a brief explanation of the symbols used in the DDL.
  TBD                      To Be Decided
 \endcode
 
-\section ddl The DDL
+\section ddl110 The DDL
 
 \code{.unparsed}
 <file> ::= HDF5 <file_name> { <file_super_block>opt <root_group> }
@@ -509,7 +509,7 @@ This section contains a brief explanation of the symbols used in the DDL.
 <hex_value> ::= 0x[0-F][0-F]+ | [0-F][0-F]+
 \endcode
 
-\section example An Example of an HDF5 File in DDL
+\section example110 An Example of an HDF5 File in DDL
 
 \code{.unparsed}
 HDF5 "example.h5" {
