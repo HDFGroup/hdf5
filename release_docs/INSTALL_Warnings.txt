@@ -60,7 +60,6 @@ Autotools UNIX warnings added to H5_CFLAGS
     -Wcast-align
     -Wcast-qual
     -Wconversion
-    -Wdeclaration-after-statement
     -Wdisabled-optimization
     -Wfloat-equal
     -Wformat=2
@@ -291,7 +290,6 @@ IF GNU GCC
     -Wcast-align
     -Wcast-qual
     -Wconversion
-    -Wdeclaration-after-statement
     -Wdisabled-optimization
     -Wfloat-equal
     -Wformat=2
