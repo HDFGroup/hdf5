@@ -238,7 +238,7 @@ aux_assign_obj(const char * name,        /* object name from traverse list */
 int
 apply_filters(const char *name,    /* object name from traverse list */
               int         rank,    /* rank of dataset */
-              hsize_t *   dims,    /* dimensions of dataset */
+              const hsize_t *   dims,    /* dimensions of dataset */
               size_t      msize,   /* size of type */
               hid_t       dcpl_id, /* dataset creation property list */
               pack_opt_t *options, /* repack options */

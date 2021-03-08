@@ -731,7 +731,7 @@ trav_table_addlink(trav_table_t *table, const H5O_token_t *obj_token, const char
  *-------------------------------------------------------------------------
  */
 void
-trav_table_addflags(unsigned *flags, char *name, h5trav_type_t type, trav_table_t *table)
+trav_table_addflags(const unsigned *flags, char *name, h5trav_type_t type, trav_table_t *table)
 {
     size_t new_obj;
 

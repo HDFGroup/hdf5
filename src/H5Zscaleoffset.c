@@ -73,9 +73,9 @@ static herr_t H5Z__scaleoffset_postdecompress_fd(void *data, unsigned d_nelmts, 
                                                  uint32_t minbits, unsigned long long minval, double D_val);
 static void   H5Z__scaleoffset_next_byte(size_t *j, unsigned *buf_len);
 static void   H5Z__scaleoffset_decompress_one_byte(unsigned char *data, size_t data_offset, unsigned k,
-                                                   unsigned begin_i, unsigned char *buffer, size_t *j,
+                                                   unsigned begin_i, const unsigned char *buffer, size_t *j,
                                                    unsigned *buf_len, parms_atomic p, unsigned dtype_len);
-static void   H5Z__scaleoffset_compress_one_byte(unsigned char *data, size_t data_offset, unsigned k,
+static void   H5Z__scaleoffset_compress_one_byte(const unsigned char *data, size_t data_offset, unsigned k,
                                                  unsigned begin_i, unsigned char *buffer, size_t *j,
                                                  unsigned *buf_len, parms_atomic p, unsigned dtype_len);
 static void   H5Z__scaleoffset_decompress_one_atomic(unsigned char *data, size_t data_offset,
@@ -1608,7 +1608,7 @@ H5Z__scaleoffset_next_byte(size_t *j, unsigned *buf_len)
 
 static void
 H5Z__scaleoffset_decompress_one_byte(unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
-                                     unsigned char *buffer, size_t *j, unsigned *buf_len, parms_atomic p,
+                                     const unsigned char *buffer, size_t *j, unsigned *buf_len, parms_atomic p,
                                      unsigned dtype_len)
 {
     unsigned      dat_len; /* dat_len is the number of bits to be copied in each data byte */
@@ -1694,7 +1694,7 @@ H5Z__scaleoffset_decompress(unsigned char *data, unsigned d_nelmts, unsigned cha
 }
 
 static void
-H5Z__scaleoffset_compress_one_byte(unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
+H5Z__scaleoffset_compress_one_byte(const unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
                                    unsigned char *buffer, size_t *j, unsigned *buf_len, parms_atomic p,
                                    unsigned dtype_len)
 {

@@ -135,7 +135,7 @@ static int EOFCode;
 
 /*************************************************************/
 int
-hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap, byte *gmap, byte *bmap, byte *pc2ncmap,
+hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, const byte *rmap, const byte *gmap, const byte *bmap, const byte *pc2ncmap,
             int numcols, int colorstyle, int BitsPerPixel)
 {
     int   InitCodeSize;

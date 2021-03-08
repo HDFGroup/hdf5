@@ -397,7 +397,7 @@ static int without_hardware_g = 0;
 void           some_dummy_func(float x);
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int     my_isnan(dtype_t type, void *val);
-static int     my_isinf(int endian, unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos,
+static int     my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos,
                         size_t esize);
 
 /*-------------------------------------------------------------------------
@@ -2853,7 +2853,7 @@ my_isnan(dtype_t type, void *val)
  *-------------------------------------------------------------------------
  */
 static int
-my_isinf(int endian, unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos, size_t esize)
+my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos, size_t esize)
 {
     unsigned char *bits;
     int            retval = 0;
