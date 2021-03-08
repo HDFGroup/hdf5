@@ -398,13 +398,13 @@ test_tconv(H5File &file)
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_BOGUS[1] = {{
-    H5Z_CLASS_T_VERS,         /* H5Z_class_t version number   */
-    H5Z_FILTER_BOGUS,         /* Filter id number             */
-    1, 1,                     /* Encode and decode enabled    */
-    "bogus",                  /* Filter name for debugging        */
-    NULL,                     /* The "can apply" callback     */
-    NULL,                     /* The "set local" callback     */
-    filter_bogus,             /* The actual filter function        */
+    H5Z_CLASS_T_VERS, /* H5Z_class_t version number   */
+    H5Z_FILTER_BOGUS, /* Filter id number             */
+    1, 1,             /* Encode and decode enabled    */
+    "bogus",          /* Filter name for debugging        */
+    NULL,             /* The "can apply" callback     */
+    NULL,             /* The "set local" callback     */
+    filter_bogus,     /* The actual filter function        */
 }};
 
 /*-------------------------------------------------------------------------

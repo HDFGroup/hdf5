@@ -49,18 +49,18 @@ static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl,
 /* Temporary filter IDs used for testing */
 const int H5Z_FILTER_BOGUS = 305;
 
-static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
+                           size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_BOGUS[1] = {{
-    H5Z_CLASS_T_VERS,         /* H5Z_class_t version */
-    H5Z_FILTER_BOGUS,         /* Filter id number             */
-    1, 1,                     /* Encoding and decoding enabled */
-    "bogus",                  /* Filter name for debugging    */
-    NULL,                     /* The "can apply" callback     */
-    NULL,                     /* The "set local" callback     */
-    filter_bogus,             /* The actual filter function   */
+    H5Z_CLASS_T_VERS, /* H5Z_class_t version */
+    H5Z_FILTER_BOGUS, /* Filter id number             */
+    1, 1,             /* Encoding and decoding enabled */
+    "bogus",          /* Filter name for debugging    */
+    NULL,             /* The "can apply" callback     */
+    NULL,             /* The "set local" callback     */
+    filter_bogus,     /* The actual filter function   */
 }};
 
 /*-------------------------------------------------------------------------
@@ -77,9 +77,8 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_bogus(unsigned int flags, size_t cd_nelmts,
-      const unsigned int *cd_values, size_t nbytes,
-      size_t *buf_size, void **buf)
+filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
+             size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
