@@ -157,8 +157,8 @@ int ReadGifApplication(GIFAPPLICATION *, GIFBYTE **);
 int ReadGifComment(GIFCOMMENT *, GIFBYTE **);
 
 /* HDFGIFWR.C */
-int hdfWriteGIF(FILE *fp, GIFBYTE *pic, int ptype, int w, int h, const GIFBYTE *rmap, const GIFBYTE *gmap, const GIFBYTE *bmap,
-                const GIFBYTE *pc2ncmap, int numcols, int colorstyle, int BitsPerPixel);
+int hdfWriteGIF(FILE *fp, GIFBYTE *pic, int ptype, int w, int h, const GIFBYTE *rmap, const GIFBYTE *gmap,
+                const GIFBYTE *bmap, const GIFBYTE *pc2ncmap, int numcols, int colorstyle, int BitsPerPixel);
 
 /* WRITEHDF.C */
 int WriteHDF(GIFTOMEM, GIFCHAR *);

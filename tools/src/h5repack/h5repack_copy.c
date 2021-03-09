@@ -406,8 +406,8 @@ done:
  *-----------------------------------------*/
 
 int
-get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t size_datum, hsize_t dims_hslab[],
-              hsize_t *hslab_nbytes_p)
+get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t size_datum,
+              hsize_t dims_hslab[], hsize_t *hslab_nbytes_p)
 {
     int          k;
     H5D_layout_t dset_layout;

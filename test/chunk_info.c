@@ -169,8 +169,8 @@ reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size)
  *-------------------------------------------------------------------------
  */
 static int
-verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size, const hsize_t *exp_offset,
-                      unsigned exp_flt_msk)
+verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
+                      const hsize_t *exp_offset, unsigned exp_flt_msk)
 {
     unsigned read_flt_msk  = 0;      /* Read filter mask */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */

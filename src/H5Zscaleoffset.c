@@ -1608,8 +1608,8 @@ H5Z__scaleoffset_next_byte(size_t *j, unsigned *buf_len)
 
 static void
 H5Z__scaleoffset_decompress_one_byte(unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
-                                     const unsigned char *buffer, size_t *j, unsigned *buf_len, parms_atomic p,
-                                     unsigned dtype_len)
+                                     const unsigned char *buffer, size_t *j, unsigned *buf_len,
+                                     parms_atomic p, unsigned dtype_len)
 {
     unsigned      dat_len; /* dat_len is the number of bits to be copied in each data byte */
     unsigned char val;     /* value to be copied in each data byte */
@@ -1694,9 +1694,9 @@ H5Z__scaleoffset_decompress(unsigned char *data, unsigned d_nelmts, unsigned cha
 }
 
 static void
-H5Z__scaleoffset_compress_one_byte(const unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
-                                   unsigned char *buffer, size_t *j, unsigned *buf_len, parms_atomic p,
-                                   unsigned dtype_len)
+H5Z__scaleoffset_compress_one_byte(const unsigned char *data, size_t data_offset, unsigned k,
+                                   unsigned begin_i, unsigned char *buffer, size_t *j, unsigned *buf_len,
+                                   parms_atomic p, unsigned dtype_len)
 {
     unsigned      dat_len; /* dat_len is the number of bits to be copied in each data byte */
     unsigned char val;     /* value to be copied in each data byte */
