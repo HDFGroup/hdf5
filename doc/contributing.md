@@ -15,9 +15,6 @@ found in the COPYING file in the top source directory of every branch.***
 
 * [Workflow](#workflow)
 * [Acceptance criteria for pull request](#criteria)
-* [Building and testing your contribution](#testing)
-	*[Testing with Autotools](#autotools)
-	*[Testing with CMake](#cmake)
 * [Check List](#checklist)
 
 # Workflow <A NAME="workflow"></A>
@@ -32,11 +29,11 @@ The process for contributing code to HDF5 is as follows:
 * Make the desired changes to the HDF5 software.
 	* New features should always go to develop branch first and later should be merged to the appropriate maintenance branches.
 	* Bug fixes should go to all appropriate branches (develop and maintenance). 
-* Build and test your changes. See the section on building and testing below. Detailed instructions can be found in the `INSTALL*` files in the `release_docs` directory.
+* Build and test your changes. Detailed instructions on how to build and test HDF5 can be found in the `INSTALL*` files in the `release_docs` directory.
 * Push your changes to GitHub.
 * Issues a pull request and address any code formatting and testing issues reported.
 
-Once a pull request is correctly formatted and passes tests, it will be reviewed and evaluated by The HDF Group developers and HDF5 community members who has approval power.
+Once a pull request is correctly formatted and passes GitHub tests, it will be reviewed and evaluated by The HDF Group developers and HDF5 community members who has approval power.
 The HDF Group developers will work with you to assure that the pull request satisfies acceptance criteria described in the next section. 
 
 # Acceptance criteria for pull request <A NAME="criteria"></A>
@@ -48,51 +45,39 @@ If the pull request does not have a clear purpose and benifits it will not be ac
 
 * **The pull request is documented** - The HDF5 developers must understand not only *what* a change is doing, but *how* it is doing it.  Documenting the code makes it easier for us to understand your patch and will help to maintaine the code in the future. 
 
-* **The pull request passes HDF5 regression testing** - Any issue fixed or functionality added should be accompanied by the corresponding tests and pass HDF5 regression testing run by The HDF Group. We do not expect you to perform comprehensive testing across a multitude of platforms before we accept the pull request. If the pull request does not pass regression testsi after the merge, The HDF Group developers will work with you on the fixes. 
-See "Building and testing your contribution" below for information on how to test your code before creating a pull request. GitHub actions will also run tests and report any issues found.
+* **The pull request passes HDF5 regression testing** - Any issue fixed or functionality added should be accompanied by the corresponding tests and pass HDF5 regression testing run by The HDF Group. We do not expect you to perform comprehensive testing across a multiple platforms before we accept the pull request. If the pull request does not pass regression testing after the merge, The HDF Group developers will work with you on the fixes. 
 
-* **The pul request does not compromise the principles behind HDF5** - HDF5 has a 100% commitment to backwards compatibility.  
+* **The pull request does not compromise the principles behind HDF5** - HDF5 has a 100% commitment to backward compatibility.  
 	* Any file ever created with HDF5 must be readable by any future version of HDF5.
-  The HDF5 data model and file format are **well** defined.  If the purpose of your patch  is to modify the data model or file format,
+   If the purpose of your patch  is to modify HDF5 data model or file format,
  **please** discuss this with us first. File format changes and features required those changes can be introduced only in a new major release. 
 	* HDF5 has a commitment to remaining *machine-independent*; data created on one platform/environment/architecture **must** remain readable by HDF5 on another. 
 	* For binary compatibilty no changes are allowed to public APIs and data structures in the maintenance releases; new APIs can be added.
 
 * **New features are documented** - Any new features should be have proper documentation; talk to us if you have any questions.
 
-# Building and testing your contribution <A NAME="testing"></A>
-
-There are several ways to test your changes before creating a pull request:
-
-## Testing with Autotools <A NAME="autotools"></A>
-
-Here is a list of commands (assuming you are building in place)
-* `./autogen.sh`	- run the script in the top source directory to created `configure` 
-* `./configure`		- run configure using appropriate flags; to see the flags run `./configure --help`.
-* `make`		- build HDF5 libraries and tests
-* `make check`		- run tests
-* `make install`	- install
-* `make check-install`	- check installation
-
-## Testing with CMake <A NAME="cmake"></A>
-.... (under construction)....
-
 
 # Checklist <A NAME="checklist"></A>
 
 Please make sure that you check the items applicable to your pull request:
 
-* Documentation
-  * [ ] Document change in release_docs/RELEASE.txt file
-  * [ ] Update MANIFEST file (if adding new files to the source)
-  * [ ] Document new function in the corresponding public header file using Doxygen
-  * [ ] Document new functionality for the HDF5 community (the level of documentation depends on the feature; ask us what would be appropriate)
 * Code 
-  * [ ] Does the pull request follow HDF5 best practices (naming convensions, code portability, code structure)? <<TODO: link to the document>>
-  * [ ] Does the pull request have necessary tests?
-  * [ ] Is the new code documented well enough for future maintenance?
-  * [ ] If new feature is added, does it affect HDF5 library perfromance?
+  * [ ] Does the pull request have a coresponding GitHub issue and clear purpose?
+  * [ ] Does the pull request follow HDF5 best practices (naming convensions, code portability, code structure, etc.)? <<TODO: link to the document>>
   * [ ] If changes were done to autotools build were they added to CMake and vice versa??
+  * [ ] Is the pull request applicable to any other branches? If yes, which ones? Please document it in the GitHub issue.
+  * [ ] Is the new code sufficiently documented for future maintenance?
+* Documentation
+  * [ ] Was the change described in the release_docs/RELEASE.txt file?
+  * [ ] Was MANIFEST updated if new files had been added to the source?
+  * [ ] Was new function documented in the corresponding public header file using Doxygen? <<TODO: link tp Doxygen instructions>>
+  * [ ] Was new functionality documented for the HDF5 community (the level of documentation depends on the feature; ask us what would be appropriate)
+* Testing
+  * [ ] Does the pull request have tests?
+  * [ ] If a new feature is added, does it affect HDF5 library perfromance?
+  * [ ] Does new feature introduce backward or forward incompatibility? <<TODO: link to the document>>
 
-We want as many contributions as we can get, and are here to help!  Feel free to reach out to us if you have any questions!
+We want as many contributions as we can get, and we are here to help. Feel free to reach out to us if you have any questions
+
+Thank you for your contribution!
 
