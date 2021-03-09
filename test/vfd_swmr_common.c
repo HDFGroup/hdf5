@@ -52,7 +52,12 @@ below_speed_limit(struct timespec *last, const struct timespec *ival)
     HDassert(0 <= last->tv_nsec && last->tv_nsec < 1000000000L);
     HDassert(0 <= ival->tv_nsec && ival->tv_nsec < 1000000000L);
 
+    /* NOTE: timespec_get() is C11. This may need further tweaks. */
+#ifdef H5_HAVE_WIN32_API
+    if (timespec_get(&now, TIME_UTC) != TIME_UTC) {
+#else
     if (HDclock_gettime(CLOCK_MONOTONIC, &now) == -1) {
+#endif
         HDfprintf(stderr, "%s: clock_gettime", __func__);
         HDexit(EXIT_FAILURE);
     }
