@@ -323,7 +323,7 @@ h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, h
  */
 char *
 h5tools_str_region_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, hsize_t elmtno,
-                          hsize_t *ptdata, h5tools_context_t *ctx)
+                          const hsize_t *ptdata, h5tools_context_t *ctx)
 {
     size_t i = 0;
 

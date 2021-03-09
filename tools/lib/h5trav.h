@@ -187,6 +187,7 @@ H5TOOLS_DLL void trav_table_init(hid_t fid, trav_table_t **table);
 
 H5TOOLS_DLL void trav_table_free(trav_table_t *table);
 
-H5TOOLS_DLL void trav_table_addflags(unsigned *flags, char *objname, h5trav_type_t type, trav_table_t *table);
+H5TOOLS_DLL void trav_table_addflags(const unsigned *flags, char *objname, h5trav_type_t type,
+                                     trav_table_t *table);
 
 #endif /* H5TRAV_H */
