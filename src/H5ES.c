@@ -529,6 +529,7 @@ H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[])
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "z*#", num_err_info, err_info);
 
     /* Check arguments */
     if (0 == num_err_info)
