@@ -49,7 +49,6 @@ public class TestH5A {
     long type_id = HDF5Constants.H5I_INVALID_HID;
     long space_id = HDF5Constants.H5I_INVALID_HID;
     long lapl_id = HDF5Constants.H5I_INVALID_HID;
-    long aapl_id = HDF5Constants.H5I_INVALID_HID;
 
     private final void _deleteFile(String filename) {
         File file = new File(filename);
@@ -202,7 +201,7 @@ public class TestH5A {
             // Opening the existing attribute, obj_name(Created by H5ACreate2)
             // by index, attached to an object identifier.
             attribute_id = H5.H5Aopen_by_idx(H5did, ".", HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC,
-                    0, aapl_id, lapl_id);
+                    0, HDF5Constants.H5P_DEFAULT, lapl_id);
 
             assertTrue("testH5Aopen_by_idx: H5Aopen_by_idx", attribute_id >= 0);
 
@@ -212,7 +211,7 @@ public class TestH5A {
             try {
                 n = 5;
                 H5.H5Aopen_by_idx(loc_id, obj_name, idx_type, order, n,
-                        aapl_id, lapl_id);
+                        HDF5Constants.H5P_DEFAULT, lapl_id);
                 fail("Negative Test Failed:- Error not Thrown when n is invalid.");
             }
             catch (AssertionError err) {
@@ -227,7 +226,7 @@ public class TestH5A {
                 n = 0;
                 obj_name = "file";
                 H5.H5Aopen_by_idx(loc_id, obj_name, idx_type, order, n,
-                        aapl_id, lapl_id);
+                        HDF5Constants.H5P_DEFAULT, lapl_id);
                 fail("Negative Test Failed:- Error not Thrown when attribute name is invalid.");
             }
             catch (AssertionError err) {
@@ -257,7 +256,7 @@ public class TestH5A {
         try {
             attribute_id = H5.H5Acreate_by_name(H5fid, obj_name, attr_name,
                     type_id, space_id, HDF5Constants.H5P_DEFAULT,
-                    aapl_id, lapl_id);
+                    HDF5Constants.H5P_DEFAULT, lapl_id);
             assertTrue("testH5Acreate_by_name: H5Acreate_by_name",
                     attribute_id >= 0);
 
@@ -288,7 +287,7 @@ public class TestH5A {
         boolean bool_val = false;
 
         try {
-            attr_id = H5.H5Acreate(loc_id, old_attr_name, type_id, space_id, HDF5Constants.H5P_DEFAULT, aapl_id);
+            attr_id = H5.H5Acreate(loc_id, old_attr_name, type_id, space_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
             ret_val = H5.H5Arename(loc_id, old_attr_name, new_attr_name);
 
@@ -327,7 +326,7 @@ public class TestH5A {
 
         try {
             attr_id = H5.H5Acreate_by_name(loc_id, obj_name, old_attr_name,
-                    type_id, space_id, HDF5Constants.H5P_DEFAULT, aapl_id, lapl_id);
+                    type_id, space_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
 
             ret_val = H5.H5Arename_by_name(loc_id, obj_name, old_attr_name,
                     new_attr_name, lapl_id);
@@ -368,7 +367,7 @@ public class TestH5A {
         try {
             attribute_id = H5.H5Acreate_by_name(H5fid, obj_name, attr_name,
                     type_id, space_id, HDF5Constants.H5P_DEFAULT,
-                    aapl_id, lapl_id);
+                    HDF5Constants.H5P_DEFAULT, lapl_id);
             assertTrue("testH5Aget_name: H5Acreate_by_name ", attribute_id > 0);
             ret_name = H5.H5Aget_name(attribute_id);
             assertEquals(ret_name, attr_name);
