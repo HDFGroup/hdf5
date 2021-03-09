@@ -1434,7 +1434,7 @@ test_compound_8(void)
         int  b;
     } s1;
 
-    typedef struct s2 {
+    struct s2 {
         char c;
         s1   d;
     } s2;

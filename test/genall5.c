@@ -103,8 +103,6 @@ ns_grp_0(hid_t fid, const char *group_name)
         HDassert(ret >= 0);
     }
 
-    return;
-
 } /* ns_grp_0 */
 
 /*-------------------------------------------------------------------------
@@ -222,7 +220,6 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* vrfy_ns_grp_0() */
 
 /*-------------------------------------------------------------------------
@@ -362,8 +359,6 @@ ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
         }
         HDassert(ret >= 0);
     }
-
-    return;
 
 } /* ns_grp_c() */
 
@@ -640,7 +635,6 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* vrfy_ns_grp_c() */
 
 /*-------------------------------------------------------------------------
@@ -776,7 +770,6 @@ ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* ns_grp_d() */
 
 /*-------------------------------------------------------------------------
@@ -1050,8 +1043,6 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
         HDassert(ret >= 0);
     }
 
-    return;
-
 } /* vrfy_ns_grp_d() */
 
 /*-------------------------------------------------------------------------
@@ -1140,7 +1131,6 @@ os_grp_0(hid_t fid, const char *group_name)
         }
     }
 
-    return;
 } /* os_grp_0() */
 
 /*-------------------------------------------------------------------------
@@ -1257,7 +1247,6 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* vrfy_os_grp_0() */
 
 /*-------------------------------------------------------------------------
@@ -1377,7 +1366,6 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         }
     }
 
-    return;
 } /* os_grp_n() */
 
 /*-------------------------------------------------------------------------
@@ -1603,7 +1591,6 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* vrfy_os_grp_n() */
 
 /*-------------------------------------------------------------------------
@@ -1700,7 +1687,6 @@ ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* ds_ctg_i */
 
 /*-------------------------------------------------------------------------
@@ -1919,8 +1905,6 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
         HDassert(ret >= 0);
     }
 
-    return;
-
 } /* vrfy_ds_ctg_i() */
 
 /*-------------------------------------------------------------------------
@@ -2047,7 +2031,6 @@ ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* ds_chk_i */
 
 /*-------------------------------------------------------------------------
@@ -2281,7 +2264,6 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* vrfy_ds_chk_i() */
 
 /*-------------------------------------------------------------------------
@@ -2408,8 +2390,6 @@ ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
         }
         HDassert(ret >= 0);
     }
-
-    return;
 
 } /* ds_cpt_i() */
 
@@ -2624,7 +2604,6 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* vrfy_ds_cpt_i() */
 
 /*-------------------------------------------------------------------------
@@ -2773,7 +2752,6 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* ds_ctg_v() */
 
 /*-------------------------------------------------------------------------
@@ -3038,7 +3016,6 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
         HDassert(ret >= 0);
     }
 
-    return;
 } /* vrfy_ds_ctg_v() */
 
 /*-------------------------------------------------------------------------
@@ -3266,7 +3243,6 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
         vrfy_ds_ctg_v(fid, full_path, TRUE);
     }
 
-    return;
 } /* create_zoo() */
 
 /*-------------------------------------------------------------------------
@@ -3414,5 +3390,4 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
         vrfy_ds_ctg_v(fid, full_path, TRUE);
     }
 
-    return;
 } /* validate_zoo() */

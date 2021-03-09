@@ -517,7 +517,6 @@ test_misc2_write_attribute(void)
 
     HDfree(string_att1);
     HDfree(string_att2);
-    return;
 }
 
 static void
@@ -563,8 +562,6 @@ test_misc2_read_attribute(const char *filename, const char *att_name)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 /****************************************************************
 **
