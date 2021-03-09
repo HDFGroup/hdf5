@@ -54,7 +54,7 @@ If the pull request does not have a clear purpose and benifits it will not be ac
 	* HDF5 has a commitment to remaining *machine-independent*; data created on one platform/environment/architecture **must** remain readable by HDF5 on another. 
 	* For binary compatibilty no changes are allowed to public APIs and data structures in the maintenance releases; new APIs can be added.
 
-* **New features are documented** - Any new features should be have proper documentation; talk to us if you have any questions.
+* **New features are documented** - Any new features should have proper documentation; talk to us if you have any questions.
 
 
 # Checklist <A NAME="checklist"></A>
