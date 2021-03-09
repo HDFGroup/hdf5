@@ -19,6 +19,7 @@
  */
 
 #include "hdf5.h"
+#include "hdf5dev.h"
 #include <string.h>
 
 #define SOURCE_FILE "extlink_source.h5"
