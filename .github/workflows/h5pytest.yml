@@ -25,7 +25,7 @@ jobs:
         repository: spack/spack
         path: ./spack
 
-    - name: Install dependencies
+   #- name: Install dependencies
       #run: sudo apt-get install ninja-build automake autoconf libtool libtool-bin bison flex
 
     - name: Run a multi-line script
