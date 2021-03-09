@@ -72,7 +72,7 @@ files_have_same_contents(const char *name1, const char *name2)
             break;
         }
 
-        if (HDmemcmp(buf1, buf2, (size_t)n1))
+        if (HDmemcmp(buf1, buf2, (size_t)n1) != 0)
             break;
 
     } /* end while */

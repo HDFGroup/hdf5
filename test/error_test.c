@@ -200,7 +200,7 @@ init_error(void)
 
     if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size) + 1)
         TEST_ERROR;
-    if (HDstrcmp(ERR_CLS_NAME, cls_name))
+    if (HDstrcmp(ERR_CLS_NAME, cls_name) != 0)
         TEST_ERROR;
 
     if ((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR, ERR_MAJ_TEST_MSG)) < 0)
@@ -225,7 +225,7 @@ init_error(void)
         TEST_ERROR;
     if (msg_type != H5E_MINOR)
         TEST_ERROR;
-    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG))
+    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG) != 0)
         TEST_ERROR;
 
     /* Register another class for later testing. */
