@@ -3072,7 +3072,6 @@ test_shadow_index_lookup(void)
     unsigned nerrors = 0;
     H5FD_vfd_swmr_idx_entry_t *idx;
     uint32_t size[] = {0, 1, 2, 3, 4, 0};
-    char vector[8];
     unsigned seed = 1;
     unsigned i, j, failj = UINT_MAX;
     hbool_t have_failj = FALSE;
