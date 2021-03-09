@@ -139,23 +139,21 @@ swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
     , .writer = true
     , .md_pages_reserved = 128
     };
-    const char *bname, *dname;
-    char *tname[2];
+    char *bname = NULL;
+    char *dname = NULL;
 
-    if ((tname[0] = strdup(filename)) == NULL) {
-        HDfprintf(stderr, "temporary string allocation failed\n");
+    if (H5_dirname(filename, &dname) < 0) {
+        HDfprintf(stderr, "H5_dirname() failed\n");
         return -1;
     }
-    if ((tname[1] = strdup(filename)) == NULL) {
-        HDfprintf(stderr, "temporary string allocation failed\n");
+    if (H5_basename(filename, &bname) < 0) {
+        HDfprintf(stderr, "H5_basename() failed\n");
         return -1;
     }
-    dname = HDdirname(tname[0]);
-    bname = HDbasename(tname[1]);
-    snprintf(config.md_file_path, sizeof(config.md_file_path),
+    HDsnprintf(config.md_file_path, sizeof(config.md_file_path),
         "%s/%s.shadow", dname, bname);
-    free(tname[0]);
-    free(tname[1]);
+    HDfree(dname);
+    HDfree(bname);
 
     /* Enable VFD SWMR configuration */
     if(H5Pset_vfd_swmr_config(fapl, &config) < 0) {

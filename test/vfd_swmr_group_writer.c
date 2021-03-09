@@ -12,6 +12,7 @@
  */
 
 #include <err.h>
+#include <libgen.h>
 
 #define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 
@@ -84,7 +85,7 @@ state_init(state_t *s, int argc, char **argv)
 
     *s = ALL_HID_INITIALIZER;
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
-    esnprintf(s->progname, sizeof(s->progname), "%s", HDbasename(tfile));
+    esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
 
     while ((ch = getopt(argc, argv, "SWa:bn:qu:")) != -1) {
         switch (ch) {

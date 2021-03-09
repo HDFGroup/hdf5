@@ -67,6 +67,7 @@
  */
 
 #include <err.h>
+#include <libgen.h>
 
 #define H5C_FRIEND              /*suppress error about including H5Cpkg   */
 #define H5F_FRIEND              /*suppress error about including H5Fpkg   */
@@ -270,7 +271,7 @@ state_init(state_t *s, int argc, char **argv)
 
     *s = state_initializer();
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
-    esnprintf(s->progname, sizeof(s->progname), "%s", HDbasename(tfile));
+    esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
 
     while ((ch = getopt(argc, argv, "FMSVWa:bc:d:n:qr:s:u:")) != -1) {
         switch (ch) {
