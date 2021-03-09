@@ -2697,7 +2697,6 @@ h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order
 
     unsigned char *sm_buf = NULL;         /* buffer for raw data */
     hsize_t        sm_size[H5S_MAX_RANK]; /* stripmine size */
-    hsize_t        hs_nelmts;             /* elements in request */
 
     int            ret_value = 0;
 
@@ -2768,8 +2767,6 @@ h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order
             alloc_size = p_nelmts * H5Tget_size(p_type);
             if (NULL == (sm_buf = (unsigned char *)HDmalloc((size_t)alloc_size)))
                 H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_mem: failed to allocate sm_buf");
-
-            hs_nelmts = 1;
 
             /* Read the data */
             if (H5Aread(attr_id, p_type, sm_buf) < 0)
