@@ -56,12 +56,12 @@ typedef struct eot_queue_entry {
     TAILQ_ENTRY(eot_queue_entry) link;
 } eot_queue_entry_t;
 
-extern unsigned int vfd_swmr_api_entries_g;
+H5_DLLVAR unsigned int vfd_swmr_api_entries_g;
 
 /* The head of the EOT queue */
 typedef TAILQ_HEAD(eot_queue, eot_queue_entry) eot_queue_t;
 
-extern eot_queue_t eot_queue_g;
+H5_DLLVAR eot_queue_t eot_queue_g;
 
 /***************************************/
 /* Library-private Function Prototypes */

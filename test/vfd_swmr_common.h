@@ -95,6 +95,6 @@ H5TEST_DLL int fetch_env_ulong(const char *, unsigned long, unsigned long *);
 }
 #endif
 
-extern int verbosity;
+H5TEST_DLLVAR int verbosity;
 
 #endif /* SWMR_COMMON_H */
