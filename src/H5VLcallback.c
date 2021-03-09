@@ -1873,9 +1873,10 @@ H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_li
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
+        /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVsii", app_file, app_func, app_line, attr_id, opt_type,
-                                     dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVsii", app_file, app_func, app_line, attr_id, opt_type, dxpl_id, es_id)) < 0)
+            /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -2882,9 +2883,10 @@ H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
+        /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVtii", app_file, app_func, app_line, dset_id, opt_type,
-                                     dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVtii", app_file, app_func, app_line, dset_id, opt_type, dxpl_id, es_id)) < 0)
+            /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -3760,9 +3762,10 @@ H5VLdatatype_optional_op(const char *app_file, const char *app_func, unsigned ap
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
+        /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVuii", app_file, app_func, app_line, type_id, opt_type,
-                                     dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVuii", app_file, app_func, app_line, type_id, opt_type, dxpl_id, es_id)) < 0)
+            /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -4741,9 +4744,10 @@ H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_li
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
+        /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVvii", app_file, app_func, app_line, file_id, opt_type,
-                                     dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVvii", app_file, app_func, app_line, file_id, opt_type, dxpl_id, es_id)) < 0)
+            /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -5554,9 +5558,10 @@ H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_l
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
+        /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVwii", app_file, app_func, app_line, group_id, opt_type,
-                                     dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIuiVwii", app_file, app_func, app_line, group_id, opt_type, dxpl_id, es_id)) < 0)
+            /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -7527,7 +7532,6 @@ done:
 herr_t
 H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5VL_request_status_t *status)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -7535,20 +7539,11 @@ H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5VL_request_s
     /* Sanity checks */
     HDassert(vol_obj);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_wait(vol_obj->data, vol_obj->connector->cls, timeout, status) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request wait failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_wait() */
 
@@ -7631,7 +7626,6 @@ done:
 herr_t
 H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void *ctx)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -7639,20 +7633,11 @@ H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void
     /* Sanity check */
     HDassert(vol_obj);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_notify(vol_obj->data, vol_obj->connector->cls, cb, ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "request notify failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_notify() */
 
@@ -7734,7 +7719,6 @@ done:
 herr_t
 H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -7742,20 +7726,11 @@ H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status)
     /* Sanity check */
     HDassert(vol_obj);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_cancel(vol_obj->data, vol_obj->connector->cls, status) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request cancel failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_cancel() */
 
@@ -7840,18 +7815,12 @@ H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t spec
 {
     va_list arguments;                 /* Argument list passed from the API call */
     hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(vol_obj);
-
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, specific_type);
@@ -7865,10 +7834,6 @@ done:
     /* End access to the va_list, if we started it */
     if (arg_started)
         HDva_end(arguments);
-
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_specific() */
@@ -7997,18 +7962,12 @@ H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_request_optional_t opt_
 {
     va_list arguments;                 /* Argument list passed from the API call */
     hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(vol_obj);
-
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, opt_type);
@@ -8021,10 +7980,6 @@ done:
     /* End access to the va_list, if we started it */
     if (arg_started)
         HDva_end(arguments);
-
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_optional() */
@@ -8149,7 +8104,6 @@ done:
 herr_t
 H5VL_request_free(const H5VL_object_t *vol_obj)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -8157,20 +8111,11 @@ H5VL_request_free(const H5VL_object_t *vol_obj)
     /* Sanity check */
     HDassert(vol_obj);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding VOL callback */
     if (H5VL__request_free(vol_obj->data, vol_obj->connector->cls) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request free failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_free() */
 
@@ -8254,7 +8199,6 @@ done:
 herr_t
 H5VL_blob_put(const H5VL_object_t *vol_obj, const void *buf, size_t size, void *blob_id, void *ctx)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -8264,19 +8208,11 @@ H5VL_blob_put(const H5VL_object_t *vol_obj, const void *buf, size_t size, void *
     HDassert(size == 0 || buf);
     HDassert(blob_id);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding VOL callback */
     if (H5VL__blob_put(vol_obj->data, vol_obj->connector->cls, buf, size, blob_id, ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "blob put failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_blob_put() */
 
@@ -8358,7 +8294,6 @@ done:
 herr_t
 H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf, size_t size, void *ctx)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -8368,19 +8303,11 @@ H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf, size
     HDassert(blob_id);
     HDassert(buf);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding VOL callback */
     if (H5VL__blob_get(vol_obj->data, vol_obj->connector->cls, blob_id, buf, size, ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "blob get failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_blob_get() */
 
@@ -8468,7 +8395,6 @@ H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specif
 {
     va_list arguments;                 /* Argument list passed from the API call */
     hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -8476,11 +8402,6 @@ H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specif
     /* Sanity check */
     HDassert(vol_obj);
     HDassert(blob_id);
-
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, specific_type);
@@ -8493,10 +8414,6 @@ done:
     /* End access to the va_list, if we started it */
     if (arg_started)
         HDva_end(arguments);
-
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_blob_specific() */
@@ -8629,7 +8546,6 @@ H5VL_blob_optional(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_option
 {
     va_list arguments;                 /* Argument list passed from the API call */
     hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -8637,11 +8553,6 @@ H5VL_blob_optional(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_option
     /* Sanity check */
     HDassert(vol_obj);
     HDassert(blob_id);
-
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, opt_type);
@@ -8654,10 +8565,6 @@ done:
     /* End access to the va_list, if we started it */
     if (arg_started)
         HDva_end(arguments);
-
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_blob_optional() */
@@ -8804,7 +8711,6 @@ herr_t
 H5VL_token_cmp(const H5VL_object_t *vol_obj, const H5O_token_t *token1, const H5O_token_t *token2,
                int *cmp_value)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -8813,20 +8719,11 @@ H5VL_token_cmp(const H5VL_object_t *vol_obj, const H5O_token_t *token1, const H5
     HDassert(vol_obj);
     HDassert(cmp_value);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
     if ((ret_value = H5VL__token_cmp(vol_obj->data, vol_obj->connector->cls, token1, token2, cmp_value)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "token compare failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_token_cmp() */
 
@@ -8923,7 +8820,6 @@ herr_t
 H5VL_token_to_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const H5O_token_t *token,
                   char **token_str)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -8933,21 +8829,12 @@ H5VL_token_to_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const H5O_t
     HDassert(token);
     HDassert(token_str);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
     if ((ret_value = H5VL__token_to_str(vol_obj->data, obj_type, vol_obj->connector->cls, token, token_str)) <
         0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "token serialization failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_token_to_str() */
 
@@ -9041,7 +8928,6 @@ herr_t
 H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const char *token_str,
                     H5O_token_t *token)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -9051,21 +8937,12 @@ H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const cha
     HDassert(token);
     HDassert(token_str);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
     if ((ret_value =
              H5VL__token_from_str(vol_obj->data, obj_type, vol_obj->connector->cls, token_str, token)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "token deserialization failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_token_from_str() */
 
