@@ -3077,7 +3077,6 @@ test_shadow_index_lookup(void)
     unsigned i, j, failj = UINT_MAX;
     hbool_t have_failj = FALSE;
     unsigned long tmpl;
-    char *ostate;
     const char *seedvar = "H5_SHADOW_INDEX_SEED";
     const char *failvar = "H5_SHADOW_INDEX_FAIL";
 
@@ -3109,7 +3108,7 @@ test_shadow_index_lookup(void)
         break;
     }
 
-    ostate = initstate(seed, vector, _arraycount(vector));
+    HDsrandom(seed);
 
     size[5] = (uint32_t)(1024 + HDrandom() % (16 * 1024 * 1024 - 1024));
 
@@ -3148,7 +3147,7 @@ test_shadow_index_lookup(void)
         if (idx != NULL)
             HDfree(idx);
     }
-    (void)setstate(ostate);
+
 out:
     if (nerrors == 0)
         PASSED();
