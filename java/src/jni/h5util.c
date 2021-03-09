@@ -1464,7 +1464,6 @@ h5str_print_region_data_points(JNIEnv *env, hid_t region_space, hid_t region_id,
         if (!h5str_sprintf(ENVONLY, str, region_id, type_id, ((char *)region_buf + jndx * type_size), 1))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-
         if (jndx + 1 < (size_t)npoints)
             if (!h5str_append(str, ", "))
                 H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
@@ -2873,7 +2872,6 @@ h5str_dump_simple_data(JNIEnv *env, FILE *stream, hid_t container, hid_t type, v
 
         if (HDfprintf(stream, "%s", buffer.s) < 0)
             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
-
 
         h5str_free(&buffer);
     } /* end for (i = 0; i < nelmts... */

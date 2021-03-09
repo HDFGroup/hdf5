@@ -51,7 +51,7 @@ public class TestH5 {
     private static final String EXPORT_FILE = "testExport.txt";
     private static final String H5_DREG_FILE = "trefer_reg.h5";
     private static final String EXPORT_DREG_FILE = "testExportReg.txt";
-    private static final String H5_AREG_FILE = "trefer_attr.h5";
+    private static final String H5_AREG_FILE = "tattrreg.h5";
     private static final String EXPORT_AREG_FILE = "testExportAReg.txt";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
@@ -493,7 +493,7 @@ public class TestH5 {
             fail("read file failed: " + err);
         }
         for(int row = 0; row < DIM_X; row++)
-            assertTrue("H5export_dataset: <"+row+">"+dset_indata[row], dset_indata[row]==dset_data_expect[row]);
+            assertTrue("testH5export_regdataset: <"+row+">"+dset_indata[row], dset_indata[row]==dset_data_expect[row]);
     }
 
     @Test
@@ -513,7 +513,7 @@ public class TestH5 {
         }
         catch (HDF5LibraryException err) {
             err.printStackTrace();
-            fail("H5export_dataset failed: " + err);
+            fail("H5export_attribute failed: " + err);
         }
 
         File file = new File(EXPORT_AREG_FILE);
@@ -536,6 +536,6 @@ public class TestH5 {
             fail("read file failed: " + err);
         }
         for(int row = 0; row < DIM_X; row++)
-            assertTrue("H5export_dataset: <"+row+">"+dset_indata[row], dset_indata[row]==dset_data_expect[row]);
+            assertTrue("testH5export_attrdataset: <"+row+">"+dset_indata[row], dset_indata[row]==dset_data_expect[row]);
     }
 }
