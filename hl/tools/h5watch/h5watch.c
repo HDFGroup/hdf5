@@ -43,7 +43,7 @@ static unsigned g_retry = DEFAULT_RETRY;  /* # of times to try opening the file 
 static hbool_t  g_display_hex    = FALSE; /* display data in hexadecimal format : LATER */
 static hbool_t  g_user_interrupt = FALSE; /* Flag to indicate that user interrupted execution */
 
-static herr_t doprint(hid_t did, hsize_t *start, hsize_t *block, int rank);
+static herr_t doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank);
 static herr_t slicendump(hid_t did, hsize_t *prev_dims, hsize_t *cur_dims, hsize_t *start, hsize_t *block,
                          int rank, int subrank);
 static herr_t monitor_dataset(hid_t fid, char *dsetname);
@@ -95,7 +95,7 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},         {"hel", no
  *-------------------------------------------------------------------------
  */
 static herr_t
-doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
+doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
 {
     h5tools_context_t ctx;                           /* print context  */
     h5tool_format_t   info;                          /* Format info for the tools library */

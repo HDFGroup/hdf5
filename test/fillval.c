@@ -1580,7 +1580,7 @@ test_extend_release_cmpd_vl(void *_elmt)
  *-------------------------------------------------------------------------
  */
 static int
-test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, hsize_t *ch_size, hsize_t *start_size,
+test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t *ch_size, hsize_t *start_size,
                   hsize_t *max_size, hid_t dtype, void *fillval)
 {
     hid_t       fspace = -1, mspace = -1; /* File & memory dataspaces */
