@@ -1455,7 +1455,7 @@ H5_nanosleep(uint64_t nanosec)
 
     FUNC_LEAVE_NOAPI_VOID
 #else
-    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1000.0);
+    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1.0e6);
     DWORD ignore;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
