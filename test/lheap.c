@@ -155,7 +155,7 @@ main(void)
             goto error;
         }
 
-        if (HDstrcmp(s, buf)) {
+        if (HDstrcmp(s, buf) != 0) {
             H5_FAILED();
             HDprintf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
             HDprintf("    got: \"%s\"\n", s);

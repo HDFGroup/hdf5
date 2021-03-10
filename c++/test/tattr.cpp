@@ -771,7 +771,7 @@ test_attr_compound_read()
         hsize_t ii, jj;
         for (ii = 0; ii < ATTR4_DIM1; ii++)
             for (jj = 0; jj < ATTR4_DIM2; jj++)
-                if (HDmemcmp(&attr_data4[ii][jj], &read_data4[ii][jj], sizeof(struct attr4_struct))) {
+                if (HDmemcmp(&attr_data4[ii][jj], &read_data4[ii][jj], sizeof(struct attr4_struct)) != 0) {
                     TestErrPrintf("%d:attribute data different: attr_data4[%llu][%llu].i=%d, "
                                   "read_data4[%llu][%llu].i=%d\n",
                                   __LINE__, ii, jj, attr_data4[ii][jj].i, ii, jj, read_data4[ii][jj].i);
