@@ -14,6 +14,5 @@ jobs:
         source: '.'
         extensions: 'c,h,cpp,hpp'
         clangFormatVersion: 10
-        inplace: True
         style: file
         exclude: './config ./hl/src/H5LTanalyze.c ./hl/src/H5LTparse.c ./hl/src/H5LTparse.h ./src/H5Epubgen.h ./src/H5Einit.h ./src/H5Eterm.h ./src/H5Edefin.h ./src/H5version.h ./src/H5overflow.h'
