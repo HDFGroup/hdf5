@@ -46,7 +46,7 @@ public class TestH5F {
             HDF5Constants.H5F_OBJ_DATASET, HDF5Constants.H5F_OBJ_GROUP,
             HDF5Constants.H5F_OBJ_DATATYPE, HDF5Constants.H5F_OBJ_ATTR,
             HDF5Constants.H5F_OBJ_ALL };
-    long H5fid = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
 
     private final void _deleteFile(String filename) {
         File file = new File(filename);
@@ -71,7 +71,7 @@ public class TestH5F {
     public void deleteH5file() throws HDF5LibraryException {
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
+            H5fid = HDF5Constants.H5I_INVALID_HID;
         }
         _deleteFile(H5_FILE);
         System.out.println();
@@ -79,7 +79,7 @@ public class TestH5F {
 
     @Test
     public void testH5Fget_create_plist() {
-        long plist = -1;
+        long plist = HDF5Constants.H5I_INVALID_HID;
 
         try {
             plist = H5.H5Fget_create_plist(H5fid);
@@ -103,7 +103,7 @@ public class TestH5F {
 
     @Test
     public void testH5Fget_access_plist() {
-        long plist = -1;
+        long plist = HDF5Constants.H5I_INVALID_HID;
 
         try {
             plist = H5.H5Fget_access_plist(H5fid);
@@ -131,7 +131,7 @@ public class TestH5F {
 
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
+            H5fid = HDF5Constants.H5I_INVALID_HID;
         }
 
         try {
@@ -156,7 +156,7 @@ public class TestH5F {
 
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
+            H5fid = HDF5Constants.H5I_INVALID_HID;
         }
 
         try {

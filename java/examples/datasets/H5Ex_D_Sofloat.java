@@ -95,10 +95,10 @@ public class H5Ex_D_Sofloat {
     }
 
     private static void writeData() {
-        long file_id = -1;
-        long filespace_id = -1;
-        long dataset_id = -1;
-        long dcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long filespace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM_X, DIM_Y };
         long[] chunk_dims = { CHUNK_X, CHUNK_Y };
         double[][] dset_data = new double[DIM_X][DIM_Y];
@@ -212,9 +212,9 @@ public class H5Ex_D_Sofloat {
     }
 
     private static void readData() {
-        long file_id = -1;
-        long dataset_id = -1;
-        long dcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
         double[][] dset_data = new double[DIM_X][DIM_Y];
 
         // Open file using the default properties.

@@ -76,7 +76,6 @@ public class TestH5E {
 
     @Test
     public void testH5Eget_msg_major() {
-
         try {
             H5.H5Fopen("test", 0, 1);
         }

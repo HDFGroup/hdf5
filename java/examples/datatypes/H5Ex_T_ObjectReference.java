@@ -64,11 +64,11 @@ public class H5Ex_T_ObjectReference {
     }
 
     private static void writeObjRef() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long filespace_id = -1;
-        long group_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long filespace_id = HDF5Constants.H5I_INVALID_HID;
+        long group_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         byte[][] dset_data = new byte[DIM0][8];
 
@@ -89,9 +89,9 @@ public class H5Ex_T_ObjectReference {
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 if (dataset_id >= 0)
                     H5.H5Dclose(dataset_id);
-                dataset_id = -1;
+                dataset_id = HDF5Constants.H5I_INVALID_HID;
                 H5.H5Sclose(dataspace_id);
-                dataspace_id = -1;
+                dataspace_id = HDF5Constants.H5I_INVALID_HID;
             }
         }
         catch (Exception e) {
@@ -105,7 +105,7 @@ public class H5Ex_T_ObjectReference {
                         HDF5Constants.H5P_DEFAULT);
             if (group_id >= 0)
                 H5.H5Gclose(group_id);
-            group_id = -1;
+            group_id = HDF5Constants.H5I_INVALID_HID;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -186,11 +186,11 @@ public class H5Ex_T_ObjectReference {
     }
 
     private static void readObjRef() {
-        long file_id = -1;
-        long dataset_id = -1;
-        long dataspace_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
         int object_type = -1;
-        long object_id = -1;
+        long object_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         byte[][] dset_data;
 
