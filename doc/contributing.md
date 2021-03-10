@@ -1,7 +1,7 @@
 # How to contribute to HDF5 (Draft)
 
-The HDF Group encourges community members to contribute to the HDF5 project. We accept and are very grateful for any type of contribuitons 
-from small typos and bug fixes to new features. The HDF Group is committed to work with the code contributors and make contribution process simple and enjoable.
+The HDF Group encourages community members to contribute to the HDF5 project. We accept and are very grateful for any type of contributions 
+from small typos and bug fixes to new features. The HDF Group is committed to work with the code contributors and make contribution process simple and enjoyable.
 
 This document describes guiding principles for the HDF5 code contributors and does not pretend to address any possible 
 contribution. If in doubt, please do not hesitate to ask us for guidance. 
@@ -25,7 +25,7 @@ The process for contributing code to HDF5 is as follows:
 
 > This step is ***required*** unless the change is minor (e.g., typo fix). If reporting an issue, please follow a template found in issue_template.md file if possible.  
 
-* Fork [HDF5](https://github.com/HDFGroup/hdf5) repository.
+* Fork the [HDF5](https://github.com/HDFGroup/hdf5) repository.
 * Make the desired changes to the HDF5 software.
 	* New features should always go to develop branch first and later should be merged to the appropriate maintenance branches.
 	* Bug fixes should go to all appropriate branches (develop and maintenance). 
@@ -33,15 +33,15 @@ The process for contributing code to HDF5 is as follows:
 * Push your changes to GitHub.
 * Issues a pull request and address any code formatting and testing issues reported.
 
-Once a pull request is correctly formatted and passes GitHub tests, it will be reviewed and evaluated by The HDF Group developers and HDF5 community members who has approval power.
+Once a pull request is correctly formatted and passes **ALL** CI tests, it will be reviewed and evaluated by The HDF Group developers and HDF5 community members who can approve pull requests..
 The HDF Group developers will work with you to assure that the pull request satisfies acceptance criteria described in the next section. 
 
 # Acceptance criteria for pull request <A NAME="criteria"></A>
 
-We appreciate every contribution we receive, but we do not accept them all.  Those that we *do* accept satisfy the following criteria:
+We appreciate every contribution we receive, but we may not accept them all.  Those that we *do* accept satisfy the following criteria:
 
-* **Pull request has a clear purpose** - What does the pull request address? How does it benefit the HDF5 community? 
-If the pull request does not have a clear purpose and benifits it will not be accepted. 
+* **The pull request has a clear purpose** - What does the pull request address? How does it benefit the HDF5 community? 
+If the pull request does not have a clear purpose and benefits it will not be accepted. 
 
 * **The pull request is documented** - The HDF5 developers must understand not only *what* a change is doing, but *how* it is doing it.  Documenting the code makes it easier for us to understand your patch and will help to maintaine the code in the future. 
 
@@ -51,8 +51,8 @@ If the pull request does not have a clear purpose and benifits it will not be ac
 	* Any file ever created with HDF5 must be readable by any future version of HDF5.
    If the purpose of your patch  is to modify HDF5 data model or file format,
  **please** discuss this with us first. File format changes and features required those changes can be introduced only in a new major release. 
-	* HDF5 has a commitment to remaining *machine-independent*; data created on one platform/environment/architecture **must** remain readable by HDF5 on another. 
-	* For binary compatibilty no changes are allowed to public APIs and data structures in the maintenance releases; new APIs can be added.
+	* HDF5 has a commitment to remaining *machine-independent*; data created on one platform/environment/architecture **must** remain readable by HDF5 on any other. 
+	* For binary compatibility no changes are allowed to public APIs and data structures in the maintenance releases; new APIs can be added.
 
 * **New features are documented** - Any new features should have proper documentation; talk to us if you have any questions.
 
@@ -70,7 +70,7 @@ Please make sure that you check the items applicable to your pull request:
 * Documentation
   * [ ] Was the change described in the release_docs/RELEASE.txt file?
   * [ ] Was MANIFEST updated if new files had been added to the source?
-  * [ ] Was new function documented in the corresponding public header file using Doxygen? <<TODO: link tp Doxygen instructions>>
+  * [ ] Was new function documented in the corresponding public header file using Doxygen? <<TODO: link to Doxygen instructions>>
   * [ ] Was new functionality documented for the HDF5 community (the level of documentation depends on the feature; ask us what would be appropriate)
 * Testing
   * [ ] Does the pull request have tests?
