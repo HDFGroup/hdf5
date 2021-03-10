@@ -8658,8 +8658,8 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         TEST_ERROR
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                                HDstrcmp(env_h5_drvr, "family"));
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                                HDstrcmp(env_h5_drvr, "family") != 0);
     if (single_file_vfd) {
         /* Make a copy of the file in memory, in order to speed up deletion testing */
 
