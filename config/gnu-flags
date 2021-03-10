@@ -130,6 +130,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
         # Everybody else gets c99 as the standard.
         *)
             H5_CFLAGS="$H5_CFLAGS -std=c99"
+            H5_CFLAGS="$H5_CFLAGS -fvisibility=hidden"
             ;;
     esac
 
