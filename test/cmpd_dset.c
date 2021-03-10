@@ -2233,7 +2233,7 @@ main(int argc, char *argv[])
 
     /* Turn off optimized compound converter? */
     if (argc > 1) {
-        if (argc > 2 || HDstrcmp("--noopt", argv[1])) {
+        if (argc > 2 || HDstrcmp("--noopt", argv[1]) != 0) {
             HDfprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
             HDexit(EXIT_FAILURE);
         }

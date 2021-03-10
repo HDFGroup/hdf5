@@ -19,11 +19,7 @@
    EXTERNAL ROUTINES/VARIABLES:
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -516,7 +512,7 @@ test_h5s_compound_scalar_read()
         dataset.read(&rdata, type);
 
         // Verify read data
-        if (HDmemcmp(&space4_data, &rdata, sizeof(struct space4_struct))) {
+        if (HDmemcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
             cerr << "scalar data different: space4_data.c1=" << space4_data.c1
                  << ", read_data4.c1=" << rdata.c1 << endl;
             cerr << "scalar data different: space4_data.u=" << space4_data.u << ", read_data4.u=" << rdata.u
