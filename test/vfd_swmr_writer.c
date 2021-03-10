@@ -29,11 +29,12 @@
 /* Headers */
 /***********/
 
-#include <unistd.h> /* getopt(3) */
-
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 #include "swmr_common.h"
+
+/* Uses getopt */
+#ifndef H5_HAVE_WIN32_API
 
 /********************/
 /* Local Prototypes */
@@ -427,3 +428,13 @@ main(int argc, char * const *argv)
     return 0;
 }
 
+#else /* H5_HAVE_WIN32_API */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_WIN32_API */

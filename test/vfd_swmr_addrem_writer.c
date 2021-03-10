@@ -32,7 +32,7 @@
 /* Headers */
 /***********/
 
-#include <err.h> /* errx(3) */
+
 
 #include "h5test.h"
 #include "vfd_swmr_common.h"
@@ -45,6 +45,10 @@
 /********************/
 /* Local Prototypes */
 /********************/
+
+#ifndef H5_HAVE_WIN32_API
+
+#include <err.h> /* errx(3) */
 
 static hid_t open_skeleton(const char *filename, unsigned verbose);
 static int addrem_records(hid_t fid, unsigned verbose, unsigned long nops,
@@ -474,3 +478,14 @@ int main(int argc, const char *argv[])
 
     return 0;
 } /* main() */
+
+#else /* H5_HAVE_WIN32_API */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_WIN32_API */

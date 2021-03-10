@@ -28,12 +28,14 @@
 /***********/
 /* Headers */
 /***********/
-#include <err.h>
-#include <signal.h>
 
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 #include "swmr_common.h"
+
+#ifndef H5_HAVE_WIN32_API
+
+#include <err.h>
 
 /****************/
 /* Local Macros */
@@ -461,3 +463,14 @@ int main(int argc, const char *argv[])
 
     return 0;
 } /* main() */
+
+#else /* H5_HAVE_WIN32_API */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_WIN32_API */
