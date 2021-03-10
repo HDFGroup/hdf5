@@ -832,8 +832,6 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 #endif /* H5C_COLLECT_CACHE_STATS */
-
-    return;
 } /* H5C_stats__reset() */
 
 extern void H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, hbool_t dump_parents,

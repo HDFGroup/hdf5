@@ -30,14 +30,14 @@ static size_t add_sub_value_hdf5(unsigned int flags, size_t cd_nelmts, const uns
 
 /* Filter class struct */
 const H5Z_class2_t FILTER_INFO[1] = {{
-    H5Z_CLASS_T_VERS,               /* H5Z_class_t version              */
-    FILTER3_ID,                     /* Filter ID number                 */
-    1,                              /* Encoding enabled                 */
-    1,                              /* Decoding enabled                 */
-    "test filter plugin 3",         /* Filter name for debugging        */
-    NULL,                           /* The "can apply" callback         */
-    NULL,                           /* The "set local" callback         */
-    (H5Z_func_t)add_sub_value_hdf5, /* The actual filter function       */
+    H5Z_CLASS_T_VERS,       /* H5Z_class_t version              */
+    FILTER3_ID,             /* Filter ID number                 */
+    1,                      /* Encoding enabled                 */
+    1,                      /* Decoding enabled                 */
+    "test filter plugin 3", /* Filter name for debugging        */
+    NULL,                   /* The "can apply" callback         */
+    NULL,                   /* The "set local" callback         */
+    add_sub_value_hdf5,     /* The actual filter function       */
 }};
 
 H5PL_type_t

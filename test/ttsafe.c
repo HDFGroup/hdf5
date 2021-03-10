@@ -70,8 +70,6 @@ tts_is_threadsafe(void)
 
     if (is_ts != should_be)
         TestErrPrintf("Thread-safety value incorrect - test failed\n");
-
-    return;
 }
 
 /* Routine to generate attribute names for numeric values */
