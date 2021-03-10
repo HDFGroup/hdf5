@@ -1541,7 +1541,7 @@ H5A__rename_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     HDassert(new_name);
 
     /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_name, new_name))
+    if (HDstrcmp(old_name, new_name) != 0)
         /* Rename the attribute */
         if (H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_RENAME, H5P_DATASET_XFER_DEFAULT, token_ptr,
                                old_name, new_name) < 0)

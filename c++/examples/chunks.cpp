@@ -16,11 +16,7 @@
  *   We will read from the file created by extend.cpp
  */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cout;
 using std::endl;
 

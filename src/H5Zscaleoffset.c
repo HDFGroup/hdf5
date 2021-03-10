@@ -364,12 +364,12 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
 #define H5Z_scaleoffset_max_min_3(i, d_nelmts, buf, filval, max, min, D_val)                                 \
     {                                                                                                        \
         i = 0;                                                                                               \
-        while (i < d_nelmts && HDfabs(buf[i] - filval) < HDpow(10.0f, -D_val))                               \
+        while (i < d_nelmts && HDfabs(buf[i] - filval) < HDpow(10.0, -D_val))                                \
             i++;                                                                                             \
         if (i < d_nelmts)                                                                                    \
             min = max = buf[i];                                                                              \
         for (; i < d_nelmts; i++) {                                                                          \
-            if (HDfabs(buf[i] - filval) < HDpow(10.0f, -D_val))                                              \
+            if (HDfabs(buf[i] - filval) < HDpow(10.0, -D_val))                                               \
                 continue; /* ignore fill value */                                                            \
             if (buf[i] > max)                                                                                \
                 max = buf[i];                                                                                \
