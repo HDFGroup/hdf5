@@ -106,8 +106,7 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max(JNIEnv *, jcla
  * Method:    H5export_dataset
  * Signature: (Ljava/lang/String;JLjava/lang/String;I)V
  */
-JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *, jclass, jstring, jlong, jstring,
-                                                             jint);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *, jclass, jstring, jlong, jstring, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5

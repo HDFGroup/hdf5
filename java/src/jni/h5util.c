@@ -1039,7 +1039,6 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
             if (H5R_DSET_REG_REF_BUF_SIZE == typeSize) {
                 if (h5str_region_dataset(ENVONLY, out_str, container, cptr, expand_data) < 0)
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-
             }
             else if (H5R_OBJ_REF_BUF_SIZE == typeSize) {
                 H5O_info_t oi;
@@ -2688,17 +2687,17 @@ done:
 int
 h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order)
 {
-    hid_t          f_space = H5I_INVALID_HID; /* file data space */
-    hsize_t        alloc_size;
-    int            ndims;                    /* rank of dataspace */
-    unsigned       i;                        /* counters  */
-    hsize_t        total_size[H5S_MAX_RANK]; /* total size of dataset*/
-    hsize_t        p_nelmts;                 /* total selected elmts */
+    hid_t    f_space = H5I_INVALID_HID; /* file data space */
+    hsize_t  alloc_size;
+    int      ndims;                    /* rank of dataspace */
+    unsigned i;                        /* counters  */
+    hsize_t  total_size[H5S_MAX_RANK]; /* total size of dataset*/
+    hsize_t  p_nelmts;                 /* total selected elmts */
 
     unsigned char *sm_buf = NULL;         /* buffer for raw data */
     hsize_t        sm_size[H5S_MAX_RANK]; /* stripmine size */
 
-    int            ret_value = 0;
+    int ret_value = 0;
 
     /* VL data special information */
     unsigned int vl_data = 0; /* contains VL datatypes */
