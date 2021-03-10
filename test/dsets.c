@@ -3181,7 +3181,7 @@ test_nbit_int(hid_t file)
     /* Initialize data, assuming size of long long >= size of int */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power           = HDpow(2.0f, (double)(precision - 1));
+            power           = HDpow(2.0, (double)(precision - 1));
             orig_data[i][j] = (int)(((long long)HDrandom() % (long long)power) << offset);
 
             /* even-numbered values are negtive */
@@ -3558,7 +3558,7 @@ test_nbit_array(hid_t file)
         for (j = 0; j < (size_t)size[1]; j++)
             for (m = 0; m < (size_t)adims[0]; m++)
                 for (n = 0; n < (size_t)adims[1]; n++) {
-                    power = HDpow(2.0F, (double)precision);
+                    power = HDpow(2.0, (double)precision);
                     orig_data[i][j][m][n] =
                         (unsigned int)(((long long)HDrandom() % (long long)power) << offset);
                 } /* end for */
@@ -3754,11 +3754,11 @@ test_nbit_compound(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power             = HDpow(2.0F, (double)(precision[0] - 1));
+            power             = HDpow(2.0, (double)(precision[0] - 1));
             orig_data[i][j].i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
-            power             = HDpow(2.0F, (double)(precision[1] - 1));
+            power             = HDpow(2.0, (double)(precision[1] - 1));
             orig_data[i][j].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-            power             = HDpow(2.0F, (double)(precision[2] - 1));
+            power             = HDpow(2.0, (double)(precision[2] - 1));
             orig_data[i][j].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
             orig_data[i][j].f = float_val[i][j];
 
@@ -4036,32 +4036,32 @@ test_nbit_compound_2(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power               = HDpow(2.0F, (double)(precision[0] - 1));
+            power               = HDpow(2.0, (double)(precision[0] - 1));
             orig_data[i][j].a.i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
-            power               = HDpow(2.0F, (double)(precision[1] - 1));
+            power               = HDpow(2.0, (double)(precision[1] - 1));
             orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-            power               = HDpow(2.0F, (double)(precision[2] - 1));
+            power               = HDpow(2.0, (double)(precision[2] - 1));
             orig_data[i][j].a.s = (short)(-(((long long)HDrandom() % (long long)power) << offset[2]));
             orig_data[i][j].a.f = float_val[i][j];
 
-            power             = HDpow(2.0F, (double)precision[3]);
+            power             = HDpow(2.0, (double)precision[3]);
             orig_data[i][j].v = (unsigned int)(((long long)HDrandom() % (long long)power) << offset[3]);
 
             for (m = 0; m < (size_t)array_dims[0]; m++)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
-                    power                   = HDpow(2.0F, (double)(precision[4] - 1));
+                    power                   = HDpow(2.0, (double)(precision[4] - 1));
                     orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() % (long long)power) << offset[4]);
                 } /* end for */
 
             for (m = 0; m < (size_t)array_dims[0]; m++)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
-                    power = HDpow(2.0F, (double)(precision[0] - 1));
+                    power = HDpow(2.0, (double)(precision[0] - 1));
                     orig_data[i][j].d[m][n].i =
                         (int)(-(((long long)HDrandom() % (long long)power) << offset[0]));
-                    power = HDpow(2.0F, (double)(precision[1] - 1));
+                    power = HDpow(2.0, (double)(precision[1] - 1));
                     orig_data[i][j].d[m][n].c =
                         (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-                    power = HDpow(2.0F, (double)(precision[2] - 1));
+                    power = HDpow(2.0, (double)(precision[2] - 1));
                     orig_data[i][j].d[m][n].s =
                         (short)(((long long)HDrandom() % (long long)power) << offset[2]);
                     orig_data[i][j].d[m][n].f = float_val[i][j];
@@ -4292,7 +4292,7 @@ test_nbit_compound_3(hid_t file)
 
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++) {
-        power = HDpow(2.0F, 17.0F - 1.0F);
+        power = HDpow(2.0, 17.0 - 1.0);
         HDmemset(&orig_data[i], 0, sizeof(orig_data[i]));
         orig_data[i].i = (int)(HDrandom() % (long)power);
         HDstrcpy(orig_data[i].str, "fixed-length C string");
@@ -4481,7 +4481,7 @@ test_nbit_int_size(hid_t file)
      */
     for (i = 0; i < DSET_DIM1; i++)
         for (j = 0; j < DSET_DIM2; j++) {
-            power      = HDpow(2.0F, (double)(precision - 1));
+            power      = HDpow(2.0, (double)(precision - 1));
             orig[i][j] = HDrandom() % (int)power << offset;
         }
 
@@ -5145,7 +5145,7 @@ test_scaleoffset_float(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0F, -3.0F)) {
+            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0, -3.0)) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
                 HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -5291,7 +5291,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0F, -3.0F)) {
+        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0, -3.0)) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -5412,7 +5412,7 @@ test_scaleoffset_double(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0F, -7.0F)) {
+            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0, -7.0)) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
                 HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -5558,7 +5558,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0F, -7.0F)) {
+        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0, -7.0)) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
