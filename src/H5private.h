@@ -675,11 +675,6 @@ typedef struct {
 #ifndef HDacos
 #define HDacos(X) acos(X)
 #endif /* HDacos */
-#ifndef HDvasprintf
-#ifdef H5_HAVE_VASPRINTF
-#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
-#endif /* H5_HAVE_VASPRINTF */
-#endif /* HDvasprintf */
 #ifndef HDalarm
 #ifdef H5_HAVE_ALARM
 #define HDalarm(N) alarm(N)
@@ -1596,6 +1591,13 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDutime
 #define HDutime(S, T) utime(S, T)
 #endif /* HDutime */
+#ifndef HDvasprintf
+#ifdef H5_HAVE_VASPRINTF
+#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
+#else
+H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+#endif /* H5_HAVE_VASPRINTF */
+#endif /* HDvasprintf */
 #ifndef HDva_arg
 #define HDva_arg(A, T) va_arg(A, T)
 #endif /* HDva_arg */
