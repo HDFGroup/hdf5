@@ -539,7 +539,8 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     TESTING("simple I/O");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
-    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "family") != 0) {
+    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+        HDstrcmp(env_h5_drvr, "family") != 0) {
         h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
         /* Set up data array */
@@ -699,7 +700,8 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     TESTING("dataset offset with user block");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
-    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "family") != 0) {
+    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+        HDstrcmp(env_h5_drvr, "family") != 0) {
         h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
         /* Set up data array */

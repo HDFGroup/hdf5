@@ -1322,7 +1322,8 @@ test_opaques(void)
     }
     if (HDstrcmp(
             dt_str,
-            "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }") != 0) {
+            "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }") !=
+        0) {
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
@@ -1399,8 +1400,9 @@ test_enums(void)
         HDfree(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"   "
-                         "         6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }") != 0) {
+    if (HDstrcmp(dt_str,
+                 "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"   "
+                 "         6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }") != 0) {
 
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
