@@ -1108,7 +1108,7 @@ test_multiple_file_opens_concur(void)
 
 static unsigned
 test_disable_enable_eot_concur(void)
-
+{
     /* Output message about test being performed */
     TESTING("Verify concurrent H5Fvfd_swmr_enable/disable_end_of_tick()");
     SKIPPED();
@@ -1119,7 +1119,7 @@ test_disable_enable_eot_concur(void)
 
 static unsigned
 test_file_end_tick_concur(void)
-
+{
     /* Output message about test being performed */
     TESTING("Verify concurrent H5Fvfd_swmr_end_tick()");
     SKIPPED();
