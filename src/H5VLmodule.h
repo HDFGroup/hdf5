@@ -16,8 +16,8 @@
  *          is part of the H5VL package.
  */
 
-#ifndef _H5VLmodule_H
-#define _H5VLmodule_H
+#ifndef H5VLmodule_H
+#define H5VLmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -42,4 +42,4 @@
  * \ingroup H5VL
  */
 
-#endif /* _H5VLmodule_H */
+#endif /* H5VLmodule_H */

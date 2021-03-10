@@ -22,16 +22,16 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5Gprivate_H
-#define _H5Gprivate_H
+#ifndef H5Gprivate_H
+#define H5Gprivate_H
 
 /* Include package's public header */
 #include "H5Gpublic.h"
 
 /* Private headers needed by this file */
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Bprivate.h"  /* B-trees				*/
-#include "H5Fprivate.h"  /* File access				*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Bprivate.h"  /* B-trees                */
+#include "H5Fprivate.h"  /* File access                */
 #include "H5RSprivate.h" /* Reference-counted strings            */
 
 /*
@@ -42,7 +42,7 @@
     ((sizeof_size) +     /*offset of name into heap              */                                          \
      (sizeof_addr) +     /*address of object header              */                                          \
      4 +                 /*entry type                            */                                          \
-     4 +                 /*reserved				*/                                                                    \
+     4 +                 /*reserved                */                                                        \
      H5G_SIZEOF_SCRATCH) /*scratch pad space                     */
 #define H5G_SIZEOF_ENTRY_FILE(F) H5G_SIZEOF_ENTRY(H5F_SIZEOF_ADDR(F), H5F_SIZEOF_SIZE(F))
 
@@ -291,4 +291,4 @@ H5_DLL herr_t H5G_root_loc(H5F_t *f, H5G_loc_t *loc);
 H5_DLL herr_t H5G_root_free(H5G_t *grp);
 H5_DLL H5G_t *H5G_rootof(H5F_t *f);
 
-#endif /* _H5Gprivate_H */
+#endif /* H5Gprivate_H */

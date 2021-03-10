@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _Included_hdf_hdf5lib_H5_H5PFAPL
-#define _Included_hdf_hdf5lib_H5_H5PFAPL
+#ifndef Included_hdf_hdf5lib_H5_H5PFAPL
+#define Included_hdf_hdf5lib_H5_H5PFAPL
 
 #include <jni.h>
 
@@ -477,4 +476,4 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1libver_1bounds(JNIEnv *, jcla
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_hdf_hdf5lib_H5_H5PFAPL */
+#endif /* Included_hdf_hdf5lib_H5_H5PFAPL */

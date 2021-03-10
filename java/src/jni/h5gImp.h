@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -14,8 +13,8 @@
 #include <jni.h>
 /* Header for class hdf_hdf5lib_H5_H5G */
 
-#ifndef _Included_hdf_hdf5lib_H5_H5G
-#define _Included_hdf_hdf5lib_H5_H5G
+#ifndef Included_hdf_hdf5lib_H5_H5G
+#define Included_hdf_hdf5lib_H5_H5G
 
 #ifdef __cplusplus
 extern "C" {
@@ -97,4 +96,4 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Grefresh(JNIEnv *, jclass, jlong);
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_hdf_hdf5lib_H5_H5G */
+#endif /* Included_hdf_hdf5lib_H5_H5G */

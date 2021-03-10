@@ -18,8 +18,8 @@
  *		H5A package.  Including this header means that the source file
  *		is part of the H5A package.
  */
-#ifndef _H5Amodule_H
-#define _H5Amodule_H
+#ifndef H5Amodule_H
+#define H5Amodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -46,4 +46,4 @@
  *
  */
 
-#endif /* _H5Amodule_H */
+#endif /* H5Amodule_H */

@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5M module
  */
-#ifndef _H5Mprivate_H
-#define _H5Mprivate_H
+#ifndef H5Mprivate_H
+#define H5Mprivate_H
 
 /* Include package's public header */
 #include "H5Mpublic.h"
@@ -75,4 +75,4 @@ H5_DLL herr_t H5M_init(void);
 /* Library Private Prototypes */
 /******************************/
 
-#endif /* _H5Mprivate_H */
+#endif /* H5Mprivate_H */
