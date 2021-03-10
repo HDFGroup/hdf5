@@ -19,8 +19,6 @@
  *        of the same name.
  */
 
-#include <err.h>
-
 #include "cache_common.h"
 #include "vfd_swmr_common.h"    /* for below_speed_limit() */
 #include "genall5.h"
@@ -2698,17 +2696,18 @@ random_pause(unsigned int max_pause_msecs)
     if (max_pause_msecs == 0)
         return;
 
-    nsecs_per_msec = 1 + (uint64_t)random() % (1000 * 1000);
+    nsecs_per_msec = 1 + (uint64_t)HDrandom() % (1000 * 1000);
     nsecs = max_pause_msecs * nsecs_per_msec;
 
     delay.tv_sec = (time_t)(nsecs / nsecs_per_sec);
     delay.tv_nsec = (long)(nsecs % nsecs_per_sec);
     for (;;) {
-        if (nanosleep(&delay, &delay) == 0)
+        if (HDnanosleep(&delay, &delay) == 0)
             break;
         if (errno == EINTR)
             continue;
-        errx(EXIT_FAILURE, "%s: nanosleep", __func__);
+        HDfprintf(stderr, "%s: nanosleep", __func__);
+        HDexit(EXIT_FAILURE);
     }
 }
 
@@ -2720,7 +2719,7 @@ random_pause(unsigned int max_pause_msecs)
  * Return true if all tests pass, false if any test fails.
  */
 
-static bool
+static hbool_t
 tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     zoo_config_t config, const phase_t *phase, size_t nphases)
 {
@@ -2728,21 +2727,21 @@ tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     int i, nwritten;
     size_t j;
     char *leafp;
-    bool ok = true;
+    hbool_t ok = TRUE;
 
-    nwritten = snprintf(full_path, sizeof(full_path), "%s/*", base_path);
+    nwritten = HDsnprintf(full_path, sizeof(full_path), "%s/*", base_path);
     if (nwritten < 0 || (size_t)nwritten >= sizeof(full_path)) {
         failure_mssg = "tend_zoo: snprintf failed";
-        return false;
+        return FALSE;
     }
 
-    if ((leafp = strrchr(full_path, '*')) == NULL) {
+    if ((leafp = HDstrrchr(full_path, '*')) == NULL) {
         failure_mssg = "tend_zoo: strrchr failed";
-        return false;
+        return FALSE;
     }
 
     for (i = 0; ok; i++) {
-        assert('A' + i <= 'Z');
+        HDassert('A' + i <= 'Z');
         *leafp = (char)('A' + i);
         for (j = 0; j < nphases; j++) {
             if (!create_or_validate_selection(fid, full_path, i, config,
@@ -2755,12 +2754,12 @@ tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     }
 out:
     if (!ok) {
-        if (strcmp(failure_mssg, last_failure_mssg) != 0)
+        if (HDstrcmp(failure_mssg, last_failure_mssg) != 0)
             *lastmsgtime = (struct timespec){.tv_sec = 0, .tv_nsec = 0};
 
         if (below_speed_limit(lastmsgtime, &config.msgival)) {
             last_failure_mssg = failure_mssg;
-            warnx("%s: %s", __func__, failure_mssg);
+            HDfprintf(stderr, "%s: %s", __func__, failure_mssg);
         }
     }
     return ok;

@@ -25,10 +25,10 @@
 
 #ifndef H5_HAVE_WIN32_API
 
-#include <err.h>
-
-/* Only need the pthread solution if sigtimedwait(2) isn't available */
-#ifndef H5_HAVE_SIGTIMEDWAIT
+/* Only need the pthread solution if sigtimedwait(2) isn't available.
+ * There's currently no Windows solution, so ignore that for now.
+ */
+#if !defined(H5_HAVE_SIGTIMEDWAIT) && !defined(H5_HAVE_WIN32_API)
 #include <pthread.h>
 #endif
 
@@ -83,13 +83,15 @@ evsnprintf(char *buf, size_t bufsz, const char *fmt, va_list ap)
 {
     int rc;
 
-    rc = vsnprintf(buf, bufsz, fmt, ap);
+    rc = HDvsnprintf(buf, bufsz, fmt, ap);
 
     if (rc < 0) {
-        err(EXIT_FAILURE, "%s: vsnprintf", __func__);
+        HDfprintf(stderr, "%s: HDvsnprintf", __func__);
+        HDexit(EXIT_FAILURE);
     }
     else if ((size_t)rc >= bufsz) {
-        errx(EXIT_FAILURE, "%s: buffer too small", __func__);
+        HDfprintf(stderr, "%s: buffer too small", __func__);
+        HDexit(EXIT_FAILURE);
     }
 }
 
@@ -101,9 +103,9 @@ esnprintf(char *buf, size_t bufsz, const char *fmt, ...)
 {
     va_list ap;
 
-    va_start(ap, fmt);
+    HDva_start(ap, fmt);
     evsnprintf(buf, bufsz, fmt, ap);
-    va_end(ap);
+    HDva_end(ap);
 }
 
 void
@@ -114,9 +116,9 @@ dbgf(int level, const char *fmt, ...)
     if (verbosity < level)
         return;
 
-    va_start(ap, fmt);
-    (void)vfprintf(stderr, fmt, ap);
-    va_end(ap);
+    HDva_start(ap, fmt);
+    (void)HDvfprintf(stderr, fmt, ap);
+    HDva_end(ap);
 }
 
 /* Disable HDF5 error-stack printing and return the previous state
@@ -159,20 +161,24 @@ block_signals(sigset_t *oldset)
     sigset_t fullset;
 
     if (sigfillset(&fullset) == -1) {
-        err(EXIT_FAILURE, "%s.%d: could not initialize signal masks",
-            __func__, __LINE__);
+        HDfprintf(stderr, "%s.%d: could not initialize signal masks", __func__, __LINE__);
+        HDexit(EXIT_FAILURE);
     }
 
-    if (sigprocmask(SIG_BLOCK, &fullset, oldset) == -1)
-        err(EXIT_FAILURE, "%s.%d: sigprocmask", __func__, __LINE__);
+    if (sigprocmask(SIG_BLOCK, &fullset, oldset) == -1) {
+        HDfprintf(stderr, "%s.%d: sigprocmask", __func__, __LINE__);
+        HDexit(EXIT_FAILURE);
+    }
 }
 
 /* Restore the signal mask in `oldset`. */
 void
 restore_signals(sigset_t *oldset)
 {
-    if (sigprocmask(SIG_SETMASK, oldset, NULL) == -1)
-        err(EXIT_FAILURE, "%s.%d: sigprocmask", __func__, __LINE__);
+    if (sigprocmask(SIG_SETMASK, oldset, NULL) == -1) {
+        HDfprintf(stderr, "%s.%d: sigprocmask", __func__, __LINE__);
+        HDexit(EXIT_FAILURE);
+    }
 }
 
 #if 0
@@ -192,7 +198,7 @@ strsignal(int signum)
 }
 #endif
 
-#ifndef H5_HAVE_SIGTIMEDWAIT
+#if !defined(H5_HAVE_SIGTIMEDWAIT) && !defined(H5_HAVE_WIN32_API)
 
 typedef struct timer_params_t {
     struct timespec *tick;
@@ -239,7 +245,7 @@ timer_function(void *arg)
 
     return NULL;
 }
-#endif /* H5_HAVE_SIGTIMEDWAIT */
+#endif /* !defined(H5_HAVE_SIGTIMEDWAIT) && !defined(H5_HAVE_WIN32_API) */
 
 /* Wait for any signal to occur and then return.  Wake periodically
  * during the wait to perform API calls: in this way, the
@@ -260,8 +266,10 @@ await_signal(hid_t fid)
     /* Avoid deadlock: flush the file before waiting for the reader's
      * message.
      */
-    if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-        errx(EXIT_FAILURE, "%s: H5Fflush failed", __func__);
+    if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) {
+        HDfprintf(stderr, "%s: H5Fflush failed", __func__);
+        HDexit(EXIT_FAILURE);
+    }
 
     dbgf(1, "waiting for signal\n");
 
@@ -290,8 +298,10 @@ await_signal(hid_t fid)
             pthread_mutex_unlock(&timer_mutex);
             pthread_join(timer, NULL);
         }
-        else
-            err(EXIT_FAILURE, "%s: sigwait", __func__);
+        else {
+            HDfprintf(stderr, "%s: sigwait", __func__);
+            HDexit(EXIT_FAILURE);
+        }
     }
 #else
     for (;;) {
@@ -299,10 +309,11 @@ await_signal(hid_t fid)
         const int rc = sigtimedwait(&sleepset, NULL, &tick);
 
         if (rc != -1) {
-            fprintf(stderr, "Received %s, wrapping things up.\n",
+            HDfprintf(stderr, "Received %s, wrapping things up.\n",
                 strsignal(rc));
             break;
-        } else if (rc == -1 && errno == EAGAIN) {
+        }
+        else if (rc == -1 && errno == EAGAIN) {
             estack_state_t es;
 
             /* Avoid deadlock with peer: periodically enter the API so that
@@ -316,8 +327,11 @@ await_signal(hid_t fid)
             (void)H5Aexists_by_name(fid, "nonexistent", "nonexistent",
                 H5P_DEFAULT);
             restore_estack(es);
-        } else if (rc == -1)
-            err(EXIT_FAILURE, "%s: sigtimedwait", __func__);
+        }
+        else if (rc == -1) {
+            HDfprintf(stderr, "%s: sigtimedwait", __func__);
+            HDexit(EXIT_FAILURE);
+        }
     }
 #endif /* H5_HAVE_SIGTIMEDWAIT */
 }
