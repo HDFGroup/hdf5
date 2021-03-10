@@ -779,7 +779,7 @@ count_attributes(hid_t dset_id)
  * On success, stores size in `size_out` pointer.
  */
 static herr_t
-_oh_getsize(hid_t did, hsize_t *size_out)
+oh_getsize(hid_t did, hsize_t *size_out)
 {
     H5O_info_t info;
 
@@ -802,9 +802,9 @@ oh_compare(hid_t did1, hid_t did2)
     hsize_t space1 = 0;
     hsize_t space2 = 0;
 
-    if (FAIL == _oh_getsize(did1, &space1))
+    if (FAIL == oh_getsize(did1, &space1))
         return -1;
-    if (FAIL == _oh_getsize(did2, &space2))
+    if (FAIL == oh_getsize(did2, &space2))
         return -2;
 
     if (space1 < space2)
