@@ -659,8 +659,6 @@ test_write_vl_string_attribute(void)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 
 /****************************************************************
@@ -739,8 +737,6 @@ test_read_vl_string_attribute(void)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 
 /* Helper routine for test_vl_rewrite() */
@@ -864,8 +860,6 @@ test_vl_rewrite(void)
 
     ret = H5Fclose(file2);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 } /* end test_vl_rewrite() */
 
 /****************************************************************
