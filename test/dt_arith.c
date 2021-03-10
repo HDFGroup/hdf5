@@ -592,7 +592,7 @@ generates_sigfpe(void)
         /* delete the core dump file that SIGFPE may have created */
         HDunlink("core");
     }
-#else /* H5_HAVE_UNISTD_H */
+#else  /* H5_HAVE_UNISTD_H */
     HDputs("Cannot determine if floating-point overflows generate a SIGFPE");
     HDputs("due to a lack of fork(2) - assuming yes.");
     HDputs("Overflow cases will not be tested.");

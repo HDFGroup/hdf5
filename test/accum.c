@@ -2287,7 +2287,7 @@ error:
 
     return 1;
 
-#else /* H5_HAVE_UNISTD_H */
+#else  /* H5_HAVE_UNISTD_H */
     SKIPPED();
     HDputs("    Test skipped due to fork, waitpid, or pid_t not defined.");
     return 0;
