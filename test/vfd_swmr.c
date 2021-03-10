@@ -3454,13 +3454,17 @@ main(void)
         nerrors += test_shadow_index_lookup();
 
         nerrors += test_file_fapl();
+#ifndef H5_HAVE_WIN32_API
         nerrors += test_writer_create_open_flush();
         nerrors += test_writer_md();
+#endif
         nerrors += test_reader_md_concur();
 
         nerrors += test_multiple_file_opens();
         nerrors += test_multiple_file_opens_concur();
+#ifndef H5_HAVE_WIN32_API
         nerrors += test_same_file_opens();
+#endif
 
         nerrors += test_enable_disable_eot();
         nerrors += test_disable_enable_eot_concur();

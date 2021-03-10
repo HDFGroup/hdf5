@@ -23,7 +23,6 @@
 #include "vfd_swmr_common.h"
 #include "swmr_common.h"
 
-#ifndef H5_HAVE_WIN32_API
 
 /* Only need the pthread solution if sigtimedwait(2) isn't available.
  * There's currently no Windows solution, so ignore that for now.
@@ -154,6 +153,8 @@ restore_estack(estack_state_t es)
     (void)H5Eset_auto(H5E_DEFAULT, es.efunc, es.edata);
 }
 
+
+#ifndef H5_HAVE_WIN32_API
 /* Store the signal mask at `oldset` and then block all signals. */
 void
 block_signals(sigset_t *oldset)
@@ -198,7 +199,7 @@ strsignal(int signum)
 }
 #endif
 
-#if !defined(H5_HAVE_SIGTIMEDWAIT) && !defined(H5_HAVE_WIN32_API)
+#ifndef H5_HAVE_SIGTIMEDWAIT
 
 typedef struct timer_params_t {
     struct timespec *tick;
@@ -245,7 +246,7 @@ timer_function(void *arg)
 
     return NULL;
 }
-#endif /* !defined(H5_HAVE_SIGTIMEDWAIT) && !defined(H5_HAVE_WIN32_API) */
+#endif /* H5_HAVE_SIGTIMEDWAIT */
 
 /* Wait for any signal to occur and then return.  Wake periodically
  * during the wait to perform API calls: in this way, the
@@ -336,6 +337,8 @@ await_signal(hid_t fid)
 #endif /* H5_HAVE_SIGTIMEDWAIT */
 }
 
+#endif /* H5_HAVE_WIN32_API */
+
 /* Revised support routines that can be used for all VFD SWMR integration tests
  */
 /* Initialize fields in config with the input parameters */
@@ -399,8 +402,6 @@ vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_p
     return fapl;
 
 } /* vfd_swmr_create_fapl() */
-
-#endif /* H5_HAVE_WIN32_API */
 
 /* Fetch a variable from the environment and parse it for unsigned long
  * content.  Return 0 if the variable is not present, -1 if it is present
