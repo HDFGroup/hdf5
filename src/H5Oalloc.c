@@ -1234,10 +1234,10 @@ H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
                 /* Keep first one found */
                 if (found_null < 0)
                     found_null = (ssize_t)idx;
-                else
-                    /* Check for better fit */
-                    if (oh->mesg[idx].raw_size < oh->mesg[found_null].raw_size)
+                /* Check for better fit */
+                else if (oh->mesg[idx].raw_size < oh->mesg[found_null].raw_size) {
                     found_null = (ssize_t)idx;
+                }
                 else {
                     /* If they are the same size, choose the one in the earliest chunk */
                     if (oh->mesg[idx].raw_size == oh->mesg[found_null].raw_size) {
