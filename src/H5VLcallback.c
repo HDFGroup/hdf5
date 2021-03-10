@@ -7532,7 +7532,7 @@ done:
 herr_t
 H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5VL_request_status_t *status)
 {
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7626,7 +7626,7 @@ done:
 herr_t
 H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void *ctx)
 {
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7719,7 +7719,7 @@ done:
 herr_t
 H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status)
 {
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7813,9 +7813,9 @@ done:
 herr_t
 H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t specific_type, ...)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    va_list arguments;             /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t  ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7960,9 +7960,9 @@ done:
 herr_t
 H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_request_optional_t opt_type, ...)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    va_list arguments;             /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t  ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -8104,7 +8104,7 @@ done:
 herr_t
 H5VL_request_free(const H5VL_object_t *vol_obj)
 {
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -8199,7 +8199,7 @@ done:
 herr_t
 H5VL_blob_put(const H5VL_object_t *vol_obj, const void *buf, size_t size, void *blob_id, void *ctx)
 {
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -8294,7 +8294,7 @@ done:
 herr_t
 H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf, size_t size, void *ctx)
 {
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -8393,9 +8393,9 @@ done:
 herr_t
 H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specific_t specific_type, ...)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    va_list arguments;             /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t  ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -8544,9 +8544,9 @@ done:
 herr_t
 H5VL_blob_optional(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_optional_t opt_type, ...)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    va_list arguments;             /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t  ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -8711,7 +8711,7 @@ herr_t
 H5VL_token_cmp(const H5VL_object_t *vol_obj, const H5O_token_t *token1, const H5O_token_t *token2,
                int *cmp_value)
 {
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -8820,7 +8820,7 @@ herr_t
 H5VL_token_to_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const H5O_token_t *token,
                   char **token_str)
 {
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -8928,7 +8928,7 @@ herr_t
 H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const char *token_str,
                     H5O_token_t *token)
 {
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

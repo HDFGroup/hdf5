@@ -51,13 +51,13 @@ typedef enum H5ES_status_t {
 /* Information about operations in an event set */
 typedef struct H5ES_op_info_t {
     /* API call info */
-    char *api_name;        /* Name of HDF5 API routine called */
-    char *api_args;        /* "Argument string" for arguments to HDF5 API routine called */
+    char *api_name; /* Name of HDF5 API routine called */
+    char *api_args; /* "Argument string" for arguments to HDF5 API routine called */
 
     /* Application info */
-    char *app_file_name;   /* Name of source file where the HDF5 API routine was called */
-    char *app_func_name;   /* Name of function where the HDF5 API routine was called */
-    unsigned app_line_num; /* Line # of source file where the HDF5 API routine was called */
+    char *   app_file_name; /* Name of source file where the HDF5 API routine was called */
+    char *   app_func_name; /* Name of function where the HDF5 API routine was called */
+    unsigned app_line_num;  /* Line # of source file where the HDF5 API routine was called */
 
     /* Operation info */
     uint64_t op_ins_count; /* Counter of operation's insertion into event set */
@@ -69,13 +69,13 @@ typedef struct H5ES_op_info_t {
 /* Information about failed operations in event set */
 typedef struct H5ES_err_info_t {
     /* API call info */
-    char *api_name;        /* Name of HDF5 API routine called */
-    char *api_args;        /* "Argument string" for arguments to HDF5 API routine called */
+    char *api_name; /* Name of HDF5 API routine called */
+    char *api_args; /* "Argument string" for arguments to HDF5 API routine called */
 
     /* Application info */
-    char *app_file_name;   /* Name of source file where the HDF5 API routine was called */
-    char *app_func_name;   /* Name of function where the HDF5 API routine was called */
-    unsigned app_line_num; /* Line # of source file where the HDF5 API routine was called */
+    char *   app_file_name; /* Name of source file where the HDF5 API routine was called */
+    char *   app_func_name; /* Name of function where the HDF5 API routine was called */
+    unsigned app_line_num;  /* Line # of source file where the HDF5 API routine was called */
 
     /* Operation info */
     uint64_t op_ins_count; /* Counter of operation's insertion into event set */
@@ -136,7 +136,7 @@ H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
 H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
 H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
 H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[],
-                               size_t *err_cleared); 
+                               size_t *err_cleared);
 H5_DLL herr_t H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[]);
 H5_DLL herr_t H5ESregister_insert_func(hid_t es_id, H5ES_event_insert_func_t func, void *ctx);
 H5_DLL herr_t H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t func, void *ctx);

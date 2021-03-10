@@ -265,9 +265,9 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
     for (u = 0; u < H5PL_num_plugins_g; u++) {
         /* If the plugin type (filter, VOL connector, etc.) match, proceed */
         if (search_params->type == H5PL_cache_g[u].type) {
-            hbool_t matched = FALSE;        /* Whether cached plugin info matches */
+            hbool_t matched = FALSE; /* Whether cached plugin info matches */
 
-            switch(search_params->type) {
+            switch (search_params->type) {
                 case H5PL_TYPE_FILTER:
                     if (search_params->key->id == H5PL_cache_g[u].key.id)
                         matched = TRUE;
@@ -292,7 +292,8 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
                     HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "bad plugin type")
             } /* end switch */
 
-            /* If the plugin type (filter, VOL connector, etc.) and key match, query the plugin for its info */
+            /* If the plugin type (filter, VOL connector, etc.) and key match, query the plugin for its info
+             */
             if (matched) {
                 H5PL_get_plugin_info_t get_plugin_info_function;
                 const void *           info;
@@ -313,8 +314,8 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
                 /* No need to continue processing */
                 break;
             } /* end if */
-        } /* end if */
-    } /* end for */
+        }     /* end if */
+    }         /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

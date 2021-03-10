@@ -936,17 +936,26 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             TEST_ERROR
 
         /* Reading & writing with a temporary address value should fail */
-        H5E_BEGIN_TRY { status = H5F_block_read(f, H5FD_MEM_SUPER, tmp_addr, sizeof(buf), &buf); }
+        H5E_BEGIN_TRY
+        {
+            status = H5F_block_read(f, H5FD_MEM_SUPER, tmp_addr, sizeof(buf), &buf);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR
-        H5E_BEGIN_TRY { status = H5F_block_write(f, H5FD_MEM_SUPER, tmp_addr, sizeof(buf), &buf); }
+        H5E_BEGIN_TRY
+        {
+            status = H5F_block_write(f, H5FD_MEM_SUPER, tmp_addr, sizeof(buf), &buf);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR
 
         /* Freeing a temporary address value should fail */
-        H5E_BEGIN_TRY { status = H5MF_xfree(f, H5FD_MEM_SUPER, tmp_addr, (hsize_t)TBLOCK_SIZE30); }
+        H5E_BEGIN_TRY
+        {
+            status = H5MF_xfree(f, H5FD_MEM_SUPER, tmp_addr, (hsize_t)TBLOCK_SIZE30);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR
@@ -984,13 +993,19 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             TEST_ERROR
 
         /* Test that pushing temporary space allocation into normal space fails */
-        H5E_BEGIN_TRY { check_addr = H5MF_alloc_tmp(f, (hsize_t)(maxaddr / 3)); }
+        H5E_BEGIN_TRY
+        {
+            check_addr = H5MF_alloc_tmp(f, (hsize_t)(maxaddr / 3));
+        }
         H5E_END_TRY;
         if (H5F_addr_defined(check_addr))
             TEST_ERROR
 
         /* Test that pushing normal space allocation into temporary space fails */
-        H5E_BEGIN_TRY { check_addr = H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)(maxaddr / 3)); }
+        H5E_BEGIN_TRY
+        {
+            check_addr = H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)(maxaddr / 3));
+        }
         H5E_END_TRY;
         if (H5F_addr_defined(check_addr))
             TEST_ERROR
@@ -1021,7 +1036,10 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_tmp() */
@@ -2131,7 +2149,10 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_fs_absorb() */
@@ -2416,7 +2437,10 @@ test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_aggr_alloc2() */
@@ -2579,7 +2603,10 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_aggr_alloc3() */
@@ -2744,7 +2771,10 @@ test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_aggr_alloc4() */
@@ -2867,7 +2897,10 @@ test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_aggr_alloc5() */
@@ -3027,7 +3060,10 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_aggr_alloc6() */
@@ -3216,7 +3252,10 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_aggr_alloc7() */
@@ -3512,7 +3551,10 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_aggr_extend() */
@@ -3749,7 +3791,10 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_aggr_absorb() */
@@ -4037,7 +4082,10 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_align_eoa() */
@@ -4328,7 +4376,10 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_align_fs() */
@@ -4600,7 +4651,10 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_align_alloc1() */
@@ -4890,7 +4944,10 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_align_alloc2() */
@@ -5272,7 +5329,10 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_align_alloc3() */
@@ -5484,7 +5544,10 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_align_alloc4() */
@@ -5710,7 +5773,10 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_align_alloc5() */
@@ -6021,7 +6087,10 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return 1;
 } /* test_mf_align_alloc6() */
@@ -6190,7 +6259,10 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_mf_bug1() */
@@ -7637,7 +7709,10 @@ test_dichotomy(hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return (1);
 } /* test_dichotomy() */
@@ -8545,7 +8620,10 @@ test_page_large(const char *env_h5_drvr, hid_t fapl)
     return (0);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
     return (1);
 

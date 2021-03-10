@@ -456,7 +456,10 @@ test_reference_obj(void)
 
     /* Attempting to retrieve type of object using non-valid refs */
     for (j = 0; j < 3; j++) {
-        H5E_BEGIN_TRY { ret = H5Rget_obj_type2(dataset, H5R_OBJECT, &nvrbuf[j], &obj_type); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Rget_obj_type2(dataset, H5R_OBJECT, &nvrbuf[j], &obj_type);
+        }
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Rget_obj_type2");
     } /* end for */
@@ -653,7 +656,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(hssize_ret, (hssize_t)H5S_UNLIMITED, "H5Sget_select_npoints");
 
     /* Store third dataset region */
-    H5E_BEGIN_TRY { ret = H5Rcreate(&wbuf[2], fid1, "/Dataset2", H5R_DATASET_REGION, sid2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate(&wbuf[2], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
+    }
     H5E_END_TRY;
 
     if (libver_high < H5F_LIBVER_V110)
@@ -728,7 +734,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     /*
      * Dereference an undefined reference (should fail)
      */
-    H5E_BEGIN_TRY { dset2 = H5Rdereference2(dset_NA, H5P_DEFAULT, H5R_DATASET_REGION, &rdata_NA[0]); }
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Rdereference2(dset_NA, H5P_DEFAULT, H5R_DATASET_REGION, &rdata_NA[0]);
+    }
     H5E_END_TRY;
     VERIFY(dset2, FAIL, "H5Rdereference2");
 
@@ -738,7 +747,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
 
     /* This close should fail since H5Rdereference2 never created
      * the id of the referenced object. */
-    H5E_BEGIN_TRY { ret = H5Dclose(dset2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dclose(dset2);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dclose");
 
@@ -892,7 +904,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
 
     /* Attempting to retrieve type of object using non-valid refs */
     for (j = 0; j < 3; j++) {
-        H5E_BEGIN_TRY { ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &nvrbuf[j], &obj_type); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &nvrbuf[j], &obj_type);
+        }
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Rget_obj_type2");
     } /* end for */

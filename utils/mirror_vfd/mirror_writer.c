@@ -591,7 +591,10 @@ do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open
 
 error:
     if (fapl_id > 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     return -1;

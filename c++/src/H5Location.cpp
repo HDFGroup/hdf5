@@ -45,7 +45,9 @@ namespace H5 {
 // Function:    H5Location default constructor (protected)
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Location::H5Location() : IdComponent() {}
+H5Location::H5Location() : IdComponent()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    H5Location overloaded constructor (protected)
@@ -2431,7 +2433,9 @@ f_DataSpace_setId(DataSpace *dspace, hid_t new_id)
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Location::~H5Location() {}
+H5Location::~H5Location()
+{
+}
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

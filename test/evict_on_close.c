@@ -778,7 +778,10 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5Dclose(did); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+    }
     H5E_END_TRY;
 
     H5_FAILED();
@@ -841,13 +844,19 @@ check_evict_on_close_api(void)
         TEST_ERROR;
 
     /* ensure using an incorrect access plist fails */
-    H5E_BEGIN_TRY { status = H5Pset_evict_on_close(dapl_id, evict_on_close); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Pset_evict_on_close(dapl_id, evict_on_close);
+    }
     H5E_END_TRY;
     if (status >= 0)
         FAIL_PUTS_ERROR("H5Pset_evict_on_close() accepted invalid access plist.");
 
     /* ensure an invalid plist fails */
-    H5E_BEGIN_TRY { status = H5Pget_evict_on_close(H5I_INVALID_HID, &evict_on_close); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Pget_evict_on_close(H5I_INVALID_HID, &evict_on_close);
+    }
     H5E_END_TRY;
     if (status >= 0)
         FAIL_PUTS_ERROR("H5Pget_evict_on_close() accepted invalid hid_t.");
@@ -994,7 +1003,10 @@ check_evict_on_close_parallel_fail(void)
 
     /* Set the evict on close property (should fail)*/
     evict_on_close = TRUE;
-    H5E_BEGIN_TRY { status = H5Pset_evict_on_close(fapl_id, evict_on_close); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Pset_evict_on_close(fapl_id, evict_on_close);
+    }
     H5E_END_TRY;
     if (status >= 0)
         FAIL_PUTS_ERROR("H5Pset_evict_on_close() did not fail in parallel HDF5.");

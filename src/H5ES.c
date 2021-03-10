@@ -169,14 +169,14 @@ done:
 herr_t
 H5ESget_count(hid_t es_id, size_t *count /*out*/)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", es_id, count);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
-        H5ES_t *es;                  /* Event set */
+        H5ES_t *es; /* Event set */
 
         /* Check arguments */
         if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -208,14 +208,14 @@ done:
 herr_t
 H5ESget_time_estimate(hid_t es_id, uint64_t *time_est /*out*/)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", es_id, time_est);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
-        H5ES_t *es;                  /* Event set */
+        H5ES_t *es; /* Event set */
 
         /* Check arguments */
         if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -254,14 +254,14 @@ done:
 herr_t
 H5ESget_op_counter(hid_t es_id, uint64_t *op_counter /*out*/)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", es_id, op_counter);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
-        H5ES_t *es;                  /* Event set */
+        H5ES_t *es; /* Event set */
 
         /* Check arguments */
         if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -307,14 +307,14 @@ done:
 herr_t
 H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress /*out*/, hbool_t *op_failed /*out*/)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iULxx", es_id, timeout, num_in_progress, op_failed);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
-        H5ES_t *es;                  /* Event set */
+        H5ES_t *es; /* Event set */
 
         /* Check arguments */
         if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -350,14 +350,14 @@ done:
 herr_t
 H5EScancel(hid_t es_id, size_t *num_not_canceled /*out*/, hbool_t *op_failed /*out*/)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", es_id, num_not_canceled, op_failed);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
-        H5ES_t *es;                  /* Event set */
+        H5ES_t *es; /* Event set */
 
         /* Check arguments */
         if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -393,14 +393,14 @@ done:
 herr_t
 H5ESget_err_status(hid_t es_id, hbool_t *err_status /*out*/)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", es_id, err_status);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
-        H5ES_t *es;                  /* Event set */
+        H5ES_t *es; /* Event set */
 
         /* Check arguments */
         if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -435,14 +435,14 @@ done:
 herr_t
 H5ESget_err_count(hid_t es_id, size_t *num_errs /*out*/)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", es_id, num_errs);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
-        H5ES_t *es;                  /* Event set */
+        H5ES_t *es; /* Event set */
 
         /* Check arguments */
         if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -455,7 +455,7 @@ H5ESget_err_count(hid_t es_id, size_t *num_errs /*out*/)
             else
                 *num_errs = 0;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -482,14 +482,14 @@ herr_t
 H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[] /*out*/,
                  size_t *num_cleared /*out*/)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "izxx", es_id, num_err_info, err_info, num_cleared);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
-        H5ES_t *es;                  /* Event set */
+        H5ES_t *es; /* Event set */
 
         /* Check arguments */
         if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -543,7 +543,7 @@ H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[])
         H5MM_xfree(err_info[u].api_args);
         H5MM_xfree(err_info[u].app_file_name);
         H5MM_xfree(err_info[u].app_func_name);
-        if (H5I_dec_app_ref(err_info[u].err_stack_id) < 0) 
+        if (H5I_dec_app_ref(err_info[u].err_stack_id) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "can't close error stack for err_info #%zu", u)
     } /* end for */
 
@@ -572,14 +572,14 @@ done:
 herr_t
 H5ESregister_insert_func(hid_t es_id, H5ES_event_insert_func_t func, void *ctx)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iEI*x", es_id, func, ctx);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
-        H5ES_t *es;                  /* Event set */
+        H5ES_t *es; /* Event set */
 
         /* Check arguments */
         if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -617,14 +617,14 @@ done:
 herr_t
 H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t func, void *ctx)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iEC*x", es_id, func, ctx);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
-        H5ES_t *es;                  /* Event set */
+        H5ES_t *es; /* Event set */
 
         /* Check arguments */
         if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
