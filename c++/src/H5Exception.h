@@ -18,11 +18,7 @@
 #include <string>
 
 namespace H5 {
-#ifdef H5_NO_STD
-#define H5std_string ::string
-#else
 #define H5std_string std::string
-#endif
 
 /*! \class Exception
     \brief Exception provides wrappers of HDF5 error handling functions.

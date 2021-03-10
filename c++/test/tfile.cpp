@@ -20,11 +20,7 @@
         h5_fileaccess() -- in h5test.c, returns a file access template
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
