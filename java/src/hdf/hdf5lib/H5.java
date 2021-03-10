@@ -512,8 +512,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param file_export_name
      *            The file name to export data into.
-     * @param file_name
-     *            The name of the HDF5 file containing the dataset.
+     * @param file_id
+     *            The identifier of the HDF5 file containing the dataset.
      * @param object_path
      *            The full path of the dataset to be exported.
      * @param binary_order
@@ -525,7 +525,28 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native void H5export_dataset(String file_export_name, String file_name,
+    public synchronized static native void H5export_dataset(String file_export_name, long file_id,
+            String object_path, int binary_order) throws HDF5LibraryException;
+
+    /**
+     * H5export_attribute is a utility function to save data in a file.
+     *
+     * @param file_export_name
+     *            The file name to export data into.
+     * @param dataset_id
+     *            The identifier of the dataset containing the attribute.
+     * @param object_path
+     *            The attribute to be exported.
+     * @param binary_order
+     *            99 - export data as text.
+     *            1 - export data as binary Native Order.
+     *            2 - export data as binary Little Endian.
+     *            3 - export data as binary Big Endian.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5export_attribute(String file_export_name, long dataset_id,
             String object_path, int binary_order) throws HDF5LibraryException;
 
     /**

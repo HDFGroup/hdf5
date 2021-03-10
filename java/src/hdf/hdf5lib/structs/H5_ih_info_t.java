@@ -20,7 +20,9 @@ import java.io.Serializable;
  */
 public class H5_ih_info_t implements Serializable {
     private static final long serialVersionUID = -142238015615462707L;
-    public long     index_size;     /* btree and/or list */
+    /** btree and/or list size of index */
+    public long     index_size;
+    /** btree and/or list size of hp */
     public long     heap_size;
 
     H5_ih_info_t (long index_size, long heap_size)
