@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5f90_H
-#define _H5f90_H
+#ifndef H5f90_H
+#define H5f90_H
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -24,5 +24,7 @@
 
 /* Constants used in H5Gf.c files */
 #define OBJECT_NAMELEN_DEFAULT_F -1
-#define H5_MAX(a, b)             (((a) > (b)) ? (a) : (b))
-#endif /* _H5f90_H */
+
+#define H5_MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+#endif /* H5f90_H */

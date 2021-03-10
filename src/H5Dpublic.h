@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5D module.
  */
-#ifndef _H5Dpublic_H
-#define _H5Dpublic_H
+#ifndef H5Dpublic_H
+#define H5Dpublic_H
 
 /* System headers needed by this file */
 
@@ -165,4 +165,4 @@ H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t size[]);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Dpublic_H */
+#endif /* H5Dpublic_H */

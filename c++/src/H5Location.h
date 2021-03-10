@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Location_H
-#define __H5Location_H
+#ifndef H5Location_H
+#define H5Location_H
 
 #include "H5Classes.h" // constains forward class declarations
 
@@ -276,14 +276,4 @@ class H5_DLLCPP H5Location : public IdComponent {
 }; // end of H5Location
 } // namespace H5
 
-#endif // __H5Location_H
-
-// Modification
-//      Oct 1, 2013 -BMR
-//          H5Location is added in version 1.8.12.
-//          Most of these methods were in H5Object but are now moved here
-//          because a location can be a file, group, dataset, or named datatype.
-//      May 04, 2017 -BMR
-//          Wrappers for H5A functions are copied to H5Object because H5A
-//          functions do not take an attribute id as loc_id.  The original
-//          wrappers will be deprecated in future releases.
+#endif // H5Location_H

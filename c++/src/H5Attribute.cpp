@@ -43,7 +43,7 @@ using std::cerr;
 using std::endl;
 #endif // H5_NO_STD
 
-// class H5_DLLCPP H5Object;  // forward declaration for UserData4Aiterate
+// class H5Object; // forward declaration for UserData4Aiterate
 
 //--------------------------------------------------------------------------
 // Function:    Attribute default constructor

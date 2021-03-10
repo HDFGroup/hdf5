@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5FD package!"
 #endif
 
-#ifndef _H5FDpkg_H
-#define _H5FDpkg_H
+#ifndef H5FDpkg_H
+#define H5FDpkg_H
 
 /* Get package's private header */
 #include "H5FDprivate.h" /* File drivers				*/
@@ -56,4 +56,4 @@ H5_DLL herr_t  H5FD_free_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, hadd
 #ifdef H5FD_TESTING
 #endif /* H5FD_TESTING */
 
-#endif /* _H5FDpkg_H */
+#endif /* H5FDpkg_H */

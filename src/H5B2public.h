@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5B2public_H
-#define _H5B2public_H
+#ifndef H5B2public_H
+#define H5B2public_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -48,4 +48,4 @@ extern "C" {
 }
 #endif
 
-#endif /* _H5B2public_H */
+#endif /* H5B2public_H */

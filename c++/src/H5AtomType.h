@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5AtomType_H
-#define __H5AtomType_H
+#ifndef H5AtomType_H
+#define H5AtomType_H
 
 namespace H5 {
 
@@ -24,7 +24,7 @@ namespace H5 {
     AtomType provides operations on HDF5 atomic datatypes.  It also inherits
     from DataType.
 */
-//  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
+// Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP AtomType : public DataType {
   public:
     // Returns the byte order of an atomic datatype.
@@ -64,7 +64,7 @@ class H5_DLLCPP AtomType : public DataType {
     }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-    // Copy constructor - makes copy of the original object
+    // Copy constructor: same as the original AtomType.
     AtomType(const AtomType &original);
 
     // Noop destructor
@@ -83,4 +83,4 @@ class H5_DLLCPP AtomType : public DataType {
 }; // end of AtomType
 } // namespace H5
 
-#endif // __H5AtomType_H
+#endif // H5AtomType_H

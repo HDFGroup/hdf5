@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __AbstractDs_H
-#define __AbstractDs_H
+#ifndef AbstractDs_H
+#define AbstractDs_H
 
 namespace H5 {
 
@@ -95,4 +95,4 @@ class H5_DLLCPP AbstractDs {
 }; // end of AbstractDs
 } // namespace H5
 
-#endif // __AbstractDs_H
+#endif // AbstractDs_H

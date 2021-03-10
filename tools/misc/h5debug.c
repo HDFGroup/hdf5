@@ -15,7 +15,7 @@
  *
  * Created:             debug.c
  *                      Jul 18 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Debugs an existing HDF5 file at a low level.
  *
@@ -61,7 +61,6 @@
  * Return:  Non-NULL on success/NULL on failure
  *
  * Programmer:  Quincey Koziol
- *    koziol@hdfgroup.org
  *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -70,7 +69,7 @@ static const H5B2_class_t *
 get_H5B2_class(const uint8_t *sig)
 {
     H5B2_subid_t        subtype = (H5B2_subid_t)sig[H5_SIZEOF_MAGIC + 1];
-    const H5B2_class_t *cls;
+    const H5B2_class_t *cls     = NULL;
 
     switch (subtype) {
         case H5B2_TEST_ID:
@@ -131,7 +130,6 @@ get_H5B2_class(const uint8_t *sig)
  *              Failure:        exit (non-zero)
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -139,24 +137,29 @@ get_H5B2_class(const uint8_t *sig)
 int
 main(int argc, char *argv[])
 {
-    hid_t       fid, fapl, dxpl;
+    hid_t       fid  = H5I_INVALID_HID;
+    hid_t       fapl = H5I_INVALID_HID;
+    hid_t       dxpl = H5I_INVALID_HID;
     H5F_t *     f;
     haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
-    H5E_auto2_t func;
-    void *      edata;
-    herr_t      status = SUCCEED;
+    H5E_auto2_t func       = NULL;
+    void *      edata      = NULL;
+    herr_t      status     = SUCCEED;
+    int         exit_value = 0;
 
     if (argc == 1) {
-        HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
-        HDexit(1);
+        HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]*]\n", argv[0]);
+        exit_value = 1;
+        goto done;
     } /* end if */
 
     /* Initialize the library */
     if (H5open() < 0) {
         HDfprintf(stderr, "cannot initialize the library\n");
-        HDexit(1);
+        exit_value = 1;
+        goto done;
     } /* end if */
 
     /* Disable error reporting */
@@ -168,24 +171,29 @@ main(int argc, char *argv[])
      */
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0) {
         HDfprintf(stderr, "cannot create dataset transfer property list\n");
-        HDexit(1);
+        exit_value = 1;
+        goto done;
     } /* end if */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         HDfprintf(stderr, "cannot create file access property list\n");
-        HDexit(1);
+        exit_value = 1;
+        goto done;
     } /* end if */
     if (HDstrchr(argv[1], '%'))
         if (H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT) < 0) {
             HDfprintf(stderr, "cannot set file access property list\n");
-            HDexit(1);
+            exit_value = 1;
+            goto done;
         }
     if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, fapl)) < 0) {
         HDfprintf(stderr, "cannot open file\n");
-        HDexit(1);
+        exit_value = 1;
+        goto done;
     } /* end if */
     if (NULL == (f = (H5F_t *)H5I_object(fid))) {
         HDfprintf(stderr, "cannot obtain H5F_t pointer\n");
-        HDexit(2);
+        exit_value = 2;
+        goto done;
     } /* end if */
 
     /*
@@ -208,7 +216,8 @@ main(int argc, char *argv[])
     HDfprintf(stdout, "Reading signature at address %a (rel)\n", addr);
     if (H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), dxpl, sig) < 0) {
         HDfprintf(stderr, "cannot read signature\n");
-        HDexit(3);
+        exit_value = 3;
+        goto done;
     }
     if (!HDmemcmp(sig, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN)) {
         /*
@@ -262,7 +271,8 @@ main(int argc, char *argv[])
                     HDfprintf(stderr, "B-tree symbol table node usage:\n");
                     HDfprintf(stderr,
                               "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
-                    HDexit(4);
+                    exit_value = 4;
+                    goto done;
                 } /* end if */
 
                 status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
@@ -277,7 +287,8 @@ main(int argc, char *argv[])
                     HDfprintf(stderr, "B-tree chunked storage node usage:\n");
                     HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> <slowest "
                                       "chunk dim>...<fastest chunk dim>\n");
-                    HDexit(4);
+                    exit_value = 4;
+                    goto done;
                 } /* end if */
 
                 /* Build array of chunk dimensions */
@@ -287,7 +298,8 @@ main(int argc, char *argv[])
 
             default:
                 HDfprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
-                HDexit(4);
+                exit_value = 4;
+                goto done;
         }
     }
     else if (!HDmemcmp(sig, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
@@ -315,7 +327,8 @@ main(int argc, char *argv[])
             HDfprintf(stderr, "v2 B-tree internal node usage:\n");
             HDfprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> "
                               "<number of records> <depth>\n");
-            HDexit(4);
+            exit_value = 4;
+            goto done;
         } /* end if */
 
         status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra,
@@ -337,7 +350,8 @@ main(int argc, char *argv[])
             HDfprintf(
                 stderr,
                 "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number of records>\n");
-            HDexit(4);
+            exit_value = 4;
+            goto done;
         } /* end if */
 
         status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra,
@@ -362,7 +376,8 @@ main(int argc, char *argv[])
             HDfprintf(
                 stderr,
                 "\th5debug <filename> <direct block address> <heap header address> <size of direct block>\n");
-            HDexit(4);
+            exit_value = 4;
+            goto done;
         } /* end if */
 
         status = H5HF_dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (size_t)extra2);
@@ -380,7 +395,8 @@ main(int argc, char *argv[])
             HDfprintf(
                 stderr,
                 "\th5debug <filename> <indirect block address> <heap header address> <number of rows>\n");
-            HDexit(4);
+            exit_value = 4;
+            goto done;
         } /* end if */
 
         status =
@@ -405,7 +421,8 @@ main(int argc, char *argv[])
             HDfprintf(stderr, "Free space serialized sections usage:\n");
             HDfprintf(stderr, "\th5debug <filename> <serialized sections address> <free space header "
                               "address> <client address>\n");
-            HDexit(4);
+            exit_value = 4;
+            goto done;
         } /* end if */
 
         status = H5FS_sects_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, extra2);
@@ -431,7 +448,8 @@ main(int argc, char *argv[])
             HDfprintf(stderr, "Shared message list usage:\n");
             HDfprintf(stderr, "\th5debug <filename> <shared message list address> <list format version> "
                               "<number of mesages in list>\n");
-            HDexit(4);
+            exit_value = 4;
+            goto done;
         } /* end if */
 
         status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned)extra,
@@ -469,21 +487,27 @@ main(int argc, char *argv[])
         HDputchar('\n');
 
         HDfprintf(stderr, "unknown signature\n");
-        HDexit(4);
+        exit_value = 4;
+        goto done;
     } /* end else */
 
     /* Check for an error when dumping information */
     if (status < 0) {
         HDfprintf(stderr, "An error occurred!\n");
         H5Eprint2(H5E_DEFAULT, stderr);
-        HDexit(5);
+        exit_value = 5;
+        goto done;
     } /* end if */
 
-    H5Pclose(dxpl);
-    H5Pclose(fapl);
-    H5Fclose(fid);
+done:
+    if (dxpl > 0)
+        H5Pclose(dxpl);
+    if (fapl > 0)
+        H5Pclose(fapl);
+    if (fid > 0)
+        H5Fclose(fid);
 
     H5Eset_auto2(H5E_DEFAULT, func, edata);
 
-    return 0;
+    return exit_value;
 } /* main() */

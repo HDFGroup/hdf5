@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5f90i_H
-#define _H5f90i_H
+#ifndef H5f90i_H
+#define H5f90i_H
 
 /*
  * Include generated header.  This header defines integer types,
@@ -20,8 +20,7 @@
  */
 #include "H5f90i_gen.h"
 
-/* Define _fcd.  These are the same on every system
- * but UNICOS.
+/* Define _fcd.  These are the same on every system but UNICOS.
  */
 #define _fcdtocp(desc) (desc)
 
@@ -37,4 +36,4 @@ typedef char *_fcd;
 
 #endif
 
-#endif /* _H5f90i_H */
+#endif /* H5f90i_H */

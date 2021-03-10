@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5T module
  */
-#ifndef _H5Tprivate_H
-#define _H5Tprivate_H
+#ifndef H5Tprivate_H
+#define H5Tprivate_H
 
 /* Get package's public header */
 #include "H5Tpublic.h"
@@ -158,4 +158,4 @@ H5_DLL int         H5T_get_offset(const H5T_t *dt);
 /* Fixed-point functions */
 H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
 
-#endif /* _H5Tprivate_H */
+#endif /* H5Tprivate_H */

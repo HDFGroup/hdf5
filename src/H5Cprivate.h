@@ -13,26 +13,24 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:        H5Cprivate.h
+ * Created:   H5Cprivate.h
  *            6/3/04
  *            John Mainzer
  *
- * Purpose:        Constants and typedefs available to the rest of the
+ * Purpose:   Constants and typedefs available to the rest of the
  *            library.
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5Cprivate_H
-#define _H5Cprivate_H
+#ifndef H5Cprivate_H
+#define H5Cprivate_H
 
-#include "H5Cpublic.h" /* public prototypes                */
+#include "H5Cpublic.h" /* public prototypes            */
 
-/* Pivate headers needed by this header */
+/* Private headers needed by this header */
 #include "H5private.h"  /* Generic Functions            */
-#include "H5Fprivate.h" /* File access                */
+#include "H5Fprivate.h" /* File access                  */
 
 #define H5C_DO_SANITY_CHECKS         0
 #define H5C_DO_EXTREME_SANITY_CHECKS 0
@@ -57,13 +55,9 @@
  * H5C_COLLECT_CACHE_STATS is also defined to true.
  */
 #if H5C_COLLECT_CACHE_STATS
-
 #define H5C_COLLECT_CACHE_ENTRY_STATS 1
-
 #else
-
 #define H5C_COLLECT_CACHE_ENTRY_STATS 0
-
 #endif /* H5C_COLLECT_CACHE_STATS */
 
 #ifdef H5_HAVE_PARALLEL
@@ -84,7 +78,6 @@
 #endif /* H5_HAVE_PARALLEL */
 
 /* Typedef for the main structure for the cache (defined in H5Cpkg.h) */
-
 typedef struct H5C_t H5C_t;
 
 /*
@@ -526,7 +519,6 @@ typedef struct H5C_cache_entry_t {
     struct H5C_cache_entry_t *ht_prev;
 
     /* fields supporting replacement policies: */
-
     struct H5C_cache_entry_t *next;
     struct H5C_cache_entry_t *prev;
     struct H5C_cache_entry_t *aux_next;
@@ -540,9 +532,7 @@ typedef struct H5C_cache_entry_t {
     int32_t clears;
     int32_t flushes;
     int32_t pins;
-
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
-
 } H5C_cache_entry_t;
 
 /****************************************************************************
@@ -1037,4 +1027,4 @@ H5_DLL herr_t H5C_unprotect(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxp
 
 H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests);
 
-#endif /* !_H5Cprivate_H */
+#endif /* H5Cprivate_H */

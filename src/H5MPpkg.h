@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5MP package!"
 #endif
 
-#ifndef _H5MPpkg_H
-#define _H5MPpkg_H
+#ifndef H5MPpkg_H
+#define H5MPpkg_H
 
 /* Get package's private header */
 #include "H5MPprivate.h" /* Memory Pools				*/
@@ -96,4 +96,4 @@ H5_DLL herr_t H5MP_get_page_free_size(const H5MP_page_t *mp, size_t *page);
 H5_DLL herr_t H5MP_get_page_next_page(const H5MP_page_t *page, H5MP_page_t **next_page);
 #endif /* H5MP_TESTING */
 
-#endif /* _H5MPpkg_H */
+#endif /* H5MPpkg_H */

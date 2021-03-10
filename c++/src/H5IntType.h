@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5IntType_H
-#define __H5IntType_H
+#ifndef H5IntType_H
+#define H5IntType_H
 
 namespace H5 {
 
@@ -59,7 +59,7 @@ class H5_DLLCPP IntType : public AtomType {
     // Creates a integer datatype using an existing id
     IntType(const hid_t existing_id);
 
-    // Copy constructor: makes copy of IntType object
+    // Copy constructor: same as the original IntType.
     IntType(const IntType &original);
 
     // Noop destructor.
@@ -68,4 +68,4 @@ class H5_DLLCPP IntType : public AtomType {
 }; // end of IntType
 } // namespace H5
 
-#endif // __H5IntType_H
+#endif // H5IntType_H

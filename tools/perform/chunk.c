@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <robb@arborea.spizella.com>
+ * Programmer:  Robb Matzke
  *              Thursday, May 14, 1998
  *
  * Purpose:	Checks the effect of various I/O request sizes and raw data

@@ -17,8 +17,8 @@
  *        This file contains common #defines, type definitions, and
  *        externs for tests of the cache implemented in H5C.c
  */
-#ifndef _CACHE_COMMON_H
-#define _CACHE_COMMON_H
+#ifndef CACHE_COMMON_H
+#define CACHE_COMMON_H
 
 #define H5C_PACKAGE /*suppress error about including H5Cpkg   */
 #define H5F_PACKAGE /*suppress error about including H5Fpkg   */
@@ -529,4 +529,4 @@ void check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *
 void validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, hbool_t compare_init,
                          int test_num);
 
-#endif /* _CACHE_COMMON_H */
+#endif /* CACHE_COMMON_H */

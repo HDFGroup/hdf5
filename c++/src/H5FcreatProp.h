@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5FileCreatPropList_H
-#define __H5FileCreatPropList_H
+#ifndef H5FileCreatPropList_H
+#define H5FileCreatPropList_H
 
 namespace H5 {
 
@@ -67,7 +67,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
         return ("FileCreatPropList");
     }
 
-    // Copy constructor: creates a copy of a FileCreatPropList object.
+    // Copy constructor: same as the original FileCreatPropList.
     FileCreatPropList(const FileCreatPropList &orig);
 
     // Creates a copy of an existing file create property list
@@ -93,4 +93,4 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 }; // end of FileCreatPropList
 } // namespace H5
 
-#endif // __H5FileCreatPropList_H
+#endif // H5FileCreatPropList_H

@@ -15,8 +15,8 @@
  * This file contains macros & information for file access
  */
 
-#ifndef _H5Fprivate_H
-#define _H5Fprivate_H
+#ifndef H5Fprivate_H
+#define H5Fprivate_H
 
 /* Include package's public header */
 #include "H5Fpublic.h"
@@ -696,4 +696,4 @@ H5_DLL herr_t H5F_cwfs_remove_heap(H5F_file_t *shared, struct H5HG_heap_t *heap)
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth);
 
-#endif /* _H5Fprivate_H */
+#endif /* H5Fprivate_H */

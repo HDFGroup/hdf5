@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5DataType_H
-#define __H5DataType_H
+#ifndef H5DataType_H
+#define H5DataType_H
 
 namespace H5 {
 
@@ -30,13 +30,13 @@ class H5_DLLCPP DataType : public H5Object {
     // Creates a datatype given its class and size
     DataType(const H5T_class_t type_class, size_t size);
 
-    // Copy constructor: makes a copy of the original object
+    // Copy constructor - same as the original DataType.
     DataType(const DataType &original);
 
     // Creates a copy of a predefined type
     DataType(const PredType &pred_type);
 
-    // Opens a generic named datatype at a given location.
+    // Constructors to open a generic named datatype at a given location.
     DataType(const H5Location &loc, const char *name);
     DataType(const H5Location &loc, const H5std_string &name);
 
@@ -158,6 +158,7 @@ class H5_DLLCPP DataType : public H5Object {
 
     // Opens a datatype and returns the id.
     hid_t p_opentype(const H5Location &loc, const char *dtype_name) const;
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
   private:
@@ -176,4 +177,4 @@ class H5_DLLCPP DataType : public H5Object {
 }; // end of DataType
 } // namespace H5
 
-#endif // __H5DataType_H
+#endif // H5DataType_H

@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5LinkCreatPropList_H
-#define __H5LinkCreatPropList_H
+#ifndef H5LinkCreatPropList_H
+#define H5LinkCreatPropList_H
 
 namespace H5 {
 
@@ -59,8 +59,8 @@ class H5_DLLCPP LinkCreatPropList : public StrCreatPropList {
     static LinkCreatPropList *getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-};     // end of LinkCreatPropList
 
+}; // end of LinkCreatPropList
 } // namespace H5
 
-#endif // __H5LinkCreatPropList_H
+#endif // H5LinkCreatPropList_H

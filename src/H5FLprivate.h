@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5FLprivate_H
-#define _H5FLprivate_H
+#ifndef H5FLprivate_H
+#define H5FLprivate_H
 
 /* Public headers needed by this file */
 #ifdef LATER

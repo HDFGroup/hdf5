@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5S package!"
 #endif
 
-#ifndef _H5Spkg_H
-#define _H5Spkg_H
+#ifndef H5Spkg_H
+#define H5Spkg_H
 
 /* Get package's private header */
 #include "H5Sprivate.h"
@@ -289,4 +289,4 @@ H5_DLL htri_t H5S_select_shape_same_test(hid_t sid1, hid_t sid2);
 H5_DLL htri_t H5S_get_rebuild_status_test(hid_t space_id);
 #endif /* H5S_TESTING */
 
-#endif /*_H5Spkg_H*/
+#endif /*H5Spkg_H*/

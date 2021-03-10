@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Oprivate_H
-#define _H5Oprivate_H
+#ifndef H5Oprivate_H
+#define H5Oprivate_H
 
 /* Include the public header file for this API */
 #include "H5Opublic.h" /* Object header functions              */
@@ -749,4 +749,4 @@ H5_DLL herr_t H5O_pline_set_latest_version(H5O_pline_t *pline);
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);
 
-#endif /* _H5Oprivate_H */
+#endif /* H5Oprivate_H */

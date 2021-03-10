@@ -10,8 +10,8 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef H5DUMP_H__
-#define H5DUMP_H__
+#ifndef H5DUMP_H
+#define H5DUMP_H
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -110,4 +110,4 @@ const dump_functions *dump_function_table;
 }
 #endif
 
-#endif /* !H5DUMP_H__ */
+#endif /* H5DUMP_H */
