@@ -105,7 +105,7 @@ OPQ_SIZE         {return token(OPQ_SIZE_TOKEN);}
 OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
 
 [0-9]+           {
-                        H5LTyylval.ival = atoi(yytext);
+                        H5LTyylval.ival = HDatoi(yytext);
                         return NUMBER;
                  }
 
@@ -132,12 +132,12 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
 static char *
 trim_quotes(const char *quoted)
 {
-    size_t len = strlen(quoted);
+    size_t len = HDstrlen(quoted);
     char *trimmed;
 
-    assert(quoted[0] == '"' && quoted[len - 1] == '"');
+    HDassert(quoted[0] == '"' && quoted[len - 1] == '"');
 
-    trimmed = strdup(quoted + 1);
+    trimmed = HDstrdup(quoted + 1);
     trimmed[len - 2] = '\0';
 
     return trimmed;
@@ -147,14 +147,14 @@ int my_yyinput(char *buf, int max_size)
 {
    int ret;
 
-   memcpy(buf, myinput, input_len);
+   HDmemcpy(buf, myinput, input_len);
    ret = (int)input_len;
    return ret;
 }
 
 int H5LTyyerror(const char *msg)
 {
-   printf("ERROR: %s before \"%s\".\n", msg, yytext);
+   HDprintf("ERROR: %s before \"%s\".\n", msg, yytext);
    return 0;
 }
 

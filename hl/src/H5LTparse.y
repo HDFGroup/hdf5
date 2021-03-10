@@ -190,7 +190,7 @@ memb_def        :       ddl_type { cmpd_stack[csindex].is_field = 1; /*notify le
                                 }
                             }
                             if($<sval>3) {
-                                free($<sval>3);
+                                HDfree($<sval>3);
                                 $<sval>3 = NULL;
                             }
                             cmpd_stack[csindex].is_field = 0;
@@ -201,8 +201,8 @@ memb_def        :       ddl_type { cmpd_stack[csindex].is_field = 1; /*notify le
                 ;
 field_name      :       STRING
                         {
-                            $<sval>$ = strdup(yylval.sval);
-                            free(yylval.sval);
+                            $<sval>$ = HDstrdup(yylval.sval);
+                            HDfree(yylval.sval);
                             yylval.sval = NULL;
                         }                            
                 ;
@@ -250,7 +250,7 @@ opaque_type     :       H5T_OPAQUE_TOKEN
                             OPQ_TAG_TOKEN opaque_tag ';'
                             {  
                                 H5Tset_tag($<hid>6, yylval.sval);
-                                free(yylval.sval);
+                                HDfree(yylval.sval);
                                 yylval.sval = NULL;
                             }                             
                         '}' { $<hid>$ = $<hid>6; }
@@ -334,7 +334,7 @@ enum_list       :
 enum_def        :       enum_symbol         {
                                                 is_enum_memb = 1; /*indicate member of enum*/
                                                 enum_memb_symbol = strdup(yylval.sval); 
-                                                free(yylval.sval);
+                                                HDfree(yylval.sval);
                                                 yylval.sval = NULL;
                                             }
                         enum_val ';'
@@ -374,7 +374,7 @@ enum_def        :       enum_symbol         {
                                     }
 
                                     is_enum_memb = 0; 
-                                    if(enum_memb_symbol) free(enum_memb_symbol);
+                                    if(enum_memb_symbol) HDfree(enum_memb_symbol);
                                 }
 
                                 H5Tclose(super);
