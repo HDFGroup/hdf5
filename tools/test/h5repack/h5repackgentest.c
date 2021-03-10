@@ -73,7 +73,7 @@ struct external_def {
  */
 static int
 make_dataset(hid_t file_id, const char *dset_name, hid_t mem_type_id, hid_t space_id, hid_t dcpl_id,
-               void *wdata)
+             void *wdata)
 {
     hid_t dset_id   = H5I_INVALID_HID;
     int   ret_value = 0;
@@ -102,7 +102,7 @@ done:
  */
 static int
 set_dcpl_external_list(hid_t dcpl, const char *filename, unsigned n_elts_per_file, unsigned n_elts_total,
-                         hsize_t elt_size)
+                       hsize_t elt_size)
 {
     char     name[MAX_NAME_SIZE];
     unsigned n_external_files = 0;
@@ -133,7 +133,7 @@ set_dcpl_external_list(hid_t dcpl, const char *filename, unsigned n_elts_per_fil
  */
 static int
 make_file(const char *basename, struct external_def *ext, hid_t type_id, hsize_t rank, hsize_t *dims,
-            void *wdata)
+          void *wdata)
 {
     char  filename[MAX_NAME_SIZE];
     hid_t file_id   = H5I_INVALID_HID;
@@ -150,7 +150,7 @@ make_file(const char *basename, struct external_def *ext, hid_t type_id, hsize_t
             H5REPACKGENTEST_OOPS;
 
         if (set_dcpl_external_list(dcpl_id, basename, ext->n_elts_per_file, ext->n_elts_total,
-                                     ext->type_size) < 0)
+                                   ext->type_size) < 0)
             H5REPACKGENTEST_OOPS;
     }
 
