@@ -3306,8 +3306,6 @@ get_member_types(hid_t tid, mcomp_t *members)
             get_member_types(members->ids[u], members->m[u]);
         }
     }
-
-    return;
 }
 
 /*-------------------------------------------------------------------------
