@@ -616,11 +616,11 @@ fi
 if [ ${do_groups:-no} = yes ]; then
 	echo launch vfd_swmr_group_writer
 	catch_out_err_and_rc vfd_swmr_group_writer \
-	    ../vfd_swmr_group_writer -q -u 10 -n 10000 &
+	    ../vfd_swmr_group_writer -q -c 1000 -n 10000 &
 	pid_writer=$!
 
 	catch_out_err_and_rc vfd_swmr_group_reader \
-	    ../vfd_swmr_group_reader -q -u 10 -n 10000 -W &
+	    ../vfd_swmr_group_reader -q -c 1000 -n 10000 &
 	pid_reader=$!
 
 	# Wait for the reader to finish before signalling the
@@ -628,7 +628,6 @@ if [ ${do_groups:-no} = yes ]; then
 	# reader will find the shadow file when it opens
 	# the .h5 file.
 	wait $pid_reader
-	kill -USR1 $(cat vfd_swmr_group_writer.pid)
 	wait $pid_writer
 
 	# Collect exit code of the reader
