@@ -2561,7 +2561,7 @@ test_select_hyper_contig_dr(hid_t dset_type, hid_t xfer_plist)
 static void
 test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid, unsigned tgt_n_cube_rank,
                                                          unsigned edge_size, unsigned checker_edge_size,
-                                                         unsigned sel_rank, hsize_t sel_start[])
+                                                         unsigned sel_rank, const hsize_t sel_start[])
 {
     hbool_t  first_selection = TRUE;
     unsigned n_cube_offset;

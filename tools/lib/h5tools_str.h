@@ -36,7 +36,7 @@ H5TOOLS_DLL char * h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t 
  * new functions needed to display region reference data
  */
 H5TOOLS_DLL char *h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info, hsize_t elmtno,
-                                            hsize_t *ptdata, h5tools_context_t *ctx);
+                                            const hsize_t *ptdata, h5tools_context_t *ctx);
 H5TOOLS_DLL void  h5tools_str_dump_space_slabs(h5tools_str_t *, hid_t, const h5tool_format_t *,
                                                h5tools_context_t *ctx);
 H5TOOLS_DLL void  h5tools_str_dump_space_blocks(h5tools_str_t *, hid_t, const h5tool_format_t *);
