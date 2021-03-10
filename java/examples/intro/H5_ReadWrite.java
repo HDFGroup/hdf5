@@ -26,9 +26,9 @@ public class H5_ReadWrite {
     private static final int DIM_Y = 6;
 
     private static void ReadWriteDataset() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM_X, DIM_Y };
         int[][] dset_data = new int[DIM_X][DIM_Y];
 

@@ -23,7 +23,7 @@ public class H5_CreateFile {
     static final String FILENAME = "H5_CreateFile.h5";
 
     private static void CreateFile() {
-        long file_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
 
         // Create a new file using default properties.
         try {

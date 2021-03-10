@@ -31,12 +31,12 @@ public class H5_CreateGroupDataset {
     private static final int DIM2_Y = 10;
 
     private static void h5_crtgrpd() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long group_id = -1;
-        long group1_id = -1;
-        long group2_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long group_id = HDF5Constants.H5I_INVALID_HID;
+        long group1_id = HDF5Constants.H5I_INVALID_HID;
+        long group2_id = HDF5Constants.H5I_INVALID_HID;
         int[][] dset1_data = new int[DIM1_X][DIM1_Y];
         int[][] dset2_data = new int[DIM2_X][DIM2_Y];
         long[] dims1 = { DIM1_X, DIM1_Y };
@@ -107,7 +107,7 @@ public class H5_CreateGroupDataset {
         try {
             if (dataspace_id >= 0)
                 H5.H5Sclose(dataspace_id);
-            dataspace_id = -1;
+            dataspace_id = HDF5Constants.H5I_INVALID_HID;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -117,7 +117,7 @@ public class H5_CreateGroupDataset {
         try {
             if (dataset_id >= 0)
                 H5.H5Dclose(dataset_id);
-            dataset_id = -1;
+            dataset_id = HDF5Constants.H5I_INVALID_HID;
         }
         catch (Exception e) {
             e.printStackTrace();

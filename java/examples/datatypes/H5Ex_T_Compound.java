@@ -121,12 +121,12 @@ public class H5Ex_T_Compound {
     }
 
     private static void CreateDataset() {
-        long file_id = -1;
-        long strtype_id = -1;
-        long memtype_id = -1;
-        long filetype_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long strtype_id = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         Sensor[] object_data = new Sensor[DIM0];
         byte[] dset_data = null;
@@ -285,11 +285,11 @@ public class H5Ex_T_Compound {
     }
 
     private static void ReadDataset() {
-        long file_id = -1;
-        long strtype_id = -1;
-        long memtype_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long strtype_id = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         Sensor[] object_data2;
         byte[] dset_data;
