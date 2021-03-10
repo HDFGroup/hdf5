@@ -465,7 +465,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-__add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, hsize_t max_ext_size)
+add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, hsize_t max_ext_size)
 {
     char         exname[AEF_EXNAME_MAX_LEN + 1];
     unsigned int i = 0;
@@ -519,7 +519,7 @@ test_multiple_files(hid_t file)
 
     max_ext_size = (hsize_t)(sizeof(int) * max_size[0] / n_external_files);
 
-    if (__add_external_files(dcpl, n_external_files, 0, max_ext_size) < 0) {
+    if (add_external_files(dcpl, n_external_files, 0, max_ext_size) < 0) {
         FAIL_STACK_ERROR;
     }
 
@@ -543,7 +543,7 @@ test_multiple_files(hid_t file)
 
     max_ext_size -= 1;
 
-    if (__add_external_files(dcpl, n_external_files, 0, max_ext_size) < 0) {
+    if (add_external_files(dcpl, n_external_files, 0, max_ext_size) < 0) {
         FAIL_STACK_ERROR;
     }
 
