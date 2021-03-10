@@ -2689,9 +2689,8 @@ create_or_validate_selection(hid_t fid, const char *full_path,
 static void
 random_pause(unsigned int max_pause_msecs)
 {
-    struct timespec delay;
-    const uint64_t nsecs_per_sec = 1000 * 1000 * 1000;
-    uint64_t nsecs_per_msec, nsecs;
+    uint64_t nsecs_per_msec;
+    uint64_t nsecs;
 
     if (max_pause_msecs == 0)
         return;
@@ -2699,16 +2698,7 @@ random_pause(unsigned int max_pause_msecs)
     nsecs_per_msec = 1 + (uint64_t)HDrandom() % (1000 * 1000);
     nsecs = max_pause_msecs * nsecs_per_msec;
 
-    delay.tv_sec = (time_t)(nsecs / nsecs_per_sec);
-    delay.tv_nsec = (long)(nsecs % nsecs_per_sec);
-    for (;;) {
-        if (HDnanosleep(&delay, &delay) == 0)
-            break;
-        if (errno == EINTR)
-            continue;
-        HDfprintf(stderr, "%s: nanosleep", __func__);
-        HDexit(EXIT_FAILURE);
-    }
+    H5_nanosleep(nsecs);
 }
 
 /* Create and validate objects or, if `only_validate` is true, only
