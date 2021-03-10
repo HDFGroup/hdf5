@@ -76,7 +76,7 @@ test_logging_api(void)
     if (H5Pget_mdc_log_options(fapl, &is_enabled_out, location, &size, &start_on_access_out) < 0)
         TEST_ERROR;
     if ((is_enabled != is_enabled_out) || (start_on_access != start_on_access_out) ||
-        HDstrcmp(LOG_LOCATION, location))
+        HDstrcmp(LOG_LOCATION, location) != 0)
         TEST_ERROR;
 
     /* Create a file */

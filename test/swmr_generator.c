@@ -286,7 +286,7 @@ main(int argc, const char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if (HDstrcmp(index_type, "ea") && HDstrcmp(index_type, "b2"))
+                        if (HDstrcmp(index_type, "ea") != 0 && HDstrcmp(index_type, "b2") != 0)
                             usage();
                         u += 2;
                         break;

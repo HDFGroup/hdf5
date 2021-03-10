@@ -589,7 +589,7 @@ visit_obj_cb(H5Object &obj, const H5std_string name, const H5O_info2_t *oinfo, v
     ovisit_ud_t *op_data = static_cast<ovisit_ud_t *>(_op_data);
 
     // Check for correct object information
-    if (strcmp(op_data->info[op_data->idx].path, name.c_str()))
+    if (strcmp(op_data->info[op_data->idx].path, name.c_str()) != 0)
         return (H5_ITER_ERROR);
     if (op_data->info[op_data->idx].type != oinfo->type)
         return (H5_ITER_ERROR);

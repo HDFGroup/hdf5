@@ -248,7 +248,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     fspace->addr = udata->addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -988,7 +988,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     H5_CHECKED_ASSIGN(old_sect_size, size_t, fspace->sect_size, hsize_t);
 
     /* Magic number */
-    if (HDmemcmp(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections signature")
     image += H5_SIZEOF_MAGIC;
 

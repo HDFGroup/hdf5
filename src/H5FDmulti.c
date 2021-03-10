@@ -731,7 +731,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     H5Eclear2(H5E_DEFAULT);
 
     /* Make sure the name/version number is correct */
-    if (strcmp(name, "NCSAmult"))
+    if (strcmp(name, "NCSAmult") != 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "invalid multi superblock", -1);
 
     /* Set default values */

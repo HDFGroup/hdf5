@@ -487,7 +487,7 @@ test_compound_5()
         int_array.close();
 
         /* Check results */
-        if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) || src[1].tdim != dst[1].tdim ||
+        if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) != 0 || src[1].tdim != dst[1].tdim ||
             src[1].coll_ids[0] != dst[1].coll_ids[0] || src[1].coll_ids[1] != dst[1].coll_ids[1] ||
             src[1].coll_ids[2] != dst[1].coll_ids[2] || src[1].coll_ids[3] != dst[1].coll_ids[3]) {
             H5_FAILED();

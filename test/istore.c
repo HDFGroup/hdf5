@@ -376,7 +376,7 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
             HDfprintf(stderr, "    Read failed: ctr=%lu\n", (unsigned long)ctr);
             goto error;
         }
-        if (HDmemcmp(buf, check, (size_t)nelmts)) {
+        if (HDmemcmp(buf, check, (size_t)nelmts) != 0) {
             H5_FAILED();
             HDfprintf(stderr, "    Read check failed: ctr=%lu\n", (unsigned long)ctr);
             HDfprintf(stderr, "    Wrote:\n");

@@ -773,7 +773,7 @@ read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, char *data)
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
 
-    if (HDstrcmp(data, data_read))
+    if (HDstrcmp(data, data_read) != 0)
         TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
 
     ret = H5Treclaim(type, space, H5P_DEFAULT, &data_read);
