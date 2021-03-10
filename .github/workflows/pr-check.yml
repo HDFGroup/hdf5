@@ -72,7 +72,7 @@ jobs:
 #  Threadsafe runs
           - name: "Windows TS MSVC"
             artifact: "Windows-MSVCTS.tar.xz"
-            os: windows-latest
+            os: windows-2016
             build_type: "Release"
             toolchain: ""
             cpp: OFF
@@ -80,7 +80,7 @@ jobs:
             ts: ON
             hl: OFF
             parallel: OFF
-            generator: "-G \"Visual Studio 16 2019\" -A x64"
+            generator: "-G \"Visual Studio 15 2017 Win64\""
           - name: "Ubuntu TS GCC"
             artifact: "LinuxTS.tar.xz"
             os: ubuntu-latest
