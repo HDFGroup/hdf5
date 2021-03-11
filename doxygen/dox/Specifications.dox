@@ -7,9 +7,10 @@
 
 \section File Format
 
-\li \ref FMT1 "HDF5 File Format Specification Version 1.1"
+\li \ref FMT1 "HDF5 File Format Specification Version 1.0"
+\li \ref FMT11 "HDF5 File Format Specification Version 1.1"
 \li \ref FMT2 "HDF5 File Format Specification Version 2.0"
-\li \ref FMT "HDF5 File Format Specification Version 3.0"
+\li \ref FMT3 "HDF5 File Format Specification Version 3.0"
 
 \section Other
 
