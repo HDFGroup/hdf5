@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5ST module
  */
-#ifndef _H5STprivate_H
-#define _H5STprivate_H
+#ifndef H5STprivate_H
+#define H5STprivate_H
 
 #ifdef LATER
 #include "H5STpublic.h"
@@ -60,4 +60,4 @@ H5_DLL herr_t       H5ST_delete(H5ST_tree_t *root, H5ST_ptr_t p);
 H5_DLL herr_t H5ST_dump(H5ST_tree_t *tree);
 #endif /* H5ST_DEBUG */
 
-#endif /* _H5STprivate_H */
+#endif /* H5STprivate_H */

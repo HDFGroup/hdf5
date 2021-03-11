@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -398,13 +398,13 @@ test_tconv(H5File &file)
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_BOGUS[1] = {{
-    H5Z_CLASS_T_VERS,         /* H5Z_class_t version number   */
-    H5Z_FILTER_BOGUS,         /* Filter id number             */
-    1, 1,                     /* Encode and decode enabled    */
-    "bogus",                  /* Filter name for debugging        */
-    NULL,                     /* The "can apply" callback     */
-    NULL,                     /* The "set local" callback     */
-    (H5Z_func_t)filter_bogus, /* The actual filter function        */
+    H5Z_CLASS_T_VERS, /* H5Z_class_t version number   */
+    H5Z_FILTER_BOGUS, /* Filter id number             */
+    1, 1,             /* Encode and decode enabled    */
+    "bogus",          /* Filter name for debugging        */
+    NULL,             /* The "can apply" callback     */
+    NULL,             /* The "set local" callback     */
+    filter_bogus,     /* The actual filter function        */
 }};
 
 /*-------------------------------------------------------------------------

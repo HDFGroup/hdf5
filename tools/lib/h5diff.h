@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef H5DIFF_H__
-#define H5DIFF_H__
+#ifndef H5DIFF_H
+#define H5DIFF_H
 
 #include "hdf5.h"
 #include "h5tools.h"
@@ -160,4 +160,4 @@ int  print_objname(diff_opt_t *opts, hsize_t nfound);
 void do_print_objname(const char *OBJ, const char *path1, const char *path2, diff_opt_t *opts);
 void do_print_attrname(const char *attr, const char *path1, const char *path2);
 
-#endif /* H5DIFF_H__ */
+#endif /* H5DIFF_H */

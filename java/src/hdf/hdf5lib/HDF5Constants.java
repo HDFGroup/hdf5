@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -47,10 +47,15 @@ public class HDF5Constants {
     public static final int H5_SZIP_ALLOW_K13_OPTION_MASK = H5_SZIP_ALLOW_K13_OPTION_MASK();
     /** Special parameters for szip compression */
     public static final int H5_SZIP_CHIP_OPTION_MASK = H5_SZIP_CHIP_OPTION_MASK();
+    /** indices on links, unknown index type */
     public static final int H5_INDEX_UNKNOWN = H5_INDEX_UNKNOWN();
+    /** indices on links, index on names */
     public static final int H5_INDEX_NAME = H5_INDEX_NAME();
+    /** indices on links, index on creation order */
     public static final int H5_INDEX_CRT_ORDER = H5_INDEX_CRT_ORDER();
+    /** indices on links, number of indices defined */
     public static final int H5_INDEX_N = H5_INDEX_N();
+    /** */
     public static final int H5_ITER_UNKNOWN = H5_ITER_UNKNOWN();
     public static final int H5_ITER_INC = H5_ITER_INC();
     public static final int H5_ITER_DEC = H5_ITER_DEC();

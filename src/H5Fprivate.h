@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
  * This file contains macros & information for file access
  */
 
-#ifndef _H5Fprivate_H
-#define _H5Fprivate_H
+#ifndef H5Fprivate_H
+#define H5Fprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5F_t H5F_t;
@@ -982,4 +982,4 @@ H5_DLL herr_t H5F_cwfs_remove_heap(H5F_shared_t *shared, struct H5HG_heap_t *hea
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth);
 
-#endif /* _H5Fprivate_H */
+#endif /* H5Fprivate_H */

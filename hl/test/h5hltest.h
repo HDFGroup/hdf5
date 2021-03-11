@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,8 +18,8 @@
  * Purpose:     Test support stuff.
  */
 
-#ifndef _H5HLTEST_H
-#define _H5HLTEST_H
+#ifndef H5HLTEST_H
+#define H5HLTEST_H
 
 /* Get the HDF5 test header */
 #include "h5test.h"
@@ -48,4 +48,4 @@
 
 int test_packet_table_with_varlen(void);
 
-#endif /* _H5HLTEST_H */
+#endif /* H5HLTEST_H */

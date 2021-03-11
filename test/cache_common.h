@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,8 +17,8 @@
  *        This file contains common #defines, type definitions, and
  *        externs for tests of the cache implemented in H5C.c
  */
-#ifndef _CACHE_COMMON_H
-#define _CACHE_COMMON_H
+#ifndef CACHE_COMMON_H
+#define CACHE_COMMON_H
 
 #define H5C_FRIEND /*suppress error about including H5Cpkg   */
 #define H5F_FRIEND /*suppress error about including H5Fpkg      */
@@ -694,4 +694,4 @@ H5TEST_DLL void dump_LRU(H5F_t * file_ptr);
 }
 #endif
 
-#endif /* _CACHE_COMMON_H */
+#endif /* CACHE_COMMON_H */

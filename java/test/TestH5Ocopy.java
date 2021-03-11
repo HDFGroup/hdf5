@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -36,13 +35,13 @@ public class TestH5Ocopy {
     private static final String FILENAME = "testRefsattribute.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
-    long H5fid = -1;
-    long H5dsid = -1;
-    long H5did1 = -1;
-    long H5did2 = -1;
-    long H5gcpl = -1;
-    long H5gid = -1;
-    long H5dsid2 = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid = HDF5Constants.H5I_INVALID_HID;
+    long H5did1 = HDF5Constants.H5I_INVALID_HID;
+    long H5did2 = HDF5Constants.H5I_INVALID_HID;
+    long H5gcpl = HDF5Constants.H5I_INVALID_HID;
+    long H5gid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid2 = HDF5Constants.H5I_INVALID_HID;
     long[] dims = { 2 };
 
     private final void _deleteFile(String filename) {
@@ -59,7 +58,7 @@ public class TestH5Ocopy {
     }
 
     private final long _createDataset(long fid, long dsid, String name, long dapl) {
-        long did = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
         try {
             did = H5.H5Dcreate(fid, name,
                         HDF5Constants.H5T_STD_I32BE, dsid,
@@ -75,7 +74,7 @@ public class TestH5Ocopy {
     }
 
     private final long _createGroup(long fid, String name) {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         try {
             H5gcpl = HDF5Constants.H5P_DEFAULT;
             gid = H5.H5Gcreate(fid, name, HDF5Constants.H5P_DEFAULT,
@@ -136,10 +135,10 @@ public class TestH5Ocopy {
 
     @Test
     public void testH5OcopyRefsAttr() {
-        long ocp_plist_id = -1;
+        long ocp_plist_id = HDF5Constants.H5I_INVALID_HID;
         byte rbuf0[]=null , rbuf1[] = null;
         byte[] dset_data = new byte[16];
-        long attribute_id = -1;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
 
 
         try {
@@ -184,9 +183,9 @@ public class TestH5Ocopy {
     public void testH5OcopyRefsDatasettodiffFile() {
         byte rbuf1[] = null;
         byte[] dset_data = new byte[16];
-        long ocp_plist_id = -1;
-        long dataset_id = -1;
-        long H5fid2 = -1;
+        long ocp_plist_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long H5fid2 = HDF5Constants.H5I_INVALID_HID;
 
         try {
             rbuf1 = H5.H5Rcreate(H5fid, "DS2", HDF5Constants.H5R_OBJECT, -1);
@@ -244,9 +243,9 @@ public class TestH5Ocopy {
     public void testH5OcopyRefsDatasettosameFile() {
         byte rbuf0[]=null , rbuf1[] = null;
         byte[] dset_data = new byte[16];
-        long ocp_plist_id = -1;
-        long dataset_id = -1;
-        long did = -1;
+        long ocp_plist_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long did = HDF5Constants.H5I_INVALID_HID;
         int obj_type = -1;
         byte[] read_data = new byte[16];
 
@@ -328,9 +327,9 @@ public class TestH5Ocopy {
 //    @Test(expected = HDF5LibraryException.class)
 //    public void testH5OcopyInvalidRef() throws Throwable {
 //        final long _pid_ = HDF5Constants.H5P_DEFAULT;
-//        long sid = -1;
-//        long did = -1;
-//        long aid = -1;
+//        long sid = HDF5Constants.H5I_INVALID_HID;
+//        long did = HDF5Constants.H5I_INVALID_HID;
+//        long aid = HDF5Constants.H5I_INVALID_HID;
 //
 //        try {
 //            sid = H5.H5Screate_simple(1, new long[] {1}, null);

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,10 +32,10 @@ import org.junit.rules.TestName;
 public class TestH5Gbasic {
     @Rule public TestName testname = new TestName();
     private static final String H5_FILE = "testGb.h5";
-    long H5fid = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
 
     private final long _createGroup(long fid, String name) {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         try {
             gid = H5.H5Gcreate(fid, name, HDF5Constants.H5P_DEFAULT,
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
@@ -85,7 +84,7 @@ public class TestH5Gbasic {
 
     @Test(expected = NullPointerException.class)
     public void testH5Gcreate_null() throws Throwable {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
 
         // it should fail because the group name is null
         gid = H5.H5Gcreate(H5fid, null, HDF5Constants.H5P_DEFAULT,
@@ -102,7 +101,7 @@ public class TestH5Gbasic {
 
     @Test
     public void testH5Gcreate() {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         try {
             gid = H5.H5Gcreate(H5fid, "/testH5Gcreate",
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
@@ -145,7 +144,7 @@ public class TestH5Gbasic {
 
     @Test
     public void testH5Gcreate_anon() {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         try {
             gid = H5.H5Gcreate_anon(H5fid, HDF5Constants.H5P_DEFAULT,
                     HDF5Constants.H5P_DEFAULT);
@@ -161,7 +160,7 @@ public class TestH5Gbasic {
 
     @Test(expected = NullPointerException.class)
     public void testH5Gopen_null() throws Throwable {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
 
         gid = H5.H5Gopen(H5fid, null, HDF5Constants.H5P_DEFAULT);
 
@@ -175,7 +174,7 @@ public class TestH5Gbasic {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Gopen_not_exists() throws Throwable {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
 
          gid = H5.H5Gopen(H5fid, "Never_created", HDF5Constants.H5P_DEFAULT);
 
@@ -209,7 +208,7 @@ public class TestH5Gbasic {
 
     @Test
     public void testH5Gget_create_plist() {
-        long pid = -1;
+        long pid = HDF5Constants.H5I_INVALID_HID;
         long gid = _createGroup(H5fid, "/testH5Gcreate");
         assertTrue(gid > 0);
 

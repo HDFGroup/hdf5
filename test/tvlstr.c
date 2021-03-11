@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -659,8 +659,6 @@ test_write_vl_string_attribute(void)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 
 /****************************************************************
@@ -739,8 +737,6 @@ test_read_vl_string_attribute(void)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 
 /* Helper routine for test_vl_rewrite() */
@@ -864,8 +860,6 @@ test_vl_rewrite(void)
 
     ret = H5Fclose(file2);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 } /* end test_vl_rewrite() */
 
 /****************************************************************

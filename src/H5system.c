@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -66,7 +66,7 @@
 /* Track whether tzset routine was called */
 static hbool_t H5_ntzset = FALSE;
 
-#ifndef HDvasprintf
+#ifndef H5_HAVE_VASPRINTF
 /* HDvasprintf provides vasprintf-like function on targets where it is
  * unavailable.
  */
@@ -94,7 +94,7 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
     }
     return -1;
 }
-#endif
+#endif /* H5_HAVE_VASPRINTF */
 
 /*-------------------------------------------------------------------------
  * Function:  HDstrtoll
@@ -737,7 +737,7 @@ Wroundf(float arg)
  *
  *-------------------------------------------------------------------------
  */
-const wchar_t *
+wchar_t *
 H5_get_utf16_str(const char *s)
 {
     int      nwchars = -1;   /* Length of the UTF-16 buffer */
@@ -833,7 +833,7 @@ int
 Wremove_utf8(const char *path)
 {
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
-    int      ret;
+    int      ret   = -1;
 
     /* Convert the input UTF-8 path to UTF-16 */
     if (NULL == (wpath = H5_get_utf16_str(path)))
@@ -986,7 +986,7 @@ done:
 herr_t
 H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
 {
-    size_t path1_len;           /* length of path1 */
+    size_t path1_len = 0;       /* length of path1 */
     size_t path2_len;           /* length of path2 */
     herr_t ret_value = SUCCEED; /* Return value */
 

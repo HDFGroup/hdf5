@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -60,7 +60,7 @@ main(void)
     hsize_t start_out[2], stride_out[2], count_out[2], block_out[2];
     int     wdata[DIM0],         /* Write buffer for source dataset */
         rdata[VDSDIM0][VDSDIM1], /* Read buffer for virtual dataset */
-        i, j, k, l;
+        i, j, k, l, block_inc;
     int          fill_value = -1; /* Fill value for VDS */
     H5D_layout_t layout;          /* Storage layout */
     size_t       num_map;         /* Number of mappings */
@@ -178,13 +178,14 @@ main(void)
             buf     = (hsize_t *)malloc(sizeof(hsize_t) * 2 * RANK2 * nblocks);
             status  = H5Sget_select_hyper_blocklist(vspace, (hsize_t)0, nblocks, buf);
             for (l = 0; l < nblocks; l++) {
+                block_inc = 2 * RANK2 * l;
                 printf("(");
                 for (k = 0; k < RANK2 - 1; k++)
-                    printf("%d,", (int)buf[k]);
-                printf("%d ) - (", (int)buf[k]);
+                    printf("%d,", (int)buf[block_inc + k]);
+                printf("%d) - (", (int)buf[block_inc + k]);
                 for (k = 0; k < RANK2 - 1; k++)
-                    printf("%d,", (int)buf[RANK2 + k]);
-                printf("%d)\n", (int)buf[RANK2 + k]);
+                    printf("%d,", (int)buf[block_inc + RANK2 + k]);
+                printf("%d)\n", (int)buf[block_inc + RANK2 + k]);
             }
             /* We also can use new APIs to get start, stride, count and block */
             if (H5Sis_regular_hyperslab(vspace)) {

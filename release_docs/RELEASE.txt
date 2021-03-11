@@ -3,6 +3,7 @@ HDF5 version 1.12.1-4 currently under development
 
 
 INTRODUCTION
+============
 
 This document describes the new features introduced in the HDF5 1.12.0 release.
 It contains information on the platforms tested and known problems in this
@@ -253,6 +254,16 @@ New Features
 
     Library:
     --------
+    - H5Epush_ret() now requires a trailing semi-colon
+
+        H5Epush_ret() is a function-like macro that has been changed to
+        contain a `do {} while(0)` loop. Consequently, a trailing semi-colon
+        is now required to end the `while` statement. Previously, a trailing
+        semi would work, but was not mandatory. This change was made to allow
+        clang-format to correctly format the source code.
+
+        (SAM - 2021/03/03)
+
     - Improved performance of H5Sget_select_elem_pointlist
 
         Modified library to cache the point after the last block of points
@@ -276,7 +287,7 @@ New Features
         (QAK - 2020/03/25)
 
     Java Library:
-    ----------------
+    -------------
     - Added new H5S functions.
 
         H5Sselect_copy, H5Sselect_shape_same, H5Sselect_adjust,
@@ -309,14 +320,31 @@ New Features
         (ADB - 2020/08/05, HDFFV-9984)
 
 
-Support for new platforms, languages and compilers.
-=======================================
+Support for new platforms, languages and compilers
+==================================================
     -
 
 Bug Fixes since HDF5-1.12.0 release
-==================================
+===================================
     Library
     -------
+    - Remove underscores on header file guards
+
+        Header file guards used a variety of underscores at the beginning the define.
+
+        Removed all leading (some trailing) underscores from header file guards.
+
+        (ADB - 2021/03/03, #361)
+
+    - Fixed issue with MPI communicator and info object not being
+      copied into new FAPL retrieved from H5F_get_access_plist
+
+        Added logic to copy the MPI communicator and info object into
+        the output FAPL. MPI communicator is retrieved from the VFD, while
+        the MPI info object is retrieved from the file's original FAPL.
+
+        (JTH - 2021/02/15, HDFFV-11109)
+
     - Fixed problems with vlens and refs inside compound using
       H5VLget_file_type()
 
@@ -408,8 +436,16 @@ Bug Fixes since HDF5-1.12.0 release
         (QAK - 2020/05/07)
 
 
-    Java Library:
-    ----------------
+    Java Library
+    ------------
+    - JNI utility function does not handle new references.
+
+        The JNI utility function for converting reference data to string did
+        not use the new APIs. In addition to fixing that function, added new
+        java tests for using the new APIs.
+
+        (ADB - 2021/02/16, HDFFV-11212)
+
     - The H5FArray.java class, in which virtually the entire execution time
         is spent using the HDFNativeData method that converts from an array
         of bytes to an array of the destination Java type.
@@ -477,8 +513,8 @@ Bug Fixes since HDF5-1.12.0 release
         (QAK - 2020/06/05)
 
 
-    Fortran High-Level APIs:
-    ------
+    Fortran High-Level APIs
+    -----------------------
     -
 
 

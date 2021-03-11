@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef _H5private_H
-#define _H5private_H
+#ifndef H5private_H
+#define H5private_H
 
 #include "H5public.h" /* Include Public Definitions    */
 
@@ -306,19 +306,6 @@
  * gcc warnings (it has to use the public API and can't include this
  * file). Be sure to update that file if the #ifdefs change here.
  */
-#ifdef __cplusplus
-#define H5_ATTR_FORMAT(X, Y, Z) /*void*/
-#define H5_ATTR_UNUSED          /*void*/
-#define H5_ATTR_DEPRECATED_USED /*void*/
-#define H5_ATTR_NDEBUG_UNUSED   /*void*/
-#define H5_ATTR_DEBUG_API_USED  /*void*/
-#define H5_ATTR_PARALLEL_UNUSED /*void*/
-#define H5_ATTR_PARALLEL_USED   /*void*/
-#define H5_ATTR_NORETURN        /*void*/
-#define H5_ATTR_CONST           /*void*/
-#define H5_ATTR_PURE            /*void*/
-#define H5_ATTR_FALLTHROUGH     /*void*/
-#else                           /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
 #define H5_ATTR_UNUSED          __attribute__((unused))
@@ -365,7 +352,6 @@
 #define H5_ATTR_PURE            /*void*/
 #define H5_ATTR_FALLTHROUGH     /*void*/
 #endif
-#endif /* __cplusplus */
 
 /*
  * Networking headers used by the mirror VFD and related tests and utilities.
@@ -689,11 +675,6 @@ typedef struct {
 #ifndef HDacos
 #define HDacos(X) acos(X)
 #endif /* HDacos */
-#ifndef HDvasprintf
-#ifdef H5_HAVE_VASPRINTF
-#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
-#endif /* H5_HAVE_VASPRINTF */
-#endif /* HDvasprintf */
 #ifndef HDalarm
 #ifdef H5_HAVE_ALARM
 #define HDalarm(N) alarm(N)
@@ -1610,6 +1591,13 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDutime
 #define HDutime(S, T) utime(S, T)
 #endif /* HDutime */
+#ifndef HDvasprintf
+#ifdef H5_HAVE_VASPRINTF
+#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
+#else
+H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+#endif /* H5_HAVE_VASPRINTF */
+#endif /* HDvasprintf */
 #ifndef HDva_arg
 #define HDva_arg(A, T) va_arg(A, T)
 #endif /* HDva_arg */
@@ -2858,4 +2846,4 @@ H5_DLL herr_t  H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_b
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *marker,
                              size_t buf_offset, size_t buf_size);
 
-#endif /* _H5private_H */
+#endif /* H5private_H */

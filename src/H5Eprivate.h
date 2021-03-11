@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  *  Header file for error values, etc.
  */
-#ifndef _H5Eprivate_H
-#define _H5Eprivate_H
+#ifndef H5Eprivate_H
+#define H5Eprivate_H
 
 #include "H5Epublic.h"
 
@@ -209,4 +209,4 @@ H5_DLL herr_t H5E_printf_stack(H5E_t *estack, const char *file, const char *func
 H5_DLL herr_t H5E_clear_stack(H5E_t *estack);
 H5_DLL herr_t H5E_dump_api_stack(hbool_t is_api);
 
-#endif /* _H5Eprivate_H */
+#endif /* H5Eprivate_H */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,8 +30,8 @@
 #error "Do not include this file outside the H5AC package!"
 #endif
 
-#ifndef _H5ACpkg_H
-#define _H5ACpkg_H
+#ifndef H5ACpkg_H
+#define H5ACpkg_H
 
 /* Get package's private header */
 #include "H5ACprivate.h" /* Metadata cache			*/
@@ -423,4 +423,4 @@ H5_DLL herr_t H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
 H5_DLL herr_t H5AC__set_write_done_callback(H5C_t *cache_ptr, void (*write_done)(void));
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5ACpkg_H */
+#endif /* H5ACpkg_H */

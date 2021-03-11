@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -2092,6 +2092,7 @@ error:
 unsigned
 test_swmr_write_big(hbool_t newest_format)
 {
+#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_UNISTD_H)
     hid_t    fid  = -1;   /* File ID */
     hid_t    fapl = -1;   /* File access property list */
     H5F_t *  rf   = NULL; /* File pointer */
@@ -2099,25 +2100,15 @@ test_swmr_write_big(hbool_t newest_format)
     uint8_t *wbuf2 = NULL, *rbuf = NULL; /* Buffers for reading & writing */
     uint8_t  wbuf[1024];                 /* Buffer for reading & writing */
     unsigned u;                          /* Local index variable */
-#ifdef H5_HAVE_UNISTD_H
-    pid_t pid;                      /* Process ID */
-#endif                              /* H5_HAVE_UNISTD_H */
-    int     status;                 /* Status returned from child process */
-    char *  driver         = NULL;  /* VFD string (from env variable) */
-    hbool_t api_ctx_pushed = FALSE; /* Whether API context pushed */
+    pid_t    pid;                        /* Process ID */
+    int      status;                     /* Status returned from child process */
+    char *   driver         = NULL;      /* VFD string (from env variable) */
+    hbool_t  api_ctx_pushed = FALSE;     /* Whether API context pushed */
 
     if (newest_format)
         TESTING("SWMR write of large metadata: with latest format")
     else
         TESTING("SWMR write of large metadata: with non-latest-format")
-
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
-
-    SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
-    return 0;
-
-#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
@@ -2296,7 +2287,11 @@ error:
 
     return 1;
 
-#endif
+#else
+    SKIPPED();
+    HDputs("    Test skipped due to fork, waitpid, or pid_t not defined.");
+    return 0;
+#endif /* defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_UNISTD_H) */
 
 } /* end test_swmr_write_big() */
 

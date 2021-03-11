@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -440,4 +440,193 @@ test_plist_ed(void)
 
     ret = H5Pclose(acpl);
     VRFY((ret >= 0), "H5Pclose succeeded");
+}
+
+void
+external_links(void)
+{
+    hid_t lcpl  = H5I_INVALID_HID; /* link create prop. list */
+    hid_t lapl  = H5I_INVALID_HID; /* link access prop. list */
+    hid_t fapl  = H5I_INVALID_HID; /* file access prop. list */
+    hid_t gapl  = H5I_INVALID_HID; /* group access prop. list */
+    hid_t fid   = H5I_INVALID_HID; /* file id */
+    hid_t group = H5I_INVALID_HID; /* group id */
+    int   mpi_size, mpi_rank;
+
+    MPI_Comm comm;
+    int      doIO;
+    int      i, mrc;
+
+    herr_t ret;        /* Generic return value */
+    htri_t tri_status; /* tri return value */
+
+    const char *filename     = "HDF5test.h5";
+    const char *filename_ext = "HDF5test_ext.h5";
+    const char *group_path   = "/Base/Block/Step";
+    const char *link_name    = "link"; /* external link */
+    char        link_path[50];
+
+    if (VERBOSE_MED)
+        HDprintf("Check external links\n");
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Check MPI communicator access properties are passed to
+       linked external files */
+
+    if (mpi_rank == 0) {
+
+        lcpl = H5Pcreate(H5P_LINK_CREATE);
+        VRFY((lcpl >= 0), "H5Pcreate succeeded");
+
+        ret = H5Pset_create_intermediate_group(lcpl, 1);
+        VRFY((ret >= 0), "H5Pset_create_intermediate_group succeeded");
+
+        /* Create file to serve as target for external link.*/
+        fid = H5Fcreate(filename_ext, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((fid >= 0), "H5Fcreate succeeded");
+
+        group = H5Gcreate2(fid, group_path, lcpl, H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((group >= 0), "H5Gcreate succeeded");
+
+        ret = H5Gclose(group);
+        VRFY((ret >= 0), "H5Gclose succeeded");
+
+        ret = H5Fclose(fid);
+        VRFY((ret >= 0), "H5Fclose succeeded");
+
+        fapl = H5Pcreate(H5P_FILE_ACCESS);
+        VRFY((fapl >= 0), "H5Pcreate succeeded");
+
+        /* Create a new file using the file access property list. */
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+        VRFY((fid >= 0), "H5Fcreate succeeded");
+
+        ret = H5Pclose(fapl);
+        VRFY((ret >= 0), "H5Pclose succeeded");
+
+        group = H5Gcreate2(fid, group_path, lcpl, H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((group >= 0), "H5Gcreate succeeded");
+
+        /* Create external links to the target files. */
+        ret = H5Lcreate_external(filename_ext, group_path, group, link_name, H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((ret >= 0), "H5Lcreate_external succeeded");
+
+        /* Close and release resources. */
+        ret = H5Pclose(lcpl);
+        VRFY((ret >= 0), "H5Pclose succeeded");
+        ret = H5Gclose(group);
+        VRFY((ret >= 0), "H5Gclose succeeded");
+        ret = H5Fclose(fid);
+        VRFY((ret >= 0), "H5Fclose succeeded");
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /*
+     * For the first  case, use all the  processes. For the second case
+     * use  a sub-communicator  to verify  the  correct communicator is
+     * being used for the externally linked files.
+     * There is no way to determine if MPI info is being used for the
+     * externally linked files.
+     */
+
+    for (i = 0; i < 2; i++) {
+
+        if (i == 0) {
+            doIO = 1;
+            comm = MPI_COMM_WORLD;
+        }
+        else {
+            doIO = mpi_rank % 2;
+            mrc  = MPI_Comm_split(MPI_COMM_WORLD, doIO, mpi_rank, &comm);
+            VRFY((mrc == MPI_SUCCESS), "");
+        }
+
+        if (doIO) {
+            fapl = H5Pcreate(H5P_FILE_ACCESS);
+            VRFY((fapl >= 0), "H5Pcreate succeeded");
+            ret = H5Pset_fapl_mpio(fapl, comm, MPI_INFO_NULL);
+            VRFY((fapl >= 0), "H5Pset_fapl_mpio succeeded");
+
+            fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+            VRFY((fid >= 0), "H5Fopen succeeded");
+
+            /* test opening a group that is to an external link, the external linked
+               file should inherit the source file's access properties */
+            HDsprintf(link_path, "%s%s%s", group_path, "/", link_name);
+            group = H5Gopen2(fid, link_path, H5P_DEFAULT);
+            VRFY((group >= 0), "H5Gopen succeeded");
+            ret = H5Gclose(group);
+            VRFY((ret >= 0), "H5Gclose succeeded");
+
+            /* test opening a group that is external link by setting group
+               creation property */
+            gapl = H5Pcreate(H5P_GROUP_ACCESS);
+            VRFY((gapl >= 0), "H5Pcreate succeeded");
+
+            ret = H5Pset_elink_fapl(gapl, fapl);
+            VRFY((ret >= 0), "H5Pset_elink_fapl succeeded");
+
+            group = H5Gopen2(fid, link_path, gapl);
+            VRFY((group >= 0), "H5Gopen succeeded");
+
+            ret = H5Gclose(group);
+            VRFY((ret >= 0), "H5Gclose succeeded");
+
+            ret = H5Pclose(gapl);
+            VRFY((ret >= 0), "H5Pclose succeeded");
+
+            /* test link APIs */
+            lapl = H5Pcreate(H5P_LINK_ACCESS);
+            VRFY((lapl >= 0), "H5Pcreate succeeded");
+
+            ret = H5Pset_elink_fapl(lapl, fapl);
+            VRFY((ret >= 0), "H5Pset_elink_fapl succeeded");
+
+            tri_status = H5Lexists(fid, link_path, H5P_DEFAULT);
+            VRFY((tri_status == TRUE), "H5Lexists succeeded");
+
+            tri_status = H5Lexists(fid, link_path, lapl);
+            VRFY((tri_status == TRUE), "H5Lexists succeeded");
+
+            group = H5Oopen(fid, link_path, H5P_DEFAULT);
+            VRFY((group >= 0), "H5Oopen succeeded");
+
+            ret = H5Oclose(group);
+            VRFY((ret >= 0), "H5Oclose succeeded");
+
+            group = H5Oopen(fid, link_path, lapl);
+            VRFY((group >= 0), "H5Oopen succeeded");
+
+            ret = H5Oclose(group);
+            VRFY((ret >= 0), "H5Oclose succeeded");
+
+            ret = H5Pclose(lapl);
+            VRFY((ret >= 0), "H5Pclose succeeded");
+
+            /* close the remaining resources */
+
+            ret = H5Pclose(fapl);
+            VRFY((ret >= 0), "H5Pclose succeeded");
+
+            ret = H5Fclose(fid);
+            VRFY((ret >= 0), "H5Fclose succeeded");
+
+            if (i == 1) {
+                mrc = MPI_Comm_free(&comm);
+                VRFY((mrc == MPI_SUCCESS), "MPI_Comm_free succeeded");
+            }
+        }
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /* delete the test files */
+    if (mpi_rank == 0) {
+        MPI_File_delete(filename, MPI_INFO_NULL);
+        MPI_File_delete(filename_ext, MPI_INFO_NULL);
+    }
 }

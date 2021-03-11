@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5MPprivate_H
-#define _H5MPprivate_H
+#ifndef H5MPprivate_H
+#define H5MPprivate_H
 
 /* Include package's public header (not yet) */
 /* #include "H5MPpublic.h" */
@@ -54,4 +54,4 @@ H5_DLL void *       H5MP_malloc(H5MP_pool_t *mp, size_t request);
 H5_DLL void *       H5MP_free(H5MP_pool_t *mp, void *spc);
 H5_DLL herr_t       H5MP_close(H5MP_pool_t *mp);
 
-#endif /* _H5MPprivate_H */
+#endif /* H5MPprivate_H */

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -72,28 +71,28 @@ public class TestH5VL {
 
     @Test
     public void testH5VLget_connector_id() {
-    	String H5_FILE = "testFvl.h5";
+        String H5_FILE = "testFvl.h5";
 
         long H5fid = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC,
                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
-    	try {
-    		long native_id = H5.H5VLget_connector_id(H5fid);
-    		assertTrue("H5.H5VLget_connector_id", native_id >= 0);
+        try {
+            long native_id = H5.H5VLget_connector_id(H5fid);
+            assertTrue("H5.H5VLget_connector_id", native_id >= 0);
 
-    		/*
-    		 * If HDF5_VOL_CONNECTOR is set, this might not be the
-    		 * native connector. Only check for the native connector
-    		 * if this isn't set.
-    		 */
-    		String connector = System.getenv("HDF5_VOL_CONNECTOR");
-    		if (connector == null)
-    			assertEquals(HDF5Constants.H5VL_NATIVE, native_id);
-    	}
-    	catch (Throwable err) {
-    		err.printStackTrace();
-    		fail("H5.H5VLget_connector_id " + err);
-    	}
+            /*
+             * If HDF5_VOL_CONNECTOR is set, this might not be the
+             * native connector. Only check for the native connector
+             * if this isn't set.
+             */
+            String connector = System.getenv("HDF5_VOL_CONNECTOR");
+            if (connector == null)
+                assertEquals(HDF5Constants.H5VL_NATIVE, native_id);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.H5VLget_connector_id " + err);
+        }
         finally {
             if (H5fid > 0) {
                 try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
@@ -139,14 +138,14 @@ public class TestH5VL {
         try {
             String native_name = H5.H5VLget_connector_name(H5fid);
 
-    		/*
-    		 * If HDF5_VOL_CONNECTOR is set, this might not be the
-    		 * native connector. Only check for the native connector
-    		 * if this isn't set.
-    		 */
-    		String connector = System.getenv("HDF5_VOL_CONNECTOR");
-    		if (connector == null)
-    			assertTrue("H5.H5VLget_connector_name H5VL_NATIVE", native_name.compareToIgnoreCase(HDF5Constants.H5VL_NATIVE_NAME)==0);
+            /*
+             * If HDF5_VOL_CONNECTOR is set, this might not be the
+             * native connector. Only check for the native connector
+             * if this isn't set.
+             */
+            String connector = System.getenv("HDF5_VOL_CONNECTOR");
+            if (connector == null)
+                assertTrue("H5.H5VLget_connector_name H5VL_NATIVE", native_name.compareToIgnoreCase(HDF5Constants.H5VL_NATIVE_NAME)==0);
         }
         catch (Throwable err) {
             err.printStackTrace();

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -113,32 +113,32 @@ H5HF__huge_bt2_create(H5HF_hdr_t *hdr)
     if (hdr->huge_ids_direct) {
         if (hdr->filter_len > 0) {
             bt2_cparam.rrec_size =
-                (size_t)((unsigned)hdr->sizeof_addr     /* Address of object */
-                         + (unsigned)hdr->sizeof_size   /* Length of object */
-                         + (unsigned)4                  /* Filter mask for filtered object */
-                         + (unsigned)hdr->sizeof_size); /* Size of de-filtered object in memory */
+                (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
+                           + (unsigned)hdr->sizeof_size   /* Length of object */
+                           + (unsigned)4                  /* Filter mask for filtered object */
+                           + (unsigned)hdr->sizeof_size); /* Size of de-filtered object in memory */
             bt2_cparam.cls = H5HF_HUGE_BT2_FILT_DIR;
         } /* end if */
         else {
-            bt2_cparam.rrec_size = (size_t)((unsigned)hdr->sizeof_addr     /* Address of object */
-                                            + (unsigned)hdr->sizeof_size); /* Length of object */
+            bt2_cparam.rrec_size = (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
+                                              + (unsigned)hdr->sizeof_size); /* Length of object */
             bt2_cparam.cls       = H5HF_HUGE_BT2_DIR;
         } /* end else */
     }     /* end if */
     else {
         if (hdr->filter_len > 0) {
             bt2_cparam.rrec_size =
-                (size_t)((unsigned)hdr->sizeof_addr     /* Address of filtered object */
-                         + (unsigned)hdr->sizeof_size   /* Length of filtered object */
-                         + (unsigned)4                  /* Filter mask for filtered object */
-                         + (unsigned)hdr->sizeof_size   /* Size of de-filtered object in memory */
-                         + (unsigned)hdr->sizeof_size); /* Unique ID for object */
+                (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of filtered object */
+                           + (unsigned)hdr->sizeof_size   /* Length of filtered object */
+                           + (unsigned)4                  /* Filter mask for filtered object */
+                           + (unsigned)hdr->sizeof_size   /* Size of de-filtered object in memory */
+                           + (unsigned)hdr->sizeof_size); /* Unique ID for object */
             bt2_cparam.cls = H5HF_HUGE_BT2_FILT_INDIR;
         } /* end if */
         else {
-            bt2_cparam.rrec_size = (size_t)((unsigned)hdr->sizeof_addr     /* Address of object */
-                                            + (unsigned)hdr->sizeof_size   /* Length of object */
-                                            + (unsigned)hdr->sizeof_size); /* Unique ID for object */
+            bt2_cparam.rrec_size = (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
+                                              + (unsigned)hdr->sizeof_size   /* Length of object */
+                                              + (unsigned)hdr->sizeof_size); /* Unique ID for object */
             bt2_cparam.cls       = H5HF_HUGE_BT2_INDIR;
         } /* end else */
     }     /* end else */

@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -13,8 +13,8 @@
 /*
  *  Header file for API contexts, etc.
  */
-#ifndef _H5CXprivate_H
-#define _H5CXprivate_H
+#ifndef H5CXprivate_H
+#define H5CXprivate_H
 
 /* Include package's public header */
 #ifdef NOT_YET
@@ -61,10 +61,10 @@ typedef struct H5CX_state_t {
 /***************************************/
 
 /* Library private routines */
-#ifndef _H5private_H
+#ifndef H5private_H
 H5_DLL herr_t H5CX_push(void);
 H5_DLL herr_t H5CX_pop(void);
-#endif /* _H5private_H */
+#endif /* H5private_H */
 H5_DLL void    H5CX_push_special(void);
 H5_DLL hbool_t H5CX_is_def_dxpl(void);
 
@@ -177,4 +177,4 @@ H5_DLL herr_t H5CX_test_set_mpio_coll_rank0_bcast(hbool_t rank0_bcast);
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5CXprivate_H */
+#endif /* H5CXprivate_H */

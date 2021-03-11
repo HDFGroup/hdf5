@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5T package!"
 #endif
 
-#ifndef _H5Tpkg_H
-#define _H5Tpkg_H
+#ifndef H5Tpkg_H
+#define H5Tpkg_H
 
 /*
  * Define this to enable debugging.
@@ -890,4 +890,4 @@ H5_DLL herr_t H5T__sort_name(const H5T_t *dt, int *map);
 /* Debugging functions */
 H5_DLL herr_t H5T__print_stats(H5T_path_t *path, int *nprint /*in,out*/);
 
-#endif /* _H5Tpkg_H */
+#endif /* H5Tpkg_H */

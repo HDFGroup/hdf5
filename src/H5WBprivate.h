@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5WBprivate_H
-#define _H5WBprivate_H
+#ifndef H5WBprivate_H
+#define H5WBprivate_H
 
 /* Include package's public header */
 /* #include "H5WBpublic.h" */
@@ -55,4 +55,4 @@ H5_DLL void *  H5WB_actual(H5WB_t *wb, size_t need);
 H5_DLL void *  H5WB_actual_clear(H5WB_t *wb, size_t need);
 H5_DLL herr_t  H5WB_unwrap(H5WB_t *wb);
 
-#endif /* _H5WBprivate_H */
+#endif /* H5WBprivate_H */

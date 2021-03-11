@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -56,7 +55,7 @@ public class TestH5Sbasic {
 
     @Test
     public void testH5Screate_scalar() {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         int class_type = -1;
         try {
             sid = H5.H5Screate(HDF5Constants.H5S_SCALAR);
@@ -75,7 +74,7 @@ public class TestH5Sbasic {
 
     @Test
     public void testH5Screate_null() {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         int class_type = -1;
         try {
             sid = H5.H5Screate(HDF5Constants.H5S_NULL);
@@ -125,7 +124,7 @@ public class TestH5Sbasic {
 
     @Test
     public void testH5Screate_simple() {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         int class_type = -1;
         int rank = 2;
         long dims[] = {5, 5};
@@ -148,7 +147,7 @@ public class TestH5Sbasic {
 
     @Test
     public void testH5Screate_simple_unlimted() {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         int class_type = -1;
         int rank = 2;
         long dims[] = {5, 5};
@@ -171,7 +170,7 @@ public class TestH5Sbasic {
 
     @Test
     public void testH5Screate_simple_unlimted_1d() {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         int class_type = -1;
         int rank = 1;
         long dims[] = {5};
@@ -194,7 +193,7 @@ public class TestH5Sbasic {
 
     @Test
     public void testH5Screate_simple_max_default() {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         int rank = 2;
         long dims[] = {5, 5};
 
@@ -213,7 +212,7 @@ public class TestH5Sbasic {
 
     @Test
     public void testH5Screate_simple_extent() {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         int rank = 2;
         long dims[] = {5, 5};
         long maxdims[] = {10, 10};
@@ -270,7 +269,7 @@ public class TestH5Sbasic {
 
     @Test(expected = IllegalArgumentException.class)
     public void testH5Sselect_adjust_rank_offset() throws Throwable {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         long offset[][] = {{0,1},{2,4},{5,6}};
 
         try {
@@ -292,7 +291,7 @@ public class TestH5Sbasic {
 
     @Test(expected = IllegalArgumentException.class)
     public void testH5Sselect_intersect_block_rank_start() throws Throwable {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         long start[] = new long[2];
         long end[] = null;
 
@@ -308,7 +307,7 @@ public class TestH5Sbasic {
 
     @Test(expected = IllegalArgumentException.class)
     public void testH5Sselect_intersect_block_rank_end() throws Throwable {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         long start[] = null;
         long end[] = new long[2];
 
@@ -336,7 +335,7 @@ public class TestH5Sbasic {
 
     @Test(expected = NullPointerException.class)
     public void testH5Scombine_hyperslab_null_start() throws Throwable {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         long start[] = null;
         long stride[] = null;
         long count[] = new long[2];
@@ -354,7 +353,7 @@ public class TestH5Sbasic {
 
     @Test(expected = NullPointerException.class)
     public void testH5Scombine_hyperslab_null_count() throws Throwable {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         long start[] = new long[2];
         long stride[] = null;
         long count[] = null;

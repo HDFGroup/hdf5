@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -387,8 +387,6 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
         }
     }
 
-    return;
-
 } /* create_datasets() */
 
 /*-------------------------------------------------------------------------
@@ -459,8 +457,6 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    return;
 
 } /* delete_datasets() */
 
@@ -850,8 +846,6 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d -- exiting.\n", fcn_name, cp++);
 
-    return;
-
 } /* open_hdf5_file() */
 
 /*-------------------------------------------------------------------------
@@ -959,8 +953,6 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    return;
 
 } /* attempt_swmr_open_hdf5_file() */
 
@@ -1198,8 +1190,6 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
             failure_mssg = "H5Sclose(memspace_id) failed.";
         }
     }
-
-    return;
 
 } /* verify_datasets() */
 

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -832,7 +832,7 @@ test_reference_cmpnd_obj(void)
     hsize_t    cmpnd_dims[] = {1};
     hid_t      dapl_id; /* Dataset access property list     */
     unsigned * ibuf, *obuf;
-    unsigned   i, j;     /* Counters                         */
+    unsigned   i;        /* Counter                          */
     H5O_type_t obj_type; /* Object type                      */
     herr_t     ret;      /* Generic return value             */
     s2_t       cmpnd_wbuf, cmpnd_rbuf;

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,7 +29,7 @@ import org.junit.rules.TestName;
 
 public class TestH5S {
     @Rule public TestName testname = new TestName();
-    long H5sid = -1;
+    long H5sid = HDF5Constants.H5I_INVALID_HID;
     int H5rank = 2;
     long H5dims[] = {5, 5};
     long H5maxdims[] = {10, 10};
@@ -181,7 +180,7 @@ public class TestH5S {
 
     @Test
     public void testH5Scopy() {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         int read_rank = -1;
 
         try {
@@ -201,7 +200,7 @@ public class TestH5S {
 
     @Test
     public void testH5Sextent_copy() {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         int class_type = -1;
 
         try {
@@ -222,7 +221,7 @@ public class TestH5S {
 
     @Test
     public void testH5Sextent_equal() {
-        long sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         boolean result = false;
 
         try {
@@ -252,8 +251,8 @@ public class TestH5S {
 
     @Test
     public void testH5Sencode_decode_null_dataspace() {
-        long sid = -1;
-        long decoded_sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
+        long decoded_sid = HDF5Constants.H5I_INVALID_HID;
         byte[] null_sbuf = null;
         boolean result = false;
 
@@ -299,8 +298,8 @@ public class TestH5S {
 
     @Test
     public void testH5Sencode_decode_scalar_dataspace() {
-        long sid = -1;
-        long decoded_sid = -1;
+        long sid = HDF5Constants.H5I_INVALID_HID;
+        long decoded_sid = HDF5Constants.H5I_INVALID_HID;
         byte[] scalar_sbuf = null;
         boolean result = false;
         int iresult = -1;
@@ -470,7 +469,7 @@ public class TestH5S {
 
     @Test
     public void testH5Sget_select_hyper() {
-        long space1 = -1;
+        long space1 = HDF5Constants.H5I_INVALID_HID;
         long start[] = {0,0};
         long stride[] = {1,1};
         long count[] = {1,1};
@@ -508,7 +507,7 @@ public class TestH5S {
 
     @Test
     public void testH5Sget_select_valid() {
-        long space1 = -1;
+        long space1 = HDF5Constants.H5I_INVALID_HID;
         long start[] = {1,0};
         long stride[] = {1,1};
         long count[] = {2,3};
