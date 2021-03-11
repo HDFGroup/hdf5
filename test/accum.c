@@ -2283,7 +2283,7 @@ error:
 
     return 1;
 
-#endif
+#endif /* H5_HAVE_UNISTD_H */
 
 } /* end test_swmr_write_big() */
 
