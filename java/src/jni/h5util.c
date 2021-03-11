@@ -2235,34 +2235,33 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
         }
 
         case H5T_REFERENCE: {
-            /*if (H5Tequal(tid, H5T_STD_REF))*/ {
-                hid_t        region_id    = H5I_INVALID_HID;
-                hid_t        region_space = H5I_INVALID_HID;
-                H5S_sel_type region_type;
+            hid_t        region_id    = H5I_INVALID_HID;
+            hid_t        region_space = H5I_INVALID_HID;
+            H5S_sel_type region_type;
 
-                /* Region data */
-                for (block_index = 0; block_index < block_nelmts; block_index++) {
-                    mem = ((unsigned char *)_mem) + block_index * size;
-                    if ((region_id = H5Ropen_object((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-                        continue;
-                    if ((region_space = H5Ropen_region((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                        if (!h5str_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
-                            region_type = H5Sget_select_type(region_space);
-                            if (region_type == H5S_SEL_POINTS)
-                                ret_value = render_bin_output_region_points(stream, region_space, region_id,
-                                                                            container);
-                            else if (region_type == H5S_SEL_HYPERSLABS)
-                                ret_value = render_bin_output_region_blocks(stream, region_space, region_id,
-                                                                            container);
-                        }
-                        H5Sclose(region_space);
-                    } /* end if (region_space >= 0) */
-                    H5Dclose(region_id);
+            /* Region data */
+            for (block_index = 0; block_index < block_nelmts; block_index++) {
+                mem = ((unsigned char *)_mem) + block_index * size;
+                if ((region_id = H5Ropen_object((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                    continue;
+                if ((region_space = H5Ropen_region((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    if (!h5str_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
+                        region_type = H5Sget_select_type(region_space);
+                        if (region_type == H5S_SEL_POINTS)
+                            ret_value = render_bin_output_region_points(stream, region_space, region_id,
+                                                                        container);
+                        else if (region_type == H5S_SEL_HYPERSLABS)
+                            ret_value = render_bin_output_region_blocks(stream, region_space, region_id,
+                                                                        container);
+                    }
+                    H5Sclose(region_space);
+                } /* end if (region_space >= 0) */
+                H5Dclose(region_id);
 
-                    if (ret_value < 0)
-                        break;
-                }
+                if (ret_value < 0)
+                    break;
             }
+
             break;
         }
 
