@@ -2248,11 +2248,11 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
                     if (!h5str_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
                         region_type = H5Sget_select_type(region_space);
                         if (region_type == H5S_SEL_POINTS)
-                            ret_value = render_bin_output_region_points(stream, region_space, region_id,
-                                                                        container);
+                            ret_value =
+                                render_bin_output_region_points(stream, region_space, region_id, container);
                         else if (region_type == H5S_SEL_HYPERSLABS)
-                            ret_value = render_bin_output_region_blocks(stream, region_space, region_id,
-                                                                        container);
+                            ret_value =
+                                render_bin_output_region_blocks(stream, region_space, region_id, container);
                     }
                     H5Sclose(region_space);
                 } /* end if (region_space >= 0) */
@@ -2784,7 +2784,8 @@ h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
 
     if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
         p_nelmts = H5Sget_simple_extent_npoints(f_space);
-        if (NULL == (sm_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)p_nelmts)))
+        if (NULL ==
+            (sm_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)p_nelmts)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_mem: failed to allocate sm_buf");
 
         /* Read the data */
@@ -2849,9 +2850,9 @@ h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
                     vl_data = 1;
 
                 /*
-                * Determine the strip mine size and allocate a buffer. The strip mine is
-                * a hyperslab whose size is manageable.
-                */
+                 * Determine the strip mine size and allocate a buffer. The strip mine is
+                 * a hyperslab whose size is manageable.
+                 */
                 if (!(sm_nbytes = p_type_nbytes = H5Tget_size(p_type)))
                     H5_LIBRARY_ERROR(ENVONLY);
 
@@ -2883,15 +2884,17 @@ h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
                         if (ndims > 0) {
                             for (i = 0, hs_nelmts = 1; i < (size_t)ndims; i++) {
                                 hs_size[i] = (((total_size[i] - hs_offset[i]) < (sm_size[i]))
-                                                ? (total_size[i] - hs_offset[i])
-                                                : (sm_size[i]));
+                                                  ? (total_size[i] - hs_offset[i])
+                                                  : (sm_size[i]));
                                 hs_nelmts *= hs_size[i];
                             }
 
-                            if (H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
+                            if (H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) <
+                                0)
                                 H5_LIBRARY_ERROR(ENVONLY);
 
-                            if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL) < 0)
+                            if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL) <
+                                0)
                                 H5_LIBRARY_ERROR(ENVONLY);
                         }
                         else {
@@ -2992,7 +2995,8 @@ h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order
 
     if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
         p_nelmts = H5Sget_simple_extent_npoints(f_space);
-        if (NULL == (sm_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)p_nelmts)))
+        if (NULL ==
+            (sm_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)p_nelmts)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_mem: failed to allocate sm_buf");
 
         /* Read the data */
@@ -3802,7 +3806,8 @@ Java_hdf_hdf5lib_H5_H5export_1attribute(JNIEnv *env, jclass clss, jstring file_e
     if (NULL == attribute_name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5export_dataset: object_path is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, attribute_name, object_name, &isCopy, "H5export_dataset: object_path not pinned");
+    PIN_JAVA_STRING(ENVONLY, attribute_name, object_name, &isCopy,
+                    "H5export_dataset: object_path not pinned");
 
     if ((attr_id = H5Aopen(dset_id, object_name, H5P_DEFAULT)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
