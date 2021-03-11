@@ -84,7 +84,7 @@ static int skip_overflow_tests_g = 0;
  * be allowed to continue (cf. Posix signals) so in order to recover from a
  * SIGFPE we run tests that might generate one in a child process.
  */
-#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
+#ifdef H5_HAVE_UNISTD_H
 #define HANDLE_SIGFPE
 #endif
 
@@ -556,7 +556,7 @@ some_dummy_func(float x)
 static void
 generates_sigfpe(void)
 {
-#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
+#ifdef H5_HAVE_UNISTD_H
     pid_t          pid;
     int            status;
     size_t         i, j;
@@ -592,12 +592,12 @@ generates_sigfpe(void)
         /* delete the core dump file that SIGFPE may have created */
         HDunlink("core");
     }
-#else
-    HDputs("Cannot determine if floating-point overflows generate a SIGFPE;");
-    HDputs("assuming yes.");
+#else  /* H5_HAVE_UNISTD_H */
+    HDputs("Cannot determine if floating-point overflows generate a SIGFPE");
+    HDputs("due to a lack of fork(2) - assuming yes.");
     HDputs("Overflow cases will not be tested.");
     skip_overflow_tests_g = TRUE;
-#endif
+#endif /* H5_HAVE_UNISTD_H */
 }
 
 /*-------------------------------------------------------------------------
