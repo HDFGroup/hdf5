@@ -3688,8 +3688,7 @@ H5_DLL herr_t H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func, void 
  *
  * \since 1.10.1
  */
-H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size,
-                                      unsigned *min_meta_perc,
+H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned *min_meta_perc,
                                       unsigned *min_raw_perc);
 /**
  * \ingroup FAPL
