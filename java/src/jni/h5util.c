@@ -1100,123 +1100,123 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
         }
 
         case H5T_REFERENCE: {
-            /*if (H5Tequal(tid, H5T_STD_REF))*/ {
-                hid_t      new_obj_id = H5I_INVALID_HID;
-                H5O_type_t obj_type   = -1; /* Object type */
-                H5R_type_t ref_type;        /* Reference type */
+            /* H5T_STD_REF */
+            hid_t      new_obj_id = H5I_INVALID_HID;
+            H5O_type_t obj_type   = -1; /* Object type */
+            H5R_type_t ref_type;        /* Reference type */
 
-                H5R_ref_t *ref_vp = (H5R_ref_t *)cptr;
+            H5R_ref_t *ref_vp = (H5R_ref_t *)cptr;
 
-                ref_type = H5Rget_type(ref_vp);
-                if (!h5str_is_zero(ref_vp, H5Tget_size(H5T_STD_REF))) {
-                    switch (ref_type) {
-                        case H5R_OBJECT1:
-                            if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
-                                switch (obj_type) {
-                                    case H5O_TYPE_DATASET:
-                                        if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
-                                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                                        break;
+            ref_type = H5Rget_type(ref_vp);
+            if (!h5str_is_zero(ref_vp, H5Tget_size(H5T_STD_REF))) {
+                switch (ref_type) {
+                    case H5R_OBJECT1:
+                        if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
+                            switch (obj_type) {
+                                case H5O_TYPE_DATASET:
+                                    if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                    break;
 
-                                    case H5O_TYPE_GROUP:
-                                    case H5O_TYPE_NAMED_DATATYPE:
-                                    case H5O_TYPE_MAP:
-                                    case H5O_TYPE_UNKNOWN:
-                                    case H5O_TYPE_NTYPES:
-                                    default: {
-                                        /* Object references -- show the type and OID of the referenced object. */
-                                        H5O_info2_t oi;
-                                        char *      obj_tok_str = NULL;
-                                        if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >=
-                                            0) {
-                                            H5Oget_info3(new_obj_id, &oi, H5O_INFO_BASIC);
-                                            H5Otoken_to_str(new_obj_id, &oi.token, &obj_tok_str);
-                                            if (H5Dclose(new_obj_id) < 0)
-                                                H5_LIBRARY_ERROR(ENVONLY);
-                                        }
-                                        else
+                                case H5O_TYPE_GROUP:
+                                case H5O_TYPE_NAMED_DATATYPE:
+                                case H5O_TYPE_MAP:
+                                case H5O_TYPE_UNKNOWN:
+                                case H5O_TYPE_NTYPES:
+                                default: {
+                                    /* Object references -- show the type and OID of the referenced object. */
+                                    H5O_info2_t oi;
+                                    char *      obj_tok_str = NULL;
+                                    if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >=
+                                        0) {
+                                        H5Oget_info3(new_obj_id, &oi, H5O_INFO_BASIC);
+                                        H5Otoken_to_str(new_obj_id, &oi.token, &obj_tok_str);
+                                        if (H5Dclose(new_obj_id) < 0)
                                             H5_LIBRARY_ERROR(ENVONLY);
+                                    }
+                                    else
+                                        H5_LIBRARY_ERROR(ENVONLY);
 
-                                        if (NULL == (this_str = (char *)HDmalloc(14)))
+                                    if (NULL == (this_str = (char *)HDmalloc(14)))
+                                        H5_OUT_OF_MEMORY_ERROR(
+                                            ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                                    if (HDsprintf(this_str, "%u-", (unsigned)oi.type) < 0)
+                                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                                    if (!h5str_append(out_str, this_str))
+                                        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
+                                    HDfree(this_str);
+                                    this_str = NULL;
+
+                                    /* Print OID */
+                                    {
+                                        char *token_str;
+
+                                        H5Otoken_to_str(tid, &oi.token, &token_str);
+
+                                        if (NULL == (this_str = (char *)HDmalloc(64 + strlen(token_str) + 1)))
                                             H5_OUT_OF_MEMORY_ERROR(
                                                 ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-                                        if (HDsprintf(this_str, "%u-", (unsigned)oi.type) < 0)
+                                        if (HDsprintf(this_str, "%lu:%s", oi.fileno, token_str) < 0)
                                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
-                                        if (!h5str_append(out_str, this_str))
-                                            H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
-                                        HDfree(this_str);
-                                        this_str = NULL;
 
-                                        /* Print OID */
-                                        {
-                                            char *token_str;
+                                        H5free_memory(token_str);
+                                    }
+                                } break;
+                            } /* end switch */
+                        }
+                        else
+                            H5_LIBRARY_ERROR(ENVONLY);
+                        break;
+                    case H5R_DATASET_REGION1:
+                        if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                        break;
+                    case H5R_OBJECT2:
+                        if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
+                            switch (obj_type) {
+                                case H5O_TYPE_GROUP:
+                                    break;
 
-                                            H5Otoken_to_str(tid, &oi.token, &token_str);
+                                case H5O_TYPE_DATASET:
+                                    if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                    break;
 
-                                            if (NULL == (this_str = (char *)HDmalloc(64 + strlen(token_str) + 1)))
-                                                H5_OUT_OF_MEMORY_ERROR(
-                                                    ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-                                            if (HDsprintf(this_str, "%lu:%s", oi.fileno, token_str) < 0)
-                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                                case H5O_TYPE_NAMED_DATATYPE:
+                                    break;
 
-                                            H5free_memory(token_str);
-                                        }
-                                    } break;
-                                } /* end switch */
-                            }
-                            else
+                                case H5O_TYPE_MAP:
+                                case H5O_TYPE_UNKNOWN:
+                                case H5O_TYPE_NTYPES:
+                                default:
+                                    break;
+                            } /* end switch */
+                        }
+                        else
+                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: H5R_OBJECT2 failed");
+                        break;
+                    case H5R_DATASET_REGION2:
+                        if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                        break;
+                    case H5R_ATTR:
+                        if ((new_obj_id = H5Ropen_attr(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                            if (h5str_dump_region_attribute(ENVONLY, out_str, new_obj_id) < 0)
+                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                            if (H5Aclose(new_obj_id) < 0)
                                 H5_LIBRARY_ERROR(ENVONLY);
-                            break;
-                        case H5R_DATASET_REGION1:
-                            if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
-                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                            break;
-                        case H5R_OBJECT2:
-                            if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
-                                switch (obj_type) {
-                                    case H5O_TYPE_GROUP:
-                                        break;
-
-                                    case H5O_TYPE_DATASET:
-                                        if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
-                                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                                        break;
-
-                                    case H5O_TYPE_NAMED_DATATYPE:
-                                        break;
-
-                                    case H5O_TYPE_MAP:
-                                    case H5O_TYPE_UNKNOWN:
-                                    case H5O_TYPE_NTYPES:
-                                    default:
-                                        break;
-                                } /* end switch */
-                            }
-                            else
-                                H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: H5R_OBJECT2 failed");
-                            break;
-                        case H5R_DATASET_REGION2:
-                            if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
-                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                            break;
-                        case H5R_ATTR:
-                            if ((new_obj_id = H5Ropen_attr(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                                if (h5str_dump_region_attribute(ENVONLY, out_str, new_obj_id) < 0)
-                                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                                if (H5Aclose(new_obj_id) < 0)
-                                    H5_LIBRARY_ERROR(ENVONLY);
-                            }
-                            break;
-                        case H5R_BADTYPE:
-                        case H5R_MAXTYPE:
-                        default:
-                            break;
-                    } /* end switch */
-                }
-
-                if (H5Rdestroy(ref_vp) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
+                        }
+                        break;
+                    case H5R_BADTYPE:
+                    case H5R_MAXTYPE:
+                    default:
+                        break;
+                } /* end switch */
             }
+
+            if (H5Rdestroy(ref_vp) < 0)
+                H5_LIBRARY_ERROR(ENVONLY);
+
             break;
         }
 
@@ -3786,7 +3786,7 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5export_1attribute(JNIEnv *env, jclass clss, jstring file_export_name, jlong dset_id,
-                                        jstring object_path, jint binary_order)
+                                        jstring attribute_name, jint binary_order)
 {
     const char *file_export = NULL;
     const char *object_name = NULL;
@@ -3800,10 +3800,10 @@ Java_hdf_hdf5lib_H5_H5export_1attribute(JNIEnv *env, jclass clss, jstring file_e
     if (NULL == file_export_name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5export_dataset: file_export_name is NULL");
 
-    if (NULL == object_path)
+    if (NULL == attribute_name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5export_dataset: object_path is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, object_path, object_name, &isCopy, "H5export_dataset: object_path not pinned");
+    PIN_JAVA_STRING(ENVONLY, attribute_name, object_name, &isCopy, "H5export_dataset: object_path not pinned");
 
     if ((attr_id = H5Aopen(dset_id, object_name, H5P_DEFAULT)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -3828,7 +3828,7 @@ done:
     if (file_export)
         UNPIN_JAVA_STRING(ENVONLY, file_export_name, file_export);
     if (object_name)
-        UNPIN_JAVA_STRING(ENVONLY, object_path, object_name);
+        UNPIN_JAVA_STRING(ENVONLY, attribute_name, object_name);
     if (attr_id >= 0)
         H5Aclose(attr_id);
 } /* end Java_hdf_hdf5lib_H5_H5export_1attribute */
