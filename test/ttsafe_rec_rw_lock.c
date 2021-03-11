@@ -37,7 +37,7 @@
 /* Include library header files */
 #include "H5ACprivate.h"
 
-#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -1306,6 +1306,6 @@ cleanup_rec_rw_lock_smoke_check_4(void)
     return;
 }
 
-#endif /* H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX */
+#endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
 
 #endif /*H5_HAVE_THREADSAFE*/

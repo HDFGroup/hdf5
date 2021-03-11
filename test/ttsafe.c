@@ -106,7 +106,7 @@ main(int argc, char *argv[])
     AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
 #ifdef H5_HAVE_THREADSAFE
 
-#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
     AddTest("rec_rwlock_1", tts_rec_rw_lock_smoke_check_1, cleanup_rec_rw_lock_smoke_check_1,
             "recursive R/W lock smoke check 1 -- basic", NULL);
 
@@ -118,7 +118,7 @@ main(int argc, char *argv[])
 
     AddTest("rec_rwlock_4", tts_rec_rw_lock_smoke_check_4, cleanup_rec_rw_lock_smoke_check_4,
             "recursive R/W lock smoke check 4 -- mixed mob", NULL);
-#endif /* H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX */
+#endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
 
     AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
     AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);

@@ -290,17 +290,17 @@ H5TS_pthread_first_thread_init(void)
 #endif
 
     /* initialize global API mutex lock */
-#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
 
     H5TS_pt_rec_rw_lock_init(&H5_g.init_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
 
-#else /* H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX */
+#else /* H5_USE_RECURSIVE_WRITER_LOCKS */
 
     pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
     pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
     H5_g.init_lock.lock_count = 0;
 
-#endif /* H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX */
+#endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
 
     /* Initialize integer thread identifiers. */
     H5TS_tid_init();
@@ -737,7 +737,7 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
     return ret_value;
 } /* H5TS_create_thread */
 
-#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_alloc_pt_rec_entry_count
@@ -1587,6 +1587,6 @@ H5TS_pt_rec_rw_lock_print_stats(const char *header_str, H5TS_pt_rec_rw_lock_stat
     return (ret_value);
 
 } /* H5TS_pt_rec_rw_lock_print_stats() */
-#endif /* H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX */
+#endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
 
 #endif /* H5_HAVE_THREADSAFE */

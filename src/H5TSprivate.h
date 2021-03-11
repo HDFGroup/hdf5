@@ -32,12 +32,6 @@
 
 #ifdef H5_HAVE_WIN_THREADS
 
-/* At present, the recursive R/W lock does not function with
- * windows -- thus set H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
- * to FALSE.
- */
-#define H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX FALSE
-
 /* Library level data structures */
 
 /* Mutexes, Threads, and Attributes */
@@ -81,11 +75,6 @@ H5_DLL herr_t        H5TS_win32_thread_exit(void);
 
 /* Defines */
 
-/* Set H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX to TRUE iff you want
- * to replace the global mutex with the recursive R/W lock.
- */
-#define H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX TRUE
-
 /******************************************************************************
  *
  * p-thread recursive R/W lock stats collection macros
@@ -95,6 +84,8 @@ H5_DLL herr_t        H5TS_win32_thread_exit(void);
  ******************************************************************************/
 
 /* clang-format off */
+
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
 
 #define REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK(rw, count_ptr)                  \
 do {                                                                          \
@@ -222,6 +213,8 @@ do {                                                                          \
     }                                                                         \
 } while ( FALSE ) /* end REC_RW_LOCK_STATS__UPDATE_FOR_WR_UNLOCK */
 
+#endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
+
 /* clang-format on */
 
 /* Library level data structures */
@@ -240,6 +233,8 @@ typedef pthread_attr_t  H5TS_attr_t;
 typedef pthread_mutex_t H5TS_mutex_simple_t;
 typedef pthread_key_t   H5TS_key_t;
 typedef pthread_once_t  H5TS_once_t;
+
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
 
 /******************************************************************************
  *
@@ -486,6 +481,8 @@ typedef struct H5TS_pt_rec_entry_count_t {
 
 } H5TS_pt_rec_entry_count_t;
 
+#endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
+
 /* Scope Definitions */
 #define H5TS_SCOPE_SYSTEM                       PTHREAD_SCOPE_SYSTEM
 #define H5TS_SCOPE_PROCESS                      PTHREAD_SCOPE_PROCESS
@@ -526,8 +523,8 @@ H5_DLL herr_t H5TS_cancel_count_dec(void);
 /* Testing routines */
 H5_DLL H5TS_thread_t H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata);
 
-/* recursive R/W lock related function declarations */
-#if H5TS__USE_REC_RW_LOCK_FOR_GLOBAL_MUTEX
+/* Fully recursive R/W lock related function declarations */
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
 H5_DLL H5TS_pt_rec_entry_count_t *H5TS_alloc_pt_rec_entry_count(hbool_t write_lock);
 H5_DLL void                       H5TS_free_pt_rec_entry_count(void *target_ptr);
 H5_DLL herr_t                     H5TS_pt_rec_rw_lock_init(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, int policy);
