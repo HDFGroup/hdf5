@@ -471,7 +471,7 @@ typedef struct H5TS_pt_rec_rw_lock_t {
  *
  ******************************************************************************/
 
-#define H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC    0XABBA
+#define H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC 0XABBA
 
 typedef struct H5TS_pt_rec_entry_count_t {
 

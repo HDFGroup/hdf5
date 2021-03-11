@@ -11,7 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 /********************************************************************
  *
  * Test the correctness of the recursive R/W lock in the HDF5 library
