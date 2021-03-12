@@ -2092,7 +2092,7 @@ error:
 unsigned
 test_swmr_write_big(hbool_t newest_format)
 {
-#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_UNISTD_H)
+#ifdef H5_HAVE_UNISTD_H
     hid_t    fid  = -1;   /* File ID */
     hid_t    fapl = -1;   /* File access property list */
     H5F_t *  rf   = NULL; /* File pointer */
@@ -2287,11 +2287,11 @@ error:
 
     return 1;
 
-#else
+#else  /* H5_HAVE_UNISTD_H */
     SKIPPED();
     HDputs("    Test skipped due to fork, waitpid, or pid_t not defined.");
     return 0;
-#endif /* defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_UNISTD_H) */
+#endif /* H5_HAVE_UNISTD_H */
 
 } /* end test_swmr_write_big() */
 
