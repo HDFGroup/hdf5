@@ -1430,7 +1430,7 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info, h5tools
  *-------------------------------------------------------------------------
  */
 void
-init_acc_pos(unsigned ndims, hsize_t *dims, hsize_t *acc, hsize_t *pos, hsize_t *p_min_idx)
+init_acc_pos(unsigned ndims, const hsize_t *dims, hsize_t *acc, hsize_t *pos, hsize_t *p_min_idx)
 {
     int      i;
     unsigned j;
@@ -1463,7 +1463,7 @@ init_acc_pos(unsigned ndims, hsize_t *dims, hsize_t *acc, hsize_t *pos, hsize_t 
  *-------------------------------------------------------------------------
  */
 hsize_t
-calc_acc_pos(unsigned ndims, hsize_t elmtno, hsize_t *acc, hsize_t *pos)
+calc_acc_pos(unsigned ndims, hsize_t elmtno, const hsize_t *acc, hsize_t *pos)
 {
     int     i;
     hsize_t curr_pos = elmtno;
@@ -1731,7 +1731,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
  */
 int
 render_bin_output_region_data_blocks(hid_t region_id, FILE *stream, hid_t container, unsigned ndims,
-                                     hid_t type_id, hsize_t nblocks, hsize_t *ptdata)
+                                     hid_t type_id, hsize_t nblocks, const hsize_t *ptdata)
 {
     hsize_t *dims1 = NULL;
     hsize_t *start = NULL;
@@ -2039,12 +2039,12 @@ h5tools_is_obj_same(hid_t loc_id1, const char *name1, hid_t loc_id2, const char 
     H5O_info_t oinfo1, oinfo2;
     hbool_t    ret_val = FALSE;
 
-    if (name1 && HDstrcmp(name1, "."))
+    if (name1 && HDstrcmp(name1, ".") != 0)
         H5Oget_info_by_name2(loc_id1, name1, &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT);
     else
         H5Oget_info2(loc_id1, &oinfo1, H5O_INFO_BASIC);
 
-    if (name2 && HDstrcmp(name2, "."))
+    if (name2 && HDstrcmp(name2, ".") != 0)
         H5Oget_info_by_name2(loc_id2, name2, &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT);
     else
         H5Oget_info2(loc_id2, &oinfo2, H5O_INFO_BASIC);

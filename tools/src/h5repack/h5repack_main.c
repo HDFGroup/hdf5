@@ -341,7 +341,7 @@ read_info(const char *filename, pack_opt_t *options)
             break;
 
         /* Info indicator must be for layout or filter */
-        if (HDstrcmp(stype, "-l") && HDstrcmp(stype, "-f")) {
+        if (HDstrcmp(stype, "-l") != 0 && HDstrcmp(stype, "-f") != 0) {
             error_msg("bad file format for %s", filename);
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = EXIT_FAILURE;

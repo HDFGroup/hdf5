@@ -1520,7 +1520,7 @@ test_mount_after_close(hid_t fapl)
     *objname = '\0';
     if (H5Iget_name(gidABMX, objname, (size_t)NAME_BUF_SIZE) < 0)
         FAIL_STACK_ERROR
-    if (HDstrcmp(objname, "/A/B/M/X"))
+    if (HDstrcmp(objname, "/A/B/M/X") != 0)
         TEST_ERROR
 
     /* Close object in mounted file */
@@ -1535,7 +1535,7 @@ test_mount_after_close(hid_t fapl)
     *objname = '\0';
     if (H5Iget_name(gidABC, objname, (size_t)NAME_BUF_SIZE) < 0)
         FAIL_STACK_ERROR
-    if (HDstrcmp(objname, "/A/B/C"))
+    if (HDstrcmp(objname, "/A/B/C") != 0)
         TEST_ERROR
 
     /* Close object in mounted file */
@@ -1550,7 +1550,7 @@ test_mount_after_close(hid_t fapl)
     *objname = '\0';
     if (H5Iget_name(gidABT, objname, (size_t)NAME_BUF_SIZE) < 0)
         FAIL_STACK_ERROR
-    if (HDstrcmp(objname, "/A/B/T"))
+    if (HDstrcmp(objname, "/A/B/T") != 0)
         TEST_ERROR
 
     /* Close object in original file */
@@ -1565,7 +1565,7 @@ test_mount_after_close(hid_t fapl)
     *objname = '\0';
     if (H5Iget_name(didABMXYD, objname, (size_t)NAME_BUF_SIZE) < 0)
         FAIL_STACK_ERROR
-    if (HDstrcmp(objname, "/A/B/M/X/Y/D"))
+    if (HDstrcmp(objname, "/A/B/M/X/Y/D") != 0)
         TEST_ERROR
 
     /* Close object in mounted file */
@@ -1738,7 +1738,7 @@ test_mount_after_unmount(hid_t fapl)
     *objname = '\0';
     if (H5Iget_name(gidAMXX, objname, (size_t)NAME_BUF_SIZE) < 0)
         TEST_ERROR
-    if (HDstrcmp(objname, "/A/M/X/X"))
+    if (HDstrcmp(objname, "/A/M/X/X") != 0)
         TEST_ERROR
 
     /* Open group in mounted file #2 */
@@ -1758,7 +1758,7 @@ test_mount_after_unmount(hid_t fapl)
     *objname = '\0';
     if (H5Iget_name(gidAMXMY, objname, (size_t)NAME_BUF_SIZE) < 0)
         TEST_ERROR
-    if (HDstrcmp(objname, "/A/M/X/M/Y"))
+    if (HDstrcmp(objname, "/A/M/X/M/Y") != 0)
         TEST_ERROR
 
     /* Unmount second file */
@@ -1769,7 +1769,7 @@ test_mount_after_unmount(hid_t fapl)
     *objname = '\0';
     if (H5Iget_name(gidAMXMY, objname, (size_t)NAME_BUF_SIZE) < 0)
         TEST_ERROR
-    if (HDstrcmp(objname, "/X/M/Y"))
+    if (HDstrcmp(objname, "/X/M/Y") != 0)
         TEST_ERROR
 
     /* Rename object in file #3 that is "disconnected" from name hiearchy */
@@ -1789,7 +1789,7 @@ test_mount_after_unmount(hid_t fapl)
     *objname = '\0';
     if (H5Iget_name(gidAMXMY, objname, (size_t)NAME_BUF_SIZE) < 0)
         TEST_ERROR
-    if (HDstrcmp(objname, "/X/M/Z"))
+    if (HDstrcmp(objname, "/X/M/Z") != 0)
         TEST_ERROR
 
     /* Mount fourth file */
@@ -1805,7 +1805,7 @@ test_mount_after_unmount(hid_t fapl)
     *objname = '\0';
     if (H5Iget_name(gidBMZ, objname, (size_t)NAME_BUF_SIZE) < 0)
         TEST_ERROR
-    if (HDstrcmp(objname, "/B/M/Z"))
+    if (HDstrcmp(objname, "/B/M/Z") != 0)
         TEST_ERROR
 
     /* Unmount third file */
@@ -3053,7 +3053,7 @@ test_mult_mount(hid_t fapl)
     *name = '\0';
     if (H5Iget_name(gidAMT, name, (size_t)NAME_BUF_SIZE) < 0)
         TEST_ERROR
-    if (HDstrcmp(name, "/A/M/T"))
+    if (HDstrcmp(name, "/A/M/T") != 0)
         TEST_ERROR
 
     /* Create object in file #3 */
@@ -3071,7 +3071,7 @@ test_mult_mount(hid_t fapl)
     *name = '\0';
     if (H5Iget_name(gidBS, name, (size_t)NAME_BUF_SIZE) < 0)
         TEST_ERROR
-    if (HDstrcmp(name, "/B/S"))
+    if (HDstrcmp(name, "/B/S") != 0)
         TEST_ERROR
 
     /* Re-open object created in file #3 through file #1 mount path */
@@ -3252,7 +3252,7 @@ test_nested_survive(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidAM, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/A/M"))
+    if (name_len == 0 || HDstrcmp(name, "/A/M") != 0)
         TEST_ERROR
 
     /* Unmount file #2 from file #1 */
@@ -3263,7 +3263,7 @@ test_nested_survive(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidAM, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len != 0 || HDstrcmp(name, ""))
+    if (name_len != 0 || HDstrcmp(name, "") != 0)
         TEST_ERROR
 
     /* Open object in file #3 through file #1 mount path (should fail) */
@@ -3280,7 +3280,7 @@ test_nested_survive(hid_t fapl)
     *name = '\0';
     if (H5Iget_name(gidMS, name, (size_t)NAME_BUF_SIZE) < 0)
         TEST_ERROR
-    if (HDstrcmp(name, "/M/S"))
+    if (HDstrcmp(name, "/M/S") != 0)
         TEST_ERROR
 
     /* Close group in file #3 */
@@ -3299,7 +3299,7 @@ test_nested_survive(hid_t fapl)
     *name = '\0';
     if (H5Iget_name(gidAMS, name, (size_t)NAME_BUF_SIZE) < 0)
         TEST_ERROR
-    if (HDstrcmp(name, "/A/M/S"))
+    if (HDstrcmp(name, "/A/M/S") != 0)
         TEST_ERROR
 
     /* Close group in file #3 */
@@ -3448,7 +3448,7 @@ test_close_parent(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/A/M"))
+    if (name_len == 0 || HDstrcmp(name, "/A/M") != 0)
         TEST_ERROR
 
     /* Unmount file #2 from file #1, closing file #1 */
@@ -3459,7 +3459,7 @@ test_close_parent(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/M"))
+    if (name_len == 0 || HDstrcmp(name, "/M") != 0)
         TEST_ERROR
 
     /* Just file #2's underlying shared file should be open still */
@@ -3726,7 +3726,7 @@ test_cut_graph(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/A/E/M"))
+    if (name_len == 0 || HDstrcmp(name, "/A/E/M") != 0)
         TEST_ERROR
 
     /* Open object in file #7 */
@@ -3737,7 +3737,7 @@ test_cut_graph(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidQ, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/B/I/Q"))
+    if (name_len == 0 || HDstrcmp(name, "/B/I/Q") != 0)
         TEST_ERROR
 
     /* Close file #1 */
@@ -3794,7 +3794,7 @@ test_cut_graph(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidK, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/D/K"))
+    if (name_len == 0 || HDstrcmp(name, "/D/K") != 0)
         TEST_ERROR
 
     if (H5Gclose(gidK) < 0)
@@ -3814,7 +3814,7 @@ test_cut_graph(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidO, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/B/H/O"))
+    if (name_len == 0 || HDstrcmp(name, "/B/H/O") != 0)
         TEST_ERROR
 
     if (H5Gclose(gidO) < 0)
@@ -3824,14 +3824,14 @@ test_cut_graph(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/E/M"))
+    if (name_len == 0 || HDstrcmp(name, "/E/M") != 0)
         TEST_ERROR
 
     /* Check the name of "Q" is still defined */
     *name = '\0';
     if ((name_len = H5Iget_name(gidQ, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/B/I/Q"))
+    if (name_len == 0 || HDstrcmp(name, "/B/I/Q") != 0)
         TEST_ERROR
 
     /* Check that all seven underlying files are still opened */
@@ -3856,7 +3856,7 @@ test_cut_graph(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidQ, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/I/Q"))
+    if (name_len == 0 || HDstrcmp(name, "/I/Q") != 0)
         TEST_ERROR
 
     /* Open object in file #6 from file #7 */
@@ -3867,7 +3867,7 @@ test_cut_graph(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidO, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/H/O"))
+    if (name_len == 0 || HDstrcmp(name, "/H/O") != 0)
         TEST_ERROR
 
     if (H5Gclose(gidO) < 0)
@@ -4033,7 +4033,7 @@ test_symlink(hid_t fapl)
     *name = '\0';
     if ((name_len = H5Iget_name(gidL, name, (size_t)NAME_BUF_SIZE)) < 0)
         TEST_ERROR
-    if (name_len == 0 || HDstrcmp(name, "/L"))
+    if (name_len == 0 || HDstrcmp(name, "/L") != 0)
         TEST_ERROR
 
     /* Close file #1 */

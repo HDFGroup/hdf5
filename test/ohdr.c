@@ -779,7 +779,7 @@ count_attributes(hid_t dset_id)
  * On success, stores size in `size_out` pointer.
  */
 static herr_t
-_oh_getsize(hid_t did, hsize_t *size_out)
+oh_getsize(hid_t did, hsize_t *size_out)
 {
     H5O_info_t info;
 
@@ -802,9 +802,9 @@ oh_compare(hid_t did1, hid_t did2)
     hsize_t space1 = 0;
     hsize_t space2 = 0;
 
-    if (FAIL == _oh_getsize(did1, &space1))
+    if (FAIL == oh_getsize(did1, &space1))
         return -1;
-    if (FAIL == _oh_getsize(did2, &space2))
+    if (FAIL == oh_getsize(did2, &space2))
         return -2;
 
     if (space1 < space2)
@@ -906,7 +906,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
     /* Read the data back and verify */
     if (H5Aread(aid, H5T_NATIVE_CHAR, out_buf) < 0)
         TEST_ERROR;
-    if (HDstrcmp(in_buf, out_buf))
+    if (HDstrcmp(in_buf, out_buf) != 0)
         TEST_ERROR;
 
     /* modify the string attribute */
@@ -921,7 +921,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
     /* Read the data back and verify */
     if (H5Aread(aid, H5T_NATIVE_CHAR, out_buf) < 0)
         TEST_ERROR;
-    if (HDstrcmp(in_buf, out_buf))
+    if (HDstrcmp(in_buf, out_buf) != 0)
         TEST_ERROR;
 
     /* Close */
@@ -1752,8 +1752,8 @@ main(void)
         env_h5_drvr = "nomatch";
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                                HDstrcmp(env_h5_drvr, "family"));
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                                HDstrcmp(env_h5_drvr, "family") != 0);
 
     /* Reset library */
     h5_reset();
