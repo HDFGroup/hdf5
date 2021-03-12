@@ -1,7 +1,6 @@
 /** \page RM Reference Manual
 
-The HDF5 C-API provides applications with fine-grained control over all aspects
-of HDF5 functionality. This functionality is grouped into the following
+The functions provides by the HDF5 C-API are grouped into the following
 \Emph{modules}:
 
 \li \ref H5A "Attributes" — Management of HDF5 attributes (\ref H5A)
@@ -37,8 +36,5 @@ of HDF5 functionality. This functionality is grouped into the following
      \li \Bold{Use of locations:} Identifier + name combo
 
 \cpp_c_api_note
-
-\par ToDo List
-     There is plenty of <a href="./todo.html">unfinished business</a>.
 
 */

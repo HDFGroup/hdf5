@@ -143,7 +143,7 @@ typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
 /**
  * \brief Callback function for H5Pregister2(),H5Pregister1(),H5Pinsert2(),H5Pinsert1()
  *
- * \plist_id(prop_id)
+ * \plist_id{prop_id}
  * \param[in]     name  The name of the property
  * \param[in]     size  The size of the property in bytes
  * \param[in]     value The value for the property
