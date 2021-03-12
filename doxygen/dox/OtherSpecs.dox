@@ -1,0 +1,11 @@
+/** \page IMG HDF5 Image and Palette Specification Version 1.2
+
+\htmlinclude ImageSpec.html
+
+*/
+
+/** \page TBL HDF5 Table Specification Version 1.0
+
+\htmlinclude TableSpec.html
+
+*/

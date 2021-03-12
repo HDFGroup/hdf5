@@ -14,6 +14,9 @@
 
 \section Other
 
-\li <a href="https://portal.hdfgroup.org/display/HDF5/Design+Specifications"> Other Specifications</a>
+\li \ref IMG "HDF5 Image and Palette Specification Version 1.2"
+\li \ref TBL "HDF5 Table Specification Version 1.0"
+\li <a href="https://support.hdfgroup.org/HDF5/doc/HL/H5DS_Spec.pdf">
+      HDF5 Dimension Scale Specification</a>
 
 */
