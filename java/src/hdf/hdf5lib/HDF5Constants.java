@@ -55,11 +55,15 @@ public class HDF5Constants {
     public static final int H5_INDEX_CRT_ORDER = H5_INDEX_CRT_ORDER();
     /** indices on links, number of indices defined */
     public static final int H5_INDEX_N = H5_INDEX_N();
-    /** */
+    /** Common iteration orders, Unknown order */
     public static final int H5_ITER_UNKNOWN = H5_ITER_UNKNOWN();
+    /** Common iteration orders, Increasing order */
     public static final int H5_ITER_INC = H5_ITER_INC();
+    /** Common iteration orders, Decreasing order */
     public static final int H5_ITER_DEC = H5_ITER_DEC();
+    /** Common iteration orders, No particular order, whatever is fastest */
     public static final int H5_ITER_NATIVE = H5_ITER_NATIVE();
+    /** Common iteration orders, Number of iteration orders */
     public static final int H5_ITER_N = H5_ITER_N();
     public static final int H5AC_CURR_CACHE_CONFIG_VERSION = H5AC_CURR_CACHE_CONFIG_VERSION();
     public static final int H5AC_MAX_TRACE_FILE_NAME_LEN = H5AC_MAX_TRACE_FILE_NAME_LEN();
