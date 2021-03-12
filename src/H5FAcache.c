@@ -252,7 +252,7 @@ BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
     hdr->addr = udata->addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         H5E_THROW(H5E_BADVALUE, "wrong fixed array header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -637,7 +637,7 @@ BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
     dblock->addr = udata->dblk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         H5E_THROW(H5E_BADVALUE, "wrong fixed array data block signature")
     image += H5_SIZEOF_MAGIC;
 

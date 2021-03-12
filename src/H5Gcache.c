@@ -176,7 +176,7 @@ H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata, hbool_
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* magic */
-    if (HDmemcmp(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "bad symbol table node signature")
     image += H5_SIZEOF_MAGIC;
 
