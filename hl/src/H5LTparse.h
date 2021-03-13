@@ -110,7 +110,7 @@ extern int H5LTyydebug;
 typedef union YYSTYPE
 {
 /* Line 2058 of yacc.c  */
-#line 67 "hl/src//H5LTparse.y"
+#line 69 "hl/src//H5LTparse.y"
 
     int     ival;         /*for integer token*/
     char    *sval;        /*for name string*/
