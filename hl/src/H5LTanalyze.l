@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <hdf5.h>
+
+#include "H5private.h"
 #include "H5LTparse.h"
 
 static char *trim_quotes(const char *);

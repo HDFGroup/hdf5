@@ -22,6 +22,8 @@
 #include <string.h>
 #include <hdf5.h>
 
+#include "H5private.h"
+
 extern int yylex(void);
 extern int yyerror(const char *);
 
