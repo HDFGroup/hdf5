@@ -46,11 +46,9 @@ main(void)
     int rowo4i = 11, colo4i = 21, plno4i = 51;
     int rowi4i = 1, coli4i = 2, plni4i = 5;
 
-#ifdef H5_SIZEOF_LONG_LONG
     long long row4i64[3], col4i64[4], pln4i64[5];
     long long rowo4i64 = (long long)11, colo4i64 = (long long)21, plno4i64 = (long long)51;
     long long rowi4i64 = (long long)1, coli4i64 = (long long)2, plni4i64 = (long long)5;
-#endif
 
     short b16i3[5][3][4];
     short row4i16[3], col4i16[4], pln4i16[5];
@@ -101,11 +99,9 @@ main(void)
     col4i[0] = colo4i;
     pln4i[0] = plno4i;
 
-#ifdef H5_SIZEOF_LONG_LONG
     row4i64[0] = rowo4i64;
     col4i64[0] = colo4i64;
     pln4i64[0] = plno4i64;
-#endif
 
     row4i16[0] = rowo4i16;
     col4i16[0] = colo4i16;
@@ -119,9 +115,7 @@ main(void)
         row4[i]  = row4[i - 1] + rowi4;
         row8[i]  = row8[i - 1] + rowi8;
         row4i[i] = row4i[i - 1] + rowi4i;
-#ifdef H5_SIZEOF_LONG_LONG
         row4i64[i] = row4i64[i - 1] + rowi4i64;
-#endif
         row4i16[i] = (short)(row4i16[i - 1] + rowi4i16);
         row4i8[i]  = (char)(row4i8[i - 1] + rowi4i8);
     }
@@ -130,9 +124,7 @@ main(void)
         col4[j]  = col4[j - 1] + coli4;
         col8[j]  = col8[j - 1] + coli8;
         col4i[j] = col4i[j - 1] + coli4i;
-#ifdef H5_SIZEOF_LONG_LONG
         col4i64[j] = col4i64[j - 1] + coli4i64;
-#endif
         col4i16[j] = (short)(col4i16[j - 1] + coli4i16);
         col4i8[j]  = (char)(col4i8[j - 1] + coli4i8);
     }
@@ -140,9 +132,7 @@ main(void)
         pln4[k]  = pln4[k - 1] + plni4;
         pln8[k]  = pln8[k - 1] + plni8;
         pln4i[k] = pln4i[k - 1] + plni4i;
-#ifdef H5_SIZEOF_LONG_LONG
         pln4i64[k] = pln4i64[k - 1] + plni4i64;
-#endif
         pln4i16[k] = (short)(pln4i16[k - 1] + plni4i16);
         pln4i8[k]  = (char)(pln4i8[k - 1] + plni4i8);
     }

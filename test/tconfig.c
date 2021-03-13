@@ -119,25 +119,11 @@ test_config_ctypes(void)
 #endif
 
     /* standard C99 basic types */
-#if H5_SIZEOF_LONG_LONG > 0
     vrfy_cint_type(long long, unsigned long long, H5_SIZEOF_LONG_LONG);
-#endif
-
-#if H5_SIZEOF_INT8_T > 0
     vrfy_cint_type(int8_t, uint8_t, H5_SIZEOF_INT8_T);
-#endif
-
-#if H5_SIZEOF_INT16_T > 0
     vrfy_cint_type(int16_t, uint16_t, H5_SIZEOF_INT16_T);
-#endif
-
-#if H5_SIZEOF_INT32_T > 0
     vrfy_cint_type(int32_t, uint32_t, H5_SIZEOF_INT32_T);
-#endif
-
-#if H5_SIZEOF_INT64_T > 0
     vrfy_cint_type(int64_t, uint64_t, H5_SIZEOF_INT64_T);
-#endif
 
     /* Some vendors have different sizes for the signed and unsigned */
     /* fast8_t.  Need to check them individually. */
