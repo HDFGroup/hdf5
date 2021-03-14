@@ -64,10 +64,7 @@ PacketTable::~PacketTable()
 bool
 PacketTable::IsValid()
 {
-    if (H5PTis_valid(table_id) == 0)
-        return true;
-    else
-        return false;
+    return H5PTis_valid(table_id) == 0;
 }
 
 /* IsVariableLength

@@ -285,7 +285,7 @@ test_attr_getname()
 
         // Check for existence of attribute FATTR1_NAME
         bool attr_exists = fid1.attrExists(FATTR1_NAME);
-        if (attr_exists == false)
+        if (!attr_exists)
             throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
         // Open attribute
@@ -361,7 +361,7 @@ test_attr_getname()
 
         // Check for existence of attribute
         attr_exists = dataset.attrExists(ATTR1_NAME);
-        if (attr_exists == false)
+        if (!attr_exists)
             throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
         // Open attribute
@@ -410,7 +410,7 @@ test_attr_rename()
 
         // Check for existence of attribute
         bool attr_exists = fid1.attrExists(FATTR1_NAME);
-        if (attr_exists == false)
+        if (!attr_exists)
             throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
         // Change attribute name
@@ -436,7 +436,7 @@ test_attr_rename()
 
         // Check for existence of attribute
         attr_exists = dataset.attrExists(ATTR1_NAME);
-        if (attr_exists == false)
+        if (!attr_exists)
             throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
         // Change attribute name
@@ -464,7 +464,7 @@ test_attr_rename()
 
         // Check for existence of second attribute
         attr_exists = dataset.attrExists(ATTR2_NAME);
-        if (attr_exists == false)
+        if (!attr_exists)
             throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
         // Open the second attribute
@@ -492,7 +492,7 @@ test_attr_rename()
 
         // Check for existence of attribute after renaming
         attr_exists = dataset.attrExists(ATTR1_NAME);
-        if (attr_exists == false)
+        if (!attr_exists)
             throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
         PASSED();
@@ -1681,13 +1681,13 @@ test_attr_exists()
 
         // Check for existence of attribute
         bool attr_exists = fid1.attrExists(ATTR1_FL_STR_NAME);
-        if (attr_exists == false)
+        if (!attr_exists)
             throw InvalidActionException("H5File::attrExists",
                                          "fid1, ATTR1_FL_STR_NAMEAttribute should exist but does not");
 
         // Check for existence of attribute
         attr_exists = fid1.attrExists(FATTR1_NAME);
-        if (attr_exists == false)
+        if (!attr_exists)
             throw InvalidActionException("H5File::attrExists",
                                          "fid1,FATTR2_NAMEAttribute should exist but does not");
 
@@ -1696,7 +1696,7 @@ test_attr_exists()
 
         // Check for existence of attribute
         attr_exists = group.attrExists(ATTR2_NAME);
-        if (attr_exists == false)
+        if (!attr_exists)
             throw InvalidActionException("H5File::attrExists",
                                          "group, ATTR2_NAMEAttribute should exist but does not");
 
