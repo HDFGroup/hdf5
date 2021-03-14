@@ -3061,7 +3061,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
         hw_f      = 911.0f;
         hw_d      = 911.0f;
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-        hw_ld = 911.0f;
+        hw_ld = 911.0L;
 #endif
 
         /* The hardware conversion */
