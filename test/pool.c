@@ -34,7 +34,7 @@
 #define MPOOL_LARGE_BLOCK       (MPOOL_PAGE_SIZE * 3)
 #define MPOOL_NUM_SMALL_BLOCKS  64
 #define MPOOL_SMALL_BLOCK       1
-#define MPOOL_NUM_RANDOM        10 * 1024
+#define MPOOL_NUM_RANDOM        (10 * 1024)
 #define MPOOL_RANDOM_MAX_SIZE   (MPOOL_PAGE_SIZE * 2)
 
 /*-------------------------------------------------------------------------

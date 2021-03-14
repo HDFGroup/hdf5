@@ -53,7 +53,7 @@ const char *FILENAME[] = {"dt_arith1", "dt_arith2", NULL};
  * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
  * be I, otherwise the result will be Z-(I+1).
  */
-#define ENDIAN(Z, I, E) (H5T_ORDER_BE == E ? (I) : (Z) - ((I) + 1))
+#define ENDIAN(Z, I, E) (H5T_ORDER_BE == (E) ? (I) : (Z) - ((I) + 1))
 
 typedef enum dtype_t {
     INT_SCHAR,

@@ -65,7 +65,7 @@
 #define SIO_HDF5  0x4
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes, t) (H5_DBL_ABS_EQUAL(t, 0.0) ? 0.0 : ((((double)bytes) / (double)ONE_MB) / (t)))
+#define MB_PER_SEC(bytes, t) (H5_DBL_ABS_EQUAL(t, 0.0) ? 0.0 : ((((double)(bytes)) / (double)ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE 1

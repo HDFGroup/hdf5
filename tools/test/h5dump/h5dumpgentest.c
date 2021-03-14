@@ -199,8 +199,8 @@ const H5L_class_t UD_link_class[1] = {{
 
 #define DIM1  20
 #define DIM2  10
-#define CDIM1 DIM1 / 2
-#define CDIM2 DIM2 / 2
+#define CDIM1 (DIM1 / 2)
+#define CDIM2 (DIM2 / 2)
 #define RANK  2
 
 /* Dataspace of 0 dimension size */

@@ -50,7 +50,7 @@
 /* verify: if val is false (0), print mesg. */
 #define VRFY(val, mesg)                                                                                      \
     do {                                                                                                     \
-        if (!val) {                                                                                          \
+        if (!(val)) {                                                                                          \
             ERRMSG(mesg);                                                                                    \
             GOTOERROR(FAIL);                                                                                 \
         }                                                                                                    \

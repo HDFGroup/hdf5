@@ -56,8 +56,8 @@
 #define DNAME "big.data"
 
 #define WRT_N       50
-#define WRT_SIZE    4 * 1024
-#define FAMILY_SIZE 1024 * 1024 * 1024
+#define WRT_SIZE    (4 * 1024)
+#define FAMILY_SIZE (1024 * 1024 * 1024)
 
 #define GB (HDoff_t)0x40000000L
 
