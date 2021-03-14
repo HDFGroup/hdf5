@@ -6683,13 +6683,13 @@ static int
 test_int_float_except(void)
 {
 #if H5_SIZEOF_INT == 4 && H5_SIZEOF_FLOAT == 4
-    float  buf[CONVERT_SIZE]       = {(float)INT_MIN - 172.0f, (float)INT_MAX - 32.0f, (float)INT_MAX - 68.0f,
-                               (float)4.5f};
+    float  buf[CONVERT_SIZE]       = {(float)INT_MIN - 172.0F, (float)INT_MAX - 32.0F, (float)INT_MAX - 68.0F,
+                               (float)4.5F};
     int    buf_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 4};
-    float  buf_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX + 1.0f, (float)INT_MAX - 127.0f, 4};
+    float  buf_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX + 1.0F, (float)INT_MAX - 127.0F, 4};
     int *  intp; /* Pointer to buffer, as integers */
     int    buf2[CONVERT_SIZE]       = {INT_MIN, INT_MAX, INT_MAX - 72, 0};
-    float  buf2_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX, (float)INT_MAX - 127.0f, (float)0.0f};
+    float  buf2_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX, (float)INT_MAX - 127.0F, (float)0.0F};
     int    buf2_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 0};
     float *floatp;   /* Pointer to buffer #2, as floats */
     hid_t  dxpl;     /* Dataset transfer property list */

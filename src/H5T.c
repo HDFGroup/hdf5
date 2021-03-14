@@ -560,8 +560,8 @@ size_t H5T_NATIVE_UINT_FAST64_ALIGN_g  = 0;
 
 /* Useful floating-point values for conversion routines */
 /* (+/- Inf for all floating-point types) */
-float  H5T_NATIVE_FLOAT_POS_INF_g  = 0.0f;
-float  H5T_NATIVE_FLOAT_NEG_INF_g  = 0.0f;
+float  H5T_NATIVE_FLOAT_POS_INF_g  = 0.0F;
+float  H5T_NATIVE_FLOAT_NEG_INF_g  = 0.0F;
 double H5T_NATIVE_DOUBLE_POS_INF_g = 0.0;
 double H5T_NATIVE_DOUBLE_NEG_INF_g = 0.0;
 
