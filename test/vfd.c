@@ -84,63 +84,59 @@ static int __k;
         HDprintf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                            \
     } /* end #define HEXPRINT() */
 
-
 /* Macro SET_SIZE()
  *
  * Helper macro to track the sizes of entries in a vector
- * I/O call when stepping through the vector incrementally.  
- * Assuming that bool_size_fixed is initialized to FALSE 
- * before the scan, this macro will detect the sizes array 
- * optimization for the case in which all remaining entries 
+ * I/O call when stepping through the vector incrementally.
+ * Assuming that bool_size_fixed is initialized to FALSE
+ * before the scan, this macro will detect the sizes array
+ * optimization for the case in which all remaining entries
  * are of the same size, and set size_value accordingly.
  *
  *                                   JRM -- 3/11/21
  */
-#define SET_SIZE(bool_size_fixed, sizes_array, size_value, idx) \
-do {                                                            \
-    if ( ! ( bool_size_fixed ) ) {                              \
-                                                                \
-        if ( (sizes_array)[idx] == 0 ) {                        \
-                                                                \
-            HDassert((idx) > 0);                                \
-            (bool_size_fixed) = TRUE;                           \
-                                                                \
-        } else {                                                \
-                                                                \
-            (size_value) = (sizes_array)[idx];                  \
-        }                                                       \
-    }                                                           \
-} while ( FALSE )
-
+#define SET_SIZE(bool_size_fixed, sizes_array, size_value, idx)                                              \
+    do {                                                                                                     \
+        if (!(bool_size_fixed)) {                                                                            \
+                                                                                                             \
+            if ((sizes_array)[idx] == 0) {                                                                   \
+                                                                                                             \
+                HDassert((idx) > 0);                                                                         \
+                (bool_size_fixed) = TRUE;                                                                    \
+            }                                                                                                \
+            else {                                                                                           \
+                                                                                                             \
+                (size_value) = (sizes_array)[idx];                                                           \
+            }                                                                                                \
+        }                                                                                                    \
+    } while (FALSE)
 
 /* Macro SET_TYPE()
  *
  * Helper macro to track the types of entries in a vector
- * I/O call when stepping through the vector incrementally.  
- * Assuming that bool_type_fixed is initialized to FALSE 
- * before the scan, this macro will detect the types array 
- * optimization for the case in which all remaining entries 
+ * I/O call when stepping through the vector incrementally.
+ * Assuming that bool_type_fixed is initialized to FALSE
+ * before the scan, this macro will detect the types array
+ * optimization for the case in which all remaining entries
  * are of the same type, and set type_value accordingly.
  *
  *                                   JRM -- 3/11/21
  */
-#define SET_TYPE(bool_type_fixed, types_array, type_value, idx) \
-do {                                                            \
-    if ( ! ( bool_type_fixed ) ) {                              \
-                                                                \
-        if ( (types_array)[idx] == H5FD_MEM_NOLIST ) {          \
-                                                                \
-            HDassert((idx) > 0);                                \
-            (bool_type_fixed) = TRUE;                           \
-                                                                \
-        } else {                                                \
-                                                                \
-            (type_value) = (types_array)[idx];                  \
-        }                                                       \
-    }                                                           \
-} while ( FALSE )
-
-
+#define SET_TYPE(bool_type_fixed, types_array, type_value, idx)                                              \
+    do {                                                                                                     \
+        if (!(bool_type_fixed)) {                                                                            \
+                                                                                                             \
+            if ((types_array)[idx] == H5FD_MEM_NOLIST) {                                                     \
+                                                                                                             \
+                HDassert((idx) > 0);                                                                         \
+                (bool_type_fixed) = TRUE;                                                                    \
+            }                                                                                                \
+            else {                                                                                           \
+                                                                                                             \
+                (type_value) = (types_array)[idx];                                                           \
+            }                                                                                                \
+        }                                                                                                    \
+    } while (FALSE)
 
 /* Helper structure to pass around dataset information.
  */
@@ -3362,7 +3358,6 @@ error:
 
 #undef SPLITTER_TEST_FAULT
 
-
 /*****************************************************************************
  *
  * Function    setup_rand()
@@ -3370,7 +3365,7 @@ error:
  * Purpose:    Use gettimeofday() to obtain a seed for rand(), print the
  *             seed to stdout, and then pass it to srand().
  *
- *             This is a version of the same routine in 
+ *             This is a version of the same routine in
  *             testpar/t_cache.c modified for use in serial tests.
  *
  * Return:     void.
@@ -3385,12 +3380,12 @@ error:
 static void
 setup_rand(void)
 {
-    hbool_t use_predefined_seed = FALSE;
-    unsigned predefined_seed = 18669;
-    unsigned seed;
+    hbool_t        use_predefined_seed = FALSE;
+    unsigned       predefined_seed     = 18669;
+    unsigned       seed;
     struct timeval tv;
 
-    if ( use_predefined_seed ) {
+    if (use_predefined_seed) {
 
         seed = predefined_seed;
 
@@ -3398,17 +3393,15 @@ setup_rand(void)
         HDfflush(stdout);
 
         HDsrand(seed);
+    }
+    else {
 
-    } else {
+        if (HDgettimeofday(&tv, NULL) != 0) {
 
-        if ( HDgettimeofday(&tv, NULL) != 0 ) {
-
-            HDfprintf(stdout, 
-                      "\n%s: gettimeofday() failed -- srand() not called.\n\n", 
-                      FUNC);
+            HDfprintf(stdout, "\n%s: gettimeofday() failed -- srand() not called.\n\n", FUNC);
             HDfflush(stdout);
-
-        } else {
+        }
+        else {
 
             seed = (unsigned)tv.tv_usec;
 
@@ -3423,19 +3416,18 @@ setup_rand(void)
 
 } /* setup_rand() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_vector_io__setup_v
  *
- * Purpose:     Construct and initialize a vector of I/O requests used 
- *              to test vector I/O.  Note that while the vectors are 
- *              allocated and initialized, they are not assigned 
+ * Purpose:     Construct and initialize a vector of I/O requests used
+ *              to test vector I/O.  Note that while the vectors are
+ *              allocated and initialized, they are not assigned
  *              base addresses.
  *
- *              All arrays parameters are presumed to be of length 
+ *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors 
+ * Return:      Return TRUE if sucessful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -3449,27 +3441,26 @@ setup_rand(void)
  */
 
 static hbool_t
-test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], 
-    size_t sizes[], void * write_bufs[], void * read_bufs[], 
-    char base_fill_char)
+test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
+                        void *write_bufs[], void *read_bufs[], char base_fill_char)
 {
-    hbool_t result = TRUE; /* will set to FALSE on failure */
-    char fill_char = base_fill_char;
-    uint32_t i;
-    uint32_t j;
-    H5FD_mem_t mem_types[6] = {H5FD_MEM_SUPER, H5FD_MEM_BTREE, H5FD_MEM_DRAW, 
+    hbool_t    result    = TRUE; /* will set to FALSE on failure */
+    char       fill_char = base_fill_char;
+    uint32_t   i;
+    uint32_t   j;
+    H5FD_mem_t mem_types[6] = {H5FD_MEM_SUPER, H5FD_MEM_BTREE, H5FD_MEM_DRAW,
                                H5FD_MEM_GHEAP, H5FD_MEM_LHEAP, H5FD_MEM_OHDR};
 
     /* set the arrays of pointers to the write and read buffers to NULL,
      * so that we can release memory on failure.
      */
-    for ( i = 0; i < count; i++ ) {
+    for (i = 0; i < count; i++) {
 
         write_bufs[i] = NULL;
-        read_bufs[i] = NULL;
+        read_bufs[i]  = NULL;
     }
 
-    for ( i = 0; i < count; i++ ) {
+    for (i = 0; i < count; i++) {
 
         types[i] = mem_types[i % 6];
 
@@ -3478,38 +3469,38 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
         sizes[i] = (size_t)((rand() & 1023) + 1);
 
         write_bufs[i] = HDmalloc(sizes[i] + 1);
-        read_bufs[i] = HDmalloc(sizes[i] + 1);
+        read_bufs[i]  = HDmalloc(sizes[i] + 1);
 
-        if ( ( NULL == write_bufs[i] ) || ( NULL == read_bufs[i] ) ) {
+        if ((NULL == write_bufs[i]) || (NULL == read_bufs[i])) {
 
             HDfprintf(stderr, "%s: can't malloc read / write bufs.\n", FUNC);
             result = FALSE;
             break;
         }
 
-        for ( j = 0; j < sizes[i]; j++ ) {
+        for (j = 0; j < sizes[i]; j++) {
 
             ((char *)(write_bufs[i]))[j] = fill_char;
-            ((char *)(read_bufs[i]))[j] = '\0';
+            ((char *)(read_bufs[i]))[j]  = '\0';
         }
 
         ((char *)(write_bufs[i]))[sizes[i]] = '\0';
-        ((char *)(read_bufs[i]))[sizes[i]] = '\0';
+        ((char *)(read_bufs[i]))[sizes[i]]  = '\0';
 
         fill_char++;
     }
 
-    if ( ! result ) { /* free buffers */
+    if (!result) { /* free buffers */
 
-        for ( i = 0; i < count; i++ ) {
+        for (i = 0; i < count; i++) {
 
-            if ( write_bufs[i] ) {
+            if (write_bufs[i]) {
 
                 HDfree(write_bufs[i]);
                 write_bufs[i] = NULL;
             }
 
-            if ( read_bufs[i] ) {
+            if (read_bufs[i]) {
 
                 HDfree(read_bufs[i]);
                 read_bufs[i] = NULL;
@@ -3517,28 +3508,27 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
         }
     }
 
-    return(result);
+    return (result);
 
 } /* end test_vector_io__setup_v() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_vector_io__setup_fixed_size_v
  *
- * Purpose:     To test the optimization allowing short sizes and types 
- *              arrays, construct and initialize a vector of I/O requests 
- *              with each request of the same size and type, and use the 
- *              optimizatin to allow reduced length sizes and types 
- *              vectors.  Since the function is supplied with types and 
+ * Purpose:     To test the optimization allowing short sizes and types
+ *              arrays, construct and initialize a vector of I/O requests
+ *              with each request of the same size and type, and use the
+ *              optimizatin to allow reduced length sizes and types
+ *              vectors.  Since the function is supplied with types and
  *              sizes vectors of length count, simulate shorter vectors
- *              by initializing the sizes and types vectors to values 
+ *              by initializing the sizes and types vectors to values
  *              that will cause failure if used.
  *
- *              All arrays parameters are presumed to be of length 
- *              count. Count is presumed to be a power of 2, and at 
+ *              All arrays parameters are presumed to be of length
+ *              count. Count is presumed to be a power of 2, and at
  *              least 2.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors 
+ * Return:      Return TRUE if sucessful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -3552,17 +3542,16 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
  */
 
 static hbool_t
-test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], 
-    haddr_t addrs[], size_t sizes[], void * write_bufs[], void * read_bufs[], 
-    char base_fill_char)
+test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
+                                   void *write_bufs[], void *read_bufs[], char base_fill_char)
 {
-    hbool_t result = TRUE; /* will set to FALSE on failure */
-    char fill_char = base_fill_char;
-    uint32_t fix_point; 
-    uint32_t i;
-    uint32_t j;
-    uint32_t k;
-    H5FD_mem_t mem_types[6] = {H5FD_MEM_SUPER, H5FD_MEM_BTREE, H5FD_MEM_DRAW, 
+    hbool_t    result    = TRUE; /* will set to FALSE on failure */
+    char       fill_char = base_fill_char;
+    uint32_t   fix_point;
+    uint32_t   i;
+    uint32_t   j;
+    uint32_t   k;
+    H5FD_mem_t mem_types[6] = {H5FD_MEM_SUPER, H5FD_MEM_BTREE, H5FD_MEM_DRAW,
                                H5FD_MEM_GHEAP, H5FD_MEM_LHEAP, H5FD_MEM_OHDR};
 
     /* set the arrays of pointers to the write and read buffers to NULL,
@@ -3571,7 +3560,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[],
      * Set the types[] and sizes[] arrays to invalid / improbable values
      * so that use of these values will trigger failures.
      */
-    for ( i = 0; i < count; i++ ) {
+    for (i = 0; i < count; i++) {
 
         write_bufs[i] = NULL;
         read_bufs[i]  = NULL;
@@ -3579,7 +3568,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[],
         sizes[i]      = ULONG_MAX;
     }
 
-    /* randomly select the point in the vector after which all entries are 
+    /* randomly select the point in the vector after which all entries are
      * fixed at the same size and type.  Observe that 0 <= fix_point <
      * count / 2.
      */
@@ -3587,9 +3576,9 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[],
 
     HDassert(fix_point < count / 2);
 
-    for ( i = 0; i < count; i++ ) {
+    for (i = 0; i < count; i++) {
 
-        if ( i <= fix_point ) {
+        if (i <= fix_point) {
 
             types[i] = mem_types[i % 6];
 
@@ -3598,13 +3587,13 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[],
             sizes[i] = (size_t)((rand() & 1023) + 1);
 
             write_bufs[i] = HDmalloc(sizes[i] + 1);
-            read_bufs[i] = HDmalloc(sizes[i] + 1);
+            read_bufs[i]  = HDmalloc(sizes[i] + 1);
+        }
+        else {
 
-        } else {
+            if (i == fix_point + 1) {
 
-            if ( i == fix_point + 1 ) {
-
-                /* set the sentinals that indicate that all remaining 
+                /* set the sentinals that indicate that all remaining
                  * types and sizes are the same as the previous value.
                  */
                 types[i] = H5FD_MEM_NOLIST;
@@ -3614,11 +3603,10 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[],
             addrs[i] = HADDR_UNDEF;
 
             write_bufs[i] = HDmalloc(sizes[fix_point] + 1);
-            read_bufs[i] = HDmalloc(sizes[fix_point] + 1);
-
+            read_bufs[i]  = HDmalloc(sizes[fix_point] + 1);
         }
 
-        if ( ( NULL == write_bufs[i] ) || ( NULL == read_bufs[i] ) ) {
+        if ((NULL == write_bufs[i]) || (NULL == read_bufs[i])) {
 
             HDfprintf(stderr, "%s: can't malloc read / write bufs.\n", FUNC);
             result = FALSE;
@@ -3628,29 +3616,29 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[],
         /* need to avoid examining sizes beyond the fix_point */
         k = MIN(i, fix_point);
 
-        for ( j = 0; j < sizes[k]; j++ ) {
+        for (j = 0; j < sizes[k]; j++) {
 
             ((char *)(write_bufs[i]))[j] = fill_char;
-            ((char *)(read_bufs[i]))[j] = '\0';
+            ((char *)(read_bufs[i]))[j]  = '\0';
         }
 
         ((char *)(write_bufs[i]))[sizes[k]] = '\0';
-        ((char *)(read_bufs[i]))[sizes[k]] = '\0';
+        ((char *)(read_bufs[i]))[sizes[k]]  = '\0';
 
         fill_char++;
     }
 
-    if ( ! result ) { /* free buffers */
+    if (!result) { /* free buffers */
 
-        for ( i = 0; i < count; i++ ) {
+        for (i = 0; i < count; i++) {
 
-            if ( write_bufs[i] ) {
+            if (write_bufs[i]) {
 
                 HDfree(write_bufs[i]);
                 write_bufs[i] = NULL;
             }
 
-            if ( read_bufs[i] ) {
+            if (read_bufs[i]) {
 
                 HDfree(read_bufs[i]);
                 read_bufs[i] = NULL;
@@ -3658,21 +3646,20 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[],
         }
     }
 
-    return(result);
+    return (result);
 
 } /* end test_vector_io__setup_fixed_size_v() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_vector_io__read_v_indiv
  *
- * Purpose:     Read the supplied vector as a sequence of individual 
+ * Purpose:     Read the supplied vector as a sequence of individual
  *              reads.
  *
- *              All arrays parameters are presumed to be of length 
+ *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors 
+ * Return:      Return TRUE if sucessful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -3686,51 +3673,48 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[],
  */
 
 static hbool_t
-test_vector_io__read_v_indiv(H5FD_t * lf, uint32_t count, H5FD_mem_t types[], 
-    haddr_t addrs[], size_t sizes[], void * read_bufs[])
+test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
+                             void *read_bufs[])
 {
-    hbool_t size_fixed = FALSE;
-    hbool_t type_fixed = FALSE;
-    hbool_t result = TRUE;   /* will set to FALSE on failure */
-    hbool_t verbose = FALSE;
-    uint32_t i;
-    size_t size = ULONG_MAX;
+    hbool_t    size_fixed = FALSE;
+    hbool_t    type_fixed = FALSE;
+    hbool_t    result     = TRUE; /* will set to FALSE on failure */
+    hbool_t    verbose    = FALSE;
+    uint32_t   i;
+    size_t     size = ULONG_MAX;
     H5FD_mem_t type = H5FD_MEM_NTYPES;
 
-    for ( i = 0; i < count; i++ ) {
+    for (i = 0; i < count; i++) {
 
         SET_SIZE(size_fixed, sizes, size, i);
 
         SET_TYPE(type_fixed, types, type, i);
 
-        if ( H5FDread(lf, type, H5P_DEFAULT, addrs[i], size,
-                       read_bufs[i]) < 0 ) {
+        if (H5FDread(lf, type, H5P_DEFAULT, addrs[i], size, read_bufs[i]) < 0) {
 
-            if ( verbose ) {
+            if (verbose) {
 
-                HDfprintf(stdout, "%s: HDread() failed on entry %d.\n",
-                          FUNC, i);
+                HDfprintf(stdout, "%s: HDread() failed on entry %d.\n", FUNC, i);
             }
             result = FALSE;
             break;
         }
     }
 
-    return(result);
+    return (result);
 
 } /* end test_vector_io__read_v_indiv() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_vector_io__write_v_indiv
  *
- * Purpose:     Write the supplied vector as a sequence of individual 
+ * Purpose:     Write the supplied vector as a sequence of individual
  *              writes.
  *
- *              All arrays parameters are presumed to be of length 
+ *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors 
+ * Return:      Return TRUE if sucessful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -3744,49 +3728,46 @@ test_vector_io__read_v_indiv(H5FD_t * lf, uint32_t count, H5FD_mem_t types[],
  */
 
 static hbool_t
-test_vector_io__write_v_indiv(H5FD_t * lf, uint32_t count, H5FD_mem_t types[], 
-    haddr_t addrs[], size_t sizes[], void * write_bufs[])
+test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
+                              void *write_bufs[])
 {
-    hbool_t size_fixed = FALSE;
-    hbool_t type_fixed = FALSE;
-    hbool_t result = TRUE;   /* will set to FALSE on failure */
-    hbool_t verbose = FALSE;
-    uint32_t i;
-    size_t size = ULONG_MAX;
+    hbool_t    size_fixed = FALSE;
+    hbool_t    type_fixed = FALSE;
+    hbool_t    result     = TRUE; /* will set to FALSE on failure */
+    hbool_t    verbose    = FALSE;
+    uint32_t   i;
+    size_t     size = ULONG_MAX;
     H5FD_mem_t type = H5FD_MEM_NTYPES;
 
-    for ( i = 0; i < count; i++ ) {
+    for (i = 0; i < count; i++) {
 
         SET_SIZE(size_fixed, sizes, size, i);
 
         SET_TYPE(type_fixed, types, type, i);
 
-        if ( H5FDwrite(lf, type, H5P_DEFAULT, addrs[i], size, 
-                       write_bufs[i]) < 0 ) {
+        if (H5FDwrite(lf, type, H5P_DEFAULT, addrs[i], size, write_bufs[i]) < 0) {
 
-            if ( verbose ) {
+            if (verbose) {
 
-                HDfprintf(stdout, "%s: HDwrite() failed on entry %d.\n",
-                          FUNC, i);
+                HDfprintf(stdout, "%s: HDwrite() failed on entry %d.\n", FUNC, i);
             }
             result = FALSE;
             break;
         }
     }
 
-    return(result);
+    return (result);
 
 } /* end test_vector_io__write_v_indiv() */
 
-
 /*-------------------------------------------------------------------------
  *
  * Function:    test_vector_io__verify_v
  *
- * Purpose:     Verify that the read and write buffers of the supplied 
- *              vectors are identical.  
+ * Purpose:     Verify that the read and write buffers of the supplied
+ *              vectors are identical.
  *
- * Return:      TRUE if the read and write vectors are identical, and 
+ * Return:      TRUE if the read and write vectors are identical, and
  *              FALSE otherwise.
  *
  * Programmer:  John Mainzer
@@ -3798,28 +3779,26 @@ test_vector_io__write_v_indiv(H5FD_t * lf, uint32_t count, H5FD_mem_t types[],
  */
 
 static hbool_t
-test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[],
-    size_t sizes[], void * write_bufs[], void * read_bufs[], const char * name)
+test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], void *write_bufs[],
+                         void *read_bufs[], const char *name)
 {
-    hbool_t size_fixed = FALSE;
-    hbool_t type_fixed = FALSE;
-    hbool_t identical = TRUE;  
-    hbool_t verbose = TRUE;
-    uint32_t i;
-    uint32_t j;
-    uint32_t buf_size;
-    char * w_buf;
-    char * r_buf;
-    const char * mem_type_names[7] = {"H5FD_MEM_DEFAULT", "H5FD_MEM_SUPER",
-                                      "H5FD_MEM_BTREE", "H5FD_MEM_DRAW", 
-                                      "H5FD_MEM_GHEAP", "H5FD_MEM_LHEAP",
-                                      "H5FD_MEM_OHDR"};
-    size_t size = ULONG_MAX;
-    H5FD_mem_t type = H5FD_MEM_NTYPES;
+    hbool_t     size_fixed = FALSE;
+    hbool_t     type_fixed = FALSE;
+    hbool_t     identical  = TRUE;
+    hbool_t     verbose    = TRUE;
+    uint32_t    i;
+    uint32_t    j;
+    uint32_t    buf_size;
+    char *      w_buf;
+    char *      r_buf;
+    const char *mem_type_names[7] = {"H5FD_MEM_DEFAULT", "H5FD_MEM_SUPER", "H5FD_MEM_BTREE", "H5FD_MEM_DRAW",
+                                     "H5FD_MEM_GHEAP",   "H5FD_MEM_LHEAP", "H5FD_MEM_OHDR"};
+    size_t      size              = ULONG_MAX;
+    H5FD_mem_t  type              = H5FD_MEM_NTYPES;
 
     i = 0;
 
-    while ( ( i < count ) && ( identical ) ) {
+    while ((i < count) && (identical)) {
 
         SET_SIZE(size_fixed, sizes, size, i);
 
@@ -3831,38 +3810,34 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[],
         r_buf = (char *)(read_bufs[i]);
 
         j = 0;
-        while ( ( j < buf_size ) && ( identical ) ) {
+        while ((j < buf_size) && (identical)) {
 
-            if ( w_buf[j] != r_buf[j] ) {
+            if (w_buf[j] != r_buf[j]) {
 
                 identical = FALSE;
 
-                if ( verbose ) {
+                if (verbose) {
 
-                    HDfprintf(stdout, 
-                              "\n\nread/write buf mismatch in vector/entry");
-                    HDfprintf(stdout, 
-                         "\"%s\"/%d at offset %d/%d w/r = %c/%c type = %s\n\n", 
-                         name, i, j, buf_size, w_buf[j], r_buf[j],
-                         mem_type_names[type]);
+                    HDfprintf(stdout, "\n\nread/write buf mismatch in vector/entry");
+                    HDfprintf(stdout, "\"%s\"/%d at offset %d/%d w/r = %c/%c type = %s\n\n", name, i, j,
+                              buf_size, w_buf[j], r_buf[j], mem_type_names[type]);
                 }
-            } 
+            }
             j++;
         }
         i++;
     }
 
-    return(identical);
+    return (identical);
 
 } /* end test_vector_io__verify_v() */
 
-
 /*-------------------------------------------------------------------------
  *
  * Function:    test_vector_io__dump_test_vectors
  *
  * Purpose:     Print a set of test vectors to stdout.
- *              Vectors are assumed to be of length count, and 
+ *              Vectors are assumed to be of length count, and
  *              buffers must be either NULL, or null terminate strings
  *              of char.
  *
@@ -3877,52 +3852,45 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[],
  */
 
 static void
-test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[],
-    haddr_t addrs[], size_t sizes[], void * write_bufs[], void * read_bufs[],
-    const char * name)
+test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
+                                  void *write_bufs[], void *read_bufs[], const char *name)
 {
-    hbool_t size_fixed = FALSE;
-    hbool_t type_fixed = FALSE;
-    uint32_t i;
-    const char * mem_type_names[7] = {"H5FD_MEM_DEFAULT", "H5FD_MEM_SUPER",
-                                      "H5FD_MEM_BTREE", "H5FD_MEM_DRAW", 
-                                      "H5FD_MEM_GHEAP", "H5FD_MEM_LHEAP",
-                                      "H5FD_MEM_OHDR"};
-    size_t size = ULONG_MAX;
-    H5FD_mem_t type = H5FD_MEM_NTYPES;
+    hbool_t     size_fixed = FALSE;
+    hbool_t     type_fixed = FALSE;
+    uint32_t    i;
+    const char *mem_type_names[7] = {"H5FD_MEM_DEFAULT", "H5FD_MEM_SUPER", "H5FD_MEM_BTREE", "H5FD_MEM_DRAW",
+                                     "H5FD_MEM_GHEAP",   "H5FD_MEM_LHEAP", "H5FD_MEM_OHDR"};
+    size_t      size              = ULONG_MAX;
+    H5FD_mem_t  type              = H5FD_MEM_NTYPES;
 
-    char * w_buf;
-    char * r_buf;
+    char *w_buf;
+    char *r_buf;
 
-    HDfprintf(stdout, "\n\nDumping test vector \"%s\" of length %d\n\n", 
-              name, count);
+    HDfprintf(stdout, "\n\nDumping test vector \"%s\" of length %d\n\n", name, count);
 
-    for ( i = 0; i < count; i++ ) {
+    for (i = 0; i < count; i++) {
 
         SET_SIZE(size_fixed, sizes, size, i);
 
         SET_TYPE(type_fixed, types, type, i);
 
-        HDassert((H5FD_MEM_DEFAULT <= type) &&
-                 (type <= H5FD_MEM_OHDR));
+        HDassert((H5FD_MEM_DEFAULT <= type) && (type <= H5FD_MEM_OHDR));
 
         w_buf = (char *)(write_bufs[i]);
 
-        if ( read_bufs ) {
+        if (read_bufs) {
 
             r_buf = (char *)(read_bufs[i]);
-
-        } else {
+        }
+        else {
 
             r_buf = NULL;
         }
 
-        HDfprintf(stdout, 
-                  "%d: addr/len = %lld/%lld, type = %s, w_buf = \"%s\"\n",
-                  i, (long long)(addrs[i]), (long long)(size), 
-                  mem_type_names[type], w_buf);
+        HDfprintf(stdout, "%d: addr/len = %lld/%lld, type = %s, w_buf = \"%s\"\n", i, (long long)(addrs[i]),
+                  (long long)(size), mem_type_names[type], w_buf);
 
-        if ( r_buf ) {
+        if (r_buf) {
 
             HDfprintf(stdout, " r_buf = \"%s\"\n", r_buf);
         }
@@ -3932,7 +3900,6 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[],
 
 } /* end test_vector_io__dump_test_vectors() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_vector_io
  *
@@ -3946,7 +3913,7 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[],
  *
  *              3) write vector / read individual and verify results
  *
- *              4) Close and then re-open the file, verify data written 
+ *              4) Close and then re-open the file, verify data written
  *                 above.
  *
  * Return:      Success:        0
@@ -3959,20 +3926,20 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[],
  *
  *-------------------------------------------------------------------------
  */
-#define VECTOR_LEN              16
+#define VECTOR_LEN 16
 
 static herr_t
-test_vector_io(const char * vfd_name)
+test_vector_io(const char *vfd_name)
 {
     char       test_title[80];
-    hbool_t    size_fixed_0 = FALSE;       /* whether remaining entry      */
-    hbool_t    size_fixed_1 = FALSE;       /* sizes in vector are fixed.   */
-    hbool_t    size_fixed_2 = FALSE;       /*                              */
-    hbool_t    type_fixed_0 = FALSE;       /* whether remaining entry      */
-    hbool_t    type_fixed_1 = FALSE;       /* types in vector are fixed.   */
-    hbool_t    type_fixed_2 = FALSE;       /*                              */
-    hbool_t    verbose = FALSE;
-    hid_t      fapl_id = -1;               /* file access property list ID */
+    hbool_t    size_fixed_0 = FALSE; /* whether remaining entry      */
+    hbool_t    size_fixed_1 = FALSE; /* sizes in vector are fixed.   */
+    hbool_t    size_fixed_2 = FALSE; /*                              */
+    hbool_t    type_fixed_0 = FALSE; /* whether remaining entry      */
+    hbool_t    type_fixed_1 = FALSE; /* types in vector are fixed.   */
+    hbool_t    type_fixed_2 = FALSE; /*                              */
+    hbool_t    verbose      = FALSE;
+    hid_t      fapl_id      = -1;          /* file access property list ID */
     haddr_t    eoa;                        /* file eoa                     */
     char       filename[1024];             /* filename                     */
     char *     buf;                        /* tmp ptr to buf               */
@@ -4024,67 +3991,58 @@ test_vector_io(const char * vfd_name)
 
     /* Set property list and file name for target driver */
 
-    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    if ( strcmp(vfd_name, "sec2") == 0 ) {
+    if (strcmp(vfd_name, "sec2") == 0) {
 
-        if(H5Pset_fapl_sec2(fapl_id) < 0)
+        if (H5Pset_fapl_sec2(fapl_id) < 0)
             TEST_ERROR;
 
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
+    }
+    else if (strcmp(vfd_name, "stdio") == 0) {
 
-    } else if ( strcmp(vfd_name, "stdio") == 0 ) {
-
-        if(H5Pset_fapl_stdio(fapl_id) < 0)
+        if (H5Pset_fapl_stdio(fapl_id) < 0)
             TEST_ERROR;
 
         h5_fixname(FILENAME[7], fapl_id, filename, sizeof filename);
-
-    } else {
+    }
+    else {
 
         HDfprintf(stdout, "un-supported VFD\n");
         TEST_ERROR
     }
 
-    /* setup the test vectors -- note that addresses are not set until 
+    /* setup the test vectors -- note that addresses are not set until
      * we allocate space via the file driver.
      */
-    if ( ! ( test_vector_io__setup_v(count, types_0, addrs_0, sizes_0, 
-                           write_bufs_0, read_bufs_0, 'a') && 
-             test_vector_io__setup_v(count, types_1, addrs_1, sizes_1, 
-                           write_bufs_1, read_bufs_1, 'e') &&
-             test_vector_io__setup_v(count, types_2, addrs_2, sizes_2, 
-                           write_bufs_2, read_bufs_2, 'A') ) )
+    if (!(test_vector_io__setup_v(count, types_0, addrs_0, sizes_0, write_bufs_0, read_bufs_0, 'a') &&
+          test_vector_io__setup_v(count, types_1, addrs_1, sizes_1, write_bufs_1, read_bufs_1, 'e') &&
+          test_vector_io__setup_v(count, types_2, addrs_2, sizes_2, write_bufs_2, read_bufs_2, 'A')))
         TEST_ERROR;
 
-    if ( ! ( test_vector_io__setup_fixed_size_v(count, f_types_0, f_addrs_0, 
-                           f_sizes_0, f_write_bufs_0, f_read_bufs_0, 'b') && 
-             test_vector_io__setup_fixed_size_v(count, f_types_1, f_addrs_1, 
-                           f_sizes_1, f_write_bufs_1, f_read_bufs_1, 'f') &&
-             test_vector_io__setup_fixed_size_v(count, f_types_2, f_addrs_2, 
-                           f_sizes_2, f_write_bufs_2, f_read_bufs_2, 'B') ) )
+    if (!(test_vector_io__setup_fixed_size_v(count, f_types_0, f_addrs_0, f_sizes_0, f_write_bufs_0,
+                                             f_read_bufs_0, 'b') &&
+          test_vector_io__setup_fixed_size_v(count, f_types_1, f_addrs_1, f_sizes_1, f_write_bufs_1,
+                                             f_read_bufs_1, 'f') &&
+          test_vector_io__setup_fixed_size_v(count, f_types_2, f_addrs_2, f_sizes_2, f_write_bufs_2,
+                                             f_read_bufs_2, 'B')))
         TEST_ERROR;
-
 
     flags = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
 
-    if ( NULL == (lf = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF)))
+    if (NULL == (lf = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
 
     /* allocate space for the data in the test vectors */
-    for ( i = 0; i < count; i++ ) {
+    for (i = 0; i < count; i++) {
 
-        addrs_0[i] = H5FDalloc(lf, types_0[i], H5P_DEFAULT, 
-                                 (hsize_t)(sizes_0[i]));
-        addrs_1[i] = H5FDalloc(lf, types_1[i], H5P_DEFAULT, 
-                                 (hsize_t)(sizes_1[i]));
-        addrs_2[i] = H5FDalloc(lf, types_2[i], H5P_DEFAULT, 
-                                 (hsize_t)(sizes_2[i]));
+        addrs_0[i] = H5FDalloc(lf, types_0[i], H5P_DEFAULT, (hsize_t)(sizes_0[i]));
+        addrs_1[i] = H5FDalloc(lf, types_1[i], H5P_DEFAULT, (hsize_t)(sizes_1[i]));
+        addrs_2[i] = H5FDalloc(lf, types_2[i], H5P_DEFAULT, (hsize_t)(sizes_2[i]));
 
-        if ( ( addrs_0[i] == HADDR_UNDEF ) ||
-             ( addrs_1[i] == HADDR_UNDEF ) ||
-             ( addrs_2[i] == HADDR_UNDEF ) )
+        if ((addrs_0[i] == HADDR_UNDEF) || (addrs_1[i] == HADDR_UNDEF) || (addrs_2[i] == HADDR_UNDEF))
             TEST_ERROR;
 
         SET_SIZE(size_fixed_0, f_sizes_0, f_size_0, i);
@@ -4095,191 +4053,160 @@ test_vector_io(const char * vfd_name)
         SET_TYPE(type_fixed_1, f_types_1, f_type_1, i);
         SET_TYPE(type_fixed_2, f_types_2, f_type_2, i);
 
-        f_addrs_0[i] = H5FDalloc(lf, f_type_0, H5P_DEFAULT, 
-                                 (hsize_t)(f_size_0));
-        f_addrs_1[i] = H5FDalloc(lf, f_type_1, H5P_DEFAULT, 
-                                 (hsize_t)(f_size_1));
-        f_addrs_2[i] = H5FDalloc(lf, f_type_2, H5P_DEFAULT, 
-                                 (hsize_t)(f_size_2));
+        f_addrs_0[i] = H5FDalloc(lf, f_type_0, H5P_DEFAULT, (hsize_t)(f_size_0));
+        f_addrs_1[i] = H5FDalloc(lf, f_type_1, H5P_DEFAULT, (hsize_t)(f_size_1));
+        f_addrs_2[i] = H5FDalloc(lf, f_type_2, H5P_DEFAULT, (hsize_t)(f_size_2));
 
-        if ( ( f_addrs_0[i] == HADDR_UNDEF ) ||
-             ( f_addrs_1[i] == HADDR_UNDEF ) ||
-             ( f_addrs_2[i] == HADDR_UNDEF ) )
+        if ((f_addrs_0[i] == HADDR_UNDEF) || (f_addrs_1[i] == HADDR_UNDEF) || (f_addrs_2[i] == HADDR_UNDEF))
             TEST_ERROR;
     }
 
+    if (verbose) {
 
-    if ( verbose ) {
+        test_vector_io__dump_test_vectors(count, types_0, addrs_0, sizes_0, write_bufs_0, NULL, "zero");
 
-        test_vector_io__dump_test_vectors(count, types_0, addrs_0, sizes_0, 
-                                          write_bufs_0, NULL, "zero");
+        test_vector_io__dump_test_vectors(count, types_1, addrs_1, sizes_1, write_bufs_1, NULL, "one");
 
-        test_vector_io__dump_test_vectors(count, types_1, addrs_1, sizes_1, 
-                                          write_bufs_1, NULL, "one");
+        test_vector_io__dump_test_vectors(count, types_2, addrs_2, sizes_2, write_bufs_2, NULL, "two");
 
-        test_vector_io__dump_test_vectors(count, types_2, addrs_2, sizes_2, 
-                                          write_bufs_2, NULL, "two");
+        test_vector_io__dump_test_vectors(count, f_types_0, f_addrs_0, f_sizes_0, f_write_bufs_0, NULL,
+                                          "fixed zero");
 
-        test_vector_io__dump_test_vectors(count, f_types_0, f_addrs_0, f_sizes_0, 
-                                          f_write_bufs_0, NULL, "fixed zero");
+        test_vector_io__dump_test_vectors(count, f_types_1, f_addrs_1, f_sizes_1, f_write_bufs_1, NULL,
+                                          "fixed one");
 
-        test_vector_io__dump_test_vectors(count, f_types_1, f_addrs_1, f_sizes_1, 
-                                          f_write_bufs_1, NULL, "fixed one");
-
-        test_vector_io__dump_test_vectors(count, f_types_2, f_addrs_2, f_sizes_2, 
-                                          f_write_bufs_2, NULL, "fixed two");
+        test_vector_io__dump_test_vectors(count, f_types_2, f_addrs_2, f_sizes_2, f_write_bufs_2, NULL,
+                                          "fixed two");
     }
 
-
-    /* write and then read using vector I/O.  First, read/write vector 
-     * of length 1, then of length 2, then remainder of vector 
+    /* write and then read using vector I/O.  First, read/write vector
+     * of length 1, then of length 2, then remainder of vector
      */
-    if ( H5FDwrite_vector(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), 
-                          &(sizes_0[0]), &(write_bufs_0[0])) < 0 )
+    if (H5FDwrite_vector(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), &(sizes_0[0]),
+                         &(write_bufs_0[0])) < 0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), 
-                       &(sizes_0[0]), &(read_bufs_0[0])) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), &(sizes_0[0]), &(read_bufs_0[0])) <
+        0)
         TEST_ERROR;
 
-    if ( H5FDwrite_vector(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), 
-                        &(sizes_0[1]), &(write_bufs_0[1])) < 0 )
+    if (H5FDwrite_vector(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), &(sizes_0[1]),
+                         &(write_bufs_0[1])) < 0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), 
-                       &(sizes_0[1]), &(read_bufs_0[1])) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), &(sizes_0[1]), &(read_bufs_0[1])) <
+        0)
         TEST_ERROR;
 
-    if ( H5FDwrite_vector(lf, H5P_DEFAULT, count - 3,  &(types_0[3]), 
-                        &(addrs_0[3]), &(sizes_0[3]), &(write_bufs_0[3])) < 0 )
+    if (H5FDwrite_vector(lf, H5P_DEFAULT, count - 3, &(types_0[3]), &(addrs_0[3]), &(sizes_0[3]),
+                         &(write_bufs_0[3])) < 0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, count - 3, &(types_0[3]), 
-                       &(addrs_0[3]), &(sizes_0[3]), &(read_bufs_0[3])) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, count - 3, &(types_0[3]), &(addrs_0[3]), &(sizes_0[3]),
+                        &(read_bufs_0[3])) < 0)
         TEST_ERROR;
 
     /* for fixed size / type vector, just write and read as single operations */
-    if ( H5FDwrite_vector(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, 
-                          f_sizes_0, f_write_bufs_0) < 0 )
+    if (H5FDwrite_vector(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, f_sizes_0, f_write_bufs_0) < 0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, 
-                         f_sizes_0, f_read_bufs_0) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, f_sizes_0, f_read_bufs_0) < 0)
         TEST_ERROR;
-
 
     /* verify that the expected data is read */
-    if ( ! test_vector_io__verify_v(count, types_0, sizes_0, 
-                                    write_bufs_0, read_bufs_0, "zero") )
+    if (!test_vector_io__verify_v(count, types_0, sizes_0, write_bufs_0, read_bufs_0, "zero"))
         TEST_ERROR;
 
-    if ( ! test_vector_io__verify_v(count, f_types_0, f_sizes_0, 
-                                    f_write_bufs_0, f_read_bufs_0, "fixed zero") )
+    if (!test_vector_io__verify_v(count, f_types_0, f_sizes_0, f_write_bufs_0, f_read_bufs_0, "fixed zero"))
         TEST_ERROR;
-
 
     /* write the contents of a vector individually, and then read it back
      * in several vector reads.
      */
-    if ( ! test_vector_io__write_v_indiv(lf, count, types_1, addrs_1, 
-                                         sizes_1, write_bufs_1) )
+    if (!test_vector_io__write_v_indiv(lf, count, types_1, addrs_1, sizes_1, write_bufs_1))
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, 1, &(types_1[0]), &(addrs_1[0]), 
-                       &(sizes_1[0]), &(read_bufs_1[0])) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, 1, &(types_1[0]), &(addrs_1[0]), &(sizes_1[0]), &(read_bufs_1[0])) <
+        0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, 2, &(types_1[1]), &(addrs_1[1]), 
-                       &(sizes_1[1]), &(read_bufs_1[1])) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, 2, &(types_1[1]), &(addrs_1[1]), &(sizes_1[1]), &(read_bufs_1[1])) <
+        0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, count - 3, &(types_1[3]), 
-                       &(addrs_1[3]), &(sizes_1[3]), &(read_bufs_1[3])) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, count - 3, &(types_1[3]), &(addrs_1[3]), &(sizes_1[3]),
+                        &(read_bufs_1[3])) < 0)
         TEST_ERROR;
 
     /* for fixed size, write individually, and the read back in a single call */
-    if ( ! test_vector_io__write_v_indiv(lf, count, f_types_1, f_addrs_1, 
-                                         f_sizes_1, f_write_bufs_1) )
+    if (!test_vector_io__write_v_indiv(lf, count, f_types_1, f_addrs_1, f_sizes_1, f_write_bufs_1))
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, count, f_types_1, f_addrs_1, 
-                         f_sizes_1, f_read_bufs_1) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, count, f_types_1, f_addrs_1, f_sizes_1, f_read_bufs_1) < 0)
         TEST_ERROR;
-
 
     /* verify that the expected data is read */
-    if ( ! test_vector_io__verify_v(count, types_1, sizes_1, 
-                                    write_bufs_1, read_bufs_1, "one") )
+    if (!test_vector_io__verify_v(count, types_1, sizes_1, write_bufs_1, read_bufs_1, "one"))
         TEST_ERROR;
 
-    if ( ! test_vector_io__verify_v(count, f_types_1, f_sizes_1, 
-                                    f_write_bufs_1, f_read_bufs_1, "fixed one") )
+    if (!test_vector_io__verify_v(count, f_types_1, f_sizes_1, f_write_bufs_1, f_read_bufs_1, "fixed one"))
         TEST_ERROR;
 
-
-    /* Write the contents of a vector as several vector writes, then 
+    /* Write the contents of a vector as several vector writes, then
      * read it back in idividual reads.
      */
-    if ( H5FDwrite_vector(lf, H5P_DEFAULT, 1, &(types_2[0]), &(addrs_2[0]), 
-                          &(sizes_2[0]), &(write_bufs_2[0])) < 0 )
+    if (H5FDwrite_vector(lf, H5P_DEFAULT, 1, &(types_2[0]), &(addrs_2[0]), &(sizes_2[0]),
+                         &(write_bufs_2[0])) < 0)
         TEST_ERROR;
 
-    if ( H5FDwrite_vector(lf, H5P_DEFAULT, 2, &(types_2[1]), &(addrs_2[1]), 
-                        &(sizes_2[1]), &(write_bufs_2[1])) < 0 )
+    if (H5FDwrite_vector(lf, H5P_DEFAULT, 2, &(types_2[1]), &(addrs_2[1]), &(sizes_2[1]),
+                         &(write_bufs_2[1])) < 0)
         TEST_ERROR;
 
-    if ( H5FDwrite_vector(lf, H5P_DEFAULT, count - 3,  &(types_2[3]), 
-                        &(addrs_2[3]), &(sizes_2[3]), &(write_bufs_2[3])) < 0 )
+    if (H5FDwrite_vector(lf, H5P_DEFAULT, count - 3, &(types_2[3]), &(addrs_2[3]), &(sizes_2[3]),
+                         &(write_bufs_2[3])) < 0)
         TEST_ERROR;
 
-    if ( ! test_vector_io__read_v_indiv(lf, count, types_2, addrs_2, 
-                                        sizes_2, read_bufs_2) )
+    if (!test_vector_io__read_v_indiv(lf, count, types_2, addrs_2, sizes_2, read_bufs_2))
         TEST_ERROR;
 
     /* for fixed size, write as a single vector, read back individually */
-    if ( H5FDwrite_vector(lf, H5P_DEFAULT, count, f_types_2, f_addrs_2, 
-                          f_sizes_2, f_write_bufs_2) < 0 )
+    if (H5FDwrite_vector(lf, H5P_DEFAULT, count, f_types_2, f_addrs_2, f_sizes_2, f_write_bufs_2) < 0)
         TEST_ERROR;
 
-    if ( ! test_vector_io__read_v_indiv(lf, count, f_types_2, f_addrs_2, 
-                                        f_sizes_2, f_read_bufs_2) )
+    if (!test_vector_io__read_v_indiv(lf, count, f_types_2, f_addrs_2, f_sizes_2, f_read_bufs_2))
         TEST_ERROR;
-
 
     /* verify that the expected data is read */
-    if ( ! test_vector_io__verify_v(count, types_2, sizes_2, 
-                                    write_bufs_2, read_bufs_2, "two") )
+    if (!test_vector_io__verify_v(count, types_2, sizes_2, write_bufs_2, read_bufs_2, "two"))
         TEST_ERROR;
 
-    if ( ! test_vector_io__verify_v(count, f_types_2, f_sizes_2, 
-                                    f_write_bufs_2, f_read_bufs_2, "fixed two") )
+    if (!test_vector_io__verify_v(count, f_types_2, f_sizes_2, f_write_bufs_2, f_read_bufs_2, "fixed two"))
         TEST_ERROR;
-
 
     /* make note of eoa -- needed after we re-open the file */
-    if ( HADDR_UNDEF == (eoa = H5FDget_eoa(lf, H5FD_MEM_DEFAULT)))
+    if (HADDR_UNDEF == (eoa = H5FDget_eoa(lf, H5FD_MEM_DEFAULT)))
         TEST_ERROR;
 
     /* close the file and then re-open it */
-    if ( H5FDclose(lf) < 0 )
+    if (H5FDclose(lf) < 0)
         TEST_ERROR;
 
-    flags = H5F_ACC_RDWR ;
+    flags = H5F_ACC_RDWR;
 
-    if ( NULL == (lf = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF)))
+    if (NULL == (lf = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
 
-    /* The EOA is set to 0 on open.  To avoid errors, we must set it 
+    /* The EOA is set to 0 on open.  To avoid errors, we must set it
      * to its correct value before we do any reads.
      *
-     * Note:  In the context of using the VFD layer without the HDF5 
-     *        library on top, this doesn't make much sense.  Consider 
+     * Note:  In the context of using the VFD layer without the HDF5
+     *        library on top, this doesn't make much sense.  Consider
      *        adding an open flag that sets the EOA to the current file
      *        size.
      */
-    if ( H5FDset_eoa(lf, H5FD_MEM_DEFAULT, eoa) < 0 )
+    if (H5FDset_eoa(lf, H5FD_MEM_DEFAULT, eoa) < 0)
         TEST_ERROR;
-
 
     /* Null the read vectors */
 
@@ -4287,20 +4214,20 @@ test_vector_io(const char * vfd_name)
     size_fixed_1 = FALSE;
     size_fixed_2 = FALSE;
 
-    for ( i = 0 ; i < count; i++ ) {
+    for (i = 0; i < count; i++) {
 
         buf = read_bufs_0[i];
-        for ( j = 0; j < sizes_0[i]; j++ ) {
+        for (j = 0; j < sizes_0[i]; j++) {
             buf[j] = '\0';
         }
 
         buf = read_bufs_1[i];
-        for ( j = 0; j < sizes_1[i]; j++ ) {
+        for (j = 0; j < sizes_1[i]; j++) {
             buf[j] = '\0';
         }
 
         buf = read_bufs_2[i];
-        for ( j = 0; j < sizes_2[i]; j++ ) {
+        for (j = 0; j < sizes_2[i]; j++) {
             buf[j] = '\0';
         }
 
@@ -4309,85 +4236,71 @@ test_vector_io(const char * vfd_name)
         SET_SIZE(size_fixed_2, f_sizes_2, f_size_2, i);
 
         buf = f_read_bufs_0[i];
-        for ( j = 0; j < f_size_0; j++ ) {
+        for (j = 0; j < f_size_0; j++) {
             buf[j] = '\0';
         }
 
         buf = f_read_bufs_1[i];
-        for ( j = 0; j < f_size_1; j++ ) {
+        for (j = 0; j < f_size_1; j++) {
             buf[j] = '\0';
         }
 
         buf = f_read_bufs_2[i];
-        for ( j = 0; j < f_size_2; j++ ) {
+        for (j = 0; j < f_size_2; j++) {
             buf[j] = '\0';
         }
     }
 
-
     /* read the contents of the file */
-    if ( H5FDread_vector(lf, H5P_DEFAULT, count, types_0, 
-                         addrs_0, sizes_0, read_bufs_0) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, count, types_0, addrs_0, sizes_0, read_bufs_0) < 0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, count, types_1, 
-                         addrs_1, sizes_1, read_bufs_1) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, count, types_1, addrs_1, sizes_1, read_bufs_1) < 0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, count, types_2, 
-                         addrs_2, sizes_2, read_bufs_2) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, count, types_2, addrs_2, sizes_2, read_bufs_2) < 0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, 
-                         f_sizes_0, f_read_bufs_0) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, f_sizes_0, f_read_bufs_0) < 0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, count, f_types_1, f_addrs_1, 
-                         f_sizes_1, f_read_bufs_1) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, count, f_types_1, f_addrs_1, f_sizes_1, f_read_bufs_1) < 0)
         TEST_ERROR;
 
-    if ( H5FDread_vector(lf, H5P_DEFAULT, count, f_types_2, f_addrs_2, 
-                         f_sizes_2, f_read_bufs_2) < 0 )
+    if (H5FDread_vector(lf, H5P_DEFAULT, count, f_types_2, f_addrs_2, f_sizes_2, f_read_bufs_2) < 0)
         TEST_ERROR;
 
     /* verify the contents. */
-    if ( ! test_vector_io__verify_v(count, types_0, sizes_0, 
-                                    write_bufs_0, read_bufs_0, "zero-") )
+    if (!test_vector_io__verify_v(count, types_0, sizes_0, write_bufs_0, read_bufs_0, "zero-"))
         TEST_ERROR;
 
-    if ( ! test_vector_io__verify_v(count, types_1, sizes_1, 
-                                    write_bufs_1, read_bufs_1, "one-") )
+    if (!test_vector_io__verify_v(count, types_1, sizes_1, write_bufs_1, read_bufs_1, "one-"))
         TEST_ERROR;
 
-    if ( ! test_vector_io__verify_v(count, types_2, sizes_2, 
-                                    write_bufs_2, read_bufs_2, "two-") )
+    if (!test_vector_io__verify_v(count, types_2, sizes_2, write_bufs_2, read_bufs_2, "two-"))
         TEST_ERROR;
 
-    if ( ! test_vector_io__verify_v(count, f_types_0, f_sizes_0, 
-                                    f_write_bufs_0, f_read_bufs_0, "fixed zero-") )
+    if (!test_vector_io__verify_v(count, f_types_0, f_sizes_0, f_write_bufs_0, f_read_bufs_0, "fixed zero-"))
         TEST_ERROR;
 
-    if ( ! test_vector_io__verify_v(count, f_types_1, f_sizes_1, 
-                                    f_write_bufs_1, f_read_bufs_1, "fixed one-") )
+    if (!test_vector_io__verify_v(count, f_types_1, f_sizes_1, f_write_bufs_1, f_read_bufs_1, "fixed one-"))
         TEST_ERROR;
 
-    if ( ! test_vector_io__verify_v(count, f_types_2, f_sizes_2, 
-                                    f_write_bufs_2, f_read_bufs_2, "fixed two-") )
+    if (!test_vector_io__verify_v(count, f_types_2, f_sizes_2, f_write_bufs_2, f_read_bufs_2, "fixed two-"))
         TEST_ERROR;
 
-
-    if ( H5FDclose(lf) < 0 )
+    if (H5FDclose(lf) < 0)
         TEST_ERROR;
 
     h5_delete_test_file(FILENAME[0], fapl_id);
 
     /* Close the fapl */
-    if(H5Pclose(fapl_id) < 0)
+    if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
     /* discard the read and write buffers */
 
-    for ( i = 0; i < count; i++ ) {
+    for (i = 0; i < count; i++) {
 
         HDfree(write_bufs_0[i]);
         write_bufs_0[i] = NULL;
@@ -4430,14 +4343,15 @@ test_vector_io(const char * vfd_name)
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(fapl_id);
         H5FDclose(lf);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return -1;
 } /* end test_vector_io() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -4471,9 +4385,8 @@ main(void)
     nerrors += test_windows() < 0 ? 1 : 0;
     nerrors += test_ros3() < 0 ? 1 : 0;
     nerrors += test_splitter() < 0 ? 1 : 0;
-    nerrors += test_vector_io("sec2") < 0      ? 1 : 0;
-    nerrors += test_vector_io("stdio") < 0     ? 1 : 0;
-
+    nerrors += test_vector_io("sec2") < 0 ? 1 : 0;
+    nerrors += test_vector_io("stdio") < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

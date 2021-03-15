@@ -293,16 +293,12 @@ typedef struct H5FD_class_t {
     herr_t (*set_eoa)(H5FD_t *file, H5FD_mem_t type, haddr_t addr);
     haddr_t (*get_eof)(const H5FD_t *file, H5FD_mem_t type);
     herr_t (*get_handle)(H5FD_t *file, hid_t fapl, void **file_handle);
-    herr_t  (*read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
-                    haddr_t addr, size_t size, void *buffer);
-    herr_t  (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
-                     haddr_t addr, size_t size, const void *buffer);
-    herr_t  (*read_vector)(H5FD_t *file, hid_t dxpl, uint32_t count, 
-                           H5FD_mem_t types[], haddr_t addrs[], 
-                           size_t sizes[], void * bufs[]);
-    herr_t  (*write_vector)(H5FD_t *file, hid_t dxpl, uint32_t count, 
-                            H5FD_mem_t types[], haddr_t addrs[], 
-                            size_t sizes[], void * bufs[]);
+    herr_t (*read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, size_t size, void *buffer);
+    herr_t (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, size_t size, const void *buffer);
+    herr_t (*read_vector)(H5FD_t *file, hid_t dxpl, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                          size_t sizes[], void *bufs[]);
+    herr_t (*write_vector)(H5FD_t *file, hid_t dxpl, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                           size_t sizes[], void *bufs[]);
     herr_t (*flush)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t (*lock)(H5FD_t *file, hbool_t rw);
@@ -377,16 +373,14 @@ H5_DLL haddr_t H5FDget_eoa(H5FD_t *file, H5FD_mem_t type);
 H5_DLL herr_t  H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t eoa);
 H5_DLL haddr_t H5FDget_eof(H5FD_t *file, H5FD_mem_t type);
 H5_DLL herr_t  H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle);
-H5_DLL herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
-                       haddr_t addr, size_t size, void *buf/*out*/);
-H5_DLL herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
-                        haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count,
-                              H5FD_mem_t types[], haddr_t addrs[], 
-                              size_t sizes[], void * bufs[] /* out */);
-H5_DLL herr_t H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count,
-                               H5FD_mem_t types[], haddr_t addrs[], 
-                               size_t sizes[], void * bufs[] /* in */);
+H5_DLL herr_t  H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                        void *buf /*out*/);
+H5_DLL herr_t  H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                         const void *buf);
+H5_DLL herr_t  H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
+                               haddr_t addrs[], size_t sizes[], void *bufs[] /* out */);
+H5_DLL herr_t  H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
+                                haddr_t addrs[], size_t sizes[], void *bufs[] /* in */);
 H5_DLL herr_t  H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDlock(H5FD_t *file, hbool_t rw);
