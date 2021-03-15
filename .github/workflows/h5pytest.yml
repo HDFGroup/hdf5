@@ -33,7 +33,7 @@ jobs:
         cd spack
         export SPACK_ROOT=${PWD}
         . share/spack/setup-env.sh
-        spack install  py-h5py ^openblas@develop
+        spack install  py-h5py@master ^openblas@develop ^hdf5@develop
         spack install py-pytest
         spack install py-ipython
         spack install py-pip
@@ -42,5 +42,5 @@ jobs:
         spack load py-ipython
         spack load py-pip
         pip install pytest-mpi
-        python -c "import h5py; h5py.run_tests()"
+        python -c "import h5py; h5py.run_tests(); print(h5py.version.info);"
 
