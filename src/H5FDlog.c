@@ -206,6 +206,8 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD__log_get_handle,    /* get_handle           */
     H5FD__log_read,          /* read			*/
     H5FD__log_write,         /* write		*/
+    NULL,                    /* read vector             */
+    NULL,                    /* write vector            */
     NULL,                    /* flush		*/
     H5FD__log_truncate,      /* truncate		*/
     H5FD__log_lock,          /* lock                 */
