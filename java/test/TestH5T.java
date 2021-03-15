@@ -206,7 +206,7 @@ public class TestH5T {
 
     @Test
     public void testH5Tenum_functions() {
-        long       filetype_id =HDF5Constants.H5I_INVALID_HID;
+        long       filetype_id = HDF5Constants.H5I_INVALID_HID;
         String    enum_type ="Enum_type";
         byte[]    enum_val = new byte[1];
         String    enum_name = null;
@@ -398,7 +398,7 @@ public class TestH5T {
 
     @Test
     public void testH5Tcompound_functions() {
-        long       filetype_id =HDF5Constants.H5I_INVALID_HID;
+        long       filetype_id = HDF5Constants.H5I_INVALID_HID;
 
         // Create a compound datatype
         try {
