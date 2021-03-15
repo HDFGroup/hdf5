@@ -12,7 +12,6 @@
  */
 
 #include <err.h>
-#include <unistd.h> /* getopt(3) */
 
 #define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 
@@ -55,7 +54,7 @@ static void
 usage(const char *progname)
 {
 	fprintf(stderr, "usage: %s [-S] [-W] [-a steps] [-b] [-c]\n"
-                "    [-n iterations] [-u milliseconds]\n"
+                "    [-n iterations]\n"
 		"\n"
 		"-S:	               do not use VFD SWMR\n"
 		"-W:	               do not wait for a signal before\n"
@@ -64,7 +63,6 @@ usage(const char *progname)
 		"-b:	               write data in big-endian byte order\n"
 		"-c steps:	       `steps` between communication between the writer and reader\n"
 		"-n iterations:        how many times to expand each dataset\n"
-		"-u ms:                milliseconds interval between updates\n"
                 "                      to %s.h5\n"
 		"\n",
 		progname, progname);
@@ -84,7 +82,7 @@ state_init(state_t *s, int argc, char **argv)
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
     esnprintf(s->progname, sizeof(s->progname), "%s", HDbasename(tfile));
 
-    while ((ch = getopt(argc, argv, "SWa:bc:n:qu:")) != -1) {
+    while ((ch = getopt(argc, argv, "SWa:bc:n:q")) != -1) {
         switch (ch) {
         case 'S':
             s->use_vfd_swmr = false;
@@ -315,8 +313,12 @@ main(int argc, char **argv)
     if (s.file == badhid)
         errx(EXIT_FAILURE, writer ? "H5Fcreate" : "H5Fopen");
 
-    /* Writer creates two named pipes(FIFO) to coordinate two-way communication */
+    /* Use two named pipes(FIFO) to coordinate the writer and reader for
+     * two-way communication so that the two sides can move forward together.
+     * One is for the writer to write to the reader.
+     * The other one is for the reader to signal the writer.  */
     if (writer) {
+        /* Writer creates two named pipes(FIFO) */
         if (HDmkfifo(fifo_writer_to_reader, 0600) < 0)
             errx(EXIT_FAILURE, "HDmkfifo");
 
@@ -343,7 +345,7 @@ main(int argc, char **argv)
 
             /* At communication interval, notifies the reader and waits for its response */
             if (step % s.csteps == 0) {
-                /* Bump up the value and notify the reader */
+                /* Bump up the value of notify to notice the reader to start to read */
                 notify++;
                 if (HDwrite(fd_writer_to_reader, &notify, sizeof(int)) < 0)
                     err(EXIT_FAILURE, "write failed");
@@ -381,9 +383,10 @@ main(int argc, char **argv)
 
             /* At communication interval, waits for the writer's notice and responds back */
             if (step % s.csteps == 0) {
+                /* The writer should have bumped up the value of notify.
+                 * Do the same with verify and confirm it */
                 verify++;
 
-                /* Receive the notify that the writer bumped up the value */
                 if (HDread(fd_writer_to_reader, &notify, sizeof(int)) < 0)
                     err(EXIT_FAILURE, "read failed");
 
@@ -406,7 +409,7 @@ main(int argc, char **argv)
     if (H5Fclose(s.file) < 0)
         errx(EXIT_FAILURE, "H5Fclose");
 
-    /* Close the named pipes */
+    /* Both the writer and reader close the named pipes */
     if (HDclose(fd_writer_to_reader) < 0)
         errx(EXIT_FAILURE, "HDclose");
 
