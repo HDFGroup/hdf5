@@ -180,11 +180,11 @@ static herr_t  H5FD__log_unlock(H5FD_t *_file);
 static herr_t  H5FD__log_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_log_g = {
-    H5FD_CLASS_VERSION,      /* struct version       */
+    H5FD_CLASS_VERSION,      /* struct version      */
     H5FD_LOG_VALUE,          /* value               */
     "log",                   /* name                */
     MAXADDR,                 /* maxaddr             */
-    H5F_CLOSE_WEAK,          /*  fc_degree          */
+    H5F_CLOSE_WEAK,          /* fc_degree           */
     H5FD__log_term,          /* terminate           */
     NULL,                    /* sb_size             */
     NULL,                    /* sb_encode           */
