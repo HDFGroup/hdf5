@@ -200,7 +200,7 @@ ref_path_table_lookup(const char *thepath, H5O_token_t *token)
     if ((thepath == NULL) || (HDstrlen(thepath) == 0))
         return -1;
     /* Allow lookups on the root group, even though it doesn't have any link info */
-    if (HDstrcmp(thepath, "/")) {
+    if (HDstrcmp(thepath, "/") != 0) {
         H5L_info2_t li;
 
         /* Check for external link first, so we don't return the OID of an object in another file */

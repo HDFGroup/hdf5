@@ -103,11 +103,6 @@ endmacro ()
 #-----------------------------------------------------------------------------
 if (CMAKE_CXX_COMPILER_LOADED)
   foreach (cxx_test
-      OLD_HEADER_FILENAME
-      HDF_NO_NAMESPACE
-      HDF_NO_STD
-      BOOL_NOTDEFINED
-      NO_STATIC_CAST
       CXX_HAVE_OFFSETOF
   )
     HDF_CXX_FUNCTION_TEST (${cxx_test})

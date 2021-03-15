@@ -307,7 +307,7 @@ BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
     hdr->addr = udata->addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         H5E_THROW(H5E_BADVALUE, "wrong extensible array header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -697,7 +697,7 @@ BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
     iblock->addr = hdr->idx_blk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         H5E_THROW(H5E_BADVALUE, "wrong extensible array index block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1100,7 +1100,7 @@ BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
     sblock->addr = udata->sblk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         H5E_THROW(H5E_BADVALUE, "wrong extensible array super block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1510,7 +1510,7 @@ BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
     dblock->addr = udata->dblk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         H5E_THROW(H5E_BADVALUE, "wrong extensible array data block signature")
     image += H5_SIZEOF_MAGIC;
 

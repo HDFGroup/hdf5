@@ -292,7 +292,7 @@ struct options {
     size_t      page_size;
 };
 
-typedef struct _minmax {
+typedef struct {
     double min;
     double max;
     double sum;
