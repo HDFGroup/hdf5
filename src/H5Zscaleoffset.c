@@ -73,9 +73,9 @@ static herr_t H5Z__scaleoffset_postdecompress_fd(void *data, unsigned d_nelmts, 
                                                  uint32_t minbits, unsigned long long minval, double D_val);
 static void   H5Z__scaleoffset_next_byte(size_t *j, unsigned *buf_len);
 static void   H5Z__scaleoffset_decompress_one_byte(unsigned char *data, size_t data_offset, unsigned k,
-                                                   unsigned begin_i, unsigned char *buffer, size_t *j,
+                                                   unsigned begin_i, const unsigned char *buffer, size_t *j,
                                                    unsigned *buf_len, parms_atomic p, unsigned dtype_len);
-static void   H5Z__scaleoffset_compress_one_byte(unsigned char *data, size_t data_offset, unsigned k,
+static void   H5Z__scaleoffset_compress_one_byte(const unsigned char *data, size_t data_offset, unsigned k,
                                                  unsigned begin_i, unsigned char *buffer, size_t *j,
                                                  unsigned *buf_len, parms_atomic p, unsigned dtype_len);
 static void   H5Z__scaleoffset_decompress_one_atomic(unsigned char *data, size_t data_offset,
@@ -364,12 +364,12 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
 #define H5Z_scaleoffset_max_min_3(i, d_nelmts, buf, filval, max, min, D_val)                                 \
     {                                                                                                        \
         i = 0;                                                                                               \
-        while (i < d_nelmts && HDfabs(buf[i] - filval) < HDpow(10.0f, -D_val))                               \
+        while (i < d_nelmts && HDfabs(buf[i] - filval) < HDpow(10.0, -D_val))                                \
             i++;                                                                                             \
         if (i < d_nelmts)                                                                                    \
             min = max = buf[i];                                                                              \
         for (; i < d_nelmts; i++) {                                                                          \
-            if (HDfabs(buf[i] - filval) < HDpow(10.0f, -D_val))                                              \
+            if (HDfabs(buf[i] - filval) < HDpow(10.0, -D_val))                                               \
                 continue; /* ignore fill value */                                                            \
             if (buf[i] > max)                                                                                \
                 max = buf[i];                                                                                \
@@ -1608,8 +1608,8 @@ H5Z__scaleoffset_next_byte(size_t *j, unsigned *buf_len)
 
 static void
 H5Z__scaleoffset_decompress_one_byte(unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
-                                     unsigned char *buffer, size_t *j, unsigned *buf_len, parms_atomic p,
-                                     unsigned dtype_len)
+                                     const unsigned char *buffer, size_t *j, unsigned *buf_len,
+                                     parms_atomic p, unsigned dtype_len)
 {
     unsigned      dat_len; /* dat_len is the number of bits to be copied in each data byte */
     unsigned char val;     /* value to be copied in each data byte */
@@ -1694,9 +1694,9 @@ H5Z__scaleoffset_decompress(unsigned char *data, unsigned d_nelmts, unsigned cha
 }
 
 static void
-H5Z__scaleoffset_compress_one_byte(unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
-                                   unsigned char *buffer, size_t *j, unsigned *buf_len, parms_atomic p,
-                                   unsigned dtype_len)
+H5Z__scaleoffset_compress_one_byte(const unsigned char *data, size_t data_offset, unsigned k,
+                                   unsigned begin_i, unsigned char *buffer, size_t *j, unsigned *buf_len,
+                                   parms_atomic p, unsigned dtype_len)
 {
     unsigned      dat_len; /* dat_len is the number of bits to be copied in each data byte */
     unsigned char val;     /* value to be copied in each data byte */

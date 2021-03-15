@@ -876,7 +876,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             HDstrncat(lib_str, "-", (size_t)1);
             HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
         } /* end if */
-        if (HDstrcmp(lib_str, H5_lib_vers_info_g)) {
+        if (HDstrcmp(lib_str, H5_lib_vers_info_g) != 0) {
             HDfputs("Warning!  Library version information error.\n"
                     "The HDF5 library version information are not "
                     "consistent in its source code.\nThis is NOT a fatal error "
