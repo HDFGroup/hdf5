@@ -1481,21 +1481,20 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDwrite() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FDread_vector
  *
  * Purpose:     Perform count reads from the specified file at the offsets
  *              provided in the addrs array, with the lengths and memory
- *              types provided in the sizes and types arrays.  Data read 
+ *              types provided in the sizes and types arrays.  Data read
  *              is returned in the buffers provided in the bufs array.
  *
- *              All reads are done according to the data transfer property 
+ *              All reads are done according to the data transfer property
  *              list dxpl_id (which may be the constant H5P_DEFAULT).
  *
  * Return:      Success:    SUCCEED
- *                          All reads have completed successfully, and 
- *                          the results havce been into the supplied 
+ *                          All reads have completed successfully, and
+ *                          the results havce been into the supplied
  *                          buffers.
  *
  *              Failure:    FAIL
@@ -1508,47 +1507,47 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, 
-                H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], 
-                void *bufs[] /* out */)
+H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                size_t sizes[], void *bufs[] /* out */)
 {
-    herr_t          ret_value = SUCCEED;    /* Return value             */
+    herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "*xiIu*Mt*a*zx", file, dxpl_id, count, types, addrs, sizes, bufs);
 
     /* Check arguments */
-    if(!file)
+    if (!file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
 
-    if(!file->cls)
+    if (!file->cls)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
 
-    if((!types) && (count > 0))
+    if ((!types) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive")
 
-    if((!addrs) && (count > 0))
+    if ((!addrs) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive")
 
-    if((!sizes) && (count > 0))
+    if ((!sizes) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive")
 
-    if((!bufs) && (count > 0))
+    if ((!bufs) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
 
-    if((count > 0) && (sizes[0] == 0))
+    if ((count > 0) && (sizes[0] == 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
 
-    if((count > 0) && (types[0] == H5FD_MEM_NOLIST))
+    if ((count > 0) && (types[0] == H5FD_MEM_NOLIST))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "count[0] can't be H5FD_MEM_NOLIST")
 
-    /* Get the default dataset transfer property list if the user 
-     * didn't provide one 
+    /* Get the default dataset transfer property list if the user
+     * didn't provide one
      */
-    if(H5P_DEFAULT == dxpl_id) {
+    if (H5P_DEFAULT == dxpl_id) {
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    } else {
-        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    }
+    else {
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
     }
 
@@ -1558,23 +1557,22 @@ H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count,
     /* Call private function */
     /* JRM -- review this */
     /* (Note compensating for base addresses addition in internal routine) */
-    if(H5FD_read_vector(file, count, types, addrs, sizes, bufs) < 0)
+    if (H5FD_read_vector(file, count, types, addrs, sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file vector read request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDread_vector() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FDwrite_vector
  *
  * Purpose:     Perform count writes to the specified file at the offsets
  *              provided in the addrs array, with the lengths and memory
- *              types provided in the sizes and types arrays.  Data to be 
+ *              types provided in the sizes and types arrays.  Data to be
  *              written is in the buffers provided in the bufs array.
  *
- *              All writes are done according to the data transfer property 
+ *              All writes are done according to the data transfer property
  *              list dxpl_id (which may be the constant H5P_DEFAULT).
  *
  * Return:      Success:    SUCCEED
@@ -1590,45 +1588,45 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, 
-                 H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
-                 void *bufs[] /* in */)
+H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                 size_t sizes[], void *bufs[] /* in */)
 {
-    herr_t          ret_value = SUCCEED;    /* Return value             */
+    herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "*xiIu*Mt*a*z**x", file, dxpl_id, count, types, addrs, sizes, bufs);
 
     /* Check arguments */
-    if(!file)
+    if (!file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
 
-    if(!file->cls)
+    if (!file->cls)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
 
-    if((!types) && (count > 0))
+    if ((!types) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive")
 
-    if((!addrs) && (count > 0))
+    if ((!addrs) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive")
 
-    if((!sizes) && (count > 0))
+    if ((!sizes) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive")
 
-    if((!bufs) && (count > 0))
+    if ((!bufs) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
 
-    if((count > 0) && (sizes[0] == 0))
+    if ((count > 0) && (sizes[0] == 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
 
-    if((count > 0) && (types[0] == H5FD_MEM_NOLIST))
+    if ((count > 0) && (types[0] == H5FD_MEM_NOLIST))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "count[0] can't be H5FD_MEM_NOLIST")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
-    if(H5P_DEFAULT == dxpl_id) {
+    if (H5P_DEFAULT == dxpl_id) {
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    } else {
-        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    }
+    else {
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
     }
 
@@ -1637,14 +1635,13 @@ H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count,
 
     /* Call private function */ /* JRM -- review this */
     /* (Note compensating for base address addition in internal routine) */
-    if(H5FD_write_vector(file, count, types, addrs, sizes, bufs) < 0)
+    if (H5FD_write_vector(file, count, types, addrs, sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDwrite_vector() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FDread_vector
  *
