@@ -331,6 +331,8 @@
       ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvms.h5
       ${HDF5_TOOLS_DIR}/testfiles/t128bit_float.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tCVE_2018_11206_fill_old.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tCVE_2018_11206_fill_new.h5
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.h5
       #STD_REF_OBJ files
       ${HDF5_TOOLS_DIR}/testfiles/trefer_attr.h5
@@ -1171,6 +1173,10 @@
 
   # test to verify HDFFV-9407: long double full precision
   ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lf t128bit_float.h5)
+
+  # test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
+  ADD_H5_TEST (0 tCVE_2018_11206_fill_old.h5)
+  ADD_H5_TEST (0 tCVE_2018_11206_fill_new.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
