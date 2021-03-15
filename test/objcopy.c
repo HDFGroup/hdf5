@@ -572,11 +572,11 @@ error:
 static int
 test_copy_attach_attribute_vl(hid_t loc_id)
 {
-    hid_t        aid = -1, sid = -1, tid = -1;
-    hvl_t        buf[4];
-    hsize_t      dim1 = 4;
-    //unsigned int i, j;
-    int          ret_value = -1;
+    hid_t   aid = -1, sid = -1, tid = -1;
+    hvl_t   buf[4];
+    hsize_t dim1 = 4;
+    // unsigned int i, j;
+    int ret_value = -1;
 
     if ((sid = H5Screate_simple(1, &dim1, NULL)) < 0)
         goto done;
@@ -742,7 +742,7 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
             goto done;
         if (H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0)
             goto done;
-     if (H5Aclose(aid) < 0)
+        if (H5Aclose(aid) < 0)
             goto done;
     }
 
@@ -968,8 +968,8 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
             TEST_ERROR
     } /* end if */
     else {
-        char     attr_name[ATTR_NAME_LEN]; /* Attribute name */
-        //unsigned i;                        /* Local index variable */
+        char attr_name[ATTR_NAME_LEN]; /* Attribute name */
+        // unsigned i;                        /* Local index variable */
 
         /* Compare the number of attributes */
         if (oinfo1.num_attrs != oinfo2.num_attrs)
@@ -2316,9 +2316,9 @@ test_copy_dataset_simple(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     hid_t   did = -1, did2 = -1;         /* Dataset IDs */
     int     buf[DIM_SIZE_1][DIM_SIZE_2]; /* Buffer for writing data */
     hsize_t dim2d[2];                    /* Dataset dimensions */
-    //int     i, j;                        /* local index variables */
-    char    src_filename[NAME_BUF_SIZE];
-    char    dst_filename[NAME_BUF_SIZE];
+    // int     i, j;                        /* local index variables */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): simple dataset");
 
@@ -2463,9 +2463,9 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     char         dst_fname[NAME_BUF_SIZE];    /* Name of destination file */
     H5F_libver_t low, high;                   /* File format bounds */
     unsigned     srcdset_layoutversion;       /* Layout version of source dataset */
-    //int          i, j;                        /* Local index variables */
-    H5D_t *      dsetp = NULL;                /* Pointer to internal dset structure */
-    herr_t       ret;                         /* Generic return value */
+    // int          i, j;                        /* Local index variables */
+    H5D_t *dsetp = NULL; /* Pointer to internal dset structure */
+    herr_t ret;          /* Generic return value */
 
     TESTING("H5Ocopy(): simple dataset with version bounds");
 
@@ -2655,8 +2655,8 @@ test_copy_dataset_simple_samefile(hid_t fcpl, hid_t fapl)
     hid_t   did = -1, did2 = -1;         /* Dataset IDs */
     int     buf[DIM_SIZE_1][DIM_SIZE_2]; /* Buffer for writing data */
     hsize_t dim2d[2];                    /* Dataset dimensions */
-    //int     i, j;                        /* local index variables */
-    char    filename[NAME_BUF_SIZE];
+    // int     i, j;                        /* local index variables */
+    char filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): simple dataset within the same file");
 
@@ -2922,9 +2922,9 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
         double d;
     } comp_t;
     comp_t buf[DIM_SIZE_1]; /* Buffer for writing data */
-    //int    i;               /* Local index variable */
-    char   src_filename[NAME_BUF_SIZE];
-    char   dst_filename[NAME_BUF_SIZE];
+    // int    i;               /* Local index variable */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): compound dataset");
 
@@ -3078,9 +3078,9 @@ test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimensions */
     float   buf1d[DIM_SIZE_1];                             /* Buffer for writing data */
     float   buf2d[DIM_SIZE_1][DIM_SIZE_2];                 /* Buffer for writing data */
-    //int     i, j;                                          /* Local index variables */
-    char    src_filename[NAME_BUF_SIZE];
-    char    dst_filename[NAME_BUF_SIZE];
+    // int     i, j;                                          /* Local index variables */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): chunked dataset");
 
@@ -4112,8 +4112,8 @@ test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     float   buf1d[DIM_SIZE_1];                             /* Buffer for writing data */
     float   buf2d[DIM_SIZE_1][DIM_SIZE_2];                 /* Buffer for writing data */
     // int     i, j;                                          /* Local index variables */
-    char    src_filename[NAME_BUF_SIZE];
-    char    dst_filename[NAME_BUF_SIZE];
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): sparse dataset");
 
@@ -4486,8 +4486,8 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimensions */
     float   buf[DIM_SIZE_1][DIM_SIZE_2];                   /* Buffer for writing data */
     // int     i, j;                                          /* Local index variables */
-    char    src_filename[NAME_BUF_SIZE];
-    char    dst_filename[NAME_BUF_SIZE];
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     TESTING("H5Ocopy(): compressed dataset");
@@ -4906,8 +4906,8 @@ test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimensions */
     float   buf[DIM_SIZE_1][DIM_SIZE_2];                   /* Buffer for writing data */
     // int     i, j;                                          /* Local index variables */
-    char    src_filename[NAME_BUF_SIZE];
-    char    dst_filename[NAME_BUF_SIZE];
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     if (test_open) {
@@ -5084,8 +5084,8 @@ test_copy_dataset_compact(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     hsize_t dim2d[2];                    /* Dataset dimensions */
     float   buf[DIM_SIZE_1][DIM_SIZE_2]; /* Buffer for writing data */
     // int     i, j;                        /* Local index variables */
-    char    src_filename[NAME_BUF_SIZE];
-    char    dst_filename[NAME_BUF_SIZE];
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
 
     if (test_open) {
         TESTING("H5Ocopy(): compact and opened dataset");
@@ -5235,10 +5235,10 @@ error:
 static int
 test_copy_dataset_external(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   pid = -1;                   /* Dataset creation property list ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
+    hid_t fid_src = -1, fid_dst = -1; /* File IDs */
+    hid_t sid = -1;                   /* Dataspace ID */
+    hid_t pid = -1;                   /* Dataset creation property list ID */
+    hid_t did = -1, did2 = -1;        /* Dataset IDs */
     // int     i;
     hsize_t size;
     hsize_t dim1d[1];
@@ -5384,10 +5384,10 @@ error:
 static int
 test_copy_dataset_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   tid = -1;                   /* Datatype ID */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
+    hid_t fid_src = -1, fid_dst = -1; /* File IDs */
+    hid_t tid = -1;                   /* Datatype ID */
+    hid_t sid = -1;                   /* Dataspace ID */
+    hid_t did = -1, did2 = -1;        /* Dataset IDs */
     // int     i;
     hsize_t dim1d[1];
     int     buf[DIM_SIZE_1];
@@ -5529,11 +5529,11 @@ error:
 static int
 test_copy_dataset_named_dtype_hier(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   tid = -1;                   /* Datatype ID */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1;                   /* Dataset ID */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
+    hid_t fid_src = -1, fid_dst = -1; /* File IDs */
+    hid_t tid = -1;                   /* Datatype ID */
+    hid_t sid = -1;                   /* Dataspace ID */
+    hid_t did = -1;                   /* Dataset ID */
+    hid_t gid = -1, gid2 = -1;        /* Group IDs */
     // int     i;
     hsize_t dim1d[1];
     int     buf[DIM_SIZE_1];
@@ -5697,11 +5697,11 @@ error:
 static int
 test_copy_dataset_named_dtype_hier_outside(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   tid = -1;                   /* Datatype ID */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1;                   /* Dataset ID */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
+    hid_t fid_src = -1, fid_dst = -1; /* File IDs */
+    hid_t tid = -1;                   /* Datatype ID */
+    hid_t sid = -1;                   /* Dataspace ID */
+    hid_t did = -1;                   /* Dataset ID */
+    hid_t gid = -1, gid2 = -1;        /* Group IDs */
     // int     i;
     hsize_t dim1d[1];
     int     buf[DIM_SIZE_1];
@@ -5869,10 +5869,10 @@ static int
 test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
                                     hbool_t test_open)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
+    hid_t fid_src = -1, fid_dst = -1; /* File IDs */
+    hid_t sid = -1;                   /* Dataspace ID */
+    hid_t did = -1, did2 = -1;        /* Dataset IDs */
+    hid_t gid = -1, gid2 = -1;        /* Group IDs */
     // int     i;
     hsize_t dim1d[1];
     int     buf[DIM_SIZE_1];
@@ -6043,11 +6043,11 @@ error:
 static int
 test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   tid = -1;                   /* Datatype ID */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
+    hid_t fid_src = -1, fid_dst = -1; /* File IDs */
+    hid_t tid = -1;                   /* Datatype ID */
+    hid_t sid = -1;                   /* Dataspace ID */
+    hid_t did = -1, did2 = -1;        /* Dataset IDs */
+    hid_t gid = -1, gid2 = -1;        /* Group IDs */
     // int     i;
     hsize_t dim1d[1];
     int     buf[DIM_SIZE_1];
@@ -7265,8 +7265,8 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimensions */
     hvl_t   buf[DIM_SIZE_1][DIM_SIZE_2];                   /* Buffer for writing data */
     // int     i, j, k;                                       /* Local index variables */
-    char    src_filename[NAME_BUF_SIZE];
-    char    dst_filename[NAME_BUF_SIZE];
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     TESTING("H5Ocopy(): compressed dataset with VLEN datatype");
@@ -7558,8 +7558,8 @@ test_copy_root_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
     hsize_t dim2d[2];
     int     buf[DIM_SIZE_1][DIM_SIZE_2];
     // int     i, j;
-    char    src_filename[NAME_BUF_SIZE];
-    char    dst_filename[NAME_BUF_SIZE];
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): root group");
 
@@ -7717,8 +7717,8 @@ test_copy_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
     hsize_t dim2d[2];
     int     buf[DIM_SIZE_1][DIM_SIZE_2];
     // int     i, j;
-    char    src_filename[NAME_BUF_SIZE];
-    char    dst_filename[NAME_BUF_SIZE];
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): simple nested groups");
 

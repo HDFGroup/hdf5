@@ -111,7 +111,7 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
     H5S_extent_t *sdim = NULL; /* New extent dimensionality structure */
     unsigned      flags, version;
     // unsigned      i;                /* Local counting variable */
-    void *        ret_value = NULL; /* Return value */
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
