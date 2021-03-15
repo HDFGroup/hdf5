@@ -334,7 +334,7 @@ main(int argc, char **argv)
         errx(EXIT_FAILURE, "fifo_reader_to_writer open failed");
 
     if (writer) {
-        /* Writer tells reader to start */
+        /* Writer tells reader to start verification */
         if (HDwrite(fd_writer_to_reader, &notify, sizeof(int)) < 0)
             err(EXIT_FAILURE, "write failed");
 
@@ -357,7 +357,8 @@ main(int argc, char **argv)
                     H5Aexists(s.file, "nonexistent");
                 }
 
-                /* Receive the same value from the reader and verify it */
+                /* Receive the same value from the reader and verify it before
+                 * going to the next step */
                 verify++;
                 if (HDread(fd_reader_to_writer, &notify, sizeof(int)) < 0)
                     err(EXIT_FAILURE, "read failed");
@@ -393,7 +394,8 @@ main(int argc, char **argv)
                 if (notify != verify)
                     errx(EXIT_FAILURE, "received message %d, expecting %d", notify, verify);
 
-                /* Send back the same nofity value for acknowledgement */
+                /* Send back the same nofity value for acknowledgement to tell the writer
+                 * move to the next step */
                 if (HDwrite(fd_reader_to_writer, &notify, sizeof(int)) < 0)
                     err(EXIT_FAILURE, "write failed");
             }
