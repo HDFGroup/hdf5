@@ -197,7 +197,7 @@ public class TestH5D {
     private final void _openH5file(String filename, String dsetname, long dapl) {
        try {
            H5fid = H5.H5Fopen(filename,
-                   HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+                   HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
        }
        catch (Throwable err) {
            err.printStackTrace();

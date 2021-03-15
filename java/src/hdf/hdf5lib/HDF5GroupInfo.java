@@ -90,32 +90,44 @@ public class HDF5GroupInfo {
         linklen = 0;
     }
 
-    /** fileno accessors */
+    /** fileno accessors
+     * @return the file number if successful
+     */
     public long[] getFileno() {
         return fileno;
     }
 
-    /** accessors */
+    /** accessors
+     * @return the object number if successful
+     */
     public long[] getObjno() {
         return objno;
     }
 
-    /** accessors */
+    /** accessors
+     * @return type of group if successful
+     */
     public int getType() {
         return type;
     }
 
-    /** accessors */
+    /** accessors
+     * @return the number of links in the group if successful
+     */
     public int getNlink() {
         return nlink;
     }
 
-    /** accessors */
+    /** accessors
+     * @return the modified time value if successful
+     */
     public long getMtime() {
         return mtime;
     }
 
-    /** accessors */
+    /** accessors
+     * @return a length of link name if successful
+     */
     public int getLinklen() {
         return linklen;
     }
