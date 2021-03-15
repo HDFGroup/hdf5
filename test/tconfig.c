@@ -114,9 +114,7 @@ test_config_ctypes(void)
     vrfy_cint_type(long, unsigned long, H5_SIZEOF_LONG);
     vrfy_ctype(float, H5_SIZEOF_FLOAT);
     vrfy_ctype(double, H5_SIZEOF_DOUBLE);
-#if H5_SIZEOF_LONG_DOUBLE > 0
     vrfy_ctype(long double, H5_SIZEOF_LONG_DOUBLE);
-#endif
 
     /* standard C99 basic types */
     vrfy_cint_type(long long, unsigned long long, H5_SIZEOF_LONG_LONG);

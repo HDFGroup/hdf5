@@ -419,9 +419,7 @@ PredType::makePredTypes()
     NATIVE_LLONG_  = new PredType(H5T_NATIVE_LLONG);
     NATIVE_ULLONG_ = new PredType(H5T_NATIVE_ULLONG);
     NATIVE_DOUBLE_ = new PredType(H5T_NATIVE_DOUBLE);
-#if H5_SIZEOF_LONG_DOUBLE != 0
     NATIVE_LDOUBLE_ = new PredType(H5T_NATIVE_LDOUBLE);
-#endif
     NATIVE_B8_     = new PredType(H5T_NATIVE_B8);
     NATIVE_B16_    = new PredType(H5T_NATIVE_B16);
     NATIVE_B32_    = new PredType(H5T_NATIVE_B32);

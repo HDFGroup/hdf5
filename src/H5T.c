@@ -435,9 +435,7 @@ hid_t H5T_NATIVE_LLONG_g  = FAIL;
 hid_t H5T_NATIVE_ULLONG_g = FAIL;
 hid_t H5T_NATIVE_FLOAT_g  = FAIL;
 hid_t H5T_NATIVE_DOUBLE_g = FAIL;
-#if H5_SIZEOF_LONG_DOUBLE != 0
 hid_t H5T_NATIVE_LDOUBLE_g = FAIL;
-#endif
 hid_t H5T_NATIVE_B8_g     = FAIL;
 hid_t H5T_NATIVE_B16_g    = FAIL;
 hid_t H5T_NATIVE_B32_g    = FAIL;
@@ -495,9 +493,7 @@ size_t H5T_NATIVE_LLONG_COMP_ALIGN_g  = 0;
 size_t H5T_NATIVE_ULLONG_COMP_ALIGN_g = 0;
 size_t H5T_NATIVE_FLOAT_COMP_ALIGN_g  = 0;
 size_t H5T_NATIVE_DOUBLE_COMP_ALIGN_g = 0;
-#if H5_SIZEOF_LONG_DOUBLE != 0
 size_t H5T_NATIVE_LDOUBLE_COMP_ALIGN_g = 0;
-#endif
 
 size_t H5T_POINTER_COMP_ALIGN_g     = 0;
 size_t H5T_HVL_COMP_ALIGN_g         = 0;
@@ -521,9 +517,7 @@ size_t H5T_NATIVE_LLONG_ALIGN_g  = 0;
 size_t H5T_NATIVE_ULLONG_ALIGN_g = 0;
 size_t H5T_NATIVE_FLOAT_ALIGN_g  = 0;
 size_t H5T_NATIVE_DOUBLE_ALIGN_g = 0;
-#if H5_SIZEOF_LONG_DOUBLE != 0
 size_t H5T_NATIVE_LDOUBLE_ALIGN_g = 0;
-#endif
 
 /*
  * Alignment constraints for C9x types. These are initialized at run time in
@@ -772,9 +766,7 @@ H5T__init_package(void)
     H5T_t *native_ullong = NULL; /* Datatype structure for native unsigned long long */
     H5T_t *native_float  = NULL; /* Datatype structure for native float */
     H5T_t *native_double = NULL; /* Datatype structure for native double */
-#if H5_SIZEOF_LONG_DOUBLE != 0
     H5T_t *native_ldouble = NULL; /* Datatype structure for native long double */
-#endif
     H5T_t * std_u8le  = NULL; /* Datatype structure for unsigned 8-bit little-endian integer */
     H5T_t * std_u8be  = NULL; /* Datatype structure for unsigned 8-bit big-endian integer */
     H5T_t * std_u16le = NULL; /* Datatype structure for unsigned 16-bit little-endian integer */
@@ -843,10 +835,8 @@ H5T__init_package(void)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
     if (NULL == (native_double = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
-#if H5_SIZEOF_LONG_DOUBLE != 0
     if (NULL == (native_ldouble = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
-#endif
 
     /*------------------------------------------------------------
      * Derived native types
@@ -1116,7 +1106,6 @@ H5T__init_package(void)
         H5T__register_int(H5T_PERS_HARD, "flt_dbl", native_float, native_double, H5T__conv_float_double);
     status |=
         H5T__register_int(H5T_PERS_HARD, "dbl_flt", native_double, native_float, H5T__conv_double_float);
-#if H5_SIZEOF_LONG_DOUBLE != 0
     status |=
         H5T__register_int(H5T_PERS_HARD, "flt_ldbl", native_float, native_ldouble, H5T__conv_float_ldouble);
     status |=
@@ -1125,7 +1114,6 @@ H5T__init_package(void)
         H5T__register_int(H5T_PERS_HARD, "ldbl_flt", native_ldouble, native_float, H5T__conv_ldouble_float);
     status |=
         H5T__register_int(H5T_PERS_HARD, "ldbl_dbl", native_ldouble, native_double, H5T__conv_ldouble_double);
-#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
     /* from long long */
     status |=
@@ -1675,9 +1663,7 @@ H5T_top_term_package(void)
             H5T_NATIVE_ULLONG_g = FAIL;
             H5T_NATIVE_FLOAT_g  = FAIL;
             H5T_NATIVE_DOUBLE_g = FAIL;
-#if H5_SIZEOF_LONG_DOUBLE != 0
             H5T_NATIVE_LDOUBLE_g = FAIL;
-#endif
             H5T_NATIVE_B8_g     = FAIL;
             H5T_NATIVE_B16_g    = FAIL;
             H5T_NATIVE_B32_g    = FAIL;

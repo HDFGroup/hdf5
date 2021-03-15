@@ -3232,7 +3232,6 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-#if H5_SIZEOF_LONG_DOUBLE != 0
     else if (!HDstrcmp(buffer, "H5T_NATIVE_LDOUBLE")) {
         in->inputSize                      = H5_SIZEOF_LONG_DOUBLE;
         in->configOptionVector[INPUT_SIZE] = 1;
@@ -3245,7 +3244,6 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-#endif
     else if (!HDstrcmp(buffer, "H5T_TIME: not yet implemented")) {
         kindex = -1;
     }
