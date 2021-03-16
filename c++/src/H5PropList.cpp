@@ -87,7 +87,9 @@ const PropList &PropList::DEFAULT = *getConstant();
 ///\brief       Default constructor: creates a stub property list object.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList() : IdComponent(), id(H5P_DEFAULT) {}
+PropList::PropList() : IdComponent(), id(H5P_DEFAULT)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    PropList copy constructor

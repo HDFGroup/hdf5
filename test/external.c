@@ -134,7 +134,10 @@ test_non_extendible(hid_t file)
         FAIL_STACK_ERROR
 
     /* Test dataset address.  Should be undefined. */
-    H5E_BEGIN_TRY { dset_addr = H5Dget_offset(dset); }
+    H5E_BEGIN_TRY
+    {
+        dset_addr = H5Dget_offset(dset);
+    }
     H5E_END_TRY;
     if (dset_addr != HADDR_UNDEF)
         FAIL_STACK_ERROR
@@ -220,7 +223,10 @@ test_too_small(hid_t file)
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { dset = H5Dcreate2(file, "dset2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        dset = H5Dcreate2(file, "dset2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external file succeeded instead of failing.");
@@ -332,7 +338,10 @@ test_large_enough_current_not_eventual(hid_t file)
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { dset = H5Dcreate2(file, "dset4", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        dset = H5Dcreate2(file, "dset4", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external file succeeded instead of failing.");
@@ -547,7 +556,10 @@ test_multiple_files(hid_t file)
         FAIL_STACK_ERROR;
     }
 
-    H5E_BEGIN_TRY { dset = H5Dcreate2(file, "dset7", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        dset = H5Dcreate2(file, "dset7", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external files succeeded instead of failing.");
@@ -599,7 +611,10 @@ test_add_to_unlimited(void)
     if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
+    }
     H5E_END_TRY;
     if (status >= 0)
         FAIL_PUTS_ERROR("    H5Pset_external() succeeded when it should have failed.");
@@ -615,7 +630,10 @@ test_add_to_unlimited(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(dcpl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
     H5E_END_TRY;
     return 1;
 } /* end test_add_to_unlimited() */
@@ -647,7 +665,10 @@ test_overflow(void)
     if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED - 1) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
+    }
     H5E_END_TRY;
     if (status >= 0)
         FAIL_PUTS_ERROR("    H5Pset_external() succeeded when it should have failed.");
@@ -659,7 +680,10 @@ test_overflow(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(dcpl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
     H5E_END_TRY;
     return 1;
 } /* end test_overflow() */
@@ -1187,7 +1211,10 @@ test_path_relative_cwd(hid_t fapl)
     /* Reopen dataset with different efile_prefix property */
     if (H5Pset_efile_prefix(dapl, "//") < 0)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { dset3 = H5Dopen2(file, "dset1", dapl); }
+    H5E_BEGIN_TRY
+    {
+        dset3 = H5Dopen2(file, "dset1", dapl);
+    }
     H5E_END_TRY;
     if (dset3 >= 0)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeded");
@@ -1221,7 +1248,10 @@ test_path_relative_cwd(hid_t fapl)
     /* Reopen dataset with different efile_prefix property */
     if (H5Pset_efile_prefix(dapl, NULL) < 0)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { dset3 = H5Dopen2(file, "dset1", dapl); }
+    H5E_BEGIN_TRY
+    {
+        dset3 = H5Dopen2(file, "dset1", dapl);
+    }
     H5E_END_TRY;
     if (dset3 >= 0)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeded");

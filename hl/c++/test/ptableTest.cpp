@@ -191,7 +191,10 @@ TestCompoundDatatype()
 
 error:
 
-    H5E_BEGIN_TRY { H5Tclose(dtypeID); }
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(dtypeID);
+    }
     H5E_END_TRY;
 
     H5_FAILED();
