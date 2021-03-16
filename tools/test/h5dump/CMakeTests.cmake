@@ -1175,8 +1175,8 @@
   ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lf t128bit_float.h5)
 
   # test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
-  ADD_H5_TEST (tCVE_2018_11206_fill_old tCVE_2018_11206_fill_old.h5)
-  ADD_H5_TEST (tCVE_2018_11206_fill_new tCVE_2018_11206_fill_new.h5)
+  ADD_H5_TEST (tCVE_2018_11206_fill_old 1 tCVE_2018_11206_fill_old.h5)
+  ADD_H5_TEST (tCVE_2018_11206_fill_new 1 tCVE_2018_11206_fill_new.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
