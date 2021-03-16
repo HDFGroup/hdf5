@@ -131,6 +131,10 @@ H5_DLL herr_t  H5FD_set_feature_flags(H5FD_t *file, unsigned long feature_flags)
 H5_DLL herr_t  H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map);
 H5_DLL herr_t  H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*out*/);
 H5_DLL herr_t  H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
+H5_DLL herr_t  H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                                size_t sizes[], void *bufs[] /* out */);
+H5_DLL herr_t  H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                                 size_t sizes[], void *bufs[] /* out */);
 H5_DLL herr_t  H5FD_flush(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_truncate(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_lock(H5FD_t *file, hbool_t rw);

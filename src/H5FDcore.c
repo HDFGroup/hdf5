@@ -177,6 +177,8 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD__core_get_handle,    /* get_handle           */
     H5FD__core_read,          /* read                 */
     H5FD__core_write,         /* write                */
+    NULL,                     /* read_vector          */
+    NULL,                     /* write_vector         */
     H5FD__core_flush,         /* flush                */
     H5FD__core_truncate,      /* truncate             */
     H5FD__core_lock,          /* lock                 */

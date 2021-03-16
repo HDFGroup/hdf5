@@ -167,6 +167,8 @@ static const H5FD_class_t H5FD_sec2_g = {
     H5FD__sec2_get_handle, /* get_handle           */
     H5FD__sec2_read,       /* read                 */
     H5FD__sec2_write,      /* write                */
+    NULL,                  /* read_vector          */
+    NULL,                  /* write_vector         */
     NULL,                  /* flush                */
     H5FD__sec2_truncate,   /* truncate             */
     H5FD__sec2_lock,       /* lock                 */

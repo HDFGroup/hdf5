@@ -166,6 +166,8 @@ static const H5FD_class_t H5FD_direct_g = {
     H5FD__direct_get_handle,    /* get_handle           */
     H5FD__direct_read,          /* read                 */
     H5FD__direct_write,         /* write                */
+    NULL,                       /* read_vector          */
+    NULL,                       /* write_vector         */
     NULL,                       /* flush                */
     H5FD__direct_truncate,      /* truncate             */
     H5FD__direct_lock,          /* lock                 */
