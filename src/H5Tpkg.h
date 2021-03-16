@@ -339,7 +339,7 @@ typedef struct H5T_shared_t {
     size_t      size;     /*total size of an instance of this type     */
     unsigned    version;  /* Version of object header message to encode this object with */
     hbool_t
-        force_conv; /* Set if this type always needs to be converted and H5T__conv_noop cannot be called */
+                   force_conv; /* Set if this type always needs to be converted and H5T__conv_noop cannot be called */
     struct H5T_t * parent;        /*parent type for derived datatypes	     */
     H5VL_object_t *owned_vol_obj; /* Vol object owned by this type (free on close) */
     union {
