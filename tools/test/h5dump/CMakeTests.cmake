@@ -127,7 +127,8 @@
       ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl
+      #${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl #special handling on windows
+      #${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.ddl #special handling on windows
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tloop-1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tmulti.ddl
@@ -294,6 +295,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.h5
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.h5
       ${HDF5_TOOLS_DIR}/testfiles/tldouble.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.h5
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.h5
       ${HDF5_TOOLS_DIR}/testfiles/tloop.h5
       ${HDF5_TOOLS_DIR}/testfiles/tmulti-b.h5
@@ -409,8 +411,12 @@
     configure_file(${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
     #file (READ ${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     #file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tldouble.wddl" "${PROJECT_BINARY_DIR}/testfiles/std/tldouble.ddl" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.wddl" "${PROJECT_BINARY_DIR}/testfiles/std/tldouble_scalar.ddl" "h5dump_std_files")
   else ()
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tldouble.ddl" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tldouble_scalar.ddl" "h5dump_std_files")
   endif ()
   add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
 
@@ -1085,7 +1091,8 @@
   ADD_H5_TEST (zerodim 0 --enable-error-stack zerodim.h5)
 
   # test for long double (some systems do not have long double)
-#  ADD_H5_TEST (tldouble 0 --enable-error-stack tldouble.h5)
+  ADD_H5_TEST (tldouble 0 --enable-error-stack tldouble.h5)
+  ADD_H5_TEST (tldouble_scalar 0 -p --enable-error-stack tldouble_scalar.h5)
 
   # test for vms
   ADD_H5_TEST (tvms 0 --enable-error-stack tvms.h5)
