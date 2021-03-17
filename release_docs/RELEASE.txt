@@ -191,7 +191,7 @@ New Features
     - CMake option to link the generated Fortran MOD files into the include
       directory.
 
-        The Fortran generation of MOD files by a Fortran compile can produce
+        The Fortran generation of MOD files by a Fortran compiler can produce
         different binary files between SHARED and STATIC compiles with different
         compilers and/or different platforms. Note that it has been found that
         different versions of Fortran compilers will produce incompatible MOD
