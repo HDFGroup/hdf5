@@ -6010,7 +6010,10 @@ test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
     attr = H5Acreate2(fid, GET_INFO_NULL_POINTER_ATTR_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
-    H5E_BEGIN_TRY { err_ret = H5Aget_info(attr, NULL); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Aget_info(attr, NULL);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Aget_info");
@@ -6071,22 +6074,34 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     attr = H5Acreate2(fid, INVALID_RENAME_TEST_ATTR_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename(fid, NULL, INVALID_RENAME_TEST_NEW_ATTR_NAME); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename(fid, NULL, INVALID_RENAME_TEST_NEW_ATTR_NAME);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename(fid, "", INVALID_RENAME_TEST_NEW_ATTR_NAME); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename(fid, "", INVALID_RENAME_TEST_NEW_ATTR_NAME);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, NULL); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, NULL);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, ""); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, "");
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename");
@@ -6107,12 +6122,18 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, NULL, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, NULL, H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, "", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, "", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
@@ -6159,7 +6180,10 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
         H5Acreate2(fid, GET_NAME_INVALID_BUF_TEST_ATTR_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
-    H5E_BEGIN_TRY { err_ret = H5Aget_name(attr, 1, NULL); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Aget_name(attr, 1, NULL);
+    }
     H5E_END_TRY;
 
     VERIFY(err_ret, FAIL, "H5Aget_name");

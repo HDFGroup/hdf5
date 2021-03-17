@@ -357,14 +357,18 @@ CommonFG::openVarLenType(const H5std_string &name) const
 ///\brief       Default constructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CommonFG::CommonFG() {}
+CommonFG::CommonFG()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    CommonFG destructor
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CommonFG::~CommonFG() {}
+CommonFG::~CommonFG()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    f_DataType_setId - friend

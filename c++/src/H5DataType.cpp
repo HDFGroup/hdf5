@@ -46,7 +46,9 @@ using std::endl;
 ///\brief       Default constructor: Creates a stub datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType() : H5Object(), id(H5I_INVALID_HID), encoded_buf(NULL), buf_size(0) {}
+DataType::DataType() : H5Object(), id(H5I_INVALID_HID), encoded_buf(NULL), buf_size(0)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DataType overloaded constructor
