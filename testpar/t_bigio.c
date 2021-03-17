@@ -1104,7 +1104,7 @@ static void
 single_rank_independent_io(void)
 {
     if (mpi_rank_g == 0)
-        HDprintf("single_rank_independent_io\n");
+        HDprintf("\nSingle Rank Independent I/O\n");
 
     if (MAIN_PROCESS) {
         hsize_t dims[]    = {LARGE_DIM};
@@ -1223,8 +1223,6 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
  * Programmer:    Unknown
  *        July 12th, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1250,7 +1248,7 @@ coll_chunk1(void)
 {
     const char *filename = FILENAME[0];
     if (mpi_rank_g == 0)
-        HDprintf("coll_chunk1\n");
+        HDprintf("\nCollective chunk I/O Test #1\n");
 
     coll_chunktest(filename, 1, BYROW_CONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 1, BYROW_CONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
@@ -1303,7 +1301,7 @@ coll_chunk2(void)
 {
     const char *filename = FILENAME[0];
     if (mpi_rank_g == 0)
-        HDprintf("coll_chunk2\n");
+        HDprintf("\nCollective chunk I/O Test #2\n");
 
     coll_chunktest(filename, 1, BYROW_DISCONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 1, BYROW_DISCONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
@@ -1328,8 +1326,6 @@ coll_chunk2(void)
  *
  * Programmer:    Unknown
  *        July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1357,7 +1353,7 @@ coll_chunk3(void)
 {
     const char *filename = FILENAME[0];
     if (mpi_rank_g == 0)
-        HDprintf("coll_chunk3\n");
+        HDprintf("\nCollective chunk I/O Test #3\n");
 
     coll_chunktest(filename, mpi_size_g, BYROW_CONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, mpi_size_g, BYROW_CONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
@@ -1385,16 +1381,8 @@ coll_chunk3(void)
  *
  *        Failure:    -1
  *
- * Modifications:
- *   Remove invalid temporary property checkings for API_LINK_HARD and
- *   API_LINK_TRUE cases.
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
- *
  * Programmer:    Unknown
  *        July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1845,54 +1833,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
         HDfree(data_origin1);
 }
 
-/*****************************************************************************
- *
- * Function:    do_express_test()
- *
- * Purpose:    Do an MPI_Allreduce to obtain the maximum value returned
- *         by GetTestExpress() across all processes.  Return this
- *         value.
- *
- *         Envirmoment variables can be different across different
- *         processes.  This function ensures that all processes agree
- *         on whether to do an express test.
- *
- * Return:    Success:    Maximum of the values returned by
- *                 GetTestExpress() across    all processes.
- *
- *        Failure:    -1
- *
- * Programmer:    JRM -- 4/25/06
- *
- *****************************************************************************/
-static int
-do_express_test(int world_mpi_rank)
-{
-    int express_test;
-    int max_express_test;
-    int result;
-
-    express_test = GetTestExpress();
-
-    result =
-        MPI_Allreduce((void *)&express_test, (void *)&max_express_test, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-
-    if (result != MPI_SUCCESS) {
-        nerrors++;
-        max_express_test = -1;
-        if (VERBOSE_MED && (world_mpi_rank == 0)) {
-            HDfprintf(stdout, "%d:%s: MPI_Allreduce() failed.\n", world_mpi_rank, FUNC);
-        }
-    }
-
-    return (max_express_test);
-
-} /* do_express_test() */
-
 int
 main(int argc, char **argv)
 {
-    int     ExpressMode = 0;
     hsize_t newsize     = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
     hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
@@ -1902,9 +1845,8 @@ main(int argc, char **argv)
      * that we try to ensure that our bigio handling is actually
      * envoked and tested.
      */
-    if (newsize != oldsize) {
+    if (newsize != oldsize)
         bigcount = newsize * 2;
-    }
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size_g);
@@ -1915,14 +1857,11 @@ main(int argc, char **argv)
      * hang in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
-    if (H5dont_atexit() < 0) {
+    if (H5dont_atexit() < 0)
         HDprintf("Failed to turn off atexit processing. Continue.\n");
-    };
 
     /* set alarm. */
     ALARM_ON;
-
-    ExpressMode = do_express_test(mpi_rank_g);
 
     dataset_big_write();
     MPI_Barrier(MPI_COMM_WORLD);
@@ -1930,19 +1869,13 @@ main(int argc, char **argv)
     dataset_big_read();
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if (ExpressMode > 0) {
-        if (mpi_rank_g == 0)
-            HDprintf("***Express test mode on.  Several tests are skipped\n");
-    }
-    else {
-        coll_chunk1();
-        MPI_Barrier(MPI_COMM_WORLD);
-        coll_chunk2();
-        MPI_Barrier(MPI_COMM_WORLD);
-        coll_chunk3();
-        MPI_Barrier(MPI_COMM_WORLD);
-        single_rank_independent_io();
-    }
+    coll_chunk1();
+    MPI_Barrier(MPI_COMM_WORLD);
+    coll_chunk2();
+    MPI_Barrier(MPI_COMM_WORLD);
+    coll_chunk3();
+    MPI_Barrier(MPI_COMM_WORLD);
+    single_rank_independent_io();
 
     /* turn off alarm */
     ALARM_OFF;
