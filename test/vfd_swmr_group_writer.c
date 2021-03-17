@@ -62,10 +62,9 @@ usage(const char *progname)
 		"-a steps:	       `steps` between adding attributes\n"
 		"-b:	               write data in big-endian byte order\n"
 		"-c steps:	       `steps` between communication between the writer and reader\n"
-		"-n iterations:        how many times to expand each dataset\n"
-                "                      to %s.h5\n"
+                "-n ngroups:           the number of groups\n"
 		"\n",
-		progname, progname);
+		progname);
 	exit(EXIT_FAILURE);
 }
 
@@ -334,10 +333,6 @@ main(int argc, char **argv)
         errx(EXIT_FAILURE, "fifo_reader_to_writer open failed");
 
     if (writer) {
-        /* Writer tells reader to start verification */
-        if (HDwrite(fd_writer_to_reader, &notify, sizeof(int)) < 0)
-            err(EXIT_FAILURE, "write failed");
-
         for (step = 0; step < s.nsteps; step++) {
             dbgf(2, "writer: step %d\n", step);
 
@@ -368,34 +363,29 @@ main(int argc, char **argv)
             }
         }
     } else {
-        /* Start to verify group creation after receiving the writer's notice */
-        if (HDread(fd_writer_to_reader, &notify, sizeof(int)) < 0)
-            err(EXIT_FAILURE, "read failed");
-
-        /* Both notify and verify are 0 now */
-        if (notify != verify)
-            errx(EXIT_FAILURE, "received message %d, expecting %d", notify, verify);
-
         for (step = 0; step < s.nsteps; step++) {
             dbgf(2, "reader: step %d\n", step);
 
-            while (!verify_group(&s, step))
-                ;
-
-            /* At communication interval, waits for the writer's notice and responds back */
+            /* At communication interval, waits for the writer to finish creation before starting verification */
             if (step % s.csteps == 0) {
                 /* The writer should have bumped up the value of notify.
                  * Do the same with verify and confirm it */
                 verify++;
 
+                /* Receive the notify that the writer bumped up the value */
                 if (HDread(fd_writer_to_reader, &notify, sizeof(int)) < 0)
                     err(EXIT_FAILURE, "read failed");
 
                 if (notify != verify)
                     errx(EXIT_FAILURE, "received message %d, expecting %d", notify, verify);
+            }
 
+            while (!verify_group(&s, step))
+                ;
+
+            if (step % s.csteps == 0) {
                 /* Send back the same nofity value for acknowledgement to tell the writer
-                 * move to the next step */
+                 * move to the next step. */
                 if (HDwrite(fd_reader_to_writer, &notify, sizeof(int)) < 0)
                     err(EXIT_FAILURE, "write failed");
             }
