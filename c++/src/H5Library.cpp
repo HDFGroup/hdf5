@@ -281,14 +281,18 @@ H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim, int arr_globa
 ///\brief       Default constructor: Creates a stub H5Library object
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Library::H5Library() {}
+H5Library::H5Library()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    H5Library destructor
 ///\brief       Noop destructor
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Library::~H5Library() {}
+H5Library::~H5Library()
+{
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // namespace H5

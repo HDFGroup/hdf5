@@ -44,7 +44,9 @@ using std::endl;
 ///\brief       Default constructor: creates a stub DataSet.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet() : H5Object(), AbstractDs(), id(H5I_INVALID_HID) {}
+DataSet::DataSet() : H5Object(), AbstractDs(), id(H5I_INVALID_HID)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DataSet overloaded constructor

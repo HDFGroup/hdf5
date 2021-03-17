@@ -558,7 +558,10 @@ test_copy(void)
     /* Try to close error stack copy.  Should fail because
      * the current H5Eset_current_stack closes the stack to be set.
      */
-    H5E_BEGIN_TRY { ret = H5Eclose_stack(estack_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(estack_id);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -624,15 +627,24 @@ test_append(void)
         TEST_ERROR
 
     /* Try to append bad error stack IDs */
-    H5E_BEGIN_TRY { ret = H5Eappend_stack(H5E_DEFAULT, H5E_DEFAULT, FALSE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(H5E_DEFAULT, H5E_DEFAULT, FALSE);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5Eappend_stack(estack_id1, H5E_DEFAULT, FALSE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(estack_id1, H5E_DEFAULT, FALSE);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5Eappend_stack(H5E_DEFAULT, estack_id2, FALSE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(H5E_DEFAULT, estack_id2, FALSE);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -658,7 +670,10 @@ test_append(void)
     /* Try to close error stack #2.  Should fail because H5Eappend_stack
      * should have already closed it.
      */
-    H5E_BEGIN_TRY { ret = H5Eclose_stack(estack_id2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(estack_id2);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR

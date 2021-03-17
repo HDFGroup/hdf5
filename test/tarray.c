@@ -235,11 +235,17 @@ test_array_funcs(void)
     ret = H5Tset_offset(type, (size_t)16);
     CHECK(ret, FAIL, "H5Tset_offset");
 
-    H5E_BEGIN_TRY { cset = H5Tget_cset(type); }
+    H5E_BEGIN_TRY
+    {
+        cset = H5Tget_cset(type);
+    }
     H5E_END_TRY;
     VERIFY(cset, FAIL, "H5Tget_cset");
 
-    H5E_BEGIN_TRY { strpad = H5Tget_strpad(type); }
+    H5E_BEGIN_TRY
+    {
+        strpad = H5Tget_strpad(type);
+    }
     H5E_END_TRY;
     VERIFY(strpad, FAIL, "H5Tget_strpad");
 
