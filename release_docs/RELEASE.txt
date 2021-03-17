@@ -201,10 +201,10 @@ New Features
 
     Library:
     --------
-    - H5Epush_ret() now requires a trailing semi-colon
+    - H5Epush_ret() now requires a trailing semicolon
 
         H5Epush_ret() is a function-like macro that has been changed to
-        contain a `do {} while(0)` loop. Consequently, a trailing semi-colon
+        contain a `do {} while(0)` loop. Consequently, a trailing semicolon
         is now required to end the `while` statement. Previously, a trailing
         semi would work, but was not mandatory. This change was made to allow
         clang-format to correctly format the source code.
@@ -238,7 +238,6 @@ New Features
         wrapper functions added.
 
         (ADB - 2020/10/27, HDFFV-10868)
-
 
     Tools:
     ------
@@ -277,7 +276,7 @@ Bug Fixes since HDF5-1.10.7 release
     -------
     - Remove underscores on header file guards
 
-        Header file guards used a variety of underscores at the beginning the define.
+        Header file guards used a variety of underscores at the beginning of the define.
 
         Removed all leading (some trailing) underscores from header file guards.
 
@@ -330,7 +329,7 @@ Bug Fixes since HDF5-1.10.7 release
 
         Tools parsing used the length of the option from the long array to match
         the option from the command line. This incorrectly matched a shorter long
-        name option that was happened to be a subset of another long option.
+        name option that happened to be a subset of another long option.
         Changed to match whole names.
 
         (ADB - 2021/01/19, HDFFV-11106)
