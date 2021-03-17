@@ -5381,9 +5381,9 @@ test_select_hyper_union_3d(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE4_DIM1 * SPACE4_DIM2 * SPACE4_DIM3);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), SPACE3_DIM1 * SPACE3_DIM2);
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for (i = 0, tbuf = wbuf; i < SPACE4_DIM1; i++)
