@@ -486,6 +486,13 @@ Bug Fixes since HDF5-1.12.0 release
 
     Tools
     -----
+    - Fixed tools display of long double.
+
+        Long doubles were not being display correctly. Changed the printf
+        specifier from %Lf to %Lg.
+
+        (ADB - 2021/03/12, HDFFV-11113)
+
     - Fixed tools argument parsing.
 
         Tools parsing used the length of the option from the long array to match
