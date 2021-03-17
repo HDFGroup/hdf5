@@ -118,8 +118,7 @@ abort_intercept(int H5_ATTR_UNUSED sig)
  * Returning TRUE here lets Windows know that we've handled the abort() and that there
  * is no need to alert the user with a modal dialog box.
  */
-int __cdecl
-handle_crt_abort(int reportType, char *message, int *returnValue)
+int __cdecl handle_crt_abort(int reportType, char *message, int *returnValue)
 {
     return TRUE;
 }
