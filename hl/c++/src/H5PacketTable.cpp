@@ -32,15 +32,24 @@
  * Opens an existing packet table, which can contain either fixed-length or
  * variable-length packets.
  */
-PacketTable::PacketTable(hid_t fileID, const char *name) { table_id = H5PTopen(fileID, name); }
+PacketTable::PacketTable(hid_t fileID, const char *name)
+{
+    table_id = H5PTopen(fileID, name);
+}
 
 /* "Open" Constructor - will be deprecated because of char* name */
-PacketTable::PacketTable(hid_t fileID, char *name) { table_id = H5PTopen(fileID, name); }
+PacketTable::PacketTable(hid_t fileID, char *name)
+{
+    table_id = H5PTopen(fileID, name);
+}
 
 /* Destructor
  * Cleans up the packet table
  */
-PacketTable::~PacketTable() { H5PTclose(table_id); }
+PacketTable::~PacketTable()
+{
+    H5PTclose(table_id);
+}
 
 /* IsValid
  * Returns true if this packet table is valid, false otherwise.
@@ -206,10 +215,14 @@ FL_PacketTable::FL_PacketTable(hid_t fileID, char *name, hid_t dtypeID, hsize_t 
  * Opens an existing fixed-length packet table.
  * Fails if the packet table specified is variable-length.
  */
-FL_PacketTable::FL_PacketTable(hid_t fileID, const char *name) : PacketTable(fileID, name) {}
+FL_PacketTable::FL_PacketTable(hid_t fileID, const char *name) : PacketTable(fileID, name)
+{
+}
 
 /* "Open" Constructor - will be deprecated because of char* name */
-FL_PacketTable::FL_PacketTable(hid_t fileID, char *name) : PacketTable(fileID, name) {}
+FL_PacketTable::FL_PacketTable(hid_t fileID, char *name) : PacketTable(fileID, name)
+{
+}
 
 /* AppendPacket
  * Adds a single packet to the packet table.  Takes a pointer

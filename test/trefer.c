@@ -1358,7 +1358,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         /*
          * Dereference an undefined reference (should fail)
          */
-        H5E_BEGIN_TRY { dset2 = H5Ropen_object(&rdata_NA[0], H5P_DEFAULT, H5P_DEFAULT); }
+        H5E_BEGIN_TRY
+        {
+            dset2 = H5Ropen_object(&rdata_NA[0], H5P_DEFAULT, H5P_DEFAULT);
+        }
         H5E_END_TRY;
         VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object");
 
@@ -1368,7 +1371,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
 
         /* This close should fail since H5Ropen_object never created
          * the id of the referenced object. */
-        H5E_BEGIN_TRY { ret = H5Dclose(dset2); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Dclose(dset2);
+        }
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Dclose");
 
@@ -1520,7 +1526,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
 
         /* Attempting to retrieve type of object using non-valid refs */
         for (j = 0; j < 3; j++) {
-            H5E_BEGIN_TRY { ret = H5Rget_obj_type3(&nvrbuf[j], H5P_DEFAULT, &obj_type); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5Rget_obj_type3(&nvrbuf[j], H5P_DEFAULT, &obj_type);
+            }
             H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Rget_obj_type3");
         } /* end for */

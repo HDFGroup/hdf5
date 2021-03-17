@@ -85,7 +85,10 @@ test_es_create(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5ESclose(es_id); }
+    H5E_BEGIN_TRY
+    {
+        H5ESclose(es_id);
+    }
     H5E_END_TRY;
     return 1;
 }

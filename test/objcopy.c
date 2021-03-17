@@ -1728,7 +1728,9 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
     return TRUE;
 
 error:
-    H5E_BEGIN_TRY {}
+    H5E_BEGIN_TRY
+    {
+    }
     H5E_END_TRY;
     return FALSE;
 } /* end compare_groups() */
@@ -2539,7 +2541,10 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
         for (high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Set version bounds */
-            H5E_BEGIN_TRY { ret = H5Pset_libver_bounds(fapl_dst, low, high); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5Pset_libver_bounds(fapl_dst, low, high);
+            }
             H5E_END_TRY;
 
             if (ret < 0) /* Invalid low/high combinations */

@@ -42,14 +42,19 @@ namespace H5 {
 //              the provided HDF5 predefined datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PredType::PredType(const hid_t predtype_id) : AtomType(predtype_id) { id = H5Tcopy(predtype_id); }
+PredType::PredType(const hid_t predtype_id) : AtomType(predtype_id)
+{
+    id = H5Tcopy(predtype_id);
+}
 
 //--------------------------------------------------------------------------
 // Function:    PredType default constructor
 ///\brief       Default constructor: Creates a stub predefined datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PredType::PredType() : AtomType() {}
+PredType::PredType() : AtomType()
+{
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
@@ -58,7 +63,9 @@ PredType::PredType() : AtomType() {}
 ///\param       original - IN: PredType instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PredType::PredType(const PredType &original) : AtomType(original) {}
+PredType::PredType(const PredType &original) : AtomType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    PredType::operator=
@@ -109,7 +116,9 @@ PredType::committed()
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PredType::~PredType() {}
+PredType::~PredType()
+{
+}
 
 /*****************************************************************************
         The following section is regarding the global constants PredType,

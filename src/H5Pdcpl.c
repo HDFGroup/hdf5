@@ -96,19 +96,31 @@
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 #define H5D_DEF_STORAGE_COMPACT                                                                              \
     {                                                                                                        \
-        H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }                                             \
+        H5D_COMPACT,                                                                                         \
+        {                                                                                                    \
+            .compact = H5D_DEF_STORAGE_COMPACT_INIT                                                          \
+        }                                                                                                    \
     }
 #define H5D_DEF_STORAGE_CONTIG                                                                               \
     {                                                                                                        \
-        H5D_CONTIGUOUS, { .contig = H5D_DEF_STORAGE_CONTIG_INIT }                                            \
+        H5D_CONTIGUOUS,                                                                                      \
+        {                                                                                                    \
+            .contig = H5D_DEF_STORAGE_CONTIG_INIT                                                            \
+        }                                                                                                    \
     }
 #define H5D_DEF_STORAGE_CHUNK                                                                                \
     {                                                                                                        \
-        H5D_CHUNKED, { .chunk = H5D_DEF_STORAGE_CHUNK_INIT }                                                 \
+        H5D_CHUNKED,                                                                                         \
+        {                                                                                                    \
+            .chunk = H5D_DEF_STORAGE_CHUNK_INIT                                                              \
+        }                                                                                                    \
     }
 #define H5D_DEF_STORAGE_VIRTUAL                                                                              \
     {                                                                                                        \
-        H5D_VIRTUAL, { .virt = H5D_DEF_STORAGE_VIRTUAL_INIT }                                                \
+        H5D_VIRTUAL,                                                                                         \
+        {                                                                                                    \
+            .virt = H5D_DEF_STORAGE_VIRTUAL_INIT                                                             \
+        }                                                                                                    \
     }
 #define H5D_DEF_LAYOUT_COMPACT                                                                               \
     {                                                                                                        \
