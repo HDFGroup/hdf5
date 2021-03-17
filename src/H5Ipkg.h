@@ -116,4 +116,4 @@ H5_DLL H5I_id_info_t *H5I__find_id(hid_t id);
 H5_DLL ssize_t H5I__get_name_test(hid_t id, char *name /*out*/, size_t size, hbool_t *cached);
 #endif /* H5I_TESTING */
 
-#endif /*_H5Ipkg_H*/
+#endif /*H5Ipkg_H*/

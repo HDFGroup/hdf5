@@ -1,10 +1,14 @@
 JUnit version 4.11
+.testH5export_region
 .testH5get_libversion_null_param
 .testJ2C
 .testH5export_dataset
 .testIsSerializable
+.testH5export_attrdataset
 .testH5garbage_collect
 .testH5error_off
+.testH5export_regdataset
+.testH5export_attribute
 .serializeToDisk
 .testH5open
 .testH5check_version
@@ -13,5 +17,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (11 tests)
+OK (15 tests)
 

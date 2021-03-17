@@ -69,7 +69,7 @@ external_link_env(hid_t fapl, hbool_t new_format)
 
     if ((envval = HDgetenv("HDF5_EXT_PREFIX")) == NULL)
         envval = "nomatch";
-    if (HDstrcmp(envval, ".:tmp_links_env"))
+    if (HDstrcmp(envval, ".:tmp_links_env") != 0)
         TEST_ERROR
 
     /* Set up name for main file:"extlinks_env0" */
@@ -106,7 +106,10 @@ external_link_env(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* Should be able to find the target file from pathnames set via HDF5_EXT_PREFIX */

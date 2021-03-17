@@ -659,8 +659,6 @@ test_write_vl_string_attribute(void)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 
 /****************************************************************
@@ -739,8 +737,6 @@ test_read_vl_string_attribute(void)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 
 /* Helper routine for test_vl_rewrite() */
@@ -777,7 +773,7 @@ read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, char *data)
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
 
-    if (HDstrcmp(data, data_read))
+    if (HDstrcmp(data, data_read) != 0)
         TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
 
     ret = H5Treclaim(type, space, H5P_DEFAULT, &data_read);
@@ -864,8 +860,6 @@ test_vl_rewrite(void)
 
     ret = H5Fclose(file2);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 } /* end test_vl_rewrite() */
 
 /****************************************************************

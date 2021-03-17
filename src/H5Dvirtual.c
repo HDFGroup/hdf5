@@ -895,7 +895,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
     HDassert(source_dset->dset_name);
 
     /* Check if we need to open the source file */
-    if (HDstrcmp(source_dset->file_name, ".")) {
+    if (HDstrcmp(source_dset->file_name, ".") != 0) {
         unsigned intent; /* File access permissions */
 
         /* Get the virtual dataset's file open flags ("intent") */

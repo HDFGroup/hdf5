@@ -84,7 +84,9 @@ const FileCreatPropList &FileCreatPropList::DEFAULT = *getConstant();
 ///\brief       Default constructor: Creates a file create property list
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FileCreatPropList::FileCreatPropList() : PropList(H5P_FILE_CREATE) {}
+FileCreatPropList::FileCreatPropList() : PropList(H5P_FILE_CREATE)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList copy constructor
@@ -93,7 +95,9 @@ FileCreatPropList::FileCreatPropList() : PropList(H5P_FILE_CREATE) {}
 ///\param       original - IN: FileCreatPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FileCreatPropList::FileCreatPropList(const FileCreatPropList &original) : PropList(original) {}
+FileCreatPropList::FileCreatPropList(const FileCreatPropList &original) : PropList(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList overloaded constructor
@@ -102,7 +106,9 @@ FileCreatPropList::FileCreatPropList(const FileCreatPropList &original) : PropLi
 ///\param       plist_id - IN: FileCreatPropList id to use
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FileCreatPropList::FileCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
+FileCreatPropList::FileCreatPropList(const hid_t plist_id) : PropList(plist_id)
+{
+}
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
@@ -376,6 +382,8 @@ FileCreatPropList::getFileSpacePagesize() const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FileCreatPropList::~FileCreatPropList() {}
+FileCreatPropList::~FileCreatPropList()
+{
+}
 
 } // namespace H5

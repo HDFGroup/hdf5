@@ -1,12 +1,13 @@
 ---
 Language:        Cpp
 BasedOnStyle:  LLVM
-AlignConsecutiveMacros: true
 AlignConsecutiveAssignments: true
 #llvm11: AlignConsecutiveBitFields: false
 AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
 #llvm10-11: AlignOperands:   true - Align
 #llvm11: AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: None
 AlwaysBreakAfterReturnType: AllDefinitions
 # Can enable the following section when llvm 12.x is out
 #AttributeMacros:
@@ -32,6 +33,7 @@ BreakBeforeBraces: Stroustrup
 BreakAfterJavaFieldAnnotations: true
 BreakStringLiterals: true
 ColumnLimit:     110    # Update $max_trace_macro_line_len in bin/trace also
+ForEachMacros: ['ALL_MEMBERS', 'UNIQUE_MEMBERS']
 IncludeCategories:
   - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
     Priority:        3

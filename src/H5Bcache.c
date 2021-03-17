@@ -166,7 +166,7 @@ H5B__cache_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void *_uda
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate buffer for child addresses")
 
     /* magic number */
-    if (HDmemcmp(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree signature")
     image += H5_SIZEOF_MAGIC;
 

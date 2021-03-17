@@ -23,11 +23,7 @@
 
  ***************************************************************************/
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -398,13 +394,13 @@ test_tconv(H5File &file)
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_BOGUS[1] = {{
-    H5Z_CLASS_T_VERS,         /* H5Z_class_t version number   */
-    H5Z_FILTER_BOGUS,         /* Filter id number             */
-    1, 1,                     /* Encode and decode enabled    */
-    "bogus",                  /* Filter name for debugging        */
-    NULL,                     /* The "can apply" callback     */
-    NULL,                     /* The "set local" callback     */
-    (H5Z_func_t)filter_bogus, /* The actual filter function        */
+    H5Z_CLASS_T_VERS, /* H5Z_class_t version number   */
+    H5Z_FILTER_BOGUS, /* Filter id number             */
+    1, 1,             /* Encode and decode enabled    */
+    "bogus",          /* Filter name for debugging        */
+    NULL,             /* The "can apply" callback     */
+    NULL,             /* The "set local" callback     */
+    filter_bogus,     /* The actual filter function        */
 }};
 
 /*-------------------------------------------------------------------------
@@ -1161,7 +1157,7 @@ const int          RANK1 = 1;
 const H5std_string FILE_ACCPLIST("test_accplist.h5");
 
 static herr_t
-test_chunk_cache(FileAccPropList fapl)
+test_chunk_cache(const FileAccPropList &fapl)
 {
     SUBTEST("DSetAccPropList::set/getChunkCache");
 

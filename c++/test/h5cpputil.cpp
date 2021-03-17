@@ -19,11 +19,7 @@
 
  ***************************************************************************/
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -204,7 +200,9 @@ verify_val(const char *x, const char *value, const char *where, int line, const 
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException default constructor
 //--------------------------------------------------------------------------
-InvalidActionException::InvalidActionException() : Exception() {}
+InvalidActionException::InvalidActionException() : Exception()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException overloaded constructor
@@ -216,7 +214,7 @@ InvalidActionException::InvalidActionException() : Exception() {}
 //              func    - IN: Name of the function where failure should occur
 //              message - IN: Message
 //--------------------------------------------------------------------------
-InvalidActionException::InvalidActionException(const H5std_string func, const H5std_string message)
+InvalidActionException::InvalidActionException(const H5std_string &func, const H5std_string &message)
     : Exception(func, message)
 {
 }
@@ -224,12 +222,16 @@ InvalidActionException::InvalidActionException(const H5std_string func, const H5
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException destructor
 //--------------------------------------------------------------------------
-InvalidActionException::~InvalidActionException() throw() {}
+InvalidActionException::~InvalidActionException() throw()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    TestFailedException default constructor
 //--------------------------------------------------------------------------
-TestFailedException::TestFailedException() : Exception() {}
+TestFailedException::TestFailedException() : Exception()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    TestFailedException overloaded constructor
@@ -241,7 +243,7 @@ TestFailedException::TestFailedException() : Exception() {}
 //              func    - IN: Name of the function where failure should occur
 //              message - IN: Message
 //--------------------------------------------------------------------------
-TestFailedException::TestFailedException(const H5std_string func, const H5std_string message)
+TestFailedException::TestFailedException(const H5std_string &func, const H5std_string &message)
     : Exception(func, message)
 {
 }
@@ -249,4 +251,6 @@ TestFailedException::TestFailedException(const H5std_string func, const H5std_st
 //--------------------------------------------------------------------------
 // Function:    TestFailedException destructor
 //--------------------------------------------------------------------------
-TestFailedException::~TestFailedException() throw() {}
+TestFailedException::~TestFailedException() throw()
+{
+}

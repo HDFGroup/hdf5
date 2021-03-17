@@ -29,14 +29,14 @@ static size_t append_to_group_name(unsigned int flags, size_t cd_nelmts, const u
 
 /* Filter class struct */
 const H5Z_class2_t FILTER_INFO[1] = {{
-    H5Z_CLASS_T_VERS,                 /* H5Z_class_t version              */
-    FILTER4_ID,                       /* Filter ID number                 */
-    1,                                /* Encoding enabled                 */
-    1,                                /* Decoding enabled                 */
-    "test filter plugin 4",           /* Filter name for debugging        */
-    NULL,                             /* The "can apply" callback         */
-    NULL,                             /* The "set local" callback         */
-    (H5Z_func_t)append_to_group_name, /* The actual filter function       */
+    H5Z_CLASS_T_VERS,       /* H5Z_class_t version              */
+    FILTER4_ID,             /* Filter ID number                 */
+    1,                      /* Encoding enabled                 */
+    1,                      /* Decoding enabled                 */
+    "test filter plugin 4", /* Filter name for debugging        */
+    NULL,                   /* The "can apply" callback         */
+    NULL,                   /* The "set local" callback         */
+    append_to_group_name,   /* The actual filter function       */
 }};
 
 H5PL_type_t
@@ -74,7 +74,7 @@ append_to_group_name(unsigned int flags, size_t cd_nelmts, const unsigned int *c
         return 0;
 
     /* Assignment to eliminate unused parameter warning. */
-    cd_values = cd_values;
+    (void)cd_values;
 
     if (flags & H5Z_FLAG_REVERSE) {
         /* READ - Remove the suffix from the group name */

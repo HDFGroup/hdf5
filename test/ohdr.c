@@ -296,7 +296,10 @@ test_ohdr_cache(char *filename, hid_t fapl)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
 
     return FAIL;
@@ -549,7 +552,10 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     TESTING("object in r/o file with unknown header message & 'fail if unknown always' flag set");
 
     /* Attempt to open the dataset with the unknown header message, and "fail if unknown always" flag */
-    H5E_BEGIN_TRY { did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (did >= 0) {
         H5Dclose(did);
@@ -713,7 +719,10 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Attempt to open the dataset with the unknown header message, and "fail if unknown and open for write"
      * flag */
-    H5E_BEGIN_TRY { did = H5Dopen2(loc_bogus, "Dataset2", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(loc_bogus, "Dataset2", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (did >= 0) {
         H5Dclose(did);
@@ -725,7 +734,10 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     TESTING("object in r/w file with unknown header message & 'fail if unknown always' flag set");
 
     /* Attempt to open the dataset with the unknown header message, and "fail if unknown always" flag */
-    H5E_BEGIN_TRY { did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (did >= 0) {
         H5Dclose(did);
@@ -780,7 +792,7 @@ count_attributes(hid_t dset_id)
  * On success, stores size in `size_out` pointer.
  */
 static herr_t
-_oh_getsize(hid_t did, hsize_t *size_out)
+oh_getsize(hid_t did, hsize_t *size_out)
 {
     H5O_native_info_t ninfo;
 
@@ -803,9 +815,9 @@ oh_compare(hid_t did1, hid_t did2)
     hsize_t space1 = 0;
     hsize_t space2 = 0;
 
-    if (FAIL == _oh_getsize(did1, &space1))
+    if (FAIL == oh_getsize(did1, &space1))
         return -1;
-    if (FAIL == _oh_getsize(did2, &space2))
+    if (FAIL == oh_getsize(did2, &space2))
         return -2;
 
     if (space1 < space2)
@@ -907,7 +919,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
     /* Read the data back and verify */
     if (H5Aread(aid, H5T_NATIVE_CHAR, out_buf) < 0)
         TEST_ERROR;
-    if (HDstrcmp(in_buf, out_buf))
+    if (HDstrcmp(in_buf, out_buf) != 0)
         TEST_ERROR;
 
     /* modify the string attribute */
@@ -922,7 +934,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
     /* Read the data back and verify */
     if (H5Aread(aid, H5T_NATIVE_CHAR, out_buf) < 0)
         TEST_ERROR;
-    if (HDstrcmp(in_buf, out_buf))
+    if (HDstrcmp(in_buf, out_buf) != 0)
         TEST_ERROR;
 
     /* Close */
@@ -1753,8 +1765,8 @@ main(void)
         env_h5_drvr = "nomatch";
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                                HDstrcmp(env_h5_drvr, "family"));
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                                HDstrcmp(env_h5_drvr, "family") != 0);
 
     /* Reset library */
     h5_reset();
@@ -1774,7 +1786,10 @@ main(void)
             char        msg[80];     /* Message for file format version */
 
             /* Set version bounds before opening the file */
-            H5E_BEGIN_TRY { ret = H5Pset_libver_bounds(fapl, low, high); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5Pset_libver_bounds(fapl, low, high);
+            }
             H5E_END_TRY;
 
             if (ret < 0) /* Invalid low/high combinations */
@@ -1967,7 +1982,10 @@ main(void)
             if (ro != time_new)
                 TEST_ERROR
             time_new = 33333333;
-            H5E_BEGIN_TRY { ret = H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new);
+            }
             H5E_END_TRY;
             if (ret >= 0)
                 TEST_ERROR
@@ -2050,7 +2068,10 @@ main(void)
 
 error:
     HDputs("*** TESTS FAILED ***");
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
 
     if (api_ctx_pushed)

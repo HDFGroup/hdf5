@@ -115,6 +115,7 @@
 #define FILE85     "tgrpnullspace.h5"
 #define FILE86     "err_attr_dspace.h5"
 #define FILE87     "tintsnodata.h5"
+#define FILE88     "tldouble_scalar.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -153,13 +154,13 @@ static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const un
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
-    H5Z_CLASS_T_VERS,                /* H5Z_class_t version             */
-    H5Z_FILTER_DYNLIBUD,             /* Filter id number        */
-    1, 1,                            /* Encoding and decoding enabled   */
-    "dynlibud",                      /* Filter name for debugging    */
-    NULL,                            /* The "can apply" callback        */
-    NULL,                            /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlibud, /* The actual filter function    */
+    H5Z_CLASS_T_VERS,    /* H5Z_class_t version             */
+    H5Z_FILTER_DYNLIBUD, /* Filter id number        */
+    1, 1,                /* Encoding and decoding enabled   */
+    "dynlibud",          /* Filter name for debugging    */
+    NULL,                /* The "can apply" callback        */
+    NULL,                /* The "set local" callback        */
+    H5Z_filter_dynlibud, /* The actual filter function    */
 }};
 
 /* A UD link traversal function.  Shouldn't actually be called. */
@@ -5374,7 +5375,10 @@ make_dset(hid_t loc_id, const char *name, hid_t sid, hid_t tid, hid_t dcpl, void
     return 0;
 
 out:
-    H5E_BEGIN_TRY { H5Dclose(dsid); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+    }
     H5E_END_TRY;
     return -1;
 }
@@ -6333,6 +6337,57 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function: gent_ldouble_scalar
+ *
+ * Purpose: make file with a long double scalar dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+gent_ldouble_scalar(void)
+{
+    hid_t       fid;
+    hid_t       did;
+    hid_t       tid;
+    hid_t       sid;
+    hsize_t     dims[1] = {6};
+    long double buf[6]  = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+
+    if ((fid = H5Fcreate(FILE88, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if ((sid = H5Screate(H5S_SCALAR)) < 0)
+        goto error;
+
+    if ((tid = H5Tarray_create2(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
+        goto error;
+
+    if (H5Tget_size(tid) == 0)
+        goto error;
+
+    if ((did = H5Dcreate2(fid, "dset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        goto error;
+
+    if (H5Sclose(sid) < 0)
+        goto error;
+    if (H5Tclose(tid) < 0)
+        goto error;
+    if (H5Dclose(did) < 0)
+        goto error;
+    if (H5Fclose(fid) < 0)
+        goto error;
+
+    return 0;
+
+error:
+    HDprintf("error !\n");
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    gent_binary
  *
  * Purpose:     Generate a file to be used in the binary output test
@@ -6496,7 +6551,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -6682,7 +6736,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -6942,7 +6995,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -10869,7 +10921,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
         return (0);
 
     /* Assignment to eliminate unused parameter warning. */
-    cd_values = cd_values;
+    (void)cd_values;
 
     if (flags & H5Z_FLAG_REVERSE) { /*read*/
         /* Subtract the original value with MULTIPLIER */
@@ -11086,6 +11138,7 @@ main(void)
     gent_aindices();
     gent_longlinks();
     gent_ldouble();
+    gent_ldouble_scalar();
     gent_binary();
     gent_bigdims();
     gent_hyperslab();

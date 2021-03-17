@@ -3,6 +3,7 @@ HDF5 version 1.13.0 currently under development
 
 
 INTRODUCTION
+============
 
 This document describes the differences between this release and the previous
 HDF5 release. It contains information on the platforms tested and known
@@ -185,7 +186,7 @@ New Features
         HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
         pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
         or tool folder. All sources can be formatted by executing the format target;
-          make format
+        make format
 
         (ADB - 2020/08/24)
 
@@ -241,7 +242,7 @@ New Features
     - CMake option to link the generated Fortran MOD files into the include
       directory.
 
-        The Fortran generation of MOD files by a Fortran compile can produce
+        The Fortran generation of MOD files by a Fortran compiler can produce
         different binary files between SHARED and STATIC compiles with different
         compilers and/or different platforms. Note that it has been found that
         different versions of Fortran compilers will produce incompatible MOD
@@ -383,6 +384,16 @@ New Features
 
     Library:
     --------
+    - H5Epush_ret() now requires a trailing semi-colon
+
+        H5Epush_ret() is a function-like macro that has been changed to
+        contain a `do {} while(0)` loop. Consequently, a trailing semi-colon
+        is now required to end the `while` statement. Previously, a trailing
+        semi would work, but was not mandatory. This change was made to allow
+        clang-format to correctly format the source code.
+
+        (SAM - 2021/03-03)
+
     - Improved performance of H5Sget_select_elem_pointlist
 
         Modified library to cache the point after the last block of points
@@ -561,7 +572,7 @@ New Features
 
 
     Java Library:
-    ----------------
+    -------------
     - Replaced HDF5AtomException with HDF5IdException
 
       Since H5E_ATOM changed to H5E_ID in the C library, the Java exception
@@ -673,27 +684,27 @@ New Features
 
 
     High-Level APIs:
-    ---------------
+    ----------------
     -
 
-    C Packet Table API
-    ------------------
+    C Packet Table API:
+    -------------------
     -
 
-    Internal header file
-    --------------------
+    Internal header file:
+    ---------------------
     -
 
-    Documentation
-    -------------
+    Documentation:
+    --------------
     -
 
-Support for new platforms, languages and compilers.
-=======================================
+Support for new platforms, languages and compilers
+==================================================
     -
 
 Bug Fixes since HDF5-1.12.0 release
-==================================
+===================================
     Library
     -------
     - Fixed CVE-2018-17435
@@ -715,6 +726,14 @@ Bug Fixes since HDF5-1.12.0 release
         buffer size before attempting to access the buffer.
 
         (BMR - 2021/03/15, HDFFV-11159/HDFFV-11049)
+
+    - Remove underscores on header file guards
+
+        Header file guards used a variety of underscores at the beginning the define.
+
+        Removed all leading (some trailing) underscores from header file guards.
+
+        (ADB - 2021/03/03, #361)
 
     - Fixed issue with MPI communicator and info object not being
       copied into new FAPL retrieved from H5F_get_access_plist
@@ -814,8 +833,16 @@ Bug Fixes since HDF5-1.12.0 release
         (BMR - 2020/06/19, HDFFV-10591)
 
 
-    Java Library:
-    ----------------
+    Java Library
+    ------------
+    - JNI utility function does not handle new references.
+
+        The JNI utility function for converting reference data to string did
+        not use the new APIs. In addition to fixing that function, added new
+        java tests for using the new APIs.
+
+        (ADB - 2021/02/16, HDFFV-11212)
+
     - The H5FArray.java class, in which virtually the entire execution time
         is spent using the HDFNativeData method that converts from an array
         of bytes to an array of the destination Java type.
@@ -870,6 +897,13 @@ Bug Fixes since HDF5-1.12.0 release
 
     Tools
     -----
+    - Fixed tools display of long double.
+
+        Long doubles were not being display correctly. Changed the printf
+        specifier from %Lf to %Lg.
+
+        (ADB - 2021/03/12, HDFFV-11113)
+
     - Fixed tools argument parsing.
 
         Tools parsing used the length of the option from the long array to match
@@ -951,19 +985,19 @@ Bug Fixes since HDF5-1.12.0 release
 
 
     Fortran API
-    --------
+    -----------
     - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
 
         (MSB - 2020/02/18, HDFFV-11029)
 
 
     High-Level Library
-    ------
+    ------------------
     -
 
 
-    Fortran High-Level APIs:
-    ------
+    Fortran High-Level APIs
+    -----------------------
     -
 
 

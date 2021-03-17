@@ -14,8 +14,8 @@
 /*
  * Purpose:     Support h5dump functions for the various tools.
  */
-#ifndef H5TOOLS_DUMP_H__
-#define H5TOOLS_DUMP_H__
+#ifndef H5TOOLS_DUMP_H
+#define H5TOOLS_DUMP_H
 
 #include "h5tools_utils.h"
 
@@ -94,4 +94,4 @@ H5TOOLS_DLL void h5tools_print_packed_bits(h5tools_str_t *buffer /*in,out*/, hid
 }
 #endif
 
-#endif /* H5TOOLS_DUMP_H__ */
+#endif /* H5TOOLS_DUMP_H */

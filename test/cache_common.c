@@ -434,8 +434,6 @@ addr_to_type_and_index(haddr_t addr, int32_t *type_ptr, int32_t *index_ptr)
     *type_ptr  = type;
     *index_ptr = idx;
 
-    return;
-
 } /* addr_to_type_and_index() */
 
 /* Call back functions: */
@@ -1515,8 +1513,6 @@ add_flush_op(int target_type, int target_idx, int op_code, int type, int idx, hb
         (target_entry_ptr->flush_ops)[i].order_ptr = order_ptr;
     }
 
-    return;
-
 } /* add_flush_op() */
 
 /*-------------------------------------------------------------------------
@@ -1585,8 +1581,6 @@ create_pinned_entry_dependency(H5F_t *file_ptr, int pinning_type, int pinning_id
 
         (pinned_entry_ptr->pinning_ref_count)++;
     }
-
-    return;
 
 } /* create_pinned_entry_dependency() */
 
@@ -1660,8 +1654,6 @@ dirty_entry(H5F_t *file_ptr, int32_t type, int32_t idx, hbool_t dirty_pin)
         }
     }
 
-    return;
-
 } /* dirty_entry() */
 
 /*-------------------------------------------------------------------------
@@ -1691,7 +1683,7 @@ execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_o
     HDassert(cache_ptr != NULL);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(entry_ptr != NULL);
-    HDassert(entry_ptr = entry_ptr->self);
+    HDassert(entry_ptr == entry_ptr->self);
     HDassert(entry_ptr->header.addr == entry_ptr->addr);
     HDassert((entry_ptr->flush_op_self_resize_in_progress) || (entry_ptr->header.size == entry_ptr->size));
     HDassert(op_ptr != NULL);
@@ -1804,8 +1796,6 @@ execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_o
                 break;
         }
     }
-
-    return;
 
 } /* execute_flush_op() */
 
@@ -2032,8 +2022,6 @@ free_entry_arrays(void)
     HDfree(notify_entries);
     HDfree(orig_notify_entries);
 
-    return;
-
 } /* free_entry_arrays() */
 
 /*-------------------------------------------------------------------------
@@ -2177,8 +2165,6 @@ reset_entries(void)
         } /* end for */
     }     /* end else */
 
-    return;
-
 } /* reset_entries() */
 
 /*-------------------------------------------------------------------------
@@ -2257,7 +2243,7 @@ resize_entry(H5F_t *file_ptr, int32_t type, int32_t idx, size_t new_size, hbool_
                     }
                     else {
 
-                        HDassert(entry_ptr->size = (entry_ptr->header).size);
+                        HDassert(entry_ptr->size == (entry_ptr->header).size);
                     }
                 }
             }
@@ -2269,8 +2255,6 @@ resize_entry(H5F_t *file_ptr, int32_t type, int32_t idx, size_t new_size, hbool_
             unprotect_entry(file_ptr, type, idx, H5C__DIRTIED_FLAG);
         }
     }
-
-    return;
 
 } /* resize_entry() */
 
@@ -2322,8 +2306,6 @@ verify_clean(void)
             failure_mssg = "verify_clean() found dirty entry(s).";
         }
     }
-
-    return;
 
 } /* verify_clean() */
 
@@ -2621,8 +2603,6 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
         i++;
     } /* while */
 
-    return;
-
 } /* verify_entry_status() */
 
 /*-------------------------------------------------------------------------
@@ -2675,8 +2655,6 @@ verify_unprotected(void)
             failure_mssg = "verify_unprotected() found protected entry(s).";
         }
     }
-
-    return;
 
 } /* verify_unprotected() */
 
@@ -2740,8 +2718,6 @@ expunge_entry(H5F_t *file_ptr, int32_t type, int32_t idx)
             entry_ptr->expunged = TRUE;
         }
     }
-
-    return;
 
 } /* expunge_entry() */
 
@@ -2815,8 +2791,6 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
             failure_mssg = "non zero index len/sizes after H5C_flush_cache() with invalidate.";
         }
     }
-
-    return;
 
 } /* flush_cache() */
 
@@ -2985,8 +2959,6 @@ insert_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags)
         HDassert(((entry_ptr->header).type)->id == type);
     } /* end if */
 
-    return;
-
 } /* insert_entry() */
 
 /*-------------------------------------------------------------------------
@@ -3045,8 +3017,6 @@ mark_entry_dirty(int32_t type, int32_t idx)
 
         HDassert(((entry_ptr->header).type)->id == type);
     }
-
-    return;
 
 } /* mark_entry_dirty() */
 
@@ -3145,8 +3115,6 @@ move_entry(H5C_t *cache_ptr, int32_t type, int32_t idx, hbool_t main_addr)
         HDassert(entry_ptr->header.is_dirty);
         HDassert(entry_ptr->is_dirty);
     }
-
-    return;
 
 } /* move_entry() */
 
@@ -3314,8 +3282,6 @@ protect_entry_ro(H5F_t *file_ptr, int32_t type, int32_t idx)
         HDassert(((entry_ptr->header).type)->id == type);
     }
 
-    return;
-
 } /* protect_entry_ro() */
 
 /*-------------------------------------------------------------------------
@@ -3371,8 +3337,6 @@ pin_entry(int32_t type, int32_t idx)
             entry_ptr->is_pinned          = TRUE;
         }
     } /* end if */
-
-    return;
 
 } /* pin_entry() */
 
@@ -3430,8 +3394,6 @@ unpin_entry(int32_t type, int32_t idx)
 
         HDassert(((entry_ptr->header).type)->id == type);
     }
-
-    return;
 
 } /* unpin_entry() */
 
@@ -3541,8 +3503,6 @@ unprotect_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags)
         HDassert(entry_ptr->header.is_read_only == entry_ptr->is_read_only);
         HDassert(entry_ptr->header.ro_ref_count == entry_ptr->ro_ref_count);
     }
-
-    return;
 
 } /* unprotect_entry() */
 
@@ -3972,8 +3932,6 @@ hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
         H5C_stats(cache_ptr, "test cache", display_detailed_stats);
     }
 
-    return;
-
 } /* hl_row_major_scan_forward() */
 
 /*-------------------------------------------------------------------------
@@ -4234,8 +4192,6 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
         H5C_stats(cache_ptr, "test cache", display_detailed_stats);
     }
 
-    return;
-
 } /* row_major_scan_backward() */
 
 /*-------------------------------------------------------------------------
@@ -4328,8 +4284,6 @@ hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
         H5C_stats(cache_ptr, "test cache", display_detailed_stats);
     }
 
-    return;
-
 } /* hl_row_major_scan_backward() */
 
 /*-------------------------------------------------------------------------
@@ -4421,8 +4375,6 @@ col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
         H5C_stats(cache_ptr, "test cache", display_detailed_stats);
     }
-
-    return;
 
 } /* col_major_scan_forward() */
 
@@ -4526,8 +4478,6 @@ hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
 
         H5C_stats(cache_ptr, "test cache", display_detailed_stats);
     }
-
-    return;
 
 } /* hl_col_major_scan_forward() */
 
@@ -4633,8 +4583,6 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     if (verbose)
         HDfprintf(stdout, "%s: exiting.\n", FUNC);
 
-    return;
-
 } /* col_major_scan_backward() */
 
 /*-------------------------------------------------------------------------
@@ -4737,8 +4685,6 @@ hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
 
         H5C_stats(cache_ptr, "test cache", display_detailed_stats);
     }
-
-    return;
 
 } /* hl_col_major_scan_backward() */
 
@@ -5108,8 +5054,6 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
         failure_mssg = "Unexpectedly low hit rate.";
     }
 
-    return;
-
 } /* check_and_validate_cache_hit_rate() */
 
 /*-------------------------------------------------------------------------
@@ -5226,8 +5170,6 @@ check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
         HDfprintf(stdout, "max_sz: %ld, min_clean_sz: %ld, cur_sz: %ld, cur_ent: %ld\n", (long)max_size,
                   (long)min_clean_size, (long)cur_size, (long)cur_num_entries);
     }
-
-    return;
 
 } /* check_and_validate_cache_size() */
 
@@ -5388,8 +5330,6 @@ validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, hbool_t 
             failure_mssg = msg;
         }
     }
-
-    return;
 
 } /* validate_mdc_config() */
 

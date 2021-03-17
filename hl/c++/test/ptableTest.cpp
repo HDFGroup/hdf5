@@ -191,7 +191,10 @@ TestCompoundDatatype()
 
 error:
 
-    H5E_BEGIN_TRY { H5Tclose(dtypeID); }
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(dtypeID);
+    }
     H5E_END_TRY;
 
     H5_FAILED();
@@ -616,11 +619,11 @@ TestHDFFV_9758()
     s1_t s1[NUM_PACKETS];
 
     for (hsize_t i = 0; i < NUM_PACKETS; i++) {
-        s1[i].a = i;
+        s1[i].a = static_cast<int>(i);
         s1[i].b = 1.f * static_cast<float>(i * i);
         s1[i].c = 1. / (i + 1);
         HDsprintf(s1[i].d, "string%d", (int)i);
-        s1[i].e = 100 + i;
+        s1[i].e = static_cast<int>(100 + i);
     }
 
     printf("Testing %-62s", "data corruption in packed structs (HDFFV-9758)");
@@ -690,7 +693,7 @@ TestHDFFV_9758()
 
             if (s2.a != s1[i].a || s2.e != s1[i].e)
                 goto error;
-            else if (HDstrcmp(s2.d, s1[i].d))
+            else if (HDstrcmp(s2.d, s1[i].d) != 0)
                 goto error;
         }
     } // end of ptable block

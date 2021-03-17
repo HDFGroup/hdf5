@@ -11,11 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 
 #include <string>
 
@@ -91,7 +87,9 @@ const PropList &PropList::DEFAULT = *getConstant();
 ///\brief       Default constructor: creates a stub property list object.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList() : IdComponent(), id(H5P_DEFAULT) {}
+PropList::PropList() : IdComponent(), id(H5P_DEFAULT)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    PropList copy constructor
@@ -155,6 +153,9 @@ PropList::PropList(const hid_t plist_id) : IdComponent()
         case H5I_ERROR_STACK:
         case H5I_NTYPES:
         case H5I_UNINIT:
+        case H5I_MAP:
+        case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         default:
             id = H5P_DEFAULT;
             break;

@@ -89,7 +89,9 @@ const DSetMemXferPropList &DSetMemXferPropList::DEFAULT = *getConstant();
 ///             transfer property list object.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER) {}
+DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function     DSetMemXferPropList constructor
@@ -110,7 +112,9 @@ DSetMemXferPropList::DSetMemXferPropList(const char *exp) : PropList(H5P_DATASET
 ///                            list object to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList &original) : PropList(original) {}
+DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList &original) : PropList(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function     DSetMemXferPropList overloaded constructor
@@ -120,7 +124,9 @@ DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList &original) : 
 ///                            property list
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList(const hid_t plist_id) : PropList(plist_id) {}
+DSetMemXferPropList::DSetMemXferPropList(const hid_t plist_id) : PropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetMemXferPropList::setBuffer
@@ -306,7 +312,7 @@ DSetMemXferPropList::getDataTransform() const
 {
     // Initialize string to "", so that if there is no expression, the returned
     // string will be empty
-    H5std_string expression("");
+    H5std_string expression;
 
     // Preliminary call to get the expression's length
     ssize_t exp_len = H5Pget_data_transform(id, NULL, (size_t)0);
@@ -552,6 +558,8 @@ DSetMemXferPropList::getEDCCheck() const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetMemXferPropList::~DSetMemXferPropList() {}
+DSetMemXferPropList::~DSetMemXferPropList()
+{
+}
 
 } // namespace H5

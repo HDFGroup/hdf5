@@ -2321,4 +2321,4 @@ H5_DLL herr_t  H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_c
 H5_DLL herr_t  H5C_validate_index_list(H5C_t *cache_ptr);
 #endif /* NDEBUG */
 
-#endif /* !_H5Cprivate_H */
+#endif /* H5Cprivate_H */
