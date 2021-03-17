@@ -888,11 +888,11 @@ TOOLTEST_FAIL() {
     # Segfault occurred
     if [ $RET == 139 ] ; then
         nerrors="`expr $nerrors + 1`"
-        echo " FAILED"
+        echo "*FAILED - test on $infile failed with segmentation fault"
     # Should fail but didn't
     elif [ $RET == 0 ] ; then
         nerrors="`expr $nerrors + 1`"
-        echo " FAILED"
+        echo "*FAILED - test on $infile did not fail as expected"
     else
         echo " PASSED"
     fi
