@@ -1255,7 +1255,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     else
         /* Perform independent read operation */
         if (MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+        HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
 
     /* Only retrieve bytes read if this rank _actually_ participated in I/O */
     if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
@@ -1477,7 +1477,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     else
         /* Perform independent write operation */
         if (MPI_SUCCESS != (mpi_code = MPI_File_write_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
+        HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
 
         /* How many bytes were actually written? */
 #if MPI_VERSION >= 3
