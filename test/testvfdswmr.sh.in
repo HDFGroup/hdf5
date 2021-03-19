@@ -616,11 +616,11 @@ fi
 if [ ${do_groups:-no} = yes ]; then
 	echo launch vfd_swmr_group_writer
 	catch_out_err_and_rc vfd_swmr_group_writer \
-	    ../vfd_swmr_group_writer -q -c 100 -n 1000 &
+	    ../vfd_swmr_group_writer -q -c 10 -n 100 &
 	pid_writer=$!
 
 	catch_out_err_and_rc vfd_swmr_group_reader \
-	    ../vfd_swmr_group_reader -q -c 100 -n 1000 -u 5 &
+	    ../vfd_swmr_group_reader -q -c 10 -n 100 -u 5 &
 	pid_reader=$!
 
 	# Wait for the reader to finish before signalling the
