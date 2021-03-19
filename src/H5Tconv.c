@@ -3843,7 +3843,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t         half_size;            /*half the type size        */
     size_t         olap;                 /*num overlapping elements    */
     uint8_t *      s, *sp, *d, *dp;      /*source and dest traversal ptrs*/
-    uint8_t *      src_rev  = NULL;      /*order-reversed source buffer  */
+    uint8_t *      src_rev = NULL;       /*order-reversed source buffer  */
     uint8_t        dbuf[64] = {0};       /*temp destination buffer    */
     size_t         first;
     ssize_t        sfirst;                   /*a signed version of `first'    */
@@ -4286,7 +4286,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t       olap;                 /*num overlapping elements    */
     ssize_t      bitno = 0;            /*bit number            */
     uint8_t *    s, *sp, *d, *dp;      /*source and dest traversal ptrs*/
-    uint8_t *    src_rev  = NULL;      /*order-reversed source buffer  */
+    uint8_t *    src_rev = NULL;       /*order-reversed source buffer  */
     uint8_t      dbuf[64] = {0};       /*temp destination buffer    */
     uint8_t      tmp1, tmp2;           /*temp variables for swapping bytes*/
 
@@ -8401,7 +8401,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t       tsize;           /*type size for swapping bytes  */
     size_t       olap;            /*num overlapping elements    */
     uint8_t *    s, *sp, *d, *dp; /*source and dest traversal ptrs*/
-    uint8_t *    src_rev  = NULL; /*order-reversed source buffer  */
+    uint8_t *    src_rev = NULL;  /*order-reversed source buffer  */
     uint8_t      dbuf[64] = {0};  /*temp destination buffer    */
     uint8_t      tmp1, tmp2;      /*temp variables for swapping bytes*/
 
@@ -9027,7 +9027,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t       tsize;           /*type size for swapping bytes  */
     size_t       olap;            /*num overlapping elements    */
     uint8_t *    s, *sp, *d, *dp; /*source and dest traversal ptrs*/
-    uint8_t *    src_rev  = NULL; /*order-reversed source buffer  */
+    uint8_t *    src_rev = NULL;  /*order-reversed source buffer  */
     uint8_t      dbuf[64] = {0};  /*temp destination buffer    */
     uint8_t      tmp1, tmp2;      /*temp variables for swapping bytes*/
 
