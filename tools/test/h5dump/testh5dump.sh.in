@@ -181,6 +181,8 @@ $SRC_H5DUMP_TESTFILES/tvlenstr_array.h5
 $SRC_H5DUMP_TESTFILES/tvlstr.h5
 $SRC_H5DUMP_TESTFILES/tvms.h5
 $SRC_H5DUMP_TESTFILES/err_attr_dspace.h5
+$SRC_H5DUMP_TESTFILES/tCVE_2018_11206_fill_old.h5
+$SRC_H5DUMP_TESTFILES/tCVE_2018_11206_fill_new.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -870,6 +872,35 @@ TOOLTEST5() {
     fi
 }
 
+# same as TOOLTEST1 but expects h5dump to fail
+#
+TOOLTEST_FAIL() {
+
+    infile=$1
+    expect="$TESTDIR/`basename $1 exp`.ddl"
+    actual="$TESTDIR/`basename $1 .exp`.out"
+
+    # Run test.
+    TESTING $DUMPER $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $DUMPER_BIN "$@" $infile
+    ) >&$actual
+    RET=$?
+    # Segfault occurred
+    if [ $RET == 139 ] ; then
+        nerrors="`expr $nerrors + 1`"
+        echo "*FAILED - test on $infile failed with segmentation fault"
+    # Should fail but didn't
+    elif [ $RET == 0 ] ; then
+        nerrors="`expr $nerrors + 1`"
+        echo "*FAILED - test on $infile did not fail as expected"
+    else
+        echo " PASSED"
+    fi
+
+}
+
 # ADD_HELP_TEST
 TOOLTEST_HELP() {
 
@@ -1447,6 +1478,10 @@ TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5
 
 # test to verify HDFFV-9407: long double full precision
 #GREPTEST OUTTXT "1.123456789012345" t128bit_float.ddl -m %.35Lf t128bit_float.h5
+
+# test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
+TOOLTEST_FAIL tCVE_2018_11206_fill_old.h5
+TOOLTEST_FAIL tCVE_2018_11206_fill_new.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR
