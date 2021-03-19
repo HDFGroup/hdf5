@@ -2661,7 +2661,7 @@ H5A__rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_na
     FUNC_ENTER_PACKAGE
 
     /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_attr_name, new_attr_name)) {
+    if (HDstrcmp(old_attr_name, new_attr_name) != 0) {
         /* Set up opened group location to fill in */
         obj_loc.oloc = &obj_oloc;
         obj_loc.path = &obj_path;

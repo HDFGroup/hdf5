@@ -861,7 +861,7 @@ read_scalar_dset(H5File &file, DataType &type, DataSpace &space, char *name, cha
         dset.read(&data_read, type, space, space);
         dset.close();
 
-        if (HDstrcmp(data, data_read))
+        if (HDstrcmp(data, data_read) != 0)
             TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
 
         HDfree(data_read);

@@ -122,7 +122,7 @@ typedef struct earray_iter_t {
                   hsize_t cnt);             /* Initialize/allocate iterator private info */
     hssize_t (*next)(void *info);           /* Get the next element to test */
     hssize_t (*max_elem)(const void *info); /* Get the max. element set */
-    int (*state)(void *_eiter, const H5EA_create_t *cparam, const earray_test_param_t *tparam,
+    int (*state)(void *in_eiter, const H5EA_create_t *cparam, const earray_test_param_t *tparam,
                  earray_state_t *state, hsize_t idx); /* Get the state of the extensible array */
     herr_t (*term)(void *info);                       /* Shutdown/free iterator private info */
 } earray_iter_t;
@@ -1326,9 +1326,9 @@ eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_para
  *-------------------------------------------------------------------------
  */
 static hssize_t
-eiter_fw_next(void *_eiter)
+eiter_fw_next(void *in_eiter)
 {
-    eiter_fw_t *eiter = (eiter_fw_t *)_eiter;
+    eiter_fw_t *eiter = (eiter_fw_t *)in_eiter;
     hssize_t    ret_val;
 
     /* Sanity check */
@@ -1354,9 +1354,9 @@ eiter_fw_next(void *_eiter)
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
-eiter_fw_max(const void *_eiter)
+eiter_fw_max(const void *in_eiter)
 {
-    const eiter_fw_t *eiter = (const eiter_fw_t *)_eiter;
+    const eiter_fw_t *eiter = (const eiter_fw_t *)in_eiter;
 
     /* Sanity check */
     HDassert(eiter);
@@ -1379,10 +1379,10 @@ eiter_fw_max(const void *_eiter)
  *-------------------------------------------------------------------------
  */
 static int
-eiter_fw_state(void *_eiter, const H5EA_create_t *cparam, const earray_test_param_t *tparam,
+eiter_fw_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_param_t *tparam,
                earray_state_t *state, hsize_t idx)
 {
-    eiter_fw_t *eiter = (eiter_fw_t *)_eiter;
+    eiter_fw_t *eiter = (eiter_fw_t *)in_eiter;
 
     /* Sanity check */
     HDassert(eiter);
@@ -1526,9 +1526,9 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, hs
  *-------------------------------------------------------------------------
  */
 static hssize_t
-eiter_rv_next(void *_eiter)
+eiter_rv_next(void *in_eiter)
 {
-    eiter_rv_t *eiter = (eiter_rv_t *)_eiter;
+    eiter_rv_t *eiter = (eiter_rv_t *)in_eiter;
     hssize_t    ret_val;
 
     /* Sanity check */
@@ -1554,9 +1554,9 @@ eiter_rv_next(void *_eiter)
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
-eiter_rv_max(const void *_eiter)
+eiter_rv_max(const void *in_eiter)
 {
-    const eiter_rv_t *eiter = (const eiter_rv_t *)_eiter;
+    const eiter_rv_t *eiter = (const eiter_rv_t *)in_eiter;
 
     /* Sanity check */
     HDassert(eiter);
@@ -1579,10 +1579,10 @@ eiter_rv_max(const void *_eiter)
  *-------------------------------------------------------------------------
  */
 static int
-eiter_rv_state(void *_eiter, const H5EA_create_t *cparam, const earray_test_param_t *tparam,
+eiter_rv_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_param_t *tparam,
                earray_state_t *state, hsize_t idx)
 {
-    eiter_rv_t *eiter = (eiter_rv_t *)_eiter;
+    eiter_rv_t *eiter = (eiter_rv_t *)in_eiter;
 
     /* Sanity check */
     HDassert(eiter);
@@ -1756,9 +1756,9 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
  *-------------------------------------------------------------------------
  */
 static hssize_t
-eiter_rnd_next(void *_eiter)
+eiter_rnd_next(void *in_eiter)
 {
-    eiter_rnd_t *eiter = (eiter_rnd_t *)_eiter;
+    eiter_rnd_t *eiter = (eiter_rnd_t *)in_eiter;
     hssize_t     ret_val;
 
     /* Sanity check */
@@ -1789,9 +1789,9 @@ eiter_rnd_next(void *_eiter)
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
-eiter_rnd_max(const void *_eiter)
+eiter_rnd_max(const void *in_eiter)
 {
-    const eiter_rnd_t *eiter = (const eiter_rnd_t *)_eiter;
+    const eiter_rnd_t *eiter = (const eiter_rnd_t *)in_eiter;
 
     /* Sanity check */
     HDassert(eiter);
@@ -1814,9 +1814,9 @@ eiter_rnd_max(const void *_eiter)
  *-------------------------------------------------------------------------
  */
 static int
-eiter_rnd_term(void *_eiter)
+eiter_rnd_term(void *in_eiter)
 {
-    eiter_rnd_t *eiter = (eiter_rnd_t *)_eiter;
+    eiter_rnd_t *eiter = (eiter_rnd_t *)in_eiter;
 
     /* Sanity check */
     HDassert(eiter);
@@ -1970,9 +1970,9 @@ eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
  *-------------------------------------------------------------------------
  */
 static hssize_t
-eiter_cyc_next(void *_eiter)
+eiter_cyc_next(void *in_eiter)
 {
-    eiter_cyc_t *eiter = (eiter_cyc_t *)_eiter;
+    eiter_cyc_t *eiter = (eiter_cyc_t *)in_eiter;
     hssize_t     ret_val;
 
     /* Sanity check */
@@ -2005,9 +2005,9 @@ eiter_cyc_next(void *_eiter)
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
-eiter_cyc_max(const void *_eiter)
+eiter_cyc_max(const void *in_eiter)
 {
-    const eiter_cyc_t *eiter = (const eiter_cyc_t *)_eiter;
+    const eiter_cyc_t *eiter = (const eiter_cyc_t *)in_eiter;
 
     /* Sanity check */
     HDassert(eiter);
@@ -2030,9 +2030,9 @@ eiter_cyc_max(const void *_eiter)
  *-------------------------------------------------------------------------
  */
 static int
-eiter_cyc_term(void *_eiter)
+eiter_cyc_term(void *in_eiter)
 {
-    eiter_cyc_t *eiter = (eiter_cyc_t *)_eiter;
+    eiter_cyc_t *eiter = (eiter_cyc_t *)in_eiter;
 
     /* Sanity check */
     HDassert(eiter);

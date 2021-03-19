@@ -7853,8 +7853,8 @@ main(void)
     HDprintf("=========================================\n");
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                                HDstrcmp(env_h5_drvr, "family"));
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                                HDstrcmp(env_h5_drvr, "family") != 0);
 
     nerrs += check_cache_image_ctl_flow_1(single_file_vfd);
     nerrs += check_cache_image_ctl_flow_2(single_file_vfd);

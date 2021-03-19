@@ -121,7 +121,7 @@ main(void)
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
     /* Current VFD that does not support contigous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     /* Initialize random number seed */
     HDsrandom((unsigned)HDtime(NULL));

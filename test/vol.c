@@ -770,8 +770,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                  HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                  HDstrcmp(env_h5_drvr, "family") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -792,8 +792,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't retrieve VFD handle for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                  HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                  HDstrcmp(env_h5_drvr, "family") != 0)) {
         /* H5Fget_vfd_handle */
         if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
             TEST_ERROR;
@@ -832,8 +832,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                  HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                  HDstrcmp(env_h5_drvr, "family") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -847,8 +847,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                  HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                  HDstrcmp(env_h5_drvr, "family") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
             TEST_ERROR;

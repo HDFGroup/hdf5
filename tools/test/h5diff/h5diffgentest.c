@@ -466,15 +466,15 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         float data15[6];
         float data16[6];
 
-        data15[0] = (float)HDsqrt(-1.0F);
+        data15[0] = (float)HDsqrt(-1.0);
         data15[1] = 1.0F;
-        data15[2] = (float)HDsqrt(-1.0F);
+        data15[2] = (float)HDsqrt(-1.0);
         data15[3] = 1.0F;
         data15[4] = 1.0F;
         data15[5] = 1.0F;
 
-        data16[0] = (float)HDsqrt(-1.0F);
-        data16[1] = (float)HDsqrt(-1.0F);
+        data16[0] = (float)HDsqrt(-1.0);
+        data16[1] = (float)HDsqrt(-1.0);
         data16[2] = 1.0F;
         data16[3] = 1.0F;
         data16[4] = 1.0F;
@@ -493,19 +493,19 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         double data17[6];
         double data18[6];
 
-        data17[0] = HDsqrt(-1.0F);
-        data17[1] = 1.0F;
-        data17[2] = HDsqrt(-1.0F);
-        data17[3] = 1.0F;
-        data17[4] = 1.0F;
-        data17[5] = 1.0F;
+        data17[0] = HDsqrt(-1.0);
+        data17[1] = 1.0;
+        data17[2] = HDsqrt(-1.0);
+        data17[3] = 1.0;
+        data17[4] = 1.0;
+        data17[5] = 1.0;
 
-        data18[0] = HDsqrt(-1.0F);
-        data18[1] = HDsqrt(-10000.0F);
-        data18[2] = 1.0F;
-        data18[3] = 1.0F;
-        data18[4] = 1.0F;
-        data18[5] = 1.0F;
+        data18[0] = HDsqrt(-1.0);
+        data18[1] = HDsqrt(-10000.0);
+        data18[2] = 1.0;
+        data18[3] = 1.0;
+        data18[4] = 1.0;
+        data18[5] = 1.0;
 
         write_dset(gid1, 1, dims1, "fp17", H5T_NATIVE_DOUBLE, data17);
         write_dset(gid1, 1, dims1, "fp18", H5T_NATIVE_DOUBLE, data18);
@@ -520,11 +520,11 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         float  data19[6];
         double data20[6];
 
-        data19[0] = data19[1] = data19[2] = (float)HDlog(0.0F);
-        data19[3] = data19[4] = data19[5] = (float)-HDlog(0.0F);
+        data19[0] = data19[1] = data19[2] = (float)HDlog(0.0);
+        data19[3] = data19[4] = data19[5] = (float)-HDlog(0.0);
 
-        data20[0] = data20[1] = data20[2] = HDlog(0.0F);
-        data20[3] = data20[4] = data20[5] = -HDlog(0.0F);
+        data20[0] = data20[1] = data20[2] = HDlog(0.0);
+        data20[3] = data20[4] = data20[5] = -HDlog(0.0);
 
         write_dset(gid1, 1, dims1, "fp19", H5T_NATIVE_FLOAT, data19);
         write_dset(gid1, 1, dims1, "fp19_COPY", H5T_NATIVE_FLOAT, data19);
@@ -548,13 +548,13 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         size_t  type_size;
         hid_t   tid;
 
-        buf1[0].d = HDsqrt(-1.0F);
-        buf1[0].f = (float)HDsqrt(-1.0F);
-        buf2[0].d = HDsqrt(-1.0F);
-        buf2[0].f = (float)HDsqrt(-1.0F);
+        buf1[0].d = HDsqrt(-1.0);
+        buf1[0].f = (float)HDsqrt(-1.0);
+        buf2[0].d = HDsqrt(-1.0);
+        buf2[0].f = (float)HDsqrt(-1.0);
 
-        buf1[1].d = HDsqrt(-1.0F);
-        buf1[1].f = (float)HDsqrt(-1.0F);
+        buf1[1].d = HDsqrt(-1.0);
+        buf1[1].f = (float)HDsqrt(-1.0);
         buf2[1].d = 0.0F;
         buf2[1].f = 0.0F;
 

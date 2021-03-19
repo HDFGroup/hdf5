@@ -214,7 +214,7 @@ InvalidActionException::InvalidActionException() : Exception()
 //              func    - IN: Name of the function where failure should occur
 //              message - IN: Message
 //--------------------------------------------------------------------------
-InvalidActionException::InvalidActionException(const H5std_string func, const H5std_string message)
+InvalidActionException::InvalidActionException(const H5std_string &func, const H5std_string &message)
     : Exception(func, message)
 {
 }
@@ -243,7 +243,7 @@ TestFailedException::TestFailedException() : Exception()
 //              func    - IN: Name of the function where failure should occur
 //              message - IN: Message
 //--------------------------------------------------------------------------
-TestFailedException::TestFailedException(const H5std_string func, const H5std_string message)
+TestFailedException::TestFailedException(const H5std_string &func, const H5std_string &message)
     : Exception(func, message)
 {
 }

@@ -516,7 +516,7 @@ check_new_move(hid_t fapl)
     /* Check soft links */
     if (H5Lget_val(file, "group2/soft", linkval, sizeof(linkval), H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    if (HDstrcmp(linkval, "/group1/group_move"))
+    if (HDstrcmp(linkval, "/group1/group_move") != 0)
         FAIL_PUTS_ERROR("    Soft link test failed. Wrong link value")
 
     /* Cleanup */

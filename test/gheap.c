@@ -129,7 +129,7 @@ test_1(hid_t fapl)
             HDputs("    Unable to read object");
             nerrors++;
         }
-        else if (HDmemcmp(in, out, size)) {
+        else if (HDmemcmp(in, out, size) != 0) {
             H5_FAILED();
             HDputs("    Value read doesn't match value written");
             nerrors++;
@@ -229,7 +229,7 @@ test_2(hid_t fapl)
             HDputs("    Unable to read object");
             nerrors++;
         }
-        else if (HDmemcmp(in, out, size)) {
+        else if (HDmemcmp(in, out, size) != 0) {
             H5_FAILED();
             HDputs("    Value read doesn't match value written");
             nerrors++;

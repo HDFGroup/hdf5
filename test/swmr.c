@@ -2392,17 +2392,24 @@ error:
  *  (5) Parent: open a file with write access; enable SWMR writing mode
  *      Child: concurrent open of the file with write and SWMR write access (fail)
  */
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+#ifndef H5_HAVE_UNISTD_H
 
 static int
-test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t H5_ATTR_UNUSED new_format)
+test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
 {
+    if (new_format) {
+        TESTING("H5Fstart_swmr_write()--concurrent access for latest format");
+    }
+    else {
+        TESTING("H5Fstart_swmr_write()--concurrent access for non-latest-format");
+    }
+
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    HDputs("    Test skipped due to a lack of unistd.h functionality.");
     return 0;
 } /* test_start_swmr_write_concur() */
 
-#else  /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+#else  /* H5_HAVE_UNISTD_H */
 
 static int
 test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
@@ -2434,7 +2441,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
     }
     else {
         TESTING("H5Fstart_swmr_write()--concurrent access for non-latest-format");
-    } /* end if */
+    }
 
     if ((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR
@@ -3004,7 +3011,7 @@ error:
     return -1;
 
 } /* test_start_swmr_write_concur() */
-#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 /*
  * test_start_swmr_write_stress_ohdr():
@@ -4798,7 +4805,7 @@ error:
 **    This is for concurrent access.
 **
 *****************************************************************/
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK))
+#ifndef H5_HAVE_UNISTD_H
 
 static int
 test_file_lock_concur(hid_t H5_ATTR_UNUSED in_fapl)
@@ -4806,12 +4813,12 @@ test_file_lock_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combinations of flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to fork, waitpid, or flock not defined.");
+    HDputs("    Test skipped due to a lack of unistd.h functionality.");
     return 0;
 
 } /* end test_file_lock_concur() */
 
-#else
+#else /* H5_HAVE_UNISTD_H */
 
 static int
 test_file_lock_concur(hid_t in_fapl)
@@ -5181,7 +5188,7 @@ error:
 
 } /* end test_file_lock_concur() */
 
-#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 /****************************************************************
 **
@@ -5191,7 +5198,7 @@ error:
 **    This is for concurrent access.
 **
 *****************************************************************/
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+#ifndef H5_HAVE_UNISTD_H
 
 static int
 test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
@@ -5199,12 +5206,12 @@ test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combintations of flags + SWMR flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    HDputs("    Test skipped due to a lack of unistd.h functionality.");
     return 0;
 
 } /* end test_file_lock_swmr_concur() */
 
-#else
+#else /* H5_HAVE_UNISTD_H */
 
 static int
 test_file_lock_swmr_concur(hid_t in_fapl)
@@ -6204,7 +6211,7 @@ error:
 
 } /* end test_file_lock_swmr_concur() */
 
-#endif /* !(defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 /****************************************************************
 **
@@ -6216,11 +6223,19 @@ error:
 static int
 test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_override)
 {
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+#ifndef H5_HAVE_UNISTD_H
+    if (turn_locking_on && env_var_override)
+        TESTING("File locking: ON w/ env var override")
+    else if (turn_locking_on && !env_var_override)
+        TESTING("File locking: ON")
+    else if (!turn_locking_on && env_var_override)
+        TESTING("File locking: OFF w/ env var override")
+    else
+        TESTING("File locking: OFF")
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    HDputs("    Test skipped due to a lack of unistd.h functionality.");
     return 0;
-#else
+#else /* H5_HAVE_UNISTD_H */
     hid_t  fid  = -1;               /* File ID */
     hid_t  fapl = -1;               /* File access property list */
     char   filename[NAME_BUF_SIZE]; /* file name */
@@ -6386,7 +6401,7 @@ error:
 
     return -1;
 
-#endif /* !(defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 } /* end test_file_locking() */
 
@@ -6672,17 +6687,24 @@ error:
  *              (7) Refresh the dataset
  *              (8) Verify the dataset's dimension and data are correct
  */
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+#ifndef H5_HAVE_UNISTD_H
 
 static int
-test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t H5_ATTR_UNUSED new_format)
+test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
 {
+    if (new_format) {
+        TESTING("H5Drefresh()--concurrent access for latest format");
+    }
+    else {
+        TESTING("H5Drefresh()--concurrent access for non-latest-format");
+    }
+
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    HDputs("    Test skipped due to a lack of unistd.h functionality.");
     return 0;
 } /* test_refresh_concur() */
 
-#else  /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+#else  /* H5_HAVE_UNISTD_H */
 
 static int
 test_refresh_concur(hid_t in_fapl, hbool_t new_format)
@@ -6982,7 +7004,7 @@ error:
     return -1;
 
 } /* test_refresh_concur() */
-#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 /*
  * test_multiple_same():

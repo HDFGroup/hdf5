@@ -180,7 +180,7 @@ H5File::H5File(hid_t existing_id) : Group()
 ///\param       original - IN: H5File instance to copy
 // December 2000
 //--------------------------------------------------------------------------
-H5File::H5File(const H5File &original) : Group()
+H5File::H5File(const H5File &original) : Group(original)
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id

@@ -2322,7 +2322,7 @@ compare_splitter_config_info(hid_t fapl_id, H5FD_splitter_vfd_config_t *info)
         }
     }
     if ((HDstrlen(info->wo_path) != HDstrlen(fetched_info->wo_path)) ||
-        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX)) {
+        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
         HDfprintf(stderr, "MISMATCH: '%s' :: '%s'\n", info->wo_path, fetched_info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, fetched_info->wo_path);

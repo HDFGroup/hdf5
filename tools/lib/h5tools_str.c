@@ -142,7 +142,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
             /* failure, such as bad format */
             return NULL;
 
-        if ((size_t)nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s")))) {
+        if ((size_t)nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s") != 0))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is

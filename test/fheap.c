@@ -424,7 +424,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
         TEST_ERROR
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(obj, shared_robj_g, obj_size))
+    if (HDmemcmp(obj, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* If the heap IDs are to be retained, append them to the list */
@@ -1192,7 +1192,7 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
 
         /* Check that object is correct */
         wobj = &shared_wobj_g[*curr_off_ptr];
-        if (HDmemcmp(wobj, shared_robj_g, *curr_len_ptr))
+        if (HDmemcmp(wobj, shared_robj_g, *curr_len_ptr) != 0)
             TEST_ERROR
 
         /* Adjust object & ID pointers */
@@ -12722,7 +12722,7 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -12875,7 +12875,7 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert second object too large for managed heap blocks */
@@ -12905,7 +12905,7 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13108,7 +13108,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert second object too large for managed heap blocks */
@@ -13138,7 +13138,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert third object too large for managed heap blocks */
@@ -13168,7 +13168,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13419,7 +13419,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert second object too large for managed heap blocks */
@@ -13449,7 +13449,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert third object too large for managed heap blocks */
@@ -13479,7 +13479,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert fourth object small enough to fit into 'normal' heap blocks */
@@ -13516,7 +13516,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id4, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert fifth object small enough to fit into 'normal' heap blocks */
@@ -13554,7 +13554,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id5, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13892,7 +13892,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14043,7 +14043,7 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14196,7 +14196,7 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert second object small enough to encode in heap ID */
@@ -14226,7 +14226,7 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14442,14 +14442,14 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on first huge object */
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert second object too large for managed heap blocks */
@@ -14479,14 +14479,14 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on second huge object */
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id2, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert third object too large for managed heap blocks */
@@ -14516,14 +14516,14 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on third huge object */
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id3, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert fourth object small enough to fit into 'normal' heap blocks */
@@ -14560,14 +14560,14 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id4, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on fourth ('normal') object */
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id4, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert fifth object small enough to fit into 'normal' heap blocks */
@@ -14605,14 +14605,14 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id5, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on fifth ('normal') object */
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id5, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert sixth object small enough to encode in heap ID */
@@ -14642,14 +14642,14 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id6, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on sixth ('tiny') object */
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id6, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert seventh object small enough to encode in heap ID */
@@ -14679,14 +14679,14 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id7, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on seventh ('tiny') object */
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id7, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -15056,7 +15056,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -15239,7 +15239,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id1, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Read in ('normal') object #2 */
@@ -15250,7 +15250,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     HDmemset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -16062,7 +16062,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
             FAIL_STACK_ERROR
 
         /* Compare data read in */
-        if (HDmemcmp(rewrite_obj, shared_robj_g, obj_size))
+        if (HDmemcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
             TEST_ERROR
 
         /* Change size of data to write */
@@ -16111,7 +16111,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
             FAIL_STACK_ERROR
 
         /* Compare data read in */
-        if (HDmemcmp(rewrite_obj, shared_robj_g, obj_size))
+        if (HDmemcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
             TEST_ERROR
 
         /* Change size of data to write */
@@ -16370,7 +16370,7 @@ main(void)
         envval = "nomatch";
 
     /* Current VFD that does not support contigous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi"));
+    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
 
     /* Reset library */
     h5_reset();

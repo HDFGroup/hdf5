@@ -2089,11 +2089,11 @@ test_misc12(void)
     CHECK(ret, FAIL, "H5Dread");
 
     for (i = 0; i < MISC12_SPACE1_DIM1; i++)
-        if (HDstrcmp(wdata[i], rdata[i]))
+        if (HDstrcmp(wdata[i], rdata[i]) != 0)
             TestErrPrintf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n", __LINE__, i, wdata[i], i,
                           rdata[i]);
     for (; i < (MISC12_SPACE1_DIM1 + MISC12_APPEND_SIZE); i++)
-        if (HDstrcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]))
+        if (HDstrcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]) != 0)
             TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n", __LINE__, i - MISC12_SPACE1_DIM1,
                           wdata1[i - MISC12_SPACE1_DIM1], i, rdata[i]);
 

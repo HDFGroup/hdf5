@@ -204,14 +204,14 @@ test_tst_insert(void)
         found = H5ST_find(tree, uniq_words[u]);
         CHECK_PTR(found, "H5ST_find");
 
-        if (HDstrcmp((const char *)found->eqkid, uniq_words[u]))
+        if (HDstrcmp((const char *)found->eqkid, uniq_words[u]) != 0)
             TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, uniq_words[%u]=%s\n", __LINE__,
                           (char *)found->eqkid, (unsigned)u, uniq_words[u]);
 
         obj = H5ST_locate(tree, uniq_words[u]);
         CHECK_PTR(obj, "H5ST_locate");
 
-        if (HDstrcmp((const char *)obj, uniq_words[u]))
+        if (HDstrcmp((const char *)obj, uniq_words[u]) != 0)
             TestErrPrintf("%d: TST objects don't match!, obj=%s, uniq_words[%u]=%s\n", __LINE__, (char *)obj,
                           (unsigned)u, uniq_words[u]);
     } /* end for */
@@ -262,7 +262,7 @@ test_tst_iterate(void)
     u = 0;
     do {
         /* Check that the strings in the TST are in the correct order */
-        if (HDstrcmp((const char *)found->eqkid, sort_uniq_words[u]))
+        if (HDstrcmp((const char *)found->eqkid, sort_uniq_words[u]) != 0)
             TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, sort_uniq_words[%u]=%s\n",
                           __LINE__, (char *)found->eqkid, (unsigned)u, sort_uniq_words[u]);
 
@@ -311,7 +311,7 @@ test_tst_remove(void)
         CHECK_PTR(obj, "H5ST_remove");
 
         /* Check that the correct string was removed from TST */
-        if (HDstrcmp((const char *)obj, rand_uniq_words[u]))
+        if (HDstrcmp((const char *)obj, rand_uniq_words[u]) != 0)
             TestErrPrintf("%d: TST node values don't match!, obj=%s, rand_uniq_words[%u]=%s\n", __LINE__,
                           (char *)obj, (unsigned)u, rand_uniq_words[u]);
 
@@ -333,7 +333,7 @@ test_tst_remove(void)
         CHECK_PTR(found, "H5ST_find");
 
         /* Check that the correct object will be removed from TST */
-        if (HDstrcmp((const char *)found->eqkid, rand_uniq_words[u]))
+        if (HDstrcmp((const char *)found->eqkid, rand_uniq_words[u]) != 0)
             TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, rand_uniq_words[%u]=%s\n",
                           __LINE__, (char *)found->eqkid, (unsigned)u, rand_uniq_words[u]);
 

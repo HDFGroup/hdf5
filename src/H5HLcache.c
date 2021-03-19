@@ -161,7 +161,7 @@ H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, H5HL_cache_prfx_ud_t *
     HDassert(udata);
 
     /* Check magic number */
-    if (HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad local heap signature")
     image += H5_SIZEOF_MAGIC;
 

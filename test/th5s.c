@@ -2449,7 +2449,7 @@ test_h5s_compound_scalar_read(void)
 
     ret = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if (HDmemcmp(&space4_data, &rdata, sizeof(struct space4_struct))) {
+    if (HDmemcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
         HDprintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n", space4_data.c1, rdata.c1);
         HDprintf("scalar data different: space4_data.u=%u, read_data4.u=%u\n", space4_data.u, rdata.u);
         HDprintf("scalar data different: space4_data.f=%f, read_data4.f=%f\n", (double)space4_data.f,

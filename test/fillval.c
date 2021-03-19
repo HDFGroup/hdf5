@@ -324,7 +324,7 @@ test_getset_vl(hid_t fapl)
         TEST_ERROR
 
     /* Verify that the fill value is the original value */
-    if (HDstrcmp(f2, orig_fill_value))
+    if (HDstrcmp(f2, orig_fill_value) != 0)
         TEST_ERROR
 
     /* Release the fill value retrieved */
@@ -366,7 +366,7 @@ test_getset_vl(hid_t fapl)
         TEST_ERROR
 
     /* Verify that the fill value is the original value */
-    if (HDstrcmp(f2, orig_fill_value))
+    if (HDstrcmp(f2, orig_fill_value) != 0)
         TEST_ERROR
 
     /* Release the fill value retrieved */
@@ -1537,8 +1537,8 @@ test_extend_verify_cmpd_vl(unsigned lineno, const hsize_t *offset, const void *_
         (const comp_vl_datatype *)_compare_val; /* Value to compare against */
 
     /* Verify value */
-    if ((test_val->x != compare_val->x) || HDstrcmp(test_val->a, compare_val->a) ||
-        HDstrcmp(test_val->b, compare_val->b) || (test_val->y != compare_val->y)) {
+    if ((test_val->x != compare_val->x) || HDstrcmp(test_val->a, compare_val->a) != 0 ||
+        HDstrcmp(test_val->b, compare_val->b) != 0 || (test_val->y != compare_val->y)) {
         HDfprintf(stdout, "%u: Value read was not expected.\n", lineno);
         HDfprintf(stdout,
                   "    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE

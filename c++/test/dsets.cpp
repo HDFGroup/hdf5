@@ -1157,7 +1157,7 @@ const int          RANK1 = 1;
 const H5std_string FILE_ACCPLIST("test_accplist.h5");
 
 static herr_t
-test_chunk_cache(FileAccPropList fapl)
+test_chunk_cache(const FileAccPropList &fapl)
 {
     SUBTEST("DSetAccPropList::set/getChunkCache");
 

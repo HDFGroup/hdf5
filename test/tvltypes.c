@@ -1385,7 +1385,7 @@ test_vltypes_compound_vlstr(void)
 
         for (t1 = (s2 *)(wdata[i].v.p), t2 = (s2 *)(rdata[i].v.p), j = 0; j < rdata[i].v.len;
              j++, t1++, t2++) {
-            if (HDstrcmp(t1->string, t2->string)) {
+            if (HDstrcmp(t1->string, t2->string) != 0) {
                 TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n", t1->string,
                               t2->string);
                 continue;
@@ -1446,7 +1446,7 @@ test_vltypes_compound_vlstr(void)
 
         for (t1 = (s2 *)(wdata2[i].v.p), t2 = (s2 *)(rdata2[i].v.p), j = 0; j < rdata2[i].v.len;
              j++, t1++, t2++) {
-            if (HDstrcmp(t1->string, t2->string)) {
+            if (HDstrcmp(t1->string, t2->string) != 0) {
                 TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n", t1->string,
                               t2->string);
                 continue;
@@ -2819,10 +2819,10 @@ test_vltypes_fill_value(void)
 
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
-                if (HDstrcmp(rbuf[i].str_id, "foobar") || HDstrcmp(rbuf[i].str_name, "") ||
-                    rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") ||
-                    HDstrcmp(rbuf[i].str_stat, "dead") || HDstrcmp(rbuf[i].str_form, "liquid") ||
-                    HDstrcmp(rbuf[i].str_unit, "meter")) {
+                if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
+                    rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
+                    HDstrcmp(rbuf[i].str_stat, "dead") != 0 || HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
+                    HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
                     TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                     continue;
                 } /* end if */
@@ -2842,10 +2842,11 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if ((i % 2) == select_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") || HDstrcmp(rbuf[i].str_name, "") ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") || HDstrcmp(rbuf[i].str_form, "liquid") ||
-                        HDstrcmp(rbuf[i].str_unit, "meter")) {
+                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
+                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -2876,10 +2877,10 @@ test_vltypes_fill_value(void)
 
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
-                if (HDstrcmp(rbuf[i].str_id, "foobar") || HDstrcmp(rbuf[i].str_name, "") ||
-                    rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") ||
-                    HDstrcmp(rbuf[i].str_stat, "dead") || HDstrcmp(rbuf[i].str_form, "liquid") ||
-                    HDstrcmp(rbuf[i].str_unit, "meter")) {
+                if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
+                    rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
+                    HDstrcmp(rbuf[i].str_stat, "dead") != 0 || HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
+                    HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
                     TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                     continue;
                 } /* end if */
@@ -2899,10 +2900,11 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if ((i % 2) == select_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") || HDstrcmp(rbuf[i].str_name, "") ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") || HDstrcmp(rbuf[i].str_form, "liquid") ||
-                        HDstrcmp(rbuf[i].str_unit, "meter")) {
+                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
+                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -3017,21 +3019,22 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit)) {
+                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") || HDstrcmp(rbuf[i].str_name, "") ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") || HDstrcmp(rbuf[i].str_form, "liquid") ||
-                        HDstrcmp(rbuf[i].str_unit, "meter")) {
+                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
+                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -3052,22 +3055,23 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit)) {
+                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
                     if ((i % 2) == select_offset[0]) {
-                        if (HDstrcmp(rbuf[i].str_id, "foobar") || HDstrcmp(rbuf[i].str_name, "") ||
-                            rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") ||
-                            HDstrcmp(rbuf[i].str_stat, "dead") || HDstrcmp(rbuf[i].str_form, "liquid") ||
-                            HDstrcmp(rbuf[i].str_unit, "meter")) {
+                        if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
+                            rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
+                            HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
+                            HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
+                            HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
                             TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                             continue;
                         } /* end if */
@@ -3103,21 +3107,22 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit)) {
+                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") || HDstrcmp(rbuf[i].str_name, "") ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") || HDstrcmp(rbuf[i].str_form, "liquid") ||
-                        HDstrcmp(rbuf[i].str_unit, "meter")) {
+                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
+                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -3138,22 +3143,23 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit)) {
+                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
                     if ((i % 2) == select_offset[0]) {
-                        if (HDstrcmp(rbuf[i].str_id, "foobar") || HDstrcmp(rbuf[i].str_name, "") ||
-                            rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") ||
-                            HDstrcmp(rbuf[i].str_stat, "dead") || HDstrcmp(rbuf[i].str_form, "liquid") ||
-                            HDstrcmp(rbuf[i].str_unit, "meter")) {
+                        if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
+                            rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
+                            HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
+                            HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
+                            HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
                             TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                             continue;
                         } /* end if */

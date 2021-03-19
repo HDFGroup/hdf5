@@ -252,6 +252,8 @@ COPY_DATAFILES_TO_BLDDIR()
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateO2.hdf
     $CP -f $TOOLS_TESTFILES/trefer_reg.h5 $BLDDIR/trefer_reg.h5
     $CP -f $TOOLS_TESTFILES/trefer_attr.h5 $BLDDIR/trefer_attr.h5
+    $CP -f $TOOLS_TESTFILES/tdatareg.h5 $BLDDIR/tdatareg.h5
+    $CP -f $TOOLS_TESTFILES/tattrreg.h5 $BLDDIR/tattrreg.h5
 }
 
 CLEAN_DATAFILES_AND_BLDDIR()

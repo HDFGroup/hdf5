@@ -310,7 +310,7 @@ Attribute::getName(char *attr_name, size_t buf_size) const
 H5std_string
 Attribute::getName() const
 {
-    H5std_string attr_name(""); // attribute name to return
+    H5std_string attr_name; // attribute name to return
 
     // Preliminary call to get the size of the attribute name
     ssize_t name_size = H5Aget_name(id, static_cast<size_t>(0), NULL);
