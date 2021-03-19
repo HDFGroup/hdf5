@@ -85,6 +85,7 @@ typedef struct H5ES_gei_ctx_t {
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5ES__close(H5ES_t *es);
 static herr_t H5ES__close_cb(void *es, void **request_token);
 static herr_t H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app_file,
                            const char *app_func, unsigned app_line, const char *caller, const char *api_args);
