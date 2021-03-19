@@ -3718,10 +3718,17 @@ H5F__start_swmr_write(H5F_t *f)
     setup = TRUE;
 
     /* Place an advisory lock on the file */
-    if (H5F_USE_FILE_LOCKING(f))
+    if (H5F_USE_FILE_LOCKING(f)) {
+        /* Have to unlock on Windows as Win32 doesn't support changing the lock
+         * type (exclusive vs shared) with a second call.
+         */
+        if (H5FD_unlock(f->shared->lf) < 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock the file")
+        }
         if (H5FD_lock(f->shared->lf, TRUE) < 0) {
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOCKFILE, FAIL, "unable to lock the file")
         }
+    }
 
     /* Mark superblock as dirty */
     if (H5F_super_dirty(f) < 0)
