@@ -17,7 +17,7 @@
  * Purpose:     Messages related to data layout.
  */
 
-#define H5D_FRIEND     /*suppress error about including H5Dpkg	  */
+#define H5D_FRIEND     /*suppress error about including H5Dpkg       */
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions                        */
@@ -90,12 +90,13 @@ H5FL_DEFINE(H5O_layout_t);
  */
 static void *
 H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                   unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                   unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_layout_t *mesg       = NULL;
-    uint8_t *     heap_block = NULL;
-    unsigned      u;
-    void *        ret_value = NULL; /* Return value */
+    H5O_layout_t * mesg       = NULL;
+    uint8_t *      heap_block = NULL;
+    unsigned       u;
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void *         ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -179,6 +180,10 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         if (mesg->type == H5D_COMPACT) {
             UINT32DECODE(p, mesg->storage.u.compact.size);
             if (mesg->storage.u.compact.size > 0) {
+                /* Ensure that size doesn't exceed buffer size, due to possible data corruption */
+                if (p + mesg->storage.u.compact.size - 1 > p_end)
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "storage size exceeds buffer size")
+
                 if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for compact data buffer")
@@ -198,6 +203,10 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 UINT16DECODE(p, mesg->storage.u.compact.size);
 
                 if (mesg->storage.u.compact.size > 0) {
+                    /* Ensure that size doesn't exceed buffer size, due to possible data corruption */
+                    if (p + mesg->storage.u.compact.size - 1 > p_end)
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "storage size exceeds buffer size")
+
                     /* Allocate space for compact data */
                     if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
@@ -887,13 +896,13 @@ done:
 } /* end H5O__layout_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__layout_free
+ * Function:    H5O__layout_free
  *
- * Purpose:	Free's the message
+ * Purpose:     Free's the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, March 11, 2000
  *
  *-------------------------------------------------------------------------

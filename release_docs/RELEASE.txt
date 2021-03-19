@@ -707,6 +707,26 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Fixed CVE-2018-17435
+
+        The tool h5dump produced a segfault when the size of a fill value
+        message was corrupted and caused a buffer overflow.
+
+        The problem was fixed by verifying the fill value's size
+        against the buffer size before attempting to access the buffer.
+
+        (BMR - 2021/03/15, HDFFV-10480)
+
+    - Fixed CVE-2018-14033 (same issue as CVE-2020-10811)
+
+        The tool h5dump produced a segfault when the storage size message
+        was corrupted and caused a buffer overflow.
+
+        The problem was fixed by verifying the storage size against the
+        buffer size before attempting to access the buffer.
+
+        (BMR - 2021/03/15, HDFFV-11159/HDFFV-11049)
+
     - Remove underscores on header file guards
 
         Header file guards used a variety of underscores at the beginning of the define.
