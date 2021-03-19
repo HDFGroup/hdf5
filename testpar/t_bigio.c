@@ -5,6 +5,7 @@
 
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[3] = {"bigio_test.h5", "single_rank_independent_io.h5", NULL};
+char filenames[3][200];
 
 /* Constants definitions */
 #define MAX_ERR_REPORT 10 /* Maximum number of errors reported */
@@ -484,7 +485,7 @@ dataset_big_write(void)
     H5Pset_fapl_mpio(acc_tpl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     /* create the file collectively */
-    fid = H5Fcreate(FILENAME[0], H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
+    fid = H5Fcreate(filenames[0], H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
     VRFY_G((fid >= 0), "H5Fcreate succeeded");
 
     /* Release file-access template */
@@ -793,7 +794,7 @@ dataset_big_read(void)
     H5Pset_fapl_mpio(acc_tpl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     /* open the file collectively */
-    fid = H5Fopen(FILENAME[0], H5F_ACC_RDONLY, acc_tpl);
+    fid = H5Fopen(filenames[0], H5F_ACC_RDONLY, acc_tpl);
     VRFY_G((fid >= 0), "H5Fopen succeeded");
 
     /* Release file-access template */
@@ -1119,7 +1120,7 @@ single_rank_independent_io(void)
         VRFY_G((fapl_id >= 0), "H5P_FILE_ACCESS");
 
         H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
-        file_id = H5Fcreate(FILENAME[1], H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        file_id = H5Fcreate(filenames[1], H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
         VRFY_G((file_id >= 0), "H5Dcreate2 succeeded");
 
         fspace_id = H5Screate_simple(1, dims, NULL);
@@ -1152,7 +1153,7 @@ single_rank_independent_io(void)
         H5Dclose(dset_id);
         H5Fclose(file_id);
 
-        HDremove(FILENAME[1]);
+        HDremove(filenames[1]);
     }
     MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -1248,7 +1249,7 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
 void
 coll_chunk1(void)
 {
-    const char *filename = FILENAME[0];
+    const char *filename = filenames[0];
     if (mpi_rank_g == 0)
         HDprintf("coll_chunk1\n");
 
@@ -1301,7 +1302,7 @@ coll_chunk1(void)
 void
 coll_chunk2(void)
 {
-    const char *filename = FILENAME[0];
+    const char *filename = filenames[0];
     if (mpi_rank_g == 0)
         HDprintf("coll_chunk2\n");
 
@@ -1355,7 +1356,7 @@ coll_chunk2(void)
 void
 coll_chunk3(void)
 {
-    const char *filename = FILENAME[0];
+    const char *filename = filenames[0];
     if (mpi_rank_g == 0)
         HDprintf("coll_chunk3\n");
 
@@ -1721,7 +1722,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     acc_plist = create_faccess_plist(comm, info, facc_type);
     VRFY_G((acc_plist >= 0), "MPIO creation property list succeeded");
 
-    file = H5Fopen(FILENAME[0], H5F_ACC_RDONLY, acc_plist);
+    file = H5Fopen(filenames[0], H5F_ACC_RDONLY, acc_plist);
     VRFY_G((file >= 0), "H5Fcreate succeeded");
 
     status = H5Pclose(acc_plist);
@@ -1889,6 +1890,29 @@ do_express_test(int world_mpi_rank)
 
 } /* do_express_test() */
 
+/* compose the test filenames */
+int compose_test_filenames(void)
+{
+  hid_t plist= H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fapl_mpio(plist, MPI_COMM_WORLD, MPI_INFO_NULL);
+  size_t n = sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; /* exclude the NULL */
+
+  for (size_t i = 0; i < n; i++)
+    if (h5_fixname(FILENAME[i], plist, filenames[i],
+		   sizeof(filenames[i])) == NULL) {
+      HDprintf("h5_fixname failed\n");
+      nerrors++;
+      return (1);
+    }
+  H5Pclose(plist);
+  if (VERBOSE_MED) {
+    HDprintf("Test filenames are:\n");
+    for (size_t i = 0; i < n; i++)
+      HDprintf("    %s\n", filenames[i]);
+  }
+  return (0);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -1948,7 +1972,7 @@ main(int argc, char **argv)
     ALARM_OFF;
 
     if (mpi_rank_g == 0)
-        HDremove(FILENAME[0]);
+        HDremove(filenames[0]);
 
     /* close HDF5 library */
     H5close();
