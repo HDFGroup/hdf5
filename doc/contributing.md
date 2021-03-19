@@ -36,7 +36,7 @@ The process for contributing code to HDF5 is as follows:
 Once a pull request is correctly formatted and passes **ALL** CI tests, it will be reviewed and evaluated by The HDF Group developers and HDF5 community members who can approve pull requests.
 The HDF Group developers will work with you to ensure that the pull request satisfies the acceptance criteria described in the next section. 
 
-# Acceptance criteria for pull request <A NAME="criteria"></A>
+# Acceptance criteria for a pull request <A NAME="criteria"></A>
 
 We appreciate every contribution we receive, but we may not accept them all.  Those that we *do* satisfy the following criteria:
 
