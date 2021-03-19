@@ -51,7 +51,7 @@
  *-------------------------------------------------------------------------
  */
 static int
-test_file_image(size_t open_images, size_t nflags, unsigned *flags)
+test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
 {
     hid_t * file_id, *dset_id, file_space, plist; /* HDF5 ids */
     hsize_t dims1[RANK]    = {2, 3};              /* original dimension of datasets */
@@ -335,7 +335,10 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             VERIFY(status1 < 0, "H5Dwrite() should have failed");
 
             /* extend dimensions of dataset */
-            H5E_BEGIN_TRY { status1 = H5Dset_extent(dset_id[i], dims4); }
+            H5E_BEGIN_TRY
+            {
+                status1 = H5Dset_extent(dset_id[i], dims4);
+            }
             H5E_END_TRY;
 
             VERIFY(status1 < 0, "H5Dset_extent() should have failed");

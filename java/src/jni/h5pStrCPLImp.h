@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _Included_hdf_hdf5lib_H5_H5PStrCPL
-#define _Included_hdf_hdf5lib_H5_H5PStrCPL
+#ifndef Included_hdf_hdf5lib_H5_H5PStrCPL
+#define Included_hdf_hdf5lib_H5_H5PStrCPL
 
 #include <jni.h>
 
@@ -37,4 +37,4 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1char_1encoding(JNIEnv *, jcla
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_hdf_hdf5lib_H5_H5PStrCPL */
+#endif /* Included_hdf_hdf5lib_H5_H5PStrCPL */

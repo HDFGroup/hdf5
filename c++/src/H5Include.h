@@ -14,19 +14,6 @@
 
 #include <hdf5.h>
 
-// Define bool type for platforms that don't support bool yet
-#ifdef BOOL_NOTDEFINED
-#ifdef false
-#undef false
-#endif
-#ifdef true
-#undef true
-#endif
-typedef int bool;
-const bool false = 0;
-const bool true  = 1;
-#endif
-
 // These are defined in H5Opkg.h, which should not be included in the C++ API,
 // so re-define them here for now.
 
@@ -37,3 +24,10 @@ const bool true  = 1;
  *      magic number as prefix and checksum as suffix for all chunks.
  */
 #define H5O_VERSION_2 2
+
+// Define H5_OVERRIDE to override for C++11.
+#if defined(__cplusplus) && (201103L <= __cplusplus)
+#define H5_OVERRIDE override
+#else
+#define H5_OVERRIDE
+#endif

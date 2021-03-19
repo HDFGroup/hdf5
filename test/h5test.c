@@ -171,8 +171,6 @@ h5_clean_files(const char *base_name[], hid_t fapl)
 
     /* Close the FAPL used to access the file */
     H5Pclose(fapl);
-
-    return;
 } /* end h5_clean_files() */
 
 /*-------------------------------------------------------------------------
@@ -249,7 +247,6 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
         HDremove(filename);
     } /* end driver selection tree */
 
-    return;
 } /* end h5_delete_test_file() */
 H5_GCC_DIAG_ON("format-nonliteral")
 
@@ -282,7 +279,6 @@ h5_delete_all_test_files(const char *base_name[], hid_t fapl)
         h5_delete_test_file(base_name[i], fapl);
     } /* end for */
 
-    return;
 } /* end h5_delete_all_test_files() */
 
 /*-------------------------------------------------------------------------
@@ -341,8 +337,6 @@ h5_test_shutdown(void)
 
     /* Restore the original error reporting routine */
     h5_restore_err();
-
-    return;
 } /* end h5_test_shutdown() */
 
 /*-------------------------------------------------------------------------
@@ -449,8 +443,6 @@ h5_test_init(void)
     HDassert(err_func == NULL);
     H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
-
-    return;
 } /* end h5_test_init() */
 
 /*-------------------------------------------------------------------------
@@ -1733,7 +1725,10 @@ h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
         if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
             continue;
 
-        H5E_BEGIN_TRY { file = H5Fopen(filename, H5F_ACC_RDONLY, fapl); }
+        H5E_BEGIN_TRY
+        {
+            file = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+        }
         H5E_END_TRY
         if (file < 0) {
             i++;
@@ -1754,7 +1749,10 @@ h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
 
     return -1;

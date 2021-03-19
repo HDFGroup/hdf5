@@ -1257,12 +1257,12 @@ done:
 static herr_t
 h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t dset,
                             hid_t p_type, hid_t f_space, hsize_t hyperslab_count,
-                            hsize_t *    temp_start,  /* start inside offset count loop */
-                            hsize_t *    temp_count,  /* count inside offset count loop  */
-                            hsize_t *    temp_block,  /* block size used in loop  */
-                            hsize_t *    temp_stride, /* stride size used in loop  */
-                            hsize_t *    total_size,  /* total size of dataset */
-                            unsigned int row_dim)     /* index of row_counter dimension */
+                            hsize_t *      temp_start,  /* start inside offset count loop */
+                            hsize_t *      temp_count,  /* count inside offset count loop  */
+                            hsize_t *      temp_block,  /* block size used in loop  */
+                            hsize_t *      temp_stride, /* stride size used in loop  */
+                            const hsize_t *total_size,  /* total size of dataset */
+                            unsigned int   row_dim)       /* index of row_counter dimension */
 {
     size_t         i;                          /* counters  */
     size_t         j;                          /* counters  */

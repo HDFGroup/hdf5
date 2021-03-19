@@ -832,8 +832,6 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 #endif /* H5C_COLLECT_CACHE_STATS */
-
-    return;
 } /* H5C_stats__reset() */
 
 /*-------------------------------------------------------------------------

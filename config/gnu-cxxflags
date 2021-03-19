@@ -148,7 +148,7 @@ if test "X-g++" = "X-$cxx_vendor"; then
     # Enhanced Diagnostics #
     ########################
 
-    if test $cc_vers_major -ge 10; then
+    if test $cxx_vers_major -ge 10; then
         NO_DIAGS_CXXFLAGS="-fdiagnostics-urls=never -fno-diagnostics-color"
     fi
     DIAGS_CXXFLAGS=

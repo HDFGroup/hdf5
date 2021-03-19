@@ -689,9 +689,6 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             HDfprintf(stdout, "%sAuto cache resize -- unknown status code.\n", cache_ptr->prefix);
             break;
     }
-
-    return;
-
 } /* H5C_def_auto_resize_rpt_fcn() */
 
 /*-------------------------------------------------------------------------

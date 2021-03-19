@@ -39,7 +39,10 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high, hbool_t s
     if (H5Pset_libver_bounds(fapl, low, high) < 0)
         TEST_ERROR
 
-    H5E_BEGIN_TRY { ret = H5Pencode2(orig_pl, NULL, &temp_size, fapl); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pencode2(orig_pl, NULL, &temp_size, fapl);
+    }
     H5E_END_TRY;
 
     if (support_virtual && high < H5F_LIBVER_V110)

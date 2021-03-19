@@ -3088,7 +3088,7 @@ main(int argc, const char *argv[])
         symlink_list.objs                        = NULL;
 
         /* Check for root group as object name */
-        if (HDstrcmp(oname, root_name)) {
+        if (HDstrcmp(oname, root_name) != 0) {
             /* Check the type of link given */
             if (H5Lget_info2(file_id, oname, &li, H5P_DEFAULT) < 0) {
                 hsize_t           curr_pos = 0; /* total data element position   */

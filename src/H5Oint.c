@@ -449,12 +449,16 @@ H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t init
 #if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
         if (size_hint > 4294967295UL)
             oh->flags |= H5O_HDR_CHUNK0_8;
-        else
-#endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
-            if (size_hint > 65535)
+        else if (size_hint > 65535)
             oh->flags |= H5O_HDR_CHUNK0_4;
         else if (size_hint > 255)
             oh->flags |= H5O_HDR_CHUNK0_2;
+#else
+        if (size_hint > 65535)
+            oh->flags |= H5O_HDR_CHUNK0_4;
+        else if (size_hint > 255)
+            oh->flags |= H5O_HDR_CHUNK0_2;
+#endif
     }
     else {
         /* Reset unused time fields */

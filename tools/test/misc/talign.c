@@ -63,7 +63,10 @@ main(void)
         return 1;
     }
 
-    H5E_BEGIN_TRY { (void)H5Ldelete(fil, setname, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        (void)H5Ldelete(fil, setname, H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     cs6 = H5Tcopy(H5T_C_S1);

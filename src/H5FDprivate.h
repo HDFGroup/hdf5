@@ -159,4 +159,4 @@ H5_DLL int      H5FD_mpi_get_size(const H5FD_t *file);
 H5_DLL MPI_Comm H5FD_mpi_get_comm(const H5FD_t *_file);
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* !_H5FDprivate_H */
+#endif /* H5FDprivate_H */

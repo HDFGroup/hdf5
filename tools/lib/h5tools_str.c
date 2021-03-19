@@ -142,7 +142,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
             /* failure, such as bad format */
             return NULL;
 
-        if ((size_t)nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s")))) {
+        if ((size_t)nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s") != 0))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
@@ -323,7 +323,7 @@ h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, h
  */
 char *
 h5tools_str_region_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, hsize_t elmtno,
-                          hsize_t *ptdata, h5tools_context_t *ctx)
+                          const hsize_t *ptdata, h5tools_context_t *ctx)
 {
     size_t i = 0;
 
@@ -439,7 +439,10 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
     /*
      * This function fails if the rspace does not have blocks.
      */
-    H5E_BEGIN_TRY { snblocks = H5Sget_select_hyper_nblocks(rspace); }
+    H5E_BEGIN_TRY
+    {
+        snblocks = H5Sget_select_hyper_nblocks(rspace);
+    }
     H5E_END_TRY;
 
     /* Print block information */
@@ -496,7 +499,10 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
     /*
      * This function fails if the rspace does not have points.
      */
-    H5E_BEGIN_TRY { snpoints = H5Sget_select_elem_npoints(rspace); }
+    H5E_BEGIN_TRY
+    {
+        snpoints = H5Sget_select_elem_npoints(rspace);
+    }
     H5E_END_TRY;
 
     /* Print point information */

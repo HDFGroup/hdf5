@@ -37,7 +37,7 @@
  * local functions
  *-------------------------------------------------------------------------
  */
-static int  get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[], size_t size_datum,
+static int  get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t size_datum,
                           hsize_t dims_hslab[], hsize_t *hslab_nbytes_p);
 static void print_dataset_info(hid_t dcpl_id, char *objname, double per, int pr);
 static int  do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *options);
@@ -406,8 +406,8 @@ done:
  *-----------------------------------------*/
 
 int
-get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[], size_t size_datum, hsize_t dims_hslab[],
-              hsize_t *hslab_nbytes_p)
+get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t size_datum,
+              hsize_t dims_hslab[], hsize_t *hslab_nbytes_p)
 {
     int          k;
     H5D_layout_t dset_layout;
@@ -1337,7 +1337,10 @@ done:
             H5TOOLS_ERROR((-1), "named_datatype_free failed");
     }
     else {
-        H5E_BEGIN_TRY { named_datatype_free(&named_dt_head, 1); }
+        H5E_BEGIN_TRY
+        {
+            named_datatype_free(&named_dt_head, 1);
+        }
         H5E_END_TRY;
     }
 
