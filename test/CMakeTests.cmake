@@ -915,9 +915,9 @@ if (ENABLE_EXTENDED_TESTS)
         ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh_test"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh_test
     )
+  else ()
+    message (STATUS "Cannot execute TEST flushrefresh - perl not found")
   endif ()
-else ()
-  message (STATUS "Cannot execute TEST flushrefresh - perl not found")
 endif ()
 
 ##############################################################################
