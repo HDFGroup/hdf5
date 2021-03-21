@@ -358,13 +358,13 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
     /*-------------------------------------------------------------------------
      * NOTE: The userblock MUST be written out AFTER the file is closed or
      * the file locking will cause failures on Windows, where file locks
-     * are per-HANDLE and mandatory, not per-process and advisory.
+     * are mandatory, not advisory.
      *-------------------------------------------------------------------------
      */
 
     /*-------------------------------------------------------------------------
-     * write a new user block if requested
-     * write only the input file user block if there is no user block file input
+     * Write a new user block if requested, using the input file user block if
+     * there is no separate user block file input
      *-------------------------------------------------------------------------
      */
 
