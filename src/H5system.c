@@ -635,7 +635,7 @@ Wflock(int fd, int operation)
         return -1;
 
     /* Convert to Windows flags */
-    if(operation & LOCK_EX)
+    if (operation & LOCK_EX)
         dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
 
     /* Lock or unlock */
@@ -650,8 +650,8 @@ Wflock(int fd, int operation)
         }
     }
     else {
-        if(0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow,
-                                 nNumberOfBytesToLockHigh, &overlapped))
+        if (0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh,
+                            &overlapped))
             return -1;
     }
 
