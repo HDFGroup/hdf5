@@ -885,7 +885,10 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
         fid = H5Fopen(fname, flags, fapl_id);
     }
     else {
-        H5E_BEGIN_TRY { fid = H5Fopen(fname, flags, fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            fid = H5Fopen(fname, flags, fapl_id);
+        }
         H5E_END_TRY;
     }
 

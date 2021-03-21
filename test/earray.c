@@ -623,7 +623,10 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         /* Set invalid element size */
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.raw_elmt_size = 0;
-        H5E_BEGIN_TRY { ea = H5EA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            ea = H5EA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (ea) {
             /* Close opened extensible array */
@@ -637,7 +640,10 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         /* Set invalid max. # of elements bits */
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_nelmts_bits = 0;
-        H5E_BEGIN_TRY { ea = H5EA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            ea = H5EA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (ea) {
             /* Close opened extensible array */
@@ -650,7 +656,10 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
 
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_nelmts_bits = 65;
-        H5E_BEGIN_TRY { ea = H5EA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            ea = H5EA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (ea) {
             /* Close opened extensible array */
@@ -664,7 +673,10 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         /* Set invalid min. # of data block pointers in super blocks */
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.sup_blk_min_data_ptrs = 0;
-        H5E_BEGIN_TRY { ea = H5EA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            ea = H5EA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (ea) {
             /* Close opened extensible array */
@@ -676,7 +688,10 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         } /* end if */
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.sup_blk_min_data_ptrs = 1;
-        H5E_BEGIN_TRY { ea = H5EA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            ea = H5EA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (ea) {
             /* Close opened extensible array */
@@ -688,7 +703,10 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         } /* end if */
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.sup_blk_min_data_ptrs = 6;
-        H5E_BEGIN_TRY { ea = H5EA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            ea = H5EA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (ea) {
             /* Close opened extensible array */
@@ -702,7 +720,10 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         /* Set invalid min. # of elements per data block */
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.data_blk_min_elmts = 0;
-        H5E_BEGIN_TRY { ea = H5EA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            ea = H5EA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (ea) {
             /* Close opened extensible array */
@@ -718,7 +739,10 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
             HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
             test_cparam.max_dblk_page_nelmts_bits =
                 (uint8_t)(H5VM_log2_gen((uint64_t)test_cparam.idx_blk_elmts) - 1);
-            H5E_BEGIN_TRY { ea = H5EA_create(f, &test_cparam, NULL); }
+            H5E_BEGIN_TRY
+            {
+                ea = H5EA_create(f, &test_cparam, NULL);
+            }
             H5E_END_TRY;
             if (ea) {
                 /* Close opened extensible array */
@@ -732,7 +756,10 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = 4; /* corresponds to 16 elements in data block page, which is
                                                       less than the 64 elements for the default settings */
-        H5E_BEGIN_TRY { ea = H5EA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            ea = H5EA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (ea) {
             /* Close opened extensible array */
@@ -744,7 +771,10 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         } /* end if */
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = (uint8_t)(test_cparam.max_nelmts_bits + 1);
-        H5E_BEGIN_TRY { ea = H5EA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            ea = H5EA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (ea) {
             /* Close opened extensible array */
@@ -1178,7 +1208,10 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     ea2 = NULL;
 
     /* Try re-opening the array again (should fail, as array will be deleted) */
-    H5E_BEGIN_TRY { ea2 = H5EA_open(f, ea_addr, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ea2 = H5EA_open(f, ea_addr, NULL);
+    }
     H5E_END_TRY;
     if (ea2) {
         /* Close opened array */
@@ -1198,7 +1231,10 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR
 
     /* Try re-opening the array again (should fail, as array is now deleted) */
-    H5E_BEGIN_TRY { ea = H5EA_open(f, ea_addr, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ea = H5EA_open(f, ea_addr, NULL);
+    }
     H5E_END_TRY;
     if (ea) {
         /* Close opened array */
@@ -2568,7 +2604,10 @@ main(void)
 error:
     HDputs("*** TESTS FAILED ***");
 
-    H5E_BEGIN_TRY { H5Pclose(fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+    }
     H5E_END_TRY;
 
     if (api_ctx_pushed)

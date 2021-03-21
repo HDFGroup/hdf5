@@ -347,21 +347,30 @@ test_h5o_open_by_addr(void)
     /* Try giving some bogus values to H5O_open_by_addr. */
     /* Try to open an object with a bad address */
     grp_addr += 20;
-    H5E_BEGIN_TRY { grp = H5Oopen_by_addr(fid, grp_addr); }
+    H5E_BEGIN_TRY
+    {
+        grp = H5Oopen_by_addr(fid, grp_addr);
+    }
     H5E_END_TRY
     VERIFY(grp, FAIL, "H5Oopen_by_addr");
 
     /* For instance, an objectno smaller than the end of the file's superblock should
      * trigger an error */
     grp_addr = 10;
-    H5E_BEGIN_TRY { grp = H5Oopen_by_addr(fid, grp_addr); }
+    H5E_BEGIN_TRY
+    {
+        grp = H5Oopen_by_addr(fid, grp_addr);
+    }
     H5E_END_TRY
     VERIFY(grp, FAIL, "H5Oopen_by_addr");
 
     /* Likewise, an objectno larger than the size of the file should fail */
     grp_addr = 0;
     grp_addr = 1000000000;
-    H5E_BEGIN_TRY { grp = H5Oopen_by_addr(fid, grp_addr); }
+    H5E_BEGIN_TRY
+    {
+        grp = H5Oopen_by_addr(fid, grp_addr);
+    }
     H5E_END_TRY
     VERIFY(grp, FAIL, "H5Oopen_by_addr");
 
@@ -369,7 +378,10 @@ test_h5o_open_by_addr(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Also, trying to open an object without a valid location should fail */
-    H5E_BEGIN_TRY { dtype = H5Oopen_by_addr(fid, dtype_addr); }
+    H5E_BEGIN_TRY
+    {
+        dtype = H5Oopen_by_addr(fid, dtype_addr);
+    }
     H5E_END_TRY
     VERIFY(dtype, FAIL, "H5Oopen_by_addr");
 } /* test_h5o_open_by_addr() */
@@ -473,7 +485,10 @@ test_h5o_open_by_token(void)
 
     /* Try giving some bogus values to H5O_open_by_token */
     /* Try opening an object using H5O_TOKEN_UNDEF (should fail) */
-    H5E_BEGIN_TRY { dtype = H5Oopen_by_token(fid, H5O_TOKEN_UNDEF); }
+    H5E_BEGIN_TRY
+    {
+        dtype = H5Oopen_by_token(fid, H5O_TOKEN_UNDEF);
+    }
     H5E_END_TRY
     VERIFY(dtype, FAIL, "H5Oopen_by_token");
 
@@ -481,7 +496,10 @@ test_h5o_open_by_token(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Also, trying to open an object without a valid location (should fail) */
-    H5E_BEGIN_TRY { dtype = H5Oopen_by_token(fid, li.u.token); }
+    H5E_BEGIN_TRY
+    {
+        dtype = H5Oopen_by_token(fid, li.u.token);
+    }
     H5E_END_TRY
     VERIFY(dtype, FAIL, "H5Oopen_by_token");
 
@@ -929,7 +947,10 @@ test_h5o_link(void)
         for (high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Set version bounds */
-            H5E_BEGIN_TRY { ret = H5Pset_libver_bounds(fapl_id, low, high); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5Pset_libver_bounds(fapl_id, low, high);
+            }
             H5E_END_TRY;
 
             if (ret < 0) /* Invalid low/high combinations */
@@ -1114,7 +1135,10 @@ test_h5o_comment(void)
     CHECK(ret, FAIL, "H5Oset_comment");
 
     /* Putting a comment on the dataspace.  It's supposed to fail. */
-    H5E_BEGIN_TRY { ret = H5Oset_comment(dspace, "dataspace comment"); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oset_comment(dspace, "dataspace comment");
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oset_comment");
 
@@ -1283,7 +1307,10 @@ test_h5o_comment_by_name(void)
     CHECK(ret, FAIL, "H5Oset_comment_by_name");
 
     /* Putting a comment on the dataspace.  It's supposed to fail. */
-    H5E_BEGIN_TRY { ret = H5Oset_comment_by_name(dspace, ".", "dataspace comment", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oset_comment_by_name(dspace, ".", "dataspace comment", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oset_comment");
 
@@ -1565,21 +1592,30 @@ test_h5o_open_by_addr_deprec(void)
     /* Try giving some bogus values to H5O_open_by_addr. */
     /* Try to open an object with a bad address */
     grp_addr += 20;
-    H5E_BEGIN_TRY { grp = H5Oopen_by_addr(fid, grp_addr); }
+    H5E_BEGIN_TRY
+    {
+        grp = H5Oopen_by_addr(fid, grp_addr);
+    }
     H5E_END_TRY
     VERIFY(grp, FAIL, "H5Oopen_by_addr");
 
     /* For instance, an objectno smaller than the end of the file's superblock should
      * trigger an error */
     grp_addr = 10;
-    H5E_BEGIN_TRY { grp = H5Oopen_by_addr(fid, grp_addr); }
+    H5E_BEGIN_TRY
+    {
+        grp = H5Oopen_by_addr(fid, grp_addr);
+    }
     H5E_END_TRY
     VERIFY(grp, FAIL, "H5Oopen_by_addr");
 
     /* Likewise, an objectno larger than the size of the file should fail */
     grp_addr = 0;
     grp_addr = 1000000000;
-    H5E_BEGIN_TRY { grp = H5Oopen_by_addr(fid, grp_addr); }
+    H5E_BEGIN_TRY
+    {
+        grp = H5Oopen_by_addr(fid, grp_addr);
+    }
     H5E_END_TRY
     VERIFY(grp, FAIL, "H5Oopen_by_addr");
 
@@ -1587,7 +1623,10 @@ test_h5o_open_by_addr_deprec(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Also, trying to open an object without a valid location should fail */
-    H5E_BEGIN_TRY { dtype = H5Oopen_by_addr(fid, dtype_addr); }
+    H5E_BEGIN_TRY
+    {
+        dtype = H5Oopen_by_addr(fid, dtype_addr);
+    }
     H5E_END_TRY
     VERIFY(dtype, FAIL, "H5Oopen_by_addr");
 } /* test_h5o_open_by_addr_deprec() */

@@ -259,7 +259,7 @@ New Features
             YES                   NO          Default to STATIC
             NO                    YES         Default to SHARED
             NO                    NO          Default to SHARED
-        The defaults can be overriden by setting the config option
+        The defaults can be overridden by setting the config option
             HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
 
         (ADB - 2020/07/09, HDFFV-11116)
@@ -384,10 +384,10 @@ New Features
 
     Library:
     --------
-    - H5Epush_ret() now requires a trailing semi-colon
+    - H5Epush_ret() now requires a trailing semicolon
 
         H5Epush_ret() is a function-like macro that has been changed to
-        contain a `do {} while(0)` loop. Consequently, a trailing semi-colon
+        contain a `do {} while(0)` loop. Consequently, a trailing semicolon
         is now required to end the `while` statement. Previously, a trailing
         semi would work, but was not mandatory. This change was made to allow
         clang-format to correctly format the source code.
@@ -413,7 +413,7 @@ New Features
 
       (DER - 2020/11/24, HDFFV-11190)
 
-    - Add new public function H5Ssel_iter_reset
+    - Add a new public function H5Ssel_iter_reset
 
         This function resets a dataspace selection iterator back to an
         initial state so that it may be used for iteration once more.
@@ -536,7 +536,7 @@ New Features
         This function returns a datatype equivalent to the supplied datatype but
         with the location set to be in the file.  This datatype can then be used
         with H5Tconvert to convert data between file and in-memory representation.
-        This funcition is intended for use only by VOL connector developers.
+        This function is intended for use only by VOL connector developers.
 
         (NAF - 2019/11/08, ID-127)
 
@@ -608,11 +608,11 @@ New Features
 
     - Added ability to test java library with VOLs.
 
-        Created new CMake script that combines the java and vol test scripts.
+        Created a new CMake script that combines the java and vol test scripts.
 
         (ADB - 2020/02/03, HDFFV-10996)
 
-    - Tests fail for non-English locale.
+    - Tests fail for non-English locales.
 
         In the JUnit tests with a non-English locale, only the part before
         the decimal comma is replaced by XXXX and this leads to a comparison
@@ -707,9 +707,29 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Fixed CVE-2018-17435
+
+        The tool h5dump produced a segfault when the size of a fill value
+        message was corrupted and caused a buffer overflow.
+
+        The problem was fixed by verifying the fill value's size
+        against the buffer size before attempting to access the buffer.
+
+        (BMR - 2021/03/15, HDFFV-10480)
+
+    - Fixed CVE-2018-14033 (same issue as CVE-2020-10811)
+
+        The tool h5dump produced a segfault when the storage size message
+        was corrupted and caused a buffer overflow.
+
+        The problem was fixed by verifying the storage size against the
+        buffer size before attempting to access the buffer.
+
+        (BMR - 2021/03/15, HDFFV-11159/HDFFV-11049)
+
     - Remove underscores on header file guards
 
-        Header file guards used a variety of underscores at the beginning the define.
+        Header file guards used a variety of underscores at the beginning of the define.
 
         Removed all leading (some trailing) underscores from header file guards.
 
@@ -739,7 +759,7 @@ Bug Fixes since HDF5-1.12.0 release
         and the filter is optional, it was supposed to be skipped but it was
         not skipped and the creation failed.
 
-        Allowed the creation of the dataset in such situation.
+        Allowed the creation of the dataset in such a situation.
 
         (BMR - 2020/08/13, HDFFV-10933)
 
@@ -758,7 +778,7 @@ Bug Fixes since HDF5-1.12.0 release
         H5S_NO_CLASS is an internal class value that should not have been
         exposed via a public API call.
 
-        In debug builds of the library, this can cause asserts to trip. In
+        In debug builds of the library, this can cause assert() functions to trip. In
         non-debug builds, it will produce normal library errors.
 
         The new library behavior is for H5Sset_extent_none() to convert
@@ -836,11 +856,11 @@ Bug Fixes since HDF5-1.12.0 release
 
     - Added ability to test java library with VOLs.
 
-        Created new CMake script that combines the java and vol test scripts.
+        Created a new CMake script that combines the java and vol test scripts.
 
         (ADB - 2020/02/03, HDFFV-10996)
 
-    - Tests fail for non-English locale.
+    - Tests fail for non-English locales.
 
         In the JUnit tests with a non-English locale, only the part before
         the decimal comma is replaced by XXXX and this leads to a comparison
@@ -881,7 +901,7 @@ Bug Fixes since HDF5-1.12.0 release
 
         Tools parsing used the length of the option from the long array to match
         the option from the command line. This incorrectly matched a shorter long
-        name option that was happened to be a subset of another long option.
+        name option that happened to be a subset of another long option.
         Changed to match whole names.
 
         (ADB - 2021/01/19, HDFFV-11106)
@@ -909,8 +929,8 @@ Bug Fixes since HDF5-1.12.0 release
     - h5diff added a command line option to ignore attributes.
 
         h5diff would ignore all objects with a supplied path if the exclude-path argument is used.
-        Adding the exclude-attribute argument will only eclude attributes, with the supplied path,
-        from comparision.
+        Adding the exclude-attribute argument will only exclude attributes, with the supplied path,
+        from comparison.
 
         (ADB - 2020/07/20, HDFFV-5935)
 

@@ -204,7 +204,9 @@
 
 ./config/site-specific/BlankForm
 
+./doc/branches-explained.md
 ./doc/code-conventions.md
+./doc/contributing.md
 
 ./doxygen/aliases
 ./doxygen/Doxyfile.in
@@ -2022,7 +2024,11 @@
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
 ./tools/testfiles/tldouble.ddl
+./tools/testfiles/tldouble.wddl
 ./tools/testfiles/tldouble.h5
+./tools/testfiles/tldouble_scalar.ddl
+./tools/testfiles/tldouble_scalar.wddl
+./tools/testfiles/tldouble_scalar.h5
 ./tools/testfiles/tlonglinks.ddl
 ./tools/testfiles/tlonglinks.h5
 ./tools/testfiles/tloop-1.ddl
@@ -2129,6 +2135,8 @@
 ./tools/testfiles/twithddl.exp
 ./tools/testfiles/twithddlfile.ddl
 ./tools/testfiles/twithddlfile.exp
+./tools/testfiles/tCVE_2018_11206_fill_old.h5
+./tools/testfiles/tCVE_2018_11206_fill_new.h5
 
 # h5dump test error files
 ./tools/test/h5dump/errfiles/filter_fail.err

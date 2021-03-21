@@ -856,7 +856,10 @@ test_remove_clear_type(void)
 
 error:
     /* Cleanup. For simplicity, just destroy the types and ignore errors. */
-    H5E_BEGIN_TRY { H5Idestroy_type(obj_type); }
+    H5E_BEGIN_TRY
+    {
+        H5Idestroy_type(obj_type);
+    }
     H5E_END_TRY
 
     HDfree(obj_list.objects);
@@ -995,19 +998,28 @@ test_future_ids(void)
 
     /* Test basic error conditions */
     fake_future_obj = 0;
-    H5E_BEGIN_TRY { future_id = H5Iregister_future(obj_type, &fake_future_obj, NULL, NULL); }
+    H5E_BEGIN_TRY
+    {
+        future_id = H5Iregister_future(obj_type, &fake_future_obj, NULL, NULL);
+    }
     H5E_END_TRY
     VERIFY(future_id, H5I_INVALID_HID, "H5Iregister_future");
     if (H5I_INVALID_HID != future_id)
         goto error;
 
-    H5E_BEGIN_TRY { future_id = H5Iregister_future(obj_type, &fake_future_obj, realize_future_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        future_id = H5Iregister_future(obj_type, &fake_future_obj, realize_future_cb, NULL);
+    }
     H5E_END_TRY
     VERIFY(future_id, H5I_INVALID_HID, "H5Iregister_future");
     if (H5I_INVALID_HID != future_id)
         goto error;
 
-    H5E_BEGIN_TRY { future_id = H5Iregister_future(obj_type, &fake_future_obj, NULL, discard_future_cb); }
+    H5E_BEGIN_TRY
+    {
+        future_id = H5Iregister_future(obj_type, &fake_future_obj, NULL, discard_future_cb);
+    }
     H5E_END_TRY
     VERIFY(future_id, H5I_INVALID_HID, "H5Iregister_future");
     if (H5I_INVALID_HID != future_id)
@@ -1349,7 +1361,10 @@ test_future_ids(void)
 
 error:
     /* Cleanup. For simplicity, just destroy the types and ignore errors. */
-    H5E_BEGIN_TRY { H5Idestroy_type(obj_type); }
+    H5E_BEGIN_TRY
+    {
+        H5Idestroy_type(obj_type);
+    }
     H5E_END_TRY
 
     return -1;

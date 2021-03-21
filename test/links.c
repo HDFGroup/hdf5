@@ -664,14 +664,20 @@ cklinks(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
     if (H5Lexists(file, "/grp1/hard", H5P_DEFAULT) != TRUE)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { status = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
         HDputs("    H5Lexists() should have failed for a path with missing components.");
         TEST_ERROR
     } /* end if */
-    H5E_BEGIN_TRY { status = H5Lexists(file, "/no_grp1/hard", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Lexists(file, "/no_grp1/hard", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
@@ -1074,7 +1080,10 @@ toomany(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through too deep soft link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "soft17", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "soft17", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gid >= 0) {
         H5_FAILED();
@@ -1419,7 +1428,10 @@ test_move(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that the group is no longer in the original location */
-    H5E_BEGIN_TRY { moved_grp = H5Gopen2(grp_1, "group_move", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        moved_grp = H5Gopen2(grp_1, "group_move", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (moved_grp >= 0) {
         H5_FAILED();
@@ -2169,14 +2181,20 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
     if (H5Lexists(file, "/grp1/hard", H5P_DEFAULT) != TRUE)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { status = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
         HDputs("    H5Lexists() should have failed for a path with missing components.");
         TEST_ERROR
     } /* end if */
-    H5E_BEGIN_TRY { status = H5Lexists(file, "/no_grp1/hard", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Lexists(file, "/no_grp1/hard", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
@@ -2924,7 +2942,10 @@ external_link_root_deprec(hid_t fapl, hbool_t new_format)
     if ((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR
 
-    H5E_BEGIN_TRY { gid = H5Gcreate2(fid, "ext_link/readonly_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gcreate2(fid, "ext_link/readonly_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (gid >= 0)
         TEST_ERROR
@@ -4231,7 +4252,10 @@ lapl_nlinks_deprec(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Try opening through what is now too many soft links */
-    H5E_BEGIN_TRY { gid = H5Oopen(fid, "soft5", plist); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Oopen(fid, "soft5", plist);
+    }
     H5E_END_TRY;
     if (gid >= 0) {
         H5_FAILED();
@@ -6397,7 +6421,10 @@ link_iterate_check_deprec(hid_t group_id, H5_index_t idx_type, H5_iter_order_t o
 
     /* Check for iteration routine indicating failure */
     skip = 0;
-    H5E_BEGIN_TRY { ret = H5Literate1(group_id, idx_type, order, &skip, link_iterate_fail_deprec_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Literate1(group_id, idx_type, order, &skip, link_iterate_fail_deprec_cb, NULL);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -6895,7 +6922,10 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     if (ret >= 0)
         TEST_ERROR
 
-    H5E_BEGIN_TRY { ret = H5Giterate((hid_t)(-1), ".", &gskip, group_iterate_old_deprec_cb, iter_info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Giterate((hid_t)(-1), ".", &gskip, group_iterate_old_deprec_cb, iter_info);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -7230,7 +7260,10 @@ external_link_root(hid_t fapl, hbool_t new_format)
     if ((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR
 
-    H5E_BEGIN_TRY { gid = H5Gcreate2(fid, "ext_link/readonly_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gcreate2(fid, "ext_link/readonly_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (gid >= 0)
         TEST_ERROR
@@ -8024,7 +8057,10 @@ external_link_toomany(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "link1", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "link1", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gid >= 0) {
         H5_FAILED();
@@ -8131,7 +8167,10 @@ external_link_dangling(hid_t fapl, hbool_t new_format)
         TEST_ERROR;
 
     /* Open object through dangling file external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "no_file", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "no_file", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gid >= 0) {
         H5_FAILED();
@@ -8140,7 +8179,10 @@ external_link_dangling(hid_t fapl, hbool_t new_format)
     }
 
     /* Open object through dangling object external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "no_object", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "no_object", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gid >= 0) {
         H5_FAILED();
@@ -8248,7 +8290,10 @@ external_link_prefix(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", gapl_id); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", gapl_id);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file from pathnames set via H5Pset_elink_prefix() */
@@ -8342,7 +8387,10 @@ external_link_abs_mainpath(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file from absolute path set for main file */
@@ -8427,7 +8475,10 @@ external_link_rel_mainpath(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file from the main file's relative pathname */
@@ -8517,7 +8568,10 @@ external_link_cwd(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file from the current working directory */
@@ -8612,7 +8666,10 @@ external_link_abstar(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file with abolute path */
@@ -8707,7 +8764,10 @@ external_link_abstar_cur(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file from main file's current working directory */
@@ -8879,7 +8939,10 @@ external_link_chdir(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     if (HDchdir("..") < 0)
@@ -9511,7 +9574,10 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
         TEST_ERROR
 
     /* Attempt to create a group through the external link using gapl (should fail) */
-    H5E_BEGIN_TRY { group = H5Gcreate2(file1, "/ext_link/group", H5P_DEFAULT, H5P_DEFAULT, gapl); }
+    H5E_BEGIN_TRY
+    {
+        group = H5Gcreate2(file1, "/ext_link/group", H5P_DEFAULT, H5P_DEFAULT, gapl);
+    }
     H5E_END_TRY;
     if (group != FAIL)
         TEST_ERROR
@@ -9559,25 +9625,40 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
         TEST_ERROR
 
     /* Attempt to set invalid flags on gapl */
-    H5E_BEGIN_TRY { ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_TRUNC); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_TRUNC);
+    }
     H5E_END_TRY;
     if (ret != FAIL)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_EXCL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_EXCL);
+    }
     H5E_END_TRY;
     if (ret != FAIL)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_CREAT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_CREAT);
+    }
     H5E_END_TRY;
     if (ret != FAIL)
         TEST_ERROR
     /* SWMR reader with write access */
-    H5E_BEGIN_TRY { ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_RDWR | H5F_ACC_SWMR_READ); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_RDWR | H5F_ACC_SWMR_READ);
+    }
     H5E_END_TRY;
     if (ret != FAIL)
         TEST_ERROR
     /* SWMR writer with read-only access */
-    H5E_BEGIN_TRY { ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE);
+    }
     H5E_END_TRY;
     if (ret != FAIL)
         TEST_ERROR
@@ -9690,19 +9771,31 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     } /* end if */
 
     /* Verify that H5Fcreate and H5Fopen reject H5F_ACC_DEFAULT */
-    H5E_BEGIN_TRY { file1 = H5Fcreate(filename1, H5F_ACC_DEFAULT, H5P_DEFAULT, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file1 = H5Fcreate(filename1, H5F_ACC_DEFAULT, H5P_DEFAULT, fapl);
+    }
     H5E_END_TRY;
     if (file1 != FAIL)
         TEST_ERROR
-    H5E_BEGIN_TRY { file1 = H5Fcreate(filename1, H5F_ACC_TRUNC | H5F_ACC_DEFAULT, H5P_DEFAULT, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file1 = H5Fcreate(filename1, H5F_ACC_TRUNC | H5F_ACC_DEFAULT, H5P_DEFAULT, fapl);
+    }
     H5E_END_TRY;
     if (file1 != FAIL)
         TEST_ERROR
-    H5E_BEGIN_TRY { file1 = H5Fopen(filename1, H5F_ACC_DEFAULT, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file1 = H5Fopen(filename1, H5F_ACC_DEFAULT, fapl);
+    }
     H5E_END_TRY;
     if (file1 != FAIL)
         TEST_ERROR
-    H5E_BEGIN_TRY { file1 = H5Fopen(filename1, H5F_ACC_RDWR | H5F_ACC_DEFAULT, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file1 = H5Fopen(filename1, H5F_ACC_RDWR | H5F_ACC_DEFAULT, fapl);
+    }
     H5E_END_TRY;
     if (file1 != FAIL)
         TEST_ERROR
@@ -9883,7 +9976,10 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     op_data.code = 1;
 
     /* Attempt to reopen group2 (should fail) */
-    H5E_BEGIN_TRY { group = H5Gopen2(file1, "/group1/ext_link/group2", gapl); }
+    H5E_BEGIN_TRY
+    {
+        group = H5Gopen2(file1, "/group1/ext_link/group2", gapl);
+    }
     H5E_END_TRY;
     if (group != FAIL)
         TEST_ERROR
@@ -9892,7 +9988,10 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     op_data.code = 2;
 
     /* Attempt to reopen group2 (should fail) */
-    H5E_BEGIN_TRY { group = H5Gopen2(file1, "/group1/ext_link/group2", gapl); }
+    H5E_BEGIN_TRY
+    {
+        group = H5Gopen2(file1, "/group1/ext_link/group2", gapl);
+    }
     H5E_END_TRY;
     if (group != FAIL)
         TEST_ERROR
@@ -9977,7 +10076,10 @@ external_reset_register(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return FAIL;
 } /* end external_reset_register() */
@@ -10046,7 +10148,10 @@ external_link_win1(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file via main file's CWD*/
@@ -10140,7 +10245,10 @@ external_link_win2(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file directly */
@@ -10231,7 +10339,10 @@ external_link_win3(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file directly */
@@ -10319,7 +10430,10 @@ external_link_win4(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file via main file's absolute drive/relative path */
@@ -10417,7 +10531,10 @@ external_link_win5(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file via main file's rel drive/abs path */
@@ -10512,7 +10629,10 @@ external_link_win6(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file via target file's rel path in current drive */
@@ -10604,7 +10724,10 @@ external_link_win7(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file via main file's local host/main drive*/
@@ -10701,7 +10824,10 @@ external_link_win8(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file directly */
@@ -10793,7 +10919,10 @@ external_link_win9(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* should be able to find the target file via main file's local host/main drive*/
@@ -10865,7 +10994,10 @@ external_link_recursive(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through dangling file external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "recursive", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "recursive", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gid >= 0) {
         H5_FAILED();
@@ -12706,7 +12838,10 @@ external_dont_fail_to_source(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Attempt to open the object the link points to.  This should fail */
-    H5E_BEGIN_TRY { oid = H5Oopen(fid, "link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        oid = H5Oopen(fid, "link", H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (oid >= 0)
         FAIL_PUTS_ERROR("Succeeded in opening target of invalid external link")
@@ -15103,7 +15238,10 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Try opening through what is now too many soft links */
-    H5E_BEGIN_TRY { gid = H5Oopen(fid, "soft5", plist); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Oopen(fid, "soft5", plist);
+    }
     H5E_END_TRY;
     if (gid >= 0) {
         H5_FAILED();
@@ -15426,7 +15564,10 @@ check_all_closed(hid_t fapl, hbool_t new_format, int stopat)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
     return FAIL;
 } /* end check_all_closed() */
@@ -15552,7 +15693,10 @@ build_visit_file(hid_t fapl)
     return (fid);
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
     return FAIL;
 } /* end build_visit_file() */
@@ -16027,7 +16171,10 @@ obj_visit_stop(hid_t fapl, hbool_t new_format)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
     return FAIL;
 } /* end obj_visit_stop() */
@@ -16537,7 +16684,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
 
     /* Hard links */
     /* Verify that H5Oexists_by_name() fails for non-existent link in root group */
-    H5E_BEGIN_TRY { status = H5Oexists_by_name(fid, "foo", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Oexists_by_name(fid, "foo", H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (status >= 0)
         TEST_ERROR
@@ -16553,7 +16703,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that H5Oexists_by_name() fails for non-existent link in non-root group */
-    H5E_BEGIN_TRY { status = H5Oexists_by_name(fid, "group/foo", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Oexists_by_name(fid, "group/foo", H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (status >= 0)
         TEST_ERROR
@@ -16867,7 +17020,10 @@ corder_create_empty(hid_t fapl)
         TEST_ERROR
 
     /* Setting invalid combination of a group order creation order indexing on should fail */
-    H5E_BEGIN_TRY { ret = H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_INDEXED); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_INDEXED);
+    }
     H5E_END_TRY;
     if (ret > 0) {
         H5_FAILED();
@@ -19339,7 +19495,10 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
 
     /* Check for iteration routine indicating failure */
     skip = 0;
-    H5E_BEGIN_TRY { ret = H5Literate2(group_id, idx_type, order, &skip, link_iterate_fail_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Literate2(group_id, idx_type, order, &skip, link_iterate_fail_cb, NULL);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -19502,7 +19661,10 @@ link_iterate(hid_t fapl)
 
                 /* Check for out of bound iteration on compact group */
                 skip = (hsize_t)u;
-                H5E_BEGIN_TRY { ret = H5Literate2(group_id, idx_type, order, &skip, link_iterate_cb, NULL); }
+                H5E_BEGIN_TRY
+                {
+                    ret = H5Literate2(group_id, idx_type, order, &skip, link_iterate_cb, NULL);
+                }
                 H5E_END_TRY;
                 if (ret >= 0)
                     TEST_ERROR
@@ -19532,7 +19694,10 @@ link_iterate(hid_t fapl)
 
                 /* Check for out of bound iteration on dense group */
                 skip = (hsize_t)u;
-                H5E_BEGIN_TRY { ret = H5Literate2(group_id, idx_type, order, &skip, link_iterate_cb, NULL); }
+                H5E_BEGIN_TRY
+                {
+                    ret = H5Literate2(group_id, idx_type, order, &skip, link_iterate_cb, NULL);
+                }
                 H5E_END_TRY;
                 if (ret >= 0)
                     TEST_ERROR
@@ -19827,20 +19992,29 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
 
     /* Check for iteration routine indicating failure */
     skip = 0;
-    H5E_BEGIN_TRY { ret = H5Literate2(group_id, H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Literate2(group_id, H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
 
     /* Check for iteration w/bad location ID */
     skip = 0;
-    H5E_BEGIN_TRY { ret = H5Literate2((hid_t)(-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Literate2((hid_t)(-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    H5E_BEGIN_TRY { ret = H5Giterate((hid_t)(-1), ".", &gskip, group_iterate_old_cb, iter_info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Giterate((hid_t)(-1), ".", &gskip, group_iterate_old_cb, iter_info);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -19930,7 +20104,10 @@ link_iterate_old(hid_t fapl)
 
         /* Check for out of bound iteration on old-style group */
         skip = (hsize_t)u;
-        H5E_BEGIN_TRY { ret = H5Literate2(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, NULL); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Literate2(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, NULL);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -20535,7 +20712,10 @@ open_by_idx_old(hid_t fapl)
             TEST_ERROR
 
         /* Try to open on object in an empty group */
-        H5E_BEGIN_TRY { ret = H5Oopen_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Oopen_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -20571,7 +20751,10 @@ open_by_idx_old(hid_t fapl)
             TEST_ERROR
 
         /* Check for out of bound open by index */
-        H5E_BEGIN_TRY { ret = H5Oopen_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Oopen_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR

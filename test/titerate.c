@@ -271,19 +271,28 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     /* Test invalid indices for starting iteration */
     info.command = RET_ZERO;
     idx          = (hsize_t)-1;
-    H5E_BEGIN_TRY { ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Literate2");
 
     /* Test skipping exactly as many entries as in the group */
     idx = NDATASETS + 2;
-    H5E_BEGIN_TRY { ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Literate2");
 
     /* Test skipping more entries than are in the group */
     idx = NDATASETS + 3;
-    H5E_BEGIN_TRY { ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Literate2");
 
@@ -461,13 +470,19 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
 
     /* Test skipping exactly as many attributes as there are */
     idx = NATTR;
-    H5E_BEGIN_TRY { ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aiterate2");
 
     /* Test skipping more attributes than there are */
     idx = NATTR + 1;
-    H5E_BEGIN_TRY { ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aiterate2");
 

@@ -1725,7 +1725,10 @@ test_failed_attempts(const char *filename, hid_t fapl)
         TEST_ERROR
 
     /* Attempt to get the number of chunks on contiguous dataset, should fail */
-    H5E_BEGIN_TRY { ret = H5Dget_num_chunks(dset, dspace, &nchunks); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dget_num_chunks(dset, dspace, &nchunks);
+    }
     H5E_END_TRY;
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt a chunk query function on a contiguous dataset.")
@@ -1745,7 +1748,10 @@ test_failed_attempts(const char *filename, hid_t fapl)
      * dataset, should fail */
     offset[0] = 0;
     offset[1] = 0;
-    H5E_BEGIN_TRY { ret = H5Dget_chunk_info_by_coord(dset, offset, &read_flt_msk, &addr, &size); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dget_chunk_info_by_coord(dset, offset, &read_flt_msk, &addr, &size);
+    }
     H5E_END_TRY;
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt a chunk query function on a contiguous dataset.")

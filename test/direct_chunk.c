@@ -2026,7 +2026,10 @@ test_read_unallocated_chunk(hid_t file)
             offset[1] = j * CHUNK_NY;
 
             /* Read a non-existant chunk using the direct read function. */
-            H5E_BEGIN_TRY { status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, &direct_buf); }
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, &direct_buf);
+            }
             H5E_END_TRY;
 
             /* Check that the chunk read call does not succeed. */
@@ -2035,7 +2038,10 @@ test_read_unallocated_chunk(hid_t file)
 
             /* Query the size of the non-existant chunk */
             direct_chunk_nbytes = ULONG_MAX;
-            H5E_BEGIN_TRY { status = H5Dget_chunk_storage_size(dataset, offset, &direct_chunk_nbytes); }
+            H5E_BEGIN_TRY
+            {
+                status = H5Dget_chunk_storage_size(dataset, offset, &direct_chunk_nbytes);
+            }
             H5E_END_TRY;
 
             /* Check that the chunk storage size call does not succeed. */

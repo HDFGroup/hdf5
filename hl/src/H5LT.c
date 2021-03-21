@@ -907,7 +907,10 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
     return file_id;
 
 out:
-    H5E_BEGIN_TRY { H5Pclose(fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+    }
     H5E_END_TRY;
     return -1;
 } /* end H5LTopen_file_image() */
