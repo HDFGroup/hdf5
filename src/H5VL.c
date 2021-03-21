@@ -87,27 +87,6 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "*xi", cls, vipl_id);
 
-    /* Check arguments */
-    if (!cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "VOL connector class pointer cannot be NULL")
-    if (H5VL_VERSION != cls->version)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL connector has incompatible version")
-    if (!cls->name)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector class name cannot be the NULL pointer")
-    if (0 == HDstrlen(cls->name))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector class name cannot be the empty string")
-    if (cls->info_cls.copy && !cls->info_cls.free)
-        HGOTO_ERROR(
-            H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-            "VOL connector must provide free callback for VOL info objects when a copy callback is provided")
-    if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector must provide free callback for object wrapping contexts when a get "
-                    "callback is provided")
-
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
         vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
