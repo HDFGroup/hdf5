@@ -104,7 +104,7 @@ table_attrs_free(table_attrs_t *table)
  * Date: March 15, 2011
  *------------------------------------------------------------------------*/
 static void
-table_attr_mark_exist(unsigned *exist, char *name, table_attrs_t *table)
+table_attr_mark_exist(const unsigned *exist, char *name, table_attrs_t *table)
 {
     if (table->nattrs == table->size) {
         match_attr_t *new_attrs;

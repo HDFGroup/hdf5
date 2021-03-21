@@ -306,7 +306,7 @@ DSetMemXferPropList::getDataTransform() const
 {
     // Initialize string to "", so that if there is no expression, the returned
     // string will be empty
-    H5std_string expression("");
+    H5std_string expression;
 
     // Preliminary call to get the expression's length
     ssize_t exp_len = H5Pget_data_transform(id, NULL, (size_t)0);

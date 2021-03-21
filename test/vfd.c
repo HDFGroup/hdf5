@@ -99,7 +99,7 @@ static int splitter_create_single_file_at(const char *filename, hid_t fapl_id,
                                           const struct splitter_dataset_def *data);
 static int splitter_compare_expected_data(hid_t file_id, const struct splitter_dataset_def *data);
 static int run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_errors,
-                             hbool_t provide_logfile_path, hid_t sub_fapl_ids[2]);
+                             hbool_t provide_logfile_path, const hid_t sub_fapl_ids[2]);
 static int splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id);
 static int splitter_tentative_open_test(hid_t child_fapl_id);
 static int file_exists(const char *filename, hid_t fapl_id);
@@ -2306,7 +2306,7 @@ compare_splitter_config_info(hid_t fapl_id, H5FD_splitter_vfd_config_t *info)
         }
     }
     if ((HDstrlen(info->wo_path) != HDstrlen(fetched_info->wo_path)) ||
-        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX)) {
+        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
         HDfprintf(stderr, "MISMATCH: '%s' :: '%s'\n", info->wo_path, fetched_info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, fetched_info->wo_path);
@@ -2338,7 +2338,7 @@ done:
  */
 static int
 run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_errors,
-                  hbool_t provide_logfile_path, hid_t sub_fapl_ids[2])
+                  hbool_t provide_logfile_path, const hid_t sub_fapl_ids[2])
 {
     hid_t                       file_id     = H5I_INVALID_HID;
     hid_t                       fapl_id     = H5I_INVALID_HID;

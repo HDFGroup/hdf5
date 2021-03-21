@@ -1490,7 +1490,7 @@ main(int argc, const char *argv[])
                 }
             }
             else {
-                if (useschema_g && HDstrcmp(xmlnsprefix, "")) {
+                if (useschema_g && HDstrcmp(xmlnsprefix, "") != 0) {
                     error_msg(
                         "Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
                     h5tools_setstatus(EXIT_FAILURE);

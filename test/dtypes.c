@@ -1141,7 +1141,7 @@ test_compound_5(void)
     H5Tclose(int_array);
 
     /* Check results */
-    if (HDmemcmp(src[1].name, dst[1].name, sizeof(src[1].name)) || src[1].tdim != dst[1].tdim ||
+    if (HDmemcmp(src[1].name, dst[1].name, sizeof(src[1].name)) != 0 || src[1].tdim != dst[1].tdim ||
         src[1].coll_ids[0] != dst[1].coll_ids[0] || src[1].coll_ids[1] != dst[1].coll_ids[1] ||
         src[1].coll_ids[2] != dst[1].coll_ids[2] || src[1].coll_ids[3] != dst[1].coll_ids[3]) {
         H5_FAILED();
@@ -1817,7 +1817,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || HDstrcmp(rdata.str, wdata.str)) {
+    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || HDstrcmp(rdata.str, wdata.str) != 0) {
         H5_FAILED();
         AT();
         HDprintf("incorrect read data\n");
@@ -1891,7 +1891,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || strcmp(rdata.str, wdata.str)) {
+    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || HDstrcmp(rdata.str, wdata.str) != 0) {
         H5_FAILED();
         AT();
         HDprintf("incorrect read data\n");
@@ -2081,7 +2081,7 @@ test_compound_10(void)
 
     for (i = 0; i < ARRAY_DIM; i++) {
         if (rdata[i].i1 != wdata[i].i1 || rdata[i].i2 != wdata[i].i2 ||
-            HDstrcmp(rdata[i].str, wdata[i].str)) {
+            HDstrcmp(rdata[i].str, wdata[i].str) != 0) {
             H5_FAILED();
             AT();
             HDprintf("incorrect read data\n");
@@ -2097,7 +2097,7 @@ test_compound_10(void)
 
         t1 = rdata[i].text.p;
         t2 = wdata[i].text.p;
-        if (strcmp((char *)t1, (char *)t2)) {
+        if (HDstrcmp((char *)t1, (char *)t2) != 0) {
             H5_FAILED();
             AT();
             HDprintf("incorrect VL read data\n");
@@ -2282,7 +2282,7 @@ test_compound_11(void)
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
-        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1)) {
+        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
@@ -2333,7 +2333,7 @@ test_compound_11(void)
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
-        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1)) {
+        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
@@ -2374,7 +2374,7 @@ test_compound_11(void)
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
-        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1)) {
+        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
@@ -2956,14 +2956,14 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || HDstrcmp(rdata1.str, wdata1.str)) {
+    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || HDstrcmp(rdata1.str, wdata1.str) != 0) {
         H5_FAILED();
         AT();
         HDprintf("incorrect read data\n");
         goto error;
     } /* end if */
 
-    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || HDstrcmp(rdata2.str, wdata2.str) ||
+    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || HDstrcmp(rdata2.str, wdata2.str) != 0 ||
         rdata2.l1 != wdata2.l1 || rdata2.l2 != wdata2.l2 || rdata2.l3 != wdata2.l3 ||
         rdata2.l4 != wdata2.l4) {
         H5_FAILED();
@@ -3054,14 +3054,14 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || strcmp(rdata1.str, wdata1.str)) {
+    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || HDstrcmp(rdata1.str, wdata1.str) != 0) {
         H5_FAILED();
         AT();
         HDprintf("incorrect read data\n");
         goto error;
     } /* end if */
 
-    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || HDstrcmp(rdata2.str, wdata2.str) ||
+    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || HDstrcmp(rdata2.str, wdata2.str) != 0 ||
         rdata2.l1 != wdata2.l1 || rdata2.l2 != wdata2.l2 || rdata2.l3 != wdata2.l3 ||
         rdata2.l4 != wdata2.l4) {
         H5_FAILED();
@@ -3885,7 +3885,7 @@ test_query(void)
         HDprintf("Can't get name for enum member\n");
         goto error;
     } /* end if */
-    if (strcmp("YELLOW", enum_name)) {
+    if (HDstrcmp("YELLOW", enum_name) != 0) {
         H5_FAILED();
         HDprintf("Incorrect name for enum member\n");
         goto error;
@@ -4504,14 +4504,14 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd\0abcd\0abcdefghi\0", (size_t)20)) {
+    if (HDmemcmp(buf, "abcd\0abcd\0abcdefghi\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Truncated C-string test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", (size_t)20)) {
+    if (HDmemcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Extended C-string test failed");
         goto error;
@@ -4535,14 +4535,14 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdeabcdeabcdefghij", (size_t)20)) {
+    if (HDmemcmp(buf, "abcdeabcdeabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Truncated C buffer test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20)) {
+    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Extended C buffer test failed");
         goto error;
@@ -4566,14 +4566,14 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdeabcdeabcdefghij", (size_t)20)) {
+    if (HDmemcmp(buf, "abcdeabcdeabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Truncated Fortran-string test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcde     abcde     ", (size_t)20)) {
+    if (HDmemcmp(buf, "abcde     abcde     ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Extended Fortran-string test failed");
         goto error;
@@ -4600,7 +4600,7 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdefghijabcdefghij", (size_t)20)) {
+    if (HDmemcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Non-terminated string test 1");
         goto error;
@@ -4611,7 +4611,7 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd\0abcd\0abcdefghij", (size_t)20)) {
+    if (HDmemcmp(buf, "abcd\0abcd\0abcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Non-terminated string test 2");
         goto error;
@@ -4619,7 +4619,7 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcdeabcdexxxxxxxxxx", (size_t)20);
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20)) {
+    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Non-terminated string test 2");
         goto error;
@@ -4643,14 +4643,14 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdefghi abcdefghi ", (size_t)20)) {
+    if (HDmemcmp(buf, "abcdefghi abcdefghi ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C string to Fortran test 1");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdefghi\0abcdefghi\0", (size_t)20)) {
+    if (HDmemcmp(buf, "abcdefghi\0abcdefghi\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C string test 1");
         goto error;
@@ -4662,14 +4662,14 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcdefgh\0\0abcdefgh\0\0", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20)) {
+    if (HDmemcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C string to Fortran test 2");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20)) {
+    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C string test 2");
         goto error;
@@ -4685,14 +4685,14 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcd\0abcd\0xxxxxxxxxx", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd      abcd      ", (size_t)20)) {
+    if (HDmemcmp(buf, "abcd      abcd      ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C string to Fortran test 3");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20)) {
+    if (HDmemcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C string test 3");
         goto error;
@@ -4716,14 +4716,14 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdefghijabcdefghij", (size_t)20)) {
+    if (HDmemcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C buffer to Fortran test 1");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdefghijabcdefghij", (size_t)20)) {
+    if (HDmemcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C buffer test 1");
         goto error;
@@ -4735,14 +4735,14 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcdefgh\0\0abcdefgh\0\0", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20)) {
+    if (HDmemcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C buffer to Fortran test 2");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20)) {
+    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C buffer test 2");
         goto error;
@@ -4758,14 +4758,14 @@ test_conv_str_1(void)
     HDmemcpy(buf, "abcd\0abcd\0xxxxxxxxxx", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd      abcd      ", (size_t)20)) {
+    if (HDmemcmp(buf, "abcd      abcd      ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C buffer to Fortran test 3");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20)) {
+    if (HDmemcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C buffer test 3");
         goto error;
@@ -7193,7 +7193,7 @@ test_named_indirect_reopen(hid_t fapl)
         TEST_ERROR
     if (NULL == (tag_ret = H5Tget_tag(type)))
         TEST_ERROR
-    if (HDstrcmp(tag, tag_ret))
+    if (HDstrcmp(tag, tag_ret) != 0)
         TEST_ERROR
     H5free_memory(tag_ret);
     tag_ret = NULL;
@@ -7209,7 +7209,7 @@ test_named_indirect_reopen(hid_t fapl)
         TEST_ERROR
     if (NULL == (tag_ret = H5Tget_tag(type)))
         TEST_ERROR
-    if (HDstrcmp(tag, tag_ret))
+    if (HDstrcmp(tag, tag_ret) != 0)
         TEST_ERROR
     H5free_memory(tag_ret);
     tag_ret = NULL;

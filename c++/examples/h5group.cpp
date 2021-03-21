@@ -20,11 +20,7 @@
  * the C version is used in this example.
  */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cout;
 using std::endl;
 

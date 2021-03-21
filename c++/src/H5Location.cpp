@@ -346,7 +346,7 @@ H5Location::getComment(const char *name, size_t buf_size) const
 {
     // Initialize string to "", so that if there is no comment, the returned
     // string will be empty
-    H5std_string comment("");
+    H5std_string comment;
 
     // Preliminary call to get the comment's length
     ssize_t comment_len = H5Oget_comment_by_name(getId(), name, NULL, (size_t)0, H5P_DEFAULT);
@@ -398,6 +398,7 @@ H5Location::getComment(const H5std_string &name, size_t buf_size) const
 {
     return (getComment(name.c_str(), buf_size));
 }
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
@@ -646,6 +647,7 @@ H5Location::p_get_obj_type(void *ref, H5R_type_t ref_type) const
     return (obj_type);
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
+
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
@@ -704,6 +706,7 @@ H5Location::p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const
     }
     return (obj_type);
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getRegion
@@ -1695,7 +1698,7 @@ H5Location::getLinkval(const char *name, size_t size) const
     H5L_info_t   linkinfo;
     char *       value_C; // value in C string
     size_t       val_size = size;
-    H5std_string value    = "";
+    H5std_string value;
     herr_t       ret_value;
 
     // if user doesn't provide buffer size, determine it
@@ -2170,7 +2173,6 @@ H5Location::childObjVersion(const H5std_string &objname) const
 }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    H5Location::getObjTypeByIdx
 ///\brief       Returns the type of an object in this group, given the
@@ -2248,7 +2250,6 @@ H5Location::getObjTypeByIdx(hsize_t idx, H5std_string &type_name) const
     return (obj_type);
 }
 
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
@@ -2308,7 +2309,5 @@ f_DataSpace_setId(DataSpace *dspace, hid_t new_id)
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Location::~H5Location() {}
-
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // namespace H5

@@ -17,11 +17,7 @@
         C attribute interface (H5A)
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -775,16 +771,16 @@ test_attr_compound_read()
         hsize_t ii, jj;
         for (ii = 0; ii < ATTR4_DIM1; ii++)
             for (jj = 0; jj < ATTR4_DIM2; jj++)
-                if (HDmemcmp(&attr_data4[ii][jj], &read_data4[ii][jj], sizeof(struct attr4_struct))) {
-                    TestErrPrintf(
-                        "%d:attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",
-                        __LINE__, ii, jj, attr_data4[ii][jj].i, ii, jj, read_data4[ii][jj].i);
-                    TestErrPrintf(
-                        "%d:attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",
-                        __LINE__, ii, jj, attr_data4[ii][jj].d, ii, jj, read_data4[ii][jj].d);
-                    TestErrPrintf(
-                        "%d:attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",
-                        __LINE__, ii, jj, attr_data4[ii][jj].c, ii, jj, read_data4[ii][jj].c);
+                if (HDmemcmp(&attr_data4[ii][jj], &read_data4[ii][jj], sizeof(struct attr4_struct)) != 0) {
+                    TestErrPrintf("%d:attribute data different: attr_data4[%llu][%llu].i=%d, "
+                                  "read_data4[%llu][%llu].i=%d\n",
+                                  __LINE__, ii, jj, attr_data4[ii][jj].i, ii, jj, read_data4[ii][jj].i);
+                    TestErrPrintf("%d:attribute data different: attr_data4[%llu][%llu].d=%f, "
+                                  "read_data4[%llu][%llu].d=%f\n",
+                                  __LINE__, ii, jj, attr_data4[ii][jj].d, ii, jj, read_data4[ii][jj].d);
+                    TestErrPrintf("%d:attribute data different: attr_data4[%llu][%llu].c=%c, "
+                                  "read_data4[%llu][%llu].c=%c\n",
+                                  __LINE__, ii, jj, attr_data4[ii][jj].c, ii, jj, read_data4[ii][jj].c);
                 } /* end if */
 
         // Verify name

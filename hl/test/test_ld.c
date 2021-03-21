@@ -157,7 +157,8 @@ static herr_t test_LD_elmts_invalid(const char *file);
 static herr_t test_LD_elmts_one(const char *file, const char *dname, const char *fields);
 static herr_t test_LD_elmts_two(const char *file, const char *dname, const char *fields);
 
-static herr_t verify_elmts_two(int type, hsize_t *ext_dims, hsize_t *prev_dims, void *_ldbuf, void *_buf);
+static herr_t verify_elmts_two(int type, const hsize_t *ext_dims, const hsize_t *prev_dims, void *_ldbuf,
+                               void *_buf);
 
 /* data structures for compound data type */
 typedef struct sub22_t {
@@ -1135,7 +1136,7 @@ error:
  **************************************************************************************
  */
 static herr_t
-verify_elmts_two(int type, hsize_t *ext_dims, hsize_t *prev_dims, void *_ldbuf, void *_buf)
+verify_elmts_two(int type, const hsize_t *ext_dims, const hsize_t *prev_dims, void *_ldbuf, void *_buf)
 {
     int k, m; /* Local index variable */
 

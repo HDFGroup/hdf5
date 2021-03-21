@@ -2695,7 +2695,7 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     for (i = 0, j = 0; i < src->shared->u.enumer.nmembs && j < dst->shared->u.enumer.nmembs; i++, j++) {
         while (j < dst->shared->u.enumer.nmembs &&
-               HDstrcmp(src->shared->u.enumer.name[i], dst->shared->u.enumer.name[j]))
+               HDstrcmp(src->shared->u.enumer.name[i], dst->shared->u.enumer.name[j]) != 0)
             j++;
         if (j >= dst->shared->u.enumer.nmembs)
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
@@ -8252,7 +8252,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
             /* Allocate enough space for the buffer holding temporary
              * converted value
              */
-            buf_size = (size_t)(HDpow((double)2.0f, (double)src.u.f.esize) / 8 + 1);
+            buf_size = (size_t)(HDpow(2.0, (double)src.u.f.esize) / 8 + 1);
             int_buf  = (uint8_t *)H5MM_calloc(buf_size);
 
             /* Get conversion exception callback property */
@@ -9087,7 +9087,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 }
 
                 /* Check if the exponent is too big */
-                expo_max = (hsize_t)(HDpow((double)2.0f, (double)dst.u.f.esize) - 1);
+                expo_max = (hsize_t)(HDpow(2.0, (double)dst.u.f.esize) - 1);
 
                 if (expo > expo_max) {    /*overflows*/
                     if (cb_struct.func) { /*user's exception handler.  Reverse back source order*/

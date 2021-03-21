@@ -69,7 +69,7 @@ external_link_env(hid_t fapl, hbool_t new_format)
 
     if ((envval = HDgetenv("HDF5_EXT_PREFIX")) == NULL)
         envval = "nomatch";
-    if (HDstrcmp(envval, ".:tmp_links_env"))
+    if (HDstrcmp(envval, ".:tmp_links_env") != 0)
         TEST_ERROR
 
     /* Set up name for main file:"extlinks_env0" */

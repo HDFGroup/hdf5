@@ -565,7 +565,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info_t H5_ATTR_UNUSED *link_
     H5O_info_t       oinfo;
     herr_t           ret; /* Generic return value        */
 
-    if (HDstrcmp(name, test_info->name)) {
+    if (HDstrcmp(name, test_info->name) != 0) {
         TestErrPrintf("name = '%s', test_info = '%s'\n", name, test_info->name);
         return (H5_ITER_ERROR);
     } /* end if */

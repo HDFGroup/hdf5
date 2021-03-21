@@ -1515,7 +1515,7 @@ test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if (HDmemcmp(rbuf, wbuf, sizeof(uint16_t) * 30 * 12))
+    if (HDmemcmp(rbuf, wbuf, sizeof(uint16_t) * 30 * 12) != 0)
         TestErrPrintf("hyperslab values don't match! Line=%d\n", __LINE__);
 
     /* Close memory dataspace */
@@ -1658,7 +1658,7 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if (HDmemcmp(rbuf, wbuf, sizeof(uint16_t) * 2 * SPACE8_DIM3 * SPACE8_DIM2 * SPACE8_DIM1))
+    if (HDmemcmp(rbuf, wbuf, sizeof(uint16_t) * 2 * SPACE8_DIM3 * SPACE8_DIM2 * SPACE8_DIM1) != 0)
         TestErrPrintf("Error: hyperslab values don't match!\n");
 
     /* Close memory dataspace */
@@ -2561,7 +2561,7 @@ test_select_hyper_contig_dr(hid_t dset_type, hid_t xfer_plist)
 static void
 test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid, unsigned tgt_n_cube_rank,
                                                          unsigned edge_size, unsigned checker_edge_size,
-                                                         unsigned sel_rank, hsize_t sel_start[])
+                                                         unsigned sel_rank, const hsize_t sel_start[])
 {
     hbool_t  first_selection = TRUE;
     unsigned n_cube_offset;
@@ -3765,7 +3765,7 @@ test_select_hyper_copy(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if (HDmemcmp(rbuf, rbuf2, sizeof(uint16_t) * SPACE3_DIM1 * SPACE3_DIM2))
+    if (HDmemcmp(rbuf, rbuf2, sizeof(uint16_t) * SPACE3_DIM1 * SPACE3_DIM2) != 0)
         TestErrPrintf("hyperslab values don't match! Line=%d\n", __LINE__);
 
     /* Close memory dataspace */
@@ -3978,7 +3978,7 @@ test_select_point_copy(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if (HDmemcmp(rbuf, rbuf2, sizeof(uint16_t) * SPACE3_DIM1 * SPACE3_DIM2))
+    if (HDmemcmp(rbuf, rbuf2, sizeof(uint16_t) * SPACE3_DIM1 * SPACE3_DIM2) != 0)
         TestErrPrintf("point values don't match!\n");
 
     /* Close memory dataspace */
@@ -14220,18 +14220,18 @@ test_hyper_unlim_check(hid_t sid, hsize_t *dims, hssize_t enpoints, hssize_t enb
 
             /* Verify blocklist */
             if (nblocks == (hssize_t)1) {
-                if (HDmemcmp(blocklist, eblock1, 6 * sizeof(eblock1[0])))
+                if (HDmemcmp(blocklist, eblock1, 6 * sizeof(eblock1[0])) != 0)
                     ERROR("H5Sget_select_hyper_blocklist");
             } /* end if */
             else {
                 HDassert(nblocks == (hssize_t)2);
-                if (HDmemcmp(blocklist, eblock1, 6 * sizeof(eblock1[0]))) {
-                    if (HDmemcmp(blocklist, eblock2, 6 * sizeof(eblock2[0])))
+                if (HDmemcmp(blocklist, eblock1, 6 * sizeof(eblock1[0])) != 0) {
+                    if (HDmemcmp(blocklist, eblock2, 6 * sizeof(eblock2[0])) != 0)
                         ERROR("H5Sget_select_hyper_blocklist");
-                    if (HDmemcmp(&blocklist[6], eblock1, 6 * sizeof(eblock1[0])))
+                    if (HDmemcmp(&blocklist[6], eblock1, 6 * sizeof(eblock1[0])) != 0)
                         ERROR("H5Sget_select_hyper_blocklist");
                 } /* end if */
-                else if (HDmemcmp(&blocklist[6], eblock2, 6 * sizeof(eblock2[0])))
+                else if (HDmemcmp(&blocklist[6], eblock2, 6 * sizeof(eblock2[0])) != 0)
                     ERROR("H5Sget_select_hyper_blocklist");
             } /* end else */
         }     /* end if */

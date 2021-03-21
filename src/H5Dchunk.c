@@ -4252,7 +4252,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[])
+H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const hsize_t old_dim[])
 {
     const H5D_t *          dset = io_info->dset;                           /* the dataset pointer */
     H5D_chk_idx_info_t     idx_info;                                       /* Chunked index info */

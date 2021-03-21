@@ -16,11 +16,7 @@
         titerate.cpp - HDF5 C++ testing iterate related functionality
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 

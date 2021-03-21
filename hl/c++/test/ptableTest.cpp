@@ -690,7 +690,7 @@ TestHDFFV_9758()
 
             if (s2.a != s1[i].a || s2.e != s1[i].e)
                 goto error;
-            else if (HDstrcmp(s2.d, s1[i].d))
+            else if (HDstrcmp(s2.d, s1[i].d) != 0)
                 goto error;
         }
     } // end of ptable block

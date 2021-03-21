@@ -1570,7 +1570,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
                             HDprintf("h5dump DATATYPE STRING STRSIZE %s found\n", temp);
 #endif
-                            if (HDstrcmp("H5T_VARIABLE;", temp)) {
+                            if (HDstrcmp("H5T_VARIABLE;", temp) != 0) {
                                 char *more = temp;
                                 ival       = (int)HDstrtol(more, &more, 10);
                                 if (getInputSize(in, ival) == -1) {
@@ -1896,7 +1896,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         HDprintf("h5dump STORAGE_LAYOUT CHUNKED SIZE %d found\n", ival);
 #endif
                     }
-                    while (HDstrcmp("}", temp)) {
+                    while (HDstrcmp("}", temp) != 0) {
                         if (fscanf(strm, "%254s", temp) != 1) { /* end bracket */
                             (void)HDfprintf(stderr, "%s", err18);
                             goto error;

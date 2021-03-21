@@ -48,14 +48,14 @@ void issue_fail_msg(const char *where, int line, const char *file_name, const ch
 
 class InvalidActionException : public Exception {
   public:
-    InvalidActionException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
+    InvalidActionException(const H5std_string &func_name, const H5std_string &message = DEFAULT_MSG);
     InvalidActionException();
     virtual ~InvalidActionException() throw();
 };
 
 class TestFailedException : public Exception {
   public:
-    TestFailedException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
+    TestFailedException(const H5std_string &func_name, const H5std_string &message = DEFAULT_MSG);
     TestFailedException();
     virtual ~TestFailedException() throw();
 };

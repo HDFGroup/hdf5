@@ -11,11 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 #include <string>
 
 #include "H5Include.h"
@@ -182,7 +178,7 @@ H5File::H5File(hid_t existing_id) : Group()
 ///\param       original - IN: H5File instance to copy
 // December 2000
 //--------------------------------------------------------------------------
-H5File::H5File(const H5File &original) : Group()
+H5File::H5File(const H5File &original) : Group(original)
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id

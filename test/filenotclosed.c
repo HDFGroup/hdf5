@@ -77,7 +77,7 @@ main(void)
      * Further investigation is needed to resolve the test failure with the
      * split/multi driver.  Please see HDFFV-10160.
      */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
     if (!contig_addr_vfd) {
         SKIPPED();
         puts("    Temporary skipped for a spilt/multi driver");
