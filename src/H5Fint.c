@@ -1056,9 +1056,10 @@ done:
 htri_t
 H5F__is_hdf5(const char *name, hid_t fapl_id)
 {
-    H5FD_t *file      = NULL;        /* Low-level file struct                    */
-    haddr_t sig_addr  = HADDR_UNDEF; /* Addess of hdf5 file signature            */
-    htri_t  ret_value = FAIL;        /* Return value                             */
+    H5FD_t *file            = NULL;         /* Low-level file struct            */
+    H5F_shared_t *shared    = NULL;         /* Shared part of file              */
+    haddr_t sig_addr        = HADDR_UNDEF;  /* Addess of hdf5 file signature    */
+    htri_t  ret_value       = FAIL;         /* Return value                     */
 
     FUNC_ENTER_PACKAGE
 
@@ -1069,10 +1070,20 @@ H5F__is_hdf5(const char *name, hid_t fapl_id)
     if (NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to open file")
 
-    /* The file is an hdf5 file if the hdf5 file signature can be found */
-    if (H5FD_locate_signature(file, &sig_addr) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "error while trying to locate file signature")
-    ret_value = (HADDR_UNDEF != sig_addr);
+    /* If the file is already open, it's an HDF5 file
+     *
+     * If the file is open with an exclusive lock on an operating system that enforces
+     * mandatory file locks (like Windows), creating a new file handle and attempting
+     * to read through it will fail so we have to try this first.
+     */
+    if ((shared = H5F__sfile_search(file)) != NULL)
+        ret_value = TRUE;
+    else {
+        /* The file is an HDF5 file if the HDF5 file signature can be found */
+        if (H5FD_locate_signature(file, &sig_addr) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "error while trying to locate file signature")
+        ret_value = (HADDR_UNDEF != sig_addr);
+    }
 
 done:
     /* Close the file */
