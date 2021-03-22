@@ -650,10 +650,10 @@ test_generate(void)
     HL_TESTING2("make indexed image from land data");
 
     for (i = 0; i < n_elements; i++) {
-        if (data[i] < 0)
+        if (data[i] < 0.0f)
             image_data[i] = 0;
         else
-            image_data[i] = (unsigned char)((255 * (data[i])) / xmax);
+            image_data[i] = (unsigned char)((255 * data[i]) / xmax);
     }
 
     /* make the image */
@@ -671,10 +671,11 @@ test_generate(void)
     HL_TESTING2("make indexed image from sea data");
 
     for (i = 0; i < n_elements; i++) {
-        if (data[i] > 0)
+        if (data[i] > 0.0f)
             image_data[i] = 0;
-        else
-            image_data[i] = (unsigned char)((255 * (data[i] - xmin)) / xmin);
+        else {
+            image_data[i] = (unsigned char)((255.0f * (data[i] - xmin)) / (xmax - xmin));
+		}
     }
 
     /* make the image */
