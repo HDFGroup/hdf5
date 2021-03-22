@@ -313,8 +313,7 @@ test_vlstring_array_dataset()
         issue_fail_msg("test_vlstring_array_dataset()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } // end test_vlstring_array_dataset()
 
 /*-------------------------------------------------------------------------
@@ -527,8 +526,7 @@ test_vlstring_type()
         issue_fail_msg("test_vlstring_type()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } // end test_vlstring_type()
 
 /*-------------------------------------------------------------------------
