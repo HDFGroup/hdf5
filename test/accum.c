@@ -2287,7 +2287,7 @@ test_swmr_write_big(hbool_t newest_format)
 #endif /* defined(H5_HAVE_WIN32_API) */
 
     /* Check if the process terminated correctly */
-    if (process_success)
+    if (!process_success)
         FAIL_PUTS_ERROR("child process exited abnormally")
 
     /* Flush the accumulator */
