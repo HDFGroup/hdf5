@@ -847,14 +847,17 @@ error:
 static int
 test_metadata_read_retry_info(hid_t in_fapl)
 {
-    hid_t            fapl, new_fapl;                             /* File access property list */
-    hid_t            fid, fid1;                                  /* File IDs */
+    hid_t            fapl     = H5I_INVALID_HID;                 /* File access property list */
+    hid_t            new_fapl = H5I_INVALID_HID;                 /* File access property list */
+    hid_t            fid      = H5I_INVALID_HID;                 /* File ID */
+    hid_t            fid1     = H5I_INVALID_HID;                 /* File ID */
     H5F_retry_info_t info, info1;                                /* The collection of metadata retries */
     H5F_t *          f = NULL, *f1 = NULL;                       /* Internal file object pointers */
     unsigned         i, j, n;                                    /* Local index variables */
-    hid_t            did1, did2;                                 /* Dataset IDs */
-    hid_t            sid;                                        /* Dataspace ID */
-    hid_t            dcpl;                                       /* Dataset creation property list */
+    hid_t            did1    = H5I_INVALID_HID;                  /* Dataset ID */
+    hid_t            did2    = H5I_INVALID_HID;                  /* Dataset ID */
+    hid_t            sid     = H5I_INVALID_HID;                  /* Dataspace ID */
+    hid_t            dcpl    = H5I_INVALID_HID;                  /* Dataset creation property list */
     hsize_t          dims[2] = {6, 10};                          /* Dataset dimensions */
     char             filename[NAME_BUF_SIZE];                    /* File name */
     int              buf[6][10], chkbuf1[6][10], chkbuf2[6][10]; /* Buffers for data */
@@ -1623,7 +1626,7 @@ test_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Should be 100 */
-    if (attempts != (new_format ? H5F_METADATA_READ_ATTEMPTS : H5F_SWMR_METADATA_READ_ATTEMPTS))
+    if (attempts != (unsigned int)(new_format ? H5F_METADATA_READ_ATTEMPTS : H5F_SWMR_METADATA_READ_ATTEMPTS))
         TEST_ERROR;
 
     /* Close the property list */
@@ -4499,8 +4502,9 @@ error:
 static int
 test_file_lock_swmr_same(hid_t in_fapl)
 {
-    hid_t fid, fid2;               /* File IDs */
-    hid_t fapl;                    /* File access property list */
+    hid_t fid  = H5I_INVALID_HID;  /* File IDs */
+    hid_t fid2 = H5I_INVALID_HID;
+    hid_t fapl = H5I_INVALID_HID;  /* File access property list */
     char  filename[NAME_BUF_SIZE]; /* file name */
 
     /* Output message about test being performed */
@@ -6556,10 +6560,18 @@ error:
 static int
 test_bug_refresh(hid_t in_fapl)
 {
-    hid_t  fid = -1; /* File ID */
-    hid_t  fapl;
+    hid_t  fid  = H5I_INVALID_HID;
+    hid_t  fapl = H5I_INVALID_HID;
     H5F_t *f;
-    hid_t  gid1, gid2, gid3, gid4, gid5, gid6, gid7, gid8, gid9;
+    hid_t  gid1 = H5I_INVALID_HID;
+    hid_t  gid2 = H5I_INVALID_HID;
+    hid_t  gid3 = H5I_INVALID_HID;
+    hid_t  gid4 = H5I_INVALID_HID;
+    hid_t  gid5 = H5I_INVALID_HID;
+    hid_t  gid6 = H5I_INVALID_HID;
+    hid_t  gid7 = H5I_INVALID_HID;
+    hid_t  gid8 = H5I_INVALID_HID;
+    hid_t  gid9 = H5I_INVALID_HID;
     char   filename[NAME_BUF_SIZE]; /* File name */
 
     /* Create a copy of the input parameter in_fapl */
