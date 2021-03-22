@@ -26,6 +26,11 @@
 
 #include "H5public.h" /* Include Public Definitions    */
 
+/* For setting POSIX, BSD, etc. compatibility */
+#ifdef H5_HAVE_FEATURES_H
+#include <features.h>
+#endif
+
 /* include the pthread header */
 #ifdef H5_HAVE_THREADSAFE
 #ifdef H5_HAVE_WIN32_API
@@ -42,21 +47,18 @@
 #endif /* H5_HAVE_THREADSAFE */
 
 /*
- * Include ANSI-C header files.
+ * Include ANSI-C header files that aren't included in H5public.h
  */
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <float.h>
-#include <limits.h>
 #include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 /*
  * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
@@ -67,17 +69,15 @@
 #include <unistd.h>
 #endif
 #ifdef _POSIX_VERSION
-#include <sys/wait.h>
 #include <pwd.h>
+#include <sys/wait.h>
 #endif
 
 /*
- * C9x integer types
+ * sys/time is needed for gettimeofday()
  */
-#ifndef __cplusplus
-#ifdef H5_HAVE_STDINT_H
-#include <stdint.h>
-#endif
+#ifdef H5_HAVE_SYS_TIME_H
+#include <sys/time.h>
 #endif
 
 /*
@@ -87,25 +87,6 @@
  */
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
-
-/*
- * If a program may include both `time.h' and `sys/time.h' then
- * TIME_WITH_SYS_TIME is defined (see AC_HEADER_TIME in configure.ac).
- * On some older systems, `sys/time.h' includes `time.h' but `time.h' is not
- * protected against multiple inclusion, so programs should not explicitly
- * include both files. This macro is useful in programs that use, for example,
- * `struct timeval' or `struct timezone' as well as `struct tm'.  It is best
- * used in conjunction with `HAVE_SYS_TIME_H', whose existence is checked
- * by `AC_CHECK_HEADERS(sys/time.h)' in configure.ac.
- */
-#if defined(H5_TIME_WITH_SYS_TIME)
-#include <sys/time.h>
-#include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#else
-#include <time.h>
 #endif
 
 /*
@@ -136,21 +117,6 @@
  */
 #ifdef H5_HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
-#endif
-
-/*
- * System information. These are needed on the DEC Alpha to turn off fixing
- * of unaligned accesses by the operating system during detection of
- * alignment constraints in H5detect.c:main().
- */
-#ifdef H5_HAVE_SYS_SYSINFO_H
-#include <sys/sysinfo.h>
-#endif
-#ifdef H5_HAVE_SYS_PROC_H
-#include <sys/proc.h>
-#endif
-#ifdef H5_HAVE_IO_H
-#include <io.h>
 #endif
 
 /*
@@ -194,6 +160,24 @@
 #define F_OK 00
 #define W_OK 02
 #define R_OK 04
+#endif
+
+/* Macros for enabling/disabling particular GCC warnings */
+/* (see the following web-sites for more info:
+ *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
+ *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
+ */
+/* These pragmas are only implemented usefully in gcc 4.6+ */
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
+#define H5_GCC_DIAG_JOINSTR(x, y) x y
+#define H5_GCC_DIAG_DO_PRAGMA(x)  _Pragma(#x)
+#define H5_GCC_DIAG_PRAGMA(x)     H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+
+#define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR("-W", x))
+#define H5_GCC_DIAG_ON(x)  H5_GCC_DIAG_PRAGMA(pop)
+#else
+#define H5_GCC_DIAG_OFF(x)
+#define H5_GCC_DIAG_ON(x)
 #endif
 
 /*

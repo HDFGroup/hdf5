@@ -31,31 +31,22 @@
 /* API Version macro wrapper definitions */
 #include "H5version.h"
 
-#ifdef H5_HAVE_FEATURES_H
-#include <features.h> /* For setting POSIX, BSD, etc. compatibility */
-#endif
-#ifdef H5_HAVE_SYS_TYPES_H
+/* C header files for things that appear in our public headers */
+#include <inttypes.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <time.h>
+
+/* sys/types.h is needed for a few types in the public headers, such
+ * as off_t and ssize_t.
+ */
+#if !defined(_WIN32) || defined(__CYGWIN__)
 #include <sys/types.h>
 #endif
-#ifdef H5_STDC_HEADERS
-#include <limits.h> /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
-#include <stdarg.h> /* For variadic functions in H5VLpublic.h   */
-#endif
-#ifndef __cplusplus
-#ifdef H5_HAVE_STDINT_H
-#include <stdint.h> /* For C9x types */
-#endif
-#else
-#ifdef H5_HAVE_STDINT_H_CXX
-#include <stdint.h> /* For C9x types (when included from C++) */
-#endif
-#endif
-#ifdef H5_HAVE_INTTYPES_H
-#include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
-#endif
-#ifdef H5_HAVE_STDDEF_H
-#include <stddef.h>
-#endif
+
 #ifdef H5_HAVE_PARALLEL
 /* Don't link against MPI C++ bindings */
 #define MPICH_SKIP_MPICXX 1
@@ -64,31 +55,6 @@
 #ifndef MPI_FILE_NULL /* MPIO may be defined in mpi.h already */
 #include <mpio.h>
 #endif
-#endif
-
-/* Include the Windows API adapter header early */
-#include "H5api_adpt.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Macros for enabling/disabling particular GCC warnings */
-/* (see the following web-sites for more info:
- *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
- *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
- */
-/* These pragmas are only implemented usefully in gcc 4.6+ */
-#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
-#define H5_GCC_DIAG_JOINSTR(x, y) x y
-#define H5_GCC_DIAG_DO_PRAGMA(x)  _Pragma(#x)
-#define H5_GCC_DIAG_PRAGMA(x)     H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
-
-#define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR("-W", x))
-#define H5_GCC_DIAG_ON(x)  H5_GCC_DIAG_PRAGMA(pop)
-#else
-#define H5_GCC_DIAG_OFF(x)
-#define H5_GCC_DIAG_ON(x)
 #endif
 
 /* Macro to hide a symbol from further preprocessor substitutions */
@@ -140,172 +106,41 @@ typedef int herr_t;
  *      printf("error determining whether data type is committed\n");
  *  }
  */
-#ifdef H5_HAVE_STDBOOL_H
-#include <stdbool.h>
-#else /* H5_HAVE_STDBOOL_H */
-#ifndef __cplusplus
-#if defined(H5_SIZEOF_BOOL) && (H5_SIZEOF_BOOL != 0)
-#define bool _Bool
-#else
-#define bool unsigned int
-#endif
-#define true 1
-#define false 0
-#endif /* __cplusplus */
-#endif /* H5_HAVE_STDBOOL_H */
 typedef bool hbool_t;
 typedef int  htri_t;
 
-/* Define the ssize_t type if it not is defined */
-#if H5_SIZEOF_SSIZE_T == 0
-/* Undefine this size, we will re-define it in one of the sections below */
-#undef H5_SIZEOF_SSIZE_T
-#if H5_SIZEOF_SIZE_T == H5_SIZEOF_INT
-typedef int ssize_t;
-#define H5_SIZEOF_SSIZE_T H5_SIZEOF_INT
-#elif H5_SIZEOF_SIZE_T == H5_SIZEOF_LONG
-typedef long ssize_t;
-#define H5_SIZEOF_SSIZE_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_SIZE_T == H5_SIZEOF_LONG_LONG
-typedef long long ssize_t;
-#define H5_SIZEOF_SSIZE_T H5_SIZEOF_LONG_LONG
-#else /* Can't find matching type for ssize_t */
-#error "nothing appropriate for ssize_t"
-#endif
-#endif
-
-/* int64_t type is used for creation order field for links.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_INT64_T >= 8
-#elif H5_SIZEOF_INT >= 8
-typedef int           int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 8
-typedef long               int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef long long          int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_LONG_LONG
-#else
-#error "nothing appropriate for int64_t"
-#endif
-
-/* uint64_t type is used for fields for H5O_info_t.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_UINT64_T >= 8
-#ifndef UINT64_MAX
-#define UINT64_MAX ((uint64_t)-1)
-#endif
-#elif H5_SIZEOF_INT >= 8
-typedef unsigned      uint64_t;
-#define UINT64_MAX UINT_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 8
-typedef unsigned long      uint64_t;
-#define UINT64_MAX ULONG_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef unsigned long long uint64_t;
-#define UINT64_MAX ULLONG_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG_LONG
-#else
-#error "nothing appropriate for uint64_t"
-#endif
-
 /*
- * The sizes of file objects have their own types defined here, use a minimum
- * 64-bit type.
+ * The sizes of file objects have their own types defined here.
  */
-#if H5_SIZEOF_LONG_LONG >= 8
-H5_GCC_DIAG_OFF("long-long")
-typedef unsigned long long hsize_t;
-typedef signed long long   hssize_t;
-H5_GCC_DIAG_ON("long-long")
-#define PRIdHSIZE          H5_PRINTF_LL_WIDTH "d"
-#define PRIiHSIZE          H5_PRINTF_LL_WIDTH "i"
-#define PRIoHSIZE          H5_PRINTF_LL_WIDTH "o"
-#define PRIuHSIZE          H5_PRINTF_LL_WIDTH "u"
-#define PRIxHSIZE          H5_PRINTF_LL_WIDTH "x"
-#define PRIXHSIZE          H5_PRINTF_LL_WIDTH "X"
-#define H5_SIZEOF_HSIZE_T  H5_SIZEOF_LONG_LONG
-#define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
-#define HSIZE_UNDEF        ULLONG_MAX
-#else
-#error "nothing appropriate for hsize_t"
-#endif
+typedef uint64_t  hsize_t;
+typedef int64_t   hssize_t;
+#define PRIdHSIZE PRId64
+#define PRIiHSIZE PRIi64
+#define PRIoHSIZE PRIo64
+#define PRIuHSIZE PRIu64
+#define PRIxHSIZE PRIx64
+#define PRIXHSIZE PRIX64
+#define H5_SIZEOF_HSIZE_T  8
+#define H5_SIZEOF_HSSIZE_T 8
+#define HSIZE_UNDEF        UINT64_MAX
 
 /*
  * File addresses have their own types.
  */
-#if H5_SIZEOF_INT >= 8
-typedef unsigned haddr_t;
-#define HADDR_UNDEF       UINT_MAX
-#define H5_SIZEOF_HADDR_T H5_SIZEOF_INT
-#ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_UNSIGNED
-#endif /* H5_HAVE_PARALLEL */
-#define PRIdHADDR "d"
-#define PRIoHADDR "o"
-#define PRIuHADDR "u"
-#define PRIxHADDR "x"
-#define PRIXHADDR "X"
-#elif H5_SIZEOF_LONG >= 8
-typedef unsigned long haddr_t;
-#define HADDR_UNDEF       ULONG_MAX
-#define H5_SIZEOF_HADDR_T H5_SIZEOF_LONG
-#ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_UNSIGNED_LONG
-#endif /* H5_HAVE_PARALLEL */
-#define PRIdHADDR "ld"
-#define PRIoHADDR "lo"
-#define PRIuHADDR "lu"
-#define PRIxHADDR "lx"
-#define PRIXHADDR "lX"
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef unsigned long long haddr_t;
-#define HADDR_UNDEF       ULLONG_MAX
-#define H5_SIZEOF_HADDR_T H5_SIZEOF_LONG_LONG
-#ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_LONG_LONG_INT
-#endif /* H5_HAVE_PARALLEL */
-#define PRIdHADDR H5_PRINTF_LL_WIDTH "d"
-#define PRIoHADDR H5_PRINTF_LL_WIDTH "o"
-#define PRIuHADDR H5_PRINTF_LL_WIDTH "u"
-#define PRIxHADDR H5_PRINTF_LL_WIDTH "x"
-#define PRIXHADDR H5_PRINTF_LL_WIDTH "X"
-#else
-#error "nothing appropriate for haddr_t"
-#endif
+typedef uint64_t haddr_t;
+#define PRIdHADDR PRId64
+#define PRIoHADDR PRIo64
+#define PRIuHADDR PRIu64
+#define PRIxHADDR PRIx64
+#define PRIXHADDR PRIX64
+#define H5_SIZEOF_HADDR_T 8
+#define HADDR_UNDEF       UINT64_MAX
 #define H5_PRINTF_HADDR_FMT "%" PRIuHADDR
 #define HADDR_MAX           (HADDR_UNDEF - 1)
 
-/* uint32_t type is used for creation order field for messages.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_UINT32_T >= 4
-#elif H5_SIZEOF_SHORT >= 4
-typedef short         uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_SHORT
-#elif H5_SIZEOF_INT >= 4
-typedef unsigned int       uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 4
-typedef unsigned long      uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_LONG
-#else
-#error "nothing appropriate for uint32_t"
-#endif
+#ifdef H5_HAVE_PARALLEL
+#define HADDR_AS_MPI_TYPE MPI_LONG_LONG_INT
+#endif /* H5_HAVE_PARALLEL */
 
 //! [H5_iter_order_t_snip]
 
@@ -393,6 +228,13 @@ typedef struct H5_alloc_stats_t {
  * Library shutdown callback, used by H5atclose().
  */
 typedef void (*H5_atclose_func_t)(void *ctx);
+
+/* API adapter for decorating exported functions */
+#include "H5api_adpt.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Functions in H5.c */
 /**
