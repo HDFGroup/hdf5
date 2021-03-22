@@ -74,9 +74,6 @@ typedef enum dtype_t {
     OTHER
 } dtype_t;
 
-/* Skip overflow tests if non-zero */
-static int skip_overflow_tests_g = 0;
-
 /*
  * Although we check whether a floating point overflow generates a SIGFPE and
  * turn off overflow tests in that case, it might still be possible for an
@@ -394,7 +391,6 @@ static int without_hardware_g = 0;
         HDfree(value);                                                                                       \
     }
 
-void           some_dummy_func(float x);
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int     my_isnan(dtype_t type, void *val);
 static int my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos,
@@ -512,92 +508,6 @@ except_func(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
         *(int *)dst_buf = *(int *)user_data;
 
     return ret;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    some_dummy_func
- *
- * Purpose:    A dummy function to help check for overflow.
- *
- * Note:    DO NOT DECLARE THIS FUNCTION STATIC OR THE COMPILER MIGHT
- *        PROMOTE ARGUMENT `x' TO DOUBLE AND DEFEAT THE OVERFLOW
- *        CHECKING.
- *
- * Return:    void
- *
- * Programmer:    Robb Matzke
- *              Tuesday, July 21, 1998
- *
- *-------------------------------------------------------------------------
- */
-void
-some_dummy_func(float x)
-{
-    char s[128];
-
-    HDsnprintf(s, sizeof(s), "%g", (double)x);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    generates_sigfpe
- *
- * Purpose:    Determines if SIGFPE is generated from overflows.  We must be
- *        able to fork() and waitpid() in order for this test to work
- *        properly.  Sets skip_overflow_tests_g to non-zero if they
- *        would generate SIGBUS, zero otherwise.
- *
- * Programmer:    Robb Matzke
- *              Tuesday, July 21, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-generates_sigfpe(void)
-{
-#ifdef H5_HAVE_UNISTD_H
-    pid_t          pid;
-    int            status;
-    size_t         i, j;
-    double         d;
-    unsigned char *dp = (unsigned char *)&d;
-    float          f;
-
-    HDfflush(stdout);
-    HDfflush(stderr);
-    if ((pid = HDfork()) < 0) {
-        HDperror("fork");
-        HDexit(EXIT_FAILURE);
-    }
-    else if (0 == pid) {
-        for (i = 0; i < 2000; i++) {
-            for (j = 0; j < sizeof(double); j++)
-                dp[j] = (unsigned char)HDrand();
-            f = (float)d;
-            some_dummy_func((float)f);
-        }
-        HDexit(EXIT_SUCCESS);
-    }
-
-    while (pid != HDwaitpid(pid, &status, 0))
-        /*void*/;
-    if (WIFEXITED(status) && 0 == WEXITSTATUS(status)) {
-        HDputs("Floating-point overflow cases will be tested.");
-        skip_overflow_tests_g = FALSE;
-    }
-    else if (WIFSIGNALED(status) && SIGFPE == WTERMSIG(status)) {
-        HDputs("Floating-point overflow cases cannot be safely tested.");
-        skip_overflow_tests_g = TRUE;
-        /* delete the core dump file that SIGFPE may have created */
-        HDunlink("core");
-    }
-#else  /* H5_HAVE_UNISTD_H */
-    HDputs("Cannot determine if floating-point overflows generate a SIGFPE");
-    HDputs("due to a lack of fork(2) - assuming yes.");
-    HDputs("Overflow cases will not be tested.");
-    skip_overflow_tests_g = TRUE;
-#endif /* H5_HAVE_UNISTD_H */
 }
 
 /*-------------------------------------------------------------------------
@@ -5405,9 +5315,6 @@ main(void)
     /* Test user-define, query functions and software conversion
      * for user-defined integer types */
     nerrors += (unsigned long)test_derived_integer();
-
-    /* Does floating point overflow generate a SIGFPE? */
-    generates_sigfpe();
 
     /* Test degenerate cases */
     nerrors += (unsigned long)run_fp_tests("noop");
