@@ -618,40 +618,43 @@ c99_vsnprintf(char *str, size_t size, const char *format, va_list ap)
  *-------------------------------------------------------------------------
  */
 int
-Wflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation)
+Wflock(int fd, int operation)
 {
 
-/* This is a no-op while we implement a Win32 VFD */
-#if 0
-int
-Wflock(int fd, int operation) {
-
-    HANDLE          hFile;
-    DWORD           dwFlags = LOCKFILE_FAIL_IMMEDIATELY;
-    DWORD           dwReserved = 0;
-                    /* MAXDWORD for entire file */
-    DWORD           nNumberOfBytesToLockLow = MAXDWORD;
-    DWORD           nNumberOfBytesToLockHigh = MAXDWORD;
-                    /* Must initialize OVERLAPPED struct */
-    OVERLAPPED      overlapped = {0};
+    HANDLE hFile;
+    DWORD  dwFlags    = LOCKFILE_FAIL_IMMEDIATELY;
+    DWORD  dwReserved = 0;
+    /* MAXDWORD locks the entire file */
+    DWORD nNumberOfBytesToLockLow  = MAXDWORD;
+    DWORD nNumberOfBytesToLockHigh = MAXDWORD;
+    /* Must initialize OVERLAPPED struct */
+    OVERLAPPED overlapped = {0};
 
     /* Get Windows HANDLE */
-    hFile = _get_osfhandle(fd);
+    if (INVALID_HANDLE_VALUE == (hFile = (HANDLE)_get_osfhandle(fd)))
+        return -1;
 
     /* Convert to Windows flags */
-    if(operation & LOCK_EX)
+    if (operation & LOCK_EX)
         dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
 
     /* Lock or unlock */
-    if(operation & LOCK_UN)
-        if(0 == UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow,
-                            nNumberOfBytesToLockHigh, &overlapped))
+    if (operation & LOCK_UN) {
+        if (0 ==
+            UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh, &overlapped)) {
+            /* Attempting to unlock an already unlocked file will fail and this can happen
+             * in H5Fstart_swmr_write(). For now, just ignore the "error" (error code: 0x9e / 158).
+             */
+            if (GetLastError() != 158)
+                return -1;
+        }
+    }
+    else {
+        if (0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh,
+                            &overlapped))
             return -1;
-    else
-        if(0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow,
-                            nNumberOfBytesToLockHigh, &overlapped))
-            return -1;
-#endif /* 0 */
+    }
+
     return 0;
 } /* end Wflock() */
 
