@@ -90,7 +90,6 @@ H5_DLL int    Wgettimeofday(struct timeval *tv, struct timezone *tz);
 H5_DLL int    Wsetenv(const char *name, const char *value, int overwrite);
 H5_DLL int    Wflock(int fd, int operation);
 H5_DLL char * Wgetlogin(void);
-H5_DLL int    Wnanosleep(const struct timespec *req, struct timespec *rem);
 H5_DLL herr_t H5_expand_windows_env_vars(char **env_var);
 H5_DLL wchar_t *H5_get_utf16_str(const char *s);
 H5_DLL int      Wopen_utf8(const char *path, int oflag, ...);

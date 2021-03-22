@@ -629,25 +629,6 @@ Wflock(int fd, int operation) {
     return 0;
 } /* end Wflock() */
 
-/*--------------------------------------------------------------------------
- * Function:    Wnanosleep
- *
- * Purpose:     Sleep for a given # of nanoseconds (Windows version)
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2016
- *--------------------------------------------------------------------------
- */
-int
-Wnanosleep(const struct timespec *req, struct timespec *rem)
-{
-    /* XXX: Currently just a placeholder */
-    return 0;
-
-} /* end Wnanosleep() */
-
 /*-------------------------------------------------------------------------
  * Function:     H5_get_utf16_str
  *
@@ -977,6 +958,9 @@ done:
  *
  * Purpose:     Sleep for a given # of nanoseconds
  *
+ *              Note that commodity hardware is probably going to have a
+ *              resolution of milliseconds, not nanoseconds.
+ *
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
@@ -986,15 +970,26 @@ done:
 void
 H5_nanosleep(uint64_t nanosec)
 {
-    struct timespec sleeptime; /* Struct to hold time to sleep */
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Set up time to sleep */
-    sleeptime.tv_sec  = 0;
-    sleeptime.tv_nsec = (long)nanosec;
+#ifdef H5_HAVE_WIN32_API
 
-    HDnanosleep(&sleeptime, NULL);
+    /* On Windows, Sleep() is in milliseconds. Passing 0 to Sleep()
+     * causes the thread to relinquish the rest of its time slice.
+     */
+    Sleep(nanosec / (1000 * 1000));
+
+#else
+    {
+        struct timespec sleeptime; /* Struct to hold time to sleep */
+
+        /* Set up time to sleep */
+        sleeptime.tv_sec  = 0;
+        sleeptime.tv_nsec = (long)nanosec;
+
+        HDnanosleep(&sleeptime, NULL);
+    }
+#endif
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5_nanosleep() */
