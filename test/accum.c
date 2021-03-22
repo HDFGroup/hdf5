@@ -2237,14 +2237,14 @@ test_swmr_write_big(hbool_t newest_format)
         si.cb = sizeof(si);
         ZeroMemory(&pi, sizeof(pi));
 
-        if (!CreateProcess(NULL, SWMR_READER, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+        if (0 == CreateProcess(NULL, SWMR_READER, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
             HDprintf("CreateProcess failed (%d).\n", GetLastError());
             FAIL_STACK_ERROR;
         }
 
-        WaitForSingleObject(pi.hProcess, INFINITE);
+        (void)WaitForSingleObject(pi.hProcess, INFINITE);
 
-        if (FALSE == GetExitCodeProcess(pi.hProcess, &exit_code) || 0 == exit_code)
+        if (FALSE == GetExitCodeProcess(pi.hProcess, &exit_code) || EXIT_FAILURE == exit_code)
             process_success = FALSE;
         else
             process_success = TRUE;
