@@ -802,8 +802,7 @@ test_named()
         issue_fail_msg("test_named", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (ds_type)
-        delete ds_type;
+    delete ds_type;
 } // test_named
 
 /*-------------------------------------------------------------------------

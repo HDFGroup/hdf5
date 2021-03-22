@@ -76,8 +76,7 @@ FileAccPropList::getConstant()
 void
 FileAccPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
