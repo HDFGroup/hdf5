@@ -1056,10 +1056,10 @@ done:
 htri_t
 H5F__is_hdf5(const char *name, hid_t fapl_id)
 {
-    H5FD_t *file            = NULL;         /* Low-level file struct            */
-    H5F_shared_t *shared    = NULL;         /* Shared part of file              */
-    haddr_t sig_addr        = HADDR_UNDEF;  /* Addess of hdf5 file signature    */
-    htri_t  ret_value       = FAIL;         /* Return value                     */
+    H5FD_t *      file      = NULL;        /* Low-level file struct            */
+    H5F_shared_t *shared    = NULL;        /* Shared part of file              */
+    haddr_t       sig_addr  = HADDR_UNDEF; /* Addess of hdf5 file signature    */
+    htri_t        ret_value = FAIL;        /* Return value                     */
 
     FUNC_ENTER_PACKAGE
 
