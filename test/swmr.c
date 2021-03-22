@@ -4502,7 +4502,7 @@ error:
 static int
 test_file_lock_swmr_same(hid_t in_fapl)
 {
-    hid_t fid  = H5I_INVALID_HID;  /* File IDs */
+    hid_t fid  = H5I_INVALID_HID; /* File IDs */
     hid_t fid2 = H5I_INVALID_HID;
     hid_t fapl = H5I_INVALID_HID;  /* File access property list */
     char  filename[NAME_BUF_SIZE]; /* file name */
