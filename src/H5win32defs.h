@@ -203,8 +203,8 @@ H5_DLL float     Wroundf(float arg);
 
 /* VS 2015 introduced C99-compliant versions of these functions */
 #if (_MSC_VER < 1900)
-#define HDsnprintf           c99_snprintf  /*varargs*/
-#define HDvsnprintf          c99_vsnprintf /*varargs*/
+#define HDsnprintf  c99_snprintf  /*varargs*/
+#define HDvsnprintf c99_vsnprintf /*varargs*/
 #endif
 
 /* Non-POSIX functions */
