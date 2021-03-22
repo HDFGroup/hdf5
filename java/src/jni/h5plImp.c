@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,8 +36,7 @@ extern "C" {
  * Signature: (I)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLset_1loading_1state
-    (JNIEnv *env, jclass clss, jint plugin_flags)
+Java_hdf_hdf5lib_H5_H5PLset_1loading_1state(JNIEnv *env, jclass clss, jint plugin_flags)
 {
     UNUSED(clss);
 
@@ -55,8 +53,7 @@ done:
  * Signature: (V)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5PLget_1loading_1state
-    (JNIEnv *env, jclass clss)
+Java_hdf_hdf5lib_H5_H5PLget_1loading_1state(JNIEnv *env, jclass clss)
 {
     unsigned int plugin_type = 0;
 
@@ -75,11 +72,10 @@ done:
  * Signature: (Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLappend
-  (JNIEnv *env, jclass clss, jobjectArray plugin_path)
+Java_hdf_hdf5lib_H5_H5PLappend(JNIEnv *env, jclass clss, jobjectArray plugin_path)
 {
     const char *newPath = NULL;
-    herr_t      retVal = FAIL;
+    herr_t      retVal  = FAIL;
 
     UNUSED(clss);
 
@@ -101,11 +97,10 @@ done:
  * Signature: (Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLprepend
-  (JNIEnv *env, jclass clss, jobjectArray plugin_path)
+Java_hdf_hdf5lib_H5_H5PLprepend(JNIEnv *env, jclass clss, jobjectArray plugin_path)
 {
     const char *newPath = NULL;
-    herr_t      retVal = FAIL;
+    herr_t      retVal  = FAIL;
 
     UNUSED(clss);
 
@@ -128,11 +123,10 @@ done:
  * Signature: (Ljava/lang/String;I)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLreplace
-  (JNIEnv *env, jclass clss, jobjectArray plugin_path, jint idx)
+Java_hdf_hdf5lib_H5_H5PLreplace(JNIEnv *env, jclass clss, jobjectArray plugin_path, jint idx)
 {
     const char *newPath = NULL;
-    herr_t      retVal = FAIL;
+    herr_t      retVal  = FAIL;
 
     UNUSED(clss);
 
@@ -144,7 +138,7 @@ Java_hdf_hdf5lib_H5_H5PLreplace
 
     PIN_JAVA_STRING(ENVONLY, plugin_path, newPath, NULL, "H5PLreplace: new path not pinned");
 
-    if ((retVal = H5PLreplace(newPath, (unsigned) idx)) < 0)
+    if ((retVal = H5PLreplace(newPath, (unsigned)idx)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -158,11 +152,10 @@ done:
  * Signature: (Ljava/lang/String;I)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLinsert
-  (JNIEnv *env, jclass clss, jobjectArray plugin_path, jint idx)
+Java_hdf_hdf5lib_H5_H5PLinsert(JNIEnv *env, jclass clss, jobjectArray plugin_path, jint idx)
 {
     const char *newPath = NULL;
-    herr_t      retVal = FAIL;
+    herr_t      retVal  = FAIL;
 
     UNUSED(clss);
 
@@ -174,7 +167,7 @@ Java_hdf_hdf5lib_H5_H5PLinsert
 
     PIN_JAVA_STRING(ENVONLY, plugin_path, newPath, NULL, "H5PLinsert: new path not pinned");
 
-    if ((retVal = H5PLinsert(newPath, (unsigned) idx)) < 0)
+    if ((retVal = H5PLinsert(newPath, (unsigned)idx)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -188,15 +181,14 @@ done:
  * Signature: (I)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLremove
-  (JNIEnv *env, jclass clss, jint idx)
+Java_hdf_hdf5lib_H5_H5PLremove(JNIEnv *env, jclass clss, jint idx)
 {
     UNUSED(clss);
 
     if (idx < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5PLremove: index < 0");
 
-    if (H5PLremove((unsigned) idx) < 0)
+    if (H5PLremove((unsigned)idx) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -209,12 +201,11 @@ done:
  * Signature: (I)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5PLget
-  (JNIEnv *env, jclass clss, jint idx)
+Java_hdf_hdf5lib_H5_H5PLget(JNIEnv *env, jclass clss, jint idx)
 {
-    jstring  str = NULL;
-    ssize_t  buf_size;
-    char    *aName = NULL;
+    jstring str = NULL;
+    ssize_t buf_size;
+    char *  aName = NULL;
 
     UNUSED(clss);
 
@@ -222,13 +213,13 @@ Java_hdf_hdf5lib_H5_H5PLget
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5PLget: index < 0");
 
     /* Get the length of the name */
-    if ((buf_size = H5PLget((unsigned) idx, NULL, 0)) < 0)
+    if ((buf_size = H5PLget((unsigned)idx, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (aName = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (aName = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5PLget: failed to allocate plugin name buffer");
 
-    if ((H5PLget((unsigned) idx, aName, (size_t)buf_size + 1)) < 0)
+    if ((H5PLget((unsigned)idx, aName, (size_t)buf_size + 1)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     aName[buf_size] = '\0';
 
@@ -248,8 +239,7 @@ done:
  * Signature: (V)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5PLsize
-  (JNIEnv *env, jclass clss)
+Java_hdf_hdf5lib_H5_H5PLsize(JNIEnv *env, jclass clss)
 {
     unsigned int listsize = 0;
 

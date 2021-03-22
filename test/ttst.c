@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -35,13 +35,12 @@
 #include "H5STprivate.h"
 
 /* Test words to insert into s TST */
-static const char *words[]={
-    "We", "hold", "these", "truths", "to", "be", "self-evident,", "that",
-    "all", "men", "are", "created", "equal,", "that", "they", "are", "endowed",
-    "by", "their", "Creator", "with", "certain", "unalienable", "Rights,",
-    "that", "among", "these", "are", "Life,", "Liberty", "and", "the",
-    "pursuit", "of", "Happiness."
-};
+static const char *words[] = {
+    "We",      "hold",        "these",   "truths", "to",      "be",      "self-evident,",
+    "that",    "all",         "men",     "are",    "created", "equal,",  "that",
+    "they",    "are",         "endowed", "by",     "their",   "Creator", "with",
+    "certain", "unalienable", "Rights,", "that",   "among",   "these",   "are",
+    "Life,",   "Liberty",     "and",     "the",    "pursuit", "of",      "Happiness."};
 /* Number of words in test words set */
 size_t num_words;
 
@@ -54,9 +53,10 @@ char **rand_uniq_words;
 /* Sorted order version of words in test word set */
 char **sort_uniq_words;
 
-static int tst_strcmp(const void *_s1, const void *_s2)
+static int
+tst_strcmp(const void *_s1, const void *_s2)
 {
-    return(HDstrcmp(*(const char * const *)_s1,*(const char * const *)_s2));
+    return (HDstrcmp(*(const char *const *)_s1, *(const char *const *)_s2));
 }
 
 /****************************************************************
@@ -68,71 +68,71 @@ static int tst_strcmp(const void *_s1, const void *_s2)
 static void
 test_tst_init(void)
 {
-    time_t curr_time;   /* Current time, for seeding random number generator */
-    char *tmp_word;/* Temporary pointer to word in word set */
-    size_t u,v,w;       /* Local index variables */
+    time_t curr_time; /* Current time, for seeding random number generator */
+    char * tmp_word;  /* Temporary pointer to word in word set */
+    size_t u, v, w;   /* Local index variables */
 
     /* Compute the number of words in the test set */
-    num_words=sizeof(words)/sizeof(words[0]);
+    num_words = sizeof(words) / sizeof(words[0]);
 
     /* Determine the number of unique words in test set */
     /* (Not particularly efficient, be careful if many words are added to set) */
-    num_uniq_words=0;
-    for(u=0; u<num_words; u++) {
+    num_uniq_words = 0;
+    for (u = 0; u < num_words; u++) {
         /* Assume word is unique */
         num_uniq_words++;
-        for(v=0; v<u; v++)
+        for (v = 0; v < u; v++)
             /* If word is already found in words looked at, decrement unique count */
-            if(!HDstrcmp(words[u],words[v])) {
+            if (!HDstrcmp(words[u], words[v])) {
                 num_uniq_words--;
                 break;
             } /* end if */
-    } /* end for */
+    }         /* end for */
 
     /* Allocate space for the array of unique words */
-    uniq_words = (char **)HDmalloc(sizeof(char *)*num_uniq_words);
+    uniq_words = (char **)HDmalloc(sizeof(char *) * num_uniq_words);
 
     /* Allocate space for the array of randomized order unique words also */
-    rand_uniq_words = (char **)HDmalloc(sizeof(char *)*num_uniq_words);
+    rand_uniq_words = (char **)HDmalloc(sizeof(char *) * num_uniq_words);
 
     /* Allocate space for the array of sorted order unique words also */
-    sort_uniq_words = (char **)HDmalloc(sizeof(char *)*num_uniq_words);
+    sort_uniq_words = (char **)HDmalloc(sizeof(char *) * num_uniq_words);
 
     /* Insert unique words from test set into unique word set */
-    w=0;
-    for(u=0; u<num_words; u++) {
+    w = 0;
+    for (u = 0; u < num_words; u++) {
         /* Assume word is unique */
-        tmp_word=(char *)words[u];
-        for(v=0; v<u; v++)
+        tmp_word = (char *)words[u];
+        for (v = 0; v < u; v++)
             /* If word is already found in words looked at, decrement unique count */
-            if(!HDstrcmp(words[u],words[v])) {
-                tmp_word=NULL;
+            if (!HDstrcmp(words[u], words[v])) {
+                tmp_word = NULL;
                 break;
             } /* end if */
 
         /* Check if word was actually unique */
-        if(tmp_word!=NULL)
-            uniq_words[w++]=tmp_word;
+        if (tmp_word != NULL)
+            uniq_words[w++] = tmp_word;
     } /* end for */
 
     /* Create randomized set of unique words */
-    for(u=0; u<num_uniq_words; u++)
-        rand_uniq_words[u]=uniq_words[u];
-    curr_time=HDtime(NULL);
+    for (u = 0; u < num_uniq_words; u++)
+        rand_uniq_words[u] = uniq_words[u];
+    curr_time = HDtime(NULL);
     HDsrandom((unsigned)curr_time);
-    for(u=0; u<num_uniq_words; u++) {
+    for (u = 0; u < num_uniq_words; u++) {
         v = u + ((size_t)HDrandom() % (num_uniq_words - u));
-        if(u!=v) {
-            tmp_word=rand_uniq_words[u];
-            rand_uniq_words[u]=rand_uniq_words[v];
-            rand_uniq_words[v]=tmp_word;
+        if (u != v) {
+            tmp_word           = rand_uniq_words[u];
+            rand_uniq_words[u] = rand_uniq_words[v];
+            rand_uniq_words[v] = tmp_word;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Create sorted set of unique words */
-    for(u=0; u<num_uniq_words; u++)
-        sort_uniq_words[u]=uniq_words[u];
-    HDqsort(sort_uniq_words,num_uniq_words,sizeof(char *),tst_strcmp);
+    for (u = 0; u < num_uniq_words; u++)
+        sort_uniq_words[u] = uniq_words[u];
+    HDqsort(sort_uniq_words, num_uniq_words, sizeof(char *), tst_strcmp);
 } /* end test_tst_init() */
 
 /****************************************************************
@@ -144,23 +144,23 @@ test_tst_init(void)
 static void
 test_tst_create(void)
 {
-    H5ST_tree_t *tree;   /* TST created */
-    herr_t ret;         /* Generic return value */
+    H5ST_tree_t *tree; /* TST created */
+    herr_t       ret;  /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Creating & Closing TSTs\n"));
 
     /* Try closing a NULL tree */
-    tree=NULL;
-    ret=H5ST_close(tree);
+    tree = NULL;
+    ret  = H5ST_close(tree);
     VERIFY(ret, FAIL, "H5ST_close");
 
     /* Try creating a TST */
-    tree=H5ST_create();
+    tree = H5ST_create();
     CHECK_PTR(tree, "H5ST_create");
 
     /* Try closing a real tree */
-    ret=H5ST_close(tree);
+    ret = H5ST_close(tree);
     CHECK(ret, FAIL, "H5ST_close");
 
 } /* end test_tst_create() */
@@ -175,55 +175,57 @@ static void
 test_tst_insert(void)
 {
     H5ST_tree_t *tree;  /* TST created */
-    H5ST_ptr_t found;   /* Pointer to TST node found */
-    void *obj;          /* Pointer to object located in TST */
-    size_t u;           /* Local index counter */
-    htri_t check;       /* Is string in TST? */
-    herr_t ret;         /* Generic return value */
+    H5ST_ptr_t   found; /* Pointer to TST node found */
+    void *       obj;   /* Pointer to object located in TST */
+    size_t       u;     /* Local index counter */
+    htri_t       check; /* Is string in TST? */
+    herr_t       ret;   /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Inserting Values into TSTs\n"));
 
     /* Create the TST */
-    tree=H5ST_create();
+    tree = H5ST_create();
     CHECK_PTR(tree, "H5ST_create");
 
     /* Insert unique words into TST, in random order */
-    for(u=0; u<num_uniq_words; u++) {
-        ret=H5ST_insert(tree,rand_uniq_words[u],rand_uniq_words[u]);
+    for (u = 0; u < num_uniq_words; u++) {
+        ret = H5ST_insert(tree, rand_uniq_words[u], rand_uniq_words[u]);
         CHECK(ret, FAIL, "H5ST_insert");
     } /* end for */
 
     /* Verify that all words were inserted into TST properly */
-    for(u=0; u<num_uniq_words; u++) {
+    for (u = 0; u < num_uniq_words; u++) {
         /* Check that the word is present */
-        check=H5ST_search(tree,uniq_words[u]);
+        check = H5ST_search(tree, uniq_words[u]);
         VERIFY(check, TRUE, "H5ST_search");
 
         /* Check that the value "payloads" are correct */
-        found=H5ST_find(tree,uniq_words[u]);
+        found = H5ST_find(tree, uniq_words[u]);
         CHECK_PTR(found, "H5ST_find");
 
-        if(HDstrcmp((const char *)found->eqkid,uniq_words[u]))
-            TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, uniq_words[%u]=%s\n",__LINE__,(char *)found->eqkid,(unsigned)u,uniq_words[u]);
+        if (HDstrcmp((const char *)found->eqkid, uniq_words[u]) != 0)
+            TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, uniq_words[%u]=%s\n", __LINE__,
+                          (char *)found->eqkid, (unsigned)u, uniq_words[u]);
 
-        obj=H5ST_locate(tree,uniq_words[u]);
+        obj = H5ST_locate(tree, uniq_words[u]);
         CHECK_PTR(obj, "H5ST_locate");
 
-        if(HDstrcmp((const char *)obj,uniq_words[u]))
-            TestErrPrintf("%d: TST objects don't match!, obj=%s, uniq_words[%u]=%s\n",__LINE__,(char *)obj,(unsigned)u,uniq_words[u]);
+        if (HDstrcmp((const char *)obj, uniq_words[u]) != 0)
+            TestErrPrintf("%d: TST objects don't match!, obj=%s, uniq_words[%u]=%s\n", __LINE__, (char *)obj,
+                          (unsigned)u, uniq_words[u]);
     } /* end for */
 
     /* Verify that words not in the TST aren't found */
-    check=H5ST_search(tree,"foo");
+    check = H5ST_search(tree, "foo");
     VERIFY(check, FALSE, "H5ST_search");
-    check=H5ST_search(tree,"bar");
+    check = H5ST_search(tree, "bar");
     VERIFY(check, FALSE, "H5ST_search");
-    check=H5ST_search(tree,"baz");
+    check = H5ST_search(tree, "baz");
     VERIFY(check, FALSE, "H5ST_search");
 
     /* Close the TST */
-    ret=H5ST_close(tree);
+    ret = H5ST_close(tree);
     CHECK(ret, FAIL, "H5ST_close");
 } /* end test_tst_insert() */
 
@@ -237,39 +239,40 @@ static void
 test_tst_iterate(void)
 {
     H5ST_tree_t *tree;  /* TST created */
-    H5ST_ptr_t found;   /* Pointer to TST node found */
-    size_t u;           /* Local index counter */
-    herr_t ret;         /* Generic return value */
+    H5ST_ptr_t   found; /* Pointer to TST node found */
+    size_t       u;     /* Local index counter */
+    herr_t       ret;   /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Iterating Over TSTs\n"));
 
     /* Create the TST */
-    tree=H5ST_create();
+    tree = H5ST_create();
     CHECK_PTR(tree, "H5ST_create");
 
     /* Insert unique words into TST, in random order */
-    for(u=0; u<num_uniq_words; u++) {
-        ret=H5ST_insert(tree,rand_uniq_words[u],rand_uniq_words[u]);
+    for (u = 0; u < num_uniq_words; u++) {
+        ret = H5ST_insert(tree, rand_uniq_words[u], rand_uniq_words[u]);
         CHECK(ret, FAIL, "H5ST_insert");
     } /* end for */
 
     /* Use findfirst/findnext calls to iterate through TST */
-    found=H5ST_findfirst(tree);
+    found = H5ST_findfirst(tree);
     CHECK_PTR(found, "H5ST_findfirst");
-    u=0;
+    u = 0;
     do {
         /* Check that the strings in the TST are in the correct order */
-        if(HDstrcmp((const char *)found->eqkid,sort_uniq_words[u]))
-            TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, sort_uniq_words[%u]=%s\n",__LINE__,(char *)found->eqkid,(unsigned)u,sort_uniq_words[u]);
+        if (HDstrcmp((const char *)found->eqkid, sort_uniq_words[u]) != 0)
+            TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, sort_uniq_words[%u]=%s\n",
+                          __LINE__, (char *)found->eqkid, (unsigned)u, sort_uniq_words[u]);
 
         /* Advance to next string in TST */
-        found=H5ST_findnext(found);
+        found = H5ST_findnext(found);
         u++;
-    } while(found!=NULL);
+    } while (found != NULL);
 
     /* Close the TST */
-    ret=H5ST_close(tree);
+    ret = H5ST_close(tree);
     CHECK(ret, FAIL, "H5ST_close");
 } /* end test_tst_iterate() */
 
@@ -283,66 +286,68 @@ static void
 test_tst_remove(void)
 {
     H5ST_tree_t *tree;  /* TST created */
-    H5ST_ptr_t found;   /* Pointer to TST node found */
-    void *obj;          /* Pointer to object removed from TST */
-    htri_t check;       /* Is string in TST? */
-    size_t u;           /* Local index counter */
-    herr_t ret;         /* Generic return value */
+    H5ST_ptr_t   found; /* Pointer to TST node found */
+    void *       obj;   /* Pointer to object removed from TST */
+    htri_t       check; /* Is string in TST? */
+    size_t       u;     /* Local index counter */
+    herr_t       ret;   /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Removing String Values from TSTs\n"));
 
     /* Create the TST */
-    tree=H5ST_create();
+    tree = H5ST_create();
     CHECK_PTR(tree, "H5ST_create");
 
     /* Insert unique words into TST, in random order */
-    for(u=0; u<num_uniq_words; u++) {
-        ret=H5ST_insert(tree,rand_uniq_words[u],rand_uniq_words[u]);
+    for (u = 0; u < num_uniq_words; u++) {
+        ret = H5ST_insert(tree, rand_uniq_words[u], rand_uniq_words[u]);
         CHECK(ret, FAIL, "H5ST_insert");
     } /* end for */
 
     /* Remove strings from TST in random order */
-    for(u=0; u<num_uniq_words; u++) {
-        obj=H5ST_remove(tree,rand_uniq_words[u]);
+    for (u = 0; u < num_uniq_words; u++) {
+        obj = H5ST_remove(tree, rand_uniq_words[u]);
         CHECK_PTR(obj, "H5ST_remove");
 
         /* Check that the correct string was removed from TST */
-        if(HDstrcmp((const char *)obj,rand_uniq_words[u]))
-            TestErrPrintf("%d: TST node values don't match!, obj=%s, rand_uniq_words[%u]=%s\n",__LINE__,(char *)obj,(unsigned)u,rand_uniq_words[u]);
+        if (HDstrcmp((const char *)obj, rand_uniq_words[u]) != 0)
+            TestErrPrintf("%d: TST node values don't match!, obj=%s, rand_uniq_words[%u]=%s\n", __LINE__,
+                          (char *)obj, (unsigned)u, rand_uniq_words[u]);
 
         /* Check that the string can't be found in the TST any longer */
-        check=H5ST_search(tree,rand_uniq_words[u]);
+        check = H5ST_search(tree, rand_uniq_words[u]);
         VERIFY(check, FALSE, "H5ST_search");
     } /* end for */
 
     /* Re-insert unique words into TST, in random order */
-    for(u=0; u<num_uniq_words; u++) {
-        ret=H5ST_insert(tree,rand_uniq_words[u],rand_uniq_words[u]);
+    for (u = 0; u < num_uniq_words; u++) {
+        ret = H5ST_insert(tree, rand_uniq_words[u], rand_uniq_words[u]);
         CHECK(ret, FAIL, "H5ST_insert");
     } /* end for */
 
     /* Remove TST nodes from TST in random order */
-    for(u=0; u<num_uniq_words; u++) {
+    for (u = 0; u < num_uniq_words; u++) {
         /* Get the pointer to the node to delete */
-        found=H5ST_find(tree,rand_uniq_words[u]);
+        found = H5ST_find(tree, rand_uniq_words[u]);
         CHECK_PTR(found, "H5ST_find");
 
         /* Check that the correct object will be removed from TST */
-        if(HDstrcmp((const char *)found->eqkid,rand_uniq_words[u]))
-            TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, rand_uniq_words[%u]=%s\n",__LINE__,(char *)found->eqkid,(unsigned)u,rand_uniq_words[u]);
+        if (HDstrcmp((const char *)found->eqkid, rand_uniq_words[u]) != 0)
+            TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, rand_uniq_words[%u]=%s\n",
+                          __LINE__, (char *)found->eqkid, (unsigned)u, rand_uniq_words[u]);
 
         /* Remove the node */
-        ret=H5ST_delete(tree,found);
+        ret = H5ST_delete(tree, found);
         CHECK(ret, FAIL, "H5ST_delete");
 
         /* Check that the string can't be found in the TST any longer */
-        check=H5ST_search(tree,rand_uniq_words[u]);
+        check = H5ST_search(tree, rand_uniq_words[u]);
         VERIFY(check, FALSE, "H5ST_search");
     } /* end for */
 
     /* Close the TST */
-    ret=H5ST_close(tree);
+    ret = H5ST_close(tree);
     CHECK(ret, FAIL, "H5ST_close");
 } /* end test_tst_remove() */
 
@@ -376,12 +381,11 @@ test_tst(void)
     test_tst_init();
 
     /* Actual TST tests */
-    test_tst_create();          /* Test TST creation */
-    test_tst_insert();          /* Test TST insertion */
-    test_tst_iterate();         /* Test TST iteration */
-    test_tst_remove();          /* Test TST deletion */
+    test_tst_create();  /* Test TST creation */
+    test_tst_insert();  /* Test TST insertion */
+    test_tst_iterate(); /* Test TST iteration */
+    test_tst_remove();  /* Test TST deletion */
 
     /* Finalize TST testing data */
     test_tst_finalize();
-}   /* end test_tst() */
-
+} /* end test_tst() */

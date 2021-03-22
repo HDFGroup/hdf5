@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -187,13 +187,23 @@ check-all-install:
 trace:
 	@(cd src && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
+# Run doxygen across source files.
+# Currently, only invoke doxygen in the src directory.
+doxygen:
+	@echo Invoking doxygen
+	for d in src; do                                                \
+	  if test $$d != .; then                                        \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
+	  fi;                                                           \
+	done
+
 # Run tests with different Virtual File Drivers.
 # Currently, only invoke check-vfd in the test directory.
 check-vfd:
-	for d in src utils test; do                                 \
-	  if test $$d != .; then                                       \
-	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;          \
-	  fi;                                                          \
+	for d in src utils test; do                                     \
+	  if test $$d != .; then                                        \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
+	  fi;                                                           \
 	done
 
 # Run tests with different passthrough Virtual Object Layer Connectors.

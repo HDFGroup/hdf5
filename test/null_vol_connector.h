@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,11 +15,10 @@
  *              (registration, etc.).
  */
 
-#ifndef _null_vol_connector_H
-#define _null_vol_connector_H
+#ifndef NULL_VOL_CONNECTOR_H
+#define NULL_VOL_CONNECTOR_H
 
-#define NULL_VOL_CONNECTOR_VALUE    ((H5VL_class_value_t)160)
-#define NULL_VOL_CONNECTOR_NAME     "null_vol_connector"
+#define NULL_VOL_CONNECTOR_VALUE ((H5VL_class_value_t)160)
+#define NULL_VOL_CONNECTOR_NAME  "null_vol_connector"
 
-#endif /* _null_vol_connector_H */
-
+#endif /* NULL_VOL_CONNECTOR_H */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,7 +25,7 @@ const char Exception::DEFAULT_MSG[] = "No detailed information provided";
 ///\brief       Default constructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Exception::Exception() : detail_message(""), func_name("") {}
+Exception::Exception() {}
 
 //--------------------------------------------------------------------------
 // Function:    Exception overloaded constructor
@@ -35,7 +35,10 @@ Exception::Exception() : detail_message(""), func_name("") {}
 ///\param       message   - IN: Message on the failure
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Exception::Exception(const H5std_string& func, const H5std_string& message) : detail_message(message), func_name(func) {}
+Exception::Exception(const H5std_string &func, const H5std_string &message)
+    : detail_message(message), func_name(func)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    Exception copy constructor
@@ -43,7 +46,9 @@ Exception::Exception(const H5std_string& func, const H5std_string& message) : de
 ///\param       orig - IN: Exception instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Exception::Exception(const Exception& orig) : detail_message(orig.detail_message), func_name(orig.func_name) {}
+Exception::Exception(const Exception &orig) : detail_message(orig.detail_message), func_name(orig.func_name)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    Exception::getMajorString
@@ -56,32 +61,30 @@ Exception::Exception(const Exception& orig) : detail_message(orig.detail_message
 ///             will be returned.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5std_string Exception::getMajorString(hid_t err_major) const
+H5std_string
+Exception::getMajorString(hid_t err_major) const
 {
     // Preliminary call to H5Eget_msg() to get the length of the message
     ssize_t mesg_size = H5Eget_msg(err_major, NULL, NULL, 0);
 
     // If H5Eget_msg() returns a negative value, raise an exception,
     if (mesg_size < 0)
-        throw IdComponentException("Exception::getMajorString",
-            "H5Eget_msg failed");
+        throw IdComponentException("Exception::getMajorString", "H5Eget_msg failed");
 
     // Call H5Eget_msg again to get the actual message
-    char* mesg_C = new char[mesg_size+1];  // temporary C-string for C API
-    mesg_size = H5Eget_msg(err_major, NULL, mesg_C, mesg_size+1);
+    char *mesg_C = new char[mesg_size + 1]; // temporary C-string for C API
+    mesg_size    = H5Eget_msg(err_major, NULL, mesg_C, mesg_size + 1);
 
     // Check for failure again
-    if (mesg_size < 0)
-    {
-        delete []mesg_C;
-        throw IdComponentException("Exception::getMajorString",
-            "H5Eget_msg failed");
+    if (mesg_size < 0) {
+        delete[] mesg_C;
+        throw IdComponentException("Exception::getMajorString", "H5Eget_msg failed");
     }
 
     // Convert the C error description and return
     H5std_string major_str(mesg_C);
-    delete []mesg_C;
-    return(major_str);
+    delete[] mesg_C;
+    return (major_str);
 }
 
 //--------------------------------------------------------------------------
@@ -95,32 +98,30 @@ H5std_string Exception::getMajorString(hid_t err_major) const
 ///             will be returned.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5std_string Exception::getMinorString(hid_t err_minor) const
+H5std_string
+Exception::getMinorString(hid_t err_minor) const
 {
     // Preliminary call to H5Eget_msg() to get the length of the message
     ssize_t mesg_size = H5Eget_msg(err_minor, NULL, NULL, 0);
 
     // If H5Eget_msg() returns a negative value, raise an exception,
     if (mesg_size < 0)
-        throw IdComponentException("Exception::getMinorString",
-            "H5Eget_msg failed");
+        throw IdComponentException("Exception::getMinorString", "H5Eget_msg failed");
 
     // Call H5Eget_msg again to get the actual message
-    char* mesg_C = new char[mesg_size+1];  // temporary C-string for C API
-    mesg_size = H5Eget_msg(err_minor, NULL, mesg_C, mesg_size+1);
+    char *mesg_C = new char[mesg_size + 1]; // temporary C-string for C API
+    mesg_size    = H5Eget_msg(err_minor, NULL, mesg_C, mesg_size + 1);
 
     // Check for failure again
-    if (mesg_size < 0)
-    {
-        delete []mesg_C;
-        throw IdComponentException("Exception::getMinorString",
-            "H5Eget_msg failed");
+    if (mesg_size < 0) {
+        delete[] mesg_C;
+        throw IdComponentException("Exception::getMinorString", "H5Eget_msg failed");
     }
 
     // Convert the C error description and return
     H5std_string minor_str(mesg_C);
-    delete []mesg_C;
-    return(minor_str);
+    delete[] mesg_C;
+    return (minor_str);
 }
 
 //--------------------------------------------------------------------------
@@ -139,7 +140,8 @@ H5std_string Exception::getMinorString(hid_t err_minor) const
 ///             handlers
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::setAutoPrint(H5E_auto2_t& func, void* client_data)
+void
+Exception::setAutoPrint(H5E_auto2_t &func, void *client_data)
 {
     // calls the C API routine H5Eset_auto to set the auto printing to
     // the specified function.
@@ -153,7 +155,8 @@ void Exception::setAutoPrint(H5E_auto2_t& func, void* client_data)
 ///\brief       Turns off the automatic error printing from the C library.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::dontPrint()
+void
+Exception::dontPrint()
 {
     // calls the C API routine H5Eset_auto with NULL parameters to turn
     // off the automatic error printing.
@@ -172,7 +175,8 @@ void Exception::dontPrint()
 ///                                the error function
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::getAutoPrint(H5E_auto2_t& func, void** client_data)
+void
+Exception::getAutoPrint(H5E_auto2_t &func, void **client_data)
 {
     // calls the C API routine H5Eget_auto to get the current setting of
     // the automatic error printing
@@ -189,7 +193,8 @@ void Exception::getAutoPrint(H5E_auto2_t& func, void** client_data)
 ///             called, with certain exceptions (for instance, \c H5Eprint).
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::clearErrorStack()
+void
+Exception::clearErrorStack()
 {
     // calls the C API routine H5Eclear to clear the error stack
     herr_t ret_value = H5Eclear2(H5E_DEFAULT);
@@ -238,7 +243,8 @@ void Exception::clearErrorStack()
 ///\endcode
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::walkErrorStack(H5E_direction_t direction, H5E_walk2_t func, void* client_data)
+void
+Exception::walkErrorStack(H5E_direction_t direction, H5E_walk2_t func, void *client_data)
 {
     // calls the C API routine H5Ewalk to walk the error stack
     herr_t ret_value = H5Ewalk2(H5E_DEFAULT, direction, func, client_data);
@@ -253,9 +259,10 @@ void Exception::walkErrorStack(H5E_direction_t direction, H5E_walk2_t func, void
 ///\return      Text message - \c H5std_string
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5std_string Exception::getDetailMsg() const
+H5std_string
+Exception::getDetailMsg() const
 {
-    return(detail_message);
+    return (detail_message);
 }
 
 //--------------------------------------------------------------------------
@@ -265,9 +272,10 @@ H5std_string Exception::getDetailMsg() const
 ///\return      Text message - \c char pointer
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-const char* Exception::getCDetailMsg() const
+const char *
+Exception::getCDetailMsg() const
 {
-    return(detail_message.c_str());
+    return (detail_message.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -276,9 +284,10 @@ const char* Exception::getCDetailMsg() const
 ///\return      Text message - \c H5std_string
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5std_string Exception::getFuncName() const
+H5std_string
+Exception::getFuncName() const
 {
-    return(func_name);
+    return (func_name);
 }
 
 //--------------------------------------------------------------------------
@@ -287,9 +296,10 @@ H5std_string Exception::getFuncName() const
 ///\return      Text message - \c char pointer
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-const char* Exception::getCFuncName() const
+const char *
+Exception::getCFuncName() const
 {
-    return(func_name.c_str());
+    return (func_name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -299,7 +309,8 @@ const char* Exception::getCFuncName() const
 ///\param       err_stack - IN: Error stack ID, default to H5E_DEFAULT(0)
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::printErrorStack(FILE* stream, hid_t err_stack)
+void
+Exception::printErrorStack(FILE *stream, hid_t err_stack)
 {
     herr_t ret_value = H5Eprint2(err_stack, stream);
     if (ret_value < 0)
@@ -319,7 +330,7 @@ void Exception::printErrorStack(FILE* stream, hid_t err_stack)
 //              Removed from documentation. -BMR, 2016/03/23
 //              Removed from code. -BMR, 2017/08/11 1.8.20 and 1.10.2
 //--------------------------------------------------------------------------
-//void Exception::printError(FILE* stream) const
+// void Exception::printError(FILE* stream) const
 //{
 //    Exception::printErrorStack(stream, H5E_DEFAULT);
 //}
@@ -339,7 +350,7 @@ Exception::~Exception() throw() {}
 // Function:    FileIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-FileIException::FileIException():Exception(){}
+FileIException::FileIException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    FileIException overloaded constructor
 ///\brief       Creates a FileIException with the name of the function,
@@ -347,7 +358,10 @@ FileIException::FileIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-FileIException::FileIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+FileIException::FileIException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    FileIException destructor
 ///\brief       Noop destructor.
@@ -362,7 +376,7 @@ FileIException::~FileIException() throw() {}
 // Function:    GroupIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-GroupIException::GroupIException():Exception(){}
+GroupIException::GroupIException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    GroupIException overloaded constructor
 ///\brief       Creates a GroupIException with the name of the function,
@@ -370,7 +384,10 @@ GroupIException::GroupIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-GroupIException::GroupIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+GroupIException::GroupIException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    GroupIException destructor
 ///\brief       Noop destructor.
@@ -385,7 +402,7 @@ GroupIException::~GroupIException() throw() {}
 // Function:    DataSpaceIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-DataSpaceIException::DataSpaceIException():Exception(){}
+DataSpaceIException::DataSpaceIException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    DataSpaceIException overloaded constructor
 ///\brief       Creates a DataSpaceIException with the name of the function,
@@ -393,7 +410,10 @@ DataSpaceIException::DataSpaceIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-DataSpaceIException::DataSpaceIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+DataSpaceIException::DataSpaceIException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    DataSpaceIException destructor
 ///\brief       Noop destructor.
@@ -408,7 +428,7 @@ DataSpaceIException::~DataSpaceIException() throw() {}
 // Function:    DataTypeIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-DataTypeIException::DataTypeIException():Exception(){}
+DataTypeIException::DataTypeIException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    DataTypeIException overloaded constructor
 ///\brief       Creates a DataTypeIException with the name of the function,
@@ -416,7 +436,10 @@ DataTypeIException::DataTypeIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-DataTypeIException::DataTypeIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+DataTypeIException::DataTypeIException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    DataTypeIException destructor
 ///\brief       Noop destructor.
@@ -431,7 +454,7 @@ DataTypeIException::~DataTypeIException() throw() {}
 // Function:    ObjHeaderIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-ObjHeaderIException::ObjHeaderIException():Exception(){}
+ObjHeaderIException::ObjHeaderIException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    ObjHeaderIException overloaded constructor
 ///\brief       Creates an ObjHeaderIException with the name of the function,
@@ -439,7 +462,10 @@ ObjHeaderIException::ObjHeaderIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-ObjHeaderIException::ObjHeaderIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+ObjHeaderIException::ObjHeaderIException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    ObjHeaderIException destructor
 ///\brief       Noop destructor.
@@ -454,7 +480,7 @@ ObjHeaderIException::~ObjHeaderIException() throw() {}
 // Function:    PropListIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-PropListIException::PropListIException():Exception(){}
+PropListIException::PropListIException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    PropListIException overloaded constructor
 ///\brief       Creates a PropListIException with the name of the function,
@@ -462,7 +488,10 @@ PropListIException::PropListIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-PropListIException::PropListIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+PropListIException::PropListIException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    PropListIException destructor
 ///\brief       Noop destructor.
@@ -477,7 +506,7 @@ PropListIException::~PropListIException() throw() {}
 // Function:    DataSetIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-DataSetIException::DataSetIException():Exception(){}
+DataSetIException::DataSetIException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    DataSetIException overloaded constructor
 ///\brief       Creates a DataSetIException with the name of the function,
@@ -485,7 +514,10 @@ DataSetIException::DataSetIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-DataSetIException::DataSetIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+DataSetIException::DataSetIException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    DataSetIException destructor
 ///\brief       Noop destructor.
@@ -500,7 +532,7 @@ DataSetIException::~DataSetIException() throw() {}
 // Function:    AttributeIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-AttributeIException::AttributeIException():Exception(){}
+AttributeIException::AttributeIException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    AttributeIException overloaded constructor
 ///\brief       Creates an AttributeIException with the name of the function,
@@ -508,7 +540,10 @@ AttributeIException::AttributeIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-AttributeIException::AttributeIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+AttributeIException::AttributeIException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    AttributeIException destructor
 ///\brief       Noop destructor.
@@ -523,7 +558,7 @@ AttributeIException::~AttributeIException() throw() {}
 // Function:    ReferenceException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-ReferenceException::ReferenceException():Exception(){}
+ReferenceException::ReferenceException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    ReferenceException overloaded constructor
 ///\brief       Creates a ReferenceException with the name of the function,
@@ -531,7 +566,10 @@ ReferenceException::ReferenceException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-ReferenceException::ReferenceException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+ReferenceException::ReferenceException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    ReferenceException destructor
 ///\brief       Noop destructor.
@@ -546,7 +584,7 @@ ReferenceException::~ReferenceException() throw() {}
 // Function:    LibraryIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-LibraryIException::LibraryIException():Exception(){}
+LibraryIException::LibraryIException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    LibraryIException overloaded constructor
 ///\brief       Creates a LibraryIException with the name of the function,
@@ -554,7 +592,10 @@ LibraryIException::LibraryIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-LibraryIException::LibraryIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+LibraryIException::LibraryIException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    LibraryIException destructor
 ///\brief       Noop destructor.
@@ -569,7 +610,7 @@ LibraryIException::~LibraryIException() throw() {}
 // Function:    LocationException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-LocationException::LocationException():Exception(){}
+LocationException::LocationException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    LocationException overloaded constructor
 ///\brief       Creates a LocationException with the name of the function,
@@ -577,7 +618,10 @@ LocationException::LocationException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-LocationException::LocationException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+LocationException::LocationException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    LocationException destructor
 ///\brief       Noop destructor.
@@ -592,7 +636,7 @@ LocationException::~LocationException() throw() {}
 // Function:    IdComponentException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-IdComponentException::IdComponentException(): Exception() {}
+IdComponentException::IdComponentException() : Exception() {}
 //--------------------------------------------------------------------------
 // Function:    IdComponentException overloaded constructor
 ///\brief       Creates a IdComponentException with the name of the function,
@@ -600,11 +644,14 @@ IdComponentException::IdComponentException(): Exception() {}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-IdComponentException::IdComponentException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+IdComponentException::IdComponentException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 //--------------------------------------------------------------------------
 // Function:    IdComponentException destructor
 ///\brief       Noop destructor.
 //--------------------------------------------------------------------------
 IdComponentException::~IdComponentException() throw() {}
 
-} // end namespace
+} // namespace H5

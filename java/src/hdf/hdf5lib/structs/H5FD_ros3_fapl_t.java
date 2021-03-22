@@ -16,7 +16,7 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-/*
+/**
  * Java representation of the ROS3 VFD file access property list (fapl)
  * structure.
  *

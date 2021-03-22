@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,11 +28,11 @@
 /* global variables */
 unsigned h5tools_nCols = 80;
 /* ``get_option'' variables */
-int         opt_err = 1;    /*get_option prints errors if this is on */
-int         opt_ind = 1;    /*token pointer                          */
-const char *opt_arg;        /*flag argument (or value)               */
-static int  h5tools_d_status = 0;
-static const char  *h5tools_progname = "h5tools";
+int                opt_err = 1; /*get_option prints errors if this is on */
+int                opt_ind = 1; /*token pointer                          */
+const char *       opt_arg;     /*flag argument (or value)               */
+static int         h5tools_d_status = 0;
+static const char *h5tools_progname = "h5tools";
 
 /*
  * The output functions need a temporary buffer to hold a piece of the
@@ -41,22 +41,21 @@ static const char  *h5tools_progname = "h5tools";
  * largest value suitable for your machine (for testing use a small value).
  */
 /* Maximum size used in a call to malloc for a dataset */
-hsize_t H5TOOLS_MALLOCSIZE = (256 * 1024 * 1024);  /* 256 MB */
+hsize_t H5TOOLS_MALLOCSIZE = (256 * 1024 * 1024); /* 256 MB */
 /* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
-hsize_t H5TOOLS_BUFSIZE = ( 32 * 1024 * 1024);  /* 32 MB */
-
+hsize_t H5TOOLS_BUFSIZE = (32 * 1024 * 1024); /* 32 MB */
 
 /* ``parallel_print'' variables */
-unsigned char  g_Parallel = 0;  /*0 for serial, 1 for parallel */
-char     outBuff[OUTBUFF_SIZE];
-unsigned outBuffOffset;
-FILE*    overflow_file = NULL;
+unsigned char g_Parallel = 0; /*0 for serial, 1 for parallel */
+char          outBuff[OUTBUFF_SIZE];
+unsigned      outBuffOffset;
+FILE *        overflow_file = NULL;
 
 /* local functions */
 static void init_table(hid_t fid, table_t **tbl);
 #ifdef H5DUMP_DEBUG
-static void dump_table(hid_t fid, char* tablename, table_t *table);
-#endif  /* H5DUMP_DEBUG */
+static void dump_table(hid_t fid, char *tablename, table_t *table);
+#endif /* H5DUMP_DEBUG */
 static void add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool_t recorded);
 
 /*-------------------------------------------------------------------------
@@ -66,28 +65,29 @@ static void add_obj(table_t *table, const H5O_token_t *obj_token, const char *ob
  *-------------------------------------------------------------------------
  */
 void
-parallel_print(const char* format, ...)
+parallel_print(const char *format, ...)
 {
-    int  bytes_written;
+    int     bytes_written;
     va_list ap;
 
     HDva_start(ap, format);
 
-    if(!g_Parallel)
+    if (!g_Parallel)
         HDvprintf(format, ap);
     else {
-        if(overflow_file == NULL) /*no overflow has occurred yet */ {
+        if (overflow_file == NULL) /*no overflow has occurred yet */ {
             bytes_written = HDvsnprintf(outBuff + outBuffOffset, OUTBUFF_SIZE - outBuffOffset, format, ap);
             HDva_end(ap);
             HDva_start(ap, format);
 
-            if((bytes_written < 0) || ((unsigned)bytes_written >= (OUTBUFF_SIZE - outBuffOffset))) {
+            if ((bytes_written < 0) || ((unsigned)bytes_written >= (OUTBUFF_SIZE - outBuffOffset))) {
                 /* Terminate the outbuff at the end of the previous output */
                 outBuff[outBuffOffset] = '\0';
 
                 overflow_file = HDtmpfile();
-                if(overflow_file == NULL)
-                    HDfprintf(rawerrorstream, "warning: could not create overflow file.  Output may be truncated.\n");
+                if (overflow_file == NULL)
+                    HDfprintf(rawerrorstream,
+                              "warning: could not create overflow file.  Output may be truncated.\n");
                 else
                     bytes_written = HDvfprintf(overflow_file, format, ap);
             }
@@ -96,11 +96,9 @@ parallel_print(const char* format, ...)
         }
         else
             bytes_written = HDvfprintf(overflow_file, format, ap);
-
     }
     HDva_end(ap);
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: error_msg
@@ -125,7 +123,6 @@ error_msg(const char *fmt, ...)
 
     HDva_end(ap);
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: warn_msg
@@ -162,9 +159,8 @@ void
 help_ref_msg(FILE *output)
 {
     HDfprintf(output, "Try '-h' or '--help' for more information or ");
-    HDfprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n",h5tools_getprogname());
+    HDfprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n", h5tools_getprogname());
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: get_option
@@ -182,8 +178,8 @@ help_ref_msg(FILE *output)
 int
 get_option(int argc, const char **argv, const char *opts, const struct long_options *l_opts)
 {
-    static int sp = 1;    /* character index in current token */
-    int opt_opt = '?';    /* option character passed back to user */
+    static int sp      = 1;   /* character index in current token */
+    int        opt_opt = '?'; /* option character passed back to user */
 
     if (sp == 1) {
         /* check for more flag-like tokens */
@@ -198,46 +194,48 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
     if (sp == 1 && argv[opt_ind][0] == '-' && argv[opt_ind][1] == '-') {
         /* long command line option */
-        const char *arg = &argv[opt_ind][2];
-        int i;
+        int        i;
+        const char ch      = '=';
+        char *     arg     = HDstrdup(&argv[opt_ind][2]);
+        size_t     arg_len = 0;
+
+        opt_arg = strchr(&argv[opt_ind][2], ch);
+        arg_len = HDstrlen(&argv[opt_ind][2]);
+        if (opt_arg) {
+            arg_len -= HDstrlen(opt_arg);
+            opt_arg++; /* skip the equal sign */
+        }
+        arg[arg_len] = 0;
 
         for (i = 0; l_opts && l_opts[i].name; i++) {
-            size_t len = HDstrlen(l_opts[i].name);
-
-            if (HDstrncmp(arg, l_opts[i].name, len) == 0) {
+            if (HDstrcmp(arg, l_opts[i].name) == 0) {
                 /* we've found a matching long command line flag */
                 opt_opt = l_opts[i].shortval;
 
                 if (l_opts[i].has_arg != no_arg) {
-                    if (arg[len] == '=') {
-                        opt_arg = &arg[len + 1];
-                    }
-                    else if (l_opts[i].has_arg != optional_arg) {
-                        if (opt_ind < (argc - 1))
-                            if (argv[opt_ind + 1][0] != '-')
-                                opt_arg = argv[++opt_ind];
-                    }
-                    else if (l_opts[i].has_arg == require_arg) {
-                        if (opt_err)
-                            HDfprintf(rawerrorstream,
-                                    "%s: option required for \"--%s\" flag\n",
-                                    argv[0], arg);
+                    if (opt_arg == NULL) {
+                        if (l_opts[i].has_arg != optional_arg) {
+                            if (opt_ind < (argc - 1))
+                                if (argv[opt_ind + 1][0] != '-')
+                                    opt_arg = argv[++opt_ind];
+                        }
+                        else if (l_opts[i].has_arg == require_arg) {
+                            if (opt_err)
+                                HDfprintf(rawerrorstream, "%s: option required for \"--%s\" flag\n", argv[0],
+                                          arg);
 
-                        opt_opt = '?';
+                            opt_opt = '?';
+                        }
                     }
-                    else
-                        opt_arg = NULL;
                 }
                 else {
-                    if (arg[len] == '=') {
+                    if (opt_arg) {
                         if (opt_err)
-                            HDfprintf(rawerrorstream,
-                                    "%s: no option required for \"%s\" flag\n",
-                                    argv[0], arg);
+                            HDfprintf(rawerrorstream, "%s: no option required for \"%s\" flag\n", argv[0],
+                                      arg);
 
                         opt_opt = '?';
                     }
-                    opt_arg = NULL;
                 }
                 break;
             }
@@ -253,17 +251,18 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
         opt_ind++;
         sp = 1;
+
+        HDfree(arg);
     }
     else {
-        register char *cp;    /* pointer into current token */
+        register char *cp; /* pointer into current token */
 
         /* short command line option */
         opt_opt = argv[opt_ind][sp];
 
         if (opt_opt == ':' || (cp = HDstrchr(opts, opt_opt)) == 0) {
             if (opt_err)
-                HDfprintf(rawerrorstream, "%s: unknown option \"%c\"\n",
-                        argv[0], opt_opt);
+                HDfprintf(rawerrorstream, "%s: unknown option \"%c\"\n", argv[0], opt_opt);
 
             /* if no chars left in this token, move to next token */
             if (argv[opt_ind][++sp] == '\0') {
@@ -281,9 +280,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
             }
             else if (++opt_ind >= argc) {
                 if (opt_err)
-                    HDfprintf(rawerrorstream,
-                            "%s: value expected for option \"%c\"\n",
-                            argv[0], opt_opt);
+                    HDfprintf(rawerrorstream, "%s: value expected for option \"%c\"\n", argv[0], opt_opt);
 
                 opt_opt = '?';
             }
@@ -299,8 +296,8 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
             /* check the next argument */
             opt_ind++;
             /* we do have an extra argument, check if not last */
-            if ( (opt_ind+1) < argc ) {
-                if ( argv[opt_ind][0] != '-' ) {
+            if ((opt_ind + 1) < argc) {
+                if (argv[opt_ind][0] != '-') {
                     opt_arg = argv[opt_ind++];
                 }
                 else {
@@ -325,7 +322,6 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
     /* return the current flag character found */
     return opt_opt;
 }
-
 
 /*****************************************************************************
  *
@@ -388,27 +384,19 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
  * Programmer: Jacob Smith
  *             2017-11-10
  *
- * Changes: None.
- *
  *****************************************************************************
  */
 herr_t
-parse_tuple(const char   *start,
-           int           sep,
-           char        **cpy_out,
-           unsigned     *nelems,
-           char       ***ptrs_out)
+parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char ***ptrs_out)
 {
-    char      *elem_ptr    = NULL;
-    char      *dest_ptr    = NULL;
-    unsigned   elems_count = 0;
-    char     **elems       = NULL; /* more like *elems[], but complier... */
-    char     **elems_re    = NULL; /* temporary pointer, for realloc */
-    char      *cpy         = NULL;
-    herr_t     ret_value   = SUCCEED;
-    unsigned   init_slots  = 2;
-
-
+    char *   elem_ptr    = NULL;
+    char *   dest_ptr    = NULL;
+    unsigned elems_count = 0;
+    char **  elems       = NULL; /* more like *elems[], but complier... */
+    char **  elems_re    = NULL; /* temporary pointer, for realloc */
+    char *   cpy         = NULL;
+    herr_t   ret_value   = SUCCEED;
+    unsigned init_slots  = 2;
 
     /*****************
      * SANITY-CHECKS *
@@ -433,8 +421,6 @@ parse_tuple(const char   *start,
 
     elems_count = 0;
 
-
-
     /***********
      * PREPARE *
      ***********/
@@ -442,21 +428,25 @@ parse_tuple(const char   *start,
     /* create list
      */
     elems = (char **)HDmalloc(sizeof(char *) * (init_slots + 1));
-    if (elems == NULL) { ret_value = FAIL; goto done; } /* CANTALLOC */
+    if (elems == NULL) {
+        ret_value = FAIL;
+        goto done;
+    } /* CANTALLOC */
 
     /* create destination string
      */
-    start++; /* advance past opening paren '(' */
+    start++;                                                  /* advance past opening paren '(' */
     cpy = (char *)HDmalloc(sizeof(char) * (HDstrlen(start))); /* no +1; less '(' */
-    if (cpy == NULL) { ret_value = FAIL; goto done; } /* CANTALLOC */
+    if (cpy == NULL) {
+        ret_value = FAIL;
+        goto done;
+    } /* CANTALLOC */
 
     /* set pointers
      */
-    dest_ptr = cpy; /* start writing copy here */
-    elem_ptr = cpy; /* first element starts here */
+    dest_ptr             = cpy;      /* start writing copy here */
+    elem_ptr             = cpy;      /* first element starts here */
     elems[elems_count++] = elem_ptr; /* set first element pointer into list */
-
-
 
     /*********
      * PARSE *
@@ -468,30 +458,30 @@ parse_tuple(const char   *start,
         if (*start == '\\') {
             /* Possibly an escape digraph.
              */
-            if ((*(start + 1) == '\\') ||
-                (*(start + 1) == sep) )
-            {
+            if ((*(start + 1) == '\\') || (*(start + 1) == sep)) {
                 /* Valid escape digraph of "\\" or "\<sep>".
                  */
-                start++; /* advance past escape char '\' */
+                start++;                    /* advance past escape char '\' */
                 *(dest_ptr++) = *(start++); /* Copy subsequent char  */
                                             /* and advance pointers. */
-            } else {
-               /* Not an accepted escape digraph.
-                * Copy backslash character.
-                */
+            }
+            else {
+                /* Not an accepted escape digraph.
+                 * Copy backslash character.
+                 */
                 *(dest_ptr++) = *(start++);
             }
-        } else if (*start == sep) {
+        }
+        else if (*start == sep) {
             /* Non-escaped separator.
              * Terminate elements substring in copy, record element, advance.
              * Expand elements list if appropriate.
              */
-            *(dest_ptr++) = 0; /* Null-terminate elem substring in copy */
-                               /* and advance pointer.                  */
-            start++; /* Advance src pointer past separator. */
-            elem_ptr = dest_ptr; /* Element pointer points to start of first */
-                                 /* character after null sep in copy.        */
+            *(dest_ptr++) = 0;               /* Null-terminate elem substring in copy */
+                                             /* and advance pointer.                  */
+            start++;                         /* Advance src pointer past separator. */
+            elem_ptr = dest_ptr;             /* Element pointer points to start of first */
+                                             /* character after null sep in copy.        */
             elems[elems_count++] = elem_ptr; /* Set elem pointer in list */
                                              /* and increment count.     */
 
@@ -499,8 +489,7 @@ parse_tuple(const char   *start,
              */
             if (elems_count == init_slots) {
                 init_slots *= 2;
-                elems_re = (char **)realloc(elems, sizeof(char *) * \
-                                                   (init_slots + 1));
+                elems_re = (char **)realloc(elems, sizeof(char *) * (init_slots + 1));
                 if (elems_re == NULL) {
                     /* CANTREALLOC */
                     ret_value = FAIL;
@@ -508,23 +497,23 @@ parse_tuple(const char   *start,
                 }
                 elems = elems_re;
             }
-        } else if (*start == ')' && *(start + 1) == '\0') {
+        }
+        else if (*start == ')' && *(start + 1) == '\0') {
             /* Found terminal, non-escaped close-paren. Last element.
              * Write null terminator to copy.
              * Advance source pointer to gently break from loop.
              * Requred to prevent ")" from always being added to last element.
              */
             start++;
-        } else {
+        }
+        else {
             /* Copy character into destination. Advance pointers.
              */
             *(dest_ptr++) = *(start++);
         }
     }
-    *dest_ptr = '\0'; /* Null-terminate destination string. */
+    *dest_ptr          = '\0'; /* Null-terminate destination string. */
     elems[elems_count] = NULL; /* Null-terminate elements list. */
-
-
 
     /********************
      * PASS BACK VALUES *
@@ -537,17 +526,15 @@ parse_tuple(const char   *start,
 done:
     if (ret_value == FAIL) {
         /* CLEANUP */
-        if (cpy)   free(cpy);
-        if (elems) free(elems);
+        if (cpy)
+            free(cpy);
+        if (elems)
+            free(elems);
     }
 
     return ret_value;
 
 } /* parse_tuple */
-
-
-
-
 
 /*-------------------------------------------------------------------------
  * Function: indentation
@@ -570,7 +557,6 @@ indentation(unsigned x)
     }
 }
 
-
 /*-------------------------------------------------------------------------
  * Function: print_version
  *
@@ -583,11 +569,9 @@ indentation(unsigned x)
 void
 print_version(const char *progname)
 {
-    PRINTSTREAM(rawoutstream, "%s: Version %u.%u.%u%s%s\n",
-           progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
-           ((const char *)H5_VERS_SUBRELEASE)[0] ? "-" : "", H5_VERS_SUBRELEASE);
+    PRINTSTREAM(rawoutstream, "%s: Version %u.%u.%u%s%s\n", progname, H5_VERS_MAJOR, H5_VERS_MINOR,
+                H5_VERS_RELEASE, ((const char *)H5_VERS_SUBRELEASE)[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    init_table
@@ -603,14 +587,13 @@ init_table(hid_t fid, table_t **tbl)
 {
     table_t *table = (table_t *)HDmalloc(sizeof(table_t));
 
-    table->fid = fid;
-    table->size = 20;
+    table->fid   = fid;
+    table->size  = 20;
     table->nobjs = 0;
-    table->objs = (obj_t *)HDmalloc(table->size * sizeof(obj_t));
+    table->objs  = (obj_t *)HDmalloc(table->size * sizeof(obj_t));
 
     *tbl = table;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    free_table
@@ -624,11 +607,11 @@ init_table(hid_t fid, table_t **tbl)
 void
 free_table(table_t *table)
 {
-    unsigned u;         /* Local index value */
+    unsigned u; /* Local index value */
 
     /* Free the names for the objects in the table */
-    for(u = 0; u < table->nobjs; u++)
-        if(table->objs[u].objname)
+    for (u = 0; u < table->nobjs; u++)
+        if (table->objs[u].objname)
             HDfree(table->objs[u].objname);
 
     HDfree(table->objs);
@@ -645,23 +628,21 @@ free_table(table_t *table)
  *-------------------------------------------------------------------------
  */
 static void
-dump_table(hid_t fid, char* tablename, table_t *table)
+dump_table(hid_t fid, char *tablename, table_t *table)
 {
     unsigned u;
-    char *obj_tok_str = NULL;
+    char *   obj_tok_str = NULL;
 
-    PRINTSTREAM(rawoutstream,"%s: # of entries = %d\n", tablename,table->nobjs);
+    PRINTSTREAM(rawoutstream, "%s: # of entries = %d\n", tablename, table->nobjs);
     for (u = 0; u < table->nobjs; u++) {
         H5VLconnector_token_to_str(fid, table->objs[u].obj_token, &obj_tok_str);
 
-        PRINTSTREAM(rawoutstream,"%s %s %d %d\n", obj_tok_str,
-           table->objs[u].objname,
-           table->objs[u].displayed, table->objs[u].recorded);
+        PRINTSTREAM(rawoutstream, "%s %s %d %d\n", obj_tok_str, table->objs[u].objname,
+                    table->objs[u].displayed, table->objs[u].recorded);
 
         H5VLfree_token_str(fid, obj_tok_str);
     }
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    dump_tables
@@ -678,8 +659,7 @@ dump_tables(find_objs_t *info)
     dump_table(info->fid, "dset_table", info->dset_table);
     dump_table(info->fid, "type_table", info->type_table);
 }
-#endif  /* H5DUMP_DEBUG */
-
+#endif /* H5DUMP_DEBUG */
 
 /*-------------------------------------------------------------------------
  * Function:    search_obj
@@ -692,21 +672,20 @@ dump_tables(find_objs_t *info)
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE obj_t *
-search_obj(table_t *table, const H5O_token_t *obj_token)
+             search_obj(table_t *table, const H5O_token_t *obj_token)
 {
     unsigned u;
-    int token_cmp;
+    int      token_cmp;
 
-    for(u = 0; u < table->nobjs; u++) {
-        if(H5Otoken_cmp(table->fid, &table->objs[u].obj_token, obj_token, &token_cmp) < 0)
+    for (u = 0; u < table->nobjs; u++) {
+        if (H5Otoken_cmp(table->fid, &table->objs[u].obj_token, obj_token, &token_cmp) < 0)
             return NULL;
-        if(!token_cmp)
+        if (!token_cmp)
             return &(table->objs[u]);
     }
 
     return NULL;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    find_objs_cb
@@ -721,31 +700,31 @@ search_obj(table_t *table, const H5O_token_t *obj_token)
 static herr_t
 find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_seen, void *op_data)
 {
-    find_objs_t *info = (find_objs_t*)op_data;
-    herr_t ret_value = 0;
+    find_objs_t *info      = (find_objs_t *)op_data;
+    herr_t       ret_value = 0;
 
-    switch(oinfo->type) {
+    switch (oinfo->type) {
         case H5O_TYPE_GROUP:
-            if(NULL == already_seen)
+            if (NULL == already_seen)
                 add_obj(info->group_table, &oinfo->token, name, TRUE);
             break;
 
         case H5O_TYPE_DATASET:
-            if(NULL == already_seen) {
+            if (NULL == already_seen) {
                 hid_t dset = H5I_INVALID_HID;
 
                 /* Add the dataset to the list of objects */
                 add_obj(info->dset_table, &oinfo->token, name, TRUE);
 
                 /* Check for a dataset that uses a named datatype */
-                if((dset = H5Dopen2(info->fid, name, H5P_DEFAULT)) >= 0) {
+                if ((dset = H5Dopen2(info->fid, name, H5P_DEFAULT)) >= 0) {
                     hid_t type = H5Dget_type(dset);
 
-                    if(H5Tcommitted(type) > 0) {
+                    if (H5Tcommitted(type) > 0) {
                         H5O_info2_t type_oinfo;
 
                         H5Oget_info3(type, &type_oinfo, H5O_INFO_BASIC);
-                        if(search_obj(info->type_table, &type_oinfo.token) == NULL)
+                        if (search_obj(info->type_table, &type_oinfo.token) == NULL)
                             add_obj(info->type_table, &type_oinfo.token, name, FALSE);
                     } /* end if */
 
@@ -758,10 +737,10 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
             break;
 
         case H5O_TYPE_NAMED_DATATYPE:
-            if(NULL == already_seen) {
+            if (NULL == already_seen) {
                 obj_t *found_obj;
 
-                if((found_obj = search_obj(info->type_table, &oinfo->token)) == NULL)
+                if ((found_obj = search_obj(info->type_table, &oinfo->token)) == NULL)
                     add_obj(info->type_table, &oinfo->token, name, TRUE);
                 else {
                     /* Use latest version of name */
@@ -771,7 +750,7 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
                     /* Mark named datatype as having valid name */
                     found_obj->recorded = TRUE;
                 } /* end else */
-            } /* end if */
+            }     /* end if */
             break;
 
         case H5O_TYPE_MAP:
@@ -784,7 +763,6 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
     return ret_value;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    init_objs
  *
@@ -796,8 +774,7 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
  *-------------------------------------------------------------------------
  */
 herr_t
-init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
-    table_t **dset_table, table_t **type_table)
+init_objs(hid_t fid, find_objs_t *info, table_t **group_table, table_t **dset_table, table_t **type_table)
 {
     herr_t ret_value = SUCCEED;
 
@@ -807,18 +784,18 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     init_table(fid, type_table);
 
     /* Init the find_objs_t */
-    info->fid = fid;
+    info->fid         = fid;
     info->group_table = *group_table;
-    info->type_table = *type_table;
-    info->dset_table = *dset_table;
+    info->type_table  = *type_table;
+    info->dset_table  = *dset_table;
 
     /* Find all shared objects */
-    if((ret_value = h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info, H5O_INFO_BASIC)) < 0)
+    if ((ret_value = h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info, H5O_INFO_BASIC)) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "finding shared objects failed");
 
 done:
     /* Release resources */
-    if(ret_value < 0) {
+    if (ret_value < 0) {
         free_table(*group_table);
         info->group_table = NULL;
         free_table(*type_table);
@@ -828,7 +805,6 @@ done:
     }
     return ret_value;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    add_obj
@@ -845,7 +821,7 @@ add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool
     size_t u;
 
     /* See if we need to make table larger */
-    if(table->nobjs == table->size) {
+    if (table->nobjs == table->size) {
         table->size *= 2;
         table->objs = (struct obj_t *)HDrealloc(table->objs, table->size * sizeof(table->objs[0]));
     } /* end if */
@@ -855,11 +831,10 @@ add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool
 
     /* Set information about object */
     HDmemcpy(&table->objs[u].obj_token, obj_token, sizeof(H5O_token_t));
-    table->objs[u].objname = HDstrdup(objname);
-    table->objs[u].recorded = record;
+    table->objs[u].objname   = HDstrdup(objname);
+    table->objs[u].recorded  = record;
     table->objs[u].displayed = 0;
 }
-
 
 #ifndef H5_HAVE_TMPFILE
 /*-------------------------------------------------------------------------
@@ -901,52 +876,54 @@ tmpfile(void)
  *  link_info->trg_path must be freed out of this function
  *-------------------------------------------------------------------------*/
 int
-H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t *link_info, hbool_t get_obj_type)
+H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t *link_info,
+                         hbool_t get_obj_type)
 {
-    htri_t l_ret;
+    htri_t      l_ret;
     H5O_info2_t trg_oinfo;
-    hid_t fapl = H5P_DEFAULT;
-    hid_t lapl = H5P_DEFAULT;
-    int   ret_value = -1; /* init to fail */
+    hid_t       fapl      = H5P_DEFAULT;
+    hid_t       lapl      = H5P_DEFAULT;
+    int         ret_value = -1; /* init to fail */
 
     /* init */
     link_info->trg_type = H5O_TYPE_UNKNOWN;
 
     /* if path is root, return group type */
-    if(!HDstrcmp(linkpath,"/")) {
+    if (!HDstrcmp(linkpath, "/")) {
         link_info->trg_type = H5O_TYPE_GROUP;
         H5TOOLS_GOTO_DONE(2);
     }
 
     /* check if link itself exist */
-    if(H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0) {
-        if(link_info->opt.msg_mode == 1)
-            parallel_print("Warning: link <%s> doesn't exist \n",linkpath);
+    if (H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0) {
+        if (link_info->opt.msg_mode == 1)
+            parallel_print("Warning: link <%s> doesn't exist \n", linkpath);
         H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* get info from link */
-    if(H5Lget_info2(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0) {
-        if(link_info->opt.msg_mode == 1)
-            parallel_print("Warning: unable to get link info from <%s>\n",linkpath);
+    if (H5Lget_info2(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0) {
+        if (link_info->opt.msg_mode == 1)
+            parallel_print("Warning: unable to get link info from <%s>\n", linkpath);
         H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* given path is hard link (object) */
-    if(link_info->linfo.type == H5L_TYPE_HARD)
+    if (link_info->linfo.type == H5L_TYPE_HARD)
         H5TOOLS_GOTO_DONE(2);
 
     /* trg_path must be freed out of this function when finished using */
-    if((link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char))) == NULL) {
-        if(link_info->opt.msg_mode == 1)
-            parallel_print("Warning: unable to allocate buffer for <%s>\n",linkpath);
+    if ((link_info->trg_path = (char *)HDcalloc(link_info->linfo.u.val_size, sizeof(char))) == NULL) {
+        if (link_info->opt.msg_mode == 1)
+            parallel_print("Warning: unable to allocate buffer for <%s>\n", linkpath);
         H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* get link value */
-    if(H5Lget_val(file_id, linkpath, (void *)link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0) {
-        if(link_info->opt.msg_mode == 1)
-            parallel_print("Warning: unable to get link value from <%s>\n",linkpath);
+    if (H5Lget_val(file_id, linkpath, (void *)link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) <
+        0) {
+        if (link_info->opt.msg_mode == 1)
+            parallel_print("Warning: unable to get link value from <%s>\n", linkpath);
         H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
@@ -954,51 +931,51 @@ H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t
      * if link type is external link use different lapl to
      * follow object in other file
      */
-    if(link_info->linfo.type == H5L_TYPE_EXTERNAL) {
-        if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if (link_info->linfo.type == H5L_TYPE_EXTERNAL) {
+        if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
             H5TOOLS_GOTO_DONE(FAIL);
-        if(H5Pset_fapl_sec2(fapl) < 0)
+        if (H5Pset_fapl_sec2(fapl) < 0)
             H5TOOLS_GOTO_DONE(FAIL);
-        if((lapl = H5Pcreate(H5P_LINK_ACCESS)) < 0)
+        if ((lapl = H5Pcreate(H5P_LINK_ACCESS)) < 0)
             H5TOOLS_GOTO_DONE(FAIL);
-        if(H5Pset_elink_fapl(lapl, fapl) < 0)
+        if (H5Pset_elink_fapl(lapl, fapl) < 0)
             H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* Check for retrieving object info */
-    if(get_obj_type) {
+    if (get_obj_type) {
         /*--------------------------------------------------------------
          * if link's target object exist, get type
          */
-         /* check if target object exist */
+        /* check if target object exist */
         l_ret = H5Oexists_by_name(file_id, linkpath, lapl);
 
         /* detect dangling link */
-        if(l_ret == FALSE) {
+        if (l_ret == FALSE) {
             H5TOOLS_GOTO_DONE(0);
         }
-        else if(l_ret < 0) {       /* function failed */
+        else if (l_ret < 0) { /* function failed */
             H5TOOLS_GOTO_DONE(FAIL);
         }
 
         /* get target object info */
-        if(H5Oget_info_by_name3(file_id, linkpath, &trg_oinfo, H5O_INFO_BASIC, lapl) < 0) {
-            if(link_info->opt.msg_mode == 1)
+        if (H5Oget_info_by_name3(file_id, linkpath, &trg_oinfo, H5O_INFO_BASIC, lapl) < 0) {
+            if (link_info->opt.msg_mode == 1)
                 parallel_print("Warning: unable to get object information for <%s>\n", linkpath);
             H5TOOLS_GOTO_DONE(FAIL);
         } /* end if */
 
         /* check unknown type */
-        if(trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES) {
-            if(link_info->opt.msg_mode == 1)
+        if (trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >= H5O_TYPE_NTYPES) {
+            if (link_info->opt.msg_mode == 1)
                 parallel_print("Warning: target object of <%s> is unknown type\n", linkpath);
             H5TOOLS_GOTO_DONE(FAIL);
-        }  /* end if */
+        } /* end if */
 
         /* set target obj type to return */
         HDmemcpy(&link_info->obj_token, &trg_oinfo.token, sizeof(H5O_token_t));
         link_info->trg_type = trg_oinfo.type;
-        link_info->fileno = trg_oinfo.fileno;
+        link_info->fileno   = trg_oinfo.fileno;
     } /* end if */
     else
         link_info->trg_type = H5O_TYPE_UNKNOWN;
@@ -1007,9 +984,9 @@ H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t
     ret_value = 1;
 
 done:
-    if(fapl != H5P_DEFAULT)
+    if (fapl != H5P_DEFAULT)
         H5Pclose(fapl);
-    if(lapl != H5P_DEFAULT)
+    if (lapl != H5P_DEFAULT)
         H5Pclose(lapl);
 
     return ret_value;
@@ -1039,13 +1016,13 @@ h5tools_setstatus(int D_status)
 H5_ATTR_PURE const char *
 h5tools_getprogname(void)
 {
-   return h5tools_progname;
+    return h5tools_progname;
 }
 
 H5_ATTR_PURE int
 h5tools_getstatus(void)
 {
-   return h5tools_d_status;
+    return h5tools_d_status;
 }
 
 /*-----------------------------------------------------------
@@ -1059,13 +1036,13 @@ int
 h5tools_getenv_update_hyperslab_bufsize(void)
 {
     const char *env_str = NULL;
-    long hyperslab_bufsize_mb;
-    int  ret_value = 1;
+    long        hyperslab_bufsize_mb;
+    int         ret_value = 1;
 
     /* check if environment variable is set for the hyperslab buffer size */
-    if (NULL != (env_str = HDgetenv ("H5TOOLS_BUFSIZE"))) {
-        errno = 0;
-        hyperslab_bufsize_mb = HDstrtol(env_str, (char**)NULL, 10);
+    if (NULL != (env_str = HDgetenv("H5TOOLS_BUFSIZE"))) {
+        errno                = 0;
+        hyperslab_bufsize_mb = HDstrtol(env_str, (char **)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
             H5TOOLS_GOTO_ERROR(FAIL, "hyperslab buffer size failed");
 
@@ -1094,15 +1071,13 @@ done:
  *----------------------------------------------------------------------------
  */
 herr_t
-h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim,
-    H5FD_ros3_fapl_t *fapl_config_out)
+h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t *fapl_config_out)
 {
-    const char  *ccred[3];
-    unsigned     nelems     = 0;
-    char        *start      = NULL;
-    char        *s3cred_src = NULL;
-    char       **s3cred     = NULL;
-    herr_t       ret_value  = SUCCEED;
+    const char *ccred[3];
+    unsigned    nelems     = 0;
+    char *      s3cred_src = NULL;
+    char **     s3cred     = NULL;
+    herr_t      ret_value  = SUCCEED;
 
     /* Attempt to parse S3 credentials tuple */
     if (parse_tuple(tuple_str, delim, &s3cred_src, &nelems, &s3cred) < 0)
@@ -1127,7 +1102,6 @@ done:
 
     return ret_value;
 }
-
 
 /*----------------------------------------------------------------------------
  *
@@ -1192,8 +1166,7 @@ done:
  *----------------------------------------------------------------------------
  */
 int
-h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
-                           const char       **values)
+h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
 {
     int show_progress = 0; /* set to 1 for debugging */
     int ret_value     = 1; /* 1 for success, 0 for failure           */
@@ -1248,9 +1221,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
         /* if region and ID are supplied (key optional), write to fapl...
          * fail if value would overflow
          */
-        if (*values[0] != '\0' &&
-            *values[1] != '\0')
-        {
+        if (*values[0] != '\0' && *values[1] != '\0') {
             if (HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
                 if (show_progress) {
                     HDprintf("  ERROR: aws_region value too long\n");
@@ -1258,12 +1229,10 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->aws_region,                     values[0],
-                     (HDstrlen(values[0]) + 1));
+            HDmemcpy(fa->aws_region, values[0], (HDstrlen(values[0]) + 1));
             if (show_progress) {
                 HDprintf("  aws_region set\n");
             }
-
 
             if (HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
                 if (show_progress) {
@@ -1272,9 +1241,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->secret_id,
-                     values[1],
-                     (HDstrlen(values[1]) + 1));
+            HDmemcpy(fa->secret_id, values[1], (HDstrlen(values[1]) + 1));
             if (show_progress) {
                 HDprintf("  secret_id set\n");
             }
@@ -1286,9 +1253,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->secret_key,
-                     values[2],
-                     (HDstrlen(values[2]) + 1));
+            HDmemcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
             if (show_progress) {
                 HDprintf("  secret_key set\n");
             }
@@ -1297,15 +1262,10 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
             if (show_progress) {
                 HDprintf("  set to authenticate\n");
             }
-
-        } else if (*values[0] != '\0' ||
-                   *values[1] != '\0' ||
-                   *values[2] != '\0')
-        {
+        }
+        else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0') {
             if (show_progress) {
-                HDprintf(
-                    "  ERROR: invalid assortment of empty/non-empty values\n"
-                );
+                HDprintf("  ERROR: invalid assortment of empty/non-empty values\n");
             }
             ret_value = 0;
             goto done;
@@ -1330,14 +1290,13 @@ done:
  *----------------------------------------------------------------------------
  */
 herr_t
-h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim,
-    H5FD_hdfs_fapl_t *fapl_config_out)
+h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim, H5FD_hdfs_fapl_t *fapl_config_out)
 {
-    unsigned long   k         = 0;
-    unsigned        nelems    = 0;
-    char           *props_src = NULL;
-    char          **props     = NULL;
-    herr_t          ret_value = SUCCEED;
+    unsigned long k         = 0;
+    unsigned      nelems    = 0;
+    char *        props_src = NULL;
+    char **       props     = NULL;
+    herr_t        ret_value = SUCCEED;
 
     /* Attempt to parse HDFS configuration tuple */
     if (parse_tuple(tuple_str, delim, &props_src, &nelems, &props) < 0)
@@ -1382,4 +1341,3 @@ done:
     return ret_value;
 }
 #endif /* H5_HAVE_LIBHDFS */
-

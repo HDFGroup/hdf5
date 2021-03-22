@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -46,22 +45,23 @@ static herr_t H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info2_t *in
  * Create a java object of hdf.hdf5lib.structs.H5O_token_t.
  */
 jobject
-create_H5O_token_t
-    (JNIEnv *envptr, const H5O_token_t *token, hbool_t is_critical_pinning)
+create_H5O_token_t(JNIEnv *envptr, const H5O_token_t *token, hbool_t is_critical_pinning)
 {
-    jbyteArray  tokenByteBuf;
-    jboolean    token_buf_is_copy;
-    jvalue      constructor_args[1];
-    jbyte      *token_buf = NULL;
-    jobject     ret_token_obj = NULL;
+    jbyteArray tokenByteBuf;
+    jboolean   token_buf_is_copy;
+    jvalue     constructor_args[1];
+    jbyte *    token_buf     = NULL;
+    jobject    ret_token_obj = NULL;
 
     if (NULL == (tokenByteBuf = (*envptr)->NewByteArray(envptr, H5O_MAX_TOKEN_SIZE)))
         CHECK_JNI_EXCEPTION(envptr, JNI_FALSE);
 
     if (is_critical_pinning)
-        PIN_BYTE_ARRAY_CRITICAL(envptr, tokenByteBuf, token_buf, &token_buf_is_copy, "create_H5O_token_t: object token buffer not pinned");
+        PIN_BYTE_ARRAY_CRITICAL(envptr, tokenByteBuf, token_buf, &token_buf_is_copy,
+                                "create_H5O_token_t: object token buffer not pinned");
     else
-        PIN_BYTE_ARRAY(envptr, tokenByteBuf, token_buf, &token_buf_is_copy, "create_H5O_token_t: object token buffer not pinned");
+        PIN_BYTE_ARRAY(envptr, tokenByteBuf, token_buf, &token_buf_is_copy,
+                       "create_H5O_token_t: object token buffer not pinned");
 
     HDmemcpy(token_buf, token, sizeof(H5O_token_t));
 
@@ -99,11 +99,10 @@ done:
  * Signature: (JLjava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Oopen
-    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_plist_id)
+Java_hdf_hdf5lib_H5__1H5Oopen(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_plist_id)
 {
     const char *objName = NULL;
-    hid_t       status = H5I_INVALID_HID;
+    hid_t       status  = H5I_INVALID_HID;
 
     UNUSED(clss);
 
@@ -128,8 +127,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5__1H5Oclose
-    (JNIEnv *env, jclass clss, jlong object_id)
+Java_hdf_hdf5lib_H5__1H5Oclose(JNIEnv *env, jclass clss, jlong object_id)
 {
     herr_t retVal = FAIL;
 
@@ -148,13 +146,12 @@ done:
  * Signature: (JLjava/lang/String;JLjava/lang/String;JJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Ocopy
-    (JNIEnv *env, jclass clss, jlong cur_loc_id, jstring cur_name,
-        jlong dst_loc_id, jstring dst_name, jlong create_id, jlong access_id)
+Java_hdf_hdf5lib_H5_H5Ocopy(JNIEnv *env, jclass clss, jlong cur_loc_id, jstring cur_name, jlong dst_loc_id,
+                            jstring dst_name, jlong create_id, jlong access_id)
 {
     const char *lCurName = NULL;
     const char *lDstName = NULL;
-    herr_t      status = FAIL;
+    herr_t      status   = FAIL;
 
     UNUSED(clss);
 
@@ -166,7 +163,8 @@ Java_hdf_hdf5lib_H5_H5Ocopy
     PIN_JAVA_STRING(ENVONLY, cur_name, lCurName, NULL, "H5Ocopy: src name not pinned");
     PIN_JAVA_STRING(ENVONLY, dst_name, lDstName, NULL, "H5Ocopy: dest name not pinned");
 
-    if ((status = H5Ocopy((hid_t)cur_loc_id, lCurName, (hid_t)dst_loc_id, lDstName, (hid_t)create_id, (hid_t)access_id)) < 0)
+    if ((status = H5Ocopy((hid_t)cur_loc_id, lCurName, (hid_t)dst_loc_id, lDstName, (hid_t)create_id,
+                          (hid_t)access_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -182,13 +180,12 @@ done:
  * Signature: (JI)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_H5_H5Oget_1info
-    (JNIEnv *env, jclass clss, jlong loc_id, jint fields)
+Java_hdf_hdf5lib_H5_H5Oget_1info(JNIEnv *env, jclass clss, jlong loc_id, jint fields)
 {
     H5O_info2_t infobuf;
     jobject     token;
     jvalue      args[9];
-    herr_t      status = FAIL;
+    herr_t      status  = FAIL;
     jobject     ret_obj = NULL;
 
     UNUSED(clss);
@@ -209,7 +206,8 @@ Java_hdf_hdf5lib_H5_H5Oget_1info
     args[7].j = infobuf.btime;
     args[8].j = (jlong)infobuf.num_attrs;
 
-    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_info_t", "(JLhdf/hdf5lib/structs/H5O_token_t;IIJJJJJ)V", args, ret_obj);
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_info_t",
+                     "(JLhdf/hdf5lib/structs/H5O_token_t;IIJJJJJ)V", args, ret_obj);
 
 done:
     return ret_obj;
@@ -221,15 +219,15 @@ done:
  * Signature: (JLjava/lang/String;IJ)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name
-    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jint fields, jlong access_id)
+Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jint fields,
+                                           jlong access_id)
 {
-    H5O_info2_t  infobuf;
-    const char  *objName = NULL;
-    jobject      token;
-    jvalue       args[9];
-    herr_t       status = FAIL;
-    jobject      ret_obj = NULL;
+    H5O_info2_t infobuf;
+    const char *objName = NULL;
+    jobject     token;
+    jvalue      args[9];
+    herr_t      status  = FAIL;
+    jobject     ret_obj = NULL;
 
     UNUSED(clss);
 
@@ -238,7 +236,8 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name
 
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oget_info_by_name: object name not pinned");
 
-    if ((status = H5Oget_info_by_name3((hid_t)loc_id, objName, &infobuf, (unsigned)fields, (hid_t)access_id)) < 0)
+    if ((status =
+             H5Oget_info_by_name3((hid_t)loc_id, objName, &infobuf, (unsigned)fields, (hid_t)access_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Create an H5O_token_t object */
@@ -255,7 +254,8 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name
     args[7].j = infobuf.btime;
     args[8].j = (jlong)infobuf.num_attrs;
 
-    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_info_t", "(JLhdf/hdf5lib/structs/H5O_token_t;IIJJJJJ)V", args, ret_obj);
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_info_t",
+                     "(JLhdf/hdf5lib/structs/H5O_token_t;IIJJJJJ)V", args, ret_obj);
 
 done:
     if (objName)
@@ -270,16 +270,16 @@ done:
  * Signature: (JLjava/lang/String;IIJIJ)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx
-    (JNIEnv *env, jclass clss, jlong loc_id,
-        jstring name, jint index_field, jint order, jlong link_n, jint fields, jlong access_id)
+Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id, jstring name,
+                                          jint index_field, jint order, jlong link_n, jint fields,
+                                          jlong access_id)
 {
-    H5O_info2_t  infobuf;
-    const char  *grpName = NULL;
-    jobject      token;
-    jvalue       args[9];
-    herr_t       status = FAIL;
-    jobject      ret_obj = NULL;
+    H5O_info2_t infobuf;
+    const char *grpName = NULL;
+    jobject     token;
+    jvalue      args[9];
+    herr_t      status  = FAIL;
+    jobject     ret_obj = NULL;
 
     UNUSED(clss);
 
@@ -288,8 +288,8 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx
 
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Oget_info_by_idx: group name not pinned");
 
-    if ((status = H5Oget_info_by_idx3((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n,
-            &infobuf, (unsigned)fields, (hid_t)access_id)) < 0)
+    if ((status = H5Oget_info_by_idx3((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order,
+                                      (hsize_t)link_n, &infobuf, (unsigned)fields, (hid_t)access_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Create an H5O_token_t object */
@@ -306,7 +306,8 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx
     args[7].j = infobuf.btime;
     args[8].j = (jlong)infobuf.num_attrs;
 
-    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_info_t", "(JLhdf/hdf5lib/structs/H5O_token_t;IIJJJJJ)V", args, ret_obj);
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_info_t",
+                     "(JLhdf/hdf5lib/structs/H5O_token_t;IIJJJJJ)V", args, ret_obj);
 
 done:
     if (grpName)
@@ -321,15 +322,14 @@ done:
  * Signature: (JI)Lhdf/hdf5lib/structs/H5O_native_info_t;
  */
 JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_H5_H5Oget_1native_1info
-    (JNIEnv *env, jclass clss, jlong loc_id, jint fields)
+Java_hdf_hdf5lib_H5_H5Oget_1native_1info(JNIEnv *env, jclass clss, jlong loc_id, jint fields)
 {
     H5O_native_info_t infobuf;
     jobject           hdrinfobuf;
     jobject           obj_ihinfobuf;
     jobject           attr_ihinfobuf;
     jvalue            args[10];
-    herr_t            status = FAIL;
+    herr_t            status  = FAIL;
     jobject           ret_obj = NULL;
 
     UNUSED(clss);
@@ -367,7 +367,10 @@ Java_hdf_hdf5lib_H5_H5Oget_1native_1info
     args[1].l = obj_ihinfobuf;
     args[2].l = attr_ihinfobuf;
 
-    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_native_info_t", "(Lhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V", args, ret_obj);
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_native_info_t",
+                     "(Lhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/"
+                     "structs/H5_ih_info_t;)V",
+                     args, ret_obj);
 
 done:
     return ret_obj;
@@ -379,17 +382,17 @@ done:
  * Signature: (JLjava/lang/String;IJ)Lhdf/hdf5lib/structs/H5O_native_info_t;
  */
 JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1name
-    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jint fields, jlong access_id)
+Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring name,
+                                                   jint fields, jlong access_id)
 {
-    H5O_native_info_t  infobuf;
-    const char        *objName = NULL;
-    jobject            hdrinfobuf;
-    jobject            obj_ihinfobuf;
-    jobject            attr_ihinfobuf;
-    jvalue             args[10];
-    herr_t             status = FAIL;
-    jobject            ret_obj = NULL;
+    H5O_native_info_t infobuf;
+    const char *      objName = NULL;
+    jobject           hdrinfobuf;
+    jobject           obj_ihinfobuf;
+    jobject           attr_ihinfobuf;
+    jvalue            args[10];
+    herr_t            status  = FAIL;
+    jobject           ret_obj = NULL;
 
     UNUSED(clss);
 
@@ -398,7 +401,8 @@ Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1name
 
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oget_native_info_by_name: object name not pinned");
 
-    if ((status = H5Oget_native_info_by_name((hid_t)loc_id, objName, &infobuf, (unsigned)fields, (hid_t)access_id)) < 0)
+    if ((status = H5Oget_native_info_by_name((hid_t)loc_id, objName, &infobuf, (unsigned)fields,
+                                             (hid_t)access_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     args[0].i = (jint)infobuf.hdr.version;
@@ -431,7 +435,10 @@ Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1name
     args[1].l = obj_ihinfobuf;
     args[2].l = attr_ihinfobuf;
 
-    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_native_info_t", "(Lhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V", args, ret_obj);
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_native_info_t",
+                     "(Lhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/"
+                     "structs/H5_ih_info_t;)V",
+                     args, ret_obj);
 
 done:
     if (objName)
@@ -446,18 +453,18 @@ done:
  * Signature: (JLjava/lang/String;IIJIJ)Lhdf/hdf5lib/structs/H5O_native_info_t;
  */
 JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1idx
-    (JNIEnv *env, jclass clss, jlong loc_id,
-        jstring name, jint index_field, jint order, jlong link_n, jint fields, jlong access_id)
+Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id, jstring name,
+                                                  jint index_field, jint order, jlong link_n, jint fields,
+                                                  jlong access_id)
 {
-    H5O_native_info_t  infobuf;
-    const char        *grpName = NULL;
-    jobject            hdrinfobuf;
-    jobject            obj_ihinfobuf;
-    jobject            attr_ihinfobuf;
-    jvalue             args[10];
-    herr_t             status = FAIL;
-    jobject            ret_obj = NULL;
+    H5O_native_info_t infobuf;
+    const char *      grpName = NULL;
+    jobject           hdrinfobuf;
+    jobject           obj_ihinfobuf;
+    jobject           attr_ihinfobuf;
+    jvalue            args[10];
+    herr_t            status  = FAIL;
+    jobject           ret_obj = NULL;
 
     UNUSED(clss);
 
@@ -466,8 +473,9 @@ Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1idx
 
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Oget_native_info_by_idx: group name not pinned");
 
-    if ((status = H5Oget_native_info_by_idx((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n,
-            &infobuf, (unsigned)fields, (hid_t)access_id)) < 0)
+    if ((status = H5Oget_native_info_by_idx((hid_t)loc_id, grpName, (H5_index_t)index_field,
+                                            (H5_iter_order_t)order, (hsize_t)link_n, &infobuf,
+                                            (unsigned)fields, (hid_t)access_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     args[0].i = (jint)infobuf.hdr.version;
@@ -500,7 +508,10 @@ Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1idx
     args[1].l = obj_ihinfobuf;
     args[2].l = attr_ihinfobuf;
 
-    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_native_info_t", "(Lhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V", args, ret_obj);
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_native_info_t",
+                     "(Lhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/"
+                     "structs/H5_ih_info_t;)V",
+                     args, ret_obj);
 
 done:
     if (grpName)
@@ -515,12 +526,11 @@ done:
  * Signature: (JJLjava/lang/String;JJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Olink
-    (JNIEnv *env, jclass clss, jlong cur_loc_id, jlong dst_loc_id,
-        jstring dst_name, jlong create_id, jlong access_id)
+Java_hdf_hdf5lib_H5_H5Olink(JNIEnv *env, jclass clss, jlong cur_loc_id, jlong dst_loc_id, jstring dst_name,
+                            jlong create_id, jlong access_id)
 {
     const char *linkDstName = NULL;
-    herr_t      status = FAIL;
+    herr_t      status      = FAIL;
 
     UNUSED(clss);
 
@@ -529,7 +539,8 @@ Java_hdf_hdf5lib_H5_H5Olink
 
     PIN_JAVA_STRING(ENVONLY, dst_name, linkDstName, NULL, "H5Olink: link destination name not pinned");
 
-    if ((status = H5Olink((hid_t)cur_loc_id, (hid_t)dst_loc_id, linkDstName, (hid_t)create_id, (hid_t)access_id)) < 0)
+    if ((status = H5Olink((hid_t)cur_loc_id, (hid_t)dst_loc_id, linkDstName, (hid_t)create_id,
+                          (hid_t)access_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -538,20 +549,19 @@ done:
 } /* end Java_hdf_hdf5lib_H5_H5Olink */
 
 static herr_t
-H5O_iterate_cb
-    (hid_t g_id, const char *name, const H5O_info2_t *info, void *cb_data)
+H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info2_t *info, void *cb_data)
 {
     cb_wrapper *wrapper = (cb_wrapper *)cb_data;
     jmethodID   mid;
-    jobject     cb_info_t = NULL;
+    jobject     cb_info_t      = NULL;
     jobject     visit_callback = wrapper->visit_callback;
     jobject     token;
     jstring     str;
-    JNIEnv     *cbenv = NULL;
+    JNIEnv *    cbenv = NULL;
     jclass      cbcls;
     jvalue      args[12];
-    void       *op_data = (void *)wrapper->op_data;
-    jint        status = FAIL;
+    void *      op_data = (void *)wrapper->op_data;
+    jint        status  = FAIL;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);
@@ -561,7 +571,9 @@ H5O_iterate_cb
     if (NULL == (cbcls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
-    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cbcls, "callback", "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5O_info_t;Lhdf/hdf5lib/callbacks/H5O_iterate_opdata_t;)I")))
+    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cbcls, "callback",
+                                             "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5O_info_t;Lhdf/"
+                                             "hdf5lib/callbacks/H5O_iterate_opdata_t;)I")))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     if (NULL == (str = CBENVPTR->NewStringUTF(CBENVONLY, name)))
@@ -582,7 +594,8 @@ H5O_iterate_cb
     args[8].j = (jlong)info->num_attrs;
 
     /* Get a reference to the H5O_info_t class */
-    CALL_CONSTRUCTOR(CBENVONLY, "hdf/hdf5lib/structs/H5O_info_t", "(JLhdf/hdf5lib/structs/H5O_token_t;IIJJJJJ)V", args, cb_info_t);
+    CALL_CONSTRUCTOR(CBENVONLY, "hdf/hdf5lib/structs/H5O_info_t",
+                     "(JLhdf/hdf5lib/structs/H5O_token_t;IIJJJJJ)V", args, cb_info_t);
 
     status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, g_id, str, cb_info_t, op_data);
     CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
@@ -600,12 +613,11 @@ done:
  * Signature: (JIILjava/lang/Object;Ljava/lang/Object;I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Ovisit
-    (JNIEnv *env, jclass clss, jlong grp_id, jint idx_type, jint order,
-        jobject callback_op, jobject op_data, jint fields)
+Java_hdf_hdf5lib_H5_H5Ovisit(JNIEnv *env, jclass clss, jlong grp_id, jint idx_type, jint order,
+                             jobject callback_op, jobject op_data, jint fields)
 {
-    cb_wrapper wrapper = { callback_op, op_data };
-    herr_t     status = FAIL;
+    cb_wrapper wrapper = {callback_op, op_data};
+    herr_t     status  = FAIL;
 
     UNUSED(clss);
 
@@ -617,8 +629,8 @@ Java_hdf_hdf5lib_H5_H5Ovisit
     if (NULL == callback_op)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ovisit: callback_op is NULL");
 
-    if ((status = H5Ovisit3((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order,
-            H5O_iterate_cb, (void *)&wrapper, (unsigned)fields)) < 0)
+    if ((status = H5Ovisit3((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, H5O_iterate_cb,
+                            (void *)&wrapper, (unsigned)fields)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -631,13 +643,13 @@ done:
  * Signature: (JLjava/lang/String;IILjava/lang/Object;Ljava/lang/Object;IJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
-    (JNIEnv *env, jclass clss, jlong grp_id, jstring name, jint idx_type, jint order,
-        jobject callback_op, jobject op_data, jint fields, jlong access_id)
+Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name(JNIEnv *env, jclass clss, jlong grp_id, jstring name, jint idx_type,
+                                       jint order, jobject callback_op, jobject op_data, jint fields,
+                                       jlong access_id)
 {
-    cb_wrapper  wrapper = { callback_op, op_data };
+    cb_wrapper  wrapper = {callback_op, op_data};
     const char *objName = NULL;
-    herr_t      status = FAIL;
+    herr_t      status  = FAIL;
 
     UNUSED(clss);
 
@@ -654,7 +666,8 @@ Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Ovisit_by_name: object name not pinned");
 
     if ((status = H5Ovisit_by_name3((hid_t)grp_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order,
-            H5O_iterate_cb, (void *)&wrapper, (unsigned)fields, (hid_t)access_id)) < 0)
+                                    H5O_iterate_cb, (void *)&wrapper, (unsigned)fields, (hid_t)access_id)) <
+        0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -670,11 +683,10 @@ done:
  * Signature: (JLjava/lang/String;)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Oset_1comment
-    (JNIEnv *env, jclass clss, jlong loc_id, jstring comment)
+Java_hdf_hdf5lib_H5_H5Oset_1comment(JNIEnv *env, jclass clss, jlong loc_id, jstring comment)
 {
     const char *oComment = NULL;
-    herr_t      status = FAIL;
+    herr_t      status   = FAIL;
 
     UNUSED(clss);
 
@@ -695,11 +707,10 @@ done:
  * Signature: (JLjava/lang/String;Ljava/lang/String;J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Oset_1comment_1by_1name
-    (JNIEnv *env, jclass clss, jlong loc_id,
-        jstring name, jstring comment, jlong access_id)
+Java_hdf_hdf5lib_H5_H5Oset_1comment_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring name,
+                                              jstring comment, jlong access_id)
 {
-    const char *objName = NULL;
+    const char *objName    = NULL;
     const char *objComment = NULL;
     jboolean    isCopy;
     herr_t      status = FAIL;
@@ -712,7 +723,8 @@ Java_hdf_hdf5lib_H5_H5Oset_1comment_1by_1name
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oset_comment_by_name: object name not pinned");
 
     if (NULL != comment)
-        PIN_JAVA_STRING(ENVONLY, comment, objComment, &isCopy, "H5Oset_comment_by_name: object comment not pinned");
+        PIN_JAVA_STRING(ENVONLY, comment, objComment, &isCopy,
+                        "H5Oset_comment_by_name: object comment not pinned");
 
     if ((status = H5Oset_comment_by_name((hid_t)loc_id, objName, objComment, (hid_t)access_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -730,13 +742,12 @@ done:
  * Signature: (J)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Oget_1comment
-    (JNIEnv *env, jclass clss, jlong loc_id)
+Java_hdf_hdf5lib_H5_H5Oget_1comment(JNIEnv *env, jclass clss, jlong loc_id)
 {
-    jstring  str = NULL;
-    ssize_t  buf_size;
-    ssize_t  status = -1;
-    char    *oComment = NULL;
+    jstring str = NULL;
+    ssize_t buf_size;
+    ssize_t status   = -1;
+    char *  oComment = NULL;
 
     UNUSED(clss);
 
@@ -745,7 +756,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (buf_size) {
-        if (NULL == (oComment = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+        if (NULL == (oComment = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Oget_comment: failed to allocate object comment buffer");
 
         if ((status = H5Oget_comment((hid_t)loc_id, oComment, (size_t)buf_size + 1)) < 0)
@@ -769,14 +780,14 @@ done:
  * Signature: (JLjava/lang/String;J)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name
-    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_id)
+Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring name,
+                                              jlong access_id)
 {
     const char *objName = NULL;
-    jstring     str = NULL;
+    jstring     str     = NULL;
     ssize_t     buf_size;
     ssize_t     status;
-    char       *objComment = NULL;
+    char *      objComment = NULL;
 
     UNUSED(clss);
 
@@ -790,10 +801,12 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (buf_size) {
-        if (NULL == (objComment = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Oget_comment_by_name: failed to allocate buffer for object comment");
+        if (NULL == (objComment = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                                   "H5Oget_comment_by_name: failed to allocate buffer for object comment");
 
-        if ((status = H5Oget_comment_by_name((hid_t)loc_id, objName, objComment, (size_t)buf_size + 1, (hid_t)access_id)) < 0)
+        if ((status = H5Oget_comment_by_name((hid_t)loc_id, objName, objComment, (size_t)buf_size + 1,
+                                             (hid_t)access_id)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
         objComment[buf_size] = '\0';
 
@@ -816,11 +829,10 @@ done:
  * Signature: (JLjava/lang/String;J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Oexists_1by_1name
-    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_id)
+Java_hdf_hdf5lib_H5_H5Oexists_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_id)
 {
     const char *objName = NULL;
-    htri_t      bval = JNI_FALSE;
+    htri_t      bval    = JNI_FALSE;
 
     UNUSED(clss);
 
@@ -847,8 +859,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Odecr_1refcount
-    (JNIEnv *env, jclass clss, jlong object_id)
+Java_hdf_hdf5lib_H5_H5Odecr_1refcount(JNIEnv *env, jclass clss, jlong object_id)
 {
     UNUSED(clss);
 
@@ -865,8 +876,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Oincr_1refcount
-    (JNIEnv *env, jclass clss, jlong object_id)
+Java_hdf_hdf5lib_H5_H5Oincr_1refcount(JNIEnv *env, jclass clss, jlong object_id)
 {
     UNUSED(clss);
 
@@ -883,16 +893,15 @@ done:
  * Signature: (JLhdf/hdf5lib/structs/H5O_token_t;)J;
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Oopen_1by_1token
-    (JNIEnv *env, jclass clss, jlong loc_id, jobject token)
+Java_hdf_hdf5lib_H5__1H5Oopen_1by_1token(JNIEnv *env, jclass clss, jlong loc_id, jobject token)
 {
-    H5O_token_t  obj_token;
-    jboolean     token_buf_is_copy;
-    jfieldID     token_data_field_id;
-    jclass       token_cls;
-    jbyte       *token_buf = NULL;
-    jobject      token_data;
-    hid_t        retVal = H5I_INVALID_HID;
+    H5O_token_t obj_token;
+    jboolean    token_buf_is_copy;
+    jfieldID    token_data_field_id;
+    jclass      token_cls;
+    jbyte *     token_buf = NULL;
+    jobject     token_data;
+    hid_t       retVal = H5I_INVALID_HID;
 
     UNUSED(clss);
 
@@ -905,7 +914,8 @@ Java_hdf_hdf5lib_H5__1H5Oopen_1by_1token
     token_data = ENVPTR->GetObjectField(ENVONLY, token, token_data_field_id);
     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-    PIN_BYTE_ARRAY(ENVONLY, (jbyteArray)token_data, token_buf, &token_buf_is_copy, "H5Oopen_by_token: token buffer not pinned");
+    PIN_BYTE_ARRAY(ENVONLY, (jbyteArray)token_data, token_buf, &token_buf_is_copy,
+                   "H5Oopen_by_token: token buffer not pinned");
     HDmemcpy(&obj_token, token_buf, sizeof(H5O_token_t));
     UNPIN_BYTE_ARRAY(ENVONLY, (jbyteArray)token_data, token_buf, JNI_ABORT);
     token_buf = NULL;
@@ -926,12 +936,11 @@ done:
  * Signature: (JLjava/lang/String;IIJJ)J;
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Oopen_1by_1idx
-    (JNIEnv *env, jclass clss, jlong loc_id, jstring name,
-        jint index_field, jint order, jlong link_n, jlong lapl_id)
+Java_hdf_hdf5lib_H5__1H5Oopen_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jint index_field,
+                                       jint order, jlong link_n, jlong lapl_id)
 {
     const char *grpName = NULL;
-    hid_t       retVal = H5I_INVALID_HID;
+    hid_t       retVal  = H5I_INVALID_HID;
 
     UNUSED(clss);
 
@@ -940,7 +949,8 @@ Java_hdf_hdf5lib_H5__1H5Oopen_1by_1idx
 
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Oopen_by_idx: object name not pinned");
 
-    if ((retVal = H5Oopen_by_idx((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, (hid_t)lapl_id)) < 0)
+    if ((retVal = H5Oopen_by_idx((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order,
+                                 (hsize_t)link_n, (hid_t)lapl_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -956,8 +966,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Oflush
-    (JNIEnv *env, jclass clss, jlong loc_id)
+Java_hdf_hdf5lib_H5_H5Oflush(JNIEnv *env, jclass clss, jlong loc_id)
 {
     UNUSED(clss);
 
@@ -974,8 +983,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Orefresh
-    (JNIEnv *env, jclass clss, jlong loc_id)
+Java_hdf_hdf5lib_H5_H5Orefresh(JNIEnv *env, jclass clss, jlong loc_id)
 {
     UNUSED(clss);
 
@@ -992,8 +1000,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Odisable_1mdc_1flushes
-    (JNIEnv *env, jclass clss, jlong loc_id)
+Java_hdf_hdf5lib_H5_H5Odisable_1mdc_1flushes(JNIEnv *env, jclass clss, jlong loc_id)
 {
     UNUSED(clss);
 
@@ -1010,8 +1017,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Oenable_1mdc_1flushes
-    (JNIEnv *env, jclass clss, jlong loc_id)
+Java_hdf_hdf5lib_H5_H5Oenable_1mdc_1flushes(JNIEnv *env, jclass clss, jlong loc_id)
 {
     UNUSED(clss);
 
@@ -1028,11 +1034,10 @@ done:
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Oare_1mdc_1flushes_1disabled
-    (JNIEnv *env, jclass clss, jlong loc_id)
+Java_hdf_hdf5lib_H5_H5Oare_1mdc_1flushes_1disabled(JNIEnv *env, jclass clss, jlong loc_id)
 {
-    jboolean bval = JNI_FALSE;
-    hbool_t    is_disabled = FALSE;
+    jboolean bval        = JNI_FALSE;
+    hbool_t  is_disabled = FALSE;
 
     UNUSED(clss);
 
@@ -1040,13 +1045,11 @@ Java_hdf_hdf5lib_H5_H5Oare_1mdc_1flushes_1disabled
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (is_disabled == TRUE)
-        bval =  JNI_TRUE;
+        bval = JNI_TRUE;
 
 done:
     return bval;
 } /* end Java_hdf_hdf5lib_H5_H5Oare_1mdc_1flushes_1disabled */
-
-
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -16,7 +16,7 @@
  *  Purpose:     GIF Header file
  */
 #ifndef GIF_H_
-#define GIF_H_   1
+#define GIF_H_ 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,10 +39,10 @@ typedef unsigned char boolean;
 #endif
 
 #ifndef false
-#define false       0
+#define false 0
 #endif
 #ifndef true
-#define true        1
+#define true 1
 #endif
 
 /* Set the EndianOrder.
@@ -50,7 +50,7 @@ typedef unsigned char boolean;
 ** Set EndianOrder = 0 if machine is little endian
 **     EndianOrder = 1 if machine is big endian.
 */
-extern int  EndianOrder;
+extern int EndianOrder;
 
 /*
 **  The GIF header format.
@@ -59,31 +59,30 @@ extern int  EndianOrder;
 **  descriptor, and the global color table for the GIF image.
 */
 typedef struct _GifHeader { /* Offset   Description                         */
-    GIFBYTE PackedField;       /*  0Ah     Color Information                   */
+    GIFBYTE PackedField;    /*  0Ah     Color Information                   */
     GIFWORD TableSize;
-    GIFBYTE ImageCount;        /* Keep a count of the number of images         */
+    GIFBYTE ImageCount; /* Keep a count of the number of images         */
     GIFBYTE CommentCount;
     GIFBYTE ApplicationCount;
     GIFBYTE PlainTextCount;
     GIFBYTE HDFPalette[256][3];
-    GIFBYTE HeaderDump[6];     /* GIFBYTE array to dump header contents           */
-    GIFBYTE LSDDump[7];        /* Logical Screen Descriptor dump               */
+    GIFBYTE HeaderDump[6]; /* GIFBYTE array to dump header contents           */
+    GIFBYTE LSDDump[7];    /* Logical Screen Descriptor dump               */
 } GIFHEAD;
-
 
 /*
 **  The GIF Image Descriptor.
 */
 typedef struct _GifImageDescriptor {
-    GIFWORD ImageWidth;            /* Width of the image in pixels             */
-    GIFWORD ImageHeight;           /* Height of the image in pixels            */
-    GIFBYTE PackedField;           /* Image and Color Table Data Information   */
+    GIFWORD ImageWidth;  /* Width of the image in pixels             */
+    GIFWORD ImageHeight; /* Height of the image in pixels            */
+    GIFBYTE PackedField; /* Image and Color Table Data Information   */
     GIFWORD TableSize;
-    GIFWORD CodeSize;              /* Minimum LZW CodeSize for image data      */
+    GIFWORD CodeSize; /* Minimum LZW CodeSize for image data      */
     GIFBYTE HDFPalette[256][3];
-    GIFBYTE GIDDump[9];            /* GifImageDescriptor dump                  */
+    GIFBYTE GIDDump[9]; /* GifImageDescriptor dump                  */
 
-    GIFBYTE *Image;                /* Decompressed Raster Image                */
+    GIFBYTE *Image; /* Decompressed Raster Image                */
     GIFBYTE *GIFImage;
 } GIFIMAGEDESC;
 
@@ -91,36 +90,35 @@ typedef struct _GifImageDescriptor {
 **  GIF 89a Graphic Control Extension Block
 */
 typedef struct _GifGraphicControlExtension {
-    GIFBYTE GCEDump[5];            /* Graphic Control Extension Dump           */
+    GIFBYTE GCEDump[5]; /* Graphic Control Extension Dump           */
 } GIFGRAPHICCONTROL;
 
 /*
 **  GIF 89a Plain Text Extension Block
 */
 typedef struct _GifPlainTextExtension {
-    GIFBYTE PTEDump[15];           /* Plain Text Extension Dump                */
-    GIFBYTE *PlainTextData;        /* Plain Text data sub-blocks               */
-    GIFWORD DataSize;
+    GIFBYTE  PTEDump[15];   /* Plain Text Extension Dump                */
+    GIFBYTE *PlainTextData; /* Plain Text data sub-blocks               */
+    GIFWORD  DataSize;
 } GIFPLAINTEXT;
-
 
 /*
 **  GIF 89a Application Extension Block
 */
 typedef struct _GifApplicationExtension {
-    GIFBYTE AEDump[14];            /* Application Extension Dump               */
-    GIFBYTE *ApplicationData;      /* Application data sub-blocks              */
-    GIFWORD DataSize;
+    GIFBYTE  AEDump[14];      /* Application Extension Dump               */
+    GIFBYTE *ApplicationData; /* Application data sub-blocks              */
+    GIFWORD  DataSize;
 } GIFAPPLICATION;
 
 /*
 **  GIF 89a Comment Extension Block
 */
 typedef struct _GifCommentExtension {
-    GIFBYTE CEDump[2];             /* Comment Extension Dump                   */
-    GIFBYTE *CommentData;          /* Comment data sub-blocks                  */
-    GIFWORD DataSize;
-    GIFBYTE Terminator;            /* Block Terminator (always 0)              */
+    GIFBYTE  CEDump[2];   /* Comment Extension Dump                   */
+    GIFBYTE *CommentData; /* Comment data sub-blocks                  */
+    GIFWORD  DataSize;
+    GIFBYTE  Terminator; /* Block Terminator (always 0)              */
 } GIFCOMMENT;
 
 /*
@@ -135,12 +133,12 @@ typedef struct _GifCommentExtension {
 **           extension.
 */
 typedef struct _GifToMem {
-    GIFHEAD            *GifHeader;
-    GIFIMAGEDESC      **GifImageDesc;
+    GIFHEAD *           GifHeader;
+    GIFIMAGEDESC **     GifImageDesc;
     GIFGRAPHICCONTROL **GifGraphicControlExtension;
-    GIFPLAINTEXT      **GifPlainTextExtension;
-    GIFAPPLICATION    **GifApplicationExtension;
-    GIFCOMMENT        **GifCommentExtension;
+    GIFPLAINTEXT **     GifPlainTextExtension;
+    GIFAPPLICATION **   GifApplicationExtension;
+    GIFCOMMENT **       GifCommentExtension;
 } GIFTOMEM;
 
 /*
@@ -159,12 +157,11 @@ int ReadGifApplication(GIFAPPLICATION *, GIFBYTE **);
 int ReadGifComment(GIFCOMMENT *, GIFBYTE **);
 
 /* HDFGIFWR.C */
-int hdfWriteGIF(FILE *fp, GIFBYTE *pic, int ptype, int w, int h, GIFBYTE *rmap,
-                GIFBYTE *gmap, GIFBYTE *bmap, GIFBYTE *pc2ncmap, int numcols,
-                int colorstyle, int BitsPerPixel);
+int hdfWriteGIF(FILE *fp, GIFBYTE *pic, int ptype, int w, int h, const GIFBYTE *rmap, const GIFBYTE *gmap,
+                const GIFBYTE *bmap, const GIFBYTE *pc2ncmap, int numcols, int colorstyle, int BitsPerPixel);
 
 /* WRITEHDF.C */
-int WriteHDF(GIFTOMEM , GIFCHAR * );
+int WriteHDF(GIFTOMEM, GIFCHAR *);
 
 /* Function:    ReadHDF
 ** Return:      0 on completion without error, -1 on error
@@ -175,13 +172,13 @@ int WriteHDF(GIFTOMEM , GIFCHAR * );
 **              GIFBYTE  palette[256][3] - the corresponding palette
 **              hsize_t* image_size - the size of each dimension of the image
 */
-int ReadHDF(GIFBYTE** data, GIFBYTE palette[256][3], hsize_t *image_size,
-            GIFCHAR *h5_file, GIFCHAR *dset_name, GIFCHAR *pal_name);
+int ReadHDF(GIFBYTE **data, GIFBYTE palette[256][3], hsize_t *image_size, GIFCHAR *h5_file,
+            GIFCHAR *dset_name, GIFCHAR *pal_name);
 
 GIFBYTE *Decompress(GIFIMAGEDESC *, GIFHEAD *);
-GIFBYTE GetByte(GIFBYTE *);
-GIFWORD GetWord(GIFBYTE *);
+GIFBYTE  GetByte(const GIFBYTE *);
+GIFWORD  GetWord(GIFBYTE *);
 
-void cleanup(GIFBYTE*);
+void cleanup(GIFBYTE *);
 
-#endif  /* GIF_H_ */
+#endif /* GIF_H_ */

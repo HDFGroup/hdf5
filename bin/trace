@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -210,6 +210,14 @@ $Source = "";
                "ssize_t"                    => "Zs",
               );
 
+
+##############################################################################
+# Maximum length of H5TRACE macro line
+# If the ColumnLimit in .clang-format is changed, this value will need to be updated
+#
+my $max_trace_macro_line_len = 110;
+
+
 ##############################################################################
 # Print an error message.
 #
@@ -287,7 +295,7 @@ sub rewrite_func ($$$$$) {
 
   # Parse arguments
   if ($args eq "void") {
-    $trace = "H5TRACE0(\"$rettype\",\"\");\n";
+    $trace = "H5TRACE0(\"$rettype\", \"\");\n";
   } else {
     # Split arguments.  First convert `/*in,out*/' to get rid of the
     # comma, then split the arguments on commas.
@@ -331,18 +339,34 @@ sub rewrite_func ($$$$$) {
         }
       }
     }
+
+    # Compose the trace macro
     $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\", \"";
     $trace .= join("", @arg_str) . "\"";
-    my $len = 4 + length $trace;
+    my $len = 4 + length $trace;        # Add 4, for indenting the line
     for (@arg_name) {
-      if ($len + length >= 77) {
-        $trace .= ",\n             $_";
-        $len = 13 + length;
+      # Wrap lines that will be longer than the limit, after ');' is added
+      if ($len + length >= ($max_trace_macro_line_len - 2)) {
+        # Wrap line, with indention
+        $trace .= ",\n             ";
+        $len = 13;              # Set to 13, for indention
+
+        # Indent an extra space to account for extra digit in 'H5TRACE' macro
+        if (scalar(@arg_str) >= 10) {
+          $trace .= " ";
+          $len++;
+        }
       } else {
-        $trace .= ", $_";
-        $len += 1 + length;
+        $trace .= ", ";
+        $len += 2;     # Add 2, for ', '
       }
+
+      # Append argument
+      $trace .= "$_";
+      $len += length;     # Add length of appended argument name
     }
+
+    # Append final ');' for macro
     $trace .= ");\n";
   }
   goto error if grep {/!/} @arg_str;

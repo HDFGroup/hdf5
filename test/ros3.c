@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -20,7 +20,7 @@
  *
  *     Demonstrates basic use cases and fapl/dxpl interaction.
  *
- * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
+ * Programmer: Jacob Smith
  *             2017-10-11
  */
 
@@ -77,7 +77,6 @@
  *
  *****************************************************************************/
 
-
 /*----------------------------------------------------------------------------
  *
  * ifdef flag: JSVERIFY_EXP_ACT
@@ -88,7 +87,6 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_EXP_ACT 1L
-
 
 /*----------------------------------------------------------------------------
  *
@@ -106,10 +104,10 @@
  *
  *----------------------------------------------------------------------------
  */
-#define JSFAILED_AT() {                                                   \
-    HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC); \
-}
-
+#define JSFAILED_AT()                                                                                        \
+    {                                                                                                        \
+        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);                                \
+    }
 
 /*----------------------------------------------------------------------------
  *
@@ -134,12 +132,11 @@
  *
  *----------------------------------------------------------------------------
  */
-#define FAIL_IF(condition) \
-if (condition) {           \
-    JSFAILED_AT()          \
-    goto error;           \
-}
-
+#define FAIL_IF(condition)                                                                                   \
+    if (condition) {                                                                                         \
+        JSFAILED_AT()                                                                                        \
+        goto error;                                                                                          \
+    }
 
 /*----------------------------------------------------------------------------
  *
@@ -164,13 +161,12 @@ if (condition) {           \
  *----------------------------------------------------------------------------
  */
 #if 0 /* UNUSED */
-#define FAIL_UNLESS(condition) \
-if (!(condition)) {            \
-    JSFAILED_AT()              \
-    goto error;                \
-}
+#define FAIL_UNLESS(condition)                                                                               \
+    if (!(condition)) {                                                                                      \
+        JSFAILED_AT()                                                                                        \
+        goto error;                                                                                          \
+    }
 #endif
-
 
 /*----------------------------------------------------------------------------
  *
@@ -197,16 +193,22 @@ if (!(condition)) {            \
  *
  *----------------------------------------------------------------------------
  */
-#define JSERR_LONG(expected, actual, reason) {           \
-    JSFAILED_AT()                                        \
-    if (reason!= NULL) {                                 \
-        HDprintf("%s\n", (reason));                      \
-    } else {                                             \
-        HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", \
-                  (long)(expected), (long)(actual));     \
-    }                                                    \
+static inline void
+jserr_long(long expected, long actual, const char *reason)
+{
+    if (reason != NULL) {
+        HDprintf("%s\n", reason);
+    }
+    else {
+        HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
+    }
 }
 
+#define JSERR_LONG(expected, actual, reason)                                                                 \
+    {                                                                                                        \
+        JSFAILED_AT()                                                                                        \
+        jserr_long((long)(expected), (long)(actual), (reason));                                              \
+    }
 
 /*----------------------------------------------------------------------------
  *
@@ -236,20 +238,24 @@ if (!(condition)) {            \
  *
  *----------------------------------------------------------------------------
  */
-#define JSERR_STR(expected, actual, reason) {           \
-    JSFAILED_AT()                                       \
-    if ((reason) != NULL) {                             \
-        HDprintf("%s\n", (reason));                     \
-    } else {                                            \
-        HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", \
-                 (expected), (actual));                 \
-    }                                                   \
+static inline void
+jserr_str(const char *expected, const char *actual, const char *reason)
+{
+    if (reason != NULL) {
+        HDprintf("%s\n", reason);
+    }
+    else {
+        HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
+    }
 }
 
-
+#define JSERR_STR(expected, actual, reason)                                                                  \
+    {                                                                                                        \
+        JSFAILED_AT()                                                                                        \
+        jserr_str((expected), (actual), (reason));                                                           \
+    }
 
 #ifdef JSVERIFY_EXP_ACT
-
 
 /*----------------------------------------------------------------------------
  *
@@ -267,12 +273,11 @@ if (!(condition)) {            \
  *
  *----------------------------------------------------------------------------
  */
-#define JSVERIFY(expected, actual, reason)     \
-if ((long)(actual) != (long)(expected)) {      \
-    JSERR_LONG((expected), (actual), (reason)) \
-    goto error;                                \
-} /* JSVERIFY */
-
+#define JSVERIFY(expected, actual, reason)                                                                   \
+    if ((long)(actual) != (long)(expected)) {                                                                \
+        JSERR_LONG((expected), (actual), (reason))                                                           \
+        goto error;                                                                                          \
+    } /* JSVERIFY */
 
 /*----------------------------------------------------------------------------
  *
@@ -290,12 +295,11 @@ if ((long)(actual) != (long)(expected)) {      \
  *
  *----------------------------------------------------------------------------
  */
-#define JSVERIFY_NOT(expected, actual, reason) \
-if ((long)(actual) == (long)(expected)) {      \
-    JSERR_LONG((expected), (actual), (reason)) \
-    goto error;                                \
-} /* JSVERIFY_NOT */
-
+#define JSVERIFY_NOT(expected, actual, reason)                                                               \
+    if ((long)(actual) == (long)(expected)) {                                                                \
+        JSERR_LONG((expected), (actual), (reason))                                                           \
+        goto error;                                                                                          \
+    } /* JSVERIFY_NOT */
 
 /*----------------------------------------------------------------------------
  *
@@ -313,19 +317,17 @@ if ((long)(actual) == (long)(expected)) {      \
  *
  *----------------------------------------------------------------------------
  */
-#define JSVERIFY_STR(expected, actual, reason) \
-if (strcmp((actual), (expected)) != 0) {       \
-    JSERR_STR((expected), (actual), (reason)); \
-    goto error;                                \
-} /* JSVERIFY_STR */
-
+#define JSVERIFY_STR(expected, actual, reason)                                                               \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+        JSERR_STR((expected), (actual), (reason));                                                           \
+        goto error;                                                                                          \
+    } /* JSVERIFY_STR */
 
 #else
 /* JSVERIFY_EXP_ACT not defined
  *
  * Repeats macros above, but with actual/expected parameters reversed.
  */
-
 
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
@@ -334,12 +336,11 @@ if (strcmp((actual), (expected)) != 0) {       \
  *             2017-10-14
  *----------------------------------------------------------------------------
  */
-#define JSVERIFY(actual, expected, reason)      \
-if ((long)(actual) != (long)(expected)) {       \
-    JSERR_LONG((expected), (actual), (reason)); \
-    goto error;                                 \
-} /* JSVERIFY */
-
+#define JSVERIFY(actual, expected, reason)                                                                   \
+    if ((long)(actual) != (long)(expected)) {                                                                \
+        JSERR_LONG((expected), (actual), (reason));                                                          \
+        goto error;                                                                                          \
+    } /* JSVERIFY */
 
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
@@ -348,12 +349,11 @@ if ((long)(actual) != (long)(expected)) {       \
  *             2017-10-14
  *----------------------------------------------------------------------------
  */
-#define JSVERIFY_NOT(actual, expected, reason) \
-if ((long)(actual) == (long)(expected)) {      \
-    JSERR_LONG((expected), (actual), (reason)) \
-    goto error;                                \
-} /* JSVERIFY_NOT */
-
+#define JSVERIFY_NOT(actual, expected, reason)                                                               \
+    if ((long)(actual) == (long)(expected)) {                                                                \
+        JSERR_LONG((expected), (actual), (reason))                                                           \
+        goto error;                                                                                          \
+    } /* JSVERIFY_NOT */
 
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
@@ -362,11 +362,11 @@ if ((long)(actual) == (long)(expected)) {      \
  *             2017-10-14
  *----------------------------------------------------------------------------
  */
-#define JSVERIFY_STR(actual, expected, reason) \
-if (strcmp((actual), (expected)) != 0) {       \
-    JSERR_STR((expected), (actual), (reason)); \
-    goto error;                                \
-} /* JSVERIFY_STR */
+#define JSVERIFY_STR(actual, expected, reason)                                                               \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+        JSERR_STR((expected), (actual), (reason));                                                           \
+        goto error;                                                                                          \
+    } /* JSVERIFY_STR */
 
 #endif /* ifdef/else JSVERIFY_EXP_ACT */
 
@@ -374,16 +374,16 @@ if (strcmp((actual), (expected)) != 0) {       \
  * OTHER MACROS AND DEFINITIONS *
  ********************************/
 
-#define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
+#define MAXADDR (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
 
 #define S3_TEST_PROFILE_NAME "ros3_vfd_test"
 
 #define S3_TEST_MAX_URL_SIZE 256
 
 #define S3_TEST_RESOURCE_TEXT_RESTRICTED "t8.shakespeare.txt"
-#define S3_TEST_RESOURCE_TEXT_PUBLIC "Poe_Raven.txt"
-#define S3_TEST_RESOURCE_H5_PUBLIC "GMODO-SVM01.h5"
-#define S3_TEST_RESOURCE_MISSING "missing.csv"
+#define S3_TEST_RESOURCE_TEXT_PUBLIC     "Poe_Raven.txt"
+#define S3_TEST_RESOURCE_H5_PUBLIC       "GMODO-SVM01.h5"
+#define S3_TEST_RESOURCE_MISSING         "missing.csv"
 
 static char    url_text_restricted[S3_TEST_MAX_URL_SIZE] = "";
 static char    url_text_public[S3_TEST_MAX_URL_SIZE]     = "";
@@ -402,17 +402,13 @@ static char s3_test_aws_region[16];
 static char s3_test_aws_access_key_id[64];
 static char s3_test_aws_secret_access_key[128];
 
-H5FD_ros3_fapl_t restricted_access_fa = {
-            H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl version      */
-            TRUE,                           /* authenticate      */
-            "",             /* aws region        */
-            "",      /* access key id     */
-            ""}; /* secret access key */
+H5FD_ros3_fapl_t restricted_access_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl version      */
+                                         TRUE,                          /* authenticate      */
+                                         "",                            /* aws region        */
+                                         "",                            /* access key id     */
+                                         ""};                           /* secret access key */
 
-H5FD_ros3_fapl_t anonymous_fa = {
-            H5FD_CURR_ROS3_FAPL_T_VERSION,
-            FALSE, "", "", "" };
-
+H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, FALSE, "", "", ""};
 
 /*---------------------------------------------------------------------------
  *
@@ -446,92 +442,108 @@ test_fapl_config_validation(void)
      *************************/
 
     struct testcase {
-        const char       *msg;
-        herr_t            expected;
-        H5FD_ros3_fapl_t  config;
+        const char *     msg;
+        herr_t           expected;
+        H5FD_ros3_fapl_t config;
     };
 
     /************************
      * test-local variables *
      ************************/
 
-    hid_t            fapl_id     = -1;   /* file access property list ID */
+    hid_t            fapl_id = -1; /* file access property list ID */
     H5FD_ros3_fapl_t config;
     H5FD_ros3_fapl_t fa_fetch;
-    herr_t           success     = SUCCEED;
-    unsigned int     i           = 0;
-    unsigned int     ncases      = 8;    /* should equal number of cases */
-    struct testcase *case_ptr    = NULL; /* dumb work-around for possible     */
-                                         /* dynamic cases creation because    */
-                                         /* of compiler warnings Wlarger-than */
-    struct testcase  cases_arr[] = {
-        {   "non-authenticating config allows empties.\n",
+    herr_t           success  = SUCCEED;
+    unsigned int     i        = 0;
+    unsigned int     ncases   = 8;    /* should equal number of cases */
+    struct testcase *case_ptr = NULL; /* dumb work-around for possible     */
+                                      /* dynamic cases creation because    */
+                                      /* of compiler warnings Wlarger-than */
+    struct testcase cases_arr[] = {
+        {
+            "non-authenticating config allows empties.\n",
             SUCCEED,
-            {   H5FD_CURR_ROS3_FAPL_T_VERSION, /* version      */
-                FALSE,                          /* authenticate */
-                "",                             /* aws_region   */
-                "",                             /* secret_id    */
-                "",                             /* secret_key   */
+            {
+                H5FD_CURR_ROS3_FAPL_T_VERSION, /* version      */
+                FALSE,                         /* authenticate */
+                "",                            /* aws_region   */
+                "",                            /* secret_id    */
+                "",                            /* secret_key   */
             },
         },
-        {   "authenticating config asks for populated strings.\n",
+        {
+            "authenticating config asks for populated strings.\n",
             FAIL,
-            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
+            {
+                H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "",
                 "",
                 "",
             },
         },
-        {   "populated strings; key is the empty string?\n",
+        {
+            "populated strings; key is the empty string?\n",
             SUCCEED,
-            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
+            {
+                H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "region",
                 "me",
                 "",
             },
         },
-        {   "id cannot be empty.\n",
+        {
+            "id cannot be empty.\n",
             FAIL,
-            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
+            {
+                H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "",
                 "me",
                 "",
             },
         },
-        {   "region cannot be empty.\n",
+        {
+            "region cannot be empty.\n",
             FAIL,
-            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
+            {
+                H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "where",
                 "",
                 "",
             },
         },
-        {   "all strings populated.\n",
+        {
+            "all strings populated.\n",
             SUCCEED,
-            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
+            {
+                H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "where",
                 "who",
                 "thisIsA GREAT seeeecrit",
             },
         },
-        {   "incorrect version should fail\n",
+        {
+            "incorrect version should fail\n",
             FAIL,
-            {   12345,
+            {
+                12345,
                 FALSE,
                 "",
                 "",
                 "",
             },
         },
-        {   "non-authenticating config cares not for (de)population"
+        {
+            "non-authenticating config cares not for (de)population"
             "of strings.\n",
             SUCCEED,
-            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
+            {
+                H5FD_CURR_ROS3_FAPL_T_VERSION,
                 FALSE,
                 "someregion",
                 "someid",
@@ -548,8 +560,8 @@ test_fapl_config_validation(void)
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -560,58 +572,46 @@ test_fapl_config_validation(void)
          *---------------
          */
         case_ptr = &cases_arr[i];
-        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-        FAIL_IF( fapl_id < 0 ) /* sanity-check */
+        fapl_id  = H5Pcreate(H5P_FILE_ACCESS);
+        FAIL_IF(fapl_id < 0) /* sanity-check */
 
         /*-----------------------------------
          * Actually test.
          * Mute stack trace in failure cases.
          *-----------------------------------
          */
-        H5E_BEGIN_TRY {
+        H5E_BEGIN_TRY
+        {
             /* `H5FD_ros3_validate_config(...)` is static/private
              * to src/ros3.c and cannot (and should not?) be tested directly?
              * Instead, validate config through public api.
              */
             success = H5Pset_fapl_ros3(fapl_id, &case_ptr->config);
-        } H5E_END_TRY;
+        }
+        H5E_END_TRY;
 
-        JSVERIFY( case_ptr->expected, success, case_ptr->msg )
+        JSVERIFY(case_ptr->expected, success, case_ptr->msg)
 
         /* Make sure we can get back what we put in.
          * Only valid if the fapl configuration does not result in error.
          */
         if (success == SUCCEED) {
             config = case_ptr->config;
-            JSVERIFY( SUCCEED,
-                      H5Pget_fapl_ros3(fapl_id, &fa_fetch),
-                      "unable to get fapl" )
+            JSVERIFY(SUCCEED, H5Pget_fapl_ros3(fapl_id, &fa_fetch), "unable to get fapl")
 
-            JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION,
-                      fa_fetch.version,
-                      "invalid version number" )
-            JSVERIFY( config.version,
-                      fa_fetch.version,
-                      "version number mismatch" )
-            JSVERIFY( config.authenticate,
-                      fa_fetch.authenticate,
-                      "authentication flag mismatch" )
-            JSVERIFY_STR( config.aws_region,
-                          fa_fetch.aws_region,
-                          NULL )
-            JSVERIFY_STR( config.secret_id,
-                          fa_fetch.secret_id,
-                          NULL )
-            JSVERIFY_STR( config.secret_key,
-                          fa_fetch.secret_key,
-                          NULL )
+            JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa_fetch.version, "invalid version number")
+            JSVERIFY(config.version, fa_fetch.version, "version number mismatch")
+            JSVERIFY(config.authenticate, fa_fetch.authenticate, "authentication flag mismatch")
+            JSVERIFY_STR(config.aws_region, fa_fetch.aws_region, NULL)
+            JSVERIFY_STR(config.secret_id, fa_fetch.secret_id, NULL)
+            JSVERIFY_STR(config.secret_key, fa_fetch.secret_key, NULL)
         }
 
         /*-----------------------------
          * per-test sanitation/teardown
          *-----------------------------
          */
-        FAIL_IF( FAIL == H5Pclose(fapl_id) )
+        FAIL_IF(FAIL == H5Pclose(fapl_id))
         fapl_id = -1;
 
     } /* for each test case */
@@ -625,13 +625,11 @@ error:
      ***********/
 
     if (fapl_id < 0) {
-        H5E_BEGIN_TRY {
-            (void)H5Pclose(fapl_id);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_END_TRY;
     }
     return 1;
 } /* test_fapl_config_validation */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -661,15 +659,15 @@ test_ros3_fapl(void)
      * test-local variables *
      ************************/
 
-    hid_t             fapl_id        = -1;  /* file access property list ID */
-    hid_t             driver_id      = -1;  /* ID for this VFD              */
-    unsigned long     driver_flags   =  0;  /* VFD feature flags            */
-    H5FD_ros3_fapl_t  ros3_fa_0      = {
+    hid_t            fapl_id      = -1; /* file access property list ID */
+    hid_t            driver_id    = -1; /* ID for this VFD              */
+    unsigned long    driver_flags = 0;  /* VFD feature flags            */
+    H5FD_ros3_fapl_t ros3_fa_0    = {
         H5FD_CURR_ROS3_FAPL_T_VERSION, /* version       */
-        FALSE,                          /* authenticate  */
-        "",                             /* aws_region    */
-        "",                             /* secret_id     */
-        "plugh",                        /* secret_key    */
+        FALSE,                         /* authenticate  */
+        "",                            /* aws_region    */
+        "",                            /* secret_id     */
+        "plugh",                       /* secret_key    */
     };
 
     TESTING("ROS3 fapl ");
@@ -677,39 +675,36 @@ test_ros3_fapl(void)
     /* Set property list and file name for ROS3 driver.
      */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF( fapl_id < 0 )
+    FAIL_IF(fapl_id < 0)
 
-    FAIL_IF( FAIL == H5Pset_fapl_ros3(fapl_id, &ros3_fa_0) )
+    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &ros3_fa_0))
 
     driver_id = H5Pget_driver(fapl_id);
-    FAIL_IF( driver_id < 0 )
+    FAIL_IF(driver_id < 0)
 
     /****************
      * Check that the VFD feature flags are correct
      * SPEC MAY CHANGE
      ******************/
 
-    FAIL_IF( H5FDdriver_query(driver_id, &driver_flags) < 0 )
+    FAIL_IF(H5FDdriver_query(driver_id, &driver_flags) < 0)
 
-    JSVERIFY_NOT( 0, (driver_flags & H5FD_FEAT_DATA_SIEVE),
-                  "bit(s) in `driver_flags` must align with "
-                  "H5FD_FEAT_DATA_SIEVE" )
+    JSVERIFY_NOT(0, (driver_flags & H5FD_FEAT_DATA_SIEVE),
+                 "bit(s) in `driver_flags` must align with "
+                 "H5FD_FEAT_DATA_SIEVE")
 
-    JSVERIFY( H5FD_FEAT_DATA_SIEVE, driver_flags,
-              "H5FD_FEAT_DATA_SIEVE should be the only supported flag")
+    JSVERIFY(H5FD_FEAT_DATA_SIEVE, driver_flags, "H5FD_FEAT_DATA_SIEVE should be the only supported flag")
 
     PASSED();
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
-        (void)H5Pclose(fapl_id);
-    } H5E_END_TRY;
+    H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+    H5E_END_TRY;
 
     return 1;
 
 } /* test_ros3_fapl() */
-
 
 /*---------------------------------------------------------------------------
  *
@@ -737,7 +732,6 @@ test_vfd_open(void)
      * test-local macros *
      *********************/
 
-
 #define FAPL_H5P_DEFAULT -2
 #define FAPL_FILE_ACCESS -3
 #define FAPL_ROS3_ANON   -4
@@ -759,92 +753,102 @@ test_vfd_open(void)
      ************************/
 
     struct test_condition tests[] = {
-        {   "default property list (H5P_DEFAULT) is invalid",
+        {
+            "default property list (H5P_DEFAULT) is invalid",
             url_text_public,
             H5F_ACC_RDONLY,
             FAPL_H5P_DEFAULT,
             MAXADDR,
         },
-        {   "generic file access property list is invalid",
+        {
+            "generic file access property list is invalid",
             url_text_public,
             H5F_ACC_RDONLY,
             FAPL_FILE_ACCESS,
             MAXADDR,
         },
-        {   "filename cannot be null",
+        {
+            "filename cannot be null",
             NULL,
             H5F_ACC_RDONLY,
             FAPL_ROS3_ANON,
             MAXADDR,
         },
-        {   "filename cannot be empty",
+        {
+            "filename cannot be empty",
             "",
             H5F_ACC_RDONLY,
             FAPL_ROS3_ANON,
             MAXADDR,
         },
-        {   "filename must exist",
+        {
+            "filename must exist",
             url_missing,
             H5F_ACC_RDONLY,
             FAPL_ROS3_ANON,
             MAXADDR,
         },
-        {   "read-write flag not supported",
+        {
+            "read-write flag not supported",
             url_text_public,
             H5F_ACC_RDWR,
             FAPL_ROS3_ANON,
             MAXADDR,
         },
-        {   "truncate flag not supported",
+        {
+            "truncate flag not supported",
             url_text_public,
             H5F_ACC_TRUNC,
             FAPL_ROS3_ANON,
             MAXADDR,
         },
-        {   "create flag not supported",
+        {
+            "create flag not supported",
             url_text_public,
             H5F_ACC_CREAT,
             FAPL_ROS3_ANON,
             MAXADDR,
         },
-        {   "EXCL flag not supported",
+        {
+            "EXCL flag not supported",
             url_text_public,
             H5F_ACC_EXCL,
             FAPL_ROS3_ANON,
             MAXADDR,
         },
-        {   "maxaddr cannot be 0 (caught in `H5FD_open()`)",
+        {
+            "maxaddr cannot be 0 (caught in `H5FD_open()`)",
             url_text_public,
             H5F_ACC_RDONLY,
             FAPL_ROS3_ANON,
             0,
         },
     };
-    H5FD_t   *fd         = NULL;
-    hbool_t   curl_ready = FALSE;
-    hid_t     fapl_id    = -1;
-    hid_t     fapl_file_access = -1;
-    unsigned  i                = 0;
-    unsigned  tests_count      = 10;
+    H5FD_t * fd               = NULL;
+    hbool_t  curl_ready       = FALSE;
+    hid_t    fapl_id          = -1;
+    hid_t    fapl_file_access = -1;
+    unsigned i                = 0;
+    unsigned tests_count      = 10;
 
     TESTING("ROS3 VFD-level open");
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
-    FAIL_IF( CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT) )
+    FAIL_IF(CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
     curl_ready = TRUE;
 
     fapl_file_access = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF( fapl_file_access < 0 )
+    FAIL_IF(fapl_file_access < 0)
 
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF( fapl_id < 0 )
-    FAIL_IF( FAIL == H5Pset_fapl_ros3(fapl_id, &anonymous_fa) )
+    FAIL_IF(fapl_id < 0)
+    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &anonymous_fa))
 
     /*********
      * TESTS *
@@ -853,8 +857,8 @@ test_vfd_open(void)
     /* all the test cases that will _not_ open
      */
     for (i = 0; i < tests_count; i++) {
-        struct test_condition T = tests[i];
-        hid_t _fapl_id = H5P_DEFAULT;
+        struct test_condition T        = tests[i];
+        hid_t                 _fapl_id = H5P_DEFAULT;
 
         fd = NULL;
 
@@ -863,35 +867,30 @@ test_vfd_open(void)
         else if (T.which_fapl == FAPL_ROS3_ANON)
             _fapl_id = fapl_id;
 
-        H5E_BEGIN_TRY {
-            fd = H5FDopen(T.url, T.flags, _fapl_id, T.maxaddr);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY { fd = H5FDopen(T.url, T.flags, _fapl_id, T.maxaddr); }
+        H5E_END_TRY;
         if (NULL != fd)
             JSVERIFY(1, 0, T.message); /* wrapper to print message and fail */
     }
 
-    FAIL_IF( NULL != fd )
+    FAIL_IF(NULL != fd)
 
     /* finally, show that a file can be opened
      */
-    fd = H5FDopen(
-            url_text_public,
-            H5F_ACC_RDONLY,
-            fapl_id,
-            MAXADDR);
-    FAIL_IF( NULL == fd )
+    fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, MAXADDR);
+    FAIL_IF(NULL == fd)
 
     /************
      * TEARDOWN *
      ************/
 
-    FAIL_IF( FAIL == H5FDclose(fd) )
+    FAIL_IF(FAIL == H5FDclose(fd))
     fd = NULL;
 
-    FAIL_IF( FAIL == H5Pclose(fapl_id) )
+    FAIL_IF(FAIL == H5Pclose(fapl_id))
     fapl_id = -1;
 
-    FAIL_IF( FAIL == H5Pclose(fapl_file_access) )
+    FAIL_IF(FAIL == H5Pclose(fapl_file_access))
     fapl_file_access = -1;
 
     curl_global_cleanup();
@@ -909,14 +908,12 @@ error:
         (void)H5FDclose(fd);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY {
-            (void)H5Pclose(fapl_id);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_END_TRY;
     }
     if (fapl_file_access >= 0) {
-        H5E_BEGIN_TRY {
-            (void)H5Pclose(fapl_file_access);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY { (void)H5Pclose(fapl_file_access); }
+        H5E_END_TRY;
     }
     if (curl_ready == TRUE) {
         curl_global_cleanup();
@@ -929,7 +926,6 @@ error:
 #undef FAPL_ROS3_ANON
 
 } /* test_vfd_open */
-
 
 /*---------------------------------------------------------------------------
  *
@@ -965,23 +961,23 @@ test_eof_eoa(void)
      * test-local variables *
      ************************/
 
-    H5FD_t  *fd_shakespeare  = NULL;
-    hbool_t  curl_ready      = FALSE;
-    hid_t    fapl_id         = -1;
+    H5FD_t *fd_shakespeare = NULL;
+    hbool_t curl_ready     = FALSE;
+    hid_t   fapl_id        = -1;
 
     TESTING("ROS3 eof/eoa gets and sets");
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -989,19 +985,15 @@ test_eof_eoa(void)
      * SETUP *
      *********/
 
-    FAIL_IF( CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT) )
+    FAIL_IF(CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
     curl_ready = TRUE;
 
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF( 0 > fapl_id )
-    FAIL_IF( FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) )
+    FAIL_IF(0 > fapl_id)
+    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa))
 
-    fd_shakespeare = H5FDopen(
-             url_text_restricted,
-             H5F_ACC_RDONLY,
-             fapl_id,
-             HADDR_UNDEF);
-    FAIL_IF( NULL == fd_shakespeare )
+    fd_shakespeare = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    FAIL_IF(NULL == fd_shakespeare)
 
     /*********
      * TESTS *
@@ -1009,45 +1001,30 @@ test_eof_eoa(void)
 
     /* verify as found
      */
-    JSVERIFY( 5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), NULL )
-    JSVERIFY( H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
-              H5FDget_eof(fd_shakespeare, H5FD_MEM_DRAW),
-              "mismatch between DEFAULT and RAW memory types" )
-    JSVERIFY( 0,
-              H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT),
-              "EoA should be unset by H5FDopen" )
+    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), NULL)
+    JSVERIFY(H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), H5FDget_eof(fd_shakespeare, H5FD_MEM_DRAW),
+             "mismatch between DEFAULT and RAW memory types")
+    JSVERIFY(0, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA should be unset by H5FDopen")
 
     /* set EoA below EoF
      */
-    JSVERIFY( SUCCEED,
-              H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 44442202),
-              "unable to set EoA (lower)" )
-    JSVERIFY( 5458199,
-              H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
-              "EoF changed" )
-    JSVERIFY( 44442202,
-              H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT),
-              "EoA unchanged" )
+    JSVERIFY(SUCCEED, H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 44442202), "unable to set EoA (lower)")
+    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EoF changed")
+    JSVERIFY(44442202, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA unchanged")
 
     /* set EoA above EoF
      */
-    JSVERIFY( SUCCEED,
-              H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 6789012),
-              "unable to set EoA (higher)" )
-    JSVERIFY( 5458199,
-              H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
-              "EoF changed" )
-    JSVERIFY( 6789012,
-              H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT),
-              "EoA unchanged" )
+    JSVERIFY(SUCCEED, H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 6789012), "unable to set EoA (higher)")
+    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EoF changed")
+    JSVERIFY(6789012, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA unchanged")
 
     /************
      * TEARDOWN *
      ************/
 
-    FAIL_IF( FAIL == H5FDclose(fd_shakespeare) )
+    FAIL_IF(FAIL == H5FDclose(fd_shakespeare))
 
-    FAIL_IF( FAIL == H5Pclose(fapl_id) )
+    FAIL_IF(FAIL == H5Pclose(fapl_id))
     fapl_id = -1;
 
     curl_global_cleanup();
@@ -1061,18 +1038,18 @@ error:
      * CLEANUP *
      ***********/
 
-    if (fd_shakespeare)     (void)H5FDclose(fd_shakespeare);
-    if (TRUE == curl_ready) curl_global_cleanup();
+    if (fd_shakespeare)
+        (void)H5FDclose(fd_shakespeare);
+    if (TRUE == curl_ready)
+        curl_global_cleanup();
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY {
-            (void)H5Pclose(fapl_id);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_END_TRY;
     }
 
     return 1;
 
 } /* test_eof_eoa */
-
 
 /*-----------------------------------------------------------------------------
  *
@@ -1091,24 +1068,24 @@ error:
 static int
 test_H5FDread_without_eoa_set_fails(void)
 {
-    char              buffer[256];
-    unsigned int      i                = 0;
-    H5FD_t           *file_shakespeare = NULL;
-    hid_t             fapl_id          = -1;
+    char         buffer[256];
+    unsigned int i                = 0;
+    H5FD_t *     file_shakespeare = NULL;
+    hid_t        fapl_id          = -1;
 
     TESTING("ROS3 VFD read-eoa temporal coupling library limitation ");
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1119,18 +1096,13 @@ test_H5FDread_without_eoa_set_fails(void)
     /* create ROS3 fapl
      */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF( fapl_id < 0 )
-    FAIL_IF( FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) )
+    FAIL_IF(fapl_id < 0)
+    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa))
 
-    file_shakespeare = H5FDopen(
-            url_text_restricted,
-            H5F_ACC_RDONLY,
-            fapl_id,
-            MAXADDR);
-    FAIL_IF( NULL == file_shakespeare )
+    file_shakespeare = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, MAXADDR);
+    FAIL_IF(NULL == file_shakespeare)
 
-    JSVERIFY( 0, H5FDget_eoa(file_shakespeare, H5FD_MEM_DEFAULT),
-              "EoA should remain unset by H5FDopen" )
+    JSVERIFY(0, H5FDget_eoa(file_shakespeare, H5FD_MEM_DEFAULT), "EoA should remain unset by H5FDopen")
 
     for (i = 0; i < 256; i++)
         buffer[i] = 0; /* zero buffer contents */
@@ -1139,26 +1111,19 @@ test_H5FDread_without_eoa_set_fails(void)
      * TEST *
      ********/
 
-    H5E_BEGIN_TRY { /* mute stack trace on expected failure */
-        JSVERIFY( FAIL,
-                  H5FDread(file_shakespeare,
-                       H5FD_MEM_DRAW,
-                       H5P_DEFAULT,
-                       1200699,
-                       102,
-                       buffer),
-                  "cannot read before eoa is set" )
-    } H5E_END_TRY;
-    JSVERIFY_STR( "", buffer, "buffer should remain untouched" )
+    H5E_BEGIN_TRY{/* mute stack trace on expected failure */
+                  JSVERIFY(FAIL, H5FDread(file_shakespeare, H5FD_MEM_DRAW, H5P_DEFAULT, 1200699, 102, buffer),
+                           "cannot read before eoa is set")} H5E_END_TRY;
+    JSVERIFY_STR("", buffer, "buffer should remain untouched")
 
     /************
      * TEARDOWN *
      ************/
 
-    FAIL_IF( FAIL == H5FDclose(file_shakespeare) )
+    FAIL_IF(FAIL == H5FDclose(file_shakespeare))
     file_shakespeare = NULL;
 
-    FAIL_IF( FAIL == H5Pclose(fapl_id) )
+    FAIL_IF(FAIL == H5Pclose(fapl_id))
     fapl_id = -1;
 
     PASSED();
@@ -1169,18 +1134,17 @@ error:
      * CLEANUP *
      ***********/
 
-    if (file_shakespeare)   { (void)H5FDclose(file_shakespeare); }
+    if (file_shakespeare) {
+        (void)H5FDclose(file_shakespeare);
+    }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY {
-           (void)H5Pclose(fapl_id);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_END_TRY;
     }
 
     return 1;
 
 } /* test_H5FDread_without_eoa_set_fails */
-
-
 
 /*---------------------------------------------------------------------------
  *
@@ -1222,42 +1186,48 @@ test_read(void)
      * test-local variables *
      ************************/
     struct testcase cases[] = {
-        {   "successful range-get",
+        {
+            "successful range-get",
             6464,
             5691,
             32, /* fancy quotes are three bytes each(?) */
             SUCCEED,
             "Quoth the Raven “Nevermore.”",
         },
-        {   "read past EOA fails (EOA < EOF < addr)",
+        {
+            "read past EOA fails (EOA < EOF < addr)",
             3000,
             4000,
             100,
             FAIL,
             NULL,
         },
-        {   "read overlapping EOA fails (EOA < addr < EOF < (addr+len))",
+        {
+            "read overlapping EOA fails (EOA < addr < EOF < (addr+len))",
             3000,
             8000,
             100,
             FAIL,
             NULL,
         },
-        {   "read past EOA/EOF fails ((EOA==EOF) < addr)",
+        {
+            "read past EOA/EOF fails ((EOA==EOF) < addr)",
             6464,
             7000,
             100,
             FAIL,
             NULL,
         },
-        {   "read overlapping EOA/EOF fails (addr < (EOA==EOF) < (addr+len))",
+        {
+            "read overlapping EOA/EOF fails (addr < (EOA==EOF) < (addr+len))",
             6464,
             6400,
             100,
             FAIL,
             NULL,
         },
-        {   "read between EOF and EOA fails (EOF < addr < (addr+len) < EOA)",
+        {
+            "read between EOF and EOA fails (EOF < addr < (addr+len) < EOA)",
             8000,
             7000,
             100,
@@ -1265,28 +1235,28 @@ test_read(void)
             NULL,
         },
     };
-    unsigned          testcase_count   = 6;
-    unsigned          test_i           = 0;
-    struct testcase   test;
-    herr_t            open_return      = FAIL;
-    char              buffer[S3_TEST_MAX_URL_SIZE];
-    unsigned int      i                = 0;
-    H5FD_t           *file_raven       = NULL;
-    hid_t             fapl_id          = -1;
+    unsigned        testcase_count = 6;
+    unsigned        test_i         = 0;
+    struct testcase test;
+    herr_t          open_return = FAIL;
+    char            buffer[S3_TEST_MAX_URL_SIZE];
+    unsigned int    i          = 0;
+    H5FD_t *        file_raven = NULL;
+    hid_t           fapl_id    = -1;
 
     TESTING("ROS3 VFD read/range-gets");
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1297,19 +1267,19 @@ test_read(void)
     /* create ROS3 fapl
      */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF( fapl_id < 0 )
-    FAIL_IF( FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) )
+    FAIL_IF(fapl_id < 0)
+    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa))
 
     /* open file
      */
-    file_raven = H5FDopen( /* will open with "authenticating" fapl */
-            url_text_public, /* TODO: check return state: anon access of restricted says OK? (not NULL) */
-            H5F_ACC_RDONLY,
-            fapl_id,
-            HADDR_UNDEF); /* Demonstrate success with "automatic" value */
-    FAIL_IF( NULL == file_raven )
+    file_raven =
+        H5FDopen(                 /* will open with "authenticating" fapl */
+                 url_text_public, /* TODO: check return state: anon access of restricted says OK? (not NULL)
+                                   */
+                 H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF); /* Demonstrate success with "automatic" value */
+    FAIL_IF(NULL == file_raven)
 
-    JSVERIFY( 6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), NULL )
+    JSVERIFY(6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), NULL)
 
     /*********
      * TESTS *
@@ -1324,10 +1294,9 @@ test_read(void)
         test        = cases[test_i];
         open_return = FAIL;
 
-        FAIL_IF( S3_TEST_MAX_URL_SIZE < test.len ) /* buffer too small! */
+        FAIL_IF(S3_TEST_MAX_URL_SIZE < test.len) /* buffer too small! */
 
-        FAIL_IF( FAIL ==
-                 H5FD_set_eoa( file_raven, H5FD_MEM_DEFAULT, test.eoa_set) )
+        FAIL_IF(FAIL == H5FD_set_eoa(file_raven, H5FD_MEM_DEFAULT, test.eoa_set))
 
         for (i = 0; i < S3_TEST_MAX_URL_SIZE; i++) /* zero buffer contents */
             buffer[i] = 0;
@@ -1336,21 +1305,15 @@ test_read(void)
          * conduct test *
          * ------------ */
 
-        H5E_BEGIN_TRY {
-            open_return = H5FDread(
-                    file_raven,
-                    H5FD_MEM_DRAW,
-                    H5P_DEFAULT,
-                    test.addr,
-                    test.len,
-                    buffer);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY
+        {
+            open_return = H5FDread(file_raven, H5FD_MEM_DRAW, H5P_DEFAULT, test.addr, test.len, buffer);
+        }
+        H5E_END_TRY;
 
-        JSVERIFY( test.success,
-                  open_return,
-                  test.message )
+        JSVERIFY(test.success, open_return, test.message)
         if (open_return == SUCCEED)
-            JSVERIFY_STR( test.expected, buffer, NULL )
+            JSVERIFY_STR(test.expected, buffer, NULL)
 
     } /* for each testcase */
 
@@ -1358,10 +1321,10 @@ test_read(void)
      * TEARDOWN *
      ************/
 
-    FAIL_IF( FAIL == H5FDclose(file_raven) )
+    FAIL_IF(FAIL == H5FDclose(file_raven))
     file_raven = NULL;
 
-    FAIL_IF( FAIL == H5Pclose(fapl_id) )
+    FAIL_IF(FAIL == H5Pclose(fapl_id))
     fapl_id = -1;
 
     PASSED();
@@ -1375,15 +1338,13 @@ error:
     if (file_raven)
         (void)H5FDclose(file_raven);
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY {
-           (void)H5Pclose(fapl_id);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_END_TRY;
     }
 
     return 1;
 
 } /* test_read */
-
 
 /*---------------------------------------------------------------------------
  *
@@ -1419,18 +1380,17 @@ test_noops_and_autofails(void)
      * test-local variables *
      ************************/
 
-    hbool_t           curl_ready = FALSE;
-    hid_t             fapl_id    = -1;
-    H5FD_t           *file       = NULL;
-    const char        data[36]   = "The Force shall be with you, always";
+    hbool_t    curl_ready = FALSE;
+    hid_t      fapl_id    = -1;
+    H5FD_t *   file       = NULL;
+    const char data[36]   = "The Force shall be with you, always";
 
     TESTING("ROS3 VFD always-fail and no-op routines");
 
-
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1438,23 +1398,19 @@ test_noops_and_autofails(void)
      * SETUP *
      *********/
 
-    FAIL_IF( CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT) )
+    FAIL_IF(CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
     curl_ready = TRUE;
 
     /* create ROS3 fapl
      */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF( fapl_id < 0 )
-    JSVERIFY( SUCCEED, H5Pset_fapl_ros3(fapl_id, &anonymous_fa), NULL )
+    FAIL_IF(fapl_id < 0)
+    JSVERIFY(SUCCEED, H5Pset_fapl_ros3(fapl_id, &anonymous_fa), NULL)
 
     /* open file
      */
-    file = H5FDopen(
-            url_text_public,
-            H5F_ACC_RDONLY,
-            fapl_id,
-            HADDR_UNDEF);
-    FAIL_IF( NULL == file )
+    file = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    FAIL_IF(NULL == file)
 
     /*********
      * TESTS *
@@ -1462,35 +1418,19 @@ test_noops_and_autofails(void)
 
     /* auto-fail calls to write and truncate
      */
-    H5E_BEGIN_TRY {
-        JSVERIFY( FAIL,
-                  H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, 1000, 35, data),
-                  "write must fail" )
-    } H5E_END_TRY;
+    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, 1000, 35, data),
+                           "write must fail")} H5E_END_TRY;
 
-    H5E_BEGIN_TRY {
-        JSVERIFY( FAIL,
-                  H5FDtruncate(file, H5P_DEFAULT, FALSE),
-                  "truncate must fail" )
-    } H5E_END_TRY;
+    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, FALSE), "truncate must fail")} H5E_END_TRY;
 
-    H5E_BEGIN_TRY {
-        JSVERIFY( FAIL,
-                  H5FDtruncate(file, H5P_DEFAULT, TRUE),
-                  "truncate must fail (closing)" )
-    } H5E_END_TRY;
+    H5E_BEGIN_TRY{
+        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY;
 
     /* no-op calls to `lock()` and `unlock()`
      */
-    JSVERIFY( SUCCEED,
-              H5FDlock(file, TRUE),
-              "lock always succeeds; has no effect" )
-    JSVERIFY( SUCCEED,
-              H5FDlock(file, FALSE),
-              NULL )
-    JSVERIFY( SUCCEED,
-              H5FDunlock(file),
-              NULL )
+    JSVERIFY(SUCCEED, H5FDlock(file, TRUE), "lock always succeeds; has no effect")
+    JSVERIFY(SUCCEED, H5FDlock(file, FALSE), NULL)
+    JSVERIFY(SUCCEED, H5FDunlock(file), NULL)
     /* Lock/unlock with null file or similar error crashes tests.
      * HDassert in calling heirarchy, `H5FD[un]lock()` and `H5FD_[un]lock()`
      */
@@ -1499,10 +1439,10 @@ test_noops_and_autofails(void)
      * TEARDOWN *
      ************/
 
-    FAIL_IF( FAIL == H5FDclose(file) )
+    FAIL_IF(FAIL == H5FDclose(file))
     file = NULL;
 
-    FAIL_IF( FAIL == H5Pclose(fapl_id) )
+    FAIL_IF(FAIL == H5Pclose(fapl_id))
     fapl_id = -1;
 
     curl_global_cleanup();
@@ -1517,17 +1457,19 @@ error:
      ***********/
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY {
-           (void)H5Pclose(fapl_id);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_END_TRY;
     }
-    if (file)               { (void)H5FDclose(file); }
-    if (curl_ready == TRUE) { curl_global_cleanup(); }
+    if (file) {
+        (void)H5FDclose(file);
+    }
+    if (curl_ready == TRUE) {
+        curl_global_cleanup();
+    }
 
     return 1;
 
 } /* test_noops_and_autofails*/
-
 
 /*---------------------------------------------------------------------------
  *
@@ -1563,25 +1505,25 @@ test_cmp(void)
      * test-local variables *
      ************************/
 
-    H5FD_t           *fd_raven   = NULL;
-    H5FD_t           *fd_shakes  = NULL;
-    H5FD_t           *fd_raven_2 = NULL;
-    hbool_t           curl_ready = FALSE;
-    hid_t             fapl_id    = -1;
+    H5FD_t *fd_raven   = NULL;
+    H5FD_t *fd_shakes  = NULL;
+    H5FD_t *fd_raven_2 = NULL;
+    hbool_t curl_ready = FALSE;
+    hid_t   fapl_id    = -1;
 
     TESTING("ROS3 cmp (comparison)");
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1589,53 +1531,41 @@ test_cmp(void)
      * SETUP *
      *********/
 
-    FAIL_IF( CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT) )
+    FAIL_IF(CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
     curl_ready = TRUE;
 
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF( 0 > fapl_id )
-    JSVERIFY( SUCCEED, H5Pset_fapl_ros3(fapl_id, &restricted_access_fa), NULL )
+    FAIL_IF(0 > fapl_id)
+    JSVERIFY(SUCCEED, H5Pset_fapl_ros3(fapl_id, &restricted_access_fa), NULL)
 
-    fd_raven = H5FDopen(
-            url_text_public,
-            H5F_ACC_RDONLY,
-            fapl_id,
-            HADDR_UNDEF);
-    FAIL_IF( NULL == fd_raven )
+    fd_raven = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    FAIL_IF(NULL == fd_raven)
 
-    fd_shakes = H5FDopen(
-            url_text_restricted,
-            H5F_ACC_RDONLY,
-            fapl_id,
-            HADDR_UNDEF);
-    FAIL_IF( NULL == fd_shakes )
+    fd_shakes = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    FAIL_IF(NULL == fd_shakes)
 
-    fd_raven_2 = H5FDopen(
-            url_text_public,
-            H5F_ACC_RDONLY,
-            fapl_id,
-            HADDR_UNDEF);
-    FAIL_IF( NULL == fd_raven_2 )
+    fd_raven_2 = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    FAIL_IF(NULL == fd_raven_2)
 
     /*********
      * TESTS *
      *********/
 
-    JSVERIFY(  0, H5FDcmp(fd_raven,  fd_raven_2), NULL )
-    JSVERIFY( -1, H5FDcmp(fd_raven,  fd_shakes),  NULL )
-    JSVERIFY( -1, H5FDcmp(fd_shakes, fd_raven_2), NULL )
+    JSVERIFY(0, H5FDcmp(fd_raven, fd_raven_2), NULL)
+    JSVERIFY(-1, H5FDcmp(fd_raven, fd_shakes), NULL)
+    JSVERIFY(-1, H5FDcmp(fd_shakes, fd_raven_2), NULL)
 
     /************
      * TEARDOWN *
      ************/
 
-    FAIL_IF( FAIL == H5FDclose(fd_raven) )
+    FAIL_IF(FAIL == H5FDclose(fd_raven))
     fd_raven = NULL;
-    FAIL_IF( FAIL == H5FDclose(fd_shakes) )
+    FAIL_IF(FAIL == H5FDclose(fd_shakes))
     fd_shakes = NULL;
-    FAIL_IF( FAIL == H5FDclose(fd_raven_2) )
+    FAIL_IF(FAIL == H5FDclose(fd_raven_2))
     fd_raven_2 = NULL;
-    FAIL_IF( FAIL == H5Pclose(fapl_id) )
+    FAIL_IF(FAIL == H5Pclose(fapl_id))
     fapl_id = -1;
 
     curl_global_cleanup();
@@ -1649,20 +1579,22 @@ error:
      * CLEANUP *
      ***********/
 
-    if (fd_raven   != NULL)  (void)H5FDclose(fd_raven);
-    if (fd_raven_2 != NULL)  (void)H5FDclose(fd_raven_2);
-    if (fd_shakes  != NULL)  (void)H5FDclose(fd_shakes);
-    if (TRUE == curl_ready)  curl_global_cleanup();
+    if (fd_raven != NULL)
+        (void)H5FDclose(fd_raven);
+    if (fd_raven_2 != NULL)
+        (void)H5FDclose(fd_raven_2);
+    if (fd_shakes != NULL)
+        (void)H5FDclose(fd_shakes);
+    if (TRUE == curl_ready)
+        curl_global_cleanup();
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY {
-            (void)H5Pclose(fapl_id);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_END_TRY;
     }
 
     return 1;
 
 } /* test_cmp */
-
 
 /*---------------------------------------------------------------------------
  *
@@ -1704,15 +1636,15 @@ test_H5F_integration(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1721,8 +1653,8 @@ test_H5F_integration(void)
      *********/
 
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF( 0 > fapl_id )
-    FAIL_IF( FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) )
+    FAIL_IF(0 > fapl_id)
+    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa))
 
     /*********
      * TESTS *
@@ -1730,39 +1662,25 @@ test_H5F_integration(void)
 
     /* Read-Write Open access is not allowed with this file driver.
      */
-    H5E_BEGIN_TRY {
-        FAIL_IF( 0 <= H5Fopen(
-                      url_h5_public,
-                      H5F_ACC_RDWR,
-                      fapl_id) )
-    } H5E_END_TRY;
+    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fopen(url_h5_public, H5F_ACC_RDWR, fapl_id))} H5E_END_TRY;
 
     /* H5Fcreate() is not allowed with this file driver.
      */
-    H5E_BEGIN_TRY {
-        FAIL_IF( 0 <= H5Fcreate(
-                      url_missing,
-                      H5F_ACC_RDONLY,
-                      H5P_DEFAULT,
-                      fapl_id) )
-    } H5E_END_TRY;
+    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fcreate(url_missing, H5F_ACC_RDONLY, H5P_DEFAULT, fapl_id))} H5E_END_TRY;
 
     /* Successful open.
      */
-    file = H5Fopen(
-            url_h5_public,
-            H5F_ACC_RDONLY,
-            fapl_id);
-    FAIL_IF( file < 0 )
+    file = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id);
+    FAIL_IF(file < 0)
 
     /************
      * TEARDOWN *
      ************/
 
-    FAIL_IF( FAIL == H5Fclose(file) )
+    FAIL_IF(FAIL == H5Fclose(file))
     file = -1;
 
-    FAIL_IF( FAIL == H5Pclose(fapl_id) )
+    FAIL_IF(FAIL == H5Pclose(fapl_id))
     fapl_id = -1;
 
     PASSED();
@@ -1772,12 +1690,12 @@ error:
     /***********
      * CLEANUP *
      ***********/
-HDprintf("\nerror!"); fflush(stdout);
+    HDprintf("\nerror!");
+    HDfflush(stdout);
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY {
-           (void)H5Pclose(fapl_id);
-        } H5E_END_TRY;
+        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_END_TRY;
     }
     if (file > 0)
         (void)H5Fclose(file);
@@ -1787,7 +1705,6 @@ HDprintf("\nerror!"); fflush(stdout);
 } /* test_H5F_integration */
 
 #endif /* H5_HAVE_ROS3_VFD */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1807,7 +1724,7 @@ int
 main(void)
 {
 #ifdef H5_HAVE_ROS3_VFD
-    int nerrors = 0;
+    int         nerrors        = 0;
     const char *bucket_url_env = NULL;
 
 #endif /* H5_HAVE_ROS3_VFD */
@@ -1822,50 +1739,35 @@ main(void)
 
     bucket_url_env = HDgetenv("HDF5_ROS3_TEST_BUCKET_URL");
     if (bucket_url_env == NULL || bucket_url_env[0] == '\0') {
-        HDprintf("WARNING: S3 bucket url is not defined in enviornment " \
+        HDprintf("WARNING: S3 bucket url is not defined in enviornment "
                  "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
-    } else {
+    }
+    else {
         HDstrncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
         s3_test_bucket_defined = TRUE;
     }
 
-    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(
-            url_text_restricted,
-            (size_t)S3_TEST_MAX_URL_SIZE,
-            "%s/%s",
-            (const char *)s3_test_bucket_url,
-            (const char *)S3_TEST_RESOURCE_TEXT_RESTRICTED))
-    {
+    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_text_restricted, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
+                                          (const char *)s3_test_bucket_url,
+                                          (const char *)S3_TEST_RESOURCE_TEXT_RESTRICTED)) {
         HDprintf("* ros3 setup failed (text_restricted) ! *\n");
         return 1;
     }
-    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(
-            url_text_public,
-            (size_t)S3_TEST_MAX_URL_SIZE,
-            "%s/%s",
-            (const char *)s3_test_bucket_url,
-            (const char *)S3_TEST_RESOURCE_TEXT_PUBLIC))
-    {
+    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_text_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
+                                          (const char *)s3_test_bucket_url,
+                                          (const char *)S3_TEST_RESOURCE_TEXT_PUBLIC)) {
         HDprintf("* ros3 setup failed (text_public) ! *\n");
         return 1;
     }
-    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(
-            url_h5_public,
-            (size_t)S3_TEST_MAX_URL_SIZE,
-            "%s/%s",
-            (const char *)s3_test_bucket_url,
-            (const char *)S3_TEST_RESOURCE_H5_PUBLIC))
-    {
+    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_h5_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
+                                          (const char *)s3_test_bucket_url,
+                                          (const char *)S3_TEST_RESOURCE_H5_PUBLIC)) {
         HDprintf("* ros3 setup failed (h5_public) ! *\n");
         return 1;
     }
-    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(
-            url_missing,
-            S3_TEST_MAX_URL_SIZE,
-            "%s/%s",
-            (const char *)s3_test_bucket_url,
-            (const char *)S3_TEST_RESOURCE_MISSING))
-    {
+    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s",
+                                          (const char *)s3_test_bucket_url,
+                                          (const char *)S3_TEST_RESOURCE_MISSING)) {
         HDprintf("* ros3 setup failed (missing) ! *\n");
         return 1;
     }
@@ -1882,22 +1784,15 @@ main(void)
     /* attempt to load test credentials
      * if unable, certain tests will be skipped
      */
-    if (SUCCEED == H5FD_s3comms_load_aws_profile(
-            S3_TEST_PROFILE_NAME,
-            s3_test_aws_access_key_id,
-            s3_test_aws_secret_access_key,
-            s3_test_aws_region))
-    {
+    if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
+                                                 s3_test_aws_secret_access_key, s3_test_aws_region)) {
         s3_test_credentials_loaded = 1;
-        HDstrncpy(restricted_access_fa.aws_region,
-                (const char *)s3_test_aws_region,
-                H5FD_ROS3_MAX_REGION_LEN);
-        HDstrncpy(restricted_access_fa.secret_id,
-                (const char *)s3_test_aws_access_key_id,
-                H5FD_ROS3_MAX_SECRET_ID_LEN);
-        HDstrncpy(restricted_access_fa.secret_key,
-                (const char *)s3_test_aws_secret_access_key,
-                H5FD_ROS3_MAX_SECRET_KEY_LEN);
+        HDstrncpy(restricted_access_fa.aws_region, (const char *)s3_test_aws_region,
+                  H5FD_ROS3_MAX_REGION_LEN);
+        HDstrncpy(restricted_access_fa.secret_id, (const char *)s3_test_aws_access_key_id,
+                  H5FD_ROS3_MAX_SECRET_ID_LEN);
+        HDstrncpy(restricted_access_fa.secret_key, (const char *)s3_test_aws_secret_access_key,
+                  H5FD_ROS3_MAX_SECRET_KEY_LEN);
     }
 
     /******************
@@ -1917,11 +1812,10 @@ main(void)
     nerrors += test_H5F_integration();
 
     if (nerrors > 0) {
-        HDprintf("***** %d ros3 TEST%s FAILED! *****\n",
-                 nerrors,
-                 nerrors > 1 ? "S" : "");
+        HDprintf("***** %d ros3 TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         nerrors = 1;
-    } else {
+    }
+    else {
         HDprintf("All ros3 tests passed.\n");
     }
     return nerrors; /* 0 if no errors, 1 if any errors */
@@ -1934,4 +1828,3 @@ main(void)
 #endif /* H5_HAVE_ROS3_VFD */
 
 } /* main() */
-

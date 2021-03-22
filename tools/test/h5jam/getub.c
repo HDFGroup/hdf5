@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,11 +21,9 @@ void parse_command_line(int argc, const char *argv[]);
 #define PROGRAM_NAME "getub"
 char *nbytes = NULL;
 
-static const char *s_opts = "c:";  /* add more later ? */
-static struct long_options l_opts[] = {
-  {"c", require_arg, 'c'},  /* input file */
-  {NULL, 0, '\0'}
-};
+static const char *        s_opts   = "c:";                     /* add more later ? */
+static struct long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file */
+                                       {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -36,7 +34,7 @@ static struct long_options l_opts[] = {
  *-------------------------------------------------------------------------
  */
 static void
-usage (const char *prog)
+usage(const char *prog)
 {
     HDfflush(stdout);
     HDfprintf(stdout, "usage: %s -c nb file] \n", prog);
@@ -59,33 +57,33 @@ parse_command_line(int argc, const char *argv[])
     int opt;
 
     /* parse command line options */
-    while((opt = get_option (argc, argv, s_opts, l_opts)) != EOF) {
-        switch((char) opt) {
-        case 'c':
-            nbytes = HDstrdup(opt_arg);
-            break;
-        case '?':
-        default:
-            usage(h5tools_getprogname());
-            HDexit(EXIT_FAILURE);
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+        switch ((char)opt) {
+            case 'c':
+                nbytes = HDstrdup(opt_arg);
+                break;
+            case '?':
+            default:
+                usage(h5tools_getprogname());
+                HDexit(EXIT_FAILURE);
         } /* end switch */
-    } /* end while */
+    }     /* end while */
 
-    if(argc <= opt_ind) {
-      error_msg("missing file name\n");
-      usage(h5tools_getprogname());
-      HDexit(EXIT_FAILURE);
+    if (argc <= opt_ind) {
+        error_msg("missing file name\n");
+        usage(h5tools_getprogname());
+        HDexit(EXIT_FAILURE);
     } /* end if */
 } /* end parse_command_line() */
 
 int
 main(int argc, const char *argv[])
 {
-    int fd = H5I_INVALID_HID;
+    int      fd = H5I_INVALID_HID;
     unsigned size;
-    char *filename = NULL;
-    long res;
-    char *buf = NULL;
+    char *   filename = NULL;
+    long     res;
+    char *   buf = NULL;
 
     h5tools_setprogname(PROGRAM_NAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -95,14 +93,14 @@ main(int argc, const char *argv[])
 
     parse_command_line(argc, argv);
 
-    if(NULL == nbytes) {
+    if (NULL == nbytes) {
         /* missing arg */
         error_msg("missing size\n");
         usage(h5tools_getprogname());
         goto error;
     } /* end if */
 
-    if(argc <= (opt_ind)) {
+    if (argc <= (opt_ind)) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         goto error;
@@ -111,45 +109,45 @@ main(int argc, const char *argv[])
     filename = HDstrdup(argv[opt_ind]);
 
     size = 0;
-    if(EOF == (res = sscanf(nbytes, "%u", &size))) {
-      /* fail */
-      error_msg("missing file name\n");
-      usage(h5tools_getprogname());
-      goto error;
+    if (EOF == (res = sscanf(nbytes, "%u", &size))) {
+        /* fail */
+        error_msg("missing file name\n");
+        usage(h5tools_getprogname());
+        goto error;
     } /* end if */
 
-    if((fd = HDopen(filename, O_RDONLY, 0)) < 0) {
+    if ((fd = HDopen(filename, O_RDONLY, 0)) < 0) {
         error_msg("can't open file %s\n", filename);
         goto error;
     } /* end if */
 
-    if(NULL == (buf = (char *)HDmalloc((unsigned)(size + 1)))) {
+    if (NULL == (buf = (char *)HDmalloc((unsigned)(size + 1)))) {
         error_msg("can't allocate buffer \n");
         goto error;
     } /* end if */
 
     res = HDread(fd, buf, (unsigned)size);
-    if(res < (long)size) {
+    if (res < (long)size) {
         error_msg("Bad read \n");
         goto error;
     } /* end if */
 
-    if(HDwrite(1, buf, (unsigned)size) < 0) {
+    if (HDwrite(1, buf, (unsigned)size) < 0) {
         error_msg("Bad write \n");
         goto error;
     } /* end if */
 
     /* close things and exit */
+    HDfree(filename);
     HDfree(buf);
     HDclose(fd);
 
     return EXIT_SUCCESS;
 
 error:
-    if(buf)
-        HDfree(buf);
-    if(fd >= 0)
+    HDfree(filename);
+    HDfree(buf);
+    if (fd >= 0)
         HDclose(fd);
     return EXIT_FAILURE;
 } /* end main() */
-

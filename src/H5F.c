@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,36 +15,26 @@
 /* Module Setup */
 /****************/
 
-#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
-
+#include "H5Fmodule.h" /* This source code file is part of the H5F module */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"          /* Generic Functions                        */
-#include "H5Aprivate.h"         /* Attributes                               */
-#include "H5ACprivate.h"        /* Metadata cache                           */
-#include "H5CXprivate.h"        /* API Contexts                             */
-#include "H5Dprivate.h"         /* Datasets                                 */
-#include "H5Eprivate.h"         /* Error handling                           */
-#include "H5Fpkg.h"             /* File access                              */
-#include "H5FDprivate.h"        /* File drivers                             */
-#include "H5FLprivate.h"        /* Free lists                               */
-#include "H5Gprivate.h"         /* Groups                                   */
-#include "H5Iprivate.h"         /* IDs                                      */
-#include "H5MFprivate.h"        /* File memory management                   */
-#include "H5MMprivate.h"        /* Memory management                        */
-#include "H5Pprivate.h"         /* Property lists                           */
-#include "H5Tprivate.h"         /* Datatypes                                */
-#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata cache                           */
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Fpkg.h"      /* File access                              */
+#include "H5FLprivate.h" /* Free lists                               */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5Pprivate.h"  /* Property lists                           */
+#include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
-
 
 /****************/
 /* Local Macros */
 /****************/
-
 
 /******************/
 /* Local Typedefs */
@@ -52,28 +42,24 @@
 
 /* User data for traversal routine to get ID counts */
 typedef struct {
-    size_t obj_count;           /* Number of objects counted so far */
-    unsigned types;             /* Types of objects to be counted */
+    size_t   obj_count; /* Number of objects counted so far */
+    unsigned types;     /* Types of objects to be counted */
 } H5F_trav_obj_cnt_t;
 
 /* User data for traversal routine to get ID lists */
 typedef struct {
-    size_t max_objs;            /* Maximum # of IDs to record */
-    hid_t *oid_list;            /* Array of recorded IDs*/
-    size_t obj_count;           /* Number of objects counted so far */
+    size_t max_objs;  /* Maximum # of IDs to record */
+    hid_t *oid_list;  /* Array of recorded IDs*/
+    size_t obj_count; /* Number of objects counted so far */
 } H5F_trav_obj_ids_t;
-
 
 /********************/
 /* Package Typedefs */
 /********************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
-static herr_t H5F__close_cb(H5VL_object_t *file_vol_obj);
 
 /* Callback for getting object counts in a file */
 static int H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key);
@@ -81,19 +67,13 @@ static int H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNU
 /* Callback for getting IDs for open objects in a file */
 static int H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key);
 
-
 /*********************/
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
@@ -105,152 +85,6 @@ H5FL_EXTERN(H5VL_t);
 /* Declare a free list to manage the H5VL_object_t struct */
 H5FL_EXTERN(H5VL_object_t);
 
-/* File ID class */
-static const H5I_class_t H5I_FILE_CLS[1] = {{
-    H5I_FILE,                   /* ID class value */
-    0,                          /* Class flags */
-    0,                          /* # of reserved IDs for class */
-    (H5I_free_t)H5F__close_cb   /* Callback routine for closing objects of this class */
-}};
-
-
-
-/*-------------------------------------------------------------------------
- * Function: H5F_init
- *
- * Purpose:  Initialize the interface from some other layer.
- *
- * Return:   Success:    non-negative
- *
- *           Failure:    negative
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_init(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_init() */
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5F__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5F__init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
-herr_t
-H5F__init_package(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /*
-     * Initialize the atom group for the file IDs.
-     */
-    if(H5I_register_type(H5I_FILE_CLS) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__init_package() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_term_package
- *
- * Purpose:     Terminate this interface: free all memory and reset global
- *              variables to their initial values.  Release all ID groups
- *              associated with this interface.
- *
- * Return:      Success:    Positive if anything was done that might
- *                          have affected other interfaces;
- *                          zero otherwise.
- *
- *              Failure:    Never fails
- *
- *-------------------------------------------------------------------------
- */
-int
-H5F_term_package(void)
-{
-    int    n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if(H5_PKG_INIT_VAR) {
-        if(H5I_nmembers(H5I_FILE) > 0) {
-            (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
-            n++; /*H5I*/
-        } /* end if */
-        else {
-            /* Make certain we've cleaned up all the shared file objects */
-            H5F_sfile_assert_num(0);
-
-            /* Destroy the file object id group */
-            n += (H5I_dec_type_ref(H5I_FILE) > 0);
-
-            /* Mark closed */
-            if(0 == n)
-                H5_PKG_INIT_VAR = FALSE;
-        } /* end else */
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(n)
-} /* end H5F_term_package() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__close_cb
- *
- * Purpose:     Closes a file or causes the close operation to be pended.
- *              This function is called from the API and gets called
- *              by H5Fclose->H5I_dec_ref->H5F__close_cb when H5I_dec_ref()
- *              decrements the file ID reference count to zero.  The file ID
- *              is removed from the H5I_FILE group by H5I_dec_ref() just
- *              before H5F__close_cb() is called. If there are open object
- *              headers then the close is pended by moving the file to the
- *              H5I_FILE_CLOSING ID group (the f->closing contains the ID
- *              assigned to file).
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F__close_cb(H5VL_object_t *file_vol_obj)
-{
-    herr_t          ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity check */
-    HDassert(file_vol_obj);
-
-    /* Close the file */
-    if(H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
-
-    /* Free the VOL object */
-    if(H5VL_free_object(file_vol_obj) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__close_cb() */
-
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_create_plist
  *
@@ -268,25 +102,24 @@ done:
 hid_t
 H5Fget_create_plist(hid_t file_id)
 {
-    H5VL_object_t  *vol_obj;                           /* File info */
-    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
+    H5VL_object_t *vol_obj;                     /* File info */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
 
     /* check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
     /* Retrieve the file creation property list */
-    if(H5VL_file_get(vol_obj, H5VL_FILE_GET_FCPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if (H5VL_file_get(vol_obj, H5VL_FILE_GET_FCPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, H5I_INVALID_HID, "unable to retrieve file creation properties")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_create_plist() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_access_plist
  *
@@ -308,25 +141,24 @@ done:
 hid_t
 H5Fget_access_plist(hid_t file_id)
 {
-    H5VL_object_t   *vol_obj;                          /* File info */
-    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
+    H5VL_object_t *vol_obj;                     /* File info */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
     /* Retrieve the file's access property list */
-    if(H5VL_file_get(vol_obj, H5VL_FILE_GET_FAPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if (H5VL_file_get(vol_obj, H5VL_FILE_GET_FAPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get file access property list")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_access_plist() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5F__get_all_count_cb
  *
@@ -341,8 +173,8 @@ done:
 static int
 H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
 {
-    H5F_trav_obj_cnt_t *udata = (H5F_trav_obj_cnt_t *)key;
-    int                ret_value = H5_ITER_CONT;    /* Return value */
+    H5F_trav_obj_cnt_t *udata     = (H5F_trav_obj_cnt_t *)key;
+    int                 ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -351,7 +183,6 @@ H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_all_count_cb */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_obj_count
  *
@@ -367,28 +198,29 @@ H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id,
 ssize_t
 H5Fget_obj_count(hid_t file_id, unsigned types)
 {
-    ssize_t  ret_value = 0;         /* Return value */
+    ssize_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE2("Zs", "iIu", file_id, types);
 
     /* Check arguments */
-    if(0 == (types & H5F_OBJ_ALL))
+    if (0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "not an object type")
 
     /* Perform the query */
     /* If the 'special' ID wasn't passed in, just make a normal call to
      * count the IDs in the file.
      */
-    if(file_id != (hid_t)H5F_OBJ_ALL) {
+    if (file_id != (hid_t)H5F_OBJ_ALL) {
         H5VL_object_t *vol_obj;
 
         /* Get the file object */
-        if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a file id")
 
         /* Get the count */
-        if(H5VL_file_get(vol_obj, H5VL_FILE_GET_OBJ_COUNT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, types, &ret_value) < 0)
+        if (H5VL_file_get(vol_obj, H5VL_FILE_GET_OBJ_COUNT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, types,
+                          &ret_value) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to get object count in file(s)")
     }
     /* If we passed in the 'special' ID, get the count for everything open in the
@@ -398,23 +230,23 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
         H5F_trav_obj_cnt_t udata;
 
         /* Set up callback context */
-        udata.types = types | H5F_OBJ_LOCAL;
+        udata.types     = types | H5F_OBJ_LOCAL;
         udata.obj_count = 0;
 
-        if(types & H5F_OBJ_FILE)
-            if(H5I_iterate(H5I_FILE, H5F__get_all_count_cb, &udata, TRUE) < 0)
+        if (types & H5F_OBJ_FILE)
+            if (H5I_iterate(H5I_FILE, H5F__get_all_count_cb, &udata, TRUE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over file IDs failed")
-        if(types & H5F_OBJ_DATASET)
-            if(H5I_iterate(H5I_DATASET, H5F__get_all_count_cb, &udata, TRUE) < 0)
+        if (types & H5F_OBJ_DATASET)
+            if (H5I_iterate(H5I_DATASET, H5F__get_all_count_cb, &udata, TRUE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over dataset IDs failed")
-        if(types & H5F_OBJ_GROUP)
-            if(H5I_iterate(H5I_GROUP, H5F__get_all_count_cb, &udata, TRUE) < 0)
+        if (types & H5F_OBJ_GROUP)
+            if (H5I_iterate(H5I_GROUP, H5F__get_all_count_cb, &udata, TRUE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over group IDs failed")
-        if(types & H5F_OBJ_DATATYPE)
-            if(H5I_iterate(H5I_DATATYPE, H5F__get_all_count_cb, &udata, TRUE) < 0)
+        if (types & H5F_OBJ_DATATYPE)
+            if (H5I_iterate(H5I_DATATYPE, H5F__get_all_count_cb, &udata, TRUE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over datatype IDs failed")
-        if(types & H5F_OBJ_ATTR)
-            if(H5I_iterate(H5I_ATTR, H5F__get_all_count_cb, &udata, TRUE) < 0)
+        if (types & H5F_OBJ_ATTR)
+            if (H5I_iterate(H5I_ATTR, H5F__get_all_count_cb, &udata, TRUE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over attribute IDs failed")
 
         /* Set return value */
@@ -425,7 +257,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_obj_count() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5F__get_all_ids_cb
  *
@@ -440,12 +271,12 @@ done:
 static int
 H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
-    H5F_trav_obj_ids_t *udata = (H5F_trav_obj_ids_t *)key;
-    int                ret_value = H5_ITER_CONT;    /* Return value */
+    H5F_trav_obj_ids_t *udata     = (H5F_trav_obj_ids_t *)key;
+    int                 ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
-    if(udata->obj_count >= udata->max_objs)
+    if (udata->obj_count >= udata->max_objs)
         HGOTO_DONE(H5_ITER_STOP);
 
     /* Add the ID to the array */
@@ -456,7 +287,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__get_all_ids_cb */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_object_ids
  *
@@ -477,30 +307,31 @@ done:
 ssize_t
 H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
 {
-    ssize_t     ret_value = 0;          /* Return value */
+    ssize_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE4("Zs", "iIuz*i", file_id, types, max_objs, oid_list);
 
     /* Check arguments */
-    if(0 == (types & H5F_OBJ_ALL))
+    if (0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "not an object type")
-    if(!oid_list)
+    if (!oid_list)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "object ID list cannot be NULL")
 
     /* Perform the query */
     /* If the 'special' ID wasn't passed in, just make a normal VOL call to
      * get the IDs from the file.
      */
-    if(file_id != (hid_t)H5F_OBJ_ALL) {
+    if (file_id != (hid_t)H5F_OBJ_ALL) {
         H5VL_object_t *vol_obj;
 
         /* get the file object */
-        if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
 
         /* Get the IDs */
-        if(H5VL_file_get(vol_obj, H5VL_FILE_GET_OBJ_IDS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, types, max_objs, oid_list, &ret_value) < 0)
+        if (H5VL_file_get(vol_obj, H5VL_FILE_GET_OBJ_IDS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, types,
+                          max_objs, oid_list, &ret_value) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to get object ids in file(s)")
     } /* end if */
     /* If we passed in the 'special' ID, get the count for everything open in the
@@ -514,24 +345,24 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
         H5F_trav_obj_ids_t udata;
 
         /* Set up callback context */
-        udata.max_objs = max_objs;
-        udata.oid_list = oid_list;
+        udata.max_objs  = max_objs;
+        udata.oid_list  = oid_list;
         udata.obj_count = 0;
 
-        if(types & H5F_OBJ_FILE)
-            if(H5I_iterate(H5I_FILE, H5F__get_all_ids_cb, &udata, TRUE) < 0)
+        if (types & H5F_OBJ_FILE)
+            if (H5I_iterate(H5I_FILE, H5F__get_all_ids_cb, &udata, TRUE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over file IDs failed")
-        if(types & H5F_OBJ_DATASET)
-            if(H5I_iterate(H5I_DATASET, H5F__get_all_ids_cb, &udata, TRUE) < 0)
+        if (types & H5F_OBJ_DATASET)
+            if (H5I_iterate(H5I_DATASET, H5F__get_all_ids_cb, &udata, TRUE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over dataset IDs failed")
-        if(types & H5F_OBJ_GROUP)
-            if(H5I_iterate(H5I_GROUP, H5F__get_all_ids_cb, &udata, TRUE) < 0)
+        if (types & H5F_OBJ_GROUP)
+            if (H5I_iterate(H5I_GROUP, H5F__get_all_ids_cb, &udata, TRUE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over group IDs failed")
-        if(types & H5F_OBJ_DATATYPE)
-            if(H5I_iterate(H5I_DATATYPE, H5F__get_all_ids_cb, &udata, TRUE) < 0)
+        if (types & H5F_OBJ_DATATYPE)
+            if (H5I_iterate(H5I_DATATYPE, H5F__get_all_ids_cb, &udata, TRUE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over datatype IDs failed")
-        if(types & H5F_OBJ_ATTR)
-            if(H5I_iterate(H5I_ATTR, H5F__get_all_ids_cb, &udata, TRUE) < 0)
+        if (types & H5F_OBJ_ATTR)
+            if (H5I_iterate(H5I_ATTR, H5F__get_all_ids_cb, &udata, TRUE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over attribute IDs failed")
 
         /* Set return value */
@@ -542,7 +373,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_obj_ids() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_vfd_handle
  *
@@ -556,29 +386,29 @@ done:
 herr_t
 H5Fget_vfd_handle(hid_t file_id, hid_t fapl_id, void **file_handle)
 {
-    H5VL_object_t  *vol_obj;                           /* File info */
-    herr_t          ret_value = SUCCEED;            /* Return value */
+    H5VL_object_t *vol_obj;             /* File info */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii**x", file_id, fapl_id, file_handle);
 
     /* Check args */
-    if(!file_handle)
+    if (!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle pointer")
 
     /* Get the file object */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Retrieve the VFD handle for the file */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_VFD_HANDLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, file_handle, fapl_id) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_VFD_HANDLE, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, file_handle, fapl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get VFD handle")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_vfd_handle() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fis_accessible
  *
@@ -592,31 +422,30 @@ done:
 htri_t
 H5Fis_accessible(const char *filename, hid_t fapl_id)
 {
-    htri_t      ret_value;              /* Return value */
+    htri_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "*si", filename, fapl_id);
 
     /* Check args */
-    if(!filename || !*filename)
+    if (!filename || !*filename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* Check the file access property list */
-    if(H5P_DEFAULT == fapl_id)
+    if (H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+    else if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     /* Check if file is accessible */
-    if(H5VL_file_specific(NULL, H5VL_FILE_IS_ACCESSIBLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fapl_id, filename, &ret_value) < 0)
+    if (H5VL_file_specific(NULL, H5VL_FILE_IS_ACCESSIBLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fapl_id,
+                           filename, &ret_value) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to determine if file is accessible as HDF5")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fis_accessible() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fcreate
  *
@@ -643,86 +472,86 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t              *new_file = NULL;    /* File struct for new file                 */
-    H5P_genplist_t     *plist;              /* Property list pointer                    */
-    H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info     */
-    H5VL_object_t       *vol_obj = NULL;    /* VOL object for file                      */
-    hbool_t             supported;          /* Whether 'post open' operation is supported by VOL connector */
-    hid_t               ret_value;          /* return value                             */
+    void *                new_file = NULL; /* File struct for new file                 */
+    H5P_genplist_t *      plist;           /* Property list pointer                    */
+    H5VL_connector_prop_t connector_prop;  /* Property for VOL connector ID & info     */
+    H5VL_object_t *       vol_obj = NULL;  /* VOL object for file                      */
+    hbool_t               supported;       /* Whether 'post open' operation is supported by VOL connector */
+    hid_t                 ret_value;       /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Check/fix arguments */
-    if(!filename || !*filename)
+    if (!filename || !*filename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file name")
 
     /* In this routine, we only accept the following flags:
      *          H5F_ACC_EXCL, H5F_ACC_TRUNC and H5F_ACC_SWMR_WRITE
      */
-    if(flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE))
+    if (flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid flags")
 
     /* The H5F_ACC_EXCL and H5F_ACC_TRUNC flags are mutually exclusive */
-    if((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
+    if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "mutually exclusive flags for file creation")
 
     /* Check file creation property list */
-    if(H5P_DEFAULT == fcpl_id)
+    if (H5P_DEFAULT == fcpl_id)
         fcpl_id = H5P_FILE_CREATE_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not file create property list")
+    else if (TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not file create property list")
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+    if (H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Get the VOL info from the fapl */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file access property list")
-    if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+    if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
 
     /* Stash a copy of the "top-level" connector property, before any pass-through
      *  connectors modify or unwrap it.
      */
-    if(H5CX_set_vol_connector_prop(&connector_prop) < 0)
+    if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context")
 
     /* Adjust bit flags by turning on the creation bit and making sure that
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
      * reading and writing.
      */
-    if(0 == (flags & (H5F_ACC_EXCL | H5F_ACC_TRUNC)))
-        flags |= H5F_ACC_EXCL;	 /*default*/
+    if (0 == (flags & (H5F_ACC_EXCL | H5F_ACC_TRUNC)))
+        flags |= H5F_ACC_EXCL; /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create a new file or truncate an existing file through the VOL */
-    if(NULL == (new_file = (H5F_t *)H5VL_file_create(&connector_prop, filename, flags, fcpl_id, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if (NULL == (new_file = H5VL_file_create(&connector_prop, filename, flags, fcpl_id, fapl_id,
+                                             H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
     /* Get an atom for the file */
-    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
+    if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
     /* Get the file object */
-    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
+    if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
 
     /* Make the 'post open' callback */
     supported = FALSE;
-    if(H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
+    if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'post open' operation")
-    if(supported)
-        if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (supported)
+        if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT,
+                               H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file 'post open' callback")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fopen
  *
@@ -743,72 +572,74 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    H5F_t              *new_file = NULL;    /* File struct for new file                 */
-    H5P_genplist_t     *plist;              /* Property list pointer                    */
-    H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info     */
-    H5VL_object_t       *vol_obj = NULL;    /* VOL object for file                      */
-    hbool_t             supported;          /* Whether 'post open' operation is supported by VOL connector */
-    hid_t               ret_value;          /* Return value                             */
+    void *                new_file = NULL; /* File struct for new file                 */
+    H5P_genplist_t *      plist;           /* Property list pointer                    */
+    H5VL_connector_prop_t connector_prop;  /* Property for VOL connector ID & info     */
+    H5VL_object_t *       vol_obj = NULL;  /* VOL object for file                      */
+    hbool_t               supported;       /* Whether 'post open' operation is supported by VOL connector */
+    hid_t                 ret_value;       /* Return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
 
     /* Check arguments */
-    if(!filename || !*filename)
+    if (!filename || !*filename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file name")
     /* Reject undefined flags (~H5F_ACC_PUBLIC_FLAGS) and the H5F_ACC_TRUNC & H5F_ACC_EXCL flags */
-    if((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
-            (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
+    if ((flags & ~H5F_ACC_PUBLIC_FLAGS) || (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file open flags")
     /* XXX (VOL MERGE): Might want to move SWMR flag checks to H5F_open() */
     /* Asking for SWMR write access on a read-only file is invalid */
-    if((flags & H5F_ACC_SWMR_WRITE) && 0 == (flags & H5F_ACC_RDWR))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "SWMR write access on a file open for read-only access is not allowed")
+    if ((flags & H5F_ACC_SWMR_WRITE) && 0 == (flags & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID,
+                    "SWMR write access on a file open for read-only access is not allowed")
     /* Asking for SWMR read access on a non-read-only file is invalid */
-    if((flags & H5F_ACC_SWMR_READ) && (flags & H5F_ACC_RDWR))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "SWMR read access on a file open for read-write access is not allowed")
+    if ((flags & H5F_ACC_SWMR_READ) && (flags & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID,
+                    "SWMR read access on a file open for read-write access is not allowed")
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+    if (H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Get the VOL info from the fapl */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file access property list")
-    if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+    if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
 
     /* Stash a copy of the "top-level" connector property, before any pass-through
      *  connectors modify or unwrap it.
      */
-    if(H5CX_set_vol_connector_prop(&connector_prop) < 0)
+    if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context")
 
     /* Open the file through the VOL layer */
-    if(NULL == (new_file = (H5F_t *)H5VL_file_open(&connector_prop, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if (NULL == (new_file = H5VL_file_open(&connector_prop, filename, flags, fapl_id,
+                                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* Get an ID for the file */
-    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
+    if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
     /* Get the file object */
-    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
+    if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "invalid object identifier")
 
     /* Make the 'post open' callback */
     supported = FALSE;
-    if(H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
+    if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'post open' operation")
-    if(supported)
-        if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (supported)
+        if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT,
+                               H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file 'post open' callback")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fflush
  *
@@ -823,32 +654,32 @@ done:
 herr_t
 H5Fflush(hid_t object_id, H5F_scope_t scope)
 {
-    H5VL_object_t   *vol_obj = NULL;                    /* Object info      */
-    H5I_type_t      obj_type;                       /* Type of object   */
-    herr_t          ret_value = SUCCEED;            /* Return value     */
+    H5VL_object_t *vol_obj = NULL;      /* Object info      */
+    H5I_type_t     obj_type;            /* Type of object   */
+    herr_t         ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iFs", object_id, scope);
 
     /* Get the type of object we're flushing + sanity check */
     obj_type = H5I_get_type(object_id);
-    if(H5I_FILE != obj_type && H5I_GROUP != obj_type && H5I_DATATYPE != obj_type &&
-            H5I_DATASET != obj_type && H5I_ATTR != obj_type)
+    if (H5I_FILE != obj_type && H5I_GROUP != obj_type && H5I_DATATYPE != obj_type &&
+        H5I_DATASET != obj_type && H5I_ATTR != obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-    /* get the file object */
-    if(NULL == (vol_obj = H5VL_vol_object(object_id)))
+    /* Get the file object */
+    if (NULL == (vol_obj = H5VL_vol_object(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Flush the object */
-    if(H5VL_file_specific(vol_obj, H5VL_FILE_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)obj_type, (int)scope) < 0)
+    if (H5VL_file_specific(vol_obj, H5VL_FILE_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)obj_type,
+                           (int)scope) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fflush() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fclose
  *
@@ -866,24 +697,23 @@ done:
 herr_t
 H5Fclose(hid_t file_id)
 {
-    herr_t      ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Check arguments */
-    if(H5I_FILE != H5I_get_type(file_id))
+    if (H5I_FILE != H5I_get_type(file_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
 
     /* Close the file */
-    if(H5I_dec_app_ref(file_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "closing file ID failed")
+    if (H5I_dec_app_ref(file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclose() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fdelete
  *
@@ -896,49 +726,50 @@ done:
 herr_t
 H5Fdelete(const char *filename, hid_t fapl_id)
 {
-    H5P_genplist_t         *plist;                  /* Property list pointer */
-    H5VL_connector_prop_t   connector_prop;         /* Property for VOL connector ID & info */
-    htri_t                  is_hdf5 = FAIL;
-    herr_t                  ret_value = SUCCEED;
+    H5P_genplist_t *      plist;          /* Property list pointer */
+    H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
+    htri_t                is_hdf5   = FAIL;
+    herr_t                ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "*si", filename, fapl_id);
 
     /* Check args */
-    if(!filename || !*filename)
+    if (!filename || !*filename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+    if (H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Get the VOL info from the fapl */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
-    if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+    if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
 
     /* Stash a copy of the "top-level" connector property, before any pass-through
      *  connectors modify or unwrap it.
      */
-    if(H5CX_set_vol_connector_prop(&connector_prop) < 0)
+    if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context")
 
     /* Make sure this is HDF5 storage for this VOL connector */
-    if(H5VL_file_specific(NULL, H5VL_FILE_IS_ACCESSIBLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fapl_id, filename, &is_hdf5) < 0)
+    if (H5VL_file_specific(NULL, H5VL_FILE_IS_ACCESSIBLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fapl_id,
+                           filename, &is_hdf5) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to determine if file is accessible as HDF5")
-    if(!is_hdf5)
+    if (!is_hdf5)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "not an HDF5 file")
 
     /* Delete the file */
-    if(H5VL_file_specific(NULL, H5VL_FILE_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fapl_id, filename, &ret_value) < 0)
+    if (H5VL_file_specific(NULL, H5VL_FILE_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fapl_id,
+                           filename, &ret_value) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDELETEFILE, FAIL, "unable to delete the file")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fdelete() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Freopen
  *
@@ -957,48 +788,47 @@ done:
 hid_t
 H5Freopen(hid_t file_id)
 {
-    void            *file = NULL;                   /* File struct for new file */
-    H5VL_object_t   *vol_obj = NULL;                /* VOL object for file                      */
-    hbool_t         supported;                      /* Whether 'post open' operation is supported by VOL connector */
-    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
+    void *         file    = NULL; /* File struct for new file */
+    H5VL_object_t *vol_obj = NULL; /* VOL object for file                      */
+    hbool_t        supported;      /* Whether 'post open' operation is supported by VOL connector */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
 
     /* Get the file object */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
     /* Reopen the file */
-    if(H5VL_file_specific(vol_obj, H5VL_FILE_REOPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &file) < 0)
+    if (H5VL_file_specific(vol_obj, H5VL_FILE_REOPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &file) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file via the VOL connector")
 
     /* Make sure that worked */
-    if(NULL == file)
+    if (NULL == file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
 
     /* Get an atom for the file */
-    if((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
     /* Get the file object */
-    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
+    if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
 
     /* Make the 'post open' callback */
     supported = FALSE;
-    if(H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
+    if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'post open' operation")
-    if(supported)
-        if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (supported)
+        if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT,
+                               H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file 'post open' callback")
 
 done:
-    /* XXX (VOL MERGE): If registration fails, file will not be closed */
     FUNC_LEAVE_API(ret_value)
 } /* end H5Freopen() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_intent
  *
@@ -1018,15 +848,16 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags)
     H5TRACE2("e", "i*Iu", file_id, intent_flags);
 
     /* If no intent flags were passed in, exit quietly */
-    if(intent_flags) {
-        H5VL_object_t   *vol_obj;                      /* File info */
+    if (intent_flags) {
+        H5VL_object_t *vol_obj; /* File info */
 
         /* Get the internal file structure */
-        if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+        if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
         /* Get the flags */
-        if((ret_value = H5VL_file_get(vol_obj, H5VL_FILE_GET_INTENT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, intent_flags)) < 0)
+        if ((ret_value = H5VL_file_get(vol_obj, H5VL_FILE_GET_INTENT, H5P_DATASET_XFER_DEFAULT,
+                                       H5_REQUEST_NULL, intent_flags)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file's intent flags")
     } /* end if */
 
@@ -1034,7 +865,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_intent() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_fileno
  *
@@ -1054,15 +884,16 @@ H5Fget_fileno(hid_t file_id, unsigned long *fnumber)
     H5TRACE2("e", "i*Ul", file_id, fnumber);
 
     /* If no fnumber pointer was passed in, exit quietly */
-    if(fnumber) {
-        H5VL_object_t   *vol_obj;                      /* File info */
+    if (fnumber) {
+        H5VL_object_t *vol_obj; /* File info */
 
         /* Get the internal file structure */
-        if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+        if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
         /* Get the flags */
-        if((ret_value = H5VL_file_get(vol_obj, H5VL_FILE_GET_FILENO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fnumber)) < 0)
+        if ((ret_value = H5VL_file_get(vol_obj, H5VL_FILE_GET_FILENO, H5P_DATASET_XFER_DEFAULT,
+                                       H5_REQUEST_NULL, fnumber)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file's 'file number'")
     } /* end if */
 
@@ -1070,7 +901,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_fileno() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_freespace
  *
@@ -1084,24 +914,24 @@ hssize_t
 H5Fget_freespace(hid_t file_id)
 {
     H5VL_object_t *vol_obj = NULL;
-    hssize_t    ret_value;      /* Return value */
+    hssize_t       ret_value; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE1("Hs", "i", file_id);
 
     /* Get the file object */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
 
     /* Get the amount of free space in the file */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_FREE_SPACE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_FREE_SPACE, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to get file free space")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_freespace() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_filesize
  *
@@ -1116,27 +946,27 @@ done:
 herr_t
 H5Fget_filesize(hid_t file_id, hsize_t *size)
 {
-    H5VL_object_t   *vol_obj;                          /* File info */
-    herr_t          ret_value = SUCCEED;            /* Return value */
+    H5VL_object_t *vol_obj;             /* File info */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", file_id, size);
 
     /* Check args */
-    if(!size)
+    if (!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size parameter cannot be NULL")
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Get the file size */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, size) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+                           size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_filesize() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_file_image
  *
@@ -1175,27 +1005,27 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
+H5Fget_file_image(hid_t file_id, void *buf, size_t buf_len)
 {
-    H5VL_object_t  *vol_obj;            /* File object for file ID  */
-    ssize_t         ret_value;          /* Return value             */
+    H5VL_object_t *vol_obj;   /* File object for file ID  */
+    ssize_t        ret_value; /* Return value             */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "i*xz", file_id, buf_ptr, buf_len);
+    H5TRACE3("Zs", "i*xz", file_id, buf, buf_len);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "not a file ID")
 
     /* Get the file image */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_FILE_IMAGE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf_ptr, &ret_value, buf_len) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_FILE_IMAGE, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, buf, &ret_value, buf_len) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to get file image")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_file_image() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_mdc_config
  *
@@ -1211,31 +1041,31 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
+H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config)
 {
-    H5VL_object_t *vol_obj = NULL;
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", file_id, config_ptr);
+    H5TRACE2("e", "i*x", file_id, config);
 
     /* Check args */
-    if((NULL == config_ptr) || (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
+    if ((NULL == config) || (config->version != H5AC__CURR_CACHE_CONFIG_VERSION))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad configptr")
 
     /* Get the file object */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Get the metadata cache configuration */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MDC_CONF, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, config_ptr) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MDC_CONF, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+                           config) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get metadata cache configuration")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_mdc_config() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fset_mdc_config
  *
@@ -1250,25 +1080,25 @@ done:
 herr_t
 H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
 {
-    H5VL_object_t *vol_obj = NULL;
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", file_id, config_ptr);
 
     /* Get the file object */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Set the metadata cache configuration  */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_SET_MDC_CONFIG, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, config_ptr) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_SET_MDC_CONFIG, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, config_ptr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set metadata cache configuration")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fset_mdc_config() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_mdc_hit_rate
  *
@@ -1282,29 +1112,29 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr)
+H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate)
 {
-    H5VL_object_t       *vol_obj;
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    H5VL_object_t *vol_obj;
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*d", file_id, hit_rate_ptr);
+    H5TRACE2("e", "i*d", file_id, hit_rate);
 
     /* Check args */
-    if(NULL == hit_rate_ptr)
+    if (NULL == hit_rate)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL hit rate pointer")
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Get the current hit rate */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MDC_HR, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, hit_rate_ptr) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MDC_HR, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+                           hit_rate) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get MDC hit rate")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_mdc_hit_rate() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_mdc_size
  *
@@ -1319,29 +1149,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
-    size_t *cur_size_ptr, int *cur_num_entries_ptr)
+H5Fget_mdc_size(hid_t file_id, size_t *max_size, size_t *min_clean_size, size_t *cur_size,
+                int *cur_num_entries)
 {
-    H5VL_object_t       *vol_obj;
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    H5VL_object_t *vol_obj;
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*z*z*z*Is", file_id, max_size_ptr, min_clean_size_ptr,
-             cur_size_ptr, cur_num_entries_ptr);
+    H5TRACE5("e", "i*z*z*z*Is", file_id, max_size, min_clean_size, cur_size, cur_num_entries);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Get the size data */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MDC_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, max_size_ptr, min_clean_size_ptr, cur_size_ptr, cur_num_entries_ptr) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MDC_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+                           max_size, min_clean_size, cur_size, cur_num_entries) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get MDC size")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_mdc_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Freset_mdc_hit_rate_stats
  *
@@ -1361,25 +1190,25 @@ done:
 herr_t
 H5Freset_mdc_hit_rate_stats(hid_t file_id)
 {
-    H5VL_object_t *vol_obj = NULL;
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Get the file object */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Reset the hit rate statistic */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't reset cache hit rate")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Freset_mdc_hit_rate_stats() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_name
  *
@@ -1400,33 +1229,34 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
+H5Fget_name(hid_t obj_id, char *name /*out*/, size_t size)
 {
-    H5VL_object_t       *vol_obj = NULL;
-    H5I_type_t          type;
-    ssize_t             ret_value = -1;         /* Return value */
+    H5VL_object_t *vol_obj = NULL;
+    H5I_type_t     type;
+    ssize_t        ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "ixz", obj_id, name, size);
 
     /* Check the type */
     type = H5I_get_type(obj_id);
-    if(H5I_FILE != type && H5I_GROUP != type && H5I_DATATYPE != type && H5I_DATASET != type && H5I_ATTR != type)
+    if (H5I_FILE != type && H5I_GROUP != type && H5I_DATATYPE != type && H5I_DATASET != type &&
+        H5I_ATTR != type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a file or file object")
 
     /* Get the file object */
-    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
 
     /* Get the filename via the VOL */
-    if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)type, size, name, &ret_value) < 0)
+    if (H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)type, size,
+                      name, &ret_value) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to get file name")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_name() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_info2
  *
@@ -1443,35 +1273,36 @@ done:
 herr_t
 H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
 {
-    H5VL_object_t  *vol_obj = NULL;
-    H5I_type_t      type;
-    herr_t          ret_value = SUCCEED;         /* Return value */
+    H5VL_object_t *vol_obj = NULL;
+    H5I_type_t     type;
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", obj_id, finfo);
 
     /* Check args */
-    if(!finfo)
+    if (!finfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file info pointer can't be NULL")
 
     /* Check the type */
     type = H5I_get_type(obj_id);
-    if(H5I_FILE != type && H5I_GROUP != type && H5I_DATATYPE != type && H5I_DATASET != type && H5I_ATTR != type)
+    if (H5I_FILE != type && H5I_GROUP != type && H5I_DATATYPE != type && H5I_DATASET != type &&
+        H5I_ATTR != type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Get the file object */
-    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the file information */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)type, finfo) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+                           (int)type, finfo) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve file info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info2() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_metadata_read_retry_info
  *
@@ -1485,29 +1316,29 @@ done:
 herr_t
 H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info)
 {
-    H5VL_object_t   *vol_obj       = NULL;         /* File object for file ID */
-    herr_t          ret_value   = SUCCEED;      /* Return value */
+    H5VL_object_t *vol_obj   = NULL;    /* File object for file ID */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", file_id, info);
 
     /* Check args */
-    if(!info)
+    if (!info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
     /* Get the file pointer */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Get the retry info */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, info) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, info) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't get metadata read retry info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_metadata_read_retry_info() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_free_sections
  *
@@ -1521,30 +1352,29 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
-    H5F_sect_info_t *sect_info/*out*/)
+H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects, H5F_sect_info_t *sect_info /*out*/)
 {
-    H5VL_object_t  *vol_obj        = NULL;
-    ssize_t         ret_value   = -1;       /* Return value */
+    H5VL_object_t *vol_obj   = NULL;
+    ssize_t        ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE4("Zs", "iFmzx", file_id, type, nsects, sect_info);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
-    if(sect_info && nsects == 0)
+    if (sect_info && nsects == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "nsects must be > 0")
 
     /* Get the free-space section information in the file */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_FREE_SECTIONS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, sect_info, &ret_value, (int)type, nsects) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_FREE_SECTIONS, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, sect_info, &ret_value, (int)type, nsects) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to get file free sections")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_free_sections() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fclear_elink_file_cache
  *
@@ -1559,25 +1389,25 @@ done:
 herr_t
 H5Fclear_elink_file_cache(hid_t file_id)
 {
-    H5VL_object_t  *vol_obj;                           /* File */
-    herr_t          ret_value = SUCCEED;            /* Return value */
+    H5VL_object_t *vol_obj;             /* File */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Release the EFC */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclear_elink_file_cache() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fstart_swmr_write
  *
@@ -1615,29 +1445,29 @@ done:
 herr_t
 H5Fstart_swmr_write(hid_t file_id)
 {
-    H5VL_object_t   *vol_obj = NULL;                /* File info */
-    herr_t          ret_value = SUCCEED;            /* Return value */
+    H5VL_object_t *vol_obj   = NULL;    /* File info */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(file_id) < 0)
+    if (H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Start SWMR writing */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_START_SWMR_WRITE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_START_SWMR_WRITE, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "unable to start SWMR writing")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fstart_swmr_write() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fstart_mdc_logging
  *
@@ -1651,25 +1481,25 @@ done:
 herr_t
 H5Fstart_mdc_logging(hid_t file_id)
 {
-    H5VL_object_t   *vol_obj;                          /* File info */
-    herr_t          ret_value = SUCCEED;            /* Return value */
+    H5VL_object_t *vol_obj;             /* File info */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Sanity check */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Call mdc logging function */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_START_MDC_LOGGING, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_START_MDC_LOGGING, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to start mdc logging")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fstart_mdc_logging() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fstop_mdc_logging
  *
@@ -1684,25 +1514,25 @@ done:
 herr_t
 H5Fstop_mdc_logging(hid_t file_id)
 {
-    H5VL_object_t   *vol_obj;                          /* File info */
-    herr_t          ret_value = SUCCEED;            /* Return value */
+    H5VL_object_t *vol_obj;             /* File info */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Sanity check */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Call mdc logging function */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_STOP_MDC_LOGGING, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_STOP_MDC_LOGGING, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to stop mdc logging")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fstop_mdc_logging() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_mdc_logging_status
  *
@@ -1715,28 +1545,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
-                          hbool_t *is_currently_logging)
+H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled, hbool_t *is_currently_logging)
 {
-    H5VL_object_t   *vol_obj;                          /* File info */
-    herr_t          ret_value = SUCCEED;            /* Return value */
+    H5VL_object_t *vol_obj;             /* File info */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*b*b", file_id, is_enabled, is_currently_logging);
 
     /* Sanity check */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Call mdc logging function */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, is_enabled, is_currently_logging) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, is_enabled, is_currently_logging) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to get logging status")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_mdc_logging_status() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fset_libver_bounds
  *
@@ -1752,29 +1581,29 @@ done:
 herr_t
 H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
 {
-    H5VL_object_t *vol_obj;                 /* File as VOL object           */
-    herr_t ret_value = SUCCEED;         /* Return value 				*/
+    H5VL_object_t *vol_obj;             /* File as VOL object           */
+    herr_t         ret_value = SUCCEED; /* Return value 				*/
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iFvFv", file_id, low, high);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(file_id) < 0)
+    if (H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Set the library's version bounds */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, low, high) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, low, high) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set library version bounds")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fset_libver_bounds() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fformat_convert (Internal)
  *
@@ -1789,29 +1618,29 @@ done:
 herr_t
 H5Fformat_convert(hid_t file_id)
 {
-    H5VL_object_t  *vol_obj = NULL;               /* File */
-    herr_t          ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t *vol_obj   = NULL;    /* File */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "file_id parameter is not a valid file identifier")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(file_id) < 0)
+    if (H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Convert the format */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_FORMAT_CONVERT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_FORMAT_CONVERT, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCONVERT, FAIL, "can't convert file format")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fformat_convert() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Freset_page_buffering_stats
  *
@@ -1824,25 +1653,25 @@ done:
 herr_t
 H5Freset_page_buffering_stats(hid_t file_id)
 {
-    H5VL_object_t  *vol_obj;                           /* File to reset stats on */
-    herr_t          ret_value = SUCCEED;            /* Return value */
+    H5VL_object_t *vol_obj;             /* File to reset stats on */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Reset the statistics */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't reset stats for page buffering")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* H5Freset_page_buffering_stats() */
+} /* H5Freset_page_buffering_stats() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_page_buffering_stats
  *
@@ -1853,31 +1682,30 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2],
-    unsigned misses[2], unsigned evictions[2], unsigned bypasses[2])
+H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2], unsigned misses[2],
+                            unsigned evictions[2], unsigned bypasses[2])
 {
-    H5VL_object_t   *vol_obj;                          /* File object */
-    herr_t          ret_value = SUCCEED;            /* Return value */
+    H5VL_object_t *vol_obj;             /* File object */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*Iu*Iu*Iu*Iu*Iu", file_id, accesses, hits, misses, evictions,
-             bypasses);
+    H5TRACE6("e", "i*Iu*Iu*Iu*Iu*Iu", file_id, accesses, hits, misses, evictions, bypasses);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    if(NULL == accesses || NULL == hits || NULL == misses || NULL == evictions || NULL == bypasses)
+    if (NULL == accesses || NULL == hits || NULL == misses || NULL == evictions || NULL == bypasses)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL input parameters for stats")
 
     /* Get the statistics */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, accesses, hits, misses, evictions, bypasses) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, accesses, hits, misses, evictions, bypasses) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stats for page buffering")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_page_buffering_stats() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_mdc_image_info
  *
@@ -1894,25 +1722,25 @@ done:
 herr_t
 H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_len)
 {
-    H5VL_object_t  *vol_obj;            /* File info */
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    H5VL_object_t *vol_obj;             /* File info */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*a*h", file_id, image_addr, image_len);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Go get the address and size of the cache image */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, image_addr, image_len) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, image_addr, image_len) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_mdc_image_info() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_eoa
  *
@@ -1927,20 +1755,21 @@ done:
 herr_t
 H5Fget_eoa(hid_t file_id, haddr_t *eoa)
 {
-    H5VL_object_t  *vol_obj;        /* File info */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5VL_object_t *vol_obj;             /* File info */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*a", file_id, eoa);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Only do work if valid pointer to fill in */
-    if(eoa) {
+    if (eoa) {
         /* Retrieve the EOA for the file */
-        if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_EOA, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, eoa) < 0)
+        if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_EOA, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+                               eoa) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get EOA")
     } /* end if */
 
@@ -1948,7 +1777,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_eoa() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fincrement_filesize
  *
@@ -1961,25 +1789,25 @@ done:
 herr_t
 H5Fincrement_filesize(hid_t file_id, hsize_t increment)
 {
-    H5VL_object_t  *vol_obj;            /* File info */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5VL_object_t *vol_obj;             /* File info */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ih", file_id, increment);
 
     /* Check args */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Increment the file size */
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_INCR_FILESIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, increment) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_INCR_FILESIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+                           increment) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to increment file size")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fincrement_filesize() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_dset_no_attrs_hint
  *
@@ -1993,27 +1821,27 @@ done:
 herr_t
 H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize)
 {
-    H5VL_object_t  *vol_obj   = NULL;
-    herr_t          ret_value = SUCCEED;
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", file_id, minimize);
 
-    if(NULL == minimize)
+    if (NULL == minimize)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out pointer 'minimize' cannot be NULL")
 
     vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE);
-    if(NULL == vol_obj)
+    if (NULL == vol_obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, minimize) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, minimize) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set file's dataset header minimization flag")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_dset_no_attrs_hint */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fset_dset_no_attrs_hint
  *
@@ -2034,13 +1862,13 @@ H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize)
     H5TRACE2("e", "ib", file_id, minimize);
 
     vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE);
-    if(NULL == vol_obj)
+    if (NULL == vol_obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, minimize) < 0)
+    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG, H5P_DATASET_XFER_DEFAULT,
+                           H5_REQUEST_NULL, minimize) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set file's dataset header minimization flag")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fset_dset_no_attrs_hint */
-

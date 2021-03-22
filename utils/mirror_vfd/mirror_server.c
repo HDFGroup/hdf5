@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -46,17 +46,16 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
-#define MAXBUF 2048             /* max buffer length.                        */
-#define LISTENQ 80              /* max pending mirrorS requests              */
-#define DEFAULT_PORT 3000       /* default listening port                    */
-#define MAX_PORT_LOOPS 20       /* max iteratations through port range       */
-#define PORT_LOOP_RETRY_DELAY 1 /* seconds to wait between port scans        */
+#define MAXBUF                2048 /* max buffer length.                        */
+#define LISTENQ               80   /* max pending mirrorS requests              */
+#define DEFAULT_PORT          3000 /* default listening port                    */
+#define MAX_PORT_LOOPS        20   /* max iteratations through port range       */
+#define PORT_LOOP_RETRY_DELAY 1    /* seconds to wait between port scans        */
 
 /* semi-unique "magic" numbers to sanity-check structure pointers */
 #define OP_ARGS_MAGIC    0xCF074379u
 #define SERVER_RUN_MAGIC 0x741B459Au
 
-
 /* ---------------------------------------------------------------------------
  * Structure:   struct op_args
  *
@@ -95,17 +94,16 @@
  * ---------------------------------------------------------------------------
  */
 struct op_args {
-    uint32_t    magic;
-    int         help;
-    int         main_port;
-    int         verbosity;
-    int         log_prepend_serv;
-    int         log_prepend_type;
-    char        log_path[PATH_MAX+1];
-    char        writer_log_path[PATH_MAX+1];
+    uint32_t magic;
+    int      help;
+    int      main_port;
+    int      verbosity;
+    int      log_prepend_serv;
+    int      log_prepend_type;
+    char     log_path[PATH_MAX + 1];
+    char     writer_log_path[PATH_MAX + 1];
 };
 
-
 /* ---------------------------------------------------------------------------
  * Structure:   struct server_run
  *
@@ -129,13 +127,12 @@ struct op_args {
  * ---------------------------------------------------------------------------
  */
 struct server_run {
-    uint32_t            magic;
-    struct op_args      opts;
+    uint32_t                magic;
+    struct op_args          opts;
     struct mirror_log_info *loginfo;
-    int                 listenfd;
+    int                     listenfd;
 };
 
-
 /* ---------------------------------------------------------------------------
  * Function:   mybzero
  *
@@ -145,18 +142,18 @@ struct server_run {
  *             2020-03-30
  * ---------------------------------------------------------------------------
  */
-static void mybzero(void *dest, size_t size)
+static void
+mybzero(void *dest, size_t size)
 {
     size_t i = 0;
-    char  *s = NULL;
+    char * s = NULL;
     HDassert(dest);
     s = (char *)dest;
     for (i = 0; i < size; i++) {
-        *(s+i) = 0;
+        *(s + i) = 0;
     }
 } /* end mybzero() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    usage
  *
@@ -167,25 +164,23 @@ static void
 usage(void)
 {
     HDfprintf(stdout,
-              "mirror_server [options]\n"                                     \
-              "\n"                                                            \
-              "Application for providing Mirror Writer process to "           \
-              " Mirror VFD on file-open.\n"                                   \
-              "Listens on a dedicated socket; forks as a Writer upon receipt" \
-              " of a valid OPEN xmit.\n"                                      \
-              "\n"                                                            \
-              "Options:\n"                                                    \
-              "--help [-h]         : Print this help message and quit.\n"     \
-              "--logpath=PATH      : File path for logging output "           \
-                  "(default none, to stdout).\n"                              \
-              "--port=PORT         : Primary port (default %d).\n"            \
-              "--verbosity=NUM     : Debug printing level "                   \
-                  "0..4, (default %d).\n",
-              DEFAULT_PORT,
-              MIRROR_LOG_DEFAULT_VERBOSITY);
+              "mirror_server [options]\n"
+              "\n"
+              "Application for providing Mirror Writer process to "
+              " Mirror VFD on file-open.\n"
+              "Listens on a dedicated socket; forks as a Writer upon receipt"
+              " of a valid OPEN xmit.\n"
+              "\n"
+              "Options:\n"
+              "--help [-h]         : Print this help message and quit.\n"
+              "--logpath=PATH      : File path for logging output "
+              "(default none, to stdout).\n"
+              "--port=PORT         : Primary port (default %d).\n"
+              "--verbosity=NUM     : Debug printing level "
+              "0..4, (default %d).\n",
+              DEFAULT_PORT, MIRROR_LOG_DEFAULT_VERBOSITY);
 } /* end usage() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    parse_args
  *
@@ -202,14 +197,14 @@ parse_args(int argc, char **argv, struct op_args *args_out)
 
     /* preset default values
      */
-    args_out->main_port = DEFAULT_PORT;
-    args_out->help = 0;
+    args_out->main_port        = DEFAULT_PORT;
+    args_out->help             = 0;
     args_out->log_prepend_serv = 1;
     args_out->log_prepend_type = 1;
-    args_out->verbosity = MIRROR_LOG_DEFAULT_VERBOSITY;
+    args_out->verbosity        = MIRROR_LOG_DEFAULT_VERBOSITY;
     /* preset empty strings */
-    mybzero(args_out->log_path,        PATH_MAX+1);
-    mybzero(args_out->writer_log_path, PATH_MAX+1);
+    mybzero(args_out->log_path, PATH_MAX + 1);
+    mybzero(args_out->writer_log_path, PATH_MAX + 1);
 
     if (argv == NULL || *argv == NULL) {
         mirror_log(NULL, V_ERR, "invalid argv pointer");
@@ -217,39 +212,35 @@ parse_args(int argc, char **argv, struct op_args *args_out)
     }
 
     /* Loop over arguments after program name and writer_path */
-    for (i=2; i < argc; i++) {
+    for (i = 2; i < argc; i++) {
         if (!HDstrncmp(argv[i], "-h", 3) || !HDstrncmp(argv[i], "--help", 7)) {
             mirror_log(NULL, V_INFO, "found help argument");
             args_out->help = 1;
             return 0;
         } /* end if help */
-        else
-        if (!HDstrncmp(argv[i], "--port=", 7)) {
-            mirror_log(NULL, V_INFO, "parsing 'main_port' (%s)", argv[i]+7);
-            args_out->main_port = HDatoi(argv[i]+7);
+        else if (!HDstrncmp(argv[i], "--port=", 7)) {
+            mirror_log(NULL, V_INFO, "parsing 'main_port' (%s)", argv[i] + 7);
+            args_out->main_port = HDatoi(argv[i] + 7);
         } /* end if port */
-        else
-        if (!HDstrncmp(argv[i], "--verbosity=", 12)) {
-            mirror_log(NULL, V_INFO, "parsing 'verbosity' (%s)", argv[i]+12);
-            args_out->verbosity = HDatoi(argv[i]+12);
+        else if (!HDstrncmp(argv[i], "--verbosity=", 12)) {
+            mirror_log(NULL, V_INFO, "parsing 'verbosity' (%s)", argv[i] + 12);
+            args_out->verbosity = HDatoi(argv[i] + 12);
         } /* end if verbosity */
-        else
-        if (!HDstrncmp(argv[i], "--logpath=", 10)) {
-            mirror_log(NULL, V_INFO, "parsing 'logpath' (%s)", argv[i]+10);
-            HDstrncpy(args_out->log_path, argv[i]+10, PATH_MAX);
+        else if (!HDstrncmp(argv[i], "--logpath=", 10)) {
+            mirror_log(NULL, V_INFO, "parsing 'logpath' (%s)", argv[i] + 10);
+            HDstrncpy(args_out->log_path, argv[i] + 10, PATH_MAX);
         } /* end if logpath */
         else {
             mirror_log(NULL, V_ERR, "unrecognized argument: %s", argv[i]);
             return -1;
         } /* end if unrecognized argument */
-    } /* end for each arg after the path to writer "receiver process" */
+    }     /* end for each arg after the path to writer "receiver process" */
 
     mirror_log(NULL, V_INFO, "all args parsed");
 
     return 0;
 } /* end parse_args() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    prepare_listening_socket
  *
@@ -264,9 +255,9 @@ static int
 prepare_listening_socket(struct server_run *run)
 {
     struct sockaddr_in server_addr;
-    int _true = 1; /* needed for setsockopt() */
-    int ret_value = -1;
-    int ret = 0; /* for checking return value of function calls */
+    int                _true     = 1; /* needed for setsockopt() */
+    int                ret_value = -1;
+    int                ret       = 0; /* for checking return value of function calls */
 
     if (run == NULL || run->magic != SERVER_RUN_MAGIC) {
         mirror_log(NULL, V_ERR, "invalid server_run pointer");
@@ -290,8 +281,7 @@ prepare_listening_socket(struct server_run *run)
     HDsetsockopt(ret_value, SOL_SOCKET, SO_REUSEADDR, &_true, sizeof(int));
 
     mirror_log(run->loginfo, V_INFO, "bind()");
-    ret = HDbind(ret_value, (struct sockaddr *)&server_addr,
-            sizeof(server_addr));
+    ret = HDbind(ret_value, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if (ret < 0) {
         mirror_log(run->loginfo, V_ERR, "bind() %s", HDstrerror(errno));
         goto error;
@@ -314,7 +304,6 @@ error:
     return -1;
 } /* end prepare_listening_socket() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    init_server_run
  *
@@ -334,9 +323,9 @@ init_server_run(int argc, char **argv)
         return NULL;
     }
 
-    run->magic = (uint32_t)SERVER_RUN_MAGIC;
+    run->magic      = (uint32_t)SERVER_RUN_MAGIC;
     run->opts.magic = (uint32_t)OP_ARGS_MAGIC;
-    run->listenfd = -1;
+    run->listenfd   = -1;
 
     if (parse_args(argc, argv, &(run->opts)) < 0) {
         mirror_log(NULL, V_ERR, "can't parse arguments");
@@ -349,8 +338,7 @@ init_server_run(int argc, char **argv)
         return run; /* early exit */
     }
 
-    run->loginfo = mirror_log_init(run->opts.log_path, "s- ",
-            run->opts.verbosity);
+    run->loginfo = mirror_log_init(run->opts.log_path, "s- ", run->opts.verbosity);
 
     run->listenfd = prepare_listening_socket(run);
     if (run->listenfd < 0) {
@@ -368,7 +356,6 @@ error:
 
 } /* end init_server_run() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    term_server_run
  *
@@ -389,7 +376,7 @@ term_server_run(struct server_run *run)
 
     if (run->listenfd >= 0) {
         HDshutdown(run->listenfd, SHUT_RDWR); /* TODO: error-checking? */
-        HDclose(run->listenfd); /* TODO: error-checking? */
+        HDclose(run->listenfd);               /* TODO: error-checking? */
         run->listenfd = -1;
     }
 
@@ -405,7 +392,6 @@ term_server_run(struct server_run *run)
     return 0;
 } /* end term_server_run() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    accept_connection
  *
@@ -418,11 +404,11 @@ term_server_run(struct server_run *run)
 static int
 accept_connection(struct server_run *run)
 {
-    struct sockaddr_in client_addr;        /**/
-    socklen_t          clilen;             /**/
-    struct hostent    *host_port = NULL;   /**/
-    char              *hostaddrp;          /**/
-    int                connfd = -1; /* connection file descriptor */
+    struct sockaddr_in client_addr;      /**/
+    socklen_t          clilen;           /**/
+    struct hostent *   host_port = NULL; /**/
+    char *             hostaddrp;        /**/
+    int                connfd = -1;      /* connection file descriptor */
 
     if (run == NULL || run->magic != SERVER_RUN_MAGIC) {
         mirror_log(NULL, V_ERR, "invalid server_run pointer");
@@ -441,10 +427,8 @@ accept_connection(struct server_run *run)
 
     /*------------------------------*/
     /* get client address information */
-    host_port = HDgethostbyaddr(
-            (const char *)&client_addr.sin_addr.s_addr,
-            sizeof(client_addr.sin_addr.s_addr),
-            AF_INET);
+    host_port = HDgethostbyaddr((const char *)&client_addr.sin_addr.s_addr,
+                                sizeof(client_addr.sin_addr.s_addr), AF_INET);
     if (host_port == NULL) {
         mirror_log(run->loginfo, V_ERR, "gethostbyaddr()");
         goto error;
@@ -454,10 +438,7 @@ accept_connection(struct server_run *run)
     hostaddrp = HDinet_ntoa(client_addr.sin_addr);
     /* TODO? proper error-checking */
 
-    mirror_log(run->loginfo, V_INFO,
-            "server connected with %s (%s)",
-            host_port->h_name,
-            hostaddrp);
+    mirror_log(run->loginfo, V_INFO, "server connected with %s (%s)", host_port->h_name, hostaddrp);
 
     return connfd;
 
@@ -468,7 +449,6 @@ error:
     return -1;
 } /* end accept_connection() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    wait_for_child
  *
@@ -478,10 +458,10 @@ error:
 static void
 wait_for_child(int sig)
 {
-    while (HDwaitpid(-1, NULL, WNOHANG) > 0);
+    while (HDwaitpid(-1, NULL, WNOHANG) > 0)
+        ;
 } /* end wait_for_child() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    handle_requests
  *
@@ -494,12 +474,12 @@ wait_for_child(int sig)
 static int
 handle_requests(struct server_run *run)
 {
-    int         connfd = -1;        /**/
-    char        mybuf[H5FD_MIRROR_XMIT_OPEN_SIZE];      /**/
-    int         ret;                /* general-purpose error-checking */
-    int         pid;                /* process ID of fork */
+    int              connfd = -1;                       /**/
+    char             mybuf[H5FD_MIRROR_XMIT_OPEN_SIZE]; /**/
+    int              ret;                               /* general-purpose error-checking */
+    int              pid;                               /* process ID of fork */
     struct sigaction sa;
-    int         ret_value = 0;
+    int              ret_value = 0;
 
     if (run == NULL || run->magic != SERVER_RUN_MAGIC) {
         mirror_log(NULL, V_ERR, "invalid server_run pointer");
@@ -548,8 +528,7 @@ handle_requests(struct server_run *run)
         }
         mirror_log(run->loginfo, V_INFO, "received %d bytes", ret);
         mirror_log(run->loginfo, V_ALL, "```");
-        mirror_log_bytes(run->loginfo, V_ALL, ret,
-                (const unsigned char *)mybuf);
+        mirror_log_bytes(run->loginfo, V_ALL, ret, (const unsigned char *)mybuf);
         mirror_log(run->loginfo, V_ALL, "```");
 
         /* Respond to handshake message.
@@ -562,33 +541,27 @@ handle_requests(struct server_run *run)
             connfd = -1;
             goto done;
         } /* end if explicit "SHUTDOWN" directive */
-        else
-        if (H5FD_MIRROR_XMIT_OPEN_SIZE == ret) {
+        else if (H5FD_MIRROR_XMIT_OPEN_SIZE == ret) {
             H5FD_mirror_xmit_open_t xopen;
 
-            mirror_log(run->loginfo, V_INFO,
-                     "probable OPEN xmit received");
+            mirror_log(run->loginfo, V_INFO, "probable OPEN xmit received");
 
             H5FD_mirror_xmit_decode_open(&xopen, (const unsigned char *)mybuf);
             if (FALSE == H5FD_mirror_xmit_is_open(&xopen)) {
-                mirror_log(run->loginfo, V_WARN,
-                         "expected OPEN xmit was malformed");
+                mirror_log(run->loginfo, V_WARN, "expected OPEN xmit was malformed");
                 HDclose(connfd);
                 continue;
             }
 
-            mirror_log(run->loginfo, V_INFO,
-                     "probable OPEN xmit confirmed");
+            mirror_log(run->loginfo, V_INFO, "probable OPEN xmit confirmed");
 
             pid = HDfork();
             if (pid < 0) { /* fork error */
                 mirror_log(run->loginfo, V_ERR, "cannot fork");
                 goto error;
-            } /* end if fork error */
-            else
-            if (pid == 0) { /* child process (writer side of fork) */
-                mirror_log(run->loginfo, V_INFO,
-                         "executing writer");
+            }                    /* end if fork error */
+            else if (pid == 0) { /* child process (writer side of fork) */
+                mirror_log(run->loginfo, V_INFO, "executing writer");
                 if (run_writer(connfd, &xopen) < 0) {
                     HDprintf("can't run writer\n");
                 }
@@ -598,7 +571,7 @@ handle_requests(struct server_run *run)
                 HDclose(connfd);
 
                 HDexit(EXIT_SUCCESS);
-            } /* end if writer side of fork */
+            }      /* end if writer side of fork */
             else { /* parent process (server side of fork) */
                 mirror_log(run->loginfo, V_INFO, "tidying up from handshake");
                 HDclose(connfd);
@@ -628,12 +601,11 @@ error:
     return -1;
 } /* end handle_requests() */
 
-
 /* ------------------------------------------------------------------------- */
 int
 main(int argc, char **argv)
 {
-    struct server_run  *run;
+    struct server_run *run;
 
     run = init_server_run(argc, argv);
     if (NULL == run) {
@@ -663,4 +635,3 @@ main(void)
 }
 
 #endif /* H5_HAVE_MIRROR_VFD */
-

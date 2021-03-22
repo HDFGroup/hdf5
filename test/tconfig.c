@@ -6,18 +6,18 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
-*
-* Test program:  tconfig
-*
-* Test the definitions in the H5config.h as much as possible
-*
-*************************************************************/
+ *
+ * Test program:  tconfig
+ *
+ * Test the definitions in the H5config.h as much as possible
+ *
+ *************************************************************/
 
 #include "testhdf5.h"
 
@@ -25,27 +25,24 @@
 /* verify C int type: verify the size of signed and unsigned int type
  * with the macro size.
  */
-#define vrfy_cint_type(ctype, uctype, ctype_macro) \
-    /* check signed type size */ \
-    vrfy_macrosize(ctype, ctype_macro, #ctype_macro);\
-    /* check unsigned type size */ \
+#define vrfy_cint_type(ctype, uctype, ctype_macro)                                                           \
+    /* check signed type size */                                                                             \
+    vrfy_macrosize(ctype, ctype_macro, #ctype_macro);                                                        \
+    /* check unsigned type size */                                                                           \
     vrfy_macrosize(uctype, ctype_macro, #ctype_macro);
 
 /* verify C type sizes: verify the sizeof type with the macro size. */
-#define vrfy_ctype(type, macro) \
-    vrfy_macrosize(type, macro, #macro);
+#define vrfy_ctype(type, macro) vrfy_macrosize(type, macro, #macro);
 
 /* verify if the sizeof(type) matches size defined in macro. */
 /* Needs this extra step so that we can print the macro name. */
-#define vrfy_macrosize(type, macro, macroname) \
-    if (sizeof(type) != macro) \
-    TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", \
-        #type, sizeof(type), macroname, (int)macro);
+#define vrfy_macrosize(type, macro, macroname)                                                               \
+    if (sizeof(type) != macro)                                                                               \
+        TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", #type, sizeof(type), macroname, (int)macro);
 
 /* local routine prototypes */
 void test_config_ctypes(void);
 void test_exit_definitions(void);
-
 
 /*-------------------------------------------------------------------------
  * Function:    test_configure
@@ -68,7 +65,6 @@ test_configure(void)
     test_exit_definitions();
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    cleanup_configure
  *
@@ -88,7 +84,6 @@ cleanup_configure(void)
 {
     /* no file to clean */
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    test_config_ctypes
@@ -118,7 +113,7 @@ test_config_ctypes(void)
     vrfy_cint_type(long, unsigned long, H5_SIZEOF_LONG);
     vrfy_ctype(float, H5_SIZEOF_FLOAT);
     vrfy_ctype(double, H5_SIZEOF_DOUBLE);
-#if H5_SIZEOF_LONG_DOUBLE >0
+#if H5_SIZEOF_LONG_DOUBLE > 0
     vrfy_ctype(long double, H5_SIZEOF_LONG_DOUBLE);
 #endif
 
@@ -197,9 +192,7 @@ test_config_ctypes(void)
 #if H5_SIZEOF_SSIZE_T > 0
     vrfy_ctype(ssize_t, H5_SIZEOF_SSIZE_T);
 #endif
-
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    test_exit_definitions
@@ -220,10 +213,8 @@ test_exit_definitions(void)
 {
     /* Verify the EXIT_SUCCESS and EXIT_FAILURE are 0 and 1 respectively. */
     /* This should be true for POSIX compliant systems. */
-    if (EXIT_SUCCESS != 0) \
-    TestErrPrintf("Error: EXIT_SUCCESS is %d, should be %d\n", \
-        EXIT_SUCCESS, 0);
-    if (EXIT_FAILURE != 1) \
-    TestErrPrintf("Error: EXIT_FAILURE is %d, should be %d\n", \
-        EXIT_FAILURE, 1);
+    if (EXIT_SUCCESS != 0)
+        TestErrPrintf("Error: EXIT_SUCCESS is %d, should be %d\n", EXIT_SUCCESS, 0);
+    if (EXIT_FAILURE != 1)
+        TestErrPrintf("Error: EXIT_FAILURE is %d, should be %d\n", EXIT_FAILURE, 1);
 }

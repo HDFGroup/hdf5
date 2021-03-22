@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -38,7 +38,7 @@ cmake_minimum_required (VERSION 3.12)
 ##############################################################################
 
 set (CTEST_SOURCE_VERSION "1.12.1")
-set (CTEST_SOURCE_VERSEXT "-2")
+set (CTEST_SOURCE_VERSEXT "-4")
 
 ##############################################################################
 # handle input parameters to script.
@@ -204,7 +204,7 @@ endif ()
 #set (LOCAL_NO_PACKAGE "TRUE")
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
-set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
+set (REPOSITORY_URL "https://github.com/HDFGroup/hdf5.git")
 set (REPOSITORY_BRANCH "hdf5_1_12")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,60 +18,57 @@
 /* Name of tool */
 #define PROGRAMNAME "h5repack"
 
-static int parse_command_line(int argc, const char **argv, pack_opt_t* options);
+static int  parse_command_line(int argc, const char **argv, pack_opt_t *options);
 static void leave(int ret) H5_ATTR_NORETURN;
 
-
 /* module-scoped variables */
-static int has_i = 0;
-static int has_o = 0;
-const char *infile = NULL;
+static int  has_i   = 0;
+static int  has_o   = 0;
+const char *infile  = NULL;
 const char *outfile = NULL;
 
 /*
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:vz:EG:LM:P:S:T:VXW1:2:3:4:5:6:";
-static struct long_options l_opts[] = {
-    { "alignment",           require_arg, 'a' },
-    { "block",               require_arg, 'b' },
-    { "compact",             require_arg, 'c' },
-    { "indexed",             require_arg, 'd' },
-    { "file",                require_arg, 'e' },
-    { "filter",              require_arg, 'f' },
-    { "help",                no_arg,      'h' },
-    { "infile",              require_arg, 'i' }, /* for backward compability */
-    { "low",                 require_arg, 'j' },
-    { "high",                require_arg, 'k' },
-    { "layout",              require_arg, 'l' },
-    { "minimum",             require_arg, 'm' },
-    { "native",              no_arg,      'n' },
-    { "outfile",             require_arg, 'o' }, /* for backward compability */
-    { "sort_by",             require_arg, 'q' },
-    { "ssize",               require_arg, 's' },
-    { "threshold",           require_arg, 't' },
-    { "ublock",              require_arg, 'u' },
-    { "verbose",             no_arg,      'v' },
-    { "sort_order",          require_arg, 'z' },
-    { "enable-error-stack",  no_arg,      'E' },
-    { "fs_pagesize",         require_arg, 'G' },
-    { "latest",              no_arg,      'L' },
-    { "metadata_block_size", require_arg, 'M' },
-    { "fs_persist",          require_arg, 'P' },
-    { "fs_strategy",         require_arg, 'S' },
-    { "fs_threshold",        require_arg, 'T' },
-    { "version",             no_arg,      'V' },
-    { "merge",               no_arg,      'X' },
-    { "prune",               no_arg,      'W' },
-    { "src-vol-value",       require_arg, '1' },
-    { "src-vol-name",        require_arg, '2' },
-    { "src-vol-info",        require_arg, '3' },
-    { "dst-vol-value",       require_arg, '4' },
-    { "dst-vol-name",        require_arg, '5' },
-    { "dst-vol-info",        require_arg, '6' },
-    { NULL, 0, '\0' }
-};
+static const char *        s_opts   = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:vz:EG:LM:P:S:T:VXW1:2:3:4:5:6:";
+static struct long_options l_opts[] = {{"alignment", require_arg, 'a'},
+                                       {"block", require_arg, 'b'},
+                                       {"compact", require_arg, 'c'},
+                                       {"indexed", require_arg, 'd'},
+                                       {"file", require_arg, 'e'},
+                                       {"filter", require_arg, 'f'},
+                                       {"help", no_arg, 'h'},
+                                       {"infile", require_arg, 'i'}, /* for backward compability */
+                                       {"low", require_arg, 'j'},
+                                       {"high", require_arg, 'k'},
+                                       {"layout", require_arg, 'l'},
+                                       {"minimum", require_arg, 'm'},
+                                       {"native", no_arg, 'n'},
+                                       {"outfile", require_arg, 'o'}, /* for backward compability */
+                                       {"sort_by", require_arg, 'q'},
+                                       {"ssize", require_arg, 's'},
+                                       {"threshold", require_arg, 't'},
+                                       {"ublock", require_arg, 'u'},
+                                       {"verbose", no_arg, 'v'},
+                                       {"sort_order", require_arg, 'z'},
+                                       {"enable-error-stack", no_arg, 'E'},
+                                       {"fs_pagesize", require_arg, 'G'},
+                                       {"latest", no_arg, 'L'},
+                                       {"metadata_block_size", require_arg, 'M'},
+                                       {"fs_persist", require_arg, 'P'},
+                                       {"fs_strategy", require_arg, 'S'},
+                                       {"fs_threshold", require_arg, 'T'},
+                                       {"version", no_arg, 'V'},
+                                       {"merge", no_arg, 'X'},
+                                       {"prune", no_arg, 'W'},
+                                       {"src-vol-value", require_arg, '1'},
+                                       {"src-vol-name", require_arg, '2'},
+                                       {"src-vol-info", require_arg, '3'},
+                                       {"dst-vol-value", require_arg, '4'},
+                                       {"dst-vol-name", require_arg, '5'},
+                                       {"dst-vol-info", require_arg, '6'},
+                                       {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function: usage
@@ -82,7 +79,9 @@ static struct long_options l_opts[] = {
  *
  *-------------------------------------------------------------------------
  */
-static void usage(const char *prog) {
+static void
+usage(const char *prog)
+{
     FLUSHSTREAM(rawoutstream);
     PRINTSTREAM(rawoutstream, "usage: %s [OPTIONS] file1 file2\n", prog);
     PRINTVALSTREAM(rawoutstream, "  file1                    Input HDF5 File\n");
@@ -92,105 +91,140 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -v, --verbose           Verbose mode, print object information\n");
     PRINTVALSTREAM(rawoutstream, "   -V, --version           Print version number and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
-    PRINTVALSTREAM(rawoutstream, "   --enable-error-stack    Prints messages from the HDF5 error stack as they\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --enable-error-stack    Prints messages from the HDF5 error stack as they\n");
     PRINTVALSTREAM(rawoutstream, "                           occur\n");
-    PRINTVALSTREAM(rawoutstream, "   --src-vol-value         Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --src-vol-value         Value (ID) of the VOL connector to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                           input HDF5 file specified\n");
-    PRINTVALSTREAM(rawoutstream, "   --src-vol-name          Name of the VOL connector to use for opening the input\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --src-vol-name          Name of the VOL connector to use for opening the input\n");
     PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
-    PRINTVALSTREAM(rawoutstream, "   --src-vol-info          VOL-specific info to pass to the VOL connector used for\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --src-vol-info          VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the input HDF5 file specified\n");
-    PRINTVALSTREAM(rawoutstream, "   --dst-vol-value         Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --dst-vol-value         Value (ID) of the VOL connector to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                           output HDF5 file specified\n");
-    PRINTVALSTREAM(rawoutstream, "   --dst-vol-name          Name of the VOL connector to use for opening the output\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --dst-vol-name          Name of the VOL connector to use for opening the output\n");
     PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
-    PRINTVALSTREAM(rawoutstream, "   --dst-vol-info          VOL-specific info to pass to the VOL connector used for\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --dst-vol-info          VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the output HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   -L, --latest            Use latest version of file format\n");
-    PRINTVALSTREAM(rawoutstream, "                           This option will take precedence over the options\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           This option will take precedence over the options\n");
     PRINTVALSTREAM(rawoutstream, "                           --low and --high\n");
-    PRINTVALSTREAM(rawoutstream, "   --low=BOUND             The low bound for library release versions to use\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --low=BOUND             The low bound for library release versions to use\n");
     PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file\n");
     PRINTVALSTREAM(rawoutstream, "                           (default is H5F_LIBVER_EARLIEST)\n");
-    PRINTVALSTREAM(rawoutstream, "   --high=BOUND            The high bound for library release versions to use\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --high=BOUND            The high bound for library release versions to use\n");
     PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file\n");
     PRINTVALSTREAM(rawoutstream, "                           (default is H5F_LIBVER_LATEST)\n");
-    PRINTVALSTREAM(rawoutstream, "   --merge                 Follow external soft link recursively and merge data\n");
-    PRINTVALSTREAM(rawoutstream, "   --prune                 Do not follow external soft links and remove link\n");
-    PRINTVALSTREAM(rawoutstream, "   --merge --prune         Follow external link, merge data and remove dangling link\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --merge                 Follow external soft link recursively and merge data\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --prune                 Do not follow external soft links and remove link\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --merge --prune         Follow external link, merge data and remove dangling link\n");
     PRINTVALSTREAM(rawoutstream, "   -c L1, --compact=L1     Maximum number of links in header messages\n");
-    PRINTVALSTREAM(rawoutstream, "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
     PRINTVALSTREAM(rawoutstream, "   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
-    PRINTVALSTREAM(rawoutstream, "   -m M, --minimum=M       Do not apply the filter to datasets smaller than M\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -m M, --minimum=M       Do not apply the filter to datasets smaller than M\n");
     PRINTVALSTREAM(rawoutstream, "   -e E, --file=E          Name of file E with the -f and -l options\n");
-    PRINTVALSTREAM(rawoutstream, "   -u U, --ublock=U        Name of file U with user block data to be added\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -u U, --ublock=U        Name of file U with user block data to be added\n");
     PRINTVALSTREAM(rawoutstream, "   -b B, --block=B         Size of user block to be added\n");
-    PRINTVALSTREAM(rawoutstream, "   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
     PRINTVALSTREAM(rawoutstream, "   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
     PRINTVALSTREAM(rawoutstream, "   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
     PRINTVALSTREAM(rawoutstream, "   -q Q, --sort_by=Q       Sort groups and attributes by index Q\n");
     PRINTVALSTREAM(rawoutstream, "   -z Z, --sort_order=Z    Sort groups and attributes by order Z\n");
     PRINTVALSTREAM(rawoutstream, "   -f FILT, --filter=FILT  Filter type\n");
     PRINTVALSTREAM(rawoutstream, "   -l LAYT, --layout=LAYT  Layout type\n");
-    PRINTVALSTREAM(rawoutstream, "   -S FS_STRATEGY, --fs_strategy=FS_STRATEGY  File space management strategy for\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -S FS_STRATEGY, --fs_strategy=FS_STRATEGY  File space management strategy for\n");
     PRINTVALSTREAM(rawoutstream, "                           H5Pset_file_space_strategy\n");
-    PRINTVALSTREAM(rawoutstream, "   -P FS_PERSIST, --fs_persist=FS_PERSIST  Persisting or not persisting free-\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -P FS_PERSIST, --fs_persist=FS_PERSIST  Persisting or not persisting free-\n");
     PRINTVALSTREAM(rawoutstream, "                           space for H5Pset_file_space_strategy\n");
-    PRINTVALSTREAM(rawoutstream, "   -T FS_THRESHOLD, --fs_threshold=FS_THRESHOLD   Free-space section threshold\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -T FS_THRESHOLD, --fs_threshold=FS_THRESHOLD   Free-space section threshold\n");
     PRINTVALSTREAM(rawoutstream, "                           for H5Pset_file_space_strategy\n");
     PRINTVALSTREAM(rawoutstream, "   -G FS_PAGESIZE, --fs_pagesize=FS_PAGESIZE   File space page size for\n");
     PRINTVALSTREAM(rawoutstream, "                           H5Pset_file_space_page_size\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0)\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "    M - is an integer greater than 1, size of dataset in bytes (default is 0)\n");
     PRINTVALSTREAM(rawoutstream, "    E - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "    S - is an integer\n");
     PRINTVALSTREAM(rawoutstream, "    U - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "    T - is an integer\n");
     PRINTVALSTREAM(rawoutstream, "    A - is an integer greater than zero\n");
-    PRINTVALSTREAM(rawoutstream, "    Q - is the sort index type for the input file. It can be \"name\" or\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "    Q - is the sort index type for the input file. It can be \"name\" or\n");
     PRINTVALSTREAM(rawoutstream, "        \"creation_order\" (default)\n");
-    PRINTVALSTREAM(rawoutstream, "    Z - is the sort order type for the input file. It can be \"descending\" or\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "    Z - is the sort order type for the input file. It can be \"descending\" or\n");
     PRINTVALSTREAM(rawoutstream, "        \"ascending\" (default)\n");
     PRINTVALSTREAM(rawoutstream, "    B - is the user block size, any value that is 512 or greater and is\n");
     PRINTVALSTREAM(rawoutstream, "        a power of 2 (1024 default)\n");
-    PRINTVALSTREAM(rawoutstream, "    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
     PRINTVALSTREAM(rawoutstream, "        pline|attr>. If F is not specified, S applies to all messages\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    BOUND is an integer indicating the library release versions to use when\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "    BOUND is an integer indicating the library release versions to use when\n");
     PRINTVALSTREAM(rawoutstream, "          creating objects in the file (see H5Pset_libver_bounds()):\n");
     PRINTVALSTREAM(rawoutstream, "        0: This is H5F_LIBVER_EARLIEST in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "        1: This is H5F_LIBVER_V18 in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "        2: This is H5F_LIBVER_V110 in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "        3: This is H5F_LIBVER_V112 in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "        4: This is H5F_LIBVER_V114 in H5F_libver_t struct\n");
-    PRINTVALSTREAM(rawoutstream, "           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V114 for this release\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V114 for this release\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    FS_STRATEGY is a string indicating the file space strategy used:\n");
     PRINTVALSTREAM(rawoutstream, "        FSM_AGGR:\n");
-    PRINTVALSTREAM(rawoutstream, "               The mechanisms used in managing file space are free-space\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "               The mechanisms used in managing file space are free-space\n");
     PRINTVALSTREAM(rawoutstream, "               managers, aggregators and virtual file driver.\n");
     PRINTVALSTREAM(rawoutstream, "        PAGE:\n");
-    PRINTVALSTREAM(rawoutstream, "               The mechanisms used in managing file space are free-space\n");
-    PRINTVALSTREAM(rawoutstream, "               managers with embedded paged aggregation and virtual file driver.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "               The mechanisms used in managing file space are free-space\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "               managers with embedded paged aggregation and virtual file driver.\n");
     PRINTVALSTREAM(rawoutstream, "        AGGR:\n");
-    PRINTVALSTREAM(rawoutstream, "               The mechanisms used in managing file space are aggregators and\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "               The mechanisms used in managing file space are aggregators and\n");
     PRINTVALSTREAM(rawoutstream, "               virtual file driver.\n");
     PRINTVALSTREAM(rawoutstream, "        NONE:\n");
-    PRINTVALSTREAM(rawoutstream, "               The mechanisms used in managing file space are virtual file\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "               The mechanisms used in managing file space are virtual file\n");
     PRINTVALSTREAM(rawoutstream, "               driver.\n");
-    PRINTVALSTREAM(rawoutstream, "        The default strategy when not set is FSM_AGGR without persisting free-\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "        The default strategy when not set is FSM_AGGR without persisting free-\n");
     PRINTVALSTREAM(rawoutstream, "        space.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    FS_PERSIST is 1 to persisting free-space or 0 to not persisting free-space.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "    FS_PERSIST is 1 to persisting free-space or 0 to not persisting free-space.\n");
     PRINTVALSTREAM(rawoutstream, "      The default when not set is not persisting free-space.\n");
     PRINTVALSTREAM(rawoutstream, "      The value is ignored for AGGR and NONE strategies.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    FS_THRESHOLD is the minimum size (in bytes) of free-space sections to be\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "    FS_THRESHOLD is the minimum size (in bytes) of free-space sections to be\n");
     PRINTVALSTREAM(rawoutstream, "        tracked by the library.\n");
     PRINTVALSTREAM(rawoutstream, "      The default when not set is 1.\n");
     PRINTVALSTREAM(rawoutstream, "      The value is ignored for AGGR and NONE strategies.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    FS_PAGESIZE is the size (in bytes) >=512 that is used by the library when\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "    FS_PAGESIZE is the size (in bytes) >=512 that is used by the library when\n");
     PRINTVALSTREAM(rawoutstream, "        the file space strategy PAGE is used.\n");
     PRINTVALSTREAM(rawoutstream, "      The default when not set is 4096.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -198,8 +232,10 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "      <list of objects>:<name of filter>=<filter parameters>\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "      <list of objects> is a comma separated list of object names, meaning apply\n");
-    PRINTVALSTREAM(rawoutstream, "        compression only to those objects. If no names are specified, the filter\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "      <list of objects> is a comma separated list of object names, meaning apply\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "        compression only to those objects. If no names are specified, the filter\n");
     PRINTVALSTREAM(rawoutstream, "        is applied to all objects\n");
     PRINTVALSTREAM(rawoutstream, "      <name of filter> can be:\n");
     PRINTVALSTREAM(rawoutstream, "        GZIP, to apply the HDF5 GZIP filter (GZIP compression)\n");
@@ -212,24 +248,31 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "        NONE, to remove all filters\n");
     PRINTVALSTREAM(rawoutstream, "      <filter parameters> is optional filter parameter information\n");
     PRINTVALSTREAM(rawoutstream, "        GZIP=<deflation level> from 1-9\n");
-    PRINTVALSTREAM(rawoutstream, "        SZIP=<pixels per block,coding> pixels per block is a even number in\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "        SZIP=<pixels per block,coding> pixels per block is a even number in\n");
     PRINTVALSTREAM(rawoutstream, "            2-32 and coding method is either EC or NN\n");
     PRINTVALSTREAM(rawoutstream, "        SHUF (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "        FLET (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "        NBIT (no parameter)\n");
-    PRINTVALSTREAM(rawoutstream, "        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
     PRINTVALSTREAM(rawoutstream, "            is either IN or DS\n");
-    PRINTVALSTREAM(rawoutstream, "        UD=<filter_number,filter_flag,cd_value_count,value1[,value2,...,valueN]>\n");
-    PRINTVALSTREAM(rawoutstream, "            Required values: filter_number, filter_flag, cd_value_count, value1\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "        UD=<filter_number,filter_flag,cd_value_count,value1[,value2,...,valueN]>\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "            Required values: filter_number, filter_flag, cd_value_count, value1\n");
     PRINTVALSTREAM(rawoutstream, "            Optional values: value2 to valueN\n");
+    PRINTVALSTREAM(rawoutstream, "            filter_flag: 1 is OPTIONAL or 0 is MANDATORY\n");
     PRINTVALSTREAM(rawoutstream, "        NONE (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    LAYT - is a string with the format:\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "      <list of objects>:<layout type>=<layout parameters>\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "      <list of objects> is a comma separated list of object names, meaning that\n");
-    PRINTVALSTREAM(rawoutstream, "        layout information is supplied for those objects. If no names are\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "      <list of objects> is a comma separated list of object names, meaning that\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "        layout information is supplied for those objects. If no names are\n");
     PRINTVALSTREAM(rawoutstream, "        specified, the layout type is applied to all objects\n");
     PRINTVALSTREAM(rawoutstream, "      <layout type> can be:\n");
     PRINTVALSTREAM(rawoutstream, "        CHUNK, to apply chunking layout\n");
@@ -248,11 +291,14 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "2) h5repack -v -f dset1:SZIP=8,NN file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "   SZIP compression with 8 pixels per block and NN coding method to object dset1\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   SZIP compression with 8 pixels per block and NN coding method to object dset1\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "3) h5repack -v -l dset1,dset2:CHUNK=20x10 -f dset3,dset4,dset5:NONE file1 file2\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "3) h5repack -v -l dset1,dset2:CHUNK=20x10 -f dset3,dset4,dset5:NONE file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "   Chunked layout, with a layout size of 20x10, to objects dset1 and dset2\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   Chunked layout, with a layout size of 20x10, to objects dset1 and dset2\n");
     PRINTVALSTREAM(rawoutstream, "   and remove filters to objects dset3, dset4, dset5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "4) h5repack -L -c 10 -s 20:dtype file1 file2\n");
@@ -283,7 +329,8 @@ static void usage(const char *prog) {
  * Return:      Does not return
  *-------------------------------------------------------------------------
  */
-static void leave(int ret)
+static void
+leave(int ret)
 {
     h5tools_close();
     HDexit(ret);
@@ -297,15 +344,15 @@ static void leave(int ret)
  * Return: void, exit on error
  *-------------------------------------------------------------------------
  */
-static
-int read_info(const char *filename, pack_opt_t *options)
+static int
+read_info(const char *filename, pack_opt_t *options)
 {
-    char stype[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    char comp_info[1024];
+    char  stype[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    char  comp_info[1024];
     FILE *fp = NULL;
-    char c;
-    int i;
-    int ret_value = EXIT_SUCCESS;
+    char  c;
+    int   i;
+    int   ret_value = EXIT_SUCCESS;
 
     if (NULL == (fp = HDfopen(filename, "r"))) {
         error_msg("cannot open options file %s\n", filename);
@@ -320,7 +367,7 @@ int read_info(const char *filename, pack_opt_t *options)
             break;
 
         /* Info indicator must be for layout or filter */
-        if (HDstrcmp(stype,"-l") && HDstrcmp(stype, "-f")) {
+        if (HDstrcmp(stype, "-l") != 0 && HDstrcmp(stype, "-f") != 0) {
             error_msg("bad file format for %s", filename);
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = EXIT_FAILURE;
@@ -434,16 +481,16 @@ set_sort_order(const char *form)
  * Purpose: parse command line input
  *-------------------------------------------------------------------------
  */
-static
-int parse_command_line(int argc, const char **argv, pack_opt_t* options)
+static int
+parse_command_line(int argc, const char **argv, pack_opt_t *options)
 {
     h5tools_vol_info_t in_vol_info;
     h5tools_vol_info_t out_vol_info;
-    hbool_t custom_in_fapl = FALSE;
-    hbool_t custom_out_fapl = FALSE;
-    hid_t tmp_fapl = H5I_INVALID_HID;
-    int bound, opt;
-    int ret_value = 0;
+    hbool_t            custom_in_fapl  = FALSE;
+    hbool_t            custom_out_fapl = FALSE;
+    hid_t              tmp_fapl        = H5I_INVALID_HID;
+    int                bound, opt;
+    int                ret_value = 0;
 
     /* Initialize fapl info structs */
     HDmemset(&in_vol_info, 0, sizeof(h5tools_vol_info_t));
@@ -451,7 +498,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
     /* parse command line options */
     while (EOF != (opt = get_option(argc, argv, s_opts, l_opts))) {
-        switch ((char) opt) {
+        switch ((char)opt) {
 
             /* -i for backward compatibility */
             case 'i':
@@ -502,8 +549,8 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'm':
-                options->min_comp = HDstrtoull(opt_arg , NULL, 0);
-                if ((int) options->min_comp <= 0) {
+                options->min_comp = HDstrtoull(opt_arg, NULL, 0);
+                if ((int)options->min_comp <= 0) {
                     error_msg("invalid minimum compress size <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
@@ -559,66 +606,64 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'c':
-                options->grp_compact = HDatoi( opt_arg );
+                options->grp_compact = HDatoi(opt_arg);
                 if (options->grp_compact > 0)
                     options->latest = TRUE; /* must use latest format */
                 break;
 
             case 'd':
-                options->grp_indexed = HDatoi( opt_arg );
+                options->grp_indexed = HDatoi(opt_arg);
                 if (options->grp_indexed > 0)
                     options->latest = TRUE; /* must use latest format */
                 break;
 
-            case 's':
-                {
-                    int idx = 0;
-                    int ssize = 0;
-                    char *msgPtr = HDstrchr(opt_arg, ':');
-                    options->latest = TRUE; /* must use latest format */
-                    if (msgPtr == NULL) {
-                        ssize = HDatoi(opt_arg);
-                        for (idx = 0; idx < 5; idx++)
-                            options->msg_size[idx] = ssize;
-                    }
-                    else {
-                        char msgType[10];
-
-                        HDstrcpy(msgType, msgPtr + 1);
-                        msgPtr[0] = '\0';
-                        ssize = HDatoi( opt_arg );
-                        if (!HDstrncmp(msgType, "dspace", 6))
-                            options->msg_size[0] = ssize;
-                        else if (!HDstrncmp(msgType, "dtype", 5))
-                            options->msg_size[1] = ssize;
-                        else if (!HDstrncmp(msgType, "fill", 4))
-                            options->msg_size[2] = ssize;
-                        else if (!HDstrncmp(msgType, "pline", 5))
-                            options->msg_size[3] = ssize;
-                        else if (!HDstrncmp(msgType, "attr", 4))
-                            options->msg_size[4] = ssize;
-                    }
+            case 's': {
+                int   idx       = 0;
+                int   ssize     = 0;
+                char *msgPtr    = HDstrchr(opt_arg, ':');
+                options->latest = TRUE; /* must use latest format */
+                if (msgPtr == NULL) {
+                    ssize = HDatoi(opt_arg);
+                    for (idx = 0; idx < 5; idx++)
+                        options->msg_size[idx] = ssize;
                 }
-                break;
+                else {
+                    char msgType[10];
+
+                    HDstrcpy(msgType, msgPtr + 1);
+                    msgPtr[0] = '\0';
+                    ssize     = HDatoi(opt_arg);
+                    if (!HDstrncmp(msgType, "dspace", 6))
+                        options->msg_size[0] = ssize;
+                    else if (!HDstrncmp(msgType, "dtype", 5))
+                        options->msg_size[1] = ssize;
+                    else if (!HDstrncmp(msgType, "fill", 4))
+                        options->msg_size[2] = ssize;
+                    else if (!HDstrncmp(msgType, "pline", 5))
+                        options->msg_size[3] = ssize;
+                    else if (!HDstrncmp(msgType, "attr", 4))
+                        options->msg_size[4] = ssize;
+                }
+            } break;
 
             case 'u':
                 options->ublock_filename = opt_arg;
                 break;
 
             case 'b':
-                options->ublock_size = (hsize_t) HDatol( opt_arg );
+                options->ublock_size = (hsize_t)HDatol(opt_arg);
                 break;
 
             case 'M':
-                options->meta_block_size = (hsize_t) HDatol( opt_arg );
+                options->meta_block_size = (hsize_t)HDatol(opt_arg);
                 break;
 
             case 't':
-                options->threshold = (hsize_t) HDatol( opt_arg );
+                options->threshold = (hsize_t)HDatol(opt_arg);
                 break;
 
             case 'a':
-                options->alignment = HDstrtoull(opt_arg , NULL, 0);
+                options->alignment = HDstrtoull(opt_arg, NULL, 0);
                 if (options->alignment < 1) {
                     error_msg("invalid alignment size\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
@@ -627,30 +672,28 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 }
                 break;
 
-            case 'S':
-                {
-                    char strategy[MAX_NC_NAME];
+            case 'S': {
+                char strategy[MAX_NC_NAME];
 
-                    HDstrcpy(strategy, opt_arg);
-                    if (!HDstrcmp(strategy, "FSM_AGGR"))
-                        options->fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
-                    else if (!HDstrcmp(strategy, "PAGE"))
-                        options->fs_strategy = H5F_FSPACE_STRATEGY_PAGE;
-                    else if (!HDstrcmp(strategy, "AGGR"))
-                        options->fs_strategy = H5F_FSPACE_STRATEGY_AGGR;
-                    else if (!HDstrcmp(strategy, "NONE"))
-                        options->fs_strategy = H5F_FSPACE_STRATEGY_NONE;
-                    else {
-                        error_msg("invalid file space management strategy\n", opt_arg);
-                        h5tools_setstatus(EXIT_FAILURE);
-                        ret_value = -1;
-                        goto done;
-                    }
-                    if (options->fs_strategy == (H5F_fspace_strategy_t)0)
-                        /* To distinguish the "specified" zero value */
-                        options->fs_strategy = (H5F_fspace_strategy_t)-1;
+                HDstrcpy(strategy, opt_arg);
+                if (!HDstrcmp(strategy, "FSM_AGGR"))
+                    options->fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
+                else if (!HDstrcmp(strategy, "PAGE"))
+                    options->fs_strategy = H5F_FSPACE_STRATEGY_PAGE;
+                else if (!HDstrcmp(strategy, "AGGR"))
+                    options->fs_strategy = H5F_FSPACE_STRATEGY_AGGR;
+                else if (!HDstrcmp(strategy, "NONE"))
+                    options->fs_strategy = H5F_FSPACE_STRATEGY_NONE;
+                else {
+                    error_msg("invalid file space management strategy\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
                 }
-                break;
+                if (options->fs_strategy == (H5F_fspace_strategy_t)0)
+                    /* To distinguish the "specified" zero value */
+                    options->fs_strategy = (H5F_fspace_strategy_t)-1;
+            } break;
 
             case 'P':
                 options->fs_persist = HDatoi(opt_arg);
@@ -670,7 +713,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 options->fs_pagesize = HDstrtoll(opt_arg, NULL, 0);
                 if (options->fs_pagesize == 0)
                     /* To distinguish the "specified" zero value */
-                   options->fs_pagesize = -1;
+                    options->fs_pagesize = -1;
                 break;
 
             case 'q':
@@ -696,15 +739,15 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case '1':
-                in_vol_info.type = VOL_BY_VALUE;
+                in_vol_info.type    = VOL_BY_VALUE;
                 in_vol_info.u.value = (H5VL_class_value_t)HDatoi(opt_arg);
-                custom_in_fapl = TRUE;
+                custom_in_fapl      = TRUE;
                 break;
 
             case '2':
-                in_vol_info.type = VOL_BY_NAME;
+                in_vol_info.type   = VOL_BY_NAME;
                 in_vol_info.u.name = opt_arg;
-                custom_in_fapl = TRUE;
+                custom_in_fapl     = TRUE;
                 break;
 
             case '3':
@@ -712,15 +755,15 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case '4':
-                out_vol_info.type = VOL_BY_VALUE;
+                out_vol_info.type    = VOL_BY_VALUE;
                 out_vol_info.u.value = (H5VL_class_value_t)HDatoi(opt_arg);
-                custom_out_fapl = TRUE;
+                custom_out_fapl      = TRUE;
                 break;
 
             case '5':
-                out_vol_info.type = VOL_BY_NAME;
+                out_vol_info.type   = VOL_BY_NAME;
                 out_vol_info.u.name = opt_arg;
-                custom_out_fapl = TRUE;
+                custom_out_fapl     = TRUE;
                 break;
 
             case '6':
@@ -730,12 +773,12 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
             default:
                 break;
         } /* end switch */
-    } /* end while there are more options to parse */
+    }     /* end while there are more options to parse */
 
     /* If neither -i nor -o given, get in and out files positionally */
     if (0 == (has_i + has_o)) {
         if (argv[opt_ind] != NULL && argv[opt_ind + 1] != NULL) {
-            infile = argv[opt_ind];
+            infile  = argv[opt_ind];
             outfile = argv[opt_ind + 1];
 
             if (!HDstrcmp(infile, outfile)) {
@@ -814,10 +857,11 @@ done:
  * Failure: EXIT_FAILURE(1)
  *-------------------------------------------------------------------------
  */
-int main(int argc, const char **argv)
+int
+main(int argc, const char **argv)
 {
-    pack_opt_t          options; /*the global options */
-    int                 parse_ret;
+    pack_opt_t options; /*the global options */
+    int        parse_ret;
 
     HDmemset(&options, 0, sizeof(pack_opt_t));
 
@@ -879,4 +923,3 @@ done:
 
     leave(h5tools_getstatus());
 }
-

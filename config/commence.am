@@ -8,7 +8,7 @@
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
 ## terms governing use, modification, and redistribution, is contained in
 ## the COPYING file, which can be found at the root of the source code
-## distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+## distribution tree, or in https://www.hdfgroup.org/licenses.
 ## If you do not have access to either file, you may request a copy from
 ## help@hdfgroup.org.
 
@@ -70,9 +70,9 @@ H5CPP=${DESTDIR}$(bindir)/h5c++
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
 
-AM_CFLAGS=@AM_CFLAGS@ @H5_CFLAGS@ @H5_ECFLAGS@
+AM_CFLAGS=@AM_CFLAGS@ @H5_CFLAGS@
 AM_FCFLAGS=@AM_FCFLAGS@ @H5_FCFLAGS@
-AM_CXXFLAGS=@AM_CXXFLAGS@ @H5_CXXFLAGS@ @H5_ECXXFLAGS@
+AM_CXXFLAGS=@AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_CPPFLAGS=@AM_CPPFLAGS@ @H5_CPPFLAGS@
 AM_LDFLAGS=@AM_LDFLAGS@ @H5_LDFLAGS@
 
@@ -96,9 +96,9 @@ CHECK_CLEANFILES=*.chkexe *.chklog *.clog *.clog2
 # commands that should be executed even if a file with the same name already
 # exists.
 .PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
-        build-tests check-clean check-install check-p check-s check-vfd \
-        check-passthrough-vol install-doc lib progs tests uninstall-doc \
-        _exec_check-s _test help
+	build-tests check-clean check-install check-p check-s check-vfd \
+	check-passthrough-vol install-doc lib progs tests uninstall-doc \
+	_exec_check-s _test help trace doxygen
 
 help:
 	@$(top_srcdir)/bin/makehelp

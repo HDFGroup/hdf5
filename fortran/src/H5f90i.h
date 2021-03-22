@@ -6,14 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
-#ifndef _H5f90i_H
-#define _H5f90i_H
+#ifndef H5f90i_H
+#define H5f90i_H
 
 /*
  * Include generated header.  This header defines integer types,
@@ -25,7 +24,7 @@
  */
 #define _fcdtocp(desc) (desc)
 
-#if (defined (UNICOS) || defined (_UNICOS)) && !defined(__crayx1)
+#if (defined(UNICOS) || defined(_UNICOS)) && !defined(__crayx1)
 
 #include <fortran.h>
 
@@ -33,8 +32,8 @@
 
 #else
 
-typedef char              *_fcd;
+typedef char *_fcd;
 
 #endif
 
-#endif /* _H5f90i_H */
+#endif /* H5f90i_H */

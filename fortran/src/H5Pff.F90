@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -8262,6 +8262,108 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     hdferr = INT(h5pget_vol_id(plist_id, vol_id))
 
   END SUBROUTINE h5pget_vol_id_f
+
+!****s* H5P (F03)/h5pget_file_locking_f_F03
+!
+! NAME
+!  h5pget_file_locking_f
+!
+! PURPOSE
+!  Gets the file locking properties. File locking is mainly used to help
+!  enforce SWMR semantics.
+!
+! INPUTS
+!  fapl_id    - Target file access property list identifier.
+!
+! OUTPUTS
+!  use_file_locking - Whether or not to use file locks.
+!  ignore_disabled_locks - Whether or not to ignore file locks when locking
+!                          is disabled on a file system.
+!  hdferr     - error code:
+!                 0 on success and -1 on failure
+!
+! AUTHOR
+!  Dana Robinson
+!  Summer 2020
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5pget_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)              :: fapl_id
+    LOGICAL        , INTENT(OUT)             :: use_file_locking
+    LOGICAL        , INTENT(OUT)             :: ignore_disabled_locks
+    INTEGER        , INTENT(OUT)             :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_use_flag
+    LOGICAL(C_BOOL) :: c_ignore_flag
+
+    INTERFACE
+       INTEGER FUNCTION h5pget_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) BIND(C, NAME='H5Pget_file_locking')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: fapl_id
+         LOGICAL(C_BOOL), INTENT(OUT) :: use_file_locking
+         LOGICAL(C_BOOL), INTENT(OUT) :: ignore_disabled_locks
+       END FUNCTION h5pget_file_locking
+    END INTERFACE
+
+    hdferr = INT(h5pget_file_locking(fapl_id, c_use_flag, c_ignore_flag))
+
+    ! Transfer value of C C_BOOL type to Fortran LOGICAL
+    use_file_locking = c_use_flag
+    ignore_disabled_locks = c_ignore_flag
+
+   END SUBROUTINE h5pget_file_locking_f
+
+!****s* H5P (F03)/h5pset_file_locking_f_F03
+!
+! NAME
+!  h5pset_file_locking_f
+!
+! PURPOSE
+!  Sets the file locking properties. File locking is mainly used to help
+!  enforce SWMR semantics.
+!
+! INPUTS
+!  fapl_id    - Target file access property list identifier.
+!  use_file_locking - Whether or not to use file locks.
+!  ignore_disabled_locks - Whether or not to ignore file locks when locking
+!                          is disabled on a file system.
+!  hdferr     - error code:
+!                 0 on success and -1 on failure
+!
+! AUTHOR
+!  Dana Robinson
+!  Summer 2020
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5pset_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)              :: fapl_id
+    LOGICAL        , INTENT(IN)              :: use_file_locking
+    LOGICAL        , INTENT(IN)              :: ignore_disabled_locks
+    INTEGER        , INTENT(OUT)             :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_use_flag
+    LOGICAL(C_BOOL) :: c_ignore_flag
+
+    INTERFACE
+       INTEGER FUNCTION h5pset_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) BIND(C, NAME='H5Pset_file_locking')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: fapl_id
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: use_file_locking
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: ignore_disabled_locks
+       END FUNCTION h5pset_file_locking
+    END INTERFACE
+
+    ! Transfer value of Fortran LOGICAL to C C_BOOL type
+    c_use_flag = use_file_locking
+    c_ignore_flag = ignore_disabled_locks
+
+    hdferr = INT(h5pset_file_locking(fapl_id, c_use_flag, c_ignore_flag))
+
+  END SUBROUTINE h5pset_file_locking_f
 
 END MODULE H5P
 

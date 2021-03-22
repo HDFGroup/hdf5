@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,8 +38,7 @@ extern "C" {
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Iget_1type
-    (JNIEnv *env, jclass clss, jlong obj_id)
+Java_hdf_hdf5lib_H5_H5Iget_1type(JNIEnv *env, jclass clss, jlong obj_id)
 {
     H5I_type_t retVal = H5I_BADID;
 
@@ -58,19 +57,19 @@ done:
  * Signature: (JLjava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Iget_1name_1long
-    (JNIEnv *env, jclass clss, jlong obj_id, jobjectArray name, jlong buf_size)
+Java_hdf_hdf5lib_H5_H5Iget_1name_1long(JNIEnv *env, jclass clss, jlong obj_id, jobjectArray name,
+                                       jlong buf_size)
 {
-    ssize_t  size = -1;
-    jstring  str;
-    char    *aName = NULL;
+    ssize_t size = -1;
+    jstring str;
+    char *  aName = NULL;
 
     UNUSED(clss);
 
     if (buf_size < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Iget_name_long: buf_size < 0");
 
-    if (NULL == (aName = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (aName = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Iget_name_long: malloc failed");
 
     if ((size = H5Iget_name((hid_t)obj_id, aName, (size_t)buf_size + 1)) < 0)
@@ -90,19 +89,17 @@ done:
     return (jlong)size;
 } /* end Java_hdf_hdf5lib_H5_H5Iget_1name */
 
-
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Iget_name
  * Signature: (J)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Iget_1name
-    (JNIEnv *env, jclass clss, jlong obj_id)
+Java_hdf_hdf5lib_H5_H5Iget_1name(JNIEnv *env, jclass clss, jlong obj_id)
 {
-    jstring  str = NULL;
-    ssize_t  buf_size = -1;
-    char    *aName = NULL;
+    jstring str      = NULL;
+    ssize_t buf_size = -1;
+    char *  aName    = NULL;
 
     UNUSED(clss);
 
@@ -110,7 +107,7 @@ Java_hdf_hdf5lib_H5_H5Iget_1name
     if ((buf_size = H5Iget_name((hid_t)obj_id, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (aName = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (aName = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Iget_name: malloc failed");
 
     if (H5Iget_name((hid_t)obj_id, aName, (size_t)buf_size + 1) < 0)
@@ -133,8 +130,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Iget_1ref
-    (JNIEnv *env, jclass clss, jlong obj_id)
+Java_hdf_hdf5lib_H5_H5Iget_1ref(JNIEnv *env, jclass clss, jlong obj_id)
 {
     int retVal = FAIL;
 
@@ -153,8 +149,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Iinc_1ref
-    (JNIEnv *env, jclass clss, jlong obj_id)
+Java_hdf_hdf5lib_H5_H5Iinc_1ref(JNIEnv *env, jclass clss, jlong obj_id)
 {
     int retVal = FAIL;
 
@@ -173,8 +168,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Idec_1ref
-    (JNIEnv *env, jclass clss, jlong obj_id)
+Java_hdf_hdf5lib_H5_H5Idec_1ref(JNIEnv *env, jclass clss, jlong obj_id)
 {
     int retVal = FAIL;
 
@@ -194,8 +188,7 @@ done:
  */
 
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Iget_1file_1id
-    (JNIEnv *env, jclass clss, jlong obj_id)
+Java_hdf_hdf5lib_H5_H5Iget_1file_1id(JNIEnv *env, jclass clss, jlong obj_id)
 {
     hid_t file_id = H5I_INVALID_HID;
 
@@ -205,7 +198,7 @@ Java_hdf_hdf5lib_H5_H5Iget_1file_1id
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jlong) file_id;
+    return (jlong)file_id;
 } /* end Java_hdf_hdf5lib_H5_H5Iget_1file_1id */
 
 /*
@@ -214,8 +207,7 @@ done:
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Iget_1type_1ref
-    (JNIEnv *env, jclass clss, jint type)
+Java_hdf_hdf5lib_H5_H5Iget_1type_1ref(JNIEnv *env, jclass clss, jint type)
 {
     int retVal = FAIL;
 
@@ -234,8 +226,7 @@ done:
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Idec_1type_1ref
-    (JNIEnv *env, jclass clss, jint type)
+Java_hdf_hdf5lib_H5_H5Idec_1type_1ref(JNIEnv *env, jclass clss, jint type)
 {
     int retVal = FAIL;
 
@@ -254,8 +245,7 @@ done:
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Iinc_1type_1ref
-    (JNIEnv *env, jclass clss, jint type)
+Java_hdf_hdf5lib_H5_H5Iinc_1type_1ref(JNIEnv *env, jclass clss, jint type)
 {
     int retVal = FAIL;
 
@@ -274,8 +264,7 @@ done:
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Inmembers
-    (JNIEnv *env, jclass clss, jint type)
+Java_hdf_hdf5lib_H5_H5Inmembers(JNIEnv *env, jclass clss, jint type)
 {
     hsize_t num_members = 0;
 
@@ -294,8 +283,7 @@ done:
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Iis_1valid
-    (JNIEnv *env, jclass clss, jlong obj_id)
+Java_hdf_hdf5lib_H5_H5Iis_1valid(JNIEnv *env, jclass clss, jlong obj_id)
 {
     htri_t bval = JNI_FALSE;
 
@@ -315,8 +303,7 @@ done:
  * Signature: (I)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Itype_1exists
-    (JNIEnv *env, jclass clss, jint type)
+Java_hdf_hdf5lib_H5_H5Itype_1exists(JNIEnv *env, jclass clss, jint type)
 {
     htri_t bval = JNI_FALSE;
 
@@ -337,8 +324,7 @@ done:
  * Signature: (IZ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Iclear_1type
-    (JNIEnv *env, jclass clss, jint type, jboolean force)
+Java_hdf_hdf5lib_H5_H5Iclear_1type(JNIEnv *env, jclass clss, jint type, jboolean force)
 {
     UNUSED(clss);
 
@@ -355,8 +341,7 @@ done:
  * Signature: (I)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Idestroy_1type
-    (JNIEnv *env, jclass clss, jint type)
+Java_hdf_hdf5lib_H5_H5Idestroy_1type(JNIEnv *env, jclass clss, jint type)
 {
     UNUSED(clss);
 

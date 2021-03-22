@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
@@ -118,12 +118,16 @@ if test "X-gcc" = "X-$cc_vendor"; then
     esac
 
     case "$host_os-$host_cpu" in
-        # cygwin needs the "-std=c99" flag removed, so make
-        # a specific case for Cygwin without the flag and a default
-        # case to add the flag everywhere else
+        # Cygwin needs the "-std=c99" flag removed.
         cygwin-*)
             ;;
-
+        # On Solaris, gcc needs the gnu99 standard to pick up certain POSIX
+        # things. Do NOT use this as the gcc norm as this encourages the use
+        # of non-standard gcc extensions.
+        *solaris*)
+            H5_CFLAGS="$H5_CFLAGS -std=gnu99"
+            ;;
+        # Everybody else gets c99 as the standard.
         *)
             H5_CFLAGS="$H5_CFLAGS -std=c99"
             ;;
@@ -153,6 +157,15 @@ if test "X-gcc" = "X-$cc_vendor"; then
     else
         DEBUG_CFLAGS="-ftrapv -fno-common"
     fi
+
+    ########################
+    # Enhanced Diagnostics #
+    ########################
+
+    if test $cc_vers_major -ge 10; then
+        NO_DIAGS_CFLAGS="-fdiagnostics-urls=never -fno-diagnostics-color"
+    fi
+    DIAGS_CFLAGS=
 
     ###########
     # Symbols #
@@ -192,6 +205,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8 -o $cc_vers_major -gt 4; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments general)"
         H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-general)"
+        H5_NECFLAGS="$H5_NECFLAGS $(load_gnu_arguments noerror-general)"
 
     ######################
     # Developer warnings #
@@ -231,6 +245,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     if test $cc_vers_major -ge 5; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 5)"
         H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-5)"
+        H5_NECFLAGS="$H5_NECFLAGS $(load_gnu_arguments noerror-5)"
     fi
 
     # gcc >= 6
@@ -248,6 +263,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     if test $cc_vers_major -ge 8; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 8)"
         H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-8)"
+        H5_NECFLAGS="$H5_NECFLAGS $(load_gnu_arguments noerror-8)"
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-8)"
         NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-8)"
     fi
@@ -255,6 +271,16 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # gcc 9
     if test $cc_vers_major -ge 9; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 9)"
+    fi
+
+    # gcc >= 9.3
+    if test $cc_vers_major -ge 10 -o $cc_vers_major -eq 9 -a $cc_vers_minor -ge 3; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 9.3)"
+    fi
+
+    # gcc >= 10
+    if test $cc_vers_major -ge 10; then
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-10)"
     fi
 
     #################

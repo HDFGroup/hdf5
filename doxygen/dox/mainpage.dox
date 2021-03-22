@@ -1,0 +1,44 @@
+/*! \mainpage HDF5 C-API Reference
+ *
+ * The HDF5 C-API provides applications with fine-grained control over all
+ * aspects HDF5 functionality. This functionality is grouped into the following
+ * \Emph{modules}:
+ * \li \ref H5A "Attributes" — Management of HDF5 attributes (\ref H5A)
+ * \li \ref H5D "Datasets" — Management of HDF5 datasets (\ref H5D)
+ * \li \ref H5S "Dataspaces" — Management of HDF5 dataspaces which describe the shape of datasets and attributes (\ref H5S)
+ * \li \ref H5T "Datatypes" — Management of datatypes which describe elements of datasets and attributes (\ref H5T)
+ * \li \ref H5E "Error Handling" — Functions for handling errors that occur within HDF5 (\ref H5E)
+ * \li \ref H5F "Files" — Management of HDF5 files (\ref H5F)
+ * \li \ref H5Z "Filters" — Configuration of filters that process data during I/O operation (\ref H5Z)
+ * \li \ref H5G "Groups" — Management of groups in HDF5 files (\ref H5G)
+ * \li \ref H5I "Identifiers" — Management of object identifiers and object names (\ref H5I)
+ * \li \ref H5 "Library" — General purpose library functions (\ref H5)
+ * \li \ref H5L "Links" — Management of links in HDF5 groups (\ref H5L)
+ * \li \ref H5O "Objects" — Management of objects in HDF5 files (\ref H5O)
+ * \li \ref H5PL "Plugins" — Programmatic control over dynamically loaded plugins (\ref H5PL)
+ * \li \ref H5P "Property Lists" — Management of property lists to control HDF5 library behavior (\ref H5P)
+ * \li \ref H5R "References" — Management of references to specific objects and data regions in an HDF5 file (\ref H5R)
+ * \li \ref H5VL "Virtual Object Layer" — Management of the Virtual Object Layer (\ref H5VL)
+ *
+ * Here are a few simple rules to follow:
+ *
+ * \li \Bold{Handle discipline:} If you acquire a handle (by creation or coopy), \Emph{you own it!} (..., i.e., you have to close it.)
+ * \li \Bold{Dynamic memory allocation:} ...
+ * \li \Bold{Use of locations:} Identifier + name combo
+ *
+ * \attention \Bold{C++ Developers using HDF5 C-API functions beware:}\n
+ *       If a C routine that takes a function pointer as an argument is called from
+ *       within C++ code, the C routine should be returned from normally.
+ *       Examples of this kind of routine include callbacks such as H5Pset_elink_cb()
+ *       and H5Pset_type_conv_cb() and functions such as H5Tconvert() and H5Ewalk2().\n
+ *       Exiting the routine in its normal fashion allows the HDF5 C library to clean
+ *       up its work properly. In other words, if the C++ application jumps out of
+ *       the routine back to the C++ \c catch statement, the library is not given the
+ *       opportunity to close any temporary data structures that were set up when the
+ *       routine was called. The C++ application should save some state as the
+ *       routine is started so that any problem that occurs might be diagnosed.
+ *
+ * \todo Fix the search form for server deployments.
+ * \todo Make it mobile-friendly
+ *
+ */

@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -128,6 +128,8 @@ $SRC_H5REPACK_TESTFILES/h5repack_paged_nopersist.h5
 $SRC_H5REPACK_TESTFILES/h5repack_paged_persist.h5
 ########h5diff/testfile########
 $SRC_H5DIFF_TESTFILES/h5diff_attr1.h5
+########test#HDFFV-10590########
+$SRC_H5REPACK_TESTFILES/h5repack_HDFFV-10590_CVE-2018-17432.h5
 ########tools/testfiles#for#external#links########
 $SRC_TOOLS_TESTFILES/tsoftlinks.h5
 $SRC_TOOLS_TESTFILES/textlinkfar.h5
@@ -689,7 +691,7 @@ DIFFFAIL()
         $RUNSERIAL $H5DIFF_BIN -q  "$@"
     )
     RET=$?
-    if [ $RET == 0 ] ; then
+    if [ $RET -eq 0 ] ; then
          echo "*FAILED*"
          nerrors="`expr $nerrors + 1`"
     else
@@ -863,6 +865,34 @@ TOOLTESTV()
 
    rm -f $actual $actual_err
    rm -f $outfile
+}
+
+# Same as TOOLTEST, but expects h5repack fails
+#
+TOOLTEST_FAIL()
+{
+    infile=$1
+    outfile=$2
+    expect="$TESTDIR/$2-$1.ddl"
+    actual="$TESTDIR/$2-$1.out"
+    actual_err="$TESTDIR/$2-$1.err"
+    shift
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+        cd $TESTDIR
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    ) >$actual
+    RET=$?
+    if [ $RET == 0 ] ; then
+        nerrors="`expr $nerrors + 1`"
+        echo " FAILED"
+    else
+        echo " PASSED"
+    fi
+    rm -f $outfile
 }
 
 # This is same as TOOLTESTV() with comparing display output
@@ -1680,6 +1710,10 @@ TOOLTEST HDFFV-5932 h5repack_attr_refs.h5
 # (HDFFV-7840, )
 # Note: this test is experimental for sharing test file among tools
 TOOLTEST HDFFV-7840 h5diff_attr1.h5
+
+# test HDFFV-10590
+arg="h5repack_HDFFV-10590_CVE-2018-17432.h5 h5repack_HDFFV-10590_CVE-2018-17432_out.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6"
+TOOLTEST_FAIL $arg
 
 # tests for metadata block size option
 TOOLTEST_META meta_short h5repack_layout.h5 -M 8192

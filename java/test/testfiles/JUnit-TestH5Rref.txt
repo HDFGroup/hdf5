@@ -1,0 +1,10 @@
+JUnit version 4.11
+.testH5Rget_region_dataset
+.testH5Rget_object
+.testH5Rget_region_attribute
+.testH5Rget_obj_type3
+
+Time:  XXXX
+
+OK (4 tests)
+

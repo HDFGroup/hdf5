@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -61,8 +60,7 @@ static herr_t H5E_walk_cb(int nindx, const H5E_error2_t *info, void *cb_data);
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Eauto_1is_1v2
-    (JNIEnv *env, jclass clss, jlong stk_id)
+Java_hdf_hdf5lib_H5_H5Eauto_1is_1v2(JNIEnv *env, jclass clss, jlong stk_id)
 {
     unsigned int is_stack = 0;
 
@@ -84,13 +82,13 @@ done:
  * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Eregister_1class
-    (JNIEnv *env, jclass clss, jstring cls_name, jstring lib_name, jstring version)
+Java_hdf_hdf5lib_H5_H5Eregister_1class(JNIEnv *env, jclass clss, jstring cls_name, jstring lib_name,
+                                       jstring version)
 {
-    const char* the_cls_name = NULL;
-    const char* the_lib_name = NULL;
-    const char* the_version = NULL;
-    hid_t       ret_val = H5I_INVALID_HID;
+    const char *the_cls_name = NULL;
+    const char *the_lib_name = NULL;
+    const char *the_version  = NULL;
+    hid_t       ret_val      = H5I_INVALID_HID;
 
     UNUSED(clss);
 
@@ -125,8 +123,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Eunregister_1class
-    (JNIEnv *env, jclass clss, jlong cls_id)
+Java_hdf_hdf5lib_H5_H5Eunregister_1class(JNIEnv *env, jclass clss, jlong cls_id)
 {
     UNUSED(clss);
 
@@ -146,8 +143,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Eclose_1msg
-    (JNIEnv *env, jclass clss, jlong err_id)
+Java_hdf_hdf5lib_H5_H5Eclose_1msg(JNIEnv *env, jclass clss, jlong err_id)
 {
     UNUSED(clss);
 
@@ -167,12 +163,11 @@ done:
  * Signature: (JILjava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Ecreate_1msg
-    (JNIEnv *env, jclass clss, jlong err_id, jint msg_type, jstring err_msg)
+Java_hdf_hdf5lib_H5_H5Ecreate_1msg(JNIEnv *env, jclass clss, jlong err_id, jint msg_type, jstring err_msg)
 {
     H5E_type_t  error_msg_type = (H5E_type_t)msg_type;
-    const char *the_err_msg = NULL;
-    hid_t       ret_val = H5I_INVALID_HID;
+    const char *the_err_msg    = NULL;
+    hid_t       ret_val        = H5I_INVALID_HID;
 
     UNUSED(clss);
 
@@ -199,8 +194,7 @@ done:
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Ecreate_1stack
-    (JNIEnv *env, jclass clss)
+Java_hdf_hdf5lib_H5_H5Ecreate_1stack(JNIEnv *env, jclass clss)
 {
     hid_t ret_val = H5I_INVALID_HID;
 
@@ -219,8 +213,7 @@ done:
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Eget_1current_1stack
-    (JNIEnv *env, jclass clss)
+Java_hdf_hdf5lib_H5_H5Eget_1current_1stack(JNIEnv *env, jclass clss)
 {
     hid_t ret_val = H5I_INVALID_HID;
 
@@ -239,8 +232,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Eclose_1stack
-    (JNIEnv *env, jclass clss, jlong stk_id)
+Java_hdf_hdf5lib_H5_H5Eclose_1stack(JNIEnv *env, jclass clss, jlong stk_id)
 {
     UNUSED(clss);
 
@@ -260,8 +252,7 @@ done:
  * Signature: (JLjava/lang/Object;)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Eprint2
-    (JNIEnv *env, jclass clss, jlong stk_id, jobject stream_obj)
+Java_hdf_hdf5lib_H5_H5Eprint2(JNIEnv *env, jclass clss, jlong stk_id, jobject stream_obj)
 {
     herr_t ret_val = FAIL;
 
@@ -289,12 +280,11 @@ done:
  * Signature: (J)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Eget_1class_1name
-    (JNIEnv *env, jclass clss, jlong cls_id)
+Java_hdf_hdf5lib_H5_H5Eget_1class_1name(JNIEnv *env, jclass clss, jlong cls_id)
 {
-    jstring  str = NULL;
-    ssize_t  buf_size;
-    char    *namePtr = NULL;
+    jstring str = NULL;
+    ssize_t buf_size;
+    char *  namePtr = NULL;
 
     UNUSED(clss);
 
@@ -308,7 +298,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1class_1name
     if (!buf_size)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_class_name: no class name");
 
-    if (NULL == (namePtr = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Eget_class_name: malloc failed");
 
     if ((H5Eget_class_name((hid_t)cls_id, (char *)namePtr, (size_t)buf_size + 1)) < 0)
@@ -331,8 +321,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Eset_1current_1stack
-    (JNIEnv *env, jclass clss, jlong stk_id)
+Java_hdf_hdf5lib_H5_H5Eset_1current_1stack(JNIEnv *env, jclass clss, jlong stk_id)
 {
     UNUSED(clss);
 
@@ -352,8 +341,7 @@ done:
  * Signature: (JJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Epop
-    (JNIEnv *env, jclass clss, jlong stk_id, jlong count)
+Java_hdf_hdf5lib_H5_H5Epop(JNIEnv *env, jclass clss, jlong stk_id, jlong count)
 {
     UNUSED(clss);
 
@@ -373,13 +361,13 @@ done:
  * Signature: (JLjava/lang/String;Ljava/lang/String;IJJJLjava/lang/String;)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Epush2
-    (JNIEnv *env, jclass clss, jlong stk_id, jstring filename, jstring funcname,
-        jint linenumber, jlong class_id, jlong major_id, jlong minor_id, jstring err_desc)
+Java_hdf_hdf5lib_H5_H5Epush2(JNIEnv *env, jclass clss, jlong stk_id, jstring filename, jstring funcname,
+                             jint linenumber, jlong class_id, jlong major_id, jlong minor_id,
+                             jstring err_desc)
 {
-    const char *fName = NULL;
+    const char *fName   = NULL;
     const char *fncName = NULL;
-    const char *errMsg = NULL;
+    const char *errMsg  = NULL;
     herr_t      ret_val = FAIL;
 
     UNUSED(clss);
@@ -404,7 +392,7 @@ Java_hdf_hdf5lib_H5_H5Epush2
     PIN_JAVA_STRING(ENVONLY, err_desc, errMsg, NULL, "H5Epush2: error message not pinned");
 
     if ((ret_val = H5Epush2((hid_t)stk_id, fName, fncName, (unsigned)linenumber, (hid_t)class_id,
-            (hid_t)major_id, (hid_t)minor_id, errMsg)) < 0)
+                            (hid_t)major_id, (hid_t)minor_id, errMsg)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -422,8 +410,7 @@ done:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Eclear2
-    (JNIEnv *env, jclass clss, jlong stk_id)
+Java_hdf_hdf5lib_H5_H5Eclear2(JNIEnv *env, jclass clss, jlong stk_id)
 {
     UNUSED(clss);
 
@@ -443,14 +430,13 @@ done:
  * Signature: (J[I)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Eget_1msg
-    (JNIEnv *env, jclass clss, jlong msg_id, jintArray error_msg_type_list)
+Java_hdf_hdf5lib_H5_H5Eget_1msg(JNIEnv *env, jclass clss, jlong msg_id, jintArray error_msg_type_list)
 {
-    H5E_type_t  error_msg_type;
-    jstring     str = NULL;
-    ssize_t     buf_size;
-    jint       *theArray = NULL;
-    char       *namePtr = NULL;
+    H5E_type_t error_msg_type;
+    jstring    str = NULL;
+    ssize_t    buf_size;
+    jint *     theArray = NULL;
+    char *     namePtr  = NULL;
 
     UNUSED(clss);
 
@@ -466,7 +452,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1msg
     if (!buf_size)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_msg: invalid message");
 
-    if (NULL == (namePtr = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Eget_msg: malloc failed");
 
     PIN_INT_ARRAY(ENVONLY, error_msg_type_list, theArray, NULL, "H5Eget_msg: error_msg_type_list not pinned");
@@ -495,8 +481,7 @@ done:
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Eget_1num
-    (JNIEnv *env, jclass clss, jlong stk_id)
+Java_hdf_hdf5lib_H5_H5Eget_1num(JNIEnv *env, jclass clss, jlong stk_id)
 {
     ssize_t ret_val = -1;
 
@@ -513,8 +498,7 @@ done:
 } /* end Java_hdf_hdf5lib_H5_H5Eget_1num */
 
 static herr_t
-H5E_walk_cb
-    (int nindx, const H5E_error2_t *info, void *cb_data)
+H5E_walk_cb(int nindx, const H5E_error2_t *info, void *cb_data)
 {
     cb_wrapper *wrapper = (cb_wrapper *)cb_data;
     jmethodID   mid;
@@ -522,10 +506,10 @@ H5E_walk_cb
     jstring     str1, str2, str3;
     jobject     cb_info_t = NULL;
     jvalue      args[7];
-    JNIEnv     *cbenv = NULL;
+    JNIEnv *    cbenv = NULL;
     jclass      cbcls;
-    void       *op_data = (void *)wrapper->op_data;
-    jint        status = FAIL;
+    void *      op_data = (void *)wrapper->op_data;
+    jint        status  = FAIL;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);
@@ -535,7 +519,9 @@ H5E_walk_cb
     if (NULL == (cbcls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
-    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cbcls, "callback", "(ILhdf/hdf5lib/structs/H5E_error2_t;Lhdf/hdf5lib/callbacks/H5E_walk_t;)I")))
+    if (NULL == (mid = CBENVPTR->GetMethodID(
+                     CBENVONLY, cbcls, "callback",
+                     "(ILhdf/hdf5lib/structs/H5E_error2_t;Lhdf/hdf5lib/callbacks/H5E_walk_t;)I")))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     args[0].j = info->cls_id;
@@ -558,7 +544,8 @@ H5E_walk_cb
 
     args[6].l = str3;
 
-    CALL_CONSTRUCTOR(CBENVONLY, "hdf/hdf5lib/structs/H5E_error2_t", "(JJJILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", args, cb_info_t);
+    CALL_CONSTRUCTOR(CBENVONLY, "hdf/hdf5lib/structs/H5E_error2_t",
+                     "(JJJILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", args, cb_info_t);
 
     status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, nindx, cb_info_t, op_data);
     CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
@@ -576,10 +563,10 @@ done:
  * Signature: (JJLjava/lang/Object;Ljava/lang/Object;)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Ewalk2
-    (JNIEnv *env, jclass clss, jlong stk_id, jlong direction, jobject callback_op, jobject op_data)
+Java_hdf_hdf5lib_H5_H5Ewalk2(JNIEnv *env, jclass clss, jlong stk_id, jlong direction, jobject callback_op,
+                             jobject op_data)
 {
-    cb_wrapper wrapper = { callback_op, op_data };
+    cb_wrapper wrapper = {callback_op, op_data};
 
     UNUSED(clss);
 

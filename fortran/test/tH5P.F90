@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -723,5 +723,78 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE test_chunk_cache
+
+!-------------------------------------------------------------------------
+! Function: test_misc_properties
+!
+! Purpose:  Tests setting and getting of miscellaneous properties. Does
+!           not test the underlying functionality as that is done in
+!           the C library tests.
+!
+!           Tests APIs:
+!               H5P_GET/SET_FILE_LOCKING_F
+!
+! Return:   Success:    0
+!           Failure:    -1
+!
+!-------------------------------------------------------------------------
+!
+SUBROUTINE test_misc_properties(cleanup, total_error)
+
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN)  :: cleanup
+  INTEGER, INTENT(INOUT) :: total_error
+
+  INTEGER(hid_t) :: fapl_id = -1 !  Local fapl
+  LOGICAL :: use_file_locking           ! (H5Pset/get_file_locking_f)
+  LOGICAL :: ignore_disabled_locks      ! (H5Pset/get_file_locking_f)
+  INTEGER :: error
+
+  ! Create a default fapl
+  CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl_id, error)
+  CALL check("H5Pcreate_f", error, total_error)
+
+  ! Test H5Pset/get_file_locking_f
+  ! true values
+  use_file_locking = .TRUE.
+  ignore_disabled_locks = .TRUE.
+  CALL h5pset_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, error)
+  CALL check("h5pset_set_file_locking_f", error, total_error)
+  use_file_locking = .FALSE.
+  ignore_disabled_locks = .FALSE.
+  CALL h5pget_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, error)
+  CALL check("h5pget_set_file_locking_f", error, total_error)
+  if(use_file_locking .neqv. .TRUE.) then
+    total_error = total_error + 1
+    write(*,*) "Got wrong use_file_locking flag from h5pget_file_locking_f"
+  endif
+  if(ignore_disabled_locks .neqv. .TRUE.) then
+    total_error = total_error + 1
+    write(*,*) "Got wrong ignore_disabled_locks flag from h5pget_file_locking_f"
+  endif
+
+  ! false values
+  use_file_locking = .FALSE.
+  ignore_disabled_locks = .FALSE.
+  CALL h5pset_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, error)
+  CALL check("h5pset_set_file_locking_f", error, total_error)
+  use_file_locking = .TRUE.
+  ignore_disabled_locks = .TRUE.
+  CALL h5pget_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, error)
+  CALL check("h5pget_set_file_locking_f", error, total_error)
+  if(use_file_locking .neqv. .FALSE.) then
+    total_error = total_error + 1
+    write(*,*) "Got wrong use_file_locking flag from h5pget_file_locking_f"
+  endif
+  if(ignore_disabled_locks .neqv. .FALSE.) then
+    total_error = total_error + 1
+    write(*,*) "Got wrong ignore_disabled_locks flag from h5pget_file_locking_f"
+  endif
+
+  ! Close the fapl
+  CALL H5Pclose_f(fapl_id, error)
+  CALL check("H5Pclose_f", error, total_error)
+
+END SUBROUTINE test_misc_properties
 
 END MODULE TH5P

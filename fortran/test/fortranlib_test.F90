@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -183,8 +183,12 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' Multi file driver test', total_error)
 
   ret_total_error = 0
-  CALL test_chunk_cache (cleanup, ret_total_error)
+  CALL test_chunk_cache(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset chunk cache configuration', total_error)
+
+  ret_total_error = 0
+  CALL test_misc_properties(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Miscellaneous properties', total_error)
 
 !
 !      '========================================='

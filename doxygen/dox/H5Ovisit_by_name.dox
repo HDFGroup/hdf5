@@ -1,0 +1,92 @@
+/**
+ * \ingroup H5O
+ * \def H5Ovisit_by_name()
+ *
+ * #H5Ovisit_by_name is a macro that is mapped to one of the following:
+ * \li H5Ovisit_by_name3()
+ * \li H5Ovisit_by_name1()
+ *
+ * \details Such macros are provided to facilitate application
+ *          compatibility. Their use and mappings are fully described in
+ *          API Compatibility Macros in HDF5; we urge you to read that
+ *          document closely.
+ *
+ *          In HDF5 versions 1.12 and after, \ref H5Ovisit_by_name() is mapped to 
+ *          \ref H5Ovisit_by_name3().  In version 1.10, \ref H5Ovisit_by_name() 
+ *          is identical to \ref H5Ovisit_by_name1().
+ *
+ *          Specific compile-time compatibility flags and the resulting
+ *          mappings are as follows:
+ *
+ * \par
+ * <table>
+ *  <tr>
+ *      <th>Compatibility settings</th>
+ *      <th>H5Ovisit_by_name</th>
+ * </tr>
+ *  <tr>
+ *      <td>No compatibility flag</td>
+ *      <td>\ref H5Ovisit_by_name3() for 1.12 and above</td>
+ *  </tr>
+ *  <tr>
+        <td></td>
+ *      <td>\ref H5Ovisit_by_name1() for 1.10 or 1.8</td>
+ *  </tr>
+ *  <tr>
+ *      <td>Emulate Release 1.12 interface</td>
+ *      <td>\ref H5Ovisit_by_name3()</td>
+ *  </tr>
+ *  <tr>
+ *      <td>Emulate Release 1.10 or 1.8 interface</td>
+ *      <td>\ref H5Ovisit_by_name1()</td>
+ *  </tr>
+ * </table>
+ *
+ * \todo Fix reference to the document
+ *
+ * \par Version
+ * <table>
+ *  <tr>
+ *      <th>Release</th>
+ *      <th>Change</th>
+ * </tr>
+ *  <tr>
+ *      <td>1.12.0</td>
+ *      <td>The macro #H5Ovisit_by_name and function \ref H5Ovisit_by_name3() were added.
+ *  </tr>
+ *  <tr>
+ *      <td>1.10.5</td>
+ *      <td>The macro #H5Ovisit_by_name was removed.</td>
+ *  </tr>
+ *  <tr>
+ *      <td></td>
+ *      <td>The functions \ref H5Ovisit_by_name() and
+ *          H5Ovisit_by_name1() are identical in this release.</td>
+ *  </tr>
+ *  <tr>
+ *      <td></td>
+ *      <td>This change was added to restore the broken API compatibility 
+ *          introduced in HDF5-1.10.3.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>1.10.3</td>
+ *      <td>The function \ref H5Ovisit_by_name() was renamed 
+ *          to \ref H5Ovisit_by_name1.</td>
+ *  </tr>
+ *  <tr>
+ *      <td></td>
+ *      <td>The macro #H5Ovisit_by_name and the function \ref H5Ovisit_by_name2() 
+ *          were introduced in this release.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>1.8.8</td>
+ *      <td>Fortran subroutine introduced in this release.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>1.8.0</td>
+ *      <td>Function introduced in this release.</td>
+ *  </tr>
+ * </table>
+ *
+ * 
+ */

@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -33,7 +33,12 @@
 ./autogen.sh
 ./configure.ac
 
+./.clang-format
+./.github/CODEOWNERS  _DO_NOT_DISTRIBUTE_
+./.github/workflows/clang-format-fix.yml  _DO_NOT_DISTRIBUTE_
+./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
+./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
 
 ./m4/aclocal_cxx.m4
 ./m4/aclocal_fc.m4
@@ -46,6 +51,7 @@
 ./m4/ax_java_check_class.m4
 ./m4/ax_java_options.m4
 ./m4/ax_jni_include_dir.m4
+./m4/ax_prog_doxygen.m4
 ./m4/ax_prog_jar.m4
 ./m4/ax_prog_java_cc.m4
 ./m4/ax_prog_java_works.m4
@@ -71,6 +77,8 @@
 ./bin/deploy
 ./bin/distdep
 ./bin/errors              _DO_NOT_DISTRIBUTE_
+./bin/format_source
+./bin/format_source_patch
 ./bin/genparser
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
 ./bin/h5cc.in
@@ -132,6 +140,7 @@
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
+./config/libhdf5.pc.in
 ./config/linux-gnu
 ./config/linux-gnuaout
 ./config/linux-gnueabihf
@@ -151,6 +160,7 @@
 ./config/clang-warnings/error-general
 ./config/clang-warnings/general
 ./config/clang-warnings/no-developer-general
+./config/clang-warnings/noerror-general
 ./config/gnu-warnings/4.8-4.last
 ./config/gnu-warnings/4.8
 ./config/gnu-warnings/4.9
@@ -159,14 +169,19 @@
 ./config/gnu-warnings/7
 ./config/gnu-warnings/8
 ./config/gnu-warnings/9
+./config/gnu-warnings/9.3
 ./config/gnu-warnings/cxx-general
+./config/gnu-warnings/cxx-4.8
 ./config/gnu-warnings/cxx-4.9
 ./config/gnu-warnings/cxx-5
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
+./config/gnu-warnings/cxx-noerror-5
+./config/gnu-warnings/cxx-noerror-general
 ./config/gnu-warnings/developer-4.8
 ./config/gnu-warnings/developer-7
 ./config/gnu-warnings/developer-8
+./config/gnu-warnings/developer-10
 ./config/gnu-warnings/developer-general
 ./config/gnu-warnings/error-5
 ./config/gnu-warnings/error-8
@@ -180,10 +195,41 @@
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
+./config/gnu-warnings/noerror-5
+./config/gnu-warnings/noerror-8
+./config/gnu-warnings/noerror-general
 ./config/intel-warnings/ifort-general
 ./config/intel-warnings/general
 
 ./config/site-specific/BlankForm
+
+./doc/code-conventions.md
+
+./doxygen/aliases
+./doxygen/Doxyfile.in
+./doxygen/dox/api-compat-macros.dox
+./doxygen/dox/H5AC_cache_config_t.dox
+./doxygen/dox/H5Acreate.dox
+./doxygen/dox/H5Aiterate.dox
+./doxygen/dox/H5Fget_info.dox
+./doxygen/dox/H5Lget_info_by_idx.dox
+./doxygen/dox/H5Lget_info.dox
+./doxygen/dox/H5Literate_by_name.dox
+./doxygen/dox/H5Literate.dox
+./doxygen/dox/H5Lvisit_by_name.dox
+./doxygen/dox/H5Lvisit.dox
+./doxygen/dox/H5Oget_info_by_idx.dox
+./doxygen/dox/H5Oget_info_by_name.dox
+./doxygen/dox/H5Oget_info.dox
+./doxygen/dox/H5Ovisit_by_name.dox
+./doxygen/dox/H5Ovisit.dox
+./doxygen/dox/H5Sencode.dox
+./doxygen/dox/mainpage.dox
+./doxygen/dox/rm-template.dox
+./doxygen/examples/H5Fclose.c
+./doxygen/examples/H5Fcreate.c
+./doxygen/examples/hello_hdf5.c
+./doxygen/img/HDFG-logo.png
 
 ./examples/Attributes.txt
 ./examples/Makefile.am
@@ -500,10 +546,11 @@
 
 ./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
-./release_docs/HISTORY-1_8.txt
-./release_docs/HISTORY-1_10.txt
 ./release_docs/HISTORY-1_8_0-1_10_0.txt
 ./release_docs/HISTORY-1_10_0-1_12_0.txt
+./release_docs/HISTORY-1_8.txt
+./release_docs/HISTORY-1_10.txt
+./release_docs/HISTORY-1_12.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_CMake.txt
 ./release_docs/INSTALL_Cygwin.txt
@@ -528,6 +575,7 @@
 ./src/H5err.txt
 ./src/H5detect.c
 ./src/H5make_libsettings.c
+./src/H5module.h
 ./src/H5mpi.c
 ./src/H5overflow.txt
 ./src/H5private.h
@@ -791,6 +839,8 @@
 ./src/H5HP.c
 ./src/H5HPprivate.h
 ./src/H5I.c
+./src/H5Idbg.c
+./src/H5Iint.c
 ./src/H5Imodule.h
 ./src/H5Ipkg.h
 ./src/H5Iprivate.h
@@ -910,8 +960,6 @@
 ./src/H5Rpkg.h
 ./src/H5Rprivate.h
 ./src/H5Rpublic.h
-./src/H5UC.c
-./src/H5UCprivate.h
 ./src/H5RS.c
 ./src/H5RSprivate.h
 ./src/H5S.c
@@ -971,6 +1019,8 @@
 ./src/H5Tvlen.c
 ./src/H5TS.c
 ./src/H5TSprivate.h
+./src/H5UC.c
+./src/H5UCprivate.h
 ./src/H5VL.c
 ./src/H5VLcallback.c
 ./src/H5VLconnector.h
@@ -1038,9 +1088,9 @@
 ./test/be_extlink2.h5
 ./test/big.c
 ./test/bittests.c
+./test/btree2.c
 ./test/btree_idx_1_6.h5
 ./test/btree_idx_1_8.h5
-./test/btree2.c
 ./test/cache.c
 ./test/cache_api.c
 ./test/cache_common.c
@@ -1059,13 +1109,15 @@
 ./test/direct_chunk.c
 ./test/dsets.c
 ./test/dt_arith.c
-./test/dtypes.c
 ./test/dtransform.c
+./test/dtypes.c
 ./test/earray.c
 ./test/efc.c
 ./test/enc_dec_plist.c
 ./test/enc_dec_plist_cross_platform.c
 ./test/enum.c
+./test/err_compat.c
+./test/error_test.c
 ./test/evict_on_close.c
 ./test/extend.c
 ./test/external.c
@@ -1073,25 +1125,21 @@
 ./test/external_common.h
 ./test/external_env.c
 ./test/external_fname.h
-./test/error_test.c
-./test/err_compat.c
-./test/filter_error.h5
-./test/links_env.c
 ./test/family_v16_00000.h5
 ./test/family_v16_00001.h5
 ./test/family_v16_00002.h5
 ./test/family_v16_00003.h5
 ./test/farray.c
 ./test/fheap.c
-./test/filespace_1_8.h5
-./test/filespace_1_6.h5
-./test/freespace.c
-./test/filenotclosed.c
 ./test/file_image.c
 ./test/file_image_core_test.h5
-./test/fill_old.h5
+./test/filenotclosed.c
+./test/filespace_1_6.h5
+./test/filespace_1_8.h5
 ./test/fill18.h5
+./test/fill_old.h5
 ./test/fillval.c
+./test/filter_error.h5
 ./test/filter_fail.c
 ./test/filter_plugin.c
 ./test/filter_plugin1_dsets.c
@@ -1101,13 +1149,12 @@
 ./test/flush1.c
 ./test/flush2.c
 ./test/flushrefresh.c
+./test/freespace.c
 ./test/fsm_aggr_nopersist.h5
 ./test/fsm_aggr_persist.h5
-./test/genall5.c
-./test/genall5.h
+./test/gen_bad_compound.c
 ./test/gen_bad_offset.c
 ./test/gen_bad_ohdr.c
-./test/gen_bad_compound.c
 ./test/gen_bogus.c
 ./test/gen_bounds.c
 ./test/gen_cross.c
@@ -1131,6 +1178,8 @@
 ./test/gen_sizes_lheap.c
 ./test/gen_specmetaread.c
 ./test/gen_udlinks.c
+./test/genall5.c
+./test/genall5.h
 ./test/getname.c
 ./test/gheap.c
 ./test/group_old.h5
@@ -1150,6 +1199,7 @@
 ./test/le_extlink2.h5
 ./test/lheap.c
 ./test/links.c
+./test/links_env.c
 ./test/memleak_H5O_dtype_decode_helper_H5Odtype.h5
 ./test/mergemsg.h5
 ./test/mf.c
@@ -1163,15 +1213,15 @@
 ./test/ntypes.c
 ./test/null_vol_connector.c
 ./test/null_vol_connector.h
-./test/ohdr.c
 ./test/objcopy.c
 ./test/objcopy_ref.c
+./test/ohdr.c
 ./test/page_buffer.c
 ./test/paged_nopersist.h5
 ./test/paged_persist.h5
+./test/pool.c
 ./test/reserved.c
 ./test/ros3.c
-./test/pool.c
 ./test/s3comms.c
 ./test/set_extent.c
 # ====distribute this for now. See HDFFV-8236====
@@ -1197,30 +1247,30 @@
 ./test/tattr.c
 ./test/tbad_msg_count.h5
 ./test/tbogus.h5
-./test/tchecksum.c
 ./test/tcheck_version.c
+./test/tchecksum.c
 ./test/tconfig.c
 ./test/tcoords.c
+./test/test_filter_plugin.sh.in
+./test/test_filters_be.h5
+./test/test_filters_le.h5
+./test/test_usecases.sh.in
+./test/test_vol_plugin.sh.in
 ./test/testabort_fail.sh.in
 ./test/testcheck_version.sh.in
-./test/testexternal_env.sh.in
 ./test/testerror.sh.in
-./test/testlinks_env.sh.in
-./test/test_filter_plugin.sh.in
-./test/test_filters_le.h5
-./test/test_filters_be.h5
+./test/testexternal_env.sh.in
 ./test/testflushrefresh.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
-./test/test_mirror.sh.in
-./test/test_usecases.sh.in
-./test/test_vol_plugin.sh.in
+./test/testlinks_env.sh.in
 ./test/testmeta.c
+./test/test_mirror.sh.in
 ./test/testswmr.sh.in
-./test/testvdsswmr.sh.in
 ./test/testvds_env.sh.in
+./test/testvdsswmr.sh.in
 ./test/tfile.c
 ./test/tgenprop.c
 ./test/th5o.c
@@ -1236,7 +1286,6 @@
 ./test/tmisc.c
 ./test/tmtimen.h5
 ./test/tmtimeo.h5
-./test/ttime.c
 ./test/trefer.c
 ./test/trefer_deprec.c
 ./test/trefer_shutdown.c
@@ -1245,7 +1294,7 @@
 ./test/tsizeslheap.h5
 ./test/tskiplist.c
 ./test/tsohm.c
-./test/ttst.c
+./test/ttime.c
 ./test/ttsafe.c
 ./test/ttsafe.h
 ./test/ttsafe_acreate.c
@@ -1253,18 +1302,19 @@
 ./test/ttsafe_cancel.c
 ./test/ttsafe_dcreate.c
 ./test/ttsafe_error.c
+./test/ttst.c
 ./test/tunicode.c
 ./test/tvlstr.c
 ./test/tvltypes.c
 ./test/twriteorder.c
 ./test/unlink.c
 ./test/unregister.c
+./test/use.h
 ./test/use_append_chunk.c
 ./test/use_append_chunk_mirror.c
 ./test/use_append_mchunks.c
 ./test/use_common.c
 ./test/use_disable_mdc_flushes.c
-./test/use.h
 ./test/vds.c
 ./test/vds_env.c
 ./test/vds_swmr.h
@@ -1958,6 +2008,7 @@
 ./tools/testfiles/tintsnodata.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
+./tools/testfiles/tldouble.ddl
 ./tools/testfiles/tldouble.h5
 ./tools/testfiles/tlonglinks.ddl
 ./tools/testfiles/tlonglinks.h5
@@ -2729,6 +2780,7 @@
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_zero.ddl
+./tools/test/h5repack/testfiles/h5repack_HDFFV-10590_CVE-2018-17432.h5
 ./tools/test/h5repack/testfiles/GS.h5repack_paged_nopersist.h5.ddl
 ./tools/test/h5repack/testfiles/S.h5repack_fsm_aggr_persist.h5.ddl
 ./tools/test/h5repack/testfiles/SP.h5repack_fsm_aggr_nopersist.h5.ddl
@@ -3366,6 +3418,7 @@
 ./java/test/testfiles/JUnit-TestH5Pvirtual.txt
 ./java/test/testfiles/JUnit-TestH5PL.txt
 ./java/test/testfiles/JUnit-TestH5R.txt
+./java/test/testfiles/JUnit-TestH5Rref.txt
 ./java/test/testfiles/JUnit-TestH5Sbasic.txt
 ./java/test/testfiles/JUnit-TestH5S.txt
 ./java/test/testfiles/JUnit-TestH5Tparams.txt
@@ -3406,6 +3459,7 @@
 ./java/test/TestH5Pvirtual.java
 ./java/test/TestH5PL.java
 ./java/test/TestH5R.java
+./java/test/TestH5Rref.java
 ./java/test/TestH5Sbasic.java
 ./java/test/TestH5S.java
 ./java/test/TestH5Tparams.java
@@ -3446,13 +3500,13 @@
 ./config/cmake/HDFCompilerFlags.cmake
 ./config/cmake/HDFCXXCompilerFlags.cmake
 ./config/cmake/HDFFortranCompilerFlags.cmake
-./config/cmake/HDF5_Process_Flex_Files.cmake
 ./config/cmake/HDF5Macros.cmake
+./config/cmake/HDF5PluginMacros.cmake
+./config/cmake/HDF5PluginCache.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/jrunTest.cmake
 ./config/cmake/jvolTest.cmake
 ./config/cmake/libh5cc.in
-./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml
@@ -3495,6 +3549,7 @@
 ./CMakeLists.txt
 ./CMakeFilters.cmake
 ./CMakeInstallation.cmake
+./CMakePlugins.cmake
 ./CTestConfig.cmake
 ./UserMacros.cmake
 ./c++/CMakeLists.txt
@@ -3608,6 +3663,7 @@
 
 # CMake-specific Sanitizer Scripts
 ./config/sanitizer/code-coverage.cmake
+./config/sanitizer/formatting.cmake
 ./config/sanitizer/sanitizers.cmake
 ./config/sanitizer/tools.cmake
 ./config/sanitizer/LICENSE
@@ -3708,3 +3764,5 @@
 ./tools/test/misc/Makefile.in
 ./tools/test/misc/vds/Makefile.in
 ./tools/test/perform/Makefile.in
+./utils/Makefile.in
+./utils/mirror_vfd/Makefile.in

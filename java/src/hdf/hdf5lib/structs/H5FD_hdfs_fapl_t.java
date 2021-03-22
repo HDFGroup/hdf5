@@ -16,7 +16,7 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-/*
+/**
  * Java representation of the HDFS VFD file access property list (fapl)
  * structure.
  *

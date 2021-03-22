@@ -8,7 +8,7 @@ dnl
 dnl This file is part of HDF5.  The full HDF5 copyright notice, including
 dnl terms governing use, modification, and redistribution, is contained in
 dnl the COPYING file, which can be found at the root of the source code
-dnl dnl distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+dnl dnl distribution tree, or in https://www.hdfgroup.org/licenses.
 dnl dnl If you do not have access to either file, you may request a copy from
 dnl dnl help@hdfgroup.org.
 dnl
@@ -21,9 +21,9 @@ dnl -------------------------------------------------------------------------
 dnl _AC_SYS_LARGEFILE_MACRO_VALUE
 dnl
 dnl The following macro overrides the autoconf macro of the same name
-dnl with this custom definition. This macro performs the same checks as 
+dnl with this custom definition. This macro performs the same checks as
 dnl autoconf's native _AC_SYS_LARGEFILE_MACRO_VALUE, but will also set
-dnl AM_CPPFLAGS with the appropriate -D defines so additional configure 
+dnl AM_CPPFLAGS with the appropriate -D defines so additional configure
 dnl sizeof checks do not fail.
 dnl
 # _AC_SYS_LARGEFILE_MACRO_VALUE(C-MACRO, VALUE,
