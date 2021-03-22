@@ -1793,7 +1793,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     FUNC_ENTER_NOAPI(NULL)
 
     /*
-     * If the driver has a `cmp' method then the driver is capable of
+     * If the driver has a 'cmp' method then the driver is capable of
      * determining when two file handles refer to the same file and the
      * library can insure that when the application opens a file twice
      * that the two handles coordinate their operations appropriately.
