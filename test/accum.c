@@ -2102,8 +2102,8 @@ test_swmr_write_big(hbool_t newest_format)
     uint8_t  wbuf[1024];                 /* Buffer for reading & writing */
     unsigned u;                          /* Local index variable */
     hbool_t  process_success = FALSE;
-    char *   driver         = NULL;      /* VFD string (from env variable) */
-    hbool_t  api_ctx_pushed = FALSE;     /* Whether API context pushed */
+    char *   driver          = NULL;  /* VFD string (from env variable) */
+    hbool_t  api_ctx_pushed  = FALSE; /* Whether API context pushed */
 
     if (newest_format)
         TESTING("SWMR write of large metadata: with latest format")
@@ -2252,9 +2252,9 @@ test_swmr_write_big(hbool_t newest_format)
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
     }
-#else /* defined(H5_HAVE_WIN32_API) */
+#else  /* defined(H5_HAVE_WIN32_API) */
     {
-        pid_t pid; /* Process ID */
+        pid_t pid;    /* Process ID */
         int   status; /* Status returned from child process */
 
         /* Fork child process to verify that the data at [1024, 2014] does get written to disk */
