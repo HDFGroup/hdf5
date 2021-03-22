@@ -70,8 +70,7 @@ ObjCreatPropList::getConstant()
 void
 ObjCreatPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
