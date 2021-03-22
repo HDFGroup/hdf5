@@ -112,14 +112,14 @@ typedef int  htri_t;
 /*
  * The sizes of file objects have their own types defined here.
  */
-typedef uint64_t  hsize_t;
-typedef int64_t   hssize_t;
-#define PRIdHSIZE PRId64
-#define PRIiHSIZE PRIi64
-#define PRIoHSIZE PRIo64
-#define PRIuHSIZE PRIu64
-#define PRIxHSIZE PRIx64
-#define PRIXHSIZE PRIX64
+typedef uint64_t hsize_t;
+typedef int64_t  hssize_t;
+#define PRIdHSIZE          PRId64
+#define PRIiHSIZE          PRIi64
+#define PRIoHSIZE          PRIo64
+#define PRIuHSIZE          PRIu64
+#define PRIxHSIZE          PRIx64
+#define PRIXHSIZE          PRIX64
 #define H5_SIZEOF_HSIZE_T  8
 #define H5_SIZEOF_HSSIZE_T 8
 #define HSIZE_UNDEF        UINT64_MAX
@@ -128,13 +128,13 @@ typedef int64_t   hssize_t;
  * File addresses have their own types.
  */
 typedef uint64_t haddr_t;
-#define PRIdHADDR PRId64
-#define PRIoHADDR PRIo64
-#define PRIuHADDR PRIu64
-#define PRIxHADDR PRIx64
-#define PRIXHADDR PRIX64
-#define H5_SIZEOF_HADDR_T 8
-#define HADDR_UNDEF       UINT64_MAX
+#define PRIdHADDR           PRId64
+#define PRIoHADDR           PRIo64
+#define PRIuHADDR           PRIu64
+#define PRIxHADDR           PRIx64
+#define PRIXHADDR           PRIX64
+#define H5_SIZEOF_HADDR_T   8
+#define HADDR_UNDEF         UINT64_MAX
 #define H5_PRINTF_HADDR_FMT "%" PRIuHADDR
 #define HADDR_MAX           (HADDR_UNDEF - 1)
 
