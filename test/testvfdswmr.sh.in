@@ -59,12 +59,12 @@ if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # Setting for exhaustive run
     BIGSET_n=50
     BIGSET_few_s=40
     BIGSET_many_s=1000
-    GROUP_n = 400
+    GROUP_n=400
 elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # Setting for quick run
     BIGSET_n=10
     BIGSET_few_s=10
     BIGSET_many_s=100
-    GROUP_n = 40
+    GROUP_n=40
 fi
 
 ###############################################################################

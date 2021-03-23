@@ -611,7 +611,7 @@ error:
     if (fd_writer_to_reader >= 0)
         HDclose(fd_writer_to_reader);
 
-    if (fd_writer_to_reader >= 0)
+    if (fd_reader_to_writer >= 0)
         HDclose(fd_reader_to_writer);
 
     if(!writer) {
