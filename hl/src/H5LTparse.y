@@ -315,7 +315,7 @@ strsize         :       H5T_VARIABLE_TOKEN     {$<ival>$ = H5T_VARIABLE_TOKEN;}
                 |       NUMBER
                 ;
 strpad          :       H5T_STR_NULLTERM_TOKEN {$<ival>$ = H5T_STR_NULLTERM_TOKEN;}
-                |       H5T_STR_NULLPAD_TOKEN  {$<ival>$ = H5T_STR_NULLPAD_TOKEN;}
+                
                 |       H5T_STR_SPACEPAD_TOKEN {$<ival>$ = H5T_STR_SPACEPAD_TOKEN;}
                 ;
 cset            :       H5T_CSET_ASCII_TOKEN {$<ival>$ = H5T_CSET_ASCII_TOKEN;}
@@ -335,7 +335,7 @@ enum_list       :
                 ;
 enum_def        :       enum_symbol         {
                                                 is_enum_memb = 1; /*indicate member of enum*/
-                                                enum_memb_symbol = strdup(yylval.sval); 
+                                                enum_memb_symbol = HDstrdup(yylval.sval); 
                                                 HDfree(yylval.sval);
                                                 yylval.sval = NULL;
                                             }
