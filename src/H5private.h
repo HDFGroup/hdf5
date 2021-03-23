@@ -1575,6 +1575,16 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDtimes
     #define HDtimes(T)    times(T)
 #endif /* HDtimes*/
+#ifndef HDtimespeccmp
+#ifdef H5_HAVE_TIMESPECCMP
+    #define HDtimespeccmp(tsp, usp, cmp)    timespeccmp(tsp, usp, cmp)
+#else
+#define	HDtimespeccmp(tsp, usp, cmp)				\
+            (((tsp)->tv_sec == (usp)->tv_sec) ?		\
+	        ((tsp)->tv_nsec cmp (usp)->tv_nsec) :	\
+	        ((tsp)->tv_sec cmp (usp)->tv_sec))
+#endif
+#endif /* HDtimespeccmp */
 #ifndef HDtmpfile
     #define HDtmpfile()    tmpfile()
 #endif /* HDtmpfile */
@@ -2187,7 +2197,6 @@ H5_DLL herr_t H5CX_pop(void);
     BEGIN_MPE_LOG
 
 #include "H5FDvfd_swmr_private.h"
-#include "H5time_private.h" /* for timespeccmp */
 
 #define VFD_SWMR_ENTER(err)                                                   \
     do {                                                                      \

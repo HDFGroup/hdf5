@@ -441,6 +441,9 @@
 # cmakedefine H5_HAVE_THREADSAFE @H5_HAVE_THREADSAFE@
 #endif
 
+/* Define to 1 if you have the `timespeccmp' function. */
+#cmakedefine H5_HAVE_TIMESPECCMP @H5_HAVE_TIMESPECCMP@
+
 /* Define if timezone is a global variable */
 #cmakedefine H5_HAVE_TIMEZONE @H5_HAVE_TIMEZONE@
 
