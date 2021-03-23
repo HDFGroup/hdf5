@@ -384,6 +384,33 @@ New Features
 
     Library:
     --------
+    - HSYS_GOTO_ERROR now emits the results of GetLastError() on Windows
+
+      HSYS_GOTO_ERROR is an internal macro that is used to produce error
+      messages when system calls fail. These strings include errno and the
+      the associated strerror() value, which are not particularly useful
+      when a Win32 API call fails.
+
+      On Windows, this macro has been updated to include the result of
+      GetLastError(). When a system call fails on Windows, usually only
+      one of errno and GetLastError() will be useful, however we emit both
+      for the user to parse. The Windows error message is not emitted as
+      it would be awkward to free the FormatMessage() buffer given the
+      existing HDF5 error framework. Users will have to look up the error
+      codes in MSDN.
+
+      The format string on Windows has been changed from:
+
+          "%s, errno = %d, error message = '%s'"
+
+      to:
+
+          "%s, errno = %d, error message = '%s', Win32 GetLastError() = %"PRIu32""
+
+      for those inclined to parse it for error values.
+
+        (DER - 2021/03/21)
+
     - File locking now works on Windows
 
       Since version 1.10.0, the HDF5 library has used a file locking scheme
@@ -399,7 +426,6 @@ New Features
       locks (by passing DWORDMAX as both size parameters to LockFileEx()).
 
         (DER - 2021/03/19, HDFFV-10191)
-
 
     - H5Epush_ret() now requires a trailing semicolon
 
