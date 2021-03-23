@@ -1320,7 +1320,7 @@ insert_eot_entry(eot_queue_entry_t *entry_ptr)
 
     /* Find the insertion point for the entry on the EOT queue */
     TAILQ_FOREACH_REVERSE(prec_ptr, &eot_queue_g, eot_queue, link) {
-        if (timespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, <=))
+        if (HDtimespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, <=))
             break;
     }
 
@@ -1964,7 +1964,7 @@ H5F_vfd_swmr_process_eot_queue(hbool_t entering_api)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
         }
 #endif
-        if(timespeccmp(&now, &head->end_of_tick, <))
+        if(HDtimespeccmp(&now, &head->end_of_tick, <))
             break;
         /* If the H5F_shared_t is labeled with a later EOT time than
          * the queue entry is, then we have already performed the
@@ -1972,7 +1972,7 @@ H5F_vfd_swmr_process_eot_queue(hbool_t entering_api)
          * multiple H5F_t share the H5F_shared_t.  Just update the
          * EOT queue entry and move to the next.
          */
-        if (timespeccmp(&head->end_of_tick, &shared->end_of_tick, <)) {
+        if (HDtimespeccmp(&head->end_of_tick, &shared->end_of_tick, <)) {
             H5F_vfd_swmr_update_entry_eot(head);
         } else if (shared->vfd_swmr_writer) {
             if (H5F_vfd_swmr_writer_end_of_tick(f, FALSE) < 0)
