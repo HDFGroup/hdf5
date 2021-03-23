@@ -123,7 +123,7 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
 ":"              {return token(':');}
 ";"              {return token(';');}
 [ \t\n]*         ;
-"[\n]"             { return 0; }
+"\n"             { return 0; }
 
 %%
 
