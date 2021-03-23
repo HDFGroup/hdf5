@@ -1035,7 +1035,6 @@
 ./src/H5Ztrans.c
 ./src/H5queue.h
 ./src/H5retry_private.h
-./src/H5time_private.h
 ./src/H5win32defs.h
 ./src/Makefile.am
 ./src/hdf5.h
