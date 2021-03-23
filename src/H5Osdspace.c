@@ -110,8 +110,8 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
 {
     H5S_extent_t *sdim = NULL; /* New extent dimensionality structure */
     unsigned      flags, version;
-    // unsigned      i;                /* Local counting variable */
-    void *ret_value = NULL; /* Return value */
+    unsigned      i;                /* Local counting variable */
+    void *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -164,13 +164,13 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
         if (NULL == (sdim->size = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-        for (unsigned i = 0; i < sdim->rank; i++)
+        for (i = 0; i < sdim->rank; i++)
             H5F_DECODE_LENGTH(f, p, sdim->size[i]);
 
         if (flags & H5S_VALID_MAX) {
             if (NULL == (sdim->max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-            for (unsigned i = 0; i < sdim->rank; i++)
+            for (i = 0; i < sdim->rank; i++)
                 H5F_DECODE_LENGTH(f, p, sdim->max[i]);
         } /* end if */
     }     /* end if */
@@ -179,8 +179,7 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
     if (sdim->type == H5S_NULL)
         sdim->nelem = 0;
     else {
-        sdim->nelem = 1;
-        for (unsigned i = 0; i < sdim->rank; i++)
+        for (i = 0, sdim->nelem = 1; i < sdim->rank; i++)
             sdim->nelem *= sdim->size[i];
     } /* end else */
 
@@ -219,7 +218,7 @@ H5O__sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5S_extent_t *sdim  = (const H5S_extent_t *)_mesg;
     unsigned            flags = 0;
-    // unsigned            u; /* Local counting variable */
+    unsigned            u; /* Local counting variable */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -256,10 +255,10 @@ H5O__sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     if (H5S_SIMPLE == sdim->type) {
         /* Encode current & maximum dimensions */
         if (sdim->rank > 0) {
-            for (unsigned u = 0; u < sdim->rank; u++)
+            for (u = 0; u < sdim->rank; u++)
                 H5F_ENCODE_LENGTH(f, p, sdim->size[u]);
             if (flags & H5S_VALID_MAX)
-                for (unsigned u = 0; u < sdim->rank; u++)
+                for (u = 0; u < sdim->rank; u++)
                     H5F_ENCODE_LENGTH(f, p, sdim->max[u]);
         } /* end if */
     }     /* end if */
@@ -492,17 +491,17 @@ H5O__sdspace_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int 
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth, "Rank:", (unsigned long)(sdim->rank));
 
     if (sdim->rank > 0) {
-        // unsigned u; /* local counting variable */
+        unsigned u; /* local counting variable */
 
         HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
-        for (unsigned u = 0; u < sdim->rank; u++)
+        for (u = 0; u < sdim->rank; u++)
             HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->size[u]);
         HDfprintf(stream, "}\n");
 
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
         if (sdim->max) {
             HDfprintf(stream, "{");
-            for (unsigned u = 0; u < sdim->rank; u++) {
+            for (u = 0; u < sdim->rank; u++) {
                 if (H5S_UNLIMITED == sdim->max[u])
                     HDfprintf(stream, "%sUNLIM", u ? ", " : "");
                 else

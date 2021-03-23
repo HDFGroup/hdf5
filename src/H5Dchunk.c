@@ -4462,7 +4462,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
     for (op_dim = 0; op_dim < space_ndims; op_dim++) {
         H5D_chunk_ud_t udata; /* User data for querying chunk info */
         unsigned       u;     /* Local index variable */
-        // int            i;     /* Local index variable */
+        int            i;     /* Local index variable */
 
         /* Check if allocation along this dimension is really necessary */
         if (min_unalloc[op_dim] > max_unalloc[op_dim])
@@ -4638,7 +4638,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
 
             /* Increment indices and adjust the edge chunk state */
             carry = TRUE;
-            for (int i = ((int)space_ndims - 1); i >= 0; --i) {
+            for (i = ((int)space_ndims - 1); i >= 0; --i) {
                 scaled[i]++;
                 if (scaled[i] > max_unalloc[i]) {
                     if ((unsigned)i == op_dim)
@@ -4829,7 +4829,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
         } /* end if */
 
         while (!carry) {
-            // int i; /* Local index variable */
+            int i; /* Local index variable */
 
             /* Make sure the chunk is really a former edge chunk */
             HDassert(H5D__chunk_is_partial_edge_chunk(space_ndims, chunk_dim, chunk_sc, old_dim) &&
@@ -4854,7 +4854,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
 
             /* Increment indices */
             carry = TRUE;
-            for (int i = ((int)space_ndims - 1); i >= 0; --i) {
+            for (i = ((int)space_ndims - 1); i >= 0; --i) {
                 if ((unsigned)i != op_dim) {
                     ++chunk_sc[i];
                     if (chunk_sc[i] > (hsize_t)max_edge_chunk_sc[i])
@@ -4916,8 +4916,8 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     H5FD_mpio_xfer_t prev_xfer_mode;         /* Previous data xfer mode */
     hbool_t          have_xfer_mode = FALSE; /* Whether the previous xffer mode has been retrieved */
     hbool_t          need_addr_sort = FALSE;
-    // int              i;                   /* Local index variable */
-    herr_t ret_value = SUCCEED; /* Return value */
+    int              i;                   /* Local index variable */
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -4957,7 +4957,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
         if (NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
 
-        for (int i = 0; i < blocks; i++) {
+        for (i = 0; i < blocks; i++) {
             /* store the chunk address as an MPI_Aint */
             chunk_disp_array[i] = (MPI_Aint)(chunk_info->addr[i + (mpi_rank * blocks)]);
 
