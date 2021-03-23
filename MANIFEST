@@ -196,6 +196,8 @@
 
 ./examples/Attributes.txt
 ./examples/Makefile.am
+./examples/credel.c
+./examples/gaussians.c
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
 ./examples/h5_crtgrpd.c
@@ -234,6 +236,8 @@
 ./examples/h5_vds-percival.c
 ./examples/h5_vds-percival-unlim.c
 ./examples/h5_vds-percival-unlim-maxmin.c
+./examples/nbcompat.c
+./examples/nbcompat.h
 ./examples/testh5cc.sh.in
 ./examples/README
 
