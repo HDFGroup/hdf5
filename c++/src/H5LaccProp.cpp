@@ -70,8 +70,7 @@ LinkAccPropList::getConstant()
 void
 LinkAccPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------

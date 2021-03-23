@@ -1666,6 +1666,29 @@ test_file_is_accessible(const char *env_h5_drvr)
     is_hdf5 = H5Fis_accessible(filename, fapl_id);
     VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
 
+    /*****************************************/
+    /* Newly created file that is still open */
+    /*****************************************/
+
+    /* On Windows, file locking is mandatory so this check ensures that
+     * H5Fis_accessible() works on files that have an exclusive lock.
+     * Previous versions of this API call created an additional file handle
+     * and attempted to read through it, which will not work when locks
+     * are enforced by the OS.
+     */
+
+    /* Create a file and hold it open */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    /* Verify that the file is an HDF5 file */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
     /*******************************/
     /* Non-default user block size */
     /*******************************/
