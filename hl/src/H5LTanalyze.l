@@ -18,11 +18,15 @@
  */
 
 %{
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <hdf5.h>
+
+#include "H5private.h"
 #include "H5LTparse.h"
 
+static char *trim_quotes(const char *);
 int my_yyinput(char *, int);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r=my_yyinput(b, ms))
@@ -37,42 +41,7 @@ int my_yyinput(char *, int);
 extern char *myinput;
 extern size_t input_len;
 
-#define STACK_SIZE      16
-
-/*variables for compound type*/
-struct cmpd_info {
-    hid_t       id;
-    hbool_t         is_field;
-    hbool_t         first_memb;
-};
-extern struct cmpd_info cmpd_stack[STACK_SIZE];
-extern int csindex;
-
-/*variables for array type*/
-struct arr_info {
-    hsize_t             dims[H5S_MAX_RANK];
-    int                 ndim;
-    hbool_t             is_dim;
-};
-extern struct arr_info arr_stack[STACK_SIZE];
-extern int asindex;
-
-/*variables for enumerate type*/
-extern hbool_t     is_enum;
-extern hbool_t     is_enum_memb;
-
-/*variables for string type*/
-extern hbool_t is_str_size;
-
-/*variables for opaque type*/
-extern hbool_t is_opq_size;
-extern hbool_t is_opq_tag;
-
-hbool_t        first_quote = 1;
-
 %}
-
-%s TAG_STRING
 
 %%
 
@@ -138,32 +107,12 @@ OPQ_SIZE         {return token(OPQ_SIZE_TOKEN);}
 OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
 
 [0-9]+           {
-                        if( is_str_size || (is_enum && is_enum_memb) ||
-                            is_opq_size || (asindex>-1 && arr_stack[asindex].is_dim) ||
-                            (csindex>-1 && cmpd_stack[csindex].is_field) ) {
-                            H5LTyylval.ival = atoi(yytext);
-                            return NUMBER;
-                        } else
-                            REJECT;
+                        H5LTyylval.ival = HDatoi(yytext);
+                        return NUMBER;
                  }
 
-"\""             {
-                    /*if it's first quote, and is a compound field name or an enum symbol*/
-                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field))
-                        && first_quote) {
-                        first_quote = 0;
-                        BEGIN TAG_STRING;
-                    } else /*if it's second quote*/
-                        first_quote = 1;
-                    return token('"');
-                 }
-<TAG_STRING>[^\"]+       {
-#ifdef H5_HAVE_WIN32_API
-                    H5LTyylval.sval = _strdup(yytext);
-#else /* H5_HAVE_WIN32_API */
-                    H5LTyylval.sval = strdup(yytext);
-#endif  /* H5_HAVE_WIN32_API */
-                    BEGIN INITIAL;
+["][^\"]+["]     {
+                    H5LTyylval.sval = trim_quotes(yytext);
                     return STRING;
                  }
 
@@ -174,21 +123,39 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
 ":"              {return token(':');}
 ";"              {return token(';');}
 [ \t\n]*         ;
-"\n"             { return 0; }
 
 %%
+
+/* Allocate a copy of `quoted` with the double quote character at
+ * the beginning and the one at the end both removed.  The caller is
+ * responsible for free()ing the copy.
+ */
+static char *
+trim_quotes(const char *quoted)
+{
+    size_t len = HDstrlen(quoted);
+    char *trimmed;
+
+    HDassert(quoted[0] == '"' && quoted[len - 1] == '"');
+
+    trimmed = HDstrdup(quoted + 1);
+    trimmed[len - 2] = '\0';
+
+    return trimmed;
+}
+
 int my_yyinput(char *buf, int max_size)
 {
    int ret;
 
-   memcpy(buf, myinput, input_len);
+   HDmemcpy(buf, myinput, input_len);
    ret = (int)input_len;
    return ret;
 }
 
 int H5LTyyerror(const char *msg)
 {
-   printf("ERROR: %s before \"%s\".\n", msg, yytext);
+   HDprintf("ERROR: %s before \"%s\".\n", msg, yytext);
    return 0;
 }
 
