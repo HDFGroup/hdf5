@@ -20,20 +20,50 @@ import java.io.Serializable;
  */
 public class H5O_info_t implements Serializable {
     private static final long serialVersionUID = 4691681163544054518L;
-    public long   fileno;     /* File number that object is located in */
-    public long   addr;       /* Object address in file   */
-    public int    type;       /* Basic object type (group, dataset, etc.) */
-    public int    rc;         /* Reference count of object    */
-    public long   atime;      /* Access time          */
-    public long   mtime;      /* Modification time        */
-    public long   ctime;      /* Change time          */
-    public long   btime;      /* Birth time           */
-    public long   num_attrs;  /* # of attributes attached to object */
-    public H5O_hdr_info_t   hdr;            /* Object header information */
-    /* Extra metadata storage for obj & attributes */
-    public H5_ih_info_t     meta_size_obj;  /* v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */
-    public H5_ih_info_t     meta_size_attr; /* v2 B-tree & heap for attributes */
+    /** File number that object is located in */
+    public long   fileno;
+    /** Object address in file */
+    public long   addr;
+    /** Basic object type (group, dataset, etc.) */
+    public int    type;
+    /** Reference count of object */
+    public int    rc;
+    /** Access time */
+    public long   atime;
+    /** Modification time */
+    public long   mtime;
+    /** Change time */
+    public long   ctime;
+    /** Birth time */
+    public long   btime;
+    /** # of attributes attached to object */
+    public long   num_attrs;
+    /** Object header information */
+    public H5O_hdr_info_t   hdr;
+    /** Extra metadata storage for obj
+     * v1/v2 B-tree and local/fractal heap for groups, B-tree for chunked datasets
+     */
+    public H5_ih_info_t     meta_size_obj;
+    /** Extra metadata storage for attributes
+     * v2 B-tree and heap for attributes
+     */
+    public H5_ih_info_t     meta_size_attr;
 
+    /** Constructor for data model information struct for objects
+     *
+     * @param fileno: File number that object is located in
+     * @param addr: Object address in file
+     * @param type: Basic object type
+     * @param rc: Reference count of object
+     * @param num_attrs: Number of attributes attached to object
+     * @param atime: Access time
+     * @param mtime: Modification time
+     * @param ctime: Change time
+     * @param btime: Birth time
+     * @param hdr: Object header information
+     * @param meta_size_obj: v1/v2 B-tree and local/fractal heap for groups, B-tree for chunked datasets
+     * @param meta_size_attr: v2 B-tree and heap for attributes
+     */
     public H5O_info_t (long fileno, long addr, int type,
         int rc, long num_attrs, long atime, long mtime, long ctime, long btime,
         H5O_hdr_info_t hdr, H5_ih_info_t meta_size_obj, H5_ih_info_t meta_size_attr)

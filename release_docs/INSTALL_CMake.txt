@@ -795,6 +795,8 @@ HDF5_BUILD_DOC                 "Build documentation"                            
 HDF5_ENABLE_ANALYZER_TOOLS     "enable the use of Clang tools"                    OFF
 HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                      OFF
 HDF5_ENABLE_FORMATTERS         "format source files"                              OFF
+HDF5_USE_FILE_LOCKING          "Use file locking by default (mainly for SWMR)"    ON
+HDF5_IGNORE_DISABLED_FILE_LOCKS "Ignore file locks when disabled on file system"  ON
 
 ---------------- External Library Options ---------------------
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"

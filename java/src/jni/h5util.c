@@ -1324,7 +1324,10 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     /*
      * This function fails if the region does not have blocks.
      */
-    H5E_BEGIN_TRY { nblocks = H5Sget_select_hyper_nblocks(region_space); }
+    H5E_BEGIN_TRY
+    {
+        nblocks = H5Sget_select_hyper_nblocks(region_space);
+    }
     H5E_END_TRY;
 
     if (nblocks <= 0) {
@@ -1497,7 +1500,10 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     /*
      * This function fails if the region does not have points.
      */
-    H5E_BEGIN_TRY { npoints = H5Sget_select_elem_npoints(region_space); }
+    H5E_BEGIN_TRY
+    {
+        npoints = H5Sget_select_elem_npoints(region_space);
+    }
     H5E_END_TRY;
 
     if (npoints <= 0) {
@@ -2865,7 +2871,6 @@ h5str_dump_simple_data(JNIEnv *env, FILE *stream, hid_t container, hid_t type, v
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
             }
         }
-
         if (HDfprintf(stream, "%s", buffer.s) < 0)
             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
 
