@@ -36,9 +36,21 @@ public class H5O_info_t implements Serializable {
     public long        ctime;
     /** Birth time */
     public long        btime;
-    /** # of attributes attached to object */
+    /** Number of attributes attached to object */
     public long        num_attrs;
 
+    /** Constructor for data model information struct for objects
+     *
+     * @param fileno: File number that object is located in
+     * @param token: Object token in file
+     * @param type: Basic object type
+     * @param rc: Reference count of object
+     * @param atime: Access time
+     * @param mtime: Modification time
+     * @param ctime: Change time
+     * @param btime: Birth time
+     * @param num_attrs: Number of attributes attached to object
+     */
     public H5O_info_t (long fileno, H5O_token_t token, int type,
         int rc, long atime, long mtime, long ctime, long btime, long num_attrs)
     {
