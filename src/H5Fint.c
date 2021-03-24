@@ -81,6 +81,7 @@ static herr_t H5F__build_name(const char *prefix, const char *file_name, char **
 static char * H5F__getenv_prefix_name(char **env_prefix /*in,out*/);
 static H5F_t *H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 static herr_t H5F__check_if_using_file_locks(H5P_genplist_t *fapl, hbool_t *use_file_locking);
+static herr_t H5F__dest(H5F_t *f, hbool_t flush);
 static herr_t H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name,
                                      char ** /*out*/ actual_name);
 static herr_t H5F__flush_phase1(H5F_t *f);
@@ -1369,12 +1370,12 @@ done:
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F__dest(H5F_t *f, hbool_t flush)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -2501,11 +2502,6 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
     if (f->shared->efc && (f->shared->nrefs > 1))
         if (H5F__efc_try_close(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't attempt to close EFC")
-
-    /* Delay flush until the shared file struct is closed, in H5F__dest.  If the
-     * application called H5Fclose, it would have been flushed in that function
-     * (unless it will have been flushed in H5F__dest anyways).
-     */
 
     /* Destroy the H5F_t struct and decrement the reference count for the
      * shared H5F_shared_t struct. If the reference count for the H5F_shared_t
