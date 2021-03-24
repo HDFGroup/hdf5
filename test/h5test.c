@@ -2069,23 +2069,23 @@ h5_get_version_string(H5F_libver_t libver)
 int
 h5_compare_file_bytes(char *f1name, char *f2name)
 {
-    FILE       *f1ptr = NULL;  /* two file pointers */
-    FILE       *f2ptr = NULL;
-    off_t       f1size = 0;    /* size of the files */
-    off_t       f2size = 0;
-    char        f1char = 0;    /* one char from each file */
-    char        f2char = 0;
-    off_t       ii = 0;
-    int         ret_value = 0; /* for error handling */
+    FILE *f1ptr     = NULL; /* two file pointers */
+    FILE *f2ptr     = NULL;
+    off_t f1size    = 0; /* size of the files */
+    off_t f2size    = 0;
+    char  f1char    = 0; /* one char from each file */
+    char  f2char    = 0;
+    off_t ii        = 0;
+    int   ret_value = 0; /* for error handling */
 
     /* Open files for reading */
-    f1ptr = HDfopen(f1name, "r");
+    f1ptr = HDfopen(f1name, "rb");
     if (f1ptr == NULL) {
         HDfprintf(stderr, "Unable to fopen() %s\n", f1name);
         ret_value = -1;
         goto done;
     }
-    f2ptr = HDfopen(f2name, "r");
+    f2ptr = HDfopen(f2name, "rb");
     if (f2ptr == NULL) {
         HDfprintf(stderr, "Unable to fopen() %s\n", f2name);
         ret_value = -1;
@@ -2093,14 +2093,15 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     }
 
     /* Get the file sizes and verify that they equal */
-    HDfseek(f1ptr , 0 , SEEK_END);
+    HDfseek(f1ptr, 0, SEEK_END);
     f1size = HDftell(f1ptr);
 
-    HDfseek(f2ptr , 0 , SEEK_END);
+    HDfseek(f2ptr, 0, SEEK_END);
     f2size = HDftell(f2ptr);
 
     if (f1size != f2size) {
-        HDfprintf(stderr, "Files differ in size, %llu vs. %llu\n", f1size, f2size);
+        HDfprintf(stderr, "Files differ in size, %" PRIuHSIZE " vs. %" PRIuHSIZE "\n", (hsize_t)f1size,
+                  (hsize_t)f2size);
         ret_value = -1;
         goto done;
     }
@@ -2109,23 +2110,27 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     HDrewind(f1ptr);
     HDrewind(f2ptr);
     for (ii = 0; ii < f1size; ii++) {
-        HDfread(&f1char, 1, 1, f1ptr);
-        HDfread(&f2char, 1, 1, f2ptr);
+        if (HDfread(&f1char, 1, 1, f1ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
+        if (HDfread(&f2char, 1, 1, f2ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
         if (f1char != f2char) {
-            HDfprintf(stderr, "Mismatch @ 0x%llX: 0x%X != 0x%X\n", ii, f1char, f2char);
+            HDfprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n", (hsize_t)ii, f1char, f2char);
             ret_value = -1;
             goto done;
         }
     }
 
 done:
-    if (f1ptr) {
+    if (f1ptr)
         HDfclose(f1ptr);
-    }
-    if (f2ptr) {
+    if (f2ptr)
         HDfclose(f2ptr);
-    }
-    return(ret_value);
+    return ret_value;
 } /* end h5_compare_file_bytes() */
 
 /*-------------------------------------------------------------------------
@@ -2198,41 +2203,44 @@ const char *H5_get_srcdir(void)
 int
 h5_duplicate_file_by_bytes(const char *orig, const char *dest)
 {
-    FILE *orig_ptr = NULL;
-    FILE *dest_ptr = NULL;
-    hsize_t fsize = 0;
+    FILE *  orig_ptr  = NULL;
+    FILE *  dest_ptr  = NULL;
+    hsize_t fsize     = 0;
     hsize_t read_size = 0;
-    hsize_t max_buf = 0;
-    void *dup_buf = NULL;
-    int ret_value = 0;
+    hsize_t max_buf   = 0;
+    void *  dup_buf   = NULL;
+    int     ret_value = 0;
 
     max_buf = 4096 * sizeof(char);
 
-    orig_ptr = HDfopen(orig, "r");
+    orig_ptr = HDfopen(orig, "rb");
     if (NULL == orig_ptr) {
         ret_value = -1;
         goto done;
     }
 
-    HDfseek(orig_ptr , 0 , SEEK_END);
+    HDfseek(orig_ptr, 0, SEEK_END);
     fsize = (hsize_t)HDftell(orig_ptr);
     HDrewind(orig_ptr);
 
-    dest_ptr = HDfopen(dest, "w");
+    dest_ptr = HDfopen(dest, "wb");
     if (NULL == dest_ptr) {
         ret_value = -1;
         goto done;
     }
 
     read_size = MIN(fsize, max_buf);
-    dup_buf = HDmalloc(read_size);
+    dup_buf   = HDmalloc(read_size);
     if (NULL == dup_buf) {
         ret_value = -1;
         goto done;
     }
 
     while (read_size > 0) {
-        HDfread(dup_buf, read_size, 1, orig_ptr); /* warning: no error-check */
+        if (HDfread(dup_buf, read_size, 1, orig_ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
         HDfwrite(dup_buf, read_size, 1, dest_ptr);
         fsize -= read_size;
         read_size = MIN(fsize, max_buf);

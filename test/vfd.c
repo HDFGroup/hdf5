@@ -2443,7 +2443,7 @@ run_splitter_test(const struct splitter_dataset_def      *data,
         SPLITTER_TEST_FAULT("files are not byte-for-byte equivalent\n");
     }
 
-    /* Verify existence of logfile iff appropriate */
+    /* Verify existence of logfile if appropriate */
     logfile = fopen(vfd_config.log_file_path, "r");
     if ( (TRUE  == provide_logfile_path && NULL == logfile) ||
          (FALSE == provide_logfile_path && NULL != logfile) )
