@@ -23,7 +23,6 @@
 
 #if !defined(WIN32) && !defined(__MINGW32__)
 
-
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
