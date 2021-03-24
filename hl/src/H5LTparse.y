@@ -315,7 +315,7 @@ strsize         :       H5T_VARIABLE_TOKEN     {$<ival>$ = H5T_VARIABLE_TOKEN;}
                 |       NUMBER
                 ;
 strpad          :       H5T_STR_NULLTERM_TOKEN {$<ival>$ = H5T_STR_NULLTERM_TOKEN;}
-                
+                |       H5T_STR_NULLPAD_TOKEN  {$<ival>$ = H5T_STR_NULLPAD_TOKEN;}
                 |       H5T_STR_SPACEPAD_TOKEN {$<ival>$ = H5T_STR_SPACEPAD_TOKEN;}
                 ;
 cset            :       H5T_CSET_ASCII_TOKEN {$<ival>$ = H5T_CSET_ASCII_TOKEN;}
