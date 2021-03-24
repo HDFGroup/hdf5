@@ -573,8 +573,8 @@ Wgetlogin(void)
 {
 
 #ifdef H5_HAVE_WINSOCK2_H
-    long bufferCount = WloginBuffer_count;
-    if (GetUserName(Wlogin_buffer, &bufferCount) == 0)
+    DWORD bufferCount = WloginBuffer_count;
+    if (GetUserName(Wlogin_buffer, &bufferCount) != 0)
         return (Wlogin_buffer);
     else
 #endif /* H5_HAVE_WINSOCK2_H */
