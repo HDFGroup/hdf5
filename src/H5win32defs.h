@@ -11,66 +11,18 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Scott Wegner
- *              June 3, 2008
- *
- * Purpose: This file is used to map HDF macros to Windows functions.  This
+/* Purpose: This file is used to map HDF macros to Windows functions.  This
  *          should get included H5private mappings, so as to override them.
  *          Any macro not mapped here, however, will receive a similar mapping
  *          inside H5private.h
  *
  */
-#ifndef H5_HAVE_INTTYPES_H
-/* The following definitions should be suitable for 64-bit Windows, which is
- * LLP64, and for 32-bit Windows, which is ILP32.  Those are the only
- * platforms where <inttypes.h> is likely to be missing.  VS2015 and later
- * *may* provide these definitions.
- */
-#ifdef _WIN64
-#define PRIdPTR "lld"
-#define PRIoPTR "llo"
-#define PRIuPTR "llu"
-#define PRIxPTR "llx"
-#define PRIXPTR "llX"
-#else /* _WIN64 */
-#define PRIdPTR "ld"
-#define PRIoPTR "lo"
-#define PRIuPTR "lu"
-#define PRIxPTR "lx"
-#define PRIXPTR "lX"
-#endif /* _WIN64 */
 
-#define PRId8   "d"
-#define PRIo8   "o"
-#define PRIu8   "u"
-#define PRIx8   "x"
-#define PRIX8   "X"
-#define PRId16  "d"
-#define PRIo16  "o"
-#define PRIu16  "u"
-#define PRIx16  "x"
-#define PRIX16  "X"
-#define PRId32  "d"
-#define PRIo32  "o"
-#define PRIu32  "u"
-#define PRIx32  "x"
-#define PRIX32  "X"
-#define PRId64  "lld"
-#define PRIo64  "llo"
-#define PRIu64  "llu"
-#define PRIx64  "llx"
-#define PRIX64  "llX"
-#define PRIdMAX "lld"
-#define PRIoMAX "llo"
-#define PRIuMAX "llu"
-#define PRIxMAX "llx"
-#define PRIXMAX "llX"
-#endif
-
-/*
- * _MSC_VER = 1900 VS2015
- * _MSC_VER = 1800 VS2013
- * _MSC_VER = 1700 VS2012
+/* _MSC_VER = 192x  VS2019
+ * _MSC_VER = 191x  VS2017
+ * _MSC_VER = 1900  VS2015
+ * _MSC_VER = 1800  VS2013
+ * _MSC_VER = 1700  VS2012
  */
 #ifdef H5_HAVE_WIN32_API
 
@@ -119,22 +71,8 @@ typedef __int64         h5_stat_size_t;
 
 #ifdef H5_HAVE_VISUAL_STUDIO
 
-#if (_MSC_VER < 1800)
-#ifndef H5_HAVE_STRTOLL
-#define HDstrtoll(S, R, N) _strtoi64(S, R, N)
-#endif /* H5_HAVE_STRTOLL */
-#ifndef H5_HAVE_STRTOULL
-#define HDstrtoull(S, R, N) _strtoui64(S, R, N)
-#endif /* H5_HAVE_STRTOULL */
-/* va_copy() does not exist on pre-2013 Visual Studio. Since va_lists are
- * just pointers into the stack in those CRTs, the usual work-around
- * is to just define the operation as a pointer copy.
- */
-#define HDva_copy(D, S) ((D) = (S))
-#endif /* MSC_VER < 1800 */
-
 /*
- * The (void*) cast just avoids a compiler warning in H5_HAVE_VISUAL_STUDIO
+ * The (void*) cast just avoids a compiler warning in MSVC
  */
 #define HDmemset(X, C, Z) memset((void *)(X), C, Z)
 
@@ -142,26 +80,6 @@ struct timezone {
     int tz_minuteswest;
     int tz_dsttime;
 };
-
-/* time.h before VS2015 does not include timespec */
-#if (_MSC_VER < 1900)
-struct timespec {
-    time_t tv_sec;  /* Seconds - >= 0 */
-    long   tv_nsec; /* Nanoseconds - [0, 999999999] */
-};
-#endif /* MSC_VER < 1900 */
-
-#if (_MSC_VER <= 1700)
-/* The isnan function needs underscore in VS2012 and earlier */
-#define HDisnan(X) _isnan(X)
-/* The round functions do not exist in VS2012 and earlier */
-#define HDllround(V)  Wllround(V)
-#define HDllroundf(V) Wllroundf(V)
-#define HDlround(V)   Wlround(V)
-#define HDlroundf(V)  Wlroundf(V)
-#define HDround(V)    Wround(V)
-#define HDroundf(V)   Wroundf(V)
-#endif /* MSC_VER < 1700 */
 
 #endif /* H5_HAVE_VISUAL_STUDIO */
 
@@ -172,37 +90,19 @@ H5_DLL int    Wgettimeofday(struct timeval *tv, struct timezone *tz);
 H5_DLL int    Wsetenv(const char *name, const char *value, int overwrite);
 H5_DLL int    Wflock(int fd, int operation);
 H5_DLL char * Wgetlogin(void);
-H5_DLL int    c99_snprintf(char *str, size_t size, const char *format, ...);
-H5_DLL int    c99_vsnprintf(char *str, size_t size, const char *format, va_list ap);
-H5_DLL int    Wnanosleep(const struct timespec *req, struct timespec *rem);
 H5_DLL herr_t H5_expand_windows_env_vars(char **env_var);
 H5_DLL wchar_t *H5_get_utf16_str(const char *s);
 H5_DLL int      Wopen_utf8(const char *path, int oflag, ...);
 H5_DLL int      Wremove_utf8(const char *path);
 H5_DLL int      H5_get_win32_times(H5_timevals_t *tvs);
-
-/* Round functions only needed for VS2012 and earlier.
- * They are always built to ensure they don't go stale and
- * can be deleted (along with their #defines, above) when we
- * drop VS2012 support.
- */
-H5_DLL long long Wllround(double arg);
-H5_DLL long long Wllroundf(float arg);
-H5_DLL long      Wlround(double arg);
-H5_DLL long      Wlroundf(float arg);
-H5_DLL double    Wround(double arg);
-H5_DLL float     Wroundf(float arg);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#define HDflock(F, L)        Wflock(F, L)
-#define HDgetlogin()         Wgetlogin()
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
 #define HDsetenv(N, V, O)    Wsetenv(N, V, O)
-#define HDsnprintf           c99_snprintf /*varargs*/
-#define HDunsetenv(S)        Wsetenv(S, "", 1)
-#define HDvsnprintf          c99_vsnprintf /*varargs*/
+#define HDflock(F, L)        Wflock(F, L)
+#define HDgetlogin()         Wgetlogin()
 
 /* Non-POSIX functions */
 
