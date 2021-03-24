@@ -716,9 +716,6 @@
 /* The size of `__int64', as computed by sizeof. */
 #define H5_SIZEOF___INT64 @H5_SIZEOF___INT64@
 
-/* Define to 1 if you have the ANSI C header files. */
-#cmakedefine H5_STDC_HEADERS @H5_STDC_HEADERS@
-
 /* Define if strict file format checks are enabled */
 #cmakedefine H5_STRICT_FORMAT_CHECKS @H5_STRICT_FORMAT_CHECKS@
 

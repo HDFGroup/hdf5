@@ -23,14 +23,12 @@
 
 #if !defined(WIN32) && !defined(__MINGW32__)
 
-#include <math.h>
 
-#ifdef H5_STDC_HEADERS
 #include <errno.h>
 #include <fcntl.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#endif
 
 #ifdef H5_HAVE_UNISTD_H
 #include <sys/types.h>

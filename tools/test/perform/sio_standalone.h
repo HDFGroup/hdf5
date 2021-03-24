@@ -24,7 +24,6 @@
 /*
  * Include ANSI-C header files.
  */
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -37,7 +36,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 /* maximum of two, three, or four values */
 #undef MAX
