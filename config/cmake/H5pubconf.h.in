@@ -222,9 +222,6 @@
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #cmakedefine H5_HAVE_LIBDMALLOC @H5_HAVE_LIBDMALLOC@
 
-/* Define to 1 if you have the <libgen.h> header file. */
-#cmakedefine H5_HAVE_LIBGEN_H @H5_HAVE_LIBGEN_H@
-
 /* Proceed to build with libhdfs */
 #cmakedefine H5_HAVE_LIBHDFS @H5_HAVE_LIBHDFS@
 

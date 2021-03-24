@@ -11,8 +11,6 @@
  * help@hdfgroup.org.
  */
 
-#include <err.h>
-
 #define H5C_FRIEND              /*suppress error about including H5Cpkg   */
 #define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 
@@ -26,6 +24,10 @@
 
 #include "testhdf5.h"
 #include "vfd_swmr_common.h"
+
+#ifndef H5_HAVE_WIN32_API
+
+#include <err.h>
 
 enum _step {
   CREATE = 0
@@ -323,3 +325,14 @@ main(int argc, char **argv)
 
     return EXIT_SUCCESS;
 }
+
+#else /* H5_HAVE_WIN32_API */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_WIN32_API */

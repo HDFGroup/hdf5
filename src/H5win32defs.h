@@ -111,20 +111,6 @@ typedef __int64             h5_stat_size_t;
 
 #ifdef H5_HAVE_VISUAL_STUDIO
 
-#if (_MSC_VER < 1800)
-  #ifndef H5_HAVE_STRTOLL
-    #define HDstrtoll(S,R,N)    _strtoi64(S,R,N)
-  #endif /* H5_HAVE_STRTOLL */
-  #ifndef H5_HAVE_STRTOULL
-    #define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
-  #endif /* H5_HAVE_STRTOULL */
-  /* va_copy() does not exist on pre-2013 Visual Studio. Since va_lists are
-   * just pointers into the stack in those CRTs, the usual work-around
-   * is to just define the operation as a pointer copy.
-   */
-  #define HDva_copy(D,S)      ((D) = (S))
-#endif /* MSC_VER < 1800 */
-
 /*
  * The (void*) cast just avoids a compiler warning in H5_HAVE_VISUAL_STUDIO
  */
@@ -134,27 +120,6 @@ struct timezone {
     int tz_minuteswest;
     int tz_dsttime;
 };
-
-/* time.h before VS2015 does not include timespec */
-#if (_MSC_VER < 1900)
-struct timespec
-{
-    time_t tv_sec;  /* Seconds - >= 0 */
-    long   tv_nsec; /* Nanoseconds - [0, 999999999] */
-};
-#endif /* MSC_VER < 1900 */
-
-#if (_MSC_VER <= 1700)
-/* The isnan function needs underscore in VS2012 and earlier */
-#define HDisnan(X)         _isnan(X)
-/* The round functions do not exist in VS2012 and earlier */
-#define HDllround(V)        Wllround(V)
-#define HDllroundf(V)       Wllroundf(V)
-#define HDlround(V)         Wlround(V)
-#define HDlroundf(V)        Wlroundf(V)
-#define HDround(V)          Wround(V)
-#define HDroundf(V)         Wroundf(V)
-#endif /* MSC_VER < 1700 */
 
 #endif /* H5_HAVE_VISUAL_STUDIO */
 
@@ -166,25 +131,11 @@ extern "C" {
     H5_DLL int Wsetenv(const char *name, const char *value, int overwrite);
     H5_DLL int Wflock(int fd, int operation);
     H5_DLL char* Wgetlogin(void);
-    H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
-    H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
     H5_DLL herr_t H5_expand_windows_env_vars(char **env_var);
     H5_DLL const wchar_t *H5_get_utf16_str(const char *s);
     H5_DLL int Wopen_utf8(const char *path, int oflag, ...);
     H5_DLL int Wremove_utf8(const char *path);
     H5_DLL int H5_get_win32_times(H5_timevals_t* tvs);
-
-    /* Round functions only needed for VS2012 and earlier.
-     * They are always built to ensure they don't go stale and
-     * can be deleted (along with their #defines, above) when we
-     * drop VS2012 support.
-     */
-    H5_DLL long long Wllround(double arg);
-    H5_DLL long long Wllroundf(float arg);
-    H5_DLL long Wlround(double arg);
-    H5_DLL long Wlroundf(float arg);
-    H5_DLL double Wround(double arg);
-    H5_DLL float Wroundf(float arg);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
@@ -193,8 +144,6 @@ extern "C" {
 #define HDsetenv(N,V,O)     Wsetenv(N,V,O)
 #define HDflock(F,L)        Wflock(F,L)
 #define HDgetlogin()        Wgetlogin()
-#define HDsnprintf          c99_snprintf /*varargs*/
-#define HDvsnprintf         c99_vsnprintf /*varargs*/
 
 /* Non-POSIX functions */
 

@@ -19,8 +19,6 @@
 *
 *************************************************************/
 
-#include <err.h>
-
 #include "h5test.h"
 
 /*
@@ -102,33 +100,6 @@ error:
     return H5I_INVALID_HID;
 }
 
-static struct timespec
-print_elapsed_time(const struct timespec H5_ATTR_UNUSED *lastp,
-    const char H5_ATTR_UNUSED *fn, int H5_ATTR_UNUSED ln)
-{
-#if 0
-    uint64_t elapsed_ns;
-    struct timespec diff, now, last;
-#endif
-    struct timespec now;
-
-    if (clock_gettime(CLOCK_MONOTONIC, &now) == -1)
-        err(EXIT_FAILURE, "%s: clock_gettime", __func__);
-
-#if 0
-    last = (lastp == NULL) ? now : *lastp;
-
-    timespecsub(&now, &last, &diff);
-
-    elapsed_ns = (uint64_t)diff.tv_sec * (uint64_t)1000000000 + diff.tv_nsec;
-
-    printf("%5" PRIu64 ".%03" PRIu64 " %s.%d\n",
-        elapsed_ns / 1000000000, (elapsed_ns / 1000000) % 1000, fn, ln);
-#endif
-
-    return now;
-}
-
 static int
 swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
 {
@@ -139,23 +110,21 @@ swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
     , .writer = true
     , .md_pages_reserved = 128
     };
-    const char *bname, *dname;
-    char *tname[2];
+    char *bname = NULL;
+    char *dname = NULL;
 
-    if ((tname[0] = strdup(filename)) == NULL) {
-        HDfprintf(stderr, "temporary string allocation failed\n");
+    if (H5_dirname(filename, &dname) < 0) {
+        HDfprintf(stderr, "H5_dirname() failed\n");
         return -1;
     }
-    if ((tname[1] = strdup(filename)) == NULL) {
-        HDfprintf(stderr, "temporary string allocation failed\n");
+    if (H5_basename(filename, &bname) < 0) {
+        HDfprintf(stderr, "H5_basename() failed\n");
         return -1;
     }
-    dname = HDdirname(tname[0]);
-    bname = HDbasename(tname[1]);
-    snprintf(config.md_file_path, sizeof(config.md_file_path),
+    HDsnprintf(config.md_file_path, sizeof(config.md_file_path),
         "%s/%s.shadow", dname, bname);
-    free(tname[0]);
-    free(tname[1]);
+    HDfree(dname);
+    HDfree(bname);
 
     /* Enable VFD SWMR configuration */
     if(H5Pset_vfd_swmr_config(fapl, &config) < 0) {
@@ -870,7 +839,6 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
     const hsize_t pgbufsz = 10 * pgsz;
     hsize_t ofs;
     bool flushed;
-    struct timespec last;
     haddr_t addr;
     haddr_t pressure;
 
@@ -878,7 +846,6 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
 
     h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
-    last = print_elapsed_time(NULL, __func__, __LINE__);
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         TEST_ERROR
 
@@ -900,8 +867,6 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
-
-    last = print_elapsed_time(&last, __func__, __LINE__);
 
     /* Allocate a region whose pages we can write to force eviction of
      * least-recently used pages.
@@ -931,8 +896,6 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
            odata) < 0)
         FAIL_STACK_ERROR;
 
-    last = print_elapsed_time(&last, __func__, __LINE__);
-
     /* H5Fvfd_swmr_end_tick() processes delayed writes before it increases
      * the tick number, so only after `max_lag + 1` times through this loop
      * is a metadata write eligible to be written to the HDF5 file.
@@ -944,8 +907,6 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
             TEST_ERROR;
         H5Fvfd_swmr_end_tick(file_id);
     }
-
-    last = print_elapsed_time(&last, __func__, __LINE__);
 
     flushed = false;
     /* We are waiting for a single-page metadata buffer to
@@ -971,8 +932,6 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
         }
     }
 
-    last = print_elapsed_time(&last, __func__, __LINE__);
-
     if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data, -1))
         TEST_ERROR;
 
@@ -984,16 +943,12 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
             sizeof(int) * num_elements, odata) < 0)
         FAIL_STACK_ERROR;
 
-    last = print_elapsed_time(&last, __func__, __LINE__);
-
     /* All elements read through the page buffer should be -2.  That is,
      * no page-buffer entry should shadow the page.
      */
     if (!pgbuf_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data,
             -2))
         TEST_ERROR;
-
-    last = print_elapsed_time(&last, __func__, __LINE__);
 
     /* Force ticks to occur so that H5Fclose() doesn't pause waiting
      * for them to elapse.
@@ -1009,8 +964,6 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     HDfree(data);
     HDfree(odata);
-
-    last = print_elapsed_time(&last, __func__, __LINE__);
 
     PASSED();
     return 0;

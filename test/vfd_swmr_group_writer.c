@@ -11,8 +11,6 @@
  * help@hdfgroup.org.
  */
 
-#include <err.h>
-
 #define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 
 #include "hdf5.h"
@@ -23,6 +21,11 @@
 
 #include "testhdf5.h"
 #include "vfd_swmr_common.h"
+
+#ifndef H5_HAVE_WIN32_API
+
+#include <err.h>
+#include <libgen.h>
 
 typedef struct {
         hid_t file, filetype, one_by_one_sid;
@@ -79,7 +82,7 @@ state_init(state_t *s, int argc, char **argv)
 
     *s = ALL_HID_INITIALIZER;
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
-    esnprintf(s->progname, sizeof(s->progname), "%s", HDbasename(tfile));
+    esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
 
     while ((ch = getopt(argc, argv, "SWa:bc:n:q")) != -1) {
         switch (ch) {
@@ -419,3 +422,14 @@ main(int argc, char **argv)
 
     return EXIT_SUCCESS;
 }
+
+#else /* H5_HAVE_WIN32_API */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_WIN32_API */

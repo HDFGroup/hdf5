@@ -960,36 +960,12 @@ Wgetlogin(void)
 {
 
 #ifdef H5_HAVE_WINSOCK2_H
-    long bufferCount = WloginBuffer_count;
-    if (GetUserName(Wlogin_buffer, &bufferCount) == 0)
+    DWORD bufferCount = WloginBuffer_count;
+    if (GetUserName(Wlogin_buffer, &bufferCount) != 0)
         return (Wlogin_buffer);
     else
 #endif /* H5_HAVE_WINSOCK2_H */
         return NULL;
-}
-
-int c99_snprintf(char* str, size_t size, const char* format, ...)
-{
-    int count;
-    va_list ap;
-
-    HDva_start(ap, format);
-    count = c99_vsnprintf(str, size, format, ap);
-    HDva_end(ap);
-
-    return count;
-}
-
-int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
-{
-    int count = -1;
-
-    if (size != 0)
-        count = _vsnprintf_s(str, size, _TRUNCATE, format, ap);
-    if (count == -1)
-        count = _vscprintf(format, ap);
-
-    return count;
 }
 
 
@@ -1039,56 +1015,6 @@ Wflock(int fd, int operation) {
 #endif /* 0 */
     return 0;
 } /* end Wflock() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
- *
- * Purpose:     Wrapper function for round functions for use with VS2012
- *              and earlier.
- *
- * Return:      The rounded value that was passed in.
- *
- * Programmer:  Dana Robinson
- *              December 2016
- *
- *-------------------------------------------------------------------------
- */
-long long
-Wllround(double arg)
-{
-    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long long
-Wllroundf(float arg)
-{
-    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-long
-Wlround(double arg)
-{
-    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long
-Wlroundf(float arg)
-{
-    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-double
-Wround(double arg)
-{
-    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
-}
-
-float
-Wroundf(float arg)
-{
-    return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
 
 /*-------------------------------------------------------------------------
 * Function:     H5_get_utf16_str
@@ -1455,7 +1381,7 @@ H5_nanosleep(uint64_t nanosec)
 
     FUNC_LEAVE_NOAPI_VOID
 #else
-    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1000.0);
+    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1.0e6);
     DWORD ignore;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1516,3 +1442,143 @@ done:
 } /* end H5_expand_windows_env_vars() */
 #endif /* H5_HAVE_WIN32_API */
 
+
+/* dirname() and basename() are not easily ported to Windows and basename
+ * behavior varies depending on if you get POSIX vs. GNU. As a more
+ * platform-indpendent work-around, we've implemented H5_ versions of
+ * dirname() and basename().
+ *
+ * - The input string is never modified.
+ *
+ * - The out parameter is a new string that was allocated with HDcalloc()
+ *   and must be freed by the caller via HDfree().
+ *
+ * - NULL pointers are errors.
+ *
+ * - On errors, FAIL will be returned and the output parameter will be
+ *   undefined.
+ *
+ * - The trailing file separator is not returned in H5_dirname().
+ *
+ * - Passing a path that ends in a file separator to H5_basename() will
+ *   return the empty string.
+ *
+ * - If the path doesn't contain a file separator, we assume you passed
+ *   in a raw filename and H5_basename() will return the input string
+ *   while H5_dirname will return ".".
+ *
+ * - Assumes the file separator is \ on Win32 and / everywhere else,
+ *   including Cygwin.
+ */
+
+#ifdef H5_HAVE_WIN32_API
+#define H5_FILE_SEPARATOR   '\\'
+#else
+#define H5_FILE_SEPARATOR   '/'
+#endif
+
+static size_t
+H5__find_last_file_separator(const char *path, size_t len, hbool_t *no_separator)
+{
+    size_t i;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    *no_separator = TRUE;
+
+    for (i = len; i > 0; i--) {
+        if (H5_FILE_SEPARATOR == path[i - 1]) {
+            break;
+            no_separator = FALSE;
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(i - 1)
+}
+
+herr_t
+H5_dirname(const char *path, char **dirname)
+{
+    size_t path_len;
+    size_t pos;
+    size_t out_len;
+    char *out = NULL;
+    hbool_t no_separator = FALSE;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!path)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
+    if (!dirname)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL")
+
+    path_len = HDstrlen(path);
+
+    pos = H5__find_last_file_separator(path, path_len, &no_separator);
+    
+    /* Special case of no path separator */
+    if (no_separator)
+        out_len = 2;
+    else
+        out_len = pos + 1; /* Include room for terminator */
+
+    if (NULL == (out = HDmalloc(out_len * sizeof(char))))
+        HGOTO_ERROR(H5E_SYSTEM, H5E_NOSPACE, FAIL, "unable to allocate memory for output string")
+
+    /* Copy bytes and terminate */
+    if (no_separator)
+        HDstrncpy(out, ".", 2);
+    else {
+        HDstrncpy(out, path, out_len - 1);
+        out[out_len - 1] = '\0';
+    }
+
+    *dirname = out;
+done:
+    if (FAIL == ret_value)
+        HDfree(out);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_dirname() */
+
+herr_t
+H5_basename(const char *path, char **basename)
+{
+    size_t path_len;
+    size_t pos;
+    size_t out_len;
+    char *out = NULL;
+    hbool_t no_separator = FALSE;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!path)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
+    if (!basename)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL")
+
+    path_len = HDstrlen(path);
+    pos = H5__find_last_file_separator(path, path_len, &no_separator);
+
+    if (no_separator)
+        out_len = path_len;
+    else
+        out_len = path_len - pos; /* Include room for terminator */
+
+    if (NULL == (out = HDmalloc(out_len * sizeof(char))))
+        HGOTO_ERROR(H5E_SYSTEM, H5E_NOSPACE, FAIL, "unable to allocate memory for output string")
+
+    /* Copy bytes and terminate */
+    HDstrncpy(out, path + pos + 1, out_len - 1);
+    out[out_len - 1] = '\0';
+
+    /* Copy bytes and terminate */
+    *basename = out;
+done:
+    if (FAIL == ret_value)
+        HDfree(out);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_basename() */

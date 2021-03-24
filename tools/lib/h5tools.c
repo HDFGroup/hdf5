@@ -473,8 +473,7 @@ static hid_t
 swmr_fapl_augment(hid_t fapl, const char *fname)
 {
     H5F_vfd_swmr_config_t *config = NULL;   /* Configuration for VFD SWMR */
-    const char *dname;
-    char *tname;
+    char *dname = NULL;
 
     /*
      * Set up to open the file with VFD SWMR configured.
@@ -498,14 +497,13 @@ swmr_fapl_augment(hid_t fapl, const char *fname)
     config->writer = FALSE;
     config->md_pages_reserved = 128;
 
-    if ((tname = strdup(fname)) == NULL) {
-        HDfprintf(rawerrorstream, "temporary string allocation failed\n");
+    if (H5_dirname(fname, &dname) < 0) {
+        HDfprintf(rawerrorstream, "H5_dirname() failed\n");
         return H5I_INVALID_HID;
     }
-    dname = dirname(tname);
-    snprintf(config->md_file_path, sizeof(config->md_file_path),
+    HDsnprintf(config->md_file_path, sizeof(config->md_file_path),
         "%s/my_md_file", dname);
-    free(tname);
+    HDfree(dname);
 
     /* Enable VFD SWMR configuration */
     if(H5Pset_vfd_swmr_config(fapl, config) < 0) {

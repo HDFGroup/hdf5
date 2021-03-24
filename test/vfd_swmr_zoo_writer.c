@@ -12,6 +12,7 @@
  */
 
 #include <err.h>
+#include <libgen.h>
 
 #define H5C_FRIEND              /* suppress error about including H5Cpkg */
 #define H5F_FRIEND              /* suppress error about including H5Fpkg */
@@ -216,14 +217,13 @@ main(int argc, char **argv)
     struct timespec lastmsgtime = {.tv_sec = 0, .tv_nsec = 0};
     bool wait_for_signal;
     int ch;
-    char vector[8];
     unsigned seed;
     unsigned long tmpl;
-    char *end, *ostate;
+    char *end;
     const char *seedvar = "H5_ZOO_STEP_SEED";
     bool use_vfd_swmr = true;
     bool print_estack = false;
-    const char *progname = HDbasename(argv[0]);
+    const char *progname = basename(argv[0]);
     const char *personality = strstr(progname, "vfd_swmr_zoo_");
     estack_state_t es;
     char step = 'b';
@@ -348,7 +348,7 @@ main(int argc, char **argv)
 
         dbgf(1, "To reproduce, set seed (%s) to %u.\n", seedvar, seed);
 
-        ostate = initstate(seed, vector, _arraycount(vector));
+        HDsrandom(seed);
 
         if (!create_zoo(fid, ".", &lastmsgtime, config))
             errx(EXIT_FAILURE, "create_zoo didn't pass self-check");
@@ -367,7 +367,6 @@ main(int argc, char **argv)
 
         if (!delete_zoo(fid, ".", &lastmsgtime, config))
             errx(EXIT_FAILURE, "delete_zoo failed");
-        (void)setstate(ostate);
     } else {
         dbgf(2, "Reading zoo...\n");
 

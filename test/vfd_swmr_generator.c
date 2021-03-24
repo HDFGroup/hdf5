@@ -37,6 +37,7 @@
 #define H5O_TESTING
 #include "H5Opkg.h"     /* Object headers			*/
 
+#ifndef H5_HAVE_WIN32_API
 
 /****************/
 /* Local Macros */
@@ -381,3 +382,14 @@ int main(int argc, const char *argv[])
 
     return 0;
 } /* main() */
+
+#else /* H5_HAVE_WIN32_API */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_WIN32_API */

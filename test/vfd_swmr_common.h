@@ -44,14 +44,16 @@ typedef struct _estack_state {
 } estack_state_t;
 
 typedef enum _testsel {
-  TEST_NONE = 0
-, TEST_NULL
-, TEST_OOB
+  TEST_NONE = 0,
+  TEST_NULL,
+  TEST_OOB
 } testsel_t;
 
 /********************/
 /* Global Variables */
 /********************/
+
+H5TEST_DLLVAR int verbosity;
 
 /**************/
 /* Prototypes */
@@ -60,16 +62,17 @@ typedef enum _testsel {
 extern "C" {
 #endif
 
-H5TEST_DLL bool below_speed_limit(struct timespec *, const struct timespec *);
+H5TEST_DLL hbool_t below_speed_limit(struct timespec *, const struct timespec *);
 
 H5TEST_DLL estack_state_t estack_get_state(void);
 H5TEST_DLL estack_state_t disable_estack(void);
 H5TEST_DLL void restore_estack(estack_state_t);
 
-
+#ifndef H5_HAVE_WIN32_API
 H5TEST_DLL void block_signals(sigset_t *);
 H5TEST_DLL void restore_signals(sigset_t *);
 H5TEST_DLL void await_signal(hid_t);
+#endif /* H5_HAVE_WIN32_API */
 
 H5TEST_DLL hid_t 
 vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_pages, 
@@ -90,7 +93,5 @@ H5TEST_DLL int fetch_env_ulong(const char *, unsigned long, unsigned long *);
 #ifdef __cplusplus
 }
 #endif
-
-extern int verbosity;
 
 #endif /* SWMR_COMMON_H */

@@ -1082,8 +1082,7 @@ error:
     return 1;
 } /* test_writer__md() */
 
-
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK))
+#ifndef H5_HAVE_UNISTD_H
 
 static unsigned
 test_reader_md_concur(void)
@@ -1091,7 +1090,7 @@ test_reader_md_concur(void)
     /* Output message about test being performed */
     TESTING("Verify the metadata file for VFD SWMR reader");
     SKIPPED();
-    HDputs("    Test skipped due to fork, waitpid, or flock not defined.");
+    HDputs("    Test skipped (unistd.h not present)");
     return 0;
 
 } /* test_reader_md_concur() */
@@ -1102,23 +1101,34 @@ test_multiple_file_opens_concur(void)
     /* Output message about test being performed */
     TESTING("EOT queue entries when opening files concurrently with VFD SWMR");
     SKIPPED();
-    HDputs("    Test skipped due to fork, waitpid, or flock not defined.");
+    HDputs("    Test skipped (unistd.h not present)");
     return 0;
 
 }  /* test_multiple_file_opens_concur() */
 
 static unsigned
 test_disable_enable_eot_concur(void)
-
+{
     /* Output message about test being performed */
     TESTING("Verify concurrent H5Fvfd_swmr_enable/disable_end_of_tick()");
     SKIPPED();
-    HDputs("    Test skipped due to fork, waitpid, or flock not defined.");
+    HDputs("    Test skipped (unistd.h not present)");
     return 0;
 
 } /* test_disable_enble_eot_concur() */
 
-#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK) */
+static unsigned
+test_file_end_tick_concur(void)
+{
+    /* Output message about test being performed */
+    TESTING("Verify concurrent H5Fvfd_swmr_end_tick()");
+    SKIPPED();
+    HDputs("    Test skipped (unistd.h not present)");
+    return 0;
+
+} /* test_disable_enble_eot_concur() */
+
+#else /* H5_HAVE_UNISTD_H */
 
 /*-------------------------------------------------------------------------
  * Function:    test_reader_md_concur()
@@ -2610,7 +2620,7 @@ error:
     return 1;
 } /* test_file_end_tick_concur() */
 
-#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 
 /*-------------------------------------------------------------------------
@@ -3062,12 +3072,10 @@ test_shadow_index_lookup(void)
     unsigned nerrors = 0;
     H5FD_vfd_swmr_idx_entry_t *idx;
     uint32_t size[] = {0, 1, 2, 3, 4, 0};
-    char vector[8];
     unsigned seed = 1;
     unsigned i, j, failj = UINT_MAX;
     hbool_t have_failj = FALSE;
     unsigned long tmpl;
-    char *ostate;
     const char *seedvar = "H5_SHADOW_INDEX_SEED";
     const char *failvar = "H5_SHADOW_INDEX_FAIL";
 
@@ -3099,7 +3107,7 @@ test_shadow_index_lookup(void)
         break;
     }
 
-    ostate = initstate(seed, vector, _arraycount(vector));
+    HDsrandom(seed);
 
     size[5] = (uint32_t)(1024 + HDrandom() % (16 * 1024 * 1024 - 1024));
 
@@ -3138,7 +3146,7 @@ test_shadow_index_lookup(void)
         if (idx != NULL)
             HDfree(idx);
     }
-    (void)setstate(ostate);
+
 out:
     if (nerrors == 0)
         PASSED();
@@ -3446,13 +3454,17 @@ main(void)
         nerrors += test_shadow_index_lookup();
 
         nerrors += test_file_fapl();
+#ifndef H5_HAVE_WIN32_API
         nerrors += test_writer_create_open_flush();
         nerrors += test_writer_md();
+#endif
         nerrors += test_reader_md_concur();
 
         nerrors += test_multiple_file_opens();
         nerrors += test_multiple_file_opens_concur();
+#ifndef H5_HAVE_WIN32_API
         nerrors += test_same_file_opens();
+#endif
 
         nerrors += test_enable_disable_eot();
         nerrors += test_disable_enable_eot_concur();

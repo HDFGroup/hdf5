@@ -19,8 +19,6 @@
  *        of the same name.
  */
 
-#include <err.h>
-
 #include "cache_common.h"
 #include "vfd_swmr_common.h"    /* for below_speed_limit() */
 #include "genall5.h"
@@ -33,25 +31,25 @@
 typedef enum phase {PHASE_CREATE, PHASE_VALIDATE, PHASE_DELETE,
     PHASE_VALIDATE_DELETION} phase_t;
 
-static bool rm_ns_grp_0(hid_t, const char *);
-static bool rm_ns_grp_c(hid_t, const char *, unsigned);
-static bool rm_ns_grp_d(hid_t, const char *, unsigned);
-static bool rm_os_grp_0(hid_t, const char *);
-static bool rm_os_grp_n(hid_t, const char *, int, unsigned);
-static bool rm_ds_ctg_i(hid_t, const char *, hbool_t);
-static bool rm_ds_chk_i(hid_t, const char *, hbool_t);
-static bool rm_ds_cpt_i(hid_t, const char *, hbool_t);
-static bool rm_ds_ctg_v(hid_t, const char *, hbool_t);
+static hbool_t rm_ns_grp_0(hid_t, const char *);
+static hbool_t rm_ns_grp_c(hid_t, const char *, unsigned);
+static hbool_t rm_ns_grp_d(hid_t, const char *, unsigned);
+static hbool_t rm_os_grp_0(hid_t, const char *);
+static hbool_t rm_os_grp_n(hid_t, const char *, int, unsigned);
+static hbool_t rm_ds_ctg_i(hid_t, const char *, hbool_t);
+static hbool_t rm_ds_chk_i(hid_t, const char *, hbool_t);
+static hbool_t rm_ds_cpt_i(hid_t, const char *, hbool_t);
+static hbool_t rm_ds_ctg_v(hid_t, const char *, hbool_t);
 
-static bool missing_ns_grp_0(hid_t, const char *);
-static bool missing_ns_grp_c(hid_t, const char *, unsigned);
-static bool missing_ns_grp_d(hid_t, const char *, unsigned);
-static bool missing_os_grp_0(hid_t, const char *);
-static bool missing_os_grp_n(hid_t, const char *, int, unsigned);
-static bool missing_ds_ctg_i(hid_t, const char *, hbool_t);
-static bool missing_ds_chk_i(hid_t, const char *, hbool_t);
-static bool missing_ds_cpt_i(hid_t, const char *, hbool_t);
-static bool missing_ds_ctg_v(hid_t, const char *, hbool_t);
+static hbool_t missing_ns_grp_0(hid_t, const char *);
+static hbool_t missing_ns_grp_c(hid_t, const char *, unsigned);
+static hbool_t missing_ns_grp_d(hid_t, const char *, unsigned);
+static hbool_t missing_os_grp_0(hid_t, const char *);
+static hbool_t missing_os_grp_n(hid_t, const char *, int, unsigned);
+static hbool_t missing_ds_ctg_i(hid_t, const char *, hbool_t);
+static hbool_t missing_ds_chk_i(hid_t, const char *, hbool_t);
+static hbool_t missing_ds_cpt_i(hid_t, const char *, hbool_t);
+static hbool_t missing_ds_ctg_v(hid_t, const char *, hbool_t);
 
 #define FN_ITEM_DEFN(__name, ...)                           \
     typedef bool (*__name##fn_t)(__VA_ARGS__);              \
@@ -70,7 +68,7 @@ FN_ITEM_DEFN(ds_ctg_v, hid_t, const char *, bool);
 
 #undef FN_ITEM_DEFN
 
-static bool
+static hbool_t
 file_has_no_path(hid_t fid, const char *path)
 {
     switch (H5Lexists(fid, path, H5P_DEFAULT)) {
@@ -85,7 +83,7 @@ file_has_no_path(hid_t fid, const char *path)
     }
 }
 
-static bool
+static hbool_t
 remove_from_file_path(hid_t fid, const char *path)
 {
     if (H5Ldelete(fid, path, H5P_DEFAULT) < 0) {
@@ -112,19 +110,19 @@ remove_from_file_path(hid_t fid, const char *path)
  *-------------------------------------------------------------------------
  */
 
-static bool
+static hbool_t
 missing_ns_grp_0(hid_t fid, const char *group_name)
 {
     return file_has_no_path(fid, group_name);
 }
 
-static bool
+static hbool_t
 rm_ns_grp_0(hid_t fid, const char *group_name)
 {
     return remove_from_file_path(fid, group_name);
 }
 
-bool
+hbool_t
 ns_grp_0(hid_t fid, const char *group_name)
 {
     hid_t gid = -1;
@@ -187,7 +185,7 @@ ns_grp_0(hid_t fid, const char *group_name)
  *-------------------------------------------------------------------------
  */
 
-bool
+hbool_t
 vrfy_ns_grp_0(hid_t fid, const char *group_name)
 {
     hid_t gid = -1;
@@ -277,20 +275,20 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
  *-------------------------------------------------------------------------
  */
 
-static bool
+static hbool_t
 missing_ns_grp_c(hid_t fid, const char *group_name,
     unsigned H5_ATTR_UNUSED nlinks)
 {
     return file_has_no_path(fid, group_name);
 }
 
-static bool
+static hbool_t
 rm_ns_grp_c(hid_t fid, const char *group_name, unsigned H5_ATTR_UNUSED nlinks)
 {
     return remove_from_file_path(fid, group_name);
 }
 
-bool
+hbool_t
 ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
 {
     hid_t gid = -1;
@@ -403,7 +401,7 @@ ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
  *-------------------------------------------------------------------------
  */
 
-bool
+hbool_t
 vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
 {
     hid_t gid = -1;
@@ -625,20 +623,20 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
  *-------------------------------------------------------------------------
  */
 
-static bool
+static hbool_t
 missing_ns_grp_d(hid_t fid, const char *group_name,
     unsigned H5_ATTR_UNUSED nlinks)
 {
     return file_has_no_path(fid, group_name);
 }
 
-static bool
+static hbool_t
 rm_ns_grp_d(hid_t fid, const char *group_name, unsigned H5_ATTR_UNUSED nlinks)
 {
     return remove_from_file_path(fid, group_name);
 }
 
-bool
+hbool_t
 ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
 {
     hid_t gid = -1;
@@ -750,7 +748,7 @@ ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
  */
 
 
-bool
+hbool_t
 vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
 {
     hid_t gid = -1;
@@ -969,19 +967,19 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
  *-------------------------------------------------------------------------
  */
 
-static bool
+static hbool_t
 missing_os_grp_0(hid_t fid, const char *group_name)
 {
     return file_has_no_path(fid, group_name);
 }
 
-static bool
+static hbool_t
 rm_os_grp_0(hid_t fid, const char *group_name)
 {
     return remove_from_file_path(fid, group_name);
 }
 
-bool
+hbool_t
 os_grp_0(hid_t fid, const char *group_name)
 {
     hid_t gid = -1;
@@ -1055,7 +1053,7 @@ os_grp_0(hid_t fid, const char *group_name)
  *-------------------------------------------------------------------------
  */
 
-bool
+hbool_t
 vrfy_os_grp_0(hid_t fid, const char *group_name)
 {
     hid_t gid = -1;
@@ -1143,21 +1141,21 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
  *-------------------------------------------------------------------------
  */
 
-static bool
+static hbool_t
 missing_os_grp_n(hid_t fid, const char *group_name, int H5_ATTR_UNUSED proc_num,
     unsigned H5_ATTR_UNUSED nlinks)
 {
     return file_has_no_path(fid, group_name);
 }
 
-static bool
+static hbool_t
 rm_os_grp_n(hid_t fid, const char *group_name, int H5_ATTR_UNUSED proc_num,
     unsigned H5_ATTR_UNUSED nlinks)
 {
     return remove_from_file_path(fid, group_name);
 }
 
-bool
+hbool_t
 os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
 {
     hid_t gid = -1;
@@ -1255,7 +1253,7 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
  *
  *-------------------------------------------------------------------------
  */
-bool
+hbool_t
 vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
 {
     hid_t gid = -1;
@@ -1433,20 +1431,20 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
  *
  *-------------------------------------------------------------------------
  */
-static bool
+static hbool_t
 missing_ds_ctg_i(hid_t fid, const char *dset_name,
     hbool_t H5_ATTR_UNUSED write_data)
 {
     return file_has_no_path(fid, dset_name);
 }
 
-static bool
+static hbool_t
 rm_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
 {
     return remove_from_file_path(fid, dset_name);
 }
 
-bool
+hbool_t
 ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *wdata = NULL;
@@ -1527,7 +1525,7 @@ ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  *-------------------------------------------------------------------------
  */
-bool
+hbool_t
 vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *rdata = NULL;
@@ -1695,20 +1693,20 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  *-------------------------------------------------------------------------
  */
-static bool
+static hbool_t
 missing_ds_chk_i(hid_t fid, const char *dset_name,
     hbool_t H5_ATTR_UNUSED write_data)
 {
     return file_has_no_path(fid, dset_name);
 }
 
-static bool
+static hbool_t
 rm_ds_chk_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
 {
     return remove_from_file_path(fid, dset_name);
 }
 
-bool
+hbool_t
 ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *wdata = NULL;
@@ -1810,7 +1808,7 @@ ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  *-------------------------------------------------------------------------
  */
-bool
+hbool_t
 vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *rdata = NULL;
@@ -1985,20 +1983,20 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  *-------------------------------------------------------------------------
  */
-static bool
+static hbool_t
 missing_ds_cpt_i(hid_t fid, const char *dset_name,
     hbool_t H5_ATTR_UNUSED write_data)
 {
     return file_has_no_path(fid, dset_name);
 }
 
-static bool
+static hbool_t
 rm_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
 {
     return remove_from_file_path(fid, dset_name);
 }
 
-bool
+hbool_t
 ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *wdata = NULL;
@@ -2101,7 +2099,7 @@ ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  *-------------------------------------------------------------------------
  */
-bool
+hbool_t
 vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *rdata = NULL;
@@ -2264,20 +2262,20 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  *-------------------------------------------------------------------------
  */
-static bool
+static hbool_t
 missing_ds_ctg_v(hid_t fid, const char *dset_name,
     hbool_t H5_ATTR_UNUSED write_data)
 {
     return file_has_no_path(fid, dset_name);
 }
 
-static bool
+static hbool_t
 rm_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
 {
     return remove_from_file_path(fid, dset_name);
 }
 
-bool
+hbool_t
 ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     hid_t dsid = -1;
@@ -2402,7 +2400,7 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  *-------------------------------------------------------------------------
  */
-bool
+hbool_t
 vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     hid_t dsid = -1;
@@ -2603,7 +2601,7 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
  * Return `true` if the selector was valid, `false` if it was not.
  */
 
-static bool
+static hbool_t
 create_or_validate_selection(hid_t fid, const char *full_path,
     int selector, zoo_config_t config, phase_t phase, bool *okp)
 {
@@ -2691,25 +2689,16 @@ create_or_validate_selection(hid_t fid, const char *full_path,
 static void
 random_pause(unsigned int max_pause_msecs)
 {
-    struct timespec delay;
-    const uint64_t nsecs_per_sec = 1000 * 1000 * 1000;
-    uint64_t nsecs_per_msec, nsecs;
+    uint64_t nsecs_per_msec;
+    uint64_t nsecs;
 
     if (max_pause_msecs == 0)
         return;
 
-    nsecs_per_msec = 1 + (uint64_t)random() % (1000 * 1000);
+    nsecs_per_msec = 1 + (uint64_t)HDrandom() % (1000 * 1000);
     nsecs = max_pause_msecs * nsecs_per_msec;
 
-    delay.tv_sec = (time_t)(nsecs / nsecs_per_sec);
-    delay.tv_nsec = (long)(nsecs % nsecs_per_sec);
-    for (;;) {
-        if (nanosleep(&delay, &delay) == 0)
-            break;
-        if (errno == EINTR)
-            continue;
-        errx(EXIT_FAILURE, "%s: nanosleep", __func__);
-    }
+    H5_nanosleep(nsecs);
 }
 
 /* Create and validate objects or, if `only_validate` is true, only
@@ -2720,7 +2709,7 @@ random_pause(unsigned int max_pause_msecs)
  * Return true if all tests pass, false if any test fails.
  */
 
-static bool
+static hbool_t
 tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     zoo_config_t config, const phase_t *phase, size_t nphases)
 {
@@ -2728,21 +2717,21 @@ tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     int i, nwritten;
     size_t j;
     char *leafp;
-    bool ok = true;
+    hbool_t ok = TRUE;
 
-    nwritten = snprintf(full_path, sizeof(full_path), "%s/*", base_path);
+    nwritten = HDsnprintf(full_path, sizeof(full_path), "%s/*", base_path);
     if (nwritten < 0 || (size_t)nwritten >= sizeof(full_path)) {
         failure_mssg = "tend_zoo: snprintf failed";
-        return false;
+        return FALSE;
     }
 
-    if ((leafp = strrchr(full_path, '*')) == NULL) {
+    if ((leafp = HDstrrchr(full_path, '*')) == NULL) {
         failure_mssg = "tend_zoo: strrchr failed";
-        return false;
+        return FALSE;
     }
 
     for (i = 0; ok; i++) {
-        assert('A' + i <= 'Z');
+        HDassert('A' + i <= 'Z');
         *leafp = (char)('A' + i);
         for (j = 0; j < nphases; j++) {
             if (!create_or_validate_selection(fid, full_path, i, config,
@@ -2755,12 +2744,12 @@ tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     }
 out:
     if (!ok) {
-        if (strcmp(failure_mssg, last_failure_mssg) != 0)
+        if (HDstrcmp(failure_mssg, last_failure_mssg) != 0)
             *lastmsgtime = (struct timespec){.tv_sec = 0, .tv_nsec = 0};
 
         if (below_speed_limit(lastmsgtime, &config.msgival)) {
             last_failure_mssg = failure_mssg;
-            warnx("%s: %s", __func__, failure_mssg);
+            HDfprintf(stderr, "%s: %s", __func__, failure_mssg);
         }
     }
     return ok;
@@ -2787,7 +2776,7 @@ out:
  *-------------------------------------------------------------------------
  */
 
-bool
+hbool_t
 create_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     zoo_config_t config)
 {
@@ -2815,7 +2804,7 @@ create_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
  *-------------------------------------------------------------------------
  */
 
-bool
+hbool_t
 validate_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     zoo_config_t config)
 {
@@ -2824,7 +2813,7 @@ validate_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     return tend_zoo(fid, base_path, lastmsgtime, config, phase, NELMTS(phase));
 }
 
-bool
+hbool_t
 delete_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     zoo_config_t config)
 {
@@ -2833,7 +2822,7 @@ delete_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
     return tend_zoo(fid, base_path, lastmsgtime, config, phase, NELMTS(phase));
 }
 
-bool
+hbool_t
 validate_deleted_zoo(hid_t fid, const char *base_path,
     struct timespec *lastmsgtime, zoo_config_t config)
 {
