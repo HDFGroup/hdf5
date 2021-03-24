@@ -33,6 +33,7 @@
 ./autogen.sh
 ./configure.ac
 
+./.clang-format
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 
 ./m4/aclocal_cxx.m4
@@ -71,6 +72,8 @@
 ./bin/deploy
 ./bin/distdep
 ./bin/errors              _DO_NOT_DISTRIBUTE_
+./bin/format_source
+./bin/format_source_patch
 ./bin/genparser
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
 ./bin/h5cc.in
