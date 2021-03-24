@@ -581,32 +581,6 @@ Wgetlogin(void)
         return NULL;
 }
 
-int
-c99_snprintf(char *str, size_t size, const char *format, ...)
-{
-    int     count;
-    va_list ap;
-
-    HDva_start(ap, format);
-    count = c99_vsnprintf(str, size, format, ap);
-    HDva_end(ap);
-
-    return count;
-}
-
-int
-c99_vsnprintf(char *str, size_t size, const char *format, va_list ap)
-{
-    int count = -1;
-
-    if (size != 0)
-        count = _vsnprintf_s(str, size, _TRUNCATE, format, ap);
-    if (count == -1)
-        count = _vscprintf(format, ap);
-
-    return count;
-}
-
 /*-------------------------------------------------------------------------
  * Function:    Wflock
  *
@@ -657,55 +631,6 @@ Wflock(int fd, int operation)
 
     return 0;
 } /* end Wflock() */
-
-/*-------------------------------------------------------------------------
- * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
- *
- * Purpose:     Wrapper function for round functions for use with VS2012
- *              and earlier.
- *
- * Return:      The rounded value that was passed in.
- *
- * Programmer:  Dana Robinson
- *              December 2016
- *
- *-------------------------------------------------------------------------
- */
-long long
-Wllround(double arg)
-{
-    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long long
-Wllroundf(float arg)
-{
-    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-long
-Wlround(double arg)
-{
-    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long
-Wlroundf(float arg)
-{
-    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-double
-Wround(double arg)
-{
-    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
-}
-
-float
-Wroundf(float arg)
-{
-    return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
 
 /*-------------------------------------------------------------------------
  * Function:     H5_get_utf16_str
