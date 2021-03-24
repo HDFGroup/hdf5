@@ -20,15 +20,24 @@ import java.io.Serializable;
  */
 public class H5O_info_t implements Serializable {
     private static final long serialVersionUID = 4691681163544054518L;
-    public long        fileno;     /* File number that object is located in */
-    public H5O_token_t token;      /* Object token in file */
-    public int         type;       /* Basic object type (group, dataset, etc.) */
-    public int         rc;         /* Reference count of object    */
-    public long        atime;      /* Access time          */
-    public long        mtime;      /* Modification time        */
-    public long        ctime;      /* Change time          */
-    public long        btime;      /* Birth time           */
-    public long        num_attrs;  /* # of attributes attached to object */
+    /** File number that object is located in */
+    public long        fileno;
+    /** Object token in file */
+    public H5O_token_t token;
+    /** Basic object type (group, dataset, etc.) */
+    public int         type;
+    /** Reference count of object */
+    public int         rc;
+    /** Access time */
+    public long        atime;
+    /** Modification time */
+    public long        mtime;
+    /** Change time */
+    public long        ctime;
+    /** Birth time */
+    public long        btime;
+    /** # of attributes attached to object */
+    public long        num_attrs;
 
     public H5O_info_t (long fileno, H5O_token_t token, int type,
         int rc, long atime, long mtime, long ctime, long btime, long num_attrs)
