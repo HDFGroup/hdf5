@@ -1233,7 +1233,7 @@ test_h5s_encode(void)
 
     if (sbuf_size > 0) {
         sbuf = (unsigned char *)HDcalloc((size_t)1, sbuf_size);
-        CHECK(sbuf, NULL, "HDcalloc");
+        CHECK_PTR(sbuf, "HDcalloc");
     }
 
     /* Try decoding bogus buffer */
@@ -1294,7 +1294,7 @@ test_h5s_encode(void)
 
     if (null_size > 0) {
         null_sbuf = (unsigned char *)HDcalloc((size_t)1, null_size);
-        CHECK(null_sbuf, NULL, "HDcalloc");
+        CHECK_PTR(null_sbuf, "HDcalloc");
     }
 
     /* Encode the null dataspace in the buffer */
@@ -1312,6 +1312,627 @@ test_h5s_encode(void)
     /* Close the dataspaces */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
+<<<<<<< HEAD
+=======
+
+    ret = H5Sclose(decoded_sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /*-------------------------------------------------------------------------
+     * Test encoding and decoding of scalar dataspace.
+     *-------------------------------------------------------------------------
+     */
+    /* Create scalar dataspace */
+    sid3 = H5Screate(H5S_SCALAR);
+    CHECK(sid3, FAIL, "H5Screate");
+
+    /* Encode scalar dataspace in a buffer */
+    ret = H5Sencode1(sid3, NULL, &scalar_size);
+    CHECK(ret, FAIL, "H5Sencode");
+
+    if (scalar_size > 0) {
+        scalar_buf = (unsigned char *)HDcalloc((size_t)1, scalar_size);
+        CHECK_PTR(scalar_buf, "HDcalloc");
+    }
+
+    /* Encode the scalar dataspace in the buffer */
+    ret = H5Sencode1(sid3, scalar_buf, &scalar_size);
+    CHECK(ret, FAIL, "H5Sencode2");
+
+    /* Decode from the dataspace buffer and return an object handle */
+    decoded_sid3 = H5Sdecode(scalar_buf);
+    CHECK(decoded_sid3, FAIL, "H5Sdecode");
+
+    /* Verify extent type */
+    space_type = H5Sget_simple_extent_type(decoded_sid3);
+    VERIFY(space_type, H5S_SCALAR, "H5Sget_simple_extent_type");
+
+    /* Verify decoded dataspace */
+    n = H5Sget_simple_extent_npoints(decoded_sid3);
+    CHECK(n, FAIL, "H5Sget_simple_extent_npoints");
+    VERIFY(n, 1, "H5Sget_simple_extent_npoints");
+
+    /* Retrieve and verify the dataspace rank */
+    rank = H5Sget_simple_extent_ndims(decoded_sid3);
+    CHECK(rank, FAIL, "H5Sget_simple_extent_ndims");
+    VERIFY(rank, 0, "H5Sget_simple_extent_ndims");
+
+    /* Close the dataspaces */
+    ret = H5Sclose(sid3);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Sclose(decoded_sid3);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Release resources */
+    if (sbuf)
+        HDfree(sbuf);
+    if (null_sbuf)
+        HDfree(null_sbuf);
+    if (scalar_buf)
+        HDfree(scalar_buf);
+} /* test_h5s_encode1() */
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+/****************************************************************
+**
+**  test_h5s_check_encoding():
+**      This is the helper routine to verify that H5Sencode2()
+**      works as specified in the RFC for the library format setting
+**      in the file access property list.
+**      See "RFC: H5Sencode/H5Sdeocde Format Change".
+**
+**      This routine is used by:
+**          test_h5s_encode_regular_hyper()
+**          test_h5s_encode_irregular_hyper()
+**          test_h5s_encode_points()
+**
+****************************************************************/
+static herr_t
+test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, uint8_t expected_enc_size,
+                        hbool_t expected_to_fail)
+{
+    char *  buf = NULL; /* Pointer to the encoded buffer */
+    size_t  buf_size;   /* Size of the encoded buffer */
+    hid_t   d_sid = -1; /* The decoded dataspace ID */
+    htri_t  check;
+    hsize_t in_low_bounds[1];  /* The low bounds for the selection for in_sid */
+    hsize_t in_high_bounds[1]; /* The high bounds for the selection for in_sid */
+    hsize_t d_low_bounds[1];   /* The low bounds for the selection for d_sid */
+    hsize_t d_high_bounds[1];  /* The high bounds for the selection for d_sid */
+    herr_t  ret;               /* Return value */
+
+    /* Get buffer size for encoding with the format setting in in_fapl */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sencode2(in_sid, NULL, &buf_size, in_fapl);
+    }
+    H5E_END_TRY
+
+    if (expected_to_fail) {
+        VERIFY(ret, FAIL, "H5Screate_simple");
+    }
+    else {
+
+        CHECK(ret, FAIL, "H5Sencode2");
+
+        /* Allocate the buffer for encoding */
+        buf = (char *)HDmalloc(buf_size);
+        CHECK_PTR(buf, "H5Dmalloc");
+
+        /* Encode according to the setting in in_fapl */
+        ret = H5Sencode2(in_sid, buf, &buf_size, in_fapl);
+        CHECK(ret, FAIL, "H5Sencode2");
+
+        /* Decode the buffer */
+        d_sid = H5Sdecode(buf);
+        CHECK(d_sid, FAIL, "H5Sdecode");
+
+        /* Verify the number of selected points for in_sid and d_sid */
+        VERIFY(H5Sget_select_npoints(in_sid), H5Sget_select_npoints(d_sid), "Compare npoints");
+
+        /* Verify if the two dataspace selections (in_sid, d_sid) are the same shape */
+        check = H5Sselect_shape_same(in_sid, d_sid);
+        VERIFY(check, TRUE, "H5Sselect_shape_same");
+
+        /* Compare the starting/ending coordinates of the bounding box for in_sid and d_sid */
+        ret = H5Sget_select_bounds(in_sid, in_low_bounds, in_high_bounds);
+        CHECK(ret, FAIL, "H5Sget_select_bounds");
+        ret = H5Sget_select_bounds(d_sid, d_low_bounds, d_high_bounds);
+        CHECK(ret, FAIL, "H5Sget_select_bounds");
+        VERIFY(in_low_bounds[0], d_low_bounds[0], "Compare selection low bounds");
+        VERIFY(in_high_bounds[0], d_high_bounds[0], "Compare selection high bounds");
+
+        /*
+         * See "RFC: H5Sencode/H5Sdeocde Format Change" for the verification of:
+         *   H5S_SEL_POINTS:
+         *      --the expected version for point selection info
+         *      --the expected encoded size (version 2 points selection info)
+         *   H5S_SEL_HYPERSLABS:
+         *      --the expected version for hyperslab selection info
+         *      --the expected encoded size (version 3 hyperslab selection info)
+         */
+
+        if (H5Sget_select_type(in_sid) == H5S_SEL_POINTS) {
+
+            /* Verify the version */
+            VERIFY((uint32_t)buf[35], expected_version, "Version for point selection");
+
+            /* Verify the encoded size for version 2 */
+            if (expected_version == 2)
+                VERIFY((uint8_t)buf[39], expected_enc_size, "Encoded size of point selection info");
+        }
+
+        if (H5Sget_select_type(in_sid) == H5S_SEL_HYPERSLABS) {
+
+            /* Verify the version */
+            VERIFY((uint32_t)buf[35], expected_version, "Version for hyperslab selection info");
+
+            /* Verify the encoded size for version 3 */
+            if (expected_version == 3)
+                VERIFY((uint8_t)buf[40], expected_enc_size, "Encoded size of selection info");
+
+        } /* hyperslab selection */
+
+        ret = H5Sclose(d_sid);
+        CHECK(ret, FAIL, "H5Sclose");
+        if (buf)
+            HDfree(buf);
+    }
+
+    return (0);
+
+} /* test_h5s_check_encoding */
+
+/****************************************************************
+**
+**  test_h5s_encode_regular_hyper():
+**      This test verifies that H5Sencode2() works as specified in
+**      the RFC for regular hyperslabs.
+**      See "RFC: H5Sencode/H5Sdeocde Format Change".
+**
+****************************************************************/
+static void
+test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
+{
+    hid_t    fapl            = -1;      /* File access property list ID */
+    hid_t    sid             = -1;      /* Dataspace ID */
+    hsize_t  numparticles    = 8388608; /* Used to calculate dimension size */
+    unsigned num_dsets       = 513;     /* Used to calculate dimension size */
+    hsize_t  total_particles = numparticles * num_dsets;
+    hsize_t  vdsdims[1]      = {total_particles}; /* Dimension size */
+    hsize_t  start, stride, count, block;         /* Selection info */
+    unsigned config;                              /* Testing configuration */
+    unsigned unlim;                               /* H5S_UNLIMITED setting or not */
+    herr_t   ret;                                 /* Generic return value */
+    uint32_t expected_version  = 0;               /* Expected version for selection info */
+    uint8_t  expected_enc_size = 0;               /* Expected encoded size for selection info */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Dataspace encoding of regular hyperslabs\n"));
+
+    /* Create the file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the low/high bounds in the fapl */
+    ret = H5Pset_libver_bounds(fapl, low, high);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create the dataspace */
+    sid = H5Screate_simple(1, vdsdims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Testing with each configuration */
+    for (config = CONFIG_16; config <= CONFIG_32; config++) {
+        hbool_t expected_to_fail = FALSE;
+
+        /* Testing with unlimited or not */
+        for (unlim = 0; unlim <= 1; unlim++) {
+            start = 0;
+            count = unlim ? H5S_UNLIMITED : 2;
+
+            if ((high <= H5F_LIBVER_V18) && (unlim || config == CONFIG_32))
+                expected_to_fail = TRUE;
+
+            if (low >= H5F_LIBVER_V112)
+                expected_version = 3;
+            else if (config == CONFIG_16 && !unlim)
+                expected_version = 1;
+            else
+                expected_version = 2;
+
+            /* test 1 */
+            switch (config) {
+                case CONFIG_16:
+                    stride            = POWER16 - 1;
+                    block             = 4;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 2 : 4);
+                    break;
+                case CONFIG_32:
+                    stride            = POWER32 - 1;
+                    block             = 4;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 4 : 8);
+
+                    break;
+                default:
+                    HDassert(0);
+                    break;
+            } /* end switch */
+
+            /* Set the hyperslab selection */
+            ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, &stride, &count, &block);
+            CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+            /* Verify the version and encoded size expected for this configuration */
+            ret = test_h5s_check_encoding(fapl, sid, expected_version, expected_enc_size, expected_to_fail);
+            CHECK(ret, FAIL, "test_h5s_check_encoding");
+
+            /* test 2 */
+            switch (config) {
+                case CONFIG_16:
+                    stride            = POWER16 - 1;
+                    block             = POWER16 - 2;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 2 : 4);
+                    break;
+                case CONFIG_32:
+                    stride            = POWER32 - 1;
+                    block             = POWER32 - 2;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 4 : 8);
+                    break;
+                default:
+                    HDassert(0);
+                    break;
+            } /* end switch */
+
+            /* Set the hyperslab selection */
+            ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, &stride, &count, &block);
+            CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+            /* Verify the version and encoded size for this configuration */
+            ret = test_h5s_check_encoding(fapl, sid, expected_version, expected_enc_size, expected_to_fail);
+            CHECK(ret, FAIL, "test_h5s_check_encoding");
+
+            /* test 3 */
+            switch (config) {
+                case CONFIG_16:
+                    stride            = POWER16 - 1;
+                    block             = POWER16 - 1;
+                    expected_enc_size = 4;
+                    break;
+                case CONFIG_32:
+                    stride            = POWER32 - 1;
+                    block             = POWER32 - 1;
+                    expected_enc_size = 8;
+                    break;
+                default:
+                    HDassert(0);
+                    break;
+            }
+
+            /* Set the hyperslab selection */
+            ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, &stride, &count, &block);
+            CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+            /* Verify the version and encoded size expected for this configuration */
+            ret = test_h5s_check_encoding(fapl, sid, expected_version, expected_enc_size, expected_to_fail);
+            CHECK(ret, FAIL, "test_h5s_check_encoding");
+
+            /* test 4 */
+            switch (config) {
+                case CONFIG_16:
+                    stride            = POWER16;
+                    block             = POWER16 - 2;
+                    expected_enc_size = 4;
+                    break;
+                case CONFIG_32:
+                    stride            = POWER32;
+                    block             = POWER32 - 2;
+                    expected_enc_size = 8;
+                    break;
+                default:
+                    HDassert(0);
+                    break;
+            } /* end switch */
+
+            /* Set the hyperslab selection */
+            ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, &stride, &count, &block);
+            CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+            /* Verify the version and encoded size expected for this configuration */
+            ret = test_h5s_check_encoding(fapl, sid, expected_version, expected_enc_size, expected_to_fail);
+            CHECK(ret, FAIL, "test_h5s_check_encoding");
+
+            /* test 5 */
+            switch (config) {
+                case CONFIG_16:
+                    stride            = POWER16;
+                    block             = 1;
+                    expected_enc_size = 4;
+                    break;
+                case CONFIG_32:
+                    stride            = POWER32;
+                    block             = 1;
+                    expected_enc_size = 8;
+                    break;
+                default:
+                    HDassert(0);
+                    break;
+            }
+
+            /* Set the hyperslab selection */
+            ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, &stride, &count, &block);
+            CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+            /* Verify the version and encoded size expected for this configuration */
+            ret = test_h5s_check_encoding(fapl, sid, expected_version, expected_enc_size, expected_to_fail);
+            CHECK(ret, FAIL, "test_h5s_check_encoding");
+
+        } /* for unlim */
+    }     /* for config */
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+} /* test_h5s_encode_regular_hyper() */
+
+/****************************************************************
+**
+**  test_h5s_encode_irregular_hyper():
+**      This test verifies that H5Sencode2() works as specified in
+**      the RFC for irregular hyperslabs.
+**      See "RFC: H5Sencode/H5Sdeocde Format Change".
+**
+****************************************************************/
+static void
+test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
+{
+    hid_t    fapl = -1;                 /* File access property list ID */
+    hid_t    sid;                       /* Dataspace ID */
+    hsize_t  numparticles    = 8388608; /* Used to calculate dimension size */
+    unsigned num_dsets       = 513;     /* Used to calculate dimension size */
+    hsize_t  total_particles = numparticles * num_dsets;
+    hsize_t  vdsdims[1]      = {total_particles}; /* Dimension size */
+    hsize_t  start, stride, count, block;         /* Selection info */
+    htri_t   is_regular;                          /* Is this a regular hyperslab */
+    unsigned config;                              /* Testing configuration */
+    herr_t   ret;                                 /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Dataspace encoding of irregular hyperslabs\n"));
+
+    /* Create the file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the low/high bounds in the fapl */
+    ret = H5Pset_libver_bounds(fapl, low, high);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create the dataspace */
+    sid = H5Screate_simple(1, vdsdims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Testing with each configuration */
+    for (config = CONFIG_8; config <= CONFIG_32; config++) {
+        hbool_t  expected_to_fail  = FALSE; /* Whether H5Sencode2 is expected to fail */
+        uint32_t expected_version  = 0;     /* Expected version for selection info */
+        uint32_t expected_enc_size = 0;     /* Expected encoded size for selection info */
+
+        start = 0;
+        count = 2;
+        block = 4;
+
+        /* H5Sencode2 is expected to fail for library v110 and below
+           when the selection exceeds the 32 bits integer limit */
+        if (high <= H5F_LIBVER_V110 && config == CONFIG_32)
+            expected_to_fail = TRUE;
+
+        if (low >= H5F_LIBVER_V112 || config == CONFIG_32)
+            expected_version = 3;
+        else
+            expected_version = 1;
+
+        switch (config) {
+            case CONFIG_8:
+                stride = POWER8 - 2;
+                break;
+
+            case CONFIG_16:
+                stride = POWER16 - 2;
+                break;
+
+            case CONFIG_32:
+                stride = POWER32 - 2;
+                break;
+
+            default:
+                HDassert(0);
+                break;
+        }
+
+        /* Set the hyperslab selection */
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, &stride, &count, &block);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        start = 8;
+        count = 5;
+        block = 2;
+
+        switch (config) {
+            case CONFIG_8:
+                stride            = POWER8;
+                expected_enc_size = expected_version == 3 ? 2 : 4;
+                break;
+
+            case CONFIG_16:
+                stride            = POWER16;
+                expected_enc_size = 4;
+                break;
+
+            case CONFIG_32:
+                stride            = POWER32;
+                expected_enc_size = 8;
+                break;
+
+            default:
+                HDassert(0);
+                break;
+        }
+
+        /* Set the hyperslab selection */
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_OR, &start, &stride, &count, &block);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        /* Should be irregular hyperslab */
+        is_regular = H5Sis_regular_hyperslab(sid);
+        VERIFY(is_regular, FALSE, "H5Sis_regular_hyperslab");
+
+        /* Verify the version and encoded size expected for the configuration */
+        HDassert(expected_enc_size <= 255);
+        ret = test_h5s_check_encoding(fapl, sid, expected_version, (uint8_t)expected_enc_size,
+                                      expected_to_fail);
+        CHECK(ret, FAIL, "test_h5s_check_encoding");
+
+    } /* for config */
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+} /* test_h5s_encode_irregular_hyper() */
+
+/****************************************************************
+**
+**  test_h5s_encode_points():
+**      This test verifies that H5Sencode2() works as specified in
+**      the RFC for point selection.
+**      See "RFC: H5Sencode/H5Sdeocde Format Change".
+**
+****************************************************************/
+static void
+test_h5s_encode_points(H5F_libver_t low, H5F_libver_t high)
+{
+    hid_t    fapl = -1;                 /* File access property list ID */
+    hid_t    sid;                       /* Dataspace ID */
+    hsize_t  numparticles    = 8388608; /* Used to calculate dimenion size */
+    unsigned num_dsets       = 513;     /* used to calculate dimension size */
+    hsize_t  total_particles = numparticles * num_dsets;
+    hsize_t  vdsdims[1]      = {total_particles}; /* Dimension size */
+    hsize_t  coord[4];                            /* The point coordinates */
+    herr_t   ret;                                 /* Generic return value */
+    hbool_t  expected_to_fail  = FALSE;           /* Expected to fail or not */
+    uint32_t expected_version  = 0;               /* Expected version for selection info */
+    uint8_t  expected_enc_size = 0;               /* Expected encoded size of selection info */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Dataspace encoding of points selection\n"));
+
+    /* Create the file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the low/high bounds in the fapl */
+    ret = H5Pset_libver_bounds(fapl, low, high);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create the dataspace */
+    sid = H5Screate_simple(1, vdsdims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* test 1 */
+    coord[0] = 5;
+    coord[1] = 15;
+    coord[2] = POWER16;
+    coord[3] = 19;
+    ret      = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)4, coord);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    expected_to_fail  = FALSE;
+    expected_enc_size = 4;
+    expected_version  = 1;
+
+    if (low >= H5F_LIBVER_V112)
+        expected_version = 2;
+
+    /* Verify the version and encoded size expected for the configuration */
+    ret = test_h5s_check_encoding(fapl, sid, expected_version, expected_enc_size, expected_to_fail);
+    CHECK(ret, FAIL, "test_h5s_check_encoding");
+
+    /* test 2 */
+    coord[0] = 5;
+    coord[1] = 15;
+    coord[2] = POWER32 - 1;
+    coord[3] = 19;
+    ret      = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)4, coord);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Expected result same as test 1 */
+    ret = test_h5s_check_encoding(fapl, sid, expected_version, expected_enc_size, expected_to_fail);
+    CHECK(ret, FAIL, "test_h5s_check_encoding");
+
+    /* test 3 */
+    if (high <= H5F_LIBVER_V110)
+        expected_to_fail = TRUE;
+
+    if (high >= H5F_LIBVER_V112) {
+        expected_version  = 2;
+        expected_enc_size = 8;
+    }
+
+    coord[0] = 5;
+    coord[1] = 15;
+    coord[2] = POWER32 + 1;
+    coord[3] = 19;
+    ret      = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)4, coord);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Verify the version and encoded size expected for the configuration */
+    ret = test_h5s_check_encoding(fapl, sid, expected_version, expected_enc_size, expected_to_fail);
+    CHECK(ret, FAIL, "test_h5s_check_encoding");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+} /* test_h5s_encode_points() */
+
+/****************************************************************
+**
+**  test_h5s_encode_length():
+**      Test to verify HDFFV-10271 is fixed.
+**      Verify that version 2 hyperslab encoding length is correct.
+**
+**  See "RFC: H5Sencode/H5Sdecode Format Change" for the
+**  description of the encoding format.
+**
+****************************************************************/
+static void
+test_h5s_encode_length(void)
+{
+    hid_t          sid;                         /* Dataspace ID */
+    hid_t          decoded_sid;                 /* Dataspace ID from H5Sdecode2 */
+    size_t         sbuf_size = 0;               /* Buffer size for H5Sencode2/1 */
+    unsigned char *sbuf      = NULL;            /* Buffer for H5Sencode2/1 */
+    hsize_t        dims[1]   = {500};           /* Dimension size */
+    hsize_t        start, count, block, stride; /* Hyperslab selection specifications */
+    herr_t         ret;                         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Version 2 Hyperslab Encoding Length is correct\n"));
+
+    /* Create dataspace */
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Setting H5S_UNLIMITED in count will use version 2 for hyperslab encoding */
+    start  = 0;
+    stride = 10;
+    block  = 4;
+    count  = H5S_UNLIMITED;
 
     ret = H5Sclose(decoded_sid2);
     CHECK(ret, FAIL, "H5Sclose");
@@ -1330,7 +1951,7 @@ test_h5s_encode(void)
 
     if (scalar_size > 0) {
         scalar_buf = (unsigned char *)HDcalloc((size_t)1, scalar_size);
-        CHECK(scalar_buf, NULL, "HDcalloc");
+        CHECK_PTR(scalar_buf, "HDcalloc");
     }
 
     /* Encode the scalar dataspace in the buffer */
@@ -2494,7 +3115,7 @@ test_versionbounds(void)
 
     /* Its version should be H5O_SDSPACE_VERSION_1 */
     spacep = (H5S_t *)H5I_object(space);
-    CHECK(spacep, NULL, "H5I_object");
+    CHECK_PTR(spacep, "H5I_object");
     VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
 
     /* Set high bound to V18 */
@@ -2515,7 +3136,7 @@ test_versionbounds(void)
         dset_space = H5Dget_space(dset);
         CHECK(dset_space, FAIL, "H5Dget_space");
         spacep = (H5S_t *)H5I_object(dset_space);
-        CHECK(spacep, NULL, "H5I_object");
+        CHECK_PTR(spacep, "H5I_object");
 
         /* Dataspace version should remain as H5O_SDSPACE_VERSION_1 */
         VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
@@ -2552,7 +3173,7 @@ test_versionbounds(void)
     dset_space = H5Dget_space(dset);
     CHECK(dset_space, FAIL, "H5Dget_space");
     spacep = (H5S_t *)H5I_object(dset_space);
-    CHECK(spacep, NULL, "H5I_object");
+    CHECK_PTR(spacep, "H5I_object");
 
     /* Verify the dataspace version */
     VERIFY(spacep->extent.version, H5O_sdspace_ver_bounds[low], "upgraded dataspace version");

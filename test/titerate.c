@@ -947,7 +947,7 @@ test_links(hid_t fapl)
         else if (!HDstrcmp(obj_name, "softlink"))
             VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
         else
-            CHECK(0, 0, "unknown object name");
+            ERROR("unknown object name");
     } /* end for */
 
     ret = H5Gclose(gid);
