@@ -36,6 +36,8 @@ public class H5O_token_t implements Serializable {
 
     /**
      * Check if token data is undefined
+     *
+     * @return true if token data is undefined
      */
     public boolean isUndefined() {
         return this.equals(HDF5Constants.H5O_TOKEN_UNDEF);

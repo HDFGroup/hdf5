@@ -281,8 +281,8 @@ public class H5AC_cache_config_t implements Serializable{
      *      modes.
      * @param dirty_bytes_threshold:  Threshold of dirty byte creation used to
      *     synchronize updates between caches.
-     * @param upper_hr_threshold: Upper hit rate threshold.  The use of this field
-     *      varies according to the current decr_mode.
+     * @param metadata_write_strategy: Integer field containing a code indicating the
+     *    desired metadata write strategy.
     */
     public H5AC_cache_config_t (int version, boolean rpt_fcn_enabled, boolean open_trace_file,
             boolean close_trace_file, String trace_file_name, boolean evictions_enabled,
