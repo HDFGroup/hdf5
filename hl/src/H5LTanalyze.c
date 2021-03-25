@@ -686,20 +686,20 @@ static const flex_int16_t yy_accept[276] =
 
 static const YY_CHAR yy_ec[256] =
     {   0,
-        1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
+        1,    1,    1,    1,    1,    1,    1,    1,    2,    2,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    2,    1,    4,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    5,    6,    7,
-        8,    9,   10,   11,    5,   12,    5,   13,   14,    1,
-        1,    1,    1,    1,   15,   16,   17,   18,   19,   20,
-       21,   22,   23,    1,    1,   24,   25,   26,   27,   28,
-       29,   30,   31,   32,   33,   34,    1,    1,   35,   36,
-       37,    1,   38,    1,   39,    1,    1,    1,    1,    1,
+        1,    2,    1,    3,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    4,    5,    6,
+        7,    8,    9,   10,    4,   11,    4,   12,   13,    1,
+        1,    1,    1,    1,   14,   15,   16,   17,   18,   19,
+       20,   21,   22,    1,    1,   23,   24,   25,   26,   27,
+       28,   29,   30,   31,   32,   33,    1,    1,   34,   35,
+       36,    1,   37,    1,   38,    1,    1,    1,    1,    1,
 
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,   40,    1,   41,    1,    1,    1,    1,    1,
+        1,    1,   39,    1,   40,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -718,11 +718,10 @@ static const YY_CHAR yy_ec[256] =
 
 static const YY_CHAR yy_meta[42] =
     {   0,
-        1,    1,    1,    2,    3,    3,    3,    3,    3,    3,
-        3,    3,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    2,    3,    3,    3,    3,    3,    3,    3,
+        3,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1
     } ;
 
 static const flex_int16_t yy_base[278] =
@@ -1180,7 +1179,6 @@ yy_match:
 			++yy_cp;
 			}
 		while ( yy_base[yy_current_state] != 305 );
-
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
 		if ( yy_act == 0 )
@@ -1495,27 +1493,28 @@ YY_RULE_SETUP
 #line 119 "hl/src/H5LTanalyze.l"
 {return token('{');}
 	YY_BREAK
-case 58:
+case 57:
 YY_RULE_SETUP
 #line 120 "hl/src/H5LTanalyze.l"
 {return token('}');}
 	YY_BREAK
-case 59:
+case 58:
 YY_RULE_SETUP
 #line 121 "hl/src/H5LTanalyze.l"
 {return token('[');}
 	YY_BREAK
-case 60:
+case 59:
 YY_RULE_SETUP
 #line 122 "hl/src/H5LTanalyze.l"
 {return token(']');}
 	YY_BREAK
-case 61:
+case 60:
 YY_RULE_SETUP
 #line 123 "hl/src/H5LTanalyze.l"
 {return token(':');}
+=======
 	YY_BREAK
-case 62:
+case 61:
 YY_RULE_SETUP
 #line 124 "hl/src/H5LTanalyze.l"
 {return token(';');}
@@ -1526,8 +1525,8 @@ YY_RULE_SETUP
 #line 125 "hl/src/H5LTanalyze.l"
 ;
 	YY_BREAK
-case 64:
-/* rule 64 can match eol */
+case 63:
+/* rule 63 can match eol */
 YY_RULE_SETUP
 #line 126 "hl/src/H5LTanalyze.l"
 { return 0; }

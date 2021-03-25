@@ -1979,7 +1979,7 @@ yyreduce:
 #line 336 "hl/src/H5LTparse.y" /* yacc.c:1646  */
     {
                                                 is_enum_memb = 1; /*indicate member of enum*/
-                                                enum_memb_symbol = strdup(yylval.sval); 
+                                                enum_memb_symbol = HDstrdup(yylval.sval); 
                                                 HDfree(yylval.sval);
                                                 yylval.sval = NULL;
                                             }
