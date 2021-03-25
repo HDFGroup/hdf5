@@ -2,21 +2,17 @@
 # HDF5 code should not trigger the following warnings under any
 # circumstances, so ask the compiler to treat them as errors:
 #
--Werror=bad-function-cast
--Werror=declaration-after-statement
--Werror=implicit-function-declaration
--Werror=missing-declarations
--Werror=missing-prototypes
--Werror=nested-externs
--Werror=old-style-definition
--Werror=packed
--Werror=pointer-sign
--Werror=pointer-to-int-cast
--Werror=redundant-decls
--Werror=strict-prototypes
--Werror=switch
+-Wbad-function-cast
+-Wimplicit-function-declaration
+-Wincompatible-pointer-types
+-Wmissing-declarations
+-Wpacked
+-Wshadow
+-Wswitch
 #
-#-Werror=discarded-qualifiers
+# NOTE: Following files are not compatible with incompatible-pointer-types as errors
+#     src/H5Dchunk.c,src/H5Dint.c,src/H5Gint.c,src/H5HFcache.c,src/H5I.c,src/H5T.c
+-Wno-error=incompatible-pointer-types-discards-qualifiers
 #
 #
 # NOTE: File Driver files are not compatible with these warnings as errors
@@ -43,11 +39,6 @@
 #
 -Wcast-align
 #
-#     lib/h5diff_array.c
-#       -Werror=unused-but-set-variable
-#
--Wunused-but-set-variable
-#
 #     lib/h5tools_utils.c
 #       -Werror=unused-parameter
 #
@@ -59,7 +50,7 @@
 #     jni/h5util.c
 #       -Werror=format(-overflow)
 #
--Werror=format
+-Wformat
 #
 #
 #Examples and tests do not use the same set of extensive warning flags as libraries
@@ -70,8 +61,6 @@
 #       -Werror=unused-function
 #     dsets.c
 #       -Werror=unused-parameter
-#     external.c,perform/sio_engine.c
-#       -Werror=format(-truncation)
 #
 #
 # NOTE: Examples files are not compatible with these warnings as errors

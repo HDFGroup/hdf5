@@ -2,19 +2,19 @@
 # HDF5 code should not trigger the following warnings under any
 # circumstances, so ask the compiler to treat them as errors:
 #
--Werror=bad-function-cast
--Werror=declaration-after-statement
--Werror=implicit-function-declaration
--Werror=missing-declarations
--Werror=missing-prototypes
--Werror=nested-externs
--Werror=old-style-definition
--Werror=packed
--Werror=pointer-sign
--Werror=pointer-to-int-cast
--Werror=redundant-decls
--Werror=strict-prototypes
--Werror=switch
+-Wbad-function-cast
+-Wdeclaration-after-statement
+-Wimplicit-function-declaration
+-Wmissing-declarations
+-Wmissing-prototypes
+-Wnested-externs
+-Wold-style-definition
+-Wpacked
+-Wpointer-sign
+-Wpointer-to-int-cast
+-Wredundant-decls
+-Wstrict-prototypes
+-Wswitch
 #
 #-Werror=discarded-qualifiers
 #
@@ -59,7 +59,7 @@
 #     jni/h5util.c
 #       -Werror=format(-overflow)
 #
--Werror=format
+-Wformat
 #
 #
 #Examples and tests do not use the same set of extensive warning flags as libraries

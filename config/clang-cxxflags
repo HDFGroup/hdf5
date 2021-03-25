@@ -173,6 +173,7 @@ if test "X-clang" = "X-$cxx_vendor" -o "X-Apple LLVM" = "X-$cxx_vendor"; then
 
     H5_CXXFLAGS="$H5_CXXFLAGS $(load_clang_arguments general)"
     H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_clang_arguments error-general)"
+    H5_NECXXFLAGS="$H5_NECXXFLAGS $(load_clang_arguments noerror-general)"
 
     ######################
     # Developer warnings #
