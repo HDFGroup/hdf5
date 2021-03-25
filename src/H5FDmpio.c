@@ -151,7 +151,8 @@ static int H5FD_mpio_debug_flags_s[256];
 static int H5FD_mpio_debug_rank_s = -1;
 
 /* Indicate if this rank should output tracing info */
-#define H5FD_MPIO_TRACE_THIS_RANK(file) (H5FD_mpio_debug_rank_s < 0 || H5FD_mpio_debug_rank_s == (file)->mpi_rank)
+#define H5FD_MPIO_TRACE_THIS_RANK(file)                                                                      \
+    (H5FD_mpio_debug_rank_s < 0 || H5FD_mpio_debug_rank_s == (file)->mpi_rank)
 #endif
 
 /*--------------------------------------------------------------------------
@@ -236,7 +237,7 @@ hid_t
 H5FD_mpio_init(void)
 {
     static int H5FD_mpio_Debug_inited = 0;
-    hid_t       ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t      ret_value              = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -263,7 +264,7 @@ H5FD_mpio_init(void)
 #endif /* H5FDmpio_DEBUG */
 
         H5FD_mpio_Debug_inited++;
-    }  /* end if */
+    } /* end if */
 
     /* Set return value */
     ret_value = H5FD_MPIO_g;
@@ -689,11 +690,10 @@ H5FD_set_mpio_atomicity(H5FD_t *_file, hbool_t flag)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
 #ifdef H5FDmpio_DEBUG
-    hbool_t     H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] &&
-                                          H5FD_MPIO_TRACE_THIS_RANK(file));
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
-    int          mpi_code; /* MPI return code */
-    herr_t       ret_value = SUCCEED;
+    int    mpi_code; /* MPI return code */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -733,11 +733,10 @@ H5FD_get_mpio_atomicity(H5FD_t *_file, hbool_t *flag)
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
     int          temp_flag;
 #ifdef H5FDmpio_DEBUG
-    hbool_t     H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] &&
-                                          H5FD_MPIO_TRACE_THIS_RANK(file));
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
-    int          mpi_code; /* MPI return code */
-    herr_t       ret_value = SUCCEED;
+    int    mpi_code; /* MPI return code */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -796,10 +795,10 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     int             mpi_size;             /* Total number of MPI processes */
     MPI_Offset      file_size;            /* File size (of existing files) */
 #ifdef H5FDmpio_DEBUG
-    hbool_t     H5FD_mpio_debug_t_flag = FALSE;
+    hbool_t H5FD_mpio_debug_t_flag = FALSE;
 #endif
-    int             mpi_code;             /* MPI return code */
-    H5FD_t *        ret_value = NULL;     /* Return value */
+    int     mpi_code;         /* MPI return code */
+    H5FD_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -927,12 +926,11 @@ H5FD__mpio_close(H5FD_t *_file)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
 #ifdef H5FDmpio_DEBUG
-    hbool_t     H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] &&
-                                          H5FD_MPIO_TRACE_THIS_RANK(file));
-    int         mpi_rank = file->mpi_rank;
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    int     mpi_rank               = file->mpi_rank;
 #endif
-    int          mpi_code;            /* MPI return code */
-    herr_t       ret_value = SUCCEED; /* Return value */
+    int    mpi_code;            /* MPI return code */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -986,10 +984,11 @@ H5FD__mpio_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out
         *flags = 0;
         *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
-        *flags |= H5FD_FEAT_HAS_MPI;             /* This driver uses MPI                                             */
+        *flags |= H5FD_FEAT_HAS_MPI; /* This driver uses MPI                                             */
         *flags |= H5FD_FEAT_ALLOCATE_EARLY;         /* Allocate space early instead of late         */
-        *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default VFD */
-    } /* end if */
+        *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
+                                                       VFD */
+    }                                               /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__mpio_query() */
@@ -1166,13 +1165,11 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     hbool_t use_view_this_time = FALSE;
     hbool_t rank0_bcast        = FALSE; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
-    hbool_t     H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] &&
-                                          H5FD_MPIO_TRACE_THIS_RANK(file));
-    hbool_t     H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] &&
-                                          H5FD_MPIO_TRACE_THIS_RANK(file));
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    hbool_t H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
-    int          mpi_code;            /* MPI return code */
-    herr_t  ret_value          = SUCCEED;
+    int    mpi_code; /* MPI return code */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1408,13 +1405,11 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     hbool_t          derived_type       = FALSE;
     H5FD_mpio_xfer_t xfer_mode; /* I/O transfer mode */
 #ifdef H5FDmpio_DEBUG
-    hbool_t     H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] &&
-                                          H5FD_MPIO_TRACE_THIS_RANK(file));
-    hbool_t     H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] &&
-                                          H5FD_MPIO_TRACE_THIS_RANK(file));
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    hbool_t H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
-    int          mpi_code;            /* MPI return code */
-    herr_t           ret_value = SUCCEED;
+    int    mpi_code; /* MPI return code */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1609,11 +1604,10 @@ H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
 #ifdef H5FDmpio_DEBUG
-    hbool_t     H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] &&
-                                          H5FD_MPIO_TRACE_THIS_RANK(file));
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
-    int          mpi_code; /* mpi return code */
-    herr_t       ret_value = SUCCEED;
+    int    mpi_code; /* mpi return code */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1666,12 +1660,11 @@ done:
 static herr_t
 H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
-    H5FD_mpio_t *file      = (H5FD_mpio_t *)_file;
+    H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
 #ifdef H5FDmpio_DEBUG
-    hbool_t     H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] &&
-                                          H5FD_MPIO_TRACE_THIS_RANK(file));
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
-    herr_t       ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
