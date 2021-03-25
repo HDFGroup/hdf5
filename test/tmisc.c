@@ -3613,7 +3613,7 @@ test_misc19(void)
 
     /* Get a VOL class to register */
     vol_cls = h5_get_dummy_vol_class();
-    CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
+    CHECK_PTR(vol_cls, "h5_get_dummy_vol_class");
 
     /* Register a VOL connector */
     volid = H5VLregister_connector(vol_cls, H5P_DEFAULT);
