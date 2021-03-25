@@ -1126,8 +1126,13 @@ if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c")
   endif ()
   set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
 else ()
+  # Make custom command byproducts explicit for Ninja generators when CMake >= 3.3
+  if( POLICY CMP0058 )
+    set(NinjaByproducts BYPRODUCTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
+  endif()
   add_custom_command (
       OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1
+      ${NinjaByproducts}
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E touch ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1
       DEPENDS    ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
