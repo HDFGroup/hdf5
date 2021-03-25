@@ -1,7 +1,7 @@
 HDF5 "tldouble_scalar.h5" {
 GROUP "/" {
    DATASET "dset" {
-      DATATYPE  H5T_ARRAY { [6] H5T_NATIVE_LDOUBLE }
+      DATATYPE  H5T_ARRAY { [6] 128-bit little-endian floating-point }
       DATASPACE  SCALAR
       STORAGE_LAYOUT {
          CONTIGUOUS
