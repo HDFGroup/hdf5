@@ -875,8 +875,8 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(head && *head);
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    HDassert(head && *head);
     HDassert(api_state);
 
     /* Allocate & clear API context state */
