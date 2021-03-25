@@ -449,7 +449,7 @@ New Features
         semi would work, but was not mandatory. This change was made to allow
         clang-format to correctly format the source code.
 
-        (SAM - 2021/03-03)
+        (SAM - 2021/03/03)
 
     - Improved performance of H5Sget_select_elem_pointlist
 
@@ -967,6 +967,15 @@ Bug Fixes since HDF5-1.12.0 release
 
     Tools
     -----
+    - Changed how h5dump and h5ls identify long double.
+
+        Long double support is not consistent across platforms. Tools will always
+        identify long double as 128-bit [little/big]-endian float. New test file
+        created for datasets with attributes for float, double and long double.
+        These files are also used in the java tests.
+
+        (ADB - 2021/03/24, HDFFV-11229)
+
     - Fixed tools argument parsing.
 
         Tools parsing used the length of the option from the long array to match
