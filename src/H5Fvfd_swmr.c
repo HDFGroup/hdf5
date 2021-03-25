@@ -293,12 +293,12 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 
         /* Close the md file */
         if (HDclose(shared->vfd_swmr_md_fd) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close the metadata file");
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close the metadata file");
         shared->vfd_swmr_md_fd = -1;
 
         /* Unlink the md file */
         if (HDunlink(shared->vfd_swmr_config.md_file_path) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "unable to unlink the metadata file");
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "unable to unlink the metadata file");
 
         /* Close the free-space manager for the metadata file */
         if (H5MV_close(f) < 0)
