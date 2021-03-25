@@ -305,14 +305,6 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
         H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
 
     /*-------------------------------------------------------------------------
-     * write a new user block if requested
-     *-------------------------------------------------------------------------
-     */
-    if (options->ublock_size > 0)
-        if (copy_user_block(options->ublock_filename, fnameout, options->ublock_size) < 0)
-            H5TOOLS_GOTO_ERROR((-1), "Could not copy user block. Exiting...");
-
-    /*-------------------------------------------------------------------------
      * get list of objects
      *-------------------------------------------------------------------------
      */
@@ -346,27 +338,60 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
     }
 
     /*-------------------------------------------------------------------------
-     * write only the input file user block if there is no user block file input
+     * Close the file and everything in it so the lock is removed
+     *-------------------------------------------------------------------------
+     */
+    if (H5Pclose(fcpl) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+    if (H5Pclose(options->fout_fapl) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+    options->fout_fapl = H5P_DEFAULT;
+    if (H5Pclose(gcpl_in) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+    if (H5Gclose(grp_in) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+    if (H5Fclose(fidout) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+    if (H5Fclose(fidin) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+
+    /*-------------------------------------------------------------------------
+     * NOTE: The userblock MUST be written out AFTER the file is closed or
+     * the file locking will cause failures on Windows, where file locks
+     * are mandatory, not advisory.
      *-------------------------------------------------------------------------
      */
 
-    if (ub_size > 0 && options->ublock_size == 0)
+    /*-------------------------------------------------------------------------
+     * Write a new user block if requested, using the input file user block if
+     * there is no separate user block file input
+     *-------------------------------------------------------------------------
+     */
+
+    if (options->ublock_size > 0) {
+        if (copy_user_block(options->ublock_filename, fnameout, options->ublock_size) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "Could not copy user block. Exiting...");
+    }
+    else if (ub_size > 0 && options->ublock_size == 0) {
         if (copy_user_block(fnamein, fnameout, ub_size) < 0)
             H5TOOLS_GOTO_ERROR((-1), "Could not copy user block. Exiting...");
+    }
 
 done:
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(fcpl_in);
-        H5Pclose(gcpl_in);
-        H5Pclose(fcpl);
-        H5Gclose(grp_in);
-        H5Fclose(fidin);
-        H5Fclose(fidout);
-        H5Fclose(fidin);
-        H5Fclose(fidout);
+    if (-1 == ret_value) {
+        H5E_BEGIN_TRY
+        {
+            H5Pclose(fcpl);
+            H5Pclose(options->fout_fapl);
+            options->fout_fapl = H5P_DEFAULT;
+            H5Pclose(gcpl_in);
+            H5Gclose(grp_in);
+            H5Pclose(fcpl_in);
+            H5Fclose(fidout);
+            H5Fclose(fidin);
+        }
+        H5E_END_TRY;
     }
-    H5E_END_TRY;
     if (travt)
         trav_table_free(travt);
 

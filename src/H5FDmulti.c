@@ -12,8 +12,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke <matzke@llnl.gov>
- *		Monday, November 10, 1997
+ * Programmer:    Robb Matzke
+ *        Monday, November 10, 1997
  *
  * Purpose:	Implements a file driver which dispatches I/O requests to
  *		other file drivers depending on the purpose of the address
@@ -1829,8 +1829,8 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
 {
     H5FD_multi_t *     file    = (H5FD_multi_t *)_file;
     int                nerrors = 0;
-    H5FD_mem_t         out_mt;
-    static const char *func = "H5FD_multi_unlock"; /* Function Name for error reporting */
+    H5FD_mem_t         out_mt  = H5FD_MEM_DEFAULT;
+    static const char *func    = "H5FD_multi_unlock"; /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1866,7 +1866,8 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
     }     /* end if */
 
     if (nerrors)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error locking member files", -1) return 0;
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTLOCKFILE, "error locking member files", -1);
+    return 0;
 
 } /* H5FD_multi_lock() */
 
@@ -1902,7 +1903,7 @@ H5FD_multi_unlock(H5FD_t *_file)
     END_MEMBERS;
 
     if (nerrors)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error unlocking member files", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTUNLOCKFILE, "error unlocking member files", -1);
 
             return 0;
 } /* H5FD_multi_unlock() */

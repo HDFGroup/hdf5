@@ -1792,7 +1792,6 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
          */
 
         if (H5C__make_space_in_cache(f, space_needed, write_permitted) < 0)
-
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5C__make_space_in_cache failed")
     } /* end if */
 
@@ -1821,45 +1820,18 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
 
 #ifdef H5_HAVE_PARALLEL
-    if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-
-        coll_access = (H5P_USER_TRUE == f->coll_md_read ? TRUE : FALSE);
-
-        /* If not explicitly disabled, get the cmdr setting from the
-         * API context
-         */
-        if (!coll_access && H5P_FORCE_FALSE != f->coll_md_read) {
-
-            coll_access = H5CX_get_coll_metadata_read();
-        }
-    } /* end if */
+    if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
+        coll_access = H5CX_get_coll_metadata_read();
 
     entry_ptr->coll_access = coll_access;
-
     if (coll_access) {
         H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, FAIL)
 
-        /* Make sure the size of the collective entries in the cache
-         * remain in check
-         */
-        if (H5P_USER_TRUE == f->coll_md_read) {
-
-            if (cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100) {
-
-                if (H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries")
-            } /* end if */
-        }     /* end if */
-        else {
-            if (cache_ptr->max_cache_size * 40 < cache_ptr->coll_list_size * 100) {
-
-                if (H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries")
-            } /* end if */
-        }     /* end else */
-    }         /* end if */
+        /* Make sure the size of the collective entries in the cache remain in check */
+        if (cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100)
+            if (H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries")
+    } /* end if */
 #endif
 
 done:
@@ -1874,7 +1846,6 @@ done:
             HDONE_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry from tag list")
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_insert_entry() */
 
 /*-------------------------------------------------------------------------

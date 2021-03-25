@@ -12,11 +12,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Monday, July 26, 1999
  */
-#ifndef _H5FDpublic_H
-#define _H5FDpublic_H
+#ifndef H5FDpublic_H
+#define H5FDpublic_H
 
 #include "H5public.h"
 #include "H5Fpublic.h" /*for H5F_close_degree_t */

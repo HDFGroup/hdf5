@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  * Purpose:     This is the MPI-2 I/O driver.
@@ -1445,6 +1445,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             if (H5FD_mpio_Debug[(int)'w'])
                 HDfprintf(stdout, "%s: doing MPI collective IO\n", FUNC);
 #endif
+            /* Perform collective write operation */
             if (MPI_SUCCESS !=
                 (mpi_code = MPI_File_write_at_all(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
@@ -1457,6 +1458,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             if (H5FD_mpio_Debug[(int)'w'])
                 HDfprintf(stdout, "%s: doing MPI independent IO\n", FUNC);
 #endif
+            /* Perform independent write operation */
             if (MPI_SUCCESS !=
                 (mpi_code = MPI_File_write_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
@@ -1506,9 +1508,9 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
         file->local_eof = addr + (haddr_t)bytes_written;
 
 done:
-    if (derived_type) {
+    if (derived_type)
         MPI_Type_free(&buf_type);
-    }
+
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
         HDfprintf(stdout, "%s: Leaving, proc %d: ret_value = %d\n", FUNC, file->mpi_rank, ret_value);
@@ -1636,7 +1638,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
         if (H5FD_mpi_haddr_to_MPIOff(file->eoa, &needed_eof) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
 
-        /* eoa != eof.  Set eof to eoa */
+        /* EOA != EOF.  Set EOF to EOA */
         if (size != needed_eof) {
             /* Extend the file's size */
             if (MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, needed_eof)))

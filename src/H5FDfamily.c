@@ -12,23 +12,23 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke <matzke@llnl.gov>
- *		Monday, November 10, 1997
+ * Programmer:    Robb Matzke
+ *        Monday, November 10, 1997
  *
- * Purpose:	Implements a family of files that acts as a single hdf5
- *		file.  The purpose is to be able to split a huge file on a
- *		64-bit platform, transfer all the <2GB members to a 32-bit
- *		platform, and then access the entire huge file on the 32-bit
- *		platform.
+ * Purpose:    Implements a family of files that acts as a single hdf5
+ *        file.  The purpose is to be able to split a huge file on a
+ *        64-bit platform, transfer all the <2GB members to a 32-bit
+ *        platform, and then access the entire huge file on the 32-bit
+ *        platform.
  *
- *		All family members are logically the same size although their
- *		physical sizes may vary.  The logical member size is
- *		determined by looking at the physical size of the first member
- *		when the file is opened.  When creating a file family, the
- *		first member is created with a predefined physical size
- *		(actually, this happens when the file family is flushed, and
- *		can be quite time consuming on file systems that don't
- *		implement holes, like nfs).
+ *        All family members are logically the same size although their
+ *        physical sizes may vary.  The logical member size is
+ *        determined by looking at the physical size of the first member
+ *        when the file is opened.  When creating a file family, the
+ *        first member is created with a predefined physical size
+ *        (actually, this happens when the file family is flushed, and
+ *        can be quite time consuming on file systems that don't
+ *        implement holes, like nfs).
  *
  */
 
@@ -1305,9 +1305,9 @@ H5FD_family_lock(H5FD_t *_file, hbool_t rw)
         for (v = 0; v < u; v++) {
             if (H5FD_unlock(file->memb[v]) < 0)
                 /* Push error, but keep going */
-                HDONE_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock member files")
+                HDONE_ERROR(H5E_IO, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock member files")
         } /* end for */
-        HGOTO_ERROR(H5E_IO, H5E_CANTLOCK, FAIL, "unable to lock member files")
+        HGOTO_ERROR(H5E_IO, H5E_CANTLOCKFILE, FAIL, "unable to lock member files")
     } /* end if */
 
 done:
@@ -1338,7 +1338,7 @@ H5FD_family_unlock(H5FD_t *_file)
     for (u = 0; u < file->nmembs; u++)
         if (file->memb[u])
             if (H5FD_unlock(file->memb[u]) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock member files")
+                HGOTO_ERROR(H5E_IO, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock member files")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

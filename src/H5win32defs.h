@@ -11,59 +11,18 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Scott Wegner
- *              June 3, 2008
- *
- * Purpose: This file is used to map HDF macros to Windows functions.  This
+/* Purpose: This file is used to map HDF macros to Windows functions.  This
  *          should get included H5private mappings, so as to override them.
  *          Any macro not mapped here, however, will receive a similar mapping
  *          inside H5private.h
  *
  */
-#ifndef H5_HAVE_INTTYPES_H
-/* The following definitions should be suitable for 64-bit Windows, which is
- * LLP64, and for 32-bit Windows, which is ILP32.  Those are the only
- * platforms where <inttypes.h> is likely to be missing.  VS2015 and later
- * *may* provide these definitions.
- */
-#ifdef _WIN64
-#define PRIdPTR "lld"
-#define PRIoPTR "llo"
-#define PRIuPTR "llu"
-#define PRIxPTR "llx"
-#else /* _WIN64 */
-#define PRIdPTR "ld"
-#define PRIoPTR "lo"
-#define PRIuPTR "lu"
-#define PRIxPTR "lx"
-#endif /* _WIN64 */
 
-#define PRId8   "d"
-#define PRIo8   "o"
-#define PRIu8   "u"
-#define PRIx8   "x"
-#define PRId16  "d"
-#define PRIo16  "o"
-#define PRIu16  "u"
-#define PRIx16  "x"
-#define PRId32  "d"
-#define PRIo32  "o"
-#define PRIu32  "u"
-#define PRIx32  "x"
-#define PRId64  "lld"
-#define PRIo64  "llo"
-#define PRIu64  "llu"
-#define PRIx64  "llx"
-#define PRIdMAX "lld"
-#define PRIoMAX "llo"
-#define PRIuMAX "llu"
-#define PRIxMAX "llx"
-#endif
-
-/*
- * _MSC_VER = 1900 VS2015
- * _MSC_VER = 1800 VS2013
- * _MSC_VER = 1700 VS2012
+/* _MSC_VER = 192x  VS2019
+ * _MSC_VER = 191x  VS2017
+ * _MSC_VER = 1900  VS2015
+ * _MSC_VER = 1800  VS2013
+ * _MSC_VER = 1700  VS2012
  */
 #ifdef H5_HAVE_WIN32_API
 
@@ -112,7 +71,7 @@ typedef __int64         h5_stat_size_t;
 #ifdef H5_HAVE_VISUAL_STUDIO
 
 /*
- * The (void*) cast just avoids a compiler warning in H5_HAVE_VISUAL_STUDIO
+ * The (void*) cast just avoids a compiler warning in MSVC
  */
 #define HDmemset(X, C, Z) memset((void *)(X), C, Z)
 
@@ -131,10 +90,10 @@ H5_DLL int    Wsetenv(const char *name, const char *value, int overwrite);
 H5_DLL int    Wflock(int fd, int operation);
 H5_DLL char * Wgetlogin(void);
 H5_DLL herr_t H5_expand_windows_env_vars(char **env_var);
-H5_DLL const wchar_t *H5_get_utf16_str(const char *s);
-H5_DLL int            Wopen_utf8(const char *path, int oflag, ...);
-H5_DLL int            Wremove_utf8(const char *path);
-H5_DLL int            H5_get_win32_times(H5_timevals_t *tvs);
+H5_DLL wchar_t *H5_get_utf16_str(const char *s);
+H5_DLL int      Wopen_utf8(const char *path, int oflag, ...);
+H5_DLL int      Wremove_utf8(const char *path);
+H5_DLL int      H5_get_win32_times(H5_timevals_t *tvs);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -199,7 +199,7 @@ endif ()
 #set (LOCAL_NO_PACKAGE "TRUE")
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
-set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
+set (REPOSITORY_URL "https://github.com/HDFGroup/hdf5.git")
 set (REPOSITORY_BRANCH "develop")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
