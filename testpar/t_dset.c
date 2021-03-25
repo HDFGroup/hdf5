@@ -1635,9 +1635,11 @@ extend_writeInd(void)
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* write data independently.  Should fail. */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace, H5P_DEFAULT, data_array1);
-    } H5E_END_TRY                                                                                          \
+    }
+    H5E_END_TRY
     VRFY((ret < 0), "H5Dwrite failed as expected");
 
     H5Sclose(file_dataspace);
@@ -1914,9 +1916,11 @@ extend_readInd(void)
     ret = H5Sget_simple_extent_dims(file_dataspace, dims, NULL);
     VRFY((ret > 0), "H5Sget_simple_extent_dims succeeded");
     dims[0]++;
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Dset_extent(dataset1, dims);
-    } H5E_END_TRY                                                                                          \
+    }
+    H5E_END_TRY
     VRFY((ret < 0), "H5Dset_extent failed as expected");
 
     H5Sclose(file_dataspace);
@@ -2211,9 +2215,11 @@ extend_writeAll(void)
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* write data independently.  Should fail. */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace, xfer_plist, data_array1);
-    } H5E_END_TRY                                                                                          \
+    }
+    H5E_END_TRY
     VRFY((ret < 0), "H5Dwrite failed as expected");
 
     H5Sclose(file_dataspace);
@@ -2328,9 +2334,11 @@ extend_readAll(void)
     ret = H5Sget_simple_extent_dims(file_dataspace, dims, NULL);
     VRFY((ret > 0), "H5Sget_simple_extent_dims succeeded");
     dims[0]++;
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Dset_extent(dataset1, dims);
-    } H5E_END_TRY                                                                                          \
+    }
+    H5E_END_TRY
     VRFY((ret < 0), "H5Dset_extent failed as expected");
 
     H5Sclose(file_dataspace);
@@ -4109,9 +4117,11 @@ dataset_atomicity(void)
         VRFY((fid >= 0), "H5Fopen succeeed");
 
         /* should fail */
-        H5E_BEGIN_TRY {
+        H5E_BEGIN_TRY
+        {
             ret = H5Fset_mpi_atomicity(fid, TRUE);
-        } H5E_END_TRY                                                                                          \
+        }
+        H5E_END_TRY
         VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
 
         ret = H5Fclose(fid);

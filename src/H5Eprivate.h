@@ -171,12 +171,12 @@ extern int  H5E_mpi_error_str_len;
 #define HMPI_DONE_ERROR(retcode, str, mpierr)                                                                \
     {                                                                                                        \
         MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
-        HDONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str, H5E_mpi_error_str);                       \
+        HDONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str, H5E_mpi_error_str); \
     }
 #define HMPI_GOTO_ERROR(retcode, str, mpierr)                                                                \
     {                                                                                                        \
         MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
-        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str, H5E_mpi_error_str);                       \
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str, H5E_mpi_error_str); \
     }
 #endif /* H5_HAVE_PARALLEL */
 
