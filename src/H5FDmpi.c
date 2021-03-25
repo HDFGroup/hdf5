@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Friday, January 30, 2004
  *
  * Purpose:	Common routines for all MPI-based VFL drivers.
@@ -40,8 +40,6 @@
  *
  * Programmer:	Quincey Koziol
  *              Friday, January 30, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -79,8 +77,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Friday, January 30, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -115,8 +111,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Friday, January 30, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -191,13 +185,6 @@ done:
  * Programmer:  Unknown
  *              January 30, 1998
  *
- * Modifications:
- * 		Robb Matzke, 1999-04-23
- *		An error is reported for address overflows. The ADDR output
- *		argument is optional.
- *
- * 		Robb Matzke, 1999-08-06
- *		Modified to work with the virtual file layer.
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -228,16 +215,6 @@ H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off)
  * Programmer:  Unknown
  *              January 30, 1998
  *
- * Modifications:
- * 		Robb Matzke, 1999-04-23
- *		An error is reported for address overflows. The ADDR output
- *		argument is optional.
- *
- * 		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- * 		Robb Matzke, 1999-08-06
- *		Modified to work with the virtual file layer.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -283,9 +260,6 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off /*out*/)
  * Programmer:	rky
  *              19981207
  *
- * Modifications:
- *		Robb Matzke, 1999-08-09
- *		Modified to work with the virtual file layer.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -337,9 +311,6 @@ done:
  * Programmer:	rky
  *              19981207
  *
- * Modifications:
- *		Robb Matzke, 1999-08-09
- *		Modified to work with the virtual file layer.
  *-------------------------------------------------------------------------
  */
 herr_t

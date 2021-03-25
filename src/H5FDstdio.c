@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Wednesday, October 22, 1997
  *
  * Purpose: The C STDIO virtual file driver which only uses calls from stdio.h.
@@ -52,6 +52,9 @@
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_STDIO_g = 0;
 
+/* Whether to ignore file locks when disabled (env var value) */
+static htri_t ignore_disabled_file_locks_s = -1;
+
 /* The maximum number of bytes which can be written in a single I/O operation */
 static size_t H5_STDIO_MAX_IO_BYTES_g = (size_t)-1;
 
@@ -82,7 +85,8 @@ typedef struct H5FD_stdio_t {
     haddr_t            eof;          /* end of file; current file size   */
     haddr_t            pos;          /* current file I/O position        */
     unsigned           write_access; /* Flag to indicate the file was opened with write access */
-    H5FD_stdio_file_op op;           /* last operation */
+    hbool_t            ignore_disabled_file_locks;
+    H5FD_stdio_file_op op; /* last operation */
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
      * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
@@ -231,11 +235,23 @@ static const H5FD_class_t H5FD_stdio_g = {
 hid_t
 H5FD_stdio_init(void)
 {
+    char *lock_env_var = NULL; /* Environment variable pointer */
+
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
+    /* Check the use disabled file locks environment variable */
+    lock_env_var = getenv("HDF5_USE_FILE_LOCKING");
+    if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = 1; /* Override: Ignore disabled locks */
+    else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = 0; /* Override: Don't ignore disabled locks */
+    else
+        ignore_disabled_file_locks_s = -1; /* Environment variable not set, or not set correctly */
+
     if (H5I_VFL != H5Iget_type(H5FD_STDIO_g))
         H5FD_STDIO_g = H5FDregister(&H5FD_stdio_g);
+
     return H5FD_STDIO_g;
 } /* end H5FD_stdio_init() */
 
@@ -285,9 +301,9 @@ H5Pset_fapl_stdio(hid_t fapl_id)
     H5Eclear2(H5E_DEFAULT);
 
     if (0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
 
-            return H5Pset_driver(fapl_id, H5FD_STDIO, NULL);
+    return H5Pset_driver(fapl_id, H5FD_STDIO, NULL);
 } /* end H5Pset_fapl_stdio() */
 
 /*-------------------------------------------------------------------------
@@ -395,6 +411,22 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t /*UNUSED*/ fapl_id, hadd
         file_offset_t x = file_ftell(file->fp);
         assert(x >= 0);
         file->eof = (haddr_t)x;
+    }
+
+    /* Check the file locking flags in the fapl */
+    if (ignore_disabled_file_locks_s != -1)
+        /* The environment variable was set, so use that preferentially */
+        file->ignore_disabled_file_locks = ignore_disabled_file_locks_s;
+    else {
+        hbool_t unused;
+
+        /* Use the value in the property list */
+        if (H5Pget_file_locking(fapl_id, &unused, &file->ignore_disabled_file_locks) < 0) {
+            free(file);
+            fclose(f);
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTGET,
+                        "unable to get use disabled file locks property", NULL);
+        }
     }
 
     /* Get the file descriptor (needed for truncate and some Windows information) */
@@ -556,7 +588,7 @@ static herr_t
 H5FD_stdio_query(const H5FD_t *_f, unsigned long /*OUT*/ *flags)
 {
     /* Quiet the compiler */
-    _f = _f;
+    (void)_f;
 
     /* Set the VFL feature flags that this driver supports.
      *
@@ -601,8 +633,8 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
     haddr_t       addr;
 
     /* Quiet compiler */
-    type    = type;
-    dxpl_id = dxpl_id;
+    (void)type;
+    (void)dxpl_id;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -640,7 +672,7 @@ H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
     H5Eclear2(H5E_DEFAULT);
 
     /* Quiet compiler */
-    type = type;
+    (void)type;
 
     return file->eoa;
 } /* end H5FD_stdio_get_eoa() */
@@ -670,7 +702,7 @@ H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, haddr_t addr)
     H5Eclear2(H5E_DEFAULT);
 
     /* Quiet the compiler */
-    type = type;
+    (void)type;
 
     file->eoa = addr;
 
@@ -701,13 +733,13 @@ H5FD_stdio_get_eof(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
     const H5FD_stdio_t *file = (const H5FD_stdio_t *)_file;
 
     /* Quiet the compiler */
-    type = type;
+    (void)type;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
     /* Quiet the compiler */
-    type = type;
+    (void)type;
 
     return (file->eof);
 } /* end H5FD_stdio_get_eof() */
@@ -731,7 +763,7 @@ H5FD_stdio_get_handle(H5FD_t *_file, hid_t /*UNUSED*/ fapl, void **file_handle)
     static const char *func = "H5FD_stdio_get_handle"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
-    fapl = fapl;
+    (void)fapl;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -769,8 +801,8 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl
     static const char *func = "H5FD_stdio_read"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
-    type    = type;
-    dxpl_id = dxpl_id;
+    (void)type;
+    (void)dxpl_id;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -871,8 +903,8 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
     static const char *func = "H5FD_stdio_write"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
-    dxpl_id = dxpl_id;
-    type    = type;
+    (void)dxpl_id;
+    (void)type;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -959,7 +991,7 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t closing)
     static const char *func = "H5FD_stdio_flush"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
-    dxpl_id = dxpl_id;
+    (void)dxpl_id;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1003,8 +1035,8 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t /*UNUSED*/ 
     static const char *func = "H5FD_stdio_truncate"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
-    dxpl_id = dxpl_id;
-    closing = closing;
+    (void)dxpl_id;
+    (void)closing;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1104,20 +1136,22 @@ H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
 
     /* Place a non-blocking lock on the file */
     if (flock(file->fd, lock_flags | LOCK_NB) < 0) {
-        if (ENOSYS == errno)
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL,
-                        "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING environment "
-                        "variable to override)",
-                        -1) else H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "file lock failed", -1)
+        if (file->ignore_disabled_file_locks && ENOSYS == errno)
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it.
+             */
+            errno = 0;
+        else
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTLOCKFILE, "file lock failed", -1);
     } /* end if */
 
     /* Flush the stream */
     if (fflush(file->fp) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fflush failed", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fflush failed", -1);
 
 #endif /* H5_HAVE_FLOCK */
 
-            return 0;
+    return 0;
 } /* end H5FD_stdio_lock() */
 
 /*-------------------------------------------------------------------------
@@ -1149,18 +1183,18 @@ H5FD_stdio_unlock(H5FD_t *_file)
 
     /* Flush the stream */
     if (fflush(file->fp) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fflush failed", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fflush failed", -1);
 
-            /* Place a non-blocking lock on the file */
-            if (flock(file->fd, LOCK_UN) < 0)
-        {
-            if (ENOSYS == errno)
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL,
-                            "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING "
-                            "environment variable to override)",
-                            -1) else H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "file unlock failed",
-                                                 -1)
-        } /* end if */
+    /* Place a non-blocking lock on the file */
+    if (flock(file->fd, LOCK_UN) < 0) {
+        if (file->ignore_disabled_file_locks && ENOSYS == errno)
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it.
+             */
+            errno = 0;
+        else
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTUNLOCKFILE, "file unlock failed", -1);
+    } /* end if */
 
 #endif /* H5_HAVE_FLOCK */
 

@@ -893,8 +893,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDflock
 /* NOTE: flock(2) is not present on all POSIX systems.
  * If it is not present, we try a flock() equivalent based on
- * fcntl(2), then fall back to a function that always fails if
- * it is not present at all (Windows uses a separate Wflock()
+ * fcntl(2), then fall back to a function that always succeeds
+ * if it is not present at all (Windows uses a separate Wflock()
  * function).
  */
 #if defined(H5_HAVE_FLOCK)

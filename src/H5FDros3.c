@@ -13,7 +13,7 @@
 /*
  * Read-Only S3 Virtual File Driver (VFD)
  *
- * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
+ * Programmer: Jacob Smith
  *             2017-10-13
  *
  * Purpose:

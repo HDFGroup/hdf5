@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:  Quincey Koziol
  *              Monday, April 17, 2000
  *
  * Purpose:     The POSIX unbuffered file driver using only the HDF5 public
@@ -38,6 +38,9 @@
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_LOG_g = 0;
+
+/* Whether to ignore file locks when disabled (env var value) */
+static htri_t ignore_disabled_file_locks_s = FAIL;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_log_fapl_t {
@@ -74,6 +77,7 @@ typedef struct H5FD_log_t {
     haddr_t        eof;                             /* end of file; current file size   */
     haddr_t        pos;                             /* current file I/O position        */
     H5FD_file_op_t op;                              /* last operation                   */
+    hbool_t        ignore_disabled_file_locks;
     char           filename[H5FD_MAX_FILENAME_LEN]; /* Copy of file name from open operation */
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
@@ -225,9 +229,19 @@ H5FL_DEFINE_STATIC(H5FD_log_t);
 static herr_t
 H5FD__init_package(void)
 {
-    herr_t ret_value = SUCCEED;
+    char * lock_env_var = NULL; /* Environment variable pointer */
+    herr_t ret_value    = SUCCEED;
 
     FUNC_ENTER_STATIC
+
+    /* Check the use disabled file locks environment variable */
+    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
+    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+    else
+        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
     if (H5FD_log_init() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize log VFD")
@@ -471,8 +485,8 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
-    H5_timer_t open_timer; /* Timer for open() call */
-    H5_timer_t stat_timer; /* Timer for stat() call */
+    H5_timer_t open_timer = {{0}, {0}, {0}, FALSE}; /* Timer for open() call */
+    H5_timer_t stat_timer = {{0}, {0}, {0}, FALSE}; /* Timer for stat() call */
     h5_stat_t  sb;
     H5FD_t *   ret_value = NULL; /* Return value */
 
@@ -612,6 +626,16 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         } /* end if */
     }     /* end if */
 
+    /* Check the file locking flags in the fapl */
+    if (ignore_disabled_file_locks_s != FAIL)
+        /* The environment variable was set, so use that preferentially */
+        file->ignore_disabled_file_locks = ignore_disabled_file_locks_s;
+    else {
+        /* Use the value in the property list */
+        if (H5P_get(plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, &file->ignore_disabled_file_locks) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get ignore disabled file locks property")
+    }
+
     /* Check for non-default FAPL */
     if (H5P_FILE_ACCESS_DEFAULT != fapl_id) {
         /* This step is for h5repart tool only. If user wants to change file driver from
@@ -654,9 +678,9 @@ done:
 static herr_t
 H5FD_log_close(H5FD_t *_file)
 {
-    H5FD_log_t *file = (H5FD_log_t *)_file;
-    H5_timer_t  close_timer;         /* Timer for close() call */
-    herr_t      ret_value = SUCCEED; /* Return value */
+    H5FD_log_t *file        = (H5FD_log_t *)_file;
+    H5_timer_t  close_timer = {{0}, {0}, {0}, FALSE}; /* Timer for close() call */
+    herr_t      ret_value   = SUCCEED;                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1692,13 +1716,15 @@ H5FD_log_lock(H5FD_t *_file, hbool_t rw)
 
     /* Place a non-blocking lock on the file */
     if (HDflock(file->fd, lock_flags | LOCK_NB) < 0) {
-        if (ENOSYS == errno)
-            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL,
-                            "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING "
-                            "environment variable to override)")
+        if (file->ignore_disabled_file_locks && ENOSYS == errno) {
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it.
+             */
+            errno = 0;
+        }
         else
-            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file")
-    } /* end if */
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock file")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1726,13 +1752,15 @@ H5FD_log_unlock(H5FD_t *_file)
     HDassert(file);
 
     if (HDflock(file->fd, LOCK_UN) < 0) {
-        if (ENOSYS == errno)
-            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL,
-                            "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING "
-                            "environment variable to override)")
+        if (file->ignore_disabled_file_locks && ENOSYS == errno) {
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it.
+             */
+            errno = 0;
+        }
         else
-            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to unlock file")
-    } /* end if */
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock file")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

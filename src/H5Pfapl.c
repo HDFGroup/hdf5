@@ -289,7 +289,29 @@
 #define H5F_ACS_VOL_CONN_COPY  H5P__facc_vol_copy
 #define H5F_ACS_VOL_CONN_CMP   H5P__facc_vol_cmp
 #define H5F_ACS_VOL_CONN_CLOSE H5P__facc_vol_close
-
+/* Definition for using file locking or not. The default is set
+ * via the configure step.
+ */
+#define H5F_ACS_USE_FILE_LOCKING_SIZE sizeof(hbool_t)
+#if defined H5_USE_FILE_LOCKING && H5_USE_FILE_LOCKING
+#define H5F_ACS_USE_FILE_LOCKING_DEF TRUE
+#else
+#define H5F_ACS_USE_FILE_LOCKING_DEF FALSE
+#endif
+#define H5F_ACS_USE_FILE_LOCKING_ENC H5P__encode_hbool_t
+#define H5F_ACS_USE_FILE_LOCKING_DEC H5P__decode_hbool_t
+/* Definition for whether we ignore file locking errors when we can
+ * tell that file locking has been disabled on the file system.
+ * The default is set via the configure step.
+ */
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_SIZE sizeof(hbool_t)
+#if defined H5_IGNORE_DISABLED_FILE_LOCKS && H5_IGNORE_DISABLED_FILE_LOCKS
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF TRUE
+#else
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF FALSE
+#endif
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC H5P__encode_hbool_t
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC H5P__decode_hbool_t
 /* Definitions for the VFD SWMR configuration */
 #define H5F_ACS_VFD_SWMR_CONFIG_SIZE sizeof(H5F_vfd_swmr_config_t)
 #define H5F_ACS_VFD_SWMR_CONFIG_DEF  H5F__DEFAULT_VFD_SWMR_CONFIG
@@ -487,7 +509,10 @@ static const unsigned H5F_def_page_buf_min_meta_perc_g =
     H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF; /* Default page buffer minimum metadata size */
 static const unsigned H5F_def_page_buf_min_raw_perc_g =
     H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF; /* Default page buffer mininum raw data size */
-
+static const hbool_t H5F_def_use_file_locking_g =
+    H5F_ACS_USE_FILE_LOCKING_DEF; /* Default use file locking flag */
+static const hbool_t H5F_def_ignore_disabled_file_locks_g =
+    H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF; /* Default ignore disabled file locks flag */
 static const H5F_vfd_swmr_config_t H5F_def_vfd_swmr_config_g =
     H5F_ACS_VFD_SWMR_CONFIG_DEF; /* Default vfd swmr configuration */
 
@@ -782,6 +807,19 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
                            H5F_ACS_VOL_CONN_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register the use file locking flag */
+    if (H5P__register_real(pclass, H5F_ACS_USE_FILE_LOCKING_NAME, H5F_ACS_USE_FILE_LOCKING_SIZE,
+                           &H5F_def_use_file_locking_g, NULL, NULL, NULL, H5F_ACS_USE_FILE_LOCKING_ENC,
+                           H5F_ACS_USE_FILE_LOCKING_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the ignore disabled file locks flag */
+    if (H5P__register_real(pclass, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME,
+                           H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_SIZE, &H5F_def_ignore_disabled_file_locks_g,
+                           NULL, NULL, NULL, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC,
+                           H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
     if (H5P_LST_FILE_ACCESS_ANY_VFD_g == H5I_INVALID_HID) {
         H5P_LST_FILE_ACCESS_ANY_VFD_g = H5P_create_id(pclass, false);
         if (H5P_LST_FILE_ACCESS_ANY_VFD_g == H5I_INVALID_HID) {
@@ -814,12 +852,6 @@ done:
  * Programmer:    Robb Matzke
  *              Tuesday, June  9, 1998
  *
- * Modifications:
- *
- *        Raymond Lu
- *        Tuesday, Oct 23, 2001
- *        Changed file access property list mechanism to the new
- *        generic property list.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4749,6 +4781,96 @@ H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_evict_on_close() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_file_locking
+ *
+ * Purpose:     Sets the file locking property values.
+ *
+ *              Overrides the default file locking flag setting that was
+ *              set when the library was configured.
+ *
+ *              Can be overridden by the HDF5_USE_FILE_LOCKING environment
+ *              variable.
+ *
+ *              File locking is used when creating/opening a file to prevent
+ *              problematic file accesses.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_file_locking(hid_t fapl_id, hbool_t use_file_locking, hbool_t ignore_when_disabled)
+{
+    H5P_genplist_t *plist;               /* property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ibb", fapl_id, use_file_locking, ignore_when_disabled);
+
+    /* Make sure this is a fapl */
+    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
+
+    /* Get the plist structure */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set values */
+    if (H5P_set(plist, H5F_ACS_USE_FILE_LOCKING_NAME, &use_file_locking) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set use file locking property")
+    if (H5P_set(plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, &ignore_when_disabled) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set ignore disabled file locks property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_file_locking() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_file_locking
+ *
+ * Purpose:     Gets the file locking property values.
+ *
+ *              File locking is used when creating/opening a file to prevent
+ *              problematic file accesses.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_file_locking(hid_t fapl_id, hbool_t *use_file_locking /*out*/, hbool_t *ignore_when_disabled /*out*/)
+{
+    H5P_genplist_t *plist;               /* property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ixx", fapl_id, use_file_locking, ignore_when_disabled);
+
+    /* Make sure this is a fapl */
+    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
+
+    /* Get the plist structure */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get values */
+    if (H5P_get(plist, H5F_ACS_USE_FILE_LOCKING_NAME, use_file_locking) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get use file locking property")
+    if (H5P_get(plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, ignore_when_disabled) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get ignore disabled file locks property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_file_locking() */
 
 #ifdef H5_HAVE_PARALLEL
 

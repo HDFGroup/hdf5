@@ -73,6 +73,7 @@ typedef struct H5F_olist_t {
 /* Local Prototypes */
 /********************/
 
+static herr_t H5F__close_cb(H5VL_object_t *file_vol_obj, void **request);
 static herr_t H5F__set_vol_conn(H5F_t *file);
 static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list,
                                hbool_t app_ref, size_t *obj_id_count_ptr);
@@ -89,6 +90,15 @@ static herr_t H5F__flush_phase2(H5F_t *f, hbool_t closing);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
+/* Based on the value of the HDF5_USE_FILE_LOCKING environment variable.
+ * TRUE/FALSE have obvious meanings. FAIL means the environment variable was
+ * not set, so the code should ignore it and use the fapl value instead.
+ */
+htri_t use_locks_env_g = FAIL;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -102,6 +112,181 @@ H5FL_DEFINE(H5F_t);
 
 /* Declare a free list to manage the H5F_shared_t struct */
 H5FL_DEFINE(H5F_shared_t);
+
+/* File ID class */
+static const H5I_class_t H5I_FILE_CLS[1] = {{
+    H5I_FILE,                 /* ID class value */
+    0,                        /* Class flags */
+    0,                        /* # of reserved IDs for class */
+    (H5I_free_t)H5F__close_cb /* Callback routine for closing objects of this class */
+}};
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_init
+ *
+ * Purpose:  Initialize the interface from some other layer.
+ *
+ * Return:   Success:    non-negative
+ *
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_init(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_init() */
+
+/*--------------------------------------------------------------------------
+NAME
+   H5F__init_package -- Initialize interface-specific information
+USAGE
+    herr_t H5F__init_package()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+
+--------------------------------------------------------------------------*/
+herr_t
+H5F__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Initialize the ID group for the file IDs */
+    if (H5I_register_type(H5I_FILE_CLS) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    /* Check the file locking environment variable */
+    if (H5F__parse_file_lock_env_var(&use_locks_env_g) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to parse file locking environment variable")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__init_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_term_package
+ *
+ * Purpose:     Terminate this interface: free all memory and reset global
+ *              variables to their initial values.  Release all ID groups
+ *              associated with this interface.
+ *
+ * Return:      Success:    Positive if anything was done that might
+ *                          have affected other interfaces;
+ *                          zero otherwise.
+ *
+ *              Failure:    Never fails
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5F_term_package(void)
+{
+    int n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (H5_PKG_INIT_VAR) {
+        if (H5I_nmembers(H5I_FILE) > 0) {
+            (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
+            n++; /*H5I*/
+        }        /* end if */
+        else {
+            /* Make certain we've cleaned up all the shared file objects */
+            H5F_sfile_assert_num(0);
+
+            /* Destroy the file object id group */
+            n += (H5I_dec_type_ref(H5I_FILE) > 0);
+
+            /* Mark closed */
+            if (0 == n)
+                H5_PKG_INIT_VAR = FALSE;
+        } /* end else */
+    }     /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5F_term_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__close_cb
+ *
+ * Purpose:     Closes a file or causes the close operation to be pended.
+ *              This function is called from the API and gets called
+ *              by H5Fclose->H5I_dec_ref->H5F__close_cb when H5I_dec_ref()
+ *              decrements the file ID reference count to zero.  The file ID
+ *              is removed from the H5I_FILE group by H5I_dec_ref() just
+ *              before H5F__close_cb() is called. If there are open object
+ *              headers then the close is pended by moving the file to the
+ *              H5I_FILE_CLOSING ID group (the f->closing contains the ID
+ *              assigned to file).
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__close_cb(H5VL_object_t *file_vol_obj, void **request)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(file_vol_obj);
+
+    /* Close the file */
+    if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+
+    /* Free the VOL object; it is unnecessary to unwrap the VOL
+     * object before freeing it, as the object was not wrapped */
+    if (H5VL_free_object(file_vol_obj) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__close_cb() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__parse_file_lock_env_var
+ *
+ * Purpose:     Parses the HDF5_USE_FILE_LOCKING environment variable.
+ *
+ * NOTE:        This is done in a separate function so we can call it from
+ *              the test code.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__parse_file_lock_env_var(htri_t *use_locks)
+{
+    char *lock_env_var = NULL; /* Environment variable pointer */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Check the file locking environment variable */
+    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    if (lock_env_var && (!HDstrcmp(lock_env_var, "FALSE") || !HDstrcmp(lock_env_var, "0")))
+        *use_locks = FALSE; /* Override: Never use locks */
+    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "BEST_EFFORT") ||
+                              !HDstrcmp(lock_env_var, "1")))
+        *use_locks = TRUE; /* Override: Always use locks */
+    else
+        *use_locks = FAIL; /* Environment variable not set, or not set correctly */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5F__parse_file_lock_env_var() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F__set_vol_conn
@@ -857,9 +1042,10 @@ done:
 htri_t
 H5F__is_hdf5(const char *name, hid_t fapl_id)
 {
-    H5FD_t *file      = NULL;        /* Low-level file struct                    */
-    haddr_t sig_addr  = HADDR_UNDEF; /* Addess of hdf5 file signature            */
-    htri_t  ret_value = FAIL;        /* Return value                             */
+    H5FD_t *      file      = NULL;        /* Low-level file struct            */
+    H5F_shared_t *shared    = NULL;        /* Shared part of file              */
+    haddr_t       sig_addr  = HADDR_UNDEF; /* Addess of hdf5 file signature    */
+    htri_t        ret_value = FAIL;        /* Return value                     */
 
     FUNC_ENTER_PACKAGE
 
@@ -870,10 +1056,20 @@ H5F__is_hdf5(const char *name, hid_t fapl_id)
     if (NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to open file")
 
-    /* The file is an hdf5 file if the hdf5 file signature can be found */
-    if (H5FD_locate_signature(file, &sig_addr) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "error while trying to locate file signature")
-    ret_value = (HADDR_UNDEF != sig_addr);
+    /* If the file is already open, it's an HDF5 file
+     *
+     * If the file is open with an exclusive lock on an operating system that enforces
+     * mandatory file locks (like Windows), creating a new file handle and attempting
+     * to read through it will fail so we have to try this first.
+     */
+    if ((shared = H5F__sfile_search(file)) != NULL)
+        ret_value = TRUE;
+    else {
+        /* The file is an HDF5 file if the HDF5 file signature can be found */
+        if (H5FD_locate_signature(file, &sig_addr) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "error while trying to locate file signature")
+        ret_value = (HADDR_UNDEF != sig_addr);
+    }
 
 done:
     /* Close the file */
@@ -1490,6 +1686,51 @@ H5F__dest(H5F_t *f, hbool_t flush)
 } /* end H5F__dest() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F__check_if_using_file_locks
+ *
+ * Purpose:     Determines if this file will use file locks.
+ *
+ * There are three ways that file locking can be controlled:
+ *
+ * 1) The configure/cmake option that sets the H5_USE_FILE_LOCKING
+ *    symbol (which is used as the default fapl value).
+ *
+ * 2) The H5Pset_file_locking() API call, which will override
+ *    the configuration default.
+ *
+ * 3) The HDF5_USE_FILE_LOCKING environment variable, which overrides
+ *    everything above.
+ *
+ * The main reason to disable file locking is to prevent errors on file
+ * systems where locking is not supported or has been disabled (as is
+ * often the case in parallel file systems).
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__check_if_using_file_locks(H5P_genplist_t *fapl, hbool_t *use_file_locking)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Make sure the out parameter has a value */
+    *use_file_locking = TRUE;
+
+    /* Check the fapl property */
+    if (H5P_get(fapl, H5F_ACS_USE_FILE_LOCKING_NAME, use_file_locking) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get use file locking flag")
+
+    /* Check the environment variable */
+    if (use_locks_env_g != FAIL)
+        *use_file_locking = (use_locks_env_g == TRUE) ? TRUE : FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__check_if_using_file_locks() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5F_open
  *
  * Purpose:    Opens (or creates) a file.  This function understands the
@@ -1578,8 +1819,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t                set_flag               = FALSE; /*set the status_flags in the superblock */
     hbool_t                clear                  = FALSE; /*clear the status_flags         */
     hbool_t                evict_on_close;                 /* evict on close value from plist  */
-    char *                 lock_env_var = NULL;            /*env var pointer               */
-    hbool_t                use_file_locking;               /*read from env var             */
+    hbool_t                use_file_locking = TRUE;        /* Using file locks? */
     hbool_t                ci_load             = FALSE;    /* whether MDC ci load requested */
     hbool_t                ci_write            = FALSE;    /* whether MDC CI write requested */
     hbool_t                file_create         = FALSE;    /* creating a new file or not */
@@ -1620,15 +1860,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if (NULL == (drvr = H5FD_get_class(fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
 
-    /* Check the environment variable that determines if we care
-     * about file locking. File locking should be used unless explicitly
-     * disabled.
-     */
-    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
-    if (lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
-        use_file_locking = FALSE;
-    else
-        use_file_locking = TRUE;
+    /* Get the file access property list, for future queries */
+    if (NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
+    /* Check if we are using file locking */
+    if (H5F__check_if_using_file_locks(a_plist, &use_file_locking) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file locking flag")
 
     /*
      * Opening a file is a two step process. First we try to open the
@@ -1716,8 +1954,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             if (H5FD_lock(lf, (hbool_t)((flags & H5F_ACC_RDWR) ? TRUE : FALSE)) < 0) {
                 /* Locking failed - Closing will remove the lock */
                 if (H5FD_close(lf) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to lock the file")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "unable to close low-level file info")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTLOCKFILE, NULL, "unable to lock the file")
             } /* end if */
 
         /* Create the 'top' file structure */
@@ -1748,6 +1986,15 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Short cuts */
     shared = file->shared;
     lf     = shared->lf;
+
+    /* Set the file locking flag. If the file is already open, the file
+     * requested file locking flag must match that of the open file.
+     */
+    if (shared->nrefs == 1)
+        file->shared->use_file_locking = use_file_locking;
+    else if (shared->nrefs > 1)
+        if (file->shared->use_file_locking != use_file_locking)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file locking flag values don't match")
 
     /* Check if page buffering is enabled */
     if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
@@ -1813,7 +2060,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         /* Open the root group */
         if (H5G_mkroot(file, FALSE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
-
     } /* end if */
 
     /* Checked if configured for VFD SWMR */
@@ -1910,7 +2156,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             /* Remove the file lock for SWMR_WRITE */
             if (use_file_locking && ((H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) || H5F_USE_VFD_SWMR(file))) {
                 if (H5FD_unlock(file->shared->lf) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to unlock the file")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTUNLOCKFILE, NULL, "unable to unlock the file")
             }  /* end if */
         }      /* end if */
         else { /* H5F_ACC_RDONLY: check consistency of status_flags */
@@ -1979,7 +2225,7 @@ H5F__post_open(H5F_t *f)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__flush() */
+} /* end H5F__post_open() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_flush_phase1
@@ -3573,6 +3819,19 @@ H5F__start_swmr_write(H5F_t *f)
 
     setup = TRUE;
 
+    /* Place an advisory lock on the file */
+    if (H5F_USE_FILE_LOCKING(f)) {
+        /* Have to unlock on Windows as Win32 doesn't support changing the lock
+         * type (exclusive vs shared) with a second call.
+         */
+        if (H5FD_unlock(f->shared->lf) < 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock the file")
+        }
+        if (H5FD_lock(f->shared->lf, TRUE) < 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_CANTLOCKFILE, FAIL, "unable to lock the file")
+        }
+    }
+
     /* Mark superblock as dirty */
     if (H5F_super_dirty(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
@@ -3598,10 +3857,6 @@ H5F__start_swmr_write(H5F_t *f)
          */
         if (H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], NULL, vol_connector, TRUE) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
-
-    /* Unlock the file */
-    if (H5FD_unlock(f->shared->lf) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to unlock the file")
 
 done:
     if (ret_value < 0 && setup) {
@@ -3630,6 +3885,11 @@ done:
         if (H5F_flush_tagged_metadata(f, H5AC__SUPERBLOCK_TAG) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush superblock")
     } /* end if */
+
+    /* Unlock the file */
+    if (H5F_USE_FILE_LOCKING(f))
+        if (H5FD_unlock(f->shared->lf) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock the file")
 
     /* Free memory */
     if (obj_ids)

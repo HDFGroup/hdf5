@@ -351,6 +351,8 @@ H5_DLL herr_t      H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_le
 H5_DLL herr_t      H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr);
 H5_DLL herr_t      H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
 H5_DLL herr_t      H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
+H5_DLL herr_t      H5Pset_file_locking(hid_t fapl_id, hbool_t use_file_locking, hbool_t ignore_when_disabled);
+H5_DLL herr_t      H5Pget_file_locking(hid_t fapl_id, hbool_t *use_file_locking, hbool_t *ignore_when_disabled);
 H5_DLL herr_t      H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size_t page_size);
 H5_DLL herr_t      H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, size_t *page_size);
 H5_DLL herr_t      H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts);

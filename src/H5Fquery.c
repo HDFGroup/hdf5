@@ -15,7 +15,7 @@
  *
  * Created:             H5Fquery.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             File structure query routines.
  *
@@ -200,8 +200,8 @@ H5F_get_actual_name(const H5F_t *f)
  * Function: H5F_get_extpath
  *
  * Purpose:  Retrieve the file's 'extpath' flags
- *           This is used by H5L_extern_traverse() and H5D_build_file_prefix() to retrieve the main file's
- *location when searching the target file.
+ *           This is used by H5L_extern_traverse() and H5D_build_file_prefix()
+ *           to retrieve the main file's location when searching the target file.
  *
  * Return:   'extpath' on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
@@ -1229,8 +1229,8 @@ H5F_get_null_fsm_addr(const H5F_t *f)
  *
  * Return:   VOL class pointer for file, can't fail
  *
- * Programmer:	Quincey Koziol
- *		Saturday, August 17, 2019
+ * Programmer:    Quincey Koziol
+ *        Saturday, August 17, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1272,8 +1272,8 @@ H5F_get_vol_obj(const H5F_t *f)
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:	Quincey Koziol
- *		Saturday, August 17, 2019
+ * Programmer:    Quincey Koziol
+ *        Saturday, August 17, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1300,6 +1300,26 @@ H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_cont_info */
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_get_file_locking
+ *
+ * Purpose:  Get the file locking flag for the file
+ *
+ * Return:   TRUE/FALSE
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_file_locking(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->use_file_locking)
+} /* end H5F_get_file_locking */
 
 /*-------------------------------------------------------------------------
  * Function: H5F_use_vfd_swmr

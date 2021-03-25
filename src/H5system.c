@@ -677,15 +677,15 @@ Pflock(int fd, int operation)
  * Purpose:     Wrapper function for systems where no file locking is
  *              available.
  *
- * Return:      Failure:    -1 (always fails)
+ * Return:      0 (success)
  *
  *-------------------------------------------------------------------------
  */
 int H5_ATTR_CONST
 Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation)
 {
-    /* just fail */
-    return -1;
+    /* just succeed */
+    return 0;
 } /* end Nflock() */
 
 /*-------------------------------------------------------------------------

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:	Quincey Koziol
  *		Thursday, September 28, 2000
  *
  * Purpose:	This file contains declarations which are visible only within
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5F package!"
 #endif
 
-#ifndef _H5Fpkg_H
-#define _H5Fpkg_H
+#ifndef H5Fpkg_H
+#define H5Fpkg_H
 
 /* Get package's private header */
 #include "H5Fprivate.h"
@@ -340,6 +340,7 @@ struct H5F_shared_t {
     struct H5G_t *       root_grp;          /* Open root group			*/
     H5FO_t *             open_objs;         /* Open objects in file                 */
     H5UC_t *             grp_btree_shared;  /* Ref-counted group B-tree node info   */
+    hbool_t              use_file_locking;  /* Whether or not to use file locking */
     hbool_t              closing;           /* File is in the process of being closed */
 
     /* Cached VOL connector ID & info */
@@ -507,6 +508,11 @@ H5FL_EXTERN(H5F_t);
 /* Declare a free list to manage the H5F_shared_t struct */
 H5FL_EXTERN(H5F_shared_t);
 
+/* Whether or not to use file locking (based on the environment variable)
+ * FAIL means ignore the environment variable.
+ */
+H5_DLLVAR htri_t use_locks_env_g;
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/
@@ -524,6 +530,7 @@ H5_DLL herr_t  H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t  H5F__close(H5F_t *f);
 H5_DLL herr_t  H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL herr_t  H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
+H5_DLL herr_t  H5F__parse_file_lock_env_var(htri_t *use_locks);
 H5_DLL herr_t  H5F__vfd_swmr_end_tick(H5F_t *f);
 H5_DLL herr_t  H5F__vfd_swmr_disable_end_of_tick(H5F_t *f);
 H5_DLL herr_t  H5F__vfd_swmr_enable_end_of_tick(H5F_t *f);
@@ -594,6 +601,7 @@ H5_DLL herr_t H5F__vfd_swmr_writer_create_open_flush_test(hid_t file_id, hbool_t
 H5_DLL herr_t H5F__vfd_swmr_writer_md_test(hid_t, unsigned, struct H5FD_vfd_swmr_idx_entry_t *, unsigned);
 
 H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
+H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */
 
-#endif /* _H5Fpkg_H */
+#endif /* H5Fpkg_H */
