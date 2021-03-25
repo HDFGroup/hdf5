@@ -10238,13 +10238,13 @@ gent_floatsattrs(void)
     hid_t   aspace  = H5I_INVALID_HID;
     hsize_t dims[2], adims[1];
 
-    float **       dset32  = NULL;
-    double **      dset64  = NULL;
-    long double ** dset128 = NULL;
+    float **      dset32  = NULL;
+    double **     dset64  = NULL;
+    long double **dset128 = NULL;
 
-    float *       aset32  = NULL;
-    double *      aset64  = NULL;
-    long double * aset128 = NULL;
+    float *      aset32  = NULL;
+    double *     aset64  = NULL;
+    long double *aset128 = NULL;
 
     float       val32bits;
     double      val64bits;
