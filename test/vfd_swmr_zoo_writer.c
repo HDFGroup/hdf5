@@ -111,16 +111,16 @@ vfd_swmr_writer_may_increase_tick_to(uint64_t new_tick, bool wait_for_reader)
     dbgf(3, "%s: enter\n", __func__);
 
     if (fd == -1) {
-        if (access("./shared_tick_num", F_OK ) < 0)
+        if (HDaccess("./shared_tick_num", F_OK ) < 0)
             return true;
 
-        fd = open("./shared_tick_num", O_RDONLY);
+        fd = HDopen("./shared_tick_num", O_RDONLY);
         if (fd == -1) {
             warn("%s: open", __func__); // TBD ratelimit/silence this warning
             return true;
         }
         assert(tick_stats == NULL);
-        tick_stats = calloc(1, sizeof(*tick_stats) +
+        tick_stats = HDcalloc(1, sizeof(*tick_stats) +
             (swmr_config.max_lag - 1) *
             sizeof(tick_stats->writer_lead_reader_by[0]));
         if (tick_stats == NULL)
@@ -136,7 +136,7 @@ vfd_swmr_writer_may_increase_tick_to(uint64_t new_tick, bool wait_for_reader)
 
         tick_stats->writer_read_shared_file++;
 
-        if ((nread = pread(fd, &shared, sizeof(shared), 0)) == -1)
+        if ((nread = HDpread(fd, &shared, sizeof(shared), 0)) == -1)
             err(EXIT_FAILURE, "%s: pread", __func__);
 
         if (nread != sizeof(shared))
@@ -180,7 +180,7 @@ vfd_swmr_reader_did_increase_tick_to(uint64_t new_tick)
     if (fd == -1) {
         // TBD create a temporary file, here, and move it to its final path
         // after writing it.
-        fd = open("./shared_tick_num", O_RDWR|O_CREAT, 0600);
+        fd = HDopen("./shared_tick_num", O_RDWR|O_CREAT, 0600);
         if (fd == -1)
             err(EXIT_FAILURE, "%s: open", __func__);
     }
@@ -189,7 +189,7 @@ vfd_swmr_reader_did_increase_tick_to(uint64_t new_tick)
 
     // TBD convert endianness
 
-    if ((nwritten = pwrite(fd, &shared, sizeof(shared), 0)) == -1)
+    if ((nwritten = HDpwrite(fd, &shared, sizeof(shared), 0)) == -1)
         errx(EXIT_FAILURE, "%s: pwrite", __func__);
 
     if (nwritten != sizeof(shared))
@@ -273,7 +273,7 @@ main(int argc, char **argv)
         case 'l':
             /* Expected maximal time for reader's validation of zoo creation or deletion */
             errno = 0;
-            tmpl = strtoul(optarg, &end, 0);
+            tmpl = HDstrtoul(optarg, &end, 0);
             if (end == optarg || *end != '\0')
                 errx(EXIT_FAILURE, "couldn't parse `-l` argument `%s`", optarg);
             else if (errno != 0)
@@ -284,7 +284,7 @@ main(int argc, char **argv)
             break;
         case 'm':
             errno = 0;
-            tmpl = strtoul(optarg, &end, 0);
+            tmpl = HDstrtoul(optarg, &end, 0);
             if (end == optarg || *end != '\0')
                 errx(EXIT_FAILURE, "couldn't parse `-m` argument `%s`", optarg);
             else if (errno != 0)
@@ -349,10 +349,10 @@ main(int argc, char **argv)
 
     /* Writer creates two named pipes(FIFO) to coordinate two-way communication */
     if (writer) {
-        if (HDmkfifo(fifo_writer_to_reader, 0666) < 0)
+        if (HDmkfifo(fifo_writer_to_reader, 0600) < 0)
             errx(EXIT_FAILURE, "HDmkfifo");
 
-        if (HDmkfifo(fifo_reader_to_writer, 0666) < 0)
+        if (HDmkfifo(fifo_reader_to_writer, 0600) < 0)
             errx(EXIT_FAILURE, "HDmkfifo");
     }
 
