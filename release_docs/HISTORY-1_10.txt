@@ -3,6 +3,9 @@ HDF5 History
 
 This file contains development history of the HDF5 1.10 branch
 
+09.      Release Information for hdf5-1.10.7
+08.      Release Information for hdf5-1.10.6
+07.      Release Information for hdf5-1.10.5
 06.      Release Information for hdf5-1.10.4
 05.      Release Information for hdf5-1.10.3
 04.      Release Information for hdf5-1.10.2
@@ -11,6 +14,2172 @@ This file contains development history of the HDF5 1.10 branch
 01.      Release Information for hdf5-1.10.0
 
 [Search on the string '%%%%' for section breaks of each release.]
+
+%%%%1.10.7%%%%
+
+HDF5 version 1.10.7 released on 2020-09-11
+================================================================================
+
+
+INTRODUCTION
+
+This document describes the differences between this release and the previous
+HDF5 release. It contains information on the platforms tested and known
+problems in this release. For more details check the HISTORY*.txt files in the
+HDF5 source.
+
+Note that documentation in the links below will be updated at the time of each
+final release.
+
+Links to HDF5 documentation can be found on The HDF5 web page:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5
+
+The official HDF5 releases can be obtained from:
+
+     https://www.hdfgroup.org/downloads/hdf5/
+
+     HDF5 binaries provided are fully tested with ZLIB and the free
+     Open Source SZIP successor Libaec (with BSD license).
+     The official ZLIB and SZIP/Libaec pages are at:
+
+        ZLIB: http://www.zlib.net/
+            http://www.zlib.net/zlib_license.html
+        SZIP/Libaec: https://gitlab.dkrz.de/k202009/libaec
+            https://gitlab.dkrz.de/k202009/libaec/-/blob/master/Copyright.txt
+
+Changes from Release to Release and New Features in the HDF5-1.10.x release series
+can be found at:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
+
+If you have any questions or comments, please send them to the HDF Help Desk:
+
+     help@hdfgroup.org
+
+
+CONTENTS
+
+- New Features
+- Support for new platforms and languages
+- Bug Fixes since HDF5-1.10.6
+- Supported Platforms
+- Tested Configuration Features Summary
+- More Tested Platforms
+- Known Problems
+- CMake vs. Autotools installations
+
+
+New Features
+============
+
+    Configuration:
+    -------------
+    - Disable memory sanity checks in the Autotools in release branches
+
+      The library can be configured to use internal memory sanity checking,
+      which replaces C API calls like malloc(3) and free(3) with our own calls
+      which add things like heap canaries. These canaries can cause problems
+      when external filter plugins reallocate canary-marked buffers.
+
+      For this reason, the default will be to not use the memory allocation
+      sanity check feature in release branches (e.g., hdf5_1_10_7).
+      Debug builds in development branches (e.g., develop, hdf5_1_10) will
+      still use them by default.
+
+      This change only affects Autotools debug builds. Non-debug autotools
+      builds and all CMake builds do not enable this feature by default.
+
+      (DER - 2020/08/19)
+
+    - Add file locking configure and CMake options
+
+      HDF5 1.10.0 introduced a file locking scheme, primarily to help
+      enforce SWMR setup. Formerly, the only user-level control of the scheme
+      was via the HDF5_USE_FILE_LOCKING environment variable.
+
+      This change introduces configure-time options that control whether
+      or not file locking will be used and whether or not the library
+      ignores errors when locking has been disabled on the file system
+      (useful on some HPC Lustre installations).
+
+      In both the Autotools and CMake, the settings have the effect of changing
+      the default property list settings (see the H5Pset/get_file_locking()
+      entry, below).
+
+      The yes/no/best-effort file locking configure setting has also been
+      added to the libhdf5.settings file.
+
+      Autotools:
+
+        An --enable-file-locking=(yes|no|best-effort) option has been added.
+
+        yes:          Use file locking.
+        no:           Do not use file locking.
+        best-effort:  Use file locking and ignore "disabled" errors.
+
+      CMake:
+
+        Two self-explanatory options have been added:
+
+        HDF5_USE_FILE_LOCKING
+        HDF5_IGNORE_DISABLED_FILE_LOCKS
+
+        Setting both of these to ON is the equivalent to the Autotools'
+        best-effort setting.
+
+      NOTE:
+      The precedence order of the various file locking control mechanisms is:
+
+        1) HDF5_USE_FILE_LOCKING environment variable (highest)
+
+        2) H5Pset_file_locking()
+
+        3) configure/CMake options (which set the property list defaults)
+
+        4) library defaults (currently best-effort)
+
+      (DER - 2020/07/30, HDFFV-11092)
+
+    - CMake option to link the generated Fortran MOD files into the include
+      directory.
+
+      The Fortran generation of MOD files by a Fortran compile can produce
+      different binary files between SHARED and STATIC compiles with different
+      compilers and/or different platforms. Note that it has been found that
+      different versions of Fortran compilers will produce incompatible MOD
+      files. Currently, CMake will locate these MOD files in subfolders of
+      the include directory and add that path to the Fortran library target
+      in the CMake config file, which can be used by the CMake find library
+      process. For other build systems using the binary from a CMake install,
+      a new CMake configuration can be used to copy the pre-chosen version
+      of the Fortran MOD files into the install include directory.
+
+      The default will depend on the configuration of
+      BUILD_STATIC_LIBS and BUILD_SHARED_LIBS:
+            YES                   YES         Default to SHARED
+            YES                   NO          Default to STATIC
+            NO                    YES         Default to SHARED
+            NO                    NO          Default to SHARED
+      The defaults can be overriden by setting the config option
+         HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
+
+      (ADB - 2020/07/09, HDFFV-11116)
+
+    - CMake option to use AEC (open source SZip) library instead of SZip
+
+      The open source AEC library is a replacement library for SZip. In
+      order to use it for hdf5, the libaec CMake source was changed to add
+      "-fPIC" and exclude test files. A new option USE_LIBAEC is required
+      to compensate for the different files produced by AEC build.
+
+      Autotools does not build the compression libraries within hdf5 builds,
+      but will use an installed libaec when configured as before with the
+      option --with-libsz=<path to libaec directory>.
+
+      (ADB - 2020/04/22, OESS-65)
+
+    - CMake ConfigureChecks.cmake file now uses CHECK_STRUCT_HAS_MEMBER
+
+      Some handcrafted tests in HDFTests.c have been removed and the CMake
+      CHECK_STRUCT_HAS_MEMBER module has been used.
+
+      (ADB - 2020/03/24, TRILAB-24)
+
+    - Both build systems use same set of warnings flags
+
+      GNU C, C++ and gfortran warnings flags were moved to files in a config
+      sub-folder named gnu-warnings. Flags that only are available for a specific
+      version of the compiler are in files named with that version.
+      Clang C warnings flags were moved to files in a config sub-folder
+      named clang-warnings.
+      Intel C, Fortran warnings flags were moved to files in a config sub-folder
+      named intel-warnings.
+
+      There are flags in named "error-xxx" files with warnings that may
+      be promoted to errors. Some source files may still need fixes.
+
+      There are also pairs of files named "developer-xxx" and "no-developer-xxx"
+      that are chosen by the CMake option:HDF5_ENABLE_DEV_WARNINGS or the
+      configure option:--enable-developer-warnings.
+
+      In addition, CMake no longer applies these warnings for examples.
+
+      (ADB - 2020/03/24, TRILAB-192)
+
+    - Update CMake minimum version to 3.12
+
+      Updated CMake minimum version to 3.12 and added version checks
+      for Windows features.
+
+      (ADB - 2020/02/05, TRILABS-142)
+
+    - Fixed CMake include properties for Fortran libraries
+
+      Corrected the library properties for Fortran to use the
+      correct path for the Fortran module files.
+
+      (ADB - 2020/02/04, HDFFV-11012)
+
+    - Added common warnings files for gnu and intel
+
+      Added warnings files to use one common set of flags
+      during configure for both autotools and CMake build
+      systems. The initial implementation only affects a
+      general set of flags for gnu and intel compilers.
+
+      (ADB - 2020/01/17)
+
+    - Added new options to CMake for control of testing
+
+      Added CMake options (default ON);
+          HDF5_TEST_SERIAL AND/OR HDF5_TEST_PARALLEL
+          combined with:
+            HDF5_TEST_TOOLS
+            HDF5_TEST_EXAMPLES
+            HDF5_TEST_SWMR
+            HDF5_TEST_FORTRAN
+            HDF5_TEST_CPP
+            HDF5_TEST_JAVA
+
+      (ADB - 2020/01/15, HDFFV-11001)
+
+    - Added Clang sanitizers to CMake for analyzer support if compiler is clang.
+
+      Added CMake code and files to execute the Clang sanitizers if
+      HDF5_ENABLE_SANITIZERS is enabled and the USE_SANITIZER option
+      is set to one of the following:
+          Address
+          Memory
+          MemoryWithOrigins
+          Undefined
+          Thread
+          Leak
+          'Address;Undefined'
+
+      (ADB - 2019/12/12, TRILAB-135)
+
+
+    Library:
+    --------
+    - Add metadata cache optimization to reduce skip list usage
+
+      On file flush or close, the metadata cache attempts to write out
+      all dirty entries in increasing address order.  To do this, it needs
+      an address sorted list of metadata entries.  Further, since flushing
+      one metadata cache entry can dirty another, this list must support
+      efficient insertion and deletion.
+
+      The metadata cache uses a skip list of all dirty entries for this
+      purpose.  Before this release, this skip list was maintained at all
+      times.  However, since profiling indicates that this imposes a
+      significant cost, we now construct and maintain the skip list only
+      when needed.  Specifically, we enable the skip list and load it with
+      a list of all dirty entries in the metadata cache just before a flush,
+      and disable it after the flush.
+
+      (JRM - 2020/08/17, HDFFV-11034)
+
+    - Add BEST_EFFORT value to HDF5_USE_FILE_LOCKING environment variable
+
+      This change adds a BEST_EFFORT to the TRUE/FALSE, 1/0 settings that
+      were previously accepted. This option turns on file locking but
+      ignores locking errors when the library detects that file locking
+      has been disabled on a file system (useful on some HPC Lustre
+      installations).
+
+      The capitalization of BEST_EFFORT is mandatory.
+
+      See the configure option discussion for HDFFV-11092 (above) for more
+      information on the file locking feature and how it's controlled.
+
+      (DER - 2020/07/30, HDFFV-11092)
+
+
+    - Add H5Pset/get_file_locking() API calls
+
+      This change adds new API calls which can be used to set or get the
+      file locking parameters. The single API call sets both the "use file
+      locking" flag and the "ignore disabled file locking" flag.
+
+      When opening a file multiple times without closing, the file MUST be
+      opened with the same file locking settings. Opening a file with different
+      file locking settings will fail (this is similar to the behavior of
+      H5Pset_fclose_degree()).
+
+      See the configure option discussion for HDFFV-11092 (above) for more
+      information on the file locking feature and how it's controlled.
+
+      (DER - 2020/07/30, HDFFV-11092)
+
+    - Add Mirror VFD
+
+      Use TCP/IP sockets to perform write-only (W/O) file I/O on a remote
+      machine. Must be used in conjunction with the Splitter VFD.
+
+      (JOS - 2020/03/13, TBD)
+
+    - Add Splitter VFD
+
+      Maintain separate R/W and W/O channels for "concurrent" file writes
+      to two files using a single HDF5 file handle.
+
+      (JOS - 2020/03/13, TBD)
+
+    - Fixed an assertion failure in the parallel library when collectively
+      filling chunks. As it is required that chunks be written in
+      monotonically non-decreasing order of offset in the file, this assertion
+      was being triggered when the list of chunk file space allocations being
+      passed to the collective chunk filling routine was not sorted according
+      to this particular requirement.
+
+      The addition of a sort of the out of order chunks trades a bit of
+      performance for the elimination of this assertion and of any complaints
+      from MPI implementations about the file offsets used being out of order.
+
+      (JTH - 2019/10/07)
+
+    Fortran Library:
+    ----------------
+    - Add wrappers for H5Pset/get_file_locking() API calls
+
+      h5pget_file_locking_f()
+      h5pset_file_locking_f()
+
+      See the configure option discussion for HDFFV-11092 (above) for more
+      information on the file locking feature and how it's controlled.
+
+      (DER - 2020/07/30, HDFFV-11092)
+
+    - Added new Fortran parameters:
+
+        H5F_LIBVER_ERROR_F
+        H5F_LIBVER_NBOUNDS_F
+        H5F_LIBVER_V18_F
+        H5F_LIBVER_V110_F
+
+    - Added new Fortran API: h5pget_libver_bounds_f
+
+      (MSB - 2020/02/11, HDFFV-11018)
+
+    C++ Library:
+    ------------
+    - Add wrappers for H5Pset/get_file_locking() API calls
+
+      FileAccPropList::setFileLocking()
+      FileAccPropList::getFileLocking()
+
+      See the configure option discussion for HDFFV-11092 (above) for more
+      information on the file locking feature and how it's controlled.
+
+      (DER - 2020/07/30, HDFFV-11092)
+
+    Java Library:
+    ----------------
+    - Add wrappers for H5Pset/get_file_locking() API calls
+
+      H5Pset_file_locking()
+      H5Pget_use_file_locking()
+      H5Pget_ignore_disabled_file_locking()
+
+      Unlike the C++ and Fortran wrappers, there are separate getters for the
+      two file locking settings, each of which returns a boolean value.
+
+      See the configure option discussion for HDFFV-11092 (above) for more
+      information on the file locking feature and how it's controlled.
+
+      (DER - 2020/07/30, HDFFV-11092)
+
+    Tools:
+    ------
+    - h5repack added options to control how external links are handled.
+
+      Currently h5repack preserves external links and cannot copy and merge
+      data from the external files. Two options, merge and prune, were added to
+      control how to merge data from an external link into the resulting file.
+       --merge             Follow external soft link recursively and merge data.
+       --prune             Do not follow external soft links and remove link.
+       --merge --prune     Follow external link, merge data and remove dangling link.
+
+      (ADB - 2020/08/05, HDFFV-9984)
+
+    High-Level APIs:
+    ---------------
+    - None
+
+    C Packet Table API
+    ------------------
+    - None
+
+    Internal header file
+    --------------------
+    - None
+
+    Documentation
+    -------------
+    - None
+
+
+Support for new platforms, languages and compilers.
+=======================================
+    - None
+
+
+Bug Fixes since HDF5-1.10.6 release
+==================================
+
+    Library
+    -------
+    - Fix bug and simplify collective metadata write operation when some ranks
+        have no entries to contribute.  This fixes parallel regression test
+        failures with IBM SpectrumScale MPI on the Summit system at ORNL.
+
+      (QAK - 2020/09/02)
+
+    - Avoid setting up complex MPI types with 0-length vectors, which some
+        MPI implementations don't handle well.  (In particular, IBM
+        SpectrumScale MPI on the Summit system at ORNL)
+
+      (QAK - 2020/08/21)
+
+    - Fixed use-of-uninitialized-value error
+
+      Appropriate initialization of local structs was added to remove the
+      use-of-uninitialized-value errors reported by MemorySanitizer.
+
+      (BMR - 2020/8/13, HDFFV-11101)
+
+    - Creation of dataset with optional filter
+
+      When the combination of type, space, etc doesn't work for filter
+      and the filter is optional, it was supposed to be skipped but it was
+      not skipped and the creation failed.
+
+      A fix is applied to allow the creation of a dataset in such
+      situation, as specified in the user documentation.
+
+      (BMR - 2020/8/13, HDFFV-10933)
+
+    - Explicitly declared dlopen to use RTLD_LOCAL
+
+      dlopen documentation states that if neither RTLD_GLOBAL nor
+      RTLD_LOCAL are specified, then the default behavior is unspecified.
+      The default on linux is usually RTLD_LOCAL while macos will default
+      to RTLD_GLOBAL.
+
+      (ADB - 2020/08/12, HDFFV-11127)
+
+    - Fixed issues CVE-2018-13870 and CVE-2018-13869
+
+      When a buffer overflow occurred because a name length was corrupted
+      and became very large, h5dump crashed on memory access violation.
+
+      A check for reading past the end of the buffer was added to multiple
+      locations to prevent the crashes and h5dump now simply fails with an
+      error message when this error condition occurs.
+
+      (BMR - 2020/7/31, HDFFV-11120 and HDFFV-11121)
+
+    - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
+      causes asserts/errors when passed to other dataspace API calls.
+
+      H5S_NO_CLASS is an internal class value that should not have been
+      exposed via a public API call.
+
+      In debug builds of the library, this can cause asserts to trip. In
+      non-debug builds, it will produce normal library errors.
+
+      The new library behavior is for H5Sset_extent_none() to convert
+      the dataspace into one of type H5S_NULL, which is better handled
+      by the library and easier for developers to reason about.
+
+      (DER - 2020/07/27, HDFFV-11027)
+
+    - Fixed the segmentation fault when reading attributes with multiple threads
+
+      It was reported that the reading of attributes with variable length string
+      datatype will crash with segmentation fault particularly when the number
+      of threads is high (>16 threads).  The problem was due to the file pointer
+      that was set in the variable length string datatype for the attribute.
+      That file pointer was already closed when the attribute was accessed.
+
+      The problem was fixed by setting the file pointer to the current opened
+      file pointer when the attribute was accessed.  Similar patch up was done
+      before when reading dataset with variable length string datatype.
+
+      (VC - 2020/07/13, HDFFV-11080)
+
+    -  Fixed issue CVE-2018-17438
+
+      A division by zero was discovered in H5D__select_io() of H5Dselect.c.
+        https://security-tracker.debian.org/tracker/CVE-2018-17438
+
+      A check was added to protect against division by zero.  When such
+      situation occurs again, the normal HDF5 error handling will be invoked,
+      instead of segmentation fault.
+
+      (BMR, DER - 2020/07/09, HDFFV-10587)
+
+    - Fixed CVE-2018-17435
+
+      The tool h52gif produced a segfault when the size of an attribute message
+      was corrupted and caused a buffer overflow.
+
+      The problem was fixed by verifying the attribute message's size against the
+      buffer size before accessing the buffer.  h52gif was also fixed to display
+      the failure instead of silently exiting after the segfault was eliminated.
+
+      (BMR - 2020/6/19, HDFFV-10591)
+
+    - Don't allocate an empty (0-dimensioned) chunked dataset's chunk
+      index, until the dataset's dimensions are increased.
+
+      (QAK - 2020/05/07)
+
+    Configuration
+    -------------
+    - Stopped addition of szip header and include directory path for
+      incompatible libsz
+
+      szlib.h is the same for both 32-bit and 64-bit szip, and the header file
+      and its path were added to the HDF5 binary even though the configure
+      check of a function in libsz later failed and szip compression was not
+      enabled.  The header file and include path are now added only when the
+      libsz function passes the configure check.
+
+      (LRK - 2020/08/17, HDFFV-10830)
+
+    - Added -fsanitize=address autotools configure option for Clang compiler
+
+      Clang sanitizer options were also added for Clang compilers with CMake.
+
+      (LRK, 2020/08/05, HDFFV-10836)
+
+    - Updated testh5cc.sh.in for functions versioned in HDF5 1.10.
+
+      testh5cc.sh previously tested that the correct version of a function
+      versioned in HDF5 1.6 or 1.8 was compiled when one of
+      H5_NO_DEPRECATED_SYMBOLS or H5_USE_16_API_DEFAULT were defined.  This
+      test was extended for additional testing with H5_USE_18_API_DEFAULT.
+
+      (LRK, 2020/06/22, HDFFV-11000)
+
+    - Fixed CMake include properties for Fortran libraries
+
+      Corrected the library properties for Fortran to use the
+      correct path for the Fortran module files.
+
+      (ADB - 2020/02/04, HDFFV-11012)
+
+    Performance
+    -------------
+    - None
+
+    Java Library:
+    ----------------
+    - None
+
+    Fortran
+    --------
+    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
+
+      (MSB - 2020/2/18, HDFFV-11029)
+
+    - Fixed configure issue when building HDF5 with NAG Fortran 7.0.
+
+      HDF5 now accounts for the addition of half-precision floating-point
+      in NAG 7.0 with a KIND=16.
+
+      (MSB - 2020/02/28, HDFFV-11033)
+
+    Tools
+    -----
+    - The tools library was updated by standardizing the error stack process.
+
+      General sequence is:
+          h5tools_setprogname(PROGRAMNAME);
+          h5tools_setstatus(EXIT_SUCCESS);
+          h5tools_init();
+          ... process the command-line (check for error-stack enable) ...
+          h5tools_error_report();
+          ... (do work) ...
+          h5diff_exit(ret);
+
+      (ADB - 2020/07/20, HDFFV-11066)
+
+    - h5diff fixed a command line parsing error.
+
+      h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
+      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+
+      (ADB - 2020/07/20, HDFFV-10897)
+
+    - h5diff added a command line option to ignore attributes.
+
+      h5diff would ignore all objects with a supplied path if the exclude-path argument is used.
+      Adding the exclude-attribute argument will only eclude attributes, with the supplied path,
+      from comparision.
+
+      (ADB - 2020/07/20, HDFFV-5935)
+
+    - h5diff added another level to the verbose argument to print filenames.
+
+      Added verbose level 3 that is level 2 plus the filenames. The levels are:
+          0 : Identical to '-v' or '--verbose'
+          1 : All level 0 information plus one-line attribute status summary
+          2 : All level 1 information plus extended attribute status report
+          3 : All level 2 information plus file names
+
+      (ADB - 2020/07/20, HDFFV-10005)
+
+    - h5repack was fixed to repack the reference attributes properly.
+      The code line that checks if the update of reference inside a compound
+      datatype is misplaced outside the code block loop that carries out the
+      check. In consequence, the next attribute that is not the reference
+      type was repacked again as the reference type and caused the failure of
+      repacking. The fix is to move the corresponding code line to the correct
+      code block.
+
+      (KY -2020/02/10, HDFFV-11014)
+
+    High-Level APIs:
+    ------
+    - The H5DSis_scale function was updated to return "not a dimension scale" (0)
+      instead of failing (-1), when CLASS or DIMENSION_SCALE attributes are
+      not written according to Dimension Scales Specification.
+
+     (EIP - 2020/08/12, HDFFV-10436)
+
+    Fortran High-Level APIs:
+    ------
+    - None
+
+    Documentation
+    -------------
+    - None
+
+    F90 APIs
+    --------
+    - None
+
+    C++ APIs
+    --------
+    - None
+
+    Testing
+    -------
+    - Stopped java/test/junit.sh.in installing libs for testing under ${prefix}
+
+      Lib files needed are now copied to a subdirectory in the java/test
+      directory, and on Macs the loader path for libhdf5.xxxs.so is changed
+      in the temporary copy of libhdf5_java.dylib.
+
+      (LRK, 2020/7/2, HDFFV-11063)
+
+
+Supported Platforms
+===================
+
+    Linux 3.10.0-1127.10.1.el7    gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    (echidna)                     GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+
+    Linux 2.6.32-754.31.1.el6     IBM XL C/C++ V13.1
+    #1 SMP ppc64 GNU/Linux        IBM XL Fortran V15.1
+    (ostrich)
+
+    Linux 3.10.0-327.18.2.el7     GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (jelly/kituo/moohan)          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+                                    Version 4.9.3, Version 5.3.0, Version 6.3.0,
+                                    Version 7.2.0, Version 8.3.0, Version 9.1.0
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 17.0.0.098 Build 20160721
+                                  MPICH 3.3 compiled with GCC 7.2.0
+                                  OpenMPI 4.0.0 compiled with GCC 7.2.0
+
+    SunOS 5.11 11.4.5.12.5.0      Sun C 5.15 SunOS_sparc 2017/05/30
+    32- and 64-bit                Studio 12.6 Fortran 95 8.8 SunOS_sparc 2017/05/30
+    (hedgehog)                    Sun C++ 5.15 SunOS_sparc 2017/05/30
+
+    Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
+
+    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2017 w/ Intel Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ MSMPI 10.1 (cmake)
+
+    macOS Mojave 10.14.6          Apple LLVM version 10.0.1 (clang-1001.0.46.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (swallow)                     Intel icc/icpc/ifort version 19.0.4.233 20190416
+
+Tested Configuration Features Summary
+=====================================
+
+    In the tables below
+          y   = tested
+          n   = not tested in this release
+          C   = Cluster
+          W   = Workstation
+          x   = not working in this release
+          dna = does not apply
+          ( ) = footnote appears below second table
+          <blank> = testing incomplete on this feature or platform
+
+Platform                              C         F90/   F90      C++  zlib  SZIP
+                                      parallel  F2003  parallel
+Solaris2.11 32-bit                      n        y/y    n        y    y     y
+Solaris2.11 64-bit                      n        y/n    n        y    y     y
+Windows 7 x64                           y        y/y    y        y    y     y
+Windows 10                              y        y/y    n        y    y     y
+Windows 10 x64                          y        y/y    n        y    y     y
+MacOS Sierra 10.12.6 64-bit             n        y/y    n        y    y     y
+MacOS High Sierra 10.13.6 64-bit        n        y/y    n        y    y     y
+MacOS Mojave 10.14.6 64-bit             n        y/y    n        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 PGI      n        y/y    n        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 Intel    n        y/y    n        y    y     y
+Linux 2.6.32-754.31.1.el6.ppc64 XL      n        y/y    n        y    y     y
+
+
+Platform                                 Shared  Shared    Shared    Thread-
+                                         C libs  F90 libs  C++ libs  safe
+Solaris2.11 32-bit                         y       y         y         y
+Solaris2.11 64-bit                         y       y         y         y
+Windows 7 x64                              y       y         y         y
+Windows 10                                 y       y         y         y
+Windows 10 x64                             y       y         y         y
+MacOS Sierra 10.12.6 64-bit                y       n         y         y
+MacOS High Sierra 10.13.6 64-bit           y       n         y         y
+MacOS Mojave 10.14.6 64-bit                y       n         y         y
+CentOS 7.2 Linux 3.10.0 x86_64 PGI         y       y         y         n
+CentOS 7.2 Linux 3.10.0 x86_64 GNU         y       y         y         y
+CentOS 7.2 Linux 3.10.0 x86_64 Intel       y       y         y         n
+Linux 2.6.32-754.31.1.el6.ppc64 XL         y       y         y         n
+
+Compiler versions for each platform are listed in the preceding
+"Supported Platforms" table.
+
+
+More Tested Platforms
+=====================
+The following platforms are not supported but have been tested for this release.
+
+    Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (platypus)                       Version 4.4.7 20120313
+                                     Version 4.9.3, 5.3.0, 6.2.0
+                                  PGI C, Fortran, C++ for 64-bit target on
+                                  x86-64;
+                                     Version 19.10-0
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
+
+    Linux 2.6.32-754.31.1.el6     gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+
+    Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
+    #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+    (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
+                                  GCC Version 7.1.0
+                                  OpenMPI 2.1.6-GCC-7.2.0-2.29,
+                                     3.1.3-GCC-7.2.0-2.29
+                                  Intel(R) C (icc) and C++ (icpc) compilers
+                                     Version 17.0.0.098 Build 20160721
+                                  with NAG Fortran Compiler Release 6.1(Tozai)
+
+    Linux 3.10.0-327.10.1.el7     MPICH 3.1.4 compiled with GCC 4.9.3
+    #1 SMP x86_64 GNU/Linux
+    (moohan)
+
+    Linux-3.10.0-1127.0.0.1chaos  openmpi-4.0.0
+    #1 SMP x86_64 GNU/Linux           clang/3.9.0, 8.0.1
+    (quartz)                          gcc/7.3.0, 8.1.0
+                                      intel/16.0.4
+
+    Linux-4.14.0-115.10.1.1       spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux          clang/coral-2018.08.08
+    (lassen)                          gcc/7.3.1
+                                      xl/2019.02.07
+
+    Linux-4.12.14-150.52-default  cray-mpich/7.7.10
+    #1 SMP x86_64 GNU/Linux           gcc/7.3.0, 8.2.0
+    (cori)                            intel/19.0.3
+
+    Linux-4.4.180-94.107-default  cray-mpich/7.7.6
+    # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
+    (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
+
+    Fedora 32 5.7.15-200.fc32.x86_64  Clang version 10.0.0 (Fedora 10.0.0-2.fc32)
+    #1 SMP x86_64  GNU/Linux      GNU gcc (GCC) 10.2.1 20200723 (Red Hat 10.2.1-1)
+                                  GNU Fortran (GCC) 10.2.1 20200723 (Red Hat 10.2.1)
+                                     (cmake and autotools)
+
+    Mac OS X El Capitan 10.11.6   Apple clang version 7.3.0 from Xcode 7.3
+    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                 Intel icc/icpc/ifort version 16.0.2
+
+    macOS Sierra 10.12.6          Apple LLVM version 9.0.0 (clang-900.39.2)
+    64-bit                        gfortran GNU Fortran (GCC) 7.4.0
+    (kite)                        Intel icc/icpc/ifort version 17.0.2
+
+    macOS High Sierra 10.13.6     Apple LLVM version 10.0.0 (clang-1000.10.44.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                        Intel icc/icpc/ifort version 19.0.4.233 20190416
+
+    SunOS 5.11 11.3               Sun C 5.15 SunOS_sparc
+    32- and 64-bit                Sun Fortran 95 8.8 SunOS_sparc
+    (emu)                         Sun C++ 5.15 SunOS_sparc
+
+
+Known Problems
+==============
+    CMake files do not behave correctly with paths containing spaces.
+    Do not use spaces in paths because the required escaping for handling spaces
+    results in very complex and fragile build files.
+    ADB - 2019/05/07
+
+    At present, metadata cache images may not be generated by parallel
+    applications.  Parallel applications can read files with metadata cache
+    images, but since this is a collective operation, a deadlock is possible
+    if one or more processes do not participate.
+
+    Two tests fail attempting collective writes with OpenMPI 3.0.0/GCC-7.2.0-2.29:
+        testphdf5 (ecdsetw, selnone, cchunk1, cchunk3, cchunk4, and actualio)
+        t_shapesame (sscontig2)
+
+    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
+    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
+
+    Known problems in previous releases can be found in the HISTORY*.txt files
+    in the HDF5 source. Please report any new problems found to
+    help@hdfgroup.org.
+
+
+CMake vs. Autotools installations
+=================================
+While both build systems produce similar results, there are differences.
+Each system produces the same set of folders on linux (only CMake works
+on standard Windows); bin, include, lib and share. Autotools places the
+COPYING and RELEASE.txt file in the root folder, CMake places them in
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+creates dynamic versions of the tools with the suffix "-shared". Autotools
+installs one set of tools depending on the "--enable-shared" configuration
+option.
+  build scripts
+  -------------
+  Autotools: h5c++, h5cc, h5fc
+  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+
+The include folder holds the header files and the fortran mod files. CMake
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+places the fortran mod files into separate shared and static subfolders,
+while Autotools places one set of mod files into the include folder. Because
+CMake produces a tools library, the header files for tools will appear in
+the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig
+subfolder with the hdf5*.pc files used by the bin/build scripts created by
+the CMake build. CMake separates the C interface code from the fortran code by
+creating C-stub libraries for each Fortran library. In addition, only CMake
+installs the tools library. The names of the szip libraries are different
+between the build systems.
+
+The share folder will have the most differences because CMake builds include
+a number of CMake specific files for support of CMake's find_package and support
+for the HDF5 Examples CMake project.
+
+
+
+%%%%1.10.6%%%%
+
+HDF5 version 1.10.6 released on 2019-12-23
+================================================================================
+
+
+INTRODUCTION
+
+This document describes the differences between this release and the previous
+HDF5 release. It contains information on the platforms tested and known
+problems in this release. For more details check the HISTORY*.txt files in the
+HDF5 source.
+
+Note that documentation in the links below will be updated at the time of each
+final release.
+
+Links to HDF5 documentation can be found on The HDF5 web page:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5
+
+The official HDF5 releases can be obtained from:
+
+     https://www.hdfgroup.org/downloads/hdf5/
+
+Changes from Release to Release and New Features in the HDF5-1.10.x release series
+can be found at:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
+
+If you have any questions or comments, please send them to the HDF Help Desk:
+
+     help@hdfgroup.org
+
+
+CONTENTS
+
+- New Features
+- Support for new platforms and languages
+- Bug Fixes since HDF5-1.10.5
+- Supported Platforms
+- Tested Configuration Features Summary
+- More Tested Platforms
+- Known Problems
+- CMake vs. Autotools installations
+
+
+New Features
+============
+
+    Configuration:
+    -------------
+    - Update CMake for VS2019 support
+
+      CMake added support for VS2019 in version 3.15. Changes to the CMake
+      generator setting required changes to scripts. Also updated version
+      references in CMake files as necessary.
+
+      (ADB - 2019/11/18, HDFFV-10962)
+
+    - Update CMake options to match new autotools options
+
+      Add configure options (autotools - CMake):
+            enable-asserts       HDF5_ENABLE_ASSERTS
+            enable-symbols       HDF5_ENABLE_SYMBOLS
+            enable-profiling     HDF5_ENABLE_PROFILING
+            enable-optimization  HDF5_ENABLE_OPTIMIZATION
+      In addition NDEBUG is no longer forced defined and relies on the CMake
+      process.
+
+      (ADB - 2019/10/07, HDFFV-100901, HDFFV-10637, TRILAB-97)
+
+    - Update CMake tests to use FIXTURES
+
+      CMake test fixtures allow setup/cleanup tests and other dependency
+      requirements as properties for tests. This is more flexible for
+      modern CMake code.
+
+      (ADB - 2019/07/23, HDFFV-10529)
+
+    - Windows PDB files are always installed
+
+      There are build configuration or flag settings for Windows that may not
+      generate PDB files. If those files are not generated then the install
+      utility will fail because those PDB files are not found. An optional
+      variable, DISABLE_PDB_FILES, was added to not install PDB files.
+
+      (ADB - 2019/07/17, HDFFV-10424)
+
+    - Add mingw CMake support with a toolchain file
+
+      There have been a number of mingw issues that have been linked under
+      HDFFV-10845. It has been decided to implement the CMake cross-compiling
+      technique of toolchain files. We will use a linux platform with the mingw
+      compiler stack for testing. Only the C language is fully supported, and
+      the error tests are skipped. The C++ language works for static but shared
+      builds have a shared library issue with the mingw Standard Exception Handling
+      library, which is not available on Windows. Fortran has a common cross-compile
+      problem with the fortran configure tests.
+
+      (ADB - 2019/07/12, HDFFV-10845, HDFFV-10595)
+
+    - Windows PDB files are installed incorrectly
+
+      For static builds, the PDB files for windows should be installed next
+      to the static libraries in the lib folder. Also the debug versions of
+      libraries and PDB files are now correctly built using the default
+      CMAKE_DEBUG_POSTFIX setting.
+
+      (ADB - 2019/07/09, HDFFV-10581)
+
+    - Add option to build only shared libs
+
+      A request was made to prevent building static libraries and only build
+      shared.  A new option was added to CMake, ONLY_SHARED_LIBS, which will
+      skip building static libraries. Certain utility functions will build with
+      static libs but are not published. Tests are adjusted to use the correct
+      libraries depending on SHARED/STATIC settings.
+
+      (ADB - 2019/06/12, HDFFV-10805)
+
+    - Add options to enable or disable building tools and tests
+
+      Configure options --enable-tests and --enable-tools were added for
+      autotools configure.  These options are enabled by default, and can be
+      disabled with either --disable-tests (or tools) or --enable-tests=no
+      (or --enable-tools=no).  Build time is reduced ~20% when tools are
+      disabled, 35% when tests are disabled, 45% when both are disabled.
+      Re-enabling them after the initial build requires running configure
+      again with the option(s) enabled.
+
+      (LRK - 2019/06/12, HDFFV-9976)
+
+    - Change tools tests to search the error stack
+
+      There are some use cases which can cause the error stack of tools to be
+      different then the expected output. These tests now use grepTest.cmake;
+      this was changed to allow the error file to be searched for an expected string.
+
+      (ADB - 2019/04/15, HDFFV-10741)
+
+
+    Library:
+    --------
+    - Added S3 and HDFS Virtual File Drivers (VFDs) to HDF5
+
+      These new VFDs have been introduced in HDF5-1.10.6.  Instructions to
+      enable them when configuring HDF5 on Linux and Mac may be found at
+      https://portal.hdfgroup.org/display/HDF5/Virtual+File+Drivers+-+S3+and+HDFS.
+
+      Installing on Windows requires CMake 3.13 and the following additional setup.
+            Install openssl library (with dev files);
+            from "Shining Light Productions". msi package preferred.
+
+            PATH should have been updated with the installation dir.
+            set ENV variable OPENSSL_ROOT_DIR to the installation dir.
+            set ENV variable OPENSSL_CONF to the cfg file, likely %OPENSSL_ROOT_DIR%\bin\openssl.cfg
+            Install libcurl library (with dev files);
+            download the latest released version using git: https://github.com/curl/curl.git
+
+            Open a Visual Studio Command prompt
+            change to the libcurl root folder
+            run the "buildconf.bat" batch file
+            change to the winbuild directory
+            nmake /f Makefile.vc mode=dll MACHINE=x64
+            copy libcurl-vc-x64-release-dll-ipv6-sspi-winssl dir to C:\curl (installation dir)
+            set ENV variable CURL_ROOT to C:\curl (installation dir)
+            update PATH ENV variable to %CURL_ROOT%\bin (installation bin dir).
+            the aws credentials file should be in %USERPROFILE%\.aws folder
+            set the ENV variable "HDF5_ROS3_TEST_BUCKET_URL=https://s3.us-east-2.amazonaws.com/hdf5ros3"
+
+      (ADB - 2019/09/12, HDFFV-10854)
+
+    C++ Library:
+    ------------
+    - Added new wrappers for H5Pset/get_create_intermediate_group()
+        LinkCreatPropList::setCreateIntermediateGroup()
+        LinkCreatPropList::getCreateIntermediateGroup()
+
+      (BMR - 2019/04/22, HDFFV-10622)
+
+
+    Java Library:
+    ----------------
+    - Fixed a failure in JUnit-TestH5P on 32-bit architectures
+
+      (JTH - 2019/04/30)
+
+
+Support for new platforms, languages and compilers.
+=======================================
+    - CMake added support for VS2019 in version 3.15. Updated scripts.
+
+    - macOS 10.13.6 Darwin 17.7.0 with Apple clang LLVM version 10.0.0
+
+    - macOS 10.14.6 Darwin 18.7.0 with Apple clang LLVM version 10.0.1
+
+
+Bug Fixes since HDF5-1.10.5 release
+==================================
+
+    Library
+    -------
+    - Improved performance when creating a large number of small datasets by
+      retrieving default property values from the API context instead of doing
+      skip list searches. More work is required to achieve parity with HDF5 1.8.
+
+      (CJH - 2019/12/10, HDFFV-10658)
+
+    - Fixed user-created data access properties not existing in the property list
+      returned by H5Dget_access_plist. Thanks to Steven Varga for submitting a
+      reproducer and a patch.
+
+      (CJH - 2019/12/9, HDFFV-10934)
+
+    - Inappropriate linking with deprecated MPI C++ libraries
+
+      HDF5 does not define *_SKIP_MPICXX in the public headers, so applications
+      can inadvertently wind up linking to the deprecated MPI C++ wrappers.
+
+      MPICH_SKIP_MPICXX and OMPI_SKIP_MPICXX have both been defined in H5public.h
+      so this should no longer be an issue. HDF5 makes no use of the deprecated
+      MPI C++ wrappers.
+
+      (DER - 2019/09/17, HDFFV-10893)
+
+    - fcntl(2)-based file locking incorrectly passed the lock argument struct
+      instead of a pointer to the struct, causing errors on systems where
+      flock(2) is not available.
+
+      File locking is used when files are opened to enforce SWMR semantics. A
+      lock operation takes place on all file opens unless the
+      HDF5_USE_FILE_LOCKING environment variable is set to the string "FALSE".
+      flock(2) is preferentially used, with fcntl(2) locks as a backup if
+      flock(2) is unavailable on a system (if neither is available, the lock
+      operation fails). On these systems, the file lock will often fail, which
+      causes HDF5 to not open the file and report an error.
+
+      This bug only affects POSIX systems. Win32 builds on Windows use a no-op
+      locking call which always succeeds. Systems which exhibit this bug will
+      have H5_HAVE_FCNTL defined but not H5_HAVE_FLOCK in the configure output.
+
+      This bug affects HDF5 1.10.0 through 1.10.5.
+
+      fcntl(2)-based file locking now correctly passes the struct pointer.
+
+      (DER - 2019/08/27, HDFFV-10892)
+
+    - Fixed a bug caused by a bad tag value when condensing object header
+      messages
+
+      There was an assertion failure when moving messages from running a
+      user test program with library release HDF5 1.10.4. It was because
+      the tag value (object header's address) was not set up when entering
+      the library routine H5O__chunk_update_idx(), which eventually
+      verifies the metadata tag value when protecting the object header.
+
+      The problem was fixed by replacing FUNC_ENTER_PACKAGE in H5O__chunk_update_idx()
+      with FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr) to set up the metadata tag.
+
+      (VC - 2019/08/23, HDFFV-10873)
+
+    - Fixed the test failure from test_metadata_read_retry_info() in
+      test/swmr.c
+
+      The test failure is due to an incorrect number of bins returned for
+      retry info (info.nbins).  The # of bins expected for 101 read attempts
+      is 3 instead of 2.  The routine H5F_set_retries() in src/H5Fint.c
+      calculates the # of bins by first obtaining the log10 value for
+      (read attempts - 1).  For PGI/19, the log10 value for 100 read attempts
+      is 1.9999999999999998 instead of 2.00000.  When casting the log10 value
+      to unsigned later on, the decimal part is chopped off causing the test
+      failure.
+
+      This was fixed by obtaining the rounded integer value (HDceil) for the
+      log10 value of read attempts first before casting the result to unsigned.
+
+      (VC - 2019/8/14, HDFFV-10813)
+
+    - Fixed an issue when creating a file with non-default file space info
+      together with library high bound setting to H5F_LIBVER_V18.
+
+      When setting non-default file space info in fcpl via
+      H5Pset_file_space_strategy() and then creating a file with both high and
+      low library bounds set to H5F_LIBVER_V18 in fapl, the library succeeds in
+      creating the file.  File creation should fail because the feature of
+      setting non-default file space info does not exist in library release 1.8
+      or earlier.
+
+      This was fixed by setting and checking the proper version in the file
+      space info message based on the library low and high bounds when creating
+      and opening the HDF5 file.
+
+      (VC - 2019/6/25, HDFFV-10808)
+
+    - Fixed an issue where copying a version 1.8 dataset between files using
+      H5Ocopy fails due to an incompatible fill version
+
+      When using the HDF5 1.10.x H5Ocopy() API call to copy a version 1.8
+      dataset to a file created with both high and low library bounds set to
+      H5F_LIBVER_V18, the H5Ocopy() call will fail with the error stack indicating
+      that the fill value version is out of bounds.
+
+      This was fixed by changing the fill value message version to H5O_FILL_VERSION_3
+      (from H5O_FILL_VERSION_2) for H5F_LIBVER_V18.
+
+      (VC - 2019/6/14, HDFFV-10800)
+
+    - Fixed a bug that would cause an error or cause fill values to be
+      incorrectly read from a chunked dataset using the "single chunk" index if
+      the data was held in cache and there was no data on disk.
+
+      (NAF - 2019/03/06)
+
+    - Fixed a bug that could cause an error or cause fill values to be
+      incorrectly read from a dataset that was written to using H5Dwrite_chunk
+      if the dataset was not closed after writing.
+
+      (NAF - 2019/03/06, HDFFV-10716)
+
+    - Fixed memory leak in scale offset filter
+
+      In a special case where the MinBits is the same as the number of bits in
+      the datatype's precision, the filter's data buffer was not freed, causing
+      the memory usage to grow. In general the buffer was freed correctly.  The
+      Minbits are the minimal number of bits to store the data values.  Please
+      see the reference manual for H5Pset_scaleoffset for the details.
+
+      (RL - 2019/3/4, HDFFV-10705)
+
+
+    Configuration
+    -------------
+    - Correct option for default API version
+
+      CMake options for default API version are not mutually exclusive.
+      Change the multiple BOOL options to a single STRING option with the
+      strings; v16, v18, v110.
+
+      (ADB - 2019/08/12, HDFFV-10879)
+
+    Tools
+    -----
+    - h5repack was fixed to repack datasets with external storage
+      to other types of storage.
+
+      New test added to repack files and verify the correct data using h5diff.
+
+      (JS - 2019/09/25, HDFFV-10408)
+      (ADB - 2019/10/02, HDFFV-10918)
+
+
+Supported Platforms
+===================
+
+    Linux 2.6.32-696.20.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-23)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-23)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-23)
+                                  IBM XL C/C++ V13.1
+                                  IBM XL Fortran V15.1
+
+    Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (jelly/kituo/moohan)          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+                                    Version 4.9.3, Version 5.2.0
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 17.0.0.098 Build 20160721
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
+
+    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
+    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
+                                  Sun C++ 5.12 SunOS_sparc
+
+    Windows 7                     Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+
+    Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
+
+    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+
+    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2017 w/ Intel Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+
+    macOS 10.13.6, Darwin,        Apple clang LLVM version 10.0.0
+    17.7.0, x86_64                gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                        Intel icc/icpc/ifort version 19.0.4
+
+    macOS 10.14.6, Darwin         Apple clang LLVM version 10.0.1
+    18.7.0, x86_64                gfortran GNU Fortran (GCC) 6.3.0
+    (bobcat)                      Intel icc/icpc/ifort version 19.0.4
+
+
+Tested Configuration Features Summary
+=====================================
+
+    In the tables below
+          y   = tested
+          n   = not tested in this release
+          C   = Cluster
+          W   = Workstation
+          x   = not working in this release
+          dna = does not apply
+          ( ) = footnote appears below second table
+          <blank> = testing incomplete on this feature or platform
+
+Platform                              C         F90/   F90      C++  zlib  SZIP
+                                      parallel  F2003  parallel
+Solaris2.11 32-bit                      n        y/y    n        y    y     y
+Solaris2.11 64-bit                      n        y/n    n        y    y     y
+Windows 7                               y        y/y    n        y    y     y
+Windows 7 x64                           y        y/y    y        y    y     y
+Windows 7 Cygwin                        n        y/n    n        y    y     y
+Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
+Windows 10                              y        y/y    n        y    y     y
+Windows 10 x64                          y        y/y    n        y    y     y
+Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     y
+Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
+MacOS High Sierra 10.13.6 64-bit        n        y/y    n        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 PGI      n        y/y    n        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 Intel    n        y/y    n        y    y     y
+Linux 2.6.32-573.18.1.el6.ppc64         n        y/y    n        y    y     y
+
+
+Platform                                 Shared  Shared    Shared    Thread-
+                                         C libs  F90 libs  C++ libs  safe
+Solaris2.11 32-bit                         y       y         y         y
+Solaris2.11 64-bit                         y       y         y         y
+Windows 7                                  y       y         y         y
+Windows 7 x64                              y       y         y         y
+Windows 7 Cygwin                           n       n         n         y
+Windows 7 x64 Cygwin                       n       n         n         y
+Windows 10                                 y       y         y         y
+Windows 10 x64                             y       y         y         y
+Mac OS X Yosemite 10.10.5 64-bit           y       y         y         y
+Mac OS X El Capitan 10.11.6 64-bit         y       y         y         y
+MacOS High Sierra 10.13.6 64-bit           y       y         y         y
+CentOS 7.2 Linux 3.10.0 x86_64 PGI         y       y         y         n
+CentOS 7.2 Linux 3.10.0 x86_64 GNU         y       y         y         y
+CentOS 7.2 Linux 3.10.0 x86_64 Intel       y       y         y         n
+Linux 2.6.32-573.18.1.el6.ppc64            y       y         y         n
+
+Compiler versions for each platform are listed in the preceding
+"Supported Platforms" table.
+
+
+More Tested Platforms
+=====================
+The following configurations are not supported but have been tested for this release.
+
+    Linux 2.6.32-754.11.1.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (mayll/platypus)                 Version 4.4.7 20120313
+                                     Version 4.9.3, 5.3.0, 6.2.0
+                                  PGI C, Fortran, C++ for 64-bit target on
+                                  x86-64;
+                                     Version 17.10-0
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 17.0.4.196 Build 20170411
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
+
+    Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
+    #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+    (jelly)                       with NAG Fortran Compiler Release 6.2(Chiyoda)
+                                  GCC Version 7.1.0
+                                  MPICH 3.2-GCC-4.9.3
+                                  MPICH 3.2.1-GCC-7.2.0-2.29
+                                  OpenMPI 2.1.5-GCC-7.2.0-2.29
+                                  Intel(R) C (icc) and C++ (icpc) compilers
+                                     Version 17.0.0.098 Build 20160721
+                                  with NAG Fortran Compiler Release 6.2(Chiyoda)
+
+    Linux 3.10.0-327.10.1.el7     MPICH 3.2 compiled with GCC 5.3.0
+    #1 SMP x86_64 GNU/Linux
+    (moohan)
+
+    Linux 2.6.32-573.18.1.el6.ppc64  MPICH mpich 3.1.4 compiled with
+    #1 SMP ppc64 GNU/Linux           IBM XL C/C++ for Linux, V13.1
+    (ostrich)                        and IBM XL Fortran for Linux, V15.1
+
+    Fedora30 5.3.11-200.fc30.x86_64
+    #1 SMP x86_64  GNU/Linux      GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+                                  GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+                                     (cmake and autotools)
+
+    Mac OS X 10.11.6, Darwin,     Apple clang version 7.3.0 from Xcode 7.3
+    15.6.0, x86-64                gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                 Intel icc/icpc/ifort version 16.0.2
+
+    macOS 10.12.6, Darwin,        Apple clang LLVM version 8.1.0 from Xcode 8.3
+    16.6.0, x86_64                gfortran GNU Fortran (GCC) 7.1.0
+    (kite)                        Intel icc/icpc/ifort version 17.0.2
+
+    Windows 7 x64                 Visual Studio 2008
+
+
+Known Problems
+==============
+    CMake files do not behave correctly with paths containing spaces.
+    Do not use spaces in paths because the required escaping for handling spaces
+    results in very complex and fragile build files.
+    ADB - 2019/05/07
+
+    At present, metadata cache images may not be generated by parallel
+    applications.  Parallel applications can read files with metadata cache
+    images, but since this is a collective operation, a deadlock is possible
+    if one or more processes do not participate.
+
+    Three tests fail with OpenMPI 3.0.0/GCC-7.2.0-2.29:
+        testphdf5 (ecdsetw, selnone, cchunk1, cchunk3, cchunk4, and actualio)
+        t_shapesame (sscontig2)
+        t_pflush1/fails on exit
+    The first two tests fail attempting collective writes.
+
+    Parallel builds using OpenMPI 3.03 or later and romio fail several tests
+    with collective writes or compression that will not fail when ompio is used
+    instead of romio.  This can be done by adding "--mca io ompio" to the mpirun
+    command.  For example, in autotools builds RUNPARALLEL can be set to
+    "mpirun --mca io ompio -n 6" provided ompio is installed.
+
+    CPP ptable test fails on VS2017 with Intel compiler, JIRA issue: HDFFV-10628.
+    This test will pass with VS2015 with Intel compiler.
+
+    Older MPI libraries such as OpenMPI 2.0.1 and MPICH 2.1.5 were tested
+    while attempting to resolve the Jira issue: HDFFV-10540.
+    The known problems of reading or writing > 2GBs when using MPI-2 was
+    partially resolved with the MPICH library. The proposed support recognizes
+    IO operations > 2GB and if the datatype is not a derived type, the library
+    breaks the IO into chunks which can be input or output with the existing
+    MPI 2 limitations, i.e. size reporting and function API size/count
+    arguments are restricted to be 32 bit integers.  For derived types larger
+    than 2GB, MPICH 2.1.5 fails while attempting to read or write data.
+    OpenMPI in contrast, implements MPI-3 APIs even in the older releases
+    and thus does not suffer from the 32 bit size limitation described here.
+    OpenMPI releases prior to v3.1.3 appear to have other datatype issues however,
+    e.g. within a single parallel test (testphdf5) the subtests (cdsetr, eidsetr)
+    report data verfication errors before eventually aborting.
+    The most recent versions of OpenMPI (v3.1.3 or newer) have evidently
+    resolved these isses and parallel HDF5 testing does not currently report
+    errors though occasional hangs have been observed.
+
+    Known problems in previous releases can be found in the HISTORY*.txt files
+    in the HDF5 source. Please report any new problems found to
+    help@hdfgroup.org.
+
+
+CMake vs. Autotools installations
+=================================
+While both build systems produce similar results, there are differences.
+Each system produces the same set of folders on linux (only CMake works
+on standard Windows); bin, include, lib and share. Autotools places the
+COPYING and RELEASE.txt file in the root folder, CMake places them in
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+creates dynamic versions of the tools with the suffix "-shared". Autotools
+installs one set of tools depending on the "--enable-shared" configuration
+option.
+  build scripts
+  -------------
+  Autotools: h5c++, h5cc, h5fc
+  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+
+The include folder holds the header files and the fortran mod files. CMake
+places the fortran mod files into separate shared and static subfolders,
+while Autotools places one set of mod files into the include folder. Because
+CMake produces a tools library, the header files for tools will appear in
+the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig
+subfolder with the hdf5*.pc files used by the bin/build scripts created by
+the CMake build. CMake separates the C interface code from the fortran code by
+creating C-stub libraries for each Fortran library. In addition, only CMake
+installs the tools library. The names of the szip libraries are different
+between the build systems.
+
+The share folder will have the most differences because CMake builds include
+a number of CMake specific files for support of CMake's find_package and support
+for the HDF5 Examples CMake project.
+
+%%%%1.10.5%%%%
+
+HDF5 version 1.10.5 released on 2019-02-25
+================================================================================
+
+
+INTRODUCTION
+
+This document describes the differences between this release and the previous
+HDF5 release. It contains information on the platforms tested and known
+problems in this release. For more details check the HISTORY*.txt files in the
+HDF5 source.
+
+Note that documentation in the links below will be updated at the time of each
+final release.
+
+Links to HDF5 documentation can be found on The HDF5 web page:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5
+
+The official HDF5 releases can be obtained from:
+
+     https://www.hdfgroup.org/downloads/hdf5/
+
+Changes from Release to Release and New Features in the HDF5-1.10.x release series
+can be found at:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
+
+If you have any questions or comments, please send them to the HDF Help Desk:
+
+     help@hdfgroup.org
+
+
+CONTENTS
+
+- New Features
+- Support for new platforms and languages
+- Bug Fixes since HDF5-1.10.4
+- Supported Platforms
+- Tested Configuration Features Summary
+- More Tested Platforms
+- Known Problems
+- CMake vs. Autotools installations
+
+
+New Features
+============
+
+    Configuration:
+    -------------
+    - Cross compile on mutrino and other Cray XC40 systems.
+
+      Added support for CMake options to use CrayLinuxEnvironment, craype-mic-knl
+      module for building with craype-haswell module for configuration, and
+      batch scripts in bin/batch for use with sbatch or bsub to run tests in
+      batch jobs on compute nodes.  An instruction file README_HPC describing
+      the use of these options was added in release_docs.
+
+      (LRK - 2019/02/18, TRILABS-34)
+
+    - Rework CMake command files to fix MPI testing.
+
+      Added setup fixture to remove any test generated files and added DEPENDS
+      to test properties to execute tests in order expected.
+
+      (ADB - 2019/02/14, TRILABS-111)
+
+    - Disable SZIP or ZLIB options if TGZ files are not available.
+
+      Changed the TGZ option for SZip and ZLib to disable the options
+      if the source tar.gz files are not found.
+
+      (ADB - 2019/02/05, HDFFV-10697)
+
+    - Added a new option to enable/disable using pread/pwrite instead of
+      read/write in the sec2, log, and core VFDs.
+
+      This option is enabled by default when pread/pwrite are detected.
+
+      Autotools:    --enable-preadwrite
+      CMake:        HDF5_ENABLE_PREADWRITE
+
+      (DER - 2019/02/03, HDFFV-10696)
+
+    - Rework CMake versioning for OSX platforms.
+
+      Changed the current_version and compatibility_version flags from optional
+      with HDF5_BUILD_WITH_INSTALL_NAME to always setting the flags for OSX.
+
+      (ADB - 2019/01/22, HDFFV-10685)
+
+    - Rework CMake command files to eliminate developer CMP005 warning
+
+      Use variables without quotes in if () statements.
+
+      (ADB - 2019/01/18, TILABS-105)
+
+    - Rework CMake configure files to eliminate developer CMP0075 warning
+
+      Renamed varname to HDF5_REQUIRED_LIBRARIES as the contents were not
+      required for configuration. Also moved check includes calls to top of
+      files.
+
+      (ADB - 2019/01/03, HDFFV-10546)
+
+    - Keep stderr and stdout separate in tests
+
+      Changed test handling of output capture. Tests now keep the stderr
+      output separate from the stdout output. It is up to the test to decide
+      which output to check against a reference. Also added the option
+      to grep for a string in either output.
+
+      (ADB - 2018/12/12, HDFFV-10632)
+
+    - Incorrectly installed private header files were removed from
+      CMake installs.
+
+      The CMake build files incorrectly flagged the following header files
+      as public and installed them. They are private and will no longer be
+      installed.
+
+        HDF5 library private package files (H5Xpkg.h)
+        H5Edefin.h
+        H5Einit.h
+        H5Eterm.h
+        H5LTparse.h
+        h5diff.h
+        h5tools_dump.h
+        h5tools.h
+        h5tools_ref.h
+        h5tools_str.h
+        h5tools_utils.h
+        h5trav.h
+
+      (DER - 2018/10/26, HDFFV-10614, 10609)
+
+    - Autotools installs now install H5FDwindows.h
+
+      This is simply to align the installed header files between the
+      autotools and CMake. H5FDwindows.h has no functionality on
+      non-Windows systems.
+
+      (DER - 2018/10/26, HDFFV-10614)
+
+
+    Library:
+    --------
+    - The sec2, log, and core VFDs can now use pread/pwrite instead of
+      read/write.
+
+      pread and pwrite do not change the file offset, a feature that was
+      requested by a user working with a multi-threaded application.
+
+      The option to configure this feature is described above.
+
+      (DER - 2019/02/03, HDFFV-10696)
+
+    - Add ability to minimze dataset object headers.
+
+      Creation of many, very small datasets resulted in extensive file bloat
+      due to extra space in the dataset object headers -- this space is
+      allocated by default to allow for the insertion of a small number of
+      attributes within the object header and not require a continuation
+      block, an unnecessary provision in the target use case.
+
+      Inform the library to expect no attributes on created datasets, and to
+      allocate the least space possible for the object headers.
+      NOTE: A continuation block is created if attributes are added to a
+      'minimized' dataset, which can reduce performance.
+      NOTE: Some extra space is allocated for attributes essential to the
+      correct behavior of the object header (store creation times, e.g.). This
+      does not violate the design principle, as the space is calculated and
+      allocated as needed at the time of dataset object header creation --
+      unused space is not generated.
+      New API calls:
+      H5Fget_dset_no_attrs_hint
+      H5Fset_dset_no_attrs_hint
+      H5Pget_dset_no_attrs_hint
+      H5Pset_dset_no_attrs_hint
+
+      (JOS - 2019/01/04, TRILAB-45)
+
+    - Added new chunk query functions
+
+      The following public functions were added to discover information about
+      the chunks in an HDF5 file.
+        herr_t H5Dget_num_chunks(dset_id, fspace_id, *nchunks)
+        herr_t H5Dget_chunk_info_by_coord(dset_id, *coord, *filter_mask, *addr, *size)
+        herr_t H5Dget_chunk_info(dset_id, fspace_id, index, *coord, *filter_mask, *addr, *size)
+
+      (BMR - 2018/11/07, HDFFV-10615)
+
+    - Several empty public header files where removed from the distribution
+
+      The following files were empty placeholders. They are for internal
+      packages that are unlikely to ever have public functionality and have
+      thus been removed.
+
+        H5Bpublic.h
+        H5B2public.h
+        H5FSpublic.h
+        H5HFpublic.h
+        H5HGpublic.h
+        H5HLpublic.h
+
+      They were only installed in CMake builds.
+
+      (DER - 2018/10/26, HDFFV-10614)
+
+
+     Parallel Library:
+    -----------------
+    - Changed the default behavior in parallel when reading the same dataset in its entirety
+      (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
+      The dataset must be contiguous, less than 2GB, and of an atomic datatype.
+      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from
+      the disk by the root process to the remain processes in the MPI communicator associated
+      with the HDF5 file.
+
+      (MSB - 2019/01/02, HDFFV-10652)
+
+    - All MPI-1 API calls have been replaced with MPI-2 equivalents.
+
+      This was done to better support OpenMPI, as default builds no longer
+      include MPI-1 support (as of OpenMPI 4.0).
+
+      (DER - 2018/12/30, HDFFV-10566)
+
+    Fortran Library:
+    ----------------
+    - Added wrappers for dataset object header minimization calls.
+      (see the note for TRILAB-45, above)
+
+      New API calls:
+
+      h5fget_dset_no_attrs_hint_f
+      h5fset_dset_no_attrs_hint_f
+      h5pget_dset_no_attrs_hint_f
+      h5pset_dset_no_attrs_hint_f
+
+      (DER - 2019/01/09, TRILAB-45)
+
+    - Added new Fortran derived type, c_h5o_info_t, which is interoperable with
+      C's h5o_info_t. This is needed for callback functions which
+      pass C's h5o_info_t data type definition.
+
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added new Fortran API, H5gmtime, which converts (C) 'time_t' structure
+      to Fortran DATE AND TIME storage format.
+
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f,
+      h5oget_info, h5oget_info_by_idx and h5ovisit_by_name_f.
+
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    C++ Library:
+    ------------
+    - Added new function to the C++ interface
+
+      Added wrapper for H5Ovisit2:
+          H5Object::visit()
+
+      (BMR - 2019/02/14, HDFFV-10532)
+
+
+    Java Library:
+    ----------------
+    - Rewrote the JNI error handling to be much cleaner
+
+      (JTH - 2019/02/12)
+
+    - Add new functions to java interface
+
+      Added wrappers for:
+      H5Fset_libver_bounds
+      H5Fget_dset_no_attrs_hint/H5Fset_dset_no_attrs_hint
+      H5Pget_dset_no_attrs_hint/H5Pset_dset_no_attrs_hint
+
+      (ADB - 2019/01/07, HDFFV-10664)
+
+    - Fix java unit tests when Time is a natural number
+
+      Time substitution in java/test/junit.sh.in doesn't
+      handle the case when Time is a natural number. Fixed
+      the regular expression.
+
+      (ADB - 2019/01/07, HDFFV-10674)
+
+    - Duplicate the data read/write functions of Datasets for Attributes.
+
+      Region references could not be displayed for attributes as they could
+      for datasets. Datasets had overloaded read and write functions for different
+      datatypes that were not available for attributes. After adding similar
+      functions, attribute region references work normally.
+
+      (ADB - 2018/12/12, HDFVIEW-4)
+
+
+    Tools:
+    ------
+    - The h5repart -family-to-sec2 argument was changed to -family-to-single
+
+      In order to better support other single-file VFDs which could work with
+      h5repart, the -family-to-sec2 argument was renamed to -family-to-single.
+      This is just a name change and the functionality of the argument has not
+      changed.
+
+      The -family-to-sec2 argument has been kept for backwards-compatibility.
+      This argument should be considered deprecated.
+
+      (DER - 2018/11/14, HDFFV-10633)
+
+
+Bug Fixes since HDF5-1.10.4 release
+==================================
+
+    Library
+    -------
+    - Fix hangs with collective metadata reads during chunked dataset I/O
+
+      In the parallel library, it was discovered that when a particular
+      sequence of operations following a pattern of:
+
+      "write to chunked dataset" -> "flush file" -> "read from dataset"
+
+      occurred with collective metadata reads enabled, hangs could be
+      observed due to certain MPI ranks not participating in the collective
+      metadata reads.
+
+      To fix the issue, collective metadata reads are now disabled during
+      chunked dataset raw data I/O.
+
+      (JTH - 2019/02/11, HDFFV-10563, HDFFV-10688)
+
+    - Performance issue when closing an object
+
+      The slow down is due to the search of the "tag_list" to find
+      out the "corked" status of an object and "uncork" it if so.
+
+      Improve performance by skipping the search of the "tag_list"
+      if there are no "corked" objects when closing an object.
+
+      (VC - 2019/02/06)
+
+    - Uninitialized bytes from a type conversion buffer could be written
+      to disk in H5Dwrite calls where type conversion takes place
+      and the type conversion buffer was created by the HDF5 library.
+
+      When H5Dwrite is called and datatype conversion must be performed,
+      the library will create a temporary buffer for type conversion if
+      one is not provided by the user via H5Pset_buffer. This internal
+      buffer is allocated via malloc and contains uninitialized data. In
+      some datatype conversions (float to long double, possibly others),
+      some of this uninitialized data could be written to disk.
+
+      This was flagged by valgrind in the dtransform test and does not
+      appear to be a common occurrence (it is flagged in one test out
+      of the entire HDF5 test suite).
+
+      Switching to calloc fixed the problem.
+
+      (DER - 2019/02/03, HDFFV-10694)
+
+    - There was missing protection against division by zero reported to
+      The HDF Group as issue #CVE-2018-17434.
+
+      Protection against division by zero was added to address the issue
+      #CVE-2018-17434.
+
+      (BMR - 2019/01/29, HDFFV-10586)
+
+    - The issue CVE-2018-17437 was reported to The HDF Group
+
+      Although CVE-2018-17437 reported a memory leak, the actual issue
+      was invalid read. It was found that the attribute name length
+      in an attribute message was corrupted, which caused the buffer
+      pointer to be advanced too far and later caused an invalid read.
+
+      A check was added to detect when the attribute name or its length
+      was corrupted and report the potential of data corruption.
+
+      (BMR - 2019/01/29, HDFFV-10588)
+
+    - H5Ewalk did not stop when it was supposed to
+
+      H5Ewalk was supposed to stop when the callback function stopped
+      even though the errors in the stack were not all visited, but it
+      did not.  This problem is now fixed.
+
+      (BMR - 2019/01/29, HDFFV-10684)
+
+    - Revert H5Oget_info* and H5Ovisit* functions
+
+      In 1.10.3 new H5Oget_info*2 and H5Ovisit*2 functions were
+      added for performance. Inadvertently, the original functions;
+          H5Oget_info,
+          H5Oget_info_by_name,
+          H5Oget_info_by_idx,
+          H5Ovisit,
+          H5Ovisit_by_name
+      were versioned to H5Oget_info*1 and H5Ovisit*1. This
+      broke the API compatibility for a maintenance release. The
+      original functions have been restored.
+
+      (ADB - 2019/01/24, HDFFV-10686)
+
+    - Fixed a potential invalid memory access and failure that could occur when
+      decoding an unknown object header message (from a future version of the
+      library).
+
+      (NAF - 2019/01/07)
+
+    - Deleting attributes in dense storage
+
+      The library aborts with "infinite loop closing library" after
+      attributes in dense storage are created and then deleted.
+
+      When deleting the attribute nodes from the name index v2 B-tree,
+      if an attribute is found in the intermediate B-tree nodes,
+      which may be merged/redistributed in the process, we need to
+      free the dynamically allocated spaces for the intermediate
+      decoded attribute.
+
+      (VC - 2018/12/26, HDFFV-10659)
+
+    - There was missing protection against division by zero reported to
+      The HDF Group as issue #CVE-2018-17233.
+
+      Protection against division by zero was added to address the issue
+      #CVE-2018-17233.  In addition, several similar occurrences in the same
+      file were fixed as well.
+
+      (BMR - 2018/12/23, HDFFV-10577)
+
+    - Fixed an issue where the parallel filters tests would fail
+      if zlib was not available on the system. Until support can
+      be added in the tests for filters beyond gzip/zlib, the tests
+      will be skipped if zlib is not available.
+
+      (JTH - 2018/12/05)
+
+    - A bug was discovered in the parallel library where an application
+      would eventually consume all of the available MPI communicators
+      when continually writing to a compressed dataset in parallel. This
+      was due to internal copies of an HDF5 File Access Property List,
+      which each contained a copy of the MPI communicator, not being
+      closed at the end of each write operation. This problem was
+      exacerbated by larger numbers of processors.
+
+      (JTH - 2018/12/05, HDFFV-10629)
+
+
+    Fortran
+    --------
+    - Fixed issue with Fortran not returning h5o_info_t field values
+      meta_size%attr%index_size and  meta_size%attr%heap_size.
+
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added symbolic links libhdf5_hl_fortran.so to libhdf5hl_fortran.so and
+      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for
+      autotools installs.  These were added to match the name of the files
+      installed by cmake and the general pattern of hl lib files.  We will
+      change the names of the installed lib files to the matching name in
+      the next major release.
+
+      (LRK - 2019/01/04, HDFFV-10596)
+
+    - Made Fortran specific subroutines PRIVATE in generic procedures.
+
+      Affected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
+
+      (MSB, 2018/12/04, HDFFV-10511)
+
+
+    Testing
+    -------
+    - Fixed a test failure in testpar/t_dset.c caused by
+      the test trying to use the parallel filters feature
+      on MPI-2 implementations.
+
+      (JTH, 2019/2/7)
+
+
+Supported Platforms
+===================
+
+    Linux 2.6.32-696.16.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+                                  IBM XL C/C++ V13.1
+                                  IBM XL Fortran V15.1
+
+    Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (kituo/moohan)                Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+                                    Version 4.9.3, Version 5.2.0
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 17.0.0.098 Build 20160721
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
+
+    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
+    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
+                                  Sun C++ 5.12 SunOS_sparc
+
+    Windows 7                     Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+
+    Windows 7 x64                 Visual Studio 2013
+                                  Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+                                  Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
+
+    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+
+    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2017 w/ Intel Fortran 18 (cmake)
+
+    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
+    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
+    (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
+
+    Mac OS X El Capitan 10.11.6   Apple clang/clang++ version 7.3.0 from Xcode 7.3
+    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
+
+    MacOS High Sierra 10.13.6     Apple LLVM version 10.0.0 (clang/clang++-1000.10.44.4)
+    64-bit                        gfortran GNU Fortran (GCC) 8.3.0
+
+
+Tested Configuration Features Summary
+=====================================
+
+    In the tables below
+          y   = tested
+          n   = not tested in this release
+          C   = Cluster
+          W   = Workstation
+          x   = not working in this release
+          dna = does not apply
+          ( ) = footnote appears below second table
+          <blank> = testing incomplete on this feature or platform
+
+Platform                              C         F90/   F90      C++  zlib  SZIP
+                                      parallel  F2003  parallel
+Solaris2.11 32-bit                      n        y/y    n        y    y     y
+Solaris2.11 64-bit                      n        y/n    n        y    y     y
+Windows 7                               y        y/y    n        y    y     y
+Windows 7 x64                           y        y/y    y        y    y     y
+Windows 7 Cygwin                        n        y/n    n        y    y     y
+Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
+Windows 10                              y        y/y    n        y    y     y
+Windows 10 x64                          y        y/y    n        y    y     y
+Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     y
+Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
+MacOS High Sierra 10.13.6 64-bit        n        y/y    n        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 PGI      n        y/y    n        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 Intel    n        y/y    n        y    y     y
+Linux 2.6.32-573.18.1.el6.ppc64         n        y/y    n        y    y     y
+
+
+Platform                                 Shared  Shared    Shared    Thread-
+                                         C libs  F90 libs  C++ libs  safe
+Solaris2.11 32-bit                         y       y         y         y
+Solaris2.11 64-bit                         y       y         y         y
+Windows 7                                  y       y         y         y
+Windows 7 x64                              y       y         y         y
+Windows 7 Cygwin                           n       n         n         y
+Windows 7 x64 Cygwin                       n       n         n         y
+Windows 10                                 y       y         y         y
+Windows 10 x64                             y       y         y         y
+Mac OS X Yosemite 10.10.5 64-bit           y       y         y         y
+Mac OS X El Capitan 10.11.6 64-bit         y       y         y         y
+MacOS High Sierra 10.13.6 64-bit           y       y         y         y
+CentOS 7.2 Linux 3.10.0 x86_64 PGI         y       y         y         n
+CentOS 7.2 Linux 3.10.0 x86_64 GNU         y       y         y         y
+CentOS 7.2 Linux 3.10.0 x86_64 Intel       y       y         y         n
+Linux 2.6.32-573.18.1.el6.ppc64            y       y         y         n
+
+Compiler versions for each platform are listed in the preceding
+"Supported Platforms" table.
+
+
+More Tested Platforms
+=====================
+The following configurations are not supported but have been tested for this release.
+
+    Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (mayll/platypus)                 Version 4.4.7 20120313
+                                     Version 4.9.3, 5.3.0, 6.2.0
+                                  PGI C, Fortran, C++ for 64-bit target on
+                                  x86-64;
+                                     Version 17.10-0
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 17.0.4.196 Build 20170411
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
+
+    Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
+    #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+    (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
+                                  GCC Version 7.1.0
+                                  MPICH 3.2-GCC-4.9.3
+                                  MPICH 3.2.1-GCC-7.2.0-2.29
+                                  OpenMPI 2.1.5-GCC-7.2.0-2.29
+                                  Intel(R) C (icc) and C++ (icpc) compilers
+                                     Version 17.0.0.098 Build 20160721
+                                  with NAG Fortran Compiler Release 6.1(Tozai)
+
+    Linux 3.10.0-327.10.1.el7     MPICH 3.2 compiled with GCC 5.3.0
+    #1 SMP x86_64 GNU/Linux
+    (moohan)
+
+    Fedora 29  4.20.10-200.fc29.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc, g++ (GCC) 8.2.1 20181215
+                                      (Red Hat 8.2.1-6)
+                                  GNU Fortran (GCC) 8.2.1 20181215
+                                      (Red Hat 8.2.1-6)
+                                  (cmake and autotools)
+
+    Windows 7 x64                 Visual Studio 2008
+
+
+Known Problems
+==============
+
+    At present, metadata cache images may not be generated by parallel
+    applications.  Parallel applications can read files with metadata cache
+    images, but since this is a collective operation, a deadlock is possible
+    if one or more processes do not participate.
+
+    Three tests fail with OpenMPI 3.0.0/GCC-7.2.0-2.29:
+        testphdf5 (ecdsetw, selnone, cchunk1, cchunk3, cchunk4, and actualio)
+        t_shapesame (sscontig2)
+        t_pflush1/fails on exit
+    The first two tests fail attempting collective writes.
+
+    CPP ptable test fails on VS2017 with Intel compiler, JIRA issue: HDFFV-10628.
+    This test will pass with VS2015 with Intel compiler.
+
+    Older MPI libraries such as OpenMPI 2.0.1 and MPICH 2.1.5 were tested
+    while attempting to resolve the Jira issue: HDFFV-10540.
+    The known problems of reading or writing > 2GBs when using MPI-2 was
+    partially resolved with the MPICH library. The proposed support recognizes
+    IO operations > 2GB and if the datatype is not a derived type, the library
+    breaks the IO into chunks which can be input or output with the existing
+    MPI 2 limitations, i.e. size reporting and function API size/count
+    arguments are restricted to be 32 bit integers.  For derived types larger
+    than 2GB, MPICH 2.1.5 fails while attempting to read or write data.
+    OpenMPI in contrast, implements MPI-3 APIs even in the older releases
+    and thus does not suffer from the 32 bit size limitation described here.
+    OpenMPI releases prior to v3.1.3 appear to have other datatype issues however,
+    e.g. within a single parallel test (testphdf5) the subtests (cdsetr, eidsetr)
+    report data verfication errors before eventually aborting.
+    The most recent versions of OpenMPI (v3.1.3 or newer) have evidently
+    resolved these isses and parallel HDF5 testing does not currently report
+    errors though occasional hangs have been observed.
+
+    Known problems in previous releases can be found in the HISTORY*.txt files
+    in the HDF5 source. Please report any new problems found to
+    help@hdfgroup.org.
+
+
+CMake vs. Autotools installations
+=================================
+While both build systems produce similar results, there are differences.
+Each system produces the same set of folders on linux (only CMake works
+on standard Windows); bin, include, lib and share. Autotools places the
+COPYING and RELEASE.txt file in the root folder, CMake places them in
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+creates dynamic versions of the tools with the suffix "-shared". Autotools
+installs one set of tools depending on the "--enable-shared" configuration
+option.
+  build scripts
+  -------------
+  Autotools: h5c++, h5cc, h5fc
+  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+
+The include folder holds the header files and the fortran mod files. CMake
+places the fortran mod files into separate shared and static subfolders,
+while Autotools places one set of mod files into the include folder. Because
+CMake produces a tools library, the header files for tools will appear in
+the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig
+subfolder with the hdf5*.pc files used by the bin/build scripts created by
+the CMake build. CMake separates the C interface code from the fortran code by
+creating C-stub libraries for each Fortran library. In addition, only CMake
+installs the tools library. The names of the szip libraries are different
+between the build systems.
+
+The share folder will have the most differences because CMake builds include
+a number of CMake specific files for support of CMake's find_package and support
+for the HDF5 Examples CMake project.
 
 %%%%1.10.4%%%%
 
