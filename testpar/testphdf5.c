@@ -33,9 +33,6 @@ int ngroups   = 512;             /* number of groups to create in root
 int facc_type       = FACC_MPIO; /*Test file access type */
 int dxfer_coll_type = DXFER_COLLECTIVE_IO;
 
-H5E_auto2_t old_func;        /* previous error handler */
-void *      old_client_data; /* previous error handler arg.*/
-
 /* other option flags */
 
 /* FILENAME and filenames must have the same number of names.
