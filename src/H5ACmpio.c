@@ -15,7 +15,7 @@
  *
  * Created:             H5ACmpio.c
  *                      Jun 20 2015
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             Functions in this file implement support for parallel
  *                      I/O cache functionality
@@ -482,7 +482,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t H5_ATTR_SANITY_CHECK *aux_ptr, int sync_point_op)
+H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t H5_ATTR_NDEBUG_UNUSED *aux_ptr,
+                               int sync_point_op)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

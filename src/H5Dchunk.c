@@ -5694,7 +5694,7 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* Set it in the userdata to return */
     udata->chunk_addr[chunk_index] = chunk_rec->chunk_addr;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
 } /* H5D__chunk_addrmap_cb() */
 
 /*-------------------------------------------------------------------------
