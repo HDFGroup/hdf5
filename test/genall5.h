@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
+/*
  * This file contains declarations of all functions defined in genall5.c
  */
 
@@ -19,14 +19,14 @@
 #define GENALL5_H
 
 typedef struct _zoo_config {
-    int proc_num;
-    bool continue_on_failure;
-    bool skip_compact;
-    bool skip_varlen;
-    unsigned max_pause_msecs;
-    struct timespec msgival;    /* minimum interval between warning-message
-                                 * repetitions
-                                 */
+    int             proc_num;
+    bool            continue_on_failure;
+    bool            skip_compact;
+    bool            skip_varlen;
+    unsigned        max_pause_msecs;
+    struct timespec msgival; /* minimum interval between warning-message
+                              * repetitions
+                              */
 } zoo_config_t;
 
 /**************/
@@ -39,8 +39,7 @@ extern "C" {
 H5TEST_DLL hbool_t create_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
 H5TEST_DLL hbool_t validate_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
 H5TEST_DLL hbool_t delete_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
-H5TEST_DLL hbool_t validate_deleted_zoo(hid_t, const char *, struct timespec *,
-    zoo_config_t);
+H5TEST_DLL hbool_t validate_deleted_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
 
 H5TEST_DLL hbool_t ns_grp_0(hid_t fid, const char *group_name);
 H5TEST_DLL hbool_t vrfy_ns_grp_0(hid_t fid, const char *group_name);
@@ -55,8 +54,7 @@ H5TEST_DLL hbool_t os_grp_0(hid_t fid, const char *group_name);
 H5TEST_DLL hbool_t vrfy_os_grp_0(hid_t fid, const char *group_name);
 
 H5TEST_DLL hbool_t os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks);
-H5TEST_DLL hbool_t vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num,
-    unsigned nlinks);
+H5TEST_DLL hbool_t vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks);
 
 H5TEST_DLL hbool_t ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
 H5TEST_DLL hbool_t vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);

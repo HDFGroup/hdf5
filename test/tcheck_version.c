@@ -11,21 +11,21 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
- /*
-  * This tests the h5check_version() function.
-  *
-  * The default is to call the h5check_version() with the version information
-  * in the header file and should incur no warnings or abort.
-  * Options provided to call it with incorrect versions to test
-  * if it will indeed issue the warning message and aborts.  With environment
-  * variable $HDF5_DISABLE_VERSION_CHECK sets to 1, it should issue warnings
-  * but no abort.  If it is 2, no warning or abort.
-  *
-  * Programmer: Albert Cheng
-  *             September 20, 2009
-  * Modifications:
-  *   Added abort signal intercept. AKC - 2009/10/16 -
-  */
+/*
+ * This tests the h5check_version() function.
+ *
+ * The default is to call the h5check_version() with the version information
+ * in the header file and should incur no warnings or abort.
+ * Options provided to call it with incorrect versions to test
+ * if it will indeed issue the warning message and aborts.  With environment
+ * variable $HDF5_DISABLE_VERSION_CHECK sets to 1, it should issue warnings
+ * but no abort.  If it is 2, no warning or abort.
+ *
+ * Programmer: Albert Cheng
+ *             September 20, 2009
+ * Modifications:
+ *   Added abort signal intercept. AKC - 2009/10/16 -
+ */
 
 #include "h5test.h"
 
@@ -35,14 +35,14 @@
 
 #define progname "tcheck_version"
 
-  /* prototypes */
+/* prototypes */
 void showhelp(void);
-void parse(int ac, char** av);
+void parse(int ac, char **av);
 void abort_intercept(int H5_ATTR_UNUSED sig);
 
 /* global variables */
-unsigned major = H5_VERS_MAJOR;
-unsigned minor = H5_VERS_MINOR;
+unsigned major   = H5_VERS_MAJOR;
+unsigned minor   = H5_VERS_MINOR;
 unsigned release = H5_VERS_RELEASE;
 
 void
@@ -58,9 +58,9 @@ showhelp(void)
 }
 
 void
-parse(int ac, char** av)
+parse(int ac, char **av)
 {
-    char* pt;
+    char *pt;
 
     while (--ac > 0) {
         pt = *(++av);
@@ -70,28 +70,28 @@ parse(int ac, char** av)
         }
         else {
             switch (*(++pt)) {
-            case 't': /* option -t */
-                switch (*(++pt)) {
-                case 'M':
-                    major++;
+                case 't': /* option -t */
+                    switch (*(++pt)) {
+                        case 'M':
+                            major++;
+                            break;
+                        case 'm':
+                            minor++;
+                            break;
+                        case 'r':
+                            release++;
+                            break;
+                        default:
+                            HDfprintf(stderr, "Unknown -v parameter (%s). Aborted.\n", *av);
+                            HDexit(EXIT_FAILURE);
+                    }
                     break;
-                case 'm':
-                    minor++;
-                    break;
-                case 'r':
-                    release++;
-                    break;
+                case 'h': /* help page */
+                    showhelp();
+                    HDexit(EXIT_SUCCESS);
                 default:
-                    HDfprintf(stderr, "Unknown -v parameter (%s). Aborted.\n", *av);
+                    HDfprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
                     HDexit(EXIT_FAILURE);
-                }
-                break;
-            case 'h': /* help page */
-                showhelp();
-                HDexit(EXIT_SUCCESS);
-            default:
-                HDfprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
-                HDexit(EXIT_FAILURE);
             }
         }
     }
@@ -119,14 +119,14 @@ abort_intercept(int H5_ATTR_UNUSED sig)
  * is no need to alert the user with a modal dialog box.
  */
 int
-handle_crt_abort(int reportType, char* message, int* returnValue)
+handle_crt_abort(int reportType, char *message, int *returnValue)
 {
     return TRUE;
 }
 #endif
 
 int
-main(int ac, char** av)
+main(int ac, char **av)
 {
 #ifdef H5_HAVE_WIN32_API
     (void)_CrtSetReportHook2(_CRT_RPTHOOK_INSTALL, handle_crt_abort);

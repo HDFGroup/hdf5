@@ -25,18 +25,14 @@ extern "C" {
  * Method:    H5Pset_copy_object
  * Signature: (JI)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1copy_1object
-(JNIEnv *, jclass, jlong, jint);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1copy_1object(JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_copy_object
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1copy_1object
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1copy_1object(JNIEnv *, jclass, jlong);
 
 /*
  * TODO: H5Padd_merge_committed_dtype_path

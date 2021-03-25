@@ -12,7 +12,7 @@
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
- 
+
 /* This example demonstrates debug trace output.
  *
  * Debug/trace/performance output is not tested as a regular part of our
@@ -42,33 +42,33 @@
  * fast machines, these numbers may be 0.0.  Adjust the loop variables in
  * the program as needed to generate reasonable output.
  */
- 
+
 #include <stdio.h>
 #include <stdlib.h>
- 
+
 #include "hdf5.h"
- 
-#define BUF_SIZE   1048576
-#define N_LOOPS    64
- 
+
+#define BUF_SIZE 1048576
+#define N_LOOPS  64
+
 #define TESTFILE "h5_debug_trace_out.h5"
- 
+
 int
 main(int argc, char **argv)
 {
-    int i, j;
+    int  i, j;
     int *data;
-    
-    hid_t   fid;
-    hid_t   pid;
-    hid_t   did;
-    hid_t   sid;
-    
-    hsize_t dims[1] = { BUF_SIZE };
-    hsize_t chunk_sizes[1] = { 1024 };
-    
+
+    hid_t fid;
+    hid_t pid;
+    hid_t did;
+    hid_t sid;
+
+    hsize_t dims[1]        = {BUF_SIZE};
+    hsize_t chunk_sizes[1] = {1024};
+
     herr_t err;
-    
+
     /*************************************************************************/
 
     /* Warn the user about trace deluge to come */
@@ -82,55 +82,52 @@ main(int argc, char **argv)
     fflush(stdout);
 
     /* This will emit H5Tconvert() performance information */
-    
-    for(i = 0; i < N_LOOPS; i++) {
-        
+
+    for (i = 0; i < N_LOOPS; i++) {
+
         /* The buffer has to be large enough to hold the conversion output */
         data = (int *)malloc(BUF_SIZE * sizeof(double));
-        
-        for(j = 0; j < BUF_SIZE; j++) {
+
+        for (j = 0; j < BUF_SIZE; j++) {
             data[j] = j;
         }
-        
-        err = H5Tconvert(H5T_NATIVE_INT, H5T_NATIVE_DOUBLE, BUF_SIZE, data,
-            NULL, H5P_DEFAULT);
-        
-        if(err < 0) {
+
+        err = H5Tconvert(H5T_NATIVE_INT, H5T_NATIVE_DOUBLE, BUF_SIZE, data, NULL, H5P_DEFAULT);
+
+        if (err < 0) {
             fprintf(stderr, "ERROR: Conversion failed\n");
             free(data);
             return err;
         }
-        
+
         free(data);
-        
     }
-    
-    
+
     /* This will emit H5Z performance information */
-    
+
     data = (int *)malloc(BUF_SIZE * sizeof(int));
-    
-    for(i = 0; i < BUF_SIZE; i++) {
+
+    for (i = 0; i < BUF_SIZE; i++) {
         data[i] = i;
     }
-    
+
     fid = H5Fcreate(TESTFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    
+
     pid = H5Pcreate(H5P_DATASET_CREATE);
     err = H5Pset_chunk(pid, 1, chunk_sizes);
     err = H5Pset_shuffle(pid);
-    
+
     sid = H5Screate_simple(1, dims, dims);
     did = H5Dcreate2(fid, "somedata", H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT);
     err = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data);
-    
+
     H5Sclose(sid);
     H5Dclose(did);
     H5Pclose(pid);
     H5Fclose(fid);
-    
+
     free(data);
-    
+
     /* Finished */
     fflush(stdout);
     printf("\n");
@@ -138,7 +135,6 @@ main(int argc, char **argv)
     printf("\n");
 
     remove(TESTFILE);
-    
+
     return 0;
 }
-

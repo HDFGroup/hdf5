@@ -25,9 +25,8 @@
  *      reporting macros.
  */
 #define H5I_MODULE
-#define H5_MY_PKG       H5I
-#define H5_MY_PKG_ERR   H5E_ATOM
-#define H5_MY_PKG_INIT  NO
+#define H5_MY_PKG      H5I
+#define H5_MY_PKG_ERR  H5E_ATOM
+#define H5_MY_PKG_INIT NO
 
 #endif /* _H5Imodule_H */
-

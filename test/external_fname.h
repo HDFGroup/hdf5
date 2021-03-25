@@ -23,15 +23,7 @@
 /* Include test header files */
 #include "h5test.h"
 
-static const char *EXT_FNAME[] = {
-    "extern_1",
-    "extern_2",
-    "extern_3",
-    "extern_4",
-    "extern_dir/file_1",
-    "extern_5",
-    NULL
-};
+static const char *EXT_FNAME[] = {"extern_1",          "extern_2", "extern_3", "extern_4",
+                                  "extern_dir/file_1", "extern_5", NULL};
 
 #endif /* _EXTERNAL_FNAME_H */
-

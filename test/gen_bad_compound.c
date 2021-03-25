@@ -26,16 +26,17 @@
 
 #define FILENAME "bad_compound.h5"
 
-int main()
+int
+main()
 {
-    hid_t       file;
-    hid_t       cmpd_dt;
-    hid_t       sid;
-    hid_t       did;
-    hid_t       aid;
-    hid_t       gid;
-    hsize_t     dim = 1;
-    herr_t      ret;
+    hid_t   file;
+    hid_t   cmpd_dt;
+    hid_t   sid;
+    hid_t   did;
+    hid_t   aid;
+    hid_t   gid;
+    hsize_t dim = 1;
+    herr_t  ret;
 
     /* Create compound datatype, but don't insert fields */
     cmpd_dt = H5Tcreate(H5T_COMPOUND, (size_t)8);
@@ -79,6 +80,5 @@ int main()
     ret = H5Fclose(file);
     assert(ret >= 0);
 
-    return(0);
+    return (0);
 }
-

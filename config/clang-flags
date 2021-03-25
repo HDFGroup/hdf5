@@ -56,7 +56,10 @@ load_clang_arguments()
 #
 if test "X-" = "X-$cc_flags_set"; then
     # clang -v will return version number following "clang" on Linux machines,
-    # but on Macs the version number will follow "Apple LLVM version"
+    # but on Xcode the version number will follow "Apple LLVM version"
+    # Note that the Xcode reported LLVM version doesn't match the canonical
+    # LLVM version, so you'll need to do different version checks for
+    # Xcode.
     cc_version="`$CC $CFLAGS $H5_CFLAGS -v 2>&1 |\
         grep 'clang version' | sed 's/.*clang version \([-a-z0-9\.]*\).*/\1/'`"
     if test -n "$cc_version"; then

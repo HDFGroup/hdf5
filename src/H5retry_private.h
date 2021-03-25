@@ -18,20 +18,20 @@
 
 /* State for a retry loop.  No user-serviceable parts inside. */
 typedef struct h5_retry_t {
-    uint64_t maxival;   /* maximum sleep interval (nanoseconds) */
-    unsigned maxtries;  /* maximum permissible tries */
-    unsigned tries;     /* remaining tries */
-    uint64_t ival;      /* nanoseconds sleep interval before clamping to
-                         * maxival
-                         */
+    uint64_t maxival;  /* maximum sleep interval (nanoseconds) */
+    unsigned maxtries; /* maximum permissible tries */
+    unsigned tries;    /* remaining tries */
+    uint64_t ival;     /* nanoseconds sleep interval before clamping to
+                        * maxival
+                        */
 } h5_retry_t;
 
 /* Default minimum/maximum retry intervals: 1/10s minimum, 1s maximum. */
-#define H5_RETRY_DEFAULT_MINIVAL   (           100ULL * 1000ULL * 1000ULL)
-#define H5_RETRY_DEFAULT_MAXIVAL   (          1000ULL * 1000ULL * 1000ULL)
+#define H5_RETRY_DEFAULT_MINIVAL (100ULL * 1000ULL * 1000ULL)
+#define H5_RETRY_DEFAULT_MAXIVAL (1000ULL * 1000ULL * 1000ULL)
 /* One hour: */
-#define H5_RETRY_ONE_SECOND          (1000ULL * 1000ULL * 1000ULL)
-#define H5_RETRY_ONE_HOUR          (3600ULL * H5_RETRY_ONE_SECOND)
+#define H5_RETRY_ONE_SECOND (1000ULL * 1000ULL * 1000ULL)
+#define H5_RETRY_ONE_HOUR   (3600ULL * H5_RETRY_ONE_SECOND)
 
 /* If any tries remain, decrease the number of remaining tries and
  * return true.  Otherwise, return false.
@@ -53,7 +53,7 @@ h5_retry_decrement(struct h5_retry_t *r)
  * increase to `maxival` nanoseconds or twice the previous sleep time,
  * whichever is less.
  *
- * `h5_retry_init` always returns true.  This is to help one use 
+ * `h5_retry_init` always returns true.  This is to help one use
  * it in a loop like this:
  *
  * for (do_try = h5_retry_init(&r, 100, H5_RETRY_DEFAULT_MINIVAL,
@@ -69,15 +69,14 @@ h5_retry_decrement(struct h5_retry_t *r)
  * than 101 times: once for an initial try, and then 100 times for retries.
  */
 static inline bool
-h5_retry_init(struct h5_retry_t *r, unsigned int maxtries, uint64_t minival,
-    uint64_t maxival)
+h5_retry_init(struct h5_retry_t *r, unsigned int maxtries, uint64_t minival, uint64_t maxival)
 {
     memset(r, '\0', sizeof(*r));
     assert(0 < maxtries);
     assert(0 < minival && minival <= maxival);
     r->tries = r->maxtries = maxtries;
-    r->ival = minival;
-    r->maxival = maxival;
+    r->ival                = minival;
+    r->maxival             = maxival;
     return h5_retry_decrement(r);
 }
 

@@ -21,13 +21,13 @@
 #include "H5public.h"   /* uint64_t *ahem* */
 #include "H5Ipublic.h"  /* hid_t */
 
-#define H5FD_VFD_SWMR   (H5FD_vfd_swmr_init())
+#define H5FD_VFD_SWMR (H5FD_vfd_swmr_init())
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5_DLL hid_t H5FD_vfd_swmr_init(void);
+H5_DLL hid_t  H5FD_vfd_swmr_init(void);
 H5_DLL herr_t H5Pset_fapl_vfd_swmr(hid_t fapl_id);
 
 #ifdef __cplusplus

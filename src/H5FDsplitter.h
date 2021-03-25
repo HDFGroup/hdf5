@@ -75,19 +75,19 @@
  * ----------------------------------------------------------------------------
  */
 typedef struct H5FD_splitter_vfd_config_t {
-    int32_t magic;
+    int32_t      magic;
     unsigned int version;
-    hid_t rw_fapl_id;
-    hid_t wo_fapl_id;
-    char wo_path[H5FD_SPLITTER_PATH_MAX + 1];
-    char log_file_path[H5FD_SPLITTER_PATH_MAX + 1];
-    hbool_t ignore_wo_errs;
+    hid_t        rw_fapl_id;
+    hid_t        wo_fapl_id;
+    char         wo_path[H5FD_SPLITTER_PATH_MAX + 1];
+    char         log_file_path[H5FD_SPLITTER_PATH_MAX + 1];
+    hbool_t      ignore_wo_errs;
 } H5FD_splitter_vfd_config_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-H5_DLL hid_t H5FD_splitter_init(void);
+H5_DLL hid_t  H5FD_splitter_init(void);
 H5_DLL herr_t H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr);
 H5_DLL herr_t H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr);
 
@@ -96,4 +96,3 @@ H5_DLL herr_t H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *co
 #endif
 
 #endif
-

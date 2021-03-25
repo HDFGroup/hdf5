@@ -10,9 +10,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
- /* Programmer:  Mike McGreevy
-  *              October 7, 2010
-  */
+/* Programmer:  Mike McGreevy
+ *              October 7, 2010
+ */
 #include "h5test.h"
 
 #define H5F_FRIEND  /*suppress error about including H5Fpkg	  */
@@ -25,9 +25,9 @@
 #include "H5Iprivate.h"
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
-  /* Filename */
-  /* (The file names are the same as the define in accum_swmr_reader.c) */
-const char* FILENAME[] = { "accum", "accum_swmr_big", NULL };
+/* Filename */
+/* (The file names are the same as the define in accum_swmr_reader.c) */
+const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
 
 /* The reader forked by test_swmr_write_big() */
 #define SWMR_READER "accum_swmr_reader"
@@ -42,22 +42,22 @@ const char* FILENAME[] = { "accum", "accum_swmr_big", NULL };
 #define RANDOM_BASE_OFF     (1024 * 1024)
 
 /* Function Prototypes */
-unsigned test_write_read(H5F_t* f);
-unsigned test_write_read_nonacc_front(H5F_t* f);
-unsigned test_write_read_nonacc_end(H5F_t* f);
-unsigned test_accum_overlap(H5F_t* f);
-unsigned test_accum_overlap_clean(H5F_t* f);
-unsigned test_accum_overlap_size(H5F_t* f);
-unsigned test_accum_non_overlap_size(H5F_t* f);
-unsigned test_accum_adjust(H5F_t* f);
-unsigned test_read_after(H5F_t* f);
-unsigned test_free(H5F_t* f);
-unsigned test_big(H5F_t* f);
-unsigned test_random_write(H5F_t* f);
+unsigned test_write_read(H5F_t *f);
+unsigned test_write_read_nonacc_front(H5F_t *f);
+unsigned test_write_read_nonacc_end(H5F_t *f);
+unsigned test_accum_overlap(H5F_t *f);
+unsigned test_accum_overlap_clean(H5F_t *f);
+unsigned test_accum_overlap_size(H5F_t *f);
+unsigned test_accum_non_overlap_size(H5F_t *f);
+unsigned test_accum_adjust(H5F_t *f);
+unsigned test_read_after(H5F_t *f);
+unsigned test_free(H5F_t *f);
+unsigned test_big(H5F_t *f);
+unsigned test_random_write(H5F_t *f);
 unsigned test_swmr_write_big(hbool_t newest_format);
 
 /* Helper Function Prototypes */
-void accum_printf(const H5F_t* f);
+void accum_printf(const H5F_t *f);
 
 /* Private Test H5Faccum Function Wrappers */
 #define accum_write(a, s, b) H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), (b))
@@ -86,12 +86,12 @@ void accum_printf(const H5F_t* f);
 int
 main(void)
 {
-    unsigned nerrors = 0;     /* track errors */
+    unsigned nerrors        = 0;     /* track errors */
     hbool_t  api_ctx_pushed = FALSE; /* Whether API context pushed */
-    hid_t    fid = -1;
-    hid_t    fapl = -1; /* File access property list */
+    hid_t    fid            = -1;
+    hid_t    fapl           = -1; /* File access property list */
     char     filename[1024];
-    H5F_t* f = NULL; /* File for all tests */
+    H5F_t *  f = NULL; /* File for all tests */
 
     /* Test Setup */
     HDputs("Testing the metadata accumulator");
@@ -100,32 +100,32 @@ main(void)
     h5_reset();
     if ((fapl = h5_fileaccess()) < 0)
         FAIL_STACK_ERROR
-        h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create a test file */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
-        /* Push API context */
-        if (H5CX_push() < 0)
-            FAIL_STACK_ERROR
-            api_ctx_pushed = TRUE;
+    /* Push API context */
+    if (H5CX_push() < 0)
+        FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
-    if (NULL == (f = (H5F_t*)H5VL_object(fid)))
+    if (NULL == (f = (H5F_t *)H5VL_object(fid)))
         FAIL_STACK_ERROR
 
-        /* We'll be writing lots of garbage data, so extend the
-            file a ways. 10MB should do. */
-        if (H5FD_set_eoa(f->shared->lf, H5FD_MEM_DEFAULT, (haddr_t)(1024 * 1024 * 10)) < 0)
-            FAIL_STACK_ERROR
+    /* We'll be writing lots of garbage data, so extend the
+        file a ways. 10MB should do. */
+    if (H5FD_set_eoa(f->shared->lf, H5FD_MEM_DEFAULT, (haddr_t)(1024 * 1024 * 10)) < 0)
+        FAIL_STACK_ERROR
 
-            /* Reset metadata accumulator for the file */
-            if (accum_reset(f) < 0)
-                FAIL_STACK_ERROR
+    /* Reset metadata accumulator for the file */
+    if (accum_reset(f) < 0)
+        FAIL_STACK_ERROR
 
-                /* Test Functions */
-                nerrors += test_write_read(f);
+    /* Test Functions */
+    nerrors += test_write_read(f);
     nerrors += test_write_read_nonacc_front(f);
     nerrors += test_write_read_nonacc_end(f);
     nerrors += test_accum_overlap(f);
@@ -141,14 +141,14 @@ main(void)
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop() < 0)
         FAIL_STACK_ERROR
-        api_ctx_pushed = FALSE;
+    api_ctx_pushed = FALSE;
 
     /* End of test code, close and delete file */
     if (H5Fclose(fid) < 0)
         TEST_ERROR
 
-        /* This test uses a different file */
-        nerrors += test_swmr_write_big(TRUE);
+    /* This test uses a different file */
+    nerrors += test_swmr_write_big(TRUE);
     nerrors += test_swmr_write_big(FALSE);
 
     if (nerrors)
@@ -184,17 +184,17 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_write_read(H5F_t* f)
+test_write_read(H5F_t *f)
 {
     int  i = 0;
-    int* write_buf, * read_buf;
+    int *write_buf, *read_buf;
 
     TESTING("simple write/read to/from metadata accumulator");
 
     /* Allocate buffers */
-    write_buf = (int*)HDmalloc(1024 * sizeof(int));
+    write_buf = (int *)HDmalloc(1024 * sizeof(int));
     HDassert(write_buf);
-    read_buf = (int*)HDcalloc((size_t)1024, sizeof(int));
+    read_buf = (int *)HDcalloc((size_t)1024, sizeof(int));
     HDassert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
@@ -243,17 +243,17 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_write_read_nonacc_front(H5F_t* f)
+test_write_read_nonacc_front(H5F_t *f)
 {
     int  i = 0;
-    int* write_buf, * read_buf;
+    int *write_buf, *read_buf;
 
     TESTING("simple write/read to/from before metadata accumulator");
 
     /* Allocate buffers */
-    write_buf = (int*)HDmalloc(2048 * sizeof(int));
+    write_buf = (int *)HDmalloc(2048 * sizeof(int));
     HDassert(write_buf);
-    read_buf = (int*)HDcalloc((size_t)2048, sizeof(int));
+    read_buf = (int *)HDcalloc((size_t)2048, sizeof(int));
     HDassert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
@@ -308,17 +308,17 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_write_read_nonacc_end(H5F_t* f)
+test_write_read_nonacc_end(H5F_t *f)
 {
     int  i = 0;
-    int* write_buf, * read_buf;
+    int *write_buf, *read_buf;
 
     TESTING("simple write/read to/from after metadata accumulator");
 
     /* Allocate buffers */
-    write_buf = (int*)HDmalloc(2048 * sizeof(int));
+    write_buf = (int *)HDmalloc(2048 * sizeof(int));
     HDassert(write_buf);
-    read_buf = (int*)HDcalloc((size_t)2048, sizeof(int));
+    read_buf = (int *)HDcalloc((size_t)2048, sizeof(int));
     HDassert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
@@ -373,21 +373,21 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_free(H5F_t* f)
+test_free(H5F_t *f)
 {
-    int      i = 0;
-    int32_t* wbuf = NULL;
-    int32_t* rbuf = NULL;
-    int32_t* expect = NULL;
+    int      i      = 0;
+    int32_t *wbuf   = NULL;
+    int32_t *rbuf   = NULL;
+    int32_t *expect = NULL;
 
     TESTING("simple freeing metadata accumulator");
 
     /* Write and free the whole accumulator. */
-    wbuf = (int32_t*)HDmalloc(256 * sizeof(int32_t));
+    wbuf = (int32_t *)HDmalloc(256 * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int32_t*)HDmalloc(256 * sizeof(int32_t));
+    rbuf = (int32_t *)HDmalloc(256 * sizeof(int32_t));
     HDassert(rbuf);
-    expect = (int32_t*)HDmalloc(256 * sizeof(int32_t));
+    expect = (int32_t *)HDmalloc(256 * sizeof(int32_t));
     HDassert(expect);
 
     /* Fill buffer with data */
@@ -606,17 +606,17 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_accum_overlap(H5F_t* f)
+test_accum_overlap(H5F_t *f)
 {
     int      i = 0;
-    int32_t* wbuf, * rbuf;
+    int32_t *wbuf, *rbuf;
 
     TESTING("overlapping write to metadata accumulator");
 
     /* Allocate buffers */
-    wbuf = (int32_t*)HDmalloc(4096 * sizeof(int32_t));
+    wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int32_t*)HDcalloc((size_t)4096, sizeof(int32_t));
+    rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
     HDassert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -813,17 +813,17 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_accum_overlap_clean(H5F_t* f)
+test_accum_overlap_clean(H5F_t *f)
 {
     int      i = 0;
-    int32_t* wbuf, * rbuf;
+    int32_t *wbuf, *rbuf;
 
     TESTING("overlapping write to partially clean metadata accumulator");
 
     /* Allocate buffers */
-    wbuf = (int32_t*)HDmalloc(4096 * sizeof(int32_t));
+    wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int32_t*)HDcalloc((size_t)4096, sizeof(int32_t));
+    rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
     HDassert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -855,8 +855,8 @@ test_accum_overlap_clean(H5F_t* f)
 
     /* Case 3: Start of new piece aligns with start of accumulated data,
      * completely encloses dirty section of accumulator */
-     /* Write 6 3's at address 20 */
-     /* @0:|  333333111111111| */
+    /* Write 6 3's at address 20 */
+    /* @0:|  333333111111111| */
     for (i = 0; i < 6; i++)
         wbuf[i] = 3;
     if (accum_write(20, 6 * sizeof(int32_t), wbuf) < 0)
@@ -868,8 +868,8 @@ test_accum_overlap_clean(H5F_t* f)
 
     /* Case 4: New piece completely within accumulated data, overlaps
      * end of dirty section of accumulator */
-     /* Write 2 4's at address 40 */
-     /* @0:|  333334411111111| */
+    /* Write 2 4's at address 40 */
+    /* @0:|  333334411111111| */
     for (i = 0; i < 2; i++)
         wbuf[i] = 4;
     if (accum_write(40, 2 * sizeof(int32_t), wbuf) < 0)
@@ -881,8 +881,8 @@ test_accum_overlap_clean(H5F_t* f)
 
     /* Case 5: New piece completely within accumulated data, completely
      * after dirty section of accumulator */
-     /* Write 2 5's at address 52 */
-     /* @0:|  333334415511111| */
+    /* Write 2 5's at address 52 */
+    /* @0:|  333334415511111| */
     for (i = 0; i < 2; i++)
         wbuf[i] = 5;
     if (accum_write(52, 2 * sizeof(int32_t), wbuf) < 0)
@@ -922,8 +922,8 @@ test_accum_overlap_clean(H5F_t* f)
 
     /* Case 8: New piece overlaps start of accumulated data, completely
      * encloses dirty section of accumulator */
-     /* Write 4 8's at address 12 */
-     /* @0:|  88883334666511111| */
+    /* Write 4 8's at address 12 */
+    /* @0:|  88883334666511111| */
     for (i = 0; i < 4; i++)
         wbuf[i] = 8;
     if (accum_write(12, 4 * sizeof(int32_t), wbuf) < 0)
@@ -963,8 +963,8 @@ test_accum_overlap_clean(H5F_t* f)
 
     /* Case 11: New piece overlaps end of accumulated data, completely encloses
      * dirty section of accumulator */
-     /* Write 4 7's at address 84 */
-     /* @0:|  8888333466651111197777| */
+    /* Write 4 7's at address 84 */
+    /* @0:|  8888333466651111197777| */
     for (i = 0; i < 4; i++)
         wbuf[i] = 7;
     if (accum_write(84, 4 * sizeof(int32_t), wbuf) < 0)
@@ -1032,17 +1032,17 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_accum_non_overlap_size(H5F_t* f)
+test_accum_non_overlap_size(H5F_t *f)
 {
     int      i = 0;
-    int32_t* wbuf, * rbuf;
+    int32_t *wbuf, *rbuf;
 
     TESTING("non-overlapping write to accumulator larger then accum_size");
 
     /* Allocate buffers */
-    wbuf = (int*)HDmalloc(4096 * sizeof(int32_t));
+    wbuf = (int *)HDmalloc(4096 * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int*)HDcalloc((size_t)4096, sizeof(int32_t));
+    rbuf = (int *)HDcalloc((size_t)4096, sizeof(int32_t));
     HDassert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -1106,17 +1106,17 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_accum_overlap_size(H5F_t* f)
+test_accum_overlap_size(H5F_t *f)
 {
     int      i = 0;
-    int32_t* wbuf, * rbuf;
+    int32_t *wbuf, *rbuf;
 
     TESTING("overlapping write to accumulator larger then accum_size");
 
     /* Allocate buffers */
-    wbuf = (int32_t*)HDmalloc(4096 * sizeof(int32_t));
+    wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int32_t*)HDcalloc((size_t)4096, sizeof(int32_t));
+    rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
     HDassert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -1190,18 +1190,18 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_accum_adjust(H5F_t* f)
+test_accum_adjust(H5F_t *f)
 {
     int      i = 0;
     int      s = 1048576; /* size of buffer */
-    int32_t* wbuf, * rbuf;
+    int32_t *wbuf, *rbuf;
 
     TESTING("accumulator adjustments after append/prepend of data");
 
     /* Allocate buffers */
-    wbuf = (int32_t*)HDmalloc((size_t)s * sizeof(int32_t));
+    wbuf = (int32_t *)HDmalloc((size_t)s * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int32_t*)HDcalloc((size_t)s, sizeof(int32_t));
+    rbuf = (int32_t *)HDcalloc((size_t)s, sizeof(int32_t));
     HDassert(rbuf);
 
     /* Fill up write buffer */
@@ -1297,15 +1297,15 @@ test_accum_adjust(H5F_t* f)
     if (accum_flush(f) < 0)
         FAIL_STACK_ERROR
 
-        /* Write a small (1KB) block to the end of the accumulator */
-        /* ==> Accumulator will need more buffer space */
-        /* ==> Accumulator will try to resize, but see that it's getting too big */
-        /* ==> Size of new block is larger than half maximum size of accumulator */
-        /* ==> New block being appended to accumulator */
-        /* ==> Accumulator is NOT dirty */
-        /* ==> Since we're appending, need to adjust location of accumulator */
-        if (accum_write((1024 * 1024) - 1, 1024, wbuf) < 0)
-            FAIL_STACK_ERROR;
+    /* Write a small (1KB) block to the end of the accumulator */
+    /* ==> Accumulator will need more buffer space */
+    /* ==> Accumulator will try to resize, but see that it's getting too big */
+    /* ==> Size of new block is larger than half maximum size of accumulator */
+    /* ==> New block being appended to accumulator */
+    /* ==> Accumulator is NOT dirty */
+    /* ==> Since we're appending, need to adjust location of accumulator */
+    if (accum_write((1024 * 1024) - 1, 1024, wbuf) < 0)
+        FAIL_STACK_ERROR;
 
     /* Write a piece of metadata outside current accumulator to force write
         to disk */
@@ -1339,9 +1339,9 @@ test_accum_adjust(H5F_t* f)
     if (accum_flush(f) < 0)
         FAIL_STACK_ERROR
 
-        /* write to part of the accumulator so just the start of it is dirty */
-        if (accum_write(0, 5, wbuf) < 0)
-            FAIL_STACK_ERROR;
+    /* write to part of the accumulator so just the start of it is dirty */
+    if (accum_write(0, 5, wbuf) < 0)
+        FAIL_STACK_ERROR;
 
     /* Write a small (~340KB) piece of data to the other end of the accumulator */
     /* ==> Accumulator will need more buffer space */
@@ -1384,10 +1384,10 @@ test_accum_adjust(H5F_t* f)
     if (accum_flush(f) < 0)
         FAIL_STACK_ERROR
 
-        /* write to part of the accumulator so it's dirty, but not entirely dirty */
-        /* (just the begging few bytes will be clean) */
-        if (accum_write(10, (1024 * 1024) - 15, wbuf) < 0)
-            FAIL_STACK_ERROR;
+    /* write to part of the accumulator so it's dirty, but not entirely dirty */
+    /* (just the begging few bytes will be clean) */
+    if (accum_write(10, (1024 * 1024) - 15, wbuf) < 0)
+        FAIL_STACK_ERROR;
 
     /* Write a small piece of data to the dirty end of the accumulator */
     /* ==> Accumulator will need more buffer space */
@@ -1488,18 +1488,18 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_read_after(H5F_t* f)
+test_read_after(H5F_t *f)
 {
     int      i = 0;
     int      s = 128; /* size of buffer */
-    int32_t* wbuf, * rbuf;
+    int32_t *wbuf, *rbuf;
 
     TESTING("reading data from both accumulator and disk");
 
     /* Allocate buffers */
-    wbuf = (int32_t*)HDmalloc((size_t)s * sizeof(int32_t));
+    wbuf = (int32_t *)HDmalloc((size_t)s * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int32_t*)HDcalloc((size_t)s, sizeof(int32_t));
+    rbuf = (int32_t *)HDcalloc((size_t)s, sizeof(int32_t));
     HDassert(rbuf);
 
     /* Fill up write buffer with 1s */
@@ -1573,24 +1573,24 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_big(H5F_t* f)
+test_big(H5F_t *f)
 {
-    uint8_t* wbuf, * wbuf2, * rbuf, * zbuf; /* Buffers for reading & writing, etc */
+    uint8_t *wbuf, *wbuf2, *rbuf, *zbuf; /* Buffers for reading & writing, etc */
     unsigned u;                          /* Local index variable */
 
     /* Allocate space for the write & read buffers */
-    wbuf = (uint8_t*)HDmalloc((size_t)BIG_BUF_SIZE);
+    wbuf = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE);
     HDassert(wbuf);
-    wbuf2 = (uint8_t*)HDmalloc((size_t)BIG_BUF_SIZE);
+    wbuf2 = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE);
     HDassert(wbuf2);
-    rbuf = (uint8_t*)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
+    rbuf = (uint8_t *)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
     HDassert(rbuf);
-    zbuf = (uint8_t*)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
+    zbuf = (uint8_t *)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
     HDassert(zbuf);
 
     /* Initialize write buffers */
     for (u = 0; u < BIG_BUF_SIZE; u++) {
-        wbuf[u] = (uint8_t)u;
+        wbuf[u]  = (uint8_t)u;
         wbuf2[u] = (uint8_t)(u + 1);
     } /* end for */
 
@@ -1938,21 +1938,21 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_random_write(H5F_t* f)
+test_random_write(H5F_t *f)
 {
-    uint8_t* wbuf, * rbuf; /* Buffers for reading & writing */
+    uint8_t *wbuf, *rbuf; /* Buffers for reading & writing */
     unsigned seed = 0;    /* Random # seed */
-    size_t* off;         /* Offset of buffer segments to write */
-    size_t* len;         /* Size of buffer segments to write */
+    size_t * off;         /* Offset of buffer segments to write */
+    size_t * len;         /* Size of buffer segments to write */
     size_t   cur_off;     /* Current offset */
     size_t   nsegments;   /* Number of segments to write */
     size_t   swap;        /* Position to swap with */
     unsigned u;           /* Local index variable */
 
     /* Allocate space for the write & read buffers */
-    wbuf = (uint8_t*)HDmalloc((size_t)RANDOM_BUF_SIZE);
+    wbuf = (uint8_t *)HDmalloc((size_t)RANDOM_BUF_SIZE);
     HDassert(wbuf);
-    rbuf = (uint8_t*)HDcalloc((size_t)RANDOM_BUF_SIZE, (size_t)1);
+    rbuf = (uint8_t *)HDcalloc((size_t)RANDOM_BUF_SIZE, (size_t)1);
     HDassert(rbuf);
 
     /* Initialize write buffer */
@@ -1970,9 +1970,9 @@ test_random_write(H5F_t* f)
     HDsrandom(seed);
 
     /* Allocate space for the segment length buffer */
-    off = (size_t*)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
+    off = (size_t *)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
     HDassert(off);
-    len = (size_t*)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
+    len = (size_t *)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
     HDassert(len);
 
     /* Randomly choose lengths of segments */
@@ -2019,11 +2019,11 @@ test_random_write(H5F_t* f)
             swap = nsegments - 1;
 
         /* Swap values */
-        tmp = off[u];
-        off[u] = off[swap];
+        tmp       = off[u];
+        off[u]    = off[swap];
         off[swap] = tmp;
-        tmp = len[u];
-        len[u] = len[swap];
+        tmp       = len[u];
+        len[u]    = len[swap];
         len[swap] = tmp;
     } /* end for */
 
@@ -2094,16 +2094,16 @@ unsigned
 test_swmr_write_big(hbool_t newest_format)
 {
 
-    hid_t    fid = -1;   /* File ID */
+    hid_t    fid  = -1;   /* File ID */
     hid_t    fapl = -1;   /* File access property list */
-    H5F_t* rf = NULL; /* File pointer */
+    H5F_t *  rf   = NULL; /* File pointer */
     char     filename[1024];
-    uint8_t* wbuf2 = NULL, * rbuf = NULL; /* Buffers for reading & writing */
+    uint8_t *wbuf2 = NULL, *rbuf = NULL; /* Buffers for reading & writing */
     uint8_t  wbuf[1024];                 /* Buffer for reading & writing */
     unsigned u;                          /* Local index variable */
     hbool_t  process_success = FALSE;
-    char* driver = NULL;  /* VFD string (from env variable) */
-    hbool_t  api_ctx_pushed = FALSE; /* Whether API context pushed */
+    char *   driver          = NULL;  /* VFD string (from env variable) */
+    hbool_t  api_ctx_pushed  = FALSE; /* Whether API context pushed */
 
     if (newest_format)
         TESTING("SWMR write of large metadata: with latest format")
@@ -2112,16 +2112,16 @@ test_swmr_write_big(hbool_t newest_format)
 
 #if !defined(H5_HAVE_UNISTD_H) && !defined(H5_HAVE_WIN32_API)
 
-        /* Not a Windows or POSIX system */
-        SKIPPED();
+    /* Not a Windows or POSIX system */
+    SKIPPED();
     HDputs("    Test skipped: Not a Windows or POSIX system.");
     return 0;
 
 #else
-        /* Skip this test if SWMR I/O is not supported for the VFD specified
-         * by the environment variable.
-         */
-        driver = HDgetenv("HDF5_DRIVER");
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    driver = HDgetenv("HDF5_DRIVER");
     if (!H5FD__supports_swmr_test(driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
@@ -2131,15 +2131,15 @@ test_swmr_write_big(hbool_t newest_format)
     /* File access property list */
     if ((fapl = h5_fileaccess()) < 0)
         FAIL_STACK_ERROR
-        h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
     /* Both cases will result in v3 superblock and version 2 object header for SWMR */
     if (newest_format) { /* latest format */
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             FAIL_STACK_ERROR
 
-            if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-                FAIL_STACK_ERROR
+        if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
     }
     else { /* non-latest-format */
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
@@ -2150,35 +2150,35 @@ test_swmr_write_big(hbool_t newest_format)
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR
 
-        /* Open the file with SWMR_WRITE */
-        if ((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
-            FAIL_STACK_ERROR
-
-            /* Push API context */
-            if (H5CX_push() < 0)
-                FAIL_STACK_ERROR
-                api_ctx_pushed = TRUE;
-
-    /* Get H5F_t * to internal file structure */
-    if (NULL == (rf = (H5F_t*)H5VL_object(fid)))
+    /* Open the file with SWMR_WRITE */
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
         FAIL_STACK_ERROR
 
-        /* We'll be writing lots of garbage data, so extend the
-            file a ways. 10MB should do. */
-        if (H5FD_set_eoa(rf->shared->lf, H5FD_MEM_DEFAULT, (haddr_t)(1024 * 1024 * 10)) < 0)
-            FAIL_STACK_ERROR
+    /* Push API context */
+    if (H5CX_push() < 0)
+        FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
-            if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-                FAIL_STACK_ERROR;
+    /* Get H5F_t * to internal file structure */
+    if (NULL == (rf = (H5F_t *)H5VL_object(fid)))
+        FAIL_STACK_ERROR
+
+    /* We'll be writing lots of garbage data, so extend the
+        file a ways. 10MB should do. */
+    if (H5FD_set_eoa(rf->shared->lf, H5FD_MEM_DEFAULT, (haddr_t)(1024 * 1024 * 10)) < 0)
+        FAIL_STACK_ERROR
+
+    if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+        FAIL_STACK_ERROR;
 
     /* Reset metadata accumulator for the file */
     if (accum_reset(rf) < 0)
         FAIL_STACK_ERROR;
 
     /* Allocate space for the write & read buffers */
-    if ((wbuf2 = (uint8_t*)HDmalloc((size_t)BIG_BUF_SIZE)) == NULL)
+    if ((wbuf2 = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE)) == NULL)
         FAIL_STACK_ERROR;
-    if ((rbuf = (uint8_t*)HDmalloc((size_t)BIG_BUF_SIZE)) == NULL)
+    if ((rbuf = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE)) == NULL)
         FAIL_STACK_ERROR;
 
     /* Initialize wbuf with "0, 1, 2...1024"*/
@@ -2269,7 +2269,7 @@ test_swmr_write_big(hbool_t newest_format)
              * NULL at argv[0], so we follow the convention unconditionally.
              */
             char        swmr_reader[] = SWMR_READER;
-            char* const new_argv[] = { swmr_reader, NULL };
+            char *const new_argv[]    = {swmr_reader, NULL};
             /* Run the reader */
             status = HDexecv(SWMR_READER, new_argv);
             HDprintf("errno from execv = %s\n", HDstrerror(errno));
@@ -2290,9 +2290,9 @@ test_swmr_write_big(hbool_t newest_format)
     if (!process_success)
         FAIL_PUTS_ERROR("child process exited abnormally")
 
-        /* Flush the accumulator */
-        if (accum_reset(rf) < 0)
-            FAIL_STACK_ERROR;
+    /* Flush the accumulator */
+    if (accum_reset(rf) < 0)
+        FAIL_STACK_ERROR;
 
     /* Close and remove the file */
     if (H5Fclose(fid) < 0)
@@ -2305,7 +2305,7 @@ test_swmr_write_big(hbool_t newest_format)
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop() < 0)
         FAIL_STACK_ERROR
-        api_ctx_pushed = FALSE;
+    api_ctx_pushed = FALSE;
 
     /* Release memory */
     if (wbuf2)
@@ -2351,9 +2351,9 @@ error:
  *-------------------------------------------------------------------------
  */
 void
-accum_printf(const H5F_t* f)
+accum_printf(const H5F_t *f)
 {
-    H5F_meta_accum_t* accum = &f->shared->accum;
+    H5F_meta_accum_t *accum = &f->shared->accum;
 
     HDprintf("\n");
     HDprintf("Current contents of accumulator:\n");
@@ -2371,14 +2371,14 @@ accum_printf(const H5F_t* f)
         HDfprintf(stdout, " start of accumulated data, loc = %" PRIuHADDR "\n", accum->loc);
         if (accum->dirty) {
             HDfprintf(stdout, " start of dirty region, loc = %" PRIuHADDR "\n",
-                (haddr_t)(accum->loc + accum->dirty_off));
+                      (haddr_t)(accum->loc + accum->dirty_off));
             HDfprintf(stdout, " end of dirty region,   loc = %" PRIuHADDR "\n",
-                (haddr_t)(accum->loc + accum->dirty_off + accum->dirty_len));
+                      (haddr_t)(accum->loc + accum->dirty_off + accum->dirty_len));
         } /* end if */
         HDfprintf(stdout, " end of accumulated data,   loc = %" PRIuHADDR "\n",
-            (haddr_t)(accum->loc + accum->size));
+                  (haddr_t)(accum->loc + accum->size));
         HDfprintf(stdout, " end of accumulator allocation,   loc = %" PRIuHADDR "\n",
-            (haddr_t)(accum->loc + accum->alloc_size));
+                  (haddr_t)(accum->loc + accum->alloc_size));
         HDprintf("=====================================================\n");
     }
     HDprintf("\n\n");

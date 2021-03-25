@@ -11,7 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #ifndef _H5f90_H
 #define _H5f90_H
 
@@ -21,12 +20,11 @@
 #include "H5f90proto.h"
 
 /* Constants used in H5Rff.F90 and H5Rf.c files */
-#define REF_REG_BUF_LEN_F    3
+#define REF_REG_BUF_LEN_F 3
 
 /* Constants used in H5Gf.c files */
 #define OBJECT_NAMELEN_DEFAULT_F -1
 
-#define H5_MAX(a,b)            (((a)>(b)) ? (a) : (b))
+#define H5_MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 #endif /* _H5f90_H */
-

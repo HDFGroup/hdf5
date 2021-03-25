@@ -22,4 +22,3 @@ zoo_create_hook(hid_t H5_ATTR_UNUSED fid)
 {
     return;
 }
-
