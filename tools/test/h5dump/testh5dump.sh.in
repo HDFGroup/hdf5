@@ -1386,7 +1386,7 @@ TOOLTEST tgrpnullspace.ddl -p --enable-error-stack tgrpnullspace.h5
 TOOLTEST zerodim.ddl --enable-error-stack zerodim.h5
 
 # test for long double (some systems do not have long double)
-TOOLTEST tfloatsattr.ddl -p --enable-error-stack tfloatsattr.h5
+TOOLTEST tfloatsattrs.ddl -p --enable-error-stack tfloatsattrs.h5
 TOOLTEST tldouble.ddl --enable-error-stack tldouble.h5
 TOOLTEST tldouble_scalar.ddl -p --enable-error-stack tldouble_scalar.h5
 
