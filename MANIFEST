@@ -1987,6 +1987,7 @@
 ./tools/testfiles/tfletcher32.ddl
 ./tools/testfiles/tfloatsattrs.ddl
 ./tools/testfiles/tfloatsattrs.h5
+./tools/testfiles/tfloatsattrs.wddl
 ./tools/testfiles/tfvalues.h5
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl

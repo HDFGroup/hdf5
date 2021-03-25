@@ -101,7 +101,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tfamily.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tfill.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tfletcher32.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.ddl
+      #${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.ddl #special for windows
       ${HDF5_TOOLS_DIR}/testfiles/tfpformat.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-2.ddl
@@ -415,8 +415,10 @@
     configure_file(${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
     #file (READ ${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     #file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.wddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
   else ()
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
   endif ()
   add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
 
