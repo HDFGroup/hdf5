@@ -11,7 +11,7 @@
  * help@hdfgroup.org.
  */
 
-#define H5F_FRIEND              /*suppress error about including H5Fpkg   */
+#define H5F_FRIEND /*suppress error about including H5Fpkg   */
 
 #include "hdf5.h"
 
@@ -28,26 +28,23 @@
 #include <libgen.h>
 
 typedef struct {
-        hid_t file, filetype, one_by_one_sid;
-	char filename[PATH_MAX];
-	char progname[PATH_MAX];
-	unsigned int asteps;
-	unsigned int csteps;
-	unsigned int nsteps;
-        bool wait_for_signal;
-        bool use_vfd_swmr;
+    hid_t        file, filetype, one_by_one_sid;
+    char         filename[PATH_MAX];
+    char         progname[PATH_MAX];
+    unsigned int asteps;
+    unsigned int csteps;
+    unsigned int nsteps;
+    bool         wait_for_signal;
+    bool         use_vfd_swmr;
 } state_t;
 
-#define ALL_HID_INITIALIZER (state_t){					\
-	  .file = H5I_INVALID_HID					\
-	, .one_by_one_sid = H5I_INVALID_HID				\
-	, .filename = ""						\
-	, .filetype = H5T_NATIVE_UINT32					\
-	, .asteps = 10							\
-	, .csteps = 10							\
-	, .nsteps = 100							\
-        , .wait_for_signal = true                                       \
-        , .use_vfd_swmr = true}
+#define ALL_HID_INITIALIZER                                                                                  \
+    (state_t)                                                                                                \
+    {                                                                                                        \
+        .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
+        .filetype = H5T_NATIVE_UINT32, .asteps = 10, .csteps = 10, .nsteps = 100, .wait_for_signal = true,   \
+        .use_vfd_swmr = true                                                                                 \
+    }
 
 static void state_init(state_t *, int, char **);
 
@@ -56,29 +53,30 @@ static const hid_t badhid = H5I_INVALID_HID;
 static void
 usage(const char *progname)
 {
-	fprintf(stderr, "usage: %s [-S] [-W] [-a steps] [-b] [-c]\n"
-                "    [-n iterations]\n"
-		"\n"
-		"-S:	               do not use VFD SWMR\n"
-		"-W:	               do not wait for a signal before\n"
-                "                      exiting\n"
-		"-a steps:	       `steps` between adding attributes\n"
-		"-b:	               write data in big-endian byte order\n"
-		"-c steps:	       `steps` between communication between the writer and reader\n"
-                "-n ngroups:           the number of groups\n"
-		"\n",
-		progname);
-	exit(EXIT_FAILURE);
+    fprintf(stderr,
+            "usage: %s [-S] [-W] [-a steps] [-b] [-c]\n"
+            "    [-n iterations]\n"
+            "\n"
+            "-S:	               do not use VFD SWMR\n"
+            "-W:	               do not wait for a signal before\n"
+            "                      exiting\n"
+            "-a steps:	       `steps` between adding attributes\n"
+            "-b:	               write data in big-endian byte order\n"
+            "-c steps:	       `steps` between communication between the writer and reader\n"
+            "-n ngroups:           the number of groups\n"
+            "\n",
+            progname);
+    exit(EXIT_FAILURE);
 }
 
 static void
 state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
-    int ch;
+    int           ch;
     const hsize_t dims = 1;
-    char tfile[PATH_MAX];
-    char *end;
+    char          tfile[PATH_MAX];
+    char *        end;
 
     *s = ALL_HID_INITIALIZER;
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
@@ -86,43 +84,43 @@ state_init(state_t *s, int argc, char **argv)
 
     while ((ch = getopt(argc, argv, "SWa:bc:n:q")) != -1) {
         switch (ch) {
-        case 'S':
-            s->use_vfd_swmr = false;
-            break;
-        case 'W':
-            s->wait_for_signal = false;
-            break;
-        case 'a':
-        case 'c':
-        case 'n':
-            errno = 0;
-            tmp = strtoul(optarg, &end, 0);
-            if (end == optarg || *end != '\0') {
-                errx(EXIT_FAILURE, "couldn't parse `-%c` argument `%s`", ch,
-                    optarg);
-            } else if (errno != 0) {
-                err(EXIT_FAILURE, "couldn't parse `-%c` argument `%s`", ch,
-                    optarg);
-            } else if (tmp > UINT_MAX)
-                errx(EXIT_FAILURE, "`-%c` argument `%lu` too large", ch, tmp);
+            case 'S':
+                s->use_vfd_swmr = false;
+                break;
+            case 'W':
+                s->wait_for_signal = false;
+                break;
+            case 'a':
+            case 'c':
+            case 'n':
+                errno = 0;
+                tmp   = strtoul(optarg, &end, 0);
+                if (end == optarg || *end != '\0') {
+                    errx(EXIT_FAILURE, "couldn't parse `-%c` argument `%s`", ch, optarg);
+                }
+                else if (errno != 0) {
+                    err(EXIT_FAILURE, "couldn't parse `-%c` argument `%s`", ch, optarg);
+                }
+                else if (tmp > UINT_MAX)
+                    errx(EXIT_FAILURE, "`-%c` argument `%lu` too large", ch, tmp);
 
-            if (ch == 'a')
-                s->asteps = (unsigned)tmp;
-            else if (ch == 'c')
-                s->csteps = (unsigned)tmp;
-            else if (ch == 'n')
-                s->nsteps = (unsigned)tmp;
-            break;
-        case 'b':
-            s->filetype = H5T_STD_U32BE;
-            break;
-        case 'q':
-            verbosity = 0;
-            break;
-        case '?':
-        default:
-            usage(s->progname);
-            break;
+                if (ch == 'a')
+                    s->asteps = (unsigned)tmp;
+                else if (ch == 'c')
+                    s->csteps = (unsigned)tmp;
+                else if (ch == 'n')
+                    s->nsteps = (unsigned)tmp;
+                break;
+            case 'b':
+                s->filetype = H5T_STD_U32BE;
+                break;
+            case 'q':
+                verbosity = 0;
+                break;
+            case '?':
+            default:
+                usage(s->progname);
+                break;
         }
     }
     argc -= optind;
@@ -132,10 +130,10 @@ state_init(state_t *s, int argc, char **argv)
     if ((s->one_by_one_sid = H5Screate_simple(1, &dims, &dims)) < 0)
         errx(EXIT_FAILURE, "H5Screate_simple failed");
 
-    if( s->csteps < 1 || s->csteps > s->nsteps)
+    if (s->csteps < 1 || s->csteps > s->nsteps)
         errx(EXIT_FAILURE, "communication interval is out of bounds");
 
-    if( s->asteps < 1 || s->asteps > s->nsteps)
+    if (s->asteps < 1 || s->asteps > s->nsteps)
         errx(EXIT_FAILURE, "attribute interval is out of bounds");
 
     if (argc > 0)
@@ -148,14 +146,13 @@ static void
 add_group_attribute(const state_t *s, hid_t g, hid_t sid, unsigned int which)
 {
     hid_t aid;
-    char name[sizeof("attr-9999999999")];
+    char  name[sizeof("attr-9999999999")];
 
     esnprintf(name, sizeof(name), "attr-%u", which);
 
     dbgf(1, "setting attribute %s on group %u to %u\n", name, which, which);
 
-    if ((aid = H5Acreate2(g, name, s->filetype, sid, H5P_DEFAULT,
-            H5P_DEFAULT)) < 0)
+    if ((aid = H5Acreate2(g, name, s->filetype, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         errx(EXIT_FAILURE, "H5Acreate2 failed");
 
     if (H5Awrite(aid, H5T_NATIVE_UINT, &which) < 0)
@@ -164,11 +161,10 @@ add_group_attribute(const state_t *s, hid_t g, hid_t sid, unsigned int which)
         errx(EXIT_FAILURE, "H5Aclose failed");
 }
 
-
 static void
 write_group(state_t *s, unsigned int which)
 {
-    char name[sizeof("/group-9999999999")];
+    char  name[sizeof("/group-9999999999")];
     hid_t g;
 
     assert(which < s->nsteps);
@@ -191,14 +187,13 @@ static bool
 verify_group_attribute(hid_t g, unsigned int which)
 {
     estack_state_t es;
-    unsigned int read_which;
-    hid_t aid;
-    char name[sizeof("attr-9999999999")];
+    unsigned int   read_which;
+    hid_t          aid;
+    char           name[sizeof("attr-9999999999")];
 
     esnprintf(name, sizeof(name), "attr-%u", which);
 
-    dbgf(1, "verifying attribute %s on group %u equals %u\n", name, which,
-        which);
+    dbgf(1, "verifying attribute %s on group %u equals %u\n", name, which, which);
 
     es = disable_estack();
     if ((aid = H5Aopen(g, name, H5P_DEFAULT)) < 0) {
@@ -224,17 +219,17 @@ verify_group_attribute(hid_t g, unsigned int which)
 static bool
 verify_group(state_t *s, unsigned int which)
 {
-    char name[sizeof("/group-9999999999")];
-    hid_t g;
+    char           name[sizeof("/group-9999999999")];
+    hid_t          g;
     estack_state_t es;
-    bool result;
+    bool           result;
 
     assert(which < s->nsteps);
 
     esnprintf(name, sizeof(name), "/group-%d", which);
 
     es = disable_estack();
-    g = H5Gopen(s->file, name, H5P_DEFAULT);
+    g  = H5Gopen(s->file, name, H5P_DEFAULT);
     restore_estack(es);
 
     if (g < 0)
@@ -263,32 +258,29 @@ decisleep(uint32_t tenths)
 int
 main(int argc, char **argv)
 {
-    hid_t fapl, fcpl;
-    herr_t ret;
-    unsigned step;
-    bool writer;
-    state_t s;
-    const char *personality;
+    hid_t                 fapl, fcpl;
+    herr_t                ret;
+    unsigned              step;
+    bool                  writer;
+    state_t               s;
+    const char *          personality;
     H5F_vfd_swmr_config_t config;
-    const char *fifo_writer_to_reader = "./fifo_group_writer_to_reader";
-    const char *fifo_reader_to_writer = "./fifo_group_reader_to_writer";
-    int fd_writer_to_reader, fd_reader_to_writer;
-    int notify = 0, verify = 0;
-    unsigned int i;
+    const char *          fifo_writer_to_reader = "./fifo_group_writer_to_reader";
+    const char *          fifo_reader_to_writer = "./fifo_group_reader_to_writer";
+    int                   fd_writer_to_reader, fd_reader_to_writer;
+    int                   notify = 0, verify = 0;
+    unsigned int          i;
 
     state_init(&s, argc, argv);
 
     personality = strstr(s.progname, "vfd_swmr_group_");
 
-    if (personality != NULL &&
-        strcmp(personality, "vfd_swmr_group_writer") == 0)
+    if (personality != NULL && strcmp(personality, "vfd_swmr_group_writer") == 0)
         writer = true;
-    else if (personality != NULL &&
-             strcmp(personality, "vfd_swmr_group_reader") == 0)
+    else if (personality != NULL && strcmp(personality, "vfd_swmr_group_reader") == 0)
         writer = false;
     else {
-        errx(EXIT_FAILURE,
-             "unknown personality, expected vfd_swmr_group_{reader,writer}");
+        errx(EXIT_FAILURE, "unknown personality, expected vfd_swmr_group_{reader,writer}");
     }
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
@@ -350,7 +342,7 @@ main(int argc, char **argv)
 
                 /* During the wait, writer makes repeated HDF5 API calls
                  * to trigger EOT at approximately the correct time */
-                for(i = 0; i < config.max_lag + 1; i++) {
+                for (i = 0; i < config.max_lag + 1; i++) {
                     decisleep(config.tick_len);
                     H5Aexists(s.file, "nonexistent");
                 }
@@ -365,11 +357,13 @@ main(int argc, char **argv)
                     errx(EXIT_FAILURE, "received message %d, expecting %d", notify, verify);
             }
         }
-    } else {
+    }
+    else {
         for (step = 0; step < s.nsteps; step++) {
             dbgf(2, "reader: step %d\n", step);
 
-            /* At communication interval, waits for the writer to finish creation before starting verification */
+            /* At communication interval, waits for the writer to finish creation before starting verification
+             */
             if (step % s.csteps == 0) {
                 /* The writer should have bumped up the value of notify.
                  * Do the same with verify and confirm it */
@@ -412,11 +406,11 @@ main(int argc, char **argv)
         errx(EXIT_FAILURE, "HDclose");
 
     /* Reader finishes last and deletes the named pipes */
-    if(!writer) {
-        if(HDremove(fifo_writer_to_reader) != 0)
+    if (!writer) {
+        if (HDremove(fifo_writer_to_reader) != 0)
             errx(EXIT_FAILURE, "fifo_writer_to_reader deletion failed");
 
-        if(HDremove(fifo_reader_to_writer) != 0)
+        if (HDremove(fifo_reader_to_writer) != 0)
             errx(EXIT_FAILURE, "fifo_reader_to_writer deletion failed");
     }
 

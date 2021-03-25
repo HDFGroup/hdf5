@@ -23,7 +23,6 @@
 #include "vfd_swmr_common.h"
 #include "swmr_common.h"
 
-
 /* Only need the pthread solution if sigtimedwait(2) isn't available.
  * There's currently no Windows solution, so ignore that for now.
  */
@@ -46,7 +45,7 @@ hbool_t
 below_speed_limit(struct timespec *last, const struct timespec *ival)
 {
     struct timespec now;
-    hbool_t result;
+    hbool_t         result;
 
     HDassert(0 <= last->tv_nsec && last->tv_nsec < 1000000000L);
     HDassert(0 <= ival->tv_nsec && ival->tv_nsec < 1000000000L);
@@ -153,7 +152,6 @@ restore_estack(estack_state_t es)
     (void)H5Eset_auto(H5E_DEFAULT, es.efunc, es.edata);
 }
 
-
 #ifndef H5_HAVE_WIN32_API
 /* Store the signal mask at `oldset` and then block all signals. */
 void
@@ -203,18 +201,18 @@ strsignal(int signum)
 
 typedef struct timer_params_t {
     struct timespec *tick;
-    hid_t fid;
+    hid_t            fid;
 } timer_params_t;
 
 pthread_mutex_t timer_mutex;
-hbool_t timer_stop = FALSE;
+hbool_t         timer_stop = FALSE;
 
 static void *
 timer_function(void *arg)
 {
     timer_params_t *params = (timer_params_t *)arg;
-    sigset_t sleepset;
-    hbool_t done = FALSE;
+    sigset_t        sleepset;
+    hbool_t         done = FALSE;
 
     /* Ignore any signals */
     sigfillset(&sleepset);
@@ -257,7 +255,7 @@ void
 await_signal(hid_t fid)
 {
     struct timespec tick = {.tv_sec = 0, .tv_nsec = 1000000000 / 100};
-    sigset_t sleepset;
+    sigset_t        sleepset;
 
     if (sigfillset(&sleepset) == -1) {
         HDfprintf(stderr, "%s.%d: could not initialize signal mask", __func__, __LINE__);
@@ -280,11 +278,11 @@ await_signal(hid_t fid)
          * sigtimedwait(2)
          */
         timer_params_t params;
-        int rc;
-        pthread_t timer;
+        int            rc;
+        pthread_t      timer;
 
         params.tick = &tick;
-        params.fid = fid;
+        params.fid  = fid;
 
         pthread_mutex_init(&timer_mutex, NULL);
 
@@ -310,8 +308,7 @@ await_signal(hid_t fid)
         const int rc = sigtimedwait(&sleepset, NULL, &tick);
 
         if (rc != -1) {
-            HDfprintf(stderr, "Received %s, wrapping things up.\n",
-                strsignal(rc));
+            HDfprintf(stderr, "Received %s, wrapping things up.\n", strsignal(rc));
             break;
         }
         else if (rc == -1 && errno == EAGAIN) {
@@ -325,8 +322,7 @@ await_signal(hid_t fid)
              * so squelch errors.
              */
             es = disable_estack();
-            (void)H5Aexists_by_name(fid, "nonexistent", "nonexistent",
-                H5P_DEFAULT);
+            (void)H5Aexists_by_name(fid, "nonexistent", "nonexistent", H5P_DEFAULT);
             restore_estack(es);
         }
         else if (rc == -1) {
@@ -344,24 +340,23 @@ await_signal(hid_t fid)
 /* Initialize fields in config with the input parameters */
 void
 init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag, hbool_t writer,
-    hbool_t flush_raw_data, uint32_t md_pages_reserved, const char *md_file_fmtstr, ...)
+                     hbool_t flush_raw_data, uint32_t md_pages_reserved, const char *md_file_fmtstr, ...)
 {
     va_list ap;
-    
+
     HDmemset(config, 0, sizeof(H5F_vfd_swmr_config_t));
 
-    config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config->pb_expansion_threshold = 0; 
+    config->version                = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config->pb_expansion_threshold = 0;
 
-    config->tick_len = tick_len;
-    config->max_lag = max_lag;
-    config->writer = writer;
-    config->flush_raw_data = flush_raw_data;
+    config->tick_len          = tick_len;
+    config->max_lag           = max_lag;
+    config->writer            = writer;
+    config->flush_raw_data    = flush_raw_data;
     config->md_pages_reserved = md_pages_reserved;
 
     HDva_start(ap, md_file_fmtstr);
-    evsnprintf(config->md_file_path, sizeof(config->md_file_path),
-        md_file_fmtstr, ap);
+    evsnprintf(config->md_file_path, sizeof(config->md_file_path), md_file_fmtstr, ap);
     HDva_end(ap);
 
 } /* init_vfd_swmr_config() */
@@ -375,28 +370,29 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
  * --configure for VFD SWMR or not
  */
 hid_t
-vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_pages, H5F_vfd_swmr_config_t *config)
+vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_pages,
+                     H5F_vfd_swmr_config_t *config)
 {
     hid_t fapl = H5I_INVALID_HID;
 
     /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0)
+    if ((fapl = h5_fileaccess()) < 0)
         return H5I_INVALID_HID;
 
-    if(use_latest_format) {
-        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+    if (use_latest_format) {
+        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             return H5I_INVALID_HID;
     }
 
     /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl, 4096, only_meta_pages ? 100 : 0, 0) < 0)
+    if (H5Pset_page_buffer_size(fapl, 4096, only_meta_pages ? 100 : 0, 0) < 0)
         return H5I_INVALID_HID;
 
     /*
      * Set up to open the file with VFD SWMR configured.
      */
     /* Enable VFD SWMR configuration */
-    if(use_vfd_swmr && H5Pset_vfd_swmr_config(fapl, config) < 0)
+    if (use_vfd_swmr && H5Pset_vfd_swmr_config(fapl, config) < 0)
         return H5I_INVALID_HID;
 
     return fapl;
@@ -411,15 +407,15 @@ vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_p
 int
 fetch_env_ulong(const char *varname, unsigned long limit, unsigned long *valp)
 {
-    char *end;
+    char *        end;
     unsigned long ul;
-    char *tmp;
+    char *        tmp;
 
     if ((tmp = HDgetenv(varname)) == NULL)
         return 0;
 
     errno = 0;
-    ul = HDstrtoul(tmp, &end, 0);
+    ul    = HDstrtoul(tmp, &end, 0);
     if (ul == ULONG_MAX && errno != 0) {
         HDfprintf(stderr, "could not parse %s: %s\n", varname, HDstrerror(errno));
         return -1;

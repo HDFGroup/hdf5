@@ -26,11 +26,11 @@ using namespace H5;
 
 const H5std_string FILE_NAME("h5tutr_group.h5");
 
-int main(void)
+int
+main(void)
 {
     // Try block to detect exceptions raised by any of the calls inside it
-    try
-    {
+    try {
         // Turn off the auto-printing when failure occurs so that we can
         // handle the errors appropriately
         Exception::dontPrint();
@@ -46,14 +46,12 @@ int main(void)
     } // end of try block
 
     // catch failure caused by the H5File operations
-    catch(FileIException error)
-    {
+    catch (FileIException error) {
         error.printErrorStack();
         return -1;
     }
     // catch failure caused by the Group operations
-    catch(GroupIException error)
-    {
+    catch (GroupIException error) {
         error.printErrorStack();
         return -1;
     }

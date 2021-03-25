@@ -26,58 +26,47 @@
 /* Module Declaration */
 /**********************/
 
-#include "H5EAmodule.h"         /* This source code file is part of the H5EA module */
-
+#include "H5EAmodule.h" /* This source code file is part of the H5EA module */
 
 /***********************/
 /* Other Packages Used */
 /***********************/
 
-
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5EApkg.h"		/* Extensible Arrays			*/
-
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5EApkg.h"    /* Extensible Arrays			*/
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Package Typedefs */
 /********************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
 /*******************/
 
-
-
 /*-------------------------------------------------------------------------
  * Function:	H5EA__create_flush_depend
  *
@@ -91,23 +80,21 @@
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PKG, ERR,
-herr_t, SUCCEED, FAIL,
-H5EA__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
+BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
+           H5EA__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
 
     /* Sanity check */
     HDassert(parent_entry);
     HDassert(child_entry);
 
     /* Create a flush dependency between parent and child entry */
-    if(H5AC_create_flush_dependency(parent_entry, child_entry) < 0)
+    if (H5AC_create_flush_dependency(parent_entry, child_entry) < 0)
         H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency")
 
-CATCH
+    CATCH
 
-END_FUNC(PKG)   /* end H5EA__create_flush_depend() */
+END_FUNC(PKG) /* end H5EA__create_flush_depend() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5EA__destroy_flush_depend
  *
@@ -121,19 +108,17 @@ END_FUNC(PKG)   /* end H5EA__create_flush_depend() */
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PKG, ERR,
-herr_t, SUCCEED, FAIL,
-H5EA__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
+BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
+           H5EA__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
 
     /* Sanity check */
     HDassert(parent_entry);
     HDassert(child_entry);
 
     /* Destroy a flush dependency between parent and child entry */
-    if(H5AC_destroy_flush_dependency(parent_entry, child_entry) < 0)
+    if (H5AC_destroy_flush_dependency(parent_entry, child_entry) < 0)
         H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency")
 
-CATCH
+    CATCH
 
-END_FUNC(PKG)   /* end H5EA__destroy_flush_depend() */
-
+END_FUNC(PKG) /* end H5EA__destroy_flush_depend() */

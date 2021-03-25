@@ -25,22 +25,18 @@
 /* Library Private Macros */
 /**************************/
 
-#define H5R_ENCODE_VERSION      0x1     /* Version for encoding references */
-
+#define H5R_ENCODE_VERSION 0x1 /* Version for encoding references */
 
 /****************************/
 /* Library Private Typedefs */
 /****************************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /******************************/
 /* Library Private Prototypes */
 /******************************/
 
-#endif  /* _H5Rprivate_H */
-
+#endif /* _H5Rprivate_H */

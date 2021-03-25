@@ -34,4 +34,3 @@ H5TEST_DLL const char *H5_get_srcdir_filename(const char *filename);
 #endif
 
 #endif /* _H5SRCDIR_H */
-

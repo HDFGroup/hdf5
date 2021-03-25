@@ -21,7 +21,7 @@
 #ifndef H5FDwindows_H
 #define H5FDwindows_H
 
-#define H5FD_WINDOWS	(H5FD_sec2_init())
+#define H5FD_WINDOWS (H5FD_sec2_init())
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,4 +34,3 @@ H5_DLL herr_t H5Pset_fapl_windows(hid_t fapl_id);
 #endif /* __cplusplus */
 
 #endif /* H5FDwindows_H */
-

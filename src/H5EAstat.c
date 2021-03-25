@@ -26,59 +26,48 @@
 /* Module Declaration */
 /**********************/
 
-#include "H5EAmodule.h"         /* This source code file is part of the H5EA module */
-
+#include "H5EAmodule.h" /* This source code file is part of the H5EA module */
 
 /***********************/
 /* Other Packages Used */
 /***********************/
 
-
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5EApkg.h"		/* Extensible Arrays			*/
-#include "H5MMprivate.h"	/* Memory management			*/
-
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5EApkg.h"     /* Extensible Arrays			*/
+#include "H5MMprivate.h" /* Memory management			*/
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Package Typedefs */
 /********************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
 /*******************/
 
-
-
 /*-------------------------------------------------------------------------
  * Function:	H5EA_get_stats
  *
@@ -92,14 +81,12 @@
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, NOERR,
-herr_t, SUCCEED, -,
-H5EA_get_stats(const H5EA_t *ea, H5EA_stat_t *stats))
+BEGIN_FUNC(PRIV, NOERR, herr_t, SUCCEED, -, H5EA_get_stats(const H5EA_t *ea, H5EA_stat_t *stats))
 
-    /* Local variables */
+/* Local variables */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
+    HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* QAK */
 
     /*
@@ -111,5 +98,4 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Copy extensible array statistics */
     H5MM_memcpy(stats, &ea->hdr->stats, sizeof(ea->hdr->stats));
 
-END_FUNC(PRIV)  /* end H5EA_get_stats() */
-
+END_FUNC(PRIV) /* end H5EA_get_stats() */

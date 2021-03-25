@@ -29,4 +29,3 @@
 #include "H5LDpublic.h" /* lite dataset */
 
 #endif /*H5_INCLUDE_HL*/
-
