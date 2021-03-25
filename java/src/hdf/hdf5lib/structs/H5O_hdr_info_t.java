@@ -20,16 +20,26 @@ import java.io.Serializable;
  */
 public class H5O_hdr_info_t implements Serializable {
     private static final long serialVersionUID = 7883826382952577189L;
-    public int version;       /* Version number of header format in file */
-    public int nmesgs;        /* Number of object header messages */
-    public int nchunks;       /* Number of object header chunks */
-    public int flags;         /* Object header status flags */
-    public long space_total;  /* Total space for storing object header in file */
-    public long space_meta;   /* Space within header for object header metadata information */
-    public long space_mesg;   /* Space within header for actual message information */
-    public long space_free;   /* Free space within object header */
-    public long mesg_present; /* Flags to indicate presence of message type in header */
-    public long mesg_shared;  /* Flags to indicate message type is shared in header */
+    /** Version number of header format in file */
+    public int version;
+    /** Number of object header messages */
+    public int nmesgs;
+    /** Number of object header chunks */
+    public int nchunks;
+    /** Object header status flags */
+    public int flags;
+    /** Total space for storing object header in file */
+    public long space_total;
+    /** Space within header for object header metadata information */
+    public long space_meta;
+    /** Space within header for actual message information */
+    public long space_mesg;
+    /** Free space within object header */
+    public long space_free;
+    /** Flags to indicate presence of message type in header */
+    public long mesg_present;
+    /** Flags to indicate message type is shared in header */
+    public long mesg_shared;
 
     H5O_hdr_info_t (int version, int nmesgs, int nchunks, int flags,
         long space_total, long space_meta, long space_mesg, long space_free,

@@ -533,7 +533,7 @@ public class H5 implements java.io.Serializable {
      *            The file name to export data into.
      * @param dataset_id
      *            The identifier of the dataset containing the attribute.
-     * @param object_path
+     * @param attribute_name
      *            The attribute to be exported.
      * @param binary_order
      *            99 - export data as text.
@@ -545,7 +545,7 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library.
      **/
     public synchronized static native void H5export_attribute(String file_export_name, long dataset_id,
-            String object_path, int binary_order) throws HDF5LibraryException;
+            String attribute_name, int binary_order) throws HDF5LibraryException;
 
     /**
      * H5is_library_threadsafe Checks to see if the library was built with thread-safety enabled.

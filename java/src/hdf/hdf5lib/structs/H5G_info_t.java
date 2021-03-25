@@ -20,8 +20,12 @@ import java.io.Serializable;
  */
 public class H5G_info_t implements Serializable{
     private static final long serialVersionUID = -3746463015312132912L;
-    public int storage_type; // Type of storage for links in group
-    public long nlinks; // Number of links in group
-    public long max_corder; // Current max. creation order value for group
-    public boolean mounted; // Whether group has a file mounted on it
+    /** Type of storage for links in group */
+    public int storage_type;
+    /** Number of links in group */
+    public long nlinks;
+    /** Current max. creation order value for group */
+    public long max_corder;
+    /** Whether group has a file mounted on it */
+    public boolean mounted;
 }

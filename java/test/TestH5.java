@@ -162,6 +162,7 @@ public class TestH5 {
     @After
     public void closeH5File() throws HDF5LibraryException {
         _closeH5File();
+        assertTrue("H5 open ids is 0", H5.getOpenIDCount()==0);
         System.out.println();
     }
 

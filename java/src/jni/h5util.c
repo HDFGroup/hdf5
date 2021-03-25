@@ -2865,7 +2865,6 @@ h5str_dump_simple_data(JNIEnv *env, FILE *stream, hid_t container, hid_t type, v
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
             }
         }
-
         if (HDfprintf(stream, "%s", buffer.s) < 0)
             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_data: HDfprintf failure");
 
