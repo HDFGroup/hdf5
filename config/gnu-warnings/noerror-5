@@ -1,4 +1,4 @@
--Werror=incompatible-pointer-types
+-Wincompatible-pointer-types
 #
 # In GCC 4.4.7, the compiler gripes about shadowed global
 # declarations when a local variable uses the name of a
@@ -9,4 +9,4 @@
 # is not a supported compiler, so let us promote shadowed globals
 # warnings to errors only for GCC 5 and later.
 #
--Werror=shadow
+-Wshadow

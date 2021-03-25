@@ -163,8 +163,15 @@ if test "X-clang" = "X-$cc_vendor" -o "X-Apple LLVM" = "X-$cc_vendor"; then
     ################
 
     HIGH_OPT_CFLAGS="-O3"
-    DEBUG_OPT_CFLAGS="-g"
     NO_OPT_CFLAGS="-O0"
+
+    # -Og is only understood by clang 4+ and Xcode 9+
+    # Otherwise use -O1 (which is what -Og usually equates to)
+    if test "X-clang" = "X-$cc_vendor" -a $cc_vers_major -ge 4 -o "X-Apple LLVM" = "X-$cc_vendor" -a $cc_vers_major -ge 9; then
+        DEBUG_OPT_CFLAGS="-Og"
+    else
+        DEBUG_OPT_CFLAGS="-O1"
+    fi
 
     ############
     # Warnings #
@@ -176,6 +183,7 @@ if test "X-clang" = "X-$cc_vendor" -o "X-Apple LLVM" = "X-$cc_vendor"; then
 
     H5_CFLAGS="$H5_CFLAGS $(load_clang_arguments general)"
     H5_ECFLAGS="$H5_ECFLAGS $(load_clang_arguments error-general)"
+    H5_NECFLAGS="$H5_NECFLAGS $(load_clang_arguments noerror-general)"
 
     ######################
     # Developer warnings #
