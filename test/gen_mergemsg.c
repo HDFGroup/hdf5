@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,25 +25,26 @@
 #include <stdio.h>
 #include "hdf5.h"
 
-#define FILENAME        "mergemsg.h5"
-#define GROUP1          "grp1"
-#define GROUP2          "grp2"
-#define GROUP3          "grp3"
-#define ATTR1           "__111111111111__"
-#define ATTR1_LEN       11
-#define ATTR2           "__222222222__"
-#define ATTR2_LEN       11
-#define ATTR3           "__333333333__"
-#define ATTR3_LEN       1
+#define FILENAME  "mergemsg.h5"
+#define GROUP1    "grp1"
+#define GROUP2    "grp2"
+#define GROUP3    "grp3"
+#define ATTR1     "__111111111111__"
+#define ATTR1_LEN 11
+#define ATTR2     "__222222222__"
+#define ATTR2_LEN 11
+#define ATTR3     "__333333333__"
+#define ATTR3_LEN 1
 
-int main()
+int
+main()
 {
-    hid_t fid;          /* File ID */
-    hid_t gid, gid2, gid3;      /* Group IDs */
-    hid_t aid;          /* Attribute ID */
-    hid_t sid;          /* Dataspace ID */
-    hid_t tid;          /* Datatype ID */
-    herr_t ret;         /* Generic return value */
+    hid_t  fid;             /* File ID */
+    hid_t  gid, gid2, gid3; /* Group IDs */
+    hid_t  aid;             /* Attribute ID */
+    hid_t  sid;             /* Dataspace ID */
+    hid_t  tid;             /* Datatype ID */
+    herr_t ret;             /* Generic return value */
 
     /* Create file */
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -68,7 +69,6 @@ int main()
     /* Close file */
     ret = H5Fclose(fid);
     assert(ret >= 0);
-
 
     /* Re-open file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -138,7 +138,6 @@ int main()
     ret = H5Fclose(fid);
     assert(ret >= 0);
 
-
     /* Re-open file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     assert(fid > 0);
@@ -166,9 +165,6 @@ int main()
     /* Close file */
     ret = H5Fclose(fid);
     assert(ret >= 0);
-
-
-
 
     /* Re-open file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -211,8 +207,6 @@ int main()
     /* Close file */
     ret = H5Fclose(fid);
     assert(ret >= 0);
-
-
 
     /* Re-open file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -260,7 +254,6 @@ int main()
     ret = H5Fclose(fid);
     assert(ret >= 0);
 
-
     /* Re-open file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     assert(fid > 0);
@@ -280,7 +273,6 @@ int main()
     /* Close file */
     ret = H5Fclose(fid);
     assert(ret >= 0);
-
 
     /* Re-open file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -324,7 +316,5 @@ int main()
     ret = H5Fclose(fid);
     assert(ret >= 0);
 
-    return(0);
+    return (0);
 }
-
-

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,28 +19,30 @@
 #include "hdf5.h"
 #define FILE "groups.h5"
 
-int main() {
+int
+main()
+{
 
-   hid_t       file_id, group1_id, group2_id, group3_id;  /* identifiers */
-   herr_t      status;
+    hid_t  file_id, group1_id, group2_id, group3_id; /* identifiers */
+    herr_t status;
 
-   /* Create a new file using default properties. */
-   file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create a new file using default properties. */
+    file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-   /* Create group "MyGroup" in the root group using absolute name. */
-   group1_id = H5Gcreate2(file_id, "/MyGroup", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create group "MyGroup" in the root group using absolute name. */
+    group1_id = H5Gcreate2(file_id, "/MyGroup", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-   /* Create group "Group_A" in group "MyGroup" using absolute name. */
-   group2_id = H5Gcreate2(file_id, "/MyGroup/Group_A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create group "Group_A" in group "MyGroup" using absolute name. */
+    group2_id = H5Gcreate2(file_id, "/MyGroup/Group_A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-   /* Create group "Group_B" in group "MyGroup" using relative name. */
-   group3_id = H5Gcreate2(group1_id, "Group_B", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create group "Group_B" in group "MyGroup" using relative name. */
+    group3_id = H5Gcreate2(group1_id, "Group_B", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-   /* Close groups. */
-   status = H5Gclose(group1_id);
-   status = H5Gclose(group2_id);
-   status = H5Gclose(group3_id);
+    /* Close groups. */
+    status = H5Gclose(group1_id);
+    status = H5Gclose(group2_id);
+    status = H5Gclose(group3_id);
 
-   /* Close the file. */
-   status = H5Fclose(file_id);
+    /* Close the file. */
+    status = H5Fclose(file_id);
 }

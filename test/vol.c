@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,136 +21,145 @@
 #include "h5test.h"
 
 /* Filename */
-const char *FILENAME[] = {
-    "native_vol_test",
-    NULL
-};
+const char *FILENAME[] = {"native_vol_test", NULL};
 
-#define NATIVE_VOL_TEST_GROUP_NAME      "test_group"
-#define NATIVE_VOL_TEST_DATASET_NAME    "test_dataset"
-#define NATIVE_VOL_TEST_ATTRIBUTE_NAME  "test_dataset"
-#define NATIVE_VOL_TEST_HARD_LINK_NAME  "test_hard_link"
-#define NATIVE_VOL_TEST_SOFT_LINK_NAME  "test_soft_link"
-#define NATIVE_VOL_TEST_MOVE_LINK_NAME  "test_move_link"
-#define NATIVE_VOL_TEST_COPY_LINK_NAME  "test_copy_link"
-#define NATIVE_VOL_TEST_DATATYPE_NAME   "test_datatype"
+#define NATIVE_VOL_TEST_GROUP_NAME     "test_group"
+#define NATIVE_VOL_TEST_DATASET_NAME   "test_dataset"
+#define NATIVE_VOL_TEST_ATTRIBUTE_NAME "test_dataset"
+#define NATIVE_VOL_TEST_HARD_LINK_NAME "test_hard_link"
+#define NATIVE_VOL_TEST_SOFT_LINK_NAME "test_soft_link"
+#define NATIVE_VOL_TEST_MOVE_LINK_NAME "test_move_link"
+#define NATIVE_VOL_TEST_COPY_LINK_NAME "test_copy_link"
+#define NATIVE_VOL_TEST_DATATYPE_NAME  "test_datatype"
 
-#define N_ELEMENTS  10
+#define N_ELEMENTS 10
 
-#define FAKE_VOL_NAME   "fake"
+#define FAKE_VOL_NAME  "fake"
 #define FAKE_VOL_VALUE ((H5VL_class_value_t)501)
 
 /* A VOL class struct that describes a VOL class with no
  * functionality.
  */
 static const H5VL_class_t fake_vol_g = {
-    0,                                              /* version      */
-    FAKE_VOL_VALUE,                                 /* value        */
-    FAKE_VOL_NAME,                                  /* name         */
-    0,                                              /* capability flags */
-    NULL,                                           /* initialize   */
-    NULL,                                           /* terminate    */
-    {   /* info_cls */
-        (size_t)0,                                  /* size    */
-        NULL,                                       /* copy    */
-        NULL,                                       /* compare */
-        NULL,                                       /* free    */
-        NULL,                                       /* to_str  */
-        NULL,                                       /* from_str */
+    0,              /* version      */
+    FAKE_VOL_VALUE, /* value        */
+    FAKE_VOL_NAME,  /* name         */
+    0,              /* capability flags */
+    NULL,           /* initialize   */
+    NULL,           /* terminate    */
+    {
+        /* info_cls */
+        (size_t)0, /* size    */
+        NULL,      /* copy    */
+        NULL,      /* compare */
+        NULL,      /* free    */
+        NULL,      /* to_str  */
+        NULL,      /* from_str */
     },
-    {   /* wrap_cls */
-        NULL,                                       /* get_object   */
-        NULL,                                       /* get_wrap_ctx */
-        NULL,                                       /* wrap_object  */
-        NULL,                                       /* unwrap_object */
-        NULL,                                       /* free_wrap_ctx */
+    {
+        /* wrap_cls */
+        NULL, /* get_object   */
+        NULL, /* get_wrap_ctx */
+        NULL, /* wrap_object  */
+        NULL, /* unwrap_object */
+        NULL, /* free_wrap_ctx */
     },
-    {   /* attribute_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* read         */
-        NULL,                                       /* write        */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+    {
+        /* attribute_cls */
+        NULL, /* create       */
+        NULL, /* open         */
+        NULL, /* read         */
+        NULL, /* write        */
+        NULL, /* get          */
+        NULL, /* specific     */
+        NULL, /* optional     */
+        NULL  /* close        */
     },
-    {   /* dataset_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* read         */
-        NULL,                                       /* write        */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+    {
+        /* dataset_cls */
+        NULL, /* create       */
+        NULL, /* open         */
+        NULL, /* read         */
+        NULL, /* write        */
+        NULL, /* get          */
+        NULL, /* specific     */
+        NULL, /* optional     */
+        NULL  /* close        */
     },
-    {   /* datatype_cls */
-        NULL,                                       /* commit       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get_size     */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+    {
+        /* datatype_cls */
+        NULL, /* commit       */
+        NULL, /* open         */
+        NULL, /* get_size     */
+        NULL, /* specific     */
+        NULL, /* optional     */
+        NULL  /* close        */
     },
-    {   /* file_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+    {
+        /* file_cls */
+        NULL, /* create       */
+        NULL, /* open         */
+        NULL, /* get          */
+        NULL, /* specific     */
+        NULL, /* optional     */
+        NULL  /* close        */
     },
-    {   /* group_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+    {
+        /* group_cls */
+        NULL, /* create       */
+        NULL, /* open         */
+        NULL, /* get          */
+        NULL, /* specific     */
+        NULL, /* optional     */
+        NULL  /* close        */
     },
-    {   /* link_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* copy         */
-        NULL,                                       /* move         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL                                        /* optional     */
+    {
+        /* link_cls */
+        NULL, /* create       */
+        NULL, /* copy         */
+        NULL, /* move         */
+        NULL, /* get          */
+        NULL, /* specific     */
+        NULL  /* optional     */
     },
-    {   /* object_cls */
-        NULL,                                       /* open         */
-        NULL,                                       /* copy         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL                                        /* optional     */
+    {
+        /* object_cls */
+        NULL, /* open         */
+        NULL, /* copy         */
+        NULL, /* get          */
+        NULL, /* specific     */
+        NULL  /* optional     */
     },
-    {   /* introspect_cls */
-        NULL,                                       /* get_conn_cls */
-        NULL,                                       /* opt_query    */
+    {
+        /* introspect_cls */
+        NULL, /* get_conn_cls */
+        NULL, /* opt_query    */
     },
-    {   /* request_cls */
-        NULL,                                       /* wait         */
-        NULL,                                       /* notify       */
-        NULL,                                       /* cancel       */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* free         */
+    {
+        /* request_cls */
+        NULL, /* wait         */
+        NULL, /* notify       */
+        NULL, /* cancel       */
+        NULL, /* specific     */
+        NULL, /* optional     */
+        NULL  /* free         */
     },
-    {   /* blob_cls */
-        NULL,                                       /* put          */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL                                        /* optional     */
+    {
+        /* blob_cls */
+        NULL, /* put          */
+        NULL, /* get          */
+        NULL, /* specific     */
+        NULL  /* optional     */
     },
-    {   /* token_cls */
-        NULL,                                       /* cmp              */
-        NULL,                                       /* to_str           */
-        NULL                                        /* from_str         */
+    {
+        /* token_cls */
+        NULL, /* cmp              */
+        NULL, /* to_str           */
+        NULL  /* from_str         */
     },
-    NULL                                            /* optional     */
+    NULL /* optional     */
 };
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_vol_registration()
  *
@@ -164,13 +173,13 @@ static const H5VL_class_t fake_vol_g = {
 static herr_t
 test_vol_registration(void)
 {
-    hid_t native_id = H5I_INVALID_HID;
-    hid_t lapl_id = H5I_INVALID_HID;
-    hid_t vipl_id = H5I_INVALID_HID;
-    herr_t ret = SUCCEED;
+    hid_t  native_id     = H5I_INVALID_HID;
+    hid_t  lapl_id       = H5I_INVALID_HID;
+    hid_t  vipl_id       = H5I_INVALID_HID;
+    herr_t ret           = SUCCEED;
     htri_t is_registered = FAIL;
-    hid_t vol_id = H5I_INVALID_HID;
-    hid_t vol_id2 = H5I_INVALID_HID;
+    hid_t  vol_id        = H5I_INVALID_HID;
+    hid_t  vol_id2       = H5I_INVALID_HID;
 
     TESTING("VOL registration");
 
@@ -187,9 +196,11 @@ test_vol_registration(void)
     /* Test registering a connector with an incorrect property list (SHOULD FAIL) */
     if ((lapl_id = H5Pcreate(H5P_LINK_ACCESS)) < 0)
         TEST_ERROR;
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         vol_id = H5VLregister_connector(&fake_vol_g, lapl_id);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     if (H5I_INVALID_HID != vol_id)
         FAIL_PUTS_ERROR("should not be able to register a connector with an incorrect property list");
     if (H5Pclose(lapl_id) < 0)
@@ -252,9 +263,11 @@ test_vol_registration(void)
     /* Try to unregister the native VOL connector (should fail) */
     if (H5I_INVALID_HID == (native_id = H5VLget_connector_id_by_name(H5VL_NATIVE_NAME)))
         TEST_ERROR;
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5VLunregister_connector(native_id);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to unregister the native VOL connector");
 
@@ -262,16 +275,17 @@ test_vol_registration(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5VLunregister_connector(vol_id);
         H5Pclose(lapl_id);
         H5Pclose(vipl_id);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return FAIL;
 
 } /* end test_vol_registration() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_native_vol_init()
  *
@@ -307,7 +321,6 @@ error:
 
 } /* end test_native_vol_init() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_basic_file_operation()
  *
@@ -320,20 +333,20 @@ error:
 static herr_t
 test_basic_file_operation(const char *env_h5_drvr)
 {
-    hid_t fid           = H5I_INVALID_HID;
-    hid_t fid_reopen    = H5I_INVALID_HID;
-    hid_t fapl_id       = H5I_INVALID_HID;
-    hid_t fapl_id2      = H5I_INVALID_HID;
-    hid_t fcpl_id       = H5I_INVALID_HID;
+    hid_t fid        = H5I_INVALID_HID;
+    hid_t fid_reopen = H5I_INVALID_HID;
+    hid_t fapl_id    = H5I_INVALID_HID;
+    hid_t fapl_id2   = H5I_INVALID_HID;
+    hid_t fcpl_id    = H5I_INVALID_HID;
 
-    char            filename[1024];
-    ssize_t         obj_count;
-    hid_t           obj_id_list[1];
-    hsize_t         file_size;
-    unsigned        intent;
-    void           *os_file_handle = NULL;
-    H5F_info2_t     finfo;
-    char            name[32];
+    char        filename[1024];
+    ssize_t     obj_count;
+    hid_t       obj_id_list[1];
+    hsize_t     file_size;
+    unsigned    intent;
+    void *      os_file_handle = NULL;
+    H5F_info2_t finfo;
+    char        name[32];
 
     TESTING("Basic VOL file operations");
 
@@ -350,9 +363,9 @@ test_basic_file_operation(const char *env_h5_drvr)
      *  I'm not fighting it, just getting the testing to verify that the VOL
      *  connector property is returned correctly.  -QAK, 2018/11/17
      */
-    if(H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI) < 0)
+    if (H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI) < 0)
         TEST_ERROR;
-    if(H5Pset_metadata_read_attempts(fapl_id, 9) < 0)
+    if (H5Pset_metadata_read_attempts(fapl_id, 9) < 0)
         TEST_ERROR
 
     /* H5Fcreate */
@@ -374,7 +387,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for split / multi / family VFDs */
-    if((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
+                  HDstrcmp(env_h5_drvr, "family"))) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -395,7 +409,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't retrieve VFD handle for split / multi / family VFDs */
-    if((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
+                  HDstrcmp(env_h5_drvr, "family"))) {
         /* H5Fget_vfd_handle */
         if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
             TEST_ERROR;
@@ -434,13 +449,14 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for split / multi / family VFDs */
-    if((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
+                  HDstrcmp(env_h5_drvr, "family"))) {
         /* H5Fget_access_plist */
-        if((fapl_id2 = H5Fget_access_plist(fid)) < 0)
+        if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
-        if(H5Pequal(fapl_id, fapl_id2) != TRUE)
+        if (H5Pequal(fapl_id, fapl_id2) != TRUE)
             TEST_ERROR;
-        if(H5Pclose(fapl_id2) < 0)
+        if (H5Pclose(fapl_id2) < 0)
             TEST_ERROR;
     } /* end if */
 
@@ -448,13 +464,14 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for split / multi / family VFDs */
-    if((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
+                  HDstrcmp(env_h5_drvr, "family"))) {
         /* H5Fget_access_plist */
-        if((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
+        if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
             TEST_ERROR;
-        if(H5Pequal(fapl_id, fapl_id2) != TRUE)
+        if (H5Pequal(fapl_id, fapl_id2) != TRUE)
             TEST_ERROR;
-        if(H5Pclose(fapl_id2) < 0)
+        if (H5Pclose(fapl_id2) < 0)
             TEST_ERROR;
     } /* end if */
 
@@ -473,19 +490,20 @@ test_basic_file_operation(const char *env_h5_drvr)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Fclose(fid);
         H5Fclose(fid_reopen);
         H5Pclose(fapl_id);
         H5Pclose(fapl_id2);
         H5Pclose(fcpl_id);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return FAIL;
 
 } /* end test_basic_file_operation() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_basic_group_operation()
  *
@@ -498,12 +516,12 @@ error:
 static herr_t
 test_basic_group_operation(void)
 {
-    hid_t fid = H5I_INVALID_HID;
-    hid_t fapl_id = H5I_INVALID_HID;
-    hid_t gid = H5I_INVALID_HID;
-    hid_t gid_a = H5I_INVALID_HID;
-    hid_t gcpl_id = H5I_INVALID_HID;
-    char filename[1024];
+    hid_t      fid     = H5I_INVALID_HID;
+    hid_t      fapl_id = H5I_INVALID_HID;
+    hid_t      gid     = H5I_INVALID_HID;
+    hid_t      gid_a   = H5I_INVALID_HID;
+    hid_t      gcpl_id = H5I_INVALID_HID;
+    char       filename[1024];
     H5G_info_t info;
 
     TESTING("Basic VOL group operations");
@@ -576,18 +594,19 @@ test_basic_group_operation(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Fclose(fid);
         H5Gclose(gid);
         H5Pclose(fapl_id);
         H5Pclose(gcpl_id);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return FAIL;
 
 } /* end test_basic_group_operation() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_basic_dataset_operation()
  *
@@ -600,22 +619,22 @@ error:
 static herr_t
 test_basic_dataset_operation(void)
 {
-    hid_t fid       = H5I_INVALID_HID;
-    hid_t fapl_id   = H5I_INVALID_HID;
-    hid_t dcpl_id   = H5I_INVALID_HID;
-    hid_t dapl_id   = H5I_INVALID_HID;
-    hid_t did       = H5I_INVALID_HID;
-    hid_t did_a     = H5I_INVALID_HID;
-    hid_t sid       = H5I_INVALID_HID;
-    hid_t tid       = H5I_INVALID_HID;
+    hid_t fid     = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
+    hid_t dcpl_id = H5I_INVALID_HID;
+    hid_t dapl_id = H5I_INVALID_HID;
+    hid_t did     = H5I_INVALID_HID;
+    hid_t did_a   = H5I_INVALID_HID;
+    hid_t sid     = H5I_INVALID_HID;
+    hid_t tid     = H5I_INVALID_HID;
 
     char filename[1024];
 
-    hsize_t curr_dims   = 0;
-    hsize_t max_dims    = H5S_UNLIMITED;
+    hsize_t curr_dims = 0;
+    hsize_t max_dims  = H5S_UNLIMITED;
 
-    hsize_t storage_size;
-    haddr_t offset;
+    hsize_t            storage_size;
+    haddr_t            offset;
     H5D_space_status_t status;
 
     int in_buf[N_ELEMENTS];
@@ -632,7 +651,7 @@ test_basic_dataset_operation(void)
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
     for (i = 0; i < N_ELEMENTS; i++) {
-        in_buf[i] = i;
+        in_buf[i]  = i;
         out_buf[i] = 0;
     }
 
@@ -645,7 +664,8 @@ test_basic_dataset_operation(void)
         TEST_ERROR;
     if (H5Pset_chunk(dcpl_id, 1, &curr_dims) < 0)
         TEST_ERROR;
-    if ((did = H5Dcreate2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id,
+                          H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* H5Dcreate_anon */
@@ -753,7 +773,8 @@ test_basic_dataset_operation(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Fclose(fid);
         H5Dclose(did);
         H5Dclose(did_a);
@@ -762,13 +783,13 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(dapl_id);
         H5Pclose(dcpl_id);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return FAIL;
 
 } /* end test_basic_dataset_operation() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_basic_attribute_operation()
  *
@@ -781,19 +802,19 @@ error:
 static herr_t
 test_basic_attribute_operation(void)
 {
-    hid_t fid       = H5I_INVALID_HID;
-    hid_t fapl_id   = H5I_INVALID_HID;
-    hid_t gid       = H5I_INVALID_HID;
-    hid_t aid       = H5I_INVALID_HID;
-    hid_t aid_name  = H5I_INVALID_HID;
-    hid_t sid       = H5I_INVALID_HID;
+    hid_t fid      = H5I_INVALID_HID;
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t gid      = H5I_INVALID_HID;
+    hid_t aid      = H5I_INVALID_HID;
+    hid_t aid_name = H5I_INVALID_HID;
+    hid_t sid      = H5I_INVALID_HID;
 
-    char    filename[1024];
+    char filename[1024];
 
-    hsize_t dims    = 1;
+    hsize_t dims = 1;
 
-    int     data_in     = 42;
-    int     data_out    = 0;
+    int data_in  = 42;
+    int data_out = 0;
 
     TESTING("Basic VOL attribute operations");
 
@@ -810,7 +831,8 @@ test_basic_attribute_operation(void)
         TEST_ERROR;
 
     /* H5Acreate */
-    if ((aid = H5Acreate2(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((aid = H5Acreate2(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT,
+                          H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* H5Awrite */
@@ -838,7 +860,8 @@ test_basic_attribute_operation(void)
         TEST_ERROR;
 
     /* H5Acreate_by_name */
-    if ((aid_name = H5Acreate_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((aid_name = H5Acreate_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, NATIVE_VOL_TEST_ATTRIBUTE_NAME,
+                                      H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     /* H5Aclose */
     if (H5Aclose(aid_name) < 0)
@@ -865,20 +888,21 @@ test_basic_attribute_operation(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Fclose(fid);
         H5Pclose(fapl_id);
         H5Gclose(gid);
         H5Sclose(sid);
         H5Aclose(aid);
         H5Aclose(aid_name);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return FAIL;
 
 } /* end test_basic_attribute_operation() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_basic_object_operation()
  *
@@ -891,12 +915,12 @@ error:
 static herr_t
 test_basic_object_operation(void)
 {
-    hid_t fid       = H5I_INVALID_HID;
-    hid_t fapl_id   = H5I_INVALID_HID;
-    hid_t gid       = H5I_INVALID_HID;
-    hid_t oid       = H5I_INVALID_HID;
+    hid_t fid     = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
+    hid_t gid     = H5I_INVALID_HID;
+    hid_t oid     = H5I_INVALID_HID;
 
-    char filename[1024];
+    char        filename[1024];
     H5O_info2_t object_info;
 
     TESTING("Basic VOL object operations");
@@ -939,22 +963,22 @@ test_basic_object_operation(void)
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
-
     PASSED();
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Fclose(fid);
         H5Pclose(fapl_id);
         H5Gclose(gid);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return FAIL;
 
 } /* end test_basic_object_operation() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_basic_link_operation()
  *
@@ -967,10 +991,10 @@ error:
 static herr_t
 test_basic_link_operation(void)
 {
-    hid_t fid       = H5I_INVALID_HID;
-    hid_t gid       = H5I_INVALID_HID;
-    hid_t fapl_id   = H5I_INVALID_HID;
-    char filename[1024];
+    hid_t fid     = H5I_INVALID_HID;
+    hid_t gid     = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
+    char  filename[1024];
 
     TESTING("Basic VOL link operations");
 
@@ -998,11 +1022,13 @@ test_basic_link_operation(void)
         TEST_ERROR;
 
     /* H5Lcopy */
-    if (H5Lcopy(gid, NATIVE_VOL_TEST_HARD_LINK_NAME, fid, NATIVE_VOL_TEST_COPY_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
+    if (H5Lcopy(gid, NATIVE_VOL_TEST_HARD_LINK_NAME, fid, NATIVE_VOL_TEST_COPY_LINK_NAME, H5P_DEFAULT,
+                H5P_DEFAULT) < 0)
         TEST_ERROR;
 
     /* H5Lmove */
-    if (H5Lmove(fid, NATIVE_VOL_TEST_COPY_LINK_NAME, gid, NATIVE_VOL_TEST_MOVE_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
+    if (H5Lmove(fid, NATIVE_VOL_TEST_COPY_LINK_NAME, gid, NATIVE_VOL_TEST_MOVE_LINK_NAME, H5P_DEFAULT,
+                H5P_DEFAULT) < 0)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
@@ -1016,22 +1042,22 @@ test_basic_link_operation(void)
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
-
     PASSED();
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Fclose(fid);
         H5Fclose(gid);
         H5Pclose(fapl_id);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return FAIL;
 
 } /* end test_basic_link_operation() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_basic_datatype_operation()
  *
@@ -1044,12 +1070,12 @@ error:
 static herr_t
 test_basic_datatype_operation(void)
 {
-    hid_t fid       = H5I_INVALID_HID;
-    hid_t fapl_id   = H5I_INVALID_HID;
-    hid_t tid       = H5I_INVALID_HID;
-    hid_t tid_anon  = H5I_INVALID_HID;
-    hid_t tcpl_id   = H5I_INVALID_HID;
-    char filename[1024];
+    hid_t fid      = H5I_INVALID_HID;
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t tid      = H5I_INVALID_HID;
+    hid_t tid_anon = H5I_INVALID_HID;
+    hid_t tcpl_id  = H5I_INVALID_HID;
+    char  filename[1024];
 
     TESTING("Basic VOL datatype operations");
 
@@ -1111,19 +1137,20 @@ test_basic_datatype_operation(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(tcpl_id);
         H5Fclose(fid);
         H5Pclose(fapl_id);
         H5Tclose(tid);
         H5Tclose(tid_anon);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return FAIL;
 
 } /* end test_basic_datatype_operation() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -1136,31 +1163,30 @@ error:
 int
 main(void)
 {
-    const char  *env_h5_drvr;   /* File driver value from environment */
-    int nerrors = 0;
+    const char *env_h5_drvr; /* File driver value from environment */
+    int         nerrors = 0;
 
     /* Get the VFD to use */
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
-    if(env_h5_drvr == NULL)
+    if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
     h5_reset();
 
     HDputs("Testing basic Virtual Object Layer (VOL) functionality.");
 
-    nerrors += test_vol_registration() < 0          ? 1 : 0;
-    nerrors += test_native_vol_init() < 0           ? 1 : 0;
+    nerrors += test_vol_registration() < 0 ? 1 : 0;
+    nerrors += test_native_vol_init() < 0 ? 1 : 0;
     nerrors += test_basic_file_operation(env_h5_drvr) < 0 ? 1 : 0;
-    nerrors += test_basic_group_operation() < 0     ? 1 : 0;
-    nerrors += test_basic_dataset_operation() < 0   ? 1 : 0;
+    nerrors += test_basic_group_operation() < 0 ? 1 : 0;
+    nerrors += test_basic_dataset_operation() < 0 ? 1 : 0;
     nerrors += test_basic_attribute_operation() < 0 ? 1 : 0;
-    nerrors += test_basic_object_operation() < 0    ? 1 : 0;
-    nerrors += test_basic_link_operation() < 0      ? 1 : 0;
-    nerrors += test_basic_datatype_operation() < 0  ? 1 : 0;
+    nerrors += test_basic_object_operation() < 0 ? 1 : 0;
+    nerrors += test_basic_link_operation() < 0 ? 1 : 0;
+    nerrors += test_basic_datatype_operation() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n",
-            nerrors, nerrors > 1 ? "S" : "");
+        HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         HDexit(EXIT_FAILURE);
     }
 
@@ -1169,4 +1195,3 @@ main(void)
     HDexit(EXIT_SUCCESS);
 
 } /* end main() */
-

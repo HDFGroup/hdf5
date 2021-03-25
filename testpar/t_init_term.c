@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,26 +21,23 @@
 
 #include "testphdf5.h"
 
-int nerrors = 0;			/* errors count */
+int nerrors = 0; /* errors count */
 
-const char *FILENAME[] = {
-    "after_mpi_fin",
-    NULL
-};
+const char *FILENAME[] = {"after_mpi_fin", NULL};
 
 int
-main (int argc, char **argv)
+main(int argc, char **argv)
 {
-    int         mpi_size, mpi_rank;
-    MPI_Comm    comm  = MPI_COMM_WORLD;
+    int      mpi_size, mpi_rank;
+    MPI_Comm comm = MPI_COMM_WORLD;
 
     /* Initialize and finalize MPI */
     MPI_Init(&argc, &argv);
     MPI_Comm_size(comm, &mpi_size);
     MPI_Comm_rank(comm, &mpi_rank);
 
-    if(MAINPROCESS)
-	TESTING("Usage of Serial HDF5 after MPI_Finalize() is called");
+    if (MAINPROCESS)
+        TESTING("Usage of Serial HDF5 after MPI_Finalize() is called");
 
     MPI_Finalize();
 
@@ -50,9 +47,9 @@ main (int argc, char **argv)
        and create a file serially */
     H5open();
 
-    if(mpi_rank == 0) {
-        char	filename[1024];
-        hid_t   file_id;
+    if (mpi_rank == 0) {
+        char  filename[1024];
+        hid_t file_id;
 
         h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -63,12 +60,12 @@ main (int argc, char **argv)
 
     H5close();
 
-    if(MAINPROCESS) {
-        if(0 == nerrors)
+    if (MAINPROCESS) {
+        if (0 == nerrors)
             PASSED();
         else
-	    H5_FAILED()
+            H5_FAILED()
     }
 
-    return (nerrors!=0);
+    return (nerrors != 0);
 }

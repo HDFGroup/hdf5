@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,18 +25,14 @@ extern "C" {
  * Method:    H5Pset_copy_object
  * Signature: (JI)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1copy_1object
-(JNIEnv *, jclass, jlong, jint);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1copy_1object(JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_copy_object
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1copy_1object
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1copy_1object(JNIEnv *, jclass, jlong);
 
 /*
  * TODO: H5Padd_merge_committed_dtype_path
