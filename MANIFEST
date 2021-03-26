@@ -197,12 +197,9 @@
 
 ./config/site-specific/BlankForm
 
-./doc/SWMR_Example.png
 ./doc/SWMRdataflow.png
-./doc/VFD_SWMR_Punch_List.md
 ./doc/VFD_SWMR_RFC_200916.docx
 ./doc/VFD_SWMR_RFC_200916.pdf
-./doc/VFD_SWMR_RFC_2020-02-03.docx
 ./doc/vfd-swmr-user-guide.md
 ./doc/code-conventions.md
 
