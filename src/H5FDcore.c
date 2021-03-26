@@ -1137,14 +1137,13 @@ H5FD__core_query(const H5FD_t *_file, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
         *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
         *flags |= H5FD_FEAT_DATA_SIEVE; /* OK to perform data sieving for faster raw data reads & writes    */
-        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;          /* OK to aggregate "small" raw data allocations          */
-        *flags |= H5FD_FEAT_ALLOW_FILE_IMAGE;             /* OK to use file image feature with this VFD             */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations          */
+        *flags |= H5FD_FEAT_ALLOW_FILE_IMAGE;    /* OK to use file image feature with this VFD             */
         *flags |= H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS; /* OK to use file image callbacks with this VFD */
 
         /* These feature flags are only applicable if the backing store is enabled */
         if (file && file->fd >= 0 && file->backing_store) {
-            *flags |=
-                H5FD_FEAT_POSIX_COMPAT_HANDLE; /* get_handle callback returns a POSIX file descriptor */
+            *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE; /* get_handle callback returns a POSIX file descriptor */
             *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the
                                                            default VFD      */
         }

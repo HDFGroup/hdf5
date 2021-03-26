@@ -540,16 +540,17 @@ uint64_decode(uint8_t **pp)
 #define H5F_DEFAULT_CSET H5T_CSET_ASCII
 
 /* ========= File Creation properties ============ */
-#define H5F_CRT_USER_BLOCK_NAME          "block_size"  /* Size of the file user block in bytes */
-#define H5F_CRT_SYM_LEAF_NAME            "symbol_leaf" /* 1/2 rank for symbol table leaf nodes */
-#define H5F_CRT_SYM_LEAF_DEF             4
-#define H5F_CRT_BTREE_RANK_NAME          "btree_rank"        /* 1/2 rank for btree internal nodes    */
-#define H5F_CRT_ADDR_BYTE_NUM_NAME       "addr_byte_num"     /* Byte number in an address            */
-#define H5F_CRT_OBJ_BYTE_NUM_NAME        "obj_byte_num"      /* Byte number for object size          */
-#define H5F_CRT_SUPER_VERS_NAME          "super_version"     /* Version number of the superblock     */
-#define H5F_CRT_SHMSG_NINDEXES_NAME      "num_shmsg_indexes" /* Number of shared object header message indexes */
-#define H5F_CRT_SHMSG_INDEX_TYPES_NAME   "shmsg_message_types"   /* Types of message in each index */
-#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME "shmsg_message_minsize" /* Minimum size of messages in each index   \
+#define H5F_CRT_USER_BLOCK_NAME        "block_size"  /* Size of the file user block in bytes */
+#define H5F_CRT_SYM_LEAF_NAME          "symbol_leaf" /* 1/2 rank for symbol table leaf nodes */
+#define H5F_CRT_SYM_LEAF_DEF           4
+#define H5F_CRT_BTREE_RANK_NAME        "btree_rank"        /* 1/2 rank for btree internal nodes    */
+#define H5F_CRT_ADDR_BYTE_NUM_NAME     "addr_byte_num"     /* Byte number in an address            */
+#define H5F_CRT_OBJ_BYTE_NUM_NAME      "obj_byte_num"      /* Byte number for object size          */
+#define H5F_CRT_SUPER_VERS_NAME        "super_version"     /* Version number of the superblock     */
+#define H5F_CRT_SHMSG_NINDEXES_NAME    "num_shmsg_indexes" /* Number of shared object header message indexes */
+#define H5F_CRT_SHMSG_INDEX_TYPES_NAME "shmsg_message_types" /* Types of message in each index */
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME                                                                     \
+    "shmsg_message_minsize"                                      /* Minimum size of messages in each index   \
                                                                   */
 #define H5F_CRT_SHMSG_LIST_MAX_NAME       "shmsg_list_max"       /* Shared message list maximum size */
 #define H5F_CRT_SHMSG_BTREE_MIN_NAME      "shmsg_btree_min"      /* Shared message B-tree minimum size */

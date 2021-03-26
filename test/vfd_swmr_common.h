@@ -38,8 +38,8 @@
 /************/
 
 typedef struct _estack_state {
-    H5E_auto_t efunc;
-    void *     edata;
+    H5E_auto2_t efunc;
+    void *      edata;
 } estack_state_t;
 
 typedef enum _testsel { TEST_NONE = 0, TEST_NULL, TEST_OOB } testsel_t;

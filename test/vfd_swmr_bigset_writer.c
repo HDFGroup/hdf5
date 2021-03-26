@@ -692,7 +692,7 @@ open_extensible_dset(state_t *s, unsigned int which)
     for (i = 0; i < tries; i++) {
         struct timespec one_tenth = {.tv_sec = 0, .tv_nsec = 1000000000L / 10};
 
-        ds = H5Dopen(s->file[0], dname, s->dapl);
+        ds = H5Dopen2(s->file[0], dname, s->dapl);
 
         if (ds >= 0)
             break;

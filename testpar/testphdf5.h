@@ -97,8 +97,7 @@ enum H5TEST_COLL_CHUNK_API {
 #define MSPACE1_RANK 1     /* Rank of the first dataset in memory */
 #define MSPACE1_DIM  27000 /* Dataset size in memory */
 #define FSPACE_RANK  2     /* Dataset rank as it is stored in the file */
-#define FSPACE_DIM1                                                                                          \
-    9 /* Dimension sizes of the dataset as it is stored in the file */
+#define FSPACE_DIM1  9     /* Dimension sizes of the dataset as it is stored in the file */
 #define FSPACE_DIM2                                                                                          \
     3600 /* We will read dataset back from the file                                         to the dataset   \
             in memory with these dataspace parameters. */
@@ -247,7 +246,7 @@ void collective_group_write(void);
 void independent_group_read(void);
 void test_fapl_mpio_dup(void);
 void test_split_comm_access(void);
-//void test_page_buffer_access(void);
+// void test_page_buffer_access(void);
 void dataset_atomicity(void);
 void dataset_writeInd(void);
 void dataset_writeAll(void);

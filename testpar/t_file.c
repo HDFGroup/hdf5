@@ -639,7 +639,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    VRFY((f->shared->pb_ptr!= NULL), "");
+    VRFY((f->shared->pb_ptr != NULL), "");
     VRFY((f->shared->pb_ptr->page_size == page_size), "");
     VRFY((f->shared->pb_ptr->max_size == page_buffer_size), "");
 

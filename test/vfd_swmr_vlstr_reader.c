@@ -171,7 +171,7 @@ main(int argc, char **argv)
         dbgf(2, "iteration %d which %d", i, which);
         (void)snprintf(name[which], sizeof(name[which]), "dset-%d", which);
         es          = disable_estack();
-        dset[which] = H5Dopen(fid, name[which], H5P_DEFAULT);
+        dset[which] = H5Dopen2(fid, name[which], H5P_DEFAULT);
         restore_estack(es);
         if (caught_out_of_bounds || dset[which] == badhid) {
             dbgf(2, ": couldn't open\n");

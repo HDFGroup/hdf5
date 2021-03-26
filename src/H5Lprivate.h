@@ -38,7 +38,8 @@
 /* ========  Link access property names ======== */
 #define H5L_ACS_NLINKS_NAME       "max soft links"       /* Number of soft links to traverse */
 #define H5L_ACS_ELINK_PREFIX_NAME "external link prefix" /* External link prefix */
-#define H5L_ACS_ELINK_FAPL_NAME   "external link fapl" /* file access property list for external link access \
+#define H5L_ACS_ELINK_FAPL_NAME                                                                              \
+    "external link fapl"                               /* file access property list for external link access \
                                                         */
 #define H5L_ACS_ELINK_FLAGS_NAME "external link flags" /* file access flags for external link traversal */
 #define H5L_ACS_ELINK_CB_NAME    "external link callback" /*  callback function for external link traversal */

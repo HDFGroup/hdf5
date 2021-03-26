@@ -50,8 +50,9 @@
 
 /* Free-space section types for file */
 /* (values stored in free space data structures in file) */
-#define H5MF_FSPACE_SECT_SIMPLE 0 /* For non-paged aggregation: section is a range of actual bytes in file   \
-                                   */
+#define H5MF_FSPACE_SECT_SIMPLE                                                                              \
+    0 /* For non-paged aggregation: section is a range of actual bytes in file                               \
+       */
 #define H5MF_FSPACE_SECT_SMALL                                                                               \
     1 /* For paged aggregation: "small" meta/raw data section which is < fsp_size) */
 #define H5MF_FSPACE_SECT_LARGE 2 /* For paged aggregation: "large" Section which is >= fsp_size) */
