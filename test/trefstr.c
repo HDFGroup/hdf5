@@ -265,7 +265,9 @@ test_refstr_wrap(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    CHECK(s, buf, "wrapping");
+    if (s == buf)
+        TestErrPrintf("%d: Should not have gotten the same pointer from reference-counted string!\n",
+                      __LINE__);
     cmp = HDstrcmp(s, buf);
     if (cmp <= 0)
         TestErrPrintf("%d: string comparison incorrect!\n", __LINE__);

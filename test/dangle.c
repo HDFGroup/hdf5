@@ -176,7 +176,10 @@ test_dangle_group(H5F_close_degree_t degree)
         TEST_ERROR;
 
     /* Try creating duplicate group */
-    H5E_BEGIN_TRY { gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gid >= 0)
         TEST_ERROR

@@ -217,7 +217,7 @@ New Features
             YES                   NO          Default to STATIC
             NO                    YES         Default to SHARED
             NO                    NO          Default to SHARED
-        The defaults can be overriden by setting the config option
+        The defaults can be overridden by setting the config option
             HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
 
         (ADB - 2020/07/09, HDFFV-11116)
@@ -263,10 +263,10 @@ New Features
 
     Library:
     --------
-    - H5Epush_ret() now requires a trailing semi-colon
+    - H5Epush_ret() now requires a trailing semicolon
 
         H5Epush_ret() is a function-like macro that has been changed to
-        contain a `do {} while(0)` loop. Consequently, a trailing semi-colon
+        contain a `do {} while(0)` loop. Consequently, a trailing semicolon
         is now required to end the `while` statement. Previously, a trailing
         semi would work, but was not mandatory. This change was made to allow
         clang-format to correctly format the source code.
@@ -339,7 +339,7 @@ Bug Fixes since HDF5-1.12.0 release
     -------
     - Remove underscores on header file guards
 
-        Header file guards used a variety of underscores at the beginning the define.
+        Header file guards used a variety of underscores at the beginning of the define.
 
         Removed all leading (some trailing) underscores from header file guards.
 
@@ -390,8 +390,8 @@ Bug Fixes since HDF5-1.12.0 release
         H5S_NO_CLASS is an internal class value that should not have been
         exposed via a public API call.
 
-        In debug builds of the library, this can cause asserts to trip. In
-        non-debug builds, it will produce normal library errors.
+        In debug builds of the library, this can cause assert() function to 
+        trip. In non-debug builds, it will produce normal library errors.
 
         The new library behavior is for H5Sset_extent_none() to convert
         the dataspace into one of type H5S_NULL, which is better handled
@@ -499,7 +499,7 @@ Bug Fixes since HDF5-1.12.0 release
 
         Tools parsing used the length of the option from the long array to match
         the option from the command line. This incorrectly matched a shorter long
-        name option that was happened to be a subset of another long option.
+        name option that happened to be a subset of another long option.
         Changed to match whole names.
 
         (ADB - 2021/01/19, HDFFV-11106)

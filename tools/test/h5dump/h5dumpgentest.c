@@ -5375,7 +5375,10 @@ make_dset(hid_t loc_id, const char *name, hid_t sid, hid_t tid, hid_t dcpl, void
     return 0;
 
 out:
-    H5E_BEGIN_TRY { H5Dclose(dsid); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+    }
     H5E_END_TRY;
     return -1;
 }
@@ -11135,6 +11138,7 @@ main(void)
     gent_aindices();
     gent_longlinks();
     gent_ldouble();
+    gent_ldouble_scalar();
     gent_binary();
     gent_bigdims();
     gent_hyperslab();

@@ -303,7 +303,10 @@ H5LD_get_dset_dims(hid_t did, hsize_t *cur_dims)
     ret_value = SUCCEED;
 
 done:
-    H5E_BEGIN_TRY { H5Sclose(sid); }
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+    }
     H5E_END_TRY;
 
     return (ret_value);

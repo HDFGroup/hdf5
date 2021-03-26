@@ -151,7 +151,10 @@ test_page_buffer_access(void)
     VRFY((ret == 0), "");
 
     /* This should fail because collective metadata writes are not supported with page buffering */
-    H5E_BEGIN_TRY { file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
+    }
     H5E_END_TRY;
     VRFY((file_id < 0), "H5Fcreate failed");
 
