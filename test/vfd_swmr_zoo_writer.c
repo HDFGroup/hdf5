@@ -179,11 +179,7 @@ vfd_swmr_reader_did_increase_tick_to(uint64_t new_tick)
     if (fd == -1) {
         // TBD create a temporary file, here, and move it to its final path
         // after writing it.
-<<<<<<< HEAD
-        fd = open("./shared_tick_num", O_RDWR | O_CREAT, 0600);
-=======
-        fd = HDopen("./shared_tick_num", O_RDWR|O_CREAT, 0600);
->>>>>>> 79a94e0f431ac715d5cc0ca85c144901147207ab
+        fd = HDopen("./shared_tick_num", O_RDWR | O_CREAT, 0600);
         if (fd == -1)
             err(EXIT_FAILURE, "%s: open", __func__);
     }
@@ -224,15 +220,14 @@ main(int argc, char **argv)
     struct timespec lastmsgtime = {.tv_sec = 0, .tv_nsec = 0};
     bool wait_for_signal;
     int ch;
-    char vector[8];
     unsigned seed;
     unsigned long tmpl;
-    char *end, *ostate;
+    char *end;
     const char *seedvar = "H5_ZOO_STEP_SEED";
     bool use_vfd_swmr = true;
     bool print_estack = false;
-    const char *progname = HDbasename(argv[0]);
-    const char *personality = strstr(progname, "vfd_swmr_zoo_");
+    char *progname = NULL;
+    char *personality;
     estack_state_t es;
     H5F_vfd_swmr_config_t vfd_swmr_config;
     int fd_writer_to_reader, fd_reader_to_writer;
@@ -242,6 +237,11 @@ main(int argc, char **argv)
     unsigned int i;
     struct timespec last = {0, 0};
     struct timespec ival = {MAX_READ_TIME, 0}; /* Expected maximal time for reader's validation */
+
+    if (H5_basename(argv[0], &progname) < 0)
+        errx(EXIT_FAILURE, "H5_basename failed");
+
+    personality = HDstrstr(progname, "vfd_swmr_zoo_");
 
     if (personality != NULL && strcmp(personality, "vfd_swmr_zoo_writer") == 0)
         writer = wait_for_signal = true;
@@ -422,8 +422,6 @@ main(int argc, char **argv)
         if (!delete_zoo(fid, ".", &lastmsgtime, config))
             errx(EXIT_FAILURE, "delete_zoo failed");
 
-        (void)setstate(ostate);
-
         /* Notify the reader about finishing zoo deletion */
         notify = 4;
         if (HDwrite(fd_writer_to_reader, &notify, sizeof(int)) == -1)
@@ -508,6 +506,9 @@ main(int argc, char **argv)
 
     if (H5Fclose(fid) < 0)
         errx(EXIT_FAILURE, "H5Fclose");
+
+    if (progname)
+        HDfree(progname);
 
     /* Close the named pipes */
     if (HDclose(fd_writer_to_reader) < 0)
