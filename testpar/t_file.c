@@ -952,14 +952,14 @@ test_file_properties(void)
 void
 test_delete(void)
 {
-    hid_t fid = H5I_INVALID_HID;        /* HDF5 file ID */
-    hid_t fapl_id = H5I_INVALID_HID;    /* File access plist */
-    hbool_t is_coll;
+    hid_t       fid     = H5I_INVALID_HID; /* HDF5 file ID */
+    hid_t       fapl_id = H5I_INVALID_HID; /* File access plist */
+    hbool_t     is_coll;
     const char *filename = NULL;
-    MPI_Comm comm = MPI_COMM_WORLD;
-    MPI_Info info = MPI_INFO_NULL;
-    htri_t is_hdf5 = FAIL;              /* Whether a file is an HDF5 file */
-    herr_t ret;                         /* Generic return value */
+    MPI_Comm    comm     = MPI_COMM_WORLD;
+    MPI_Info    info     = MPI_INFO_NULL;
+    htri_t      is_hdf5  = FAIL; /* Whether a file is an HDF5 file */
+    herr_t      ret;             /* Generic return value */
 
     filename = (const char *)GetTestParameters();
 
@@ -991,9 +991,11 @@ test_delete(void)
 
     /* Verify that the file is NO LONGER an HDF5 file */
     /* This should fail since there is no file */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         is_hdf5 = H5Fis_accessible(filename, fapl_id);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     VRFY((is_hdf5 != SUCCEED), "H5Fis_accessible");
 
     /* Release file-access plist */

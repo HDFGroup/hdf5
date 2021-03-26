@@ -1691,26 +1691,26 @@ done:
 static herr_t
 H5FD__mpio_delete(const char *filename, hid_t fapl_id)
 {
-    H5P_genplist_t  *plist;      /* Property list pointer */
-    MPI_Info        info = MPI_INFO_NULL;
-    herr_t          ret_value = SUCCEED;                /* Return value             */
+    H5P_genplist_t *plist; /* Property list pointer */
+    MPI_Info        info      = MPI_INFO_NULL;
+    herr_t          ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_STATIC
 
     HDassert(filename);
 
     /* Get the MPI info from the fapl */
-    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_FILE_ACCESS_DEFAULT == fapl_id || H5FD_MPIO != H5P_peek_driver(plist))
-        info = MPI_INFO_NULL;   /* default */
+    if (H5P_FILE_ACCESS_DEFAULT == fapl_id || H5FD_MPIO != H5P_peek_driver(plist))
+        info = MPI_INFO_NULL; /* default */
     else {
         if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI info object")
     }
 
     /* Delete the file */
-    if(MPI_File_delete(filename, info) < 0)
+    if (MPI_File_delete(filename, info) < 0)
         HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
 
 done:
