@@ -168,20 +168,15 @@ typedef struct H5E_t H5E_t;
 extern char H5E_mpi_error_str[MPI_MAX_ERROR_STRING];
 extern int  H5E_mpi_error_str_len;
 
-#define HMPI_ERROR(mpierr)                                                                                   \
-    {                                                                                                        \
-        MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
-        HERROR(H5E_INTERNAL, H5E_MPIERRSTR, "%s", H5E_mpi_error_str);                                        \
-    }
 #define HMPI_DONE_ERROR(retcode, str, mpierr)                                                                \
     {                                                                                                        \
-        HMPI_ERROR(mpierr);                                                                                  \
-        HDONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                                                    \
+        MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
+        HDONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str, H5E_mpi_error_str); \
     }
 #define HMPI_GOTO_ERROR(retcode, str, mpierr)                                                                \
     {                                                                                                        \
-        HMPI_ERROR(mpierr);                                                                                  \
-        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                                                    \
+        MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str, H5E_mpi_error_str); \
     }
 #endif /* H5_HAVE_PARALLEL */
 
