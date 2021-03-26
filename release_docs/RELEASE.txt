@@ -63,6 +63,15 @@ New Features
 
       (DER - 2021/03/22)
 
+    - Add CMake variable HDF5_LIB_INFIX
+
+      This infix is added to all library names after 'hdf5'.
+      e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
+      This name is used in packages on debian based systems.
+      (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
+
+      (barcode - 2021/03/22)
+
     - On macOS, Universal Binaries can now be built, allowing native execution on
       both Intel and Apple Silicon (ARM) based Macs.
 
