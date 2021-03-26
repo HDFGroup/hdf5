@@ -3494,9 +3494,9 @@ main(void)
 
         nerrors += test_file_fapl();
 #ifndef H5_HAVE_WIN32_API
-/* XXX: VFD SWMR: Fails on Win32 due to problems unlinking the metadata file.
- *                The OS claims another process is using the file.
- */
+        /* XXX: VFD SWMR: Fails on Win32 due to problems unlinking the metadata file.
+         *                The OS claims another process is using the file.
+         */
         nerrors += test_writer_create_open_flush();
         nerrors += test_writer_md();
 #endif

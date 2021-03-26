@@ -1819,7 +1819,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t                set_flag               = FALSE; /*set the status_flags in the superblock */
     hbool_t                clear                  = FALSE; /*clear the status_flags         */
     hbool_t                evict_on_close;                 /* evict on close value from plist  */
-    hbool_t                use_file_locking = TRUE;        /* Using file locks? */
+    hbool_t                use_file_locking    = TRUE;     /* Using file locks? */
     hbool_t                ci_load             = FALSE;    /* whether MDC ci load requested */
     hbool_t                ci_write            = FALSE;    /* whether MDC CI write requested */
     hbool_t                file_create         = FALSE;    /* creating a new file or not */

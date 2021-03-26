@@ -1905,7 +1905,7 @@ H5FD_multi_unlock(H5FD_t *_file)
     if (nerrors)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTUNLOCKFILE, "error unlocking member files", -1);
 
-            return 0;
+    return 0;
 } /* H5FD_multi_unlock() */
 
 /*-------------------------------------------------------------------------

@@ -126,7 +126,7 @@ disable_estack(void)
 {
     estack_state_t es = estack_get_state();
 
-    (void)H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+    (void)H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     return es;
 }
@@ -137,7 +137,7 @@ estack_get_state(void)
 {
     estack_state_t es;
 
-    (void)H5Eget_auto(H5E_DEFAULT, &es.efunc, &es.edata);
+    (void)H5Eget_auto2(H5E_DEFAULT, &es.efunc, &es.edata);
 
     return es;
 }
@@ -148,7 +148,7 @@ estack_get_state(void)
 void
 restore_estack(estack_state_t es)
 {
-    (void)H5Eset_auto(H5E_DEFAULT, es.efunc, es.edata);
+    (void)H5Eset_auto2(H5E_DEFAULT, es.efunc, es.edata);
 }
 
 #ifndef H5_HAVE_WIN32_API

@@ -228,7 +228,7 @@ verify_group(state_t *s, unsigned int which)
     esnprintf(name, sizeof(name), "/group-%d", which);
 
     es = disable_estack();
-    g  = H5Gopen(s->file, name, H5P_DEFAULT);
+    g  = H5Gopen2(s->file, name, H5P_DEFAULT);
     restore_estack(es);
 
     if (g < 0)

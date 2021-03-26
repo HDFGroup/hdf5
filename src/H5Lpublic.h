@@ -67,9 +67,10 @@ typedef enum {
     H5L_TYPE_EXTERNAL = 64,   /* External link id             */
     H5L_TYPE_MAX      = 255   /* Maximum link type id         */
 } H5L_type_t;
-#define H5L_TYPE_BUILTIN_MAX H5L_TYPE_SOFT     /* Maximum value link value for "built-in" link types */
-#define H5L_TYPE_UD_MIN      H5L_TYPE_EXTERNAL /* Link ids at or above this value are "user-defined" link types. \
-                                                */
+#define H5L_TYPE_BUILTIN_MAX H5L_TYPE_SOFT /* Maximum value link value for "built-in" link types */
+#define H5L_TYPE_UD_MIN                                                                                      \
+    H5L_TYPE_EXTERNAL /* Link ids at or above this value are "user-defined" link types.                      \
+                       */
 
 /* Information struct for link (for H5Lget_info2/H5Lget_info_by_idx2)
  * H5O_token_t version used in VOL layer and future public API calls

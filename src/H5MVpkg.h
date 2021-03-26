@@ -41,8 +41,9 @@
 
 /* Free-space section types for file */
 /* (values stored in free space data structures in file) */
-#define H5MV_FSPACE_SECT_SIMPLE 0 /* For non-paged aggregation: section is a range of actual bytes in file   \
-                                   */
+#define H5MV_FSPACE_SECT_SIMPLE                                                                              \
+    0 /* For non-paged aggregation: section is a range of actual bytes in file                               \
+       */
 
 /****************************/
 /* Package Private Typedefs */
