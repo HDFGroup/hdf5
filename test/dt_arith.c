@@ -864,7 +864,10 @@ test_particular_fp_integer(void)
 
 error:
     HDfflush(stdout);
-    H5E_BEGIN_TRY { H5Pclose(dxpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
     H5E_END_TRY;
     if (buf1)
         HDfree(buf1);

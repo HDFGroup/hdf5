@@ -2215,7 +2215,10 @@ H5DS_get_REFLIST_type(void)
 
     return ntid_t;
 out:
-    H5E_BEGIN_TRY { H5Tclose(ntid_t); }
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(ntid_t);
+    }
     H5E_END_TRY;
     return FAIL;
 }
