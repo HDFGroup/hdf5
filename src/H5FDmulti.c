@@ -134,41 +134,43 @@ static herr_t  H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD_multi_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD_multi_unlock(H5FD_t *_file);
+static herr_t  H5FD_multi_delete(const char *filename, hid_t fapl_id);
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
-    "multi",                   /*name            */
-    HADDR_MAX,                 /*maxaddr        */
-    H5F_CLOSE_WEAK,            /* fc_degree        */
-    H5FD_multi_term,           /*terminate             */
-    H5FD_multi_sb_size,        /*sb_size        */
-    H5FD_multi_sb_encode,      /*sb_encode        */
-    H5FD_multi_sb_decode,      /*sb_decode        */
-    sizeof(H5FD_multi_fapl_t), /*fapl_size        */
-    H5FD_multi_fapl_get,       /*fapl_get        */
-    H5FD_multi_fapl_copy,      /*fapl_copy        */
-    H5FD_multi_fapl_free,      /*fapl_free        */
-    0,                         /*dxpl_size        */
-    NULL,                      /*dxpl_copy        */
-    NULL,                      /*dxpl_free        */
-    H5FD_multi_open,           /*open            */
-    H5FD_multi_close,          /*close            */
-    H5FD_multi_cmp,            /*cmp            */
-    H5FD_multi_query,          /*query            */
-    H5FD_multi_get_type_map,   /*get_type_map        */
-    H5FD_multi_alloc,          /*alloc            */
-    H5FD_multi_free,           /*free            */
-    H5FD_multi_get_eoa,        /*get_eoa        */
-    H5FD_multi_set_eoa,        /*set_eoa        */
-    H5FD_multi_get_eof,        /*get_eof        */
-    H5FD_multi_get_handle,     /*get_handle            */
-    H5FD_multi_read,           /*read            */
-    H5FD_multi_write,          /*write            */
-    H5FD_multi_flush,          /*flush            */
-    H5FD_multi_truncate,       /*truncate        */
-    H5FD_multi_lock,           /*lock                  */
-    H5FD_multi_unlock,         /*unlock                */
-    H5FD_FLMAP_DEFAULT         /*fl_map        */
+    "multi",                   /* name              */
+    HADDR_MAX,                 /* maxaddr           */
+    H5F_CLOSE_WEAK,            /* fc_degree         */
+    H5FD_multi_term,           /* terminate         */
+    H5FD_multi_sb_size,        /* sb_size           */
+    H5FD_multi_sb_encode,      /* sb_encode         */
+    H5FD_multi_sb_decode,      /* sb_decode         */
+    sizeof(H5FD_multi_fapl_t), /* fapl_size         */
+    H5FD_multi_fapl_get,       /* fapl_get          */
+    H5FD_multi_fapl_copy,      /* fapl_copy         */
+    H5FD_multi_fapl_free,      /* fapl_free         */
+    0,                         /* dxpl_size         */
+    NULL,                      /* dxpl_copy         */
+    NULL,                      /* dxpl_free         */
+    H5FD_multi_open,           /* open              */
+    H5FD_multi_close,          /* close             */
+    H5FD_multi_cmp,            /* cmp               */
+    H5FD_multi_query,          /* query             */
+    H5FD_multi_get_type_map,   /* get_type_map      */
+    H5FD_multi_alloc,          /* alloc             */
+    H5FD_multi_free,           /* free              */
+    H5FD_multi_get_eoa,        /* get_eoa           */
+    H5FD_multi_set_eoa,        /* set_eoa           */
+    H5FD_multi_get_eof,        /* get_eof           */
+    H5FD_multi_get_handle,     /* get_handle        */
+    H5FD_multi_read,           /* read              */
+    H5FD_multi_write,          /* write             */
+    H5FD_multi_flush,          /* flush             */
+    H5FD_multi_truncate,       /* truncate          */
+    H5FD_multi_lock,           /* lock              */
+    H5FD_multi_unlock,         /* unlock            */
+    H5FD_multi_delete,         /* del               */
+    H5FD_FLMAP_DEFAULT         /* fl_map            */
 };
 
 /*-------------------------------------------------------------------------
@@ -2015,6 +2017,52 @@ open_members(H5FD_multi_t *file)
 
     return 0;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_multi_delete
+ *
+ * Purpose:     Delete a file
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_multi_delete(const char *filename, hid_t fapl_id)
+{
+    char                     full_filename[H5FD_MULT_MAX_FILE_NAME_LEN];
+    const H5FD_multi_fapl_t *fa;
+    static const char *      func = "H5FD_multi_delete"; /* Function Name for error reporting    */
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    assert(filename);
+
+    /* Quiet compiler */
+    (void)fapl_id;
+
+    /* Get the driver info */
+    fa = (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
+    assert(fa);
+
+    /* Delete each member file using the underlying fapl */
+    UNIQUE_MEMBERS (fa->memb_map, mt) {
+        assert(fa->memb_name[mt]);
+        assert(fa->memb_fapl[mt] >= 0);
+
+        /* Note: This truncates the user's filename down to only sizeof(tmp)
+         *      characters. -QK & JK, 2013/01/17
+         */
+        sprintf(full_filename, fa->memb_name[mt], filename);
+
+        if (H5FDdelete(full_filename, fa->memb_fapl[mt]) < 0)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_BADVALUE, "error deleting member files", -1);
+    }
+    END_MEMBERS;
+
+    return 0;
+} /* end H5FD_multi_delete() */
 H5_GCC_DIAG_ON("format-nonliteral")
 
 #ifdef H5private_H

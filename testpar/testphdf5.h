@@ -238,6 +238,7 @@ void test_plist_ed(void);
 void external_links(void);
 void zero_dim_dset(void);
 void test_file_properties(void);
+void test_delete(void);
 void multiple_dset_write(void);
 void multiple_group_write(void);
 void multiple_group_read(void);
