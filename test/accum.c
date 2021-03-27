@@ -2066,13 +2066,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_swmr_write_big
  *
- * Purpose:    	A SWMR test: verifies that writing "large" metadata to a file
- *		opened with SWMR_WRITE will flush the existing metadata in the
- *		accumulator to disk first before writing the "large" metadata
- *	 	to disk.
- *		This test will fork and exec a reader "accum_swmr_reader" which
- *		opens the same file with SWMR_READ and verifies that the correct
- *		metadata is read from disk.
+ * Purpose:     A SWMR test: verifies that writing "large" metadata to a file
+ *              opened with SWMR_WRITE will flush the existing metadata in the
+ *              accumulator to disk first before writing the "large" metadata
+ *              to disk.
+ *
+ *              This test will fork and exec a reader "accum_swmr_reader" which
+ *              opens the same file with SWMR_READ and verifies that the correct
+ *              metadata is read from disk.
  *
  * Return:      Success: 0
  *              Failure: 1
@@ -2084,6 +2085,7 @@ error:
 unsigned
 test_swmr_write_big(hbool_t newest_format)
 {
+
 
     hid_t    fid   = -1;                 /* File ID */
     hid_t    fapl  = -1;                 /* File access property list */
@@ -2292,6 +2294,7 @@ test_swmr_write_big(hbool_t newest_format)
         FAIL_STACK_ERROR;
 
     /* Pop API context */
+
     if (api_ctx_pushed && H5CX_pop() < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
