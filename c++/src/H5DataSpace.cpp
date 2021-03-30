@@ -69,8 +69,7 @@ DataSpace::getConstant()
 void
 DataSpace::deleteConstants()
 {
-    if (ALL_ != 0)
-        delete ALL_;
+    delete ALL_;
 }
 
 //--------------------------------------------------------------------------
