@@ -404,6 +404,34 @@ extern "C" {
 #endif
 
 /* Function prototypes */
+<<<<<<< HEAD
+=======
+H5_DLL hid_t  H5FDregister(const H5FD_class_t *cls);
+H5_DLL herr_t H5FDunregister(hid_t driver_id);
+H5_DLL H5FD_t *H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+H5_DLL herr_t  H5FDclose(H5FD_t *file);
+H5_DLL int     H5FDcmp(const H5FD_t *f1, const H5FD_t *f2);
+H5_DLL int     H5FDquery(const H5FD_t *f, unsigned long *flags);
+H5_DLL haddr_t H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
+H5_DLL herr_t  H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size);
+H5_DLL haddr_t H5FDget_eoa(H5FD_t *file, H5FD_mem_t type);
+H5_DLL herr_t  H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t eoa);
+H5_DLL haddr_t H5FDget_eof(H5FD_t *file, H5FD_mem_t type);
+H5_DLL herr_t  H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle);
+H5_DLL herr_t  H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                        void *buf /*out*/);
+H5_DLL herr_t  H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                         const void *buf);
+H5_DLL herr_t  H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
+                               haddr_t addrs[], size_t sizes[], void *bufs[] /* out */);
+H5_DLL herr_t  H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
+                                haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
+H5_DLL herr_t  H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
+H5_DLL herr_t  H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
+H5_DLL herr_t  H5FDlock(H5FD_t *file, hbool_t rw);
+H5_DLL herr_t  H5FDunlock(H5FD_t *file);
+
+>>>>>>> 7812e66e14 (Add H5FD_read_selection() and H5FD_write_selection().  Currently only)
 /* Allows querying a VFD ID for features before the file is opened */
 H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/);
 
