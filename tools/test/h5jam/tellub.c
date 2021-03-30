@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -24,12 +24,8 @@
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "h";
-static struct long_options l_opts[] = {
-    {"help", no_arg, 'h'},
-    {"hel", no_arg, 'h'},
-    {NULL, 0, '\0'}
-};
+static const char *        s_opts   = "h";
+static struct long_options l_opts[] = {{"help", no_arg, 'h'}, {"hel", no_arg, 'h'}, {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -40,12 +36,11 @@ static struct long_options l_opts[] = {
  *-------------------------------------------------------------------------
  */
 static void
-usage (const char *prog)
+usage(const char *prog)
 {
     HDfflush(stdout);
     HDfprintf(stdout, "usage: %s h5_file\n", prog);
-    HDfprintf(stdout,
-        "           Check that h5_fil is HDF5 file and print size of user block \n");
+    HDfprintf(stdout, "           Check that h5_fil is HDF5 file and print size of user block \n");
     HDfprintf(stdout, "       %s -h\n", prog);
     HDfprintf(stdout, "           Print a usage message and exit\n");
 } /* end usage() */
@@ -61,20 +56,20 @@ usage (const char *prog)
  */
 
 static void
-parse_command_line (int argc, const char *argv[])
+parse_command_line(int argc, const char *argv[])
 {
     int opt;
 
     /* parse command line options */
-    while ((opt = get_option (argc, argv, s_opts, l_opts)) != EOF) {
-        switch ((char) opt) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+        switch ((char)opt) {
             case 'h':
-                usage (h5tools_getprogname());
+                usage(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
                 break;
             case '?':
             default:
-                usage (h5tools_getprogname());
+                usage(h5tools_getprogname());
                 h5tools_setstatus(EXIT_FAILURE);
         }
     }
@@ -82,7 +77,7 @@ parse_command_line (int argc, const char *argv[])
     /* check for file name to be processed */
     if (argc <= opt_ind) {
         error_msg("missing file name\n");
-        usage (h5tools_getprogname());
+        usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
     }
 } /* end parse_command_line() */
@@ -90,8 +85,8 @@ parse_command_line (int argc, const char *argv[])
 static void
 leave(int ret)
 {
-   h5tools_close();
-   HDexit(ret);
+    h5tools_close();
+    HDexit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -103,14 +98,14 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main (int argc, const char *argv[])
+main(int argc, const char *argv[])
 {
-    char *ifname;
-    hid_t ifile = H5I_INVALID_HID;
+    char *  ifname;
+    hid_t   ifile = H5I_INVALID_HID;
     hsize_t usize;
-    htri_t testval;
-    herr_t status;
-    hid_t plist = H5I_INVALID_HID;
+    htri_t  testval;
+    herr_t  status;
+    hid_t   plist = H5I_INVALID_HID;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -123,9 +118,9 @@ main (int argc, const char *argv[])
     /* enable error reporting if command line option */
     h5tools_error_report();
 
-    if(argc <= (opt_ind)) {
+    if (argc <= (opt_ind)) {
         error_msg("missing file name\n");
-        usage (h5tools_getprogname());
+        usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
@@ -134,7 +129,7 @@ main (int argc, const char *argv[])
 
     testval = H5Fis_accessible(ifname, H5P_DEFAULT);
 
-    if(testval <= 0) {
+    if (testval <= 0) {
         error_msg("Input HDF5 file is not HDF \"%s\"\n", ifname);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
@@ -142,33 +137,32 @@ main (int argc, const char *argv[])
 
     ifile = H5Fopen(ifname, H5F_ACC_RDONLY, H5P_DEFAULT);
 
-    if(ifile < 0) {
+    if (ifile < 0) {
         error_msg("Can't open input HDF5 file \"%s\"\n", ifname);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
     plist = H5Fget_create_plist(ifile);
-    if(plist < 0) {
+    if (plist < 0) {
         error_msg("Can't get file creation plist for file \"%s\"\n", ifname);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
     status = H5Pget_userblock(plist, &usize);
-    if(status < 0) {
+    if (status < 0) {
         error_msg("Can't get user block for file \"%s\"\n", ifname);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
-    HDprintf("%ld\n", (long) usize);
+    HDprintf("%ld\n", (long)usize);
 
 done:
-    H5Pclose (plist);
-    if(ifile >= 0)
-        H5Fclose (ifile);
+    H5Pclose(plist);
+    if (ifile >= 0)
+        H5Fclose(ifile);
 
     leave(h5tools_getstatus());
 } /* end main() */
-

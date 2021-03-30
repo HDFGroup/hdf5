@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,39 +26,35 @@
 /* Module Setup */
 /****************/
 
-#include "H5Omodule.h"          /* This source code file is part of the H5O module */
-#define H5T_FRIEND              /* Suppress error about including H5Tpkg */
-#define H5D_FRIEND              /* Suppress error about including H5Dpkg */
+#include "H5Omodule.h" /* This source code file is part of the H5O module */
+#define H5T_FRIEND     /* Suppress error about including H5Tpkg */
+#define H5D_FRIEND     /* Suppress error about including H5Dpkg */
 
 /***********/
 /* Headers */
 /***********/
 
-#include "H5private.h"      /* Generic Functions */
-#include "H5CXprivate.h"    /* API Contexts */
-#include "H5Dprivate.h"     /* Datasets */
-#include "H5Eprivate.h"     /* Errors   */
-#include "H5Fprivate.h"     /* Files    */
-#include "H5Gprivate.h"     /* Groups   */
-#include "H5Iprivate.h"     /* IDs      */
-#include "H5Dpkg.h"         /* Datasets */
-#include "H5Opkg.h"         /* Objects  */
-#include "H5Tpkg.h"         /* Datatypes */
+#include "H5private.h"   /* Generic Functions */
+#include "H5CXprivate.h" /* API Contexts */
+#include "H5Dprivate.h"  /* Datasets */
+#include "H5Eprivate.h"  /* Errors   */
+#include "H5Fprivate.h"  /* Files    */
+#include "H5Gprivate.h"  /* Groups   */
+#include "H5Iprivate.h"  /* IDs      */
+#include "H5Dpkg.h"      /* Datasets */
+#include "H5Opkg.h"      /* Objects  */
+#include "H5Tpkg.h"      /* Datatypes */
 
 /********************/
 /* Local Prototypes */
 /********************/
 static herr_t H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag);
-static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc,
-	H5G_loc_t *obj_loc);
-
+static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc);
 
 /*************/
 /* Functions */
 /*************/
 
-
-
 /*-------------------------------------------------------------------------
  * Function:    H5Oflush
  *
@@ -74,34 +70,34 @@ static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc,
 herr_t
 H5Oflush(hid_t obj_id)
 {
-    H5VL_object_t      *vol_obj     = NULL;     /* Object of obj_id     */
-    H5VL_loc_params_t   loc_params;
-    herr_t              ret_value   = SUCCEED;  /* Return value     */
+    H5VL_object_t *   vol_obj = NULL; /* Object of obj_id     */
+    H5VL_loc_params_t loc_params;
+    herr_t            ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", obj_id);
 
     /* Check args */
-    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(obj_id) < 0)
+    if (H5CX_set_loc(obj_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Set location parameters */
-    loc_params.type         = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type     = H5I_get_type(obj_id);
+    loc_params.type     = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(obj_id);
 
     /* Flush the object */
-    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_id) < 0)
+    if (H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT,
+                             H5_REQUEST_NULL, obj_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oflush() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O_flush
  *
@@ -118,33 +114,32 @@ done:
 herr_t
 H5O_flush(H5O_loc_t *oloc, hid_t obj_id)
 {
-    void                   *obj_ptr;                /* Pointer to object */
-    const H5O_obj_class_t  *obj_class;              /* Class of object */
-    herr_t                  ret_value = SUCCEED;    /* Return value */
+    void *                 obj_ptr;             /* Pointer to object */
+    const H5O_obj_class_t *obj_class;           /* Class of object */
+    herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the object pointer */
-    if(NULL == (obj_ptr = H5VL_object(obj_id)))
+    if (NULL == (obj_ptr = H5VL_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the object class */
-    if(NULL == (obj_class = H5O__obj_class(oloc)))
+    if (NULL == (obj_class = H5O__obj_class(oloc)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object class")
 
     /* Flush the object of this class */
-    if(obj_class->flush && obj_class->flush(obj_ptr) < 0)
+    if (obj_class->flush && obj_class->flush(obj_ptr) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
     /* Flush the object metadata and invoke flush callback */
-    if(H5O_flush_common(oloc, obj_id) < 0)
+    if (H5O_flush_common(oloc, obj_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object and object flush callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_flush() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O_flush_common
  *
@@ -160,28 +155,27 @@ done:
 herr_t
 H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id)
 {
-    haddr_t 	tag = 0;
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    haddr_t tag       = 0;
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Retrieve tag for object */
-    if(H5O__oh_tag(oloc, &tag) < 0)
+    if (H5O__oh_tag(oloc, &tag) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object metadata")
 
     /* Flush metadata based on tag value of the object */
-    if(H5F_flush_tagged_metadata(oloc->file, tag) < 0)
+    if (H5F_flush_tagged_metadata(oloc->file, tag) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
 
     /* Check to invoke callback */
-    if(H5F_object_flush_cb(oloc->file, obj_id) < 0)
+    if (H5F_object_flush_cb(oloc->file, obj_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to do object flush callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_flush_common() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O__oh_tag
  *
@@ -198,8 +192,8 @@ done:
 static herr_t
 H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag)
 {
-    H5O_t       *oh = NULL;             /* Object header */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5O_t *oh        = NULL;    /* Object header */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -207,22 +201,21 @@ H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag)
     HDassert(oloc);
 
     /* Get object header for object */
-    if(NULL == (oh = H5O_protect(oloc, H5AC__READ_ONLY_FLAG, FALSE)))
+    if (NULL == (oh = H5O_protect(oloc, H5AC__READ_ONLY_FLAG, FALSE)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object's object header")
 
     /* Get object header's address (i.e. the tag value for this object) */
-    if(HADDR_UNDEF == (*tag = H5O_OH_GET_ADDR(oh)))
+    if (HADDR_UNDEF == (*tag = H5O_OH_GET_ADDR(oh)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get address of object header")
 
 done:
     /* Unprotect object header on failure */
-    if(oh && H5O_unprotect(oloc, oh, H5AC__NO_FLAGS_SET) < 0)
+    if (oh && H5O_unprotect(oloc, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__oh_tag() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Orefresh
  *
@@ -238,34 +231,34 @@ done:
 herr_t
 H5Orefresh(hid_t oid)
 {
-    H5VL_object_t      *vol_obj     = NULL;     /* Object of oid     */
-    H5VL_loc_params_t   loc_params;
-    herr_t              ret_value   = SUCCEED;  /* Return value     */
+    H5VL_object_t *   vol_obj = NULL; /* Object of oid     */
+    H5VL_loc_params_t loc_params;
+    herr_t            ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", oid);
 
     /* Check args */
-    if(NULL == (vol_obj = H5VL_vol_object(oid)))
+    if (NULL == (vol_obj = H5VL_vol_object(oid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(oid) < 0)
+    if (H5CX_set_loc(oid) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Set location parameters */
-    loc_params.type         = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type     = H5I_get_type(oid);
+    loc_params.type     = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(oid);
 
     /* Refresh the object */
-    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, oid) < 0)
+    if (H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT,
+                             H5_REQUEST_NULL, oid) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Orefresh() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O_refresh_metadata
  *
@@ -289,20 +282,20 @@ done:
 herr_t
 H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
 {
-    hbool_t objs_incr = FALSE;          /* Whether the object count in the file was incremented */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    hbool_t objs_incr = FALSE;   /* Whether the object count in the file was incremented */
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* If the file is opened with write access, no need to perform refresh actions. */
-    if(!(H5F_INTENT(oloc.file) & H5F_ACC_RDWR)) {
-        H5G_loc_t obj_loc;
-        H5O_loc_t obj_oloc;
-        H5G_name_t obj_path;
-        H5O_refresh_state_t state;
-        H5D_t *ds;
+    if (!(H5F_INTENT(oloc.file) & H5F_ACC_RDWR)) {
+        H5G_loc_t            obj_loc;
+        H5O_loc_t            obj_oloc;
+        H5G_name_t           obj_path;
+        H5O_refresh_state_t  state;
+        H5D_t *              ds;
         const H5VL_object_t *vol_obj;
-        H5VL_t *connector = NULL;
+        H5VL_t *             connector = NULL;
 
         /* Create empty object location */
         obj_loc.oloc = &obj_oloc;
@@ -319,26 +312,24 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
          * The vol_obj will disappear when the underlying object is closed, so
          * we can't use that directly.
          */
-        if(NULL == (vol_obj = H5VL_vol_object(oid)))
+        if (NULL == (vol_obj = H5VL_vol_object(oid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
         connector = vol_obj->connector;
 
         /* Save important datatype state */
         switch (H5I_get_type(oid)) {
-        case H5I_DATATYPE:
-            if (H5T_save_refresh_state(oid, &state.shared_ohdr_info) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL,
-                    "unable to save datatype state");
-            break;
-        case H5I_DATASET:
-            ds = (H5D_t *)vol_obj->data;
-            state.dapl_id = ds->shared->dapl_id;
-            if (H5I_inc_ref(state.dapl_id, false) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                    "could not increase refcnt");
-            break;
-        default:
-            break;
+            case H5I_DATATYPE:
+                if (H5T_save_refresh_state(oid, &state.shared_ohdr_info) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to save datatype state");
+                break;
+            case H5I_DATASET:
+                ds            = (H5D_t *)vol_obj->data;
+                state.dapl_id = ds->shared->dapl_id;
+                if (H5I_inc_ref(state.dapl_id, false) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not increase refcnt");
+                break;
+            default:
+                break;
         }
 
         /* Bump the number of references on the VOL connector.
@@ -347,12 +338,11 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
         connector->nrefs++;
 
         /* Close object & evict its metadata */
-        if((H5O__refresh_metadata_close(oid, oloc, &obj_loc)) < 0)
+        if ((H5O__refresh_metadata_close(oid, oloc, &obj_loc)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Re-open the object, re-fetching its metadata */
-        if (H5O_refresh_metadata_reopen(oid, &obj_loc, &state, connector,
-                FALSE) < 0)
+        if (H5O_refresh_metadata_reopen(oid, &obj_loc, &state, connector, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Restore the number of references on the VOL connector */
@@ -360,29 +350,27 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
 
         /* Restore important datatype state */
         switch (H5I_get_type(oid)) {
-        case H5I_DATATYPE:
-            if(H5T_restore_refresh_state(oid, &state.shared_ohdr_info) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to restore datatype state")
-            break;
-        case H5I_DATASET:
-            if (H5I_dec_ref(state.dapl_id) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                    "could not decrease refcnt");
-            break;
-        default:
-            break;
+            case H5I_DATATYPE:
+                if (H5T_restore_refresh_state(oid, &state.shared_ohdr_info) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to restore datatype state")
+                break;
+            case H5I_DATASET:
+                if (H5I_dec_ref(state.dapl_id) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not decrease refcnt");
+                break;
+            default:
+                break;
         }
 
     } /* end if */
 
 done:
-    if(objs_incr)
+    if (objs_incr)
         H5F_decr_nopen_objs(oloc.file);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_refresh_metadata() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O__refresh_metadata_close
  *
@@ -405,14 +393,14 @@ done:
 static herr_t
 H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc)
 {
-    haddr_t tag = 0;            /* Tag for object */
-    hbool_t corked = FALSE;     /* Whether object's metadata is corked */
-    herr_t ret_value = SUCCEED; /* Return value */
+    haddr_t tag       = 0;       /* Tag for object */
+    hbool_t corked    = FALSE;   /* Whether object's metadata is corked */
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Make deep local copy of object's location information */
-    if(obj_loc) {
+    if (obj_loc) {
         H5G_loc_t tmp_loc;
 
         H5G_loc(oid, &tmp_loc);
@@ -420,40 +408,39 @@ H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc)
     } /* end if */
 
     /* Handle close for multiple dataset opens */
-    if(H5I_get_type(oid) == H5I_DATASET)
-        if(H5D_mult_refresh_close(oid) < 0)
+    if (H5I_get_type(oid) == H5I_DATASET)
+        if (H5D_mult_refresh_close(oid) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to prepare refresh for dataset")
 
     /* Retrieve tag for object */
-    if(H5O__oh_tag(&oloc, &tag) < 0)
+    if (H5O__oh_tag(&oloc, &tag) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to get object header address")
 
     /* Get cork status of the object with tag */
-    if(H5AC_cork(oloc.file, tag, H5AC__GET_CORKED, &corked) < 0)
+    if (H5AC_cork(oloc.file, tag, H5AC__GET_CORKED, &corked) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
 
     /* Close the object */
-    if(H5I_dec_ref(oid) < 0)
+    if (H5I_dec_ref(oid) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close object")
 
     /* Flush metadata based on tag value of the object */
-    if(H5F_flush_tagged_metadata(oloc.file, tag) < 0)
+    if (H5F_flush_tagged_metadata(oloc.file, tag) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
 
     /* Evict the object's tagged metadata */
-    if(H5F_evict_tagged_metadata(oloc.file, tag) < 0)
+    if (H5F_evict_tagged_metadata(oloc.file, tag) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to evict metadata")
 
     /* Re-cork object with tag */
-    if(corked)
-        if(H5AC_cork(oloc.file, tag, H5AC__SET_CORK, &corked) < 0)
+    if (corked)
+        if (H5AC_cork(oloc.file, tag, H5AC__SET_CORK, &corked) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to cork the object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O__refresh_metadata_close() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O_refresh_metadata_reopen
  *
@@ -469,12 +456,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc,
-    const H5O_refresh_state_t *state, H5VL_t *vol_connector, hbool_t start_swmr)
+H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, const H5O_refresh_state_t *state,
+                            H5VL_t *vol_connector, hbool_t start_swmr)
 {
-    void *object = NULL;        /* Object for this operation */
-    H5I_type_t type;            /* Type of object for the ID */
-    herr_t ret_value = SUCCEED; /* Return value */
+    void *     object = NULL;       /* Object for this operation */
+    H5I_type_t type;                /* Type of object for the ID */
+    herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -485,28 +472,26 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc,
     /* Get object's type */
     type = H5I_get_type(oid);
 
-    switch(type) {
+    switch (type) {
         case H5I_GROUP:
             /* Re-open the group */
-            if(NULL == (object = H5G_open(obj_loc)))
+            if (NULL == (object = H5G_open(obj_loc)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open group")
             break;
 
         case H5I_DATATYPE:
             /* Re-open the named datatype */
-            if(NULL == (object = H5T_open(obj_loc)))
+            if (NULL == (object = H5T_open(obj_loc)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
             break;
 
         case H5I_DATASET:
-            object = H5D_open(obj_loc,
-                (state == NULL) ? H5P_DATASET_ACCESS_DEFAULT : state->dapl_id);
-            if(NULL == object) {
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL,
-                    "unable to open dataset");
+            object = H5D_open(obj_loc, (state == NULL) ? H5P_DATASET_ACCESS_DEFAULT : state->dapl_id);
+            if (NULL == object) {
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset");
             }
-            if(!start_swmr) /* No need to handle multiple opens when H5Fstart_swmr_write() */
-                if(H5D_mult_refresh_reopen((H5D_t *)object) < 0)
+            if (!start_swmr) /* No need to handle multiple opens when H5Fstart_swmr_write() */
+                if (H5D_mult_refresh_reopen((H5D_t *)object) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to finish refresh for dataset")
             break;
 
@@ -528,15 +513,15 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc,
         case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
-        break;
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL,
+                        "not a valid file object ID (dataset, group, or datatype)")
+            break;
     } /* end switch */
 
     /* Re-register ID for the object */
-    if((H5VL_register_using_existing_id(type, object, vol_connector, TRUE, oid)) < 0)
+    if ((H5VL_register_using_existing_id(type, object, vol_connector, TRUE, oid)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_refresh_metadata_reopen() */
-

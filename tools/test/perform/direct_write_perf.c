@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,213 +26,226 @@
 #include <math.h>
 
 #ifdef H5_STDC_HEADERS
-#   include <errno.h>
-#   include <fcntl.h>
-#   include <stdio.h>
-#   include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 #endif
 
 #ifdef H5_HAVE_UNISTD_H
-#   include <sys/types.h>
-#   include <unistd.h>
+#include <sys/types.h>
+#include <unistd.h>
 #endif
 
 #ifdef H5_HAVE_SYS_STAT_H
-#   include <sys/stat.h>
+#include <sys/stat.h>
 #endif
 
 #if defined(H5_TIME_WITH_SYS_TIME)
-#   include <sys/time.h>
-#   include <time.h>
+#include <sys/time.h>
+#include <time.h>
 #elif defined(H5_HAVE_SYS_TIME_H)
-#   include <sys/time.h>
+#include <sys/time.h>
 #else
-#   include <time.h>
+#include <time.h>
 #endif
 
-const char *FILENAME[] = {
-    "direct_write",
-    "unix.raw",
-    NULL
-};
+const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
 
 /*
  * Print the current location on the standard output stream.
  */
 #define FUNC __func__
-#define AT()     printf ("   at %s:%d in %s()...\n",        \
-        __FILE__, __LINE__, FUNC);
-#define H5_FAILED()  {puts("*FAILED*");fflush(stdout);}
-#define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
-#define TESTING(WHAT)  {printf("Testing %-62s",WHAT); fflush(stdout);}
-#define PASSED()  {puts(" PASSED");fflush(stdout);}
+#define AT() printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
+#define H5_FAILED()                                                                                          \
+    {                                                                                                        \
+        puts("*FAILED*");                                                                                    \
+        fflush(stdout);                                                                                      \
+    }
+#define TEST_ERROR                                                                                           \
+    {                                                                                                        \
+        H5_FAILED();                                                                                         \
+        AT();                                                                                                \
+        goto error;                                                                                          \
+    }
+#define TESTING(WHAT)                                                                                        \
+    {                                                                                                        \
+        printf("Testing %-62s", WHAT);                                                                       \
+        fflush(stdout);                                                                                      \
+    }
+#define PASSED()                                                                                             \
+    {                                                                                                        \
+        puts(" PASSED");                                                                                     \
+        fflush(stdout);                                                                                      \
+    }
 
-#define DIRECT_UNCOMPRESSED_DSET        "direct_uncompressed_dset"
-#define DIRECT_COMPRESSED_DSET        "direct_compressed_dset"
-#define REG_COMPRESSED_DSET       "reg_compressed_dset"
-#define REG_NO_COMPRESS_DSET   "reg_no_compress_dset"
-#define RANK         3
-#define NX     100
-#define NY     1000
-#define NZ     250
-#define CHUNK_NX     1
-#define CHUNK_NY     1000
-#define CHUNK_NZ     250
+#define DIRECT_UNCOMPRESSED_DSET "direct_uncompressed_dset"
+#define DIRECT_COMPRESSED_DSET   "direct_compressed_dset"
+#define REG_COMPRESSED_DSET      "reg_compressed_dset"
+#define REG_NO_COMPRESS_DSET     "reg_no_compress_dset"
+#define RANK                     3
+#define NX                       100
+#define NY                       1000
+#define NZ                       250
+#define CHUNK_NX                 1
+#define CHUNK_NY                 1000
+#define CHUNK_NZ                 250
 
-#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001)+12)
-char        filename[1024];
+#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s)) * 1.001) + 12)
+char          filename[1024];
 unsigned int *outbuf[NX];
-size_t         data_size[NX];
-double       total_size = 0.0;
+size_t        data_size[NX];
+double        total_size = 0.0;
 unsigned int *direct_buf[NX];
-double       MB = 1048576.0;
+double        MB = 1048576.0;
 
 /*--------------------------------------------------
  * Function to report IO rate
  *--------------------------------------------------
  */
-void reportTime(struct timeval start, double mbytes)
+void
+reportTime(struct timeval start, double mbytes)
 {
-    struct timeval timeval_stop,timeval_diff;
+    struct timeval timeval_stop, timeval_diff;
 
     /*end timing*/
-    gettimeofday(&timeval_stop,NULL);
+    gettimeofday(&timeval_stop, NULL);
 
     /* Calculate the elapsed gettimeofday time */
-    timeval_diff.tv_usec=timeval_stop.tv_usec-start.tv_usec;
-    timeval_diff.tv_sec=timeval_stop.tv_sec-start.tv_sec;
+    timeval_diff.tv_usec = timeval_stop.tv_usec - start.tv_usec;
+    timeval_diff.tv_sec  = timeval_stop.tv_sec - start.tv_sec;
 
-    if(timeval_diff.tv_usec<0) {
-        timeval_diff.tv_usec+=1000000;
+    if (timeval_diff.tv_usec < 0) {
+        timeval_diff.tv_usec += 1000000;
         timeval_diff.tv_sec--;
     } /* end if */
 
-/*printf("mbytes=%lf, sec=%lf, usec=%lf\n", mbytes, (double)timeval_diff.tv_sec, (double)timeval_diff.tv_usec);*/
-    printf("MBytes/second: %lf\n", (double)mbytes/((double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0)));
+    /*printf("mbytes=%lf, sec=%lf, usec=%lf\n", mbytes, (double)timeval_diff.tv_sec,
+     * (double)timeval_diff.tv_usec);*/
+    printf("MBytes/second: %lf\n", (double)mbytes / ((double)timeval_diff.tv_sec +
+                                                     ((double)timeval_diff.tv_usec / (double)1000000.0)));
 }
 
 /*--------------------------------------------------
  *  Create file, datasets, and initialize data
  *--------------------------------------------------
  */
-int create_file(hid_t fapl_id)
+int
+create_file(hid_t fapl_id)
 {
-    hid_t       file;                          /* handles */
-    hid_t       fapl;
-    hid_t       cparms;
-    hid_t       dataspace, dataset;
-    hsize_t     dims[RANK]  = {NX, NY, NZ};
-    hsize_t     chunk_dims[RANK] ={CHUNK_NX, CHUNK_NY, CHUNK_NZ};
-    unsigned int         aggression = 9;     /* Compression aggression setting */
-    int         ret;
-    int         i, j, n;
+    hid_t        file; /* handles */
+    hid_t        fapl;
+    hid_t        cparms;
+    hid_t        dataspace, dataset;
+    hsize_t      dims[RANK]       = {NX, NY, NZ};
+    hsize_t      chunk_dims[RANK] = {CHUNK_NX, CHUNK_NY, CHUNK_NZ};
+    unsigned int aggression       = 9; /* Compression aggression setting */
+    int          ret;
+    int          i, j, n;
 
     int flag;
     int unix_file;
 
     unsigned int *p;
-    size_t      buf_size = CHUNK_NY*CHUNK_NZ*sizeof(unsigned int);
+    size_t        buf_size = CHUNK_NY * CHUNK_NZ * sizeof(unsigned int);
 
     const Bytef *z_src;
-    Bytef	    *z_dst;		/*destination buffer		*/
-    uLongf	     z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
-    uLong	     z_src_nbytes = (uLong)buf_size;
+    Bytef *      z_dst; /*destination buffer		*/
+    uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
+    uLong        z_src_nbytes = (uLong)buf_size;
 
     TESTING("Create a file and dataset");
 
     /*
      * Create the data space with unlimited dimensions.
      */
-    if((dataspace = H5Screate_simple(RANK, dims, NULL)) < 0)
+    if ((dataspace = H5Screate_simple(RANK, dims, NULL)) < 0)
         TEST_ERROR;
 
     /*
      * Create a new file. If file exists its contents will be overwritten.
      */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
     /*
      * Modify dataset creation properties, i.e. enable chunking and compression
      */
-    if((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+    if ((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
 
-    if(H5Pset_chunk( cparms, RANK, chunk_dims) < 0)
+    if (H5Pset_chunk(cparms, RANK, chunk_dims) < 0)
         TEST_ERROR;
 
     /*
      * Create a new dataset within the file using cparms
      * creation properties.
      */
-    if((dataset = H5Dcreate2(file, DIRECT_UNCOMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-			cparms, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, DIRECT_UNCOMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT, cparms,
+                              H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if(H5Dclose(dataset) < 0)
+    if (H5Dclose(dataset) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dcreate2(file, REG_NO_COMPRESS_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-			cparms, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, REG_NO_COMPRESS_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT, cparms,
+                              H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if(H5Dclose(dataset) < 0)
+    if (H5Dclose(dataset) < 0)
         TEST_ERROR;
 
     /* Set compression */
-    if(H5Pset_deflate( cparms, aggression) < 0)
+    if (H5Pset_deflate(cparms, aggression) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dcreate2(file, DIRECT_COMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-			cparms, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, DIRECT_COMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT, cparms,
+                              H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if(H5Dclose(dataset) < 0)
+    if (H5Dclose(dataset) < 0)
         TEST_ERROR;
 
-
-    if((dataset = H5Dcreate2(file, REG_COMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-			cparms, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, REG_COMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT, cparms,
+                              H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if(H5Dclose(dataset) < 0)
+    if (H5Dclose(dataset) < 0)
         TEST_ERROR;
 
-    if(H5Fclose(file) < 0)
+    if (H5Fclose(file) < 0)
         TEST_ERROR;
 
-    if(H5Sclose(dataspace) < 0)
+    if (H5Sclose(dataspace) < 0)
         TEST_ERROR;
 
-    if(H5Pclose(cparms) < 0)
+    if (H5Pclose(cparms) < 0)
         TEST_ERROR;
 
     /* create a unix file*/
-    flag = O_CREAT|O_TRUNC|O_WRONLY;
+    flag = O_CREAT | O_TRUNC | O_WRONLY;
 
-    if ((unix_file=open(FILENAME[1],flag,S_IRWXU))== -1)
+    if ((unix_file = open(FILENAME[1], flag, S_IRWXU)) == -1)
         TEST_ERROR;
 
-    if (close(unix_file) < 0)
-    {
+    if (close(unix_file) < 0) {
         printf(" unable to close the file\n");
         TEST_ERROR;
     }
 
-
     /* Initialize data for chunks */
-    for(i = 0; i < NX; i++) {
-	p = direct_buf[i] = (unsigned int*)malloc(CHUNK_NY*CHUNK_NZ*sizeof(unsigned int));
+    for (i = 0; i < NX; i++) {
+        p = direct_buf[i] = (unsigned int *)malloc(CHUNK_NY * CHUNK_NZ * sizeof(unsigned int));
 
-        for(j=0; j < CHUNK_NY*CHUNK_NZ; j++, p++)
+        for (j = 0; j < CHUNK_NY * CHUNK_NZ; j++, p++)
             *p = rand() % 65000;
 
-        z_src = (const Bytef*)direct_buf[i];
+        z_src = (const Bytef *)direct_buf[i];
 
         z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
         /* Allocate output (compressed) buffer */
-        outbuf[i] = (unsigned int*)malloc((size_t)z_dst_nbytes);
-        z_dst = (Bytef *)outbuf[i];
+        outbuf[i] = (unsigned int *)malloc((size_t)z_dst_nbytes);
+        z_dst     = (Bytef *)outbuf[i];
 
         /* Perform compression from the source to the destination buffer */
         ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
@@ -241,28 +254,31 @@ int create_file(hid_t fapl_id)
         total_size += data_size[i];
 
         /* Check for various zlib errors */
-        if(Z_BUF_ERROR == ret) {
+        if (Z_BUF_ERROR == ret) {
             fprintf(stderr, "overflow");
             TEST_ERROR;
-        } else if(Z_MEM_ERROR == ret) {
-	    fprintf(stderr, "deflate memory error");
+        }
+        else if (Z_MEM_ERROR == ret) {
+            fprintf(stderr, "deflate memory error");
             TEST_ERROR;
-        } else if(Z_OK != ret) {
-	    fprintf(stderr, "other deflate error");
+        }
+        else if (Z_OK != ret) {
+            fprintf(stderr, "other deflate error");
             TEST_ERROR;
         }
     }
 
-
     PASSED();
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dataset);
         H5Sclose(dataspace);
         H5Pclose(cparms);
         H5Fclose(file);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return 1;
 }
 
@@ -274,37 +290,37 @@ error:
 int
 test_direct_write_uncompressed_data(hid_t fapl_id)
 {
-    hid_t       file;                          /* handles */
-    hid_t       dataspace, dataset;
-    hid_t       dxpl;
-    herr_t      status;
-    int         i;
+    hid_t  file; /* handles */
+    hid_t  dataspace, dataset;
+    hid_t  dxpl;
+    herr_t status;
+    int    i;
 
-    unsigned    filter_mask = 0;
-    hsize_t     offset[RANK] = {0, 0, 0};
+    unsigned filter_mask  = 0;
+    hsize_t  offset[RANK] = {0, 0, 0};
 
     struct timeval timeval_start;
 
     TESTING("H5Dwrite_chunk for uncompressed data");
 
-    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         TEST_ERROR;
 
     /* Start the timer */
-    gettimeofday(&timeval_start,NULL);
+    gettimeofday(&timeval_start, NULL);
 
     /* Reopen the file and dataset */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen2(file, DIRECT_UNCOMPRESSED_DSET, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dopen2(file, DIRECT_UNCOMPRESSED_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-
 
     /* Write the compressed chunk data repeatedly to cover all the chunks in the
      * dataset, using the direct writing function.     */
-    for(i=0; i<NX; i++) {
-        status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, CHUNK_NY*CHUNK_NZ*sizeof(unsigned int), direct_buf[i]);
+    for (i = 0; i < NX; i++) {
+        status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset,
+                                CHUNK_NY * CHUNK_NZ * sizeof(unsigned int), direct_buf[i]);
         (offset[0])++;
     }
 
@@ -316,20 +332,21 @@ test_direct_write_uncompressed_data(hid_t fapl_id)
     H5Fclose(file);
 
     /* Report the performance */
-    reportTime(timeval_start, (double)(NX*NY*NZ*sizeof(unsigned int)/MB));
+    reportTime(timeval_start, (double)(NX * NY * NZ * sizeof(unsigned int) / MB));
 
     PASSED();
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dataset);
         H5Pclose(dxpl);
         H5Fclose(file);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return 1;
 }
-
 
 /*--------------------------------------------------
  *  Benchmark the performance of the new function
@@ -339,36 +356,35 @@ error:
 int
 test_direct_write_compressed_data(hid_t fapl_id)
 {
-    hid_t       file;                          /* handles */
-    hid_t       dataspace, dataset;
-    hid_t       dxpl;
-    herr_t      status;
-    int         i;
+    hid_t  file; /* handles */
+    hid_t  dataspace, dataset;
+    hid_t  dxpl;
+    herr_t status;
+    int    i;
 
-    unsigned    filter_mask = 0;
-    hsize_t     offset[RANK] = {0, 0, 0};
+    unsigned filter_mask  = 0;
+    hsize_t  offset[RANK] = {0, 0, 0};
 
     struct timeval timeval_start;
 
     TESTING("H5DOwrite_chunk for pre-compressed data");
 
-    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         TEST_ERROR;
 
     /* Start the timer */
-    gettimeofday(&timeval_start,NULL);
+    gettimeofday(&timeval_start, NULL);
 
     /* Reopen the file and dataset */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen2(file, DIRECT_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dopen2(file, DIRECT_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-
 
     /* Write the compressed chunk data repeatedly to cover all the chunks in the
      * dataset, using the direct writing function.     */
-    for(i=0; i<NX; i++) {
+    for (i = 0; i < NX; i++) {
         status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, data_size[i], outbuf[i]);
         (offset[0])++;
     }
@@ -381,17 +397,19 @@ test_direct_write_compressed_data(hid_t fapl_id)
     H5Fclose(file);
 
     /* Report the performance */
-    reportTime(timeval_start, (double)(total_size/MB));
+    reportTime(timeval_start, (double)(total_size / MB));
 
     PASSED();
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dataset);
         H5Pclose(dxpl);
         H5Fclose(file);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return 1;
 }
 
@@ -403,13 +421,13 @@ error:
 int
 test_compressed_write(hid_t fapl_id)
 {
-    hid_t       file;                          /* handles */
-    hid_t       dataspace, dataset;
-    hid_t       mem_space;
-    hsize_t     chunk_dims[RANK] ={CHUNK_NX, CHUNK_NY, CHUNK_NZ};
-    hid_t       dxpl;
-    herr_t      status;
-    int         i;
+    hid_t   file; /* handles */
+    hid_t   dataspace, dataset;
+    hid_t   mem_space;
+    hsize_t chunk_dims[RANK] = {CHUNK_NX, CHUNK_NY, CHUNK_NZ};
+    hid_t   dxpl;
+    herr_t  status;
+    int     i;
 
     hsize_t start[RANK];  /* Start of hyperslab */
     hsize_t stride[RANK]; /* Stride of hyperslab */
@@ -420,40 +438,42 @@ test_compressed_write(hid_t fapl_id)
 
     TESTING("H5Dwrite with compression enabled");
 
-    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         TEST_ERROR;
 
-    if((mem_space = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
+    if ((mem_space = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
         TEST_ERROR;
 
     /* Start the timer */
-    gettimeofday(&timeval_start,NULL);
+    gettimeofday(&timeval_start, NULL);
 
     /* Reopen the file and dataset */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen2(file, REG_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dopen2(file, REG_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if((dataspace = H5Dget_space(dataset)) < 0)
+    if ((dataspace = H5Dget_space(dataset)) < 0)
         TEST_ERROR;
 
-    start[0]  = start[1]  = start[2] = 0;
+    start[0] = start[1] = start[2] = 0;
     stride[0] = stride[1] = stride[2] = 1;
-    count[0]  = count[1]  = count[2] = 1;
-    block[0]  = CHUNK_NX; block[1]  = CHUNK_NY; block[2] = CHUNK_NZ;
+    count[0] = count[1] = count[2] = 1;
+    block[0]                       = CHUNK_NX;
+    block[1]                       = CHUNK_NY;
+    block[2]                       = CHUNK_NZ;
 
-    for(i=0; i<NX; i++) {
+    for (i = 0; i < NX; i++) {
         /*
          * Select hyperslab for one chunk in the file
          */
-        if((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
+        if ((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
             TEST_ERROR;
         (start[0])++;
 
-        if((status = H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, dataspace,
-    		      H5P_DEFAULT, direct_buf[i])) < 0)
+        if ((status = H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, dataspace, H5P_DEFAULT, direct_buf[i])) <
+            0)
             TEST_ERROR;
     }
 
@@ -467,19 +487,21 @@ test_compressed_write(hid_t fapl_id)
     H5Fclose(file);
 
     /* Report the performance */
-    reportTime(timeval_start, (double)(NX*NY*NZ*sizeof(unsigned int)/MB));
+    reportTime(timeval_start, (double)(NX * NY * NZ * sizeof(unsigned int) / MB));
 
     PASSED();
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dataset);
         H5Sclose(dataspace);
         H5Sclose(mem_space);
         H5Pclose(dxpl);
         H5Fclose(file);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return 1;
 }
 
@@ -491,13 +513,13 @@ error:
 int
 test_no_compress_write(hid_t fapl_id)
 {
-    hid_t       file;                          /* handles */
-    hid_t       dataspace, dataset;
-    hid_t       mem_space;
-    hsize_t     chunk_dims[RANK] ={CHUNK_NX, CHUNK_NY, CHUNK_NZ};
-    hid_t       dxpl;
-    herr_t      status;
-    int         i;
+    hid_t   file; /* handles */
+    hid_t   dataspace, dataset;
+    hid_t   mem_space;
+    hsize_t chunk_dims[RANK] = {CHUNK_NX, CHUNK_NY, CHUNK_NZ};
+    hid_t   dxpl;
+    herr_t  status;
+    int     i;
 
     hsize_t start[RANK];  /* Start of hyperslab */
     hsize_t stride[RANK]; /* Stride of hyperslab */
@@ -508,40 +530,42 @@ test_no_compress_write(hid_t fapl_id)
 
     TESTING("H5Dwrite without compression");
 
-    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         TEST_ERROR;
 
-    if((mem_space = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
+    if ((mem_space = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
         TEST_ERROR;
 
     /* Start the timer */
-    gettimeofday(&timeval_start,NULL);
+    gettimeofday(&timeval_start, NULL);
 
     /* Reopen the file and dataset */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen2(file, REG_NO_COMPRESS_DSET, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dopen2(file, REG_NO_COMPRESS_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if((dataspace = H5Dget_space(dataset)) < 0)
+    if ((dataspace = H5Dget_space(dataset)) < 0)
         TEST_ERROR;
 
-    start[0]  = start[1]  = start[2] = 0;
+    start[0] = start[1] = start[2] = 0;
     stride[0] = stride[1] = stride[2] = 1;
-    count[0]  = count[1]  = count[2] = 1;
-    block[0]  = CHUNK_NX; block[1]  = CHUNK_NY; block[2] = CHUNK_NZ;
+    count[0] = count[1] = count[2] = 1;
+    block[0]                       = CHUNK_NX;
+    block[1]                       = CHUNK_NY;
+    block[2]                       = CHUNK_NZ;
 
-    for(i=0; i<NX; i++) {
+    for (i = 0; i < NX; i++) {
         /*
          * Select hyperslab for one chunk in the file
          */
-        if((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
+        if ((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
             TEST_ERROR;
         (start[0])++;
 
-        if((status = H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, dataspace,
-    		      H5P_DEFAULT, direct_buf[i])) < 0)
+        if ((status = H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, dataspace, H5P_DEFAULT, direct_buf[i])) <
+            0)
             TEST_ERROR;
     }
 
@@ -555,19 +579,21 @@ test_no_compress_write(hid_t fapl_id)
     H5Fclose(file);
 
     /* Report the performance */
-    reportTime(timeval_start, (double)(NX*NY*NZ*sizeof(unsigned int)/MB));
+    reportTime(timeval_start, (double)(NX * NY * NZ * sizeof(unsigned int) / MB));
 
     PASSED();
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dataset);
         H5Sclose(dataspace);
         H5Sclose(mem_space);
         H5Pclose(dxpl);
         H5Fclose(file);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return 1;
 }
 
@@ -579,9 +605,9 @@ error:
 int
 test_unix_write(void)
 {
-    int file, flag;
-    ssize_t op_size;
-    int i;
+    int            file, flag;
+    ssize_t        op_size;
+    int            i;
     struct timeval timeval_start;
 
     TESTING("Write compressed data to a Unix file");
@@ -590,35 +616,32 @@ test_unix_write(void)
     flag = O_WRONLY;
 
     /* Start the timer */
-    gettimeofday(&timeval_start,NULL);
+    gettimeofday(&timeval_start, NULL);
 
-    if ((file=open(FILENAME[1],flag))== -1)
+    if ((file = open(FILENAME[1], flag)) == -1)
         TEST_ERROR;
 
     /* Write the compressed chunk data repeatedly to cover all the chunks in the
      * dataset, using the direct writing function.     */
-    for(i=0; i<NX; i++) {
-        op_size = write(file, outbuf[i],data_size[i]);
-        if (op_size < 0)
-        {
+    for (i = 0; i < NX; i++) {
+        op_size = write(file, outbuf[i], data_size[i]);
+        if (op_size < 0) {
             printf(" Error in writing data to file because %s \n", strerror(errno));
             TEST_ERROR;
         }
-        else if (op_size == 0)
-        {
+        else if (op_size == 0) {
             printf(" unable to write sufficent data to file because %s \n", strerror(errno));
             TEST_ERROR;
         }
     }
 
-    if (close(file) < 0)
-    {
+    if (close(file) < 0) {
         printf(" unable to close the file\n");
         TEST_ERROR;
     }
 
     /* Report the performance */
-    reportTime(timeval_start, (double)(total_size/MB));
+    reportTime(timeval_start, (double)(total_size / MB));
 
     PASSED();
     return 0;
@@ -632,10 +655,10 @@ error:
  *--------------------------------------------------
  */
 int
-main (void)
+main(void)
 {
-    hid_t       fapl = H5P_DEFAULT;
-    int         i;
+    hid_t fapl = H5P_DEFAULT;
+    int   i;
 
     sprintf(filename, "%s.h5", FILENAME[0]);
 
@@ -646,7 +669,7 @@ main (void)
     test_compressed_write(fapl);
     test_unix_write();
 
-    for(i=0; i<NX; i++) {
+    for (i = 0; i < NX; i++) {
         free(outbuf[i]);
         free(direct_buf[i]);
     }
@@ -665,7 +688,7 @@ main(void)
 
 #endif /* WIN32 / MINGW32 */
 
-#else  /* !H5_HAVE_FILTER_DEFLATE */
+#else /* !H5_HAVE_FILTER_DEFLATE */
 
 /*
  * Function:    main
@@ -680,5 +703,4 @@ main(void)
     return EXIT_SUCCESS;
 }
 
-#endif  /* !H5_HAVE_FILTER_DEFLATE */
-
+#endif /* !H5_HAVE_FILTER_DEFLATE */

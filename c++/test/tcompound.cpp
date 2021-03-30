@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,21 +25,20 @@ using std::cerr;
 using std::endl;
 
 #include <string>
-#include "H5Cpp.h"      // C++ API header file
+#include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
 #include "h5test.h"
-#include "h5cpputil.h"  // C++ utilility header file
+#include "h5cpputil.h" // C++ utilility header file
 
 /* Number of elements in each test */
 #define NTESTELEM 100000
 
 typedef struct complex_t {
-    double                  re;
-    double                  im;
+    double re;
+    double im;
 } complex_t;
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_compound_1
  *
@@ -51,7 +50,8 @@ typedef struct complex_t {
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-static void test_compound_1()
+static void
+test_compound_1()
 {
     // Output message about test being performed
     SUBTEST("Compound Data Types");
@@ -63,15 +63,13 @@ static void test_compound_1()
         complex_type.insertMember("real", HOFFSET(complex_t, re), PredType::NATIVE_DOUBLE);
         complex_type.insertMember("imaginary", HOFFSET(complex_t, im), PredType::NATIVE_DOUBLE);
         PASSED();
-    }   // end of try block
+    } // end of try block
 
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
-}   // test_compound_1()
+} // test_compound_1()
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_compound_2
  *
@@ -85,7 +83,8 @@ static void test_compound_1()
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-static void test_compound_2()
+static void
+test_compound_2()
 {
     typedef struct {
         int a, b, c[4], d, e;
@@ -94,33 +93,33 @@ static void test_compound_2()
         int e, d, c[4], b, a;
     } dst_typ_t;
 
-    src_typ_t *s_ptr;
-    dst_typ_t *d_ptr;
-    const int nelmts = NTESTELEM;
-    const hsize_t  four = 4;
-    int i;
+    src_typ_t *    s_ptr;
+    dst_typ_t *    d_ptr;
+    const int      nelmts = NTESTELEM;
+    const hsize_t  four   = 4;
+    int            i;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    ArrayType *array_dt = NULL;
+    ArrayType *    array_dt = NULL;
 
     // Output message about test being performed
     SUBTEST("Compound Element Reordering");
     try {
         // Sizes should be the same, but be careful just in case
-        buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
-        for (i=0; i<nelmts; i++) {
-            s_ptr = ((src_typ_t*)orig) + i;
-            s_ptr->a    = i*8+0;
-            s_ptr->b    = i*8+1;
-            s_ptr->c[0] = i*8+2;
-            s_ptr->c[1] = i*8+3;
-            s_ptr->c[2] = i*8+4;
-            s_ptr->c[3] = i*8+5;
-            s_ptr->d    = i*8+6;
-            s_ptr->e    = i*8+7;
+        buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+        bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(dst_typ_t));
+        orig = (unsigned char *)HDmalloc(nelmts * sizeof(src_typ_t));
+        for (i = 0; i < nelmts; i++) {
+            s_ptr       = ((src_typ_t *)orig) + i;
+            s_ptr->a    = i * 8 + 0;
+            s_ptr->b    = i * 8 + 1;
+            s_ptr->c[0] = i * 8 + 2;
+            s_ptr->c[1] = i * 8 + 3;
+            s_ptr->c[2] = i * 8 + 4;
+            s_ptr->c[3] = i * 8 + 5;
+            s_ptr->d    = i * 8 + 6;
+            s_ptr->e    = i * 8 + 7;
         }
-        memcpy(buf, orig, nelmts*sizeof(src_typ_t));
+        memcpy(buf, orig, nelmts * sizeof(src_typ_t));
 
         // Build hdf5 datatypes
         array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
@@ -150,29 +149,22 @@ static void test_compound_2()
         st.convert(dt, (size_t)nelmts, buf, bkg);
 
         // Compare results
-        for (i=0; i<nelmts; i++) {
-            s_ptr = ((src_typ_t*)orig) + i;
-            d_ptr = ((dst_typ_t*)buf)  + i;
-            if (s_ptr->a    != d_ptr->a    ||
-                s_ptr->b    != d_ptr->b    ||
-                s_ptr->c[0] != d_ptr->c[0] ||
-                s_ptr->c[1] != d_ptr->c[1] ||
-                s_ptr->c[2] != d_ptr->c[2] ||
-                s_ptr->c[3] != d_ptr->c[3] ||
-                s_ptr->d    != d_ptr->d    ||
-                s_ptr->e    != d_ptr->e) {
+        for (i = 0; i < nelmts; i++) {
+            s_ptr = ((src_typ_t *)orig) + i;
+            d_ptr = ((dst_typ_t *)buf) + i;
+            if (s_ptr->a != d_ptr->a || s_ptr->b != d_ptr->b || s_ptr->c[0] != d_ptr->c[0] ||
+                s_ptr->c[1] != d_ptr->c[1] || s_ptr->c[2] != d_ptr->c[2] || s_ptr->c[3] != d_ptr->c[3] ||
+                s_ptr->d != d_ptr->d || s_ptr->e != d_ptr->e) {
                 H5_FAILED();
                 cerr << "    i=" << i << endl;
-                cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b
-                     << "c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << ","
-                     << s_ptr->c[2] << "," << s_ptr->c[3] << ", d="
-                     << s_ptr->d << ", e=" << s_ptr->e << "}" << endl;
-                cerr << "    dst={a=" << s_ptr->a << ", b=" << s_ptr->b
-                     << "c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << ","
-                     << s_ptr->c[2] << "," << s_ptr->c[3] << ", d="
-                     << s_ptr->d << ", e=" << s_ptr->e << "}" << endl;
+                cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b << "c=[" << s_ptr->c[0] << ","
+                     << s_ptr->c[1] << "," << s_ptr->c[2] << "," << s_ptr->c[3] << ", d=" << s_ptr->d
+                     << ", e=" << s_ptr->e << "}" << endl;
+                cerr << "    dst={a=" << s_ptr->a << ", b=" << s_ptr->b << "c=[" << s_ptr->c[0] << ","
+                     << s_ptr->c[1] << "," << s_ptr->c[2] << "," << s_ptr->c[3] << ", d=" << s_ptr->d
+                     << ", e=" << s_ptr->e << "}" << endl;
             }
-            }
+        }
         // Release resources
         HDfree(buf);
         HDfree(bkg);
@@ -182,18 +174,16 @@ static void test_compound_2()
         st.close();
         dt.close();
         PASSED();
-    }   // end of try block
+    } // end of try block
 
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if(array_dt)
+    if (array_dt)
         delete array_dt;
-}   // test_compound_2()
+} // test_compound_2()
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_compound_3
  *
@@ -207,42 +197,43 @@ static void test_compound_2()
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-static void test_compound_3()
+static void
+test_compound_3()
 {
     typedef struct {
         int a, b, c[4], d, e;
     } src_typ_t;
     typedef struct {
-        int a,    c[4],    e;
+        int a, c[4], e;
     } dst_typ_t;
 
-    src_typ_t *s_ptr;
-    dst_typ_t  *d_ptr;
-    int i;
-    const int nelmts = NTESTELEM;
-    const hsize_t  four = 4;
+    src_typ_t *    s_ptr;
+    dst_typ_t *    d_ptr;
+    int            i;
+    const int      nelmts = NTESTELEM;
+    const hsize_t  four   = 4;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    ArrayType* array_dt = NULL;
+    ArrayType *    array_dt = NULL;
 
     // Output message about test being performed
     SUBTEST("Compound Datatype Subset Conversions");
     try {
         /* Initialize */
-        buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
-        for (i=0; i<nelmts; i++) {
-            s_ptr = ((src_typ_t*)orig) + i;
-            s_ptr->a    = i*8+0;
-            s_ptr->b    = i*8+1;
-            s_ptr->c[0] = i*8+2;
-            s_ptr->c[1] = i*8+3;
-            s_ptr->c[2] = i*8+4;
-            s_ptr->c[3] = i*8+5;
-            s_ptr->d    = i*8+6;
-            s_ptr->e    = i*8+7;
+        buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+        bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(dst_typ_t));
+        orig = (unsigned char *)HDmalloc(nelmts * sizeof(src_typ_t));
+        for (i = 0; i < nelmts; i++) {
+            s_ptr       = ((src_typ_t *)orig) + i;
+            s_ptr->a    = i * 8 + 0;
+            s_ptr->b    = i * 8 + 1;
+            s_ptr->c[0] = i * 8 + 2;
+            s_ptr->c[1] = i * 8 + 3;
+            s_ptr->c[2] = i * 8 + 4;
+            s_ptr->c[3] = i * 8 + 5;
+            s_ptr->d    = i * 8 + 6;
+            s_ptr->e    = i * 8 + 7;
         }
-        memcpy(buf, orig, nelmts*sizeof(src_typ_t));
+        memcpy(buf, orig, nelmts * sizeof(src_typ_t));
 
         /* Build hdf5 datatypes */
         array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
@@ -270,27 +261,20 @@ static void test_compound_3()
         st.convert(dt, (size_t)nelmts, buf, bkg);
 
         /* Compare results */
-        for (i=0; i<nelmts; i++) {
-            s_ptr = ((src_typ_t*)orig) + i;
-            d_ptr = ((dst_typ_t*)buf)  + i;
-            if (s_ptr->a    != d_ptr->a    ||
-                s_ptr->c[0] != d_ptr->c[0] ||
-                s_ptr->c[1] != d_ptr->c[1] ||
-                s_ptr->c[2] != d_ptr->c[2] ||
-                s_ptr->c[3] != d_ptr->c[3] ||
-                s_ptr->e    != d_ptr->e) {
+        for (i = 0; i < nelmts; i++) {
+            s_ptr = ((src_typ_t *)orig) + i;
+            d_ptr = ((dst_typ_t *)buf) + i;
+            if (s_ptr->a != d_ptr->a || s_ptr->c[0] != d_ptr->c[0] || s_ptr->c[1] != d_ptr->c[1] ||
+                s_ptr->c[2] != d_ptr->c[2] || s_ptr->c[3] != d_ptr->c[3] || s_ptr->e != d_ptr->e) {
                 H5_FAILED();
                 cerr << "    i=" << i << endl;
-                cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b
-                     << ", c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << ","
-                     << s_ptr->c[2] << "," << s_ptr->c[3] << "], d="
-                     << s_ptr->d << ", e=" << s_ptr->e << "}" << endl;
-                cerr << "    dst={a=" << d_ptr->a
-                     << ", c=[" << d_ptr->c[0] << "," << d_ptr->c[1] << ","
-                     << d_ptr->c[2] << "," << d_ptr->c[3] << "], e="
-                     << d_ptr->e << "}" << endl;
+                cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b << ", c=[" << s_ptr->c[0] << ","
+                     << s_ptr->c[1] << "," << s_ptr->c[2] << "," << s_ptr->c[3] << "], d=" << s_ptr->d
+                     << ", e=" << s_ptr->e << "}" << endl;
+                cerr << "    dst={a=" << d_ptr->a << ", c=[" << d_ptr->c[0] << "," << d_ptr->c[1] << ","
+                     << d_ptr->c[2] << "," << d_ptr->c[3] << "], e=" << d_ptr->e << "}" << endl;
             } // if
-        } // for
+        }     // for
 
         /* Release resources */
         HDfree(buf);
@@ -301,18 +285,16 @@ static void test_compound_3()
         st.close();
         dt.close();
         PASSED();
-    }   // end of try block
+    } // end of try block
 
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if(array_dt)
+    if (array_dt)
         delete array_dt;
-}   // test_compound_3()
+} // test_compound_3()
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_compound_4
  *
@@ -326,7 +308,8 @@ static void test_compound_3()
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-static void test_compound_4()
+static void
+test_compound_4()
 {
 
     typedef struct {
@@ -335,38 +318,38 @@ static void test_compound_4()
 
     typedef struct {
         short b;
-        int a, c[4];
+        int   a, c[4];
         short d;
-        int e;
+        int   e;
     } dst_typ_t;
 
-    src_typ_t *s_ptr;
-    dst_typ_t *d_ptr;
-    int i;
-    const int nelmts = NTESTELEM;
-    const hsize_t  four = 4;
+    src_typ_t *    s_ptr;
+    dst_typ_t *    d_ptr;
+    int            i;
+    const int      nelmts = NTESTELEM;
+    const hsize_t  four   = 4;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    ArrayType* array_dt = NULL;
+    ArrayType *    array_dt = NULL;
 
     // Output message about test being performed
     SUBTEST("Compound Element Shrinking & Reordering");
     try {
         /* Sizes should be the same, but be careful just in case */
-        buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
-        for (i=0; i<nelmts; i++) {
-            s_ptr = ((src_typ_t*)orig) + i;
-            s_ptr->a    = i*8+0;
-            s_ptr->b    = (i*8+1) & 0x7fff;
-            s_ptr->c[0] = i*8+2;
-            s_ptr->c[1] = i*8+3;
-            s_ptr->c[2] = i*8+4;
-            s_ptr->c[3] = i*8+5;
-            s_ptr->d    = (i*8+6) & 0x7fff;
-            s_ptr->e    = i*8+7;
+        buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+        bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(dst_typ_t));
+        orig = (unsigned char *)HDmalloc(nelmts * sizeof(src_typ_t));
+        for (i = 0; i < nelmts; i++) {
+            s_ptr       = ((src_typ_t *)orig) + i;
+            s_ptr->a    = i * 8 + 0;
+            s_ptr->b    = (i * 8 + 1) & 0x7fff;
+            s_ptr->c[0] = i * 8 + 2;
+            s_ptr->c[1] = i * 8 + 3;
+            s_ptr->c[2] = i * 8 + 4;
+            s_ptr->c[3] = i * 8 + 5;
+            s_ptr->d    = (i * 8 + 6) & 0x7fff;
+            s_ptr->e    = i * 8 + 7;
         }
-        memcpy(buf, orig, nelmts*sizeof(src_typ_t));
+        memcpy(buf, orig, nelmts * sizeof(src_typ_t));
 
         /* Build hdf5 datatypes */
         array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
@@ -396,30 +379,22 @@ static void test_compound_4()
         st.convert(dt, (size_t)nelmts, buf, bkg);
 
         /* Compare results */
-        for (i=0; i<nelmts; i++) {
-            s_ptr = ((src_typ_t*)orig) + i;
-            d_ptr = ((dst_typ_t*)buf)  + i;
-            if (s_ptr->a    != d_ptr->a    ||
-                s_ptr->b    != d_ptr->b    ||
-                s_ptr->c[0] != d_ptr->c[0] ||
-                s_ptr->c[1] != d_ptr->c[1] ||
-                s_ptr->c[2] != d_ptr->c[2] ||
-                s_ptr->c[3] != d_ptr->c[3] ||
-                s_ptr->d    != d_ptr->d    ||
-                s_ptr->e    != d_ptr->e)
-            {
+        for (i = 0; i < nelmts; i++) {
+            s_ptr = ((src_typ_t *)orig) + i;
+            d_ptr = ((dst_typ_t *)buf) + i;
+            if (s_ptr->a != d_ptr->a || s_ptr->b != d_ptr->b || s_ptr->c[0] != d_ptr->c[0] ||
+                s_ptr->c[1] != d_ptr->c[1] || s_ptr->c[2] != d_ptr->c[2] || s_ptr->c[3] != d_ptr->c[3] ||
+                s_ptr->d != d_ptr->d || s_ptr->e != d_ptr->e) {
                 H5_FAILED();
                 cerr << "    i=" << i << endl;
-                cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b
-                     << "c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << ","
-                     << s_ptr->c[2] << "," << s_ptr->c[3] << ", d="
-                     << s_ptr->d << ", e=" << s_ptr->e << "}" << endl;
-                cerr << "    dst={a=" << d_ptr->a << ", b=" << d_ptr->b
-                     << "c=[" << d_ptr->c[0] << "," << d_ptr->c[1] << ","
-                     << d_ptr->c[2] << "," << d_ptr->c[3] << ", d="
-                     << d_ptr->d << ", e=" << d_ptr->e << "}" << endl;
+                cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b << "c=[" << s_ptr->c[0] << ","
+                     << s_ptr->c[1] << "," << s_ptr->c[2] << "," << s_ptr->c[3] << ", d=" << s_ptr->d
+                     << ", e=" << s_ptr->e << "}" << endl;
+                cerr << "    dst={a=" << d_ptr->a << ", b=" << d_ptr->b << "c=[" << d_ptr->c[0] << ","
+                     << d_ptr->c[1] << "," << d_ptr->c[2] << "," << d_ptr->c[3] << ", d=" << d_ptr->d
+                     << ", e=" << d_ptr->e << "}" << endl;
             } // if
-        } // for
+        }     // for
 
         /* Release resources */
         HDfree(buf);
@@ -430,18 +405,16 @@ static void test_compound_4()
         st.close();
         dt.close();
         PASSED();
-    }   // end of try block
+    } // end of try block
 
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if(array_dt)
+    if (array_dt)
         delete array_dt;
-}   // test_compound_4()
+} // test_compound_4()
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_compound_5
  *
@@ -456,27 +429,27 @@ static void test_compound_4()
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-static void test_compound_5()
+static void
+test_compound_5()
 {
     typedef struct {
-        char    name[16];
-        short   tdim;
-        short   coll_ids[4];
+        char  name[16];
+        short tdim;
+        short coll_ids[4];
     } src_typ_t;
 
     typedef struct {
-        char    name[16];
-        short   tdim;
-        int     coll_ids[4];
+        char  name[16];
+        short tdim;
+        int   coll_ids[4];
     } dst_typ_t;
 
-    hsize_t      dims[1] = {4};
-    src_typ_t  src[2] = {{"one", 102, {104, 105, 106, 107}},
-                          {"two", 202, {204, 205, 206, 207}}};
-    dst_typ_t  *dst;
-    void        *buf = HDcalloc(2, sizeof(dst_typ_t));
-    void        *bkg = HDcalloc(2, sizeof(dst_typ_t));
-    ArrayType* array_dt = NULL;
+    hsize_t    dims[1] = {4};
+    src_typ_t  src[2]  = {{"one", 102, {104, 105, 106, 107}}, {"two", 202, {204, 205, 206, 207}}};
+    dst_typ_t *dst;
+    void *     buf      = HDcalloc(2, sizeof(dst_typ_t));
+    void *     bkg      = HDcalloc(2, sizeof(dst_typ_t));
+    ArrayType *array_dt = NULL;
 
     // Output message about test being performed
     SUBTEST("Optimized Struct Converter");
@@ -484,17 +457,17 @@ static void test_compound_5()
 
         /* Build datatypes */
         array_dt = new ArrayType(PredType::NATIVE_SHORT, 1, dims);
-        CompType short_array(4*sizeof(short));
+        CompType short_array(4 * sizeof(short));
         short_array.insertMember("_", 0, *array_dt);
         array_dt->close();
         delete array_dt;
 
-        CompType int_array(4*sizeof(int));
+        CompType int_array(4 * sizeof(int));
         array_dt = new ArrayType(PredType::NATIVE_INT, 1, dims);
         int_array.insertMember("_", 0, *array_dt);
         array_dt->close();
 
-        StrType strg(PredType::C_S1, 16);
+        StrType  strg(PredType::C_S1, 16);
         CompType src_type(sizeof(src_typ_t));
         src_type.insertMember("name", HOFFSET(src_typ_t, name), strg);
         src_type.insertMember("tdim", HOFFSET(src_typ_t, tdim), PredType::NATIVE_SHORT);
@@ -508,7 +481,7 @@ static void test_compound_5()
         /* Convert data */
         memcpy(buf, src, sizeof(src));
         src_type.convert(dst_type, (size_t)2, buf, bkg);
-        dst = (dst_typ_t*)buf;
+        dst = (dst_typ_t *)buf;
 
         /* Cleanup */
         src_type.close();
@@ -518,31 +491,27 @@ static void test_compound_5()
         int_array.close();
 
         /* Check results */
-        if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) ||
-            src[1].tdim!=dst[1].tdim ||
-            src[1].coll_ids[0]!=dst[1].coll_ids[0] ||
-            src[1].coll_ids[1]!=dst[1].coll_ids[1] ||
-            src[1].coll_ids[2]!=dst[1].coll_ids[2] ||
-            src[1].coll_ids[3]!=dst[1].coll_ids[3])
-        { H5_FAILED(); }
+        if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) || src[1].tdim != dst[1].tdim ||
+            src[1].coll_ids[0] != dst[1].coll_ids[0] || src[1].coll_ids[1] != dst[1].coll_ids[1] ||
+            src[1].coll_ids[2] != dst[1].coll_ids[2] || src[1].coll_ids[3] != dst[1].coll_ids[3]) {
+            H5_FAILED();
+        }
 
         /* Free memory buffers */
         HDfree(buf);
         HDfree(bkg);
         dst = NULL;
         PASSED();
-    }   // end of try block
+    } // end of try block
 
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if(array_dt)
+    if (array_dt)
         delete array_dt;
-}   // test_compound_5()
+} // test_compound_5()
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_compound_6
  *
@@ -556,7 +525,8 @@ static void test_compound_5()
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-static void test_compound_6()
+static void
+test_compound_6()
 {
     typedef struct {
         short b;
@@ -568,25 +538,25 @@ static void test_compound_6()
         long d;
     } dst_typ_t;
 
-    src_typ_t *s_ptr;
-    dst_typ_t *d_ptr;
-    int i;
-    const int nelmts = NTESTELEM;
-    unsigned char *buf=NULL, *orig=NULL, *bkg=NULL;
+    src_typ_t *    s_ptr;
+    dst_typ_t *    d_ptr;
+    int            i;
+    const int      nelmts = NTESTELEM;
+    unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
 
     // Output message about test being performed
     SUBTEST("Compound Element Growing");
     try {
         /* Sizes should be the same, but be careful just in case */
-        buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
-        for (i=0; i<nelmts; i++) {
-            s_ptr = ((src_typ_t*)orig) + i;
-            s_ptr->b    = (i*8+1) & 0x7fff;
-            s_ptr->d    = (i*8+6) & 0x7fff;
+        buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+        bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(dst_typ_t));
+        orig = (unsigned char *)HDmalloc(nelmts * sizeof(src_typ_t));
+        for (i = 0; i < nelmts; i++) {
+            s_ptr    = ((src_typ_t *)orig) + i;
+            s_ptr->b = (i * 8 + 1) & 0x7fff;
+            s_ptr->d = (i * 8 + 6) & 0x7fff;
         }
-        memcpy(buf, orig, nelmts*sizeof(src_typ_t));
+        memcpy(buf, orig, nelmts * sizeof(src_typ_t));
 
         /* Build hdf5 datatypes */
         CompType st(sizeof(src_typ_t));
@@ -601,20 +571,16 @@ static void test_compound_6()
         st.convert(dt, (size_t)nelmts, buf, bkg);
 
         /* Compare results */
-        for (i=0; i<nelmts; i++) {
-            s_ptr = ((src_typ_t*)orig) + i;
-            d_ptr = ((dst_typ_t*)buf)  + i;
-            if (s_ptr->b    != d_ptr->b    ||
-                s_ptr->d    != d_ptr->d)
-            {
+        for (i = 0; i < nelmts; i++) {
+            s_ptr = ((src_typ_t *)orig) + i;
+            d_ptr = ((dst_typ_t *)buf) + i;
+            if (s_ptr->b != d_ptr->b || s_ptr->d != d_ptr->d) {
                 H5_FAILED();
                 cerr << "    i=" << i << endl;
-                cerr << "    src={b=" << s_ptr->b << ", d=" << s_ptr->d
-                     << "}" << endl;
-                cerr << "    dst={b=" << d_ptr->b << ", d=" << d_ptr->d
-                     << "}" << endl;
+                cerr << "    src={b=" << s_ptr->b << ", d=" << s_ptr->d << "}" << endl;
+                cerr << "    dst={b=" << d_ptr->b << ", d=" << d_ptr->d << "}" << endl;
             } // if
-        } // for
+        }     // for
 
         /* Release resources */
         HDfree(buf);
@@ -625,15 +591,13 @@ static void test_compound_6()
         st.close();
         dt.close();
         PASSED();
-    }   // end of try block
+    } // end of try block
 
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
-}   // test_compound_6()
+} // test_compound_6()
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_compound_7
  *
@@ -646,18 +610,19 @@ static void test_compound_6()
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-static void test_compound_7()
+static void
+test_compound_7()
 {
     typedef struct {
-        int a;
+        int   a;
         float b;
-        long c;
+        long  c;
     } s1_typ_t;
 
     typedef struct {
-        int a;
-        float b;
-        long c;
+        int    a;
+        float  b;
+        long   c;
         double d;
     } s2_typ_t;
 
@@ -666,9 +631,9 @@ static void test_compound_7()
     try {
         CompType tid1(sizeof(s1_typ_t));
 
-        tid1.insertMember("a", HOFFSET(s1_typ_t,a),PredType::NATIVE_INT);
-        tid1.insertMember("b", HOFFSET(s1_typ_t,b),PredType::NATIVE_FLOAT);
-        tid1.insertMember("c", HOFFSET(s1_typ_t,c),PredType::NATIVE_LONG);
+        tid1.insertMember("a", HOFFSET(s1_typ_t, a), PredType::NATIVE_INT);
+        tid1.insertMember("b", HOFFSET(s1_typ_t, b), PredType::NATIVE_FLOAT);
+        tid1.insertMember("c", HOFFSET(s1_typ_t, c), PredType::NATIVE_LONG);
 
         size_t type_size = tid1.getSize();
         verify_val(type_size, sizeof(s1_typ_t), "DataType::getSize", __LINE__, __FILE__);
@@ -683,22 +648,23 @@ static void test_compound_7()
         try {
             tid2.insertMember("d", HOFFSET(s2_typ_t, d), PredType::NATIVE_DOUBLE);
             // Should FAIL but didn't, so throw an invalid action exception
-            throw InvalidActionException("CompType::insertMember", "Attempted to insert field past end of compound data type.");
-        } catch (DataTypeIException& err) {}
+            throw InvalidActionException("CompType::insertMember",
+                                         "Attempted to insert field past end of compound data type.");
+        }
+        catch (DataTypeIException &err) {
+        }
 
         /* Release resources */
         tid1.close();
         tid2.close();
         PASSED();
-    }   // end of try block
+    } // end of try block
 
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
-}   // test_compound_7()
+} // test_compound_7()
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_compound_set_size
  *
@@ -712,7 +678,8 @@ static void test_compound_7()
  */
 const H5std_string COMPFILE("tcompound_types.h5");
 
-static void test_compound_set_size()
+static void
+test_compound_set_size()
 {
     typedef struct {
         int a, b, c[4], d, e;
@@ -779,15 +746,13 @@ static void test_compound_set_size()
         file.close();
 
         PASSED();
-    }   // end of try block
+    } // end of try block
 
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
-}   // test_compound_set_size()
+} // test_compound_set_size()
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_compound
  *
@@ -799,23 +764,22 @@ static void test_compound_set_size()
  *              January 2007
  *-------------------------------------------------------------------------
  */
-extern "C"
-void test_compound()
+extern "C" void
+test_compound()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Compound Data Type operations\n"));
 
-    test_compound_1();  // various things about compound data types
-    test_compound_2();  // compound element reordering
-    test_compound_3();  // compound datatype subset conversions
-    test_compound_4();  // compound element shrinking & reordering
-    test_compound_5();  // optimized struct converter
-    test_compound_6();  // compound element growing
-    test_compound_7();  // compound element insertion
-    test_compound_set_size();  // set size on compound data types
-}   // test_compound()
+    test_compound_1();        // various things about compound data types
+    test_compound_2();        // compound element reordering
+    test_compound_3();        // compound datatype subset conversions
+    test_compound_4();        // compound element shrinking & reordering
+    test_compound_5();        // optimized struct converter
+    test_compound_6();        // compound element growing
+    test_compound_7();        // compound element insertion
+    test_compound_set_size(); // set size on compound data types
+} // test_compound()
 
-
 /*-------------------------------------------------------------------------
  * Function:    cleanup_compound
  *
@@ -824,8 +788,8 @@ void test_compound()
  * Return       None
  *-------------------------------------------------------------------------
  */
-extern "C"
-void cleanup_compound()
+extern "C" void
+cleanup_compound()
 {
     HDremove(COMPFILE.c_str());
-}   // cleanup_file
+} // cleanup_file

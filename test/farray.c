@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -20,64 +20,61 @@
  * This file needs to access private datatypes from the H5FA package.
  * This file also needs to access the fixed array testing code.
  */
-#define H5FA_FRIEND		/*suppress error about including H5FApkg	  */
+#define H5FA_FRIEND /*suppress error about including H5FApkg	  */
 #define H5FA_TESTING
-#include "H5FApkg.h"		/* Fixed Arrays			*/
+#include "H5FApkg.h" /* Fixed Arrays			*/
 
 /* Other private headers that this test requires */
-#include "H5CXprivate.h"        /* API Contexts                             */
-#include "H5Iprivate.h"         /* IDs                                      */
-#include "H5VMprivate.h"        /* Vectors and arrays                       */
-#include "H5VLprivate.h"        /* Virtual Object Layer                     */
-
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5VMprivate.h" /* Vectors and arrays                       */
+#include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 /* Local macros */
 
 /* Max. testfile name length */
-#define FARRAY_FILENAME_LEN     1024
+#define FARRAY_FILENAME_LEN 1024
 
 /* Fixed array creation values */
-#define ELMT_SIZE      	sizeof(uint64_t)
-#define MAX_DBLOCK_PAGE_NELMTS_BITS     10      /* 2^10 = 1024 elements per data block page */
+#define ELMT_SIZE                   sizeof(uint64_t)
+#define MAX_DBLOCK_PAGE_NELMTS_BITS 10 /* 2^10 = 1024 elements per data block page */
 
 /* Testing # of elements in the Fixed Array */
-#define TEST_NELMTS 	20000
+#define TEST_NELMTS 20000
 
 /* Convenience macros for computing earray state */
-#define FA_HDR_SIZE   	28   	/* hard-coded */
-#define DBLOCK_PREFIX   18	/* hard-coded */
+#define FA_HDR_SIZE   28 /* hard-coded */
+#define DBLOCK_PREFIX 18 /* hard-coded */
 
 /* 4 giga-elements: max chunk size */
-#define MAX_NELMTS 	((unsigned long long)4*1024*1024*1024) /* 4 giga-elements */
+#define MAX_NELMTS ((unsigned long long)4 * 1024 * 1024 * 1024) /* 4 giga-elements */
 
 /* Iterator parameter values */
-#define FA_CYC_COUNT            4
-
+#define FA_CYC_COUNT 4
 
 /* Local typedefs */
 
 /* Types of tests to perform */
 typedef enum {
-    FARRAY_TEST_NORMAL,         /* "Normal" test, with no testing parameters set */
-    FARRAY_TEST_REOPEN,         /* Set the reopen_array flag */
-    FARRAY_TEST_NTESTS          /* The number of test types, must be last */
+    FARRAY_TEST_NORMAL, /* "Normal" test, with no testing parameters set */
+    FARRAY_TEST_REOPEN, /* Set the reopen_array flag */
+    FARRAY_TEST_NTESTS  /* The number of test types, must be last */
 } farray_test_type_t;
 
 /* Types of iteration to perform */
 typedef enum {
-    FARRAY_ITER_FW,             /* "Forward" iteration */
-    FARRAY_ITER_RV,             /* "Reverse" iteration */
-    FARRAY_ITER_RND,            /* "Random" iteration */
-    FARRAY_ITER_CYC,            /* "Cyclic" iteration */
-    FARRAY_ITER_NITERS          /* The number of iteration types, must be last */
+    FARRAY_ITER_FW,    /* "Forward" iteration */
+    FARRAY_ITER_RV,    /* "Reverse" iteration */
+    FARRAY_ITER_RND,   /* "Random" iteration */
+    FARRAY_ITER_CYC,   /* "Cyclic" iteration */
+    FARRAY_ITER_NITERS /* The number of iteration types, must be last */
 } farray_iter_type_t;
-
 
 /* Fixed array state information */
 typedef struct farray_state_t {
-    hsize_t hdr_size;           /* Size of header */
-    hsize_t dblk_size;          /* Size of data block */
-    hsize_t nelmts;             /* # of elements */
+    hsize_t hdr_size;  /* Size of header */
+    hsize_t dblk_size; /* Size of data block */
+    hsize_t nelmts;    /* # of elements */
 } farray_state_t;
 
 /* Forward decl. */
@@ -86,25 +83,20 @@ typedef struct farray_test_param_t farray_test_param_t;
 /* Fixed array iterator class */
 typedef struct farray_iter_t {
     void *(*init)(const H5FA_create_t *cparam, const farray_test_param_t *tparam,
-        hsize_t cnt);           /* Initialize/allocate iterator private info */
-    hssize_t (*next)(void *info);       /* Get the next element to test */
-    herr_t (*term)(void *info); /* Shutdown/free iterator private info */
+                  hsize_t cnt);   /* Initialize/allocate iterator private info */
+    hssize_t (*next)(void *info); /* Get the next element to test */
+    herr_t (*term)(void *info);   /* Shutdown/free iterator private info */
 } farray_iter_t;
-
 
 /* Testing parameters */
 struct farray_test_param_t {
-    farray_test_type_t reopen_array;    /* Whether to re-open the array during the test */
-    hsize_t	nelmts;			/* # of elements to set for the fixed array */
-    const farray_iter_t *fiter;         /* Iterator to use for this test */
+    farray_test_type_t   reopen_array; /* Whether to re-open the array during the test */
+    hsize_t              nelmts;       /* # of elements to set for the fixed array */
+    const farray_iter_t *fiter;        /* Iterator to use for this test */
 };
 
 /* Local variables */
-const char *FILENAME[] = {
-    "farray",
-    "farray_tmp",
-    NULL
-};
+const char *FILENAME[] = {"farray", "farray_tmp", NULL};
 
 /* Filename to use for all tests */
 char filename_g[FARRAY_FILENAME_LEN];
@@ -112,7 +104,6 @@ char filename_g[FARRAY_FILENAME_LEN];
 /* Empty file size */
 h5_stat_size_t empty_size_g;
 
-
 /*-------------------------------------------------------------------------
  * Function:    init_cparam
  *
@@ -128,15 +119,14 @@ init_cparam(H5FA_create_t *cparam, farray_test_param_t *tparam)
     /* Wipe out background */
     HDmemset(cparam, 0, sizeof(*cparam));
 
-    cparam->cls                         = H5FA_CLS_TEST;
-    cparam->raw_elmt_size               = ELMT_SIZE;
-    cparam->max_dblk_page_nelmts_bits   = MAX_DBLOCK_PAGE_NELMTS_BITS;
-    cparam->nelmts                      = tparam->nelmts;
+    cparam->cls                       = H5FA_CLS_TEST;
+    cparam->raw_elmt_size             = ELMT_SIZE;
+    cparam->max_dblk_page_nelmts_bits = MAX_DBLOCK_PAGE_NELMTS_BITS;
+    cparam->nelmts                    = tparam->nelmts;
 
     return SUCCEED;
 } /* init_cparam() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    create_file
  *
@@ -168,7 +158,6 @@ error:
     return FAIL;
 } /* create_file() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    check_stats
  *
@@ -181,7 +170,7 @@ error:
 static herr_t
 check_stats(const H5FA_t *fa, const farray_state_t *state)
 {
-    H5FA_stat_t farray_stats;           /* Statistics about the array */
+    H5FA_stat_t farray_stats; /* Statistics about the array */
 
     /* Get statistics for fixed array and verify they are correct */
     if (H5FA_get_stats(fa, &farray_stats) < 0)
@@ -189,20 +178,20 @@ check_stats(const H5FA_t *fa, const farray_state_t *state)
 
     /* Compare information */
     if (farray_stats.hdr_size != state->hdr_size) {
-        HDfprintf(stdout, "farray_stats.hdr_size = %Hu, state->hdr_size = %Hu\n",
-	    farray_stats.hdr_size, state->hdr_size);
+        HDfprintf(stdout, "farray_stats.hdr_size = %Hu, state->hdr_size = %Hu\n", farray_stats.hdr_size,
+                  state->hdr_size);
         TEST_ERROR
     }
 
     if (farray_stats.dblk_size != state->dblk_size) {
-        HDfprintf(stdout, "farray_stats.dblk_size = %Hu, state->dblk_size = %Hu\n",
-	    farray_stats.dblk_size, state->dblk_size);
+        HDfprintf(stdout, "farray_stats.dblk_size = %Hu, state->dblk_size = %Hu\n", farray_stats.dblk_size,
+                  state->dblk_size);
         TEST_ERROR
     }
 
     if (farray_stats.nelmts != state->nelmts) {
-        HDfprintf(stdout, "farray_stats.nelmts = %Hu, state->nelmts = %Hu\n",
-	    farray_stats.nelmts, state->nelmts);
+        HDfprintf(stdout, "farray_stats.nelmts = %Hu, state->nelmts = %Hu\n", farray_stats.nelmts,
+                  state->nelmts);
         TEST_ERROR
     }
 
@@ -213,7 +202,6 @@ error:
     return FAIL;
 } /* check_stats() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    set_fa_state
  *
@@ -226,7 +214,7 @@ error:
 static herr_t
 set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
 {
-    size_t dblk_page_nelmts;			/* # of elements per page */
+    size_t dblk_page_nelmts; /* # of elements per page */
 
     /* Sanity check */
     HDassert(cparam);
@@ -234,16 +222,16 @@ set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
 
     /* Compute the state of the fixed array */
     state->hdr_size = FA_HDR_SIZE;
-    state->nelmts = cparam->nelmts;
+    state->nelmts   = cparam->nelmts;
 
     dblk_page_nelmts = (size_t)1 << cparam->max_dblk_page_nelmts_bits;
     if (state->nelmts > dblk_page_nelmts) {
-        size_t npages = (size_t)(((state->nelmts + dblk_page_nelmts) - 1) / dblk_page_nelmts);
-        size_t dblk_page_init_size = (npages + 7) / 8;
-        hsize_t checksum_size = npages * 4;
+        size_t  npages              = (size_t)(((state->nelmts + dblk_page_nelmts) - 1) / dblk_page_nelmts);
+        size_t  dblk_page_init_size = (npages + 7) / 8;
+        hsize_t checksum_size       = npages * 4;
 
-        state->dblk_size = DBLOCK_PREFIX + dblk_page_init_size + checksum_size +
-			    state->nelmts * cparam->raw_elmt_size;
+        state->dblk_size =
+            DBLOCK_PREFIX + dblk_page_init_size + checksum_size + state->nelmts * cparam->raw_elmt_size;
     }
     else
         state->dblk_size = DBLOCK_PREFIX + state->nelmts * cparam->raw_elmt_size;
@@ -251,7 +239,6 @@ set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
     return SUCCEED;
 } /* end set_fa_state() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    reopen_file
  *
@@ -262,8 +249,8 @@ set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
  *-------------------------------------------------------------------------
  */
 static int
-reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id,
-    H5FA_t **fa, haddr_t fa_addr, const farray_test_param_t *tparam)
+reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id, H5FA_t **fa, haddr_t fa_addr,
+            const farray_test_param_t *tparam)
 {
     /* Check for closing & re-opening the array */
     /* (actually will close & re-open the file as well) */
@@ -281,7 +268,7 @@ reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id,
             if (H5Fclose(*fid) < 0)
                 FAIL_STACK_ERROR
             *fid = H5I_INVALID_HID;
-            *f = NULL;
+            *f   = NULL;
         }
 
         /* Re-open the file */
@@ -309,7 +296,6 @@ error:
     return FAIL;
 } /* reopen_file() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    create_array
  *
@@ -320,10 +306,9 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-create_array(H5F_t *f, const H5FA_create_t *cparam,
-    H5FA_t **fa, haddr_t *fa_addr)
+create_array(H5F_t *f, const H5FA_create_t *cparam, H5FA_t **fa, haddr_t *fa_addr)
 {
-    farray_state_t state;               /* State of extensible array */
+    farray_state_t state; /* State of extensible array */
 
     /* Create array */
     if (NULL == (*fa = H5FA_create(f, cparam, NULL)))
@@ -337,8 +322,8 @@ create_array(H5F_t *f, const H5FA_create_t *cparam,
 
     /* Check array stats */
     HDmemset(&state, 0, sizeof(state));
-    state.hdr_size  = FA_HDR_SIZE;
-    state.nelmts    = cparam->nelmts;
+    state.hdr_size = FA_HDR_SIZE;
+    state.nelmts   = cparam->nelmts;
     if (check_stats(*fa, &state))
         TEST_ERROR
 
@@ -349,7 +334,6 @@ error:
     return FAIL;
 } /* create_array() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    verify_cparam
  *
@@ -362,7 +346,7 @@ error:
 static herr_t
 verify_cparam(const H5FA_t *fa, const H5FA_create_t *cparam)
 {
-    H5FA_create_t test_cparam;          /* Creation parameters for array */
+    H5FA_create_t test_cparam; /* Creation parameters for array */
 
     /* Retrieve creation parameters */
     HDmemset(&test_cparam, 0, sizeof(H5FA_create_t));
@@ -380,7 +364,6 @@ error:
     return FAIL;
 } /* verify_cparam() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    finish
  *
@@ -394,7 +377,7 @@ error:
 static herr_t
 finish(hid_t fid, hid_t fapl_id, H5F_t *f, H5FA_t *fa, haddr_t fa_addr)
 {
-    h5_stat_size_t file_size;           /* File size, after deleting array */
+    h5_stat_size_t file_size; /* File size, after deleting array */
 
     /* Close the fixed array */
     if (H5FA_close(fa) < 0)
@@ -423,7 +406,6 @@ error:
     return FAIL;
 } /* finish() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	test_create
  *
@@ -437,13 +419,13 @@ error:
 static unsigned
 test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSED *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
-    H5FA_t      *fa = NULL;             /* Fixed array wrapper */
-    haddr_t     fa_addr = HADDR_UNDEF;  /* Array address in file */
+    hid_t   file    = -1;          /* File ID */
+    H5F_t * f       = NULL;        /* Internal file object pointer */
+    H5FA_t *fa      = NULL;        /* Fixed array wrapper */
+    haddr_t fa_addr = HADDR_UNDEF; /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if (create_file(fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -452,57 +434,63 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
     TESTING("invalid fixed array creation parameters");
 
 #ifndef NDEBUG
-{
-    H5FA_create_t test_cparam;          /* Creation parameters for array */
+    {
+        H5FA_create_t test_cparam; /* Creation parameters for array */
 
-    /* Set invalid element size */
-    HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
-    test_cparam.raw_elmt_size = 0;
-    H5E_BEGIN_TRY {
-        fa = H5FA_create(f, &test_cparam, NULL);
-    } H5E_END_TRY;
-    if(fa) {
-        /* Close opened fixed array */
-        H5FA_close(fa);
-        fa = NULL;
+        /* Set invalid element size */
+        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        test_cparam.raw_elmt_size = 0;
+        H5E_BEGIN_TRY
+        {
+            fa = H5FA_create(f, &test_cparam, NULL);
+        }
+        H5E_END_TRY;
+        if (fa) {
+            /* Close opened fixed array */
+            H5FA_close(fa);
+            fa = NULL;
 
-        /* Indicate error */
-        TEST_ERROR
-    } /* end if */
+            /* Indicate error */
+            TEST_ERROR
+        } /* end if */
 
-    /* Set invalid max. # of elements bits */
-    HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
-    test_cparam.max_dblk_page_nelmts_bits = 0;
-    H5E_BEGIN_TRY {
-        fa = H5FA_create(f, &test_cparam, NULL);
-    } H5E_END_TRY;
-    if(fa) {
-        /* Close opened fixed array */
-        H5FA_close(fa);
-        fa = NULL;
+        /* Set invalid max. # of elements bits */
+        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        test_cparam.max_dblk_page_nelmts_bits = 0;
+        H5E_BEGIN_TRY
+        {
+            fa = H5FA_create(f, &test_cparam, NULL);
+        }
+        H5E_END_TRY;
+        if (fa) {
+            /* Close opened fixed array */
+            H5FA_close(fa);
+            fa = NULL;
 
-        /* Indicate error */
-        TEST_ERROR
-    } /* end if */
+            /* Indicate error */
+            TEST_ERROR
+        } /* end if */
 
-    /* Set invalid max. # of elements */
-    HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
-    test_cparam.nelmts = 0;
-    H5E_BEGIN_TRY {
-        fa = H5FA_create(f, &test_cparam, NULL);
-    } H5E_END_TRY;
-    if(fa) {
-        /* Close opened fixed array */
-        H5FA_close(fa);
-        fa = NULL;
+        /* Set invalid max. # of elements */
+        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        test_cparam.nelmts = 0;
+        H5E_BEGIN_TRY
+        {
+            fa = H5FA_create(f, &test_cparam, NULL);
+        }
+        H5E_END_TRY;
+        if (fa) {
+            /* Close opened fixed array */
+            H5FA_close(fa);
+            fa = NULL;
 
-        /* Indicate error */
-        TEST_ERROR
-    } /* end if */
+            /* Indicate error */
+            TEST_ERROR
+        } /* end if */
 
-    PASSED();
-}
-#else /* NDEBUG */
+        PASSED();
+    }
+#else  /* NDEBUG */
     SKIPPED();
     puts("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
@@ -513,7 +501,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
     TESTING("fixed array creation");
 
     /* Create array */
-    if(create_array(f, cparam, &fa, &fa_addr) < 0)
+    if (create_array(f, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     PASSED();
@@ -522,11 +510,11 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
     TESTING("verify array creation parameters");
 
     /* Verify the creation parameters */
-    if(verify_cparam(fa, cparam) < 0)
+    if (verify_cparam(fa, cparam) < 0)
         TEST_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(finish(file, fapl, f, fa, fa_addr) < 0)
+    if (finish(file, fapl, f, fa, fa_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -535,16 +523,17 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
-        if(fa)
+    H5E_BEGIN_TRY
+    {
+        if (fa)
             H5FA_close(fa);
-	H5Fclose(file);
-    } H5E_END_TRY;
+        H5Fclose(file);
+    }
+    H5E_END_TRY;
 
     return 1;
 } /* end test_create() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	test_reopen
  *
@@ -558,13 +547,13 @@ error:
 static unsigned
 test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
-    H5FA_t      *fa = NULL;             /* Fixed array wrapper */
-    haddr_t     fa_addr = HADDR_UNDEF;  /* Array address in file */
+    hid_t   file    = -1;          /* File ID */
+    H5F_t * f       = NULL;        /* Internal file object pointer */
+    H5FA_t *fa      = NULL;        /* Fixed array wrapper */
+    haddr_t fa_addr = HADDR_UNDEF; /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if (create_file(fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -573,27 +562,27 @@ test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     TESTING("create, close & reopen fixed array");
 
     /* Create array */
-    if(create_array(f, cparam, &fa, &fa_addr) < 0)
+    if (create_array(f, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     /* Close the fixed array */
-    if(H5FA_close(fa) < 0)
+    if (H5FA_close(fa) < 0)
         FAIL_STACK_ERROR
 
     /* Check for closing & re-opening the file */
-    if(reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, tparam) < 0)
         TEST_ERROR
 
     /* Re-open the array */
-    if(NULL == (fa = H5FA_open(f, fa_addr, NULL)))
+    if (NULL == (fa = H5FA_open(f, fa_addr, NULL)))
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
-    if(verify_cparam(fa, cparam) < 0)
+    if (verify_cparam(fa, cparam) < 0)
         TEST_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(finish(file, fapl, f, fa, fa_addr) < 0)
+    if (finish(file, fapl, f, fa, fa_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -602,16 +591,17 @@ test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
-        if(fa)
+    H5E_BEGIN_TRY
+    {
+        if (fa)
             H5FA_close(fa);
-	H5Fclose(file);
-    } H5E_END_TRY;
+        H5Fclose(file);
+    }
+    H5E_END_TRY;
 
     return 1;
 } /* test_reopen() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	test_open_twice
  *
@@ -625,13 +615,13 @@ error:
 static unsigned
 test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tparam)
 {
-    hid_t           fid     = H5I_INVALID_HID;  /* File ID                      */
-    hid_t	        fid2    = H5I_INVALID_HID;  /* File ID                      */
-    H5F_t	       *f       = NULL;             /* Internal file object pointer */
-    H5F_t	       *f2      = NULL;             /* Internal file object pointer */
-    H5FA_t         *fa      = NULL;             /* Fixed array wrapper          */
-    H5FA_t         *fa2     = NULL;             /* Fixed array wrapper          */
-    haddr_t         fa_addr = HADDR_UNDEF;      /* Array address in file        */
+    hid_t   fid     = H5I_INVALID_HID; /* File ID                      */
+    hid_t   fid2    = H5I_INVALID_HID; /* File ID                      */
+    H5F_t * f       = NULL;            /* Internal file object pointer */
+    H5F_t * f2      = NULL;            /* Internal file object pointer */
+    H5FA_t *fa      = NULL;            /* Fixed array wrapper          */
+    H5FA_t *fa2     = NULL;            /* Fixed array wrapper          */
+    haddr_t fa_addr = HADDR_UNDEF;     /* Array address in file        */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl_id, &fid, &f) < 0)
@@ -701,19 +691,20 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         if (fa)
             H5FA_close(fa);
         if (fa2)
             H5FA_close(fa2);
         H5Fclose(fid);
         H5Fclose(fid2);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return 1;
 } /* test_open_twice() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	test_open_twice_diff
  *
@@ -732,16 +723,16 @@ error:
 static unsigned
 test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tparam)
 {
-    char filename_tmp[FARRAY_FILENAME_LEN];     /* Temporary file name          */
-    hid_t	        fid     = H5I_INVALID_HID;  /* File ID                      */
-    hid_t	        fid2    = H5I_INVALID_HID;  /* File ID                      */
-    hid_t	        fid0    = H5I_INVALID_HID;  /* File ID                      */
-    hid_t	        fid00   = H5I_INVALID_HID;  /* File ID                      */
-    H5F_t	       *f       = NULL;             /* Internal file object pointer */
-    H5F_t	       *f2      = NULL;             /* Internal file object pointer */
-    H5FA_t         *fa      = NULL;             /* Fixed array wrapper          */
-    H5FA_t         *fa2     = NULL;             /* Fixed array wrapper          */
-    haddr_t         fa_addr = HADDR_UNDEF;      /* Array address in file        */
+    char    filename_tmp[FARRAY_FILENAME_LEN]; /* Temporary file name          */
+    hid_t   fid     = H5I_INVALID_HID;         /* File ID                      */
+    hid_t   fid2    = H5I_INVALID_HID;         /* File ID                      */
+    hid_t   fid0    = H5I_INVALID_HID;         /* File ID                      */
+    hid_t   fid00   = H5I_INVALID_HID;         /* File ID                      */
+    H5F_t * f       = NULL;                    /* Internal file object pointer */
+    H5F_t * f2      = NULL;                    /* Internal file object pointer */
+    H5FA_t *fa      = NULL;                    /* Fixed array wrapper          */
+    H5FA_t *fa2     = NULL;                    /* Fixed array wrapper          */
+    haddr_t fa_addr = HADDR_UNDEF;             /* Array address in file        */
 
     /* Display testing message */
     TESTING("open fixed array twice, through different file handles");
@@ -834,7 +825,8 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         if (fa)
             H5FA_close(fa);
         if (fa2)
@@ -843,12 +835,12 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid0);
         H5Fclose(fid00);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return 1;
 } /* test_open_twice_diff() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	test_delete_open
  *
@@ -862,15 +854,15 @@ error:
 static unsigned
 test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
-    H5FA_t      *fa = NULL;             /* Fixed array wrapper */
-    H5FA_t      *fa2 = NULL;            /* Fixed array wrapper */
-    haddr_t     fa_addr = HADDR_UNDEF;  /* Array address in file */
-    h5_stat_size_t file_size;           /* File size, after deleting array */
+    hid_t          file    = -1;          /* File ID */
+    H5F_t *        f       = NULL;        /* Internal file object pointer */
+    H5FA_t *       fa      = NULL;        /* Fixed array wrapper */
+    H5FA_t *       fa2     = NULL;        /* Fixed array wrapper */
+    haddr_t        fa_addr = HADDR_UNDEF; /* Array address in file */
+    h5_stat_size_t file_size;             /* File size, after deleting array */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if (create_file(fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -879,33 +871,35 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     TESTING("deleting open fixed array");
 
     /* Create array */
-    if(create_array(f, cparam, &fa, &fa_addr) < 0)
+    if (create_array(f, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     /* Open the array again */
-    if(NULL == (fa2 = H5FA_open(f, fa_addr, NULL)))
+    if (NULL == (fa2 = H5FA_open(f, fa_addr, NULL)))
         FAIL_STACK_ERROR
 
     /* Request that the array be deleted */
-    if(H5FA_delete(f, fa_addr, NULL) < 0)
+    if (H5FA_delete(f, fa_addr, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
-    if(verify_cparam(fa, cparam) < 0)
+    if (verify_cparam(fa, cparam) < 0)
         TEST_ERROR
-    if(verify_cparam(fa2, cparam) < 0)
+    if (verify_cparam(fa2, cparam) < 0)
         TEST_ERROR
 
     /* Close the second fixed array wrapper */
-    if(H5FA_close(fa2) < 0)
+    if (H5FA_close(fa2) < 0)
         FAIL_STACK_ERROR
     fa2 = NULL;
 
     /* Try re-opening the array again (should fail, as array will be deleted) */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         fa2 = H5FA_open(f, fa_addr, NULL);
-    } H5E_END_TRY;
-    if(fa2) {
+    }
+    H5E_END_TRY;
+    if (fa2) {
         /* Close opened array */
         H5FA_close(fa2);
 
@@ -914,19 +908,21 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     } /* end if */
 
     /* Close the first fixed array wrapper */
-    if(H5FA_close(fa) < 0)
+    if (H5FA_close(fa) < 0)
         FAIL_STACK_ERROR
     fa = NULL;
 
     /* Check for closing & re-opening the file */
-    if(reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, tparam) < 0)
         TEST_ERROR
 
     /* Try re-opening the array again (should fail, as array is now deleted) */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         fa = H5FA_open(f, fa_addr, NULL);
-    } H5E_END_TRY;
-    if(fa) {
+    }
+    H5E_END_TRY;
+    if (fa) {
         /* Close opened array */
         H5FA_close(fa);
 
@@ -935,15 +931,15 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     } /* end if */
 
     /* Close the file */
-    if(H5Fclose(file) < 0)
+    if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename_g, fapl)) < 0)
+    if ((file_size = h5_get_file_size(filename_g, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
-    if(file_size != empty_size_g)
+    if (file_size != empty_size_g)
         TEST_ERROR
 
     /* All tests passed */
@@ -952,23 +948,24 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
-        if(fa)
+    H5E_BEGIN_TRY
+    {
+        if (fa)
             H5FA_close(fa);
-        if(fa2)
+        if (fa2)
             H5FA_close(fa2);
         H5Fclose(file);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return 1;
 } /* test_delete_open() */
 
 /* Fixed array iterator info for forward iteration */
 typedef struct fiter_fw_t {
-    hsize_t idx;        /* Index of next array location */
+    hsize_t idx; /* Index of next array location */
 } fiter_fw_t;
 
-
 /*-------------------------------------------------------------------------
  * Function:	fiter_fw_init
  *
@@ -981,9 +978,9 @@ typedef struct fiter_fw_t {
  */
 static void *
 fiter_fw_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_param_t H5_ATTR_UNUSED *tparam,
-    hsize_t H5_ATTR_UNUSED cnt)
+              hsize_t H5_ATTR_UNUSED cnt)
 {
-    fiter_fw_t *fiter;          /* Forward element iteration object */
+    fiter_fw_t *fiter; /* Forward element iteration object */
 
     /* Allocate space for the element iteration object */
     fiter = (fiter_fw_t *)HDmalloc(sizeof(fiter_fw_t));
@@ -993,10 +990,9 @@ fiter_fw_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_para
     fiter->idx = 0;
 
     /* Return iteration object */
-    return(fiter);
+    return (fiter);
 } /* end fiter_fw_init() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	fiter_fw_next
  *
@@ -1011,7 +1007,7 @@ static hssize_t
 fiter_fw_next(void *_fiter)
 {
     fiter_fw_t *fiter = (fiter_fw_t *)_fiter;
-    hssize_t ret_val;
+    hssize_t    ret_val;
 
     /* Sanity check */
     HDassert(fiter);
@@ -1019,10 +1015,9 @@ fiter_fw_next(void *_fiter)
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->idx++;
 
-    return(ret_val);
+    return (ret_val);
 } /* end fiter_fw_next() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	fiter_term
  *
@@ -1042,22 +1037,21 @@ fiter_term(void *fiter)
     /* Free iteration object */
     HDfree(fiter);
 
-    return(0);
+    return (0);
 } /* end fiter_term() */
 
 /* Fixed array iterator class for forward iteration */
 static const farray_iter_t fa_iter_fw = {
-    fiter_fw_init,              /* Iterator init */
-    fiter_fw_next,              /* Next array index */
-    fiter_term               	/* Iterator term */
+    fiter_fw_init, /* Iterator init */
+    fiter_fw_next, /* Next array index */
+    fiter_term     /* Iterator term */
 };
 
 /* Fixed array iterator info for reverse iteration */
 typedef struct fiter_rv_t {
-    hsize_t idx;                        /* Index of next array location */
+    hsize_t idx; /* Index of next array location */
 } fiter_rv_t;
 
-
 /*-------------------------------------------------------------------------
  * Function:	fiter_rv_init
  *
@@ -1070,9 +1064,9 @@ typedef struct fiter_rv_t {
  */
 static void *
 fiter_rv_init(const H5FA_create_t *cparam, const farray_test_param_t H5_ATTR_UNUSED *tparam,
-    hsize_t H5_ATTR_UNUSED cnt)
+              hsize_t H5_ATTR_UNUSED cnt)
 {
-    fiter_rv_t *fiter;          /* Reverse element iteration object */
+    fiter_rv_t *fiter; /* Reverse element iteration object */
 
     /* Allocate space for the element iteration object */
     fiter = (fiter_rv_t *)HDmalloc(sizeof(fiter_rv_t));
@@ -1082,10 +1076,9 @@ fiter_rv_init(const H5FA_create_t *cparam, const farray_test_param_t H5_ATTR_UNU
     fiter->idx = cparam->nelmts - 1;
 
     /* Return iteration object */
-    return(fiter);
+    return (fiter);
 } /* end fiter_rv_init() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	fiter_rv_next
  *
@@ -1100,7 +1093,7 @@ static hssize_t
 fiter_rv_next(void *_fiter)
 {
     fiter_rv_t *fiter = (fiter_rv_t *)_fiter;
-    hssize_t ret_val;
+    hssize_t    ret_val;
 
     /* Sanity check */
     HDassert(fiter);
@@ -1108,23 +1101,22 @@ fiter_rv_next(void *_fiter)
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->idx--;
 
-    return(ret_val);
+    return (ret_val);
 } /* end fiter_rv_next() */
 
 /* Fixed array iterator class for reverse iteration */
 static const farray_iter_t fa_iter_rv = {
-    fiter_rv_init,              /* Iterator init */
-    fiter_rv_next,              /* Next array index */
-    fiter_term               	/* Iterator term */
+    fiter_rv_init, /* Iterator init */
+    fiter_rv_next, /* Next array index */
+    fiter_term     /* Iterator term */
 };
 
 /* Fixed array iterator info for random iteration */
 typedef struct fiter_rnd_t {
-    hsize_t pos;                /* Position in shuffled array */
-    hsize_t *idx;               /* Array of shuffled indices */
+    hsize_t  pos; /* Position in shuffled array */
+    hsize_t *idx; /* Array of shuffled indices */
 } fiter_rnd_t;
 
-
 /*-------------------------------------------------------------------------
  * Function:	fiter_rnd_init
  *
@@ -1137,10 +1129,10 @@ typedef struct fiter_rnd_t {
  */
 static void *
 fiter_rnd_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_param_t H5_ATTR_UNUSED *tparam,
-    hsize_t cnt)
+               hsize_t cnt)
 {
-    fiter_rnd_t *fiter;         /* Random element iteration object */
-    size_t u;                   /* Local index variable */
+    fiter_rnd_t *fiter; /* Random element iteration object */
+    size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
     fiter = (fiter_rnd_t *)HDmalloc(sizeof(fiter_rnd_t));
@@ -1152,27 +1144,26 @@ fiter_rnd_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
 
     /* Initialize reverse iteration info */
     fiter->pos = 0;
-    for(u = 0; u < (size_t)cnt; u++)
+    for (u = 0; u < (size_t)cnt; u++)
         fiter->idx[u] = (hsize_t)u;
 
     /* Randomly shuffle array indices */
-    if(cnt > 1) {
-        for(u = 0; u < (size_t)cnt; u++) {
-            size_t swap_idx;            /* Location to swap with when shuffling */
-            hsize_t temp_idx;           /* Temporary index */
+    if (cnt > 1) {
+        for (u = 0; u < (size_t)cnt; u++) {
+            size_t  swap_idx; /* Location to swap with when shuffling */
+            hsize_t temp_idx; /* Temporary index */
 
-            swap_idx = ((size_t)HDrandom() % ((size_t)cnt - u)) + u;
-            temp_idx = fiter->idx[u];
-            fiter->idx[u] = fiter->idx[swap_idx];
+            swap_idx             = ((size_t)HDrandom() % ((size_t)cnt - u)) + u;
+            temp_idx             = fiter->idx[u];
+            fiter->idx[u]        = fiter->idx[swap_idx];
             fiter->idx[swap_idx] = temp_idx;
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Return iteration object */
-    return(fiter);
+    return (fiter);
 } /* end fiter_rnd_init() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	fiter_rnd_next
  *
@@ -1187,7 +1178,7 @@ static hssize_t
 fiter_rnd_next(void *_fiter)
 {
     fiter_rnd_t *fiter = (fiter_rnd_t *)_fiter;
-    hssize_t ret_val;
+    hssize_t     ret_val;
 
     /* Sanity check */
     HDassert(fiter);
@@ -1196,10 +1187,9 @@ fiter_rnd_next(void *_fiter)
     ret_val = (hssize_t)fiter->idx[fiter->pos];
     fiter->pos++;
 
-    return(ret_val);
+    return (ret_val);
 } /* end fiter_rnd_next() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	fiter_rnd_term
  *
@@ -1225,24 +1215,23 @@ fiter_rnd_term(void *_fiter)
     /* Free iteration object */
     HDfree(fiter);
 
-    return(0);
+    return (0);
 } /* end fiter_rnd_term() */
 
 /* Fixed array iterator class for random iteration */
 static const farray_iter_t fa_iter_rnd = {
-    fiter_rnd_init,             /* Iterator init */
-    fiter_rnd_next,             /* Next array index */
-    fiter_rnd_term              /* Iterator term */
+    fiter_rnd_init, /* Iterator init */
+    fiter_rnd_next, /* Next array index */
+    fiter_rnd_term  /* Iterator term */
 };
 
 /* Fixed array iterator info for cyclic iteration */
 typedef struct fiter_cyc_t {
-    hsize_t pos;                /* Position in shuffled array */
-    hsize_t cnt;                /* # of elements to store */
-    hsize_t cyc;                /* Cycle of elements to choose from */
+    hsize_t pos; /* Position in shuffled array */
+    hsize_t cnt; /* # of elements to store */
+    hsize_t cyc; /* Cycle of elements to choose from */
 } fiter_cyc_t;
 
-
 /*-------------------------------------------------------------------------
  * Function:	fiter_cyc_init
  *
@@ -1255,9 +1244,9 @@ typedef struct fiter_cyc_t {
  */
 static void *
 fiter_cyc_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_param_t H5_ATTR_UNUSED *tparam,
-    hsize_t cnt)
+               hsize_t cnt)
 {
-    fiter_cyc_t *fiter;         /* Cyclic element iteration object */
+    fiter_cyc_t *fiter; /* Cyclic element iteration object */
 
     /* Allocate space for the element iteration object */
     fiter = (fiter_cyc_t *)HDmalloc(sizeof(fiter_cyc_t));
@@ -1269,10 +1258,9 @@ fiter_cyc_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
     fiter->cyc = 0;
 
     /* Return iteration object */
-    return(fiter);
+    return (fiter);
 } /* end fiter_cyc_init() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	fiter_cyc_next
  *
@@ -1287,7 +1275,7 @@ static hssize_t
 fiter_cyc_next(void *_fiter)
 {
     fiter_cyc_t *fiter = (fiter_cyc_t *)_fiter;
-    hssize_t ret_val;
+    hssize_t     ret_val;
 
     /* Sanity check */
     HDassert(fiter);
@@ -1295,21 +1283,19 @@ fiter_cyc_next(void *_fiter)
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->pos;
     fiter->pos += FA_CYC_COUNT;
-    if(fiter->pos >= fiter->cnt)
+    if (fiter->pos >= fiter->cnt)
         fiter->pos = ++fiter->cyc;
 
-    return(ret_val);
+    return (ret_val);
 } /* end fiter_cyc_next() */
-
 
 /* Fixed array iterator class for cyclic iteration */
 static const farray_iter_t fa_iter_cyc = {
-    fiter_cyc_init,             /* Iterator init */
-    fiter_cyc_next,             /* Next array index */
-    fiter_term              	/* Iterator term */
+    fiter_cyc_init, /* Iterator init */
+    fiter_cyc_next, /* Next array index */
+    fiter_term      /* Iterator term */
 };
 
-
 /*-------------------------------------------------------------------------
  * Function:	check_elmt
  *
@@ -1328,22 +1314,21 @@ check_elmt(void *_relmt, void *_welmt)
     uint64_t *relmt = (uint64_t *)_relmt;
     uint64_t *welmt = (uint64_t *)_welmt;
 
-    if(welmt == NULL) { /* check for fill value */
-        if(*relmt != H5FA_TEST_FILL)
+    if (welmt == NULL) { /* check for fill value */
+        if (*relmt != H5FA_TEST_FILL)
             TEST_ERROR
     } /* end if */
     else {
-        if(*relmt != *welmt)
+        if (*relmt != *welmt)
             TEST_ERROR
     } /* end else */
 
-    return(0);
+    return (0);
 
 error:
-    return(-1);
+    return (-1);
 } /* end check_elmt() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	test_set_elmts
  *
@@ -1356,21 +1341,21 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
-    hsize_t nelmts, const char *test_str)
+test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, hsize_t nelmts,
+               const char *test_str)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
-    H5FA_t      *fa = NULL;             /* Fixed array wrapper */
-    void        *fiter_info;            /* Fixed array iterator info */
-    farray_state_t state;               /* State of fixed array */
-    uint64_t    welmt;                  /* Element to write */
-    uint64_t    relmt;                  /* Element to read */
-    hsize_t     cnt;                    /* Count of array indices */
-    hssize_t    sidx;                   /* Index value of next element in the fixed array */
-    hsize_t     idx;                    /* Index value of next element in the fixed array */
-    hsize_t	fa_nelmts;		/* # of elements in fixed array */
-    haddr_t     fa_addr = HADDR_UNDEF;  /* Array address in file */
+    hid_t          file = -1;             /* File ID */
+    H5F_t *        f    = NULL;           /* Internal file object pointer */
+    H5FA_t *       fa   = NULL;           /* Fixed array wrapper */
+    void *         fiter_info;            /* Fixed array iterator info */
+    farray_state_t state;                 /* State of fixed array */
+    uint64_t       welmt;                 /* Element to write */
+    uint64_t       relmt;                 /* Element to read */
+    hsize_t        cnt;                   /* Count of array indices */
+    hssize_t       sidx;                  /* Index value of next element in the fixed array */
+    hsize_t        idx;                   /* Index value of next element in the fixed array */
+    hsize_t        fa_nelmts;             /* # of elements in fixed array */
+    haddr_t        fa_addr = HADDR_UNDEF; /* Array address in file */
 
     HDassert(nelmts);
     /*
@@ -1379,111 +1364,110 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
     TESTING("%s", test_str);
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if (create_file(fapl, &file, &f) < 0)
         TEST_ERROR
 
     /* Create array */
-    if(create_array(f, cparam, &fa, &fa_addr) < 0)
+    if (create_array(f, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     /* Verify the creation parameters */
-    if(verify_cparam(fa, cparam) < 0)
+    if (verify_cparam(fa, cparam) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the file */
-    if(reopen_file(&file, &f, fapl, &fa, fa_addr, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, &fa, fa_addr, tparam) < 0)
         TEST_ERROR
 
-    if(H5FA_get_nelmts(fa, &fa_nelmts) < 0)
+    if (H5FA_get_nelmts(fa, &fa_nelmts) < 0)
         FAIL_STACK_ERROR
 
-    if(nelmts > fa_nelmts)
+    if (nelmts > fa_nelmts)
         TEST_ERROR
 
     /* Verify array state */
     HDmemset(&state, 0, sizeof(state));
-    state.hdr_size = FA_HDR_SIZE;
-    state.nelmts = cparam->nelmts;
+    state.hdr_size  = FA_HDR_SIZE;
+    state.nelmts    = cparam->nelmts;
     state.dblk_size = 0;
-    if(check_stats(fa, &state))
+    if (check_stats(fa, &state))
         TEST_ERROR
 
     /* Get all elements from empty array */
 
     /* Initialize iterator */
-    if(NULL == (fiter_info = tparam->fiter->init(cparam, tparam, nelmts)))
+    if (NULL == (fiter_info = tparam->fiter->init(cparam, tparam, nelmts)))
         TEST_ERROR
 
     /* Get elements of array */
-    for(cnt = 0; cnt < nelmts; cnt++) {
+    for (cnt = 0; cnt < nelmts; cnt++) {
         /* Get the array index */
-        if((sidx = tparam->fiter->next(fiter_info)) < 0)
+        if ((sidx = tparam->fiter->next(fiter_info)) < 0)
             TEST_ERROR
-	idx = (hsize_t)sidx;
+        idx = (hsize_t)sidx;
 
         /* Retrieve element of array (not set yet) */
         relmt = (uint64_t)0;
-        if(H5FA_get(fa, idx, &relmt) < 0)
+        if (H5FA_get(fa, idx, &relmt) < 0)
             FAIL_STACK_ERROR
 
         /* Verify that the retrieved is correct */
-        if(check_elmt(&relmt, NULL))
+        if (check_elmt(&relmt, NULL))
             TEST_ERROR
     } /* end for */
 
     /* Shutdown iterator */
-    if(tparam->fiter->term(fiter_info) < 0)
+    if (tparam->fiter->term(fiter_info) < 0)
         TEST_ERROR
-
 
     /* Set (& get) all elements from empty array */
 
     /* Initialize iterator */
-    if(NULL == (fiter_info = tparam->fiter->init(cparam, tparam, nelmts)))
+    if (NULL == (fiter_info = tparam->fiter->init(cparam, tparam, nelmts)))
         TEST_ERROR
 
     /* Set elements of array */
-    for(cnt = 0; cnt < nelmts; cnt++) {
+    for (cnt = 0; cnt < nelmts; cnt++) {
         /* Get the array index */
-        if((sidx = tparam->fiter->next(fiter_info)) < 0)
+        if ((sidx = tparam->fiter->next(fiter_info)) < 0)
             TEST_ERROR
-	idx = (hsize_t)sidx;
+        idx = (hsize_t)sidx;
 
         relmt = (uint64_t)0;
-        if(H5FA_get(fa, idx, &relmt) < 0)
+        if (H5FA_get(fa, idx, &relmt) < 0)
             FAIL_STACK_ERROR
 
         /* Verify that the retrieved element is correct */
-        if(check_elmt(&relmt, NULL))
+        if (check_elmt(&relmt, NULL))
             TEST_ERROR
 
         /* Set element of array */
         welmt = (uint64_t)7 + idx;
-        if(H5FA_set(fa, idx, &welmt) < 0)
+        if (H5FA_set(fa, idx, &welmt) < 0)
             FAIL_STACK_ERROR
 
         /* Retrieve element of array (set now) */
         relmt = (uint64_t)0;
-        if(H5FA_get(fa, idx, &relmt) < 0)
+        if (H5FA_get(fa, idx, &relmt) < 0)
             FAIL_STACK_ERROR
 
         /* Verify that the retrieved element is correct */
-        if(check_elmt(&relmt, &welmt))
+        if (check_elmt(&relmt, &welmt))
             TEST_ERROR
     } /* end for */
 
     /* Verify array state */
     HDmemset(&state, 0, sizeof(state));
     set_fa_state(cparam, &state);
-    if(check_stats(fa, &state))
+    if (check_stats(fa, &state))
         TEST_ERROR
 
     /* Shutdown iterator */
-    if(tparam->fiter->term(fiter_info) < 0)
+    if (tparam->fiter->term(fiter_info) < 0)
         TEST_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(finish(file, fapl, f, fa, fa_addr) < 0)
+    if (finish(file, fapl, f, fa, fa_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -1492,16 +1476,17 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
-        if(fa)
+    H5E_BEGIN_TRY
+    {
+        if (fa)
             H5FA_close(fa);
-	H5Fclose(file);
-    } H5E_END_TRY;
+        H5Fclose(file);
+    }
+    H5E_END_TRY;
 
     return 1;
 } /* test_set_elmts() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	test_skip_elmts
  *
@@ -1514,19 +1499,19 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
-    hsize_t skip_elmts, hbool_t check_rest, const char *test_str)
+test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, hsize_t skip_elmts,
+                hbool_t check_rest, const char *test_str)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
-    H5FA_t      *fa = NULL;             /* Extensible array wrapper */
-    farray_state_t state;               /* State of extensible array */
-    uint64_t    welmt;                  /* Element to write */
-    uint64_t    relmt;                  /* Element to read */
-    hsize_t     idx;                    /* Index value of element to get */
-    hsize_t     cnt;                    /* Count of array indices */
-    hsize_t	fa_nelmts;		/* # of elements in fixed array */
-    haddr_t     fa_addr = HADDR_UNDEF;  /* Array address in file */
+    hid_t          file = -1;             /* File ID */
+    H5F_t *        f    = NULL;           /* Internal file object pointer */
+    H5FA_t *       fa   = NULL;           /* Extensible array wrapper */
+    farray_state_t state;                 /* State of extensible array */
+    uint64_t       welmt;                 /* Element to write */
+    uint64_t       relmt;                 /* Element to read */
+    hsize_t        idx;                   /* Index value of element to get */
+    hsize_t        cnt;                   /* Count of array indices */
+    hsize_t        fa_nelmts;             /* # of elements in fixed array */
+    haddr_t        fa_addr = HADDR_UNDEF; /* Array address in file */
 
     /*
      * Display testing message
@@ -1534,33 +1519,33 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
     TESTING("%s", test_str);
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if (create_file(fapl, &file, &f) < 0)
         TEST_ERROR
 
     /* Create array */
-    if(create_array(f, cparam, &fa, &fa_addr) < 0)
+    if (create_array(f, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     /* Verify the creation parameters */
-    if(verify_cparam(fa, cparam) < 0)
+    if (verify_cparam(fa, cparam) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the file */
-    if(reopen_file(&file, &f, fapl, &fa, fa_addr, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, &fa, fa_addr, tparam) < 0)
         TEST_ERROR
 
-    if(H5FA_get_nelmts(fa, &fa_nelmts) < 0)
+    if (H5FA_get_nelmts(fa, &fa_nelmts) < 0)
         FAIL_STACK_ERROR
 
-    if(skip_elmts >= fa_nelmts)
+    if (skip_elmts >= fa_nelmts)
         TEST_ERROR
 
     /* Verify array state */
     HDmemset(&state, 0, sizeof(state));
-    state.hdr_size = FA_HDR_SIZE;
-    state.nelmts = cparam->nelmts;
+    state.hdr_size  = FA_HDR_SIZE;
+    state.nelmts    = cparam->nelmts;
     state.dblk_size = 0;
-    if(check_stats(fa, &state))
+    if (check_stats(fa, &state))
         TEST_ERROR
 
     /* Set (& get) element after skipping elements */
@@ -1568,49 +1553,49 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
 
     /* Retrieve element of array (not set yet) */
     relmt = (uint64_t)0;
-    if(H5FA_get(fa, idx, &relmt) < 0)
+    if (H5FA_get(fa, idx, &relmt) < 0)
         FAIL_STACK_ERROR
 
     /* Verify that the retrieved is correct */
-    if(check_elmt(&relmt, NULL))
+    if (check_elmt(&relmt, NULL))
         TEST_ERROR
 
     /* Set element of array */
     welmt = (uint64_t)7 + idx;
-    if(H5FA_set(fa, idx, &welmt) < 0)
+    if (H5FA_set(fa, idx, &welmt) < 0)
         FAIL_STACK_ERROR
 
     /* Verify array state */
     HDmemset(&state, 0, sizeof(state));
     set_fa_state(cparam, &state);
-    if(check_stats(fa, &state))
+    if (check_stats(fa, &state))
         TEST_ERROR
 
     /* Retrieve element of array (set now) */
     relmt = (uint64_t)0;
-    if(H5FA_get(fa, idx, &relmt) < 0)
+    if (H5FA_get(fa, idx, &relmt) < 0)
         FAIL_STACK_ERROR
 
     /* Verify that the retrieved is correct */
-    if(check_elmt(&relmt, &welmt))
+    if (check_elmt(&relmt, &welmt))
         TEST_ERROR
 
-    if(check_rest) {
+    if (check_rest) {
         /* Get unset elements of array */
-        for(cnt = 0; cnt < skip_elmts; cnt++) {
+        for (cnt = 0; cnt < skip_elmts; cnt++) {
             /* Retrieve element of array (not set yet) */
             relmt = (uint64_t)0;
-            if(H5FA_get(fa, cnt, &relmt) < 0)
+            if (H5FA_get(fa, cnt, &relmt) < 0)
                 FAIL_STACK_ERROR
 
             /* Verify that the retrieved is correct */
-            if(check_elmt(&relmt, NULL))
+            if (check_elmt(&relmt, NULL))
                 TEST_ERROR
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Close array, delete array, close file & verify file is empty */
-    if(finish(file, fapl, f, fa, fa_addr) < 0)
+    if (finish(file, fapl, f, fa, fa_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -1619,16 +1604,17 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
-        if(fa)
+    H5E_BEGIN_TRY
+    {
+        if (fa)
             H5FA_close(fa);
-	H5Fclose(file);
-    } H5E_END_TRY;
+        H5Fclose(file);
+    }
+    H5E_END_TRY;
 
     return 1;
 } /* test_skip_elmts() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	main
  *
@@ -1642,28 +1628,29 @@ error:
 int
 main(void)
 {
-    H5FA_create_t cparam;               /* Creation parameters for fixed array */
-    farray_test_param_t tparam;         /* Testing parameters */
-    farray_test_type_t curr_test;       /* Current test being worked on */
-    farray_iter_type_t curr_iter;       /* Current iteration type being worked on */
-    hid_t	fapl = -1;              /* File access property list for data files */
-    unsigned	nerrors = 0;            /* Cumulative error count */
-    time_t      curr_time;              /* Current time, for seeding random number generator */
-    int		ExpressMode;            /* Test express value */
-    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    H5FA_create_t       cparam;                 /* Creation parameters for fixed array */
+    farray_test_param_t tparam;                 /* Testing parameters */
+    farray_test_type_t  curr_test;              /* Current test being worked on */
+    farray_iter_type_t  curr_iter;              /* Current iteration type being worked on */
+    hid_t               fapl    = -1;           /* File access property list for data files */
+    unsigned            nerrors = 0;            /* Cumulative error count */
+    time_t              curr_time;              /* Current time, for seeding random number generator */
+    int                 ExpressMode;            /* Test express value */
+    hbool_t             api_ctx_pushed = FALSE; /* Whether API context pushed */
 
     /* Reset library */
     h5_reset();
-    fapl = h5_fileaccess();
+    fapl        = h5_fileaccess();
     ExpressMode = GetTestExpress();
-    if(ExpressMode > 1)
+    if (ExpressMode > 1)
         HDprintf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
 
     /* Push API context */
-    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    if (H5CX_push() < 0)
+        FAIL_STACK_ERROR
     api_ctx_pushed = TRUE;
 
     /* Seed random #'s */
@@ -1672,29 +1659,29 @@ main(void)
 
     /* Create an empty file to retrieve size */
     {
-        hid_t	file;              /* File ID */
+        hid_t file; /* File ID */
 
-        if((file = H5Fcreate(filename_g, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        if ((file = H5Fcreate(filename_g, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             FAIL_STACK_ERROR
 
         /* Close file */
-        if(H5Fclose(file) < 0)
+        if (H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
         /* Get the size of a file w/no array */
-        if((empty_size_g = h5_get_file_size(filename_g, fapl)) < 0)
+        if ((empty_size_g = h5_get_file_size(filename_g, fapl)) < 0)
             TEST_ERROR
     }
 
     /* Iterate over the testing parameters */
-    for(curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; curr_test++) {
+    for (curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; curr_test++) {
 
         /* Initialize the testing parameters */
         HDmemset(&tparam, 0, sizeof(tparam));
         tparam.nelmts = TEST_NELMTS;
 
         /* Set appropriate testing parameters for each test */
-        switch(curr_test) {
+        switch (curr_test) {
             /* "Normal" testing parameters */
             case FARRAY_TEST_NORMAL:
                 HDputs("Testing with NORMAL PARAMETERS");
@@ -1712,8 +1699,8 @@ main(void)
                 goto error;
         } /* end switch */
 
-	/* Initialize fixed array creation parameters */
-	init_cparam(&cparam, &tparam);
+        /* Initialize fixed array creation parameters */
+        init_cparam(&cparam, &tparam);
 
         /* Basic capability tests */
         nerrors += test_create(fapl, &cparam, &tparam);
@@ -1722,11 +1709,11 @@ main(void)
         nerrors += test_open_twice_diff(fapl, &cparam, &tparam);
         nerrors += test_delete_open(fapl, &cparam, &tparam);
 
-	/* Iterate over the type of capacity tests */
-	for(curr_iter = FARRAY_ITER_FW; curr_iter < FARRAY_ITER_NITERS; curr_iter++) {
+        /* Iterate over the type of capacity tests */
+        for (curr_iter = FARRAY_ITER_FW; curr_iter < FARRAY_ITER_NITERS; curr_iter++) {
 
             /* Set appropriate parameters for each type of iteration */
-            switch(curr_iter) {
+            switch (curr_iter) {
                 /* "Forward" testing parameters */
                 case FARRAY_ITER_FW:
                     HDputs("Testing with forward iteration");
@@ -1759,16 +1746,20 @@ main(void)
 
             /* Basic capacity tests */
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)1, "setting 1 element of the array");
-            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts/2), "setting half of the array's elements ");
-            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)tparam.nelmts, "setting all the array elements");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts / 2),
+                                      "setting half of the array's elements ");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)tparam.nelmts,
+                                      "setting all the array elements");
         } /* end for */
 
         /* Check skipping elements */
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)1, TRUE, "skipping to first element");
-        nerrors += test_skip_elmts(fapl, &cparam, &tparam, ((hsize_t)1 << cparam.max_dblk_page_nelmts_bits), TRUE, "skipping to first element in data block page");
-        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), TRUE, "skipping to last element");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, ((hsize_t)1 << cparam.max_dblk_page_nelmts_bits),
+                                   TRUE, "skipping to first element in data block page");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), TRUE,
+                                   "skipping to last element");
 
-	    /* Create Fixed Array */
+        /* Create Fixed Array */
         /* MAX_NELMTS succeeds on some platforms buy may fail on others:
          *
          *      "H5FD_sec2_truncate(): unable to extend file properly"
@@ -1779,21 +1770,23 @@ main(void)
          *
          * have both been seen.
          */
-        tparam.nelmts = MAX_NELMTS/17;
+        tparam.nelmts = MAX_NELMTS / 17;
         init_cparam(&cparam, &tparam);
 
         /* Set the last element in the Fixed Array */
-        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), FALSE, "skipping to last element");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), FALSE,
+                                   "skipping to last element");
     } /* end for */
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     /* Pop API context */
-    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    if (api_ctx_pushed && H5CX_pop() < 0)
+        FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
-    if(nerrors)
+    if (nerrors)
         goto error;
     HDputs("All fixed array tests passed.");
 
@@ -1805,12 +1798,14 @@ main(void)
 error:
     HDputs("*** TESTS FAILED ***");
 
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(fapl);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
-    if(api_ctx_pushed) H5CX_pop();
+    if (api_ctx_pushed)
+        H5CX_pop();
 
     HDexit(EXIT_FAILURE);
 } /* end main() */
-

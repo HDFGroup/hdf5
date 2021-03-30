@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,45 +26,37 @@
 /* Module Setup */
 /****************/
 
-
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"      /* Generic Functions        */
-#include "H5Eprivate.h"     /* Error handling           */
-#include "H5Fprivate.h"     /* File access              */
-#include "H5MMprivate.h"    /* Memory management        */
-
+#include "H5private.h"   /* Generic Functions        */
+#include "H5Eprivate.h"  /* Error handling           */
+#include "H5Fprivate.h"  /* File access              */
+#include "H5MMprivate.h" /* Memory management        */
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Package Typedefs */
 /********************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
@@ -73,7 +65,6 @@
 /* Track whether tzset routine was called */
 static hbool_t H5_ntzset = FALSE;
 
-
 /*-------------------------------------------------------------------------
  * Function:  HDfprintf
  *
@@ -107,47 +98,48 @@ static hbool_t H5_ntzset = FALSE;
  *      format_templ in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format-nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 int
 HDfprintf(FILE *stream, const char *fmt, ...)
 {
-    int    n=0, nout = 0;
-    int    fwidth, prec;
-    int    zerofill;
-    int    leftjust;
-    int    plussign;
-    int    ldspace;
-    int    prefix;
-    char  modifier[8];
-    int    conv;
-    char  *rest, format_templ[128];
-    int    len;
-    const char  *s;
-    va_list  ap;
+    int         n = 0, nout = 0;
+    int         fwidth, prec;
+    int         zerofill;
+    int         leftjust;
+    int         plussign;
+    int         ldspace;
+    int         prefix;
+    char        modifier[8];
+    int         conv;
+    char *      rest, format_templ[128];
+    int         len;
+    const char *s;
+    va_list     ap;
 
     HDassert(stream);
     HDassert(fmt);
 
-    HDva_start (ap, fmt);
+    HDva_start(ap, fmt);
     while (*fmt) {
         fwidth = prec = 0;
-        zerofill = 0;
-        leftjust = 0;
-        plussign = 0;
-        prefix = 0;
-        ldspace = 0;
-        modifier[0] = '\0';
+        zerofill      = 0;
+        leftjust      = 0;
+        plussign      = 0;
+        prefix        = 0;
+        ldspace       = 0;
+        modifier[0]   = '\0';
 
-        if ('%'==fmt[0] && '%'==fmt[1]) {
-            HDputc ('%', stream);
+        if ('%' == fmt[0] && '%' == fmt[1]) {
+            HDputc('%', stream);
             fmt += 2;
             nout++;
-        } else if ('%'==fmt[0]) {
+        }
+        else if ('%' == fmt[0]) {
             s = fmt + 1;
 
             /* Flags */
-            while(HDstrchr("-+ #", *s)) {
-                switch(*s) {
+            while (HDstrchr("-+ #", *s)) {
+                switch (*s) {
                     case '-':
                         leftjust = 1;
                         break;
@@ -171,43 +163,44 @@ HDfprintf(FILE *stream, const char *fmt, ...)
             } /* end while */
 
             /* Field width */
-            if(HDisdigit(*s)) {
+            if (HDisdigit(*s)) {
                 zerofill = ('0' == *s);
-                fwidth = (int)HDstrtol (s, &rest, 10);
-                s = rest;
+                fwidth   = (int)HDstrtol(s, &rest, 10);
+                s        = rest;
             } /* end if */
-            else if ('*'==*s) {
+            else if ('*' == *s) {
                 fwidth = HDva_arg(ap, int);
-                if(fwidth < 0) {
+                if (fwidth < 0) {
                     leftjust = 1;
-                    fwidth = -fwidth;
+                    fwidth   = -fwidth;
                 }
                 s++;
             }
 
             /* Precision */
-            if('.'==*s) {
+            if ('.' == *s) {
                 s++;
-                if(HDisdigit(*s)) {
+                if (HDisdigit(*s)) {
                     prec = (int)HDstrtol(s, &rest, 10);
-                    s = rest;
-                } else if('*'==*s) {
+                    s    = rest;
+                }
+                else if ('*' == *s) {
                     prec = HDva_arg(ap, int);
                     s++;
                 }
-                if(prec < 1)
+                if (prec < 1)
                     prec = 1;
             }
 
             /* Extra type modifiers */
-            if(HDstrchr("zZHhlqLI", *s)) {
-                switch(*s) {
+            if (HDstrchr("zZHhlqLI", *s)) {
+                switch (*s) {
                     /*lint --e{506} Don't issue warnings about constant value booleans */
                     /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true */
                     case 'H':
-                        if(sizeof(hsize_t) < sizeof(long))
+                        if (sizeof(hsize_t) < sizeof(long))
                             modifier[0] = '\0';
-                        else if(sizeof(hsize_t) == sizeof(long)) {
+                        else if (sizeof(hsize_t) == sizeof(long)) {
                             HDstrncpy(modifier, "l", sizeof(modifier));
                             modifier[sizeof(modifier) - 1] = '\0';
                         } /* end if */
@@ -219,9 +212,9 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                     case 'Z':
                     case 'z':
-                        if(sizeof(size_t) < sizeof(long))
+                        if (sizeof(size_t) < sizeof(long))
                             modifier[0] = '\0';
-                        else if(sizeof(size_t) == sizeof(long)) {
+                        else if (sizeof(size_t) == sizeof(long)) {
                             HDstrncpy(modifier, "l", sizeof(modifier));
                             modifier[sizeof(modifier) - 1] = '\0';
                         } /* end if */
@@ -233,26 +226,26 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                     default:
                         /* Handle 'I64' modifier for Microsoft's "__int64" type */
-                        if(*s=='I' && *(s+1)=='6' && *(s+2)=='4') {
+                        if (*s == 'I' && *(s + 1) == '6' && *(s + 2) == '4') {
                             modifier[0] = *s;
-                            modifier[1] = *(s+1);
-                            modifier[2] = *(s+2);
+                            modifier[1] = *(s + 1);
+                            modifier[2] = *(s + 2);
                             modifier[3] = '\0';
                             s += 2; /* Increment over 'I6', the '4' is taken care of below */
-                        } /* end if */
+                        }           /* end if */
                         else {
                             /* Handle 'll' for long long types */
-                            if(*s=='l' && *(s+1)=='l') {
+                            if (*s == 'l' && *(s + 1) == 'l') {
                                 modifier[0] = *s;
                                 modifier[1] = *s;
                                 modifier[2] = '\0';
                                 s++; /* Increment over first 'l', second is taken care of below */
-                            } /* end if */
+                            }        /* end if */
                             else {
                                 modifier[0] = *s;
                                 modifier[1] = '\0';
                             } /* end else */
-                        } /* end else */
+                        }     /* end else */
                         break;
                 }
                 s++;
@@ -263,33 +256,39 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
             /* Create the format template */
             len = 0;
-            len += HDsnprintf(format_templ, (sizeof(format_templ) - (size_t)(len + 1)), "%%%s%s%s%s%s", (leftjust ? "-" : ""),
-                    (plussign ? "+" : ""), (ldspace ? " " : ""),
-                    (prefix ? "#" : ""), (zerofill ? "0" : ""));
-            if(fwidth > 0)
-                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%d", fwidth);
-            if(prec > 0)
-                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), ".%d", prec);
-            if(*modifier)
-                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%s", modifier);
+            len += HDsnprintf(format_templ, (sizeof(format_templ) - (size_t)(len + 1)), "%%%s%s%s%s%s",
+                              (leftjust ? "-" : ""), (plussign ? "+" : ""), (ldspace ? " " : ""),
+                              (prefix ? "#" : ""), (zerofill ? "0" : ""));
+            if (fwidth > 0)
+                len +=
+                    HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%d", fwidth);
+            if (prec > 0)
+                len +=
+                    HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), ".%d", prec);
+            if (*modifier)
+                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%s",
+                                  modifier);
             HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%c", conv);
 
             /* Conversion */
             switch (conv) {
                 case 'd':
                 case 'i':
-                    if(!HDstrcmp(modifier, "h")) {
+                    if (!HDstrcmp(modifier, "h")) {
                         short x = (short)HDva_arg(ap, int);
-                        n = fprintf(stream, format_templ, x);
-                    } else if(!*modifier) {
+                        n       = fprintf(stream, format_templ, x);
+                    }
+                    else if (!*modifier) {
                         int x = HDva_arg(ap, int);
-                        n = fprintf(stream, format_templ, x);
-                    } else if(!HDstrcmp(modifier, "l")) {
+                        n     = fprintf(stream, format_templ, x);
+                    }
+                    else if (!HDstrcmp(modifier, "l")) {
                         long x = HDva_arg(ap, long);
-                        n = fprintf(stream, format_templ, x);
-                    } else {
+                        n      = fprintf(stream, format_templ, x);
+                    }
+                    else {
                         int64_t x = HDva_arg(ap, int64_t);
-                        n = fprintf(stream, format_templ, x);
+                        n         = fprintf(stream, format_templ, x);
                     }
                     break;
 
@@ -297,18 +296,21 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'u':
                 case 'x':
                 case 'X':
-                    if(!HDstrcmp(modifier, "h")) {
+                    if (!HDstrcmp(modifier, "h")) {
                         unsigned short x = (unsigned short)HDva_arg(ap, unsigned int);
-                        n = fprintf(stream, format_templ, x);
-                    } else if(!*modifier) {
+                        n                = fprintf(stream, format_templ, x);
+                    }
+                    else if (!*modifier) {
                         unsigned int x = HDva_arg(ap, unsigned int);
-                        n = fprintf(stream, format_templ, x);
-                    } else if(!HDstrcmp(modifier, "l")) {
+                        n              = fprintf(stream, format_templ, x);
+                    }
+                    else if (!HDstrcmp(modifier, "l")) {
                         unsigned long x = HDva_arg(ap, unsigned long);
-                        n = fprintf(stream, format_templ, x);
-                    } else {
+                        n               = fprintf(stream, format_templ, x);
+                    }
+                    else {
                         uint64_t x = HDva_arg(ap, uint64_t);
-                        n = fprintf(stream, format_templ, x);
+                        n          = fprintf(stream, format_templ, x);
                     }
                     break;
 
@@ -317,145 +319,133 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'E':
                 case 'g':
                 case 'G':
-                    if(!HDstrcmp(modifier, "h")) {
+                    if (!HDstrcmp(modifier, "h")) {
                         float x = (float)HDva_arg(ap, double);
-                        n = fprintf(stream, format_templ, (double)x);
-                    } else if(!*modifier || !HDstrcmp(modifier, "l")) {
+                        n       = fprintf(stream, format_templ, (double)x);
+                    }
+                    else if (!*modifier || !HDstrcmp(modifier, "l")) {
                         double x = HDva_arg(ap, double);
-                        n = fprintf(stream, format_templ, x);
-                    } else {
-                    /*
-                    * Some compilers complain when `long double' and
-                    * `double' are the same thing.
-                    */
+                        n        = fprintf(stream, format_templ, x);
+                    }
+                    else {
+                        /*
+                         * Some compilers complain when `long double' and
+                         * `double' are the same thing.
+                         */
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
                         long double x = HDva_arg(ap, long double);
-                        n = fprintf(stream, format_templ, x);
+                        n             = fprintf(stream, format_templ, x);
 #else
                         double x = HDva_arg(ap, double);
-                        n = fprintf(stream, format_templ, x);
+                        n        = fprintf(stream, format_templ, x);
 #endif
                     }
                     break;
 
-                case 'a':
-                    {
-                        haddr_t x = HDva_arg(ap, haddr_t);
+                case 'a': {
+                    haddr_t x = HDva_arg(ap, haddr_t);
 
-                        if(H5F_addr_defined(x)) {
-                            len = 0;
-                            len += HDsnprintf(format_templ, (sizeof(format_templ) - (size_t)(len + 1)), "%%%s%s%s%s%s",
-                                (leftjust ? "-" : ""), (plussign ? "+" : ""),
-                                (ldspace ? " " : ""), (prefix ? "#" : ""),
-                                (zerofill ? "0" : ""));
-                            if(fwidth > 0)
-                                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%d", fwidth);
+                    if (H5F_addr_defined(x)) {
+                        len = 0;
+                        len += HDsnprintf(format_templ, (sizeof(format_templ) - (size_t)(len + 1)),
+                                          "%%%s%s%s%s%s", (leftjust ? "-" : ""), (plussign ? "+" : ""),
+                                          (ldspace ? " " : ""), (prefix ? "#" : ""), (zerofill ? "0" : ""));
+                        if (fwidth > 0)
+                            len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)),
+                                              "%d", fwidth);
 
-                            /*lint --e{506} Don't issue warnings about constant value booleans */
-                            /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true */
-                            if(sizeof(x) == H5_SIZEOF_INT) {
-                                HDstrncat(format_templ, "u", (sizeof(format_templ) - (size_t)(len + 1)));
-                                len++;
-                            } /* end if */
-                            else if(sizeof(x) == H5_SIZEOF_LONG) {
-                                HDstrncat(format_templ, "lu", (sizeof(format_templ) - (size_t)(len + 1)));
-                                len++;
-                            } /* end if */
-                            else if(sizeof(x) == H5_SIZEOF_LONG_LONG) {
-                                HDstrncat(format_templ, H5_PRINTF_LL_WIDTH, (sizeof(format_templ) - (size_t)(len + 1)));
-                                len += (int)sizeof(H5_PRINTF_LL_WIDTH);
-                                HDstrncat(format_templ, "u", (sizeof(format_templ) - (size_t)(len + 1)));
-                                len++;
-                            }
-                            n = fprintf(stream, format_templ, x);
-                        } else {
-                            len = 0;
-                            HDstrncpy(format_templ, "%", (sizeof(format_templ) - (size_t)(len + 1)));
+                        /*lint --e{506} Don't issue warnings about constant value booleans */
+                        /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true
+                         */
+                        if (sizeof(x) == H5_SIZEOF_INT) {
+                            HDstrncat(format_templ, "u", (sizeof(format_templ) - (size_t)(len + 1)));
                             len++;
-                            if(leftjust) {
-                                HDstrncat(format_templ, "-", (sizeof(format_templ) - (size_t)(len + 1)));
-                                len++;
-                            } /* end if */
-                            if(fwidth)
-                                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)),  "%d", fwidth);
-                            HDstrncat(format_templ, "s", (sizeof(format_templ) - (size_t)(len + 1)));
-                            n = fprintf(stream, format_templ, "UNDEF");
+                        } /* end if */
+                        else if (sizeof(x) == H5_SIZEOF_LONG) {
+                            HDstrncat(format_templ, "lu", (sizeof(format_templ) - (size_t)(len + 1)));
+                            len++;
+                        } /* end if */
+                        else if (sizeof(x) == H5_SIZEOF_LONG_LONG) {
+                            HDstrncat(format_templ, H5_PRINTF_LL_WIDTH,
+                                      (sizeof(format_templ) - (size_t)(len + 1)));
+                            len += (int)sizeof(H5_PRINTF_LL_WIDTH);
+                            HDstrncat(format_templ, "u", (sizeof(format_templ) - (size_t)(len + 1)));
+                            len++;
                         }
-                    }
-                    break;
-
-                case 'c':
-                    {
-                        char x = (char)HDva_arg(ap, int);
                         n = fprintf(stream, format_templ, x);
                     }
-                    break;
+                    else {
+                        len = 0;
+                        HDstrncpy(format_templ, "%", (sizeof(format_templ) - (size_t)(len + 1)));
+                        len++;
+                        if (leftjust) {
+                            HDstrncat(format_templ, "-", (sizeof(format_templ) - (size_t)(len + 1)));
+                            len++;
+                        } /* end if */
+                        if (fwidth)
+                            len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)),
+                                              "%d", fwidth);
+                        HDstrncat(format_templ, "s", (sizeof(format_templ) - (size_t)(len + 1)));
+                        n = fprintf(stream, format_templ, "UNDEF");
+                    }
+                } break;
+
+                case 'c': {
+                    char x = (char)HDva_arg(ap, int);
+                    n      = fprintf(stream, format_templ, x);
+                } break;
 
                 case 's':
-                case 'p':
-                    {
-                        char *x = HDva_arg(ap, char*);
-                        n = fprintf(stream, format_templ, x);
-                    }
-                    break;
+                case 'p': {
+                    char *x = HDva_arg(ap, char *);
+                    n       = fprintf(stream, format_templ, x);
+                } break;
 
                 case 'n':
                     format_templ[HDstrlen(format_templ) - 1] = 'u';
-                    n = fprintf(stream, format_templ, nout);
+                    n                                        = fprintf(stream, format_templ, nout);
                     break;
 
-                case 't':
-                    {
-                        htri_t tri_var = HDva_arg(ap, htri_t);
+                case 't': {
+                    htri_t tri_var = HDva_arg(ap, htri_t);
 
-                        if(tri_var > 0)
-                            n = fprintf(stream, "TRUE");
-                        else if(!tri_var)
-                            n = fprintf(stream, "FALSE");
-                        else
-                            n = fprintf(stream, "FAIL(%d)", (int)tri_var);
-                    }
-                    break;
+                    if (tri_var > 0)
+                        n = fprintf(stream, "TRUE");
+                    else if (!tri_var)
+                        n = fprintf(stream, "FALSE");
+                    else
+                        n = fprintf(stream, "FAIL(%d)", (int)tri_var);
+                } break;
 
-                case 'T':       /* Elapsed time, in seconds */
-                    {
-                        double seconds = HDva_arg(ap, double);
-                        char *time_string = H5_timer_get_time_string(seconds);
+                case 'T': /* Elapsed time, in seconds */
+                {
+                    double seconds     = HDva_arg(ap, double);
+                    char * time_string = H5_timer_get_time_string(seconds);
 
-                        if(time_string) {
-                            n = fprintf(stream, format_templ, time_string);
-                            HDfree(time_string);
-                        } /* end if */
-                        else
-                            n = fprintf(stream, format_templ, "(error)");
-                    }
-                    break;
+                    if (time_string) {
+                        n = fprintf(stream, format_templ, time_string);
+                        HDfree(time_string);
+                    } /* end if */
+                    else
+                        n = fprintf(stream, format_templ, "(error)");
+                } break;
 
-                case 'k':
-                    {
-                        H5O_token_t token = HDva_arg(ap, H5O_token_t);
+                case 'k': {
+                    H5O_token_t token = HDva_arg(ap, H5O_token_t);
 
-                        /* Print the raw token. */
-                        n = fprintf(stream, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
-                                (unsigned char)token.__data[15],
-                                (unsigned char)token.__data[14],
-                                (unsigned char)token.__data[13],
-                                (unsigned char)token.__data[12],
-                                (unsigned char)token.__data[11],
-                                (unsigned char)token.__data[10],
-                                (unsigned char)token.__data[9],
-                                (unsigned char)token.__data[8],
-                                (unsigned char)token.__data[7],
-                                (unsigned char)token.__data[6],
-                                (unsigned char)token.__data[5],
-                                (unsigned char)token.__data[4],
-                                (unsigned char)token.__data[3],
-                                (unsigned char)token.__data[2],
-                                (unsigned char)token.__data[1],
-                                (unsigned char)token.__data[0]
-                                );
-                    }
-                    break;
+                    /* Print the raw token. */
+                    n = fprintf(
+                        stream,
+                        "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
+                        (unsigned char)token.__data[15], (unsigned char)token.__data[14],
+                        (unsigned char)token.__data[13], (unsigned char)token.__data[12],
+                        (unsigned char)token.__data[11], (unsigned char)token.__data[10],
+                        (unsigned char)token.__data[9], (unsigned char)token.__data[8],
+                        (unsigned char)token.__data[7], (unsigned char)token.__data[6],
+                        (unsigned char)token.__data[5], (unsigned char)token.__data[4],
+                        (unsigned char)token.__data[3], (unsigned char)token.__data[2],
+                        (unsigned char)token.__data[1], (unsigned char)token.__data[0]);
+                } break;
 
                 default:
                     HDfputs(format_templ, stream);
@@ -464,7 +454,8 @@ HDfprintf(FILE *stream, const char *fmt, ...)
             }
             nout += n;
             fmt = s;
-        } else {
+        }
+        else {
             HDputc(*fmt, stream);
             fmt++;
             nout++;
@@ -473,9 +464,8 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     HDva_end(ap);
     return nout;
 } /* end HDfprintf() */
-H5_GCC_DIAG_ON(format-nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")
 
-
 /*-------------------------------------------------------------------------
  * Function:  HDstrtoll
  *
@@ -516,69 +506,67 @@ H5_GCC_DIAG_ON(format-nonliteral)
  * Programmer:  Robb Matzke
  *              Thursday, April  9, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifndef HDstrtoll
 int64_t
 HDstrtoll(const char *s, const char **rest, int base)
 {
-    int64_t  sign=1, acc=0;
-    hbool_t  overflow = FALSE;
+    int64_t sign = 1, acc = 0;
+    hbool_t overflow = FALSE;
 
     errno = 0;
-    if (!s || (base && (base<2 || base>36))) {
+    if (!s || (base && (base < 2 || base > 36))) {
         if (rest)
             *rest = s;
         return 0;
     }
 
     /* Skip white space */
-    while (HDisspace (*s)) s++;
+    while (HDisspace(*s))
+        s++;
 
     /* Optional minus or plus sign */
-    if ('+'==*s) {
+    if ('+' == *s) {
         s++;
     }
-    else if ('-'==*s) {
+    else if ('-' == *s) {
         sign = -1;
         s++;
     }
 
     /* Zero base prefix */
-    if (0==base && '0'==*s && ('x'==s[1] || 'X'==s[1])) {
+    if (0 == base && '0' == *s && ('x' == s[1] || 'X' == s[1])) {
         base = 16;
         s += 2;
     }
-    else if (0==base && '0'==*s) {
+    else if (0 == base && '0' == *s) {
         base = 8;
         s++;
     }
-    else if (0==base) {
+    else if (0 == base) {
         base = 10;
     }
 
     /* Digits */
-    while ((base<=10 && *s>='0' && *s<'0'+base) ||
-     (base>10 && ((*s>='0' && *s<='9') ||
-      (*s>='a' && *s<'a'+base-10) ||
-      (*s>='A' && *s<'A'+base-10)))) {
+    while ((base <= 10 && *s >= '0' && *s < '0' + base) ||
+           (base > 10 && ((*s >= '0' && *s <= '9') || (*s >= 'a' && *s < 'a' + base - 10) ||
+                          (*s >= 'A' && *s < 'A' + base - 10)))) {
         if (!overflow) {
             int64_t digit = 0;
 
-            if (*s>='0' && *s<='9')
+            if (*s >= '0' && *s <= '9')
                 digit = *s - '0';
-            else if (*s>='a' && *s<='z')
-                digit = (*s-'a')+10;
+            else if (*s >= 'a' && *s <= 'z')
+                digit = (*s - 'a') + 10;
             else
-                digit = (*s-'A')+10;
+                digit = (*s - 'A') + 10;
 
-            if (acc*base+digit < acc) {
+            if (acc * base + digit < acc) {
                 overflow = TRUE;
             }
             else {
-                acc = acc*base + digit;
+                acc = acc * base + digit;
             }
         }
         s++;
@@ -586,11 +574,11 @@ HDstrtoll(const char *s, const char **rest, int base)
 
     /* Overflow */
     if (overflow) {
-        if (sign>0) {
-            acc = ((uint64_t)1<<(8*sizeof(int64_t)-1))-1;
+        if (sign > 0) {
+            acc = ((uint64_t)1 << (8 * sizeof(int64_t) - 1)) - 1;
         }
         else {
-            acc = (int64_t)((uint64_t)1<<(8*sizeof(int64_t)-1));
+            acc = (int64_t)((uint64_t)1 << (8 * sizeof(int64_t) - 1));
         }
         errno = ERANGE;
     }
@@ -602,7 +590,7 @@ HDstrtoll(const char *s, const char **rest, int base)
     return acc;
 } /* end HDstrtoll() */
 #endif
-
+
 /*-------------------------------------------------------------------------
  * Function:  HDrand/HDsrand
  *
@@ -626,19 +614,19 @@ HDstrtoll(const char *s, const char **rest, int base)
 
 static unsigned int g_seed = 42;
 
-int HDrand(void)
+int
+HDrand(void)
 {
     return rand_r(&g_seed);
 }
 
-void HDsrand(unsigned int seed)
+void
+HDsrand(unsigned int seed)
 {
     g_seed = seed;
 }
 #endif /* H5_HAVE_RAND_R */
 
-
-
 /*-------------------------------------------------------------------------
  * Function:    Pflock
  *
@@ -655,26 +643,27 @@ void HDsrand(unsigned int seed)
  */
 #ifdef H5_HAVE_FCNTL
 int
-Pflock(int fd, int operation) {
+Pflock(int fd, int operation)
+{
 
-    struct flock    flk;
+    struct flock flk;
 
     /* Set the lock type */
-    if(operation & LOCK_UN)
+    if (operation & LOCK_UN)
         flk.l_type = F_UNLCK;
-    else if(operation & LOCK_SH)
+    else if (operation & LOCK_SH)
         flk.l_type = F_RDLCK;
     else
         flk.l_type = F_WRLCK;
 
     /* Set the other flock struct values */
     flk.l_whence = SEEK_SET;
-    flk.l_start = 0;
-    flk.l_len = 0;              /* to EOF */
-    flk.l_pid = 0;              /* not used with set */
+    flk.l_start  = 0;
+    flk.l_len    = 0; /* to EOF */
+    flk.l_pid    = 0; /* not used with set */
 
     /* Lock or unlock */
-    if(HDfcntl(fd, F_SETLK, &flk) < 0)
+    if (HDfcntl(fd, F_SETLK, &flk) < 0)
         return -1;
 
     return 0;
@@ -682,24 +671,23 @@ Pflock(int fd, int operation) {
 } /* end Pflock() */
 #endif /* H5_HAVE_FCNTL */
 
-
 /*-------------------------------------------------------------------------
  * Function:    Nflock
  *
  * Purpose:     Wrapper function for systems where no file locking is
  *              available.
  *
- * Return:      Failure:    -1 (always fails)
+ * Return:      0 (success)
  *
  *-------------------------------------------------------------------------
  */
 int H5_ATTR_CONST
-Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
-    /* just fail */
-    return -1;
+Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation)
+{
+    /* just succeed */
+    return 0;
 } /* end Nflock() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5_make_time
  *
@@ -722,15 +710,15 @@ Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
 time_t
 H5_make_time(struct tm *tm)
 {
-    time_t the_time;    /* The converted time */
-#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900)  /* VS 2015 */
+    time_t the_time;                                     /* The converted time */
+#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) /* VS 2015 */
     /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
      * variable declared in time.h. That variable was deprecated and in
      * VS 2015 is removed, with _get_timezone replacing it.
      */
     long timezone = 0;
-#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
-    time_t ret_value;   /* Return value */
+#endif                    /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+    time_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -738,21 +726,21 @@ H5_make_time(struct tm *tm)
     HDassert(tm);
 
     /* Initialize timezone information */
-    if(!H5_ntzset) {
+    if (!H5_ntzset) {
         HDtzset();
         H5_ntzset = TRUE;
     } /* end if */
 
     /* Perform base conversion */
-    if((time_t)-1 == (the_time = HDmktime(tm)))
+    if ((time_t)-1 == (the_time = HDmktime(tm)))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message")
 
-    /* Adjust for timezones */
+        /* Adjust for timezones */
 #if defined(H5_HAVE_TM_GMTOFF)
     /* BSD-like systems */
     the_time += tm->tm_gmtoff;
 #elif defined(H5_HAVE_TIMEZONE)
-#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900)  /* VS 2015 */
+#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) /* VS 2015 */
     /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
      * variable declared in time.h. That variable was deprecated and in
      * VS 2015 is removed, with _get_timezone replacing it.
@@ -784,7 +772,6 @@ done:
 /* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
 #define _W32_FT_OFFSET (116444736000000000ULL)
 
-
 /*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
  *
@@ -809,34 +796,33 @@ done:
 int
 Wgettimeofday(struct timeval *tv, struct timezone *tz)
 {
-  union {
-    unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
-    FILETIME ft;
-  }  _now;
+    union {
+        unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+        FILETIME           ft;
+    } _now;
 
     static int tzsetflag;
 
-    if(tv) {
-      GetSystemTimeAsFileTime (&_now.ft);
-      tv->tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
-      tv->tv_sec= (long)((_now.ns100 - _W32_FT_OFFSET) / 10000000ULL);
+    if (tv) {
+        GetSystemTimeAsFileTime(&_now.ft);
+        tv->tv_usec = (long)((_now.ns100 / 10ULL) % 1000000ULL);
+        tv->tv_sec  = (long)((_now.ns100 - _W32_FT_OFFSET) / 10000000ULL);
     }
 
-    if(tz) {
-        if(!tzsetflag) {
+    if (tz) {
+        if (!tzsetflag) {
             _tzset();
             tzsetflag = 1;
         }
         tz->tz_minuteswest = _timezone / 60;
-        tz->tz_dsttime = _daylight;
+        tz->tz_dsttime     = _daylight;
     }
 
-  /* Always return 0 as per Open Group Base Specifications Issue 6.
-     Do not set errno on error.  */
-  return 0;
+    /* Always return 0 as per Open Group Base Specifications Issue 6.
+       Do not set errno on error.  */
+    return 0;
 } /* end Wgettimeofday() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    Wsetenv
  *
@@ -855,14 +841,14 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
 int
 Wsetenv(const char *name, const char *value, int overwrite)
 {
-    size_t bufsize;
+    size_t  bufsize;
     errno_t err;
 
     /* If we're not overwriting, check if the environment variable exists.
      * If it does (i.e.: the required buffer size to store the variable's
      * value is non-zero), then return an error code.
      */
-    if(!overwrite) {
+    if (!overwrite) {
         err = getenv_s(&bufsize, NULL, 0, name);
         if (err || bufsize)
             return (int)err;
@@ -875,7 +861,6 @@ Wsetenv(const char *name, const char *value, int overwrite)
 #pragma comment(lib, "advapi32.lib")
 #endif
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5_get_win32_times
  *
@@ -894,25 +879,25 @@ Wsetenv(const char *name, const char *value, int overwrite)
 int
 H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
 {
-    static HANDLE process_handle;
-    ULARGE_INTEGER kernel_start;
-    ULARGE_INTEGER user_start;
-    FILETIME KernelTime;
-    FILETIME UserTime;
-    FILETIME CreationTime;
-    FILETIME ExitTime;
-    LARGE_INTEGER counts_start;
+    static HANDLE        process_handle;
+    ULARGE_INTEGER       kernel_start;
+    ULARGE_INTEGER       user_start;
+    FILETIME             KernelTime;
+    FILETIME             UserTime;
+    FILETIME             CreationTime;
+    FILETIME             ExitTime;
+    LARGE_INTEGER        counts_start;
     static LARGE_INTEGER counts_freq;
-    static hbool_t is_initialized = FALSE;
-    BOOL err;
+    static hbool_t       is_initialized = FALSE;
+    BOOL                 err;
 
     HDassert(tvs);
 
-    if(!is_initialized) {
+    if (!is_initialized) {
         /* NOTE: This is just a pseudo handle and does not need to be closed. */
         process_handle = GetCurrentProcess();
-        err = QueryPerformanceFrequency(&counts_freq);
-        if(0 == err)
+        err            = QueryPerformanceFrequency(&counts_freq);
+        if (0 == err)
             return -1;
         is_initialized = TRUE;
     } /* end if */
@@ -921,28 +906,27 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
      * System and user times *
      *************************/
 
-    err = GetProcessTimes(process_handle, &CreationTime, &ExitTime, &KernelTime,
-            &UserTime);
-    if(0 == err)
+    err = GetProcessTimes(process_handle, &CreationTime, &ExitTime, &KernelTime, &UserTime);
+    if (0 == err)
         return -1;
 
     /* The 1.0E7 factor seems strange but it's due to the clock
      * ticking in 100 ns increments.
      */
     kernel_start.HighPart = KernelTime.dwHighDateTime;
-    kernel_start.LowPart = KernelTime.dwLowDateTime;
-    tvs->system = (double)(kernel_start.QuadPart / 1.0E7F);
+    kernel_start.LowPart  = KernelTime.dwLowDateTime;
+    tvs->system           = (double)(kernel_start.QuadPart / 1.0E7F);
 
     user_start.HighPart = UserTime.dwHighDateTime;
-    user_start.LowPart = UserTime.dwLowDateTime;
-    tvs->user = (double)(user_start.QuadPart / 1.0E7F);
+    user_start.LowPart  = UserTime.dwLowDateTime;
+    tvs->user           = (double)(user_start.QuadPart / 1.0E7F);
 
     /****************
      * Elapsed time *
      ****************/
 
     err = QueryPerformanceCounter(&counts_start);
-    if(0 == err)
+    if (0 == err)
         return -1;
 
     tvs->elapsed = (double)(counts_start.QuadPart) / (double)counts_freq.QuadPart;
@@ -954,45 +938,19 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
 #define WloginBuffer_count 256
 static char Wlogin_buffer[WloginBuffer_count];
 
-
-char*
+char *
 Wgetlogin(void)
 {
 
 #ifdef H5_HAVE_WINSOCK2_H
-    long bufferCount = WloginBuffer_count;
-    if (GetUserName(Wlogin_buffer, &bufferCount) == 0)
+    DWORD bufferCount = WloginBuffer_count;
+    if (GetUserName(Wlogin_buffer, &bufferCount) != 0)
         return (Wlogin_buffer);
     else
 #endif /* H5_HAVE_WINSOCK2_H */
         return NULL;
 }
 
-int c99_snprintf(char* str, size_t size, const char* format, ...)
-{
-    int count;
-    va_list ap;
-
-    HDva_start(ap, format);
-    count = c99_vsnprintf(str, size, format, ap);
-    HDva_end(ap);
-
-    return count;
-}
-
-int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
-{
-    int count = -1;
-
-    if (size != 0)
-        count = _vsnprintf_s(str, size, _TRUNCATE, format, ap);
-    if (count == -1)
-        count = _vscprintf(format, ap);
-
-    return count;
-}
-
-
 /*-------------------------------------------------------------------------
  * Function:    Wflock
  *
@@ -1004,131 +962,85 @@ int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
  *-------------------------------------------------------------------------
  */
 int
-Wflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
+Wflock(int fd, int operation)
+{
 
-/* This is a no-op while we implement a Win32 VFD */
-#if 0
-int
-Wflock(int fd, int operation) {
-
-    HANDLE          hFile;
-    DWORD           dwFlags = LOCKFILE_FAIL_IMMEDIATELY;
-    DWORD           dwReserved = 0;
-                    /* MAXDWORD for entire file */
-    DWORD           nNumberOfBytesToLockLow = MAXDWORD;
-    DWORD           nNumberOfBytesToLockHigh = MAXDWORD;
-                    /* Must initialize OVERLAPPED struct */
-    OVERLAPPED      overlapped = {0};
+    HANDLE hFile;
+    DWORD  dwFlags    = LOCKFILE_FAIL_IMMEDIATELY;
+    DWORD  dwReserved = 0;
+    /* MAXDWORD locks the entire file */
+    DWORD nNumberOfBytesToLockLow  = MAXDWORD;
+    DWORD nNumberOfBytesToLockHigh = MAXDWORD;
+    /* Must initialize OVERLAPPED struct */
+    OVERLAPPED overlapped = {0};
 
     /* Get Windows HANDLE */
-    hFile = _get_osfhandle(fd);
+    if (INVALID_HANDLE_VALUE == (hFile = (HANDLE)_get_osfhandle(fd)))
+        return -1;
 
     /* Convert to Windows flags */
-    if(operation & LOCK_EX)
+    if (operation & LOCK_EX)
         dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
 
     /* Lock or unlock */
-    if(operation & LOCK_UN)
-        if(0 == UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow,
-                            nNumberOfBytesToLockHigh, &overlapped))
+    if (operation & LOCK_UN) {
+        if (0 ==
+            UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh, &overlapped)) {
+            /* Attempting to unlock an already unlocked file will fail and this can happen
+             * in H5Fstart_swmr_write(). For now, just ignore the "error" (error code: 0x9e / 158).
+             */
+            if (GetLastError() != 158)
+                return -1;
+        }
+    }
+    else {
+        if (0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh,
+                            &overlapped))
             return -1;
-    else
-        if(0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow,
-                            nNumberOfBytesToLockHigh, &overlapped))
-            return -1;
-#endif /* 0 */
+    }
+
     return 0;
 } /* end Wflock() */
 
-
 /*-------------------------------------------------------------------------
- * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
+ * Function:     H5_get_utf16_str
  *
- * Purpose:     Wrapper function for round functions for use with VS2012
- *              and earlier.
+ * Purpose:      Gets a UTF-16 string from an UTF-8 (or ASCII) string.
  *
- * Return:      The rounded value that was passed in.
+ * Return:       Success:    A pointer to a UTF-16 string
+ *                           This must be freed by the caller using H5MM_xfree()
+ *               Failure:    NULL
  *
  * Programmer:  Dana Robinson
- *              December 2016
+ *              Spring 2019
  *
  *-------------------------------------------------------------------------
  */
-long long
-Wllround(double arg)
-{
-    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long long
-Wllroundf(float arg)
-{
-    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-long
-Wlround(double arg)
-{
-    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long
-Wlroundf(float arg)
-{
-    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-double
-Wround(double arg)
-{
-    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
-}
-
-float
-Wroundf(float arg)
-{
-    return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-/*-------------------------------------------------------------------------
-* Function:     H5_get_utf16_str
-*
-* Purpose:      Gets a UTF-16 string from an UTF-8 (or ASCII) string.
-*
-* Return:       Success:    A pointer to a UTF-16 string
-*                           This must be freed by the caller using H5MM_xfree()
-*               Failure:    NULL
-*
-* Programmer:  Dana Robinson
-*              Spring 2019
-*
-*-------------------------------------------------------------------------
-*/
-const wchar_t *
+wchar_t *
 H5_get_utf16_str(const char *s)
 {
-    int     nwchars = -1;       /* Length of the UTF-16 buffer */
-    wchar_t *ret_s  = NULL;     /* UTF-16 version of the string */
+    int      nwchars = -1;   /* Length of the UTF-16 buffer */
+    wchar_t *ret_s   = NULL; /* UTF-16 version of the string */
 
     /* Get the number of UTF-16 characters needed */
-    if(0 == (nwchars = MultiByteToWideChar(CP_UTF8, 0, s, -1, NULL, 0)))
+    if (0 == (nwchars = MultiByteToWideChar(CP_UTF8, 0, s, -1, NULL, 0)))
         goto error;
 
     /* Allocate a buffer for the UTF-16 string */
-    if(NULL == (ret_s = (wchar_t *)H5MM_calloc(sizeof(wchar_t) * (size_t)nwchars)))
+    if (NULL == (ret_s = (wchar_t *)H5MM_calloc(sizeof(wchar_t) * (size_t)nwchars)))
         goto error;
 
     /* Convert the input UTF-8 string to UTF-16 */
-    if(0 == MultiByteToWideChar(CP_UTF8, 0, s, -1, ret_s, nwchars))
+    if (0 == MultiByteToWideChar(CP_UTF8, 0, s, -1, ret_s, nwchars))
         goto error;
 
     return ret_s;
 
 error:
-    if(ret_s)
+    if (ret_s)
         H5MM_xfree((void *)ret_s);
     return NULL;
-}   /* end H5_get_utf16_str() */
+} /* end H5_get_utf16_str() */
 
 /*-------------------------------------------------------------------------
  * Function:     Wopen_utf8
@@ -1148,22 +1060,22 @@ error:
 int
 Wopen_utf8(const char *path, int oflag, ...)
 {
-    int fd          = -1;       /* POSIX file descriptor to be returned */
-    wchar_t *wpath  = NULL;     /* UTF-16 version of the path */
-    int pmode       = 0;        /* mode (optionally set via variable args) */
+    int      fd    = -1;   /* POSIX file descriptor to be returned */
+    wchar_t *wpath = NULL; /* UTF-16 version of the path */
+    int      pmode = 0;    /* mode (optionally set via variable args) */
 
     /* Convert the input UTF-8 path to UTF-16 */
-    if(NULL == (wpath = H5_get_utf16_str(path)))
+    if (NULL == (wpath = H5_get_utf16_str(path)))
         goto done;
 
     /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
-    * transformations when performing I/O. Note that this will
-    * produce Unix-style text files, though.
-    */
+     * transformations when performing I/O. Note that this will
+     * produce Unix-style text files, though.
+     */
     oflag |= _O_BINARY;
 
     /* Get the mode, if O_CREAT was specified */
-    if(oflag & O_CREAT) {
+    if (oflag & O_CREAT) {
         va_list vl;
 
         HDva_start(vl, oflag);
@@ -1175,11 +1087,11 @@ Wopen_utf8(const char *path, int oflag, ...)
     fd = _wopen(wpath, oflag, pmode);
 
 done:
-    if(wpath)
+    if (wpath)
         H5MM_xfree((void *)wpath);
 
     return fd;
-}   /* end Wopen_utf8() */
+} /* end Wopen_utf8() */
 
 /*-------------------------------------------------------------------------
  * Function:     Wremove_utf8
@@ -1199,26 +1111,25 @@ done:
 int
 Wremove_utf8(const char *path)
 {
-    wchar_t *wpath = NULL;     /* UTF-16 version of the path */
-    int ret;
+    wchar_t *wpath = NULL; /* UTF-16 version of the path */
+    int      ret   = -1;
 
     /* Convert the input UTF-8 path to UTF-16 */
-    if(NULL == (wpath = H5_get_utf16_str(path)))
+    if (NULL == (wpath = H5_get_utf16_str(path)))
         goto done;
 
     /* Open the file */
     ret = _wremove(wpath);
 
 done:
-    if(wpath)
+    if (wpath)
         H5MM_xfree((void *)wpath);
 
     return ret;
-}   /* end Wremove_utf8() */
+} /* end Wremove_utf8() */
 
 #endif /* H5_HAVE_WIN32_API */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5_build_extpath
  *
@@ -1235,15 +1146,15 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#define MAX_PATH_LEN     1024
+#define MAX_PATH_LEN 1024
 
 herr_t
 H5_build_extpath(const char *name, char **extpath /*out*/)
 {
-    char        *full_path = NULL;      /* Pointer to the full path, as built or passed in */
-    char        *cwdpath = NULL;        /* Pointer to the current working directory path */
-    char        *new_name = NULL;       /* Pointer to the name of the file */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    char * full_path = NULL;    /* Pointer to the full path, as built or passed in */
+    char * cwdpath   = NULL;    /* Pointer to the current working directory path */
+    char * new_name  = NULL;    /* Pointer to the name of the file */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1258,19 +1169,19 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
      * Unix: name[0] is a "/"
      * Windows: name[0-2] is "<drive letter>:\" or "<drive-letter>:/"
      */
-    if(H5_CHECK_ABSOLUTE(name)) {
-        if(NULL == (full_path = (char *)H5MM_strdup(name)))
+    if (H5_CHECK_ABSOLUTE(name)) {
+        if (NULL == (full_path = (char *)H5MM_strdup(name)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
-    } /* end if */
+    }      /* end if */
     else { /* relative pathname */
-        char *retcwd;
+        char * retcwd;
         size_t name_len;
-        int drive;
+        int    drive;
 
-        if(NULL == (cwdpath = (char *)H5MM_malloc(MAX_PATH_LEN)))
+        if (NULL == (cwdpath = (char *)H5MM_malloc(MAX_PATH_LEN)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
         name_len = HDstrlen(name) + 1;
-        if(NULL == (new_name = (char *)H5MM_malloc(name_len)))
+        if (NULL == (new_name = (char *)H5MM_malloc(name_len)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /*
@@ -1278,17 +1189,17 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
          *   Get current working directory on the drive specified in NAME
          * Unix: does not apply
          */
-        if(H5_CHECK_ABS_DRIVE(name)) {
-            drive = HDtoupper(name[0]) - 'A' + 1;
+        if (H5_CHECK_ABS_DRIVE(name)) {
+            drive  = HDtoupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             HDstrncpy(new_name, &name[2], name_len);
         } /* end if */
-       /*
-        * Windows: name[0] is a '/' or '\'
-        *  Get current drive
-        * Unix: does not apply
-        */
-        else if(H5_CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
+          /*
+           * Windows: name[0] is a '/' or '\'
+           *  Get current drive
+           * Unix: does not apply
+           */
+        else if (H5_CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
             HDsnprintf(cwdpath, MAX_PATH_LEN, "%c:%c", (drive + 'A' - 1), name[0]);
             retcwd = cwdpath;
             HDstrncpy(new_name, &name[1], name_len);
@@ -1299,7 +1210,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
             HDstrncpy(new_name, name, name_len);
         } /* end if */
 
-        if(retcwd != NULL) {
+        if (retcwd != NULL) {
             size_t cwdlen;
             size_t path_len;
 
@@ -1308,37 +1219,36 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
             HDassert(cwdlen);
             HDassert(new_name);
             path_len = cwdlen + HDstrlen(new_name) + 2;
-            if(NULL == (full_path = (char *)H5MM_malloc(path_len)))
+            if (NULL == (full_path = (char *)H5MM_malloc(path_len)))
                 HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             HDstrncpy(full_path, cwdpath, cwdlen + 1);
-            if(!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
+            if (!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
                 HDstrncat(full_path, H5_DIR_SEPS, HDstrlen(H5_DIR_SEPS));
             HDstrncat(full_path, new_name, HDstrlen(new_name));
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
     /* strip out the last component (the file name itself) from the path */
-    if(full_path) {
+    if (full_path) {
         char *ptr = NULL;
 
         H5_GET_LAST_DELIMITER(full_path, ptr)
         HDassert(ptr);
-        *++ptr = '\0';
+        *++ptr   = '\0';
         *extpath = full_path;
     } /* end if */
 
 done:
     /* Release resources */
-    if(cwdpath)
+    if (cwdpath)
         H5MM_xfree(cwdpath);
-    if(new_name)
+    if (new_name)
         H5MM_xfree(new_name);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_build_extpath() */
 
-
 /*--------------------------------------------------------------------------
  * Function:    H5_combine_path
  *
@@ -1353,35 +1263,35 @@ done:
  *--------------------------------------------------------------------------
  */
 herr_t
-H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
+H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
 {
-    size_t      path1_len;            /* length of path1 */
-    size_t      path2_len;            /* length of path2 */
-    herr_t      ret_value = SUCCEED;  /* Return value */
+    size_t path1_len = 0;       /* length of path1 */
+    size_t path2_len;           /* length of path2 */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(path2);
 
-    if(path1)
+    if (path1)
         path1_len = HDstrlen(path1);
     path2_len = HDstrlen(path2);
 
-    if(path1 == NULL || *path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
+    if (path1 == NULL || *path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
 
         /* If path1 is empty or path2 is absolute, simply use path2 */
-        if(NULL == (*full_name = (char *)H5MM_strdup(path2)))
+        if (NULL == (*full_name = (char *)H5MM_strdup(path2)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     } /* end if */
-    else if(H5_CHECK_ABS_PATH(path2)) {
+    else if (H5_CHECK_ABS_PATH(path2)) {
 
         /* On windows path2 is a path absolute name */
         if (H5_CHECK_ABSOLUTE(path1) || H5_CHECK_ABS_DRIVE(path1)) {
             /* path1 is absolute or drive absolute and path2 is path absolute.
              * Use the drive letter of path1 + path2
              */
-            if(NULL == (*full_name = (char *)H5MM_malloc(path2_len + 3)))
+            if (NULL == (*full_name = (char *)H5MM_malloc(path2_len + 3)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate path2 buffer")
             HDsnprintf(*full_name, (path2_len + 3), "%c:%s", path1[0], path2);
         } /* end if */
@@ -1390,7 +1300,7 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
              * path1 does not have a drive letter (i.e. is "a\b" or "\a\b").
              * Use path2.
              */
-            if(NULL == (*full_name = (char *)H5MM_strdup(path2)))
+            if (NULL == (*full_name = (char *)H5MM_strdup(path2)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
         } /* end else */
 
@@ -1401,11 +1311,14 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
          * Allocate a buffer to hold path1 + path2 + possibly the delimiter
          *      + terminating null byte
          */
-        if(NULL == (*full_name = (char *)H5MM_malloc(path1_len + path2_len + 2 + 2))) /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
+        if (NULL ==
+            (*full_name = (char *)H5MM_malloc(path1_len + path2_len + 2 +
+                                              2))) /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer")
 
         /* Compose the full file name */
-        HDsnprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s", path1, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
+        HDsnprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s",
+                   path1, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
                    (H5_CHECK_DELIMITER(path1[path1_len - 1]) ? "" : H5_DIR_SEPS), path2);
     } /* end else */
 
@@ -1413,7 +1326,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_combine_path() */
 
-
 /*--------------------------------------------------------------------------
  * Function:    H5_nanosleep
  *
@@ -1426,8 +1338,8 @@ void
 H5_nanosleep(uint64_t nanosec)
 {
 #ifndef H5_HAVE_WIN32_API
-    const uint64_t nanosec_per_sec = 1000 * 1000 * 1000;
-    struct timespec sleeptime;  /* Struct to hold time to sleep */
+    const uint64_t  nanosec_per_sec = 1000 * 1000 * 1000;
+    struct timespec sleeptime; /* Struct to hold time to sleep */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1438,7 +1350,7 @@ H5_nanosleep(uint64_t nanosec)
      *
      * It's harder to be sure that we don't overflow time_t.
      */
-    sleeptime.tv_sec = (time_t)(nanosec / nanosec_per_sec);
+    sleeptime.tv_sec  = (time_t)(nanosec / nanosec_per_sec);
     sleeptime.tv_nsec = (long)(nanosec % nanosec_per_sec);
 
     /* Sleep for up to `sleeptime` and, in the event of an interruption,
@@ -1455,7 +1367,7 @@ H5_nanosleep(uint64_t nanosec)
 
     FUNC_LEAVE_NOAPI_VOID
 #else
-    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1000.0);
+    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1.0e6);
     DWORD ignore;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1472,9 +1384,8 @@ H5_nanosleep(uint64_t nanosec)
 
 #ifdef H5_HAVE_WIN32_API
 
-#define H5_WIN32_ENV_VAR_BUFFER_SIZE    32767
+#define H5_WIN32_ENV_VAR_BUFFER_SIZE 32767
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5_expand_windows_env_vars()
  *
@@ -1488,9 +1399,9 @@ H5_nanosleep(uint64_t nanosec)
 herr_t
 H5_expand_windows_env_vars(char **env_var)
 {
-    long    n_chars = 0;
-    char   *temp_buf = NULL;
-    herr_t  ret_value = SUCCEED;    /* Return value */
+    long   n_chars   = 0;
+    char * temp_buf  = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1499,7 +1410,8 @@ H5_expand_windows_env_vars(char **env_var)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
 
     /* Expand the environment variable string */
-    if ((n_chars = ExpandEnvironmentStringsA(*env_var, temp_buf, H5_WIN32_ENV_VAR_BUFFER_SIZE)) > H5_WIN32_ENV_VAR_BUFFER_SIZE)
+    if ((n_chars = ExpandEnvironmentStringsA(*env_var, temp_buf, H5_WIN32_ENV_VAR_BUFFER_SIZE)) >
+        H5_WIN32_ENV_VAR_BUFFER_SIZE)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
 
     if (0 == n_chars)
@@ -1516,3 +1428,142 @@ done:
 } /* end H5_expand_windows_env_vars() */
 #endif /* H5_HAVE_WIN32_API */
 
+/* dirname() and basename() are not easily ported to Windows and basename
+ * behavior varies depending on if you get POSIX vs. GNU. As a more
+ * platform-indpendent work-around, we've implemented H5_ versions of
+ * dirname() and basename().
+ *
+ * - The input string is never modified.
+ *
+ * - The out parameter is a new string that was allocated with HDcalloc()
+ *   and must be freed by the caller via HDfree().
+ *
+ * - NULL pointers are errors.
+ *
+ * - On errors, FAIL will be returned and the output parameter will be
+ *   undefined.
+ *
+ * - The trailing file separator is not returned in H5_dirname().
+ *
+ * - Passing a path that ends in a file separator to H5_basename() will
+ *   return the empty string.
+ *
+ * - If the path doesn't contain a file separator, we assume you passed
+ *   in a raw filename and H5_basename() will return the input string
+ *   while H5_dirname will return ".".
+ *
+ * - Assumes the file separator is \ on Win32 and / everywhere else,
+ *   including Cygwin.
+ */
+
+#ifdef H5_HAVE_WIN32_API
+#define H5_FILE_SEPARATOR '\\'
+#else
+#define H5_FILE_SEPARATOR '/'
+#endif
+
+static size_t
+H5__find_last_file_separator(const char *path, size_t len, hbool_t *no_separator)
+{
+    size_t i;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    *no_separator = TRUE;
+
+    for (i = len; i > 0; i--) {
+        if (H5_FILE_SEPARATOR == path[i - 1]) {
+            break;
+            no_separator = FALSE;
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(i - 1)
+}
+
+herr_t
+H5_dirname(const char *path, char **dirname)
+{
+    size_t  path_len;
+    size_t  pos;
+    size_t  out_len;
+    char *  out          = NULL;
+    hbool_t no_separator = FALSE;
+    herr_t  ret_value    = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!path)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
+    if (!dirname)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL")
+
+    path_len = HDstrlen(path);
+
+    pos = H5__find_last_file_separator(path, path_len, &no_separator);
+
+    /* Special case of no path separator */
+    if (no_separator)
+        out_len = 2;
+    else
+        out_len = pos + 1; /* Include room for terminator */
+
+    if (NULL == (out = HDmalloc(out_len * sizeof(char))))
+        HGOTO_ERROR(H5E_SYSTEM, H5E_NOSPACE, FAIL, "unable to allocate memory for output string")
+
+    /* Copy bytes and terminate */
+    if (no_separator)
+        HDstrncpy(out, ".", 2);
+    else {
+        HDstrncpy(out, path, out_len - 1);
+        out[out_len - 1] = '\0';
+    }
+
+    *dirname = out;
+done:
+    if (FAIL == ret_value)
+        HDfree(out);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_dirname() */
+
+herr_t
+H5_basename(const char *path, char **basename)
+{
+    size_t  path_len;
+    size_t  pos;
+    size_t  out_len;
+    char *  out          = NULL;
+    hbool_t no_separator = FALSE;
+    herr_t  ret_value    = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!path)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
+    if (!basename)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL")
+
+    path_len = HDstrlen(path);
+    pos      = H5__find_last_file_separator(path, path_len, &no_separator);
+
+    if (no_separator)
+        out_len = path_len;
+    else
+        out_len = path_len - pos; /* Include room for terminator */
+
+    if (NULL == (out = HDmalloc(out_len * sizeof(char))))
+        HGOTO_ERROR(H5E_SYSTEM, H5E_NOSPACE, FAIL, "unable to allocate memory for output string")
+
+    /* Copy bytes and terminate */
+    HDstrncpy(out, path + pos + 1, out_len - 1);
+    out[out_len - 1] = '\0';
+
+    /* Copy bytes and terminate */
+    *basename = out;
+done:
+    if (FAIL == ret_value)
+        HDfree(out);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_basename() */

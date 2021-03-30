@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# Recursively format all C & C++ sources and header files, except those in the
+# 'config' directory and generated files, such as H5LTanalyze.c, etc.
+#
+# Note that any files or directories that are excluded here should also be
+# added to the 'exclude' list in .github/workflows/clang-format-check.yml
+#
+# (Remember to update both bin/format_source and bin/format_source_patch)
+
+find . \( -type d -path ./config -prune -and -not -path ./config \) \
+    -or \( \( \! \( \
+        -name H5LTanalyze.c \
+        -or -name H5LTparse.c \
+        -or -name H5LTparse.h \
+        -or -name H5Epubgen.h \
+        -or -name H5Einit.h \
+        -or -name H5Eterm.h \
+        -or -name H5Edefin.h \
+        -or -name H5version.h \
+        -or -name H5overflow.h \
+        \) \) \
+    -and \( -iname *.h -or -iname *.c -or -iname *.cpp -or -iname *.hpp \) \) \
+    | xargs clang-format -style=file -i -fallback-style=none
+
+exit 0

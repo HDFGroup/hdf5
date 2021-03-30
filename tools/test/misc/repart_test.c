@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,22 +19,16 @@
 #include "hdf5.h"
 #include "H5private.h"
 
-#define KB                      1024
-#define FAMILY_H5REPART_SIZE1   20000
-#define FAMILY_H5REPART_SIZE2   (5*KB)
+#define KB                    1024
+#define FAMILY_H5REPART_SIZE1 20000
+#define FAMILY_H5REPART_SIZE2 (5 * KB)
 
-const char *FILENAME[] = {
-    "fst_family%05d.h5",
-    "scd_family%05d.h5",
-    "family_to_single.h5",
-    "family_to_sec2.h5",
-    NULL
-};
+const char *FILENAME[] = {"fst_family%05d.h5", "scd_family%05d.h5", "family_to_single.h5",
+                          "family_to_sec2.h5", NULL};
 
 herr_t test_family_h5repart_opens(void);
 herr_t test_single_h5repart_opens(void);
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_family_h5repart_opens
  *
@@ -47,8 +41,8 @@ herr_t test_single_h5repart_opens(void);
 herr_t
 test_family_h5repart_opens(void)
 {
-    hid_t       fid = H5I_INVALID_HID;
-    hid_t       fapl_id = H5I_INVALID_HID;
+    hid_t fid     = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     /* open 1st file(single member file) with correct family size(20000 byte) */
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -57,7 +51,7 @@ test_family_h5repart_opens(void)
     if (H5Pset_fapl_family(fapl_id, (hsize_t)FAMILY_H5REPART_SIZE1, H5P_DEFAULT) < 0)
         goto error;
 
-    if ((fid = H5Fopen(FILENAME[0], H5F_ACC_RDWR, fapl_id))<0)
+    if ((fid = H5Fopen(FILENAME[0], H5F_ACC_RDWR, fapl_id)) < 0)
         goto error;
 
     if (H5Fclose(fid) < 0)
@@ -79,17 +73,17 @@ test_family_h5repart_opens(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(fapl_id);
         H5Fclose(fid);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return FAIL;
 
 } /* end test_family_h5repart_opens() */
 
-
-
 /*-------------------------------------------------------------------------
  * Function:    test_single_h5repart_opens
  *
@@ -102,7 +96,7 @@ error:
 herr_t
 test_single_h5repart_opens(void)
 {
-    hid_t       fid = H5I_INVALID_HID;
+    hid_t fid = H5I_INVALID_HID;
 
     /* open the single file */
     if ((fid = H5Fopen(FILENAME[2], H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
@@ -119,15 +113,16 @@ test_single_h5repart_opens(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Fclose(fid);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return FAIL;
 
 } /* end test_single_h5repart_opens() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -140,10 +135,10 @@ error:
 int
 main(void)
 {
-    int     nerrors = 0;
+    int nerrors = 0;
 
-    nerrors += test_family_h5repart_opens() < 0     ? 1 : 0;
-    nerrors += test_single_h5repart_opens() < 0     ? 1 : 0;
+    nerrors += test_family_h5repart_opens() < 0 ? 1 : 0;
+    nerrors += test_single_h5repart_opens() < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;
@@ -152,8 +147,6 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d FAMILY FILE TEST%s FAILED! *****\n",
-            nerrors, 1 == nerrors ? "" : "S");
+    HDprintf("***** %d FAMILY FILE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     HDexit(EXIT_FAILURE);
 } /* end main() */
-

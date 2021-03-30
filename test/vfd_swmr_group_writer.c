@@ -1,19 +1,16 @@
-/*
- * Copyright by The HDF Group.
- * Copyright by the Board of Trustees of the University of Illinois.
- * All rights reserved.
- *
- * This file is part of HDF5.  The full HDF5 copyright notice, including
- * terms governing use, modification, and redistribution, is contained in
- * the COPYING file, which can be found at the root of the source code
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
- * If you do not have access to either file, you may request a copy from
- * help@hdfgroup.org.
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <err.h>
-
-#define H5F_FRIEND              /*suppress error about including H5Fpkg   */
+#define H5F_FRIEND /*suppress error about including H5Fpkg   */
 
 #include "hdf5.h"
 
@@ -23,6 +20,8 @@
 
 #include "testhdf5.h"
 #include "vfd_swmr_common.h"
+
+#ifndef H5_HAVE_WIN32_API
 
 #define READER_WAIT_TICKS	3
 
@@ -37,16 +36,13 @@ typedef struct {
         bool use_vfd_swmr;
 } state_t;
 
-#define ALL_HID_INITIALIZER (state_t){					\
-	  .file = H5I_INVALID_HID					\
-	, .one_by_one_sid = H5I_INVALID_HID				\
-	, .filename = ""						\
-	, .filetype = H5T_NATIVE_UINT32					\
-	, .asteps = 10							\
-	, .csteps = 10							\
-	, .nsteps = 100							\
-        , .update_interval = READER_WAIT_TICKS                          \
-        , .use_vfd_swmr = true}
+#define ALL_HID_INITIALIZER                                                                                  \
+    (state_t)                                                                                                \
+    {                                                                                                        \
+        .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
+        .filetype = H5T_NATIVE_UINT32, .asteps = 10, .csteps = 10, .nsteps = 100, .update_interval = READER_WAIT_TICKS,   \
+        .use_vfd_swmr = true                                                                                 \
+    }
 
 static void
 usage(const char *progname)
@@ -69,59 +65,68 @@ static bool
 state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
-    int ch;
+    int           ch;
     const hsize_t dims = 1;
-    char tfile[PATH_MAX];
-    char *end;
+    char          *tfile = NULL;
+    char *        end;
 
     *s = ALL_HID_INITIALIZER;
-    esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
-    esnprintf(s->progname, sizeof(s->progname), "%s", HDbasename(tfile));
+
+    if (H5_basename(argv[0], &tfile) < 0) {
+        H5_FAILED(); AT();
+        printf("H5_basename failed\n");
+        goto error;
+    }
+
+    esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
+
+    if (tfile)
+        HDfree(tfile);
 
     while ((ch = getopt(argc, argv, "SWa:bc:n:qu:")) != -1) {
         switch (ch) {
-        case 'S':
-            s->use_vfd_swmr = false;
-            break;
-        case 'a':
-        case 'c':
-        case 'n':
-        case 'u':
-            errno = 0;
-            tmp = strtoul(optarg, &end, 0);
-            if (end == optarg || *end != '\0') {
-                H5_FAILED(); AT();
-                printf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
-                goto error;
-            } else if (errno != 0) {
-                H5_FAILED(); AT();
-                printf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
-                goto error;
-            } else if (tmp > UINT_MAX) {
-                H5_FAILED(); AT();
-                printf("`-%c` argument `%lu` too large\n", ch, tmp);
-                goto error;
-            }
+            case 'S':
+                s->use_vfd_swmr = false;
+                break;
+            case 'a':
+            case 'c':
+            case 'n':
+            case 'u':
+                errno = 0;
+                tmp = strtoul(optarg, &end, 0);
+                if (end == optarg || *end != '\0') {
+                    H5_FAILED(); AT();
+                    printf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                    goto error;
+                } else if (errno != 0) {
+                    H5_FAILED(); AT();
+                    printf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                    goto error;
+                } else if (tmp > UINT_MAX) {
+                    H5_FAILED(); AT();
+                    printf("`-%c` argument `%lu` too large\n", ch, tmp);
+                    goto error;
+                }
 
-            if (ch == 'a')
-                s->asteps = (unsigned)tmp;
-            else if (ch == 'c')
-                s->csteps = (unsigned)tmp;
-            else if (ch == 'n')
-                s->nsteps = (unsigned)tmp;
-            else if (ch == 'u')
-                s->update_interval = (unsigned)tmp;
-            break;
-        case 'b':
-            s->filetype = H5T_STD_U32BE;
-            break;
-        case 'q':
-            verbosity = 0;
-            break;
-        case '?':
-        default:
-            usage(s->progname);
-            break;
+                if (ch == 'a')
+                    s->asteps = (unsigned)tmp;
+                else if (ch == 'c')
+                    s->csteps = (unsigned)tmp;
+                else if (ch == 'n')
+                    s->nsteps = (unsigned)tmp;
+                else if (ch == 'u')
+                    s->update_interval = (unsigned)tmp;
+                break;
+            case 'b':
+                s->filetype = H5T_STD_U32BE;
+                break;
+            case 'q':
+                verbosity = 0;
+                break;
+            case '?':
+            default:
+                usage(s->progname);
+                break;
         }
     }
     argc -= optind;
@@ -157,6 +162,9 @@ state_init(state_t *s, int argc, char **argv)
     return true;
 
 error:
+    if (tfile)
+        HDfree(tfile);
+
     return false;
 }
 
@@ -164,7 +172,7 @@ static bool
 add_group_attribute(const state_t *s, hid_t g, hid_t sid, unsigned int which)
 {
     hid_t aid;
-    char name[sizeof("attr-9999999999")];
+    char  name[sizeof("attr-9999999999")];
 
     esnprintf(name, sizeof(name), "attr-%u", which);
 
@@ -198,7 +206,6 @@ error:
 
     return false;
 }
-
 
 static bool
 write_group(state_t *s, unsigned int which)
@@ -249,8 +256,7 @@ verify_group_attribute(hid_t g, unsigned int which)
 
     esnprintf(name, sizeof(name), "attr-%u", which);
 
-    dbgf(1, "verifying attribute %s on group %u equals %u\n", name, which,
-        which);
+    dbgf(1, "verifying attribute %s on group %u equals %u\n", name, which, which);
 
     if ((aid = H5Aopen(g, name, H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
@@ -360,11 +366,9 @@ main(int argc, char **argv)
 
     personality = strstr(s.progname, "vfd_swmr_group_");
 
-    if (personality != NULL &&
-        strcmp(personality, "vfd_swmr_group_writer") == 0)
+    if (personality != NULL && strcmp(personality, "vfd_swmr_group_writer") == 0)
         writer = true;
-    else if (personality != NULL &&
-             strcmp(personality, "vfd_swmr_group_reader") == 0)
+    else if (personality != NULL && strcmp(personality, "vfd_swmr_group_reader") == 0)
         writer = false;
     else {
         H5_FAILED(); AT();
@@ -495,11 +499,13 @@ main(int argc, char **argv)
                 }
             }
         }
-    } else {
+    }
+    else {
         for (step = 0; step < s.nsteps; step++) {
             dbgf(2, "reader: step %d\n", step);
 
-            /* At communication interval, waits for the writer to finish creation before starting verification */
+            /* At communication interval, waits for the writer to finish creation before starting verification
+             */
             if (step % s.csteps == 0) {
                 /* The writer should have bumped up the value of notify.
                  * Do the same with verify and confirm it */
@@ -621,3 +627,14 @@ error:
 
     return EXIT_FAILURE;
 }
+
+#else /* H5_HAVE_WIN32_API */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_WIN32_API */

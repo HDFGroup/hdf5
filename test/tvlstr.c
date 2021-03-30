@@ -6,43 +6,43 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
-*
-* Test program:     tvlstr
-*
-* Test the Variable-Length String functionality
-*
-*************************************************************/
+ *
+ * Test program:     tvlstr
+ *
+ * Test the Variable-Length String functionality
+ *
+ *************************************************************/
 
 #include "testhdf5.h"
 
-#define DATAFILE   "tvlstr.h5"
-#define DATAFILE2  "tvlstr2.h5"
-#define DATAFILE3  "sel2el.h5"
+#define DATAFILE  "tvlstr.h5"
+#define DATAFILE2 "tvlstr2.h5"
+#define DATAFILE3 "sel2el.h5"
 
-#define DATASET    "1Darray"
+#define DATASET "1Darray"
 
 /* 1-D dataset with fixed dimensions */
-#define SPACE1_RANK    1
-#define SPACE1_DIM1    4
-#define NUMP           4
+#define SPACE1_RANK 1
+#define SPACE1_DIM1 4
+#define NUMP        4
 
-#define VLSTR_TYPE  "vl_string_type"
+#define VLSTR_TYPE "vl_string_type"
 
 /* Definitions for the VL re-writing test */
-#define REWRITE_NDATASETS       32
+#define REWRITE_NDATASETS 32
 
 /* String for testing attributes */
-static const char *string_att = "This is the string for the attribute";
-static char *string_att_write=NULL;
+static const char *string_att       = "This is the string for the attribute";
+static char *      string_att_write = NULL;
 
 void *test_vlstr_alloc_custom(size_t size, void *info);
-void test_vlstr_free_custom(void *mem, void *info);
+void  test_vlstr_free_custom(void *mem, void *info);
 
 /****************************************************************
 **
@@ -52,24 +52,25 @@ void test_vlstr_free_custom(void *mem, void *info);
 **      allocated.
 **
 ****************************************************************/
-void *test_vlstr_alloc_custom(size_t size, void *info)
+void *
+test_vlstr_alloc_custom(size_t size, void *info)
 {
-    void *ret_value=NULL;       /* Pointer to return */
-    size_t *mem_used=(size_t *)info;  /* Get the pointer to the memory used */
-    size_t extra;               /* Extra space needed */
+    void *  ret_value = NULL;           /* Pointer to return */
+    size_t *mem_used  = (size_t *)info; /* Get the pointer to the memory used */
+    size_t  extra;                      /* Extra space needed */
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
-    extra=MAX(sizeof(void *),sizeof(size_t));
+    extra = MAX(sizeof(void *), sizeof(size_t));
 
-    if((ret_value=HDmalloc(extra+size))!=NULL) {
-        *(size_t *)ret_value=size;
-        *mem_used+=size;
+    if ((ret_value = HDmalloc(extra + size)) != NULL) {
+        *(size_t *)ret_value = size;
+        *mem_used += size;
     } /* end if */
-    ret_value=((unsigned char *)ret_value)+extra;
-    return(ret_value);
+    ret_value = ((unsigned char *)ret_value) + extra;
+    return (ret_value);
 }
 
 /****************************************************************
@@ -80,21 +81,22 @@ void *test_vlstr_alloc_custom(size_t size, void *info)
 **      allocated.
 **
 ****************************************************************/
-void test_vlstr_free_custom(void *_mem, void *info)
+void
+test_vlstr_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
-    size_t *mem_used=(size_t *)info;  /* Get the pointer to the memory used */
-    size_t extra;               /* Extra space needed */
+    size_t *       mem_used = (size_t *)info; /* Get the pointer to the memory used */
+    size_t         extra;                     /* Extra space needed */
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
-    extra=MAX(sizeof(void *),sizeof(size_t));
+    extra = MAX(sizeof(void *), sizeof(size_t));
 
-    if(_mem!=NULL) {
-        mem=((unsigned char *)_mem)-extra;
-        *mem_used-=*(size_t *)((void *)mem);
+    if (_mem != NULL) {
+        mem = ((unsigned char *)_mem) - extra;
+        *mem_used -= *(size_t *)((void *)mem);
         HDfree(mem);
     } /* end if */
 }
@@ -108,26 +110,33 @@ void test_vlstr_free_custom(void *_mem, void *info)
 static void
 test_vlstrings_basic(void)
 {
-    const char *wdata[SPACE1_DIM1]= {
-        "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
-        "conceived in liberty and dedicated to the proposition that all men are created equal.",
-        "Now we are engaged in a great civil war,",
-        "testing whether that nation or any nation so conceived and so dedicated can long endure."
-        };   /* Information to write */
-    char *rdata[SPACE1_DIM1];   /* Information read in */
-    char *wdata2;
-    hid_t dataspace, dataset2;
-    hid_t        fid1;        /* HDF5 File IDs        */
-    hid_t        dataset;    /* Dataset ID            */
-    hid_t        sid1;       /* Dataspace ID            */
-    hid_t        tid1;       /* Datatype ID            */
-    hid_t       xfer_pid;   /* Dataset transfer property list ID */
-    hsize_t        dims1[] = {SPACE1_DIM1};
-    hsize_t     size;       /* Number of bytes which will be used */
-    unsigned       i;          /* counting variable */
-    size_t         str_used;   /* String data in memory */
-    size_t         mem_used=0; /* Memory used during allocation */
-    herr_t        ret;        /* Generic return value        */
+    const char
+        *
+            wdata[SPACE1_DIM1] =
+                {
+                    "Four score and seven years ago our forefathers brought forth on this continent a new "
+                    "nation,",
+                    "conceived in liberty and dedicated to the proposition that all men are created equal.",
+                    "Now we are engaged in a great civil war,",
+                    "testing whether that nation or any nation so conceived and so dedicated can long "
+                    "endure."};  /* Information
+                                    to
+                                    write
+                                  */
+    char *   rdata[SPACE1_DIM1]; /* Information read in */
+    char *   wdata2;
+    hid_t    dataspace, dataset2;
+    hid_t    fid1;     /* HDF5 File IDs        */
+    hid_t    dataset;  /* Dataset ID            */
+    hid_t    sid1;     /* Dataspace ID            */
+    hid_t    tid1;     /* Datatype ID            */
+    hid_t    xfer_pid; /* Dataset transfer property list ID */
+    hsize_t  dims1[] = {SPACE1_DIM1};
+    hsize_t  size;         /* Number of bytes which will be used */
+    unsigned i;            /* counting variable */
+    size_t   str_used;     /* String data in memory */
+    size_t   mem_used = 0; /* Memory used during allocation */
+    herr_t   ret;          /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic VL String Functionality\n"));
@@ -144,7 +153,7 @@ test_vlstrings_basic(void)
     tid1 = H5Tcopy(H5T_C_S1);
     CHECK(tid1, FAIL, "H5Tcopy");
 
-    ret = H5Tset_size(tid1,H5T_VARIABLE);
+    ret = H5Tset_size(tid1, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Create a dataset */
@@ -160,7 +169,7 @@ test_vlstrings_basic(void)
     dataset2 = H5Dcreate2(fid1, "Dataset2", tid1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate2");
 
-    wdata2 = (char*)HDcalloc((size_t)65534, sizeof(char));
+    wdata2 = (char *)HDcalloc((size_t)65534, sizeof(char));
     HDmemset(wdata2, 'A', (size_t)65533);
 
     ret = H5Dwrite(dataset2, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata2);
@@ -174,45 +183,48 @@ test_vlstrings_basic(void)
     xfer_pid = H5Pcreate(H5P_DATASET_XFER);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
 
-    ret=H5Pset_vlen_mem_manager(xfer_pid,test_vlstr_alloc_custom,&mem_used,test_vlstr_free_custom,&mem_used);
+    ret = H5Pset_vlen_mem_manager(xfer_pid, test_vlstr_alloc_custom, &mem_used, test_vlstr_free_custom,
+                                  &mem_used);
     CHECK(ret, FAIL, "H5Pset_vlen_mem_manager");
 
     /* Make certain the correct amount of memory will be used */
-    ret=H5Dvlen_get_buf_size(dataset,tid1,sid1,&size);
+    ret = H5Dvlen_get_buf_size(dataset, tid1, sid1, &size);
     CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
 
     /* Count the actual number of bytes used by the strings */
-    for(i=0,str_used=0; i<SPACE1_DIM1; i++)
-        str_used += HDstrlen(wdata[i])+1;
+    for (i = 0, str_used = 0; i < SPACE1_DIM1; i++)
+        str_used += HDstrlen(wdata[i]) + 1;
 
     /* Compare against the strings actually written */
-    VERIFY(size,(hsize_t)str_used,"H5Dvlen_get_buf_size");
+    VERIFY(size, (hsize_t)str_used, "H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
     ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, xfer_pid, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Make certain the correct amount of memory has been used */
-    VERIFY(mem_used,str_used,"H5Dread");
+    VERIFY(mem_used, str_used, "H5Dread");
 
     /* Compare data read in */
-    for(i = 0; i < SPACE1_DIM1; i++) {
-        if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
-            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)HDstrlen(rdata[i]));
+    for (i = 0; i < SPACE1_DIM1; i++) {
+        if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
+                          (int)strlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
-        if(HDstrcmp(wdata[i], rdata[i]) != 0 ) {
-            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+        if (HDstrcmp(wdata[i], rdata[i]) != 0) {
+            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i],
+                          (int)i, rdata[i]);
             continue;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Reclaim the read VL data */
-    ret = H5Treclaim(tid1,sid1,xfer_pid,rdata);
+    ret = H5Treclaim(tid1, sid1, xfer_pid, rdata);
     CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Treclaim");
+    VERIFY(mem_used, 0, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -245,18 +257,18 @@ test_vlstrings_basic(void)
 static void
 test_vlstrings_special(void)
 {
-    const char *wdata[SPACE1_DIM1] = {"", "two", "three", "\0"};
+    const char *wdata[SPACE1_DIM1]  = {"", "two", "three", "\0"};
     const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
-    char *rdata[SPACE1_DIM1];   /* Information read in */
-    char *fill;                 /* Fill value */
-    hid_t        fid1;        /* HDF5 File IDs        */
-    hid_t        dataset;    /* Dataset ID            */
-    hid_t        sid1;       /* Dataspace ID            */
-    hid_t        tid1;       /* Datatype ID            */
-    hid_t        dcpl;       /* Dataset creation property list ID */
-    hsize_t        dims1[] = {SPACE1_DIM1};
-    unsigned       i;          /* counting variable */
-    herr_t        ret;        /* Generic return value        */
+    char *      rdata[SPACE1_DIM1]; /* Information read in */
+    char *      fill;               /* Fill value */
+    hid_t       fid1;               /* HDF5 File IDs        */
+    hid_t       dataset;            /* Dataset ID            */
+    hid_t       sid1;               /* Dataspace ID            */
+    hid_t       tid1;               /* Datatype ID            */
+    hid_t       dcpl;               /* Dataset creation property list ID */
+    hsize_t     dims1[] = {SPACE1_DIM1};
+    unsigned    i;   /* counting variable */
+    herr_t      ret; /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Special VL Strings\n"));
@@ -273,7 +285,7 @@ test_vlstrings_special(void)
     tid1 = H5Tcopy(H5T_C_S1);
     CHECK(tid1, FAIL, "H5Tcopy");
 
-    ret = H5Tset_size(tid1,H5T_VARIABLE);
+    ret = H5Tset_size(tid1, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Create a dataset */
@@ -285,9 +297,9 @@ test_vlstrings_special(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check data read in */
-    for(i = 0; i < SPACE1_DIM1; i++)
-        if(rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
+    for (i = 0; i < SPACE1_DIM1; i++)
+        if (rdata[i] != NULL)
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
 
     /* Write dataset to disk */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -298,20 +310,22 @@ test_vlstrings_special(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read in */
-    for(i = 0; i < SPACE1_DIM1; i++) {
-        if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
-            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)HDstrlen(rdata[i]));
+    for (i = 0; i < SPACE1_DIM1; i++) {
+        if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
+                          (int)strlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
-        if((wdata[i] == NULL && rdata[i] != NULL) || (rdata[i] == NULL && wdata[i] != NULL)) {
+        if ((wdata[i] == NULL && rdata[i] != NULL) || (rdata[i] == NULL && wdata[i] != NULL)) {
             TestErrPrintf("VL data values don't match!\n");
             continue;
         } /* end if */
-        if(HDstrcmp(wdata[i], rdata[i]) != 0 ) {
-            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+        if (HDstrcmp(wdata[i], rdata[i]) != 0) {
+            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i],
+                          (int)i, rdata[i]);
             continue;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Reclaim the read VL data */
     ret = H5Treclaim(tid1, sid1, H5P_DEFAULT, rdata);
@@ -327,7 +341,7 @@ test_vlstrings_special(void)
 
     /* Set the fill value for the second dataset */
     fill = NULL;
-    ret = H5Pset_fill_value(dcpl, tid1, &fill);
+    ret  = H5Pset_fill_value(dcpl, tid1, &fill);
     CHECK(ret, FAIL, "H5Pset_fill_value");
 
     dataset = H5Dcreate2(fid1, "Dataset4", tid1, sid1, H5P_DEFAULT, dcpl, H5P_DEFAULT);
@@ -342,9 +356,9 @@ test_vlstrings_special(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check data read in */
-    for(i = 0; i < SPACE1_DIM1; i++)
-        if(rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
+    for (i = 0; i < SPACE1_DIM1; i++)
+        if (rdata[i] != NULL)
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
 
     /* Try to write nil strings to disk. */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata2);
@@ -355,9 +369,9 @@ test_vlstrings_special(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check data read in */
-    for(i = 0; i < SPACE1_DIM1; i++)
-        if(rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
+    for (i = 0; i < SPACE1_DIM1; i++)
+        if (rdata[i] != NULL)
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -382,14 +396,15 @@ test_vlstrings_special(void)
 **      Tests if VL string is treated as string.
 **
 ****************************************************************/
-static void test_vlstring_type(void)
+static void
+test_vlstring_type(void)
 {
-    hid_t               fid;           /* HDF5 File IDs                */
-    hid_t               tid_vlstr;
-    H5T_cset_t          cset;
-    H5T_str_t           pad;
-    htri_t              vl_str;         /* Whether string is VL */
-    herr_t              ret;
+    hid_t      fid; /* HDF5 File IDs                */
+    hid_t      tid_vlstr;
+    H5T_cset_t cset;
+    H5T_str_t  pad;
+    htri_t     vl_str; /* Whether string is VL */
+    herr_t     ret;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing VL String type\n"));
@@ -446,7 +461,6 @@ static void test_vlstring_type(void)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-
     fid = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
@@ -478,15 +492,15 @@ static void
 test_compact_vlstring(void)
 {
     const char *wdata[SPACE1_DIM1] = {"one", "two", "three", "four"};
-    char *rdata[SPACE1_DIM1];   /* Information read in */
-    hid_t        fid1;        /* HDF5 File IDs        */
-    hid_t        dataset;    /* Dataset ID            */
-    hid_t        sid1;       /* Dataspace ID            */
-    hid_t        tid1;       /* Datatype ID            */
-    hid_t        plist;      /* Dataset creation property list    */
-    hsize_t        dims1[] = {SPACE1_DIM1};
-    unsigned       i;          /* counting variable */
-    herr_t        ret;        /* Generic return value        */
+    char *      rdata[SPACE1_DIM1]; /* Information read in */
+    hid_t       fid1;               /* HDF5 File IDs        */
+    hid_t       dataset;            /* Dataset ID            */
+    hid_t       sid1;               /* Dataspace ID            */
+    hid_t       tid1;               /* Datatype ID            */
+    hid_t       plist;              /* Dataset creation property list    */
+    hsize_t     dims1[] = {SPACE1_DIM1};
+    unsigned    i;   /* counting variable */
+    herr_t      ret; /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing VL Strings in compact dataset\n"));
@@ -500,10 +514,10 @@ test_compact_vlstring(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a datatype to refer to */
-    tid1 = H5Tcopy (H5T_C_S1);
+    tid1 = H5Tcopy(H5T_C_S1);
     CHECK(tid1, FAIL, "H5Tcopy");
 
-    ret = H5Tset_size (tid1,H5T_VARIABLE);
+    ret = H5Tset_size(tid1, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
     plist = H5Pcreate(H5P_DATASET_CREATE);
@@ -525,16 +539,18 @@ test_compact_vlstring(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read in */
-    for(i = 0; i < SPACE1_DIM1; i++) {
-        if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
-            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)HDstrlen(rdata[i]));
+    for (i = 0; i < SPACE1_DIM1; i++) {
+        if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
+                          (int)strlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
-        if(HDstrcmp(wdata[i], rdata[i]) != 0) {
-            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+        if (HDstrcmp(wdata[i], rdata[i]) != 0) {
+            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i],
+                          (int)i, rdata[i]);
             continue;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Reclaim the read VL data */
     ret = H5Treclaim(tid1, sid1, H5P_DEFAULT, rdata);
@@ -567,22 +583,23 @@ test_compact_vlstring(void)
 **      Tests writing VL strings as attributes
 **
 ****************************************************************/
-static void test_write_vl_string_attribute(void)
+static void
+test_write_vl_string_attribute(void)
 {
-    hid_t file, root, dataspace, att;
-    hid_t type;
+    hid_t  file, root, dataspace, att;
+    hid_t  type;
     herr_t ret;
-    char *string_att_check = NULL;
+    char * string_att_check = NULL;
 
     /* Open the file */
     file = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
     /* Create a datatype to refer to. */
-    type = H5Tcopy (H5T_C_S1);
+    type = H5Tcopy(H5T_C_S1);
     CHECK(type, FAIL, "H5Tcopy");
 
-    ret = H5Tset_size (type, H5T_VARIABLE);
+    ret = H5Tset_size(type, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
     root = H5Gopen2(file, "/", H5P_DEFAULT);
@@ -601,8 +618,9 @@ static void test_write_vl_string_attribute(void)
     ret = H5Aread(att, type, &string_att_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    if(HDstrcmp(string_att_check,string_att) != 0)
-        TestErrPrintf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att,string_att_check);
+    if (HDstrcmp(string_att_check, string_att) != 0)
+        TestErrPrintf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n", string_att,
+                      string_att_check);
 
     H5free_memory(string_att_check);
     string_att_check = NULL;
@@ -614,7 +632,7 @@ static void test_write_vl_string_attribute(void)
     att = H5Acreate2(root, "test_scalar_large", type, dataspace, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Acreate2");
 
-    string_att_write = (char*)HDcalloc((size_t)8192, sizeof(char));
+    string_att_write = (char *)HDcalloc((size_t)8192, sizeof(char));
     HDmemset(string_att_write, 'A', (size_t)8191);
 
     ret = H5Awrite(att, type, &string_att_write);
@@ -623,8 +641,9 @@ static void test_write_vl_string_attribute(void)
     ret = H5Aread(att, type, &string_att_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    if(HDstrcmp(string_att_check,string_att_write) != 0)
-        TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
+    if (HDstrcmp(string_att_check, string_att_write) != 0)
+        TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",
+                      string_att_write, string_att_check);
 
     H5free_memory(string_att_check);
     string_att_check = NULL;
@@ -656,22 +675,23 @@ static void test_write_vl_string_attribute(void)
 **      Tests reading VL strings from attributes
 **
 ****************************************************************/
-static void test_read_vl_string_attribute(void)
+static void
+test_read_vl_string_attribute(void)
 {
-    hid_t file, root, att;
-    hid_t type;
+    hid_t  file, root, att;
+    hid_t  type;
     herr_t ret;
-    char *string_att_check = NULL;
+    char * string_att_check = NULL;
 
     /* Open file */
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
     /* Create a datatype to refer to. */
-    type = H5Tcopy (H5T_C_S1);
+    type = H5Tcopy(H5T_C_S1);
     CHECK(type, FAIL, "H5Tcopy");
 
-    ret = H5Tset_size (type, H5T_VARIABLE);
+    ret = H5Tset_size(type, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
     root = H5Gopen2(file, "/", H5P_DEFAULT);
@@ -684,8 +704,9 @@ static void test_read_vl_string_attribute(void)
     ret = H5Aread(att, type, &string_att_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    if(HDstrcmp(string_att_check,string_att) != 0)
-        TestErrPrintf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att,string_att_check);
+    if (HDstrcmp(string_att_check, string_att) != 0)
+        TestErrPrintf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n", string_att,
+                      string_att_check);
 
     H5free_memory(string_att_check);
     string_att_check = NULL;
@@ -697,19 +718,20 @@ static void test_read_vl_string_attribute(void)
     att = H5Aopen(root, "test_scalar_large", H5P_DEFAULT);
     CHECK(att, FAIL, "H5Aopen");
 
-    if(string_att_write) {
+    if (string_att_write) {
         ret = H5Aread(att, type, &string_att_check);
         CHECK(ret, FAIL, "H5Aread");
 
-        if(HDstrcmp(string_att_check,string_att_write) != 0)
-            TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
+        if (HDstrcmp(string_att_check, string_att_write) != 0)
+            TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",
+                          string_att_write, string_att_check);
 
         H5free_memory(string_att_check);
         string_att_check = NULL;
     }
 
     /* Free string allocated in test_write_vl_string_attribute */
-    if(string_att_write)
+    if (string_att_write)
         HDfree(string_att_write);
 
     ret = H5Aclose(att);
@@ -728,27 +750,29 @@ static void test_read_vl_string_attribute(void)
 }
 
 /* Helper routine for test_vl_rewrite() */
-static void write_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, char *data)
+static void
+write_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, char *data)
 {
-      hid_t dset;
-      herr_t ret;
+    hid_t  dset;
+    herr_t ret;
 
-      dset = H5Dcreate2(file, name, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-      CHECK(dset, FAIL, "H5Dcreate2");
+    dset = H5Dcreate2(file, name, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate2");
 
-      ret = H5Dwrite(dset, type, space, space, H5P_DEFAULT, &data);
-      CHECK(ret, FAIL, "H5Dwrite");
+    ret = H5Dwrite(dset, type, space, space, H5P_DEFAULT, &data);
+    CHECK(ret, FAIL, "H5Dwrite");
 
-      ret = H5Dclose(dset);
-      CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
 }
 
 /* Helper routine for test_vl_rewrite() */
-static void read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, char *data)
+static void
+read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, char *data)
 {
-    hid_t dset;
+    hid_t  dset;
     herr_t ret;
-    char *data_read;
+    char * data_read;
 
     dset = H5Dopen2(file, name, H5P_DEFAULT);
     CHECK(dset, FAIL, "H5Dopen2");
@@ -759,7 +783,7 @@ static void read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, ch
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
 
-    if(HDstrcmp(data, data_read))
+    if (HDstrcmp(data, data_read))
         TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
 
     ret = H5Treclaim(type, space, H5P_DEFAULT, &data_read);
@@ -773,14 +797,15 @@ static void read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, ch
 **      have been linked/unlinked.
 **
 ****************************************************************/
-static void test_vl_rewrite(void)
+static void
+test_vl_rewrite(void)
 {
-    hid_t file1, file2; /* File IDs */
-    hid_t type;         /* VL string datatype ID */
-    hid_t space;        /* Scalar dataspace */
-    char name[256];     /* Buffer for names & data */
-    int i;              /* Local index variable */
-    herr_t ret;         /* Generic return value */
+    hid_t  file1, file2; /* File IDs */
+    hid_t  type;         /* VL string datatype ID */
+    hid_t  space;        /* Scalar dataspace */
+    char   name[256];    /* Buffer for names & data */
+    int    i;            /* Local index variable */
+    herr_t ret;          /* Generic return value */
 
     /* Create the VL string datatype */
     type = H5Tcopy(H5T_C_S1);
@@ -801,33 +826,33 @@ static void test_vl_rewrite(void)
     CHECK(file1, FAIL, "H5Fcreate");
 
     /* Create in file 1 */
-    for(i=0; i<REWRITE_NDATASETS; i++) {
+    for (i = 0; i < REWRITE_NDATASETS; i++) {
         HDsprintf(name, "/set_%d", i);
         write_scalar_dset(file1, type, space, name, name);
     }
 
     /* Effectively copy data from file 1 to 2 */
-    for(i=0; i<REWRITE_NDATASETS; i++) {
+    for (i = 0; i < REWRITE_NDATASETS; i++) {
         HDsprintf(name, "/set_%d", i);
         read_scalar_dset(file1, type, space, name, name);
         write_scalar_dset(file2, type, space, name, name);
     }
 
     /* Read back from file 2 */
-    for(i = 0; i < REWRITE_NDATASETS; i++) {
+    for (i = 0; i < REWRITE_NDATASETS; i++) {
         HDsprintf(name, "/set_%d", i);
         read_scalar_dset(file2, type, space, name, name);
     } /* end for */
 
     /* Remove from file 2. */
-    for(i = 0; i < REWRITE_NDATASETS; i++) {
+    for (i = 0; i < REWRITE_NDATASETS; i++) {
         HDsprintf(name, "/set_%d", i);
         ret = H5Ldelete(file2, name, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Ldelete");
     } /* end for */
 
     /* Effectively copy from file 1 to file 2 */
-    for(i = 0; i < REWRITE_NDATASETS; i++) {
+    for (i = 0; i < REWRITE_NDATASETS; i++) {
         HDsprintf(name, "/set_%d", i);
         read_scalar_dset(file1, type, space, name, name);
         write_scalar_dset(file2, type, space, name, name);
@@ -856,16 +881,17 @@ static void test_vl_rewrite(void)
  **      H5Sselect_element.
  **
  ****************************************************************/
-static void test_write_same_element(void)
+static void
+test_write_same_element(void)
 {
-    hid_t   file1, dataset1;
-    hid_t   mspace, fspace, dtype;
-    hsize_t fdim[] = {SPACE1_DIM1};
+    hid_t       file1, dataset1;
+    hid_t       mspace, fspace, dtype;
+    hsize_t     fdim[]             = {SPACE1_DIM1};
     const char *wdata[SPACE1_DIM1] = {"Parting", "is such a", "sweet", "sorrow."};
-    const char *val[SPACE1_DIM1] = {"But", "reuniting", "is a", "great joy"};
-    hsize_t marray[] = {NUMP};
-    hsize_t coord[SPACE1_RANK][NUMP];
-    herr_t ret;
+    const char *val[SPACE1_DIM1]   = {"But", "reuniting", "is a", "great joy"};
+    hsize_t     marray[]           = {NUMP};
+    hsize_t     coord[SPACE1_RANK][NUMP];
+    herr_t      ret;
 
     file1 = H5Fcreate(DATAFILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file1, FAIL, "H5Fcreate");
@@ -879,8 +905,7 @@ static void test_write_same_element(void)
     fspace = H5Screate_simple(SPACE1_RANK, fdim, NULL);
     CHECK(fspace, FAIL, "H5Screate_simple");
 
-    dataset1 = H5Dcreate2(file1, DATASET, dtype, fspace, H5P_DEFAULT,
-                          H5P_DEFAULT, H5P_DEFAULT);
+    dataset1 = H5Dcreate2(file1, DATASET, dtype, fspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dataset1, FAIL, "H5Dcreate");
 
     ret = H5Dwrite(dataset1, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -969,7 +994,7 @@ test_vlstrings(void)
     test_vl_rewrite();
     /* Test writing to the same element more than once using H5Sselect_elements */
     test_write_same_element();
-}   /* test_vlstrings() */
+} /* test_vlstrings() */
 
 /*-------------------------------------------------------------------------
  * Function:    cleanup_vlstrings
@@ -992,4 +1017,3 @@ cleanup_vlstrings(void)
     HDremove(DATAFILE2);
     HDremove(DATAFILE3);
 }
-

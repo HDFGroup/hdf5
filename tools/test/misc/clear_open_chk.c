@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -40,11 +40,11 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-    char *fname;    /* The HDF5 file name */
-    hid_t fid;        /* File ID */
+    char *fname; /* The HDF5 file name */
+    hid_t fid;   /* File ID */
 
     /* Check the # of arguments */
-    if(argc != 2) {
+    if (argc != 2) {
         usage();
         HDexit(EXIT_FAILURE);
     }
@@ -53,7 +53,7 @@ main(int argc, char *argv[])
     fname = HDstrdup(argv[1]);
 
     /* Try opening the file */
-    if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
+    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
         HDfprintf(stderr, "clear_open_chk: unable to open the file\n");
         HDfree(fname);
         HDexit(EXIT_FAILURE);
@@ -61,7 +61,7 @@ main(int argc, char *argv[])
     HDfree(fname);
 
     /* Close the file */
-    if(H5Fclose(fid) < 0) {
+    if (H5Fclose(fid) < 0) {
         HDfprintf(stderr, "clear_open_chk: cannot close the file\n");
         HDexit(EXIT_FAILURE);
     }

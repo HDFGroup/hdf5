@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,13 +28,24 @@
 #include "H5HLprivate2.h"
 
 /* Macros used in HL tests */
-#define HL_TESTING2(WHAT)  {HDprintf("Testing %-62s", WHAT); HDfflush(stdout);}
-#define HL_TESTING3(WHAT)  {HDprintf("Testing %-62s", WHAT); HDfflush(stdout);}
+#define HL_TESTING2(WHAT)                                                                                    \
+    {                                                                                                        \
+        HDprintf("Testing %-62s", WHAT);                                                                     \
+        HDfflush(stdout);                                                                                    \
+    }
+#define HL_TESTING3(WHAT)                                                                                    \
+    {                                                                                                        \
+        HDprintf("Testing %-62s", WHAT);                                                                     \
+        HDfflush(stdout);                                                                                    \
+    }
 
 /* Implements verbose 'assert' with 'goto error' exit  */
-#define VERIFY(condition, string) do { if (!(condition)) FAIL_PUTS_ERROR(string) } while(0)
+#define VERIFY(condition, string)                                                                            \
+    do {                                                                                                     \
+        if (!(condition))                                                                                    \
+            FAIL_PUTS_ERROR(string)                                                                          \
+    } while (0)
 
 int test_packet_table_with_varlen(void);
 
 #endif /* _H5HLTEST_H */
-

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -44,21 +44,20 @@ extern "C" {
 #include "h5jni.h"
 #include "nativeData.h"
 
-
 /* returns int [] */
 JNIEXPORT jintArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToInt___3B
-    (JNIEnv *env, jclass clss, jbyteArray bdata)  /* IN: array of bytes */
+Java_hdf_hdf5lib_HDFNativeData_byteToInt___3B(JNIEnv *env, jclass clss,
+                                              jbyteArray bdata) /* IN: array of bytes */
 {
-    jintArray  rarray = NULL;
-    jboolean   bb;
-    jbyte     *barr = NULL;
-    jint      *iarray = NULL;
-    jint      *iap = NULL;
-    char      *bp = NULL;
-    int        blen;
-    int        ii;
-    int        len;
+    jintArray rarray = NULL;
+    jboolean  bb;
+    jbyte *   barr   = NULL;
+    jint *    iarray = NULL;
+    jint *    iap    = NULL;
+    char *    bp     = NULL;
+    int       blen;
+    int       ii;
+    int       len;
 
     UNUSED(clss);
 
@@ -79,7 +78,7 @@ Java_hdf_hdf5lib_HDFNativeData_byteToInt___3B
 
     PIN_INT_ARRAY(ENVONLY, rarray, iarray, &bb, "byteToInt: int array not pinned");
 
-    bp = (char *)barr;
+    bp  = (char *)barr;
     iap = iarray;
     for (ii = 0; ii < len; ii++) {
         *iap = *(jint *)bp;
@@ -98,18 +97,18 @@ done:
 
 /* returns float [] */
 JNIEXPORT jfloatArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToFloat___3B
-    (JNIEnv *env, jclass clss, jbyteArray bdata)  /* IN: array of bytes */
+Java_hdf_hdf5lib_HDFNativeData_byteToFloat___3B(JNIEnv *env, jclass clss,
+                                                jbyteArray bdata) /* IN: array of bytes */
 {
-    jfloatArray  rarray = NULL;
-    jboolean     bb;
-    jfloat      *farray = NULL;
-    jfloat      *iap = NULL;
-    jbyte       *barr = NULL;
-    char        *bp = NULL;
-    int          blen;
-    int          ii;
-    int          len;
+    jfloatArray rarray = NULL;
+    jboolean    bb;
+    jfloat *    farray = NULL;
+    jfloat *    iap    = NULL;
+    jbyte *     barr   = NULL;
+    char *      bp     = NULL;
+    int         blen;
+    int         ii;
+    int         len;
 
     UNUSED(clss);
 
@@ -130,7 +129,7 @@ Java_hdf_hdf5lib_HDFNativeData_byteToFloat___3B
 
     PIN_FLOAT_ARRAY(ENVONLY, rarray, farray, &bb, "byteToFloat: float array not pinned");
 
-    bp = (char *)barr;
+    bp  = (char *)barr;
     iap = farray;
     for (ii = 0; ii < len; ii++) {
         *iap = *(jfloat *)bp;
@@ -149,18 +148,18 @@ done:
 
 /* returns short [] */
 JNIEXPORT jshortArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToShort___3B
-    (JNIEnv *env, jclass clss, jbyteArray bdata)  /* IN: array of bytes */
+Java_hdf_hdf5lib_HDFNativeData_byteToShort___3B(JNIEnv *env, jclass clss,
+                                                jbyteArray bdata) /* IN: array of bytes */
 {
-    jshortArray  rarray = NULL;
-    jboolean     bb;
-    jshort      *sarray = NULL;
-    jshort      *iap = NULL;
-    jbyte       *barr = NULL;
-    char        *bp = NULL;
-    int          blen;
-    int          ii;
-    int          len;
+    jshortArray rarray = NULL;
+    jboolean    bb;
+    jshort *    sarray = NULL;
+    jshort *    iap    = NULL;
+    jbyte *     barr   = NULL;
+    char *      bp     = NULL;
+    int         blen;
+    int         ii;
+    int         len;
 
     UNUSED(clss);
 
@@ -181,7 +180,7 @@ Java_hdf_hdf5lib_HDFNativeData_byteToShort___3B
 
     PIN_SHORT_ARRAY(ENVONLY, rarray, sarray, &bb, "byteToShort: short array not pinned");
 
-    bp = (char *)barr;
+    bp  = (char *)barr;
     iap = sarray;
     for (ii = 0; ii < len; ii++) {
         *iap = *(jshort *)bp;
@@ -200,18 +199,18 @@ done:
 
 /* returns long [] */
 JNIEXPORT jlongArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToLong___3B
-    (JNIEnv *env, jclass clss, jbyteArray bdata)  /* IN: array of bytes */
+Java_hdf_hdf5lib_HDFNativeData_byteToLong___3B(JNIEnv *env, jclass clss,
+                                               jbyteArray bdata) /* IN: array of bytes */
 {
-    jlongArray  rarray = NULL;
-    jboolean    bb;
-    jlong      *larray = NULL;
-    jlong      *iap = NULL;
-    jbyte      *barr = NULL;
-    char       *bp = NULL;
-    int         blen;
-    int         ii;
-    int         len;
+    jlongArray rarray = NULL;
+    jboolean   bb;
+    jlong *    larray = NULL;
+    jlong *    iap    = NULL;
+    jbyte *    barr   = NULL;
+    char *     bp     = NULL;
+    int        blen;
+    int        ii;
+    int        len;
 
     UNUSED(clss);
 
@@ -232,7 +231,7 @@ Java_hdf_hdf5lib_HDFNativeData_byteToLong___3B
 
     PIN_LONG_ARRAY(ENVONLY, rarray, larray, &bb, "byteToLong: long array not pinned");
 
-    bp = (char *)barr;
+    bp  = (char *)barr;
     iap = larray;
     for (ii = 0; ii < len; ii++) {
         *iap = *(jlong *)bp;
@@ -251,18 +250,18 @@ done:
 
 /* returns double [] */
 JNIEXPORT jdoubleArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToDouble___3B
-    (JNIEnv *env, jclass clss, jbyteArray bdata)  /* IN: array of bytes */
+Java_hdf_hdf5lib_HDFNativeData_byteToDouble___3B(JNIEnv *env, jclass clss,
+                                                 jbyteArray bdata) /* IN: array of bytes */
 {
-    jdoubleArray  rarray = NULL;
-    jboolean      bb;
-    jdouble      *darray = NULL;
-    jdouble      *iap = NULL;
-    jbyte        *barr = NULL;
-    char         *bp = NULL;
-    int           blen;
-    int           ii;
-    int           len;
+    jdoubleArray rarray = NULL;
+    jboolean     bb;
+    jdouble *    darray = NULL;
+    jdouble *    iap    = NULL;
+    jbyte *      barr   = NULL;
+    char *       bp     = NULL;
+    int          blen;
+    int          ii;
+    int          len;
 
     UNUSED(clss);
 
@@ -283,7 +282,7 @@ Java_hdf_hdf5lib_HDFNativeData_byteToDouble___3B
 
     PIN_DOUBLE_ARRAY(ENVONLY, rarray, darray, &bb, "byteToDouble: double array not pinned");
 
-    bp = (char *)barr;
+    bp  = (char *)barr;
     iap = darray;
     for (ii = 0; ii < len; ii++) {
         *iap = *(jdouble *)bp;
@@ -302,17 +301,17 @@ done:
 
 /* returns int [] */
 JNIEXPORT jintArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToInt__II_3B
-    (JNIEnv *env, jclass clss, jint start, jint len, jbyteArray bdata)  /* IN: array of bytes */
+Java_hdf_hdf5lib_HDFNativeData_byteToInt__II_3B(JNIEnv *env, jclass clss, jint start, jint len,
+                                                jbyteArray bdata) /* IN: array of bytes */
 {
-    jintArray  rarray = NULL;
-    jboolean   bb;
-    jint      *iarray = NULL;
-    jint      *iap = NULL;
-    jbyte     *barr = NULL;
-    char      *bp = NULL;
-    int        blen;
-    int        ii;
+    jintArray rarray = NULL;
+    jboolean  bb;
+    jint *    iarray = NULL;
+    jint *    iap    = NULL;
+    jbyte *   barr   = NULL;
+    char *    bp     = NULL;
+    int       blen;
+    int       ii;
 
     UNUSED(clss);
 
@@ -354,17 +353,17 @@ done:
 
 /* returns short [] */
 JNIEXPORT jshortArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToShort__II_3B
-    (JNIEnv *env, jclass clss, jint start, jint len, jbyteArray bdata)  /* IN: array of bytes */
+Java_hdf_hdf5lib_HDFNativeData_byteToShort__II_3B(JNIEnv *env, jclass clss, jint start, jint len,
+                                                  jbyteArray bdata) /* IN: array of bytes */
 {
-    jshortArray  rarray = NULL;
-    jboolean     bb;
-    jshort      *sarray = NULL;
-    jshort      *iap = NULL;
-    jbyte       *barr = NULL;
-    char        *bp = NULL;
-    int          blen;
-    int          ii;
+    jshortArray rarray = NULL;
+    jboolean    bb;
+    jshort *    sarray = NULL;
+    jshort *    iap    = NULL;
+    jbyte *     barr   = NULL;
+    char *      bp     = NULL;
+    int         blen;
+    int         ii;
 
     UNUSED(clss);
 
@@ -406,17 +405,17 @@ done:
 
 /* returns float [] */
 JNIEXPORT jfloatArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToFloat__II_3B
-    (JNIEnv *env, jclass clss, jint start, jint len, jbyteArray bdata)  /* IN: array of bytes */
+Java_hdf_hdf5lib_HDFNativeData_byteToFloat__II_3B(JNIEnv *env, jclass clss, jint start, jint len,
+                                                  jbyteArray bdata) /* IN: array of bytes */
 {
-    jfloatArray  rarray = NULL;
-    jboolean     bb;
-    jfloat      *farray = NULL;
-    jfloat      *iap = NULL;
-    jbyte       *barr = NULL;
-    char        *bp = NULL;
-    int          blen;
-    int          ii;
+    jfloatArray rarray = NULL;
+    jboolean    bb;
+    jfloat *    farray = NULL;
+    jfloat *    iap    = NULL;
+    jbyte *     barr   = NULL;
+    char *      bp     = NULL;
+    int         blen;
+    int         ii;
 
     UNUSED(clss);
 
@@ -458,17 +457,17 @@ done:
 
 /* returns long [] */
 JNIEXPORT jlongArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToLong__II_3B
-    (JNIEnv *env, jclass clss, jint start, jint len, jbyteArray bdata)  /* IN: array of bytes */
+Java_hdf_hdf5lib_HDFNativeData_byteToLong__II_3B(JNIEnv *env, jclass clss, jint start, jint len,
+                                                 jbyteArray bdata) /* IN: array of bytes */
 {
-    jlongArray  rarray = NULL;
-    jboolean    bb;
-    jlong      *larray = NULL;
-    jlong      *iap = NULL;
-    jbyte      *barr = NULL;
-    char       *bp = NULL;
-    int         blen;
-    int         ii;
+    jlongArray rarray = NULL;
+    jboolean   bb;
+    jlong *    larray = NULL;
+    jlong *    iap    = NULL;
+    jbyte *    barr   = NULL;
+    char *     bp     = NULL;
+    int        blen;
+    int        ii;
 
     UNUSED(clss);
 
@@ -510,17 +509,17 @@ done:
 
 /* returns double [] */
 JNIEXPORT jdoubleArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToDouble__II_3B
-    (JNIEnv *env, jclass clss, jint start, jint len, jbyteArray bdata)  /* IN: array of bytes */
+Java_hdf_hdf5lib_HDFNativeData_byteToDouble__II_3B(JNIEnv *env, jclass clss, jint start, jint len,
+                                                   jbyteArray bdata) /* IN: array of bytes */
 {
-    jdoubleArray  rarray = NULL;
-    jboolean      bb;
-    jdouble      *darray = NULL;
-    jdouble      *iap = NULL;
-    jbyte        *barr = NULL;
-    char         *bp = NULL;
-    int           blen;
-    int           ii;
+    jdoubleArray rarray = NULL;
+    jboolean     bb;
+    jdouble *    darray = NULL;
+    jdouble *    iap    = NULL;
+    jbyte *      barr   = NULL;
+    char *       bp     = NULL;
+    int          blen;
+    int          ii;
 
     UNUSED(clss);
 
@@ -562,21 +561,21 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_intToByte__II_3I
-    (JNIEnv *env, jclass clss, jint start, jint len, jintArray idata)  /* IN: array of int */
+Java_hdf_hdf5lib_HDFNativeData_intToByte__II_3I(JNIEnv *env, jclass clss, jint start, jint len,
+                                                jintArray idata) /* IN: array of int */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    jint       *ip = NULL;
-    jint       *iarr = NULL;
-    int         ilen;
-    int         blen;
-    int         ii;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    jint *     ip     = NULL;
+    jint *     iarr   = NULL;
+    int        ilen;
+    int        blen;
+    int        ii;
+    int        ij;
     union things {
-        int ival;
+        int  ival;
         char bytes[4];
     } u;
 
@@ -607,11 +606,11 @@ Java_hdf_hdf5lib_HDFNativeData_intToByte__II_3I
     bap = barray;
     for (ii = 0; ii < len; ii++) {
         u.ival = *ip++;
-        for (ij = 0; (size_t) ij < sizeof(jint); ij++) {
+        for (ij = 0; (size_t)ij < sizeof(jint); ij++) {
             *bap = u.bytes[ij];
             bap++;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
 done:
     if (barray)
@@ -624,22 +623,22 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_shortToByte__II_3S
-    (JNIEnv *env, jclass clss, jint start, jint len, jshortArray sdata)  /* IN: array of short */
+Java_hdf_hdf5lib_HDFNativeData_shortToByte__II_3S(JNIEnv *env, jclass clss, jint start, jint len,
+                                                  jshortArray sdata) /* IN: array of short */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jshort     *ip = NULL;
-    jshort     *sarr = NULL;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    int         ilen;
-    int         blen;
-    int         ii;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jshort *   ip     = NULL;
+    jshort *   sarr   = NULL;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    int        ilen;
+    int        blen;
+    int        ii;
+    int        ij;
     union things {
         short ival;
-        char bytes[4];
+        char  bytes[4];
     } u;
 
     UNUSED(clss);
@@ -669,11 +668,11 @@ Java_hdf_hdf5lib_HDFNativeData_shortToByte__II_3S
     bap = barray;
     for (ii = 0; ii < len; ii++) {
         u.ival = *ip++;
-        for (ij = 0; (size_t) ij < sizeof(jshort); ij++) {
+        for (ij = 0; (size_t)ij < sizeof(jshort); ij++) {
             *bap = u.bytes[ij];
             bap++;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
 done:
     if (barray)
@@ -686,22 +685,22 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_floatToByte__II_3F
-    (JNIEnv *env, jclass clss, jint start, jint len, jfloatArray fdata)  /* IN: array of float */
+Java_hdf_hdf5lib_HDFNativeData_floatToByte__II_3F(JNIEnv *env, jclass clss, jint start, jint len,
+                                                  jfloatArray fdata) /* IN: array of float */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jfloat     *ip = NULL;
-    jfloat     *farr = NULL;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    int         ilen;
-    int         blen;
-    int         ii;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jfloat *   ip     = NULL;
+    jfloat *   farr   = NULL;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    int        ilen;
+    int        blen;
+    int        ii;
+    int        ij;
     union things {
         float ival;
-        char bytes[4];
+        char  bytes[4];
     } u;
 
     UNUSED(clss);
@@ -731,11 +730,11 @@ Java_hdf_hdf5lib_HDFNativeData_floatToByte__II_3F
     bap = barray;
     for (ii = 0; ii < len; ii++) {
         u.ival = *ip++;
-        for (ij = 0; (size_t) ij < sizeof(jfloat); ij++) {
+        for (ij = 0; (size_t)ij < sizeof(jfloat); ij++) {
             *bap = u.bytes[ij];
             bap++;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
 done:
     if (barray)
@@ -748,22 +747,22 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_doubleToByte__II_3D
-    (JNIEnv *env, jclass clss, jint start, jint len, jdoubleArray ddata)  /* IN: array of double */
+Java_hdf_hdf5lib_HDFNativeData_doubleToByte__II_3D(JNIEnv *env, jclass clss, jint start, jint len,
+                                                   jdoubleArray ddata) /* IN: array of double */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jdouble    *ip = NULL;
-    jdouble    *darr = NULL;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    int         ilen;
-    int         blen;
-    int         ii;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jdouble *  ip     = NULL;
+    jdouble *  darr   = NULL;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    int        ilen;
+    int        blen;
+    int        ii;
+    int        ij;
     union things {
         double ival;
-        char bytes[8];
+        char   bytes[8];
     } u;
 
     UNUSED(clss);
@@ -793,11 +792,11 @@ Java_hdf_hdf5lib_HDFNativeData_doubleToByte__II_3D
     bap = barray;
     for (ii = 0; ii < len; ii++) {
         u.ival = *ip++;
-        for (ij = 0; (size_t) ij < sizeof(jdouble); ij++) {
+        for (ij = 0; (size_t)ij < sizeof(jdouble); ij++) {
             *bap = u.bytes[ij];
             bap++;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
 done:
     if (barray)
@@ -810,22 +809,22 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_longToByte__II_3J
-    (JNIEnv *env, jclass clss, jint start, jint len, jlongArray ldata)  /* IN: array of long */
+Java_hdf_hdf5lib_HDFNativeData_longToByte__II_3J(JNIEnv *env, jclass clss, jint start, jint len,
+                                                 jlongArray ldata) /* IN: array of long */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jlong      *ip = NULL;
-    jlong      *larr = NULL;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    int         ilen;
-    int         blen;
-    int         ii;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jlong *    ip     = NULL;
+    jlong *    larr   = NULL;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    int        ilen;
+    int        blen;
+    int        ii;
+    int        ij;
     union things {
         jlong ival;
-        char bytes[8];
+        char  bytes[8];
     } u;
 
     UNUSED(clss);
@@ -855,11 +854,11 @@ Java_hdf_hdf5lib_HDFNativeData_longToByte__II_3J
     bap = barray;
     for (ii = 0; ii < len; ii++) {
         u.ival = *ip++;
-        for (ij = 0; (size_t) ij < sizeof(jlong); ij++) {
+        for (ij = 0; (size_t)ij < sizeof(jlong); ij++) {
             *bap = u.bytes[ij];
             bap++;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
 done:
     if (barray)
@@ -872,16 +871,15 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_intToByte__I
-    (JNIEnv *env, jclass clss, jint idata)  /* IN: int */
+Java_hdf_hdf5lib_HDFNativeData_intToByte__I(JNIEnv *env, jclass clss, jint idata) /* IN: int */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    int        ij;
     union things {
-        int ival;
+        int  ival;
         char bytes[sizeof(int)];
     } u;
 
@@ -892,9 +890,9 @@ Java_hdf_hdf5lib_HDFNativeData_intToByte__I
 
     PIN_BYTE_ARRAY(ENVONLY, rarray, barray, &bb, "intToByte: byte array not pinned");
 
-    bap = barray;
+    bap    = barray;
     u.ival = idata;
-    for (ij = 0; (size_t) ij < sizeof(jint); ij++) {
+    for (ij = 0; (size_t)ij < sizeof(jint); ij++) {
         *bap = u.bytes[ij];
         bap++;
     } /* end for */
@@ -908,17 +906,16 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_floatToByte__F
-    (JNIEnv *env, jclass clss, jfloat fdata)  /* IN: float */
+Java_hdf_hdf5lib_HDFNativeData_floatToByte__F(JNIEnv *env, jclass clss, jfloat fdata) /* IN: float */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    int        ij;
     union things {
         float ival;
-        char bytes[sizeof(float)];
+        char  bytes[sizeof(float)];
     } u;
 
     UNUSED(clss);
@@ -928,9 +925,9 @@ Java_hdf_hdf5lib_HDFNativeData_floatToByte__F
 
     PIN_BYTE_ARRAY(ENVONLY, rarray, barray, &bb, "floatToByte: byte array not pinned");
 
-    bap = barray;
+    bap    = barray;
     u.ival = fdata;
-    for (ij = 0; (size_t) ij < sizeof(jfloat); ij++) {
+    for (ij = 0; (size_t)ij < sizeof(jfloat); ij++) {
         *bap = u.bytes[ij];
         bap++;
     } /* end for */
@@ -944,17 +941,16 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_shortToByte__S
-    (JNIEnv *env, jclass clss, jshort sdata)  /* IN: short */
+Java_hdf_hdf5lib_HDFNativeData_shortToByte__S(JNIEnv *env, jclass clss, jshort sdata) /* IN: short */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    int        ij;
     union things {
         short ival;
-        char bytes[sizeof(short)];
+        char  bytes[sizeof(short)];
     } u;
 
     UNUSED(clss);
@@ -964,9 +960,9 @@ Java_hdf_hdf5lib_HDFNativeData_shortToByte__S
 
     PIN_BYTE_ARRAY(ENVONLY, rarray, barray, &bb, "shortToByte: byte array not pinned");
 
-    bap = barray;
+    bap    = barray;
     u.ival = sdata;
-    for (ij = 0; (size_t) ij < sizeof(jshort); ij++) {
+    for (ij = 0; (size_t)ij < sizeof(jshort); ij++) {
         *bap = u.bytes[ij];
         bap++;
     } /* end for */
@@ -980,17 +976,16 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_doubleToByte__D
-    (JNIEnv *env, jclass clss, jdouble ddata)  /* IN: double */
+Java_hdf_hdf5lib_HDFNativeData_doubleToByte__D(JNIEnv *env, jclass clss, jdouble ddata) /* IN: double */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    int        ij;
     union things {
         double ival;
-        char bytes[sizeof(double)];
+        char   bytes[sizeof(double)];
     } u;
 
     UNUSED(clss);
@@ -1000,9 +995,9 @@ Java_hdf_hdf5lib_HDFNativeData_doubleToByte__D
 
     PIN_BYTE_ARRAY(ENVONLY, rarray, barray, &bb, "doubleToByte: byte array not pinned");
 
-    bap = barray;
+    bap    = barray;
     u.ival = ddata;
-    for (ij = 0; (size_t) ij < sizeof(jdouble); ij++) {
+    for (ij = 0; (size_t)ij < sizeof(jdouble); ij++) {
         *bap = u.bytes[ij];
         bap++;
     } /* end for */
@@ -1016,17 +1011,16 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_longToByte__J
-    (JNIEnv *env, jclass clss, jlong ldata)  /* IN: long */
+Java_hdf_hdf5lib_HDFNativeData_longToByte__J(JNIEnv *env, jclass clss, jlong ldata) /* IN: long */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    int        ij;
     union things {
         jlong ival;
-        char bytes[sizeof(jlong)];
+        char  bytes[sizeof(jlong)];
     } u;
 
     UNUSED(clss);
@@ -1036,9 +1030,9 @@ Java_hdf_hdf5lib_HDFNativeData_longToByte__J
 
     PIN_BYTE_ARRAY(ENVONLY, rarray, barray, &bb, "longToByte: byte array not pinned");
 
-    bap = barray;
+    bap    = barray;
     u.ival = ldata;
-    for (ij = 0; (size_t) ij < sizeof(jlong); ij++) {
+    for (ij = 0; (size_t)ij < sizeof(jlong); ij++) {
         *bap = u.bytes[ij];
         bap++;
     } /* end for */
@@ -1052,17 +1046,16 @@ done:
 
 /* returns byte [] */
 JNIEXPORT jbyteArray JNICALL
-Java_hdf_hdf5lib_HDFNativeData_byteToByte__B
-    (JNIEnv *env, jclass clss, jbyte bdata)  /* IN: byte */
+Java_hdf_hdf5lib_HDFNativeData_byteToByte__B(JNIEnv *env, jclass clss, jbyte bdata) /* IN: byte */
 {
-    jbyteArray  rarray = NULL;
-    jboolean    bb;
-    jbyte      *barray = NULL;
-    jbyte      *bap = NULL;
-    int         ij;
+    jbyteArray rarray = NULL;
+    jboolean   bb;
+    jbyte *    barray = NULL;
+    jbyte *    bap    = NULL;
+    int        ij;
     union things {
         jbyte ival;
-        char bytes[sizeof(jbyte)];
+        char  bytes[sizeof(jbyte)];
     } u;
 
     UNUSED(clss);
@@ -1072,9 +1065,9 @@ Java_hdf_hdf5lib_HDFNativeData_byteToByte__B
 
     PIN_BYTE_ARRAY(ENVONLY, rarray, barray, &bb, "byteToByte: byte array not pinned");
 
-    bap = barray;
+    bap    = barray;
     u.ival = bdata;
-    for (ij = 0; (size_t) ij < sizeof(jbyte); ij++) {
+    for (ij = 0; (size_t)ij < sizeof(jbyte); ij++) {
         *bap = u.bytes[ij];
         bap++;
     } /* end for */
@@ -1085,7 +1078,6 @@ done:
 
     return rarray;
 } /* end Java_hdf_hdf5lib_HDFNativeData_byteToByte__B */
-
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,12 +19,11 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
-#define MSHS_OPTS_MAGIC 0x613B1C15u /* sanity-checking constant */
-#define MSHS_IP_STR_SIZE 20
-#define MSHS_DEFAULT_IP "127.0.0.1"
+#define MSHS_OPTS_MAGIC     0x613B1C15u /* sanity-checking constant */
+#define MSHS_IP_STR_SIZE    20
+#define MSHS_DEFAULT_IP     "127.0.0.1"
 #define MSHS_DEFAULT_PORTNO 3000
 
-
 /* ----------------------------------------------------------------------------
  * Structure:   struct mshs_opts
  *
@@ -46,13 +45,12 @@
  * ----------------------------------------------------------------------------
  */
 struct mshs_opts {
-    uint32_t    magic;
-    int         help;
-    int         portno;
-    char        ip[MSHS_IP_STR_SIZE + 1];
+    uint32_t magic;
+    int      help;
+    int      portno;
+    char     ip[MSHS_IP_STR_SIZE + 1];
 };
 
-
 /* ----------------------------------------------------------------------------
  * Function:    usage
  *
@@ -62,19 +60,17 @@ struct mshs_opts {
 static void
 usage(void)
 {
-    HDprintf("mirror_server_halten_sie [options]\n"                           \
-             "System-independent Mirror Server shutdown program.\n"           \
-             "Sends shutdown message to Mirror Server at given IP:port\n"     \
-             "\n"                                                             \
-             "Options:\n"                                                     \
-             "    -h | --help Print this usage message and exit.\n"           \
-             "    --ip=ADDR   IP Address of remote server (defaut %s)\n"      \
+    HDprintf("mirror_server_halten_sie [options]\n"
+             "System-independent Mirror Server shutdown program.\n"
+             "Sends shutdown message to Mirror Server at given IP:port\n"
+             "\n"
+             "Options:\n"
+             "    -h | --help Print this usage message and exit.\n"
+             "    --ip=ADDR   IP Address of remote server (defaut %s)\n"
              "    --port=PORT Handshake port of remote server (default %d)\n",
-             MSHS_DEFAULT_IP,
-             MSHS_DEFAULT_PORTNO);
+             MSHS_DEFAULT_IP, MSHS_DEFAULT_PORTNO);
 } /* end usage() */
 
-
 /* ----------------------------------------------------------------------------
  * Function:    parse_args
  *
@@ -90,22 +86,20 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
 {
     int i = 0;
 
-    opts->magic = MSHS_OPTS_MAGIC;
-    opts->help = 0;
+    opts->magic  = MSHS_OPTS_MAGIC;
+    opts->help   = 0;
     opts->portno = MSHS_DEFAULT_PORTNO;
     HDstrncpy(opts->ip, MSHS_DEFAULT_IP, MSHS_IP_STR_SIZE);
 
-    for (i=1; i < argc; i++) { /* start with first possible option argument */
+    for (i = 1; i < argc; i++) { /* start with first possible option argument */
         if (!HDstrncmp(argv[i], "-h", 3) || !HDstrncmp(argv[i], "--help", 7)) {
             opts->help = 1;
         }
-        else
-        if (!HDstrncmp(argv[i], "--ip=", 5)) {
-            HDstrncpy(opts->ip, argv[i]+5, MSHS_IP_STR_SIZE);
+        else if (!HDstrncmp(argv[i], "--ip=", 5)) {
+            HDstrncpy(opts->ip, argv[i] + 5, MSHS_IP_STR_SIZE);
         }
-        else
-        if (!HDstrncmp(argv[i], "--port=", 7)) {
-            opts->portno = HDatoi(argv[i]+7);
+        else if (!HDstrncmp(argv[i], "--port=", 7)) {
+            opts->portno = HDatoi(argv[i] + 7);
         }
         else {
             HDprintf("Unrecognized option: '%s'\n", argv[i]);
@@ -123,7 +117,6 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
     return 0;
 } /* end parse_args() */
 
-
 /* ----------------------------------------------------------------------------
  * Function:    send_shutdown
  *
@@ -139,8 +132,8 @@ send_shutdown(struct mshs_opts *opts)
     struct sockaddr_in target_addr;
 
     if (opts->magic != MSHS_OPTS_MAGIC) {
-       HDprintf("invalid options structure\n");
-       return -1;
+        HDprintf("invalid options structure\n");
+        return -1;
     }
 
     live_socket = HDsocket(AF_INET, SOCK_STREAM, 0);
@@ -149,15 +142,12 @@ send_shutdown(struct mshs_opts *opts)
         return -1;
     }
 
-    target_addr.sin_family = AF_INET;
-    target_addr.sin_port = HDhtons((uint16_t)opts->portno);
+    target_addr.sin_family      = AF_INET;
+    target_addr.sin_port        = HDhtons((uint16_t)opts->portno);
     target_addr.sin_addr.s_addr = HDinet_addr(opts->ip);
     HDmemset(target_addr.sin_zero, '\0', sizeof(target_addr.sin_zero));
 
-    if (HDconnect(live_socket, (struct sockaddr *)&target_addr,
-            (socklen_t)sizeof(target_addr))
-        < 0)
-    {
+    if (HDconnect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
         HDprintf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
         return -1;
     }
@@ -175,7 +165,6 @@ send_shutdown(struct mshs_opts *opts)
     return 0;
 } /* end send_shutdown() */
 
-
 /* ------------------------------------------------------------------------- */
 int
 main(int argc, char **argv)
@@ -202,7 +191,6 @@ main(int argc, char **argv)
 
 #else /* H5_HAVE_MIRROR_VFD */
 
-
 /* ------------------------------------------------------------------------- */
 int
 main(void)

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,105 +28,103 @@
 
 #include <zlib.h>
 
-#define ONE_KB              1024
-#define ONE_MB              (ONE_KB * ONE_KB)
-#define ONE_GB              (ONE_MB * ONE_KB)
+#define ONE_KB 1024
+#define ONE_MB (ONE_KB * ONE_KB)
+#define ONE_GB (ONE_MB * ONE_KB)
 
-#define MICROSECOND         1000000.0F
+#define MICROSECOND 1000000.0F
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes,t) ((fabs(t) < (double)0.0000000001F) ? (double)0.0F : ((((double)bytes) / (double)ONE_MB) / (t)))
+#define MB_PER_SEC(bytes, t)                                                                                 \
+    ((fabs(t) < (double)0.0000000001F) ? (double)0.0F : ((((double)bytes) / (double)ONE_MB) / (t)))
 
 #ifndef TRUE
-#define TRUE    1
-#endif  /* TRUE */
+#define TRUE 1
+#endif /* TRUE */
 
 #ifndef FALSE
-#define FALSE   (!TRUE)
-#endif  /* FALSE */
+#define FALSE (!TRUE)
+#endif /* FALSE */
 
 #ifndef S_IRWXU
-#define S_IRWXU (_S_IREAD|_S_IWRITE)
+#define S_IRWXU (_S_IREAD | _S_IWRITE)
 #endif
 
 /* internal variables */
-static const char *prog=NULL;
-static const char *option_prefix=NULL;
-static char *filename=NULL;
-static int compress_percent = 0;
-static int compress_level = Z_DEFAULT_COMPRESSION;
-static int output, random_test = FALSE;
-static int report_once_flag;
-static double compression_time;
+static const char *prog             = NULL;
+static const char *option_prefix    = NULL;
+static char *      filename         = NULL;
+static int         compress_percent = 0;
+static int         compress_level   = Z_DEFAULT_COMPRESSION;
+static int         output, random_test = FALSE;
+static int         report_once_flag;
+static double      compression_time;
 
 /* internal functions */
 static void error(const char *fmt, ...);
-static void compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
-                            uLong sourceLen);
+static void compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen);
 
 /* commandline options : long and short form */
-static const char *s_opts = "hB:b:c:p:rs:0123456789";
-static struct long_options l_opts[] = {
-    { "help", no_arg, 'h' },
-    { "compressability", require_arg, 'c' },
-    { "compressabilit", require_arg, 'c' },
-    { "compressabili", require_arg, 'c' },
-    { "compressabil", require_arg, 'c' },
-    { "compressabi", require_arg, 'c' },
-    { "compressab", require_arg, 'c' },
-    { "compressa", require_arg, 'c' },
-    { "compress", require_arg, 'c' },
-    { "compres", require_arg, 'c' },
-    { "compre", require_arg, 'c' },
-    { "compr", require_arg, 'c' },
-    { "comp", require_arg, 'c' },
-    { "com", require_arg, 'c' },
-    { "co", require_arg, 'c' },
-    { "file-size", require_arg, 's' },
-    { "file-siz", require_arg, 's' },
-    { "file-si", require_arg, 's' },
-    { "file-s", require_arg, 's' },
-    { "file", require_arg, 's' },
-    { "fil", require_arg, 's' },
-    { "fi", require_arg, 's' },
-    { "max-buffer-size", require_arg, 'B' },
-    { "max-buffer-siz", require_arg, 'B' },
-    { "max-buffer-si", require_arg, 'B' },
-    { "max-buffer-s", require_arg, 'B' },
-    { "max-buffer", require_arg, 'B' },
-    { "max-buffe", require_arg, 'B' },
-    { "max-buff", require_arg, 'B' },
-    { "max-buf", require_arg, 'B' },
-    { "max-bu", require_arg, 'B' },
-    { "max-b", require_arg, 'B' },
-    { "max", require_arg, 'B' },
-    { "min-buffer-size", require_arg, 'b' },
-    { "min-buffer-siz", require_arg, 'b' },
-    { "min-buffer-si", require_arg, 'b' },
-    { "min-buffer-s", require_arg, 'b' },
-    { "min-buffer", require_arg, 'b' },
-    { "min-buffe", require_arg, 'b' },
-    { "min-buff", require_arg, 'b' },
-    { "min-buf", require_arg, 'b' },
-    { "min-bu", require_arg, 'b' },
-    { "min-b", require_arg, 'b' },
-    { "min", require_arg, 'b' },
-    { "prefix", require_arg, 'p' },
-    { "prefi", require_arg, 'p' },
-    { "pref", require_arg, 'p' },
-    { "pre", require_arg, 'p' },
-    { "pr", require_arg, 'p' },
-    { "random-test", no_arg, 'r' },
-    { "random-tes", no_arg, 'r' },
-    { "random-te", no_arg, 'r' },
-    { "random-t", no_arg, 'r' },
-    { "random", no_arg, 'r' },
-    { "rando", no_arg, 'r' },
-    { "rand", no_arg, 'r' },
-    { "ran", no_arg, 'r' },
-    { "ra", no_arg, 'r' },
-    { NULL, 0, '\0' }
-};
+static const char *        s_opts   = "hB:b:c:p:rs:0123456789";
+static struct long_options l_opts[] = {{"help", no_arg, 'h'},
+                                       {"compressability", require_arg, 'c'},
+                                       {"compressabilit", require_arg, 'c'},
+                                       {"compressabili", require_arg, 'c'},
+                                       {"compressabil", require_arg, 'c'},
+                                       {"compressabi", require_arg, 'c'},
+                                       {"compressab", require_arg, 'c'},
+                                       {"compressa", require_arg, 'c'},
+                                       {"compress", require_arg, 'c'},
+                                       {"compres", require_arg, 'c'},
+                                       {"compre", require_arg, 'c'},
+                                       {"compr", require_arg, 'c'},
+                                       {"comp", require_arg, 'c'},
+                                       {"com", require_arg, 'c'},
+                                       {"co", require_arg, 'c'},
+                                       {"file-size", require_arg, 's'},
+                                       {"file-siz", require_arg, 's'},
+                                       {"file-si", require_arg, 's'},
+                                       {"file-s", require_arg, 's'},
+                                       {"file", require_arg, 's'},
+                                       {"fil", require_arg, 's'},
+                                       {"fi", require_arg, 's'},
+                                       {"max-buffer-size", require_arg, 'B'},
+                                       {"max-buffer-siz", require_arg, 'B'},
+                                       {"max-buffer-si", require_arg, 'B'},
+                                       {"max-buffer-s", require_arg, 'B'},
+                                       {"max-buffer", require_arg, 'B'},
+                                       {"max-buffe", require_arg, 'B'},
+                                       {"max-buff", require_arg, 'B'},
+                                       {"max-buf", require_arg, 'B'},
+                                       {"max-bu", require_arg, 'B'},
+                                       {"max-b", require_arg, 'B'},
+                                       {"max", require_arg, 'B'},
+                                       {"min-buffer-size", require_arg, 'b'},
+                                       {"min-buffer-siz", require_arg, 'b'},
+                                       {"min-buffer-si", require_arg, 'b'},
+                                       {"min-buffer-s", require_arg, 'b'},
+                                       {"min-buffer", require_arg, 'b'},
+                                       {"min-buffe", require_arg, 'b'},
+                                       {"min-buff", require_arg, 'b'},
+                                       {"min-buf", require_arg, 'b'},
+                                       {"min-bu", require_arg, 'b'},
+                                       {"min-b", require_arg, 'b'},
+                                       {"min", require_arg, 'b'},
+                                       {"prefix", require_arg, 'p'},
+                                       {"prefi", require_arg, 'p'},
+                                       {"pref", require_arg, 'p'},
+                                       {"pre", require_arg, 'p'},
+                                       {"pr", require_arg, 'p'},
+                                       {"random-test", no_arg, 'r'},
+                                       {"random-tes", no_arg, 'r'},
+                                       {"random-te", no_arg, 'r'},
+                                       {"random-t", no_arg, 'r'},
+                                       {"random", no_arg, 'r'},
+                                       {"rando", no_arg, 'r'},
+                                       {"rand", no_arg, 'r'},
+                                       {"ran", no_arg, 'r'},
+                                       {"ra", no_arg, 'r'},
+                                       {NULL, 0, '\0'}};
 
 /*
  * Function:    error
@@ -165,14 +163,14 @@ cleanup(void)
 static void
 write_file(Bytef *source, uLongf sourceLen)
 {
-    Bytef *d_ptr, *dest;
-    uLongf d_len, destLen;
+    Bytef *        d_ptr, *dest;
+    uLongf         d_len, destLen;
     struct timeval timer_start, timer_stop;
 
     /* destination buffer needs to be at least 0.1% larger than sourceLen
      * plus 12 bytes */
     destLen = (uLongf)((double)sourceLen + ((double)sourceLen * (double)0.1F)) + 12;
-    dest = (Bytef *)HDmalloc(destLen);
+    dest    = (Bytef *)HDmalloc(destLen);
 
     if (!dest)
         error("out of memory");
@@ -181,10 +179,8 @@ write_file(Bytef *source, uLongf sourceLen)
     compress_buffer(dest, &destLen, source, sourceLen);
     HDgettimeofday(&timer_stop, NULL);
 
-    compression_time += ((double)timer_stop.tv_sec +
-                            ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
-                        ((double)timer_start.tv_sec +
-                            ((double)timer_start.tv_usec) / (double)MICROSECOND);
+    compression_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
+                        ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / (double)MICROSECOND);
 
     if (report_once_flag) {
         HDfprintf(stdout, "\tCompression Ratio: %g\n", ((double)destLen) / (double)sourceLen);
@@ -222,8 +218,7 @@ write_file(Bytef *source, uLongf sourceLen)
  * Modifications:
  */
 static void
-compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
-                uLong sourceLen)
+compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen)
 {
     int rc = compress2(dest, destLen, source, sourceLen, compress_level);
 
@@ -232,18 +227,18 @@ compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
         cleanup();
 
         switch (rc) {
-        case Z_MEM_ERROR:
-            error("not enough memory");
-            break;
-        case Z_BUF_ERROR:
-            error("not enough room in the output buffer");
-            break;
-        case Z_STREAM_ERROR:
-            error("level parameter (%d) is invalid", compress_level);
-            break;
-        default:
-            error("unknown compression error");
-            break;
+            case Z_MEM_ERROR:
+                error("not enough memory");
+                break;
+            case Z_BUF_ERROR:
+                error("not enough room in the output buffer");
+                break;
+            case Z_STREAM_ERROR:
+                error("level parameter (%d) is invalid", compress_level);
+                break;
+            default:
+                error("unknown compression error");
+                break;
         }
     }
 }
@@ -260,8 +255,7 @@ compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
  * Modifications:
  */
 static int
-uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
-                  uLong sourceLen)
+uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen)
 {
     int rc = uncompress(dest, destLen, source, sourceLen);
 
@@ -282,7 +276,7 @@ static void
 get_unique_name(void)
 {
     const char *prefix = NULL;
-    const char *env = HDgetenv("HDF5_PREFIX");
+    const char *env    = HDgetenv("HDF5_PREFIX");
 
     if (env)
         prefix = env;
@@ -292,15 +286,15 @@ get_unique_name(void)
 
     if (prefix)
         /* 2 = 1 for '/' + 1 for null terminator */
-        filename = (char *) HDmalloc(HDstrlen(prefix) + HDstrlen(ZIP_PERF_FILE) + 2);
+        filename = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(ZIP_PERF_FILE) + 2);
     else
-        filename = (char *) HDmalloc(HDstrlen(ZIP_PERF_FILE) + 1);
+        filename = (char *)HDmalloc(HDstrlen(ZIP_PERF_FILE) + 1);
 
     if (!filename)
         error("out of memory");
 
     filename[0] = 0;
-    if (prefix){
+    if (prefix) {
         HDstrcpy(filename, prefix);
         HDstrcat(filename, "/");
     }
@@ -361,7 +355,7 @@ static unsigned long
 parse_size_directive(const char *size)
 {
     unsigned long s;
-    char *endptr;
+    char *        endptr;
 
     s = HDstrtoul(size, &endptr, 10);
 
@@ -395,12 +389,12 @@ static void
 fill_with_random_data(Bytef *src, uLongf src_len)
 {
     register unsigned u;
-    h5_stat_t stat_buf;
+    h5_stat_t         stat_buf;
 
     if (HDstat("/dev/urandom", &stat_buf) == 0) {
         uLongf len = src_len;
         Bytef *buf = src;
-        int fd = HDopen("/dev/urandom", O_RDONLY, 0);
+        int    fd  = HDopen("/dev/urandom", O_RDONLY, 0);
 
         HDfprintf(stdout, "Using /dev/urandom for random data\n");
 
@@ -436,19 +430,18 @@ fill_with_random_data(Bytef *src, uLongf src_len)
 }
 
 static void
-do_write_test(unsigned long file_size, unsigned long min_buf_size,
-              unsigned long max_buf_size)
+do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long max_buf_size)
 {
-    uLongf src_len, total_len;
+    uLongf         src_len, total_len;
     struct timeval timer_start, timer_stop;
-    double total_time;
-    Bytef *src;
+    double         total_time;
+    Bytef *        src;
 
     for (src_len = min_buf_size; src_len <= max_buf_size; src_len <<= 1) {
         register unsigned long i, iters;
 
         iters = file_size / src_len;
-        src = (Bytef *)HDcalloc(1, sizeof(Bytef) * src_len);
+        src   = (Bytef *)HDcalloc(1, sizeof(Bytef) * src_len);
 
         if (!src) {
             cleanup();
@@ -465,10 +458,12 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         if (src_len >= ONE_KB && (src_len % ONE_KB) == 0) {
             if (src_len >= ONE_MB && (src_len % ONE_MB) == 0) {
                 HDfprintf(stdout, "%ldMB", src_len / ONE_MB);
-            } else {
+            }
+            else {
                 HDfprintf(stdout, "%ldKB", src_len / ONE_KB);
             }
-        } else {
+        }
+        else {
             HDfprintf(stdout, "%ld", src_len);
         }
 
@@ -483,7 +478,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
 
         for (i = 0; i <= iters; ++i) {
             Bytef *s_ptr = src;
-            uLong s_len = src_len;
+            uLong  s_len = src_len;
 
             /* loop to make sure we write everything out that we want to write */
             for (;;) {
@@ -503,14 +498,11 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         HDclose(output);
         HDgettimeofday(&timer_stop, NULL);
 
-        total_time = ((double)timer_stop.tv_sec +
-                            ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
-                     ((double)timer_start.tv_sec +
-                            ((double)timer_start.tv_usec) / (double)MICROSECOND);
+        total_time = ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
+                     ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / (double)MICROSECOND);
 
         HDfprintf(stdout, "\tUncompressed Write Time: %.2fs\n", total_time);
-        HDfprintf(stdout, "\tUncompressed Write Throughput: %.2fMB/s\n",
-               MB_PER_SEC(file_size, total_time));
+        HDfprintf(stdout, "\tUncompressed Write Throughput: %.2fMB/s\n", MB_PER_SEC(file_size, total_time));
 
         HDunlink(filename);
 
@@ -529,14 +521,11 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         HDclose(output);
         HDgettimeofday(&timer_stop, NULL);
 
-        total_time = ((double)timer_stop.tv_sec +
-                            ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
-                     ((double)timer_start.tv_sec +
-                            ((double)timer_start.tv_usec) / (double)MICROSECOND);
+        total_time = ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
+                     ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / (double)MICROSECOND);
 
         HDfprintf(stdout, "\tCompressed Write Time: %.2fs\n", total_time);
-        HDfprintf(stdout, "\tCompressed Write Throughput: %.2fMB/s\n",
-               MB_PER_SEC(file_size, total_time));
+        HDfprintf(stdout, "\tCompressed Write Throughput: %.2fMB/s\n", MB_PER_SEC(file_size, total_time));
         HDfprintf(stdout, "\tCompression Time: %gs\n", compression_time);
 
         HDunlink(filename);
@@ -556,7 +545,7 @@ main(int argc, const char *argv[])
 {
     unsigned long min_buf_size = 128 * ONE_KB, max_buf_size = ONE_MB;
     unsigned long file_size = 64 * ONE_MB;
-    int opt;
+    int           opt;
 
     prog = argv[0];
 
@@ -565,51 +554,56 @@ main(int argc, const char *argv[])
 
     while ((opt = get_option(argc, argv, s_opts, l_opts)) > 0) {
         switch ((char)opt) {
-        case '0': case '1': case '2':
-        case '3': case '4': case '5':
-        case '6': case '7': case '8':
-        case '9':
-            compress_level = opt - '0';
-            break;
-        case 'B':
-            max_buf_size = parse_size_directive(opt_arg);
-            break;
-        case 'b':
-            min_buf_size = parse_size_directive(opt_arg);
-            break;
-        case 'c':
-            compress_percent = (int)HDstrtol(opt_arg, NULL, 10);
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                compress_level = opt - '0';
+                break;
+            case 'B':
+                max_buf_size = parse_size_directive(opt_arg);
+                break;
+            case 'b':
+                min_buf_size = parse_size_directive(opt_arg);
+                break;
+            case 'c':
+                compress_percent = (int)HDstrtol(opt_arg, NULL, 10);
 
-            if (compress_percent < 0)
-                compress_percent = 0;
-            else if (compress_percent > 100)
-                compress_percent = 100;
+                if (compress_percent < 0)
+                    compress_percent = 0;
+                else if (compress_percent > 100)
+                    compress_percent = 100;
 
-            break;
-        case 'p':
-            option_prefix = opt_arg;
-            break;
-        case 'r':
-            random_test = TRUE;
-            break;
-        case 's':
-            file_size = parse_size_directive(opt_arg);
-            break;
-        case '?':
-            usage();
-            exit(EXIT_FAILURE);
-            break;
-        case 'h':
-        default:
-            usage();
-            exit(EXIT_SUCCESS);
-            break;
+                break;
+            case 'p':
+                option_prefix = opt_arg;
+                break;
+            case 'r':
+                random_test = TRUE;
+                break;
+            case 's':
+                file_size = parse_size_directive(opt_arg);
+                break;
+            case '?':
+                usage();
+                exit(EXIT_FAILURE);
+                break;
+            case 'h':
+            default:
+                usage();
+                exit(EXIT_SUCCESS);
+                break;
         }
     }
 
     if (min_buf_size > max_buf_size)
-        error("minmum buffer size (%d) exceeds maximum buffer size (%d)",
-              min_buf_size, max_buf_size);
+        error("minmum buffer size (%d) exceeds maximum buffer size (%d)", min_buf_size, max_buf_size);
 
     HDfprintf(stdout, "Filesize: %ld\n", file_size);
 
@@ -641,4 +635,4 @@ main(void)
     return EXIT_SUCCESS;
 }
 
-#endif  /* !H5_HAVE_FILTER_DEFLATE */
+#endif /* !H5_HAVE_FILTER_DEFLATE */
