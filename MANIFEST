@@ -983,8 +983,6 @@
 ./src/H5SMpkg.h
 ./src/H5SMprivate.h
 ./src/H5SMtest.c
-./src/H5ST.c
-./src/H5STprivate.h
 ./src/H5T.c
 ./src/H5Tarray.c
 ./src/H5Tbit.c
@@ -1297,7 +1295,6 @@
 ./test/ttsafe_cancel.c
 ./test/ttsafe_dcreate.c
 ./test/ttsafe_error.c
-./test/ttst.c
 ./test/tunicode.c
 ./test/tvlstr.c
 ./test/tvltypes.c
