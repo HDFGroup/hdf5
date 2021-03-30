@@ -1467,7 +1467,7 @@ H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xiIu*Mt*a*zx", file, dxpl_id, count, types, addrs, sizes, bufs);
+    H5TRACE7("e", "*#iIu*Mt*a*zx", file, dxpl_id, count, types, addrs, sizes, bufs);
 
     /* Check arguments */
     if (!file)
@@ -1543,12 +1543,12 @@ done:
  */
 herr_t
 H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
-                 size_t sizes[], void *bufs[] /* in */)
+                 size_t sizes[], const void *bufs[] /* in */)
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xiIu*Mt*a*z**x", file, dxpl_id, count, types, addrs, sizes, bufs);
+    H5TRACE7("e", "*#iIu*Mt*a*z**x", file, dxpl_id, count, types, addrs, sizes, bufs);
 
     /* Check arguments */
     if (!file)
