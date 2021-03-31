@@ -646,16 +646,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
-              H5S_t *mem_spaces[], H5S_t *file_spaces[], haddr_t offsets[],
-              size_t element_sizes[], void *bufs[] /* out */)
+H5FD_read_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type, H5S_t *mem_spaces[], H5S_t *file_spaces[],
+                    haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */)
 {
-    hbool_t    offsets_cooked = FALSE;
-    hbool_t    extend_sizes = FALSE;
-    uint32_t   i;
-    size_t     element_size;
-    hid_t      dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
-    herr_t     ret_value = SUCCEED;         /* Return value */
+    hbool_t  offsets_cooked = FALSE;
+    hbool_t  extend_sizes   = FALSE;
+    uint32_t i;
+    size_t   element_size;
+    hid_t    dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
+    herr_t   ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -710,38 +709,38 @@ H5FD_read_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
     if (!(file->access_flags & H5F_ACC_SWMR_READ)) {
         haddr_t eoa;
 
-        if(HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
+        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
 
         for (i = 0; i < count; i++) {
 
             if ((offsets[i]) > eoa)
 
-                HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
-                            "addr overflow, offsets[%d] = %llu, eoa = %llu", (int)i,
-                            (unsigned long long)(offsets[i]),
-                            (unsigned long long)eoa)
+                HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
+                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa)
         }
     }
 
     /* if the underlying VFD supports selection read, make the call */
     /*if (file->cls->read_selection) {
 
-        if ((file->cls->read_selection)(file, count, type, mem_spaces, file_spaces, offsets, element_sizes, bufs) < 0)
+        if ((file->cls->read_selection)(file, count, type, mem_spaces, file_spaces, offsets, element_sizes,
+    bufs) < 0)
 
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed")
     }
-    else*/ {
-        hsize_t     file_off[H5FD_SEQ_LIST_LEN];
-        size_t      file_len[H5FD_SEQ_LIST_LEN];
-        hsize_t     mem_off[H5FD_SEQ_LIST_LEN];
-        size_t      mem_len[H5FD_SEQ_LIST_LEN];
-        size_t      file_seq_i;
-        size_t      mem_seq_i;
-        size_t      file_nseq;
-        size_t      mem_nseq;
-        size_t      io_len;
-        size_t      dummy_nelem;
+    else*/
+    {
+        hsize_t        file_off[H5FD_SEQ_LIST_LEN];
+        size_t         file_len[H5FD_SEQ_LIST_LEN];
+        hsize_t        mem_off[H5FD_SEQ_LIST_LEN];
+        size_t         mem_len[H5FD_SEQ_LIST_LEN];
+        size_t         file_seq_i;
+        size_t         mem_seq_i;
+        size_t         file_nseq;
+        size_t         mem_nseq;
+        size_t         io_len;
+        size_t         dummy_nelem;
         H5S_sel_iter_t file_iter;
         H5S_sel_iter_t mem_iter;
 
@@ -777,15 +776,16 @@ H5FD_read_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
 
             /* Fill sequence lists */
             if (H5S_SELECT_ITER_GET_SEQ_LIST(&file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
-                &dummy_nelem, file_off, file_len) < 0)
+                                             &dummy_nelem, file_off, file_len) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-            if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq,
-                &dummy_nelem, mem_off, mem_len) < 0)
+            if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq, &dummy_nelem,
+                                             mem_off, mem_len) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-            if(file_nseq && !mem_nseq)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "memory selection is empty but file selection is not")
+            if (file_nseq && !mem_nseq)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                            "memory selection is empty but file selection is not")
             file_seq_i = 0;
-            mem_seq_i = 0;
+            mem_seq_i  = 0;
 
             while (file_seq_i < file_nseq) {
                 /* Calculate length of this IO */
@@ -793,11 +793,11 @@ H5FD_read_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
 
                 /* Issue scalar read call */
                 if ((file->cls->read)(file, type, dxpl_id, file_off[file_seq_i], io_len,
-                    (void *)(((uint8_t *)bufs[i]) + mem_off[mem_seq_i])) < 0)
+                                      (void *)(((uint8_t *)bufs[i]) + mem_off[mem_seq_i])) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
 
                 /* Update file sequence */
-                if(io_len == file_len[file_seq_i])
+                if (io_len == file_len[file_seq_i])
                     file_seq_i++;
                 else {
                     file_off[file_seq_i] += io_len;
@@ -805,7 +805,7 @@ H5FD_read_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
                 }
 
                 /* Update memory sequence */
-                if(io_len == mem_len[mem_seq_i])
+                if (io_len == mem_len[mem_seq_i])
                     mem_seq_i++;
                 else {
                     mem_off[mem_seq_i] += io_len;
@@ -815,29 +815,31 @@ H5FD_read_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
                 /* Refill file sequence list if necessary */
                 if (file_seq_i == H5FD_SEQ_LIST_LEN) {
                     if (H5S_SELECT_ITER_GET_SEQ_LIST(&file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
-                        &dummy_nelem, file_off, file_len) < 0)
+                                                     &dummy_nelem, file_off, file_len) < 0)
                         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
                     file_seq_i = 0;
                 }
-                HDassert (file_seq_i <= file_nseq);
+                HDassert(file_seq_i <= file_nseq);
 
                 /* Refill memory sequence list if necessary */
                 if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
                     if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq,
-                        &dummy_nelem, mem_off, mem_len) < 0)
+                                                     &dummy_nelem, mem_off, mem_len) < 0)
                         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
-                    if(!mem_nseq && file_seq_i < file_nseq)
-                        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "memory selection terminated before file selection")
+                    if (!mem_nseq && file_seq_i < file_nseq)
+                        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                                    "memory selection terminated before file selection")
 
                     mem_seq_i = 0;
                 }
-                HDassert (mem_seq_i <= mem_nseq);
+                HDassert(mem_seq_i <= mem_nseq);
             }
 
             if (mem_seq_i < mem_nseq)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "file selection terminated before memory selection")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                            "file selection terminated before memory selection")
 
             /* Terminate iterators */
             if (H5S_SELECT_ITER_RELEASE(&file_iter) < 0)
@@ -901,16 +903,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
-              H5S_t *mem_spaces[], H5S_t *file_spaces[], haddr_t offsets[],
-              size_t element_sizes[], const void *bufs[] /* out */)
+H5FD_write_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type, H5S_t *mem_spaces[], H5S_t *file_spaces[],
+                     haddr_t offsets[], size_t element_sizes[], const void *bufs[] /* out */)
 {
-    hbool_t    offsets_cooked = FALSE;
-    hbool_t    extend_sizes = FALSE;
-    uint32_t   i;
-    size_t     element_size;
-    hid_t      dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
-    herr_t     ret_value = SUCCEED;         /* Return value */
+    hbool_t  offsets_cooked = FALSE;
+    hbool_t  extend_sizes   = FALSE;
+    uint32_t i;
+    size_t   element_size;
+    hid_t    dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
+    herr_t   ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -959,38 +960,38 @@ H5FD_write_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
     {
         haddr_t eoa;
 
-        if(HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
+        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
 
         for (i = 0; i < count; i++) {
 
             if ((offsets[i]) > eoa)
 
-                HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
-                            "addr overflow, offsets[%d] = %llu, eoa = %llu", (int)i,
-                            (unsigned long long)(offsets[i]),
-                            (unsigned long long)eoa)
+                HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
+                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa)
         }
     }
 
     /* if the underlying VFD supports selection write, make the call */
     /*if (file->cls->write_selection) {
 
-        if ((file->cls->write_selection)(file, count, type, mem_spaces, file_spaces, offsets, element_sizes, bufs) < 0)
+        if ((file->cls->write_selection)(file, count, type, mem_spaces, file_spaces, offsets, element_sizes,
+    bufs) < 0)
 
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed")
     }
-    else*/ {
-        hsize_t     file_off[H5FD_SEQ_LIST_LEN];
-        size_t      file_len[H5FD_SEQ_LIST_LEN];
-        hsize_t     mem_off[H5FD_SEQ_LIST_LEN];
-        size_t      mem_len[H5FD_SEQ_LIST_LEN];
-        size_t      file_seq_i;
-        size_t      mem_seq_i;
-        size_t      file_nseq;
-        size_t      mem_nseq;
-        size_t      io_len;
-        size_t      dummy_nelem;
+    else*/
+    {
+        hsize_t        file_off[H5FD_SEQ_LIST_LEN];
+        size_t         file_len[H5FD_SEQ_LIST_LEN];
+        hsize_t        mem_off[H5FD_SEQ_LIST_LEN];
+        size_t         mem_len[H5FD_SEQ_LIST_LEN];
+        size_t         file_seq_i;
+        size_t         mem_seq_i;
+        size_t         file_nseq;
+        size_t         mem_nseq;
+        size_t         io_len;
+        size_t         dummy_nelem;
         H5S_sel_iter_t file_iter;
         H5S_sel_iter_t mem_iter;
 
@@ -1026,15 +1027,16 @@ H5FD_write_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
 
             /* Fill sequence lists */
             if (H5S_SELECT_ITER_GET_SEQ_LIST(&file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
-                &dummy_nelem, file_off, file_len) < 0)
+                                             &dummy_nelem, file_off, file_len) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-            if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq,
-                &dummy_nelem, mem_off, mem_len) < 0)
+            if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq, &dummy_nelem,
+                                             mem_off, mem_len) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-            if(file_nseq && !mem_nseq)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "memory selection is empty but file selection is not")
+            if (file_nseq && !mem_nseq)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                            "memory selection is empty but file selection is not")
             file_seq_i = 0;
-            mem_seq_i = 0;
+            mem_seq_i  = 0;
 
             while (file_seq_i < file_nseq) {
                 /* Calculate length of this IO */
@@ -1042,11 +1044,11 @@ H5FD_write_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
 
                 /* Issue scalar write call */
                 if ((file->cls->write)(file, type, dxpl_id, file_off[file_seq_i], io_len,
-                    (const void *)(((const uint8_t *)bufs[i]) + mem_off[mem_seq_i])) < 0)
+                                       (const void *)(((const uint8_t *)bufs[i]) + mem_off[mem_seq_i])) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
 
                 /* Update file sequence */
-                if(io_len == file_len[file_seq_i])
+                if (io_len == file_len[file_seq_i])
                     file_seq_i++;
                 else {
                     file_off[file_seq_i] += io_len;
@@ -1054,7 +1056,7 @@ H5FD_write_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
                 }
 
                 /* Update memory sequence */
-                if(io_len == mem_len[mem_seq_i])
+                if (io_len == mem_len[mem_seq_i])
                     mem_seq_i++;
                 else {
                     mem_off[mem_seq_i] += io_len;
@@ -1064,29 +1066,31 @@ H5FD_write_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type,
                 /* Refill file sequence list if necessary */
                 if (file_seq_i == H5FD_SEQ_LIST_LEN) {
                     if (H5S_SELECT_ITER_GET_SEQ_LIST(&file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
-                        &dummy_nelem, file_off, file_len) < 0)
+                                                     &dummy_nelem, file_off, file_len) < 0)
                         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
                     file_seq_i = 0;
                 }
-                HDassert (file_seq_i <= file_nseq);
+                HDassert(file_seq_i <= file_nseq);
 
                 /* Refill memory sequence list if necessary */
                 if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
                     if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq,
-                        &dummy_nelem, mem_off, mem_len) < 0)
+                                                     &dummy_nelem, mem_off, mem_len) < 0)
                         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
-                    if(!mem_nseq && file_seq_i < file_nseq)
-                        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "memory selection terminated before file selection")
+                    if (!mem_nseq && file_seq_i < file_nseq)
+                        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                                    "memory selection terminated before file selection")
 
                     mem_seq_i = 0;
                 }
-                HDassert (mem_seq_i <= mem_nseq);
+                HDassert(mem_seq_i <= mem_nseq);
             }
 
             if (mem_seq_i < mem_nseq)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "file selection terminated before memory selection")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                            "file selection terminated before memory selection")
 
             /* Terminate iterators */
             if (H5S_SELECT_ITER_RELEASE(&file_iter) < 0)
