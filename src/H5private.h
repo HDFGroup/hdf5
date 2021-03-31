@@ -187,23 +187,6 @@
 
 #endif /*H5_HAVE_WIN32_API*/
 
-/* Various ways that inline functions can be declared */
-#if defined(H5_HAVE___INLINE__)
-/* GNU (alternative form) */
-#define H5_INLINE __inline__
-#elif defined(H5_HAVE___INLINE)
-/* Visual Studio */
-#define H5_INLINE __inline
-#elif defined(H5_HAVE_INLINE)
-/* GNU, C++
- * Use "inline" as a last resort on the off-chance that there will
- * be C++ problems.
- */
-#define H5_INLINE inline
-#else
-#define H5_INLINE
-#endif /* inline choices */
-
 #ifndef F_OK
 #define F_OK 00
 #define W_OK 02
