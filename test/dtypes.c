@@ -1485,7 +1485,7 @@ test_compound_8(void)
     struct s2 {
         char c;
         s1   d;
-    } s2;
+    };
     hid_t   tid1, tid1_copy, tid2, tid2_copy, tid3, arr_tid;
     size_t  tsize;
     hsize_t dims[1] = {ARRAY_DIM};
