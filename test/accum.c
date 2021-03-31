@@ -2085,9 +2085,9 @@ unsigned
 test_swmr_write_big(hbool_t newest_format)
 {
 
-    hid_t    fid  = -1;   /* File ID */
-    hid_t    fapl = -1;   /* File access property list */
-    H5F_t *  rf   = NULL; /* File pointer */
+    hid_t    fid   = -1;                 /* File ID */
+    hid_t    fapl  = -1;                 /* File access property list */
+    H5F_t *  rf    = NULL;               /* File pointer */
     uint8_t *wbuf2 = NULL, *rbuf = NULL; /* Buffers for reading & writing */
     uint8_t  wbuf[1024];                 /* Buffer for reading & writing */
     unsigned u;                          /* Local index variable */
@@ -2107,7 +2107,7 @@ test_swmr_write_big(hbool_t newest_format)
     HDputs("    Test skipped: Not a Windows or POSIX system.");
     return 0;
 
-#else   
+#else
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
