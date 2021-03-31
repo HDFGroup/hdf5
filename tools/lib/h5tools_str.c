@@ -439,7 +439,10 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
     /*
      * This function fails if the rspace does not have blocks.
      */
-    H5E_BEGIN_TRY { snblocks = H5Sget_select_hyper_nblocks(rspace); }
+    H5E_BEGIN_TRY
+    {
+        snblocks = H5Sget_select_hyper_nblocks(rspace);
+    }
     H5E_END_TRY;
 
     /* Print block information */
@@ -496,7 +499,10 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
     /*
      * This function fails if the rspace does not have points.
      */
-    H5E_BEGIN_TRY { snpoints = H5Sget_select_elem_npoints(rspace); }
+    H5E_BEGIN_TRY
+    {
+        snpoints = H5Sget_select_elem_npoints(rspace);
+    }
     H5E_END_TRY;
 
     /* Print point information */
@@ -707,6 +713,15 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     HDmemcpy(&templdouble, vp, sizeof(long double));
                     h5tools_str_append(str, "%Lg", templdouble);
 #endif
+                }
+                else {
+                    size_t i;
+
+                    for (i = 0; i < nsize; i++) {
+                        if (i)
+                            h5tools_str_append(str, ":");
+                        h5tools_str_append(str, OPT(info->fmt_raw, "%02x"), ucp_vp[i]);
+                    }
                 }
                 break;
 

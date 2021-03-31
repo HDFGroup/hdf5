@@ -27,7 +27,7 @@
 #define F_FORMAT "%-15g %-15g %-15g\n"
 
 #if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT "%-15Lf %-15Lf %-15Lf\n"
+#define LD_FORMAT "%-15Lg %-15Lg %-15Lg\n"
 #endif
 
 #define I_FORMAT    "%-15d %-15d %-15d\n"
@@ -42,7 +42,7 @@
 #define F_FORMAT_P "%-15.10g %-15.10g %-15.10g %-14.10g\n"
 
 #if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT_P "%-15.10Lf %-15.10Lf %-15.10Lf %-14.10Lf\n"
+#define LD_FORMAT_P "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
 #endif
 
 #define I_FORMAT_P   "%-15d %-15d %-15d %-14f\n"
@@ -59,7 +59,7 @@
 #define F_FORMAT_P_NOTCOMP "%-15.10g %-15.10g %-15.10g not comparable\n"
 
 #if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT_P_NOTCOMP "%-15.10Lf %-15.10Lf %-15.10Lf not comparable\n"
+#define LD_FORMAT_P_NOTCOMP "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
 #endif
 
 #define I_FORMAT_P_NOTCOMP   "%-15d %-15d %-15d not comparable\n"
@@ -2908,7 +2908,10 @@ ull2float(unsigned long long ull_value, float *f_value)
     HDmemcpy(f_value, buf, dst_size);
 
 done:
-    H5E_BEGIN_TRY { H5Pclose(dxpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
     H5E_END_TRY;
 
     if (buf)

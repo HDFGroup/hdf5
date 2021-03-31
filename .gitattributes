@@ -783,6 +783,7 @@ tools/testfiles/tints4dimsStride2.ddl -text
 tools/testfiles/tintsattrs.h5 -text svneol=unset#application/x-hdf
 tools/testfiles/tlarge_objname.h5 -text
 tools/testfiles/tldouble.h5 -text
+tools/testfiles/tldouble_scalar.h5 -text
 tools/testfiles/tlonglinks.h5 -text
 tools/testfiles/tloop.h5 -text
 tools/testfiles/tloop2.h5 -text
