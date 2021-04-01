@@ -204,7 +204,6 @@
 ./config/site-specific/BlankForm
 
 ./doc/branches-explained.md
-./doc/code-conventions.md
 ./doc/contributing.md
 
 ./doxygen/aliases
