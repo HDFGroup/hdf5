@@ -1050,7 +1050,7 @@ test_heap_term(void)
         HDfree(inc_sort_num);
     if (dec_sort_num)
         HDfree(dec_sort_num);
-} /* end test_tst_term() */
+} /* end test_heap_term() */
 
 /****************************************************************
 **
