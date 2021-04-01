@@ -148,7 +148,10 @@ test_1(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     if (obj)
         HDfree(obj);
@@ -245,7 +248,10 @@ test_2(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     if (obj)
         HDfree(obj);
@@ -332,7 +338,10 @@ test_3(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     if (obj)
         HDfree(obj);
@@ -425,7 +434,10 @@ test_4(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     if (obj)
         HDfree(obj);
@@ -541,7 +553,10 @@ test_ooo_indices(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     if (obj)
         HDfree(obj);
@@ -596,7 +611,10 @@ main(void)
     HDexit(EXIT_SUCCESS);
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
     H5E_END_TRY;
 
     if (api_ctx_pushed)

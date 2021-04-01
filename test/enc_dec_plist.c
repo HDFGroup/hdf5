@@ -54,7 +54,10 @@ error:
     if (temp_buf)
         HDfree(temp_buf);
 
-    H5E_BEGIN_TRY { H5Pclose(pl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(pl);
+    }
     H5E_END_TRY;
 
     return (-1);

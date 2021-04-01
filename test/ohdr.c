@@ -295,7 +295,10 @@ test_ohdr_cache(char *filename, hid_t fapl)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
 
     return FAIL;
@@ -548,7 +551,10 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     TESTING("object in r/o file with unknown header message & 'fail if unknown always' flag set");
 
     /* Attempt to open the dataset with the unknown header message, and "fail if unknown always" flag */
-    H5E_BEGIN_TRY { did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (did >= 0) {
         H5Dclose(did);
@@ -712,7 +718,10 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Attempt to open the dataset with the unknown header message, and "fail if unknown and open for write"
      * flag */
-    H5E_BEGIN_TRY { did = H5Dopen2(loc_bogus, "Dataset2", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(loc_bogus, "Dataset2", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (did >= 0) {
         H5Dclose(did);
@@ -724,7 +733,10 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     TESTING("object in r/w file with unknown header message & 'fail if unknown always' flag set");
 
     /* Attempt to open the dataset with the unknown header message, and "fail if unknown always" flag */
-    H5E_BEGIN_TRY { did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (did >= 0) {
         H5Dclose(did);
@@ -1773,7 +1785,10 @@ main(void)
             char        msg[80];     /* Message for file format version */
 
             /* Set version bounds before opening the file */
-            H5E_BEGIN_TRY { ret = H5Pset_libver_bounds(fapl, low, high); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5Pset_libver_bounds(fapl, low, high);
+            }
             H5E_END_TRY;
 
             if (ret < 0) /* Invalid low/high combinations */
@@ -1966,7 +1981,10 @@ main(void)
             if (ro != time_new)
                 TEST_ERROR
             time_new = 33333333;
-            H5E_BEGIN_TRY { ret = H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new);
+            }
             H5E_END_TRY;
             if (ret >= 0)
                 TEST_ERROR
@@ -2049,7 +2067,10 @@ main(void)
 
 error:
     HDputs("*** TESTS FAILED ***");
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
 
     if (api_ctx_pushed)

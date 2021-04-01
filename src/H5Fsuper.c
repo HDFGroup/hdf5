@@ -385,7 +385,10 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 
             /* Try detecting file's siganture */
             /* (Don't leave before Bcast, to avoid hang on error) */
-            H5E_BEGIN_TRY { status = H5FD_locate_signature(file, &super_addr); }
+            H5E_BEGIN_TRY
+            {
+                status = H5FD_locate_signature(file, &super_addr);
+            }
             H5E_END_TRY;
 
             /* Set superblock address to undefined on error */
