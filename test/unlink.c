@@ -117,7 +117,10 @@ test_one(hid_t file)
     TESTING("unlink without a name");
     if ((grp = H5Gcreate2(work, "foo", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { status = H5Ldelete(grp, ".", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Ldelete(grp, ".", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0)
         FAIL_PUTS_ERROR("    Unlinking object w/o a name should have failed.")
@@ -287,7 +290,10 @@ test_symlink(hid_t file)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Gclose(work); }
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(work);
+    }
     H5E_END_TRY;
     return 1;
 } /* end test_symlink() */
@@ -1285,7 +1291,10 @@ test_filespace(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create another group with same name */
-    H5E_BEGIN_TRY { group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (group >= 0) {
         H5Gclose(group);
@@ -1332,7 +1341,10 @@ test_filespace(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create another named datatype with same name */
-    H5E_BEGIN_TRY { status = H5Tcommit2(file, TYPENAME, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Tcommit2(file, TYPENAME, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0)
         TEST_ERROR
@@ -1786,12 +1798,18 @@ error:
         /* Close any open groups */
         for (n = 0; n < ngroups; n++)
             if (gids[n]) {
-                H5E_BEGIN_TRY { H5Gclose(gids[n]); }
+                H5E_BEGIN_TRY
+                {
+                    H5Gclose(gids[n]);
+                }
                 H5E_END_TRY;
             } /* end if */
         HDfree(gids);
     } /* end if */
-    H5E_BEGIN_TRY { H5Gclose(rootid); }
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(rootid);
+    }
     H5E_END_TRY;
 
     return 1;
@@ -1872,12 +1890,18 @@ error:
         /* Close any open groups */
         for (n = 0; n < ngroups; n++)
             if (gids[n]) {
-                H5E_BEGIN_TRY { H5Gclose(gids[n]); }
+                H5E_BEGIN_TRY
+                {
+                    H5Gclose(gids[n]);
+                }
                 H5E_END_TRY;
             } /* end if */
         HDfree(gids);
     } /* end if */
-    H5E_BEGIN_TRY { H5Gclose(rootid); }
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(rootid);
+    }
     H5E_END_TRY;
 
     return 1;
@@ -2244,12 +2268,18 @@ error:
         /* Close any open groups */
         for (n = 0; n < ngroups; n++)
             if (gids[n]) {
-                H5E_BEGIN_TRY { H5Gclose(gids[n]); }
+                H5E_BEGIN_TRY
+                {
+                    H5Gclose(gids[n]);
+                }
                 H5E_END_TRY;
             } /* end if */
         HDfree(gids);
     } /* end if */
-    H5E_BEGIN_TRY { H5Gclose(rootid); }
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(rootid);
+    }
     H5E_END_TRY;
 
     return 1;

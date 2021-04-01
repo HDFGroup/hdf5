@@ -162,7 +162,10 @@ test_metadata_read_attempts(hid_t in_fapl)
         TEST_ERROR
 
     /* Set the # of read attempts to 0--should fail */
-    H5E_BEGIN_TRY { ret = H5Pset_metadata_read_attempts(fapl, 0); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_metadata_read_attempts(fapl, 0);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1648,7 +1651,10 @@ test_start_swmr_write(hid_t in_fapl, hbool_t new_format)
 
     /* Should fail to enable SWMR for non-latest-format */
     /* Should succeed in enabling SWMR for latest format */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (new_format) {
         if (ret < 0)
@@ -1973,7 +1979,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl);
 
     /* Should fail to enable SWMR writing when the file is already in SWMR writing mode */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1996,7 +2005,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
             FAIL_STACK_ERROR;
 
         /* Should fail to enable SWMR writing when there is an opened named datatype */
-        H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Fstart_swmr_write(fid);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -2020,7 +2032,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
             TEST_ERROR
 
         /* Should fail to enable SWMR writing because the file's superblock version is not at least 3 */
-        H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Fstart_swmr_write(fid);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -2046,7 +2061,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is already in SWMR writing mode */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2062,7 +2080,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is opened with read only access */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2078,7 +2099,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is opened with SWMR read access only */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2108,7 +2132,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when there are opened named datatype and attribute */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2118,7 +2145,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Still fail to enable SWMR writing when the attribute is still opened */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2163,7 +2193,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail for a second call to enable SWMR writing mode */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2187,7 +2220,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing mode for fid2 */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2213,7 +2249,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to enable SWMR writing for fid2 */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2240,7 +2279,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
 
         /* Should fail to open the file with SWMR write + latest format due to superblock version not at least
          * 3 */
-        H5E_BEGIN_TRY { bad_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, new_fapl); }
+        H5E_BEGIN_TRY
+        {
+            bad_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, new_fapl);
+        }
         H5E_END_TRY;
         if (bad_fid >= 0)
             TEST_ERROR
@@ -2249,7 +2291,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
 
         /* Should fail to open the file with SWMR write + non-latest-format due to superblock version not at
          * least 3 */
-        H5E_BEGIN_TRY { bad_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            bad_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
         if (bad_fid >= 0)
             TEST_ERROR
@@ -2261,7 +2306,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
             FAIL_STACK_ERROR;
 
         /* Should fail to enable SWMR writing due to superblock version not at least 3 */
-        H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Fstart_swmr_write(fid);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -2276,7 +2324,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
             FAIL_STACK_ERROR;
 
         /* Should fail to enable SWMR writing because the file's superblock version is not at least 3 */
-        H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Fstart_swmr_write(fid);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -2731,7 +2782,10 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
 
         /* Should fail in opening the test file */
-        H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl); }
+        H5E_BEGIN_TRY
+        {
+            fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+        }
         H5E_END_TRY;
         if (fid >= 0)
             HDexit(EXIT_FAILURE);
@@ -2804,7 +2858,10 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
 
         /* Should fail in opening the test file */
-        H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+        H5E_BEGIN_TRY
+        {
+            fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+        }
         H5E_END_TRY;
         if (fid >= 0)
             HDexit(EXIT_FAILURE);
@@ -2881,7 +2938,10 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
 
         /* Should fail in opening the test file */
-        H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
         if (fid >= 0)
             HDexit(EXIT_FAILURE);
@@ -3169,7 +3229,10 @@ test_object_flush_cb(hid_t in_fapl)
      *  To verify the failure condition in setting object flush property
      */
     /* Should fail if the callback function is not defined but user data is defined */
-    H5E_BEGIN_TRY { ret = H5Pset_object_flush_cb(fapl, NULL, &flush_ct); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_object_flush_cb(fapl, NULL, &flush_ct);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3470,19 +3533,28 @@ test_append_flush_generic(void)
         FAIL_STACK_ERROR
 
     /* Invalid dataset rank: zero value */
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, 0, NULL, NULL, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, 0, NULL, NULL, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
 
     /* Invalid dataset rank: > H5S_MAX_RANK */
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, H5S_MAX_RANK + 1, NULL, NULL, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, H5S_MAX_RANK + 1, NULL, NULL, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
 
     /* No boundary specified */
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, 2, NULL, NULL, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, 2, NULL, NULL, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3492,7 +3564,10 @@ test_append_flush_generic(void)
     boundary[1] = 1;
 
     /* Undefined callback function but defined user data */
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, 2, boundary, NULL, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, 2, boundary, NULL, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3500,7 +3575,10 @@ test_append_flush_generic(void)
     /* Invalid boundary size: negative value */
     boundary[0] = (hsize_t)-1;
     boundary[1] = 1;
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3508,7 +3586,10 @@ test_append_flush_generic(void)
     /* Invalid boundary size: H5S_UNLIMITED */
     boundary[0] = 1;
     boundary[1] = H5S_UNLIMITED;
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3551,7 +3632,10 @@ test_append_flush_generic(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(dapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dapl);
+    }
     H5E_END_TRY;
 
     return -1;
@@ -3669,7 +3753,10 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should fail to Create the dataset */
-    H5E_BEGIN_TRY { did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl); }
+    H5E_BEGIN_TRY
+    {
+        did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
+    }
     H5E_END_TRY;
     if (did2 >= 0)
         TEST_ERROR
@@ -3680,7 +3767,10 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should fail to create the dataset */
-    H5E_BEGIN_TRY { did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl); }
+    H5E_BEGIN_TRY
+    {
+        did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
+    }
     H5E_END_TRY;
     if (did2 >= 0)
         TEST_ERROR
@@ -3692,7 +3782,10 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Should fail to open the dataset */
-    H5E_BEGIN_TRY { did2 = H5Dopen2(fid, "dataset2", dapl); }
+    H5E_BEGIN_TRY
+    {
+        did2 = H5Dopen2(fid, "dataset2", dapl);
+    }
     H5E_END_TRY;
     if (did2 >= 0)
         TEST_ERROR
@@ -4331,7 +4424,10 @@ test_file_lock_same(hid_t in_fapl)
         TEST_ERROR
 
     /* Open file with RDWR should fail */
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4437,7 +4533,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     /*
      * Case a: RDWR|SWRM_READ : should fail
      */
-    H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_READ, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_READ, fapl);
+    }
     H5E_END_TRY;
     if (fid >= 0)
         TEST_ERROR
@@ -4445,7 +4544,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     /*
      * Case b: RDWR|SWMM_WRTE|SWMR_READ : should fail
      */
-    H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ, fapl);
+    }
     H5E_END_TRY;
     if (fid >= 0)
         TEST_ERROR
@@ -4453,7 +4555,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     /*
      * Case c: RDONLY|SWMM_WRITE : should fail
      */
-    H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE, fapl);
+    }
     H5E_END_TRY;
     if (fid >= 0)
         TEST_ERROR
@@ -4461,7 +4566,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     /*
      * Case d: RDONLY|SWMM_WRITE|SWMR_READ : should fail
      */
-    H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ, fapl);
+    }
     H5E_END_TRY;
     if (fid >= 0)
         TEST_ERROR
@@ -4476,7 +4584,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4569,7 +4680,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4584,7 +4698,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4631,7 +4748,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4646,7 +4766,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4757,7 +4880,10 @@ test_file_lock_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -4831,7 +4957,10 @@ test_file_lock_concur(hid_t in_fapl)
         }
 
         /* Opens the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -4906,7 +5035,10 @@ test_file_lock_concur(hid_t in_fapl)
         }
 
         /* Opens the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -4981,7 +5113,10 @@ test_file_lock_concur(hid_t in_fapl)
         }
 
         /* Opens the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+        }
         H5E_END_TRY;
 
         /* Should succeed */
@@ -5142,7 +5277,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5217,7 +5355,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5292,7 +5433,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5366,7 +5510,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5440,7 +5587,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+        }
         H5E_END_TRY;
 
         /* Should succeed */
@@ -5517,7 +5667,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5592,7 +5745,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5667,7 +5823,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5742,7 +5901,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+        }
         H5E_END_TRY;
 
         /* Should succeed */
@@ -5898,7 +6060,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5973,7 +6138,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+        }
         H5E_END_TRY;
 
         /* Should succeed */
@@ -6280,7 +6448,10 @@ test_different_lock_flags(hid_t in_fapl)
         TEST_ERROR
 
     /* Open the test file with different flags (should FAIL) */
-    H5E_BEGIN_TRY { fid3 = H5Fopen(filename, H5F_ACC_RDWR, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        fid3 = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+    }
     H5E_END_TRY;
     if (H5I_INVALID_HID != fid3)
         FAIL_PUTS_ERROR("Should not have been able to open a file with different locking flags")
@@ -6348,7 +6519,10 @@ test_swmr_vfd_flag(void)
 
     fid = -1;
     h5_fixname(FILENAME[0], bad_fapl, filename, sizeof(filename));
-    H5E_BEGIN_TRY { fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, bad_fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, bad_fapl);
+    }
     H5E_END_TRY;
     if (fid >= 0)
         TEST_ERROR;

@@ -45,7 +45,9 @@ using std::endl;
 ///\brief       Default constructor: creates a stub H5File object.
 // December 2000
 //--------------------------------------------------------------------------
-H5File::H5File() : Group(), id(H5I_INVALID_HID) {}
+H5File::H5File() : Group(), id(H5I_INVALID_HID)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    H5File overloaded constructor

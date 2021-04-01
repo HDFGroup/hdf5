@@ -40,14 +40,18 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub integer datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType::IntType() {}
+IntType::IntType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    IntType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType::IntType(const IntType &original) : AtomType(original) {}
+IntType::IntType(const IntType &original) : AtomType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    IntType overloaded constructor
@@ -70,7 +74,9 @@ IntType::IntType(const PredType &pred_type) : AtomType()
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType::IntType(const hid_t existing_id) : AtomType(existing_id) {}
+IntType::IntType(const hid_t existing_id) : AtomType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    IntType overloaded constructor
@@ -192,6 +198,8 @@ IntType::setSign(H5T_sign_t sign) const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType::~IntType() {}
+IntType::~IntType()
+{
+}
 
 } // namespace H5

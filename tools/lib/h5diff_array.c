@@ -2908,7 +2908,10 @@ ull2float(unsigned long long ull_value, float *f_value)
     HDmemcpy(f_value, buf, dst_size);
 
 done:
-    H5E_BEGIN_TRY { H5Pclose(dxpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
     H5E_END_TRY;
 
     if (buf)
