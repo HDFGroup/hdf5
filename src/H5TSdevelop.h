@@ -18,9 +18,6 @@
 #ifndef H5TSdevelop_H
 #define H5TSdevelop_H
 
-/* Include package's public header */
-/* #include "H5TSpublic.h" */
-
 /*****************/
 /* Public Macros */
 /*****************/

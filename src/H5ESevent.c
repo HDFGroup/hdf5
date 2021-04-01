@@ -185,14 +185,6 @@ H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el)
     /* Sanity check */
     HDassert(ev);
 
-    /*
-        HDfprintf(stderr,
-                  "%s: releasing event for '%s' (count: %llu, timestamp: %llu), with args '%s', in app source
-       " "file '%s', function '%s', and line %u\n", FUNC, ev->op_info.api_name, (unsigned long
-       long)ev->op_info.op_ins_count, (unsigned long long)ev->op_info.op_ins_ts, ev->op_info.api_args,
-       ev->op_info.app_file_name, ev->op_info.app_func_name, ev->op_info.app_line_num);
-    */
-
     /* Remove the event from the event list */
     H5ES__list_remove(el, ev);
 

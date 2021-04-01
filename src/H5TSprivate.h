@@ -26,7 +26,6 @@
 
 #ifdef H5_HAVE_THREADSAFE
 /* Include package's public headers */
-/* #include "H5TSpublic.h" */
 #include "H5TSdevelop.h"
 
 #ifdef H5_HAVE_WIN_THREADS
