@@ -71,7 +71,9 @@ userVisitOpWrpr(H5_ATTR_UNUSED hid_t obj_id, const char *attr_name, const H5O_in
 // Function:    H5Object default constructor (protected)
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Object::H5Object() : H5Location() {}
+H5Object::H5Object() : H5Location()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    f_Attribute_setId - friend
@@ -558,7 +560,9 @@ H5Object::getObjName(H5std_string &obj_name, size_t len) const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Object::~H5Object() {}
+H5Object::~H5Object()
+{
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // namespace H5
