@@ -252,7 +252,10 @@ test_LD_dims_params(const char *file)
     /*
      * 1. Verify failure with negative dataset id
      */
-    H5E_BEGIN_TRY { ret = H5LDget_dset_dims(invalid_id, one_cur_dims); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5LDget_dset_dims(invalid_id, one_cur_dims);
+    }
     H5E_END_TRY;
     VERIFY_EQUAL(ret, FAIL)
 
@@ -261,7 +264,10 @@ test_LD_dims_params(const char *file)
      */
     if ((did = H5Dopen2(fid, DSET_ALLOC_EARLY, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { ret = H5LDget_dset_dims(did, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5LDget_dset_dims(did, NULL);
+    }
     H5E_END_TRY;
     VERIFY_EQUAL(ret, FAIL)
     if (H5Dclose(did) < 0)
@@ -536,7 +542,10 @@ test_LD_size(const char *file)
     /*
      * Verify failure with an invalid dataset id
      */
-    H5E_BEGIN_TRY { dsize = H5LDget_dset_type_size(invalid_id, NULL); }
+    H5E_BEGIN_TRY
+    {
+        dsize = H5LDget_dset_type_size(invalid_id, NULL);
+    }
     H5E_END_TRY;
     VERIFY_EQUAL(dsize, 0)
 
@@ -916,7 +925,10 @@ test_LD_elmts_invalid(const char *file)
      */
 
     /* Verify failure from case #1: an invalid dataset id */
-    H5E_BEGIN_TRY { ret = H5LDget_dset_elmts(invalid_id, prev_dims, cur_dims, NULL, tbuf); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5LDget_dset_elmts(invalid_id, prev_dims, cur_dims, NULL, tbuf);
+    }
     H5E_END_TRY;
     VERIFY_EQUAL(ret, FAIL)
 

@@ -388,7 +388,10 @@ do_ranks(hid_t fapl, hbool_t new_format)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(dcpl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
     H5E_END_TRY
 
     return -1;
@@ -414,7 +417,10 @@ do_layouts(hid_t fapl)
             new_fapl = H5Pcopy(fapl);
 
             /* Set version bounds */
-            H5E_BEGIN_TRY { ret = H5Pset_libver_bounds(new_fapl, low, high); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5Pset_libver_bounds(new_fapl, low, high);
+            }
             H5E_END_TRY;
 
             if (ret < 0) /* Invalid low/high combinations */
@@ -440,7 +446,10 @@ do_layouts(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(new_fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(new_fapl);
+    }
     H5E_END_TRY;
     return -1;
 }
@@ -2075,7 +2084,10 @@ test_layouts(H5D_layout_t layout, hid_t fapl)
      *-------------------------------------------------------------------------
      */
 
-    H5E_BEGIN_TRY { ret = H5Dset_extent(did, dims_e); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dset_extent(did, dims_e);
+    }
     H5E_END_TRY;
 
     if (ret >= 0)
@@ -2121,7 +2133,10 @@ test_layouts(H5D_layout_t layout, hid_t fapl)
      *-------------------------------------------------------------------------
      */
 
-    H5E_BEGIN_TRY { ret = H5Dset_extent(did, dims_s); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dset_extent(did, dims_s);
+    }
     H5E_END_TRY;
 
     if (ret >= 0)

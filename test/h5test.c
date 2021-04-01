@@ -1724,7 +1724,10 @@ h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
         if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
             continue;
 
-        H5E_BEGIN_TRY { file = H5Fopen(filename, H5F_ACC_RDONLY, fapl); }
+        H5E_BEGIN_TRY
+        {
+            file = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+        }
         H5E_END_TRY
         if (file < 0) {
             i++;
@@ -1745,7 +1748,10 @@ h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
 
     return -1;

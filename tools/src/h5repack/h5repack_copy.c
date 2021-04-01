@@ -1337,7 +1337,10 @@ done:
             H5TOOLS_ERROR((-1), "named_datatype_free failed");
     }
     else {
-        H5E_BEGIN_TRY { named_datatype_free(&named_dt_head, 1); }
+        H5E_BEGIN_TRY
+        {
+            named_datatype_free(&named_dt_head, 1);
+        }
         H5E_END_TRY;
     }
 

@@ -1438,7 +1438,9 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
     return TRUE;
 
 error:
-    H5E_BEGIN_TRY {}
+    H5E_BEGIN_TRY
+    {
+    }
     H5E_END_TRY;
     return FALSE;
 } /* end compare_groups() */

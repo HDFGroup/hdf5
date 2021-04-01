@@ -3794,7 +3794,10 @@ main(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file_id);
+    }
     H5E_END_TRY;
 
     HDputs("***** GET NAME TESTS FAILED *****");
