@@ -2303,7 +2303,7 @@ test_swmr_write_big(hbool_t newest_format)
         FAIL_STACK_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop() < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
