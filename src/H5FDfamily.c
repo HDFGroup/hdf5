@@ -1356,7 +1356,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__family_delete(const char *filename, hid_t H5_ATTR_UNUSED fapl_id)
+H5FD__family_delete(const char *filename, hid_t fapl_id)
 {
     H5P_genplist_t *          plist;
     const H5FD_family_fapl_t *fa;
