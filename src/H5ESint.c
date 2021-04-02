@@ -576,10 +576,8 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
     /* Sanity check */
     HDassert(es);
     HDassert(ev);
-
-    /* Check for event that hasn't actually completed */
-    if (H5VL_REQUEST_STATUS_IN_PROGRESS == ev_status || H5VL_REQUEST_STATUS_CANT_CANCEL == ev_status)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "event hasn't completed?!?")
+    HDassert(H5VL_REQUEST_STATUS_SUCCEED == ev_status || H5VL_REQUEST_STATUS_FAIL == ev_status
+             || H5VL_REQUEST_STATUS_CANCELED == ev_status);
 
     /* Handle each form of event completion */
     if (H5VL_REQUEST_STATUS_SUCCEED == ev_status || H5VL_REQUEST_STATUS_CANCELED == ev_status) {
