@@ -17,7 +17,7 @@
  * Purpose:     Messages related to data layout.
  */
 
-#define H5D_FRIEND     /*suppress error about including H5Dpkg	  */
+#define H5D_FRIEND     /*suppress error about including H5Dpkg       */
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions                        */
@@ -896,13 +896,13 @@ done:
 } /* end H5O__layout_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__layout_free
+ * Function:    H5O__layout_free
  *
- * Purpose:	Free's the message
+ * Purpose:     Free's the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, March 11, 2000
  *
  *-------------------------------------------------------------------------

@@ -558,7 +558,10 @@ test_copy(void)
     /* Try to close error stack copy.  Should fail because
      * the current H5Eset_current_stack closes the stack to be set.
      */
-    H5E_BEGIN_TRY { ret = H5Eclose_stack(estack_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(estack_id);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR

@@ -1088,7 +1088,7 @@ Wroundf(float arg)
  *
  *-------------------------------------------------------------------------
  */
-const wchar_t *
+wchar_t *
 H5_get_utf16_str(const char *s)
 {
     int      nwchars = -1;   /* Length of the UTF-16 buffer */
@@ -1184,7 +1184,7 @@ int
 Wremove_utf8(const char *path)
 {
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
-    int      ret;
+    int      ret   = -1;
 
     /* Convert the input UTF-8 path to UTF-16 */
     if (NULL == (wpath = H5_get_utf16_str(path)))

@@ -96,7 +96,10 @@ setup(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return -1;
 } /* end setup() */
@@ -197,7 +200,10 @@ test_illegal(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Try mounting a file on itself */
-    H5E_BEGIN_TRY { status = H5Fmount(file1, "/mnt1", file1, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Fmount(file1, "/mnt1", file1, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
@@ -214,7 +220,10 @@ test_illegal(hid_t fapl)
         FAIL_STACK_ERROR
     if (H5Fmount(mnt, ".", file2, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { status = H5Fmount(mnt, ".", file3, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Fmount(mnt, ".", file3, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
@@ -236,7 +245,10 @@ test_illegal(hid_t fapl)
         FAIL_STACK_ERROR
     if (H5Fmount(mnt, ".", file3, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { status = H5Fmount(mnt, ".", file3b, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Fmount(mnt, ".", file3b, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
@@ -251,7 +263,10 @@ test_illegal(hid_t fapl)
     /* Try to create a "weak" cycle */
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { status = H5Fmount(file2, "/mnt1/file2", file1b, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Fmount(file2, "/mnt1/file2", file1b, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
@@ -353,7 +368,10 @@ test_samefile(hid_t fapl)
         FAIL_STACK_ERROR
     if (!grp_info.mounted)
         FAIL_PUTS_ERROR("    Group should have 'mounted' flag set.")
-    H5E_BEGIN_TRY { status = H5Fmount(mnt1b, ".", file3, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Fmount(mnt1b, ".", file3, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0)
         FAIL_PUTS_ERROR("    Mounting different files at one mount point should have failed.")
@@ -389,7 +407,10 @@ test_samefile(hid_t fapl)
         FAIL_STACK_ERROR
     if (!grp_info.mounted)
         FAIL_PUTS_ERROR("    Group should have 'mounted' flag set.")
-    H5E_BEGIN_TRY { status = H5Fmount(mnt1b, ".", file2, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Fmount(mnt1b, ".", file2, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0)
         FAIL_PUTS_ERROR("    Mounting same files at one mount point should have failed.")
@@ -469,7 +490,10 @@ test_hide(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Original names under file1:/mnt1 should not be accessible */
-    H5E_BEGIN_TRY { grp = H5Gopen2(file1, "/mnt1/file1", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        grp = H5Gopen2(file1, "/mnt1/file1", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (grp >= 0) {
         H5_FAILED();
@@ -931,7 +955,10 @@ test_unlink(hid_t fapl)
         FAIL_STACK_ERROR
     if (H5Oget_info_by_name2(root, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { status = H5Oget_info_by_name2(mnt, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Oget_info_by_name2(mnt, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
@@ -949,7 +976,10 @@ test_unlink(hid_t fapl)
      */
     if (H5Oget_info_by_name2(root, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { status = H5Oget_info_by_name2(mnt, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Oget_info_by_name2(mnt, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
@@ -972,14 +1002,20 @@ test_unlink(hid_t fapl)
      * the mount point because the name doesn't exist anymore.  We must
      * supply the mount point directly.
      */
-    H5E_BEGIN_TRY { status = H5Funmount(file1, "/mnt_unlink"); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Funmount(file1, "/mnt_unlink");
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
         HDprintf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
         TEST_ERROR
     } /* end if */
-    H5E_BEGIN_TRY { status = H5Funmount(file2, "/"); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Funmount(file2, "/");
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
@@ -2385,7 +2421,10 @@ test_fcdegree_same(hid_t fapl)
         TEST_ERROR
 
     /* Try mounting file with different file close degree (should fail) */
-    H5E_BEGIN_TRY { ret = H5Fmount(gidA, ".", fid2, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fmount(gidA, ".", fid2, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2538,7 +2577,10 @@ test_fcdegree_semi(hid_t fapl)
         TEST_ERROR
 
     /* Try closing file #2 (should fail, since there are still objects open) */
-    H5E_BEGIN_TRY { ret = H5Fclose(fid2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fclose(fid2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2548,7 +2590,10 @@ test_fcdegree_semi(hid_t fapl)
         TEST_ERROR
 
     /* Try closing file #2 (should still fail, since there are still objects open in child file) */
-    H5E_BEGIN_TRY { ret = H5Fclose(fid2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fclose(fid2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2686,11 +2731,17 @@ test_fcdegree_strong(hid_t fapl)
         TEST_ERROR
 
     /* Check that objects are closed */
-    H5E_BEGIN_TRY { ret = H5Oget_info2(gidA, &oinfo, H5O_INFO_BASIC); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oget_info2(gidA, &oinfo, H5O_INFO_BASIC);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5Oget_info2(gidAM, &oinfo, H5O_INFO_BASIC); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oget_info2(gidAM, &oinfo, H5O_INFO_BASIC);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2824,11 +2875,17 @@ test_acc_perm(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to create objects in read only file (should fail) */
-    H5E_BEGIN_TRY { bad_id = H5Gcreate2(gidAM, "Z", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        bad_id = H5Gcreate2(gidAM, "Z", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (bad_id >= 0)
         TEST_ERROR
-    H5E_BEGIN_TRY { bad_id = H5Gcreate2(fid1, "/A/L", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        bad_id = H5Gcreate2(fid1, "/A/L", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (bad_id >= 0)
         TEST_ERROR
@@ -2868,7 +2925,10 @@ test_acc_perm(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to create objects in read only file again (should fail) */
-    H5E_BEGIN_TRY { bad_id = H5Gcreate2(fid1, "/A/L", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        bad_id = H5Gcreate2(fid1, "/A/L", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (bad_id >= 0)
         TEST_ERROR
@@ -3267,7 +3327,10 @@ test_nested_survive(hid_t fapl)
         TEST_ERROR
 
     /* Open object in file #3 through file #1 mount path (should fail) */
-    H5E_BEGIN_TRY { gidAMS = H5Gopen2(fid1, "A/M/S", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gidAMS = H5Gopen2(fid1, "A/M/S", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gidAMS >= 0)
         TEST_ERROR
@@ -3781,7 +3844,10 @@ test_cut_graph(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to open an object in file #4, from file #1 */
-    H5E_BEGIN_TRY { gidK = H5Gopen2(gidQ, "/A/D/K", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gidK = H5Gopen2(gidQ, "/A/D/K", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gidK >= 0)
         TEST_ERROR
@@ -3801,7 +3867,10 @@ test_cut_graph(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to open an object in file #6, from file #5 */
-    H5E_BEGIN_TRY { gidO = H5Gopen2(gidM, "/B/H/O", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gidO = H5Gopen2(gidM, "/B/H/O", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gidO >= 0)
         TEST_ERROR
@@ -4012,7 +4081,10 @@ test_symlink(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to open an object in file #3 (should fail) */
-    H5E_BEGIN_TRY { gidL = H5Gopen2(fid1, "L", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gidL = H5Gopen2(fid1, "L", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gidL >= 0)
         TEST_ERROR

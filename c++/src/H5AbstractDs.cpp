@@ -38,7 +38,9 @@ namespace H5 {
 ///\brief       Default constructor
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AbstractDs::AbstractDs() {}
+AbstractDs::AbstractDs()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    AbstractDs default constructor
@@ -331,6 +333,8 @@ AbstractDs::getVarLenType() const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AbstractDs::~AbstractDs() {}
+AbstractDs::~AbstractDs()
+{
+}
 
 } // namespace H5
