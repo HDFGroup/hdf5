@@ -576,8 +576,8 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
     /* Sanity check */
     HDassert(es);
     HDassert(ev);
-    HDassert(H5VL_REQUEST_STATUS_SUCCEED == ev_status || H5VL_REQUEST_STATUS_FAIL == ev_status
-             || H5VL_REQUEST_STATUS_CANCELED == ev_status);
+    HDassert(H5VL_REQUEST_STATUS_SUCCEED == ev_status || H5VL_REQUEST_STATUS_FAIL == ev_status ||
+             H5VL_REQUEST_STATUS_CANCELED == ev_status);
 
     /* Handle each form of event completion */
     if (H5VL_REQUEST_STATUS_SUCCEED == ev_status || H5VL_REQUEST_STATUS_CANCELED == ev_status) {
