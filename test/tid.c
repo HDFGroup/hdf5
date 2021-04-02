@@ -513,7 +513,7 @@ test_id_type_list(void)
     /* Sanity check */
     if ((int)startType >= H5I_MAX_NUM_TYPES || startType < H5I_NTYPES) {
         /* Error condition, throw an error */
-        CHECK(1, 1, "H5Iregister_type");
+        ERROR("H5Iregister_type");
         goto out;
     }
     /* Create types up to H5I_MAX_NUM_TYPES */

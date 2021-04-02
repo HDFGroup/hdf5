@@ -1386,9 +1386,14 @@ TOOLTEST tgrpnullspace.ddl -p --enable-error-stack tgrpnullspace.h5
 TOOLTEST zerodim.ddl --enable-error-stack zerodim.h5
 
 # test for long double (some systems do not have long double)
+<<<<<<< HEAD
 TOOLTEST tfloatsattrs.ddl -p --enable-error-stack tfloatsattrs.h5
 TOOLTEST tldouble.ddl --enable-error-stack tldouble.h5
 TOOLTEST tldouble_scalar.ddl -p --enable-error-stack tldouble_scalar.h5
+=======
+#TOOLTEST tldouble.ddl --enable-error-stack tldouble.h5
+#TOOLTEST tldouble_scalar.ddl -p --enable-error-stack tldouble_scalar.h5
+>>>>>>> branch 'hdf5_1_12' of https://github.com/HDFGroup/hdf5.git
 
 # test for vms
 TOOLTEST tvms.ddl --enable-error-stack tvms.h5

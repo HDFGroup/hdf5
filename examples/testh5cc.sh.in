@@ -90,6 +90,8 @@ temp_FILES="a.out $applib"
 cat > $appmain <<EOF
 #include "hdf5.h"
 #define H5FILE_NAME        "tmp.h5"
+extern void sub1(void);
+extern void sub2(void);
 int
 main (void)
 {
@@ -114,6 +116,8 @@ EOF
 
 # generate prog1
 cat > $prog1 <<EOF
+#include <stdio.h>
+void
 sub1(void)
 {
     printf("in sub1\n");
@@ -122,6 +126,8 @@ EOF
 
 # generate prog2
 cat > $prog2 <<EOF
+#include <stdio.h>
+void
 sub2(void)
 {
     printf("in sub2\n");
