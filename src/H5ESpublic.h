@@ -63,7 +63,7 @@ typedef struct H5ES_op_info_t {
     uint64_t op_ins_count; /* Counter of operation's insertion into event set */
     uint64_t op_ins_ts;    /* Timestamp for when the operation was inserted into the event set */
     uint64_t op_exec_ts;   /* Timestamp for when the operation began execution */
-    uint64_t op_exec_time; /* Execution time for operation */
+    uint64_t op_exec_time; /* Execution time for operation (in ns) */
 } H5ES_op_info_t;
 
 /* Information about failed operations in event set */
@@ -81,7 +81,7 @@ typedef struct H5ES_err_info_t {
     uint64_t op_ins_count; /* Counter of operation's insertion into event set */
     uint64_t op_ins_ts;    /* Timestamp for when the operation was inserted into the event set */
     uint64_t op_exec_ts;   /* Timestamp for when the operation began execution */
-    uint64_t op_exec_time; /* Execution time for operation */
+    uint64_t op_exec_time; /* Execution time for operation (in ns) */
 
     /* Error info */
     hid_t err_stack_id; /* ID for error stack from failed operation */

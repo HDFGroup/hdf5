@@ -52,13 +52,13 @@
 
 /* Callback context for get time estimate (gte) operations */
 typedef struct H5ES_gte_ctx_t {
-    uint64_t *time_est; /* Pointer to accumulated time estimate */
+    uint64_t *time_est; /* Pointer to accumulated time estimate (in ns) */
 } H5ES_gte_ctx_t;
 
 /* Callback context for wait operations */
 typedef struct H5ES_wait_ctx_t {
     H5ES_t * es;              /* Event set being operated on */
-    uint64_t timeout;         /* Timeout for wait operation */
+    uint64_t timeout;         /* Timeout for wait operation (in ns) */
     size_t * num_in_progress; /* Count of # of operations that have not completed */
     hbool_t *op_failed;       /* Flag to indicate an operation failed */
 } H5ES_wait_ctx_t;
