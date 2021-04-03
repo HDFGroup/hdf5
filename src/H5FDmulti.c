@@ -35,6 +35,15 @@
 #define TRUE 1
 #endif
 
+/* Windows doesn't like some POSIX names and redefines them with an
+ * underscore
+ */
+#ifdef _WIN32
+#define my_strdup _strdup
+#else
+#define my_strdup strdup
+#endif
+
 /* Loop through all mapped files */
 #define UNIQUE_MEMBERS_CORE(MAP, ITER, SEEN, LOOPVAR)                                                        \
     {                                                                                                        \
@@ -103,9 +112,8 @@ typedef struct H5FD_multi_dxpl_t {
 } H5FD_multi_dxpl_t;
 
 /* Private functions */
-static char *my_strdup(const char *s);
-static int   compute_next(H5FD_multi_t *file);
-static int   open_members(H5FD_multi_t *file);
+static int compute_next(H5FD_multi_t *file);
+static int open_members(H5FD_multi_t *file);
 
 /* Callback prototypes */
 static herr_t  H5FD_multi_term(void);
@@ -172,36 +180,6 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_delete,         /* del               */
     H5FD_FLMAP_DEFAULT         /* fl_map            */
 };
-
-/*-------------------------------------------------------------------------
- * Function:    my_strdup
- *
- * Purpose:    Private version of strdup()
- *
- * Return:    Success:    Ptr to new copy of string
- *
- *            Failure:    NULL
- *
- * Programmer:    Robb Matzke
- *              Friday, August 13, 1999
- *
- *-------------------------------------------------------------------------
- */
-static char *
-my_strdup(const char *s)
-{
-    char * x;
-    size_t str_len;
-
-    if (!s)
-        return NULL;
-    str_len = strlen(s) + 1;
-    if (NULL == (x = (char *)malloc(str_len)))
-        return NULL;
-    memcpy(x, s, str_len);
-
-    return x;
-}
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_multi_init
