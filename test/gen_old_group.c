@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -31,28 +31,34 @@
 
 #define FILENAME "group_old.h5"
 
-int main(void)
+int
+main(void)
 {
-    hid_t fid = -1;             /* File ID */
-    hid_t gid = -1;             /* Group creation property list ID */
+    hid_t fid = -1; /* File ID */
+    hid_t gid = -1; /* Group creation property list ID */
 
     /* Create file for test groups */
-    if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) <0) goto error;
+    if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Create empty group that uses "symbol table" form to store links */
-    if((gid = H5Gcreate2(fid, "old", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
-    if(H5Gclose(gid) < 0) goto error;
+    if ((gid = H5Gcreate2(fid, "old", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Gclose(gid) < 0)
+        goto error;
 
     /* Close file */
-    if(H5Fclose(fid) < 0) goto error;
+    if (H5Fclose(fid) < 0)
+        goto error;
 
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(gid);
         H5Fclose(fid);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return 1;
 }
-

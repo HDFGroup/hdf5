@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,7 +26,7 @@
 hid_t
 h5tools_get_little_endian_type(hid_t tid)
 {
-    hid_t       p_type=H5I_INVALID_HID;
+    hid_t       p_type = H5I_INVALID_HID;
     H5T_class_t type_class;
     size_t      size;
     H5T_sign_t  sign;
@@ -35,7 +35,7 @@ h5tools_get_little_endian_type(hid_t tid)
     size       = H5Tget_size(tid);
     sign       = H5Tget_sign(tid);
 
-    switch(type_class) {
+    switch (type_class) {
         case H5T_INTEGER:
             if (size == 1 && sign == H5T_SGN_2)
                 p_type = H5Tcopy(H5T_STD_I8LE);
@@ -93,7 +93,6 @@ h5tools_get_little_endian_type(hid_t tid)
     return p_type;
 } /* end h5tools_get_little_endian_type() */
 
-
 /*-------------------------------------------------------------------------
  * Function: h5tools_get_big_endian_type
  *
@@ -115,7 +114,7 @@ h5tools_get_big_endian_type(hid_t tid)
     size       = H5Tget_size(tid);
     sign       = H5Tget_sign(tid);
 
-    switch(type_class) {
+    switch (type_class) {
         case H5T_INTEGER:
             if (size == 1 && sign == H5T_SGN_2)
                 p_type = H5Tcopy(H5T_STD_I8BE);
@@ -150,7 +149,7 @@ h5tools_get_big_endian_type(hid_t tid)
             else if (size == 4)
                 p_type = H5Tcopy(H5T_STD_B32BE);
             else if (size == 8)
-                p_type=H5Tcopy(H5T_STD_B64BE);
+                p_type = H5Tcopy(H5T_STD_B64BE);
             break;
 
         case H5T_TIME:
@@ -171,4 +170,3 @@ h5tools_get_big_endian_type(hid_t tid)
 
     return p_type;
 } /* end h5tools_get_big_endian_type() */
-

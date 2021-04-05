@@ -3,7 +3,7 @@
 size_t
 strlcpy(char *dst, const char *src, size_t size)
 {
-    char *d;
+    char *      d;
     const char *s;
 
     for (d = dst, s = src; (s - src) < size; d++, s++) {

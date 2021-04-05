@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -136,6 +136,8 @@ MINOR, FILEACC, H5E_BADFILE, Bad file ID accessed
 MINOR, FILEACC, H5E_TRUNCATED, File has been truncated
 MINOR, FILEACC, H5E_MOUNT, File mount error
 MINOR, FILEACC, H5E_CANTDELETEFILE, Unable to delete file
+MINOR, FILEACC, H5E_CANTLOCKFILE, Unable to lock file
+MINOR, FILEACC, H5E_CANTUNLOCKFILE, Unable to unlock file
 
 # Generic low-level file I/O errors
 MINOR, FILE, H5E_SEEKERROR, Seek failed

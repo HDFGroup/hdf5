@@ -11,13 +11,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  ******
-*/
+ */
 #include "H5f90.h"
 #include "H5Eprivate.h"
 
@@ -38,24 +38,25 @@
  * HISTORY
  *
  * SOURCE
-*/
+ */
 int_f
-h5iget_type_c (hid_t_f *obj_id, int_f *type)
+h5iget_type_c(hid_t_f *obj_id, int_f *type)
 /******/
 {
-     int ret_value = -1;
-     hid_t c_obj_id;
-     H5I_type_t c_type;
+    int        ret_value = -1;
+    hid_t      c_obj_id;
+    H5I_type_t c_type;
 
-     /*
-      * Call H5Iget_type function.
-      */
-     c_obj_id = *obj_id;
-     c_type = H5Iget_type(c_obj_id);
-     if (c_type == H5I_BADID) return ret_value;
-     *type = (int_f)c_type;
-     ret_value = 0;
-     return ret_value;
+    /*
+     * Call H5Iget_type function.
+     */
+    c_obj_id = *obj_id;
+    c_type   = H5Iget_type(c_obj_id);
+    if (c_type == H5I_BADID)
+        return ret_value;
+    *type     = (int_f)c_type;
+    ret_value = 0;
+    return ret_value;
 }
 /****if* H5If/h5iget_name_c
  * NAME
@@ -79,41 +80,43 @@ h5iget_type_c (hid_t_f *obj_id, int_f *type)
  *  exact size of the string (buf_size) is passed in.
  *               M. Scot Breitenfeld, April 21, 2008
  * SOURCE
-*/
+ */
 int_f
 h5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size)
 /******/
 {
-     int ret_value = -1;
-     hid_t c_obj_id;
-     ssize_t c_size;
-     size_t c_buf_size;
-     char *c_buf =NULL;
+    int     ret_value = -1;
+    hid_t   c_obj_id;
+    ssize_t c_size;
+    size_t  c_buf_size;
+    char *  c_buf = NULL;
 
-     /*
-      * Allocate buffer to hold name of an object
-      */
-     c_buf_size = (size_t)*buf_size +1;
-     c_buf = (char *)HDmalloc(c_buf_size);
-     if (c_buf == NULL) return ret_value;
+    /*
+     * Allocate buffer to hold name of an object
+     */
+    c_buf_size = (size_t)*buf_size + 1;
+    c_buf      = (char *)HDmalloc(c_buf_size);
+    if (c_buf == NULL)
+        return ret_value;
 
-     /*
-      * Call H5IAget_name function
-      */
-     c_obj_id = (hid_t)*obj_id;
-     c_size = H5Iget_name(c_obj_id, c_buf, c_buf_size);
-     if (c_size < 0) goto DONE;
+    /*
+     * Call H5IAget_name function
+     */
+    c_obj_id = (hid_t)*obj_id;
+    c_size   = H5Iget_name(c_obj_id, c_buf, c_buf_size);
+    if (c_size < 0)
+        goto DONE;
 
-     /*
-      * Convert C name to FORTRAN and place it in the given buffer
-      */
-      HD5packFstring(c_buf, _fcdtocp(buf), c_buf_size-1);
-      *name_size = (size_t_f)c_size;
-      ret_value = 0;
+    /*
+     * Convert C name to FORTRAN and place it in the given buffer
+     */
+    HD5packFstring(c_buf, _fcdtocp(buf), c_buf_size - 1);
+    *name_size = (size_t_f)c_size;
+    ret_value  = 0;
 
 DONE:
-      HDfree(c_buf);
-      return ret_value;
+    HDfree(c_buf);
+    return ret_value;
 }
 
 /****if* H5If/h5iinc_ref_c
@@ -131,25 +134,25 @@ DONE:
  *  Quincey Koziol
  *  Tuesday, December  9, 2003
  * SOURCE
-*/
+ */
 int_f
 h5iinc_ref_c(hid_t_f *obj_id, int_f *ref_count)
 /******/
 {
-     int ret_value;
+    int ret_value;
 
-     /*
-      * Call H5Iinc_ref function
-      */
-     if ((ret_value = H5Iinc_ref(*obj_id)) < 0)
-         HGOTO_DONE(FAIL);
+    /*
+     * Call H5Iinc_ref function
+     */
+    if ((ret_value = H5Iinc_ref(*obj_id)) < 0)
+        HGOTO_DONE(FAIL);
 
     /* Set output & return values */
-    *ref_count=ret_value;
-    ret_value=0;
+    *ref_count = ret_value;
+    ret_value  = 0;
 
 done:
-      return ret_value;
+    return ret_value;
 }
 
 /****if* H5If/h5idec_ref_c
@@ -167,25 +170,25 @@ done:
  *  Quincey Koziol
  *  Tuesday, December  9, 2003
  * SOURCE
-*/
+ */
 int_f
 h5idec_ref_c(hid_t_f *obj_id, int_f *ref_count)
 /******/
 {
-     int ret_value;
+    int ret_value;
 
-     /*
-      * Call H5Idec_ref function
-      */
-     if ((ret_value = H5Idec_ref(*obj_id)) < 0)
-         HGOTO_DONE(FAIL);
+    /*
+     * Call H5Idec_ref function
+     */
+    if ((ret_value = H5Idec_ref(*obj_id)) < 0)
+        HGOTO_DONE(FAIL);
 
     /* Set output & return values */
-    *ref_count=ret_value;
-    ret_value=0;
+    *ref_count = ret_value;
+    ret_value  = 0;
 
 done:
-      return ret_value;
+    return ret_value;
 }
 
 /****if* H5If/h5iget_ref_c
@@ -204,25 +207,25 @@ done:
  *  Tuesday, December  9, 2003
  *
  * SOURCE
-*/
+ */
 int_f
 h5iget_ref_c(hid_t_f *obj_id, int_f *ref_count)
 /******/
 {
-     int ret_value;
+    int ret_value;
 
-     /*
-      * Call H5Iget_ref function
-      */
-     if ((ret_value = H5Iget_ref(*obj_id)) < 0)
-         HGOTO_DONE(FAIL);
+    /*
+     * Call H5Iget_ref function
+     */
+    if ((ret_value = H5Iget_ref(*obj_id)) < 0)
+        HGOTO_DONE(FAIL);
 
     /* Set output & return values */
-    *ref_count=ret_value;
-    ret_value=0;
+    *ref_count = ret_value;
+    ret_value  = 0;
 
 done:
-      return ret_value;
+    return ret_value;
 }
 
 /****if* H5If/h5iget_file_id_c
@@ -241,26 +244,26 @@ done:
  *  Tuesday, August 24, 2004
  *
  * SOURCE
-*/
+ */
 int_f
 h5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id)
 /******/
 {
-     int ret_value;
-     hid_t c_file_id;
+    int   ret_value;
+    hid_t c_file_id;
 
-     /*
-      * Call H5Iget_file_id
-      */
-     if ((c_file_id = H5Iget_file_id(*obj_id)) < 0)
-         HGOTO_DONE(FAIL);
+    /*
+     * Call H5Iget_file_id
+     */
+    if ((c_file_id = H5Iget_file_id(*obj_id)) < 0)
+        HGOTO_DONE(FAIL);
 
     /* Set output & return values */
-    *file_id=(hid_t_f)c_file_id;
-    ret_value=0;
+    *file_id  = (hid_t_f)c_file_id;
+    ret_value = 0;
 
 done:
-      return ret_value;
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -276,19 +279,19 @@ done:
 int_f
 h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid)
 {
-     int ret_value;
-     htri_t c_ret_value;
+    int    ret_value;
+    htri_t c_ret_value;
 
-     /*
-      * Call H5Iis_valid
-      */
-     if ((c_ret_value = H5Iis_valid(*obj_id)) < 0)
-       HGOTO_DONE(FAIL);
+    /*
+     * Call H5Iis_valid
+     */
+    if ((c_ret_value = H5Iis_valid(*obj_id)) < 0)
+        HGOTO_DONE(FAIL);
 
-     /* Set output & return values */
-     *c_valid = (int_f)c_ret_value;
-     ret_value=0;
+    /* Set output & return values */
+    *c_valid  = (int_f)c_ret_value;
+    ret_value = 0;
 
 done:
-      return ret_value;
+    return ret_value;
 }
