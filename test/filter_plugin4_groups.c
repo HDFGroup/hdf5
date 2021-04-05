@@ -74,7 +74,7 @@ append_to_group_name(unsigned int flags, size_t cd_nelmts, const unsigned int *c
         return 0;
 
     /* Assignment to eliminate unused parameter warning. */
-    cd_values = cd_values;
+    (void)cd_values;
 
     if (flags & H5Z_FLAG_REVERSE) {
         /* READ - Remove the suffix from the group name */

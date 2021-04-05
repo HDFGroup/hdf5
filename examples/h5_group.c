@@ -171,9 +171,9 @@ static herr_t
 file_info(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *opdata)
 {
     /* avoid compiler warnings */
-    loc_id = loc_id;
-    opdata = opdata;
-    linfo  = linfo;
+    (void)loc_id;
+    (void)opdata;
+    (void)linfo;
 
     /*
      * Display group name. The name is passed to the function by
@@ -198,8 +198,8 @@ group_info(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *opdat
     int         rank_chunk;
 
     /* avoid warnings */
-    opdata = opdata;
-    linfo  = linfo;
+    (void)opdata;
+    (void)linfo;
 
     /*
      * Open the datasets using their names.

@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef IdComponent_H
-#define IdComponent_H
+#ifndef H5IdComponent_H
+#define H5IdComponent_H
 
 namespace H5 {
 
@@ -113,4 +113,4 @@ class H5_DLLCPP IdComponent {
 }; // end class IdComponent
 } // namespace H5
 
-#endif // IdComponent_H
+#endif // H5IdComponent_H

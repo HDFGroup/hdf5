@@ -27275,7 +27275,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
 
         /* Fill out the rest of the cache with entries */
         /* Verify expected status of entries after each insertion */
-        for (entry_idx = entry_idx; entry_idx < 50; entry_idx++) {
+        for (; entry_idx < 50; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -27409,7 +27409,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
          * After each insertion, verify the expected status of the
          * entries in the cache.
          */
-        for (entry_idx = entry_idx; entry_idx < 100; entry_idx++) {
+        for (; entry_idx < 100; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -33221,7 +33221,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
 
         /* Fill out the rest of the cache with entries */
         /* Verify expected status of entries after each insertion */
-        for (entry_idx = entry_idx; entry_idx < 50; entry_idx++) {
+        for (; entry_idx < 50; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -33282,7 +33282,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     if (pass) {
 
         /* Insert 50 more entries (indices 50-99) into the cache.  */
-        for (entry_idx = entry_idx; entry_idx < 100; entry_idx++) {
+        for (; entry_idx < 100; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
