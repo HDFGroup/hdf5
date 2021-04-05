@@ -574,11 +574,11 @@ if [ ${do_zoo:-no} = yes ]; then
 	rm -f ./shared_tick_num
 	echo launch vfd_swmr_zoo_writer
 	catch_out_err_and_rc vfd_swmr_zoo_writer \
-	    ../vfd_swmr_zoo_writer -l 5 -m 1000 -q &
+	    ../vfd_swmr_zoo_writer -q &
 	pid_writer=$!
 
 	catch_out_err_and_rc vfd_swmr_zoo_reader \
-	    ../vfd_swmr_zoo_reader -l 10 -q -W &
+	    ../vfd_swmr_zoo_reader -l 3 -q &
 	pid_reader=$!
 
 	# Wait for the reader to finish before signalling the

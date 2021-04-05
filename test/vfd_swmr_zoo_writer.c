@@ -32,7 +32,8 @@
 #define _arraycount(_a) (sizeof(_a) / sizeof(_a[0]))
 #endif
 
-#define MAX_READ_TIME           10
+#define MAX_READ_LEN_IN_SECONDS 2
+#define TICK_LEN                4
 
 typedef struct _shared_ticks {
     uint64_t reader_tick;
@@ -53,7 +54,6 @@ typedef struct _tick_stats {
 
 static H5F_vfd_swmr_config_t swmr_config;
 static tick_stats_t *        tick_stats = NULL;
-static const hid_t           badhid     = H5I_INVALID_HID;
 static bool                  writer;
 
 static void
@@ -99,6 +99,7 @@ usage(const char *progname)
     exit(EXIT_FAILURE);
 }
 
+#ifndef TMP
 bool
 vfd_swmr_writer_may_increase_tick_to(uint64_t new_tick, bool wait_for_reader)
 {
@@ -179,7 +180,7 @@ vfd_swmr_reader_did_increase_tick_to(uint64_t new_tick)
     if (fd == -1) {
         // TBD create a temporary file, here, and move it to its final path
         // after writing it.
-        fd = HDopen("./shared_tick_num", O_RDWR | O_CREAT, 0600);
+        fd = HDopen("./shared_tick_num", O_RDWR|O_CREAT, 0600);
         if (fd == -1)
             err(EXIT_FAILURE, "%s: open", __func__);
     }
@@ -202,44 +203,45 @@ vfd_swmr_reader_did_increase_tick_to(uint64_t new_tick)
         fd = -1;
     }
 }
+#endif
 
 int
 main(int argc, char **argv)
 {
-    hid_t fapl, fcpl, fid;
+    hid_t fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID, fid = H5I_INVALID_HID;
     H5F_t *f;
     H5C_t *cache;
-    herr_t ret;
     zoo_config_t config = {
           .proc_num = 0
         , .skip_compact = false
         , .skip_varlen = true
         , .max_pause_msecs = 0
-        , .msgival = {.tv_sec = MAX_READ_TIME, .tv_nsec = 0}
+        , .msgival = {.tv_sec = 0, .tv_nsec = 0}
     };
     struct timespec lastmsgtime = {.tv_sec = 0, .tv_nsec = 0};
     bool wait_for_signal;
     int ch;
-    unsigned seed;
     unsigned long tmpl;
     char *end;
-    const char *seedvar = "H5_ZOO_STEP_SEED";
     bool use_vfd_swmr = true;
-    bool print_estack = false;
     char *progname = NULL;
     char *personality;
     estack_state_t es;
+    bool print_estack = false;
     H5F_vfd_swmr_config_t vfd_swmr_config;
-    int fd_writer_to_reader, fd_reader_to_writer;
+    int fd_writer_to_reader = -1, fd_reader_to_writer = -1;
     const char *fifo_writer_to_reader = "./fifo_writer_to_reader";
     const char *fifo_reader_to_writer = "./fifo_reader_to_writer";
     int notify = 0;
     unsigned int i;
     struct timespec last = {0, 0};
-    struct timespec ival = {MAX_READ_TIME, 0}; /* Expected maximal time for reader's validation */
+    struct timespec ival = {MAX_READ_LEN_IN_SECONDS, 0}; /* Expected maximal time for reader's validation */
 
-    if (H5_basename(argv[0], &progname) < 0)
-        errx(EXIT_FAILURE, "H5_basename failed");
+    if (H5_basename(argv[0], &progname) < 0) {
+        H5_FAILED(); AT();
+        printf("H5_basename failed\n");
+        goto error;
+    }
 
     personality = HDstrstr(progname, "vfd_swmr_zoo_");
 
@@ -248,22 +250,21 @@ main(int argc, char **argv)
     else if (personality != NULL && strcmp(personality, "vfd_swmr_zoo_reader") == 0)
         writer = false;
     else {
-        errx(EXIT_FAILURE, "unknown personality, expected vfd_swmr_zoo_{reader,writer}");
+        H5_FAILED(); AT();
+        printf("unknown personality, expected vfd_swmr_zoo_{reader,writer}");
+        goto error;
     }
 
     if (writer)
         config.max_pause_msecs = 50;
 
-    while ((ch = getopt(argc, argv, "CSWael:m:qv")) != -1) {
+    while ((ch = getopt(argc, argv, "CSael:qv")) != -1) {
         switch(ch) {
         case 'C':
             config.skip_compact = true;
             break;
         case 'S':
             use_vfd_swmr = false;
-            break;
-        case 'W':
-            wait_for_signal = false;
             break;
         case 'a':
             config.skip_varlen = false;
@@ -272,7 +273,7 @@ main(int argc, char **argv)
             print_estack = true;
             break;
         case 'l':
-            /* Expected maximal time for reader's validation of zoo creation or deletion */
+            /* Expected maximal number of ticks for reader's validation of zoo creation or deletion */
             errno = 0;
             tmpl = HDstrtoul(optarg, &end, 0);
             if (end == optarg || *end != '\0')
@@ -281,18 +282,15 @@ main(int argc, char **argv)
                 err(EXIT_FAILURE, "couldn't parse `-l` argument `%s`", optarg);
             else if (tmpl > UINT_MAX)
                 errx(EXIT_FAILURE, "`-l` argument `%lu` too large", tmpl);
-            ival.tv_sec = (unsigned)tmpl;
-            break;
-        case 'm':
-            errno = 0;
-            tmpl = HDstrtoul(optarg, &end, 0);
-            if (end == optarg || *end != '\0')
-                errx(EXIT_FAILURE, "couldn't parse `-m` argument `%s`", optarg);
-            else if (errno != 0)
-                err(EXIT_FAILURE, "couldn't parse `-m` argument `%s`", optarg);
-            else if (tmpl > UINT_MAX)
-                errx(EXIT_FAILURE, "`-m` argument `%lu` too large", tmpl);
-            config.max_pause_msecs = (unsigned)tmpl;
+            {
+                /* Translate the tick number to time represented by the timespec struct */
+                float time = (float)(((unsigned)tmpl * TICK_LEN) / 10.0);
+                unsigned sec = (unsigned)time;
+                unsigned nsec = (unsigned)((time - sec) * 10 * 1000 * 1000);
+
+                ival.tv_sec = sec;
+                ival.tv_nsec = nsec;
+            }
             break;
         case 'q':
             verbosity = 1;
@@ -308,61 +306,94 @@ main(int argc, char **argv)
     argv += optind;
     argc -= optind;
 
-    if (argc > 0)
-        errx(EXIT_FAILURE, "unexpected command-line arguments");
+    if (argc > 0) {
+        H5_FAILED(); AT();
+        printf("unexpected command-line arguments");
+        goto error;
+    }
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&vfd_swmr_config, 4, 7, writer, FALSE, 128, "./zoo-shadow");
+    init_vfd_swmr_config(&vfd_swmr_config, TICK_LEN, 7, writer, FALSE, 128, "./zoo-shadow");
 
     /* ? turn off use latest format argument via 1st argument? since later on it reset to early format */
     /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, true, &vfd_swmr_config);
-
-    if (use_vfd_swmr && H5Pget_vfd_swmr_config(fapl, &swmr_config) < 0)
-        errx(EXIT_FAILURE, "H5Pget_vfd_swmr_config");
-
-    if (fapl < 0)
-        errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
-
-    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0) {
-        errx(EXIT_FAILURE, "%s.%d: H5Pset_libver_bounds", __func__, __LINE__);
+    if ((fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, true, &vfd_swmr_config)) < 0) {
+        H5_FAILED(); AT();
+        printf("vfd_swmr_create_fapl");
+        goto error;
     }
 
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        errx(EXIT_FAILURE, "H5Pcreate");
+    if (use_vfd_swmr && H5Pget_vfd_swmr_config(fapl, &swmr_config) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Pget_vfd_swmr_config failed");
+        goto error;
+    }
 
-    ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1);
-    if (ret < 0)
-        errx(EXIT_FAILURE, "H5Pset_file_space_strategy");
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Pset_libver_bounds failed");
+        goto error;
+    }
+
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Pcreate failed");
+        goto error;
+    }
+
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Pset_file_space_strategy failed");
+        goto error;
+    }
 
     if (writer)
         fid = H5Fcreate("vfd_swmr_zoo.h5", H5F_ACC_TRUNC, fcpl, fapl);
     else
         fid = H5Fopen("vfd_swmr_zoo.h5", H5F_ACC_RDONLY, fapl);
 
-    if (fid == badhid)
+    if (fid < 0) {
         errx(EXIT_FAILURE, writer ? "H5Fcreate" : "H5Fopen");
+        H5_FAILED(); AT();
+        printf(writer ? "H5Fcreate failed" : "H5Fopen failed");
+        goto error;
+    }
 
-    if ((f = H5VL_object_verify(fid, H5I_FILE)) == NULL)
-        errx(EXIT_FAILURE, "H5VL_object_verify");
+    if ((f = H5VL_object_verify(fid, H5I_FILE)) == NULL) {
+        H5_FAILED(); AT();
+        printf("H5VL_object_verify failed");
+        goto error;
+    }
 
     cache = f->shared->cache;
 
     /* Writer creates two named pipes(FIFO) to coordinate two-way communication */
     if (writer) {
-        if (HDmkfifo(fifo_writer_to_reader, 0600) < 0)
-            errx(EXIT_FAILURE, "HDmkfifo");
+        if (HDmkfifo(fifo_writer_to_reader, 0600) < 0) {
+            H5_FAILED(); AT();
+            printf("HDmkfifo failed");
+            goto error;
+        }
 
-        if (HDmkfifo(fifo_reader_to_writer, 0600) < 0)
-            errx(EXIT_FAILURE, "HDmkfifo");
+        if (HDmkfifo(fifo_reader_to_writer, 0600) < 0) {
+            H5_FAILED(); AT();
+            printf("HDmkfifo failed");
+            goto error;
+        }
     }
 
     /* Both the writer and reader open the pipes */
-    if ((fd_writer_to_reader = HDopen(fifo_writer_to_reader, O_RDWR)) < 0)
-        errx(EXIT_FAILURE, "fifo_writer_to_reader open failed");
+    if ((fd_writer_to_reader = HDopen(fifo_writer_to_reader, O_RDWR)) < 0) {
+        H5_FAILED(); AT();
+        printf("fifo_writer_to_reader open failed");
+        goto error;
+    }
 
-    if ((fd_reader_to_writer = HDopen(fifo_reader_to_writer, O_RDWR)) < 0)
-        errx(EXIT_FAILURE, "fifo_reader_to_writer open failed");
+    if ((fd_reader_to_writer = HDopen(fifo_reader_to_writer, O_RDWR)) < 0) {
+        H5_FAILED(); AT();
+        printf("fifo_reader_to_writer open failed");
+        goto error;
+    }
 
     print_cache_hits(cache);
 
@@ -370,116 +401,139 @@ main(int argc, char **argv)
     if (writer) {
         dbgf(2, "Writing zoo...\n");
 
-        /* get seed from environment or else from time(3) */
-        switch (fetch_env_ulong(seedvar, UINT_MAX, &tmpl)) {
-            case -1:
-                errx(EXIT_FAILURE, "%s: fetch_env_ulong", __func__);
-            case 0:
-                seed = (unsigned int)time(NULL);
-                break;
-            default:
-                seed = (unsigned int)tmpl;
-                break;
-        }
-
-        dbgf(2, "To reproduce, set seed (%s) to %u.\n", seedvar, seed);
-
         /* Writer tells reader to start */
         notify = 1;
-        if (HDwrite(fd_writer_to_reader, &notify, sizeof(int)) < 0)
-            err(EXIT_FAILURE, "write failed");
+        if (HDwrite(fd_writer_to_reader, &notify, sizeof(int)) < 0) {
+            H5_FAILED(); AT();
+            printf("HDwrite failed");
+            goto error;
+        }
 
-        HDsrandom(seed);
+        if (!create_zoo(fid, ".", &lastmsgtime, config)) {
+            H5_FAILED(); AT();
+            printf("create_zoo failed");
+            notify = -1;
+            HDwrite(fd_writer_to_reader, &notify, sizeof(int));
+            goto error;
+        }
 
-        if (clock_gettime(CLOCK_MONOTONIC, &lastmsgtime) < 0)
-            errx(EXIT_FAILURE, "%s: clock_gettime", __func__);
+        /* Get the current time */
+        if (HDclock_gettime(CLOCK_MONOTONIC, &last) < 0) {
+            H5_FAILED(); AT();
+            printf("HDclock_gettime failed");
+            goto error;
+        }
 
-        if (!create_zoo(fid, ".", &lastmsgtime, config))
-            errx(EXIT_FAILURE, "create_zoo didn't pass self-check");
-
-        /* Notify the reader of finishing zoo creation */
-        notify = 2;
-        if (HDwrite(fd_writer_to_reader, &notify, sizeof(int)) < 0)
-            err(EXIT_FAILURE, "write failed");
+        /* Notify the reader of finishing zoo creation by sending the timestamp */
+        if (HDwrite(fd_writer_to_reader, &last, sizeof(last)) < 0) {
+            H5_FAILED(); AT();
+            printf("HDwrite failed");
+            goto error;
+        }
 
         /* During the wait, writer makes repeated HDF5 API calls so as to trigger
          * EOT at approximately the correct time */
         for(i = 0; i < swmr_config.max_lag + 1; i++) {
             decisleep(swmr_config.tick_len);
 
-            H5Aexists(fid, "nonexistent");
+            H5E_BEGIN_TRY {
+                H5Aexists(fid, "nonexistent");
+            } H5E_END_TRY;
         }
 
         /* Wait until the reader finishes validating zoo creation */
-        if (HDread(fd_reader_to_writer, &notify, sizeof(int)) < 0)
-            err(EXIT_FAILURE, "read failed");
-        if (notify != 3)
-            errx(EXIT_FAILURE, "expected 2 but read %d", notify);
+        if (HDread(fd_reader_to_writer, &notify, sizeof(int)) < 0) {
+            H5_FAILED(); AT();
+            printf("HDread failed");
+            goto error;
+        }
 
-        if (clock_gettime(CLOCK_MONOTONIC, &lastmsgtime) == -1)
-            errx(EXIT_FAILURE, "%s: clock_gettime", __func__);
+        if (notify != 2) {
+            H5_FAILED(); AT();
+            printf("expected 2 but read %d", notify);
+            notify = -1;
+            HDwrite(fd_writer_to_reader, &notify, sizeof(int));
+            goto error;
+        }
 
-        if (!delete_zoo(fid, ".", &lastmsgtime, config))
-            errx(EXIT_FAILURE, "delete_zoo failed");
+        /* Start to delete the zoo */
+        if (!delete_zoo(fid, ".", &lastmsgtime, config)) {
+            H5_FAILED(); AT();
+            printf("delete_zoo failed");
+            notify = -1;
+            HDwrite(fd_writer_to_reader, &notify, sizeof(int));
+            goto error;
+        }
 
-        /* Notify the reader about finishing zoo deletion */
-        notify = 4;
-        if (HDwrite(fd_writer_to_reader, &notify, sizeof(int)) == -1)
-            err(EXIT_FAILURE, "write failed");
+        /* Get the current time */
+        if (HDclock_gettime(CLOCK_MONOTONIC, &last) < 0) {
+            H5_FAILED(); AT();
+            printf("HDclock_gettime failed");
+            goto error;
+        }
 
+        /* Notify the reader about finishing zoo deletion by sending the timestamp */
+        if (HDwrite(fd_writer_to_reader, &last, sizeof(last)) < 0) {
+            H5_FAILED(); AT();
+            printf("HDwrite failed");
+            goto error;
+        }
     } else {
         dbgf(2, "Reading zoo...\n");
 
         /* Start to validate zoo creation after receiving the writer's notice */
-        if (HDread(fd_writer_to_reader, &notify, sizeof(int)) < 0)
-            err(EXIT_FAILURE, "read failed");
-        if (notify != 1)
-            errx(EXIT_FAILURE, "unexpected message %d", notify);
+        if (HDread(fd_writer_to_reader, &notify, sizeof(int)) < 0) {
+            H5_FAILED(); AT();
+            printf("HDread failed");
+            goto error;
+        }
 
-        /* Get the current time */
-        if (clock_gettime(CLOCK_MONOTONIC, &lastmsgtime) < 0)
-            errx(EXIT_FAILURE, "%s: clock_gettime", __func__);
-
-        last.tv_sec = lastmsgtime.tv_sec;
-        last.tv_nsec = lastmsgtime.tv_nsec;
+        if (notify != 1) {
+            H5_FAILED(); AT();
+            printf("expected 1 but read %d", notify);
+            goto error;
+        }
 
         while (!validate_zoo(fid, ".", &lastmsgtime, config))
             ;
 
-        /* Make sure zoo validation doesn't take longer than the expected time */
-        if (below_speed_limit(&last, &ival))
-            warnx("validate_zoo took too long to finish");
+        /* Receive the notice of the writer finishing zoo creation (timestamp) */
+        if (HDread(fd_writer_to_reader, &last, sizeof(last)) < 0) {
+            H5_FAILED(); AT();
+            printf("HDread failed");
+            goto error;
+        }
 
-        /* Receive the notice of the writer finishing zoo creation */
-        if (HDread(fd_writer_to_reader, &notify, sizeof(int)) < 0)
-            err(EXIT_FAILURE, "read failed");
-        if (notify != 2)
-            errx(EXIT_FAILURE, "unexpected message %d", notify);
+        /* Make sure zoo validation doesn't take longer than the expected time */
+        if (below_speed_limit(&last, &ival)) {
+            AT();
+            warnx("validate_zoo took too long to finish");
+        }
 
         /* Notify the writer that zoo validation is finished */
-        notify = 3;
-        if (HDwrite(fd_reader_to_writer, &notify, sizeof(int)) < 0)
-            err(EXIT_FAILURE, "write failed");
-
-        /* Get the current time before validating zoo deletion */
-        if (clock_gettime(CLOCK_MONOTONIC, &lastmsgtime) < 0)
-            errx(EXIT_FAILURE, "%s: clock_gettime", __func__);
-
-        last.tv_sec = lastmsgtime.tv_sec;
-        last.tv_nsec = lastmsgtime.tv_nsec;
+        notify = 2;
+        if (HDwrite(fd_reader_to_writer, &notify, sizeof(int)) < 0) {
+            H5_FAILED(); AT();
+            printf("HDwrite failed");
+            goto error;
+        }
 
         while (!validate_deleted_zoo(fid, ".", &lastmsgtime, config))
             ;
 
-        /* Make sure validation of zoo deletion doesn't take longer than the expected time */
-        if (below_speed_limit(&last, &ival))
-            warnx("validate_deleted_zoo took too long to finish");
+        /* Receive the finish notice (timestamp) from the writer */
+        //if (HDread(fd_writer_to_reader, &notify, sizeof(int)) < 0) {
+        if (HDread(fd_writer_to_reader, &last, sizeof(last)) < 0) {
+            H5_FAILED(); AT();
+            printf("HDread failed");
+            goto error;
+        }
 
-        /* Receive the finish notice from the writer */
-        if (HDread(fd_writer_to_reader, &notify, sizeof(int)) < 0)
-            err(EXIT_FAILURE, "read failed");
-        if (notify != 4)
-            errx(EXIT_FAILURE, "unexpected message %d", notify);
+        /* Make sure validation of zoo deletion doesn't take longer than the expected time */
+        if (below_speed_limit(&last, &ival)) {
+            AT();
+            warnx("validate_deleted_zoo took too long to finish");
+        }
     }
     restore_estack(es);
 
@@ -498,33 +552,74 @@ main(int argc, char **argv)
         }
     }
 
-    if (H5Pclose(fapl) < 0)
-        errx(EXIT_FAILURE, "H5Pclose(fapl)");
+    if (H5Pclose(fapl) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Pclose failed");
+        goto error;
+    }
 
-    if (H5Pclose(fcpl) < 0)
-        errx(EXIT_FAILURE, "H5Pclose(fcpl)");
+    if (H5Pclose(fcpl) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Pclose failed");
+        goto error;
+    }
 
-    if (H5Fclose(fid) < 0)
-        errx(EXIT_FAILURE, "H5Fclose");
+    if (H5Fclose(fid) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Fclose failed");
+        goto error;
+    }
 
     if (progname)
         HDfree(progname);
 
     /* Close the named pipes */
-    if (HDclose(fd_writer_to_reader) < 0)
-        errx(EXIT_FAILURE, "HDclose");
+    if (HDclose(fd_writer_to_reader) < 0) {
+        H5_FAILED(); AT();
+        printf("HDclose failed\n");
+        goto error;
+    }
 
-    if (HDclose(fd_reader_to_writer) < 0)
-        errx(EXIT_FAILURE, "HDclose");
+    if (HDclose(fd_reader_to_writer) < 0) {
+        H5_FAILED(); AT();
+        printf("HDclose failed\n");
+        goto error;
+    }
 
     /* Reader finishes last and deletes the named pipes */
     if(!writer) {
-        if(HDremove(fifo_writer_to_reader) != 0)
-            errx(EXIT_FAILURE, "fifo_writer_to_reader deletion failed");
+        if(HDremove(fifo_writer_to_reader) != 0) {
+            H5_FAILED(); AT();
+            printf("HDremove failed\n");
+            goto error;
+        }
 
-        if(HDremove(fifo_reader_to_writer) != 0)
-            errx(EXIT_FAILURE, "fifo_reader_to_writer deletion failed");
+        if(HDremove(fifo_reader_to_writer) != 0) {
+            H5_FAILED(); AT();
+            printf("HDremove failed\n");
+            goto error;
+        }
     }
 
     return EXIT_SUCCESS;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+    if (fd_writer_to_reader >= 0)
+        HDclose(fd_writer_to_reader);
+
+    if (fd_reader_to_writer >= 0)
+        HDclose(fd_reader_to_writer);
+
+    if(!writer) {
+        HDremove(fifo_writer_to_reader);
+        HDremove(fifo_reader_to_writer);
+    }
+
+    return EXIT_FAILURE;
 }

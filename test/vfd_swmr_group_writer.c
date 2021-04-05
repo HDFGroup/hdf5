@@ -245,15 +245,6 @@ verify_group(state_t *s, unsigned int which)
     return result;
 }
 
-/* Sleep for `tenths` tenths of a second */
-static void
-decisleep(uint32_t tenths)
-{
-    uint64_t nsec = tenths * 100 * 1000 * 1000;
-
-    H5_nanosleep(nsec);
-}
-
 int
 main(int argc, char **argv)
 {

@@ -19,6 +19,7 @@
  *        of the same name.
  */
 
+#include <err.h>
 #include "cache_common.h"
 #include "vfd_swmr_common.h" /* for below_speed_limit() */
 #include "genall5.h"
@@ -2754,8 +2755,9 @@ tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime, zoo_con
 out:
     if (!ok) {
         /* Only the zoo test for VFD SWMR does this step, making sure it doesn't take too long.
-         * Other tests sets config.msgival to 0 and will skip this step */
-        if (strcmp(failure_mssg, last_failure_mssg) != 0 && ((config.msgival.tv_sec || config.msgival.tv_nsec))) {
+         * Other tests sets config.msgival or lastmsgtime to 0 and will skip this step */
+        if (strcmp(failure_mssg, last_failure_mssg) != 0 && ((config.msgival.tv_sec || config.msgival.tv_nsec))
+            && (lastmsgtime->tv_sec || lastmsgtime->tv_nsec)) {
             if (below_speed_limit(lastmsgtime, &config.msgival)) {
                 last_failure_mssg = failure_mssg;
                 warnx("%s: %s", __func__, failure_mssg);

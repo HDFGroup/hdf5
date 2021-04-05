@@ -848,15 +848,6 @@ error:
     return 1;
 } /* test_writer_create_open_flush() */
 
-/* Sleep for `tenths` tenths of a second */
-static void
-decisleep(uint32_t tenths)
-{
-    uint64_t nsec = tenths * 100 * 1000 * 1000;
-
-    H5_nanosleep(nsec);
-}
-
 /*-------------------------------------------------------------------------
  * Function:    test_writer_md()
  *
