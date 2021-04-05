@@ -2220,8 +2220,10 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                 h5tools_str_append(buffer, "H5T_NATIVE_FLOAT");
             else if (H5Tequal(type, H5T_NATIVE_DOUBLE) == TRUE)
                 h5tools_str_append(buffer, "H5T_NATIVE_DOUBLE");
+            else if (H5Tequal(type, H5T_NATIVE_LDOUBLE) == TRUE)
+                h5tools_str_append(buffer, "H5T_NATIVE_LDOUBLE");
             else {
-
+                /* print what the library knows */
                 /* byte order */
                 if (H5Tget_size(type) > 1) {
                     order = H5Tget_order(type);
