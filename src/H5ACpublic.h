@@ -466,11 +466,10 @@ extern "C" {
  * configuration options for metadata and raw data caches.
  */
 
-//! [H5AC_cache_config_t_snip]
-
+//! <!-- [H5AC_cache_config_t_snip] -->
 typedef struct H5AC_cache_config_t {
     /* general configuration fields: */
-    //! [H5AC_cache_config_t_general_snip]
+    //! <!-- [H5AC_cache_config_t_general_snip] -->
     int version;
     /**<IN: Integer field indicating the the version of the H5AC_cache_config_t
      * in use. This field should be set to #H5AC__CURR_CACHE_CONFIG_VERSION
@@ -582,10 +581,10 @@ typedef struct H5AC_cache_config_t {
     long int epoch_length;
     /**<IN: Number of cache accesses between runs of the adaptive cache resize
      * code. 50,000 is a good starting number. */
-    //! [H5AC_cache_config_t_general_snip]
+    //! <!-- [H5AC_cache_config_t_general_snip] -->
 
     /* size increase control fields: */
-    //! [H5AC_cache_config_t_incr_snip]
+    //! <!-- [H5AC_cache_config_t_incr_snip] -->
     enum H5C_cache_incr_mode incr_mode;
     /**<IN: Enumerated value indicating the operational mode of the automatic
      * cache size increase code. At present, only two values listed in
@@ -640,10 +639,10 @@ typedef struct H5AC_cache_config_t {
      * obtain the minimum size entry / entry size increase which may trigger a
      * flash cache size increase. \n
      * At present, this value must lie in the range [0.1, 1.0]. */
-    //! [H5AC_cache_config_t_incr_snip]
+    //! <!-- [H5AC_cache_config_t_incr_snip] -->
 
     /* size decrease control fields: */
-    //! [H5AC_cache_config_t_decr_snip]
+    //! <!-- [H5AC_cache_config_t_decr_snip] -->
     enum H5C_cache_decr_mode decr_mode;
     /**<IN: Enumerated value indicating the operational mode of the tomatic
      * cache size decrease code. At present, the values listed in
@@ -698,10 +697,10 @@ typedef struct H5AC_cache_config_t {
      * so directed, the ageout based algorithms will not decrease the maximum
      * cache size unless the empty reserve can be met.\n The parameter must lie
      * in the interval [0.0, 1.0]. 0.1 or 0.05 is a good place to start. */
-    //! [H5AC_cache_config_t_decr_snip]
+    //! <!-- [H5AC_cache_config_t_decr_snip] -->
 
     /* parallel configuration fields: */
-    //! [H5AC_cache_config_t_parallel_snip]
+    //! <!-- [H5AC_cache_config_t_parallel_snip] -->
     size_t dirty_bytes_threshold;
     /**<IN: Threshold number of bytes of dirty metadata generation for
      * triggering synchronizations of the metadata caches serving the target
@@ -722,41 +721,39 @@ typedef struct H5AC_cache_config_t {
      * actual flushes are distributed across the processes in the computation to
      * the extent possible.\n The src/H5ACpublic.h include file in the HDF5
      * library has detailed information on each strategy. */
-    //! [H5AC_cache_config_t_parallel_snip]
+    //! <!-- [H5AC_cache_config_t_parallel_snip] -->
 } H5AC_cache_config_t;
-
-//! [H5AC_cache_config_t_snip]
+//! <!-- [H5AC_cache_config_t_snip] -->
 
 #define H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION 1
 
 #define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE -1
 #define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX  100
 
+//! <!-- [H5AC_cache_image_config_t_snip] -->
 /**
  * H5AC_cache_image_config_t is a public structure intended for use in public
  * APIs.  At least in its initial incarnation, it is a copy of \c struct \c
  * H5C_cache_image_ctl_t.
  */
 
-//! [H5AC_cache_image_config_t_snip]
-
 typedef struct H5AC_cache_image_config_t {
-    int     version;
+    int version;
     /**< Integer field containing the version number of this version of the \c
-      *  H5C_image_ctl_t structure.  Any instance of \c H5C_image_ctl_t passed
-      *  to the cache must have a known version number, or an error will be
-      *  flagged.
-      */
+     *  H5C_image_ctl_t structure.  Any instance of \c H5C_image_ctl_t passed
+     *  to the cache must have a known version number, or an error will be
+     *  flagged.
+     */
     hbool_t generate_image;
     /**< Boolean flag indicating whether a cache image should be created on file
      *   close.
      */
     hbool_t save_resize_status;
     /**< Boolean flag indicating whether the cache image should include the
-      *  adaptive cache resize configuration and status.  Note that this field
-      *  is ignored at present.
+     *  adaptive cache resize configuration and status.  Note that this field
+     *  is ignored at present.
      */
-    int     entry_ageout;
+    int entry_ageout;
     /**< Integer field indicating the maximum number of times a
      *   prefetched entry can appear in subsequent cache images.  This field
      *   exists to allow the user to avoid the buildup of infrequently used

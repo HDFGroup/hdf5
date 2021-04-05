@@ -189,9 +189,10 @@ typedef herr_t (*H5O_iterate2_t)(hid_t obj, const char *name, const H5O_info2_t 
 //! <!-- [H5O_mcdt_search_ret_t_snip] -->
 typedef enum H5O_mcdt_search_ret_t {
     H5O_MCDT_SEARCH_ERROR = -1, /**< Abort H5Ocopy */
-    H5O_MCDT_SEARCH_CONT, /**< Continue the global search of all committed datatypes in the destination file */
-    H5O_MCDT_SEARCH_STOP  /**< Stop the search, but continue copying.  The committed datatype will be copied but
-                             not merged. */
+    H5O_MCDT_SEARCH_CONT, /**< Continue the global search of all committed datatypes in the destination file
+                           */
+    H5O_MCDT_SEARCH_STOP  /**< Stop the search, but continue copying.  The committed datatype will be copied
+                             but not merged. */
 } H5O_mcdt_search_ret_t;
 //! <!-- [H5O_mcdt_search_ret_t_snip] -->
 
