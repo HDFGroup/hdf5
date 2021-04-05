@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,37 +26,36 @@
 
 #define PREFIX_SOURCE_FILE "extlink_prefix_source.h5"
 
-#define SOFT_LINK_FILE "soft_link.h5"
-#define SOFT_LINK_NAME "soft_link_to_group"
+#define SOFT_LINK_FILE    "soft_link.h5"
+#define SOFT_LINK_NAME    "soft_link_to_group"
 #define UD_SOFT_LINK_NAME "ud_soft_link"
-#define TARGET_GROUP "target_group"
+#define TARGET_GROUP      "target_group"
 
 #define UD_SOFT_CLASS 65
 
-#define HARD_LINK_FILE "hard_link.h5"
-#define HARD_LINK_NAME "hard_link_to_group"
+#define HARD_LINK_FILE    "hard_link.h5"
+#define HARD_LINK_NAME    "hard_link_to_group"
 #define UD_HARD_LINK_NAME "ud_hard_link"
 
 #define UD_HARD_CLASS 66
 
 #define PLIST_LINK_PROP "plist_link_prop"
-#define UD_PLIST_CLASS 66
+#define UD_PLIST_CLASS  66
 
-
-
 /* Basic external link example
  *
  * Creates two files and uses an external link to access an object in the
  * second file from the first file.
  */
-static void extlink_example(void)
+static void
+extlink_example(void)
 {
     hid_t source_file_id, targ_file_id;
     hid_t group_id, group2_id;
 
     /* Create two files, a source and a target */
     source_file_id = H5Fcreate(SOURCE_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    targ_file_id = H5Fcreate(TARGET_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    targ_file_id   = H5Fcreate(TARGET_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create a group in the target file for the external link to point to. */
     group_id = H5Gcreate2(targ_file_id, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -96,7 +95,6 @@ static void extlink_example(void)
      */
 }
 
-
 /* External link prefix example
  *
  * Uses a group access property list to set a "prefix" for the filenames
@@ -109,7 +107,8 @@ static void extlink_example(void)
  * where it is run (so to run this example on Unix, first mkdir red and mkdir
  * blue).
  */
-static void extlink_prefix_example(void)
+static void
+extlink_prefix_example(void)
 {
     hid_t source_file_id, red_file_id, blue_file_id;
     hid_t group_id, group2_id;
@@ -119,14 +118,15 @@ static void extlink_prefix_example(void)
      * the same name, but one will be located in the red directory and one will
      * be located in the blue directory */
     source_file_id = H5Fcreate(PREFIX_SOURCE_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    red_file_id = H5Fcreate("red/prefix_target.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    blue_file_id = H5Fcreate("blue/prefix_target.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    red_file_id    = H5Fcreate("red/prefix_target.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    blue_file_id   = H5Fcreate("blue/prefix_target.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* This test needs a red and a blue directory in the filesystem. If they're not present,
      * trying to create the files above will fail.
      */
-    if(red_file_id < 0 || blue_file_id < 0)
-      printf("This test requires directories named 'red' and 'blue' to exist. Did you forget to create them?\n");
+    if (red_file_id < 0 || blue_file_id < 0)
+        printf("This test requires directories named 'red' and 'blue' to exist. Did you forget to create "
+               "them?\n");
 
     /* Create an external link in the source file pointing to the root group of
      * a file named prefix_target.h5.  This file doesn't exist in the current
@@ -163,7 +163,7 @@ static void extlink_prefix_example(void)
      * directory.
      */
     H5Pset_elink_prefix(gapl_id, "blue/");
-    group_id = H5Gopen2(source_file_id, "ext_link", gapl_id);
+    group_id  = H5Gopen2(source_file_id, "ext_link", gapl_id);
     group2_id = H5Gcreate2(group_id, "sky blue", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Close both groups. */
@@ -171,7 +171,7 @@ static void extlink_prefix_example(void)
     H5Gclose(group_id);
 
     /* Each file has had a group created inside it using the same external link. */
-    group_id = H5Gopen2(red_file_id, "pink", H5P_DEFAULT);
+    group_id  = H5Gopen2(red_file_id, "pink", H5P_DEFAULT);
     group2_id = H5Gopen2(blue_file_id, "sky blue", H5P_DEFAULT);
 
     /* Clean up our open IDs */
@@ -189,7 +189,6 @@ static void extlink_prefix_example(void)
      */
 }
 
-
 /* Soft Link example
  *
  * Create a new class of user-defined links that behave like HDF5's built-in
@@ -207,10 +206,11 @@ static void extlink_prefix_example(void)
  * We might also have wanted to supply a creation callback that checks
  * that a path was supplied in the udata.
  */
-static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id);
+static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t udata_size,
+                              hid_t lapl_id, hid_t dxpl_id);
 
-static void soft_link_example(void)
+static void
+soft_link_example(void)
 {
     hid_t file_id;
     hid_t group_id;
@@ -220,27 +220,26 @@ static void soft_link_example(void)
      * callback.
      */
     const H5L_class_t UD_soft_class[1] = {{
-        H5L_LINK_CLASS_T_VERS,      /* Version number for this struct.
-                                     * This field is always H5L_LINK_CLASS_T_VERS */
-        (H5L_type_t)UD_SOFT_CLASS,  /* Link class id number. This can be any
-                                     * value between H5L_TYPE_UD_MIN (64) and
-                                     * H5L_TYPE_MAX (255). It should be a
-                                     * value that isn't already being used by
-                                     * another kind of link. We'll use 65. */
-        "UD_soft_link",             /* Link class name for debugging  */
-        NULL,                       /* Creation callback              */
-        NULL,                       /* Move callback                  */
-        NULL,                       /* Copy callback                  */
-        UD_soft_traverse,           /* The actual traversal function  */
-        NULL,                       /* Deletion callback              */
-        NULL                        /* Query callback                 */
+        H5L_LINK_CLASS_T_VERS,     /* Version number for this struct.
+                                    * This field is always H5L_LINK_CLASS_T_VERS */
+        (H5L_type_t)UD_SOFT_CLASS, /* Link class id number. This can be any
+                                    * value between H5L_TYPE_UD_MIN (64) and
+                                    * H5L_TYPE_MAX (255). It should be a
+                                    * value that isn't already being used by
+                                    * another kind of link. We'll use 65. */
+        "UD_soft_link",            /* Link class name for debugging  */
+        NULL,                      /* Creation callback              */
+        NULL,                      /* Move callback                  */
+        NULL,                      /* Copy callback                  */
+        UD_soft_traverse,          /* The actual traversal function  */
+        NULL,                      /* Deletion callback              */
+        NULL                       /* Query callback                 */
     }};
-
 
     /* First, create a file and an object within the file for the link to
      * point to.
      */
-    file_id = H5Fcreate(SOFT_LINK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id  = H5Fcreate(SOFT_LINK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     group_id = H5Gcreate2(file_id, TARGET_GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group_id);
 
@@ -275,12 +274,13 @@ static void soft_link_example(void)
  * The actual traversal function simply needs to open the correct object by
  * name and return its ID.
  */
-
-static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id)
+
+static hid_t
+UD_soft_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t udata_size, hid_t lapl_id,
+                 hid_t dxpl_id)
 {
-    const char *target = (const char *) udata;
-    hid_t ret_value;
+    const char *target = (const char *)udata;
+    hid_t       ret_value;
 
     /* Pass the udata straight through to HDF5. If it's invalid, let HDF5
      * return an error.
@@ -288,7 +288,6 @@ static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group,
     ret_value = H5Oopen(cur_group, target, lapl_id);
     return ret_value;
 }
-
 
 /* Hard Link example
  *
@@ -305,17 +304,17 @@ static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group,
  * To keep the example simple, these links don't have a query callback.
  * Generally, real link classes should always be query-able.
  */
-static herr_t UD_hard_create(const char *link_name, hid_t loc_group,
-    const void *udata, size_t udata_size, hid_t lcpl_id);
-static herr_t UD_hard_delete(const char *link_name, hid_t loc_group,
-    const void *udata, size_t udata_size);
-static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id);
+static herr_t UD_hard_create(const char *link_name, hid_t loc_group, const void *udata, size_t udata_size,
+                             hid_t lcpl_id);
+static herr_t UD_hard_delete(const char *link_name, hid_t loc_group, const void *udata, size_t udata_size);
+static hid_t  UD_hard_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t udata_size,
+                               hid_t lapl_id, hid_t dxpl_id);
 
-static void hard_link_example(void)
+static void
+hard_link_example(void)
 {
-    hid_t file_id;
-    hid_t group_id;
+    hid_t       file_id;
+    hid_t       group_id;
     H5L_info2_t li;
     /* Define the link class that we'll use to register "user-defined hard
      * links" using the callbacks we defined above.
@@ -323,27 +322,26 @@ static void hard_link_example(void)
      * callback.
      */
     const H5L_class_t UD_hard_class[1] = {{
-        H5L_LINK_CLASS_T_VERS,      /* Version number for this struct.
-                                     * This field is always H5L_LINK_CLASS_T_VERS */
-        (H5L_type_t)UD_HARD_CLASS,  /* Link class id number. This can be any
-                                     * value between H5L_TYPE_UD_MIN (64) and
-                                     * H5L_TYPE_MAX (255). It should be a
-                                     * value that isn't already being used by
-                                     * another kind of link. We'll use 66. */
-        "UD_hard_link",             /* Link class name for debugging  */
-        UD_hard_create,             /* Creation callback              */
-        NULL,                       /* Move callback                  */
-        NULL,                       /* Copy callback                  */
-        UD_hard_traverse,           /* The actual traversal function  */
-        UD_hard_delete,             /* Deletion callback              */
-        NULL                        /* Query callback                 */
+        H5L_LINK_CLASS_T_VERS,     /* Version number for this struct.
+                                    * This field is always H5L_LINK_CLASS_T_VERS */
+        (H5L_type_t)UD_HARD_CLASS, /* Link class id number. This can be any
+                                    * value between H5L_TYPE_UD_MIN (64) and
+                                    * H5L_TYPE_MAX (255). It should be a
+                                    * value that isn't already being used by
+                                    * another kind of link. We'll use 66. */
+        "UD_hard_link",            /* Link class name for debugging  */
+        UD_hard_create,            /* Creation callback              */
+        NULL,                      /* Move callback                  */
+        NULL,                      /* Copy callback                  */
+        UD_hard_traverse,          /* The actual traversal function  */
+        UD_hard_delete,            /* Deletion callback              */
+        NULL                       /* Query callback                 */
     }};
-
 
     /* First, create a file and an object within the file for the link to
      * point to.
      */
-    file_id = H5Fcreate(HARD_LINK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id  = H5Fcreate(HARD_LINK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     group_id = H5Gcreate2(file_id, TARGET_GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group_id);
 
@@ -366,8 +364,8 @@ static void hard_link_example(void)
     /* Now create a user-defined link.  We give it the group's address
      * as its udata.
      */
-    H5Lcreate_ud(file_id, UD_HARD_LINK_NAME, (H5L_type_t)UD_HARD_CLASS, &(li.u.token),
-                 sizeof(H5O_token_t), H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_ud(file_id, UD_HARD_LINK_NAME, (H5L_type_t)UD_HARD_CLASS, &(li.u.token), sizeof(H5O_token_t),
+                 H5P_DEFAULT, H5P_DEFAULT);
 
     /* The UD hard link has now incremented the group's reference count
      * like a normal hard link would.  This means that we can unlink the
@@ -401,42 +399,39 @@ static void hard_link_example(void)
  * If this function returns a negative value, the call to H5Lcreate_ud()
  * will also return failure and the link will not be created.
  */
-static herr_t UD_hard_create(const char *link_name, hid_t loc_group,
-    const void *udata, size_t udata_size, hid_t lcpl_id)
+static herr_t
+UD_hard_create(const char *link_name, hid_t loc_group, const void *udata, size_t udata_size, hid_t lcpl_id)
 {
     H5O_token_t token;
-    hid_t target_obj = H5I_INVALID_HID;
-    herr_t ret_value = 0;
+    hid_t       target_obj = H5I_INVALID_HID;
+    herr_t      ret_value  = 0;
 
     /* Make sure that the address passed in looks valid */
-    if(udata_size != sizeof(H5O_token_t))
-    {
-      ret_value = -1;
-      goto done;
+    if (udata_size != sizeof(H5O_token_t)) {
+        ret_value = -1;
+        goto done;
     }
 
-    token = *((H5O_token_t *) udata);
+    token = *((H5O_token_t *)udata);
 
     /* Open the object this link points to so that we can increment
      * its reference count. This also ensures that the token passed
      * in points to a real object (although this check is not perfect!) */
     target_obj = H5Oopen_by_token(loc_group, token);
-    if(target_obj < 0)
-    {
-      ret_value = -1;
-      goto done;
+    if (target_obj < 0) {
+        ret_value = -1;
+        goto done;
     }
 
     /* Increment the reference count of the target object */
-    if(H5Oincr_refcount(target_obj) < 0)
-    {
-      ret_value = -1;
-      goto done;
+    if (H5Oincr_refcount(target_obj) < 0) {
+        ret_value = -1;
+        goto done;
     }
 
 done:
     /* Close the target object if we opened it */
-    if(target_obj >= 0)
+    if (target_obj >= 0)
         H5Oclose(target_obj);
     return ret_value;
 }
@@ -445,42 +440,39 @@ done:
  * Since the creation function increments the object's reference count, it's
  * important to decrement it again when the link is deleted.
  */
-static herr_t UD_hard_delete(const char *link_name, hid_t loc_group,
-    const void *udata, size_t udata_size)
+static herr_t
+UD_hard_delete(const char *link_name, hid_t loc_group, const void *udata, size_t udata_size)
 {
     H5O_token_t token;
-    hid_t target_obj = H5I_INVALID_HID;
-    herr_t ret_value = 0;
+    hid_t       target_obj = H5I_INVALID_HID;
+    herr_t      ret_value  = 0;
 
     /* Sanity check; we have already verified the udata's size in the creation
      * callback.
      */
-    if(udata_size != sizeof(H5O_token_t))
-    {
-      ret_value = -1;
-      goto done;
+    if (udata_size != sizeof(H5O_token_t)) {
+        ret_value = -1;
+        goto done;
     }
 
-    token = *((H5O_token_t *) udata);
+    token = *((H5O_token_t *)udata);
 
     /* Open the object this link points to */
     target_obj = H5Oopen_by_token(loc_group, token);
-    if(target_obj < 0)
-    {
-      ret_value = -1;
-      goto done;
+    if (target_obj < 0) {
+        ret_value = -1;
+        goto done;
     }
 
     /* Decrement the reference count of the target object */
-    if(H5Odecr_refcount(target_obj) < 0)
-    {
-      ret_value = -1;
-      goto done;
+    if (H5Odecr_refcount(target_obj) < 0) {
+        ret_value = -1;
+        goto done;
     }
 
 done:
     /* Close the target object if we opened it */
-    if(target_obj >= 0)
+    if (target_obj >= 0)
         H5Oclose(target_obj);
     return ret_value;
 }
@@ -489,19 +481,20 @@ done:
  * The actual traversal function simply needs to open the correct object and
  * return its ID.
  */
-static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id)
+static hid_t
+UD_hard_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t udata_size, hid_t lapl_id,
+                 hid_t dxpl_id)
 {
     H5O_token_t token;
-    hid_t ret_value = H5I_INVALID_HID;
+    hid_t       ret_value = H5I_INVALID_HID;
 
     /* Sanity check; we have already verified the udata's size in the creation
      * callback.
      */
-    if(udata_size != sizeof(H5O_token_t))
-      return H5I_INVALID_HID;
+    if (udata_size != sizeof(H5O_token_t))
+        return H5I_INVALID_HID;
 
-    token = *((H5O_token_t *) udata);
+    token = *((H5O_token_t *)udata);
 
     /* Open the object by token. If H5Oopen_by_token fails, ret_value will
      * be negative to indicate that the traversal function failed.
@@ -510,8 +503,6 @@ static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group,
 
     return ret_value;
 }
-
-
 
 /* Plist example
  *
@@ -526,10 +517,11 @@ static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group,
  * These are defined after the example below.
  * These links have no udata, so they don't need a query function.
  */
-static hid_t UD_plist_traverse(const char *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id);
+static hid_t UD_plist_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t udata_size,
+                               hid_t lapl_id, hid_t dxpl_id);
 
-static void plist_link_example(void)
+static void
+plist_link_example(void)
 {
     hid_t file_id;
     hid_t group_id, group2_id;
@@ -558,11 +550,10 @@ static void plist_link_example(void)
         NULL                        /* Query callback                 */
     }};
 
-
     /* First, create a file and two objects within the file for the link to
      * point to.
      */
-    file_id = H5Fcreate(HARD_LINK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id  = H5Fcreate(HARD_LINK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     group_id = H5Gcreate2(file_id, "group_1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group_id);
     group_id = H5Gcreate2(file_id, "group_1/group_2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -570,8 +561,7 @@ static void plist_link_example(void)
 
     /* Register "plist links" and create one.  It has no udata at all. */
     H5Lregister(UD_plist_class);
-    H5Lcreate_ud(file_id, "plist_link", (H5L_type_t)UD_PLIST_CLASS, NULL, 0,
-                 H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_ud(file_id, "plist_link", (H5L_type_t)UD_PLIST_CLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create a group access property list to pass in the target for the
      * plist link.
@@ -617,17 +607,18 @@ static void plist_link_example(void)
 /* UD_plist_traverse
  * Open a path passed in through the property list.
  */
-static hid_t UD_plist_traverse(const char *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id)
+static hid_t
+UD_plist_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t udata_size, hid_t lapl_id,
+                  hid_t dxpl_id)
 {
-    char *        path;
-    hid_t         ret_value = H5I_INVALID_HID;
+    char *path;
+    hid_t ret_value = H5I_INVALID_HID;
 
     /* If the link property isn't set or can't be found, traversal fails. */
-    if(H5Pexist(lapl_id, PLIST_LINK_PROP) < 0)
+    if (H5Pexist(lapl_id, PLIST_LINK_PROP) < 0)
         goto error;
 
-    if(H5Pget(lapl_id, PLIST_LINK_PROP, &path) < 0)
+    if (H5Pget(lapl_id, PLIST_LINK_PROP, &path) < 0)
         goto error;
 
     /* Open the object by address. If H5Oopen_by_addr fails, ret_value will
@@ -641,13 +632,11 @@ error:
     return H5I_INVALID_HID;
 }
 
-
-
 /* Main function
  *
  * Invokes the example functions.
  */
- int
+int
 main(void)
 {
     printf("Testing basic external links.\n");
@@ -667,5 +656,3 @@ main(void)
 
     return 0;
 }
-
-

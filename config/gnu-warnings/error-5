@@ -10,4 +10,3 @@
 # warnings to errors only for GCC 5 and later.
 #
 -Werror=shadow
--Werror=int-conversion

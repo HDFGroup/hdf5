@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -60,6 +60,31 @@ if (HDF5_ENABLE_CODESTACK)
   set (${HDF_PREFIX}_HAVE_CODESTACK 1)
 endif ()
 MARK_AS_ADVANCED (HDF5_ENABLE_CODESTACK)
+
+# ----------------------------------------------------------------------
+# Check if they would like to use file locking by default
+#-----------------------------------------------------------------------------
+option (HDF5_USE_FILE_LOCKING "Use file locking by default (mainly for SWMR)" ON)
+if (HDF5_USE_FILE_LOCKING)
+  set (${HDF_PREFIX}_USE_FILE_LOCKING 1)
+endif ()
+
+# ----------------------------------------------------------------------
+# Check if they would like to ignore file locks when disabled on a file system
+#-----------------------------------------------------------------------------
+option (HDF5_IGNORE_DISABLED_FILE_LOCKS "Ignore file locks when disabled on file system" ON)
+if (HDF5_IGNORE_DISABLED_FILE_LOCKS)
+  set (${HDF_PREFIX}_IGNORE_DISABLED_FILE_LOCKS 1)
+endif ()
+
+# Set the libhdf5.settings file variable
+if (HDF5_IGNORE_DISABLED_FILE_LOCKS AND HDF5_USE_FILE_LOCKING)
+  set (HDF5_FILE_LOCKING_SETTING "best-effort")
+elseif (HDF5_IGNORE_DISABLED_FILE_LOCKS)
+  set (HDF5_FILE_LOCKING_SETTING "yes")
+else ()
+  set (HDF5_FILE_LOCKING_SETTING "no")
+endif ()
 
 #-----------------------------------------------------------------------------
 #  Are we going to use HSIZE_T

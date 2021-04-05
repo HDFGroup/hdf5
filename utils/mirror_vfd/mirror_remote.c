@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,7 +19,6 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
-
 /* ---------------------------------------------------------------------------
  * Function:    mirror_log
  *
@@ -28,39 +27,35 @@
  * ----------------------------------------------------------------------------
  */
 void
-mirror_log(struct mirror_log_info *info,
-           unsigned int            level,
-           const char             *format,
-           ...)
+mirror_log(struct mirror_log_info *info, unsigned int level, const char *format, ...)
 {
-    FILE *stream = MIRROR_LOG_DEFAULT_STREAM;
+    FILE *       stream    = MIRROR_LOG_DEFAULT_STREAM;
     unsigned int verbosity = MIRROR_LOG_DEFAULT_VERBOSITY;
-    hbool_t      custom = FALSE;
+    hbool_t      custom    = FALSE;
 
     if (info != NULL && info->magic == MIRROR_LOG_INFO_MAGIC) {
-        stream = info->stream;
+        stream    = info->stream;
         verbosity = info->verbosity;
-        custom = TRUE;
+        custom    = TRUE;
     }
 
     if (level == V_NONE) {
         return;
     }
-    else
-    if (level <= verbosity) {
+    else if (level <= verbosity) {
         if (custom == TRUE && info->prefix[0] != '\0') {
             HDfprintf(stream, "%s", info->prefix);
         }
 
         switch (level) {
-        case (V_ERR) :
-            HDfprintf(stream, "ERROR ");
-            break;
-        case (V_WARN) :
-            HDfprintf(stream, "WARNING ");
-            break;
-        default:
-            break;
+            case (V_ERR):
+                HDfprintf(stream, "ERROR ");
+                break;
+            case (V_WARN):
+                HDfprintf(stream, "WARNING ");
+                break;
+            default:
+                break;
         }
 
         if (format != NULL) {
@@ -75,7 +70,6 @@ mirror_log(struct mirror_log_info *info,
     } /* end if sufficiently verbose to print */
 } /* end mirror_log() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    session_log_bytes
  *
@@ -84,12 +78,9 @@ mirror_log(struct mirror_log_info *info,
  * ----------------------------------------------------------------------------
  */
 void
-mirror_log_bytes(struct mirror_log_info *info,
-                 unsigned int            level,
-                 size_t                  n_bytes,
-                 const unsigned char    *buf)
+mirror_log_bytes(struct mirror_log_info *info, unsigned int level, size_t n_bytes, const unsigned char *buf)
 {
-    FILE *stream = MIRROR_LOG_DEFAULT_STREAM;
+    FILE *       stream    = MIRROR_LOG_DEFAULT_STREAM;
     unsigned int verbosity = MIRROR_LOG_DEFAULT_VERBOSITY;
 
     if (buf == NULL) {
@@ -97,27 +88,25 @@ mirror_log_bytes(struct mirror_log_info *info,
     }
 
     if (info != NULL && info->magic == MIRROR_LOG_INFO_MAGIC) {
-        stream = info->stream;
+        stream    = info->stream;
         verbosity = info->verbosity;
     }
 
     if (level <= verbosity) {
-        size_t bytes_written = 0;
-        const unsigned char *b = NULL;
+        size_t               bytes_written = 0;
+        const unsigned char *b             = NULL;
 
         /* print whole lines */
         while ((n_bytes - bytes_written) >= 32) {
             b = buf + bytes_written; /* point to region in buffer */
             HDfprintf(stream,
-                    "%04zX  %02X%02X%02X%02X %02X%02X%02X%02X" \
-                          " %02X%02X%02X%02X %02X%02X%02X%02X" \
-                          " %02X%02X%02X%02X %02X%02X%02X%02X" \
-                          " %02X%02X%02X%02X %02X%02X%02X%02X\n",
-                    bytes_written,
-                    b[0], b[1], b[2], b[3],   b[4], b[5], b[6], b[7],
-                    b[8], b[9], b[10],b[11],  b[12],b[13],b[14],b[15],
-                    b[16],b[17],b[18],b[19],  b[20],b[21],b[22],b[23],
-                    b[24],b[25],b[26],b[27],  b[28],b[29],b[30],b[31]);
+                      "%04zX  %02X%02X%02X%02X %02X%02X%02X%02X"
+                      " %02X%02X%02X%02X %02X%02X%02X%02X"
+                      " %02X%02X%02X%02X %02X%02X%02X%02X"
+                      " %02X%02X%02X%02X %02X%02X%02X%02X\n",
+                      bytes_written, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11],
+                      b[12], b[13], b[14], b[15], b[16], b[17], b[18], b[19], b[20], b[21], b[22], b[23],
+                      b[24], b[25], b[26], b[27], b[28], b[29], b[30], b[31]);
             bytes_written += 32;
         }
 
@@ -128,9 +117,8 @@ mirror_log_bytes(struct mirror_log_info *info,
 
         /* partial line blocks */
         while ((n_bytes - bytes_written) >= 4) {
-            HDfprintf(stream, " %02X%02X%02X%02X",
-                    buf[bytes_written],   buf[bytes_written+1],
-                    buf[bytes_written+2], buf[bytes_written+3]);
+            HDfprintf(stream, " %02X%02X%02X%02X", buf[bytes_written], buf[bytes_written + 1],
+                      buf[bytes_written + 2], buf[bytes_written + 3]);
             bytes_written += 4;
         }
 
@@ -149,7 +137,6 @@ mirror_log_bytes(struct mirror_log_info *info,
     } /* end if suitably verbose to log */
 } /* end mirror_log_bytes() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    mirror_log_init
  *
@@ -166,9 +153,9 @@ mirror_log_init(char *path, char *prefix, unsigned int verbosity)
 
     info = (loginfo_t *)HDmalloc(sizeof(loginfo_t));
     if (info != NULL) {
-        info->magic = MIRROR_LOG_INFO_MAGIC;
+        info->magic     = MIRROR_LOG_INFO_MAGIC;
         info->verbosity = verbosity;
-        info->stream = MIRROR_LOG_DEFAULT_STREAM;
+        info->stream    = MIRROR_LOG_DEFAULT_STREAM;
         info->prefix[0] = '\0';
 
         if (prefix && *prefix) {
@@ -177,11 +164,10 @@ mirror_log_init(char *path, char *prefix, unsigned int verbosity)
 
         if (path && *path) {
             FILE *f = NULL;
-            f = HDfopen(path, "w");
+            f       = HDfopen(path, "w");
             if (NULL == f) {
-                HDfprintf(MIRROR_LOG_DEFAULT_STREAM,
-                        "WARN custom logging path could not be opened: %s\n",
-                        path);
+                HDfprintf(MIRROR_LOG_DEFAULT_STREAM, "WARN custom logging path could not be opened: %s\n",
+                          path);
                 info->magic += 1;
                 HDfree(info);
             }
@@ -195,7 +181,6 @@ mirror_log_init(char *path, char *prefix, unsigned int verbosity)
     return info;
 } /* end mirror_log_init() */
 
-
 /* ---------------------------------------------------------------------------
  * Function:    mirror_log_term
  *
@@ -222,4 +207,3 @@ mirror_log_term(loginfo_t *info)
 } /* end mirror_log_term() */
 
 #endif /* H5_HAVE_MIRROR_VFD */
-

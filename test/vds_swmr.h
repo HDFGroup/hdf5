@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -61,27 +61,26 @@
          "empty" regions will contain the VDS fill value.
 */
 
-
 /* All datasets are 3D */
-#define RANK                3
+#define RANK 3
 
 /* Lengths of string identifiers (file, dataset names, etc.) */
-#define NAME_LEN            32
+#define NAME_LEN 32
 
 /* Compression level */
-#define COMPRESSION_LEVEL   7
+#define COMPRESSION_LEVEL 7
 
 /* Number of source files */
-#define N_SOURCES      6
+#define N_SOURCES 6
 
 /* Dataset dimensions */
-#define SM_HEIGHT      2   /* K */
-#define LG_HEIGHT      4   /* N */
-#define FULL_HEIGHT    18  /* (3 * K) + (3 * N) */
-#define WIDTH          8   /* M */
+#define SM_HEIGHT   2  /* K */
+#define LG_HEIGHT   4  /* N */
+#define FULL_HEIGHT 18 /* (3 * K) + (3 * N) */
+#define WIDTH       8  /* M */
 
 /* Number of planes each writer will write */
-#define N_PLANES_TO_WRITE   25
+#define N_PLANES_TO_WRITE 25
 
 /* Planes */
 H5TEST_DLLVAR hsize_t PLANES[N_SOURCES][RANK];
@@ -96,4 +95,3 @@ H5TEST_DLLVAR char VDS_FILE_NAME[NAME_LEN];
 H5TEST_DLLVAR char SOURCE_DSET_PATH[NAME_LEN];
 H5TEST_DLLVAR char VDS_DSET_NAME[NAME_LEN];
 #endif /* VDS_SWMR_H */
-

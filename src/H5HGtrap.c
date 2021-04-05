@@ -1,27 +1,27 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /****************/
 /* Module Setup */
 /****************/
 
-#include "H5HGmodule.h"         /* This source code file is part of the H5HG module */
+#include "H5HGmodule.h" /* This source code file is part of the H5HG module */
 
 /*
  * Headers
  */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5HGpkg.h"		/* Global heaps				*/
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5HGpkg.h"    /* Global heaps				*/
 
 /* H5HG_trap() is an instrumentation point for the global heap.
  * The H5HG_trap() result modifies the global heap's treatment of
@@ -35,7 +35,7 @@
  * their own H5HG_trap() implementation that overrides the one in the library.
  *
  * H5HG_trap() returns `true` if the caller should generate an error-stack
- * entry and return an error code to the caller's caller. 
+ * entry and return an error code to the caller's caller.
  *
  * H5HG_trap() returns `false` if the caller should blithely carry on;
  * if NDEBUG is not #defined, then the caller will ordinarily abort the

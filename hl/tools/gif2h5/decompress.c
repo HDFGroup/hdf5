@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,45 +15,43 @@
 
 #include "gif.h"
 
-GIFWORD iWIDE, iHIGH, eWIDE, eHIGH, expand, numcols, strip, nostrip;
-unsigned long  cols[256];
-char *cmd;
+GIFWORD       iWIDE, iHIGH, eWIDE, eHIGH, expand, numcols, strip, nostrip;
+unsigned long cols[256];
+char *        cmd;
 
 FILE *fp;
 
-static GIFWORD
-    XC = 0, YC = 0,         /* Output X and Y coords of current pixel       */
-    InitCodeSize,           /* Starting code size, used during Clear        */
-    CodeSize,               /* Code size, read from GIF header              */
-    BytesPerScanline,       /* Bytes per scanline in output raster          */
-    IWidth, IHeight;        /* image dimensions                             */
-static int
-    BitOffset = 0,          /* Bit Offset of next code                      */
-    Pass = 0,               /* Used by output routine if GIFWORDerlaced pic    */
-    OutCount = 0,           /* Decompressor output 'stack count'            */
-    Code,                   /* Value returned by ReadCode                   */
-    MaxCode,                /* limiting value for current code size         */
-    ClearCode,              /* GIF clear code                               */
-    EOFCode,                /* GIF end-of-information code                  */
-    CurCode, OldCode, InCode,   /* Decompressor variables                   */
-    FirstFree,              /* First free code, generated per GIF spec      */
-    FreeCode,               /* Decompressor, next free slot in hash table   */
-    FinChar,                /* Decompressor variable                        */
-    DataMask,               /* AND mask for data size                       */
-    ReadMask;               /* Code AND mask for current code size          */
+static GIFWORD XC = 0, YC = 0, /* Output X and Y coords of current pixel       */
+    InitCodeSize,              /* Starting code size, used during Clear        */
+    CodeSize,                  /* Code size, read from GIF header              */
+    BytesPerScanline,          /* Bytes per scanline in output raster          */
+    IWidth, IHeight;           /* image dimensions                             */
+static int BitOffset = 0,      /* Bit Offset of next code                      */
+    Pass             = 0,      /* Used by output routine if GIFWORDerlaced pic    */
+    OutCount         = 0,      /* Decompressor output 'stack count'            */
+    Code,                      /* Value returned by ReadCode                   */
+    MaxCode,                   /* limiting value for current code size         */
+    ClearCode,                 /* GIF clear code                               */
+    EOFCode,                   /* GIF end-of-information code                  */
+    CurCode, OldCode, InCode,  /* Decompressor variables                   */
+    FirstFree,                 /* First free code, generated per GIF spec      */
+    FreeCode,                  /* Decompressor, next free slot in hash table   */
+    FinChar,                   /* Decompressor variable                        */
+    DataMask,                  /* AND mask for data size                       */
+    ReadMask;                  /* Code AND mask for current code size          */
 
 /*MODIFICATIONS*/
-GIFBYTE tempbyte[10];
-GIFBYTE * tempGIFBYTEptr[10];
-GIFWORD tempint[10];
-GIFWORD ImageCount = 0;
+GIFBYTE  tempbyte[10];
+GIFBYTE *tempGIFBYTEptr[10];
+GIFWORD  tempint[10];
+GIFWORD  ImageCount = 0;
 /*END MODIFICATION*/
 
 boolean Interlace, HasColormap;
 
-GIFBYTE *Image;                /* The result array                             */
-GIFBYTE *RawGIF;               /* The heap array to hold it, raw               */
-GIFBYTE *Raster;               /* The raster data stream, unblocked            */
+GIFBYTE *Image;  /* The result array                             */
+GIFBYTE *RawGIF; /* The heap array to hold it, raw               */
+GIFBYTE *Raster; /* The raster data stream, unblocked            */
 
 /* The hash table used by the decompressor */
 
@@ -66,7 +64,7 @@ int *OutCode;
 
 /* The color map, read from the GIF header */
 
-int  numused;
+int numused;
 
 /*
  * Fetch the next code from the raster data stream.  The codes can be any
@@ -82,7 +80,7 @@ ReadCode(void)
     int RawCode, ByteOffset;
 
     ByteOffset = BitOffset / 8;
-    RawCode = Raster[ByteOffset] + (0x100 * Raster[ByteOffset + 1]);
+    RawCode    = Raster[ByteOffset] + (0x100 * Raster[ByteOffset + 1]);
 
     if (CodeSize >= 8)
         RawCode += (0x10000 * Raster[ByteOffset + 2]);
@@ -95,10 +93,8 @@ ReadCode(void)
 static void
 AddToPixel(GIFBYTE Index)
 {
-    if (YC<IHeight)
-    *(Image + YC * BytesPerScanline + XC) = Index;
-
-
+    if (YC < IHeight)
+        *(Image + YC * BytesPerScanline + XC) = Index;
 
     /* Update the X-coordinate, and if it overflows, update the
      * Y-coordinate */
@@ -113,40 +109,41 @@ AddToPixel(GIFBYTE Index)
 
         if (!Interlace) {
             YC++;
-        } else {
+        }
+        else {
             switch (Pass) {
-            case 0:
-                YC += 8;
+                case 0:
+                    YC += 8;
 
-                if (YC >= IHeight) {
-                    Pass++;
-                    YC = 4;
-                }
+                    if (YC >= IHeight) {
+                        Pass++;
+                        YC = 4;
+                    }
 
-                break;
-            case 1:
-                YC += 8;
+                    break;
+                case 1:
+                    YC += 8;
 
-                if (YC >= IHeight) {
-                    Pass++;
-                    YC = 2;
-                }
+                    if (YC >= IHeight) {
+                        Pass++;
+                        YC = 2;
+                    }
 
-                break;
-            case 2:
-                YC += 4;
+                    break;
+                case 2:
+                    YC += 4;
 
-                if (YC >= IHeight) {
-                    Pass++;
-                    YC = 1;
-                }
+                    if (YC >= IHeight) {
+                        Pass++;
+                        YC = 1;
+                    }
 
-                break;
-            case 3:
-                YC += 2;
-                break;
-            default:
-                break;
+                    break;
+                case 3:
+                    YC += 2;
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -172,20 +169,20 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
         exit(EXIT_FAILURE);
     }
 
-    XC = 0;
-    YC = 0;
-    Pass = 0;
-    OutCount = 0;
+    XC        = 0;
+    YC        = 0;
+    Pass      = 0;
+    OutCount  = 0;
     BitOffset = 0;
 
-    DataMask = (1 << ((GifHead->PackedField & 0x07) +1)) -1;
-    Raster = GifImageDesc->GIFImage;
+    DataMask = (1 << ((GifHead->PackedField & 0x07) + 1)) - 1;
+    Raster   = GifImageDesc->GIFImage;
 
     /* Check for image seperator */
 
     /* Now read in values from the image descriptor */
-    IWidth = GifImageDesc->ImageWidth;
-    IHeight = GifImageDesc->ImageHeight;
+    IWidth    = GifImageDesc->ImageWidth;
+    IHeight   = GifImageDesc->ImageHeight;
     Interlace = (uint8_t)(GifImageDesc->PackedField & 0x40);
 
     /*
@@ -200,9 +197,9 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
      * compute decompressor constant values, based on this code size.
      */
 
-    CodeSize = GifImageDesc->CodeSize;
+    CodeSize  = GifImageDesc->CodeSize;
     ClearCode = (1 << CodeSize);
-    EOFCode = ClearCode + 1;
+    EOFCode   = ClearCode + 1;
     FreeCode = FirstFree = ClearCode + 2;
 
     /*
@@ -214,8 +211,8 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
 
     CodeSize++;
     InitCodeSize = CodeSize;
-    MaxCode = (1 << CodeSize);
-    ReadMask = MaxCode - 1;
+    MaxCode      = (1 << CodeSize);
+    ReadMask     = MaxCode - 1;
 
     /*
      * Read the raster data.  Here we just transpose it from the GIF array to
@@ -225,7 +222,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
 
     /* Allocate the Image */
 
-    if (!(Image = (GIFBYTE *)malloc((size_t)IWidth*(size_t)IHeight))) {
+    if (!(Image = (GIFBYTE *)malloc((size_t)IWidth * (size_t)IHeight))) {
         printf("Out of memory");
         exit(EXIT_FAILURE);
     }
@@ -246,13 +243,14 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
          */
         if (Code == ClearCode) {
             CodeSize = InitCodeSize;
-            MaxCode = (1 << CodeSize);
+            MaxCode  = (1 << CodeSize);
             ReadMask = MaxCode - 1;
             FreeCode = FirstFree;
             CurCode = OldCode = Code = ReadCode();
-            FinChar = CurCode & DataMask;
+            FinChar                  = CurCode & DataMask;
             AddToPixel((GIFBYTE)FinChar);
-        } else {
+        }
+        else {
             /*
              * If not a clear code, then must be data: save same as CurCode
              * and InCode
@@ -264,7 +262,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
              * repeat the last character decoded
              */
             if (CurCode >= FreeCode) {
-                CurCode = OldCode;
+                CurCode             = OldCode;
                 OutCode[OutCount++] = FinChar;
             }
 
@@ -279,11 +277,11 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
                 }
 
                 OutCode[OutCount++] = Suffix[CurCode];
-                CurCode = Prefix[CurCode];
+                CurCode             = Prefix[CurCode];
             }
 
             /* The last code in the chain is treated as raw data. */
-            FinChar = CurCode & DataMask;
+            FinChar             = CurCode & DataMask;
             OutCode[OutCount++] = FinChar;
 
             /*
@@ -301,7 +299,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
              */
             Prefix[FreeCode] = OldCode;
             Suffix[FreeCode] = FinChar;
-            OldCode = InCode;
+            OldCode          = InCode;
 
             /*
              * Point to the next slot in the table.  If we exceed the current

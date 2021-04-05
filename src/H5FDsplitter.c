@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,38 +19,38 @@
 /* This source code file is part of the H5FD driver module */
 #include "H5FDdrvr_module.h"
 
-#include "H5private.h"      /* Generic Functions        */
-#include "H5Eprivate.h"     /* Error handling           */
-#include "H5Fprivate.h"     /* File access              */
-#include "H5FDprivate.h"    /* File drivers             */
-#include "H5FDsplitter.h"   /* Splitter file driver     */
-#include "H5FLprivate.h"    /* Free Lists               */
-#include "H5Iprivate.h"     /* IDs                      */
-#include "H5MMprivate.h"    /* Memory management        */
-#include "H5FDsec2.h"       /* Generic Functions        */
-#include "H5FDstdio.h"      /* Generic Functions        */
-#include "H5Pprivate.h"     /* Property lists           */
+#include "H5private.h"    /* Generic Functions        */
+#include "H5Eprivate.h"   /* Error handling           */
+#include "H5Fprivate.h"   /* File access              */
+#include "H5FDprivate.h"  /* File drivers             */
+#include "H5FDsplitter.h" /* Splitter file driver     */
+#include "H5FLprivate.h"  /* Free Lists               */
+#include "H5Iprivate.h"   /* IDs                      */
+#include "H5MMprivate.h"  /* Memory management        */
+#include "H5FDsec2.h"     /* Generic Functions        */
+#include "H5FDstdio.h"    /* Generic Functions        */
+#include "H5Pprivate.h"   /* Property lists           */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SPLITTER_g = 0;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_splitter_fapl_t {
-    hid_t rw_fapl_id;   /* fapl for the R/W channel       */
-    hid_t wo_fapl_id;   /* fapl for the W/O channel       */
-    char wo_path[H5FD_SPLITTER_PATH_MAX + 1]; /* file name for the W/O channel */
-    char log_file_path[H5FD_SPLITTER_PATH_MAX + 1]; /* file to record errors reported by the W/O channel */
-    hbool_t ignore_wo_errs; /* TRUE to ignore errors on the W/O channel */
+    hid_t   rw_fapl_id;                                /* fapl for the R/W channel       */
+    hid_t   wo_fapl_id;                                /* fapl for the W/O channel       */
+    char    wo_path[H5FD_SPLITTER_PATH_MAX + 1];       /* file name for the W/O channel */
+    char    log_file_path[H5FD_SPLITTER_PATH_MAX + 1]; /* file to record errors reported by the W/O channel */
+    hbool_t ignore_wo_errs;                            /* TRUE to ignore errors on the W/O channel */
 } H5FD_splitter_fapl_t;
 
 /* The information of this splitter */
 typedef struct H5FD_splitter_t {
-    H5FD_t pub;         /* public stuff, must be first    */
-    unsigned version;   /* version of the H5FD_splitter_vfd_config_t structure used */
-    H5FD_splitter_fapl_t fa; /* driver-specific file access properties */
-    H5FD_t  *rw_file;   /* pointer of R/W channel */
-    H5FD_t  *wo_file;   /* pointer of W/O channel */
-    FILE    *logfp;     /* Log file pointer */
+    H5FD_t               pub;     /* public stuff, must be first    */
+    unsigned             version; /* version of the H5FD_splitter_vfd_config_t structure used */
+    H5FD_splitter_fapl_t fa;      /* driver-specific file access properties */
+    H5FD_t *             rw_file; /* pointer of R/W channel */
+    H5FD_t *             wo_file; /* pointer of W/O channel */
+    FILE *               logfp;   /* Log file pointer */
 } H5FD_splitter_t;
 
 /*
@@ -68,36 +68,36 @@ typedef struct H5FD_splitter_t {
  *                  which can be addressed entirely by the second
  *                  argument of the file seek function.
  */
-#define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
-#define ADDR_OVERFLOW(A)    (HADDR_UNDEF==(A) || ((A) & ~(haddr_t)MAXADDR))
-#define SIZE_OVERFLOW(Z)    ((Z) & ~(hsize_t)MAXADDR)
-#define REGION_OVERFLOW(A,Z)    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) ||    \
-                                 HADDR_UNDEF==(A)+(Z) ||                    \
-                                (HDoff_t)((A)+(Z))<(HDoff_t)(A))
+#define MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
+#define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
+#define REGION_OVERFLOW(A, Z)                                                                                \
+    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
 
 /* This macro provides a wrapper for shared fail-log-ignore behavior
  * for errors arising in the splitter's W/O channel.
  * Logs an error entry in a log file, if the file exists.
  * If not set to ignore errors, registers an error with the library.
  */
-#define H5FD_SPLITTER_WO_ERROR(file, funcname, errmajor, errminor, ret, mesg) \
-{                                                                             \
-    H5FD__splitter_log_error((file), (funcname), (mesg));                     \
-    if (FALSE == (file)->fa.ignore_wo_errs) {                                 \
-        HGOTO_ERROR((errmajor), (errminor), (ret), (mesg))                    \
-    }                                                                         \
-}
+#define H5FD_SPLITTER_WO_ERROR(file, funcname, errmajor, errminor, ret, mesg)                                \
+    {                                                                                                        \
+        H5FD__splitter_log_error((file), (funcname), (mesg));                                                \
+        if (FALSE == (file)->fa.ignore_wo_errs) {                                                            \
+            HGOTO_ERROR((errmajor), (errminor), (ret), (mesg))                                               \
+        }                                                                                                    \
+    }
 
 #define H5FD_SPLITTER_DEBUG_OP_CALLS 0 /* debugging print toggle; 0 disables */
 
 #if H5FD_SPLITTER_DEBUG_OP_CALLS
-#define H5FD_SPLITTER_LOG_CALL(name) do { \
-    HDprintf("called %s()\n", (name));    \
-    fflush(stdout);                       \
-} while (0)
+#define H5FD_SPLITTER_LOG_CALL(name)                                                                         \
+    do {                                                                                                     \
+        HDprintf("called %s()\n", (name));                                                                   \
+        fflush(stdout);                                                                                      \
+    } while (0)
 #else
 #define H5FD_SPLITTER_LOG_CALL(name) /* no-op */
-#endif /* H5FD_SPLITTER_DEBUG_OP_CALLS */
+#endif                               /* H5FD_SPLITTER_DEBUG_OP_CALLS */
 
 /* Private functions */
 
@@ -107,71 +107,72 @@ static herr_t H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *
 static int H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
 /* Prototypes */
-static herr_t H5FD_splitter_term(void);
+static herr_t  H5FD_splitter_term(void);
 static hsize_t H5FD_splitter_sb_size(H5FD_t *_file);
-static herr_t H5FD_splitter_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*/);
-static herr_t H5FD_splitter_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
-static void *H5FD_splitter_fapl_get(H5FD_t *_file);
-static void *H5FD_splitter_fapl_copy(const void *_old_fa);
-static herr_t H5FD_splitter_fapl_free(void *_fapl);
+static herr_t  H5FD_splitter_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
+static herr_t  H5FD_splitter_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
+static void *  H5FD_splitter_fapl_get(H5FD_t *_file);
+static void *  H5FD_splitter_fapl_copy(const void *_old_fa);
+static herr_t  H5FD_splitter_fapl_free(void *_fapl);
 static H5FD_t *H5FD_splitter_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
-static herr_t H5FD_splitter_close(H5FD_t *_file);
-static int H5FD_splitter_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
-static herr_t H5FD_splitter_query(const H5FD_t *_file, unsigned long *flags /* out */);
-static herr_t H5FD_splitter_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map);
+static herr_t  H5FD_splitter_close(H5FD_t *_file);
+static int     H5FD_splitter_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
+static herr_t  H5FD_splitter_query(const H5FD_t *_file, unsigned long *flags /* out */);
+static herr_t  H5FD_splitter_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map);
 static haddr_t H5FD_splitter_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
-static herr_t H5FD_splitter_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size);
+static herr_t  H5FD_splitter_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size);
 static haddr_t H5FD_splitter_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type);
-static herr_t H5FD_splitter_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr);
+static herr_t  H5FD_splitter_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr);
 static haddr_t H5FD_splitter_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type);
-static herr_t  H5FD_splitter_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void** file_handle);
-static herr_t H5FD_splitter_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *buf);
-static herr_t H5FD_splitter_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf);
-static herr_t H5FD_splitter_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t H5FD_splitter_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t H5FD_splitter_lock(H5FD_t *_file, hbool_t rw);
-static herr_t H5FD_splitter_unlock(H5FD_t *_file);
+static herr_t  H5FD_splitter_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handle);
+static herr_t  H5FD_splitter_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                                  void *buf);
+static herr_t  H5FD_splitter_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                                   const void *buf);
+static herr_t  H5FD_splitter_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD_splitter_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD_splitter_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD_splitter_unlock(H5FD_t *_file);
 
 static const H5FD_class_t H5FD_splitter_g = {
-    "splitter",                 /* name                 */
-    MAXADDR,                    /* maxaddr              */
-    H5F_CLOSE_WEAK,             /* fc_degree            */
-    H5FD_splitter_term,         /* terminate            */
-    H5FD_splitter_sb_size,      /* sb_size              */
-    H5FD_splitter_sb_encode,    /* sb_encode            */
-    H5FD_splitter_sb_decode,    /* sb_decode            */
+    "splitter",                   /* name                 */
+    MAXADDR,                      /* maxaddr              */
+    H5F_CLOSE_WEAK,               /* fc_degree            */
+    H5FD_splitter_term,           /* terminate            */
+    H5FD_splitter_sb_size,        /* sb_size              */
+    H5FD_splitter_sb_encode,      /* sb_encode            */
+    H5FD_splitter_sb_decode,      /* sb_decode            */
     sizeof(H5FD_splitter_fapl_t), /* fapl_size          */
-    H5FD_splitter_fapl_get,     /* fapl_get             */
-    H5FD_splitter_fapl_copy,    /* fapl_copy            */
-    H5FD_splitter_fapl_free,    /* fapl_free            */
-    0,                          /* dxpl_size            */
-    NULL,                       /* dxpl_copy            */
-    NULL,                       /* dxpl_free            */
-    H5FD_splitter_open,         /* open                 */
-    H5FD_splitter_close,        /* close                */
-    H5FD_splitter_cmp,          /* cmp                  */
-    H5FD_splitter_query,        /* query                */
-    H5FD_splitter_get_type_map, /* get_type_map         */
-    H5FD_splitter_alloc,        /* alloc                */
-    H5FD_splitter_free,         /* free                 */
-    H5FD_splitter_get_eoa,      /* get_eoa              */
-    H5FD_splitter_set_eoa,      /* set_eoa              */
-    H5FD_splitter_get_eof,      /* get_eof              */
-    H5FD_splitter_get_handle,   /* get_handle           */
-    H5FD_splitter_read,         /* read                 */
-    H5FD_splitter_write,        /* write                */
-    H5FD_splitter_flush,        /* flush                */
-    H5FD_splitter_truncate,     /* truncate             */
-    H5FD_splitter_lock,         /* lock                 */
-    H5FD_splitter_unlock,       /* unlock               */
-    NULL,                       /* dedup                */
-    H5FD_FLMAP_DICHOTOMY        /* fl_map               */
+    H5FD_splitter_fapl_get,       /* fapl_get             */
+    H5FD_splitter_fapl_copy,      /* fapl_copy            */
+    H5FD_splitter_fapl_free,      /* fapl_free            */
+    0,                            /* dxpl_size            */
+    NULL,                         /* dxpl_copy            */
+    NULL,                         /* dxpl_free            */
+    H5FD_splitter_open,           /* open                 */
+    H5FD_splitter_close,          /* close                */
+    H5FD_splitter_cmp,            /* cmp                  */
+    H5FD_splitter_query,          /* query                */
+    H5FD_splitter_get_type_map,   /* get_type_map         */
+    H5FD_splitter_alloc,          /* alloc                */
+    H5FD_splitter_free,           /* free                 */
+    H5FD_splitter_get_eoa,        /* get_eoa              */
+    H5FD_splitter_set_eoa,        /* set_eoa              */
+    H5FD_splitter_get_eof,        /* get_eof              */
+    H5FD_splitter_get_handle,     /* get_handle           */
+    H5FD_splitter_read,           /* read                 */
+    H5FD_splitter_write,          /* write                */
+    H5FD_splitter_flush,          /* flush                */
+    H5FD_splitter_truncate,       /* truncate             */
+    H5FD_splitter_lock,           /* lock                 */
+    H5FD_splitter_unlock,         /* unlock               */
+    NULL,                         /* dedup                */
+    H5FD_FLMAP_DICHOTOMY          /* fl_map               */
 };
 
 /* Declare a free list to manage the H5FD_splitter_t struct */
 H5FL_DEFINE_STATIC(H5FD_splitter_t);
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD__init_package
  *
@@ -197,7 +198,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__init_package() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_init
  *
@@ -227,7 +227,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_init() */
 
-
 /*---------------------------------------------------------------------------
  * Function:    H5FD_splitter_term
  *
@@ -249,8 +248,7 @@ H5FD_splitter_term(void)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_splitter_term() */
 
-
- /*-------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
  * Function:    H5FD__copy_plist
  *
  * Purpose:     Sanity-wrapped H5P_copy_plist() for each channel.
@@ -260,11 +258,10 @@ H5FD_splitter_term(void)
  *-------------------------------------------------------------------------
  */
 static int
-H5FD__copy_plist(hid_t   fapl_id,
-                 hid_t  *id_out_ptr)
+H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
 {
-    int                 ret_value = 0;
-    H5P_genplist_t     *plist_ptr = NULL;
+    int             ret_value = 0;
+    H5P_genplist_t *plist_ptr = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -290,7 +287,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__copy_plist() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_splitter
  *
@@ -303,9 +299,9 @@ done:
 herr_t
 H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *vfd_config)
 {
-    H5FD_splitter_fapl_t  info;
-    H5P_genplist_t       *plist_ptr = NULL;
-    herr_t                ret_value = SUCCEED;
+    H5FD_splitter_fapl_t info;
+    H5P_genplist_t *     plist_ptr = NULL;
+    herr_t               ret_value = SUCCEED;
 
     H5Eclear2(H5E_DEFAULT);
 
@@ -325,7 +321,6 @@ H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *vfd_config)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid property list")
     }
 
-
     /* Make sure that the W/O channel supports write-only capability.
      * Some drivers (e.g. family or multi) do revision of the superblock
      * in-memory, causing problems in that channel.
@@ -333,10 +328,10 @@ H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *vfd_config)
      * determining attribute.
      */
     if (H5P_DEFAULT != vfd_config->wo_fapl_id) {
-        H5FD_class_t       *wo_driver = NULL;
-        H5FD_driver_prop_t  wo_driver_prop;
-        H5P_genplist_t     *wo_plist_ptr = NULL;
-        unsigned long       wo_driver_flags = 0;
+        H5FD_class_t *     wo_driver = NULL;
+        H5FD_driver_prop_t wo_driver_prop;
+        H5P_genplist_t *   wo_plist_ptr    = NULL;
+        unsigned long      wo_driver_flags = 0;
 
         wo_plist_ptr = (H5P_genplist_t *)H5I_object(vfd_config->wo_fapl_id);
         if (NULL == wo_plist_ptr) {
@@ -356,7 +351,6 @@ H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *vfd_config)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unsuitable W/O driver")
         }
     } /* end if W/O VFD is non-default */
-
 
     info.ignore_wo_errs = vfd_config->ignore_wo_errs;
     HDstrncpy(info.wo_path, vfd_config->wo_path, H5FD_SPLITTER_PATH_MAX);
@@ -384,7 +378,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_splitter() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_splitter
  *
@@ -401,7 +394,7 @@ herr_t
 H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_out)
 {
     const H5FD_splitter_fapl_t *fapl_ptr  = NULL;
-    H5P_genplist_t             *plist_ptr = NULL;
+    H5P_genplist_t *            plist_ptr = NULL;
     herr_t                      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -454,7 +447,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fapl_splitter() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_flush
  *
@@ -466,8 +458,8 @@ done:
 static herr_t
 H5FD_splitter_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 {
-    H5FD_splitter_t *file = (H5FD_splitter_t *)_file;
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -478,16 +470,14 @@ H5FD_splitter_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
         HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "unable to flush R/W file")
     }
     if (H5FDflush(file->wo_file, dxpl_id, closing) < 0) {
-       H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_flush",
-                              H5E_VFL, H5E_CANTFLUSH, FAIL,
-                              "unable to flush W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_flush", H5E_VFL, H5E_CANTFLUSH, FAIL,
+                               "unable to flush W/O file")
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_flush() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_read
  *
@@ -503,16 +493,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_splitter_read(
-        H5FD_t     *_file,
-        H5FD_mem_t  H5_ATTR_UNUSED type,
-        hid_t       H5_ATTR_UNUSED dxpl_id,
-        haddr_t     addr,
-        size_t      size,
-        void       *buf /*out*/)
+H5FD_splitter_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
+                   size_t size, void *buf /*out*/)
 {
-    H5FD_splitter_t *file       = (H5FD_splitter_t *)_file;
-    herr_t          ret_value   = SUCCEED;
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
+    herr_t           ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -539,7 +524,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_read() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_write
  *
@@ -554,7 +538,7 @@ static herr_t
 H5FD_splitter_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf)
 {
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
-    H5P_genplist_t  *plist_ptr     = NULL;
+    H5P_genplist_t * plist_ptr = NULL;
     herr_t           ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -571,16 +555,14 @@ H5FD_splitter_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "R/W file write failed")
     }
     if (H5FDwrite(file->wo_file, type, dxpl_id, addr, size, buf) < 0) {
-       H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_write",
-                              H5E_VFL, H5E_WRITEERROR, FAIL,
-                              "unable to write W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_write", H5E_VFL, H5E_WRITEERROR, FAIL,
+                               "unable to write W/O file")
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_write() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_fapl_get
  *
@@ -597,7 +579,7 @@ static void *
 H5FD_splitter_fapl_get(H5FD_t *_file)
 {
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
-    void            *ret_value = NULL;
+    void *           ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -608,7 +590,6 @@ H5FD_splitter_fapl_get(H5FD_t *_file)
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_fapl_copy
  *
@@ -622,8 +603,8 @@ static void *
 H5FD_splitter_fapl_copy(const void *_old_fa)
 {
     const H5FD_splitter_fapl_t *old_fa_ptr = (const H5FD_splitter_fapl_t *)_old_fa;
-    H5FD_splitter_fapl_t       *new_fa_ptr = NULL;
-    void                       *ret_value  = NULL;
+    H5FD_splitter_fapl_t *      new_fa_ptr = NULL;
+    void *                      ret_value  = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -666,7 +647,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_fapl_copy() */
 
-
 /*--------------------------------------------------------------------------
  * Function:    H5FD_splitter_fapl_free
  *
@@ -678,7 +658,7 @@ done:
 static herr_t
 H5FD_splitter_fapl_free(void *_fapl)
 {
-    H5FD_splitter_fapl_t *fapl      = (H5FD_splitter_fapl_t*)_fapl;
+    H5FD_splitter_fapl_t *fapl      = (H5FD_splitter_fapl_t *)_fapl;
     herr_t                ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -702,7 +682,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_fapl_free() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_open
  *
@@ -717,10 +696,10 @@ done:
 static H5FD_t *
 H5FD_splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, haddr_t maxaddr)
 {
-    H5FD_splitter_t            *file_ptr  = NULL; /* Splitter VFD info */
+    H5FD_splitter_t *           file_ptr  = NULL; /* Splitter VFD info */
     const H5FD_splitter_fapl_t *fapl_ptr  = NULL; /* Driver-specific property list */
-    H5P_genplist_t     *plist_ptr = NULL;
-    H5FD_t     *ret_value = NULL;
+    H5P_genplist_t *            plist_ptr = NULL;
+    H5FD_t *                    ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -736,9 +715,7 @@ H5FD_splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, had
     if (ADDR_OVERFLOW(maxaddr)) {
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr")
     }
-    if ( (H5P_FILE_ACCESS_DEFAULT == splitter_fapl_id) ||
-         (H5FD_SPLITTER != H5Pget_driver(splitter_fapl_id)) )
-    {
+    if ((H5P_FILE_ACCESS_DEFAULT == splitter_fapl_id) || (H5FD_SPLITTER != H5Pget_driver(splitter_fapl_id))) {
         /* presupposes that H5P_FILE_ACCESS_DEFAULT is not a splitter */
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "driver is not splitter")
     }
@@ -788,7 +765,7 @@ H5FD_splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, had
                 HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open log file")
             }
         } /* end if logfile path given */
-    } /* end if logfile pointer/handle does not exist */
+    }     /* end if logfile pointer/handle does not exist */
 
     file_ptr->rw_file = H5FD_open(name, flags, fapl_ptr->rw_fapl_id, HADDR_UNDEF);
     if (!file_ptr->rw_file) {
@@ -797,12 +774,11 @@ H5FD_splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, had
 
     file_ptr->wo_file = H5FD_open(fapl_ptr->wo_path, flags, fapl_ptr->wo_fapl_id, HADDR_UNDEF);
     if (!file_ptr->wo_file) {
-       H5FD_SPLITTER_WO_ERROR(file_ptr, "H5FD_splitter_open",
-                              H5E_VFL, H5E_CANTOPENFILE, NULL,
-                              "unable to open W/O file")
+        H5FD_SPLITTER_WO_ERROR(file_ptr, "H5FD_splitter_open", H5E_VFL, H5E_CANTOPENFILE, NULL,
+                               "unable to open W/O file")
     }
 
-    ret_value = (H5FD_t*)file_ptr;
+    ret_value = (H5FD_t *)file_ptr;
 
 done:
     if (NULL == ret_value) {
@@ -829,7 +805,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_open() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_close
  *
@@ -866,9 +841,8 @@ H5FD_splitter_close(H5FD_t *_file)
     }
     if (file->wo_file) {
         if (H5FD_close(file->wo_file) == FAIL) {
-            H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_close",
-                              H5E_VFL, H5E_CANTCLOSEFILE, FAIL,
-                              "unable to close W/O file")
+            H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_close", H5E_VFL, H5E_CANTCLOSEFILE, FAIL,
+                                   "unable to close W/O file")
         }
     }
 
@@ -885,7 +859,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_close() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_get_eoa
  *
@@ -920,7 +893,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_get_eoa */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_set_eoa
  *
@@ -934,8 +906,8 @@ done:
 static herr_t
 H5FD_splitter_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
-    H5FD_splitter_t *file = (H5FD_splitter_t *)_file;
-    herr_t      ret_value = SUCCEED;                /* Return value */
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -951,16 +923,14 @@ H5FD_splitter_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t add
     }
 
     if (H5FD_set_eoa(file->wo_file, type, addr) < 0) {
-       H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_set_eoa",
-                              H5E_VFL, H5E_CANTSET, FAIL,
-                              "unable to set EOA for W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_set_eoa", H5E_VFL, H5E_CANTSET, FAIL,
+                               "unable to set EOA for W/O file")
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_set_eoa() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_get_eof
  *
@@ -976,8 +946,8 @@ done:
 static haddr_t
 H5FD_splitter_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    const H5FD_splitter_t *file = (const H5FD_splitter_t *)_file;
-    haddr_t ret_value = HADDR_UNDEF;        /* Return value */
+    const H5FD_splitter_t *file      = (const H5FD_splitter_t *)_file;
+    haddr_t                ret_value = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -995,7 +965,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_get_eof */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_truncate
  *
@@ -1007,8 +976,8 @@ done:
 static herr_t
 H5FD_splitter_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 {
-    H5FD_splitter_t *file = (H5FD_splitter_t *)_file;
-    herr_t           ret_value = SUCCEED;       /* Return value */
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1023,16 +992,14 @@ H5FD_splitter_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
     }
 
     if (H5FDtruncate(file->wo_file, dxpl_id, closing) < 0) {
-       H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_truncate",
-                              H5E_VFL, H5E_CANTUPDATE, FAIL,
-                              "unable to truncate W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_truncate", H5E_VFL, H5E_CANTUPDATE, FAIL,
+                               "unable to truncate W/O file")
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_truncate */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_sb_size
  *
@@ -1068,7 +1035,6 @@ H5FD_splitter_sb_size(H5FD_t *_file)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_sb_size */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_sb_encode
  *
@@ -1078,10 +1044,10 @@ H5FD_splitter_sb_size(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_splitter_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*/)
+H5FD_splitter_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/)
 {
-    H5FD_splitter_t *file = (H5FD_splitter_t *)_file;
-    herr_t           ret_value = SUCCEED;       /* Return value */
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1099,7 +1065,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_sb_encode */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_sb_decode
  *
@@ -1113,8 +1078,8 @@ done:
 static herr_t
 H5FD_splitter_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 {
-    H5FD_splitter_t *file = (H5FD_splitter_t *)_file;
-    herr_t           ret_value = SUCCEED;       /* Return value */
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1132,7 +1097,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_sb_decode */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_cmp
  *
@@ -1145,9 +1109,9 @@ done:
 static int
 H5FD_splitter_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
-    const H5FD_splitter_t  *f1 = (const H5FD_splitter_t *)_f1;
-    const H5FD_splitter_t  *f2 = (const H5FD_splitter_t *)_f2;
-    herr_t ret_value = 0;   /* Return value */
+    const H5FD_splitter_t *f1        = (const H5FD_splitter_t *)_f1;
+    const H5FD_splitter_t *f2        = (const H5FD_splitter_t *)_f2;
+    herr_t                 ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1161,7 +1125,6 @@ H5FD_splitter_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_cmp */
 
-
 /*--------------------------------------------------------------------------
  * Function:    H5FD_splitter_get_handle
  *
@@ -1172,13 +1135,10 @@ H5FD_splitter_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5FD_splitter_get_handle(
-        H5FD_t                *_file,
-        hid_t H5_ATTR_UNUSED   fapl,
-        void                 **file_handle)
+H5FD_splitter_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handle)
 {
-    H5FD_splitter_t  *file = (H5FD_splitter_t*)_file;
-    herr_t ret_value = SUCCEED;   /* Return value */
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1190,8 +1150,7 @@ H5FD_splitter_get_handle(
     HDassert(file_handle);
 
     /* Only do for R/W channel */
-    if (H5FD_get_vfd_handle(file->rw_file, file->fa.rw_fapl_id, file_handle) < 0)
-    {
+    if (H5FD_get_vfd_handle(file->rw_file, file->fa.rw_fapl_id, file_handle) < 0) {
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to get handle of R/W file")
     }
 
@@ -1199,7 +1158,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_get_handle */
 
-
 /*--------------------------------------------------------------------------
  * Function:    H5FD_splitter_lock
  *
@@ -1211,8 +1169,8 @@ done:
 static herr_t
 H5FD_splitter_lock(H5FD_t *_file, hbool_t rw)
 {
-    H5FD_splitter_t *file = (H5FD_splitter_t *)_file;   /* VFD file struct */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file; /* VFD file struct */
+    herr_t           ret_value = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1227,9 +1185,8 @@ H5FD_splitter_lock(H5FD_t *_file, hbool_t rw)
     }
     if (file->wo_file != NULL) {
         if (H5FD_lock(file->wo_file, rw) < 0) {
-           H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_lock",
-                                  H5E_VFL, H5E_CANTLOCK, FAIL,
-                                  "unable to lock W/O file")
+            H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_lock", H5E_VFL, H5E_CANTLOCK, FAIL,
+                                   "unable to lock W/O file")
         }
     }
 
@@ -1237,7 +1194,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_lock */
 
-
 /*--------------------------------------------------------------------------
  * Function:    H5FD_splitter_unlock
  *
@@ -1249,8 +1205,8 @@ done:
 static herr_t
 H5FD_splitter_unlock(H5FD_t *_file)
 {
-    H5FD_splitter_t *file = (H5FD_splitter_t *)_file;   /* VFD file struct */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file; /* VFD file struct */
+    herr_t           ret_value = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1266,8 +1222,7 @@ H5FD_splitter_unlock(H5FD_t *_file)
     }
     if (file->wo_file != NULL) {
         if (H5FD_unlock(file->wo_file) < 0) {
-            HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCK, FAIL,
-                        "unable to unlock W/O file")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCK, FAIL, "unable to unlock W/O file")
         }
     }
 
@@ -1275,7 +1230,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_unlock */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_query
  *
@@ -1300,8 +1254,7 @@ H5FD_splitter_query(const H5FD_t *_file, unsigned long *flags /* out */)
         HDassert(file->rw_file);
 
         if (H5FDquery(file->rw_file, flags) < 0) {
-            HGOTO_ERROR(H5E_VFL, H5E_CANTLOCK, FAIL,
-                        "unable to query R/W file");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTLOCK, FAIL, "unable to query R/W file");
         }
     }
     else {
@@ -1317,7 +1270,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_query() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_alloc
  *
@@ -1329,8 +1281,8 @@ done:
 static haddr_t
 H5FD_splitter_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
-    H5FD_splitter_t *file = (H5FD_splitter_t *)_file;   /* VFD file struct */
-    haddr_t ret_value = HADDR_UNDEF;         /* Return value */
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file; /* VFD file struct */
+    haddr_t          ret_value = HADDR_UNDEF;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1346,16 +1298,14 @@ H5FD_splitter_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     }
 
     if (H5FDalloc(file->wo_file, type, dxpl_id, size) == HADDR_UNDEF) {
-       H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_alloc",
-                              H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
-                              "unable to alloc for W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_alloc", H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
+                               "unable to alloc for W/O file")
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_alloc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_get_type_map
  *
@@ -1387,7 +1337,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_get_type_map() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_free
  *
@@ -1399,8 +1348,8 @@ done:
 static herr_t
 H5FD_splitter_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
 {
-    H5FD_splitter_t *file = (H5FD_splitter_t *)_file;   /* VFD file struct */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file; /* VFD file struct */
+    herr_t           ret_value = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1415,16 +1364,14 @@ H5FD_splitter_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, 
     }
 
     if (H5FDfree(file->wo_file, type, dxpl_id, addr, size) < 0) {
-       H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_free",
-                              H5E_VFL, H5E_CANTINIT, FAIL,
-                              "unable to free for W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_free", H5E_VFL, H5E_CANTINIT, FAIL,
+                               "unable to free for W/O file")
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_free() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD__splitter_log_error
  *
@@ -1436,8 +1383,8 @@ done:
 static herr_t
 H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const char *msg)
 {
-    size_t size = 0;
-    char  *s = NULL;
+    size_t size      = 0;
+    char * s         = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC_NOERR
@@ -1451,16 +1398,14 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
 
     if (file->logfp != NULL) {
         size = strlen(atfunc) + strlen(msg) + 3; /* ':', ' ', '\n' */
-        s = (char *)malloc(sizeof(char) * (size+1));
+        s    = (char *)malloc(sizeof(char) * (size + 1));
         if (NULL == s) {
             ret_value = FAIL;
         }
-        else
-        if (size < (size_t)HDsnprintf(s, size+1, "%s: %s\n", atfunc, msg)) {
+        else if (size < (size_t)HDsnprintf(s, size + 1, "%s: %s\n", atfunc, msg)) {
             ret_value = FAIL;
         }
-        else
-        if (size != HDfwrite(s, 1, size, file->logfp)) {
+        else if (size != HDfwrite(s, 1, size, file->logfp)) {
             ret_value = FAIL;
         }
         HDfree(s);
@@ -1468,4 +1413,3 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__splitter_log_error() */
-
