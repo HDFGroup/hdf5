@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *    Friday, October 30, 1998
  *
  * Purpose:  This file is included by all HDF5 library source files to
@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef _H5private_H
-#define _H5private_H
+#ifndef H5private_H
+#define H5private_H
 
 #include "H5public.h" /* Include Public Definitions    */
 
@@ -2912,4 +2912,4 @@ H5_DLL herr_t  H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_b
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *marker,
                              size_t buf_offset, size_t buf_size);
 
-#endif /* _H5private_H */
+#endif /* H5private_H */

@@ -42,11 +42,11 @@ typedef struct H5E_error2_t {
 
 /* When this header is included from a private header, don't make calls to H5open() */
 #undef H5OPEN
-#ifndef _H5private_H
+#ifndef H5private_H
 #define H5OPEN H5open(),
-#else /* _H5private_H */
+#else /* H5private_H */
 #define H5OPEN
-#endif /* _H5private_H */
+#endif /* H5private_H */
 
 /* HDF5 error class */
 #define H5E_ERR_CLS (H5OPEN H5E_ERR_CLS_g)
