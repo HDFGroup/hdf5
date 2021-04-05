@@ -178,7 +178,6 @@ typedef struct H5O_native_info_t {
  */
 typedef uint32_t H5O_msg_crt_idx_t;
 
-
 //! <!-- [H5O_iterate2_t_snip] -->
 /**
  * Prototype for H5Ovisit(), H5Ovisit_by_name() operator (version 3)
@@ -1915,7 +1914,6 @@ H5_DLLVAR const H5O_token_t H5O_TOKEN_UNDEF_g;
 #define H5O_INFO_ALL (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS | H5O_INFO_HDR | H5O_INFO_META_SIZE)
 
 /* Typedefs */
-
 
 //! <!-- [H5O_stat_t_snip] -->
 /**

@@ -707,7 +707,7 @@ H5_DLL herr_t H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, c
  *
  */
 H5_DLL herr_t H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type, hid_t new_loc_id,
-                          const char *new_name);
+                       const char *new_name);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5G
