@@ -42,7 +42,7 @@
 static hid_t H5FD_MPIO_g = 0;
 
 /* Whether to allow collective I/O operations */
-/* (Value can be set from environment variable also) */
+/* (Can be changed by setting "HDF5_MPI_OPT_TYPES" environment variable to '0' or '1') */
 hbool_t H5FD_mpi_opt_types_g = TRUE;
 
 /*
@@ -133,23 +133,26 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
 };
 
 #ifdef H5FDmpio_DEBUG
-/* Flags to control debug actions in H5Fmpio.
- * Meant to be indexed by characters.
+/* Flags to control debug actions in the MPI-IO VFD.
+ * (Meant to be indexed by characters)
  *
- * 'c' show result of MPI_Get_count after read
- * 'r' show read offset and size
- * 't' trace function entry and exit
- * 'w' show write offset and size
+ * These flags can be set with either (or both) the environment variable
+ *      "H5FD_mpio_Debug" set to a string containing one or more characters
+ *      (flags) or by setting them as a string value for the
+ *      "H5F_mpio_debug_key" MPI Info key.
+ *
+ * Supported characters in 'H5FD_mpio_Debug' string:
+ *      't' trace function entry and exit
+ *      'r' show read offset and size
+ *      'w' show write offset and size
+ *      '0'-'9' only show output from a single MPI rank (ranks 0-9 supported)
  */
-static int H5FD_mpio_Debug[256] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+static int H5FD_mpio_debug_flags_s[256];
+static int H5FD_mpio_debug_rank_s = -1;
+
+/* Indicate if this rank should output tracing info */
+#define H5FD_MPIO_TRACE_THIS_RANK(file)                                                                      \
+    (H5FD_mpio_debug_rank_s < 0 || H5FD_mpio_debug_rank_s == (file)->mpi_rank)
 #endif
 
 /*--------------------------------------------------------------------------
@@ -181,6 +184,41 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__init_package() */
 
+#ifdef H5FDmpio_DEBUG
+
+/*---------------------------------------------------------------------------
+ * Function:    H5FD__mpio_parse_debug_str
+ *
+ * Purpose:     Parse a string for debugging flags
+ *
+ * Returns:     N/A
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, Aug 12, 2020
+ *
+ *---------------------------------------------------------------------------
+ */
+static void
+H5FD__mpio_parse_debug_str(const char *s)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(s);
+
+    /* Set debug mask */
+    while (*s) {
+        if ((int)(*s) >= (int)'0' && (int)(*s) <= (int)'9')
+            H5FD_mpio_debug_rank_s = ((int)*s) - (int)'0';
+        else
+            H5FD_mpio_debug_flags_s[(int)*s]++;
+        s++;
+    } /* end while */
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5FD__mpio_parse_debug_str() */
+#endif /* H5FDmpio_DEBUG */
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpio_init
  *
@@ -198,11 +236,8 @@ done:
 hid_t
 H5FD_mpio_init(void)
 {
-#ifdef H5FDmpio_DEBUG
     static int H5FD_mpio_Debug_inited = 0;
-#endif                                       /* H5FDmpio_DEBUG */
-    const char *s;                           /* String for environment variables */
-    hid_t       ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t      ret_value              = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -210,27 +245,26 @@ H5FD_mpio_init(void)
     if (H5I_VFL != H5I_get_type(H5FD_MPIO_g))
         H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_mpi_t), FALSE);
 
-    /* Allow MPI buf-and-file-type optimizations? */
-    s = HDgetenv("HDF5_MPI_OPT_TYPES");
-    if (s && HDisdigit(*s)) {
-        long env_val         = HDstrtol(s, NULL, 0);
-        H5FD_mpi_opt_types_g = (0 == env_val) ? FALSE : TRUE;
-    }
+    if (!H5FD_mpio_Debug_inited) {
+        const char *s; /* String for environment variables */
+
+        /* Allow MPI buf-and-file-type optimizations? */
+        s = HDgetenv("HDF5_MPI_OPT_TYPES");
+        if (s && HDisdigit(*s))
+            H5FD_mpi_opt_types_g = (0 == HDstrtol(s, NULL, 0)) ? FALSE : TRUE;
 
 #ifdef H5FDmpio_DEBUG
-    if (!H5FD_mpio_Debug_inited) {
+        /* Clear the flag buffer */
+        HDmemset(H5FD_mpio_debug_flags_s, 0, sizeof(H5FD_mpio_debug_flags_s));
+
         /* Retrieve MPI-IO debugging environment variable */
         s = HDgetenv("H5FD_mpio_Debug");
-        if (s) {
-            /* Set debug mask */
-            while (*s) {
-                H5FD_mpio_Debug[(int)*s]++;
-                s++;
-            } /* end while */
-        }     /* end if */
-        H5FD_mpio_Debug_inited++;
-    }  /* end if */
+        if (s)
+            H5FD__mpio_parse_debug_str(s);
 #endif /* H5FDmpio_DEBUG */
+
+        H5FD_mpio_Debug_inited++;
+    } /* end if */
 
     /* Set return value */
     ret_value = H5FD_MPIO_g;
@@ -655,30 +689,27 @@ herr_t
 H5FD_set_mpio_atomicity(H5FD_t *_file, hbool_t flag)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
-    int          mpi_code; /* MPI return code */
-    int          temp_flag;
-    herr_t       ret_value = SUCCEED;
+#ifdef H5FDmpio_DEBUG
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+#endif
+    int    mpi_code; /* MPI return code */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Entering\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
 #endif
 
-    if (FALSE == flag)
-        temp_flag = 0;
-    else
-        temp_flag = 1;
-
     /* set atomicity value */
-    if (MPI_SUCCESS != (mpi_code = MPI_File_set_atomicity(file->f, temp_flag)))
+    if (MPI_SUCCESS != (mpi_code = MPI_File_set_atomicity(file->f, (int)(flag != FALSE))))
         HMPI_GOTO_ERROR(FAIL, "MPI_File_set_atomicity", mpi_code)
 
 done:
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Leaving\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -700,15 +731,18 @@ herr_t
 H5FD_get_mpio_atomicity(H5FD_t *_file, hbool_t *flag)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
-    int          mpi_code; /* MPI return code */
     int          temp_flag;
-    herr_t       ret_value = SUCCEED;
+#ifdef H5FDmpio_DEBUG
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+#endif
+    int    mpi_code; /* MPI return code */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Entering\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
 #endif
 
     /* Get atomicity value */
@@ -722,8 +756,8 @@ H5FD_get_mpio_atomicity(H5FD_t *_file, hbool_t *flag)
 
 done:
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Leaving\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -759,17 +793,14 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     int             mpi_amode;            /* MPI file access flags */
     int             mpi_rank = INT_MAX;   /* MPI rank of this process */
     int             mpi_size;             /* Total number of MPI processes */
-    int             mpi_code;             /* MPI return code */
     MPI_Offset      file_size;            /* File size (of existing files) */
-    H5FD_t *        ret_value = NULL;     /* Return value */
+#ifdef H5FDmpio_DEBUG
+    hbool_t H5FD_mpio_debug_t_flag = FALSE;
+#endif
+    int     mpi_code;         /* MPI return code */
+    H5FD_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
-
-#ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Entering - name = \"%s\", flags = 0x%x, fapl_id = %d, maxaddr = %lu\n", FUNC,
-                  name, flags, (int)fapl_id, (unsigned long)maxaddr);
-#endif
 
     /* Get a pointer to the fapl */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -787,6 +818,14 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &mpi_size)))
         HMPI_GOTO_ERROR(NULL, "MPI_Comm_size failed", mpi_code)
 
+#ifdef H5FDmpio_DEBUG
+    H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] &&
+                              (H5FD_mpio_debug_rank_s < 0 || H5FD_mpio_debug_rank_s == mpi_rank));
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Entering - name = \"%s\", flags = 0x%x, fapl_id = %d, maxaddr = %lu\n",
+                  FUNC, mpi_rank, name, flags, (int)fapl_id, (unsigned long)maxaddr);
+#endif
+
     /* Convert HDF5 flags to MPI-IO flags */
     /* Some combinations are illegal; let MPI-IO figure it out */
     mpi_amode = (flags & H5F_ACC_RDWR) ? MPI_MODE_RDWR : MPI_MODE_RDONLY;
@@ -802,14 +841,9 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
         int  flag;
 
         MPI_Info_get(info, H5F_MPIO_DEBUG_KEY, sizeof(debug_str) - 1, debug_str, &flag);
-        if (flag) {
-            int i;
-
-            HDfprintf(stdout, "H5FD_mpio debug flags = '%s'\n", debug_str);
-            for (i = 0; debug_str[i] /*end of string*/ && i < 128 /*just in case*/; ++i)
-                H5FD_mpio_Debug[(int)debug_str[i]] = 1;
-        } /* end if */
-    }     /* end if */
+        if (flag)
+            H5FD__mpio_parse_debug_str(debug_str);
+    } /* end if */
 #endif
 
     if (MPI_SUCCESS != (mpi_code = MPI_File_open(comm, name, mpi_amode, info, &fh)))
@@ -836,6 +870,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
 
     /* Determine if the file should be truncated */
     if (file_size && (flags & H5F_ACC_TRUNC)) {
+        /* Truncate the file */
         if (MPI_SUCCESS != (mpi_code = MPI_File_set_size(fh, (MPI_Offset)0)))
             HMPI_GOTO_ERROR(NULL, "MPI_File_set_size failed", mpi_code)
 
@@ -867,8 +902,8 @@ done:
     } /* end if */
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Leaving\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -890,14 +925,18 @@ static herr_t
 H5FD__mpio_close(H5FD_t *_file)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
-    int          mpi_code;            /* MPI return code */
-    herr_t       ret_value = SUCCEED; /* Return value */
+#ifdef H5FDmpio_DEBUG
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    int     mpi_rank               = file->mpi_rank;
+#endif
+    int    mpi_code;            /* MPI return code */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Entering\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -915,8 +954,8 @@ H5FD__mpio_close(H5FD_t *_file)
 
 done:
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Leaving\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -948,7 +987,7 @@ H5FD__mpio_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out
         *flags |= H5FD_FEAT_HAS_MPI; /* This driver uses MPI                                             */
         *flags |= H5FD_FEAT_ALLOCATE_EARLY;         /* Allocate space early instead of late         */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
-                                                       VFD      */
+                                                       VFD */
     }                                               /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1110,7 +1149,6 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
     MPI_Offset   mpi_off;
     MPI_Status   mpi_stat;            /* Status from I/O operation */
-    int          mpi_code;            /* mpi return code */
     MPI_Datatype buf_type = MPI_BYTE; /* MPI description of the selection in memory */
     int          size_i;              /* Integer copy of 'size' to read */
 #if MPI_VERSION >= 3
@@ -1126,13 +1164,18 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 #endif
     hbool_t use_view_this_time = FALSE;
     hbool_t rank0_bcast        = FALSE; /* If read-with-rank0-and-bcast flag was used */
-    herr_t  ret_value          = SUCCEED;
+#ifdef H5FDmpio_DEBUG
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    hbool_t H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+#endif
+    int    mpi_code; /* MPI return code */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Entering\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -1151,8 +1194,9 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i")
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'r'])
-        HDfprintf(stdout, "%s: mpi_off = %ld  size_i = %d\n", FUNC, (long)mpi_off, size_i);
+    if (H5FD_mpio_debug_r_flag)
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  size_i = %d\n", FUNC, file->mpi_rank, (long)mpi_off,
+                  size_i);
 #endif
 
     /* Only look for MPI views for raw data transfers */
@@ -1198,8 +1242,8 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         H5FD_mpio_collective_opt_t coll_opt_mode;
 
 #ifdef H5FDmpio_DEBUG
-        if (H5FD_mpio_Debug[(int)'r'])
-            HDfprintf(stdout, "%s: using MPIO collective mode\n", FUNC);
+        if (H5FD_mpio_debug_r_flag)
+            HDfprintf(stderr, "%s: (%d) using MPIO collective mode\n", FUNC, file->mpi_rank);
 #endif
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
@@ -1207,14 +1251,14 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
-            if (H5FD_mpio_Debug[(int)'r'])
-                HDfprintf(stdout, "%s: doing MPI collective IO\n", FUNC);
+            if (H5FD_mpio_debug_r_flag)
+                HDfprintf(stderr, "%s: (%d) doing MPI collective IO\n", FUNC, file->mpi_rank);
 #endif
             /* Check whether we should read from rank 0 and broadcast to other ranks */
             if (H5CX_get_mpio_rank0_bcast()) {
 #ifdef H5FDmpio_DEBUG
-                if (H5FD_mpio_Debug[(int)'r'])
-                    HDfprintf(stdout, "%s: doing read-rank0-and-MPI_Bcast\n", FUNC);
+                if (H5FD_mpio_debug_r_flag)
+                    HDfprintf(stderr, "%s: (%d) doing read-rank0-and-MPI_Bcast\n", FUNC, file->mpi_rank);
 #endif
                 /* Indicate path we've taken */
                 rank0_bcast = TRUE;
@@ -1235,8 +1279,8 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         } /* end if */
         else {
 #ifdef H5FDmpio_DEBUG
-            if (H5FD_mpio_Debug[(int)'r'])
-                HDfprintf(stdout, "%s: doing MPI independent IO\n", FUNC);
+            if (H5FD_mpio_debug_r_flag)
+                HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", FUNC, file->mpi_rank);
 #endif
 
             /* Perform independent read operation */
@@ -1252,10 +1296,16 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end if */
-    else
+    else {
+#ifdef H5FDmpio_DEBUG
+        if (H5FD_mpio_debug_r_flag)
+            HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", FUNC, file->mpi_rank);
+#endif
+
         /* Perform independent read operation */
         if (MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+    } /* end else */
 
     /* Only retrieve bytes read if this rank _actually_ participated in I/O */
     if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
@@ -1305,8 +1355,8 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 done:
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Leaving\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1341,7 +1391,6 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     MPI_Offset   mpi_off;
     MPI_Status   mpi_stat;            /* Status from I/O operation */
     MPI_Datatype buf_type = MPI_BYTE; /* MPI description of the selection in memory */
-    int          mpi_code;            /* MPI return code */
 #if MPI_VERSION >= 3
     MPI_Count bytes_written;
     MPI_Count type_size; /* MPI datatype used for I/O's size */
@@ -1355,13 +1404,18 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     hbool_t          use_view_this_time = FALSE;
     hbool_t          derived_type       = FALSE;
     H5FD_mpio_xfer_t xfer_mode; /* I/O transfer mode */
-    herr_t           ret_value = SUCCEED;
+#ifdef H5FDmpio_DEBUG
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    hbool_t H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+#endif
+    int    mpi_code; /* MPI return code */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Entering\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -1381,8 +1435,9 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     size_i = (int)size;
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'w'])
-        HDfprintf(stdout, "%s: mpi_off = %ld  size_i = %d\n", FUNC, (long)mpi_off, size_i);
+    if (H5FD_mpio_debug_w_flag)
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  size_i = %d\n", FUNC, file->mpi_rank, (long)mpi_off,
+                  size_i);
 #endif
 
     /* Get the transfer mode from the API context */
@@ -1437,8 +1492,8 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
         H5FD_mpio_collective_opt_t coll_opt_mode;
 
 #ifdef H5FDmpio_DEBUG
-        if (H5FD_mpio_Debug[(int)'w'])
-            HDfprintf(stdout, "%s: using MPIO collective mode\n", FUNC);
+        if (H5FD_mpio_debug_w_flag)
+            HDfprintf(stderr, "%s: (%d) using MPIO collective mode\n", FUNC, file->mpi_rank);
 #endif
 
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
@@ -1447,8 +1502,8 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
-            if (H5FD_mpio_Debug[(int)'w'])
-                HDfprintf(stdout, "%s: doing MPI collective IO\n", FUNC);
+            if (H5FD_mpio_debug_w_flag)
+                HDfprintf(stderr, "%s: (%d) doing MPI collective IO\n", FUNC, file->mpi_rank);
 #endif
             /* Perform collective write operation */
             if (MPI_SUCCESS !=
@@ -1459,9 +1514,10 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             if (type != H5FD_MEM_DRAW)
                 HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL,
                             "Metadata Coll opt property should be collective at this point")
+
 #ifdef H5FDmpio_DEBUG
-            if (H5FD_mpio_Debug[(int)'w'])
-                HDfprintf(stdout, "%s: doing MPI independent IO\n", FUNC);
+            if (H5FD_mpio_debug_w_flag)
+                HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", FUNC, file->mpi_rank);
 #endif
             /* Perform independent write operation */
             if (MPI_SUCCESS !=
@@ -1474,12 +1530,18 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end if */
-    else
+    else {
+#ifdef H5FDmpio_DEBUG
+        if (H5FD_mpio_debug_w_flag)
+            HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", FUNC, file->mpi_rank);
+#endif
+
         /* Perform independent write operation */
         if (MPI_SUCCESS != (mpi_code = MPI_File_write_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
+    } /* end else */
 
-        /* How many bytes were actually written? */
+    /* How many bytes were actually written? */
 #if MPI_VERSION >= 3
     if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_written)))
 #else
@@ -1518,8 +1580,8 @@ done:
         MPI_Type_free(&buf_type);
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Leaving, proc %d: ret_value = %d\n", FUNC, file->mpi_rank, ret_value);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Leaving: ret_value = %d\n", FUNC, file->mpi_rank, ret_value);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1541,14 +1603,17 @@ static herr_t
 H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
-    int          mpi_code; /* mpi return code */
-    herr_t       ret_value = SUCCEED;
+#ifdef H5FDmpio_DEBUG
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+#endif
+    int    mpi_code; /* mpi return code */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Entering\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -1562,8 +1627,8 @@ H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 
 done:
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Leaving\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1595,14 +1660,17 @@ done:
 static herr_t
 H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
-    H5FD_mpio_t *file      = (H5FD_mpio_t *)_file;
-    herr_t       ret_value = SUCCEED;
+    H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
+#ifdef H5FDmpio_DEBUG
+    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+#endif
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Entering\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -1670,8 +1738,8 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
 
 done:
 #ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-        HDfprintf(stdout, "%s: Leaving\n", FUNC);
+    if (H5FD_mpio_debug_t_flag)
+        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)

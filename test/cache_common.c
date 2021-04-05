@@ -2757,7 +2757,6 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
 
     if (pass) {
         H5C_t *cache_ptr;
-        herr_t result = 0;
 
         HDassert(file_ptr);
 

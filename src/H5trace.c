@@ -3883,8 +3883,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     hssize_t          i;
     FILE *            out                 = H5_debug_g.trace;
     static hbool_t    is_first_invocation = TRUE;
-    H5_timer_t        function_timer      = {{0}, {0}, {0}, FALSE};
-    H5_timevals_t     function_times      = {0.0, 0.0, 0.0};
+    H5_timer_t        function_timer;
+    H5_timevals_t     function_times = {0.0, 0.0, 0.0};
     static H5_timer_t running_timer;
     H5_timevals_t     running_times;
     static int        current_depth   = 0;
@@ -3893,36 +3893,39 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     /* FUNC_ENTER() should not be called */
 
     if (!out)
-        return (double)0.0F; /*tracing is off*/
+        return 0.0; /* Tracing is off */
+
+    /* Initialize the timer for this function */
+    if (H5_debug_g.ttimes)
+        H5_timer_init(&function_timer);
 
     if (H5_debug_g.ttop) {
         if (returning) {
             if (current_depth > 1) {
                 --current_depth;
                 return (double)0.0F;
-            } /* end if */
-        }     /* end if */
+            }
+        }
         else {
             if (current_depth > 0) {
-                /*do not update last_call_depth*/
+                /* Do not update last_call_depth */
                 current_depth++;
                 return (double)0.0F;
-            } /* end if */
-        }     /* end else */
-    }         /* end if */
+            }
+        }
+    }
 
     /* Get time for event if the trace times flag is set */
     if (is_first_invocation && H5_debug_g.ttimes) {
-        /* start the library-wide timer */
+        /* Start the library-wide timer */
         is_first_invocation = FALSE;
         H5_timer_init(&running_timer);
         H5_timer_start(&running_timer);
-    } /* end if */
-    if (H5_debug_g.ttimes) {
-        /* start the timer for this function */
-        H5_timer_init(&function_timer);
+    }
+
+    /* Start the timer for this function */
+    if (H5_debug_g.ttimes)
         H5_timer_start(&function_timer);
-    } /* end if */
 
     /* Create the ref-counted string */
     rs = H5RS_create(NULL);
@@ -3945,15 +3948,15 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 H5_timer_get_times(running_timer, &running_times);
                 HDsprintf(tmp, "%.6f", (function_times.elapsed - running_times.elapsed));
                 H5RS_asprintf_cat(rs, " %*s ", (int)HDstrlen(tmp), "");
-            } /* end if */
+            }
             for (i = 0; i < current_depth; i++)
                 H5RS_aputc(rs, '+');
             H5RS_asprintf_cat(rs, "%*s%s = ", 2 * current_depth, "", func);
-        } /* end if */
+        }
         else
             /* Continue current line with return value */
             H5RS_acat(rs, " = ");
-    } /* end if */
+    }
     else {
         if (current_depth > last_call_depth)
             H5RS_acat(rs, " = <delayed>\n");
@@ -3961,11 +3964,11 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
             H5_timer_get_times(function_timer, &function_times);
             H5_timer_get_times(running_timer, &running_times);
             H5RS_asprintf_cat(rs, "@%.6f ", (function_times.elapsed - running_times.elapsed));
-        } /* end if */
+        }
         for (i = 0; i < current_depth; i++)
             H5RS_aputc(rs, '+');
         H5RS_asprintf_cat(rs, "%*s%s(", 2 * current_depth, "", func);
-    } /* end else */
+    }
 
     /* Format arguments into the refcounted string */
     HDva_start(ap, type);
@@ -3978,7 +3981,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         H5_timer_get_times(running_timer, &running_times);
         H5RS_asprintf_cat(rs, " @%.6f [dt=%.6f]", (function_times.elapsed - running_times.elapsed),
                           (function_times.elapsed - *returning));
-    } /* end if */
+    }
 
     /* Display generated string */
     if (returning)
@@ -3986,7 +3989,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     else {
         last_call_depth = current_depth++;
         H5RS_acat(rs, ")");
-    } /* end else */
+    }
     HDfputs(H5RS_get_str(rs), out);
     HDfflush(out);
     H5RS_decr(rs);
