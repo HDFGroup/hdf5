@@ -11,10 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "h5hltest.h"
 #include "H5srcdir.h"
 #include "H5LTpublic.h"

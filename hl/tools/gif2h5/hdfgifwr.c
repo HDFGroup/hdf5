@@ -135,8 +135,8 @@ static int EOFCode;
 
 /*************************************************************/
 int
-hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap, byte *gmap, byte *bmap, byte *pc2ncmap,
-            int numcols, int colorstyle, int BitsPerPixel)
+hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, const byte *rmap, const byte *gmap,
+            const byte *bmap, const byte *pc2ncmap, int numcols, int colorstyle, int BitsPerPixel)
 {
     int   InitCodeSize;
     int   i;
@@ -152,12 +152,12 @@ hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap, byte *gmap
     }
 
     /* Shut compiler up... */
-    ptype      = ptype;
-    rmap       = rmap;
-    gmap       = gmap;
-    bmap       = bmap;
-    numcols    = numcols;
-    colorstyle = colorstyle;
+    (void)ptype;
+    (void)rmap;
+    (void)gmap;
+    (void)bmap;
+    (void)numcols;
+    (void)colorstyle;
 
     for (i = 0; i < 256; i++) {
         pc2nc[i] = pc2ncmap[i];

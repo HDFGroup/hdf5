@@ -166,7 +166,9 @@ class H5_HLCPPDLL FL_PacketTable : virtual public PacketTable {
     /* Destructor
      * Cleans up the packet table
      */
-    virtual ~FL_PacketTable(){};
+    virtual ~FL_PacketTable()
+    {
+    }
 
     /* AppendPacket
      * Adds a single packet to the packet table.  Takes a pointer

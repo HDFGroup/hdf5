@@ -23,8 +23,6 @@
  *              in test_ds.c will read them.
  */
 
-#include <stdlib.h>
-#include <string.h>
 #include "h5hltest.h"
 #include "H5DSpublic.h"
 #include "H5LTpublic.h"

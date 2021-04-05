@@ -11,9 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "H5LTprivate.h"
 #include "H5TBprivate.h"
 
@@ -46,7 +43,7 @@ static hid_t H5TB_create_type(hid_t loc_id, const char *dset_name, size_t type_s
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *             Quincey Koziol
  *
  * Date: January 17, 2001
@@ -257,7 +254,7 @@ out:
  * Return: Success: 0, Failure: -1
  *
  * Programmers:
- *  Pedro Vicente, pvn@ncsa.uiuc.edu
+ *  Pedro Vicente
  *  Quincey Koziol
  *
  * Date: November 19, 2001
@@ -323,7 +320,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -415,7 +412,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 21, 2001
  *
@@ -573,7 +570,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 21, 2001
  *
@@ -738,7 +735,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 20, 2001
  *
@@ -811,7 +808,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -877,7 +874,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -1034,7 +1031,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -1192,7 +1189,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 26, 2001
  *
@@ -1352,7 +1349,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 26, 2001
  *
@@ -1504,7 +1501,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: December 5, 2001
  *
@@ -1633,7 +1630,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: December 10, 2001
  *
@@ -1989,7 +1986,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 30, 2002
  *
@@ -2406,7 +2403,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 30, 2002
  *
@@ -2858,7 +2855,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 30, 2001
  *
@@ -2884,7 +2881,7 @@ H5TBAget_title(hid_t loc_id, char *table_title)
  *
  * Return: Success: TRUE/FALSE, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 30, 2002
  *
@@ -2954,7 +2951,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -3039,7 +3036,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -3156,7 +3153,7 @@ out:
  *
  * Return: Success: TRUE/FALSE, Failure: N/A
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -3197,7 +3194,7 @@ H5TB_find_field(const char *field, const char *field_list)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: December 6, 2001
  *
@@ -3258,7 +3255,7 @@ out:
  *
  * Return: Success: the memory type ID, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 31, 2004
  *
@@ -3354,8 +3351,8 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Nat Furrer, nfurrer@ncsa.uiuc.edu
- *             James Laird, jlaird@ncsa.uiuc.edu
+ * Programmer: Nat Furrer
+ *             James Laird
  *
  * Date: March 8, 2004
  *
@@ -3419,8 +3416,8 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Nat Furrer, nfurrer@ncsa.uiuc.edu
- *             James Laird, jlaird@ncsa.uiuc.edu
+ * Programmer: Nat Furrer
+ *             James Laird
  *
  * Date: March 8, 2004
  *
