@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5DSCreatPropList_H
-#define __H5DSCreatPropList_H
+#ifndef H5DSCreatPropList_H
+#define H5DSCreatPropList_H
 
 namespace H5 {
 
@@ -123,7 +123,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
     // Maps elements of a virtual dataset to elements of the source dataset.
     void setVirtual(const DataSpace &vspace, const char *src_fname, const char *src_dsname,
                     const DataSpace &sspace) const;
-    void setVirtual(const DataSpace &vspace, const H5std_string src_fname, const H5std_string src_dsname,
+    void setVirtual(const DataSpace &vspace, const H5std_string &src_fname, const H5std_string &src_dsname,
                     const DataSpace &sspace) const;
 
     ///\brief Returns this class name.
@@ -159,4 +159,4 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
 }; // end of DSetCreatPropList
 } // namespace H5
 
-#endif // __H5DSCreatPropList_H
+#endif // H5DSCreatPropList_H

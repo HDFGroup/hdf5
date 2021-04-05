@@ -20,11 +20,7 @@
         h5_fileaccess() -- in h5test.c, returns a file access template
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -179,14 +175,14 @@ test_file_create()
     catch (InvalidActionException &E) {
         cerr << " *FAILED*" << endl;
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
-        if (file1 != NULL) // clean up
-            delete file1;
+        // clean up
+        delete file1;
     }
     // catch all other exceptions
     catch (Exception &E) {
         issue_fail_msg("test_file_create()", __LINE__, __FILE__, E.getCDetailMsg());
-        if (file1 != NULL) // clean up
-            delete file1;
+        // clean up
+        delete file1;
     }
 
     // Setting this to NULL for cleaning up in failure situations
@@ -264,8 +260,8 @@ test_file_create()
     // catch all exceptions
     catch (Exception &E) {
         issue_fail_msg("test_file_create()", __LINE__, __FILE__, E.getCDetailMsg());
-        if (tmpl1 != NULL) // clean up
-            delete tmpl1;
+        // clean up
+        delete tmpl1;
     }
 } // test_file_create()
 

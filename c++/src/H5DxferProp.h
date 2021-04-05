@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5DSetMemXferPropList_H
-#define __H5DSetMemXferPropList_H
+#ifndef H5DSetMemXferPropList_H
+#define H5DSetMemXferPropList_H
 
 namespace H5 {
 
@@ -131,4 +131,4 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 }; // end of DSetMemXferPropList
 } // namespace H5
 
-#endif // __H5DSetMemXferPropList_H
+#endif // H5DSetMemXferPropList_H

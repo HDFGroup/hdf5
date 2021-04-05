@@ -16,11 +16,7 @@
    tcompound.cpp - HDF5 C++ testing the compound data type functionality
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -180,8 +176,7 @@ test_compound_2()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_2()
 
 /*-------------------------------------------------------------------------
@@ -291,8 +286,7 @@ test_compound_3()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_3()
 
 /*-------------------------------------------------------------------------
@@ -411,8 +405,7 @@ test_compound_4()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_4()
 
 /*-------------------------------------------------------------------------
@@ -491,7 +484,7 @@ test_compound_5()
         int_array.close();
 
         /* Check results */
-        if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) || src[1].tdim != dst[1].tdim ||
+        if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) != 0 || src[1].tdim != dst[1].tdim ||
             src[1].coll_ids[0] != dst[1].coll_ids[0] || src[1].coll_ids[1] != dst[1].coll_ids[1] ||
             src[1].coll_ids[2] != dst[1].coll_ids[2] || src[1].coll_ids[3] != dst[1].coll_ids[3]) {
             H5_FAILED();
@@ -508,8 +501,7 @@ test_compound_5()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_5()
 
 /*-------------------------------------------------------------------------

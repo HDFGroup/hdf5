@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5CompType_H
-#define __H5CompType_H
+#ifndef H5CompType_H
+#define H5CompType_H
 
 namespace H5 {
 
@@ -124,4 +124,4 @@ class H5_DLLCPP CompType : public DataType {
 }; // end of CompType
 } // namespace H5
 
-#endif // __H5CompType_H
+#endif // H5CompType_H

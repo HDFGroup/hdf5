@@ -17,11 +17,7 @@
                 Reference interface (H5R)
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -183,8 +179,7 @@ test_reference_params()
         issue_fail_msg("test_reference_param()", __LINE__, __FILE__, E.getCFuncName(), E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } /* test_reference_param() */
 
 /*-------------------------------------------------------------------------
@@ -378,8 +373,7 @@ test_reference_obj()
         issue_fail_msg("test_reference_obj()", __LINE__, __FILE__, E.getCFuncName(), E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } // test_reference_obj()
 
 /*-------------------------------------------------------------------------
@@ -522,8 +516,7 @@ test_reference_group()
         issue_fail_msg("test_reference_group()", __LINE__, __FILE__, E.getCFuncName(), E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } /* test_reference_group() */
 
 /*-------------------------------------------------------------------------
