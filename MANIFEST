@@ -1912,6 +1912,7 @@
 ./tools/testfiles/tfletcher32.ddl
 ./tools/testfiles/tfloatsattrs.ddl
 ./tools/testfiles/tfloatsattrs.h5
+./tools/testfiles/tfloatsattrs.xddl
 ./tools/testfiles/tfloatsattrs.wddl
 ./tools/testfiles/tfvalues.h5
 ./tools/testfiles/tgroup-1.ddl
@@ -1952,8 +1953,10 @@
 ./tools/testfiles/tlarge_objname.h5
 ./tools/testfiles/tldouble.ddl
 ./tools/testfiles/tldouble.h5
+./tools/testfiles/tldouble.xddl
 ./tools/testfiles/tldouble_scalar.ddl
 ./tools/testfiles/tldouble_scalar.h5
+./tools/testfiles/tldouble_scalar.xddl
 ./tools/testfiles/tlonglinks.ddl
 ./tools/testfiles/tlonglinks.h5
 ./tools/testfiles/tloop-1.ddl
@@ -3423,6 +3426,7 @@
 ./config/cmake/patch.xml
 ./config/cmake/PkgInfo.in
 ./config/cmake/README.txt.cmake.in
+./config/cmake/run2Test.cmake
 ./config/cmake/UseJava.cmake
 ./config/cmake/UseJavaClassFilelist.cmake
 ./config/cmake/UseJavaSymlinks.cmake

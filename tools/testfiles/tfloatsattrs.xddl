@@ -1,7 +1,7 @@
 HDF5 "tfloatsattrs.h5" {
 GROUP "/" {
    DATASET "DS128BITS" {
-      DATATYPE  H5T_NATIVE_LDOUBLE
+      DATATYPE  128-bit little-endian floating-point
       DATASPACE  SIMPLE { ( 8, 128 ) / ( 8, 128 ) }
       STORAGE_LAYOUT {
          CONTIGUOUS
@@ -169,7 +169,7 @@ GROUP "/" {
       (7,124): 7.80469, 7.86719, 7.92969, 7.99219
       }
       ATTRIBUTE "DS128BITS" {
-         DATATYPE  H5T_NATIVE_LDOUBLE
+         DATATYPE  128-bit little-endian floating-point
          DATASPACE  SIMPLE { ( 1024 ) / ( 1024 ) }
          DATA {
          (0): 128, 0.0625, 0.125, 0.1875, 0.25, 0.3125, 0.375, 0.4375, 0.5,
