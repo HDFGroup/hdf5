@@ -26,8 +26,9 @@ The functions provides by the HDF5 C-API are grouped into the following
 \par API Versioning
      See \ref api-compat-macros
 
-\par Deprecated Functions
-     A list of deprecated functions can be found <a href="./deprecated.html">here</a>.
+\par Deprecated Functions and Types
+     A list of deprecated functions and types can be found
+     <a href="./deprecated.html">here</a>.
 
 \par Etiquette
      Here are a few simple rules to follow:
