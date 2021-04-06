@@ -578,7 +578,7 @@ if [ ${do_zoo:-no} = yes ]; then
 	pid_writer=$!
 
 	catch_out_err_and_rc vfd_swmr_zoo_reader \
-	    ../vfd_swmr_zoo_reader -l 3 -q &
+	    ../vfd_swmr_zoo_reader -l 4 -q &
 	pid_reader=$!
 
 	# Wait for the reader to finish before signalling the

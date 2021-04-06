@@ -2754,8 +2754,8 @@ tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime, zoo_con
     }
 out:
     if (!ok) {
-        /* Only the zoo test for VFD SWMR does this step, making sure it doesn't take too long.
-         * Other tests sets config.msgival or lastmsgtime to 0 and will skip this step */
+        /* Currently not used: this step makes sure the operation doesn't take too long.
+         * Any test that sets config.msgival or lastmsgtime to 0 will skip this step */
         if (strcmp(failure_mssg, last_failure_mssg) != 0 && ((config.msgival.tv_sec || config.msgival.tv_nsec))
             && (lastmsgtime->tv_sec || lastmsgtime->tv_nsec)) {
             if (below_speed_limit(lastmsgtime, &config.msgival)) {
