@@ -60,23 +60,34 @@ typedef enum {
 
 /* Deprecated types are kept for backward compatibility with previous versions */
 
+//! <!-- [hobj_ref_t_snip] -->
 /**
- * Deprecated object reference type that is used with deprecated reference APIs.
- * Note! This type can only be used with the "native" HDF5 VOL connector.
+ * \deprecated Deprecated object reference type that is used with deprecated
+ *             reference APIs.
+ *
+ * \note This type can only be used with the "native" HDF5 VOL connector.
  */
 typedef haddr_t hobj_ref_t;
+//! <!-- [hobj_ref_t_snip] -->
 
+//! <!-- [hdset_reg_ref_t_snip] -->
 /**
- * Dataset region reference type that is used with deprecated reference APIs.
- * (Buffer to store heap ID and index)
- * This needs to be large enough to store largest haddr_t in a worst case
+ * Buffer to store heap ID and index
+ *
+ * This needs to be large enough to store largest \ref haddr_t in a worst case
  * machine (8 bytes currently) plus an int.
- * Note! This type can only be used with the "native" HDF5 VOL connector.
+ *
+ * \deprecated Dataset region reference type that is used with deprecated
+ *             reference APIs.
+ *
+ * \note This type can only be used with the "native" HDF5 VOL connector.
  */
 typedef struct {
     uint8_t __data[H5R_DSET_REG_REF_BUF_SIZE];
 } hdset_reg_ref_t;
+//! <!-- [hdset_reg_ref_t_snip] -->
 
+//! <!-- [H5R_ref_t_snip] -->
 /**
  * Opaque reference type. The same reference type is used for object,
  * dataset region and attribute references. This is the type that
@@ -88,6 +99,7 @@ typedef struct {
         int64_t align;                    /**< ensures alignment */
     } u;
 } H5R_ref_t;
+//! <!-- [H5R_ref_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -124,8 +136,8 @@ extern "C" {
  *          must be of the same type as the object being referenced, that is
  *          a group, dataset or committed datatype property list.
  *
- *          H5R_ref_t is defined in H5Rpublic.h as:   typedef unsigned char
- *          H5R_ref_t[#H5R_REF_BUF_SIZE];
+ *          \ref H5R_ref_t is defined in H5Rpublic.h as:
+ *          \snippet this H5R_ref_t_snip
  *
  *          H5Rdestroy() should be used to release the resource from the
  *          reference.
@@ -160,13 +172,11 @@ H5_DLL herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5
  *          must be of the same type as the object being referenced, that is
  *          a dataset property list in this case.
  *
- *          H5R_ref_t is defined in H5Rpublic.h as:   typedef unsigned char
- *          H5R_ref_t[#H5R_REF_BUF_SIZE];
+ *          \ref H5R_ref_t is defined in H5Rpublic.h as:
+ *          \snippet this H5R_ref_t_snip
  *
  *          H5Rdestroy() should be used to release the resource from the
  *          reference.
- *
- * \see function_name()
  *
  */
 H5_DLL herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id,
@@ -199,8 +209,8 @@ H5_DLL herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, h
  *          as that object, that is a group, dataset or committed datatype
  *          property list.
  *
- *          H5R_ref_t is defined in H5Rpublic.h as:   typedef unsigned char
- *          H5R_ref_t[#H5R_REF_BUF_SIZE];
+ *          \ref H5R_ref_t is defined in H5Rpublic.h as:
+ *          \snippet this H5R_ref_t_snip
  *
  *          H5Rdestroy() should be used to release the resource from the
  *          reference.
@@ -219,12 +229,12 @@ H5_DLL herr_t H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_na
  *
  * \return \herr_t
  *
- * \details Given a reference, ref_ptr, to an object, region or attribute
- *          attached to an object, H5R_DESTROY releases allocated resources
+ * \details Given a reference, \p ref_ptr, to an object, region or attribute
+ *          attached to an object, H5Rdestroy() releases allocated resources
  *          from a previous create call.
  *
- *          H5R_ref_t is defined in H5Rpublic.h as: typedef unsigned char
- *          H5R_ref_t[#H5R_REF_BUF_SIZE];
+ *          \ref H5R_ref_t is defined in H5Rpublic.h as:
+ *          \snippet this H5R_ref_t_snip
  *
  */
 H5_DLL herr_t H5Rdestroy(H5R_ref_t *ref_ptr);
@@ -245,17 +255,14 @@ H5_DLL herr_t H5Rdestroy(H5R_ref_t *ref_ptr);
  *          type of the reference.
  *
  *          Valid returned reference types are:
- *
- *          #H5R_OBJECT2 Object reference version 2
- *          #H5R_DATASET_REGION2 Region reference version 2
- *          #H5R_ATTR   Attribute reference
+ *          \snippet this H5R_type_t_snip
  *
  *          Note that #H5R_OBJECT1 and #H5R_DATASET_REGION1 can never be
- *          associated to an H5R_ref_t reference and can therefore never be
+ *          associated to an \ref H5R_ref_t reference and can therefore never be
  *          returned through that function.
  *
- *          H5R_ref_t is defined in H5Rpublic.h as:   typedef unsigned char
- *          H5R_ref_t[#H5R_REF_BUF_SIZE];
+ *          \ref H5R_ref_t is defined in H5Rpublic.h as:
+ *          \snippet this H5R_ref_t_snip
  *
  */
 H5_DLL H5R_type_t H5Rget_type(const H5R_ref_t *ref_ptr);
@@ -276,8 +283,8 @@ H5_DLL H5R_type_t H5Rget_type(const H5R_ref_t *ref_ptr);
  * \details H5Requal() determines whether two references point to the
  *          same object, region or attribute.
  *
- *          H5R_ref_t is defined in H5Rpublic.h as: typedef unsigned char
- *          H5R_ref_t[#H5R_REF_BUF_SIZE];
+ *          \ref H5R_ref_t is defined in H5Rpublic.h as:
+ *          \snippet this H5R_ref_t_snip
  *
  */
 H5_DLL htri_t H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
@@ -323,8 +330,8 @@ H5_DLL herr_t H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr);
  *          must be of the same type as the object being referenced, that is
  *          a group or dataset property list.
  *
- *          H5R_ref_t is defined in H5Rpublic.h as:   typedef unsigned char
- *          H5R_ref_t[#H5R_REF_BUF_SIZE];
+ *          \ref H5R_ref_t is defined in H5Rpublic.h as:
+ *          \snippet this H5R_ref_t_snip
  *
  *          The object opened with this function should be closed when it
  *          is no longer needed so that resource leaks will not develop. Use
@@ -446,10 +453,7 @@ H5_DLL hid_t H5Ropen_attr_async(const char *app_file, const char *app_func, unsi
  *          Upon success, the function returns in \p obj_type the type of
  *          the object that the reference points to.  Valid values for this
  *          referenced object type are as followed (defined in H5Opublic.h):
- *
- *          H5O_TYPE_GROUP  Object is a group
- *          H5O_TYPE_DATASET    Object is a dataset
- *          H5O_TYPE_NAMED_DATATYPE Object is a named datatype
+ *          \snippet H5Opublic.h H5O_type_t_snip
  *
  */
 H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
