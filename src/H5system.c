@@ -1413,7 +1413,7 @@ H5_nanosleep(uint64_t nanosec)
         struct timespec sleeptime; /* Struct to hold time to sleep */
 
         /* Set up time to sleep */
-        sleeptime.tv_sec  = 0;
+        sleeptime.tv_sec = 0;
         sleeptime.tv_nsec = (long)nanosec;
 
         HDnanosleep(&sleeptime, NULL);

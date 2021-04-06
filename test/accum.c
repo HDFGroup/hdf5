@@ -2086,7 +2086,6 @@ unsigned
 test_swmr_write_big(hbool_t newest_format)
 {
 
-
     hid_t    fid   = -1;                 /* File ID */
     hid_t    fapl  = -1;                 /* File access property list */
     H5F_t *  rf    = NULL;               /* File pointer */
