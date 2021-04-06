@@ -133,9 +133,10 @@ static herr_t H5VL__group_specific(void *obj, const H5VL_class_t *cls, H5VL_grou
 static herr_t H5VL__group_optional(void *obj, const H5VL_class_t *cls, H5VL_group_optional_t opt_type,
                                    hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__group_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
-static herr_t H5VL__link_create(H5VL_link_create_type_t create_type, const H5VL_link_create_args_t *create_args,
-                                void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-                                hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL__link_create(H5VL_link_create_type_t        create_type,
+                                const H5VL_link_create_args_t *create_args, void *obj,
+                                const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls, hid_t lcpl_id,
+                                hid_t lapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
                               const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
                               hid_t lapl_id, hid_t dxpl_id, void **req);
@@ -4672,9 +4673,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__link_create(H5VL_link_create_type_t create_type, const H5VL_link_create_args_t *create_args,
-                  void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-                  hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+H5VL__link_create(H5VL_link_create_type_t create_type, const H5VL_link_create_args_t *create_args, void *obj,
+                  const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id,
+                  hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -4754,9 +4755,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_create(H5VL_link_create_type_t create_type, const H5VL_link_create_args_t *create_args,
-                void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, hid_t lcpl_id,
-                hid_t lapl_id, hid_t dxpl_id, void **req /*out*/)
+H5VLlink_create(H5VL_link_create_type_t create_type, const H5VL_link_create_args_t *create_args, void *obj,
+                const H5VL_loc_params_t *loc_params, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id,
+                hid_t dxpl_id, void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */

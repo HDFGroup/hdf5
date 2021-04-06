@@ -77,11 +77,11 @@ typedef struct H5VL_pass_through_wrap_ctx_t {
 /********************* */
 
 /* Helper routines */
-static herr_t H5VL_pass_through_file_specific_reissue(void *obj, hid_t connector_id,
-                                                      H5VL_file_specific_t specific_type, hid_t dxpl_id,
-                                                      void **req, ...);
-static herr_t H5VL_pass_through_request_specific_reissue(void *obj, hid_t connector_id,
-                                                         H5VL_request_specific_t specific_type, ...);
+static herr_t               H5VL_pass_through_file_specific_reissue(void *obj, hid_t connector_id,
+                                                                    H5VL_file_specific_t specific_type, hid_t dxpl_id,
+                                                                    void **req, ...);
+static herr_t               H5VL_pass_through_request_specific_reissue(void *obj, hid_t connector_id,
+                                                                       H5VL_request_specific_t specific_type, ...);
 static H5VL_pass_through_t *H5VL_pass_through_new_obj(void *under_obj, hid_t under_vol_id);
 static herr_t               H5VL_pass_through_free_obj(H5VL_pass_through_t *obj);
 
@@ -183,8 +183,9 @@ static herr_t H5VL_pass_through_group_optional(void *obj, H5VL_group_optional_t 
 static herr_t H5VL_pass_through_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
-static herr_t H5VL_pass_through_link_create(H5VL_link_create_type_t create_type, const H5VL_link_create_args_t *create_args,
-                                            void *obj, const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
+static herr_t H5VL_pass_through_link_create(H5VL_link_create_type_t        create_type,
+                                            const H5VL_link_create_args_t *create_args, void *obj,
+                                            const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
                                             hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
                                           const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id,
@@ -2164,11 +2165,11 @@ H5VL_pass_through_link_create(H5VL_link_create_type_t create_type, const H5VL_li
                               void *obj, const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
                               hid_t dxpl_id, void **req)
 {
-    H5VL_pass_through_t *o            = (H5VL_pass_through_t *)obj;
+    H5VL_pass_through_t *   o = (H5VL_pass_through_t *)obj;
     H5VL_link_create_args_t new_create_args;
-    hbool_t              use_new_args = false;
-    hid_t                under_vol_id = -1;
-    herr_t               ret_value;
+    hbool_t                 use_new_args = false;
+    hid_t                   under_vol_id = -1;
+    herr_t                  ret_value;
 
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL LINK Create\n");
@@ -2180,7 +2181,7 @@ H5VL_pass_through_link_create(H5VL_link_create_type_t create_type, const H5VL_li
 
     /* Fix up the link target object for hard link creation */
     if (H5VL_LINK_CREATE_HARD == create_type) {
-        void *             cur_obj;
+        void *cur_obj;
 
         /* Retrieve the object & loc params for the link target */
         cur_obj = create_args->hard.vol_obj_data;
@@ -2199,12 +2200,12 @@ H5VL_pass_through_link_create(H5VL_link_create_type_t create_type, const H5VL_li
 
             use_new_args = true;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Re-issue 'link create' call */
     ret_value = H5VLlink_create(create_type, use_new_args ? &new_create_args : create_args,
-                               (o ? o->under_object : NULL), loc_params, under_vol_id,
-                               lcpl_id, lapl_id, dxpl_id, req);
+                                (o ? o->under_object : NULL), loc_params, under_vol_id, lcpl_id, lapl_id,
+                                dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)

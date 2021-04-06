@@ -830,12 +830,12 @@ herr_t
 H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id)
 {
     H5VL_link_create_args_t create_args;
-    H5VL_object_t *   vol_obj1 = NULL; /* object of obj_id */
-    H5VL_object_t *   vol_obj2 = NULL; /* object of new_loc_id */
-    H5VL_object_t     tmp_vol_obj;     /* Temporary object */
-    H5VL_loc_params_t loc_params1;
-    H5VL_loc_params_t loc_params2;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *         vol_obj1 = NULL; /* object of obj_id */
+    H5VL_object_t *         vol_obj2 = NULL; /* object of new_loc_id */
+    H5VL_object_t           tmp_vol_obj;     /* Temporary object */
+    H5VL_loc_params_t       loc_params1;
+    H5VL_loc_params_t       loc_params2;
+    herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ii*sii", obj_id, new_loc_id, new_name, lcpl_id, lapl_id);
@@ -894,11 +894,11 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
 
     /* Setup link creation arguments */
     create_args.hard.vol_obj_data = vol_obj1->data;
-    create_args.hard.loc_params = &loc_params1;
+    create_args.hard.loc_params   = &loc_params1;
 
     /* Create a link to the object */
-    if (H5VL_link_create(H5VL_LINK_CREATE_HARD, &create_args, &tmp_vol_obj, &loc_params2, lcpl_id,
-                         lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_link_create(H5VL_LINK_CREATE_HARD, &create_args, &tmp_vol_obj, &loc_params2, lcpl_id, lapl_id,
+                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:

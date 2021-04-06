@@ -39,7 +39,8 @@
 herr_t
 H5VL__native_link_create(H5VL_link_create_type_t create_type, const H5VL_link_create_args_t *create_args,
                          void *obj, const H5VL_loc_params_t *loc_params, hid_t lcpl_id,
-                         hid_t H5_ATTR_UNUSED lapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+                         hid_t H5_ATTR_UNUSED lapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
+                         void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

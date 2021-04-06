@@ -195,7 +195,7 @@ typedef enum H5VL_link_create_type_t {
 typedef union H5VL_link_create_args_t {
     struct {
         H5VL_loc_params_t *loc_params;
-        void *vol_obj_data;
+        void *             vol_obj_data;
     } hard;
 
     struct {
@@ -203,9 +203,9 @@ typedef union H5VL_link_create_args_t {
     } soft;
 
     struct {
-        H5L_type_t link_type;
+        H5L_type_t  link_type;
         const void *udata;
-        size_t udata_size;
+        size_t      udata_size;
     } ud;
 } H5VL_link_create_args_t;
 

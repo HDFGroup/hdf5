@@ -224,9 +224,10 @@ H5_DLL herr_t H5VL_group_optional(const H5VL_object_t *vol_obj, H5VL_group_optio
 H5_DLL herr_t H5VL_group_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req);
 
 /* Link functions */
-H5_DLL herr_t H5VL_link_create(H5VL_link_create_type_t create_type, const H5VL_link_create_args_t *create_args,
-                               const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, hid_t lcpl_id,
-                               hid_t lapl_id, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL_link_create(H5VL_link_create_type_t        create_type,
+                               const H5VL_link_create_args_t *create_args, const H5VL_object_t *vol_obj,
+                               const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
+                               hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL_link_copy(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_params1,
                              const H5VL_object_t *dst_vol_obj, const H5VL_loc_params_t *loc_params2,
                              hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
