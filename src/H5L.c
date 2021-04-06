@@ -451,6 +451,7 @@ static herr_t
 H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const char *link_name, hid_t lcpl_id,
                             hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
+    H5VL_link_create_args_t create_args;
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
@@ -486,9 +487,12 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
         0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments")
 
+    /* Setup link creation arguments */
+    create_args.soft.link_target = link_target;
+
     /* Create the link */
-    if (H5VL_link_create(H5VL_LINK_CREATE_SOFT, *vol_obj_ptr, &loc_params, lcpl_id, lapl_id,
-                         H5P_DATASET_XFER_DEFAULT, token_ptr, link_target) < 0)
+    if (H5VL_link_create(H5VL_LINK_CREATE_SOFT, &create_args, *vol_obj_ptr, &loc_params,
+                         lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create soft link")
 
 done:
@@ -586,6 +590,7 @@ static herr_t
 H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id, const char *new_name,
                             hid_t lcpl_id, hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
+    H5VL_link_create_args_t create_args;
     H5VL_object_t * vol_obj1 = NULL;                /* Object of cur_loc_id */
     H5VL_object_t * vol_obj2 = NULL;                /* Object of new_loc_id */
     H5VL_object_t   tmp_vol_obj;                    /* Temporary object */
@@ -653,10 +658,14 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t new_lo
     (*tmp_vol_obj_ptr_ptr)->data      = (vol_obj2 ? (vol_obj2->data) : NULL);
     (*tmp_vol_obj_ptr_ptr)->connector = (vol_obj1 != NULL ? vol_obj1->connector : vol_obj2->connector);
 
+    /* Setup link creation arguments */
+    create_args.hard.vol_obj_data = (vol_obj1 ? vol_obj1->data : NULL);
+    create_args.hard.loc_params = &loc_params1;
+
     /* Create the link */
-    if (H5VL_link_create(H5VL_LINK_CREATE_HARD, *tmp_vol_obj_ptr_ptr, &loc_params2, lcpl_id, lapl_id,
-                         H5P_DATASET_XFER_DEFAULT, token_ptr, (vol_obj1 ? vol_obj1->data : NULL),
-                         &loc_params1) < 0)
+    if (H5VL_link_create(H5VL_LINK_CREATE_HARD, &create_args, *tmp_vol_obj_ptr_ptr,
+                         &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT,
+                         token_ptr) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create hard link")
 
 done:
@@ -772,6 +781,7 @@ herr_t
 H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_id, const char *link_name,
                    hid_t lcpl_id, hid_t lapl_id)
 {
+    H5VL_link_create_args_t create_args;
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     char *            norm_obj_name = NULL; /* Pointer to normalized current name */
@@ -832,10 +842,14 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
+    /* Setup link creation arguments */
+    create_args.ud.link_type = link_type;
+    create_args.ud.udata = ext_link_buf;
+    create_args.ud.udata_size = buf_size;
+
     /* Create an external link */
-    if (H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj, &loc_params, lcpl_id, lapl_id,
-                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)link_type, ext_link_buf,
-                         buf_size) < 0)
+    if (H5VL_link_create(H5VL_LINK_CREATE_UD, &create_args, vol_obj, &loc_params, lcpl_id,
+                         lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create external link")
 
 done:
@@ -873,6 +887,7 @@ herr_t
 H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type, const void *udata,
              size_t udata_size, hid_t lcpl_id, hid_t lapl_id)
 {
+    H5VL_link_create_args_t create_args;
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
@@ -908,9 +923,14 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type, con
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Setup link creation arguments */
+    create_args.ud.link_type = link_type;
+    create_args.ud.udata = udata;
+    create_args.ud.udata_size = udata_size;
+
     /* Create external link */
-    if (H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj, &loc_params, lcpl_id, lapl_id,
-                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)link_type, udata, udata_size) < 0)
+    if (H5VL_link_create(H5VL_LINK_CREATE_UD, &create_args, vol_obj, &loc_params, lcpl_id, lapl_id,
+                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:

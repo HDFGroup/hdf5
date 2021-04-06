@@ -37,9 +37,9 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
-                         hid_t lcpl_id, hid_t H5_ATTR_UNUSED lapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
-                         void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_link_create(H5VL_link_create_type_t create_type, const H5VL_link_create_args_t *create_args,
+                         void *obj, const H5VL_loc_params_t *loc_params, hid_t lcpl_id,
+                         hid_t H5_ATTR_UNUSED lapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -49,8 +49,8 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj, const H
         case H5VL_LINK_CREATE_HARD: {
             H5G_loc_t          cur_loc;
             H5G_loc_t          link_loc;
-            void *             cur_obj    = HDva_arg(arguments, void *);
-            H5VL_loc_params_t *cur_params = HDva_arg(arguments, H5VL_loc_params_t *);
+            void *             cur_obj    = create_args->hard.vol_obj_data;
+            H5VL_loc_params_t *cur_params = create_args->hard.loc_params;
 
             if (NULL != cur_obj && H5G_loc_real(cur_obj, cur_params->obj_type, &cur_loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
@@ -87,7 +87,7 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj, const H
         }
 
         case H5VL_LINK_CREATE_SOFT: {
-            char *    target_name = HDva_arg(arguments, char *);
+            char *    target_name = create_args->soft.link_target;
             H5G_loc_t link_loc; /* Group location for new link */
 
             if (H5G_loc_real(obj, loc_params->obj_type, &link_loc) < 0)
@@ -102,9 +102,9 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj, const H
 
         case H5VL_LINK_CREATE_UD: {
             H5G_loc_t  link_loc; /* Group location for new link */
-            H5L_type_t link_type  = (H5L_type_t)HDva_arg(arguments, int);
-            void *     udata      = HDva_arg(arguments, void *);
-            size_t     udata_size = HDva_arg(arguments, size_t);
+            H5L_type_t link_type  = create_args->ud.link_type;
+            void *     udata      = create_args->ud.udata;
+            size_t     udata_size = create_args->ud.udata_size;
 
             if (H5G_loc_real(obj, loc_params->obj_type, &link_loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
