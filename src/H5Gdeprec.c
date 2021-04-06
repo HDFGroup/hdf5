@@ -306,6 +306,7 @@ done:
 herr_t
 H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new_name)
 {
+    H5VL_link_create_args_t create_args;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -345,10 +346,14 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
         tmp_vol_obj.data      = NULL;
         tmp_vol_obj.connector = vol_obj->connector;
 
+        /* Setup link creation arguments */
+        create_args.hard.vol_obj_data = vol_obj->data;
+        create_args.hard.loc_params = &loc_params1;
+
         /* Create the link through the VOL */
-        if (H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, H5P_LINK_CREATE_DEFAULT,
-                             H5P_LINK_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                             vol_obj->data, &loc_params1) < 0)
+        if (H5VL_link_create(H5VL_LINK_CREATE_HARD, &create_args, &tmp_vol_obj, &loc_params2,
+                             H5P_LINK_CREATE_DEFAULT, H5P_LINK_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+                             H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if (type == H5L_TYPE_SOFT) {
@@ -364,10 +369,12 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
         if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(cur_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+        /* Setup link creation arguments */
+        create_args.soft.link_target = cur_name;
+
         /* Create the link through the VOL */
-        if (H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, &loc_params, H5P_LINK_CREATE_DEFAULT,
-                             H5P_LINK_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                             cur_name) < 0)
+        if (H5VL_link_create(H5VL_LINK_CREATE_SOFT, &create_args, vol_obj, &loc_params, H5P_LINK_CREATE_DEFAULT,
+                             H5P_LINK_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else-if */
     else
@@ -388,6 +395,7 @@ done:
 herr_t
 H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type, hid_t new_loc_id, const char *new_name)
 {
+    H5VL_link_create_args_t create_args;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -426,10 +434,13 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type, hid_t new_loc_
         if (NULL == (vol_obj2 = (H5VL_object_t *)H5I_object(new_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+        /* Setup link creation arguments */
+        create_args.hard.vol_obj_data = vol_obj1->data;
+        create_args.hard.loc_params = &loc_params1;
+
         /* Create the link through the VOL */
-        if (H5VL_link_create(H5VL_LINK_CREATE_HARD, vol_obj2, &loc_params2, H5P_LINK_CREATE_DEFAULT,
-                             H5P_LINK_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                             vol_obj1->data, &loc_params1) < 0)
+        if (H5VL_link_create(H5VL_LINK_CREATE_HARD, &create_args, vol_obj2, &loc_params2, H5P_LINK_CREATE_DEFAULT,
+                             H5P_LINK_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if (type == H5L_TYPE_SOFT) {
@@ -450,10 +461,12 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type, hid_t new_loc_
         if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(new_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+        /* Setup link creation arguments */
+        create_args.soft.link_target = cur_name;
+
         /* Create the link through the VOL */
-        if (H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, &loc_params, H5P_LINK_CREATE_DEFAULT,
-                             H5P_LINK_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                             cur_name) < 0)
+        if (H5VL_link_create(H5VL_LINK_CREATE_SOFT, &create_args, vol_obj, &loc_params, H5P_LINK_CREATE_DEFAULT,
+                             H5P_LINK_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else-if */
     else
