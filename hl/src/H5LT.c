@@ -1312,6 +1312,10 @@ find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
     if (name == NULL)
         return ret;
 
+    /* Shut the compiler up */
+    (void)loc_id;
+    (void)linfo;
+
     /* Define a positive value for return value if the dataset was found. This will
      * cause the iterator to immediately return that positive value,
      * indicating short-circuit success
@@ -1849,6 +1853,10 @@ find_attr(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5
     /* check the arguments */
     if (name == NULL)
         return H5_ITER_CONT;
+
+    /* Shut compiler up */
+    (void)loc_id;
+    (void)ainfo;
 
     /* Define a positive value for return value if the attribute was found. This will
      * cause the iterator to immediately return that positive value,
