@@ -949,6 +949,7 @@
 ./src/H5UC.c
 ./src/H5UCprivate.h
 ./src/H5RS.c
+./src/H5RSmodule.h
 ./src/H5RSprivate.h
 ./src/H5S.c
 ./src/H5Sall.c
