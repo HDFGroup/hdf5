@@ -1999,28 +1999,16 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Check if page buffering is enabled */
     if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get page buffer size")
-
-#ifdef H5_HAVE_PARALLEL
-{
-    hid_t driver_id = H5I_INVALID_HID; /* VFD ID */
-
-    /* Get the driver */
-    if ((driver_id = H5P_peek_driver(a_plist)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get driver")
-    /* Temporary: fail file create when page buffering feature is enabled for parallel */
-    if (H5FD_MPIO == driver_id)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "page buffering is disabled for MPI-I/O VFD")
-}
-#endif /* H5_HAVE_PARALLEL */
-
     if (page_buf_size) {
 #ifdef H5_HAVE_PARALLEL
         /* Collective metadata writes are not supported with page buffering */
         if (file->shared->coll_md_write)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
                         "collective metadata writes are not supported with page buffering")
-#endif /* H5_HAVE_PARALLEL */
 
+        /* Temporary: fail file create when page buffering feature is enabled for parallel */
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "page buffering is disabled for parallel")
+#endif /* H5_HAVE_PARALLEL */
         /* Query for other page buffer cache properties */
         if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &page_buf_min_meta_perc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get minimum metadata fraction of page buffer")
