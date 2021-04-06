@@ -149,7 +149,7 @@ H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
     herr_t            ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iIiIo*hx*x", group_id, idx_type, order, idx_p, op, op_data);
+    H5TRACE6("e", "iIiIo*hLi*x", group_id, idx_type, order, idx_p, op, op_data);
 
     /* Check arguments */
     id_type = H5I_get_type(group_id);
@@ -226,8 +226,7 @@ H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     herr_t            ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIo*hx*xi", loc_id, group_name, idx_type, order, idx_p, op,
-             op_data, lapl_id);
+    H5TRACE8("e", "i*sIiIo*hLi*xi", loc_id, group_name, idx_type, order, idx_p, op, op_data, lapl_id);
 
     /* Check arguments */
     if (!group_name)
@@ -384,8 +383,7 @@ H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, linfo,
-             lapl_id);
+    H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, linfo, lapl_id);
 
     /* Check arguments */
     if (!group_name || !*group_name)
@@ -489,7 +487,7 @@ H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
     herr_t            ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIiIox*x", group_id, idx_type, order, op, op_data);
+    H5TRACE5("e", "iIiIoLi*x", group_id, idx_type, order, op, op_data);
 
     /* Check args */
     id_type = H5I_get_type(group_id);
@@ -572,8 +570,7 @@ H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
     herr_t            ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIox*xi", loc_id, group_name, idx_type, order, op, op_data,
-             lapl_id);
+    H5TRACE7("e", "i*sIiIoLi*xi", loc_id, group_name, idx_type, order, op, op_data, lapl_id);
 
     /* Check args */
     if (!group_name)

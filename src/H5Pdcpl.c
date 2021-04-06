@@ -2266,8 +2266,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
     herr_t                     ret_value        = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "ii*s*si", dcpl_id, vspace_id, src_file_name, src_dset_name,
-             src_space_id);
+    H5TRACE5("e", "ii*s*si", dcpl_id, vspace_id, src_file_name, src_dset_name, src_space_id);
 
     /* Check arguments */
     if (!src_file_name)

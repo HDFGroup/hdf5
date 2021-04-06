@@ -625,7 +625,7 @@ H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
     herr_t          ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa);
+    H5TRACE2("e", "i*#", fapl_id, fa);
 
     HDassert(fa != NULL);
 
@@ -721,7 +721,7 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa_out);
+    H5TRACE2("e", "i*#", fapl_id, fa_out);
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "H5Pget_fapl_hdfs() called.\n");
@@ -1537,7 +1537,7 @@ H5FD_hdfs_cmp(const H5FD_t H5_ATTR_UNUSED *_f1, const H5FD_t H5_ATTR_UNUSED *_f2
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_hdfs_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags) /* out variable */
+H5FD_hdfs_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1545,7 +1545,8 @@ H5FD_hdfs_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags) /* out
     HDfprintf(stdout, "H5FD_hdfs_query() called.\n");
 #endif
 
-    if (flags) {
+    if (flags)
+{
         *flags = 0;
         *flags |= H5FD_FEAT_DATA_SIEVE;
     }
@@ -1804,10 +1805,8 @@ done:
 #ifdef H5_HAVE_LIBHDFS
 
 static herr_t
-H5FD_hdfs_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
-               haddr_t addr, /* start offset   */
-               size_t  size, /* length of read */
-               void *  buf)    /* out            */
+H5FD_hdfs_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
+                size_t size, void *buf)
 {
     herr_t       ret_value = SUCCEED;
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
@@ -1831,7 +1830,8 @@ H5FD_hdfs_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
 
     filesize = (size_t)file->hdfs_handle->fileinfo->mSize;
 
-    if ((addr > filesize) || ((addr + size) > filesize)) {
+    if ((addr > filesize) || ((addr + size) > filesize))
+{
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "range exceeds file address")
     }
 
