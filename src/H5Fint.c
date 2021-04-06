@@ -1816,15 +1816,15 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     size_t                 page_buf_size;
     unsigned               page_buf_min_meta_perc = 0;
     unsigned               page_buf_min_raw_perc  = 0;
-    hbool_t                set_flag               = FALSE; /*set the status_flags in the superblock */
-    hbool_t                clear                  = FALSE; /*clear the status_flags         */
-    hbool_t                evict_on_close;                 /* evict on close value from plist  */
+    hbool_t                set_flag               = FALSE; /* Set the status_flags in the superblock */
+    hbool_t                clear                  = FALSE; /* Clear the status_flags */
+    hbool_t                evict_on_close;                 /* Evict on close value from plist */
     hbool_t                use_file_locking    = TRUE;     /* Using file locks? */
-    hbool_t                ci_load             = FALSE;    /* whether MDC ci load requested */
-    hbool_t                ci_write            = FALSE;    /* whether MDC CI write requested */
-    hbool_t                file_create         = FALSE;    /* creating a new file or not */
+    hbool_t                ci_load             = FALSE;    /* Whether MDC ci load requested */
+    hbool_t                ci_write            = FALSE;    /* Whether MDC CI write requested */
+    hbool_t                file_create         = FALSE;    /* Creating a new file or not */
     H5F_vfd_swmr_config_t *vfd_swmr_config_ptr = NULL;     /* Points to VFD SMWR config info */
-    H5F_t *                ret_value           = NULL;     /*actual return value           */
+    H5F_t *                ret_value           = NULL;     /* Actual return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1999,16 +1999,28 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Check if page buffering is enabled */
     if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get page buffer size")
+
+#ifdef H5_HAVE_PARALLEL
+{
+    hid_t driver_id = H5I_INVALID_HID; /* VFD ID */
+
+    /* Get the driver */
+    if ((driver_id = H5P_peek_driver(a_plist)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get driver")
+    /* Temporary: fail file create when page buffering feature is enabled for parallel */
+    if (H5FD_MPIO == driver_id)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "page buffering is disabled for MPI-I/O VFD")
+}
+#endif /* H5_HAVE_PARALLEL */
+
     if (page_buf_size) {
 #ifdef H5_HAVE_PARALLEL
         /* Collective metadata writes are not supported with page buffering */
         if (file->shared->coll_md_write)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
                         "collective metadata writes are not supported with page buffering")
-
-        /* Temporary: fail file create when page buffering feature is enabled for parallel */
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "page buffering is disabled for parallel")
 #endif /* H5_HAVE_PARALLEL */
+
         /* Query for other page buffer cache properties */
         if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &page_buf_min_meta_perc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get minimum metadata fraction of page buffer")
