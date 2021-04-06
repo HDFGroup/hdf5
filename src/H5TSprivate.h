@@ -19,8 +19,6 @@
  *
  * Purpose:		Private non-prototype header.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifndef H5TSprivate_H_

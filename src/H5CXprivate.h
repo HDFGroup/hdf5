@@ -13,8 +13,8 @@
 /*
  *  Header file for API contexts, etc.
  */
-#ifndef _H5CXprivate_H
-#define _H5CXprivate_H
+#ifndef H5CXprivate_H
+#define H5CXprivate_H
 
 /* Include package's public header */
 #ifdef NOT_YET
@@ -177,4 +177,4 @@ H5_DLL herr_t H5CX_test_set_mpio_coll_rank0_bcast(hbool_t rank0_bcast);
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5CXprivate_H */
+#endif /* H5CXprivate_H */

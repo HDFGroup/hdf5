@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5RS module
  */
-#ifndef _H5RSprivate_H
-#define _H5RSprivate_H
+#ifndef H5RSprivate_H
+#define H5RSprivate_H
 
 /**************************************/
 /* Public headers needed by this file */
@@ -55,4 +55,4 @@ H5_DLL ssize_t     H5RS_len(const H5RS_str_t *rs);
 H5_DLL char *      H5RS_get_str(const H5RS_str_t *rs);
 H5_DLL unsigned    H5RS_get_count(const H5RS_str_t *rs);
 
-#endif /* _H5RSprivate_H */
+#endif /* H5RSprivate_H */

@@ -13,20 +13,18 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Cprivate.h
- *			6/3/04
- *			John Mainzer
+ * Created:   H5Cprivate.h
+ *            6/3/04
+ *            John Mainzer
  *
- * Purpose:		Constants and typedefs available to the rest of the
- *			library.
- *
- * Modifications:
+ * Purpose:   Constants and typedefs available to the rest of the
+ *            library.
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5Cprivate_H
-#define _H5Cprivate_H
+#ifndef H5Cprivate_H
+#define H5Cprivate_H
 
 #include "H5Cpublic.h" /* public prototypes		        */
 
@@ -2470,4 +2468,4 @@ H5_DLL herr_t H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_cl
 H5_DLL herr_t H5C_validate_index_list(H5C_t *cache_ptr);
 #endif /* NDEBUG */
 
-#endif /* !_H5Cprivate_H */
+#endif /* H5Cprivate_H */

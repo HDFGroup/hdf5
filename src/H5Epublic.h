@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5E module.
  */
-#ifndef _H5Epublic_H
-#define _H5Epublic_H
+#ifndef H5Epublic_H
+#define H5Epublic_H
 
 #include <stdio.h> /*FILE arg of H5Eprint()                     */
 
@@ -218,4 +218,4 @@ H5_DLL char * H5Eget_minor(H5E_minor_t min);
 }
 #endif
 
-#endif /* end _H5Epublic_H */
+#endif /* end H5Epublic_H */

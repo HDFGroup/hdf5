@@ -21,8 +21,8 @@
  * Programmer: John Mainzer -- 10/07/18
  */
 
-#ifndef _H5PBprivate_H
-#define _H5PBprivate_H
+#ifndef H5PBprivate_H
+#define H5PBprivate_H
 
 /* Include package's public header */
 
@@ -712,4 +712,4 @@ H5_DLL herr_t H5PB_print_stats(const H5PB_t *);
 /* test & debug functions */
 H5_DLL herr_t H5PB_page_exists(H5F_shared_t *, haddr_t, hbool_t *);
 
-#endif /* !_H5PBprivate_H */
+#endif /* H5PBprivate_H */

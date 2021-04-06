@@ -14,8 +14,8 @@
  *          H5R package.  Including this header means that the source file
  *          is part of the H5R package.
  */
-#ifndef _H5Rmodule_H
-#define _H5Rmodule_H
+#ifndef H5Rmodule_H
+#define H5Rmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -25,4 +25,11 @@
 #define H5_MY_PKG_ERR  H5E_REFERENCE
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5Rmodule_H */
+/**
+ * \defgroup H5R H5R
+ * \brief Reference Interface
+ * \details The HDF5 Reference Interface, H5R, provides a mechanism for managing
+ *          HDF5 referenced objects.
+ */
+
+#endif /* H5Rmodule_H */

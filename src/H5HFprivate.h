@@ -15,15 +15,15 @@
  *
  * Created:		H5HFprivate.h
  *			Feb 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Private header for library accessible fractal heap routines.
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5HFprivate_H
-#define _H5HFprivate_H
+#ifndef H5HFprivate_H
+#define H5HFprivate_H
 
 /* Private headers needed by this file */
 #include "H5Fprivate.h" /* File access				*/
@@ -125,4 +125,4 @@ H5_DLL herr_t H5HF_id_print(H5HF_t *fh, const void *id, FILE *stream, int indent
 H5_DLL herr_t H5HF_sects_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth);
 #endif /* H5HF_DEBUGGING */
 
-#endif /* _H5HFprivate_H */
+#endif /* H5HFprivate_H */

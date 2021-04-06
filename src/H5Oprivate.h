@@ -15,14 +15,14 @@
  *
  * Created:		H5Oprivate.h
  *			Aug  5 1997
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		Object header private include file.
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Oprivate_H
-#define _H5Oprivate_H
+#ifndef H5Oprivate_H
+#define H5Oprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5O_t      H5O_t;
@@ -1045,4 +1045,4 @@ H5_DLL herr_t H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline);
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);
 
-#endif /* _H5Oprivate_H */
+#endif /* H5Oprivate_H */

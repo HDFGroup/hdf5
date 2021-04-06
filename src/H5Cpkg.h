@@ -26,12 +26,15 @@
  *		reason why this file was created.
  */
 
+/* clang-format off */
+/* Maintain current format by disabling format for this file */
+
 #if !(defined H5C_FRIEND || defined H5C_MODULE)
 #error "Do not include this file outside the H5C package!"
 #endif
 
-#ifndef _H5Cpkg_H
-#define _H5Cpkg_H
+#ifndef H5Cpkg_H
+#define H5Cpkg_H
 
 /* Get package's private header */
 #include "H5Cprivate.h"
@@ -4681,4 +4684,5 @@ H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_
 H5_DLL void   H5C_set_curr_io_type_splitable(H5C_t *cache_ptr, hbool_t set_splitable);
 #endif /* H5C_TESTING */
 
-#endif /* _H5Cpkg_H */
+#endif /* H5Cpkg_H */
+/* clang-format on */

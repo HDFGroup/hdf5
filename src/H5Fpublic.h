@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5F module.
  */
-#ifndef _H5Fpublic_H
-#define _H5Fpublic_H
+#ifndef H5Fpublic_H
+#define H5Fpublic_H
 
 /* Public header files needed by this file */
 #include "H5public.h"
@@ -408,4 +408,4 @@ H5_DLL htri_t H5Fis_hdf5(const char *filename);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Fpublic_H */
+#endif /* H5Fpublic_H */

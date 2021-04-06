@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5S module
  */
-#ifndef _H5Sprivate_H
-#define _H5Sprivate_H
+#ifndef H5Sprivate_H
+#define H5Sprivate_H
 
 /* Include package's public header */
 #include "H5Spublic.h"
@@ -306,4 +306,4 @@ H5_DLL herr_t H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
                                   hbool_t do_permute, hsize_t **permute_map, hbool_t *is_permuted);
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5Sprivate_H */
+#endif /* H5Sprivate_H */

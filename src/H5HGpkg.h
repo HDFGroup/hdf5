@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer: Quincey Koziol
  *             Wednesday, July 9, 2003
  *
  * Purpose:     This file contains declarations which are visible
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5HG package!"
 #endif
 
-#ifndef _H5HGpkg_H
-#define _H5HGpkg_H
+#ifndef H5HGpkg_H
+#define H5HGpkg_H
 
 /* Get package's private header */
 #include "H5HGprivate.h"
@@ -136,4 +136,4 @@ struct H5HG_heap_t {
 H5_DLL herr_t H5HG__free(H5HG_heap_t *heap);
 H5_DLL H5HG_heap_t *H5HG__protect(H5F_t *f, haddr_t addr, unsigned flags);
 
-#endif /* _H5HGpkg_H */
+#endif /* H5HGpkg_H */

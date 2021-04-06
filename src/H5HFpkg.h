@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:	Quincey Koziol
  *		Friday, February 24, 2006
  *
  * Purpose:	This file contains declarations which are visible only within
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5HF package!"
 #endif
 
-#ifndef _H5HFpkg_H
-#define _H5HFpkg_H
+#ifndef H5HFpkg_H
+#define H5HFpkg_H
 
 /* Get package's private header */
 #include "H5HFprivate.h"
@@ -794,4 +794,4 @@ H5_DLL herr_t   H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len, hbool
 H5_DLL herr_t   H5HF_get_huge_info_test(const H5HF_t *fh, hsize_t *next_id, hbool_t *ids_direct);
 #endif /* H5HF_TESTING */
 
-#endif /* _H5HFpkg_H */
+#endif /* H5HFpkg_H */

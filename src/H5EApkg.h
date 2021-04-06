@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5EA package!"
 #endif
 
-#ifndef _H5EApkg_H
-#define _H5EApkg_H
+#ifndef H5EApkg_H
+#define H5EApkg_H
 
 /* Get package's private header */
 #include "H5EAprivate.h"
@@ -461,4 +461,4 @@ H5_DLL herr_t H5EA__get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam);
 H5_DLL int    H5EA__cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2);
 #endif /* H5EA_TESTING */
 
-#endif /* _H5EApkg_H */
+#endif /* H5EApkg_H */

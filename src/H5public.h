@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the HDF5 module.
  */
-#ifndef _H5public_H
-#define _H5public_H
+#ifndef H5public_H
+#define H5public_H
 
 /* Include files for public use... */
 /*
@@ -387,4 +387,4 @@ H5_DLL void * H5resize_memory(void *mem, size_t size);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5public_H */
+#endif /* H5public_H */

@@ -15,8 +15,8 @@
  * This file contains function prototypes for each exported function in
  * the H5I module.
  */
-#ifndef _H5Ipublic_H
-#define _H5Ipublic_H
+#ifndef H5Ipublic_H
+#define H5Ipublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -103,4 +103,4 @@ H5_DLL htri_t     H5Iis_valid(hid_t id);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Ipublic_H */
+#endif /* H5Ipublic_H */

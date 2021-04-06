@@ -14,8 +14,8 @@
  * Purpose:	The private header file for the native VOL connector.
  */
 
-#ifndef _H5VLnative_private_H
-#define _H5VLnative_private_H
+#ifndef H5VLnative_private_H
+#define H5VLnative_private_H
 
 /* Private headers needed by this file */
 #include "H5Fprivate.h" /* Files                                    */
@@ -178,4 +178,4 @@ H5_DLL herr_t H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **fi
 }
 #endif
 
-#endif /* _H5VLnative_private_H */
+#endif /* H5VLnative_private_H */

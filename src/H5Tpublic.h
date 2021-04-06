@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5T module.
  */
-#ifndef _H5Tpublic_H
-#define _H5Tpublic_H
+#ifndef H5Tpublic_H
+#define H5Tpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -609,4 +609,4 @@ H5_DLL int    H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int perm[]);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Tpublic_H */
+#endif /* H5Tpublic_H */

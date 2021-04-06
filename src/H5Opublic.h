@@ -15,15 +15,15 @@
  *
  * Created:             H5Opublic.h
  *                      Aug  5 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Public declarations for the H5O (object header)
  *                      package.
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Opublic_H
-#define _H5Opublic_H
+#ifndef H5Opublic_H
+#define H5Opublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"  /* Generic Functions			*/
@@ -303,4 +303,4 @@ H5_DLL herr_t H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t i
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Opublic_H */
+#endif /* H5Opublic_H */

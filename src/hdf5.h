@@ -16,8 +16,8 @@
  * a particular header file and include that here, don't fill this file with
  * lots of gunk...
  */
-#ifndef _HDF5_H
-#define _HDF5_H
+#ifndef HDF5_H
+#define HDF5_H
 
 #include "H5public.h"
 #include "H5Apublic.h"  /* Attributes                               */

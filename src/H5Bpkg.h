@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5B package!"
 #endif
 
-#ifndef _H5Bpkg_H
-#define _H5Bpkg_H
+#ifndef H5Bpkg_H
+#define H5Bpkg_H
 
 /* Get package's private header */
 #include "H5Bprivate.h"
@@ -86,4 +86,4 @@ H5_DLL herr_t H5B__node_dest(H5B_t *bt);
 herr_t H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata);
 #endif
 
-#endif /*_H5Bpkg_H*/
+#endif /*H5Bpkg_H*/
