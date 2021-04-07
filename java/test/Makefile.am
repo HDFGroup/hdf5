@@ -1,6 +1,5 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -83,11 +82,6 @@ $(jarfile): classnoinst.stamp classes
 noinst_DATA = $(jarfile)
 
 .PHONY: classes
-
-# Test with just the native connector, with a single pass-through connector
-# and with a doubly-stacked pass-through.
-VOL_LIST = native "pass_through under_vol=0;under_info={}" \
-           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
 
 check_SCRIPTS = junit.sh
 TEST_SCRIPT = $(check_SCRIPTS)

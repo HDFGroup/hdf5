@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5dbg.c
- *			Mar  4 2006
- *			Quincey Koziol
+ * Created:         H5dbg.c
+ *                  Mar  4 2006
+ *                  Quincey Koziol
  *
- * Purpose:		Generic debugging routines
+ * Purpose:         Generic debugging routines
  *
  *-------------------------------------------------------------------------
  */
@@ -25,11 +25,12 @@
 /****************/
 /* Module Setup */
 /****************/
+#include "H5module.h" /* This source code file is part of the H5 module */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h" /* Generic Functions			*/
+#include "H5private.h" /* Generic Functions            */
 
 /****************/
 /* Local Macros */
@@ -56,14 +57,14 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5_buffer_dump
+ * Function:    H5_buffer_dump
  *
- * Purpose:	Dumps a buffer of memory in an octal dump form
+ * Purpose:     Dumps a buffer of memory in an octal dump form
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar  4 2006
+ * Programmer:  Quincey Koziol
+ *              Mar  4 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -91,7 +92,7 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
     for (u = 0; u < buf_size; u += 16) {
         uint8_t c;
 
-        HDfprintf(stream, "%*s %8d: ", indent, "", u + buf_offset);
+        HDfprintf(stream, "%*s %8zu: ", indent, "", u + buf_offset);
 
         /* Print the hex values */
         for (v = 0; v < 16; v++) {
@@ -105,6 +106,7 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
             }     /* end if */
             else
                 HDfprintf(stream, "   ");
+
             if (7 == v)
                 HDfputc(' ', stream);
         } /* end for */
@@ -117,12 +119,14 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
                     HDfputc(' ', stream);
                 else {
                     c = buf[buf_offset + u + v];
+
                     if (HDisprint(c))
                         HDfputc(c, stream);
                     else
                         HDfputc('.', stream);
                 } /* end else */
             }     /* end if */
+
             if (7 == v)
                 HDfputc(' ', stream);
         } /* end for */

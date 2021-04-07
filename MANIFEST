@@ -554,6 +554,7 @@
 ./src/H5err.txt
 ./src/H5detect.c
 ./src/H5make_libsettings.c
+./src/H5module.h
 ./src/H5mpi.c
 ./src/H5overflow.txt
 ./src/H5private.h
@@ -946,8 +947,6 @@
 ./src/H5Rpkg.h
 ./src/H5Rprivate.h
 ./src/H5Rpublic.h
-./src/H5UC.c
-./src/H5UCprivate.h
 ./src/H5RS.c
 ./src/H5RSmodule.h
 ./src/H5RSprivate.h
@@ -1009,6 +1008,8 @@
 ./src/H5TS.c
 ./src/H5TSprivate.h
 ./src/H5TSpublic.h
+./src/H5UC.c
+./src/H5UCprivate.h
 ./src/H5VL.c
 ./src/H5VLcallback.c
 ./src/H5VLconnector.h
