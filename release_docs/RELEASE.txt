@@ -844,8 +844,8 @@ Bug Fixes since HDF5-1.12.0 release
         H5S_NO_CLASS is an internal class value that should not have been
         exposed via a public API call.
 
-        In debug builds of the library, this can cause assert() functions to trip. In
-        non-debug builds, it will produce normal library errors.
+        In debug builds of the library, this can cause assert() function to 
+        trip. In non-debug builds, it will produce normal library errors.
 
         The new library behavior is for H5Sset_extent_none() to convert
         the dataspace into one of type H5S_NULL, which is better handled
@@ -979,8 +979,10 @@ Bug Fixes since HDF5-1.12.0 release
     - Changed how h5dump and h5ls identify long double.
 
         Long double support is not consistent across platforms. Tools will always
-        identify long double as 128-bit [little/big]-endian float. New test file
-        created for datasets with attributes for float, double and long double.
+        identify long double as 128-bit [little/big]-endian float nn-bit precision.
+        New test file created for datasets with attributes for float, double and
+        long double. In addition any unknown integer or float datatype will now
+        also show the number of bits for precision.
         These files are also used in the java tests.
 
         (ADB - 2021/03/24, HDFFV-11229)
