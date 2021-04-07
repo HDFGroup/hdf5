@@ -2508,8 +2508,8 @@ test_vltypes_fill_value(void)
     hid_t               large_dspace_id;            /* Dataspace ID for large datasets */
     hid_t               small_select_dspace_id;     /* Dataspace ID for selection in small datasets */
     hid_t               large_select_dspace_id;     /* Dataspace ID for selection in large datasets */
-    hid_t               dset_dspace_id;             /* Dataspace ID for a particular dataset */
-    hid_t               dset_select_dspace_id;      /* Dataspace ID for selection in a particular dataset */
+    hid_t               dset_dspace_id        = -1; /* Dataspace ID for a particular dataset */
+    hid_t               dset_select_dspace_id = -1; /* Dataspace ID for selection in a particular dataset */
     hid_t               scalar_dspace_id;           /* Dataspace ID for scalar dataspace */
     hid_t               single_dspace_id;           /* Dataspace ID for single element selection */
     hsize_t             single_offset[]      = {2}; /* Offset of single element selection */
@@ -2525,8 +2525,8 @@ test_vltypes_fill_value(void)
     hid_t               dset_id;
     hsize_t             small_dims[] = {SPACE4_DIM_SMALL};
     hsize_t             large_dims[] = {SPACE4_DIM_LARGE};
-    size_t              dset_elmts; /* Number of elements in a particular dataset */
-    const dtype1_struct fill1 = {1, 2,    "foobar", "",   NULL,     "\0",   "dead",
+    size_t              dset_elmts   = 0; /* Number of elements in a particular dataset */
+    const dtype1_struct fill1        = {1, 2,    "foobar", "",   NULL,     "\0",   "dead",
                                  3, 4.0F, 100.0F,   1.0F, "liquid", "meter"};
     const dtype1_struct wdata = {3, 4, "", NULL, "\0", "foo", "two", 6, 8.0F, 200.0F, 2.0F, "solid", "yard"};
     dtype1_struct *     rbuf  = NULL;                   /* Buffer for reading data */

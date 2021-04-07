@@ -5486,7 +5486,7 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t n
     /* Get the internal file pointer if the create succeeds */
     if (fid >= 0) {
         f = (H5F_t *)H5I_object(fid);
-        CHECK(f, NULL, "H5I_object");
+        CHECK_PTR(f, "H5I_object");
     }
 
     /* Retrieve the low/high bounds */
@@ -5660,7 +5660,7 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non
 
         /* Get the internal file pointer */
         f = (H5F_t *)H5I_object(fid);
-        CHECK(f, NULL, "H5I_object");
+        CHECK_PTR(f, "H5I_object");
 
         /* The file's superblock version */
         super_vers = f->shared->sblock->super_vers;
@@ -5701,7 +5701,7 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non
                 /* Get the internal file pointer if the open succeeds */
                 if (fid >= 0) {
                     f = (H5F_t *)H5I_object(fid);
-                    CHECK(f, NULL, "H5I_object");
+                    CHECK_PTR(f, "H5I_object");
                 }
 
                 /* Verify the file open succeeds or fails */
@@ -5878,7 +5878,7 @@ test_libver_bounds_obj(hid_t fapl)
 
                 /* Get the internal file pointer */
                 f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
+                CHECK_PTR(f, "H5I_object");
 
                 /* Create a group in the file */
                 gid = H5Gcreate2(fid, GRP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -5986,7 +5986,7 @@ test_libver_bounds_dataset(hid_t fapl)
 
     /* Get the internal dataset pointer */
     dset = (H5D_t *)H5I_object(did);
-    CHECK(dset, NULL, "H5I_object");
+    CHECK_PTR(dset, "H5I_object");
 
     /* Verify version for layout and fill value messages */
     if (low == H5F_LIBVER_EARLIEST) {
@@ -6034,7 +6034,7 @@ test_libver_bounds_dataset(hid_t fapl)
 
         /* Get the internal dataset pointer */
         dset = (H5D_t *)H5I_object(did);
-        CHECK(dset, NULL, "H5I_object");
+        CHECK_PTR(dset, "H5I_object");
 
         /* Verify layout message version and chunk indexing type */
         VERIFY(dset->shared->layout.version, H5O_LAYOUT_VERSION_4, "H5O_layout_ver_bounds");
@@ -6096,7 +6096,7 @@ test_libver_bounds_dataset(hid_t fapl)
 
                 /* Get the internal file pointer */
                 f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
+                CHECK_PTR(f, "H5I_object");
 
                 /* Create the chunked dataset */
                 did = H5Dcreate2(fid, DSETC, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
@@ -6104,7 +6104,7 @@ test_libver_bounds_dataset(hid_t fapl)
 
                 /* Get the internal file pointer */
                 dset = (H5D_t *)H5I_object(did);
-                CHECK(dset, NULL, "H5I_object");
+                CHECK_PTR(dset, "H5I_object");
 
                 /* Verify the dataset's layout, fill value and filter pipeline message versions */
                 /* Also verify the chunk indexing type */
@@ -6225,7 +6225,7 @@ test_libver_bounds_dataspace(hid_t fapl)
     sid = H5Dget_space(did);
     CHECK(sid, H5I_INVALID_HID, "H5Dget_space");
     space = (H5S_t *)H5I_object(sid);
-    CHECK(space, NULL, "H5I_object");
+    CHECK_PTR(space, "H5I_object");
 
     /* Verify the dataspace version */
     VERIFY(space->extent.version, H5O_sdspace_ver_bounds[low], "H5O_sdspace_ver_bounds");
@@ -6242,7 +6242,7 @@ test_libver_bounds_dataspace(hid_t fapl)
     sid_null = H5Dget_space(did_null);
     CHECK(sid_null, H5I_INVALID_HID, "H5Dget_space");
     space_null = (H5S_t *)H5I_object(sid_null);
-    CHECK(space_null, NULL, "H5I_object");
+    CHECK_PTR(space_null, "H5I_object");
 
     /* Verify the dataspace version */
     VERIFY(space_null->extent.version, H5O_SDSPACE_VERSION_2, "H5O_sdspace_ver_bounds");
@@ -6320,7 +6320,7 @@ test_libver_bounds_dataspace(hid_t fapl)
 
                 /* Get the internal file pointer */
                 f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
+                CHECK_PTR(f, "H5I_object");
 
                 /* Create the chunked dataset */
                 did = H5Dcreate2(fid, DSETA, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
@@ -6330,7 +6330,7 @@ test_libver_bounds_dataspace(hid_t fapl)
                 tmp_sid = H5Dget_space(did);
                 CHECK(tmp_sid, H5I_INVALID_HID, "H5Dget_space");
                 tmp_space = (H5S_t *)H5I_object(tmp_sid);
-                CHECK(tmp_space, NULL, "H5I_object");
+                CHECK_PTR(tmp_space, "H5I_object");
 
                 /* Create the compact dataset */
                 did_compact = H5Dcreate2(fid, DSETB, H5T_NATIVE_INT, sid_compact, H5P_DEFAULT, dcpl_compact,
@@ -6341,7 +6341,7 @@ test_libver_bounds_dataspace(hid_t fapl)
                 tmp_sid_compact = H5Dget_space(did_compact);
                 CHECK(tmp_sid_compact, H5I_INVALID_HID, "H5Dget_space");
                 tmp_space_compact = (H5S_t *)H5I_object(tmp_sid_compact);
-                CHECK(tmp_space_compact, NULL, "H5I_object");
+                CHECK_PTR(tmp_space_compact, "H5I_object");
 
                 /* Create the contiguous dataset */
                 did_contig =
@@ -6352,7 +6352,7 @@ test_libver_bounds_dataspace(hid_t fapl)
                 tmp_sid_contig = H5Dget_space(did_contig);
                 CHECK(tmp_sid_contig, H5I_INVALID_HID, "H5Dget_space");
                 tmp_space_contig = (H5S_t *)H5I_object(tmp_sid_contig);
-                CHECK(tmp_space_contig, NULL, "H5I_object");
+                CHECK_PTR(tmp_space_contig, "H5I_object");
 
                 /* Verify versions for the three dataspaces */
                 VERIFY(tmp_space->extent.version, H5O_sdspace_ver_bounds[f->shared->low_bound],
@@ -6576,7 +6576,7 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
 
     /* Get the internal datatype pointer */
     dtype = (H5T_t *)H5I_object(dtid);
-    CHECK(dtype, NULL, "H5I_object");
+    CHECK_PTR(dtype, "H5I_object");
 
     /* Verify the datatype message version */
     /* H5T_COMPOUND, H5T_ENUM, H5T_ARRAY:
@@ -6650,13 +6650,13 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
 
                 /* Get the internal file pointer */
                 f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
+                CHECK_PTR(f, "H5I_object");
 
                 /* Open the committed datatype */
                 str_tid = H5Topen2(fid, "datatype", H5P_DEFAULT);
                 CHECK(str_tid, FAIL, "H5Topen2");
                 str_dtype = (H5T_t *)H5I_object(str_tid);
-                CHECK(str_dtype, NULL, "H5I_object");
+                CHECK_PTR(str_dtype, "H5I_object");
 
                 /* Verify the committed datatype message version */
                 VERIFY(str_dtype->shared->version, H5O_dtype_ver_bounds[H5F_LIBVER_EARLIEST],
@@ -6676,7 +6676,7 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
 
                 /* Get the internal datatype pointer */
                 dtype = (H5T_t *)H5I_object(dtid);
-                CHECK(dtype, NULL, "H5I_object");
+                CHECK_PTR(dtype, "H5I_object");
 
                 /* Verify the dataset's datatype message version */
                 /* H5T_COMPOUND, H5T_ENUM, H5T_ARRAY:
@@ -6809,7 +6809,7 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Get the internal attribute pointer */
     attr = (H5A_t *)H5I_object(aid);
-    CHECK(attr, NULL, "H5I_object");
+    CHECK_PTR(attr, "H5I_object");
 
     /* Verify the attribute version */
     if (low == H5F_LIBVER_EARLIEST)
@@ -6828,7 +6828,7 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Get the internal attribute pointer */
     attr = (H5A_t *)H5I_object(aid);
-    CHECK(attr, NULL, "H5I_object");
+    CHECK_PTR(attr, "H5I_object");
 
     /* Verify attribute version */
     VERIFY(attr->shared->version, H5O_attr_ver_bounds[low], "H5O_attr_ver_bounds");
@@ -6849,7 +6849,7 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Get internal attribute pointer */
     attr = (H5A_t *)H5I_object(aid);
-    CHECK(attr, NULL, "H5I_object");
+    CHECK_PTR(attr, "H5I_object");
 
     /* Verify attribute version */
     if (low == H5F_LIBVER_EARLIEST)
@@ -6914,7 +6914,7 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Get the internal attribute pointer */
     attr = (H5A_t *)H5I_object(aid);
-    CHECK(attr, NULL, "H5I_object");
+    CHECK_PTR(attr, "H5I_object");
 
     /* Verify the attribute version */
     if (low == H5F_LIBVER_EARLIEST)
@@ -6976,7 +6976,7 @@ test_libver_bounds_attributes(hid_t fapl)
 
                 /* Get the internal file pointer */
                 f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
+                CHECK_PTR(f, "H5I_object");
 
                 /* Open the group */
                 gid = H5Gopen2(fid, GRP_NAME, H5P_DEFAULT);
@@ -6988,7 +6988,7 @@ test_libver_bounds_attributes(hid_t fapl)
 
                 /* Get the internal attribute pointer */
                 attr = (H5A_t *)H5I_object(aid);
-                CHECK(attr, NULL, "H5I_object");
+                CHECK_PTR(attr, "H5I_object");
 
                 /* Verify the attribute message version */
                 VERIFY(attr->shared->version, H5O_attr_ver_bounds[f->shared->low_bound],
