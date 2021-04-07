@@ -26,9 +26,7 @@
 
 #ifdef H5_HAVE_THREADSAFE
 /* Public headers needed by this file */
-#ifdef LATER
-#include "H5TSpublic.h" /*Public API prototypes */
-#endif                  /* LATER */
+#include "H5TSpublic.h" /* Public API prototypes */
 
 #ifdef H5_HAVE_WIN_THREADS
 
@@ -38,6 +36,8 @@
 typedef struct H5TS_mutex_struct {
     CRITICAL_SECTION CriticalSection;
 } H5TS_mutex_t;
+
+/* Portability wrappers around Windows Threads types */
 typedef CRITICAL_SECTION H5TS_mutex_simple_t;
 typedef HANDLE           H5TS_thread_t;
 typedef HANDLE           H5TS_attr_t;
@@ -50,7 +50,7 @@ typedef INIT_ONCE        H5TS_once_t;
 #define H5TS_SCOPE_PROCESS 0
 #define H5TS_CALL_CONV     WINAPI
 
-/* Functions */
+/* Portability function aliases */
 #define H5TS_get_thread_local_value(key)        TlsGetValue(key)
 #define H5TS_set_thread_local_value(key, value) TlsSetValue(key, value)
 #define H5TS_attr_init(attr_ptr)                0
@@ -79,7 +79,12 @@ typedef struct H5TS_mutex_struct {
     pthread_mutex_t atomic_lock;  /* lock for atomicity of new mechanism */
     pthread_cond_t  cond_var;     /* condition variable */
     unsigned int    lock_count;
+
+    pthread_mutex_t atomic_lock2; /* lock for attempt_lock_count */
+    unsigned int    attempt_lock_count;
 } H5TS_mutex_t;
+
+/* Portability wrappers around pthread types */
 typedef pthread_t       H5TS_thread_t;
 typedef pthread_attr_t  H5TS_attr_t;
 typedef pthread_mutex_t H5TS_mutex_simple_t;
@@ -91,7 +96,7 @@ typedef pthread_once_t  H5TS_once_t;
 #define H5TS_SCOPE_PROCESS                      PTHREAD_SCOPE_PROCESS
 #define H5TS_CALL_CONV                          /* unused - Windows only */
 
-/* Functions */
+/* Portability function aliases */
 #define H5TS_get_thread_local_value(key)        pthread_getspecific(key)
 #define H5TS_set_thread_local_value(key, value) pthread_setspecific(key, value)
 #define H5TS_attr_init(attr_ptr)                pthread_attr_init((attr_ptr))
@@ -101,30 +106,30 @@ typedef pthread_once_t  H5TS_once_t;
 #define H5TS_mutex_init(mutex)                  pthread_mutex_init(mutex, NULL)
 #define H5TS_mutex_lock_simple(mutex)           pthread_mutex_lock(mutex)
 #define H5TS_mutex_unlock_simple(mutex)         pthread_mutex_unlock(mutex)
+
+/* Pthread-only routines */
 H5_DLL uint64_t H5TS_thread_id(void);
+H5_DLL void     H5TS_pthread_first_thread_init(void);
 
 #endif /* H5_HAVE_WIN_THREADS */
 
-/* External global variables */
-extern H5TS_once_t H5TS_first_init_g;
-extern H5TS_key_t  H5TS_errstk_key_g;
-extern H5TS_key_t  H5TS_funcstk_key_g;
-extern H5TS_key_t  H5TS_apictx_key_g;
+/* Library-scope global variables */
+extern H5TS_once_t H5TS_first_init_g; /* Library initialization */
+extern H5TS_key_t  H5TS_errstk_key_g; /* Error stacks */
+#ifdef H5_HAVE_CODESTACK
+extern H5TS_key_t H5TS_funcstk_key_g; /* Function stacks */
+#endif                                /* H5_HAVE_CODESTACK */
+extern H5TS_key_t H5TS_apictx_key_g;  /* API contexts */
 
-#if defined c_plusplus || defined __cplusplus
-extern "C" {
-#endif /* c_plusplus || __cplusplus */
+/* Library-scope routines */
+/* (Only used within H5private.h macros) */
+H5_DLL herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex);
+H5_DLL herr_t H5TS_mutex_unlock(H5TS_mutex_t *mutex);
+H5_DLL herr_t H5TS_cancel_count_inc(void);
+H5_DLL herr_t H5TS_cancel_count_dec(void);
 
-H5_DLL void          H5TS_pthread_first_thread_init(void);
-H5_DLL herr_t        H5TS_mutex_lock(H5TS_mutex_t *mutex);
-H5_DLL herr_t        H5TS_mutex_unlock(H5TS_mutex_t *mutex);
-H5_DLL herr_t        H5TS_cancel_count_inc(void);
-H5_DLL herr_t        H5TS_cancel_count_dec(void);
+/* Testing routines */
 H5_DLL H5TS_thread_t H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata);
-
-#if defined c_plusplus || defined __cplusplus
-}
-#endif /* c_plusplus || __cplusplus */
 
 #else /* H5_HAVE_THREADSAFE */
 
