@@ -28,10 +28,6 @@
 #include "genall5.h"
 #include "vfd_swmr_common.h"
 
-#ifndef _arraycount
-#define _arraycount(_a) (sizeof(_a) / sizeof(_a[0]))
-#endif
-
 #define MAX_READ_LEN_IN_SECONDS 2
 #define TICK_LEN                4
 
