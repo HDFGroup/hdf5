@@ -197,23 +197,6 @@
 
 #endif /*H5_HAVE_WIN32_API*/
 
-/* Various ways that inline functions can be declared */
-#if defined(H5_HAVE___INLINE__)
-/* GNU (alternative form) */
-#define H5_INLINE __inline__
-#elif defined(H5_HAVE___INLINE)
-/* Visual Studio */
-#define H5_INLINE __inline
-#elif defined(H5_HAVE_INLINE)
-/* GNU, C++
- * Use "inline" as a last resort on the off-chance that there will
- * be C++ problems.
- */
-#define H5_INLINE inline
-#else
-#define H5_INLINE
-#endif /* inline choices */
-
 #ifndef F_OK
 #define F_OK 00
 #define W_OK 02
@@ -305,23 +288,14 @@
  * Note that Solaris Studio supports attribute, but does not support the
  * attributes we use.
  *
+ * When using H5_ATTR_FALLTHROUGH, you should also include a comment that
+ * says FALLTHROUGH to reduce warnings on compilers that don't use
+ * attributes but do respect fall-through comments.
+ *
  * H5_ATTR_CONST is redefined in tools/h5repack/dynlib_rpk.c to quiet
  * gcc warnings (it has to use the public API and can't include this
  * file). Be sure to update that file if the #ifdefs change here.
  */
-#ifdef __cplusplus
-#define H5_ATTR_FORMAT(X, Y, Z) /*void*/
-#define H5_ATTR_UNUSED          /*void*/
-#define H5_ATTR_DEPRECATED_USED /*void*/
-#define H5_ATTR_NDEBUG_UNUSED   /*void*/
-#define H5_ATTR_DEBUG_API_USED  /*void*/
-#define H5_ATTR_PARALLEL_UNUSED /*void*/
-#define H5_ATTR_PARALLEL_USED   /*void*/
-#define H5_ATTR_NORETURN        /*void*/
-#define H5_ATTR_CONST           /*void*/
-#define H5_ATTR_PURE            /*void*/
-#define H5_ATTR_FALLTHROUGH     /*void*/
-#else                           /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
 #define H5_ATTR_UNUSED          __attribute__((unused))
@@ -368,7 +342,6 @@
 #define H5_ATTR_PURE            /*void*/
 #define H5_ATTR_FALLTHROUGH     /*void*/
 #endif
-#endif /* __cplusplus */
 
 /*
  * Networking headers used by the mirror VFD and related tests and utilities.
