@@ -432,7 +432,10 @@ test_filters_for_datasets(hid_t file)
 
 error:
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY { H5Pclose(dc); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dc);
+    }
     H5E_END_TRY
 
     return ret_value;
@@ -570,7 +573,10 @@ test_read_with_filters(hid_t file)
 
 error:
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY { H5Dclose(dset); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+    }
     H5E_END_TRY
 
     return ret_value;
@@ -594,7 +600,10 @@ test_noread_data(hid_t dataset)
     herr_t ret = -1;
 
     /* Read the dataset back */
-    H5E_BEGIN_TRY { ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -648,7 +657,10 @@ error:
     H5PLset_loading_state(plugin_state);
 
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY { H5Dclose(dset); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+    }
     H5E_END_TRY
 
     return ret_value;
@@ -823,7 +835,10 @@ test_filter_path_apis(void)
 
     TESTING("    remove (exceed min)");
     /* Exceed the min path removal */
-    H5E_BEGIN_TRY { ret = H5PLremove(0); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5PLremove(0);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -858,7 +873,10 @@ test_filter_path_apis(void)
 
     TESTING("    remove (exceed max)");
     /* Exceed the max path removal */
-    H5E_BEGIN_TRY { ret = H5PLremove(H5PL_MAX_PATH_NUM); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5PLremove(H5PL_MAX_PATH_NUM);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -899,7 +917,10 @@ test_filter_path_apis(void)
     PASSED();
 
     TESTING("    get (bounds exceed)");
-    H5E_BEGIN_TRY { pathlen = H5PLget(H5PL_MAX_PATH_NUM, NULL, 0); }
+    H5E_BEGIN_TRY
+    {
+        pathlen = H5PLget(H5PL_MAX_PATH_NUM, NULL, 0);
+    }
     H5E_END_TRY
     if (pathlen > 0)
         TEST_ERROR

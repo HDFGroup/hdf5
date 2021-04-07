@@ -265,7 +265,10 @@ test_select_hyper(hid_t xfer_plist)
     block[0]  = 1;
     block[1]  = 1;
     block[2]  = 1;
-    H5E_BEGIN_TRY { ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_hyperslab");
 
@@ -282,7 +285,10 @@ test_select_hyper(hid_t xfer_plist)
     block[0]  = 2;
     block[1]  = 2;
     block[2]  = 2;
-    H5E_BEGIN_TRY { ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_hyperslab");
 
@@ -322,10 +328,16 @@ test_select_hyper(hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Exercise checks for NULL buffer and valid selection */
-    H5E_BEGIN_TRY { ret = H5Dwrite(dataset, H5T_NATIVE_UCHAR, sid2, sid1, xfer_plist, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(dataset, H5T_NATIVE_UCHAR, sid2, sid1, xfer_plist, NULL);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dwrite");
-    H5E_BEGIN_TRY { ret = H5Dwrite(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, xfer_plist, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, xfer_plist, NULL);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dwrite");
 
@@ -366,10 +378,16 @@ test_select_hyper(hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Exercise checks for NULL buffer and valid selection */
-    H5E_BEGIN_TRY { ret = H5Dread(dataset, H5T_NATIVE_UCHAR, sid2, sid1, xfer_plist, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dataset, H5T_NATIVE_UCHAR, sid2, sid1, xfer_plist, NULL);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dread");
-    H5E_BEGIN_TRY { ret = H5Dread(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, xfer_plist, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, xfer_plist, NULL);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dread");
 
@@ -8032,14 +8050,20 @@ test_scalar_select2(void)
 
     /* Select one element in memory with a point selection */
     coord1[0] = 0;
-    H5E_BEGIN_TRY { ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, (const hsize_t *)&coord1); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, (const hsize_t *)&coord1);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_elements");
 
     /* Select one element in memory with a hyperslab selection */
     start[0] = 0;
     count[0] = 0;
-    H5E_BEGIN_TRY { ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, NULL);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_hyperslab");
 
@@ -12870,7 +12894,10 @@ test_select_bounds(void)
     CHECK(ret, FAIL, "H5Sselect_none");
 
     /* Get bounds for 'none' selection */
-    H5E_BEGIN_TRY { ret = H5Sget_select_bounds(sid, low_bounds, high_bounds); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sget_select_bounds(sid, low_bounds, high_bounds);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sget_select_bo unds");
 
@@ -12901,7 +12928,10 @@ test_select_bounds(void)
     CHECK(ret, FAIL, "H5Soffset_simple");
 
     /* Get bounds for hyperslab selection with negative offset */
-    H5E_BEGIN_TRY { ret = H5Sget_select_bounds(sid, low_bounds, high_bounds); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sget_select_bounds(sid, low_bounds, high_bounds);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sget_select_bounds");
 
@@ -12952,7 +12982,10 @@ test_select_bounds(void)
     CHECK(ret, FAIL, "H5Soffset_simple");
 
     /* Get bounds for hyperslab selection with negative offset */
-    H5E_BEGIN_TRY { ret = H5Sget_select_bounds(sid, low_bounds, high_bounds); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sget_select_bounds(sid, low_bounds, high_bounds);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sget_select_bounds");
 
@@ -13003,7 +13036,10 @@ test_select_bounds(void)
     CHECK(ret, FAIL, "H5Soffset_simple");
 
     /* Get bounds for hyperslab selection with negative offset */
-    H5E_BEGIN_TRY { ret = H5Sget_select_bounds(sid, low_bounds, high_bounds); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sget_select_bounds(sid, low_bounds, high_bounds);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sget_select_bounds");
 

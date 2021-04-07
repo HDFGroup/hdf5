@@ -108,7 +108,10 @@ test_sec2_h5repart_opens(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
 
     return FAIL;

@@ -77,7 +77,10 @@ test_earliest_latest(void)
      */
 
     /* Open the dataset */
-    H5E_BEGIN_TRY { dset = H5Dopen2(fid, "DS_chunked_layout_4", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        dset = H5Dopen2(fid, "DS_chunked_layout_4", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(dset, FAIL, "H5Dopen2");
 
@@ -145,7 +148,10 @@ test_latest_latest(void)
     const char *testfile = H5_get_srcdir_filename(FILENAME_L_L);
 
     /* Opening the file of latest version bounds should fail with HDF5 1.8. */
-    H5E_BEGIN_TRY { fid = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(fid, FAIL, "H5Fopen file with latest version bounds");
 }
@@ -233,7 +239,10 @@ test_v18_v18(void)
      */
 
     /* Open the dataset */
-    H5E_BEGIN_TRY { dset = H5Dopen2(fid, "DS_chunked_layout_4", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        dset = H5Dopen2(fid, "DS_chunked_layout_4", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(dset, FAIL, "H5Dopen2");
 

@@ -86,7 +86,10 @@ create_compound_type(void)
     return ret_value;
 
 error:
-    H5E_BEGIN_TRY { H5Tclose(ret_value); }
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(ret_value);
+    }
     H5E_END_TRY;
     return -1;
 }
@@ -197,7 +200,10 @@ test_getset(void)
      * Reading the fill value from a dataset creation property list that has
      * no fill value should result in a failure.
      */
-    H5E_BEGIN_TRY { H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i); }
+    H5E_BEGIN_TRY
+    {
+        H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i);
+    }
     H5E_END_TRY;
     if (fill_i != 0) {
         H5_FAILED();
@@ -380,7 +386,9 @@ test_getset_vl(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY {}
+    H5E_BEGIN_TRY
+    {
+    }
     H5E_END_TRY;
     return 1;
 } /* end test_getset_vl() */

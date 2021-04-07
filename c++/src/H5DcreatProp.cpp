@@ -93,7 +93,9 @@ const DSetCreatPropList &DSetCreatPropList::DEFAULT = *getConstant();
 ///\brief       Default constructor: creates a stub dataset creation property list
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::DSetCreatPropList() : ObjCreatPropList(H5P_DATASET_CREATE) {}
+DSetCreatPropList::DSetCreatPropList() : ObjCreatPropList(H5P_DATASET_CREATE)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList copy constructor
@@ -101,7 +103,9 @@ DSetCreatPropList::DSetCreatPropList() : ObjCreatPropList(H5P_DATASET_CREATE) {}
 ///             DSetCreatPropList object
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::DSetCreatPropList(const DSetCreatPropList &orig) : ObjCreatPropList(orig) {}
+DSetCreatPropList::DSetCreatPropList(const DSetCreatPropList &orig) : ObjCreatPropList(orig)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList overloaded constructor
@@ -109,7 +113,9 @@ DSetCreatPropList::DSetCreatPropList(const DSetCreatPropList &orig) : ObjCreatPr
 ///             existing dataset creation property list.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::DSetCreatPropList(const hid_t plist_id) : ObjCreatPropList(plist_id) {}
+DSetCreatPropList::DSetCreatPropList(const hid_t plist_id) : ObjCreatPropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList::setChunk
@@ -729,6 +735,8 @@ DSetCreatPropList::getExternal(unsigned idx, size_t name_size, char *name, off_t
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::~DSetCreatPropList() {}
+DSetCreatPropList::~DSetCreatPropList()
+{
+}
 
 } // namespace H5

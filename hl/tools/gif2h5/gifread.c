@@ -38,7 +38,10 @@ GetWord(GIFBYTE *MemGif)
 }
 
 GIFBYTE
-GetByte(GIFBYTE *MemGif) { return *MemGif; }
+GetByte(GIFBYTE *MemGif)
+{
+    return *MemGif;
+}
 
 /*
  *  Read a GIF image GIFBYTE Header.
