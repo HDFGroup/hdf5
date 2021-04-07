@@ -1,0 +1,72 @@
+/**\ingroup H5XYZ
+ *
+ * \brief A synopsis of what H5XYZgreat_function does
+ *
+ * \param[in]     name1 Description of IN parameter \p name1
+ * \param[out]    name2 Description of OUT parameter \p name2
+ * \param[in,out] name3 Description of INOUT parameter \p name3
+ *
+ * \return Returns what you always wanted
+ *
+ * \pre Describe preconditions for an entity. Can be repreated.
+ *
+ * \invariant Describe invariants for an entity. Can be repeated.
+ *
+ * \post Describe postconditions for an entity. Can be repreated.
+ *
+ * \deprecated This was my favorite function while it lasted.
+ *
+ * \details Describe the normal behavior flow of the function here. Try to be
+ *          helpful!
+ *
+ *          Make reference to other functions like this: H5Fopen().
+ *
+ *          Make reference to formal parameters like this: \p name1
+ *
+ *          Make reference to macros like this: #H5P_DEFAULT.
+ *
+ *          Make reference to enumeration constants like this: #H5F_CLOSE_WEAK.
+ *
+ *          Include code snippets like this:
+ *          \snippet H5Zpublic.h H5Z_class2_t_snip
+ *
+ *          Lists are supported:
+ *          - mouse events
+ *            -# mouse move event
+ *            -# mouse click event\n
+ *               More info about the click event.
+ *            -# mouse double click event
+ *          - keyboard events
+ *               1. key down event
+ *               2. key up event
+ *
+ *          The distance between \f$(x_1,y_1)\f$ and \f$(x_2,y_2)\f$ is
+ *          \f$\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}\f$.\n
+ *          For tables, see
+ *          <a href="https://www.doxygen.nl/manual/tables.html">this example</a>.
+ *
+ *          This is an example of how to use the H5XYZgreat_function().\n
+ *          The contents of the file hello_hdf5.c will be included.
+ * \include hello_hdf5.c
+ *
+ * \note  Dear reader, ...
+ *
+ * \attention Colorless green ideas sleep furiously.
+ *
+ * \warning Don't do this at home!
+ *
+ * \author This function was written by an esteemed author. Repeat this
+ *         command for multiple authors.
+ *
+ * \date Record the function's birthdate!
+ *
+ * \since 1.MAJOR.MINOR The 'since' command can also be used to record a
+ *                      function's introduction (via its initial release
+ *                                               version).
+ *
+ * \version 1.MAJOR.MINOR An important event in the version history of this
+ *                        function. There can be multiple such events.
+ *
+ * \see H5XYZanother_great_function(), H5XYZnot_so_great_a_function()
+ *
+ */

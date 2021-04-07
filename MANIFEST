@@ -196,6 +196,16 @@
 
 ./config/site-specific/BlankForm
 
+./doxygen/aliases
+./doxygen/Doxyfile.in
+./doxygen/dox/api-compat-macros.dox
+./doxygen/dox/mainpage.dox
+./doxygen/dox/rm-template.dox
+./doxygen/examples/H5Fclose.c
+./doxygen/examples/H5Fcreate.c
+./doxygen/examples/hello_hdf5.c
+./doxygen/img/HDFG-logo.png
+
 ./examples/Attributes.txt
 ./examples/Makefile.am
 ./examples/Makefile.in
@@ -1496,6 +1506,9 @@
 ./tools/testfiles/tfill.ddl
 ./tools/testfiles/tfilters.h5
 ./tools/testfiles/tfletcher32.ddl
+./tools/testfiles/tfloatsattrs.ddl
+./tools/testfiles/tfloatsattrs.h5
+./tools/testfiles/tfloatsattrs.wddl
 ./tools/testfiles/tfvalues.h5
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl
@@ -1531,7 +1544,10 @@
 ./tools/testfiles/tintsattrs.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
+./tools/testfiles/tldouble.ddl
 ./tools/testfiles/tldouble.h5
+./tools/testfiles/tldouble_scalar.ddl
+./tools/testfiles/tldouble_scalar.h5
 ./tools/testfiles/tlonglinks.ddl
 ./tools/testfiles/tlonglinks.h5
 ./tools/testfiles/tloop-1.ddl

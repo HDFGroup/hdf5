@@ -539,6 +539,7 @@
 #cmakedefine H5_SIZEOF_INT_LEAST8_T @H5_SIZEOF_INT_LEAST8_T@
 
 #if !defined(__APPLE__)
+
 /* The size of `size_t', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_SIZE_T @H5_SIZEOF_SIZE_T@
 

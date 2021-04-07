@@ -790,6 +790,7 @@ if (HDF5_BUILD_FORTRAN)
     if (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS) default HDF5_INSTALL_MOD_FORTRAN is SHARED
     if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS) default HDF5_INSTALL_MOD_FORTRAN is STATIC
     if (NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS) default HDF5_INSTALL_MOD_FORTRAN is SHARED
+HDF5_BUILD_DOC                 "Build documentation"                              OFF
 HDF5_ENABLE_ANALYZER_TOOLS     "enable the use of Clang tools"                    OFF
 HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                      OFF
 HDF5_ENABLE_FORMATTERS         "format source files"                              OFF

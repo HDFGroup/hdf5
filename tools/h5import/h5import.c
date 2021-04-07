@@ -1570,7 +1570,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
                             HDprintf("h5dump DATATYPE STRING STRSIZE %s found\n", temp);
 #endif
-                            if (HDstrcmp("H5T_VARIABLE;", temp)) {
+                            if (HDstrcmp("H5T_VARIABLE;", temp) != 0) {
                                 char *more = temp;
                                 ival       = (int)HDstrtol(more, &more, 10);
                                 if (getInputSize(in, ival) == -1) {
@@ -1896,7 +1896,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         HDprintf("h5dump STORAGE_LAYOUT CHUNKED SIZE %d found\n", ival);
 #endif
                     }
-                    while (HDstrcmp("}", temp)) {
+                    while (HDstrcmp("}", temp) != 0) {
                         if (fscanf(strm, "%254s", temp) != 1) { /* end bracket */
                             (void)HDfprintf(stderr, "%s", err18);
                             goto error;
@@ -5097,7 +5097,6 @@ help(char *name)
     (void)HDfprintf(stdout, "\t  data-set will be compressed using GZIP and a compression level \n");
     (void)HDfprintf(stdout, "\t  of 7.\n");
     (void)HDfprintf(stdout, "\t  The dataset will be stored at \"/Second-set\"\n\n");
-    return;
 }
 
 void
@@ -5107,5 +5106,4 @@ usage(char *name)
     (void)HDfprintf(stdout, "\t%s <infile> -c[onfig] <configfile> \
   [<infile> -c[config] <configfile>...] -o[utfile] <outfile> \n\n",
                     name);
-    return;
 }

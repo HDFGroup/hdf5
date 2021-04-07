@@ -27,7 +27,7 @@
 #define F_FORMAT "%-15g %-15g %-15g\n"
 
 #if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT "%-15Lf %-15Lf %-15Lf\n"
+#define LD_FORMAT "%-15Lg %-15Lg %-15Lg\n"
 #endif
 
 #define I_FORMAT    "%-15d %-15d %-15d\n"
@@ -42,7 +42,7 @@
 #define F_FORMAT_P "%-15.10g %-15.10g %-15.10g %-14.10g\n"
 
 #if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT_P "%-15.10Lf %-15.10Lf %-15.10Lf %-14.10Lf\n"
+#define LD_FORMAT_P "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
 #endif
 
 #define I_FORMAT_P   "%-15d %-15d %-15d %-14f\n"
@@ -59,7 +59,7 @@
 #define F_FORMAT_P_NOTCOMP "%-15.10g %-15.10g %-15.10g not comparable\n"
 
 #if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT_P_NOTCOMP "%-15.10Lf %-15.10Lf %-15.10Lf not comparable\n"
+#define LD_FORMAT_P_NOTCOMP "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
 #endif
 
 #define I_FORMAT_P_NOTCOMP   "%-15d %-15d %-15d not comparable\n"
@@ -2905,7 +2905,10 @@ ull2float(unsigned long long ull_value, float *f_value)
     HDmemcpy(f_value, buf, dst_size);
 
 done:
-    H5E_BEGIN_TRY { H5Pclose(dxpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
     H5E_END_TRY;
 
     if (buf)
@@ -3156,7 +3159,6 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
                     H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - c:%ld b:%ld s:%ld", j,
                                   curr_pos, curr_idx, cnt_idx, blk_idx, str_idx);
                     dim_size = opts->dims[j]; /* Current dimension size */
-                    // elmnt_cnt *= dim_size;    /* Total number of elements in dimension */
                     H5TOOLS_DEBUG("... sset loop:%d with elmnt_cnt:%ld - (prev_dim_size:%ld - dim_size:%ld) "
                                   "- str_cnt:%ld",
                                   j, elmnt_cnt, prev_dim_size, dim_size, str_cnt);
@@ -3179,7 +3181,7 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
                                       "(curr_idx:%ld - data_idx:%ld)",
                                       i, dim_size, str_cnt, curr_idx, data_idx);
                     }
-                    next_idx += dim_size * str_cnt; // + prev_dim_size;
+                    next_idx += dim_size * str_cnt;
                     H5TOOLS_DEBUG("... sset loop:%d with curr_idx:%ld (next_idx:%ld)", j, curr_idx, next_idx);
                     str_cnt       = 0;
                     prev_str      = str_idx;
@@ -3304,8 +3306,6 @@ get_member_types(hid_t tid, mcomp_t *members)
             get_member_types(members->ids[u], members->m[u]);
         }
     }
-
-    return;
 }
 
 /*-------------------------------------------------------------------------
