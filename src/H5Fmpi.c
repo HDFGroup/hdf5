@@ -15,7 +15,7 @@
  *
  * Created:             H5Fmpi.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             MPI-related routines.
  *
@@ -68,35 +68,6 @@
 /*******************/
 
 #ifdef H5_HAVE_PARALLEL
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_get_mpi_handle
- *
- * Purpose:     Retrieves MPI File handle.
- *
- * Return:      Success:        The size (positive)
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle)
-{
-    herr_t ret_value = SUCCEED;
-    hid_t  fapl_id   = H5I_INVALID_HID;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    HDassert(f && f->shared);
-
-    /* Dispatch to driver */
-    if ((ret_value = H5FD_get_vfd_handle(f->shared->lf, fapl_id, (void **)f_handle)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_mpi_handle() */
-
 /*-------------------------------------------------------------------------
  * Function:    H5F_mpi_get_rank
  *
@@ -336,13 +307,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag)
+H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL);
-    H5TRACE2("e", "i*b", file_id, flag);
+    H5TRACE2("e", "ix", file_id, flag);
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -420,31 +391,4 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_retrieve_comm */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_get_mpi_info
- *
- * Purpose:     Retrieves MPI File info.
- *
- * Return:      Success:        The size (positive)
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_get_mpi_info(const H5F_t *f, MPI_Info **f_info)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    HDassert(f && f->shared);
-
-    /* Dispatch to driver */
-    if ((ret_value = H5FD_get_mpi_info(f->shared->lf, (void **)f_info)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file info")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_mpi_info() */
 #endif /* H5_HAVE_PARALLEL */

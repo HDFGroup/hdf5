@@ -22,13 +22,13 @@
 #include "H5FDpublic.h"
 
 /* Private headers needed by this file */
-#include "H5Pprivate.h" /* Property lists			*/
+#include "H5Pprivate.h" /* Property lists            */
 
 /*
  * The MPI drivers are needed because there are
  * places where we check for things that aren't handled by these drivers.
  */
-#include "H5FDmpi.h" /* MPI-based file drivers		*/
+#include "H5FDmpi.h" /* MPI-based file drivers        */
 
 /**************************/
 /* Library Private Macros */
@@ -260,11 +260,10 @@ vfd_swmr_pageno_to_mdf_idx_entry(H5FD_vfd_swmr_idx_entry_t *idx, uint32_t nentri
 
 /* Sub-class the H5FD_class_t to add more specific functions for MPI-based VFDs */
 typedef struct H5FD_class_mpi_t {
-    H5FD_class_t super;                                    /* Superclass information & methods */
-    int (*get_rank)(const H5FD_t *file);                   /* Get the MPI rank of a process */
-    int (*get_size)(const H5FD_t *file);                   /* Get the MPI size of a communicator */
-    MPI_Comm (*get_comm)(const H5FD_t *file);              /* Get the communicator for a file */
-    herr_t (*get_mpi_info)(H5FD_t *file, void **mpi_info); /* get MPI_Info for a file */
+    H5FD_class_t super;                       /* Superclass information & methods */
+    int (*get_rank)(const H5FD_t *file);      /* Get the MPI rank of a process */
+    int (*get_size)(const H5FD_t *file);      /* Get the MPI size of a communicator */
+    MPI_Comm (*get_comm)(const H5FD_t *file); /* Get the communicator for a file */
 } H5FD_class_mpi_t;
 #endif
 
@@ -289,10 +288,16 @@ typedef struct {
 /* Define default file image info */
 #define H5FD_DEFAULT_FILE_IMAGE_INFO                                                                         \
     {                                                                                                        \
-        /* file image buffer */ NULL, /* buffer size */ 0,                                                   \
-        { /* Callbacks */                                                                                    \
-            /* image_malloc */ NULL, /* image_memcpy */ NULL, /* image_realloc */ NULL,                      \
-                /* image_free */ NULL, /* udata_copy */ NULL, /* udata_free */ NULL, /* udata */ NULL,       \
+        NULL,         /* file image buffer */                                                                \
+            0,        /* buffer size */                                                                      \
+        {             /* Callbacks */                                                                        \
+            NULL,     /* image_malloc */                                                                     \
+                NULL, /* image_memcpy */                                                                     \
+                NULL, /* image_realloc */                                                                    \
+                NULL, /* image_free */                                                                       \
+                NULL, /* udata_copy */                                                                       \
+                NULL, /* udata_free */                                                                       \
+                NULL, /* udata */                                                                            \
         }                                                                                                    \
     }
 
@@ -377,7 +382,6 @@ H5_DLL herr_t H5FD_get_mpio_atomicity(H5FD_t *file, hbool_t *flag);
 H5_DLL int      H5FD_mpi_get_rank(const H5FD_t *file);
 H5_DLL int      H5FD_mpi_get_size(const H5FD_t *file);
 H5_DLL MPI_Comm H5FD_mpi_get_comm(const H5FD_t *_file);
-H5_DLL herr_t   H5FD_get_mpi_info(H5FD_t *file, void **file_info);
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* H5FDprivate_H */

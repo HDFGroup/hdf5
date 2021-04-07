@@ -25,7 +25,7 @@
 /****************/
 /* Local Macros */
 /****************/
-#define TWO_GIG_LIMIT (1 << 31)
+#define TWO_GIG_LIMIT INT32_MAX
 #ifndef H5_MAX_MPI_COUNT
 #define H5_MAX_MPI_COUNT (1 << 30)
 #endif
@@ -33,7 +33,7 @@
 /*******************/
 /* Local Variables */
 /*******************/
-static hsize_t bigio_count = H5_MAX_MPI_COUNT;
+static hsize_t bigio_count_g = H5_MAX_MPI_COUNT;
 
 /*-------------------------------------------------------------------------
  * Function:  H5_mpi_set_bigio_count
@@ -42,7 +42,7 @@ static hsize_t bigio_count = H5_MAX_MPI_COUNT;
  *            when we utilize derived datatypes.  This is of
  *            particular interest for allowing nightly testing
  *
- * Return:    The current/previous value of bigio_count.
+ * Return:    The current/previous value of bigio_count_g.
  *
  * Programmer: Richard Warren,  March 10, 2017
  *
@@ -51,10 +51,10 @@ static hsize_t bigio_count = H5_MAX_MPI_COUNT;
 hsize_t
 H5_mpi_set_bigio_count(hsize_t new_count)
 {
-    hsize_t orig_count = bigio_count;
+    hsize_t orig_count = bigio_count_g;
 
     if ((new_count > 0) && (new_count < (hsize_t)TWO_GIG_LIMIT)) {
-        bigio_count = new_count;
+        bigio_count_g = new_count;
     }
     return orig_count;
 } /* end H5_mpi_set_bigio_count() */
@@ -63,9 +63,9 @@ H5_mpi_set_bigio_count(hsize_t new_count)
  * Function:  H5_mpi_get_bigio_count
  *
  * Purpose:   Allow other HDF5 library functions to access
- *            the current value for bigio_count.
+ *            the current value for bigio_count_g.
  *
- * Return:    The current/previous value of bigio_count.
+ * Return:    The current/previous value of bigio_count_g.
  *
  * Programmer: Richard Warren,  October 7, 2019
  *
@@ -74,7 +74,7 @@ H5_mpi_set_bigio_count(hsize_t new_count)
 hsize_t
 H5_mpi_get_bigio_count(void)
 {
-    return bigio_count;
+    return bigio_count_g;
 }
 
 /*-------------------------------------------------------------------------
@@ -210,7 +210,7 @@ H5_mpi_comm_free(MPI_Comm *comm)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "comm pointer cannot be NULL")
 
     /* Free the communicator */
-    if (MPI_COMM_NULL != *comm)
+    if (MPI_COMM_WORLD != *comm && MPI_COMM_NULL != *comm)
         MPI_Comm_free(comm);
 
     *comm = MPI_COMM_NULL;
@@ -471,8 +471,8 @@ H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes, MPI_Datat
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Calculate how many Big MPI datatypes are needed to represent the buffer */
-    num_big_types = (int)(num_elements / bigio_count);
-    leftover      = (hsize_t)num_elements - (hsize_t)num_big_types * bigio_count;
+    num_big_types = (int)(num_elements / bigio_count_g);
+    leftover      = (hsize_t)num_elements - (hsize_t)num_big_types * bigio_count_g;
     H5_CHECKED_ASSIGN(remaining_bytes, int, leftover, hsize_t);
 
     /* Create a contiguous datatype of size equal to the largest
@@ -481,11 +481,11 @@ H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes, MPI_Datat
      * use type_hvector to create the type with the displacement provided
      */
     if (0 == stride_bytes) {
-        if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)bigio_count, old_type, &inner_type)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)bigio_count_g, old_type, &inner_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
     } /* end if */
     else if (MPI_SUCCESS !=
-             (mpi_code = MPI_Type_create_hvector((int)bigio_count, 1, stride_bytes, old_type, &inner_type)))
+             (mpi_code = MPI_Type_create_hvector((int)bigio_count_g, 1, stride_bytes, old_type, &inner_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
 
     /* Create a contiguous datatype of the buffer (minus the remaining < 2GB part)
@@ -510,7 +510,7 @@ H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes, MPI_Datat
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
         } /* end if */
         else if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector(
-                                     (int)(num_elements - (hsize_t)num_big_types * bigio_count), 1,
+                                     (int)(num_elements - (hsize_t)num_big_types * bigio_count_g), 1,
                                      stride_bytes, old_type, &leftover_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
 
@@ -529,7 +529,7 @@ H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes, MPI_Datat
         block_len[0] = 1;
         block_len[1] = 1;
         disp[0]      = 0;
-        disp[1]      = (old_extent + stride_bytes) * num_big_types * (MPI_Aint)bigio_count;
+        disp[1]      = (old_extent + stride_bytes) * num_big_types * (MPI_Aint)bigio_count_g;
 
         if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct(2, block_len, disp, type, new_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)

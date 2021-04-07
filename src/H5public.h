@@ -372,7 +372,6 @@ htri_to_string(htri_t v)
  * \internal (Hoisted here, since it's used by both the
  *            H5Lpublic.h and H5Opublic.h headers) */
 /* Type for object tokens */
-/* (Hoisted here, since it's used by both the H5Lpublic.h and H5Opublic.h headers) */
 typedef struct H5O_token_t {
     uint8_t __data[H5O_MAX_TOKEN_SIZE];
 } H5O_token_t;
