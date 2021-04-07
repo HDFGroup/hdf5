@@ -2197,9 +2197,9 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                 else
                     sign_s = " unknown-sign";
 
-                /* print size, order, and sign  */
-                h5tools_str_append(buffer, "%lu-bit%s%s integer", (unsigned long)(8 * H5Tget_size(type)),
-                                   order_s, sign_s);
+                /* print size, order, sign, and precision */
+                h5tools_str_append(buffer, "%lu-bit%s%s integer %lu-bit precision", (unsigned long)(8 * H5Tget_size(type)),
+                                   order_s, sign_s, H5Tget_precision(type));
             }
             break;
 
@@ -2220,8 +2220,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                 h5tools_str_append(buffer, "H5T_NATIVE_FLOAT");
             else if (H5Tequal(type, H5T_NATIVE_DOUBLE) == TRUE)
                 h5tools_str_append(buffer, "H5T_NATIVE_DOUBLE");
-            else if (H5Tequal(type, H5T_NATIVE_LDOUBLE) == TRUE)
-                h5tools_str_append(buffer, "H5T_NATIVE_LDOUBLE");
             else {
                 /* print what the library knows */
                 /* byte order */
@@ -2239,9 +2237,9 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                 else
                     order_s = "";
 
-                /* print size and byte order */
-                h5tools_str_append(buffer, "%lu-bit%s floating-point", (unsigned long)(8 * H5Tget_size(type)),
-                                   order_s);
+                /* print size. byte order, and precision */
+                h5tools_str_append(buffer, "%lu-bit%s floating-point %lu-bit precision", (unsigned long)(8 * H5Tget_size(type)),
+                                   order_s, H5Tget_precision(type));
             }
             break;
 
