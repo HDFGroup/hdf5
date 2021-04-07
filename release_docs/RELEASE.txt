@@ -405,8 +405,10 @@ Bug Fixes since HDF5-1.10.7 release
     - Changed how h5dump and h5ls identify long double.
 
         Long double support is not consistent across platforms. Tools will always
-        identify long double as 128-bit [little/big]-endian float. New test file
-        created for datasets with attributes for float, double and long double.
+        identify long double as 128-bit [little/big]-endian float nn-bit precision.
+        New test file created for datasets with attributes for float, double and
+        long double. In addition any unknown integer or float datatype will now
+        also show the number of bits for precision.
         These files are also used in the java tests.
 
         (ADB - 2021/03/24, HDFFV-11229)

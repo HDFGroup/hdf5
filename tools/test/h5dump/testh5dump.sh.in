@@ -264,7 +264,6 @@ $SRC_H5DUMP_TESTFILES/tfamily.ddl
 $SRC_H5DUMP_TESTFILES/tfill.ddl
 $SRC_H5DUMP_TESTFILES/tfletcher32.ddl
 $SRC_H5DUMP_TESTFILES/tfloatsattrs.ddl
-$SRC_H5DUMP_TESTFILES/tfloatsattrs.xddl
 $SRC_H5DUMP_TESTFILES/tfpformat.ddl
 $SRC_H5DUMP_TESTFILES/tgroup-1.ddl
 $SRC_H5DUMP_TESTFILES/tgroup-2.ddl
@@ -291,9 +290,7 @@ $SRC_H5DUMP_TESTFILES/tints4dimsStride2.ddl
 $SRC_H5DUMP_TESTFILES/tintsattrs.ddl
 $SRC_H5DUMP_TESTFILES/tlarge_objname.ddl
 $SRC_H5DUMP_TESTFILES/tldouble.ddl
-$SRC_H5DUMP_TESTFILES/tldouble.xddl
 $SRC_H5DUMP_TESTFILES/tldouble_scalar.ddl
-$SRC_H5DUMP_TESTFILES/tldouble_scalar.xddl
 $SRC_H5DUMP_TESTFILES/tlonglinks.ddl
 $SRC_H5DUMP_TESTFILES/tloop-1.ddl
 $SRC_H5DUMP_TESTFILES/tmulti.ddl
@@ -870,66 +867,6 @@ TOOLTEST5() {
     fi
 }
 
-# same as TOOLTEST but compares output ddl to an alternate
-#
-TOOLTEST6() {
-    # check if caseless compare and diff requested
-    if [ "$1" = ignorecase ]; then
-        caseless="-i"
-        # replace cmp with diff which runs much longer.
-        xCMP="$DIFF -i"
-        shift
-    else
-        caseless=""
-        # stick with faster cmp if ignorecase is not requested.
-        xCMP="$CMP"
-    fi
-
-    expect="$TESTDIR/$1"
-    expect2="$TESTDIR/`basename $1 .ddl`.xddl"
-    actual="$TESTDIR/`basename $1 .ddl`.out"
-    actual_err="$TESTDIR/`basename $1 .ddl`.err"
-    actual_sav=${actual}-sav
-    actual_err_sav=${actual_err}-sav
-    shift
-
-    # Run test.
-    TESTING $DUMPER $@
-    (
-        cd $TESTDIR
-        $RUNSERIAL $DUMPER_BIN "$@"
-    ) >$actual 2>$actual_err
-
-    # save actual and actual_err in case they are needed later.
-    cp $actual $actual_sav
-    STDOUT_FILTER $actual
-    cp $actual_err $actual_err_sav
-    STDERR_FILTER $actual_err
-
-    if [ ! -f $expect ]; then
-        # Create the expect file if it doesn't yet exist.
-        echo " CREATED"
-        cp $actual $expect
-        echo "    Expected result (*.ddl) missing"
-        nerrors="`expr $nerrors + 1`"
-    elif $xCMP $expect $actual > /dev/null 2>&1 ; then
-        echo " PASSED"
-    elif $xCMP $expect2 $actual > /dev/null 2>&1 ; then
-        echo " PASSED"
-    else
-        echo "*FAILED*"
-        echo "    Expected result (*.[x]ddl) differs from actual result (*.out)"
-        nerrors="`expr $nerrors + 1`"
-        test yes = "$verbose" && $DIFF $caseless $expect $actual |sed 's/^/    /'
-    fi
-
-    # Clean up output file
-    if test -z "$HDF5_NOCLEANUP"; then
-        rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
-    fi
-
-}
-
 # same as TOOLTEST1 but expects h5dump to fail
 #
 TOOLTEST_FAIL() {
@@ -1442,9 +1379,9 @@ TOOLTEST tgrpnullspace.ddl -p --enable-error-stack tgrpnullspace.h5
 TOOLTEST zerodim.ddl --enable-error-stack zerodim.h5
 
 # test for long double (some systems do not have long double)
-TOOLTEST6 tfloatsattrs.ddl -p --enable-error-stack tfloatsattrs.h5
-TOOLTEST6 tldouble.ddl --enable-error-stack tldouble.h5
-TOOLTEST6 tldouble_scalar.ddl -p --enable-error-stack tldouble_scalar.h5
+TOOLTEST tfloatsattrs.ddl -p --enable-error-stack tfloatsattrs.h5
+TOOLTEST tldouble.ddl --enable-error-stack tldouble.h5
+TOOLTEST tldouble_scalar.ddl -p --enable-error-stack tldouble_scalar.h5
 
 # test for vms
 TOOLTEST tvms.ddl --enable-error-stack tvms.h5

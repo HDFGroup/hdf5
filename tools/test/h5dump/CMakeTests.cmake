@@ -101,7 +101,6 @@
       ${HDF5_TOOLS_DIR}/testfiles/tfill.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tfletcher32.ddl
       #${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.ddl #native
-      ${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.xddl #general
       #${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.wddl #special for windows
       ${HDF5_TOOLS_DIR}/testfiles/tfpformat.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-1.ddl
@@ -129,10 +128,8 @@
       ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl #native
-      ${HDF5_TOOLS_DIR}/testfiles/tldouble.xddl #general
-      ${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.ddl #native
-      ${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.xddl #general
+      ${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tloop-1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tmulti.ddl
@@ -475,40 +472,6 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-    endif ()
-  endmacro ()
-
-  macro (ADD_H5_TEST_CHECK resultfile resultcode)
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      if (${resultcode})
-        set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-      if (last_test)
-        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
-    else ()
-      add_test (
-          NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove ${resultfile}.bin
-      )
-      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      add_test (
-          NAME H5DUMP-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.ddl"
-              -D "TEST_REFERENCE2=${resultfile}.xddl"
-              -P "${HDF_RESOURCES_DIR}/run2Test.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
@@ -1104,9 +1067,9 @@
   ADD_H5_TEST (zerodim 0 --enable-error-stack zerodim.h5)
 
   # test for long double (some systems do not have long double)
-  ADD_H5_TEST_CHECK (tfloatsattrs 0 -p --enable-error-stack tfloatsattrs.h5)
-  ADD_H5_TEST_CHECK (tldouble 0 --enable-error-stack tldouble.h5)
-  ADD_H5_TEST_CHECK (tldouble_scalar 0 -p --enable-error-stack tldouble_scalar.h5)
+  ADD_H5_TEST (tfloatsattrs 0 -p --enable-error-stack tfloatsattrs.h5)
+  ADD_H5_TEST (tldouble 0 --enable-error-stack tldouble.h5)
+  ADD_H5_TEST (tldouble_scalar 0 -p --enable-error-stack tldouble_scalar.h5)
 
   # test for vms
   ADD_H5_TEST (tvms 0 --enable-error-stack tvms.h5)
