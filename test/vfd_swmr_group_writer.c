@@ -34,6 +34,7 @@ typedef struct {
 	unsigned int nsteps;
         unsigned int update_interval;
         bool use_vfd_swmr;
+        bool use_named_pipes;
 } state_t;
 
 #define ALL_HID_INITIALIZER                                                                                  \
@@ -41,21 +42,24 @@ typedef struct {
     {                                                                                                        \
         .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
         .filetype = H5T_NATIVE_UINT32, .asteps = 10, .csteps = 10, .nsteps = 100, .update_interval = READER_WAIT_TICKS,   \
-        .use_vfd_swmr = true                                                                                 \
+        .use_vfd_swmr = true,                                                                                \
+        .use_named_pipes = true                                                                              \
     }
 
 static void
 usage(const char *progname)
 {
 	fprintf(stderr, "usage: %s [-S] [-a steps] [-b] [-c]\n"
-                "    [-n iterations] [-u numb_ticks]\n"
+                "    [-n iterations] [-N] [-q] [-u numb_ticks]\n"
 		"\n"
 		"-S:	               do not use VFD SWMR\n"
 		"-a steps:	       `steps` between adding attributes\n"
 		"-b:	               write data in big-endian byte order\n"
 		"-c steps:	       `steps` between communication between the writer and reader\n"
                 "-n ngroups:           the number of groups\n"
+		"-N:	               do not use named pipes, mainly for running the writer and reader seperately\n"
                 "-u numb_tcks:         `numb_ticks` for the reader to wait before verification\n"
+		"-q:	               silence printouts, few messages\n"
 		"\n",
 		progname);
 	exit(EXIT_FAILURE);
@@ -83,7 +87,7 @@ state_init(state_t *s, int argc, char **argv)
     if (tfile)
         HDfree(tfile);
 
-    while ((ch = getopt(argc, argv, "SWa:bc:n:qu:")) != -1) {
+    while ((ch = getopt(argc, argv, "Sa:bc:n:Nqu:")) != -1) {
         switch (ch) {
             case 'S':
                 s->use_vfd_swmr = false;
@@ -119,6 +123,9 @@ state_init(state_t *s, int argc, char **argv)
                 break;
             case 'b':
                 s->filetype = H5T_STD_U32BE;
+                break;
+            case 'N':
+                s->use_named_pipes = false;
                 break;
             case 'q':
                 verbosity = 0;
@@ -413,7 +420,7 @@ main(int argc, char **argv)
      * two-way communication so that the two sides can move forward together.
      * One is for the writer to write to the reader.
      * The other one is for the reader to signal the writer.  */
-    if (writer) {
+    if (s.use_named_pipes && writer) {
         /* Writer creates two named pipes(FIFO) */
         if (HDmkfifo(fifo_writer_to_reader, 0600) < 0) {
             H5_FAILED(); AT();
@@ -430,13 +437,13 @@ main(int argc, char **argv)
     }
 
     /* Both the writer and reader open the pipes */
-    if ((fd_writer_to_reader = HDopen(fifo_writer_to_reader, O_RDWR)) < 0) {
+    if (s.use_named_pipes && (fd_writer_to_reader = HDopen(fifo_writer_to_reader, O_RDWR)) < 0) {
         H5_FAILED(); AT();
         printf("HDopen failed\n");
         goto error;
     }
 
-    if ((fd_reader_to_writer = HDopen(fifo_reader_to_writer, O_RDWR)) < 0) {
+    if (s.use_named_pipes && (fd_reader_to_writer = HDopen(fifo_reader_to_writer, O_RDWR)) < 0) {
         H5_FAILED(); AT();
         printf("HDopen failed\n");
         goto error;
@@ -451,14 +458,15 @@ main(int argc, char **argv)
                 printf("write_group failed\n");
 
                 /* At communication interval, notifies the reader about the failture and quit */
-                if (step % s.csteps == 0) {
+                if (s.use_named_pipes && (step % s.csteps == 0)) {
                     notify = -1;
                     HDwrite(fd_writer_to_reader, &notify, sizeof(int));
-                    goto error;
                 }
+
+                goto error;
             } else {
                 /* At communication interval, notifies the reader and waits for its response */
-                if (step % s.csteps == 0) {
+                if (s.use_named_pipes && (step % s.csteps == 0)) {
                     /* Bump up the value of notify to notice the reader to start to read */
                     notify++;
                     if (HDwrite(fd_writer_to_reader, &notify, sizeof(int)) < 0) {
@@ -506,7 +514,7 @@ main(int argc, char **argv)
 
             /* At communication interval, waits for the writer to finish creation before starting verification
              */
-            if (step % s.csteps == 0) {
+            if (s.use_named_pipes && (step % s.csteps == 0)) {
                 /* The writer should have bumped up the value of notify.
                  * Do the same with verify and confirm it */
                 verify++;
@@ -532,7 +540,8 @@ main(int argc, char **argv)
             }
 
             /* Wait for a few ticks for the update to happen */
-            decisleep(config.tick_len * s.update_interval);
+            if (s.use_named_pipes)
+                decisleep(config.tick_len * s.update_interval);
 
             /* Start to verify group */
             if (!verify_group(&s, step)) {
@@ -540,13 +549,14 @@ main(int argc, char **argv)
                 printf("verify_group failed\n");
 
                 /* At communication interval, tell the writer about the failure and exit */
-                if (step % s.csteps == 0) {
+                if (s.use_named_pipes && (step % s.csteps == 0)) {
                     notify = -1;
                     HDwrite(fd_reader_to_writer, &notify, sizeof(int));
-                    goto error;
                 }
+
+                goto error;
             } else {
-                if (step % s.csteps == 0) {
+                if (s.use_named_pipes && (step % s.csteps == 0)) {
                     /* Send back the same nofity value for acknowledgement to tell the writer
                      * move to the next step */
                     if (HDwrite(fd_reader_to_writer, &notify, sizeof(int)) < 0) {
@@ -578,20 +588,20 @@ main(int argc, char **argv)
     }
 
     /* Both the writer and reader close the named pipes */
-    if (HDclose(fd_writer_to_reader) < 0) {
+    if (s.use_named_pipes && HDclose(fd_writer_to_reader) < 0) {
         H5_FAILED(); AT();
         printf("HDclose failed\n");
         goto error;
     }
 
-    if (HDclose(fd_reader_to_writer) < 0) {
+    if (s.use_named_pipes && HDclose(fd_reader_to_writer) < 0) {
         H5_FAILED(); AT();
         printf("HDclose failed\n");
         goto error;
     }
 
     /* Reader finishes last and deletes the named pipes */
-    if(!writer) {
+    if(s.use_named_pipes && !writer) {
         if(HDremove(fifo_writer_to_reader) != 0) {
             H5_FAILED(); AT();
             printf("HDremove failed\n");
@@ -614,13 +624,13 @@ error:
         H5Fclose(s.file);
     } H5E_END_TRY;
 
-    if (fd_writer_to_reader >= 0)
+    if (s.use_named_pipes && fd_writer_to_reader >= 0)
         HDclose(fd_writer_to_reader);
 
-    if (fd_reader_to_writer >= 0)
+    if (s.use_named_pipes && fd_reader_to_writer >= 0)
         HDclose(fd_reader_to_writer);
 
-    if(!writer) {
+    if(s.use_named_pipes && !writer) {
         HDremove(fifo_writer_to_reader);
         HDremove(fifo_reader_to_writer);
     }
