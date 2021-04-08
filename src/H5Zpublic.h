@@ -285,9 +285,9 @@ extern "C" {
  *          combination, zero for an invalid combination and negative for an
  *          error.
  */
-//! [H5Z_can_apply_func_t_snip]
+//! <!-- [H5Z_can_apply_func_t_snip] -->
 typedef htri_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-//! [H5Z_can_apply_func_t_snip]
+//! <!-- [H5Z_can_apply_func_t_snip] -->
 /**
  * \brief The filter operation callback function, defining a filter's operation
  *        on data
@@ -322,9 +322,9 @@ typedef htri_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  *          The \ref H5Z_set_local_func_t callback must return non-negative on
  *          success and negative for an error.
  */
-//! [H5Z_set_local_func_t_snip]
+//! <!-- [H5Z_set_local_func_t_snip] -->
 typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-//! [H5Z_set_local_func_t_snip]
+//! <!-- [H5Z_set_local_func_t_snip] -->
 
 /**
  * \brief The filter operation callback function, defining a filter's operation
@@ -356,15 +356,15 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  *          output buffer. If an error occurs then the function should return
  *          zero and leave all pointer arguments unchanged.
  */
-//! [H5Z_func_t_snip]
+//! <!-- [H5Z_func_t_snip] -->
 typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
                              size_t nbytes, size_t *buf_size, void **buf);
-//! [H5Z_func_t_snip]
+//! <!-- [H5Z_func_t_snip] -->
 /**
  * The filter table maps filter identification numbers to structs that
  * contain a pointers to the filter function and timing statistics.
  */
-//! [H5Z_class2_t_snip]
+//! <!-- [H5Z_class2_t_snip] -->
 typedef struct H5Z_class2_t {
     int                  version;         /**< Version number of the H5Z_class_t struct     */
     H5Z_filter_t         id;              /**< Filter ID number                             */
@@ -375,7 +375,7 @@ typedef struct H5Z_class2_t {
     H5Z_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
     H5Z_func_t           filter;          /**< The actual filter function                   */
 } H5Z_class2_t;
-//! [H5Z_class2_t_snip]
+//! <!-- [H5Z_class2_t_snip] -->
 
 /**
  * \ingroup H5Z
@@ -670,7 +670,7 @@ H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_confi
  * The filter table maps filter identification numbers to structs that
  * contain a pointers to the filter function and timing statistics.
  */
-//! [H5Z_class1_t_snip]
+//! <!-- [H5Z_class1_t_snip] -->
 typedef struct H5Z_class1_t {
     H5Z_filter_t         id;        /**< Filter ID number			     */
     const char *         name;      /**< Comment for debugging		     */
@@ -678,7 +678,7 @@ typedef struct H5Z_class1_t {
     H5Z_set_local_func_t set_local; /**< The "set local" callback for a filter */
     H5Z_func_t           filter;    /**< The actual filter function		     */
 } H5Z_class1_t;
-//! [H5Z_class1_t_snip]
+//! <!-- [H5Z_class1_t_snip] -->
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

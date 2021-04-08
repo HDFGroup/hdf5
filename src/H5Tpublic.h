@@ -28,7 +28,7 @@
  * internal If this goes over 16 types (0-15), the file format will need to
  *          change.
  */
-//! [H5T_class_t_snip]
+//! <!-- [H5T_class_t_snip] -->
 typedef enum H5T_class_t {
     H5T_NO_CLASS  = -1, /**< error                                   */
     H5T_INTEGER   = 0,  /**< integer types                           */
@@ -45,12 +45,12 @@ typedef enum H5T_class_t {
 
     H5T_NCLASSES /**< sentinel: this must be last             */
 } H5T_class_t;
-//! [H5T_class_t_snip]
+//! <!-- [H5T_class_t_snip] -->
 
 /**
  * Byte orders
  */
-//! [H5T_order_t_snip]
+//! <!-- [H5T_order_t_snip] -->
 typedef enum H5T_order_t {
     H5T_ORDER_ERROR = -1, /**< error                                   */
     H5T_ORDER_LE    = 0,  /**< little endian                           */
@@ -60,12 +60,12 @@ typedef enum H5T_order_t {
     H5T_ORDER_NONE  = 4   /**< no particular order (strings, bits,..)  */
     /*H5T_ORDER_NONE must be last */
 } H5T_order_t;
-//! [H5T_order_t_snip]
+//! <!-- [H5T_order_t_snip] -->
 
 /**
  * Types of integer sign schemes
  */
-//! [H5T_sign_t_snip]
+//! <!-- [H5T_sign_t_snip] -->
 typedef enum H5T_sign_t {
     H5T_SGN_ERROR = -1, /**< error                                   */
     H5T_SGN_NONE  = 0,  /**< this is an unsigned type                */
@@ -73,12 +73,12 @@ typedef enum H5T_sign_t {
 
     H5T_NSGN = 2 /** sentinel: this must be last!             */
 } H5T_sign_t;
-//! [H5T_sign_t_snip]
+//! <!-- [H5T_sign_t_snip] -->
 
 /**
  * Floating-point normalization schemes
  */
-//! [H5T_norm_t_snip]
+//! <!-- [H5T_norm_t_snip] -->
 typedef enum H5T_norm_t {
     H5T_NORM_ERROR   = -1, /**< error                                   */
     H5T_NORM_IMPLIED = 0,  /**< msb of mantissa isn't stored, always 1  */
@@ -86,7 +86,7 @@ typedef enum H5T_norm_t {
     H5T_NORM_NONE    = 2   /**< not normalized                          */
     /*H5T_NORM_NONE must be last */
 } H5T_norm_t;
-//! [H5T_norm_t_snip]
+//! <!-- [H5T_norm_t_snip] -->
 
 /**
  * Character set to use for text strings.
@@ -141,7 +141,7 @@ typedef enum H5T_str_t {
 /**
  * Type of padding to use in other atomic types
  */
-//! [H5T_pad_t_snip]
+//! <!-- [H5T_pad_t_snip] -->
 typedef enum H5T_pad_t {
     H5T_PAD_ERROR      = -1, /**< error                           */
     H5T_PAD_ZERO       = 0,  /**< always set to zero              */
@@ -150,7 +150,7 @@ typedef enum H5T_pad_t {
 
     H5T_NPAD = 3 /**< sentinal: THIS MUST BE LAST     */
 } H5T_pad_t;
-//! [H5T_pad_t_snip]
+//! <!-- [H5T_pad_t_snip] -->
 
 /**
  * Commands sent to conversion functions
@@ -173,14 +173,14 @@ typedef enum H5T_bkg_t {
 /**
  * Type conversion client data
  */
-//! [H5T_cdata_t_snip]
+//! <!-- [H5T_cdata_t_snip] -->
 typedef struct H5T_cdata_t {
     H5T_cmd_t command;  /**< what should the conversion function do?    */
     H5T_bkg_t need_bkg; /**< is the background buffer needed?	     */
     hbool_t   recalc;   /**< recalculate private data		     */
     void *    priv;     /**< private data				     */
 } H5T_cdata_t;
-//! [H5T_cdata_t_snip]
+//! <!-- [H5T_cdata_t_snip] -->
 
 /**
  * Conversion function persistence
@@ -194,13 +194,13 @@ typedef enum H5T_pers_t {
 /**
  * The order to retrieve atomic native datatype
  */
-//! [H5T_direction_t_snip]
+//! <!-- [H5T_direction_t_snip] -->
 typedef enum H5T_direction_t {
     H5T_DIR_DEFAULT = 0, /**< default direction is inscendent        */
     H5T_DIR_ASCEND  = 1, /**< in inscendent order                    */
     H5T_DIR_DESCEND = 2  /**< in descendent order                    */
 } H5T_direction_t;
-//! [H5T_direction_t_snip]
+//! <!-- [H5T_direction_t_snip] -->
 
 /**
  * The exception type passed into the conversion callback function
@@ -254,10 +254,10 @@ extern "C" {
 /**
  * All datatype conversion functions are...
  */
-//! [H5T_conv_t_snip]
+//! <!-- [H5T_conv_t_snip] -->
 typedef herr_t (*H5T_conv_t)(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                              size_t bkg_stride, void *buf, void *bkg, hid_t dset_xfer_plist);
-//! [H5T_conv_t_snip]
+//! <!-- [H5T_conv_t_snip] -->
 
 /**
  * Exception handler.  If an exception like overflow happenes during conversion,

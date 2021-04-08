@@ -781,7 +781,7 @@ typedef struct H5AC_cache_image_config_t {
      */
 } H5AC_cache_image_config_t;
 
-//! [H5AC_cache_image_config_t_snip]
+//! <!-- [H5AC_cache_image_config_t_snip] -->
 
 #ifdef __cplusplus
 }

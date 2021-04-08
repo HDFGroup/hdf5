@@ -92,7 +92,7 @@ typedef enum {
 /**
  * \brief Information struct for links
  */
-//! [H5L_info2_t_snip]
+//! <!-- [H5L_info2_t_snip] -->
 typedef struct {
     H5L_type_t type;         /**< Type of link                   */
     hbool_t    corder_valid; /**< Indicate if creation order is valid */
@@ -103,7 +103,7 @@ typedef struct {
         size_t      val_size; /**< Size of a soft link or user-defined link value */
     } u;
 } H5L_info2_t;
-//! [H5L_info2_t_snip]
+//! <!-- [H5L_info2_t_snip] -->
 
 /* The H5L_class_t struct can be used to override the behavior of a
  * "user-defined" link class. Users should populate the struct with callback
@@ -150,7 +150,7 @@ typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata, 
  * "user-defined" link class. Users should populate the struct with callback
  * functions defined elsewhere.
  */
-//! [H5L_class_t_snip]
+//! <!-- [H5L_class_t_snip] -->
 typedef struct {
     int                 version;     /**< Version number of this struct       */
     H5L_type_t          id;          /**< Link type ID                        */
@@ -162,16 +162,16 @@ typedef struct {
     H5L_delete_func_t   del_func;    /**< Callback for link deletion          */
     H5L_query_func_t    query_func;  /**< Callback for queries                */
 } H5L_class_t;
-//! [H5L_class_t_snip]
+//! <!-- [H5L_class_t_snip] -->
 
 /**
  * \brief Prototype for H5Literate2(), H5Literate_by_name2() operator
  *
  * The H5O_token_t version is used in the VOL layer and future public API calls.
  */
-//! [H5L_iterate2_t_snip]
+//! <!-- [H5L_iterate2_t_snip] -->
 typedef herr_t (*H5L_iterate2_t)(hid_t group, const char *name, const H5L_info2_t *info, void *op_data);
-//! [H5L_iterate2_t_snip]
+//! <!-- [H5L_iterate2_t_snip] -->
 
 /**
  * \brief Callback for external link traversal
@@ -1672,8 +1672,10 @@ H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hi
 
 /* Typedefs */
 
-/* Information struct for link (for H5Lget_info1/H5Lget_info_by_idx1) */
-//! [H5L_info1_t_snip]
+//! <!-- [H5L_info1_t_snip] -->
+/**
+ * Information struct for link (for H5Lget_info1() and H5Lget_info_by_idx1())
+ */
 typedef struct {
     H5L_type_t type;         /**< Type of link                   */
     hbool_t    corder_valid; /**< Indicate if creation order is valid */
@@ -1684,7 +1686,7 @@ typedef struct {
         size_t  val_size; /**< Size of a soft link or UD link value */
     } u;
 } H5L_info1_t;
-//! [H5L_info1_t_snip]
+//! <!-- [H5L_info1_t_snip] -->
 
 /** Callback during link traversal */
 typedef hid_t (*H5L_traverse_0_func_t)(const char *link_name, hid_t cur_group, const void *lnkdata,
@@ -1704,9 +1706,9 @@ typedef struct {
 } H5L_class_0_t;
 
 /** Prototype for H5Literate1() / H5Literate_by_name1() operator */
-//! [H5L_iterate1_t_snip]
+//! <!-- [H5L_iterate1_t_snip] -->
 typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_t *info, void *op_data);
-//! [H5L_iterate1_t_snip]
+//! <!-- [H5L_iterate1_t_snip] -->
 
 /* Function prototypes */
 /**

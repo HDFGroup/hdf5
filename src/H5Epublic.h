@@ -155,7 +155,7 @@ extern "C" {
 #endif
 
 /* Error stack traversal callback function pointers */
-//! [H5E_walk2_t_snip]
+//! <!-- [H5E_walk2_t_snip] -->
 /**
  * \brief Callback function for H5Ewalk2()
  *
@@ -166,9 +166,9 @@ extern "C" {
  * \return \herr_t
  */
 typedef herr_t (*H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc, void *client_data);
-//! [H5E_walk2_t_snip]
+//! <!-- [H5E_walk2_t_snip] -->
 
-//! [H5E_auto2_t_snip]
+//! <!-- [H5E_auto2_t_snip] -->
 /**
  * \brief Callback function for H5Eset_auto2()
  *
@@ -178,7 +178,7 @@ typedef herr_t (*H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc, void *cl
  * \return \herr_t
  */
 typedef herr_t (*H5E_auto2_t)(hid_t estack, void *client_data);
-//! [H5E_auto2_t_snip]
+//! <!-- [H5E_auto2_t_snip] -->
 
 /* Public API functions */
 /**
@@ -676,7 +676,7 @@ typedef struct H5E_error1_t {
 } H5E_error1_t;
 
 /* Error stack traversal callback function pointers */
-//! [H5E_walk1_t_snip]
+//! <!-- [H5E_walk1_t_snip] -->
 /**
  * \brief Callback function for H5Ewalk1()
  *
@@ -687,9 +687,9 @@ typedef struct H5E_error1_t {
  * \return \herr_t
  */
 typedef herr_t (*H5E_walk1_t)(int n, H5E_error1_t *err_desc, void *client_data);
-//! [H5E_walk1_t_snip]
+//! <!-- [H5E_walk1_t_snip] -->
 
-//! [H5E_auto1_t_snip]
+//! <!-- [H5E_auto1_t_snip] -->
 /**
  * \brief Callback function for H5Eset_auto1()
  *
@@ -698,7 +698,7 @@ typedef herr_t (*H5E_walk1_t)(int n, H5E_error1_t *err_desc, void *client_data);
  * \return \herr_t
  */
 typedef herr_t (*H5E_auto1_t)(void *client_data);
-//! [H5E_auto1_t_snip]
+//! <!-- [H5E_auto1_t_snip] -->
 
 /* Function prototypes */
 /**

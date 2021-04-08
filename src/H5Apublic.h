@@ -22,17 +22,21 @@
 #include "H5Opublic.h" /* Object Headers			*/
 #include "H5Tpublic.h" /* Datatypes				*/
 
-/* Information struct for attribute (for H5Aget_info/H5Aget_info_by_idx) */
-//! [H5A_info_t_snip]
+//! <!-- [H5A_info_t_snip] -->
+/**
+ * Information struct for H5Aget_info() / H5Aget_info_by_idx()
+ */
 typedef struct {
     hbool_t           corder_valid; /* Indicate if creation order is valid */
     H5O_msg_crt_idx_t corder;       /* Creation order                 */
     H5T_cset_t        cset;         /* Character set of attribute name */
     hsize_t           data_size;    /* Size of raw data		  */
 } H5A_info_t;
-//! [H5A_info_t_snip]
+//! <!-- [H5A_info_t_snip] -->
 
-/* Typedef for H5Aiterate2() callbacks */
+/**
+ * Typedef for H5Aiterate2() callbacks
+ */
 typedef herr_t (*H5A_operator2_t)(hid_t location_id /*in*/, const char *attr_name /*in*/,
                                   const H5A_info_t *ainfo /*in*/, void *op_data /*in,out*/);
 

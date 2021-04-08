@@ -331,7 +331,7 @@ struct H5FD_t {
 /**
  * Define enum for the source of file image callbacks
  */
-//! [H5FD_file_image_op_t_snip]
+//! <!-- [H5FD_file_image_op_t_snip] -->
 typedef enum {
     H5FD_FILE_IMAGE_OP_NO_OP,
     H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
@@ -362,12 +362,12 @@ typedef enum {
     /**<Passed to the \p image_free callback when an image buffer is to
      * be released during a file close operation*/
 } H5FD_file_image_op_t;
-//! [H5FD_file_image_op_t_snip]
+//! <!-- [H5FD_file_image_op_t_snip] -->
 
 /**
  * Define structure to hold file image callbacks
  */
-//! [H5FD_file_image_callbacks_t_snip]
+//! <!-- [H5FD_file_image_callbacks_t_snip] -->
 typedef struct {
     /**
      * \param[in] size Size in bytes of the file image buffer to allocate
@@ -377,9 +377,9 @@ typedef struct {
      * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
      *            parameter \p udata
      */
-    //! [image_malloc_snip]
+    //! <!-- [image_malloc_snip] -->
     void *(*image_malloc)(size_t size, H5FD_file_image_op_t file_image_op, void *udata);
-    //! [image_malloc_snip]
+    //! <!-- [image_malloc_snip] -->
     /**
      * \param[in] dest Address of the destination buffer
      * \param[in] src Address of the source buffer
@@ -389,10 +389,10 @@ typedef struct {
      * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
      *            parameter \p udata
      */
-    //! [image_memcpy_snip]
+    //! <!-- [image_memcpy_snip] -->
     void *(*image_memcpy)(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op,
                           void *udata);
-    //! [image_memcpy_snip]
+    //! <!-- [image_memcpy_snip] -->
     /**
      * \param[in] ptr Pointer to the buffer being reallocated
      * \param[in] file_image_op A value from #H5FD_file_image_op_t indicating
@@ -401,30 +401,30 @@ typedef struct {
      * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
      *            parameter \p udata
      */
-    //! [image_realloc_snip]
+    //! <!-- [image_realloc_snip] -->
     void *(*image_realloc)(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *udata);
-    //! [image_realloc_snip]
+    //! <!-- [image_realloc_snip] -->
     /**
      * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
      *            parameter \p udata
      */
-    //! [image_free_snip]
+    //! <!-- [image_free_snip] -->
     herr_t (*image_free)(void *ptr, H5FD_file_image_op_t file_image_op, void *udata);
-    //! [image_free_snip]
+    //! <!-- [image_free_snip] -->
     /**
      * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
      *            parameter \p udata
      */
-    //! [udata_copy_snip]
+    //! <!-- [udata_copy_snip] -->
     void *(*udata_copy)(void *udata);
-    //! [udata_copy_snip]
+    //! <!-- [udata_copy_snip] -->
     /**
      * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
      *            parameter \p udata
      */
-    //! [udata_free_snip]
+    //! <!-- [udata_free_snip] -->
     herr_t (*udata_free)(void *udata);
-    //! [udata_free_snip]
+    //! <!-- [udata_free_snip] -->
     /**
      * \brief The final field in the #H5FD_file_image_callbacks_t struct,
      *        provides a pointer to user-defined data. This pointer will be
@@ -434,7 +434,7 @@ typedef struct {
      */
     void *udata;
 } H5FD_file_image_callbacks_t;
-//! [H5FD_file_image_callbacks_t_snip]
+//! <!-- [H5FD_file_image_callbacks_t_snip] -->
 
 #ifdef __cplusplus
 extern "C" {
