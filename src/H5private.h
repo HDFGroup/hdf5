@@ -2165,7 +2165,7 @@ extern hbool_t H5_MPEinit_g; /* Has the MPE Library been initialized? */
 /* Forward declaration of H5CXpush() / H5CXpop() */
 /* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
 H5_DLL herr_t H5CX_push(void);
-H5_DLL herr_t H5CX_pop(void);
+H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 #ifndef NDEBUG
 #define FUNC_ENTER_CHECK_NAME(asrt)                                                                          \
@@ -2568,7 +2568,7 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_LEAVE_API(ret_value)                                                                            \
     VFD_SWMR_LEAVE(ret_value);                                                                               \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
-    (void)H5CX_pop();                                                                                        \
+    (void)H5CX_pop(TRUE);                                                                                    \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
         (void)H5E_dump_api_stack(TRUE);                                                                      \
@@ -2580,7 +2580,7 @@ H5_DLL herr_t H5CX_pop(void);
 /* Use this macro when VFD SWMR EOT is not used on leaving an API function */
 #define FUNC_LEAVE_API_NO_EOT(ret_value)                                                                     \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
-    (void)H5CX_pop();                                                                                        \
+    (void)H5CX_pop(TRUE);                                                                                    \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
         (void)H5E_dump_api_stack(TRUE);                                                                      \

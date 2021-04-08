@@ -301,7 +301,7 @@ main(void)
     HDprintf("All filter unregistration tests passed.\n");
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -312,7 +312,7 @@ error:
     HDprintf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
 
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     HDexit(EXIT_FAILURE);
 } /* end main() */

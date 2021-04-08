@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Friday, February 24, 2006
  */
 #include "h5test.h"
@@ -20,9 +20,9 @@
  * This file needs to access private datatypes from the H5HF package.
  * This file also needs to access the fractal heap testing code.
  */
-#define H5HF_FRIEND /*suppress error about including H5HFpkg	  */
+#define H5HF_FRIEND /*suppress error about including H5HFpkg      */
 #define H5HF_TESTING
-#include "H5HFpkg.h" /* Fractal heaps			*/
+#include "H5HFpkg.h" /* Fractal heaps            */
 
 #define H5F_FRIEND /*suppress error about including H5Fpkg   */
 #define H5F_TESTING
@@ -30,9 +30,9 @@
 
 /* Other private headers that this test requires */
 #include "H5CXprivate.h" /* API Contexts                         */
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5MMprivate.h" /* Memory management            */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
-#include "H5VMprivate.h" /* Vectors and arrays 			*/
+#include "H5VMprivate.h" /* Vectors and arrays             */
 
 /* Max. testfile name length */
 #define FHEAP_FILENAME_LEN 1024
@@ -17061,7 +17061,7 @@ main(void)
         TEST_ERROR
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -17087,7 +17087,7 @@ error:
     H5E_END_TRY;
 
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     return 1;
 } /* end main() */
