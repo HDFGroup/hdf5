@@ -675,7 +675,7 @@ test_generate(void)
             image_data[i] = 0;
         else {
             image_data[i] = (unsigned char)((255.0f * (data[i] - xmin)) / (xmax - xmin));
-		}
+        }
     }
 
     /* make the image */

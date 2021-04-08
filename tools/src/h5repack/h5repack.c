@@ -243,7 +243,7 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
             if (token_cmp == 0)
                 break; // found it!
         }
-        
+
         dt_ret = dt;
     }
     else {
