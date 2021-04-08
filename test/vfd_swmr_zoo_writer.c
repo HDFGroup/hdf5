@@ -73,7 +73,7 @@ usage(const char *progname)
     fprintf(stderr,   "  -a: run all tests, including variable-length data\n");
     fprintf(stderr,   "  -e: print error stacks\n");
     fprintf(stderr,   "  -l secs: maximal seconds for reader to validate the zoo\n");
-    fprintf(stderr,   "  -p: do not use named pipes\n");
+    fprintf(stderr,   "  -N: do not use named pipes\n");
     fprintf(stderr,   "  -q: be quiet: few/no progress messages\n");
     fprintf(stderr,   "  -v: be verbose: most progress messages\n");
     exit(EXIT_FAILURE);
@@ -130,7 +130,7 @@ main(int argc, char **argv)
         goto error;
     }
 
-    while ((ch = getopt(argc, argv, "CSael:pqv")) != -1) {
+    while ((ch = getopt(argc, argv, "CSael:Nqv")) != -1) {
         switch(ch) {
         case 'C':
             config.skip_compact = true;
@@ -164,7 +164,7 @@ main(int argc, char **argv)
                 ival.tv_nsec = nsec;
             }
             break;
-        case 'p':
+        case 'N':
             /* Disable named pipes, mainly for running the writer and reader seperately */
             use_named_pipe = false;
             break;
