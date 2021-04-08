@@ -276,7 +276,7 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_CMP_TEST testname testfilter testtype resultcode resultfile)
+  macro (ADD_H5_FILTER_TEST testname testfilter testtype resultcode resultfile)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
@@ -407,6 +407,48 @@
             DEPENDS "H5REPACK_DMP-${testname}"
         )
       endif ()
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_DIFF_TEST testname testtype resultcode testfile)
+    if ("${testtype}" STREQUAL "SKIP")
+      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_DIFF-${testname}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
+        )
+        set_property(TEST H5REPACK_DIFF-${testname} PROPERTY DISABLED)
+      endif ()
+    else ()
+      add_test (
+          NAME H5REPACK_DIFF-${testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
+      )
+      set_tests_properties (H5REPACK_DIFF-${testname}-clear-objects PROPERTIES
+          FIXTURES_REQUIRED clear_h5repack
+      )
+      add_test (
+          NAME H5REPACK_DIFF-${testname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+      )
+      set_tests_properties (H5REPACK_DIFF-${testname} PROPERTIES
+          DEPENDS H5REPACK_DIFF-${testname}-clear-objects
+      )
+      add_test (
+          NAME H5REPACK_DIFF-${testname}_DFF
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
+              -D "TEST_ARGS:STRING=-v;--enable-error-stack;${testfile};out-${testname}.${testfile}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=out-${testname}.${testfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${testname}.${testfile}.tst"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5REPACK_DIFF-${testname}_DFF PROPERTIES
+          DEPENDS H5REPACK_DIFF-${testname}
+      )
     endif ()
   endmacro ()
 
@@ -1148,7 +1190,7 @@
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
   endif ()
-  ADD_H5_CMP_TEST (gzip_verbose_filters "O?...ing file[^\n]+\n" ${TESTTYPE} 0 ${arg})
+  ADD_H5_FILTER_TEST (gzip_verbose_filters "O?...ing file[^\n]+\n" ${TESTTYPE} 0 ${arg})
 
 ###########################################################
 # the following tests assume the input files have filters

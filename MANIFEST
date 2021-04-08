@@ -135,6 +135,7 @@
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
+./config/libhdf5.pc.in
 ./config/linux-gnu
 ./config/linux-gnuaout
 ./config/linux-gnueabihf
@@ -197,6 +198,7 @@
 
 ./config/site-specific/BlankForm
 
+./doc/branches-explained.md
 ./doc/SWMR_Example.png
 ./doc/SWMRdataflow.png
 ./doc/VFD_SWMR_Punch_List.md
@@ -205,6 +207,7 @@
 ./doc/VFD_SWMR_RFC_2020-02-03.docx
 ./doc/vfd-swmr-user-guide.md
 ./doc/code-conventions.md
+./doc/contributing.md
 
 ./examples/Attributes.txt
 ./examples/Makefile.am
@@ -3481,6 +3484,8 @@
 ./config/cmake/HDFFortranCompilerFlags.cmake
 ./config/cmake/HDF5_Process_Flex_Files.cmake
 ./config/cmake/HDF5Macros.cmake
+./config/cmake/HDF5PluginMacros.cmake
+./config/cmake/HDF5PluginCache.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/jrunTest.cmake
 ./config/cmake/jvolTest.cmake
@@ -3528,6 +3533,7 @@
 ./CMakeLists.txt
 ./CMakeFilters.cmake
 ./CMakeInstallation.cmake
+./CMakePlugins.cmake
 ./CTestConfig.cmake
 ./UserMacros.cmake
 ./c++/CMakeLists.txt
@@ -3641,6 +3647,7 @@
 
 # CMake-specific Sanitizer Scripts
 ./config/sanitizer/code-coverage.cmake
+./config/sanitizer/formatting.cmake
 ./config/sanitizer/sanitizers.cmake
 ./config/sanitizer/tools.cmake
 ./config/sanitizer/LICENSE
