@@ -50,14 +50,14 @@ static void
 usage(const char *progname)
 {
 	fprintf(stderr, "usage: %s [-S] [-a steps] [-b] [-c]\n"
-                "    [-n iterations] [-p] [-q] [-u numb_ticks]\n"
+                "    [-n iterations] [-N] [-q] [-u numb_ticks]\n"
 		"\n"
 		"-S:	               do not use VFD SWMR\n"
 		"-a steps:	       `steps` between adding attributes\n"
 		"-b:	               write data in big-endian byte order\n"
 		"-c steps:	       `steps` between communication between the writer and reader\n"
                 "-n ngroups:           the number of groups\n"
-		"-p:	               do not use named pipes, mainly for running the writer and reader seperately\n"
+		"-N:	               do not use named pipes, mainly for running the writer and reader seperately\n"
                 "-u numb_tcks:         `numb_ticks` for the reader to wait before verification\n"
 		"-q:	               silence printouts, few messages\n"
 		"\n",
@@ -87,7 +87,7 @@ state_init(state_t *s, int argc, char **argv)
     if (tfile)
         HDfree(tfile);
 
-    while ((ch = getopt(argc, argv, "Sa:bc:n:pqu:")) != -1) {
+    while ((ch = getopt(argc, argv, "Sa:bc:n:Nqu:")) != -1) {
         switch (ch) {
             case 'S':
                 s->use_vfd_swmr = false;
@@ -124,7 +124,7 @@ state_init(state_t *s, int argc, char **argv)
             case 'b':
                 s->filetype = H5T_STD_U32BE;
                 break;
-            case 'p':
+            case 'N':
                 s->use_named_pipes = false;
                 break;
             case 'q':
