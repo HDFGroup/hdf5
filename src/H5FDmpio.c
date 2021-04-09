@@ -1794,6 +1794,10 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
         if (MPI_SUCCESS != (mpi_code = MPI_File_delete(filename, info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_delete failed", mpi_code)
 
+    /* Set up a barrier (don't want processes to run ahead of the delete) */
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mpio_delete() */
