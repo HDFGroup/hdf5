@@ -199,21 +199,21 @@ typedef enum H5D_mpio_actual_chunk_opt_mode_t {
 
 //! <!-- [H5D_mpio_actual_io_mode_t_snip] -->
 /**
-  * The following values are conveniently defined as a bit field so that
-  * we can switch from the default to independent or collective and then to
-  * mixed without having to check the original value.
+ * The following values are conveniently defined as a bit field so that
+ * we can switch from the default to independent or collective and then to
+ * mixed without having to check the original value.
  */
 typedef enum H5D_mpio_actual_io_mode_t {
-    H5D_MPIO_NO_COLLECTIVE     = 0x0,
+    H5D_MPIO_NO_COLLECTIVE = 0x0,
     /**< No collective I/O was performed. Collective I/O was not requested or
          collective I/O isn't possible on this dataset */
     H5D_MPIO_CHUNK_INDEPENDENT = 0x1,
     /**< HDF5 performed one the chunk collective optimization schemes and each
          chunk was accessed independently */
-    H5D_MPIO_CHUNK_COLLECTIVE  = 0x2,
+    H5D_MPIO_CHUNK_COLLECTIVE = 0x2,
     /**< HDF5 performed one the chunk collective optimization schemes and each
          chunk was accessed collectively */
-    H5D_MPIO_CHUNK_MIXED       = 0x1 | 0x2,
+    H5D_MPIO_CHUNK_MIXED = 0x1 | 0x2,
     /**< HDF5 performed one the chunk collective optimization schemes and some
          chunks were accessed independently, some collectively. */
     /** \internal The contiguous case is separate from the bit field. */
@@ -227,25 +227,25 @@ typedef enum H5D_mpio_actual_io_mode_t {
  * Broken collective IO property
  */
 typedef enum H5D_mpio_no_collective_cause_t {
-    H5D_MPIO_COLLECTIVE                               = 0x00,
+    H5D_MPIO_COLLECTIVE = 0x00,
     /**< Collective I/O was performed successfully */
-    H5D_MPIO_SET_INDEPENDENT                          = 0x01,
+    H5D_MPIO_SET_INDEPENDENT = 0x01,
     /**< Collective I/O was not performed because independent I/O was requested */
-    H5D_MPIO_DATATYPE_CONVERSION                      = 0x02,
+    H5D_MPIO_DATATYPE_CONVERSION = 0x02,
     /**< Collective I/O was not performed because datatype conversions were required */
-    H5D_MPIO_DATA_TRANSFORMS                          = 0x04,
+    H5D_MPIO_DATA_TRANSFORMS = 0x04,
     /**< Collective I/O was not performed because data transforms needed to be applied */
-    H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED           = 0x08,
+    H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED = 0x08,
     /**< \todo FIXME! */
-    H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES          = 0x10,
+    H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES = 0x10,
     /**< Collective I/O was not performed because one of the dataspaces was neither simple nor scalar */
-    H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET        = 0x20,
+    H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x20,
     /**< Collective I/O was not performed because the dataset was neither contiguous nor chunked */
-    H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED        = 0x40,
+    H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED = 0x40,
     /**< \todo FIXME! */
     H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE = 0x80,
     /**< \todo FIXME! */
-    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE                  = 0x100
+    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x100
     /**< Sentinel */
 } H5D_mpio_no_collective_cause_t;
 //! <!-- [H5D_mpio_no_collective_cause_t_snip] -->
@@ -6709,7 +6709,8 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  *          VDS access time. Example code for many source and virtual dataset mappings
  *          is available in the "Examples of Source to Virtual Dataset Mapping"
  *          chapter in the
- *          <a href="https://portal.hdfgroup.org/display/HDF5/RFC+HDF5+Virtual+Dataset">RFC: HDF5 Virtual Dataset</a>.
+ *          <a href="https://portal.hdfgroup.org/display/HDF5/RFC+HDF5+Virtual+Dataset">
+ *            RFC: HDF5 Virtual Dataset</a>.
  *      </td>
  *      </tr>
  *      </table>
