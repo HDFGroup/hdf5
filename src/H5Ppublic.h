@@ -3527,12 +3527,53 @@ H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
  *
  * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
  *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
- *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t.
+ *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t,
+ *      <a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">
+ *      HDF5 File Image Operations</a>.
+ *
  *
  * \since 1.8.9
  *
  */
 H5_DLL herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves callback routines for working with file images
+ *
+ * \fapl_id
+ * \param[in,out] callbacks_ptr Pointer to the instance of the
+ *                #H5FD_file_image_callbacks_t struct in which the callback
+ *                routines are to be returned\n
+ *                Struct fields must be initialized to NULL before the call
+ *                is made.\n
+ *                Struct field contents upon return will match those passed in
+ *                in the last H5Pset_file_image_callbacks() call for the file
+ *                access property list \p fapl_id.
+ * \return \herr_t
+ *
+ * \details H5Pget_file_image_callbacks() retrieves the callback routines set for
+ *          working with file images opened with the file access property list
+ *          \p fapl_id.
+ *
+ *          The callbacks must have been previously set with
+ *          H5Pset_file_image_callbacks() in the file access property list.
+ *
+ *          Upon the successful return of H5Pset_file_image_callbacks(), the
+ *          fields in the instance of the #H5FD_file_image_callbacks_t struct
+ *          pointed to by \p callbacks_ptr will contain the same values as were
+ *          passed in the most recent H5Pset_file_image_callbacks() call for the
+ *          file access property list \p fapl_id.
+ *
+ * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
+ *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
+ *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t,
+ *      <a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">
+ *      HDF5 File Image Operations</a>.
+ *
+ * \since 1.8.9
+ *
+ */
 H5_DLL herr_t H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
 /**
  * \ingroup FAPL
@@ -3604,8 +3645,109 @@ H5_DLL herr_t H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref /*out*/);
  *
  */
 H5_DLL herr_t H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low, H5F_libver_t *high);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Get the current initial metadata cache configuration from the
+ *        provided file access property list
+ *
+ * \fapl_id{plist_id}
+ * \param[in,out] config_ptr Pointer to the instance of #H5AC_cache_config_t
+ *                in which the current metadata cache configuration is to be
+ *                reported
+ * \return \herr_t
+ *
+ * \note The \c in direction applies only to the \ref H5AC_cache_config_t.version
+ *       field. All other fields are \c out parameters.
+ *
+ * \details The fields of the #H5AC_cache_config_t structure are shown
+ *           below:
+ *           \snippet H5ACpublic.h H5AC_cache_config_t_snip
+ *           \click4more
+ *
+ *          H5Pget_mdc_config() gets the initial metadata cache configuration
+ *          contained in a file access property list and loads it into the
+ *          instance of #H5AC_cache_config_t pointed to by the \p config_ptr
+ *          parameter. This configuration is used when the file is opened.
+ *
+ *          Note that the version field of \Code{*config_ptr} must be
+ *          initialized; this allows the library to support earlier versions of
+ *          the #H5AC_cache_config_t structure.
+ *
+ *          See the overview of the metadata cache in the special topics section
+ *          of the user guide for details on the configuration data returned. If
+ *          you haven't read and understood that documentation, the results of
+ *          this call will not make much sense.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr); /* out */
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves the metadata cache image configuration values for a file
+ *        access property list
+ *
+ * \fapl_id{plist_id}
+ * \param[out] config_ptr Pointer to metadata cache image configuration values
+ * \return \herr_t
+ *
+ * \details H5Pget_mdc_image_config() retrieves the metadata cache image values
+ *          into \p config_ptr for the file access property list specified in \p
+ *          plist_id.
+ *
+ *          #H5AC_cache_image_config_t is defined as follows:
+ *          \snippet H5ACpublic.h H5AC_cache_image_config_t_snip
+ *          \click4more
+ *
+ * \since 1.10.1
+ */
 H5_DLL herr_t H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr /*out*/);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Gets metadata cache logging options
+ *
+ * \fapl_id{plist_id}
+ * \param[out] is_enabled Flag whether logging is enabled
+ * \param[out] location Location of log in UTF-8/ASCII (file path/name) (On
+ *             Windows, this must be ASCII)
+ * \param[out] location_size Size in bytes of the location string
+ * \param[out] start_on_access Whether the logging begins as soon as the file is
+ *             opened or created
+ * \return \herr_t
+ *
+ * \details The metadata cache is a central part of the HDF5 library through
+ *          which all file metadata reads and writes take place. File metadata
+ *          is normally invisible to the user and is used by the library for
+ *          purposes such as locating and indexing data. File metadata should
+ *          not be confused with user metadata, which consists of attributes
+ *          created by users and attached to HDF5 objects such as datasets via
+ *          \ref H5A API calls.
+ *
+ *          Due to the complexity of the cache, a trace/logging feature has been
+ *          created that can be used by HDF5 developers for debugging and
+ *          performance analysis. The functions that control this functionality
+ *          will normally be of use to a very limited number of developers
+ *          outside of The HDF Group. The functions have been documented to help
+ *          users create logs that can be sent with bug reports.
+ *
+ *          Control of the log functionality is straightforward. Logging is
+ *          enabled via the H5Pset_mdc_log_options() function, which will modify
+ *          the file access property list used to open or create a file. This
+ *          function has a flag that determines whether logging begins at file
+ *          open or starts in a paused state. Log messages can then be
+ *          controlled via the H5Fstart_mdc_logging() / H5Fstop_mdc_logging()
+ *          functions. H5Pget_mdc_log_options() can be used to examine a file
+ *          access property list, and H5Fget_mdc_logging_status() will return
+ *          the current state of the logging flags.
+ *
+ *          The log format is described in the
+ *           <a href="https://bit.ly/2PG6fNv">Metadata Cache Logging</a> document.
+ *
+ * \since 1.10.0
+ */
 H5_DLL herr_t H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location,
                                      size_t *location_size, hbool_t *start_on_access);
 /**
@@ -4716,55 +4858,12 @@ H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_
  * \fapl_id{plist_id}
  * \param[in] config_ptr  Pointer to the instance of \p H5AC_cache_config_t
  *            containing the desired configuration
- *
  * \return \herr_t
  *
- *  \details The fields of the \p H5AC_cache_config_t structure are discussed
+ *  \details The fields of the #H5AC_cache_config_t structure are shown
  *           below:
- *           General configuration section:
- *           \par General configuration section:
- *           \snippet H5ACpublic.h H5AC_cache_config_t_general_snip
- *           - \ref H5AC_cache_config_t.version "version"
- *           - \ref H5AC_cache_config_t.rpt_fcn_enabled "rpt_fcn_enabled"
- *           - \ref H5AC_cache_config_t.open_trace_file "open_trace_file"
- *           - \ref H5AC_cache_config_t.close_trace_file "close_trace_file"
- *           - \ref H5AC_cache_config_t.trace_file_name "trace_file_name"
- *           - \ref H5AC_cache_config_t.evictions_enabled "evictions_enabled"
- *           - \ref H5AC_cache_config_t.set_initial_size "set_initial_size"
- *           - \ref H5AC_cache_config_t.initial_size "initial_size"
- *           - \ref H5AC_cache_config_t.min_clean_fraction "min_clean_fraction"
- *           - \ref H5AC_cache_config_t.max_size "max_size"
- *           - \ref H5AC_cache_config_t.min_size "min_size"
- *           - \ref H5AC_cache_config_t.epoch_length "epoch_length"
- *
- *           \par Increment configuration section:
- *           \snippet H5ACpublic.h H5AC_cache_config_t_incr_snip
- *           - \ref H5AC_cache_config_t.incr_mode "incr_mode"
- *           - \ref H5AC_cache_config_t.lower_hr_threshold "lower_hr_threshold"
- *           - \ref H5AC_cache_config_t.increment "increment"
- *           - \ref H5AC_cache_config_t.apply_max_increment
- *                  "apply_max_increment"
- *           - \ref H5AC_cache_config_t.max_increment "max_increment"
- *           - \ref H5AC_cache_config_t.flash_incr_mode "flash_incr_mode"
- *           - \ref H5AC_cache_config_t.flash_threshold "flash_threshold"
- *           - \ref H5AC_cache_config_t.flash_multiple "flash_multiple"
- *
- *          \par Decrement configuration section:
- *          \snippet H5ACpublic.h H5AC_cache_config_t_decr_snip
- *          - \ref H5AC_cache_config_t.decr_mode "decr_mode"
- *          - \ref H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold"
- *          - \ref H5AC_cache_config_t.decrement "decrement"
- *          - \ref H5AC_cache_config_t.apply_max_decrement "apply_max_decrement"
- *          - \ref H5AC_cache_config_t.max_decrement "max_decrement"
- *          - \ref H5AC_cache_config_t.epochs_before_eviction
- *                 "epochs_before_eviction"
- *          - \ref H5AC_cache_config_t.apply_empty_reserve "apply_empty_reserve"
- *          - \ref H5AC_cache_config_t.empty_reserve "empty_reserve"
- *
- *          \par Parallel configuration section:
- *          \snippet H5ACpublic.h H5AC_cache_config_t_parallel_snip
- *          - \ref H5AC_cache_config_t.dirty_bytes_threshold "dirty_bytes_threshold"
- *          - \ref H5AC_cache_config_t.metadata_write_strategy "metadata_write_strategy"
+ *           \snippet H5ACpublic.h H5AC_cache_config_t_snip
+ *           \click4more
  *
  * \details H5Pset_mdc_config() attempts to set the initial metadata cache
  *          configuration to the supplied value.  It will fail if an invalid
@@ -5187,7 +5286,53 @@ H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective
  * \since 1.10.0
  */
 H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
+/**
+ * \ingroup GACPL
+ *
+ * \brief Sets metadata write mode to collective or independent (default)
+ *
+ * \fapl_id{plist_id}
+ * \param[out] is_collective Boolean value indicating whether metadata
+ *             writes are collective (\Code{>0}) or independent (\Code{0}).
+ *             \Emph{Default mode:} Independent (\Code{0})
+ * \return \herr_t
+ *
+ * \details H5Pset_coll_metadata_write() tells the HDF5 library whether to
+ *          perform metadata writes collectively (1) or independently (0).
+ *
+ *          If collective access is selected, then on a flush of the metadata
+ *          cache, all processes will divide the metadata cache entries to be
+ *          flushed evenly among themselves and issue a single MPI-IO collective
+ *          write operation. This is the preferred method when the size of the
+ *          metadata created by the application is large.
+ *
+ *          If independent access is selected, the library uses the default
+ *          method for doing metadata I/O either from process zero or
+ *          independently from each process.
+ *
+ * \sa_metadata_ops
+ *
+ * \since 1.10.0
+ */
 H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
+/**
+ * \ingroup GACPL
+ *
+ * \brief Retrieves metadata write mode setting
+ *
+ * \fapl_id{plist_id}
+ * \param[out] is_collective Pointer to a boolean value indicating whether
+ *             metadata writes are collective (\Code{>0}) or independent (\Code{0}).
+ *             \Emph{Default mode:} Independent (\Code{0})
+ * \return \herr_t
+ *
+ * \details H5Pget_coll_metadata_write() retrieves the collective metadata write
+ *          setting from the file access property into \p is_collective.
+ *
+ * \sa_metadata_ops
+ *
+ * \since 1.10.0
+ */
 H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
 H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
 H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
