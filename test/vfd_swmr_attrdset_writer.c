@@ -41,13 +41,10 @@
 #define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 
 #include "hdf5.h"
-
-#include "H5Fpkg.h"
-#include "H5HGprivate.h"
-#include "H5VLprivate.h"
-
 #include "testhdf5.h"
 #include "vfd_swmr_common.h"
+
+#ifndef H5_HAVE_WIN32_API
 
 #define READER_WAIT_TICKS   4
 
@@ -218,7 +215,7 @@ usage(const char *progname)
 		"-a nattrs:	   add `nattrs` attributes to all datasets\n"
 		"-d dattrs:	   delete `dattrs` attributes to all datasets after addition\n"
 		"-u nticks:         `nticks` ticks for the reader to wait before verification\n"
-        "                   (default is 3)\n"
+        "                   (default is 4)\n"
 		"-c csteps:         `csteps` steps communication interval between reader and writer\n"
         "                   (default is 1)\n"
 		"-S:	           do not use VFD SWMR\n"
@@ -319,6 +316,31 @@ state_init(state_t *s, int argc, char **argv)
     }
     argc -= optind;
     argv += optind;
+
+    /* Require to specify at least -p, -g or -k option */
+    if(!s->compact && !s->contig && !s->chunked) {
+        printf("Require to specify at least -p, -g or -k option\n");
+        usage(s->progname);
+        goto error;
+    }
+
+    /* -c <csteps> cannot be zero */
+    if(!s->csteps) {
+        printf("communication interval cannot be zero\n");
+        TEST_ERROR;
+    }
+
+    /* -c <csteps> and -a <nattrs> options */
+    if(s->asteps && s->csteps > s->asteps) {
+        printf("communication interval is out of bounds\n");
+        TEST_ERROR;
+    }
+
+    /* -d and -a */
+    if(s->dattrs > s->asteps) {
+        printf("# of attributes to be deleted exceeds # of attributes created\n");
+        TEST_ERROR;
+    }
 
     /* Dataspace for attributes added to datasets */
     /* Dataspace for compact and contiguous datasets */
@@ -1737,31 +1759,6 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    /* Require to specify at least -p, -g or -k option */
-    if(!s.compact && !s.contig && !s.chunked) {
-        printf("Require to specify at least -p, -g or -k option\n");
-        usage(s.progname);
-        goto error;
-    }
-
-    /* -c <csteps> cannot be zero */
-    if(!s.csteps) {
-        printf("communication interval cannot be zero\n");
-        TEST_ERROR;
-    }
-
-    /* -c <csteps> and -a <nattrs> options */
-    if(s.asteps && s.csteps > s.asteps) {
-        printf("communication interval is out of bounds\n");
-        TEST_ERROR;
-    }
-
-    /* -d and -a */
-    if(s.dattrs > s.asteps) {
-        printf("# of attributes to be deleted exceeds # of attributes created\n");
-        TEST_ERROR;
-    }
-
     personality = strstr(s.progname, "vfd_swmr_attrdset_");
 
     if (personality != NULL &&
@@ -2015,3 +2012,4 @@ error:
     return EXIT_FAILURE;
 } /* main */
 
+#endif /* H5_HAVE_WIN32_API */
