@@ -17,13 +17,13 @@
  * Purpose:     This file contains declarations which are normally visible
  *              only within the H5C package.
  *
- *		Source files outside the H5C package should include
- *		H5Cprivate.h instead.
+ *        Source files outside the H5C package should include
+ *        H5Cprivate.h instead.
  *
- *		The one exception to this rule is test/cache.c.  The test
- *		code is easier to write if it can look at the cache's
- *		internal data structures.  Indeed, this is the main
- *		reason why this file was created.
+ *        The one exception to this rule is test/cache.c.  The test
+ *        code is easier to write if it can look at the cache's
+ *        internal data structures.  Indeed, this is the main
+ *        reason why this file was created.
  */
 
 /* clang-format off */
@@ -40,15 +40,16 @@
 #include "H5Cprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5Clog.h"      /* Cache logging */
-#include "H5SLprivate.h" /* Skip lists */
+#include "H5Clog.h"             /* Cache logging */
+#include "H5SLprivate.h"        /* Skip lists */
 
 /**************************/
 /* Package Private Macros */
 /**************************/
 
 /* Number of epoch markers active */
-#define H5C__MAX_EPOCH_MARKERS 10
+#define H5C__MAX_EPOCH_MARKERS                  10
+
 
 /* Cache configuration settings */
 #define H5C__HASH_TABLE_LEN      (64 * 1024) /* must be a power of 2 */
@@ -76,7 +77,7 @@
  * to the HGOTO_ERROR macro, which may not be appropriate in all cases.
  * If so, we will need versions of the insertion and deletion macros which
  * do not reference the sanity checking macros.
- *							JRM - 5/5/04
+ *                            JRM - 5/5/04
  *
  * Changes:
  *
@@ -151,14 +152,14 @@
  *    sanity checking macros.  These macro are used to update the size of
  *    a DLL when one of its entries changes size.
  *
- *							JRM - 9/8/05
+ *                            JRM - 9/8/05
  *
  *  - Added macros supporting the index list -- a doubly liked list of
  *    all entries in the index.  This list is necessary to reduce the
  *    cost of visiting all entries in the cache, which was previously
  *    done via a scan of the hash table.
  *
- *							JRM - 10/15/15
+ *                            JRM - 10/15/15
  *
  ****************************************************************************/
 
@@ -799,6 +800,7 @@
 
 #endif /* H5C_COLLECT_CACHE_STATS */
 
+
 /***********************************************************************
  *
  * Hash table access and manipulation macros:
@@ -815,13 +817,13 @@
  *     the clean_index_size and dirty_index_size fields of H5C_t.  Also
  *     added macros to allow us to track entry cleans and dirties.
  *
- *     						JRM -- 11/5/08
+ *                             JRM -- 11/5/08
  *
  *   - Updated existing index macros and sanity check macros to maintain
  *     the index_ring_len, index_ring_size, clean_index_ring_size, and
  *     dirty_index_ring_size fields of H5C_t.
  *
- *						JRM -- 9/1/15
+ *                        JRM -- 9/1/15
  *
  *   - Updated existing index macros and sanity checks macros to
  *     maintain an doubly linked list of all entries in the index.

@@ -13,12 +13,12 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5ACprivate.h
- *			Jul  9 1997
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:   H5ACprivate.h
+ *            Jul  9 1997
+ *            Robb Matzke
  *
- * Purpose:		Constants and typedefs available to the rest of the
- *			library.
+ * Purpose:   Constants and typedefs available to the rest of the
+ *            library.
  *
  *-------------------------------------------------------------------------
  */
@@ -26,14 +26,14 @@
 #ifndef H5ACprivate_H
 #define H5ACprivate_H
 
-#include "H5ACpublic.h" /*public prototypes			*/
+#include "H5ACpublic.h" /*public prototypes            */
 
 /* Pivate headers needed by this header */
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Cprivate.h"  /* Cache				*/
-#include "H5Fprivate.h"  /* File access				*/
-#include "H5Pprivate.h"  /* Property lists			*/
-#include "H5SLprivate.h" /* Skip lists 				*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Cprivate.h"  /* Cache                */
+#include "H5Fprivate.h"  /* File access                */
+#include "H5Pprivate.h"  /* Property lists            */
+#include "H5SLprivate.h" /* Skip lists                 */
 
 /* Global metadata tag values */
 #define H5AC__INVALID_TAG    (haddr_t)0
@@ -90,20 +90,20 @@ typedef enum {
  *
  * NOTE: test/cache plays games with the f->shared->cache, and thus
  *       setting H5AC_DUMP_STATS_ON_CLOSE will generate constant,
- *	 irrelevant data when run with that test program.  See
- * 	 comments on setup_cache() / takedown_cache() in test/cache_common.c.
+ *       irrelevant data when run with that test program.  See
+ *       comments on setup_cache() / takedown_cache() in test/cache_common.c.
  *       for details.
  *
- *	 If you need to dump stats at file close in test/cache.c,
- *	 use the dump_stats parameter to takedown_cache(), or call
- *	 H5C_stats() directly.
- *					JRM -- 4/12/15
+ *     If you need to dump stats at file close in test/cache.c,
+ *     use the dump_stats parameter to takedown_cache(), or call
+ *     H5C_stats() directly.
+ *                    JRM -- 4/12/15
  *
  * Added the H5AC_DUMP_IMAGE_STATS_ON_CLOSE #define, which works much
  * the same way as H5AC_DUMP_STATS_ON_CLOSE.  However, the set of stats
  * displayed is much smaller, and directed purely at the cache image feature.
  *
- *					JRM -- 11/1/15
+ *                    JRM -- 11/1/15
  */
 #if H5C_COLLECT_CACHE_STATS
 
@@ -132,7 +132,7 @@ typedef enum {
 #endif
 
 /*
- * Class methods pertaining to caching.	 Each type of cached object will
+ * Class methods pertaining to caching. Each type of cached object will
  * have a constant variable with permanent life-span that describes how
  * to cache the object.
  */

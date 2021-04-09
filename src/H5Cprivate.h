@@ -26,11 +26,11 @@
 #ifndef H5Cprivate_H
 #define H5Cprivate_H
 
-#include "H5Cpublic.h" /* public prototypes		        */
+#include "H5Cpublic.h" /* public prototypes            */
 
 /* Private headers needed by this header */
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Fprivate.h" /* File access				*/
+#include "H5private.h"  /* Generic Functions            */
+#include "H5Fprivate.h" /* File access                  */
 
 /**************************/
 /* Library Private Macros */
@@ -44,7 +44,7 @@
  * or decrease it if appropriate.  Its purposes is to detect corrupt
  * object sizes, so it probably doesn't matter if it is a bit big.
  *
- *					JRM - 5/17/04
+ *                    JRM - 5/17/04
  */
 #define H5C_MAX_ENTRY_SIZE ((size_t)(32 * 1024 * 1024))
 

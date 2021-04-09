@@ -12,12 +12,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Thursday, May 15, 2003
+ * Programmer:    Quincey Koziol
+ *        Thursday, May 15, 2003
  *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5B package.  Source files outside the H5B package should
- *		include H5Bprivate.h instead.
+ * Purpose:    This file contains declarations which are visible only within
+ *        the H5B package.  Source files outside the H5B package should
+ *        include H5Bprivate.h instead.
  */
 #if !(defined H5B_FRIEND || defined H5B_MODULE)
 #error "Do not include this file outside the H5B package!"
@@ -30,7 +30,7 @@
 #include "H5Bprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h" /* Metadata cache			*/
+#include "H5ACprivate.h" /* Metadata cache            */
 #include "H5FLprivate.h" /* Free Lists                           */
 
 /**************************/
@@ -49,20 +49,20 @@
 typedef struct H5B_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions */
                             /* _must_ be first field in structure */
-    H5UC_t * rc_shared;     /*ref-counted shared info	     */
-    unsigned level;         /*node level			     */
-    unsigned nchildren;     /*number of child pointers	     */
-    haddr_t  left;          /*address of left sibling	     */
-    haddr_t  right;         /*address of right sibling	     */
+    H5UC_t * rc_shared;     /*ref-counted shared info         */
+    unsigned level;         /*node level                 */
+    unsigned nchildren;     /*number of child pointers         */
+    haddr_t  left;          /*address of left sibling         */
+    haddr_t  right;         /*address of right sibling         */
     uint8_t *native;        /*array of keys in native format     */
-    haddr_t *child;         /*2k child pointers		     */
+    haddr_t *child;         /*2k child pointers             */
 } H5B_t;
 
 /* Callback info for loading a B-tree node into the cache */
 typedef struct H5B_cache_ud_t {
     H5F_t *                   f;         /* File that B-tree node is within   */
-    const struct H5B_class_t *type;      /* Type of tree			     */
-    H5UC_t *                  rc_shared; /* Ref-counted shared info	     */
+    const struct H5B_class_t *type;      /* Type of tree                 */
+    H5UC_t *                  rc_shared; /* Ref-counted shared info         */
 } H5B_cache_ud_t;
 
 /*****************************/
