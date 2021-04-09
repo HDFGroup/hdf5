@@ -111,20 +111,20 @@ extern "C" {
 /*******************/
 
 /* Define property list class callback function pointer types */
-//! [H5P_cls_create_func_t_snip]
+//! <!-- [H5P_cls_create_func_t_snip] -->
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
-//! [H5P_cls_create_func_t_snip]
+//! <!-- [H5P_cls_create_func_t_snip] -->
 
-//! [H5P_cls_copy_func_t_snip]
+//! <!-- [H5P_cls_copy_func_t_snip] -->
 typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, void *copy_data);
-//! [H5P_cls_copy_func_t_snip]
+//! <!-- [H5P_cls_copy_func_t_snip] -->
 
-//! [H5P_cls_close_func_t_snip]
+//! <!-- [H5P_cls_close_func_t_snip] -->
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
-//! [H5P_cls_close_func_t_snip]
+//! <!-- [H5P_cls_close_func_t_snip] -->
 
 /* Define property list callback function pointer types */
-//! [H5P_prp_cb1_t_snip]
+//! <!-- [H5P_prp_cb1_t_snip] -->
 /**
  * \brief Callback function for H5Pregister2(),H5Pregister1(),H5Pinsert2(),H5Pinsert1()
  *
@@ -137,9 +137,9 @@ typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
  *          property create,copy and close callback functions.
  */
 typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
-//! [H5P_prp_cb1_t_snip]
+//! <!-- [H5P_prp_cb1_t_snip] -->
 
-//! [H5P_prp_cb2_t_snip]
+//! <!-- [H5P_prp_cb2_t_snip] -->
 /**
  * \brief Callback function for H5Pregister2(),H5Pregister1(),H5Pinsert2(),H5Pinsert1()
  *
@@ -152,9 +152,9 @@ typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
  * \details The H5P_prp_cb2_t() describes the parameters used by the
  *          property set ,copy and delete callback functions.
  */
-
 typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, void *value);
-//! [H5P_prp_cb2_t_snip]
+//! <!-- [H5P_prp_cb2_t_snip] -->
+
 typedef H5P_prp_cb1_t H5P_prp_create_func_t;
 typedef H5P_prp_cb2_t H5P_prp_set_func_t;
 typedef H5P_prp_cb2_t H5P_prp_get_func_t;
@@ -162,15 +162,17 @@ typedef herr_t (*H5P_prp_encode_func_t)(const void *value, void **buf, size_t *s
 typedef herr_t (*H5P_prp_decode_func_t)(const void **buf, void *value);
 typedef H5P_prp_cb2_t H5P_prp_delete_func_t;
 typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
-//! [H5P_prp_compare_func_t_snip]
+
+//! <!-- [H5P_prp_compare_func_t_snip] -->
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
-//! [H5P_prp_compare_func_t_snip]
+//! <!-- [H5P_prp_compare_func_t_snip] -->
+
 typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 
 /* Define property list iteration function type */
-//! [H5P_iterate_t_snip]
+//! <!-- [H5P_iterate_t_snip] -->
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
-//! [H5P_iterate_t_snip]
+//! <!-- [H5P_iterate_t_snip] -->
 
 /* Actual IO mode property */
 typedef enum H5D_mpio_actual_chunk_opt_mode_t {
@@ -3394,8 +3396,50 @@ H5_DLL hid_t H5Pget_driver(hid_t plist_id);
  *
  */
 H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
-H5_DLL herr_t      H5Pget_elink_file_cache_size(hid_t plist_id, unsigned *efc_size);
-H5_DLL herr_t      H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves the size of the external link open file cache
+ *
+ * \fapl_id{plist_id}
+ * \param[out] efc_size External link open file cache size in number of files
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_elink_file_cache_size() retrieves the number of files that
+ *          can be held open in an external link open file cache.
+ *
+ * \since 1.8.7
+ *
+ */
+H5_DLL herr_t H5Pget_elink_file_cache_size(hid_t plist_id, unsigned *efc_size);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves the file access property list setting that determines
+ *        whether an HDF5 object will be evicted from the library's metadata
+ *        cache when it is closed
+ *
+ * \fapl_id
+ * \param[out] evict_on_close Pointer to a variable that will indicate if
+ *                            the object will be evicted on close
+ *
+ * \return \herr_t
+ *
+ * \details The library's metadata cache is fairly conservative about holding on
+ *          to HDF5 object metadata (object headers, chunk index structures,
+ *          etc.), which can cause the cache size to grow, resulting in memory
+ *          pressure on an application or system. When enabled, the "evict on
+ *          close" property will cause all metadata for an object to be
+ *          immediately evicted from the cache as long as it is not referenced
+ *          by any other open object.
+ *
+ *          See H5Pset_evict_on_close() for additional notes on behavior.
+ *
+ * \since 1.10.1
+ *
+ */
+H5_DLL herr_t H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close);
 /**
  * \ingroup FAPL
  *
@@ -3440,8 +3484,72 @@ H5_DLL herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset);
  *
  */
 H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves a copy of the file image designated as the initial content
+ *        and structure of a file
+ *
+ * \fapl_id
+ * \param[in,out] buf_ptr_ptr On input, \c NULL or a pointer to a
+ *                pointer to a buffer that contains the
+ *                file image.\n On successful return, if \p buf_ptr_ptr is not
+ *                \c NULL, \Code{*buf_ptr_ptr} will contain a pointer to a copy
+ *                of the initial image provided in the last call to
+ *                H5Pset_file_image() for the supplied \p fapl_id. If no initial
+ *                image has been set, \Code{*buf_ptr_ptr} will be \c NULL.
+ * \param[in,out] buf_len_ptr On input, \c NULL or a pointer to a buffer
+ *                specifying the required size of the buffer to hold the file
+ *                image.\n On successful return, if \p buf_len_ptr was not
+ *                passed in as \c NULL, \p buf_len_ptr will return the required
+ *                size in bytes of the buffer to hold the initial file image in
+ *                the supplied file access property list, \p fapl_id. If no
+ *                initial image is set, the value of \Code{*buf_len_ptr} will be
+ *                set to 0 (zero)
+ * \return \herr_t
+ *
+ * \details H5Pget_file_image() allows an application to retrieve a copy of the
+ *          file image designated for a VFD to use as the initial contents of a file.
+ *
+ *          If file image callbacks are defined, H5Pget_file_image() will use
+ *          them when allocating and loading the buffer to return to the
+ *          application (see H5Pset_file_image_callbacks()). If file image
+ *          callbacks are not defined, the function will use \c malloc and \c
+ *          memcpy. When \c malloc and \c memcpy are used, it is the caller’s
+ *          responsibility to discard the returned buffer with a call to \c
+ *          free.
+ *
+ *          It is the responsibility of the calling application to free the
+ *          buffer whose address is returned in \p buf_ptr_ptr. This can be
+ *          accomplished with \c free if file image callbacks have not been set
+ *          (see H5Pset_file_image_callbacks()) or with the appropriate method
+ *          if file image callbacks have been set.
+ *
+ * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
+ *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
+ *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t.
+ *
+ * \since 1.8.9
+ *
+ */
 H5_DLL herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr);
 H5_DLL herr_t H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves the file locking property values
+ *
+ * \fapl_id
+ * \param[out] use_file_locking File locking flag
+ * \param[out] ignore_when_disabled Ignore when disabled flag
+ * \return \herr_t
+ *
+ * \details H5Pget_file_locking() retrieves the file locking property values for
+ *          the file access property list specified by \p fapl_id.
+ *
+ * \since 1.10.7
+ *
+ */
 H5_DLL herr_t H5Pget_file_locking(hid_t fapl_id, hbool_t *use_file_locking, hbool_t *ignore_when_disabled);
 /**
  * \ingroup FAPL
