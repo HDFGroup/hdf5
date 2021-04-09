@@ -174,50 +174,81 @@ typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 //! <!-- [H5P_iterate_t_snip] -->
 
-/* Actual IO mode property */
+//! <!--[H5D_mpio_actual_chunk_opt_mode_t_snip] -->
+/**
+ * Actual IO mode property
+ *
+ * \details The default value, #H5D_MPIO_NO_CHUNK_OPTIMIZATION, is used for all
+ *          I/O operations that do not use chunk optimizations, including
+ *          non-collective I/O and contiguous collective I/O.
+ */
 typedef enum H5D_mpio_actual_chunk_opt_mode_t {
-    /* The default value, H5D_MPIO_NO_CHUNK_OPTIMIZATION, is used for all I/O
-     * operations that do not use chunk optimizations, including non-collective
-     * I/O and contiguous collective I/O.
-     */
     H5D_MPIO_NO_CHUNK_OPTIMIZATION = 0,
+    /**< No chunk optimization was performed. Either no collective I/O was
+        attempted or the dataset wasn't chunked. */
     H5D_MPIO_LINK_CHUNK,
+    /**< Collective I/O is performed on all chunks simultaneously. */
     H5D_MPIO_MULTI_CHUNK
+    /**< Each chunk was individually assigned collective or independent I/O based
+         on what fraction of processes access the chunk. If the fraction is greater
+         than the multi chunk ratio threshold, collective I/O is performed on that
+         chunk. The multi chunk ratio threshold can be set using
+         H5Pset_dxpl_mpio_chunk_opt_ratio(). The default value is 60%. */
 } H5D_mpio_actual_chunk_opt_mode_t;
+//! <!--[H5D_mpio_actual_chunk_opt_mode_t_snip] -->
 
+//! <!-- [H5D_mpio_actual_io_mode_t_snip] -->
+/**
+  * The following values are conveniently defined as a bit field so that
+  * we can switch from the default to independent or collective and then to
+  * mixed without having to check the original value.
+ */
 typedef enum H5D_mpio_actual_io_mode_t {
-    /* The following four values are conveniently defined as a bit field so that
-     * we can switch from the default to independent or collective and then to
-     * mixed without having to check the original value.
-     *
-     * NO_COLLECTIVE means that either collective I/O wasn't requested or that
-     * no I/O took place.
-     *
-     * CHUNK_INDEPENDENT means that collective I/O was requested, but the
-     * chunk optimization scheme chose independent I/O for each chunk.
-     */
     H5D_MPIO_NO_COLLECTIVE     = 0x0,
+    /**< No collective I/O was performed. Collective I/O was not requested or
+         collective I/O isn't possible on this dataset */
     H5D_MPIO_CHUNK_INDEPENDENT = 0x1,
+    /**< HDF5 performed one the chunk collective optimization schemes and each
+         chunk was accessed independently */
     H5D_MPIO_CHUNK_COLLECTIVE  = 0x2,
+    /**< HDF5 performed one the chunk collective optimization schemes and each
+         chunk was accessed collectively */
     H5D_MPIO_CHUNK_MIXED       = 0x1 | 0x2,
-
-    /* The contiguous case is separate from the bit field. */
+    /**< HDF5 performed one the chunk collective optimization schemes and some
+         chunks were accessed independently, some collectively. */
+    /** \internal The contiguous case is separate from the bit field. */
     H5D_MPIO_CONTIGUOUS_COLLECTIVE = 0x4
+    /**< Collective I/O was performed on a contiguous dataset */
 } H5D_mpio_actual_io_mode_t;
+//! <!-- [H5D_mpio_actual_io_mode_t_snip] -->
 
-/* Broken collective IO property */
+//! <!-- [H5D_mpio_no_collective_cause_t_snip] -->
+/**
+ * Broken collective IO property
+ */
 typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_COLLECTIVE                               = 0x00,
+    /**< Collective I/O was performed successfully */
     H5D_MPIO_SET_INDEPENDENT                          = 0x01,
+    /**< Collective I/O was not performed because independent I/O was requested */
     H5D_MPIO_DATATYPE_CONVERSION                      = 0x02,
+    /**< Collective I/O was not performed because datatype conversions were required */
     H5D_MPIO_DATA_TRANSFORMS                          = 0x04,
+    /**< Collective I/O was not performed because data transforms needed to be applied */
     H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED           = 0x08,
+    /**< \todo FIXME! */
     H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES          = 0x10,
+    /**< Collective I/O was not performed because one of the dataspaces was neither simple nor scalar */
     H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET        = 0x20,
+    /**< Collective I/O was not performed because the dataset was neither contiguous nor chunked */
     H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED        = 0x40,
+    /**< \todo FIXME! */
     H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE = 0x80,
+    /**< \todo FIXME! */
     H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE                  = 0x100
+    /**< Sentinel */
 } H5D_mpio_no_collective_cause_t;
+//! <!-- [H5D_mpio_no_collective_cause_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -5337,7 +5368,94 @@ H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective)
 H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
 H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 #endif /* H5_HAVE_PARALLEL */
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the metadata cache image option for a file access property list
+ *
+ * \fapl_id{plist_id}
+ * \param[out] config_ptr Pointer to metadata cache image configuration values
+ * \return \herr_t
+ *
+ * \details H5Pset_mdc_image_config() sets the metadata cache image option with
+ *          configuration values specified by \p config_ptr for the file access
+ *          property list specified in \p plist_id.
+ *
+ *          #H5AC_cache_image_config_t is defined as follows:
+ *          \snippet H5ACpublic.h H5AC_cache_image_config_t_snip
+ *          \click4more
+ *
+ * \par Limitations: While it is an obvious error to request a cache image when
+ *      opening the file read only, it is not in general possible to test for
+ *      this error in the H5Pset_mdc_image_config() call. Rather than fail the
+ *      subsequent file open, the library silently ignores the file image
+ *      request in this case.\n It is also an error to request a cache image on
+ *      a file that does not support superblock extension messages (i.e. a
+ *      superblock version less than 2). As above, it is not always possible to
+ *      detect this error in the H5Pset_mdc_image_config() call, and thus the
+ *      request for a cache image will fail silently in this case as well.\n
+ *      Creation of cache images is currently disabled in parallel -- as above,
+ *      any request for a cache image in this context will fail silently.\n
+ *      Files with cache images may be read in parallel applications, but note
+ *      that the load of the cache image is a collective operation triggered by
+ *      the first operation that accesses metadata after file open (or, if
+ *      persistent free space managers are enabled, on the first allocation or
+ *      deallocation of file space, or read of file space manager status,
+ *      whichever comes first). Thus the parallel process may deadlock if any
+ *      process does not participate in this access.\n
+ *      In long sequences of file  closes and opens, infrequently accessed
+ *      metadata can accumulate in the cache image to the point where the cost
+ *      of storing and restoring this metadata exceeds the benefit of retaining
+ *      frequently used metadata in the cache image. When implemented, the
+ *      #H5AC_cache_image_config_t::entry_ageout should address this problem. In
+ *      the interim, not requesting a cache image every n file close/open cycles
+ *      may be an acceptable work around. The choice of \c n will be driven by
+ *      application behavior, but \Code{n = 10} seems a good starting point.
+ *
+ * \since 1.10.1
+ */
 H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the maximum size for the page buffer and the minimum percentage
+ *        for metadata and raw data pages
+ *
+ * \fapl_id{plist_id}
+ * \param[in] buf_size Maximum size, in bytes, of the page buffer
+ * \param[in] min_meta_per Minimum metadata percentage to keep in the page buffer
+ *            before allowing pages containing metadata to be evicted (Default is 0)
+ * \param[in] min_raw_per Minimum raw data percentage to keep in the page buffer
+ *            before allowing pages containing raw data to be evicted (Default is 0)
+ * \return \herr_t
+ *
+ * \details H5Pset_page_buffer_size() sets buf_size, the maximum size in bytes
+ *          of the page buffer. The default value is zero, meaning that page
+ *          buffering is disabled. When a non-zero page buffer size is set, the
+ *          library will enable page buffering if that size is larger or equal
+ *          than a single page size if a paged file space strategy is enabled
+ *          using the functions H5Pset_file_space_strategy() and
+ *          H5Pset_file_space_page_size().
+ *
+ *          The page buffer layer captures all I/O requests before they are
+ *          issued to the VFD and "caches" them in fixed sized pages. Once the
+ *          total number of pages exceeds the page buffer size, the library
+ *          evicts pages from the page buffer by writing them to the VFD. At
+ *          file close, the page buffer is flushed writing all the pages to the
+ *          file.
+ *
+ *          If a non-zero page buffer size is set, and the file space strategy
+ *          is not set to paged or the page size for the file space strategy is
+ *          larger than the page buffer size, the subsequent call to H5Fcreate()
+ *          or H5Fopen() using the \p plist_id will fail.
+ *
+ *          The function also allows setting the minimum percentage of pages for
+ *          metadata and raw data to prevent a certain type of data to evict hot
+ *          data of the other type.
+ *
+ * \since 1.10.1
+ *
+ */
 H5_DLL herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_per,
                                       unsigned min_raw_per);
 
@@ -6546,6 +6664,140 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *
  */
 H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block);
+
+/**
+ * \ingroup DCPL
+ *
+ * \brief Sets the mapping between virtual and source datasets
+ *
+ * \dcpl_id
+ * \param[in] vspace_id The dataspace identifier with the selection within the
+ *            virtual dataset applied, possibly an unlimited selection
+ * \param[in] src_file_name The name of the HDF5 file where the source dataset is
+ *            located or a \Code{"."} (period) for a source dataset in the same
+ *            file. The file might not exist yet. The name can be specified using
+ *            a C-style \c printf statement as described below.
+ * \param[in] src_dset_name The path to the HDF5 dataset in the file specified by
+ *            \p src_file_name. The dataset might not exist yet. The dataset name
+ *            can be specified using a C-style \c printf statement as described below.
+ * \param[in] src_space_id The source dataset’s dataspace identifier with a
+ *            selection applied, possibly an unlimited selection
+ * \return \herr_t
+ *
+ * \details H5Pset_virtual() maps elements of the virtual dataset (VDS)
+ *          described by the virtual dataspace identifier \p vspace_id to the
+ *          elements of the source dataset described by the source dataset
+ *          dataspace identifier \p src_space_id. The source dataset is
+ *          identified by the name of the file where it is located,
+ *          \p src_file_name, and the name of the dataset, \p src_dset_name.
+ *
+ * \par C-style \c printf Formatting Statements:
+ *      C-style \c printf formatting allows a pattern to be specified in the name
+ *      of a source file or dataset. Strings for the file and dataset names are
+ *      treated as literals except for the following substitutions:
+ *      <table>
+ *      <tr>
+ *      <td>\Code{"%%"}</td>
+ *      <td>Replaced with a single \Code{"%"} (percent) character.</td>
+ *      </tr>
+ *      <tr>
+ *      <td><code>"%<d>b"</code></td>
+ *      <td>Where <code>"<d>"</code> is the virtual dataset dimension axis (0-based)
+ *          and \Code{"b"} indicates that the block count of the selection in that
+ *          dimension should be used. The full expression (for example, \Code{"%0b"})
+ *          is replaced with a single numeric value when the mapping is evaluated at
+ *          VDS access time. Example code for many source and virtual dataset mappings
+ *          is available in the "Examples of Source to Virtual Dataset Mapping"
+ *          chapter in the
+ *          <a href="https://portal.hdfgroup.org/display/HDF5/RFC+HDF5+Virtual+Dataset">RFC: HDF5 Virtual Dataset</a>.
+ *      </td>
+ *      </tr>
+ *      </table>
+ *      If the printf form is used for the source file or dataset names, the
+ *      selection in the source dataset’s dataspace must be fixed-size.
+ *
+ * \par Source File Resolutions:
+ *      When a source dataset residing in a different file is accessed, the
+ *      library will search for the source file \p src_file_name as described
+ *      below:
+ *      \li If \p src_file_name is a \Code{"."} (period) then it refers to the
+ *          file containing the virtual dataset.
+ *      \li If \p src_file_name is a relative pathname, the following steps are
+ *          performed:
+ *          - The library will get the prefix(es) set in the environment
+ *            variable \c HDF5_VDS_PREFIX and will try to prepend each prefix
+ *            to \p src_file_name to form a new \p src_file_name. If the new
+ *            \p src_file_name does not exist or if \c HDF5_VDS_PREFIX is not
+ *            set, the library will get the prefix set via H5Pset_virtual_prefix()
+ *            and prepend it to \p src_file_name to form a new \p src_file_name.
+ *            If the new \p src_file_name does not exist or no prefix is being
+ *            set by H5Pset_virtual_prefix() then the path of the file containing
+ *            the virtual dataset is obtained. This path can be the absolute path
+ *            or the current working directory plus the relative path of that
+ *            file when it is created/opened. The library will prepend this path
+ *            to \p src_file_name to form a new \p src_file_name.
+ *          - If the new \p src_file_name does not exist, then the library will
+ *            look for \p src_file_name and will return failure/success accordingly.
+ *      \li If \p src_file_name is an absolute pathname, the library will first
+ *          try to find \p src_file_name. If \p src_file_name does not exist,
+ *          \p src_file_name is stripped of directory paths to form a new
+ *          \p src_file_name. The search for the new \p src_file_name then follows
+ *          the same steps as described above for a relative pathname. See
+ *          examples below illustrating how \p src_file_name is stripped to form
+ *          a new \p src_file_name.
+ * \par
+ *      Note that \p src_file_name is considered to be an absolute pathname when
+ *      the following condition is true:
+ *      \li For Unix, the first character of \p src_file_name is a slash
+ *          (\Code{/}).\n For example, consider a \p src_file_name of
+ *          \Code{/tmp/A.h5}. If that source file does not exist, the new
+ *          \p src_file_name after stripping will be \Code{A.h5}.
+ *      \li For Windows, there are 6 cases:
+ *          1. \p src_file_name is an absolute drive with absolute pathname.\n
+ *             For example, consider a \p src_file_name of \Code{/tmp/A.h5}.
+ *             If that source file does not exist, the new \p src_file_name
+ *             after stripping will be \Code{A.h5}.
+ *          2. \p src_file_name is an absolute pathname without specifying
+ *             drive name.\n For example, consider a \p src_file_name of
+ *             \Code{/tmp/A.h5}. If that source file does not exist, the new
+ *             \p src_file_name after stripping will be \Code{A.h5}.
+ *          3. \p src_file_name is an absolute drive with relative pathname.\n
+ *             For example, consider a \p src_file_name of \Code{/tmp/A.h5}.
+ *             If that source file does not exist, the new \p src_file_name
+ *             after stripping will be \Code{tmp/A.h5}.
+ *          4. \p src_file_name is in UNC (Uniform Naming Convention) format
+ *             with server name, share name, and pathname.\n
+ *             For example, consider a \p src_file_name of \Code{/tmp/A.h5}.
+ *             If that source file does not exist, the new \p src_file_name
+ *             after stripping will be \Code{A.h5}.
+ *          5. \p src_file_name is in Long UNC (Uniform Naming Convention)
+ *             format with server name, share name, and pathname.\n
+ *             For example, consider a \p src_file_name of \Code{/tmp/A.h5}.
+ *             If that source file does not exist, the new \p src_file_name
+ *             after stripping will be \Code{A.h5}.
+ *          6. \p src_file_name is in Long UNC (Uniform Naming Convention)
+ *             format with an absolute drive and an absolute pathname.\n
+ *             For example, consider a \p src_file_name of \Code{/tmp/A.h5}.
+ *             If that source file does not exist, the new \p src_file_name
+ *             after stripping will be \Code{A.h5}
+ *
+ * \see <a href="https://portal.hdfgroup.org/display/HDF5/Virtual+Dataset++-+VDS">
+ *        Virtual Dataset Overview</a>
+ *
+ * \see Supporting Functions: H5Pset_layout(), H5Pget_layout(),
+ *      H5Sis_regular_hyperslab(), H5Sget_regular_hyperslab(), H5Sselect_hyperslab()
+ *
+ * \see VDS Functions: H5Pget_virtual_count(), H5Pget_virtual_dsetname(),
+ *      H5Pget_virtual_filename(), H5Pget_virtual_prefix(),
+ *      H5Pget_virtual_printf_gap(), H5Pget_virtual_srcspace(),
+ *      H5Pget_virtual_view(), H5Pget_virtual_vspace(),
+ *      H5Pset_virtual(), H5Pset_virtual_prefix(),
+ *      H5Pset_virtual_printf_gap(), H5Pset_virtual_view()
+ *
+ * \version 1.10.2 A change was made to the method of searching for VDS source files.
+ * \since 1.10.0
+ *
+ */
 H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
                              const char *src_dset_name, hid_t src_space_id);
 
@@ -7118,6 +7370,26 @@ H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t dapl_id, hsize_t gap_size);
 H5_DLL herr_t H5Pset_virtual_view(hid_t dapl_id, H5D_vds_view_t view);
 
 /* Dataset xfer property list (DXPL) routines */
+/**
+ *
+ * \ingroup  DXPL
+ *
+ * \brief Gets B-tree split ratios for a dataset transfer property list
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] left The B-tree split ratio for left-most nodes
+ * \param[out] middle The B-tree split ratio for right-most nodes and lone nodes
+ * \param[out] right The B-tree split ratio for all other nodes
+ * \return \herr_t
+ *
+ * \details H5Pget_btree_ratios() returns the B-tree split ratios for a dataset
+ *          transfer property list.
+ *
+ *          The B-tree split ratios are returned through the non-NULL arguments
+ *          \p left, \p middle, and \p right, as set by the H5Pset_btree_ratios()
+ *          function.
+ *
+ */
 H5_DLL herr_t H5Pget_btree_ratios(hid_t plist_id, double *left /*out*/, double *middle /*out*/,
                                   double *right /*out*/);
 /**
@@ -7371,9 +7643,135 @@ H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void
 H5_DLL herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info,
                                       H5MM_free_t free_func, void *free_info);
 #ifdef H5_HAVE_PARALLEL
+/**
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the type of chunk optimization that HDF5 actually performed
+ *        on the last parallel I/O call (not necessarily the type requested)
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] actual_chunk_opt_mode  The type of chunk optimization performed by HDF5
+ * \return \herr_t
+ *
+ * \par Motivation:
+ *      A user can request collective I/O via a data transfer property list
+ *      (DXPL) that has been suitably modified with H5Pset_dxpl_mpio().
+ *      However, HDF5 will sometimes ignore this request and perform independent
+ *      I/O instead. This property allows the user to see what kind of I/O HDF5
+ *      actually performed. Used in conjunction with H5Pget_mpio_actual_io_mode(),
+ *      this property allows the user to determine exactly what HDF5 did when
+ *      attempting collective I/O.
+ *
+ * \details H5Pget_mpio_actual_chunk_opt_mode() retrieves the type of chunk
+ *          optimization performed when collective I/O was requested. This
+ *          property is set before I/O takes place, and will be set even if I/O
+ *          fails.
+ *
+ *          Valid values returned in \p actual_chunk_opt_mode:
+ *          \snippet this H5D_mpio_actual_chunk_opt_mode_t_snip
+ *          \click4more
+ *
+ * \since 1.8.8
+ *
+ */
 H5_DLL herr_t H5Pget_mpio_actual_chunk_opt_mode(hid_t                             plist_id,
                                                 H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode);
+/**
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the type of I/O that HDF5 actually performed on the last
+ *        parallel I/O call (not necessarily the type requested)
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] actual_io_mode The type of I/O performed by this process
+ * \return \herr_t
+ *
+ * \par Motivation:
+ *      A user can request collective I/O via a data transfer property list
+ *      (DXPL) that has been suitably modified with H5Pset_dxpl_mpio().
+ *      However, HDF5 will sometimes ignore this request and perform independent
+ *      I/O instead. This property allows the user to see what kind of I/O HDF5
+ *      actually performed. Used in conjunction with H5Pget_mpio_actual_chunk_opt_mode(),
+ *      this property allows the user to determine exactly HDF5 did when
+ *      attempting collective I/O.
+ *
+ * \details H5Pget_mpio_actual_io_mode() retrieves the type of I/O performed on
+ *          the selection of the current process. This property is set after all
+ *          I/O is completed; if I/O fails, it will not be set.
+ *
+ *          Valid values returned in \p actual_io_mode:
+ *          \snippet this H5D_mpio_actual_io_mode_t_snip
+ *          \click4more
+ *
+ * \attention All processes do not need to have the same value. For example, if
+ *            I/O is being performed using the multi chunk optimization scheme,
+ *            one process's selection may include only chunks accessed
+ *            collectively, while another may include chunks accessed
+ *            independently. In this case, the first process will report
+ *            #H5D_MPIO_CHUNK_COLLECTIVE while the second will report
+ *            #H5D_MPIO_CHUNK_INDEPENDENT.
+ *
+ * \see H5Pget_mpio_no_collective_cause(), H5Pget_mpio_actual_chunk_opt_mode()
+ *
+ * \since 1.8.8
+ *
+ */
 H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode);
+/**
+ * \ingroup DXPL
+ *
+ * \brief Retrieves local and global causes that broke collective I/O on the last
+ *        parallel I/O call
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] local_no_collective_cause An enumerated set value indicating the
+ *             causes that prevented collective I/O in the local process
+ * \param[out] global_no_collective_cause An enumerated set value indicating
+ *             the causes across all processes that prevented collective I/O
+ * \return \herr_t
+ *
+ * \par Motivation:
+ *      A user can request collective I/O via a data transfer property list (DXPL)
+ *      that has been suitably modified with H5P_SET_DXPL_MPIO. However, there are
+ *      conditions that can cause HDF5 to forgo collective I/O and perform
+ *      independent I/O. Such causes can be different across the processes of a
+ *      parallel application. This function allows the user to determine what
+ *      caused the HDF5 library to skip collective I/O locally, that is in the
+ *      local process, and globally, across all processes.
+ *
+ * \details H5Pget_mpio_no_collective_cause() serves two purposes. It can be
+ *          used to determine whether collective I/O was used for the last
+ *          preceding parallel I/O call. If collective I/O was not used, the
+ *          function retrieves the local and global causes that broke collective
+ *          I/O on that parallel I/O call. The properties retrieved by this
+ *          function are set before I/O takes place and are retained even when
+ *          I/O fails.
+ *
+ *          Valid values returned in \p local_no_collective_cause and \p
+ *          global_no_collective_cause are as follows or, if there are multiple
+ *          causes, a bitwise OR of the relevant causes; the numbers in the
+ *          center column are the bitmask values:
+ *          \snippet this H5D_mpio_no_collective_cause_t_snip
+ *          \click4more
+ *
+ * \attention Each process determines whether it can perform collective I/O and
+ *            broadcasts the result. Those results are combined to make a
+ *            collective decision; collective I/O will be performed only if all
+ *            processes can perform collective I/O.\n
+ *            If collective I/O was not used, the causes that prevented it are
+ *            reported by individual process by means of an enumerated set. The
+ *            causes may differ among processes, so H5Pget_mpio_no_collective_cause()
+ *            returns two property values. The first value is the one produced
+ *            by the local process to report local causes. This local information
+ *            is encoded in an enumeration, the \ref H5D_mpio_no_collective_cause_t
+ *            described above, with all individual causes combined into a single
+ *            enumeration value by means of a bitwise OR operation. The second
+ *            value reports global causes; this global value is the result of a
+ *            bitwise-OR operation across the values returned by all the processes.
+ *
+ * \since 1.8.10
+ *
+ */
 H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause,
                                               uint32_t *global_no_collective_cause);
 #endif /* H5_HAVE_PARALLEL */
@@ -7499,7 +7897,67 @@ H5_DLL herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_fla
  */
 H5_DLL herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/,
                                        unsigned *min_dense /*out*/);
+/**
+ * \ingroup GCPL
+ *
+ * \brief Retrieves the anticipated size of the local heap for original-style
+ *        groups
+ *
+ * \gcpl_id{plist_id}
+ * \param[out] size_hint Anticipated size of local heap
+ * \return \herr_t
+ *
+ * \details H5Pget_local_heap_size_hint() queries the group creation property
+ *          list, \p plist_id, for the anticipated size of the local heap, \p
+ *          size_hint, for original-style groups, i.e., for groups of the style
+ *          used prior to HDF5 Release 1.8.0.  See H5Pset_local_heap_size_hint()
+ *          for further discussion.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*out*/);
+/**
+ * \ingroup GCPL
+ *
+ * \brief Sets estimated number of links and length of link names in a group
+ *
+ * \gcpl_id{plist_id}
+ * \param[in] est_num_entries Estimated number of links to be inserted into group
+ * \param[in] est_name_len Estimated average length of link names
+ * \return \herr_t
+ *
+ * \details H5Pset_est_link_info() inserts two settings into the group creation
+ *          property list plist_id: the estimated number of links that are
+ *          expected to be inserted into a group created with the property list
+ *          and the estimated average length of those link names.
+ *
+ *          The estimated number of links is passed in \p est_num_entries. The
+ *          limit for \p est_num_entries is 64 K.
+ *
+ *          The estimated average length of the anticipated link names is passed
+ *          in \p est_name_len. The limit for \p est_name_len is 64 K.
+ *
+ *          The values for these two settings are multiplied to compute the
+ *          initial local heap size (for old-style groups, if the local heap
+ *          size hint is not set) or the initial object header size for
+ *          (new-style compact groups; see <a
+ *          href="https://portal.hdfgroup.org/display/HDF5/Groups">Group
+ *          implementations in HDF5</a>). Accurately setting these parameters
+ *          will help reduce wasted file space.
+ *
+ *          If a group is expected to have many links and to be stored in dense
+ *          format, set \p est_num_entries to 0 (zero) for maximum
+ *          efficiency. This will prevent the group from being created in the
+ *          compact format.
+ *
+ *          See <a href="https://portal.hdfgroup.org/display/HDF5/Groups">Group
+ *          implementations in HDF5</a> in the H5G API introduction for a
+ *          discussion of the available types of HDF5 group structures.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name_len);
 /**
  * \ingroup GCPL
@@ -7593,11 +8051,115 @@ H5_DLL herr_t H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flag
  *
  */
 H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
+/**
+ * \ingroup GCPL
+ *
+ * \brief Specifies the anticipated maximum size of a local heap
+ *
+ * \gcpl_id{plist_id}
+ * \param[in] size_hint Anticipated maximum size in bytes of local heap
+ * \return \herr_t
+ *
+ * \details H5Pset_local_heap_size_hint() is used with original-style HDF5
+ *          groups (see “Motivation” below) to specify the anticipated maximum
+ *          local heap size, size_hint, for groups created with the group
+ *          creation property list \p plist_id. The HDF5 library then uses \p
+ *          size_hint to allocate contiguous local heap space in the file for
+ *          each group created with \p plist_id.
+ *
+ *          For groups with many members or very few members, an appropriate
+ *          initial value of \p size_hint would be the anticipated number of
+ *          group members times the average length of group member names, plus a
+ *          small margin:
+ *          \code
+ *          size_hint = max_number_of_group_members  *
+ *                      (average_length_of_group_member_link_names + 2)
+ *          \endcode
+ *          If it is known that there will be groups with zero members, the use
+ *          of a group creation property list with \p size_hint set to to 1 (one)
+ *          will guarantee the smallest possible local heap for each of those groups.
+ *
+ *          Setting \p size_hint to zero (0) causes the library to make a
+ *          reasonable estimate for the default local heap size.
+ *
+ * \par Motivation:
+ *      In situations where backward-compatibility is required, specifically, when
+ *      libraries prior to HDF5 Release 1.8.0 may be used to read the file, groups
+ *      must be created and maintained in the original style. This is HDF5’s default
+ *      behavior. If backward compatibility with pre-1.8.0 libraries is not a concern,
+ *      greater efficiencies can be obtained with the new-format compact and indexed
+ *      groups. See <a href="https://portal.hdfgroup.org/display/HDF5/Groups">Group
+ *      implementations in HDF5</a> in the \ref H5G API introduction (at the bottom).\n
+ *      H5Pset_local_heap_size_hint() is useful for tuning file size when files
+ *      contain original-style groups with either zero members or very large
+ *      numbers of members.\n
+ *      The original style of HDF5 groups, the only style available prior to HDF5
+ *      Release 1.8.0, was well-suited for moderate-sized groups but was not optimized
+ *      for either very small or very large groups. This original style remains the
+ *      default, but two new group implementations were introduced in HDF5 Release 1.8.0:
+ *      compact groups to accommodate zero to small numbers of members and indexed groups
+ *      for thousands or tens of thousands of members ... or millions, if that's what
+ *      your application requires.\n
+ *      The local heap size hint, \p size_hint, is a performance tuning parameter for
+ *      original-style groups. As indicated above, an HDF5 group may have zero, a handful,
+ *      or tens of thousands of members. Since the original style of HDF5 groups stores the
+ *      metadata for all of these group members in a uniform format in a local heap, the size
+ *      of that metadata (and hence, the size of the local heap) can vary wildly from group
+ *      to group. To intelligently allocate space and to avoid unnecessary fragmentation of
+ *      the local heap, it can be valuable to provide the library with a hint as to the local
+ *      heap’s likely eventual size. This can be particularly valuable when it is known that
+ *      a group will eventually have a great many members. It can also be useful in conserving
+ *      space in a file when it is known that certain groups will never have any members.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint);
 
 /* Map access property list (MAPL) routines */
 #ifdef H5_HAVE_MAP_API
+/**
+ * \ingroup MAPL
+ *
+ * \brief Set map iteration hints
+ *
+ * \mapl_id
+ * \param[in] key_prefetch_size Number of keys to prefetch at a time during
+ *            iteration
+ * \param[in] key_alloc_size The initial size of the buffer allocated to hold
+ *            prefetched keys
+ * \return \herr_t
+ *
+ * \details H5Pset_map_iterate_hints() adjusts the behavior of H5Miterate() when
+ *          prefetching keys for iteration. The \p key_prefetch_size parameter
+ *          specifies the number of keys to prefetch at a time during
+ *          iteration. The \p key_alloc_size parameter specifies the initial
+ *          size of the buffer allocated to hold these prefetched keys. If this
+ *          buffer is too small it will be reallocated to a larger size, though
+ *          this may result in an additional I/O.
+ *
+ * \since 1.12.?
+ *
+ */
 H5_DLL herr_t H5Pset_map_iterate_hints(hid_t mapl_id, size_t key_prefetch_size, size_t key_alloc_size);
+/**
+ * \ingroup MAPL
+ *
+ * \brief Set map iteration hints
+ *
+ * \mapl_id
+ * \param[out] key_prefetch_size Pointer to number of keys to prefetch at a time
+ *             during iteration
+ * \param[out] key_alloc_size Pointer to the initial size of the buffer allocated
+ *             to hold prefetched keys
+ * \return \herr_t
+ *
+ * \details H5Pget_map_iterate() returns the map iterate hints, \p key_prefetch_size
+ *          and \p key_alloc_size, as set by H5Pset_map_iterate_hints().
+ *
+ * \since 1.12.?
+ *
+ */
 H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size /*out*/,
                                        size_t *key_alloc_size /*out*/);
 #endif /*  H5_HAVE_MAP_API */

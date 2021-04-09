@@ -209,7 +209,7 @@ ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_co
 # The Usual Suspects
 ################################################################################
 
-ALIASES += click4more="(Click on a type or field for more information.)"
+ALIASES += click4more="(Click on a enumerator, field, or type for more information.)"
 ALIASES += csets="<table><tr><td>#H5T_CSET_ASCII</td><td>US ASCII</td></tr><tr><td>#H5T_CSET_UTF8</td><td>UTF-8 Unicode encoding</td></tr></table>"
 ALIASES += datatype_class=" \li #H5T_INTEGER \li #H5T_FLOAT \li #H5T_STRING \li #H5T_BITFIELD \li #H5T_OPAQUE \li #H5T_COMPOUND \li #H5T_REFERENCE \li #H5T_ENUM \li #H5T_VLEN \li #H5T_ARRAY"
 ALIASES += file_access="<table><tr><td>#H5F_ACC_RDWR</td><td>File was opened with read/write access.</td></tr><tr><td>#H5F_ACC_RDONLY</td><td>File was opened with read-only access.</td></tr><tr><td>#H5F_ACC_SWMR_WRITE</td><td>File was opened with read/write access for a single-writer/multiple-reader (SWMR) scenario. Note that the writer process must also open the file with the #H5F_ACC_RDWR flag.</td></tr><tr><td>#H5F_ACC_SWMR_READ</td><td>File was opened with read-only access for a single-writer/multiple-reader (SWMR) scenario. Note that the reader process must also open the file with the #H5F_ACC_RDONLY flag.</td></tr></table>"
