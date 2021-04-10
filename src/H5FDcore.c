@@ -1721,16 +1721,24 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__core_delete(const char *filename, hid_t H5_ATTR_UNUSED fapl_id)
+H5FD__core_delete(const char *filename, hid_t fapl_id)
 {
-    herr_t ret_value = SUCCEED; /* Return value             */
+    const H5FD_core_fapl_t *fa = NULL;
+    H5P_genplist_t *        plist;               /* Property list pointer */
+    herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     HDassert(filename);
 
-    if (HDremove(filename) < 0)
-        HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    if (NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
+
+    if (fa->backing_store)
+        if (HDremove(filename) < 0)
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
