@@ -5793,7 +5793,7 @@ H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
  *          virtual dataset that has the creation property list specified
  *          by \p dcpl_id.
  *
- * \virtual
+ * \see_virtual
  *
  * \since 1.10.0
  *
@@ -5836,7 +5836,7 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/);
  *          assigned to \p size for a second H5Pget_virtual_dsetname()
  *          call, which will retrieve the actual dataset name.
  *
- * \virtual
+ * \see_virtual
  *
  * \since 1.10.0
  *
@@ -5880,7 +5880,7 @@ H5_DLL ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name /
  *          \p size for a second H5Pget_virtual_filename() call, which
  *          will retrieve the actual filename.
  *
- * \virtual
+ * \see_virtual
  *
  * \since 1.10.0
  *
@@ -5905,7 +5905,7 @@ H5_DLL ssize_t H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name /
  *          index, \p index, and returns a dataspace identifier for the
  *          selection within the source dataset used in the mapping.
  *
- * \virtual
+ * \see_virtual
  *
  * \since 1.10.0
  *
@@ -5930,7 +5930,7 @@ H5_DLL hid_t H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index);
  *          index, \p index, and returns a dataspace identifier for the
  *          selection within the virtual dataset used in the mapping.
  *
- * \virtual
+ * \see_virtual
  *
  * \since 1.10.0
  *
@@ -6785,15 +6785,7 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  * \see <a href="https://portal.hdfgroup.org/display/HDF5/Virtual+Dataset++-+VDS">
  *        Virtual Dataset Overview</a>
  *
- * \see Supporting Functions: H5Pset_layout(), H5Pget_layout(),
- *      H5Sis_regular_hyperslab(), H5Sget_regular_hyperslab(), H5Sselect_hyperslab()
- *
- * \see VDS Functions: H5Pget_virtual_count(), H5Pget_virtual_dsetname(),
- *      H5Pget_virtual_filename(), H5Pget_virtual_prefix(),
- *      H5Pget_virtual_printf_gap(), H5Pget_virtual_srcspace(),
- *      H5Pget_virtual_view(), H5Pget_virtual_vspace(),
- *      H5Pset_virtual(), H5Pset_virtual_prefix(),
- *      H5Pset_virtual_printf_gap(), H5Pset_virtual_view()
+ * \see_virtual
  *
  * \version 1.10.2 A change was made to the method of searching for VDS source files.
  * \since 1.10.0
@@ -6938,7 +6930,7 @@ H5_DLL ssize_t H5Pget_efile_prefix(hid_t dapl_id, char *prefix /*out*/, size_t s
  *          NULL will return the size of the prefix without the NULL
  *          terminator.
  *
- * \virtual
+ * \see_virtual
  *
  * \since 1.10.2
  *
@@ -6988,7 +6980,7 @@ H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t dapl_id, hsize_t *gap_size);
  *          list, \p dapl_id, and retrieves the flag, \p view, set by the
  *          H5Pset_virtual_view() call.
  *
- * \virtual
+ * \see_virtual
  *
  * \since 1.10.0
  *
@@ -7283,7 +7275,7 @@ H5_DLL herr_t H5Pset_efile_prefix(hid_t dapl_id, const char *prefix);
  *          buffer should not be freed until the property list has been
  *          closed.
  *
- * \virtual
+ * \see_virtual
  *
  * \since 1.10.2
  *
@@ -7325,7 +7317,7 @@ H5_DLL herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char *prefix);
  *              d-2 and d-3 will be filled according to the virtual
  *              dataset’s fill value setting.
  *
- * \virtual
+ * \see_virtual
  *
  * \since 1.10.0
  *
@@ -7363,7 +7355,7 @@ H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t dapl_id, hsize_t gap_size);
  *          Missing mapped data is filled with the fill value set in the
  *          VDS creation property list.
  *
- * \virtual
+ * \see_virtual
  *
  * \since 1.10.0
  *
