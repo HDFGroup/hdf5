@@ -93,9 +93,9 @@
  *          connectors. Subsequent values should be obtained from the HDF5
  *          development team at mailto:help@hdfgroup.org.
  */
-//! [H5VL_class_value_t_snip]
+//! <!-- [H5VL_class_value_t_snip] -->
 typedef int H5VL_class_value_t;
-//! [H5VL_class_value_t_snip]
+//! <!-- [H5VL_class_value_t_snip] -->
 
 /**
  * \ingroup H5VLDEF

@@ -1,6 +1,20 @@
 /** \page TN Technical Notes
 
+\li \link api-compat-macros API Compatibility Macros \endlink
 \li \ref TNMDC "Metadata Caching in HDF5"
-
+\li \ref MT "Thread Safe library"
+\li \ref VFL "Virtual File Layer"
 
  */
+
+/** \page MT HDF5 Thread Safe library
+
+\htmlinclude ThreadSafeLibrary.html
+
+*/
+
+/** \page VFL HDF5 Virtual File Layer
+
+\htmlinclude VFL.html
+
+*/

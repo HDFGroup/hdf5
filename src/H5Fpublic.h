@@ -126,7 +126,7 @@ typedef enum H5F_close_degree_t {
 /**
  * Current "global" information about file
  */
-//! [H5F_info2_t_snip]
+//! <!-- [H5F_info2_t_snip] -->
 typedef struct H5F_info2_t {
     struct {
         unsigned version;        /**< Superblock version # */
@@ -144,7 +144,7 @@ typedef struct H5F_info2_t {
         H5_ih_info_t msgs_info; /**< Shared object header message index & heap size */
     } sohm;
 } H5F_info2_t;
-//! [H5F_info2_t_snip]
+//! <!-- [H5F_info2_t_snip] -->
 
 /**
  * Types of allocation requests. The values larger than #H5FD_MEM_DEFAULT
@@ -176,12 +176,12 @@ typedef enum H5F_mem_t {
 /**
  * Free space section information
  */
-//! [H5F_sect_info_t_snip]
+//! <!-- [H5F_sect_info_t_snip] -->
 typedef struct H5F_sect_info_t {
     haddr_t addr; /**< Address of free space section */
     hsize_t size; /**< Size of free space section */
 } H5F_sect_info_t;
-//! [H5F_sect_info_t_snip]
+//! <!-- [H5F_sect_info_t_snip] -->
 
 /**
  * Library's format versions
@@ -201,7 +201,7 @@ typedef enum H5F_libver_t {
 /**
  * File space handling strategy
  */
-//! [H5F_fspace_strategy_t_snip]
+//! <!-- [H5F_fspace_strategy_t_snip] -->
 typedef enum H5F_fspace_strategy_t {
     H5F_FSPACE_STRATEGY_FSM_AGGR = 0, /**< Mechanisms: free-space managers, aggregators, and virtual file
                                          drivers This is the library default when not set */
@@ -211,7 +211,7 @@ typedef enum H5F_fspace_strategy_t {
     H5F_FSPACE_STRATEGY_NONE = 3, /**< Mechanisms: virtual file drivers */
     H5F_FSPACE_STRATEGY_NTYPES    /**< Sentinel */
 } H5F_fspace_strategy_t;
-//! [H5F_fspace_strategy_t_snip]
+//! <!-- [H5F_fspace_strategy_t_snip] -->
 
 /**
  * File space handling strategy for release 1.10.0
@@ -228,7 +228,7 @@ typedef enum H5F_file_space_type_t {
     H5F_FILE_SPACE_NTYPES           /**< Sentinel */
 } H5F_file_space_type_t;
 
-//! [H5F_retry_info_t_snip]
+//! <!-- [H5F_retry_info_t_snip] -->
 #define H5F_NUM_METADATA_READ_RETRY_TYPES 21
 
 /**
@@ -239,7 +239,7 @@ typedef struct H5F_retry_info_t {
     unsigned  nbins;
     uint32_t *retries[H5F_NUM_METADATA_READ_RETRY_TYPES];
 } H5F_retry_info_t;
-//! [H5F_retry_info_t_snip]
+//! <!-- [H5F_retry_info_t_snip] -->
 
 /**
  * Callback for H5Pset_object_flush_cb() in a file access property list
@@ -2231,7 +2231,7 @@ H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 /**
  * Current "global" information about file
  */
-//! [H5F_info1_t_snip]
+//! <!-- [H5F_info1_t_snip] -->
 typedef struct H5F_info1_t {
     hsize_t super_ext_size; /**< Superblock extension size */
     struct {
@@ -2239,7 +2239,7 @@ typedef struct H5F_info1_t {
         H5_ih_info_t msgs_info; /**< Shared object header message index & heap size */
     } sohm;
 } H5F_info1_t;
-//! [H5F_info1_t_snip]
+//! <!-- [H5F_info1_t_snip] -->
 
 /* Function prototypes */
 /**

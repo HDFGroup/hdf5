@@ -44,11 +44,7 @@
  * \ingroup H5T
  * \defgroup ENUM Enumeration Datatypes
  * \ingroup H5T
- * \defgroup GTO General Datatype Operations
- * \ingroup H5T
  * \defgroup OPAQUE Opaque Datatypes
- * \ingroup H5T
- * \defgroup STRING String Datatypes
  * \ingroup H5T
  * \defgroup VLEN Variable-length Sequence Datatypes
  * \ingroup H5T

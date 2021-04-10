@@ -32,7 +32,7 @@
  *           test/tmisc.c to verify that the H5I{inc|dec|get}_ref() routines
  *           work correctly with it. \endinternal
  */
-//! [H5I_type_t_snip]
+//! <!-- [H5I_type_t_snip] -->
 typedef enum H5I_type_t {
     H5I_UNINIT = (-2),  /**< uninitialized type                        */
     H5I_BADID  = (-1),  /**< invalid Type                              */
@@ -54,7 +54,7 @@ typedef enum H5I_type_t {
     H5I_EVENTSET,       /**< type ID for event sets                    */
     H5I_NTYPES          /**< number of library types, MUST BE LAST!    */
 } H5I_type_t;
-//! [H5I_type_t_snip]
+//! <!-- [H5I_type_t_snip] -->
 
 /**
  * Type of IDs to return to users
@@ -88,30 +88,30 @@ typedef herr_t (*H5I_free_t)(void *, void **);
 /**
  * The type of a function to compare objects & keys
  */
-//! [H5I_search_func_t_snip]
+//! <!-- [H5I_search_func_t_snip] -->
 typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);
-//! [H5I_search_func_t_snip]
+//! <!-- [H5I_search_func_t_snip] -->
 
 /**
  * The type of H5Iiterate() callback functions
  */
-//! [H5I_iterate_func_t_snip]
+//! <!-- [H5I_iterate_func_t_snip] -->
 typedef herr_t (*H5I_iterate_func_t)(hid_t id, void *udata);
-//! [H5I_iterate_func_t_snip]
+//! <!-- [H5I_iterate_func_t_snip] -->
 
 /**
  * The type of the realize_cb callback for H5Iregister_future
  */
-//! [H5I_future_realize_func_t_snip]
+//! <!-- [H5I_future_realize_func_t_snip] -->
 typedef herr_t (*H5I_future_realize_func_t)(void *future_object, hid_t *actual_object_id);
-//! [H5I_future_realize_func_t_snip]
+//! <!-- [H5I_future_realize_func_t_snip] -->
 
 /**
  * The type of the discard_cb callback for H5Iregister_future
  */
-//! [H5I_future_discard_func_t_snip]
+//! <!-- [H5I_future_discard_func_t_snip] -->
 typedef herr_t (*H5I_future_discard_func_t)(void *future_object);
-//! [H5I_future_discard_func_t_snip]
+//! <!-- [H5I_future_discard_func_t_snip] -->
 
 #ifdef __cplusplus
 extern "C" {

@@ -39,30 +39,41 @@
 /* Public Typedefs */
 /*******************/
 
-/* Values for the H5D_LAYOUT property */
+//! <!-- [H5D_layout_t_snip] -->
+/**
+ * Values for the H5D_LAYOUT property
+ */
 typedef enum H5D_layout_t {
     H5D_LAYOUT_ERROR = -1,
 
-    H5D_COMPACT    = 0, /*raw data is very small		     */
-    H5D_CONTIGUOUS = 1, /*the default				     */
-    H5D_CHUNKED    = 2, /*slow and fancy			     */
-    H5D_VIRTUAL    = 3, /*actual data is stored in other datasets     */
-    H5D_NLAYOUTS   = 4  /*this one must be last!		     */
+    H5D_COMPACT    = 0, /**< raw data is very small		     */
+    H5D_CONTIGUOUS = 1, /**< the default				     */
+    H5D_CHUNKED    = 2, /**< slow and fancy			     */
+    H5D_VIRTUAL    = 3, /**< actual data is stored in other datasets     */
+    H5D_NLAYOUTS   = 4  /**< this one must be last!		     */
 } H5D_layout_t;
+//! <!-- [H5D_layout_t_snip] -->
 
-/* Types of chunk index data structures */
+//! <!-- [H5D_chunk_index_t_snip] -->
+/**
+ * Types of chunk index data structures
+ */
 typedef enum H5D_chunk_index_t {
-    H5D_CHUNK_IDX_BTREE = 0, /* v1 B-tree index (default)                */
+    H5D_CHUNK_IDX_BTREE = 0, /**< v1 B-tree index (default)                */
     H5D_CHUNK_IDX_SINGLE =
-        1, /* Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered & non-filtered) */
-    H5D_CHUNK_IDX_NONE   = 2, /* Implicit: No Index (H5D_ALLOC_TIME_EARLY, non-filtered, fixed dims) */
-    H5D_CHUNK_IDX_FARRAY = 3, /* Fixed array (for 0 unlimited dims)       */
-    H5D_CHUNK_IDX_EARRAY = 4, /* Extensible array (for 1 unlimited dim)   */
-    H5D_CHUNK_IDX_BT2    = 5, /* v2 B-tree index (for >1 unlimited dims)  */
-    H5D_CHUNK_IDX_NTYPES      /* This one must be last!                   */
+        1, /**< Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered & non-filtered) */
+    H5D_CHUNK_IDX_NONE   = 2, /**< Implicit: No Index (#H5D_ALLOC_TIME_EARLY, non-filtered, fixed dims) */
+    H5D_CHUNK_IDX_FARRAY = 3, /**< Fixed array (for 0 unlimited dims)       */
+    H5D_CHUNK_IDX_EARRAY = 4, /**< Extensible array (for 1 unlimited dim)   */
+    H5D_CHUNK_IDX_BT2    = 5, /**< v2 B-tree index (for >1 unlimited dims)  */
+    H5D_CHUNK_IDX_NTYPES      /**< This one must be last!                   */
 } H5D_chunk_index_t;
+//! <!-- [H5D_chunk_index_t_snip] -->
 
-/* Values for the space allocation time property */
+//! <!-- [H5D_alloc_time_t_snip] -->
+/**
+ * Values for the space allocation time property
+ */
 typedef enum H5D_alloc_time_t {
     H5D_ALLOC_TIME_ERROR   = -1,
     H5D_ALLOC_TIME_DEFAULT = 0,
@@ -70,57 +81,84 @@ typedef enum H5D_alloc_time_t {
     H5D_ALLOC_TIME_LATE    = 2,
     H5D_ALLOC_TIME_INCR    = 3
 } H5D_alloc_time_t;
+//! <!-- [H5D_alloc_time_t_snip] -->
 
-/* Values for the status of space allocation */
+//! <!-- [H5D_space_status_t_snip] -->
+/**
+ * Values for the status of space allocation
+ */
 typedef enum H5D_space_status_t {
     H5D_SPACE_STATUS_ERROR          = -1,
     H5D_SPACE_STATUS_NOT_ALLOCATED  = 0,
     H5D_SPACE_STATUS_PART_ALLOCATED = 1,
     H5D_SPACE_STATUS_ALLOCATED      = 2
 } H5D_space_status_t;
+//! <!-- [H5D_space_status_t_snip] -->
 
-/* Values for time of writing fill value property */
+//! <!-- [H5D_fill_time_t_snip] -->
+/**
+ * Values for time of writing fill value property
+ */
 typedef enum H5D_fill_time_t {
     H5D_FILL_TIME_ERROR = -1,
     H5D_FILL_TIME_ALLOC = 0,
     H5D_FILL_TIME_NEVER = 1,
     H5D_FILL_TIME_IFSET = 2
 } H5D_fill_time_t;
+//! <!-- [H5D_fill_time_t_snip] -->
 
-/* Values for fill value status */
+//! <!-- [H5D_fill_value_t_snip] -->
+/**
+ * Values for fill value status
+ */
 typedef enum H5D_fill_value_t {
     H5D_FILL_VALUE_ERROR        = -1,
     H5D_FILL_VALUE_UNDEFINED    = 0,
     H5D_FILL_VALUE_DEFAULT      = 1,
     H5D_FILL_VALUE_USER_DEFINED = 2
 } H5D_fill_value_t;
+//! <!-- [H5D_fill_value_t_snip] -->
 
-/* Values for VDS bounds option */
+//! <!-- [H5D_vds_view_t_snip] -->
+/**
+ * Values for VDS bounds option
+ */
 typedef enum H5D_vds_view_t {
     H5D_VDS_ERROR          = -1,
     H5D_VDS_FIRST_MISSING  = 0,
     H5D_VDS_LAST_AVAILABLE = 1
 } H5D_vds_view_t;
+//! <!-- [H5D_vds_view_t_snip] -->
 
-/* Callback for H5Pset_append_flush() in a dataset access property list */
+//! <!-- [H5D_append_cb_t_snip] -->
+/**
+ * Callback for H5Pset_append_flush() in a dataset access property list
+ */
 typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_data);
+//! <!-- [H5D_append_cb_t_snip] -->
 
-/** Define the operator function pointer for H5Diterate() */
-//! [H5D_operator_t_snip]
+//! <!-- [H5D_operator_t_snip] -->
+/**
+ * Define the operator function pointer for H5Diterate()
+ */
 typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
                                  void *operator_data);
-//! [H5D_operator_t_snip]
+//! <!-- [H5D_operator_t_snip] -->
 
-/** Define the operator function pointer for H5Dscatter() */
-//! [H5D_scatter_func_t_snip]
+//! <!-- [H5D_scatter_func_t_snip] -->
+/**
+ * Define the operator function pointer for H5Dscatter()
+ */
 typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_buf_bytes_used /*out*/,
                                      void *op_data);
-//! [H5D_scatter_func_t_snip]
+//! <!-- [H5D_scatter_func_t_snip] -->
 
-/** Define the operator function pointer for H5Dgather() */
-//! [H5D_gather_func_t_snip]
+//! <!-- [H5D_gather_func_t_snip] -->
+/**
+ * Define the operator function pointer for H5Dgather()
+ */
 typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_used, void *op_data);
-//! [H5D_gather_func_t_snip]
+//! <!-- [H5D_gather_func_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -1509,9 +1547,181 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 /* Typedefs */
 
 /* Function prototypes */
-H5_DLL hid_t  H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t dcpl_id);
-H5_DLL hid_t  H5Dopen1(hid_t loc_id, const char *name);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Creates a dataset at the specified location
+ *
+ * \fgdta_loc_id
+ * \param[in] name Name of the dataset to create
+ * \type_id
+ * \space_id
+ * \dcpl_id
+ *
+ * \return \hid_t{dataset}
+ *
+ * \deprecated This function is deprecated in favor of the function H5Dcreate2()
+ *             or the macro H5Dcreate().
+ *
+ * \details H5Dcreate1() creates a data set with a name, \p name, in the
+ *          location specified by the identifier \p loc_id. \p loc_id may be a
+ *          file, group, dataset, named datatype or attribute.  If an attribute,
+ *          dataset, or named datatype is specified for \p loc_id then the
+ *          dataset will be created at the location where the attribute,
+ *          dataset, or named datatype is attached.
+ *
+ *          \p name can be a relative path based at \p loc_id or an absolute
+ *          path from the root of the file. Use of this function requires that
+ *          any intermediate groups specified in the path already exist.
+ *
+ *          The dataset’s datatype and dataspace are specified by \p type_id and
+ *          \p space_id, respectively. These are the datatype and dataspace of
+ *          the dataset as it will exist in the file, which may differ from the
+ *          datatype and dataspace in application memory.
+ *
+ *          Names within a group are unique: H5Dcreate1() will return an error
+ *          if a link with the name specified in name already exists at the
+ *          location specified in \p loc_id.
+ *
+ *          As is the case for any object in a group, the length of a dataset
+ *          name is not limited.
+ *
+ *          \p dcpl_id is an #H5P_DATASET_CREATE property list created with \p
+ *          H5reate1() and initialized with various property list functions
+ *          described in Property List Interface.
+ *
+ *          H5Dcreate() and H5Dcreate_anon() return an error if the dataset’s
+ *          datatype includes a variable-length (VL) datatype and the fill value
+ *          is undefined, i.e., set to \c NULL in the dataset creation property
+ *          list. Such a VL datatype may be directly included, indirectly
+ *          included as part of a compound or array datatype, or indirectly
+ *          included as part of a nested compound or array datatype.
+ *
+ *          H5Dcreate() and H5Dcreate_anon() return a dataset identifier for
+ *          success or a negative value for failure. The dataset identifier
+ *          should eventually be closed by calling H5Dclose() to release
+ *          resources it uses.
+ *
+ *          See H5Dcreate_anon() for discussion of the differences between
+ *          H5Dcreate() and H5Dcreate_anon().
+ *
+ *          The HDF5 library provides flexible means of specifying a fill value,
+ *          of specifying when space will be allocated for a dataset, and of
+ *          specifying when fill values will be written to a dataset.
+ *
+ * \version 1.8.0 Function H5Dcreate() renamed to H5Dcreate1() and deprecated in this release.
+ * \since 1.0.0
+ *
+ * \see H5Dopen2(), H5Dclose(), H5Tset_size()
+ *
+ */
+H5_DLL hid_t H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t dcpl_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Opens an existing dataset
+ *
+ * \fgdta_loc_id
+ * \param[in] name Name of the dataset to access
+ *
+ * \return \hid_t{dataset}
+ *
+ * \deprecated This function is deprecated in favor of the function H5Dopen2()
+ *             or the macro H5Dopen().
+ *
+ * \details H5Dopen1() opens an existing dataset for access at the location
+ *          specified by \p loc_id.  \p loc_id may be a file, group, dataset,
+ *          named datatype or attribute.  If an attribute, dataset, or named
+ *          datatype is specified for loc_id then the dataset will be opened at
+ *          the location where the attribute, dataset, or named datatype is
+ *          attached. name is a dataset name and is used to identify the dataset
+ *          in the file.
+ *
+ *          A dataset opened with this function should be closed with H5Dclose()
+ *          when the dataset is no longer needed so that resource leaks will not
+ *          develop.
+ *
+ * \version 1.8.0 Function H5Dopen() renamed to H5Dopen1() and deprecated in this release.
+ * \since 1.0.0
+ *
+ */
+H5_DLL hid_t H5Dopen1(hid_t loc_id, const char *name);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Extends a dataset
+ *
+ * \dset_id
+ * \param[in] size Array containing the new size of each dimension
+ *
+ * \return \herr_t
+ *
+ * \deprecated This function is deprecated in favor of the function H5Dset_extent().
+ *
+ * \details H5Dextend() verifies that the dataset is at least of size \p size,
+ *          extending it if necessary. The dimensionality of size is the same as
+ *          that of the dataspace of the dataset being changed.
+ *
+ *          This function can be applied to the following datasets:
+ *          \li Any dataset with unlimited dimensions
+ *          \li A dataset with fixed dimensions if the current dimension sizes
+ *              are less than the maximum sizes set with \c maxdims
+ *              (see H5Screate_simple())
+ *
+ *          Space on disk is immediately allocated for the new dataset extent if
+ *          the dataset’s space allocation time is set to
+ *          #H5D_ALLOC_TIME_EARLY. Fill values will be written to the dataset if
+ *          the dataset’s fill time is set to #H5D_FILL_TIME_IFSET or
+ *          #H5D_FILL_TIME_ALLOC. (See H5Pset_fill_time() and
+ *          H5Pset_alloc_time().)
+ *
+ *          This function ensures that the dataset dimensions are of at least
+ *          the sizes specified in size. The function H5Dset_extent() must be
+ *          used if the dataset dimension sizes are are to be reduced.
+ *
+ * \version 1.8.0 Function Function deprecated in this release. Parameter size
+ *                syntax changed to \Code{const hsize_t size[]} in this release.
+ *
+ */
 H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t size[]);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Reclaims variable-length (VL) datatype memory buffers
+ *
+ * \type_id
+ * \space_id
+ * \dxpl_id
+ * \param[in] buf Pointer to the buffer to be reclaimed
+ *
+ * \return \herr_t
+ *
+ * \deprecated This function has been deprecated in HDF5-1.12 in favor of the
+ *             function H5Treclaim().
+ *
+ * \details H5Dvlen_reclaim() reclaims memory buffers created to store VL
+ *          datatypes.
+ *
+ *          The \p type_id must be the datatype stored in the buffer. The \p
+ *          space_id describes the selection for the memory buffer to free the
+ *          VL datatypes within. The \p dxpl_id is the dataset transfer property
+ *          list which was used for the I/O transfer to create the buffer. And
+ *          \p buf is the pointer to the buffer to be reclaimed.
+ *
+ *          The VL structures (\ref hvl_t) in the user's buffer are modified to
+ *          zero out the VL information after the memory has been reclaimed.
+ *
+ *          If nested VL datatypes were used to create the buffer, this routine
+ *          frees them from the bottom up, releasing all the memory without
+ *          creating memory leaks.
+ *
+ * \version 1.12.0 Routine was deprecated
+ *
+ */
 H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

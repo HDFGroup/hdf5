@@ -458,7 +458,7 @@ typedef struct H5VL_token_class_t {
  * \ingroup H5VLDEV
  * Class information for each VOL connector
  */
-//! [H5VL_class_t_snip]
+//! <!-- [H5VL_class_t_snip] -->
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
     unsigned           version;          /**< VOL connector class struct version #     */
@@ -492,7 +492,7 @@ typedef struct H5VL_class_t {
     herr_t (*optional)(void *obj, int op_type, hid_t dxpl_id, void **req,
                        va_list arguments); /**< Optional callback */
 } H5VL_class_t;
-//! [H5VL_class_t_snip]
+//! <!-- [H5VL_class_t_snip] -->
 
 /********************/
 /* Public Variables */

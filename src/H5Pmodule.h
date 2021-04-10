@@ -72,6 +72,8 @@
  * \ingroup H5P
  * \defgroup GACPL General Access Properties
  * \ingroup H5P
+ * \defgroup MAPL Map Access Properties
+ * \ingroup H5P
  */
 
 #endif /* _H5Pmodule_H */

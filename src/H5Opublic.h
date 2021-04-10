@@ -86,17 +86,15 @@
 #define H5O_INFO_NUM_ATTRS 0x0004u /* Fill in the num_attrs field */
 #define H5O_INFO_ALL       (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS)
 
-/* Flags for H5Oget_native_info.
- * Theses flags determine which fields will be filled in in the H5O_native_info_t
- * struct.
+//! <!-- [H5O_native_info_fields_snip] -->
+/**
+ * Flags for H5Oget_native_info().  Theses flags determine which fields will be
+ * filled in in the \ref H5O_native_info_t struct.
  */
-//! [H5O_native_info_fields_snip]
-
 #define H5O_NATIVE_INFO_HDR       0x0008u /* Fill in the hdr field */
 #define H5O_NATIVE_INFO_META_SIZE 0x0010u /* Fill in the meta_size field */
 #define H5O_NATIVE_INFO_ALL       (H5O_NATIVE_INFO_HDR | H5O_NATIVE_INFO_META_SIZE)
-
-//! [H5O_native_info_fields_snip]
+//! <!-- [H5O_native_info_fields_snip] -->
 
 /* Convenience macro to check if the token is the 'undefined' token value */
 #define H5O_IS_TOKEN_UNDEF(token) (!HDmemcmp(&(token), &(H5O_TOKEN_UNDEF), sizeof(H5O_token_t)))
@@ -105,46 +103,48 @@
 /* Public Typedefs */
 /*******************/
 
-//! [H5O_type_t_snip]
-
-/* Types of objects in file */
+//! <!-- [H5O_type_t_snip] -->
+/**
+ * Types of objects in file
+ */
 typedef enum H5O_type_t {
-    H5O_TYPE_UNKNOWN = -1,   /* Unknown object type        */
-    H5O_TYPE_GROUP,          /* Object is a group          */
-    H5O_TYPE_DATASET,        /* Object is a dataset        */
-    H5O_TYPE_NAMED_DATATYPE, /* Object is a named data type    */
-    H5O_TYPE_MAP,            /* Object is a map */
-    H5O_TYPE_NTYPES          /* Number of different object types (must be last!) */
+    H5O_TYPE_UNKNOWN = -1,   /**< Unknown object type        */
+    H5O_TYPE_GROUP,          /**< Object is a group          */
+    H5O_TYPE_DATASET,        /**< Object is a dataset        */
+    H5O_TYPE_NAMED_DATATYPE, /**< Object is a named data type    */
+    H5O_TYPE_MAP,            /**< Object is a map */
+    H5O_TYPE_NTYPES          /**< Number of different object types (must be last!) */
 } H5O_type_t;
+//! <!-- [H5O_type_t_snip] -->
 
-//! [H5O_type_t_snip]
-
-/* Information struct for object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx) */
-//! [H5O_hdr_info_t_snip]
-
+//! <!-- [H5O_hdr_info_t_snip] -->
+/**
+ * Information struct for object header metadata (for
+ * H5Oget_info(), H5Oget_info_by_name(), H5Oget_info_by_idx())
+ */
 typedef struct H5O_hdr_info_t {
-    unsigned version; /* Version number of header format in file */
-    unsigned nmesgs;  /* Number of object header messages */
-    unsigned nchunks; /* Number of object header chunks */
-    unsigned flags;   /* Object header status flags */
+    unsigned version; /**< Version number of header format in file */
+    unsigned nmesgs;  /**< Number of object header messages */
+    unsigned nchunks; /**< Number of object header chunks */
+    unsigned flags;   /**< Object header status flags */
     struct {
-        hsize_t total; /* Total space for storing object header in file */
-        hsize_t meta;  /* Space within header for object header metadata information */
-        hsize_t mesg;  /* Space within header for actual message information */
-        hsize_t free;  /* Free space within object header */
+        hsize_t total; /**< Total space for storing object header in file */
+        hsize_t meta;  /**< Space within header for object header metadata information */
+        hsize_t mesg;  /**< Space within header for actual message information */
+        hsize_t free;  /**< Free space within object header */
     } space;
     struct {
-        uint64_t present; /* Flags to indicate presence of message type in header */
-        uint64_t shared;  /* Flags to indicate message type is shared in header */
+        uint64_t present; /**< Flags to indicate presence of message type in header */
+        uint64_t shared;  /**< Flags to indicate message type is shared in header */
     } mesg;
 } H5O_hdr_info_t;
+//! <!-- [H5O_hdr_info_t_snip] -->
 
-//! [H5O_hdr_info_t_snip]
-
-//! [H5O_info2_t_snip]
-
-/* Data model information struct for objects */
-/* (For H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx version 3) */
+//! <!-- [H5O_info2_t_snip] -->
+/**
+ * Data model information struct for objects
+ * (For H5Oget_info(), H5Oget_info_by_name(), H5Oget_info_by_idx() version 3)
+ */
 typedef struct H5O_info2_t {
     unsigned long fileno;    /* File number that object is located in */
     H5O_token_t   token;     /* Token representing the object        */
@@ -156,44 +156,52 @@ typedef struct H5O_info2_t {
     time_t        btime;     /* Birth time                           */
     hsize_t       num_attrs; /* # of attributes attached to object   */
 } H5O_info2_t;
+//! <!-- [H5O_info2_t_snip] -->
 
-//! [H5O_info2_t_snip]
-
-//! [H5O_native_info_t_snip]
-
-/* Native file format information struct for objects */
-/* (For H5Oget_native_info / H5Oget_native_info_by_name / H5Oget_native_info_by_idx) */
+//! <!-- [H5O_native_info_t_snip] -->
+/**
+ * Native file format information struct for objects.
+ * (For H5Oget_native_info(), H5Oget_native_info_by_name(), H5Oget_native_info_by_idx())
+ */
 typedef struct H5O_native_info_t {
-    H5O_hdr_info_t hdr; /* Object header information */
+    H5O_hdr_info_t hdr; /**< Object header information */
     /* Extra metadata storage for obj & attributes */
     struct {
-        H5_ih_info_t obj;  /* v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */
-        H5_ih_info_t attr; /* v2 B-tree & heap for attributes */
+        H5_ih_info_t obj;  /**< v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */
+        H5_ih_info_t attr; /**< v2 B-tree & heap for attributes */
     } meta_size;
 } H5O_native_info_t;
+//! <!-- [H5O_native_info_t_snip] -->
 
-//! [H5O_native_info_t_snip]
-
-/* Typedef for message creation indexes */
+/**
+ * Typedef for message creation indexes
+ */
 typedef uint32_t H5O_msg_crt_idx_t;
 
-/* Prototype for H5Ovisit/H5Ovisit_by_name() operator (version 3) */
-//! [H5O_iterate2_t_snip]
-
+//! <!-- [H5O_iterate2_t_snip] -->
+/**
+ * Prototype for H5Ovisit(), H5Ovisit_by_name() operator (version 3)
+ */
 typedef herr_t (*H5O_iterate2_t)(hid_t obj, const char *name, const H5O_info2_t *info, void *op_data);
+//! <!-- [H5O_iterate2_t_snip] -->
 
-//! [H5O_iterate2_t_snip]
-
+//! <!-- [H5O_mcdt_search_ret_t_snip] -->
 typedef enum H5O_mcdt_search_ret_t {
-    H5O_MCDT_SEARCH_ERROR = -1, /* Abort H5Ocopy */
-    H5O_MCDT_SEARCH_CONT, /* Continue the global search of all committed datatypes in the destination file */
-    H5O_MCDT_SEARCH_STOP  /* Stop the search, but continue copying.  The committed datatype will be copied but
-                             not merged. */
+    H5O_MCDT_SEARCH_ERROR = -1, /**< Abort H5Ocopy */
+    H5O_MCDT_SEARCH_CONT, /**< Continue the global search of all committed datatypes in the destination file
+                           */
+    H5O_MCDT_SEARCH_STOP  /**< Stop the search, but continue copying.  The committed datatype will be copied
+                             but not merged. */
 } H5O_mcdt_search_ret_t;
+//! <!-- [H5O_mcdt_search_ret_t_snip] -->
 
-/* Callback to invoke when completing the search for a matching committed datatype from the committed dtype
- * list */
+//! <!-- [H5O_mcdt_search_cb_t_snip] -->
+/**
+ * Callback to invoke when completing the search for a matching committed
+ * datatype from the committed dtype list
+ */
 typedef H5O_mcdt_search_ret_t (*H5O_mcdt_search_cb_t)(void *op_data);
+//! <!-- [H5O_mcdt_search_cb_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -983,7 +991,6 @@ H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
  *          - H5Pset_copy_object()
  *          - H5Pset_create_intermediate_group()
  *          - H5Pset_mcdt_search_cb()
- *          .
  *      - Copying Committed Datatypes with #H5Ocopy - A comprehensive
  *        discussion of copying committed datatypes (PDF) in
  *        Advanced Topics in HDF5
@@ -1908,46 +1915,49 @@ H5_DLLVAR const H5O_token_t H5O_TOKEN_UNDEF_g;
 
 /* Typedefs */
 
-/* A struct that's part of the H5G_stat_t structure (deprecated) */
-//! [H5O_stat_t_snip]
+//! <!-- [H5O_stat_t_snip] -->
+/**
+ * A struct that's part of the \ref H5G_stat_t structure
+ * \deprecated
+ */
 typedef struct H5O_stat_t {
-    hsize_t  size;    /* Total size of object header in file */
-    hsize_t  free;    /* Free space within object header */
-    unsigned nmesgs;  /* Number of object header messages */
-    unsigned nchunks; /* Number of object header chunks */
+    hsize_t  size;    /**< Total size of object header in file */
+    hsize_t  free;    /**< Free space within object header */
+    unsigned nmesgs;  /**< Number of object header messages */
+    unsigned nchunks; /**< Number of object header chunks */
 } H5O_stat_t;
-//! [H5O_stat_t_snip]
+//! <!-- [H5O_stat_t_snip] -->
 
-//! [H5O_info1_t_snip]
-
-/* Information struct for object */
-/* (For H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx versions 1 & 2) */
+//! <!-- [H5O_info1_t_snip] -->
+/**
+ * Information struct for object (For H5Oget_info(), H5Oget_info_by_name(),
+ * H5Oget_info_by_idx() versions 1 & 2.)
+ */
 typedef struct H5O_info1_t {
-    unsigned long  fileno;    /* File number that object is located in */
-    haddr_t        addr;      /* Object address in file                */
-    H5O_type_t     type;      /* Basic object type (group, dataset, etc.) */
-    unsigned       rc;        /* Reference count of object    */
-    time_t         atime;     /* Access time                  */
-    time_t         mtime;     /* Modification time            */
-    time_t         ctime;     /* Change time                  */
-    time_t         btime;     /* Birth time                   */
-    hsize_t        num_attrs; /* # of attributes attached to object */
-    H5O_hdr_info_t hdr;       /* Object header information */
+    unsigned long  fileno;    /**< File number that object is located in */
+    haddr_t        addr;      /**< Object address in file                */
+    H5O_type_t     type;      /**< Basic object type (group, dataset, etc.) */
+    unsigned       rc;        /**< Reference count of object    */
+    time_t         atime;     /**< Access time                  */
+    time_t         mtime;     /**< Modification time            */
+    time_t         ctime;     /**< Change time                  */
+    time_t         btime;     /**< Birth time                   */
+    hsize_t        num_attrs; /**< # of attributes attached to object */
+    H5O_hdr_info_t hdr;       /**< Object header information */
     /* Extra metadata storage for obj & attributes */
     struct {
-        H5_ih_info_t obj;  /* v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */
-        H5_ih_info_t attr; /* v2 B-tree & heap for attributes */
+        H5_ih_info_t obj;  /**< v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */
+        H5_ih_info_t attr; /**< v2 B-tree & heap for attributes */
     } meta_size;
 } H5O_info1_t;
+//! <!-- [H5O_info1_t_snip] -->
 
-//! [H5O_info1_t_snip]
-
-/* Prototype for H5Ovisit/H5Ovisit_by_name() operator (versions 1 & 2) */
-//! [H5O_iterate1_t_snip]
-
+//! <!-- [H5O_iterate1_t_snip] -->
+/**
+ * Prototype for H5Ovisit(), H5Ovisit_by_name() operator (versions 1 & 2)
+ */
 typedef herr_t (*H5O_iterate1_t)(hid_t obj, const char *name, const H5O_info1_t *info, void *op_data);
-
-//! [H5O_iterate1_t_snip]
+//! <!-- [H5O_iterate1_t_snip] -->
 
 /* Function prototypes */
 
