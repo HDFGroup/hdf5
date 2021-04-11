@@ -209,7 +209,7 @@ typedef enum H5VL_request_specific_t {
  *      though the native VOL connector doesn't implement them. QAK - 2021/04/10)
  */
 typedef int H5VL_request_optional_t;
-#define H5VL_REQUEST_GET_EXEC_TIME 0      /* Retrieve execution time for operation */
+#define H5VL_REQUEST_GET_EXEC_TIME 0 /* Retrieve execution time for operation */
 
 /* types for 'blob' SPECIFIC callback */
 typedef enum H5VL_blob_specific_t {
