@@ -123,10 +123,6 @@ test_es_none(void)
     if (H5ESget_count(H5ES_NONE, NULL) < 0)
         TEST_ERROR;
 
-    /* Get time estimate */
-    if (H5ESget_time_estimate(H5ES_NONE, NULL) < 0)
-        TEST_ERROR;
-
     /* Get op counter */
     if (H5ESget_op_counter(H5ES_NONE, NULL) < 0)
         TEST_ERROR;

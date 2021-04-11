@@ -192,47 +192,6 @@ done:
 } /* end H5ESget_count() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5ESget_time_estimate
- *
- * Purpose:     Retrieve an estimate for completing the operations in an event set
- *
- * Note:        H5ES_NONE is a valid value for 'es_id', but functions as a no-op
- *
- * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *              Thursday, December 10, 2020
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5ESget_time_estimate(hid_t es_id, uint64_t *time_est /*out*/)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", es_id, time_est);
-
-    /* Passing H5ES_NONE is valid, but a no-op */
-    if (H5ES_NONE != es_id) {
-        H5ES_t *es; /* Event set */
-
-        /* Check arguments */
-        if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
-        if (NULL == time_est)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL time_est pointer")
-
-        /* Get estimate for completing operations */
-        if (H5ES__get_time_estimate(es, time_est) < 0)
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't get time estimate")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5ESget_time_estimate() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5ESget_op_counter
  *
  * Purpose:     Retrieve the counter that will be assigned to the next operation

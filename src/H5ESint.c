@@ -50,11 +50,6 @@
 /* Local Typedefs */
 /******************/
 
-/* Callback context for get time estimate (gte) operations */
-typedef struct H5ES_gte_ctx_t {
-    uint64_t *time_est; /* Pointer to accumulated time estimate (in ns) */
-} H5ES_gte_ctx_t;
-
 /* Callback context for wait operations */
 typedef struct H5ES_wait_ctx_t {
     H5ES_t * es;              /* Event set being operated on */
@@ -89,7 +84,6 @@ static herr_t H5ES__close(H5ES_t *es);
 static herr_t H5ES__close_cb(void *es, void **request_token);
 static herr_t H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app_file,
                            const char *app_func, unsigned app_line, const char *caller, const char *api_args);
-static int    H5ES__get_time_estimate_cb(H5ES_event_t *ev, void *_ctx);
 static herr_t H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev);
 static herr_t H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status);
 static int    H5ES__wait_cb(H5ES_event_t *ev, void *_ctx);
@@ -435,89 +429,6 @@ H5ES__insert_request(H5ES_t *es, H5VL_t *connector, void *token)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__insert_request() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5ES__get_time_estimate_cb
- *
- * Purpose:     Callback for retrieving time estimates for operations
- *
- * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Thursday, December 10, 2020
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5ES__get_time_estimate_cb(H5ES_event_t *ev, void *_ctx)
-{
-    H5ES_gte_ctx_t *ctx = (H5ES_gte_ctx_t *)_ctx; /* Callback context */
-    uint64_t        op_time_est;                  /* Time estimate for operation */
-    int             ret_value = H5_ITER_CONT;     /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity check */
-    HDassert(ev);
-    HDassert(ctx);
-
-    /* Query the time estimate from the connector */
-    if (H5VL_request_specific(ev->request, H5VL_REQUEST_GET_TIME_ESTIMATE, &op_time_est) < 0)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, H5_ITER_ERROR, "unable to get time estimate")
-
-    /* Check for "unknown" time estimate value and stop iteration */
-    if (UINT64_MAX == op_time_est) {
-        /* Record the "unknown" value */
-        *ctx->time_est = UINT64_MAX;
-
-        /* Exit from the iteration */
-        ret_value = H5_ITER_STOP;
-    } /* end if */
-    else
-        /* Add the estimate to the current estimate */
-        *ctx->time_est += op_time_est;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ES__get_time_estimate_cb() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5ES__get_time_estimate
- *
- * Purpose:     Estimate time to complete operations in event set
- *
- * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Thursday, December 10, 2020
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5ES__get_time_estimate(H5ES_t *es, uint64_t *time_est)
-{
-    H5ES_gte_ctx_t ctx;                 /* Iterator callback context info */
-    herr_t         ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check */
-    HDassert(es);
-    HDassert(time_est);
-
-    /* Set user's parameter to known value */
-    *time_est = 0;
-
-    /* Set up context for iterator callbacks */
-    ctx.time_est = time_est;
-
-    /* Iterate over the events in the set, retrieving the time estimate for each */
-    if (H5ES__list_iterate(&es->active, H5ES__get_time_estimate_cb, &ctx) < 0)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ES__get_time_estimate() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__handle_fail
