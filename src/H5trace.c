@@ -3364,10 +3364,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_REQUEST_GET_TIME_ESTIMATE");
                                     break;
 
-                                case H5VL_REQUEST_GET_EXEC_TIME:
-                                    H5RS_acat(rs, "H5VL_REQUEST_GET_EXEC_TIME");
-                                    break;
-
                                 default:
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
@@ -3715,7 +3711,15 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         {
                             H5VL_request_optional_t optional = (H5VL_request_optional_t)HDva_arg(ap, int);
 
-                            H5RS_asprintf_cat(rs, "%ld", (long)optional);
+                            switch (optional) {
+                                case H5VL_REQUEST_GET_EXEC_TIME:
+                                    H5RS_acat(rs, "H5VL_REQUEST_GET_EXEC_TIME");
+                                    break;
+
+                                default:
+                                    H5RS_asprintf_cat(rs, "%ld", (long)optional);
+                                    break;
+                            } /* end switch */
                         } /* end block */
                         break;
 

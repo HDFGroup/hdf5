@@ -202,13 +202,15 @@ typedef enum H5VL_request_status_t {
 /* types for async request SPECIFIC callback */
 typedef enum H5VL_request_specific_t {
     H5VL_REQUEST_GET_ERR_STACK,     /* Retrieve error stack for failed operation */
-    H5VL_REQUEST_GET_TIME_ESTIMATE, /* Retrieve time estimate for completing operation */
-    H5VL_REQUEST_GET_EXEC_TIME      /* Retrieve execution time for operation */
+    H5VL_REQUEST_GET_TIME_ESTIMATE  /* Retrieve time estimate for completing operation */
 } H5VL_request_specific_t;
 
-/* Typedef and values for native VOL connector request optional VOL operations */
+/* Typedef and values for VOL connector request optional VOL operations */
+/* (This is an unusual case - we'd like to pre-define these operations, even
+ *      though the native VOL connector doesn't implement them. QAK - 2021/04/10)
+ */
 typedef int H5VL_request_optional_t;
-/* (No optional request VOL operations currently) */
+#define H5VL_REQUEST_GET_EXEC_TIME 0      /* Retrieve execution time for operation */
 
 /* types for 'blob' SPECIFIC callback */
 typedef enum H5VL_blob_specific_t {
