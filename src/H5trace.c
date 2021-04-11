@@ -3720,7 +3720,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         default:

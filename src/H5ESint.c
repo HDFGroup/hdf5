@@ -587,25 +587,27 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
 
             /* Set appropriate info for callback */
             if (H5VL_REQUEST_STATUS_SUCCEED == ev_status) {
-                uint64_t supported;     /* Whether 'execution time' operation is supported by VOL connector */
+                uint64_t supported; /* Whether 'execution time' operation is supported by VOL connector */
 
                 /* Translate status */
                 op_status = H5ES_STATUS_SUCCEED;
 
                 /* Check for 'execution time' callback */
                 supported = 0;
-                if (H5VL_introspect_opt_query(ev->request, H5VL_SUBCLS_REQUEST, H5VL_REQUEST_GET_EXEC_TIME, &supported) < 0)
-                    HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't check for 'get execution time' operation")
+                if (H5VL_introspect_opt_query(ev->request, H5VL_SUBCLS_REQUEST, H5VL_REQUEST_GET_EXEC_TIME,
+                                              &supported) < 0)
+                    HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL,
+                                "can't check for 'get execution time' operation")
                 if (supported & H5VL_OPT_QUERY_SUPPORTED) {
                     /* Retrieve the execution time info */
-                    if (H5VL_request_optional(ev->request, H5VL_REQUEST_GET_EXEC_TIME, &ev->op_info.op_exec_ts,
-                                              &ev->op_info.op_exec_time) < 0)
+                    if (H5VL_request_optional(ev->request, H5VL_REQUEST_GET_EXEC_TIME,
+                                              &ev->op_info.op_exec_ts, &ev->op_info.op_exec_time) < 0)
                         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL,
                                     "unable to retrieve execution time info for operation")
                 } /* end if */
                 else {
                     /* Set invalid values for execution timestamp and duration */
-                    ev->op_info.op_exec_ts = UINT64_MAX;
+                    ev->op_info.op_exec_ts   = UINT64_MAX;
                     ev->op_info.op_exec_time = UINT64_MAX;
                 } /* end else */
             }
