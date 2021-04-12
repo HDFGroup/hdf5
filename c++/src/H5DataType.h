@@ -15,6 +15,9 @@
 #ifndef H5DataType_H
 #define H5DataType_H
 
+/* Include package's developer header */
+#include "H5Tdevelop.h"
+
 namespace H5 {
 
 /*! \class DataType

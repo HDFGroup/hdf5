@@ -1010,6 +1010,7 @@
 ./src/H5Tcset.c
 ./src/H5Tdbg.c
 ./src/H5Tdeprec.c
+./src/H5Tdevelop.h
 ./src/H5Tenum.c
 ./src/H5Tfields.c
 ./src/H5Tfixed.c

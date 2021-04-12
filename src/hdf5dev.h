@@ -26,6 +26,7 @@
 #include "H5Idevelop.h"  /* ID management */
 #include "H5Ldevelop.h"  /* Links */
 #include "H5PLextern.h"  /* Plugins */
+#include "H5Tdevelop.h"  /* Datatypes */
 #include "H5TSdevelop.h" /* Threadsafety */
 #include "H5Zdevelop.h"  /* Data filters */
 
