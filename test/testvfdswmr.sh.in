@@ -577,6 +577,8 @@ if [ ${do_zoo:-no} = yes ]; then
 	    ../vfd_swmr_zoo_writer -q &
 	pid_writer=$!
 
+        # -l is the expected maximal number of ticks from the writer's finishing zoo creation or deletion
+        # to the reader's finishing validation of zoo creation or deletion
 	catch_out_err_and_rc vfd_swmr_zoo_reader \
 	    ../vfd_swmr_zoo_reader -l 4 -q &
 	pid_reader=$!
