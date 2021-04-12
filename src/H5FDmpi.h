@@ -39,7 +39,7 @@
  */
 typedef enum H5FD_mpio_xfer_t {
     H5FD_MPIO_INDEPENDENT = 0, /**< Use independent I/O access */
-    H5FD_MPIO_COLLECTIVE /**< Use collective I/O access */
+    H5FD_MPIO_COLLECTIVE       /**< Use collective I/O access */
 } H5FD_mpio_xfer_t;
 
 /* Type of chunked dataset I/O */
