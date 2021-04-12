@@ -206,13 +206,20 @@ typedef enum H5T_direction_t {
  * The exception type passed into the conversion callback function
  */
 typedef enum H5T_conv_except_t {
-    H5T_CONV_EXCEPT_RANGE_HI  = 0, /**< source value is greater than destination's range */
-    H5T_CONV_EXCEPT_RANGE_LOW = 1, /**< source value is less than destination's range    */
-    H5T_CONV_EXCEPT_PRECISION = 2, /**< source value loses precision in destination      */
-    H5T_CONV_EXCEPT_TRUNCATE  = 3, /**< source value is truncated in destination         */
-    H5T_CONV_EXCEPT_PINF      = 4, /**< source value is positive infinity(floating number) */
-    H5T_CONV_EXCEPT_NINF      = 5, /**< source value is negative infinity(floating number) */
-    H5T_CONV_EXCEPT_NAN       = 6  /**< source value is NaN(floating number)             */
+    H5T_CONV_EXCEPT_RANGE_HI  = 0,
+    /**< Source value is greater than destination's range */
+    H5T_CONV_EXCEPT_RANGE_LOW = 1,
+    /**< Source value is less than destination's range */
+    H5T_CONV_EXCEPT_PRECISION = 2,
+    /**< Source value loses precision in destination */
+    H5T_CONV_EXCEPT_TRUNCATE  = 3,
+    /**< Source value is truncated in destination */
+    H5T_CONV_EXCEPT_PINF      = 4,
+    /**< Source value is positive infinity */
+    H5T_CONV_EXCEPT_NINF      = 5,
+    /**< Source value is negative infinity */
+    H5T_CONV_EXCEPT_NAN       = 6
+    /**< Source value is \c NaN (not a number, including \c QNaN and \c SNaN) */
 } H5T_conv_except_t;
 
 /**
@@ -259,12 +266,26 @@ typedef herr_t (*H5T_conv_t)(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, siz
                              size_t bkg_stride, void *buf, void *bkg, hid_t dset_xfer_plist);
 //! <!-- [H5T_conv_t_snip] -->
 
+//! <!-- [H5T_conv_except_func_t_snip] -->
 /**
- * Exception handler.  If an exception like overflow happenes during conversion,
- * this function is called if it's registered through H5Pset_type_conv_cb().
+ * \brief Exception handler.
+ *
+ * \param[in] except_type The kind of exception that occurred
+ * \param[in] src_id Source datatype identifier
+ * \param[in] dst_id Destination datatype identifier
+ * \param[in] src_buf Source data buffer
+ * \param[in,out] dst_buf Destination data buffer
+ * \param[in,out] user_data Callback context
+ * \returns Valid callback function return values are #H5T_CONV_ABORT,
+ *          #H5T_CONV_UNHANDLED and #H5T_CONV_HANDLED.
+ *
+ * \details If an exception like overflow happenes during conversion, this
+ *          function is called if it's registered through H5Pset_type_conv_cb().
+ *
  */
 typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type, hid_t src_id, hid_t dst_id,
                                                  void *src_buf, void *dst_buf, void *user_data);
+//! <!-- [H5T_conv_except_func_t_snip] -->
 
 /* When this header is included from a private header, don't make calls to H5open() */
 #undef H5OPEN

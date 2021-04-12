@@ -7593,16 +7593,56 @@ H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_fun
  *
  */
 H5_DLL herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Sets type conversion and background buffers
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] size Size, in bytes, of the type conversion and background buffers
+ * \param[in] tconv Pointer to application-allocated type conversion buffer
+ * \param[in] bkg Pointer to application-allocated background buffer
+ * \return \herr_t
+ *
+ * \details Given a dataset transfer property list, H5Pset_buffer() sets the
+ *          maximum size for the type conversion buffer and background buffer
+ *          and optionally supplies pointers to application-allocated
+ *          buffers. If the buffer size is smaller than the entire amount of
+ *          data being transferred between the application and the file, and a
+ *          type conversion buffer or background buffer is required, then strip
+ *          mining will be used.
+ *
+ *          Note that there are minimum size requirements for the buffer. Strip
+ *          mining can only break the data up along the first dimension, so the
+ *          buffer must be large enough to accommodate a complete slice that
+ *          encompasses all of the remaining dimensions. For example, when strip
+ *          mining a \Code{100x200x300} hyperslab of a simple data space, the
+ *          buffer must be large enough to hold \Code{1x200x300} data
+ *          elements. When strip mining a \Code{100x200x300x150} hyperslab of a
+ *          simple data space, the buffer must be large enough to hold
+ *          \Code{1x200x300x150} data elements.
+ *
+ *          If \p tconv and/or \p bkg are null pointers, then buffers will be
+ *          allocated and freed during the data transfer.
+ *
+ *          The default value for the maximum buffer is 1 MiB.
+ *
+ * \version 1.6.0 The \p size parameter has changed from type #hsize_t to \c size_t.
+ * \version 1.4.0 The \p size parameter has changed to type #hsize_t.
+ *
+ */
 H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);
+
 /**
  * \ingroup DXPL
  *
  * \brief Sets a data transform expression
  *
- * \param[in] plist_id   Identifier of the property list or class
+ * \dxpl_id{plist_id}
  * \param[in] expression Pointer to the null-terminated data transform
  *                       expression
- *
  * \return \herr_t
  *
  * \details H5Pset_data_transform() sets the data transform to be used for
@@ -7610,11 +7650,11 @@ H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
  *          transfer property list \p plist_id.
  *
  *          The \p expression parameter is a string containing an algebraic
- *          expression, such as (5/9.0)*(x-32) or x*(x-5). When a dataset
- *          is read or written with this property list, the transform
- *          expression is applied with the x being replaced by the values
- *          in the dataset. When reading data, the values in the file are
- *          not changed and the transformed data is returned to the user.
+ *          expression, such as \Code{(5/9.0)*(x-32)} or \Code{x*(x-5)}. When a
+ *          dataset is read or written with this property list, the transform
+ *          expression is applied with the \c x being replaced by the values in
+ *          the dataset. When reading data, the values in the file are not
+ *          changed and the transformed data is returned to the user.
  *
  *          Data transforms can only be applied to integer or
  *          floating-point datasets. Order of operations is obeyed and
@@ -7628,13 +7668,224 @@ H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
  *
  */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char *expression);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets the dataset transfer property list to enable or disable error
+ *        detection when reading data
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] check Specifies whether error checking is enabled or disabled
+ *            for dataset read operations
+ * \return \herr_t
+ *
+ * \details H5Pset_edc_check() sets the dataset transfer property list \p plist
+ *          to enable or disable error detection when reading data.
+ *
+ *          Whether error detection is enabled or disabled is specified in the
+ *          \p check parameter. Valid values are #H5Z_ENABLE_EDC (default) and
+ *          #H5Z_DISABLE_EDC.
+ *
+ * \note The initial error detection implementation, Fletcher32 checksum,
+ *       supports error detection for chunked datasets only.
+ *
+ * \attention The Fletcher32 EDC checksum filter, set with H5Pset_fletcher32(),
+ *            was added in HDF5 Release 1.6.0. In the original implementation,
+ *            however, the checksum value was calculated incorrectly on
+ *            little-endian systems. The error was fixed in HDF5 Release 1.6.3.\n
+ *            As a result of this fix, an HDF5 library of Release 1.6.0 through
+ *            Release 1.6.2 cannot read a dataset created or written with
+ *            Release 1.6.3 or later if the dataset was created with the
+ *            checksum filter and the filter is enabled in the reading
+ *            library. (Libraries of Release 1.6.3 and later understand the
+ *            earlier error and compensate appropriately.)\n
+ *            \Bold{Work-around:} An HDF5 library of Release 1.6.2 or earlier
+ *            will be able to read a dataset created or written with the
+ *            checksum filter by an HDF5 library of Release 1.6.3 or later if
+ *            the checksum filter is disabled for the read operation. This can
+ *            be accomplished via an H5Pset_edc_check() call with the value
+ *            #H5Z_DISABLE_EDC in the second parameter. This has the obvious
+ *            drawback that the application will be unable to verify the
+ *            checksum, but the data does remain accessible.
+ *
+ * \version 1.6.3 Error in checksum calculation on little-endian systems
+ *          corrected in this release.
+ * \since 1.6.0
+ *
+ */
 H5_DLL herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets user-defined filter callback function
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] func User-defined filter callback function
+ * \param[in] op_data User-defined input data for the callback function
+ * \return \herr_t
+ *
+ * \details H5Pset_filter_callback() sets the user-defined filter callback
+ *          function \p func in the dataset transfer property list \p plist_id.
+ *
+ *          The parameter \p op_data is a pointer to user-defined input data for
+ *          the callback function and will be passed through to the callback
+ *          function.
+ *
+ *          The callback function \p func defines the actions an application is
+ *          to take when a filter fails. The function prototype is as follows:
+ *          \snippet H5Zpublic.h H5Z_filter_func_t_snip
+ *          where \c filter indicates which filter has failed, \c buf and \c buf_size
+ *          are used to pass in the failed data, and op_data is the required
+ *          input data for this callback function.
+ *
+ *          Valid callback function return values are #H5Z_CB_FAIL and #H5Z_CB_CONT.
+ *
+ * \since 1.6.0
+ *
+ */
 H5_DLL herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data);
-H5_DLL herr_t H5Pset_hyper_vector_size(hid_t fapl_id, size_t size);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets number of I/O vectors to be read/written in hyperslab I/O
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] size Number of I/O vectors to accumulate in memory for I/O
+ *            operations\n
+ *            Must be greater than 1 (one)\n
+ *            Default value: 1024
+ * \return \herr_t
+ *
+ * \details H5Pset_hyper_vector_size() sets the number of I/O vectors to be
+ *          accumulated in memory before being issued to the lower levels of
+ *          the HDF5 library for reading or writing the actual data.
+ *
+ *          The I/O vectors are hyperslab offset and length pairs and are
+ *          generated during hyperslab I/O.
+ *
+ *          The number of I/O vectors is passed in \p size to be set in the
+ *          dataset transfer property list \p plist_id. \p size must be
+ *          greater than 1 (one).
+ *
+ *          H5Pset_hyper_vector_size() is an I/O optimization function;
+ *          increasing vector_size should provide better performance, but the
+ *          library will use more memory during hyperslab I/O. The default value
+ *          of \p size is 1024.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets the dataset transfer property list \p status
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] status Status toggle of the dataset transfer property list
+ * \return \herr_t
+ *
+ * \deprecated This function is deprecated as it no longer has any effect;
+ *             compound datatype field preservation is now core functionality in
+ *             the HDF5 library.
+ *
+ * \details H5Pset_preserve() sets the dataset transfer property list status to
+ *          \c 1 or \c 0.
+ *
+ *          When reading or writing compound datatypes and the destination is
+ *          partially initialized and the read/write is intended to initialize
+ *          the other members, one must set this property to \c 1. Otherwise the
+ *          I/O pipeline treats the destination datapoints as completely
+ *          uninitialized.
+ *
+ * \todo Add missing version information: introduction, deprecation, etc.
+ *       Why is the declaration not in the deprecated section?
+ *
+ */
 H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets user-defined datatype conversion callback function
+ *
+ * \dxpl_id
+ * \param[in] op User-defined type conversion callback function
+ * \param[in] operate_data User-defined input data for the callback function
+ * \return \herr_t
+ *
+ * \details H5Pset_type_conv_cb() sets the user-defined datatype conversion
+ *          callback function \p op in the dataset transfer property list \p
+ *          dxpl_id
+ *
+ *          The parameter operate_data is a pointer to user-defined input data
+ *          for the callback function and will be passed through to the callback
+ *          function.
+ *
+ *          The callback function \p op defines the actions an application is to
+ *          take when there is an exception during datatype conversion. The
+ *          function prototype is as follows:
+ *          \snippet H5Tpublic.h H5T_conv_except_func_t_snip
+ *
+ * \todo Add version information.
+ *
+ */
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void *operate_data);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets the memory manager for variable-length datatype allocation in
+ *        H5Dread() and H5Dvlen_reclaim()
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] alloc_func User's allocate routine, or \c NULL for system \c malloc
+ * \param[in] alloc_info Extra parameter for user's allocation routine.
+ *            Contents are ignored if preceding parameter is \c NULL.
+ * \param[in] free_func User's free routine, or \c NULL for system \c free
+ * \param[in] free_info Extra parameter for user's free routine. Contents are
+ *            ignored if preceding parameter is \c NULL
+ * \return \herr_t
+ *
+ * \details H5Pset_vlen_mem_manager() sets the memory manager for
+ *          variable-length datatype allocation in H5Dread() and free in
+ *          H5Dvlen_reclaim().
+ *
+ *          The \p alloc_func and \p free_func parameters identify the memory
+ *          management routines to be used. If the user has defined custom
+ *          memory management routines, \p alloc_func and/or free_func should be
+ *          set to make those routine calls (i.e., the name of the routine is
+ *          used as the value of the parameter); if the user prefers to use the
+ *          system's \c malloc and/or \c free, the \p alloc_func and \p
+ *          free_func parameters, respectively, should be set to \c NULL
+ *
+ *          The prototypes for these user-defined functions are as follows:
+ *          \snippet H5MMpublic.h H5MM_allocate_t_snip
+ *
+ *          \snippet H5MMpublic.h H5MM_free_t_snip
+ *
+ *          The \p alloc_info and \p free_info parameters can be used to pass
+ *          along any required information to the user's memory management
+ *          routines.
+ *
+ *          In summary, if the user has defined custom memory management
+ *          routines, the name(s) of the routines are passed in the \p
+ *          alloc_func and \p free_func parameters and the custom routines'
+ *          parameters are passed in the \p alloc_info and \p free_info
+ *          parameters. If the user wishes to use the system \c malloc and \c
+ *          free functions, the \p alloc_func and/or \p free_func parameters are
+ *          set to \c NULL and the \p alloc_info and \p free_info parameters are
+ *          ignored.
+ *
+ * \todo Add version information.
+ */
 H5_DLL herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info,
                                       H5MM_free_t free_func, void *free_info);
+
 #ifdef H5_HAVE_PARALLEL
 /**
  * \ingroup DXPL
