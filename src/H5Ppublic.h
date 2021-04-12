@@ -1757,7 +1757,7 @@ H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
 /* Object creation property list (OCPL) routines */
 
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Verifies that all required filters are available
  *
@@ -1854,7 +1854,7 @@ H5_DLL herr_t H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_fla
  */
 H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Returns information about a filter in a pipeline
  *
@@ -1921,7 +1921,7 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                    char name[], unsigned *filter_config /*out*/);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Returns information about the specified filter
  *
@@ -1979,7 +1979,7 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                    char name[] /*out*/, unsigned *filter_config /*out*/);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Returns the number of filters in the pipeline
  *
@@ -2039,7 +2039,7 @@ H5_DLL int H5Pget_nfilters(hid_t plist_id);
  */
 H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Modifies a filter in the filter pipeline
  *
@@ -2068,7 +2068,7 @@ H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
 H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                                const unsigned int cd_values[/*cd_nelmts*/]);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief    Delete one or more filters in the filter pipeline
  *
@@ -2222,7 +2222,7 @@ H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flag
  */
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL GCPL
  *
  * \brief Sets deflate (GNU gzip) compression method and compression level
  *
@@ -2278,7 +2278,7 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  */
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL GCPL
  *
  * \brief Adds a filter to the filter pipeline
  *
@@ -2543,7 +2543,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                             const unsigned int c_values[]);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL GCPL
  *
  * \brief Sets up use of the Fletcher32 checksum filter
  *
@@ -5318,7 +5318,7 @@ H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective
  */
 H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
 /**
- * \ingroup GACPL
+ * \ingroup FAPL
  *
  * \brief Sets metadata write mode to collective or independent (default)
  *
@@ -5347,7 +5347,7 @@ H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collectiv
  */
 H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
 /**
- * \ingroup GACPL
+ * \ingroup FAPL
  *
  * \brief Retrieves metadata write mode setting
  *
@@ -5365,7 +5365,15 @@ H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
  * \since 1.10.0
  */
 H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
+
+/**
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
+
+/**
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 #endif /* H5_HAVE_PARALLEL */
 /**
@@ -8072,8 +8080,16 @@ H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_int
 H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd);
 
 /* Group creation property list (GCPL) routines */
+
+/**
+ * \ingroup GCPL
+ *
+ * \todo Add missing documentation
+ *
+ */
 H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */,
                                    unsigned *est_name_len /* out */);
+
 /**
  * \ingroup GCPL
  *
@@ -9557,7 +9573,7 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *va
  */
 H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Returns information about a filter in a pipeline (DEPRECATED)
  *
@@ -9612,7 +9628,7 @@ H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                    char name[]);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Returns information about the specified filter
  *
