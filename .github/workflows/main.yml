@@ -167,11 +167,7 @@ jobs:
       run: choco install ninja
       if: matrix.os == 'windows-latest'
     - name: Install Dependencies (macOS)
-      #run: brew install ninja
-      uses: ashutoshvarma/setup-ninja@master
-      with:
-        # ninja version to download. Default: 1.10.0
-        version: 1.10.0
+      run: port install ninja
       if: matrix.os == 'macos-latest'
     - name: Set environment for MSVC (Windows)
       if:  matrix.os == 'windows-latest'
