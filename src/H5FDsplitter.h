@@ -88,7 +88,19 @@ typedef struct H5FD_splitter_vfd_config_t {
 extern "C" {
 #endif
 H5_DLL hid_t  H5FD_splitter_init(void);
+
+/**
+ * \ingroup FAPL
+ *
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr);
+
+/**
+ * \ingroup FAPL
+ *
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr);
 
 #ifdef __cplusplus

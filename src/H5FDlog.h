@@ -66,6 +66,207 @@ extern "C" {
 #endif
 
 H5_DLL hid_t  H5FD_log_init(void);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets up the logging virtual file driver (#H5FD_LOG) for use
+ *
+ * \fapl_id
+ * \param[in] logfile Name of the log file
+ * \param[in] flags Flags specifying the types of logging activity
+ * \param[in] buf_size The size of the logging buffers, in bytes (see description)
+ * \returns \herr_t
+ *
+ * \details H5Pset_fapl_log() modifies the file access property list to use the
+ *          logging driver, #H5FD_LOG. The logging virtual file driver (VFD) is
+ *          a clone of the standard SEC2 (#H5FD_SEC2) driver with additional
+ *          facilities for logging VFD metrics and activity to a file.
+ *
+ *          \p logfile is the name of the file in which the logging entries are
+ *          to be recorded.
+ *
+ *          The actions to be logged are specified in the parameter \p flags
+ *          using the pre-defined constants described in the following
+ *          table. Multiple flags can be set through the use of a logical \c OR
+ *          contained in parentheses. For example, logging read and write
+ *          locations would be specified as
+ *          \Code{(H5FD_LOG_LOC_READ|H5FD_LOG_LOC_WRITE)}.
+ *
+ * <table>
+ * <caption>Table1: Logging Flags</caption>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_LOC_READ
+ * </td>
+ * <td rowspan="3">
+ * Track the location and length of every read, write, or seek operation.
+ * </td>
+ * </tr>
+ * <tr><td>#H5FD_LOG_LOC_WRITE</td></tr>
+ * <tr><td>#H5FD_LOG_LOC_SEEK</td></tr>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_LOC_IO
+ * </td>
+ * <td>
+ * Track all I/O locations and lengths. The logical equivalent of the following:
+ * \Code{(#H5FD_LOG_LOC_READ | #H5FD_LOG_LOC_WRITE | #H5FD_LOG_LOC_SEEK)}
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_FILE_READ
+ * </td>
+ * <td rowspan="2">
+ * Track the number of times each byte is read or written.
+ * </td>
+ * </tr>
+ * <tr><td>#H5FD_LOG_FILE_WRITE</td></tr>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_FILE_IO
+ * </td>
+ * <td>
+ * Track the number of times each byte is read and written. The logical
+ * equivalent of the following:
+ * \Code{(#H5FD_LOG_FILE_READ | #H5FD_LOG_FILE_WRITE)}
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_FLAVOR
+ * </td>
+ * <td>
+ * Track the type, or flavor, of information stored at each byte.
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_NUM_READ
+ * </td>
+ * <td rowspan="4">
+ * Track the total number of read, write, seek, or truncate operations that occur.
+ * </td>
+ * </tr>
+ * <tr><td>#H5FD_LOG_NUM_WRITE</td></tr>
+ * <tr><td>#H5FD_LOG_NUM_SEEK</td></tr>
+ * <tr><td>#H5FD_LOG_NUM_TRUNCATE</td></tr>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_NUM_IO
+ * </td>
+ * <td>
+ * Track the total number of all types of I/O operations. The logical equivalent
+ * of the following:
+ * \Code{(#H5FD_LOG_NUM_READ | #H5FD_LOG_NUM_WRITE | #H5FD_LOG_NUM_SEEK | #H5FD_LOG_NUM_TRUNCATE)}
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_TIME_OPEN
+ * </td>
+ * <td rowspan="6">
+ * Track the time spent in open, stat, read, write, seek, or close operations.
+ * </td>
+ * </tr>
+ * <tr><td>#H5FD_LOG_TIME_STAT</td></tr>
+ * <tr><td>#H5FD_LOG_TIME_READ</td></tr>
+ * <tr><td>#H5FD_LOG_TIME_WRITE</td></tr>
+ * <tr><td>#H5FD_LOG_TIME_SEEK</td></tr>
+ * <tr><td>#H5FD_LOG_TIME_CLOSE</td></tr>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_TIME_IO
+ * </td>
+ * <td>
+ * Track the time spent in each of the above operations. The logical equivalent
+ * of the following:
+ * \Code{(#H5FD_LOG_TIME_OPEN | #H5FD_LOG_TIME_STAT | #H5FD_LOG_TIME_READ | #H5FD_LOG_TIME_WRITE | #H5FD_LOG_TIME_SEEK | #H5FD_LOG_TIME_CLOSE)}
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_ALLOC
+ * </td>
+ * <td>
+ * Track the allocation of space in the file.
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>
+ * #H5FD_LOG_ALL
+ * </td>
+ * <td>
+ * Track everything. The logical equivalent of the following:
+ * \Code{(#H5FD_LOG_ALLOC | #H5FD_LOG_TIME_IO | #H5FD_LOG_NUM_IO | #H5FD_LOG_FLAVOR | #H5FD_LOG_FILE_IO | #H5FD_LOG_LOC_IO)}
+ * </td>
+ * </tr>
+ * </table>
+ * The logging driver can track the number of times each byte in the file is
+ * read from or written to (using #H5FD_LOG_FILE_READ and #H5FD_LOG_FILE_WRITE)
+ * and what kind of data is at that location (e.g., metadata, raw data; using
+ * #H5FD_LOG_FLAVOR). This information is tracked in internal buffers of size
+ * buf_size, which must be at least the maximum size in bytes of the file to be
+ * logged while the log driver is in use.\n
+ * One buffer of size buf_size will be created for each of #H5FD_LOG_FILE_READ,
+ * #H5FD_LOG_FILE_WRITE and #H5FD_LOG_FLAVOR when those flags are set; these
+ * buffers will not grow as the file increases in size.
+ *
+ * \par Logging output:
+ * This section describes the logging driver (LOG VFD) output.\n
+ * The table, immediately below, describes output of the various logging driver
+ * flags and function calls. A list of valid flavor values, describing the type
+ * of data stored, follows the table.
+ * <table>
+ * <caption>Table2: Logging Output</caption>
+ * <tr>
+ * <th>Flag</th><th>VFD Call</th><th>Output and Comments</th>
+ * </th>
+ * </tr>
+ * <tr>
+ * <td>#H5FD_LOG_LOC_READ</td>
+ * <td>\c Read</td>
+ * <td>
+ * \Code{%10a-%10a (%10Zu bytes) (%s) Read}\n\n
+ * Start position\n
+ * End position\n
+ * Number of bytes\n
+ * Flavor of read\n\n
+ * Adds \Code{(%f s)} and seek time if #H5FD_LOG_TIME_SEEK is also set.
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>#H5FD_LOG_LOC_READ</td>
+ * <td>Read Error</td>
+ * <td>
+ * \Code{Error! Reading: %10a-%10a (%10Zu bytes)}\n\n
+ * Same parameters as non-error entry.
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>#H5FD_LOG_LOC_WRITE</td>
+ * <td>\c Write</td>
+ * <td>
+ * \Code{%10a-%10a (%10Zu bytes) (%s) Written}\n\n
+ * Start position\n
+ * End position\n
+ * Number of bytes\n
+ * Flavor of write\n\n
+ * Adds \Code{(%f s)} and seek time if #H5FD_LOG_TIME_SEEK is also set.
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>#H5FD_LOG_LOC_WRITE</td>
+ * <td>\c Write Error</td>
+ * <td>
+ * \Code{Error! Writing: %10a-%10a (%10Zu bytes)}\n\n
+ * Same parameters as non-error entry.
+ * </td>
+ * </tr>
+ * </table>
+ *
+ *
+ */
 H5_DLL herr_t H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, size_t buf_size);
 
 #ifdef __cplusplus

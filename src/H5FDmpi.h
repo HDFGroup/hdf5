@@ -34,10 +34,12 @@
 */
 
 #define H5D_MULTI_CHUNK_IO_COL_THRESHOLD 60
-/* Type of I/O for data transfer properties */
+/**
+ * Type of I/O for data transfer properties
+ */
 typedef enum H5FD_mpio_xfer_t {
-    H5FD_MPIO_INDEPENDENT = 0, /*zero is the default*/
-    H5FD_MPIO_COLLECTIVE
+  H5FD_MPIO_INDEPENDENT = 0, /**< Use independent I/O access */
+  H5FD_MPIO_COLLECTIVE /**< Use collective I/O access */
 } H5FD_mpio_xfer_t;
 
 /* Type of chunked dataset I/O */

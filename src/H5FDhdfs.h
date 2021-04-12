@@ -113,7 +113,19 @@ typedef struct H5FD_hdfs_fapl_t {
 } H5FD_hdfs_fapl_t;
 
 H5_DLL hid_t  H5FD_hdfs_init(void);
+
+/**
+ * \ingroup FAPL
+ *
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out);
+
+/**
+ * \ingroup FAPL
+ *
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa);
 
 #ifdef __cplusplus
