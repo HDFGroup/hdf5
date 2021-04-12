@@ -206,19 +206,19 @@ typedef enum H5T_direction_t {
  * The exception type passed into the conversion callback function
  */
 typedef enum H5T_conv_except_t {
-    H5T_CONV_EXCEPT_RANGE_HI  = 0,
+    H5T_CONV_EXCEPT_RANGE_HI = 0,
     /**< Source value is greater than destination's range */
     H5T_CONV_EXCEPT_RANGE_LOW = 1,
     /**< Source value is less than destination's range */
     H5T_CONV_EXCEPT_PRECISION = 2,
     /**< Source value loses precision in destination */
-    H5T_CONV_EXCEPT_TRUNCATE  = 3,
+    H5T_CONV_EXCEPT_TRUNCATE = 3,
     /**< Source value is truncated in destination */
-    H5T_CONV_EXCEPT_PINF      = 4,
+    H5T_CONV_EXCEPT_PINF = 4,
     /**< Source value is positive infinity */
-    H5T_CONV_EXCEPT_NINF      = 5,
+    H5T_CONV_EXCEPT_NINF = 5,
     /**< Source value is negative infinity */
-    H5T_CONV_EXCEPT_NAN       = 6
+    H5T_CONV_EXCEPT_NAN = 6
     /**< Source value is \c NaN (not a number, including \c QNaN and \c SNaN) */
 } H5T_conv_except_t;
 
