@@ -25,7 +25,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-H5_DLL hid_t  H5FD_core_init(void);
+H5_DLL hid_t H5FD_core_init(void);
 
 /**
  * \ingroup FAPL

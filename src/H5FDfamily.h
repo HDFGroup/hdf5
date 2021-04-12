@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-H5_DLL hid_t  H5FD_family_init(void);
+H5_DLL hid_t H5FD_family_init(void);
 
 /**
  * \ingroup FAPL

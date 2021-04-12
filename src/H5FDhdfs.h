@@ -112,7 +112,7 @@ typedef struct H5FD_hdfs_fapl_t {
     int32_t stream_buffer_size;
 } H5FD_hdfs_fapl_t;
 
-H5_DLL hid_t  H5FD_hdfs_init(void);
+H5_DLL hid_t H5FD_hdfs_init(void);
 
 /**
  * \ingroup FAPL

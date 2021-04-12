@@ -44,7 +44,7 @@ H5_DLLVAR hbool_t H5FD_mpi_opt_types_g;
 #ifdef __cplusplus
 extern "C" {
 #endif
-H5_DLL hid_t  H5FD_mpio_init(void);
+H5_DLL hid_t H5FD_mpio_init(void);
 
 /**
  * \ingroup FAPL

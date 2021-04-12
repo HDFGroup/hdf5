@@ -89,7 +89,7 @@ typedef struct H5FD_ros3_fapl_t {
 extern "C" {
 #endif
 
-H5_DLL hid_t  H5FD_ros3_init(void);
+H5_DLL hid_t H5FD_ros3_init(void);
 
 /**
  * \ingroup FAPL

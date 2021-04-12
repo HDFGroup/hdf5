@@ -65,7 +65,8 @@
 extern "C" {
 #endif
 
-H5_DLL hid_t  H5FD_log_init(void);
+H5_DLL hid_t H5FD_log_init(void);
+
 /**
  * \ingroup FAPL
  *
@@ -181,7 +182,8 @@ H5_DLL hid_t  H5FD_log_init(void);
  * <td>
  * Track the time spent in each of the above operations. The logical equivalent
  * of the following:
- * \Code{(#H5FD_LOG_TIME_OPEN | #H5FD_LOG_TIME_STAT | #H5FD_LOG_TIME_READ | #H5FD_LOG_TIME_WRITE | #H5FD_LOG_TIME_SEEK | #H5FD_LOG_TIME_CLOSE)}
+ * \Code{(#H5FD_LOG_TIME_OPEN | #H5FD_LOG_TIME_STAT | #H5FD_LOG_TIME_READ | #H5FD_LOG_TIME_WRITE |
+ *        #H5FD_LOG_TIME_SEEK | #H5FD_LOG_TIME_CLOSE)}
  * </td>
  * </tr>
  * <tr>
@@ -198,7 +200,8 @@ H5_DLL hid_t  H5FD_log_init(void);
  * </td>
  * <td>
  * Track everything. The logical equivalent of the following:
- * \Code{(#H5FD_LOG_ALLOC | #H5FD_LOG_TIME_IO | #H5FD_LOG_NUM_IO | #H5FD_LOG_FLAVOR | #H5FD_LOG_FILE_IO | #H5FD_LOG_LOC_IO)}
+ * \Code{(#H5FD_LOG_ALLOC | #H5FD_LOG_TIME_IO | #H5FD_LOG_NUM_IO | #H5FD_LOG_FLAVOR | #H5FD_LOG_FILE_IO |
+ *        #H5FD_LOG_LOC_IO)}
  * </td>
  * </tr>
  * </table>

@@ -87,7 +87,7 @@ typedef struct H5FD_splitter_vfd_config_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
-H5_DLL hid_t  H5FD_splitter_init(void);
+H5_DLL hid_t H5FD_splitter_init(void);
 
 /**
  * \ingroup FAPL
