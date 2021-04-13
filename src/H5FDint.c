@@ -751,9 +751,7 @@ H5FD_read_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type, H5S_t *mem_sp
 
         for (i = 0; i < count; i++) {
 
-            /* we have already verified that sizes[0] != 0 and
-             * types[0] != H5FD_MEM_NOLIST
-             */
+            /* we have already verified that element_sizes[0] != 0 */
 
             if (!extend_sizes) {
 
@@ -1002,9 +1000,7 @@ H5FD_write_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type, H5S_t *mem_s
 
         for (i = 0; i < count; i++) {
 
-            /* we have already verified that sizes[0] != 0 and
-             * types[0] != H5FD_MEM_NOLIST
-             */
+            /* we have already verified that element_sizes[0] != 0 and */
 
             if (!extend_sizes) {
 
