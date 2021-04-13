@@ -11,6 +11,7 @@ The functions provides by the HDF5 C-API are grouped into the following
 \li \ref H5S "Dataspaces" — Management of HDF5 dataspaces which describe the shape of datasets and attributes (\ref H5S)
 \li \ref H5T "Datatypes" — Management of datatypes which describe elements of datasets and attributes (\ref H5T)
 \li \ref H5E "Error Handling" — Functions for handling HDF5 errors (\ref H5E)
+\li \ref H5ES "Event Sets" — Functions for handling HDF5 event sets (\ref H5ES)
 \li \ref H5F "Files" — Management of HDF5 files (\ref H5F)
 \li \ref H5Z "Filters" — Configuration of filters that process data during I/O operation (\ref H5Z)
 \li \ref H5G "Groups" — Management of groups in HDF5 files (\ref H5G)

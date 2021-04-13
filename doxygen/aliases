@@ -194,7 +194,8 @@ ALIASES += fgdta_loc_obj_id{1}="\loc_obj_id{\1}. The identifier may be that of a
 ALIASES += app_file="\param[in] app_file For internal use only, not a visible user parameter"
 ALIASES += app_func="\param[in] app_func For internal use only, not a visible user parameter"
 ALIASES += app_line="\param[in] app_line For internal use only, not a visible user parameter"
-ALIASES += es_id="\param[in] es_id The event set ID to add this asynchronous operation to. H5ES_NONE may be used for synchronous execution."
+ALIASES += es_id="\param[in] es_id Event set identifier"
+ALIASES += es_id{1}="\param[in] \1 Event set identifier"
 
 ################################################################################
 # Others
