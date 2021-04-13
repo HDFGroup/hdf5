@@ -121,6 +121,13 @@ ALIASES += fg_loc_id="\loc_id. The identifier may be that of a file or group."
 ALIASES += fg_loc_id{1}="\loc_id{\1}. The identifier may be that of a file or group."
 
 ################################################################################
+# Maps
+################################################################################
+
+ALIASES += map_id="\param[in] map_id Map identifier"
+ALIASES += map_id{1}="\param[in] \1 Map identifier"
+
+################################################################################
 # Property lists
 ################################################################################
 
@@ -153,6 +160,12 @@ ALIASES += lapl_id{1}="\param[in] \1 Link access property list identifier"
 
 ALIASES += lcpl_id="\param[in] lcpl_id Link creation property list identifier"
 ALIASES += lcpl_id{1}="\param[in] \1 Link creation property list identifier"
+
+ALIASES += mapl_id="\param[in] mapl_id Map access property list identifier"
+ALIASES += mapl_id{1}="\param[in] \1 Map access property list identifier"
+
+ALIASES += mcpl_id="\param[in] mcpl_id Map creation property list identifier"
+ALIASES += mcpl_id{1}="\param[in] \1 Map creation property list identifier"
 
 ALIASES += oapl_id="\param[in] oapl_id Object access property list identifier"
 ALIASES += oapl_id{1}="\param[in] \1 Object access property list identifier"

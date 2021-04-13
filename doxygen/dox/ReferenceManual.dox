@@ -18,6 +18,7 @@ The functions provides by the HDF5 C-API are grouped into the following
 \li \ref H5I "Identifiers" — Management of object identifiers and object names (\ref H5I)
 \li \ref H5 "Library" — General purpose library functions (\ref H5)
 \li \ref H5L "Links" — Management of links in HDF5 groups (\ref H5L)
+\li \ref H5M "Maps" — Management of HDF5 maps (\ref H5M)
 \li \ref H5O "Objects" — Management of objects in HDF5 files (\ref H5O)
 \li \ref H5PL "Plugins" — Programmatic control over dynamically loaded plugins (\ref H5PL)
 \li \ref H5P "Property Lists" — Management of property lists to control HDF5 library behavior (\ref H5P)
