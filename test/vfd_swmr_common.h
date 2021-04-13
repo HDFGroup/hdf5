@@ -57,7 +57,8 @@ H5TEST_DLLVAR int verbosity;
 extern "C" {
 #endif
 
-H5TEST_DLL hbool_t below_speed_limit(struct timespec *, const struct timespec *);
+H5TEST_DLL bool below_speed_limit(struct timespec *, const struct timespec *);
+H5TEST_DLL void decisleep(uint32_t tenths);
 
 H5TEST_DLL estack_state_t estack_get_state(void);
 H5TEST_DLL estack_state_t disable_estack(void);

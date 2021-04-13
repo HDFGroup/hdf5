@@ -19,6 +19,7 @@
  *        of the same name.
  */
 
+#include <err.h>
 #include "cache_common.h"
 #include "vfd_swmr_common.h" /* for below_speed_limit() */
 #include "genall5.h"
@@ -412,7 +413,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
     gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
 
     if (gid <= 0) {
-        failure_mssg = "vrfy_ns_grp_c: H5Gopen2() failed";
+        failure_mssg = "vrfy_ns_grp_c: H5Gopen2 failed";
         return false;
     }
 
@@ -2753,12 +2754,14 @@ tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime, zoo_con
     }
 out:
     if (!ok) {
-        if (HDstrcmp(failure_mssg, last_failure_mssg) != 0)
-            *lastmsgtime = (struct timespec){.tv_sec = 0, .tv_nsec = 0};
-
-        if (below_speed_limit(lastmsgtime, &config.msgival)) {
-            last_failure_mssg = failure_mssg;
-            HDfprintf(stderr, "%s: %s", __func__, failure_mssg);
+        /* Currently not used: this step makes sure the operation doesn't take too long.
+         * Any test that sets config.msgival or lastmsgtime to 0 will skip this step */
+        if (strcmp(failure_mssg, last_failure_mssg) != 0 && ((config.msgival.tv_sec || config.msgival.tv_nsec))
+            && (lastmsgtime->tv_sec || lastmsgtime->tv_nsec)) {
+            if (below_speed_limit(lastmsgtime, &config.msgival)) {
+                last_failure_mssg = failure_mssg;
+                warnx("%s: %s", __func__, failure_mssg);
+            }
         }
     }
     return ok;

@@ -72,6 +72,15 @@ below_speed_limit(struct timespec *last, const struct timespec *ival)
     return result;
 }
 
+/* Sleep for `tenths` tenths of a second. */
+void
+decisleep(uint32_t tenths)
+{
+    uint64_t nsec = tenths * 100 * 1000 * 1000;
+
+    H5_nanosleep(nsec);
+}
+
 /* Like vsnprintf(3), but abort the program with an error message on
  * `stderr` if the buffer is too small or some other error occurs.
  */
