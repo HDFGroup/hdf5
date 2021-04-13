@@ -136,7 +136,7 @@ extern "C" {
  * \since 1.13.0
  *
  */
-H5_DLL hid_t  H5EScreate(void);
+H5_DLL hid_t H5EScreate(void);
 
 /**
  * \ingroup H5ES

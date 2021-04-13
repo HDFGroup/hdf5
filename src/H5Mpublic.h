@@ -200,7 +200,7 @@ H5_DLL herr_t H5Mclose_async(const char *app_file, const char *app_func, unsigne
  * \since 1.13.0
  *
  */
-H5_DLL hid_t  H5Mget_key_type(hid_t map_id);
+H5_DLL hid_t H5Mget_key_type(hid_t map_id);
 
 /**
  * \ingroup H5M
@@ -217,7 +217,7 @@ H5_DLL hid_t  H5Mget_key_type(hid_t map_id);
  * \since 1.13.0
  *
  */
-H5_DLL hid_t  H5Mget_val_type(hid_t map_id);
+H5_DLL hid_t H5Mget_val_type(hid_t map_id);
 
 /**
  * \ingroup H5M
@@ -233,7 +233,7 @@ H5_DLL hid_t  H5Mget_val_type(hid_t map_id);
  * \since 1.13.0
  *
  */
-H5_DLL hid_t  H5Mget_create_plist(hid_t map_id);
+H5_DLL hid_t H5Mget_create_plist(hid_t map_id);
 
 /**
  * \ingroup H5M
@@ -249,7 +249,7 @@ H5_DLL hid_t  H5Mget_create_plist(hid_t map_id);
  * \since 1.13.0
  *
  */
-H5_DLL hid_t  H5Mget_access_plist(hid_t map_id);
+H5_DLL hid_t H5Mget_access_plist(hid_t map_id);
 
 /**
  * \ingroup H5M
