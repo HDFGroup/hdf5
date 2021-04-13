@@ -508,14 +508,6 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
-# perl is used in some optional src and tests, check availability
-find_package (Perl)
-if (PERL_FOUND)
-  set (H5_PERL_FOUND YES)
-endif ()
-#-----------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------
 # Option to Build Static executables
 #-----------------------------------------------------------------------------
 option (BUILD_STATIC_EXECS "Build Static Executables" OFF)

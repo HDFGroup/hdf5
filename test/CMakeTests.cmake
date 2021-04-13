@@ -889,7 +889,8 @@ if (ENABLE_EXTENDED_TESTS)
 
 #-- Adding test for flushrefresh
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")
-  if (H5_PERL_FOUND)
+  find_package (Perl)
+  if (PERL_FOUND)
     add_test (
         NAME H5TEST-testflushrefresh-clear-objects
         COMMAND ${CMAKE_COMMAND} -E remove flushrefresh.h5
