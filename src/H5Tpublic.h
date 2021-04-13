@@ -2894,7 +2894,7 @@ H5_DLL htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
  *       enough to hold the larger of the input and output data.
  *
  * \version 1.6.3 \p nelmts parameter type changed to size_t.
- * \version 1.4.0 \p nelmts parameter type changed to \ref hsize_t.
+ * \version 1.4.0 \p nelmts parameter type changed to hsize_t.
  *
  */
 H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *background,

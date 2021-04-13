@@ -7637,8 +7637,8 @@ H5_DLL herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, do
  *
  *          The default value for the maximum buffer is 1 MiB.
  *
- * \version 1.6.0 The \p size parameter has changed from type #hsize_t to \c size_t.
- * \version 1.4.0 The \p size parameter has changed to type #hsize_t.
+ * \version 1.6.0 The \p size parameter has changed from type hsize_t to \c size_t.
+ * \version 1.4.0 The \p size parameter has changed to type hsize_t.
  *
  */
 H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);

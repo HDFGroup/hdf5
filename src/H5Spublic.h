@@ -1069,7 +1069,7 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  *          buffer as:
  *          \n      0 0 0 0 13 5 11 17 7 21 29 21
  *
- * \version 1.6.4 C coord parameter type changed to \p const #hsize_t.
+ * \version 1.6.4 C coord parameter type changed to \p const hsize_t.
  * \version 1.6.4 Fortran \p coord parameter type changed to \p INTEGER(HSIZE_T).
  * \since 1.0.0
  *
