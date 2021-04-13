@@ -491,7 +491,6 @@ main(int argc, char **argv)
         fid = H5Fopen("vfd_swmr_zoo.h5", H5F_ACC_RDONLY, fapl);
 
     if (fid < 0) {
-        errx(EXIT_FAILURE, writer ? "H5Fcreate" : "H5Fopen");
         H5_FAILED(); AT();
         printf(writer ? "H5Fcreate failed" : "H5Fopen failed");
         goto error;
