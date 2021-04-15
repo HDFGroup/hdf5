@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(void)
+int
+main(void)
 {
     int ret_val = EXIT_SUCCESS;
 
@@ -22,7 +23,7 @@ int main(void)
             // adjust the file creation properties
         }
 
-        if((fapl = H5Pcreate(H5P_FILE_ACCESS)) == H5I_INVALID_HID) {
+        if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_fapl;
         }
@@ -45,7 +46,7 @@ fail_file:
         H5Pclose(fapl);
 fail_fapl:
         H5Pclose(fcpl);
-fail_fcpl: ;
+fail_fcpl:;
     }
     //! <!-- [life_cycle] -->
 
@@ -75,7 +76,7 @@ fail_fcpl: ;
         H5Fclose(file);
 fail_file:
         H5Pclose(fapl);
-fail_fapl: ;
+fail_fapl:;
     }
     //! <!-- [life_cycle_w_open] -->
 
