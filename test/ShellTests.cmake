@@ -23,8 +23,7 @@ if (UNIX)
     ##############################################################################
     #  configure scripts to test dir
     ##############################################################################
-    find_package (Perl)
-    if (PERL_FOUND)
+    if (H5_PERL_FOUND)
       configure_file(${HDF5_TEST_SOURCE_DIR}/testflushrefresh.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testflushrefresh.sh @ONLY)
     endif ()
     configure_file(${HDF5_TEST_SOURCE_DIR}/test_usecases.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_usecases.sh @ONLY)
