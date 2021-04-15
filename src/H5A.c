@@ -764,7 +764,8 @@ H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, H5_index_t idx_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid iteration order specified")
 
     /* Set up object access arguments */
-    if (H5VL_setup_idx_args(loc_id, obj_name, idx_type, order, n, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_idx_args(loc_id, obj_name, idx_type, order, n, FALSE, lapl_id, vol_obj_ptr, &loc_params) <
+        0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
 
     /* Verify access property list and set up collective metadata if appropriate */

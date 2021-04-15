@@ -2734,8 +2734,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_setup_name_args(hid_t loc_id, const char *name, hbool_t is_collective,
-                     hid_t lapl_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params)
+H5VL_setup_name_args(hid_t loc_id, const char *name, hbool_t is_collective, hid_t lapl_id,
+                     H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

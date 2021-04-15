@@ -44,8 +44,9 @@ const char *FILENAME[] = {"native_vol_test", NULL};
 /* A VOL class struct to verify registering optional operations */
 static int    reg_opt_curr_op_val;
 static herr_t reg_opt_op_optional(void *obj, int opt_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, int opt_type, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req,
-                    va_list arguments);
+static herr_t reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, int opt_type,
+                                    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req,
+                                    va_list arguments);
 static herr_t reg_opt_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req,
                                    va_list arguments);
 #define REG_OPT_VOL_NAME  "reg_opt"
@@ -501,8 +502,8 @@ reg_opt_op_optional(void *obj, int opt_type, hid_t H5_ATTR_UNUSED dxpl_id, void 
  *-------------------------------------------------------------------------
  */
 static herr_t
-reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, int opt_type, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req,
-                    va_list arguments)
+reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, int opt_type,
+                      hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     /* Check for receiving correct loc_params info */
     if (loc_params->type != H5VL_OBJECT_BY_NAME)
@@ -1586,13 +1587,13 @@ error:
 
 } /* end test_basic_datatype_operation() */
 
-typedef herr_t (*reg_opt_obj_oper_t)(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
-                                 int opt_type, hid_t dxpl_id, hid_t es_id, ...);
-typedef herr_t (*reg_opt_link_oper_t)(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
-                                 const char *name, hid_t lapl_id,
-                                 int opt_type, hid_t dxpl_id, hid_t es_id, ...);
+typedef herr_t (*reg_opt_obj_oper_t)(const char *app_file, const char *app_func, unsigned app_line,
+                                     hid_t obj_id, int opt_type, hid_t dxpl_id, hid_t es_id, ...);
+typedef herr_t (*reg_opt_link_oper_t)(const char *app_file, const char *app_func, unsigned app_line,
+                                      hid_t obj_id, const char *name, hid_t lapl_id, int opt_type,
+                                      hid_t dxpl_id, hid_t es_id, ...);
 typedef union {
-    reg_opt_obj_oper_t obj_op;
+    reg_opt_obj_oper_t  obj_op;
     reg_opt_link_oper_t link_op;
 } reg_opt_oper_t;
 
@@ -1674,9 +1675,11 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
     H5E_BEGIN_TRY
     {
         if (H5VL_SUBCLS_LINK == subcls)
-            ret = (*reg_opt_op.link_op)(__FILE__, __func__, __LINE__, obj_id, ".", H5P_DEFAULT, op_val, H5P_DEFAULT, H5ES_NONE, &fake_arg);
+            ret = (*reg_opt_op.link_op)(__FILE__, __func__, __LINE__, obj_id, ".", H5P_DEFAULT, op_val,
+                                        H5P_DEFAULT, H5ES_NONE, &fake_arg);
         else
-            ret = (*reg_opt_op.obj_op)(__FILE__, __func__, __LINE__, obj_id, op_val, H5P_DEFAULT, H5ES_NONE, &fake_arg);
+            ret = (*reg_opt_op.obj_op)(__FILE__, __func__, __LINE__, obj_id, op_val, H5P_DEFAULT, H5ES_NONE,
+                                       &fake_arg);
     }
     H5E_END_TRY;
     if (FAIL != ret)
@@ -1725,9 +1728,11 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
     fake_arg            = -1;
     reg_opt_curr_op_val = op_val;
     if (H5VL_SUBCLS_LINK == subcls)
-        ret = (*reg_opt_op.link_op)(__FILE__, __func__, __LINE__, obj_id, ".", H5P_DEFAULT, op_val, H5P_DEFAULT, H5ES_NONE, &fake_arg);
+        ret = (*reg_opt_op.link_op)(__FILE__, __func__, __LINE__, obj_id, ".", H5P_DEFAULT, op_val,
+                                    H5P_DEFAULT, H5ES_NONE, &fake_arg);
     else
-        ret = (*reg_opt_op.obj_op)(__FILE__, __func__, __LINE__, obj_id, op_val, H5P_DEFAULT, H5ES_NONE, &fake_arg);
+        ret = (*reg_opt_op.obj_op)(__FILE__, __func__, __LINE__, obj_id, op_val, H5P_DEFAULT, H5ES_NONE,
+                                   &fake_arg);
     if (ret < 0)
         TEST_ERROR;
 
@@ -1742,9 +1747,11 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
     fake_arg            = -1;
     reg_opt_curr_op_val = op_val2;
     if (H5VL_SUBCLS_LINK == subcls)
-        ret = (*reg_opt_op.link_op)(__FILE__, __func__, __LINE__, obj_id, ".", H5P_DEFAULT, op_val2, H5P_DEFAULT, H5ES_NONE, &fake_arg);
+        ret = (*reg_opt_op.link_op)(__FILE__, __func__, __LINE__, obj_id, ".", H5P_DEFAULT, op_val2,
+                                    H5P_DEFAULT, H5ES_NONE, &fake_arg);
     else
-        ret = (*reg_opt_op.obj_op)(__FILE__, __func__, __LINE__, obj_id, op_val2, H5P_DEFAULT, H5ES_NONE, &fake_arg);
+        ret = (*reg_opt_op.obj_op)(__FILE__, __func__, __LINE__, obj_id, op_val2, H5P_DEFAULT, H5ES_NONE,
+                                   &fake_arg);
     if (ret < 0)
         TEST_ERROR;
 
