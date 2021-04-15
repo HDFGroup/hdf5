@@ -45,7 +45,7 @@ H5_DLL hid_t H5FD_direct_init(void);
  * \brief Sets up use of the direct I/O driver
  *
  * \fapl_id
- * \param[in] boundary Required memory alignment boundary
+ * \param[in] alignment Required memory alignment boundary
  * \param[in] block_size File system block size
  * \param[in] cbuf_size Copy buffer size
  * \returns \herr_t

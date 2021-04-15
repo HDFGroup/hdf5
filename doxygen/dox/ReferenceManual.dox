@@ -3,7 +3,7 @@
 \todo Add the Event Sets module
 \todo Add the Map module
 
-The functions provides by the HDF5 C-API are grouped into the following
+The functions provided by the HDF5 C-API are grouped into the following
 \Emph{modules}:
 
 \li \ref H5A "Attributes" — Management of HDF5 attributes (\ref H5A)

@@ -210,7 +210,7 @@ H5_DLL herr_t H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collectiv
  *
  *          H5Pset_dxpl_mpio_chunk_opt() works by setting one of the following
  *          flags in the parameter \p opt_mode:
- *          - #H5FD_MPIO_CHUNK_ONE_IO -	Do one link chunked I/O
+ *          - #H5FD_MPIO_CHUNK_ONE_IO -	Do one-link chunked I/O
  *          - #H5FD_MPIO_CHUNK_MULTI_IO - Do multi-chunked I/O
  *
  *          This function works by setting a corresponding property in the

@@ -33,9 +33,9 @@ H5_DLL hid_t H5FD_core_init(void);
  * \brief Modifies the file access property list to use the #H5FD_CORE driver
  *
  * \fapl_id
- * \param[out] increment Size, in bytes, of memory increments
- * \param[in] backing_store Size, in bytes, of memory increments
- *             contents to disk when the file is closed
+ * \param[in] increment Size, in bytes, of memory increments
+ * \param[in] backing_store Boolean flag indicating whether to write the file
+ *            contents to disk when the file is closed
  * \returns \herr_t
  *
  * \details H5Pset_fapl_core() modifies the file access property list to use the
