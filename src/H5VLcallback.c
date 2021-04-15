@@ -153,8 +153,9 @@ static herr_t H5VL__link_get(void *obj, const H5VL_loc_params_t *loc_params, con
 static herr_t H5VL__link_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                   H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req,
                                   va_list arguments);
-static herr_t H5VL__link_optional(void *obj, const H5VL_class_t *cls, H5VL_link_optional_t opt_type,
-                                  hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__link_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
+                                  H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req,
+                                  va_list arguments);
 static void * H5VL__object_open(void *obj, const H5VL_loc_params_t *params, const H5VL_class_t *cls,
                                 H5I_type_t *opened_type, hid_t dxpl_id, void **req);
 static herr_t H5VL__object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, const char *src_name,
@@ -6381,8 +6382,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__link_optional(void *obj, const H5VL_class_t *cls, H5VL_link_optional_t opt_type, hid_t dxpl_id,
-                    void **req, va_list arguments)
+H5VL__link_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
+                    H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -6393,7 +6394,7 @@ H5VL__link_optional(void *obj, const H5VL_class_t *cls, H5VL_link_optional_t opt
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'link optional' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->link_cls.optional)(obj, opt_type, dxpl_id, req, arguments) < 0)
+    if ((cls->link_cls.optional)(obj, loc_params, opt_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
 
 done:
@@ -6411,8 +6412,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_link_optional(const H5VL_object_t *vol_obj, H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req,
-                   ...)
+H5VL_link_optional(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
+                   H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                 /* Argument list passed from the API call */
     hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
@@ -6429,7 +6430,7 @@ H5VL_link_optional(const H5VL_object_t *vol_obj, H5VL_link_optional_t opt_type, 
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, req);
     arg_started = TRUE;
-    if (H5VL__link_optional(vol_obj->data, vol_obj->connector->cls, opt_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__link_optional(vol_obj->data, loc_params, vol_obj->connector->cls, opt_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
 
 done:
@@ -6455,14 +6456,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_optional(void *obj, hid_t connector_id, H5VL_link_optional_t opt_type, hid_t dxpl_id,
-                  void **req /*out*/, va_list arguments)
+H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+                  H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req /*out*/, va_list arguments)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVxixx", obj, connector_id, opt_type, dxpl_id, req, arguments);
+    H5TRACE7("e", "*x*#iVxixx", obj, loc_params, connector_id, opt_type, dxpl_id, req, arguments);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6471,7 +6472,7 @@ H5VLlink_optional(void *obj, hid_t connector_id, H5VL_link_optional_t opt_type, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__link_optional(obj, cls, opt_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__link_optional(obj, loc_params, cls, opt_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
 
 done:
@@ -6491,8 +6492,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_optional_vararg(void *obj, hid_t connector_id, H5VL_link_optional_t opt_type, hid_t dxpl_id,
-                         void **req /*out*/, ...)
+H5VLlink_optional_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+                         H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req /*out*/, ...)
 {
     H5VL_class_t *cls;                   /* VOL connector's class struct */
     va_list       arguments;             /* Argument list passed from the API call */
@@ -6500,7 +6501,7 @@ H5VLlink_optional_vararg(void *obj, hid_t connector_id, H5VL_link_optional_t opt
     herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xiVxix", obj, connector_id, opt_type, dxpl_id, req);
+    H5TRACE6("e", "*x*#iVxix", obj, loc_params, connector_id, opt_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6511,7 +6512,7 @@ H5VLlink_optional_vararg(void *obj, hid_t connector_id, H5VL_link_optional_t opt
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, req);
     arg_started = TRUE;
-    if (H5VL__link_optional(obj, cls, opt_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__link_optional(obj, loc_params, cls, opt_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
 
 done:
@@ -6521,6 +6522,75 @@ done:
 
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLlink_optional_vararg() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLlink_optional_op
+ *
+ * Purpose:     Performs an optional connector-specific operation on a link
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+                     hid_t loc_id, const char *name, hid_t lapl_id,
+                     H5VL_link_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...)
+{
+    H5VL_object_t * vol_obj    = NULL;            /* Object for loc_id */
+    H5VL_loc_params_t loc_params;                 /* Location parameters for object access */
+    void *         token       = NULL;            /* Request token for async operation        */
+    void **        token_ptr   = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    va_list        arguments;                     /* Argument list passed from the API call */
+    hbool_t        arg_started = FALSE;           /* Whether the va_list has been started */
+    hbool_t        vol_wrapper_set = FALSE;       /* Whether the VOL object wrapping context was set up */
+    herr_t         ret_value   = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*s*sIui*siVxii", app_file, app_func, app_line, loc_id, name, lapl_id, opt_type, dxpl_id,
+             es_id);
+
+    /* Check arguments */
+    /* name is verified in H5VL_setup_name_args() */
+
+    /* Set up object access arguments */
+    if (H5VL_setup_name_args(loc_id, name, FALSE, lapl_id, &vol_obj, &loc_params) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set link access arguments")
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Set wrapper info in API context */
+    if (H5VL_set_vol_wrapper(vol_obj) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    HDva_start(arguments, es_id);
+    arg_started = TRUE;
+    if (H5VL__link_optional(vol_obj->data, &loc_params, vol_obj->connector->cls, opt_type, dxpl_id, token_ptr, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(FUNC, "*s*sIui*siVxii", app_file, app_func, app_line, loc_id, name, lapl_id, opt_type, dxpl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    /* End access to the va_list, if we started it */
+    if (arg_started)
+        HDva_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLlink_optional_op() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL__object_open

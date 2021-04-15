@@ -193,8 +193,9 @@ static herr_t H5VL_pass_through_link_get(void *obj, const H5VL_loc_params_t *loc
 static herr_t H5VL_pass_through_link_specific(void *obj, const H5VL_loc_params_t *loc_params,
                                               H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req,
                                               va_list arguments);
-static herr_t H5VL_pass_through_link_optional(void *obj, H5VL_link_optional_t opt_type, hid_t dxpl_id,
-                                              void **req, va_list arguments);
+static herr_t H5VL_pass_through_link_optional(void *obj, const H5VL_loc_params_t *loc_params,
+                                              H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req,
+                                              va_list arguments);
 
 /* Object callbacks */
 static void * H5VL_pass_through_object_open(void *obj, const H5VL_loc_params_t *loc_params,
@@ -2348,7 +2349,8 @@ H5VL_pass_through_link_specific(void *obj, const H5VL_loc_params_t *loc_params,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_link_optional(void *obj, H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req,
+H5VL_pass_through_link_optional(void *obj, const H5VL_loc_params_t *loc_params,
+                                H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req,
                                 va_list arguments)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
@@ -2358,7 +2360,7 @@ H5VL_pass_through_link_optional(void *obj, H5VL_link_optional_t opt_type, hid_t 
     printf("------- PASS THROUGH VOL LINK Optional\n");
 #endif
 
-    ret_value = H5VLlink_optional(o->under_object, o->under_vol_id, opt_type, dxpl_id, req, arguments);
+    ret_value = H5VLlink_optional(o->under_object, loc_params, o->under_vol_id, opt_type, dxpl_id, req, arguments);
 
     /* Check for async request */
     if (req && *req)
