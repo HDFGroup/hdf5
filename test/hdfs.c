@@ -578,7 +578,10 @@ error:
      ***********/
 
     if (fapl_id < 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     return 1;
@@ -649,7 +652,10 @@ test_hdfs_fapl(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        (void)H5Pclose(fapl_id);
+    }
     H5E_END_TRY;
 
     return 1;
@@ -824,7 +830,10 @@ test_vfd_open(void)
         HDfprintf(stderr, "testing: %s\n", T.message);
 #endif /* HDFS_TEST_DEBUG */
 
-        H5E_BEGIN_TRY { fd = H5FDopen(T.url, T.flags, fapl_id, T.maxaddr); }
+        H5E_BEGIN_TRY
+        {
+            fd = H5FDopen(T.url, T.flags, fapl_id, T.maxaddr);
+        }
         H5E_END_TRY;
         if (NULL != fd) {
             if (TRUE == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
@@ -991,7 +1000,10 @@ error:
         (void)H5FDclose(fd_shakespeare);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1076,7 +1088,10 @@ error:
         (void)H5FDclose(file_shakespeare);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1265,7 +1280,10 @@ error:
     if (file_raven)
         (void)H5FDclose(file_raven);
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1361,7 +1379,10 @@ error:
      ***********/
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (file) {
@@ -1489,7 +1510,10 @@ error:
 #endif /* HDFS_TEST_DEBUG */
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (file > 0)

@@ -914,7 +914,10 @@ test_set(void)
 error:
     if (ptrgetTest)
         HDfree(ptrgetTest);
-    H5E_BEGIN_TRY { H5Pclose(dxpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
     H5E_END_TRY
 
     return -1;

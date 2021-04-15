@@ -137,7 +137,10 @@ test_unregister_filters(hid_t fapl_id)
         goto error;
 
     /* Unregister the filter before closing the group.  It should fail */
-    H5E_BEGIN_TRY { ret = H5Zunregister(H5Z_FILTER_DUMMY); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zunregister(H5Z_FILTER_DUMMY);
+    }
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
@@ -185,7 +188,10 @@ test_unregister_filters(hid_t fapl_id)
         goto error;
 
     /* Unregister the filter before closing the dataset.  It should fail */
-    H5E_BEGIN_TRY { ret = H5Zunregister(H5Z_FILTER_DUMMY); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zunregister(H5Z_FILTER_DUMMY);
+    }
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();

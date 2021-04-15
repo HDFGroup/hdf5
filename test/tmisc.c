@@ -1892,7 +1892,10 @@ test_misc11(void)
     CHECK(ret, FAIL, "H5Pset_sizes");
 
     /* This should fail as (32770*2) will exceed ^16 - 2 bytes for storing btree entries */
-    H5E_BEGIN_TRY { ret = H5Pset_sym_k(fcpl, 32770, 0); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_sym_k(fcpl, 32770, 0);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_sym_k");
 
@@ -1900,7 +1903,10 @@ test_misc11(void)
     CHECK(ret, FAIL, "H5Pset_sym_k");
 
     /* This should fail as (32770*2) will exceed ^16 - 2 bytes for storing btree entries */
-    H5E_BEGIN_TRY { ret = H5Pset_istore_k(fcpl, 32770); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_istore_k(fcpl, 32770);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_istore_k");
 
@@ -3105,7 +3111,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the file again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fclose(fid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Fclose");
 
@@ -3136,7 +3145,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the property list again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Pclose(plid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pclose(plid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pclose");
 
@@ -3167,7 +3179,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the property class again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Pclose_class(pcid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pclose_class(pcid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pclose_class");
 
@@ -3198,7 +3213,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the datatype again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Tclose(tid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tclose(tid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Tclose");
 
@@ -3229,7 +3247,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the dataspace again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Sclose(sid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sclose(sid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sclose");
 
@@ -3268,7 +3289,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the dataset again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Dclose(did); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dclose(did);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dclose");
 
@@ -3319,7 +3343,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the attribute again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Aclose(aid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aclose(aid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aclose");
 
@@ -3366,7 +3393,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the group again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Gclose(gid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Gclose(gid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Gclose");
 
@@ -3401,7 +3431,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the error class again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Eunregister_class(ecid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eunregister_class(ecid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Eunregister_class");
 
@@ -3436,7 +3469,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the error message again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Eclose_msg(emid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_msg(emid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Eclose_msg");
 
@@ -3471,7 +3507,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the error stack again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Eclose_stack(esid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(esid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Eclose_stack");
 
@@ -3506,7 +3545,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try unregistering the VFD again (should fail) */
-    H5E_BEGIN_TRY { ret = H5FDunregister(vfdid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5FDunregister(vfdid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5FDunregister");
 
@@ -3944,7 +3986,10 @@ test_misc23(void)
      * test the old APIs
      **********************************************************************/
 
-    H5E_BEGIN_TRY { tmp_id = H5Gcreate1(file_id, "/A/B00a/grp", (size_t)0); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gcreate1(file_id, "/A/B00a/grp", (size_t)0);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gcreate1");
 
@@ -3954,7 +3999,10 @@ test_misc23(void)
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dcreate1(file_id, "/A/B00c/dset", type_id, space_id, create_id); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dcreate1(file_id, "/A/B00c/dset", type_id, space_id, create_id);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dcreate1");
 
@@ -4287,51 +4335,87 @@ test_misc24(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Attempt to open each kind of object with wrong API, including using soft links */
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
@@ -4340,19 +4424,31 @@ test_misc24(void)
     group_id = H5Gopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
     CHECK(group_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
@@ -4363,19 +4459,31 @@ test_misc24(void)
     dset_id = H5Dopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
     CHECK(dset_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
@@ -4386,19 +4494,31 @@ test_misc24(void)
     type_id = H5Topen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
@@ -4984,7 +5104,10 @@ test_misc27(void)
 
 #ifdef H5_STRICT_FORMAT_CHECKS
     /* Open group with incorrect # of object header messages (should fail) */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, MISC27_GROUP, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, MISC27_GROUP, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(gid, FAIL, "H5Gopen2");
 #else  /* H5_STRICT_FORMAT_CHECKS */
@@ -5475,17 +5598,26 @@ test_misc33(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Case (1) */
-    H5E_BEGIN_TRY { ret = H5Oget_info_by_name(fid, "/soft_two", &oinfo, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oget_info_by_name(fid, "/soft_two", &oinfo, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oget_info_by_name");
 
     /* Case (2) */
-    H5E_BEGIN_TRY { ret = H5Oget_info_by_name(fid, "/dsetA", &oinfo, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oget_info_by_name(fid, "/dsetA", &oinfo, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oget_info_by_name");
 
     /* Case (3) */
-    H5E_BEGIN_TRY { ret = H5Oget_info_by_name(fid, "/soft_one", &oinfo, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oget_info_by_name(fid, "/soft_one", &oinfo, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oget_info_by_name");
 

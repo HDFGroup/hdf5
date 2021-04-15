@@ -33,7 +33,9 @@ namespace H5 {
 ///\brief       Default constructor: Creates a string create property list
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrCreatPropList::StrCreatPropList() : PropList(H5P_STRING_CREATE) {}
+StrCreatPropList::StrCreatPropList() : PropList(H5P_STRING_CREATE)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    StrCreatPropList copy constructor
@@ -42,7 +44,9 @@ StrCreatPropList::StrCreatPropList() : PropList(H5P_STRING_CREATE) {}
 ///\param       original - IN: StrCreatPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrCreatPropList::StrCreatPropList(const StrCreatPropList &original) : PropList(original) {}
+StrCreatPropList::StrCreatPropList(const StrCreatPropList &original) : PropList(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    StrCreatPropList overloaded constructor
@@ -51,7 +55,9 @@ StrCreatPropList::StrCreatPropList(const StrCreatPropList &original) : PropList(
 ///\param       plist_id - IN: StrCreatPropList id to use
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrCreatPropList::StrCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
+StrCreatPropList::StrCreatPropList(const hid_t plist_id) : PropList(plist_id)
+{
+}
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

@@ -146,12 +146,18 @@ test_misc(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Check that creating groups with no-op names isn't allowed */
-    H5E_BEGIN_TRY { g1 = H5Gcreate2(fid, "/", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        g1 = H5Gcreate2(fid, "/", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (g1 >= 0)
         TEST_ERROR
 
-    H5E_BEGIN_TRY { g1 = H5Gcreate2(fid, "./././", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        g1 = H5Gcreate2(fid, "./././", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (g1 >= 0)
         TEST_ERROR
@@ -1356,7 +1362,10 @@ corrupt_stab_msg(void)
         TEST_ERROR
 
     /* Verify that an error is thrown when we try to access the dataset */
-    H5E_BEGIN_TRY { did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (did >= 0)
         TEST_ERROR

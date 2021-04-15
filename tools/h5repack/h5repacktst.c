@@ -5426,7 +5426,10 @@ make_dset(hid_t loc_id, const char *name, hid_t sid, hid_t dcpl, void *buf)
     return 0;
 
 out:
-    H5E_BEGIN_TRY { H5Dclose(did); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+    }
     H5E_END_TRY;
     return -1;
 }

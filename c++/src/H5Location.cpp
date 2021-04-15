@@ -57,7 +57,9 @@ userAttrOpWrpr(hid_t loc_id, const char *attr_name, const H5A_info_t *ainfo, voi
 // Function:    H5Location default constructor (protected)
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Location::H5Location() : IdComponent() {}
+H5Location::H5Location() : IdComponent()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    H5Location overloaded constructor (protected)
@@ -1454,7 +1456,9 @@ H5Location::getLinkval(const char *name, size_t size) const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Location::~H5Location() {}
+H5Location::~H5Location()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    f_Attribute_setId - friend

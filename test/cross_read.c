@@ -162,7 +162,10 @@ check_data(const char *dsetname, hid_t fid, hbool_t floating_number)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Dclose(dataset); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dataset);
+    }
     H5E_END_TRY;
     return 1;
 }
@@ -293,7 +296,10 @@ open_dataset(char *fname)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return nerrors;
 }

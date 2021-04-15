@@ -39,7 +39,9 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType() : DataType() {}
+EnumType::EnumType() : DataType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -48,14 +50,18 @@ EnumType::EnumType() : DataType() {}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType(const hid_t existing_id) : DataType(existing_id) {}
+EnumType::EnumType(const hid_t existing_id) : DataType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType copy constructor
 ///\brief       Copy constructor: makes a copy of the original EnumType object.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType(const EnumType &original) : DataType(original) {}
+EnumType::EnumType(const EnumType &original) : DataType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -67,7 +73,9 @@ EnumType::EnumType(const EnumType &original) : DataType(original) {}
 //              the enum datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size) {}
+EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -332,6 +340,8 @@ EnumType::getMemberValue(unsigned memb_no, void *value) const
 ///\brief       Properly terminates access to this enum datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::~EnumType() {}
+EnumType::~EnumType()
+{
+}
 
 } // namespace H5
