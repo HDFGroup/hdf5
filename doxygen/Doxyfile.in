@@ -858,6 +858,7 @@ FILE_PATTERNS          = H5*public.h \
                          H5FDdirect.h \
                          H5FDfamily.h \
                          H5FDlog.h \
+                         H5FDmpi.h \
                          H5FDmpio.h \
                          H5FDmulti.h \
                          H5FDsec2.h \

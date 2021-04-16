@@ -236,10 +236,12 @@ typedef enum H5Z_cb_return_t {
     H5Z_CB_NO    = 2   /**< sentinel */
 } H5Z_cb_return_t;
 
+//! <!-- [H5Z_filter_func_t_snip] -->
 /**
  *  Filter callback function definition
  */
 typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf, size_t buf_size, void *op_data);
+//! <!-- [H5Z_filter_func_t_snip] -->
 
 /**
  * Structure for filter callback property

@@ -95,20 +95,43 @@ extern "C" {
 #define H5_NO_EXPAND(x) (x)
 
 /* Version numbers */
-#define H5_VERS_MAJOR      1  /* For major interface/format changes       */
-#define H5_VERS_MINOR      13 /* For minor interface/format changes       */
-#define H5_VERS_RELEASE    0  /* For tweaks, bug-fixes, or development    */
-#define H5_VERS_SUBRELEASE "" /* For pre-releases like snap0          */
-/* Empty string for real releases.           */
-#define H5_VERS_INFO "HDF5 library version: 1.13.0" /* Full version string */
+/**
+ * For major interface/format changes
+ */
+#define H5_VERS_MAJOR 1
+/**
+ * For minor interface/format changes
+ */
+#define H5_VERS_MINOR 13
+/**
+ * For tweaks, bug-fixes, or development
+ */
+#define H5_VERS_RELEASE 0
+/**
+ * For pre-releases like \c snap0. Empty string for official releases.
+ */
+#define H5_VERS_SUBRELEASE ""
+/**
+ * Full version string
+ */
+#define H5_VERS_INFO "HDF5 library version: 1.13.0"
 
+/**
+ * \todo Add missing documentation
+ */
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
 /* macros for comparing the version */
+/**
+ * \todo Add missing documentation
+ */
 #define H5_VERSION_GE(Maj, Min, Rel)                                                                         \
     (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE >= Rel)) ||                       \
      ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR > Min)) || (H5_VERS_MAJOR > Maj))
 
+/**
+ * \todo Add missing documentation
+ */
 #define H5_VERSION_LE(Maj, Min, Rel)                                                                         \
     (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) ||                       \
      ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))

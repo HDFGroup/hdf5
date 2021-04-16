@@ -74,7 +74,7 @@ typedef haddr_t hobj_ref_t;
 /**
  * Buffer to store heap ID and index
  *
- * This needs to be large enough to store largest \ref haddr_t in a worst case
+ * This needs to be large enough to store largest #haddr_t in a worst case
  * machine (8 bytes currently) plus an int.
  *
  * \deprecated Dataset region reference type that is used with deprecated

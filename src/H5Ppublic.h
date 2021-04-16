@@ -553,8 +553,6 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  *          list of this class is being created. The #H5P_cls_create_func_t
  *          callback function is defined as follows:
  *
- *          \todo fix snippets to work, when you click on them.
- *
  *          \snippet this H5P_cls_create_func_t_snip
  *
  *          The parameters to this callback function are defined as follows:
@@ -1293,8 +1291,6 @@ H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
  *          property list objects; the initial value is assumed to
  *          have any necessary setup already performed on it.
  *
- * \todo "cpp_note" goes here
- *
  * \since 1.8.0
  *
  */
@@ -1385,9 +1381,6 @@ H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
  *          identified by \p id remain unchanged through the iteration.
  *          If the membership changes during the iteration, the function's
  *          behavior is undefined.
- *
- *
- * \todo "cpp_note" goes here
  *
  * \since 1.4.0
  *
@@ -1667,8 +1660,6 @@ H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_da
  *          list close routine returns an error value but the property list is
  *          still closed.
  *
- * \todo "cpp_note" goes here
- *
  * \since 1.8.0
  *
  */
@@ -1757,7 +1748,7 @@ H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
 /* Object creation property list (OCPL) routines */
 
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Verifies that all required filters are available
  *
@@ -1854,7 +1845,7 @@ H5_DLL herr_t H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_fla
  */
 H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Returns information about a filter in a pipeline
  *
@@ -1921,7 +1912,7 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                    char name[], unsigned *filter_config /*out*/);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Returns information about the specified filter
  *
@@ -1979,7 +1970,7 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                    char name[] /*out*/, unsigned *filter_config /*out*/);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Returns the number of filters in the pipeline
  *
@@ -2039,7 +2030,7 @@ H5_DLL int H5Pget_nfilters(hid_t plist_id);
  */
 H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Modifies a filter in the filter pipeline
  *
@@ -2068,7 +2059,7 @@ H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
 H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                                const unsigned int cd_values[/*cd_nelmts*/]);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief    Delete one or more filters in the filter pipeline
  *
@@ -2222,7 +2213,7 @@ H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flag
  */
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL GCPL
  *
  * \brief Sets deflate (GNU gzip) compression method and compression level
  *
@@ -2278,7 +2269,7 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  */
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL GCPL
  *
  * \brief Adds a filter to the filter pipeline
  *
@@ -2534,7 +2525,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *       (The SZIP filter is an exception to this rule; see H5Pset_szip()
  *       for details.)
  *
- * \todo Removed several references to links to documentation
+ * \see \ref_filter_pipe, \ref_group_impls
  *
  * \version 1.8.5 Function applied to group creation property lists.
  * \since 1.6.0
@@ -2543,7 +2534,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                             const unsigned int c_values[]);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL GCPL
  *
  * \brief Sets up use of the Fletcher32 checksum filter
  *
@@ -3486,9 +3477,7 @@ H5_DLL herr_t H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close);
  *          application can retrieve a file handle for low-level access to
  *          a particular member of a family of files. The file handle is
  *          retrieved with a separate call to H5Fget_vfd_handle() (or,
- *          in special circumstances, to H5FDget_vfd_handle()).
- *
- * \todo References the VFL documentation.
+ *          in special circumstances, to H5FDget_vfd_handle(), see \ref VFL).
  *
  * \since 1.6.0
  *
@@ -4388,10 +4377,7 @@ H5_DLL herr_t H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close);
  *          retrieve a file handle for low-level access to a particular member
  *          of a family of files. The file handle is retrieved with a separate
  *          call to H5Fget_vfd_handle() (or, in special circumstances, to
- *          H5FDget_vfd_handle(); see -- <em> Virtual File Layer </em>
- *          and -- <em> List of VFL Functions </em> in
- *          [HDF5 Technical Notes]
- *          (https://portal.hdfgroup.org/display/HDF5/Tech+Notes)).
+ *          H5FDget_vfd_handle(); see \ref VFL).
  *
  *          The value of \p offset is an offset in bytes from the beginning of
  *          the HDF5 file, identifying a user-determined location within the
@@ -5066,11 +5052,7 @@ H5_DLL herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts);
  *          low-level access to the particular member of a set of \Code{MULTI}
  *          files in which that type of data is stored. The file handle is
  *          retrieved with a separate call to H5Fget_vfd_handle() (or, in special
- *          circumstances, to H5FDget_vfd_handle(); see \Emph{Virtual File Layer} and
- *          \Emph{List of VFL Functions} in \Emph{HDF5 Technical Notes}).
- *
- * \todo Link to Virtual File Layer and List of VFL Functions pages once HDF5 Technical
- *       Notes section is created
+ *          circumstances, to H5FDget_vfd_handle(); see \ref VFL.
  *
  * The type of data specified in \p type may be one of the following:
  *
@@ -5318,7 +5300,7 @@ H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective
  */
 H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
 /**
- * \ingroup GACPL
+ * \ingroup FAPL
  *
  * \brief Sets metadata write mode to collective or independent (default)
  *
@@ -5347,7 +5329,7 @@ H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collectiv
  */
 H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
 /**
- * \ingroup GACPL
+ * \ingroup FAPL
  *
  * \brief Retrieves metadata write mode setting
  *
@@ -5365,7 +5347,15 @@ H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
  * \since 1.10.0
  */
 H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
+
+/**
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
+
+/**
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 #endif /* H5_HAVE_PARALLEL */
 /**
@@ -6823,8 +6813,6 @@ H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_fil
  *          \p udata is the user-defined input data for the callback
  *          function.
  *
- * \todo Example Usage was removed and needs to be re-added
- *
  * \since 1.10.0
  *
  */
@@ -7021,7 +7009,7 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
  *          \p boundary. It is a 1-dimensional array with \p ndims
  *          elements, which should be the same as the rank of the
  *          dataset’s dataspace. While appending to a dataset along a
- *          particular dimension index via H5DOappend(), the library
+ *          particular dimension index via H5Dappend(), the library
  *          determines a boundary is reached when the resulting dimension
  *          size is divisible by \p boundary[index]. A zero value for
  *          \p boundary[index] indicates no boundary is set for that
@@ -7047,8 +7035,7 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
  *
  *          The callback function \p func must conform to the following
  *          prototype:
- *          \Code{typedef herr_t (#H5D_append_cb_t)(hid_t dataset_id,
- *                                    hsize_t *cur_dims, void *user_data)}
+ *          \snippet H5Dpublic.h H5D_append_cb_t_snip
  *
  *          The parameters of the callback function, per the above
  *          prototype, are defined as follows:
@@ -7057,10 +7044,6 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
  *          \li \p cur_dims is the dataset’s current dimension sizes when
  *              a boundary is hit.
  *          \li \p user_data is the user-defined input data.
- *
- * \todo Example Usage was removed and should be added back.
- * \todo Adding snippet for H5D_append_cb_t_snip did not work.
- * \todo H5DOappend() not found
  *
  * \since 1.10.0
  *
@@ -7593,16 +7576,56 @@ H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_fun
  *
  */
 H5_DLL herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Sets type conversion and background buffers
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] size Size, in bytes, of the type conversion and background buffers
+ * \param[in] tconv Pointer to application-allocated type conversion buffer
+ * \param[in] bkg Pointer to application-allocated background buffer
+ * \return \herr_t
+ *
+ * \details Given a dataset transfer property list, H5Pset_buffer() sets the
+ *          maximum size for the type conversion buffer and background buffer
+ *          and optionally supplies pointers to application-allocated
+ *          buffers. If the buffer size is smaller than the entire amount of
+ *          data being transferred between the application and the file, and a
+ *          type conversion buffer or background buffer is required, then strip
+ *          mining will be used.
+ *
+ *          Note that there are minimum size requirements for the buffer. Strip
+ *          mining can only break the data up along the first dimension, so the
+ *          buffer must be large enough to accommodate a complete slice that
+ *          encompasses all of the remaining dimensions. For example, when strip
+ *          mining a \Code{100x200x300} hyperslab of a simple data space, the
+ *          buffer must be large enough to hold \Code{1x200x300} data
+ *          elements. When strip mining a \Code{100x200x300x150} hyperslab of a
+ *          simple data space, the buffer must be large enough to hold
+ *          \Code{1x200x300x150} data elements.
+ *
+ *          If \p tconv and/or \p bkg are null pointers, then buffers will be
+ *          allocated and freed during the data transfer.
+ *
+ *          The default value for the maximum buffer is 1 MiB.
+ *
+ * \version 1.6.0 The \p size parameter has changed from type hsize_t to \c size_t.
+ * \version 1.4.0 The \p size parameter has changed to type hsize_t.
+ *
+ */
 H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);
+
 /**
  * \ingroup DXPL
  *
  * \brief Sets a data transform expression
  *
- * \param[in] plist_id   Identifier of the property list or class
+ * \dxpl_id{plist_id}
  * \param[in] expression Pointer to the null-terminated data transform
  *                       expression
- *
  * \return \herr_t
  *
  * \details H5Pset_data_transform() sets the data transform to be used for
@@ -7610,11 +7633,11 @@ H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
  *          transfer property list \p plist_id.
  *
  *          The \p expression parameter is a string containing an algebraic
- *          expression, such as (5/9.0)*(x-32) or x*(x-5). When a dataset
- *          is read or written with this property list, the transform
- *          expression is applied with the x being replaced by the values
- *          in the dataset. When reading data, the values in the file are
- *          not changed and the transformed data is returned to the user.
+ *          expression, such as \Code{(5/9.0)*(x-32)} or \Code{x*(x-5)}. When a
+ *          dataset is read or written with this property list, the transform
+ *          expression is applied with the \c x being replaced by the values in
+ *          the dataset. When reading data, the values in the file are not
+ *          changed and the transformed data is returned to the user.
  *
  *          Data transforms can only be applied to integer or
  *          floating-point datasets. Order of operations is obeyed and
@@ -7628,13 +7651,224 @@ H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
  *
  */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char *expression);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets the dataset transfer property list to enable or disable error
+ *        detection when reading data
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] check Specifies whether error checking is enabled or disabled
+ *            for dataset read operations
+ * \return \herr_t
+ *
+ * \details H5Pset_edc_check() sets the dataset transfer property list \p plist
+ *          to enable or disable error detection when reading data.
+ *
+ *          Whether error detection is enabled or disabled is specified in the
+ *          \p check parameter. Valid values are #H5Z_ENABLE_EDC (default) and
+ *          #H5Z_DISABLE_EDC.
+ *
+ * \note The initial error detection implementation, Fletcher32 checksum,
+ *       supports error detection for chunked datasets only.
+ *
+ * \attention The Fletcher32 EDC checksum filter, set with H5Pset_fletcher32(),
+ *            was added in HDF5 Release 1.6.0. In the original implementation,
+ *            however, the checksum value was calculated incorrectly on
+ *            little-endian systems. The error was fixed in HDF5 Release 1.6.3.\n
+ *            As a result of this fix, an HDF5 library of Release 1.6.0 through
+ *            Release 1.6.2 cannot read a dataset created or written with
+ *            Release 1.6.3 or later if the dataset was created with the
+ *            checksum filter and the filter is enabled in the reading
+ *            library. (Libraries of Release 1.6.3 and later understand the
+ *            earlier error and compensate appropriately.)\n
+ *            \Bold{Work-around:} An HDF5 library of Release 1.6.2 or earlier
+ *            will be able to read a dataset created or written with the
+ *            checksum filter by an HDF5 library of Release 1.6.3 or later if
+ *            the checksum filter is disabled for the read operation. This can
+ *            be accomplished via an H5Pset_edc_check() call with the value
+ *            #H5Z_DISABLE_EDC in the second parameter. This has the obvious
+ *            drawback that the application will be unable to verify the
+ *            checksum, but the data does remain accessible.
+ *
+ * \version 1.6.3 Error in checksum calculation on little-endian systems
+ *          corrected in this release.
+ * \since 1.6.0
+ *
+ */
 H5_DLL herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets user-defined filter callback function
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] func User-defined filter callback function
+ * \param[in] op_data User-defined input data for the callback function
+ * \return \herr_t
+ *
+ * \details H5Pset_filter_callback() sets the user-defined filter callback
+ *          function \p func in the dataset transfer property list \p plist_id.
+ *
+ *          The parameter \p op_data is a pointer to user-defined input data for
+ *          the callback function and will be passed through to the callback
+ *          function.
+ *
+ *          The callback function \p func defines the actions an application is
+ *          to take when a filter fails. The function prototype is as follows:
+ *          \snippet H5Zpublic.h H5Z_filter_func_t_snip
+ *          where \c filter indicates which filter has failed, \c buf and \c buf_size
+ *          are used to pass in the failed data, and op_data is the required
+ *          input data for this callback function.
+ *
+ *          Valid callback function return values are #H5Z_CB_FAIL and #H5Z_CB_CONT.
+ *
+ * \since 1.6.0
+ *
+ */
 H5_DLL herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data);
-H5_DLL herr_t H5Pset_hyper_vector_size(hid_t fapl_id, size_t size);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets number of I/O vectors to be read/written in hyperslab I/O
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] size Number of I/O vectors to accumulate in memory for I/O
+ *            operations\n
+ *            Must be greater than 1 (one)\n
+ *            Default value: 1024
+ * \return \herr_t
+ *
+ * \details H5Pset_hyper_vector_size() sets the number of I/O vectors to be
+ *          accumulated in memory before being issued to the lower levels of
+ *          the HDF5 library for reading or writing the actual data.
+ *
+ *          The I/O vectors are hyperslab offset and length pairs and are
+ *          generated during hyperslab I/O.
+ *
+ *          The number of I/O vectors is passed in \p size to be set in the
+ *          dataset transfer property list \p plist_id. \p size must be
+ *          greater than 1 (one).
+ *
+ *          H5Pset_hyper_vector_size() is an I/O optimization function;
+ *          increasing vector_size should provide better performance, but the
+ *          library will use more memory during hyperslab I/O. The default value
+ *          of \p size is 1024.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets the dataset transfer property list \p status
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] status Status toggle of the dataset transfer property list
+ * \return \herr_t
+ *
+ * \deprecated This function is deprecated as it no longer has any effect;
+ *             compound datatype field preservation is now core functionality in
+ *             the HDF5 library.
+ *
+ * \details H5Pset_preserve() sets the dataset transfer property list status to
+ *          \c 1 or \c 0.
+ *
+ *          When reading or writing compound datatypes and the destination is
+ *          partially initialized and the read/write is intended to initialize
+ *          the other members, one must set this property to \c 1. Otherwise the
+ *          I/O pipeline treats the destination datapoints as completely
+ *          uninitialized.
+ *
+ * \todo Add missing version information: introduction, deprecation, etc.
+ *       Why is the declaration not in the deprecated section?
+ *
+ */
 H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets user-defined datatype conversion callback function
+ *
+ * \dxpl_id
+ * \param[in] op User-defined type conversion callback function
+ * \param[in] operate_data User-defined input data for the callback function
+ * \return \herr_t
+ *
+ * \details H5Pset_type_conv_cb() sets the user-defined datatype conversion
+ *          callback function \p op in the dataset transfer property list \p
+ *          dxpl_id
+ *
+ *          The parameter operate_data is a pointer to user-defined input data
+ *          for the callback function and will be passed through to the callback
+ *          function.
+ *
+ *          The callback function \p op defines the actions an application is to
+ *          take when there is an exception during datatype conversion. The
+ *          function prototype is as follows:
+ *          \snippet H5Tpublic.h H5T_conv_except_func_t_snip
+ *
+ * \todo Add version information.
+ *
+ */
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void *operate_data);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets the memory manager for variable-length datatype allocation in
+ *        H5Dread() and H5Dvlen_reclaim()
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] alloc_func User's allocate routine, or \c NULL for system \c malloc
+ * \param[in] alloc_info Extra parameter for user's allocation routine.
+ *            Contents are ignored if preceding parameter is \c NULL.
+ * \param[in] free_func User's free routine, or \c NULL for system \c free
+ * \param[in] free_info Extra parameter for user's free routine. Contents are
+ *            ignored if preceding parameter is \c NULL
+ * \return \herr_t
+ *
+ * \details H5Pset_vlen_mem_manager() sets the memory manager for
+ *          variable-length datatype allocation in H5Dread() and free in
+ *          H5Dvlen_reclaim().
+ *
+ *          The \p alloc_func and \p free_func parameters identify the memory
+ *          management routines to be used. If the user has defined custom
+ *          memory management routines, \p alloc_func and/or free_func should be
+ *          set to make those routine calls (i.e., the name of the routine is
+ *          used as the value of the parameter); if the user prefers to use the
+ *          system's \c malloc and/or \c free, the \p alloc_func and \p
+ *          free_func parameters, respectively, should be set to \c NULL
+ *
+ *          The prototypes for these user-defined functions are as follows:
+ *          \snippet H5MMpublic.h H5MM_allocate_t_snip
+ *
+ *          \snippet H5MMpublic.h H5MM_free_t_snip
+ *
+ *          The \p alloc_info and \p free_info parameters can be used to pass
+ *          along any required information to the user's memory management
+ *          routines.
+ *
+ *          In summary, if the user has defined custom memory management
+ *          routines, the name(s) of the routines are passed in the \p
+ *          alloc_func and \p free_func parameters and the custom routines'
+ *          parameters are passed in the \p alloc_info and \p free_info
+ *          parameters. If the user wishes to use the system \c malloc and \c
+ *          free functions, the \p alloc_func and/or \p free_func parameters are
+ *          set to \c NULL and the \p alloc_info and \p free_info parameters are
+ *          ignored.
+ *
+ * \todo Add version information.
+ */
 H5_DLL herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info,
                                       H5MM_free_t free_func, void *free_info);
+
 #ifdef H5_HAVE_PARALLEL
 /**
  * \ingroup DXPL
@@ -7821,8 +8055,16 @@ H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_int
 H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd);
 
 /* Group creation property list (GCPL) routines */
+
+/**
+ * \ingroup GCPL
+ *
+ * \todo Add missing documentation
+ *
+ */
 H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */,
                                    unsigned *est_name_len /* out */);
+
 /**
  * \ingroup GCPL
  *
@@ -8514,9 +8756,6 @@ H5_DLL herr_t H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags);
  *          </pre>
  *
  *
- * \todo Add Programming Note for C++ Developers Using C Functions
- *
- *
  * \since 1.8.3
  *
  */
@@ -8699,10 +8938,7 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
- *
- * \todo missing link to "Copying Committed Datatypes with H5Ocopy - A
- *       comprehensive discussion of copying committed datatypes (PDF)
- *       in Advanced Topics in HDF5
+ *    \li \ref_h5ocopy
  *
  * \since 1.8.9
  *
@@ -8816,8 +9052,7 @@ H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/)
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
- *
- * \todo Link to Copying Committed Datatypes with H5Ocopy was removed.
+ *    \li \ref_h5ocopy
  *
  * \since 1.8.9
  *
@@ -8908,8 +9143,8 @@ H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, 
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
+ *    \li \ref_h5ocopy
  *
- * \todo Link to Copying Committed Datatypes with H5Ocopy was removed.
  * \version 1.8.9 #H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG added in this release.
  *
  * \since 1.8.0
@@ -8995,10 +9230,7 @@ H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
- *
- * \todo Link removed to "Copying Committed Datatypes with H5Ocopy" in Advanced
- *       Topics in HDF5
- * \todo Programming Note for C++ Developers Using C Functions:
+ *    \li \ref_h5ocopy
  *
  * \since 1.8.9
  *
@@ -9306,7 +9538,7 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *va
  */
 H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Returns information about a filter in a pipeline (DEPRECATED)
  *
@@ -9361,7 +9593,7 @@ H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                    char name[]);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Returns information about the specified filter
  *

@@ -206,13 +206,20 @@ typedef enum H5T_direction_t {
  * The exception type passed into the conversion callback function
  */
 typedef enum H5T_conv_except_t {
-    H5T_CONV_EXCEPT_RANGE_HI  = 0, /**< source value is greater than destination's range */
-    H5T_CONV_EXCEPT_RANGE_LOW = 1, /**< source value is less than destination's range    */
-    H5T_CONV_EXCEPT_PRECISION = 2, /**< source value loses precision in destination      */
-    H5T_CONV_EXCEPT_TRUNCATE  = 3, /**< source value is truncated in destination         */
-    H5T_CONV_EXCEPT_PINF      = 4, /**< source value is positive infinity(floating number) */
-    H5T_CONV_EXCEPT_NINF      = 5, /**< source value is negative infinity(floating number) */
-    H5T_CONV_EXCEPT_NAN       = 6  /**< source value is NaN(floating number)             */
+    H5T_CONV_EXCEPT_RANGE_HI = 0,
+    /**< Source value is greater than destination's range */
+    H5T_CONV_EXCEPT_RANGE_LOW = 1,
+    /**< Source value is less than destination's range */
+    H5T_CONV_EXCEPT_PRECISION = 2,
+    /**< Source value loses precision in destination */
+    H5T_CONV_EXCEPT_TRUNCATE = 3,
+    /**< Source value is truncated in destination */
+    H5T_CONV_EXCEPT_PINF = 4,
+    /**< Source value is positive infinity */
+    H5T_CONV_EXCEPT_NINF = 5,
+    /**< Source value is negative infinity */
+    H5T_CONV_EXCEPT_NAN = 6
+    /**< Source value is \c NaN (not a number, including \c QNaN and \c SNaN) */
 } H5T_conv_except_t;
 
 /**
@@ -259,12 +266,26 @@ typedef herr_t (*H5T_conv_t)(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, siz
                              size_t bkg_stride, void *buf, void *bkg, hid_t dset_xfer_plist);
 //! <!-- [H5T_conv_t_snip] -->
 
+//! <!-- [H5T_conv_except_func_t_snip] -->
 /**
- * Exception handler.  If an exception like overflow happenes during conversion,
- * this function is called if it's registered through H5Pset_type_conv_cb().
+ * \brief Exception handler.
+ *
+ * \param[in] except_type The kind of exception that occurred
+ * \param[in] src_id Source datatype identifier
+ * \param[in] dst_id Destination datatype identifier
+ * \param[in] src_buf Source data buffer
+ * \param[in,out] dst_buf Destination data buffer
+ * \param[in,out] user_data Callback context
+ * \returns Valid callback function return values are #H5T_CONV_ABORT,
+ *          #H5T_CONV_UNHANDLED and #H5T_CONV_HANDLED.
+ *
+ * \details If an exception like overflow happenes during conversion, this
+ *          function is called if it's registered through H5Pset_type_conv_cb().
+ *
  */
 typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type, hid_t src_id, hid_t dst_id,
                                                  void *src_buf, void *dst_buf, void *user_data);
+//! <!-- [H5T_conv_except_func_t_snip] -->
 
 /* When this header is included from a private header, don't make calls to H5open() */
 #undef H5OPEN
@@ -1061,7 +1082,7 @@ H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
  *          predefined datatype.
  *
  *          When creating a variable-length string datatype, \p size must
- *          be #H5T_VARIABLE.
+ *          be #H5T_VARIABLE; see \ref_vlen_strings.
  *
  *          When creating a fixed-length string datatype, \p size will
  *          be the length of the string in bytes. The length of the
@@ -1075,13 +1096,9 @@ H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
  *          The datatype identifier returned from this function should be
  *          released with H5Tclose or resource leaks will result.
  *
- * \since 1.2.0
- *
  * \see H5Tclose()
  *
- * \todo Original has a reference to “Creating variable-length string
- *       datatypes”.
- * \todo Create an example for H5Tcreate.
+ * \since 1.2.0
  *
  */
 H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
@@ -1106,8 +1123,6 @@ H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
  *          The returned datatype identifier should be released with H5Tclose()
  *          to prevent resource leak.
  *
- * \todo Create an example for H5Tcopy().
- *
  */
 H5_DLL hid_t H5Tcopy(hid_t type_id);
 /**
@@ -1129,8 +1144,6 @@ H5_DLL herr_t H5Tclose(hid_t type_id);
  * \ingroup H5T
  *
  * \brief Asynchronous version of H5Tclose().
- *
- * \todo Create an example for H5Tclose_async().
  *
  */
 H5_DLL herr_t H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t type_id,
@@ -1222,8 +1235,6 @@ H5_DLL herr_t H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lc
  *
  * \brief Asynchronous version of H5Tcommit2().
  *
- * \todo Create an example for H5Tcommit_async().
- *
  */
 H5_DLL herr_t H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                               const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id,
@@ -1256,8 +1267,6 @@ H5_DLL hid_t H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
  * \ingroup H5T
  *
  * \brief Asynchronous version of H5Topen2().
- *
- * \todo Create an example for H5Topen_async().
  *
  */
 H5_DLL hid_t H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
@@ -1503,8 +1512,6 @@ H5_DLL herr_t H5Trefresh(hid_t type_id);
  *
  * \since 1.2.0
  *
- * \todo Create example for  H5Tinsert
- *
  */
 H5_DLL herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id);
 /**
@@ -1663,10 +1670,7 @@ H5_DLL herr_t H5Tenum_valueof(hid_t type, const char *name, void *value /*out*/)
  *            character base type creates a variable-length sequence of strings
  *            (a variable-length, 1-dimensional array), with each element of
  *            the array being of the string or character base type.\n
- *            To create a variable-length string datatype, see "Creating
- *            variable-length string datatypes."
- *
- * \todo Fix the reference.
+ *            To create a variable-length string datatype, see \ref_vlen_strings.
  *
  */
 H5_DLL hid_t H5Tvlen_create(hid_t base_id);
@@ -1870,13 +1874,9 @@ H5_DLL htri_t H5Tdetect_class(hid_t type_id, H5T_class_t cls);
  *          actual data and a size value.  This function does not return the
  *          size of actual variable-length sequence data.
  *
- * \since 1.2.0
- *
  * \see H5Tset_size()
  *
- * \todo Original has a reference to “Creating variable-length string datatypes”.
- * \todo Create an example for H5Tget_size().
- *
+ * \since 1.2.0
  */
 H5_DLL size_t H5Tget_size(hid_t type_id);
 /**
@@ -2090,7 +2090,7 @@ H5_DLL H5T_pad_t H5Tget_inpad(hid_t type_id);
  */
 H5_DLL H5T_str_t H5Tget_strpad(hid_t type_id);
 /**
- * \ingroup COMPOUND
+ * \ingroup COMPOUND ENUM
  *
  * \brief Retrieves the number of elements in a compound or enumeration datatype
  *
@@ -2107,7 +2107,7 @@ H5_DLL H5T_str_t H5Tget_strpad(hid_t type_id);
  */
 H5_DLL int H5Tget_nmembers(hid_t type_id);
 /**
- * \ingroup COMPOUND
+ * \ingroup COMPOUND ENUM
  *
  * \brief Retrieves the name of a compound or enumeration datatype member
  *
@@ -2134,7 +2134,7 @@ H5_DLL int H5Tget_nmembers(hid_t type_id);
  */
 H5_DLL char *H5Tget_member_name(hid_t type_id, unsigned membno);
 /**
- * \ingroup COMPOUND
+ * \ingroup COMPOUND ENUM
  *
  * \brief Retrieves the index of a compound or enumeration datatype member
  *
@@ -2406,6 +2406,7 @@ H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
  *
  *          \li Variable-length string datatypes: If \p dtype_id is a
  *          variable-length string, size must normally be set to #H5T_VARIABLE.
+ *          See \ref_vlen_strings.
  *
  *          \li Compound datatypes: This function may be used to increase or
  *          decrease the size of a compound datatype, but the function will
@@ -2416,12 +2417,9 @@ H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
  *          variable-length array datatypes (#H5T_VLEN), or reference datatypes
  *          (#H5T_REFERENCE).
  *
- * \since 1.2.0
- *
  * \see H5Tget_size()
  *
- *\todo Create an example for H5Tset_size().
- *\todo Original has a reference to “Creating variable-length string datatypes”.
+ * \since 1.2.0
  *
  */
 H5_DLL herr_t H5Tset_size(hid_t type_id, size_t size);
@@ -2873,7 +2871,7 @@ H5_DLL htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
  *       enough to hold the larger of the input and output data.
  *
  * \version 1.6.3 \p nelmts parameter type changed to size_t.
- * \version 1.4.0 \p nelmts parameter type changed to \ref hsize_t.
+ * \version 1.4.0 \p nelmts parameter type changed to hsize_t.
  *
  */
 H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *background,

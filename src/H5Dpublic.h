@@ -613,7 +613,7 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  *          using the coordinates specified by \p offset.
  *
  *          If the queried chunk does not exist in the file, \p size will
- *          be set to 0, \p addr to #HADDR_UNDEF, and the buffer \p
+ *          be set to 0, \p addr to \c HADDR_UNDEF, and the buffer \p
  *          filter_mask will not be modified.
  *
  *          \p offset is a pointer to a one-dimensional array with a size
@@ -648,7 +648,7 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  *          specified by the index index. The chunk belongs to a set of
  *          chunks in the selection specified by fspace_id. If the queried
  *          chunk does not exist in the file, the size will be set to 0 and
- *          address to #HADDR_UNDEF. The value pointed to by filter_mask will
+ *          address to \c HADDR_UNDEF. The value pointed to by filter_mask will
  *          not be modified. NULL can be passed in for any \p out parameters.
  *
  *          \p chk_idx is the chunk index in the selection. Index value
@@ -683,7 +683,7 @@ H5_DLL herr_t H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_idx,
  *
  * \dset_id
  *
- * \return Returns the offset in bytes; otherwise, returns #HADDR_UNDEF,
+ * \return Returns the offset in bytes; otherwise, returns \c HADDR_UNDEF,
  *         a negative value.
  *
  * \details H5Dget_offset() returns the address in the file of
