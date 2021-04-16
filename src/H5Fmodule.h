@@ -46,10 +46,10 @@
  * <tr><th>Create</th><th>Open</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet{lineno} H5F_examples.c life_cycle
+ *   \snippet H5F_examples.c life_cycle
  *   </td>
  *   <td>
- *   \snippet{lineno} H5F_examples.c life_cycle_w_open
+ *   \snippet H5F_examples.c life_cycle_w_open
  *   </td>
  * </tr>
  * </table>
