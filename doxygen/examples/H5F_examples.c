@@ -112,17 +112,14 @@ fail_fapl:;
         char     name[] = "f11.h5";
 
         hid_t file = H5Fopen(name, mode, H5P_DEFAULT);
-        if (file != H5I_INVALID_HID)
-        {
+        if (file != H5I_INVALID_HID) {
             int step;
-            for (step = 0; step < 1000; ++step)
-            {
+            for (step = 0; step < 1000; ++step) {
+
                 // do important work & flush every 20 steps
 
-                if (step % 20 == 0)
-                {
-                    if (H5Fflush(file, H5F_SCOPE_LOCAL) < 0)
-                    {
+                if (step % 20 == 0) {
+                    if (H5Fflush(file, H5F_SCOPE_LOCAL) < 0) {
                         perror("H5Fflush failed.");
                         ret_val = EXIT_FAILURE;
                         break;
@@ -144,12 +141,11 @@ fail_fapl:;
         char     name[] = "f11.h5";
 
         hid_t file = H5Fopen(name, mode, H5P_DEFAULT);
-        if (file != H5I_INVALID_HID)
-        {
-            if (H5Fset_libver_bounds(file, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18)
-                >= 0)
-            {
+        if (file != H5I_INVALID_HID) {
+            if (H5Fset_libver_bounds(file, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18) >= 0) {
+
                 // object creation will not exceed HDF5 version 1.8.x
+
             }
             else
                 perror("H5Fset_libver_bounds failed.");
@@ -168,18 +164,14 @@ fail_fapl:;
         if (file != H5I_INVALID_HID)
         {
             hid_t group, child;
-            if ((group = H5Gcreate1(file, "mount_point", H5P_DEFAULT)) !=
-                H5I_INVALID_HID)
-            {
-                if ((child = H5Fopen("f1.h5", H5F_ACC_RDONLY, H5P_DEFAULT)) !=
-                    H5I_INVALID_HID)
-                {
-                    if (H5Fmount(group, ".", child, H5P_DEFAULT) >= 0)
-                    {
+            if ((group = H5Gcreate1(file, "mount_point", H5P_DEFAULT)) != H5I_INVALID_HID) {
+                if ((child = H5Fopen("f1.h5", H5F_ACC_RDONLY, H5P_DEFAULT)) != H5I_INVALID_HID) {
+                    if (H5Fmount(group, ".", child, H5P_DEFAULT) >= 0) {
+
                         // do something useful w/ the mounted file
+
                     }
-                    else
-                    {
+                    else {
                         ret_val = EXIT_FAILURE;
                         perror("H5Fmount failed.");
                     }

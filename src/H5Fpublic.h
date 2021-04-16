@@ -54,15 +54,15 @@
 /* NOTE: 0x0008u was H5F_ACC_DEBUG, now deprecated */
 #define H5F_ACC_CREAT (H5CHECK H5OPEN 0x0010u) /**< Create non-existing files  */
 #define H5F_ACC_SWMR_WRITE                                                                                   \
-    (H5CHECK 0x0020u) /**< Indicate that this file is open for writing in a
-                       *   single-writer/multi-reader (SWMR)  scenario.
-                       *   Note that the process(es) opening the file for reading
-                       *   must open the file with #H5F_ACC_RDONLY and use the
+    (H5CHECK 0x0020u) /**< Indicate that this file is open for writing in a                                  \
+                       *   single-writer/multi-reader (SWMR)  scenario.                                      \
+                       *   Note that the process(es) opening the file for reading                            \
+                       *   must open the file with #H5F_ACC_RDONLY and use the                               \
                        *   #H5F_ACC_SWMR_READ access flag. */
 #define H5F_ACC_SWMR_READ                                                                                    \
-    (H5CHECK 0x0040u) /**< Indicate that this file is open for reading in a
-                       * single-writer/multi-reader (SWMR) scenario. Note that
-                       * the process(es) opening the file for SWMR reading must
+    (H5CHECK 0x0040u) /**< Indicate that this file is open for reading in a                                  \
+                       * single-writer/multi-reader (SWMR) scenario. Note that                               \
+                       * the process(es) opening the file for SWMR reading must                              \
                        * also open the file with the #H5F_ACC_RDONLY flag.  */
 
 /**
@@ -890,7 +890,7 @@ H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
  *          if any, the HDF5 portion of the file, and any data that may have
  *          been appended beyond the data written through the HDF5 library.
  *
-* \since 1.6.3
+ * \since 1.6.3
  *
  */
 H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
