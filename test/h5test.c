@@ -189,65 +189,22 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  *
  *-------------------------------------------------------------------------
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the snprintf() calls with
- *      sub_filename in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_DIAG_OFF("format-nonliteral")
 void
 h5_delete_test_file(const char *base_name, hid_t fapl)
 {
-    char  filename[1024];     /* VFD-dependent filename to delete     */
-    char  sub_filename[2048]; /* sub-files in multi & family VFDs     */
-    hid_t driver = -1;        /* VFD ID                               */
+    char filename[1024]; /* VFD-dependent filename to delete */
 
     /* Get the VFD-dependent filename */
     if (NULL == h5_fixname(base_name, fapl, filename, sizeof(filename)))
         return;
 
-    driver = H5Pget_driver(fapl);
-
-    if (driver == H5FD_FAMILY) {
-        int j;
-        for (j = 0; /*void*/; j++) {
-            HDsnprintf(sub_filename, sizeof(sub_filename), filename, j);
-
-            /* If we can't access the file, it probably doesn't exist
-             * and we are done deleting the sub-files.
-             */
-            if (HDaccess(sub_filename, F_OK) < 0)
-                break;
-
-            HDremove(sub_filename);
-        } /* end for */
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(filename, fapl);
     }
-    else if (driver == H5FD_CORE) {
-        hbool_t backing; /* Whether the core file has backing store */
-
-        H5Pget_fapl_core(fapl, NULL, &backing);
-
-        /* If the file was stored to disk with bacing store, remove it */
-        if (backing)
-            HDremove(filename);
-    }
-    else if (driver == H5FD_MULTI) {
-        H5FD_mem_t mt;
-
-        HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
-
-        for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
-            HDsnprintf(sub_filename, sizeof(sub_filename), "%s-%c.h5", filename, multi_letters[mt]);
-            HDremove(sub_filename);
-        }
-    }
-    else {
-        HDremove(filename);
-    } /* end driver selection tree */
+    H5E_END_TRY;
 
 } /* end h5_delete_test_file() */
-H5_GCC_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    h5_delete_all_test_files
@@ -1962,6 +1919,7 @@ static const H5FD_class_t H5FD_dummy_g = {
     NULL,                /* truncate     */
     NULL,                /* lock         */
     NULL,                /* unlock       */
+    NULL,                /* del          */
     H5FD_FLMAP_DICHOTOMY /* fl_map       */
 };
 

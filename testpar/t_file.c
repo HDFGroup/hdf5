@@ -948,3 +948,58 @@ test_file_properties(void)
     VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
 
 } /* end test_file_properties() */
+
+void
+test_delete(void)
+{
+    hid_t       fid     = H5I_INVALID_HID; /* HDF5 file ID */
+    hid_t       fapl_id = H5I_INVALID_HID; /* File access plist */
+    hbool_t     is_coll;
+    const char *filename = NULL;
+    MPI_Comm    comm     = MPI_COMM_WORLD;
+    MPI_Info    info     = MPI_INFO_NULL;
+    htri_t      is_hdf5  = FAIL; /* Whether a file is an HDF5 file */
+    herr_t      ret;             /* Generic return value */
+
+    filename = (const char *)GetTestParameters();
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* setup file access plist */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id != H5I_INVALID_HID), "H5Pcreate");
+    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    VRFY((SUCCEED == ret), "H5Pset_fapl_mpio");
+
+    /* create the file */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((fid != H5I_INVALID_HID), "H5Fcreate");
+
+    /* close the file */
+    ret = H5Fclose(fid);
+    VRFY((SUCCEED == ret), "H5Fclose");
+
+    /* Verify that the file is an HDF5 file */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VRFY((TRUE == is_hdf5), "H5Fis_accessible");
+
+    /* Delete the file */
+    ret = H5Fdelete(filename, fapl_id);
+    VRFY((SUCCEED == ret), "H5Fdelete");
+
+    /* Verify that the file is NO LONGER an HDF5 file */
+    /* This should fail since there is no file */
+    H5E_BEGIN_TRY
+    {
+        is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    }
+    H5E_END_TRY;
+    VRFY((is_hdf5 != SUCCEED), "H5Fis_accessible");
+
+    /* Release file-access plist */
+    ret = H5Pclose(fapl_id);
+    VRFY((SUCCEED == ret), "H5Pclose");
+
+} /* end test_delete() */
