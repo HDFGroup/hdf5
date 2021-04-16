@@ -145,7 +145,6 @@ fail_fapl:;
             if (H5Fset_libver_bounds(file, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18) >= 0) {
 
                 // object creation will not exceed HDF5 version 1.8.x
-
             }
             else
                 perror("H5Fset_libver_bounds failed.");
@@ -161,15 +160,13 @@ fail_fapl:;
     //! <!-- [mount] -->
     {
         hid_t file = H5Fopen("f11.h5", H5F_ACC_RDWR, H5P_DEFAULT);
-        if (file != H5I_INVALID_HID)
-        {
+        if (file != H5I_INVALID_HID) {
             hid_t group, child;
             if ((group = H5Gcreate1(file, "mount_point", H5P_DEFAULT)) != H5I_INVALID_HID) {
                 if ((child = H5Fopen("f1.h5", H5F_ACC_RDONLY, H5P_DEFAULT)) != H5I_INVALID_HID) {
                     if (H5Fmount(group, ".", child, H5P_DEFAULT) >= 0) {
 
                         // do something useful w/ the mounted file
-
                     }
                     else {
                         ret_val = EXIT_FAILURE;
@@ -185,7 +182,6 @@ fail_fapl:;
             ret_val = EXIT_FAILURE;
     }
     //! <!-- [mount] -->
-
 
     return ret_val;
 }
