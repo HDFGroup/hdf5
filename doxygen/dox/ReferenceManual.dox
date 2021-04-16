@@ -1,8 +1,5 @@
 /** \page RM Reference Manual
 
-\todo Add the Event Sets module
-\todo Add the Map module
-
 The functions provided by the HDF5 C-API are grouped into the following
 \Emph{modules}:
 

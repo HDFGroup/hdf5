@@ -220,6 +220,15 @@ ALIASES += cpp_c_api_note="\attention \Bold{C++ Developers using HDF5 C-API func
 ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_coll_metadata_write() \li H5Pset_all_coll_metadata_ops() \li H5Pset_coll_metadata_write() \li \ref maybe_metadata_reads"
 
 ################################################################################
+# References
+################################################################################
+
+ALIASES += ref_cons_semantics="<a href=\"https://portal.hdfgroup.org/display/HDF5/Enabling+a+Strict+Consistency+Semantics+Model+in+Parallel+HDF5\">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a>"
+ALIASES += ref_file_image_ops="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations\">HDF5 File Image Operations</a>"
+ALIASES += ref_mdc_in_hdf5="<a href=\"https://portal.hdfgroup.org/display/HDF5/Metadata+Caching+in+HDF5\">Metadata Caching in HDF5</a>"
+ALIASES += ref_mdc_logging="<a href=\"https://portal.hdfgroup.org/display/HDF5/H5F_START_MDC_LOGGING\">Metadata Cache Logging</a>"
+
+################################################################################
 # The Usual Suspects
 ################################################################################
 
