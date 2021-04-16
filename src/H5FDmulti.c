@@ -1965,7 +1965,7 @@ open_members(H5FD_multi_t *file)
     char               tmp[H5FD_MULT_MAX_FILE_NAME_LEN];
     int                nerrors = 0;
     int                nchars;
-    static const char *func    = "(H5FD_multi)open_members"; /* Function Name for error reporting */
+    static const char *func = "(H5FD_multi)open_members"; /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1977,7 +1977,8 @@ open_members(H5FD_multi_t *file)
 
         nchars = snprintf(tmp, sizeof(tmp), file->fa.memb_name[mt], file->name);
         if (nchars < 0 || nchars >= (int)sizeof(tmp))
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_BADVALUE, "filename is too long and would be truncated", -1);
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_BADVALUE,
+                        "filename is too long and would be truncated", -1);
 
         H5E_BEGIN_TRY
         {
@@ -2032,7 +2033,8 @@ H5FD_multi_delete(const char *filename, hid_t fapl_id)
 
         nchars = snprintf(full_filename, sizeof(full_filename), fa->memb_name[mt], filename);
         if (nchars < 0 || nchars >= (int)sizeof(full_filename))
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_BADVALUE, "filename is too long and would be truncated", -1);
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_BADVALUE,
+                        "filename is too long and would be truncated", -1);
 
         if (H5FDdelete(full_filename, fa->memb_fapl[mt]) < 0)
             H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_BADVALUE, "error deleting member files", -1);

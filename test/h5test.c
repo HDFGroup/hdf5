@@ -193,15 +193,17 @@ h5_clean_files(const char *base_name[], hid_t fapl)
 void
 h5_delete_test_file(const char *base_name, hid_t fapl)
 {
-    char  filename[1024];     /* VFD-dependent filename to delete */
+    char filename[1024]; /* VFD-dependent filename to delete */
 
     /* Get the VFD-dependent filename */
     if (NULL == h5_fixname(base_name, fapl, filename, sizeof(filename)))
         return;
 
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Fdelete(filename, fapl);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
 } /* end h5_delete_test_file() */
 
