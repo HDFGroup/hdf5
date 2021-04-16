@@ -77,11 +77,9 @@
  *          Custom filters that have been registered with the library will have
  *          additional unique identifiers.
  *
- *          See \Emph{HDF5 Dynamically Loaded Filters} for more information on
- *          how an HDF5 application can apply a filter that is not registered
- *          with the HDF5 library.
- *
- * \todo Fix the reference.
+ *          See \ref_dld_filters for more information on how an HDF5
+ *          application can apply a filter that is not registered with the HDF5
+ *          library.
  *
  * \defgroup H5ZPRE Predefined Filters
  * \ingroup H5Z

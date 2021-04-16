@@ -1082,7 +1082,7 @@ H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
  *          predefined datatype.
  *
  *          When creating a variable-length string datatype, \p size must
- *          be #H5T_VARIABLE.
+ *          be #H5T_VARIABLE; see \ref_vlen_strings.
  *
  *          When creating a fixed-length string datatype, \p size will
  *          be the length of the string in bytes. The length of the
@@ -1096,13 +1096,9 @@ H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
  *          The datatype identifier returned from this function should be
  *          released with H5Tclose or resource leaks will result.
  *
- * \since 1.2.0
- *
  * \see H5Tclose()
  *
- * \todo Original has a reference to “Creating variable-length string
- *       datatypes”.
- * \todo Create an example for H5Tcreate.
+ * \since 1.2.0
  *
  */
 H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
@@ -1127,8 +1123,6 @@ H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
  *          The returned datatype identifier should be released with H5Tclose()
  *          to prevent resource leak.
  *
- * \todo Create an example for H5Tcopy().
- *
  */
 H5_DLL hid_t H5Tcopy(hid_t type_id);
 /**
@@ -1150,8 +1144,6 @@ H5_DLL herr_t H5Tclose(hid_t type_id);
  * \ingroup H5T
  *
  * \brief Asynchronous version of H5Tclose().
- *
- * \todo Create an example for H5Tclose_async().
  *
  */
 H5_DLL herr_t H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t type_id,
@@ -1243,8 +1235,6 @@ H5_DLL herr_t H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lc
  *
  * \brief Asynchronous version of H5Tcommit2().
  *
- * \todo Create an example for H5Tcommit_async().
- *
  */
 H5_DLL herr_t H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                               const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id,
@@ -1277,8 +1267,6 @@ H5_DLL hid_t H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
  * \ingroup H5T
  *
  * \brief Asynchronous version of H5Topen2().
- *
- * \todo Create an example for H5Topen_async().
  *
  */
 H5_DLL hid_t H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
@@ -1524,8 +1512,6 @@ H5_DLL herr_t H5Trefresh(hid_t type_id);
  *
  * \since 1.2.0
  *
- * \todo Create example for  H5Tinsert
- *
  */
 H5_DLL herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id);
 /**
@@ -1684,10 +1670,7 @@ H5_DLL herr_t H5Tenum_valueof(hid_t type, const char *name, void *value /*out*/)
  *            character base type creates a variable-length sequence of strings
  *            (a variable-length, 1-dimensional array), with each element of
  *            the array being of the string or character base type.\n
- *            To create a variable-length string datatype, see "Creating
- *            variable-length string datatypes."
- *
- * \todo Fix the reference.
+ *            To create a variable-length string datatype, see \ref_vlen_strings.
  *
  */
 H5_DLL hid_t H5Tvlen_create(hid_t base_id);
@@ -1891,13 +1874,9 @@ H5_DLL htri_t H5Tdetect_class(hid_t type_id, H5T_class_t cls);
  *          actual data and a size value.  This function does not return the
  *          size of actual variable-length sequence data.
  *
- * \since 1.2.0
- *
  * \see H5Tset_size()
  *
- * \todo Original has a reference to “Creating variable-length string datatypes”.
- * \todo Create an example for H5Tget_size().
- *
+ * \since 1.2.0
  */
 H5_DLL size_t H5Tget_size(hid_t type_id);
 /**
@@ -2427,6 +2406,7 @@ H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
  *
  *          \li Variable-length string datatypes: If \p dtype_id is a
  *          variable-length string, size must normally be set to #H5T_VARIABLE.
+ *          See \ref_vlen_strings.
  *
  *          \li Compound datatypes: This function may be used to increase or
  *          decrease the size of a compound datatype, but the function will
@@ -2437,12 +2417,9 @@ H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
  *          variable-length array datatypes (#H5T_VLEN), or reference datatypes
  *          (#H5T_REFERENCE).
  *
- * \since 1.2.0
- *
  * \see H5Tget_size()
  *
- *\todo Create an example for H5Tset_size().
- *\todo Original has a reference to “Creating variable-length string datatypes”.
+ * \since 1.2.0
  *
  */
 H5_DLL herr_t H5Tset_size(hid_t type_id, size_t size);

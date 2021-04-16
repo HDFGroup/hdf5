@@ -44,7 +44,6 @@
  *          and compressed.
  *
  * \todo Describe concisely what the functions in this module are about.
- * \todo Clicking on "more" after "Property List Interface" at the top does not work
  *
  * \defgroup GPLO General Property List Operations
  * \ingroup H5P

@@ -364,10 +364,8 @@ H5_DLL hid_t H5Sdecode(const void *buf);
  *
  * \note Motivation: This function was introduced in HDF5-1.12 as part of the
  *       H5Sencode() format change to enable 64-bit selection encodings and
- *       a dataspace selection that is tied to a file. See the New Features
- *       in HDF5 Release 1.12 as well as the H5Sencode() / H5Sdecode() Format Change RFC.
- *
- * \todo Fix the references.
+ *       a dataspace selection that is tied to a file. See the \ref_news_112
+ *       as well as the \ref_sencode_fmt_change.
  *
  * \since 1.12.0
  *

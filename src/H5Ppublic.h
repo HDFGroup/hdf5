@@ -553,8 +553,6 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  *          list of this class is being created. The #H5P_cls_create_func_t
  *          callback function is defined as follows:
  *
- *          \todo fix snippets to work, when you click on them.
- *
  *          \snippet this H5P_cls_create_func_t_snip
  *
  *          The parameters to this callback function are defined as follows:
@@ -1293,8 +1291,6 @@ H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
  *          property list objects; the initial value is assumed to
  *          have any necessary setup already performed on it.
  *
- * \todo "cpp_note" goes here
- *
  * \since 1.8.0
  *
  */
@@ -1385,9 +1381,6 @@ H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
  *          identified by \p id remain unchanged through the iteration.
  *          If the membership changes during the iteration, the function's
  *          behavior is undefined.
- *
- *
- * \todo "cpp_note" goes here
  *
  * \since 1.4.0
  *
@@ -1666,8 +1659,6 @@ H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_da
  *          If the \p close routine returns a negative value, the property
  *          list close routine returns an error value but the property list is
  *          still closed.
- *
- * \todo "cpp_note" goes here
  *
  * \since 1.8.0
  *
@@ -2534,7 +2525,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *       (The SZIP filter is an exception to this rule; see H5Pset_szip()
  *       for details.)
  *
- * \todo Removed several references to links to documentation
+ * \see \ref_filter_pipe, \ref_group_impls
  *
  * \version 1.8.5 Function applied to group creation property lists.
  * \since 1.6.0
@@ -3486,9 +3477,7 @@ H5_DLL herr_t H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close);
  *          application can retrieve a file handle for low-level access to
  *          a particular member of a family of files. The file handle is
  *          retrieved with a separate call to H5Fget_vfd_handle() (or,
- *          in special circumstances, to H5FDget_vfd_handle()).
- *
- * \todo References the VFL documentation.
+ *          in special circumstances, to H5FDget_vfd_handle(), see \ref VFL).
  *
  * \since 1.6.0
  *
@@ -4388,10 +4377,7 @@ H5_DLL herr_t H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close);
  *          retrieve a file handle for low-level access to a particular member
  *          of a family of files. The file handle is retrieved with a separate
  *          call to H5Fget_vfd_handle() (or, in special circumstances, to
- *          H5FDget_vfd_handle(); see -- <em> Virtual File Layer </em>
- *          and -- <em> List of VFL Functions </em> in
- *          [HDF5 Technical Notes]
- *          (https://portal.hdfgroup.org/display/HDF5/Tech+Notes)).
+ *          H5FDget_vfd_handle(); see \ref VFL).
  *
  *          The value of \p offset is an offset in bytes from the beginning of
  *          the HDF5 file, identifying a user-determined location within the
@@ -5066,11 +5052,7 @@ H5_DLL herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts);
  *          low-level access to the particular member of a set of \Code{MULTI}
  *          files in which that type of data is stored. The file handle is
  *          retrieved with a separate call to H5Fget_vfd_handle() (or, in special
- *          circumstances, to H5FDget_vfd_handle(); see \Emph{Virtual File Layer} and
- *          \Emph{List of VFL Functions} in \Emph{HDF5 Technical Notes}).
- *
- * \todo Link to Virtual File Layer and List of VFL Functions pages once HDF5 Technical
- *       Notes section is created
+ *          circumstances, to H5FDget_vfd_handle(); see \ref VFL.
  *
  * The type of data specified in \p type may be one of the following:
  *
@@ -6831,8 +6813,6 @@ H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_fil
  *          \p udata is the user-defined input data for the callback
  *          function.
  *
- * \todo Example Usage was removed and needs to be re-added
- *
  * \since 1.10.0
  *
  */
@@ -7029,7 +7009,7 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
  *          \p boundary. It is a 1-dimensional array with \p ndims
  *          elements, which should be the same as the rank of the
  *          dataset’s dataspace. While appending to a dataset along a
- *          particular dimension index via H5DOappend(), the library
+ *          particular dimension index via H5Dappend(), the library
  *          determines a boundary is reached when the resulting dimension
  *          size is divisible by \p boundary[index]. A zero value for
  *          \p boundary[index] indicates no boundary is set for that
@@ -7055,8 +7035,7 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
  *
  *          The callback function \p func must conform to the following
  *          prototype:
- *          \Code{typedef herr_t (#H5D_append_cb_t)(hid_t dataset_id,
- *                                    hsize_t *cur_dims, void *user_data)}
+ *          \snippet H5Dpublic.h H5D_append_cb_t_snip
  *
  *          The parameters of the callback function, per the above
  *          prototype, are defined as follows:
@@ -7065,10 +7044,6 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
  *          \li \p cur_dims is the dataset’s current dimension sizes when
  *              a boundary is hit.
  *          \li \p user_data is the user-defined input data.
- *
- * \todo Example Usage was removed and should be added back.
- * \todo Adding snippet for H5D_append_cb_t_snip did not work.
- * \todo H5DOappend() not found
  *
  * \since 1.10.0
  *
@@ -8781,9 +8756,6 @@ H5_DLL herr_t H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags);
  *          </pre>
  *
  *
- * \todo Add Programming Note for C++ Developers Using C Functions
- *
- *
  * \since 1.8.3
  *
  */
@@ -8966,10 +8938,7 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
- *
- * \todo missing link to "Copying Committed Datatypes with H5Ocopy - A
- *       comprehensive discussion of copying committed datatypes (PDF)
- *       in Advanced Topics in HDF5
+ *    \li \ref_h5ocopy
  *
  * \since 1.8.9
  *
@@ -9083,8 +9052,7 @@ H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/)
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
- *
- * \todo Link to Copying Committed Datatypes with H5Ocopy was removed.
+ *    \li \ref_h5ocopy
  *
  * \since 1.8.9
  *
@@ -9175,8 +9143,8 @@ H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, 
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
+ *    \li \ref_h5ocopy
  *
- * \todo Link to Copying Committed Datatypes with H5Ocopy was removed.
  * \version 1.8.9 #H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG added in this release.
  *
  * \since 1.8.0
@@ -9262,10 +9230,7 @@ H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
- *
- * \todo Link removed to "Copying Committed Datatypes with H5Ocopy" in Advanced
- *       Topics in HDF5
- * \todo Programming Note for C++ Developers Using C Functions:
+ *    \li \ref_h5ocopy
  *
  * \since 1.8.9
  *
