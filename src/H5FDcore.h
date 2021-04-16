@@ -57,9 +57,9 @@ H5_DLL hid_t H5FD_core_init(void);
  *
  *          The application is allowed to open an existing file with #H5FD_CORE
  *          driver. While using H5Fopen() to open an existing file, if the \p
- *          backing_store is set to 1 and the \c flags for H5Fopen() is set to
+ *          backing_store is set to 1 (TRUE) and the \c flags for H5Fopen() is set to
  *          #H5F_ACC_RDWR, any change to the file contents are saved to the file
- *          when the file is closed. If \p backing_store is set to 0 and the \c
+ *          when the file is closed. If \p backing_store is set to 0 (FALSE) and the \c
  *          flags for H5Fopen() is set to #H5F_ACC_RDWR, any change to the file
  *          contents will be lost when the file is closed. If the flags for
  *          H5Fopen() is set to #H5F_ACC_RDONLY, no change to the file is

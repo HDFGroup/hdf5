@@ -73,7 +73,7 @@ H5_DLL hid_t H5FD_multi_init(void);
  *          address space, from 0 (zero) to #HADDR_MAX, at which each type of
  *          data storage begins.
  *
- *          If \p relax is set to TRUE (or 1), then opening an existing file for
+ *          If \p relax is set to 1 (TRUE), then opening an existing file for
  *          read-only access will not fail if some file members are
  *          missing. This allows a file to be accessed in a limited sense if
  *          just the meta data is available.
