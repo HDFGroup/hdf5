@@ -350,6 +350,8 @@ main(int argc, char **argv)
 
     AddTest("props", test_file_properties, NULL, "Coll Metadata file property settings", PARATESTFILE);
 
+    AddTest("delete", test_delete, NULL, "MPI-IO VFD file delete", PARATESTFILE);
+
     AddTest("idsetw", dataset_writeInd, NULL, "dataset independent write", PARATESTFILE);
     AddTest("idsetr", dataset_readInd, NULL, "dataset independent read", PARATESTFILE);
 
