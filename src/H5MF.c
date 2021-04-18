@@ -2123,9 +2123,8 @@ H5MF__close_shrink_eoa(H5F_t *f)
                         curr_ring = needed_ring;
                     } /* end if */
 
-                    udata.alloc_type =
-                        (H5FD_mem_t)((H5FD_mem_t)ptype < H5FD_MEM_NTYPES ? ptype
-                                                                         : ((ptype % H5FD_MEM_NTYPES) + 1));
+                    udata.alloc_type = (H5FD_mem_t)(
+                        (H5FD_mem_t)ptype < H5FD_MEM_NTYPES ? ptype : ((ptype % H5FD_MEM_NTYPES) + 1));
 
                     if ((status = H5FS_sect_try_shrink_eoa(f, f->shared->fs_man[ptype], &udata)) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")

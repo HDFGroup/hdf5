@@ -9900,8 +9900,8 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
                          base_driver == H5FD_MPIO || base_driver == H5FD_CORE)
                             ? H5P_DEFAULT
                             : fapl;
-    op_data.fam_size  = ELINK_CB_FAM_SIZE;
-    op_data.code      = 0;
+    op_data.fam_size = ELINK_CB_FAM_SIZE;
+    op_data.code     = 0;
 
     /* Create family fapl */
     if ((fam_fapl = H5Pcopy(fapl)) < 0)
