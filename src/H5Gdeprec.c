@@ -692,8 +692,8 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Set the comment */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_SET_COMMENT, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, comment) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, H5VL_NATIVE_OBJECT_SET_COMMENT, H5P_DATASET_XFER_DEFAULT,
+                             H5_REQUEST_NULL, comment) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set comment value")
 
 done:
@@ -754,8 +754,8 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf /*out*/
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "invalid location identifier")
 
     /* Get the comment */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_GET_COMMENT, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, buf, bufsize, &op_ret) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, H5VL_NATIVE_OBJECT_GET_COMMENT, H5P_DATASET_XFER_DEFAULT,
+                             H5_REQUEST_NULL, buf, bufsize, &op_ret) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, -1, "unable to get comment value")
 
     /* Set return value */

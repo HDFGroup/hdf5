@@ -144,8 +144,9 @@ H5_DLL herr_t H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_pa
 H5_DLL herr_t H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
                                            H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req,
                                            va_list arguments);
-H5_DLL herr_t H5VL__native_object_optional(void *obj, H5VL_object_optional_t opt_type, hid_t dxpl_id,
-                                           void **req, va_list arguments);
+H5_DLL herr_t H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
+                                           H5VL_object_optional_t opt_type, hid_t dxpl_id, void **req,
+                                           va_list arguments);
 
 /* Connector/container introspection functions */
 H5_DLL herr_t H5VL__native_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl,
