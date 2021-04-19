@@ -180,6 +180,7 @@ static herr_t  H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD_stdio_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD_stdio_unlock(H5FD_t *_file);
+static herr_t  H5FD_stdio_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_stdio_g = {
     "stdio",               /* name         */
@@ -213,6 +214,7 @@ static const H5FD_class_t H5FD_stdio_g = {
     H5FD_stdio_truncate,   /* truncate     */
     H5FD_stdio_lock,       /* lock         */
     H5FD_stdio_unlock,     /* unlock       */
+    H5FD_stdio_delete,     /* del          */
     H5FD_FLMAP_DICHOTOMY   /* fl_map       */
 };
 
@@ -1199,6 +1201,34 @@ H5FD_stdio_unlock(H5FD_t *_file)
 
     return 0;
 } /* end H5FD_stdio_unlock() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_stdio_delete
+ *
+ * Purpose:     Delete a file
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_stdio_delete(const char *filename, hid_t /*UNUSED*/ fapl_id)
+{
+    static const char *func = "H5FD_stdio_delete"; /* Function Name for error reporting    */
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    assert(filename);
+
+    /* Quiet compiler */
+    (void)fapl_id;
+
+    if (remove(filename) < 0)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTDELETEFILE, "can't delete file)", -1);
+
+    return 0;
+} /* end H5FD_stdio_delete() */
 
 #ifdef H5private_H
 /*
