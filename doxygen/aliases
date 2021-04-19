@@ -170,6 +170,9 @@ ALIASES += mcpl_id{1}="\param[in] \1 Map creation property list identifier"
 ALIASES += oapl_id="\param[in] oapl_id Object access property list identifier"
 ALIASES += oapl_id{1}="\param[in] \1 Object access property list identifier"
 
+ALIASES += ocpl_id="\param[in] oapl_id Object creation property list identifier"
+ALIASES += ocpl_id{1}="\param[in] \1 Object creation property list identifier"
+
 ALIASES += plist_id="\param[in] plist_id Property list identifier"
 ALIASES += plist_id{1}="\param[in] \1 Property list identifier"
 

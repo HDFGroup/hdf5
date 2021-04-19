@@ -1845,14 +1845,14 @@ H5_DLL herr_t H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_fla
  */
 H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
 /**
- * \ingroup DCPL
+ * \ingroup OCPL
  *
  * \brief Returns information about a filter in a pipeline
  *
  * \todo Signature for H5Pget_filter2 is different in H5Pocpl.c than in
  *       H5Ppublic.h
  *
- * \plist_id{plist_id}
+ * \ocpl_id{plist_id}
  * \param[in] idx    Sequence number within the filter pipeline of the filter
  *                   for which information is sought
  * \param[out] flags Bit vector specifying certain general properties of the
@@ -1912,11 +1912,11 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                    char name[], unsigned *filter_config /*out*/);
 /**
- * \ingroup DCPL
+ * \ingroup OCPL
  *
  * \brief Returns information about the specified filter
  *
- * \plist_id
+ * \ocpl_id{plist_id}
  * \param[in]     filter_id     Filter identifier
  * \param[out]    flags         Bit vector specifying certain general
  *                              properties of the filter
@@ -1970,14 +1970,14 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
                                    char name[] /*out*/, unsigned *filter_config /*out*/);
 /**
- * \ingroup DCPL
+ * \ingroup OCPL
  *
  * \brief Returns the number of filters in the pipeline
  *
  * \todo Signature for H5Pget_nfilters() is different in H5Pocpl.c than in
  *       H5Ppublic.h.
  *
- * \plist_id
+ * \ocpl_id{plist_id}
  *
  * \return  Returns the number of filters in the pipeline if successful;
  *          otherwise returns a negative value.
@@ -2030,11 +2030,11 @@ H5_DLL int H5Pget_nfilters(hid_t plist_id);
  */
 H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
 /**
- * \ingroup DCPL
+ * \ingroup OCPL
  *
  * \brief Modifies a filter in the filter pipeline
  *
- * \plist_id
+ * \ocpl_id{plist_id}
  * \param[in] filter      Filter to be modified
  * \param[in] flags       Bit vector specifying certain general properties
  *                        of the filter
@@ -2059,11 +2059,11 @@ H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
 H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                                const unsigned int cd_values[/*cd_nelmts*/]);
 /**
- * \ingroup DCPL
+ * \ingroup OCPL
  *
  * \brief    Delete one or more filters in the filter pipeline
  *
- * \plist_id
+ * \ocpl_id{plist_id}
  * \param[in] filter Filter to be deleted
  *
  * \return \herr_t
@@ -2213,11 +2213,11 @@ H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flag
  */
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 /**
- * \ingroup DCPL GCPL
+ * \ingroup OCPL
  *
  * \brief Sets deflate (GNU gzip) compression method and compression level
  *
- * \plist_id
+ * \ocpl_id{plist_id}
  * \param[in] level Compression level
  *
  * \return \herr_t
@@ -2269,11 +2269,11 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  */
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
 /**
- * \ingroup DCPL GCPL
+ * \ingroup OCPL
  *
  * \brief Adds a filter to the filter pipeline
  *
- * \param[in] plist_id  Dataset or group creation property list identifier
+ * \ocpl_id{plist_id}
  * \param[in] filter    Filter identifier for the filter to be added to the
  *                      pipeline
  * \param[in] flags     Bit vector specifying certain general properties of
@@ -2534,11 +2534,11 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                             const unsigned int c_values[]);
 /**
- * \ingroup DCPL GCPL
+ * \ingroup OCPL
  *
  * \brief Sets up use of the Fletcher32 checksum filter
  *
- * \param[in] plist_id Dataset or group creation property list identifier
+ * \ocpl_id{plist_id}
  *
  * \return \herr_t
  *
