@@ -263,6 +263,7 @@ TAB_SIZE               = 4
 
 ALIASES                =
 
+@INCLUDE_PATH          = @DOXYGEN_INCLUDE_ALIASES_PATH@
 @INCLUDE               = @DOXYGEN_INCLUDE_ALIASES@
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C sources

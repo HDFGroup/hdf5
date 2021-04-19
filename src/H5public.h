@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,16 +14,16 @@
 /*
  * This file contains public declarations for the HDF5 module.
  */
-#ifndef _H5public_H
-#define _H5public_H
+#ifndef H5public_H
+#define H5public_H
 
 /* Include files for public use... */
 /*
  * Since H5pubconf.h is a generated header file, it is messy to try
- * to put a #ifndef _H5pubconf_H ... #endif guard in it.
+ * to put a #ifndef H5pubconf_H ... #endif guard in it.
  * HDF5 has set an internal rule that it is being included here.
  * Source files should NOT include H5pubconf.h directly but include
- * it via H5public.h.  The #ifndef _H5public_H guard above would
+ * it via H5public.h.  The #ifndef H5public_H guard above would
  * prevent repeated include.
  */
 #include "H5pubconf.h" /* From configure */
@@ -868,4 +868,4 @@ H5_DLL void *H5resize_memory(void *mem, size_t size);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5public_H */
+#endif /* H5public_H */

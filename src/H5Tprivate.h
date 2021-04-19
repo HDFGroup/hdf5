@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5T module
  */
-#ifndef _H5Tprivate_H
-#define _H5Tprivate_H
+#ifndef H5Tprivate_H
+#define H5Tprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5T_t H5T_t;
@@ -173,4 +173,4 @@ H5_DLL int         H5T_get_offset(const H5T_t *dt);
 /* Fixed-point functions */
 H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
 
-#endif /* _H5Tprivate_H */
+#endif /* H5Tprivate_H */

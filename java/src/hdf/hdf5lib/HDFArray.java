@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -827,12 +827,10 @@ class ArrayDescriptor {
         else if (NT == 'S') {
             NTsize = 2;
         }
-        else if ((NT == 'I')
-                || (NT == 'F')) {
+        else if ((NT == 'I') || (NT == 'F')) {
             NTsize = 4;
         }
-        else if ((NT == 'J')
-                || (NT == 'D')) {
+        else if ((NT == 'J') || (NT == 'D')) {
             NTsize = 8;
         }
         else if (css.startsWith("Ljava.lang.Byte")) {
@@ -925,8 +923,8 @@ class ArrayDescriptor {
         System.out.println("Type: " + theType);
         System.out.println("Class: " + theClass);
         System.out.println("NT: " + NT + " NTsize: " + NTsize);
-        System.out
-                .println("Array has " + dims + " dimensions (" + totalSize + " bytes, " + totalElements + " elements)");
+        System.out.println("Array has " + dims + " dimensions (" + totalSize
+                + " bytes, " + totalElements + " elements)");
         int i;
         for (i = 0; i <= dims; i++) {
             Class tc = objs[i].getClass();

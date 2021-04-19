@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -408,7 +408,10 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pset_page_buffer_size(fapl, 512, 0, 0) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
+    }
     H5E_END_TRY;
 
     if (file_id >= 0)
@@ -426,7 +429,10 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pset_page_buffer_size(fapl, 511, 0, 0) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
+    }
     H5E_END_TRY;
 
     if (file_id >= 0)
@@ -435,7 +441,10 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     /* Test setting a page buffer with sum of min meta and raw
      * data percentage > 100 - should fail
      */
-    H5E_BEGIN_TRY { ret = H5Pset_page_buffer_size(fapl, 512, 50, 51); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_page_buffer_size(fapl, 512, 50, 51);
+    }
     H5E_END_TRY;
 
     if (ret >= 0)
@@ -2054,7 +2063,10 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* try to create  the file -- should fail */
-    H5E_BEGIN_TRY { file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
+    }
     H5E_END_TRY;
 
     if (file_id >= 0)
@@ -2083,7 +2095,10 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     /* try to open the file using the fapl prepared above which enables
      * page buffering.  Should fail.
      */
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+    }
     H5E_END_TRY;
 
     if (file_id >= 0)
@@ -2195,7 +2210,10 @@ main(void)
 error:
     HDprintf("***** %d Page Buffering TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
 
-    H5E_BEGIN_TRY { H5Pclose(fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+    }
     H5E_END_TRY;
 
     if (api_ctx_pushed)

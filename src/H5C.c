@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,14 +21,8 @@
  *              things which exist on disk, and which may be
  *              unambiguously referenced by their disk addresses.
  *
- *              The code in this module was initially written in
- *        support of a complete re-write of the metadata cache
- *        in H5AC.c  However, other uses for the cache code
- *        suggested themselves, and thus this file was created
- *        in an attempt to support re-use.
- *
- *        For a detailed overview of the cache, please see the
- *        header comment for H5C_t in H5Cpkg.h.
+ *		For a detailed overview of the cache, please see the
+ *		header comment for H5C_t in H5Cpkg.h.
  *
  *-------------------------------------------------------------------------
  */
@@ -39,9 +33,7 @@
  *
  *    Code Changes:
  *
- *     - Remove extra functionality in H5C__flush_single_entry()?
- *
- *     - Change protect/unprotect to lock/unlock.
+ *	 - Change protect/unprotect to lock/unlock.
  *
  *     - Flush entries in increasing address order in
  *       H5C__make_space_in_cache().
@@ -53,18 +45,9 @@
  *       I/O overhead.  Can't do this just yet as some entries are not
  *       contiguous.  Do this in parallel only or in serial as well?
  *
- *     - Create MPI type for dirty objects when flushing in parallel.
- *
- *     - Now that TBBT routines aren't used, fix nodes in memory to
- *         point directly to the skip list node from the LRU list, eliminating
- *         skip list lookups when evicting objects from the cache.
- *
- *    Tests:
- *
- *     - Trim execution time.  (This is no longer a major issue with the
- *       shift from the TBBT to a hash table for indexing.)
- *
- *     - Add random tests.
+ *	 - Fix nodes in memory to point directly to the skip list node from
+ *         the LRU list, eliminating skip list lookups when evicting objects
+ *         from the cache.
  *
  **************************************************************************/
 
@@ -689,9 +672,6 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             HDfprintf(stdout, "%sAuto cache resize -- unknown status code.\n", cache_ptr->prefix);
             break;
     }
-
-    return;
-
 } /* H5C_def_auto_resize_rpt_fcn() */
 
 /*-------------------------------------------------------------------------
@@ -2229,8 +2209,8 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
 #ifdef H5_HAVE_PARALLEL
     hbool_t coll_access = FALSE; /* whether access to the cache entry is done collectively */
 #endif                           /* H5_HAVE_PARALLEL */
-    hbool_t            write_permitted;
-    hbool_t            was_loaded = FALSE; /* Whether the entry was loaded as a result of the protect */
+    hbool_t            write_permitted = FALSE;
+    hbool_t            was_loaded      = FALSE; /* Whether the entry was loaded as a result of the protect */
     size_t             empty_space;
     void *             thing;
     H5C_cache_entry_t *entry_ptr;
@@ -6653,9 +6633,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                 }
 
                 if (H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) < 0)
-
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file")
-
 #ifdef H5_HAVE_PARALLEL
             }
 #endif /* H5_HAVE_PARALLEL */

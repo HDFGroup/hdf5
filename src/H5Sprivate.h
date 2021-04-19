@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5S module
  */
-#ifndef _H5Sprivate_H
-#define _H5Sprivate_H
+#ifndef H5Sprivate_H
+#define H5Sprivate_H
 
 /* Include package's public header */
 #include "H5Spublic.h"
@@ -276,7 +276,7 @@ H5_DLL herr_t H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_ele
 /* Operations on hyperslab selections */
 H5_DLL herr_t  H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[],
                                     const hsize_t *stride, const hsize_t count[], const hsize_t *block);
-H5_DLL herr_t  H5S_combine_hyperslab(H5S_t *old_space, H5S_seloper_t op, const hsize_t start[],
+H5_DLL herr_t  H5S_combine_hyperslab(const H5S_t *old_space, H5S_seloper_t op, const hsize_t start[],
                                      const hsize_t *stride, const hsize_t count[], const hsize_t *block,
                                      H5S_t **new_space);
 H5_DLL herr_t  H5S_hyper_add_span_element(H5S_t *space, unsigned rank, const hsize_t *coords);
@@ -307,4 +307,4 @@ H5_DLL herr_t H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
                                   hbool_t do_permute, hsize_t **permute_map, hbool_t *is_permuted);
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5Sprivate_H */
+#endif /* H5Sprivate_H */

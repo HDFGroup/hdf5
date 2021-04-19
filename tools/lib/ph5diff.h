@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _PH5DIFF_H__
-#define _PH5DIFF_H__
+#ifndef PH5DIFF_H
+#define PH5DIFF_H
 
 /* Send from manager to workers */
 #define MPI_TAG_ARGS      1
@@ -40,4 +40,4 @@ struct diffs_found {
     int     not_cmp;
 };
 
-#endif /* _PH5DIFF_H__ */
+#endif /* PH5DIFF_H */

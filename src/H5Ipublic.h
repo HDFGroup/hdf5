@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
  * This file contains function prototypes for each exported function in
  * the H5I module.
  */
-#ifndef _H5Ipublic_H
-#define _H5Ipublic_H
+#ifndef H5Ipublic_H
+#define H5Ipublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -755,4 +755,4 @@ H5_DLL htri_t H5Iis_valid(hid_t id);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Ipublic_H */
+#endif /* H5Ipublic_H */

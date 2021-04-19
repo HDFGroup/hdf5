@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -78,9 +78,9 @@ main(void)
 
     /* Access reference and read dataset data without opening original file */
     assert(H5Rget_type((const H5R_ref_t *)&ref_buf[0]) == H5R_OBJECT2);
-    H5Rget_obj_type3((const H5R_ref_t *)&ref_buf[0], H5P_DEFAULT, &obj_type);
+    H5Rget_obj_type3(&ref_buf[0], H5P_DEFAULT, &obj_type);
     assert(obj_type == H5O_TYPE_DATASET);
-    dset1 = H5Ropen_object((const H5R_ref_t *)&ref_buf[0], H5P_DEFAULT, H5P_DEFAULT);
+    dset1 = H5Ropen_object(&ref_buf[0], H5P_DEFAULT, H5P_DEFAULT);
     H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_buf);
     H5Dclose(dset1);
     H5Rdestroy(&ref_buf[0]);

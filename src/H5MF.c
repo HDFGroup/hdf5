@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -3081,16 +3081,16 @@ done:
 herr_t
 H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 {
-    H5F_mem_page_t sm_fshdr_fs_type;                /* small fs hdr fsm */
-    H5F_mem_page_t sm_fssinfo_fs_type;              /* small fs sinfo fsm */
-    H5F_mem_page_t lg_fshdr_fs_type;                /* large fs hdr fsm */
-    H5F_mem_page_t lg_fssinfo_fs_type;              /* large fs sinfo fsm */
-    H5FS_t *       sm_hdr_fspace   = NULL;          /* ptr to sm FSM hdr alloc FSM */
-    H5FS_t *       sm_sinfo_fspace = NULL;          /* ptr to sm FSM sinfo alloc FSM */
-    H5FS_t *       lg_hdr_fspace   = NULL;          /* ptr to lg FSM hdr alloc FSM */
-    H5FS_t *       lg_sinfo_fspace = NULL;          /* ptr to lg FSM sinfo alloc FSM */
-    haddr_t        eoa_fsm_fsalloc;                 /* eoa after file space allocation */
-                                                    /* for self referential FSMs */
+    H5F_mem_page_t sm_fshdr_fs_type;                          /* small fs hdr fsm */
+    H5F_mem_page_t sm_fssinfo_fs_type;                        /* small fs sinfo fsm */
+    H5F_mem_page_t lg_fshdr_fs_type   = H5F_MEM_PAGE_DEFAULT; /* large fs hdr fsm */
+    H5F_mem_page_t lg_fssinfo_fs_type = H5F_MEM_PAGE_DEFAULT; /* large fs sinfo fsm */
+    H5FS_t *       sm_hdr_fspace      = NULL;                 /* ptr to sm FSM hdr alloc FSM */
+    H5FS_t *       sm_sinfo_fspace    = NULL;                 /* ptr to sm FSM sinfo alloc FSM */
+    H5FS_t *       lg_hdr_fspace      = NULL;                 /* ptr to lg FSM hdr alloc FSM */
+    H5FS_t *       lg_sinfo_fspace    = NULL;                 /* ptr to lg FSM sinfo alloc FSM */
+    haddr_t        eoa_fsm_fsalloc;                           /* eoa after file space allocation */
+                                                              /* for self referential FSMs */
     hbool_t     continue_alloc_fsm = FALSE;         /* Continue allocating addr and sect_addr for FSMs */
     H5AC_ring_t orig_ring          = H5AC_RING_INV; /* Original ring value */
     herr_t      ret_value          = SUCCEED;       /* Return value */

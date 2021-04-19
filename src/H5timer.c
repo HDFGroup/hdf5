@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -583,10 +583,10 @@ H5_timer_get_time_string(double seconds)
     char *s; /* output string */
 
     /* Used when the time is greater than 59 seconds */
-    double days;
-    double hours;
-    double minutes;
-    double remainder_sec;
+    double days          = 0.0;
+    double hours         = 0.0;
+    double minutes       = 0.0;
+    double remainder_sec = 0.0;
 
     /* Extract larger time units from count of seconds */
     if (seconds > (double)60.0F) {

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5P module
  */
-#ifndef _H5Pprivate_H
-#define _H5Pprivate_H
+#ifndef H5Pprivate_H
+#define H5Pprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5P_genplist_t H5P_genplist_t;
@@ -209,4 +209,4 @@ H5_DLL herr_t H5P_get_fill_value(H5P_genplist_t *plist, const struct H5T_t *type
 H5_DLL int    H5P_ignore_cmp(const void H5_ATTR_UNUSED *val1, const void H5_ATTR_UNUSED *val2,
                              size_t H5_ATTR_UNUSED size);
 
-#endif /* _H5Pprivate_H */
+#endif /* H5Pprivate_H */

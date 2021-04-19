@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,8 +21,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5FAprivate_H
-#define _H5FAprivate_H
+#ifndef H5FAprivate_H
+#define H5FAprivate_H
 
 /* Include package's public header */
 #ifdef NOT_YET
@@ -137,4 +137,4 @@ H5_DLL herr_t H5FA_get_stats(const H5FA_t *ea, H5FA_stat_t *stats);
 #ifdef H5FA_DEBUGGING
 #endif /* H5FA_DEBUGGING */
 
-#endif /* _H5FAprivate_H */
+#endif /* H5FAprivate_H */

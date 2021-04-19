@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1570,7 +1570,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
                             HDprintf("h5dump DATATYPE STRING STRSIZE %s found\n", temp);
 #endif
-                            if (HDstrcmp("H5T_VARIABLE;", temp)) {
+                            if (HDstrcmp("H5T_VARIABLE;", temp) != 0) {
                                 char *more = temp;
                                 ival       = (int)HDstrtol(more, &more, 10);
                                 if (getInputSize(in, ival) == -1) {
@@ -1896,7 +1896,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         HDprintf("h5dump STORAGE_LAYOUT CHUNKED SIZE %d found\n", ival);
 #endif
                     }
-                    while (HDstrcmp("}", temp)) {
+                    while (HDstrcmp("}", temp) != 0) {
                         if (fscanf(strm, "%254s", temp) != 1) { /* end bracket */
                             (void)HDfprintf(stderr, "%s", err18);
                             goto error;
@@ -2536,7 +2536,7 @@ parsePathInfo(struct path_info *path, char *temp)
 
     token = HDstrtok(temp, delimiter);
     if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) {
-        (void)HDfprintf(stderr, err1);
+        (void)HDfprintf(stderr, "%s", err1);
         return (-1);
     }
     HDstrcpy(path->group[i++], token);
@@ -2546,7 +2546,7 @@ parsePathInfo(struct path_info *path, char *temp)
         if (token == NULL)
             break;
         if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) {
-            (void)HDfprintf(stderr, err1);
+            (void)HDfprintf(stderr, "%s", err1);
             return (-1);
         }
         HDstrcpy(path->group[i++], token);
@@ -5097,7 +5097,6 @@ help(char *name)
     (void)HDfprintf(stdout, "\t  data-set will be compressed using GZIP and a compression level \n");
     (void)HDfprintf(stdout, "\t  of 7.\n");
     (void)HDfprintf(stdout, "\t  The dataset will be stored at \"/Second-set\"\n\n");
-    return;
 }
 
 void
@@ -5107,5 +5106,4 @@ usage(char *name)
     (void)HDfprintf(stdout, "\t%s <infile> -c[onfig] <configfile> \
   [<infile> -c[config] <configfile>...] -o[utfile] <outfile> \n\n",
                     name);
-    return;
 }

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -746,10 +746,10 @@ done:
 static H5SL_node_t *
 H5SL__insert_common(H5SL_t *slist, void *item, const void *key)
 {
-    H5SL_node_t *x;           /* Current node to examine */
-    H5SL_node_t *prev;        /* Node before the new node */
-    uint32_t     hashval = 0; /* Hash value for key */
-    H5SL_node_t *ret_value;   /* Return value */
+    H5SL_node_t *x;                /* Current node to examine */
+    H5SL_node_t *prev;             /* Node before the new node */
+    uint32_t     hashval   = 0;    /* Hash value for key */
+    H5SL_node_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1378,9 +1378,9 @@ done:
 void *
 H5SL_search(H5SL_t *slist, const void *key)
 {
-    H5SL_node_t *x;           /* Current node to examine */
-    uint32_t     hashval = 0; /* Hash value for key */
-    void *       ret_value;   /* Return value */
+    H5SL_node_t *x;                /* Current node to examine */
+    uint32_t     hashval   = 0;    /* Hash value for key */
+    void *       ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1676,9 +1676,9 @@ done:
 H5SL_node_t *
 H5SL_find(H5SL_t *slist, const void *key)
 {
-    H5SL_node_t *x;           /* Current node to examine */
-    uint32_t     hashval = 0; /* Hash value for key */
-    H5SL_node_t *ret_value;   /* Return value */
+    H5SL_node_t *x;                /* Current node to examine */
+    uint32_t     hashval   = 0;    /* Hash value for key */
+    H5SL_node_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

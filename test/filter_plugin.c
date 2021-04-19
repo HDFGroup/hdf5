@@ -5,7 +5,7 @@
  * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -566,7 +566,10 @@ test_dataset_write_with_filters(hid_t fid)
 
 error:
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY { H5Pclose(dcpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl_id);
+    }
     H5E_END_TRY
 
     return FAIL;
@@ -703,7 +706,10 @@ test_dataset_read_with_filters(hid_t fid)
 
 error:
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY { H5Dclose(did); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+    }
     H5E_END_TRY
 
     return FAIL;
@@ -728,7 +734,10 @@ ensure_data_read_fails(hid_t did)
         TEST_ERROR;
 
     /* Read the dataset back (should fail) */
-    H5E_BEGIN_TRY { ret = H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, *check); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, *check);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
@@ -998,7 +1007,10 @@ test_path_api_calls(void)
     TESTING("    remove (index 0 in empty table)");
 
     /* Try to remove index zero in an empty list (SHOULD FAIL) */
-    H5E_BEGIN_TRY { ret = H5PLremove(0); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5PLremove(0);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
@@ -1029,7 +1041,10 @@ test_path_api_calls(void)
     TESTING("    remove (index too high)");
 
     /* Try to remove a path where the index is beyond the table capacity (SHOULD FAIL) */
-    H5E_BEGIN_TRY { ret = H5PLremove(n_starting_paths); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5PLremove(n_starting_paths);
+    }
     H5E_END_TRY
 
     if (ret >= 0)
@@ -1087,7 +1102,10 @@ test_path_api_calls(void)
     TESTING("    get (index too high)");
 
     /* Get path at the last + 1 index (SHOULD FAIL) */
-    H5E_BEGIN_TRY { path_len = H5PLget(n_starting_paths, NULL, 0); }
+    H5E_BEGIN_TRY
+    {
+        path_len = H5PLget(n_starting_paths, NULL, 0);
+    }
     H5E_END_TRY
     if (path_len > 0)
         TEST_ERROR;

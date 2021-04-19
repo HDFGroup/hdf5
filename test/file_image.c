@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1064,21 +1064,30 @@ test_get_file_image_error_rejection(void)
     VERIFY(image_ptr != NULL, "HDmalloc(1) failed.");
 
     /* load the image of the file into the buffer */
-    H5E_BEGIN_TRY { bytes_read = H5Fget_file_image(file_id, image_ptr, (size_t)(image_size - 1)); }
+    H5E_BEGIN_TRY
+    {
+        bytes_read = H5Fget_file_image(file_id, image_ptr, (size_t)(image_size - 1));
+    }
     H5E_END_TRY;
     VERIFY(bytes_read < 0, "H5Fget_file_image(2 -- test 1) succeeded.");
 
     /* Call H5Fget_file_image() with good buffer and buffer size,
      * but non-existant file_id.  Should fail.
      */
-    H5E_BEGIN_TRY { bytes_read = H5Fget_file_image((hid_t)0, image_ptr, (size_t)(image_size)); }
+    H5E_BEGIN_TRY
+    {
+        bytes_read = H5Fget_file_image((hid_t)0, image_ptr, (size_t)(image_size));
+    }
     H5E_END_TRY;
     VERIFY(bytes_read < 0, "H5Fget_file_image(3 -- test 1) succeeded.");
 
     /* Call H5Fget_file_image() with good buffer and buffer size,
      * but a file_id of the wrong type.  Should fail.
      */
-    H5E_BEGIN_TRY { bytes_read = H5Fget_file_image(dset_id, image_ptr, (size_t)(image_size)); }
+    H5E_BEGIN_TRY
+    {
+        bytes_read = H5Fget_file_image(dset_id, image_ptr, (size_t)(image_size));
+    }
     H5E_END_TRY;
     VERIFY(bytes_read < 0, "H5Fget_file_image(4 -- test 1) succeeded.");
 
@@ -1179,7 +1188,10 @@ test_get_file_image_error_rejection(void)
     VERIFY(err >= 0, "H5Fflush failed");
 
     /* attempt to get the size of the file -- should fail */
-    H5E_BEGIN_TRY { image_size = H5Fget_file_image(file_id, NULL, (size_t)0); }
+    H5E_BEGIN_TRY
+    {
+        image_size = H5Fget_file_image(file_id, NULL, (size_t)0);
+    }
     H5E_END_TRY;
     VERIFY(image_size == -1, "H5Fget_file_image(5) succeeded.");
 
@@ -1238,7 +1250,10 @@ test_get_file_image_error_rejection(void)
     VERIFY(err >= 0, "H5Fflush failed");
 
     /* attempt to get the size of the file -- should fail */
-    H5E_BEGIN_TRY { image_size = H5Fget_file_image(file_id, NULL, (size_t)0); }
+    H5E_BEGIN_TRY
+    {
+        image_size = H5Fget_file_image(file_id, NULL, (size_t)0);
+    }
     H5E_END_TRY;
     VERIFY(image_size == -1, "H5Fget_file_image(6) succeeded.");
 
@@ -1295,7 +1310,10 @@ test_get_file_image_error_rejection(void)
     VERIFY(err >= 0, "H5Fflush failed");
 
     /* attempt to get the size of the file -- should fail */
-    H5E_BEGIN_TRY { image_size = H5Fget_file_image(file_id, NULL, (size_t)0); }
+    H5E_BEGIN_TRY
+    {
+        image_size = H5Fget_file_image(file_id, NULL, (size_t)0);
+    }
     H5E_END_TRY;
     VERIFY(image_size == -1, "H5Fget_file_image(7) succeeded.");
 

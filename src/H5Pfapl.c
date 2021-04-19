@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -4271,9 +4271,9 @@ herr_t
 H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled /*out*/, char *location /*out*/,
                        size_t *location_size /*out*/, hbool_t *start_on_access /*out*/)
 {
-    H5P_genplist_t *plist;               /* Property list pointer */
-    char *          location_ptr;        /* Pointer to location string */
-    herr_t          ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;                  /* Property list pointer */
+    char *          location_ptr = NULL;    /* Pointer to location string */
+    herr_t          ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ixxxx", plist_id, is_enabled, location, location_size, start_on_access);

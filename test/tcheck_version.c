@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,6 +28,10 @@
  */
 
 #include "h5test.h"
+
+#ifdef H5_HAVE_WIN32_API
+#include <crtdbg.h>
+#endif
 
 #define progname "tcheck_version"
 
@@ -108,12 +112,31 @@ abort_intercept(int H5_ATTR_UNUSED sig)
     HDexit(6);
 }
 
+#ifdef H5_HAVE_WIN32_API
+/* Turns off the modal dialog that is raised when the Windows CRT calls abort().
+ *
+ * Returning TRUE here lets Windows know that we've handled the abort() and that there
+ * is no need to alert the user with a modal dialog box.
+ */
+int
+handle_crt_abort(int reportType, char *message, int *returnValue)
+{
+    return TRUE;
+}
+#endif
+
 int
 main(int ac, char **av)
 {
+#ifdef H5_HAVE_WIN32_API
+    (void)_CrtSetReportHook2(_CRT_RPTHOOK_INSTALL, handle_crt_abort);
+#endif
     parse(ac, av);
     HDsignal(SIGABRT, &abort_intercept);
     H5check_version(major, minor, release);
     HDsignal(SIGABRT, SIG_DFL);
+#ifdef H5_HAVE_WIN32_API
+    (void)_CrtSetReportHook2(_CRT_RPTHOOK_REMOVE, handle_crt_abort);
+#endif
     return 0;
 }

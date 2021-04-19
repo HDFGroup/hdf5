@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,7 +38,9 @@ namespace H5 {
 ///\brief       Default constructor
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AbstractDs::AbstractDs() {}
+AbstractDs::AbstractDs()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    AbstractDs default constructor
@@ -331,6 +333,8 @@ AbstractDs::getVarLenType() const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AbstractDs::~AbstractDs() {}
+AbstractDs::~AbstractDs()
+{
+}
 
 } // namespace H5

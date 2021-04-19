@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5E module.
  */
-#ifndef _H5Epublic_H
-#define _H5Epublic_H
+#ifndef H5Epublic_H
+#define H5Epublic_H
 
 #include <stdio.h> /*FILE arg of H5Eprint()                     */
 
@@ -35,22 +35,29 @@ typedef enum H5E_type_t { H5E_MAJOR, H5E_MINOR } H5E_type_t;
  * Information about an error; element of error stack
  */
 typedef struct H5E_error2_t {
-    hid_t       cls_id;    /**< class ID                           */
-    hid_t       maj_num;   /**< major error ID		     */
-    hid_t       min_num;   /**< minor error number		     */
-    unsigned    line;      /**< line in file where error occurs    */
-    const char *func_name; /**< function in which error occurred   */
-    const char *file_name; /**< file in which error occurred       */
-    const char *desc;      /**< optional supplied description      */
+    hid_t       cls_id;
+    /**< Class ID                           */
+    hid_t       maj_num;
+    /**< Major error ID		                */
+    hid_t       min_num;
+    /**< Minor error number		            */
+    unsigned    line;
+    /**< Line in file where error occurs    */
+    const char *func_name;
+    /**< Function in which error occurred   */
+    const char *file_name;
+    /**< File in which error occurred       */
+    const char *desc;
+    /**< Optional supplied description      */
 } H5E_error2_t;
 
 /* When this header is included from a private header, don't make calls to H5open() */
 #undef H5OPEN
-#ifndef _H5private_H
+#ifndef H5private_H
 #define H5OPEN H5open(),
-#else /* _H5private_H */
+#else /* H5private_H */
 #define H5OPEN
-#endif /* _H5private_H */
+#endif /* H5private_H */
 
 /* HDF5 error class */
 #define H5E_ERR_CLS (H5OPEN H5E_ERR_CLS_g)
@@ -65,12 +72,12 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * trying something that's likely or expected to fail.  The code to try can
  * be nested between calls to H5Eget_auto() and H5Eset_auto(), but it's
  * easier just to use this macro like:
- * 	H5E_BEGIN_TRY {
- *	    ...stuff here that's likely to fail...
+ *     H5E_BEGIN_TRY {
+ *        ...stuff here that's likely to fail...
  *      } H5E_END_TRY;
  *
  * Warning: don't break, return, or longjmp() from the body of the loop or
- *	    the error reporting won't be properly restored!
+ *        the error reporting won't be properly restored!
  *
  * These two macros still use the old API functions for backward compatibility
  * purpose.
@@ -128,10 +135,10 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
 /*  And return after pushing error onto stack */
 #define H5Epush_ret(func, cls, maj, min, str, ret)                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, cls, maj, min, str);                                 \
         return (ret);                                                                                        \
-    }
+    } while (0)
 
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in
  * And goto a label after pushing error onto stack.
@@ -922,4 +929,4 @@ H5_DLL char *H5Eget_minor(H5E_minor_t min);
 }
 #endif
 
-#endif /* end _H5Epublic_H */
+#endif /* end H5Epublic_H */

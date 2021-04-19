@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -86,7 +86,10 @@ create_compound_type(void)
     return ret_value;
 
 error:
-    H5E_BEGIN_TRY { H5Tclose(ret_value); }
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(ret_value);
+    }
     H5E_END_TRY;
     return -1;
 }
@@ -197,7 +200,10 @@ test_getset(void)
      * Reading the fill value from a dataset creation property list that has
      * no fill value should result in a failure.
      */
-    H5E_BEGIN_TRY { H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i); }
+    H5E_BEGIN_TRY
+    {
+        H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i);
+    }
     H5E_END_TRY;
     if (fill_i != 0) {
         H5_FAILED();
@@ -318,7 +324,7 @@ test_getset_vl(hid_t fapl)
         TEST_ERROR
 
     /* Verify that the fill value is the original value */
-    if (HDstrcmp(f2, orig_fill_value))
+    if (HDstrcmp(f2, orig_fill_value) != 0)
         TEST_ERROR
 
     /* Release the fill value retrieved */
@@ -360,7 +366,7 @@ test_getset_vl(hid_t fapl)
         TEST_ERROR
 
     /* Verify that the fill value is the original value */
-    if (HDstrcmp(f2, orig_fill_value))
+    if (HDstrcmp(f2, orig_fill_value) != 0)
         TEST_ERROR
 
     /* Release the fill value retrieved */
@@ -380,7 +386,9 @@ test_getset_vl(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY {}
+    H5E_BEGIN_TRY
+    {
+    }
     H5E_END_TRY;
     return 1;
 } /* end test_getset_vl() */
@@ -1529,8 +1537,8 @@ test_extend_verify_cmpd_vl(unsigned lineno, const hsize_t *offset, const void *_
         (const comp_vl_datatype *)_compare_val; /* Value to compare against */
 
     /* Verify value */
-    if ((test_val->x != compare_val->x) || HDstrcmp(test_val->a, compare_val->a) ||
-        HDstrcmp(test_val->b, compare_val->b) || (test_val->y != compare_val->y)) {
+    if ((test_val->x != compare_val->x) || HDstrcmp(test_val->a, compare_val->a) != 0 ||
+        HDstrcmp(test_val->b, compare_val->b) != 0 || (test_val->y != compare_val->y)) {
         HDfprintf(stdout, "%u: Value read was not expected.\n", lineno);
         HDfprintf(stdout,
                   "    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
@@ -1586,7 +1594,7 @@ test_extend_release_cmpd_vl(void *_elmt)
  *-------------------------------------------------------------------------
  */
 static int
-test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, hsize_t *ch_size, hsize_t *start_size,
+test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t *ch_size, hsize_t *start_size,
                   hsize_t *max_size, hid_t dtype, void *fillval)
 {
     hid_t       fspace = -1, mspace = -1; /* File & memory dataspaces */

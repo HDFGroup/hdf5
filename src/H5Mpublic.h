@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,8 +17,8 @@
  * NOTE:    This is an experimental API. Everything in the H5M package
  *          is subject to revision in a future release.
  */
-#ifndef _H5Mpublic_H
-#define _H5Mpublic_H
+#ifndef H5Mpublic_H
+#define H5Mpublic_H
 
 /* System headers needed by this file */
 
@@ -510,4 +510,4 @@ H5_DLL herr_t H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hi
 }
 #endif
 
-#endif /* _H5Mpublic_H */
+#endif /* H5Mpublic_H */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -513,7 +513,7 @@ test_id_type_list(void)
     /* Sanity check */
     if ((int)startType >= H5I_MAX_NUM_TYPES || startType < H5I_NTYPES) {
         /* Error condition, throw an error */
-        CHECK(1, 1, "H5Iregister_type");
+        ERROR("H5Iregister_type");
         goto out;
     }
     /* Create types up to H5I_MAX_NUM_TYPES */
@@ -705,7 +705,7 @@ test_remove_clear_type(void)
     /* Create an array to hold the objects in the master list */
     list_size        = RCT_MAX_NOBJS * sizeof(rct_obj_t);
     obj_list.objects = HDmalloc(list_size);
-    CHECK(obj_list.objects, NULL, "HDcalloc");
+    CHECK_PTR(obj_list.objects, "HDcalloc");
     if (NULL == obj_list.objects)
         goto error;
 
@@ -718,7 +718,7 @@ test_remove_clear_type(void)
         hsize_t nmembers = 1234567;
 
         /* The number of objects found while scanning through the object list */
-        unsigned found;
+        int found;
 
         /*********************
          * Build object list *
@@ -856,7 +856,10 @@ test_remove_clear_type(void)
 
 error:
     /* Cleanup. For simplicity, just destroy the types and ignore errors. */
-    H5E_BEGIN_TRY { H5Idestroy_type(obj_type); }
+    H5E_BEGIN_TRY
+    {
+        H5Idestroy_type(obj_type);
+    }
     H5E_END_TRY
 
     HDfree(obj_list.objects);
@@ -995,19 +998,28 @@ test_future_ids(void)
 
     /* Test basic error conditions */
     fake_future_obj = 0;
-    H5E_BEGIN_TRY { future_id = H5Iregister_future(obj_type, &fake_future_obj, NULL, NULL); }
+    H5E_BEGIN_TRY
+    {
+        future_id = H5Iregister_future(obj_type, &fake_future_obj, NULL, NULL);
+    }
     H5E_END_TRY
     VERIFY(future_id, H5I_INVALID_HID, "H5Iregister_future");
     if (H5I_INVALID_HID != future_id)
         goto error;
 
-    H5E_BEGIN_TRY { future_id = H5Iregister_future(obj_type, &fake_future_obj, realize_future_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        future_id = H5Iregister_future(obj_type, &fake_future_obj, realize_future_cb, NULL);
+    }
     H5E_END_TRY
     VERIFY(future_id, H5I_INVALID_HID, "H5Iregister_future");
     if (H5I_INVALID_HID != future_id)
         goto error;
 
-    H5E_BEGIN_TRY { future_id = H5Iregister_future(obj_type, &fake_future_obj, NULL, discard_future_cb); }
+    H5E_BEGIN_TRY
+    {
+        future_id = H5Iregister_future(obj_type, &fake_future_obj, NULL, discard_future_cb);
+    }
     H5E_END_TRY
     VERIFY(future_id, H5I_INVALID_HID, "H5Iregister_future");
     if (H5I_INVALID_HID != future_id)
@@ -1068,7 +1080,7 @@ test_future_ids(void)
     VERIFY(*actual_obj2, 7, "H5Iobject_verify");
     if (7 != *actual_obj2)
         goto error;
-    VERIFY(actual_obj, actual_obj2, "H5Iobject_verify");
+    CHECK_PTR_EQ(actual_obj, actual_obj2, "H5Iobject_verify");
     if (actual_obj != actual_obj2)
         goto error;
 
@@ -1119,7 +1131,7 @@ test_future_ids(void)
     VERIFY(*actual_obj2, 7, "H5Iobject_verify");
     if (7 != *actual_obj2)
         goto error;
-    VERIFY(actual_obj, actual_obj2, "H5Iobject_verify");
+    CHECK_PTR_EQ(actual_obj, actual_obj2, "H5Iobject_verify");
     if (actual_obj != actual_obj2)
         goto error;
 
@@ -1349,7 +1361,10 @@ test_future_ids(void)
 
 error:
     /* Cleanup. For simplicity, just destroy the types and ignore errors. */
-    H5E_BEGIN_TRY { H5Idestroy_type(obj_type); }
+    H5E_BEGIN_TRY
+    {
+        H5Idestroy_type(obj_type);
+    }
     H5E_END_TRY
 
     return -1;

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -350,19 +350,14 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         if (NULL == (aux_ptr->candidate_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create candidate entry list")
 
-        if (aux_ptr != NULL)
-            if (aux_ptr->mpi_rank == 0)
-                f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE,
-                                              (H5AC_NTYPES - 1), H5AC_class_s, H5AC__check_if_write_permitted,
-                                              TRUE, H5AC__log_flushed_entry, (void *)aux_ptr);
-            else
-                f->shared->cache =
-                    H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                               H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, (void *)aux_ptr);
+        if (aux_ptr->mpi_rank == 0)
+            f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE,
+                                          (H5AC_NTYPES - 1), H5AC_class_s, H5AC__check_if_write_permitted,
+                                          TRUE, H5AC__log_flushed_entry, (void *)aux_ptr);
         else
             f->shared->cache =
                 H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                           H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, NULL);
+                           H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, (void *)aux_ptr);
     } /* end if */
     else {
 #endif /* H5_HAVE_PARALLEL */

@@ -71,6 +71,13 @@ mark_as_advanced (HDF5_EXTERNAL_LIB_PREFIX)
 #   If the parent project needs to install hdf libraries, but avoid
 #   name conflicts with system versions, then a prefix may be added
 #   to ensure that the correct versions configured are used.
+set (HDF5_LIB_INFIX "" CACHE STRING "Use infix for custom library naming.")
+mark_as_advanced (HDF5_LIB_INFIX)
+# HDF5_LIB_INFIX :
+#   This infix is added to all library names after 'hdf5'.
+#   e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
+#   This name is used in packages on debian based systems.
+#   (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
 #
 # HDF5_INSTALL_BIN_DIR, HDF5_INSTALL_LIB_DIR, HDF5_INSTALL_INCLUDE_DIR, HDF5_INSTALL_DATA_DIR :
 #   Customize the 'bin', 'lib', 'include', and 'share' installation directories.
@@ -130,20 +137,20 @@ mark_as_advanced (ALLOW_UNSUPPORTED)
 #-----------------------------------------------------------------------------
 # Set the core names of all the libraries
 #-----------------------------------------------------------------------------
-set (HDF5_LIB_CORENAME              "hdf5")
-set (HDF5_TEST_LIB_CORENAME         "hdf5_test")
-set (HDF5_CPP_LIB_CORENAME          "hdf5_cpp")
-set (HDF5_HL_LIB_CORENAME           "hdf5_hl")
-set (HDF5_HL_CPP_LIB_CORENAME       "hdf5_hl_cpp")
-set (HDF5_TOOLS_LIB_CORENAME        "hdf5_tools")
-set (HDF5_UTILS_LIB_CORENAME        "hdf5_utils")
-set (HDF5_F90_LIB_CORENAME          "hdf5_fortran")
-set (HDF5_F90_C_LIB_CORENAME        "hdf5_f90cstub")
-set (HDF5_F90_TEST_LIB_CORENAME     "hdf5_test_fortran")
-set (HDF5_F90_C_TEST_LIB_CORENAME   "hdf5_test_f90cstub")
-set (HDF5_HL_F90_LIB_CORENAME       "hdf5_hl_fortran")
-set (HDF5_HL_F90_C_LIB_CORENAME     "hdf5_hl_f90cstub")
-set (HDF5_JAVA_JNI_LIB_CORENAME     "hdf5_java")
+set (HDF5_LIB_CORENAME              "hdf5${HDF5_LIB_INFIX}")
+set (HDF5_TEST_LIB_CORENAME         "hdf5${HDF5_LIB_INFIX}_test")
+set (HDF5_CPP_LIB_CORENAME          "hdf5${HDF5_LIB_INFIX}_cpp")
+set (HDF5_HL_LIB_CORENAME           "hdf5${HDF5_LIB_INFIX}_hl")
+set (HDF5_HL_CPP_LIB_CORENAME       "hdf5${HDF5_LIB_INFIX}_hl_cpp")
+set (HDF5_TOOLS_LIB_CORENAME        "hdf5${HDF5_LIB_INFIX}_tools")
+set (HDF5_UTILS_LIB_CORENAME        "hdf5${HDF5_LIB_INFIX}_utils")
+set (HDF5_F90_LIB_CORENAME          "hdf5${HDF5_LIB_INFIX}_fortran")
+set (HDF5_F90_C_LIB_CORENAME        "hdf5${HDF5_LIB_INFIX}_f90cstub")
+set (HDF5_F90_TEST_LIB_CORENAME     "hdf5${HDF5_LIB_INFIX}_test_fortran")
+set (HDF5_F90_C_TEST_LIB_CORENAME   "hdf5${HDF5_LIB_INFIX}_test_f90cstub")
+set (HDF5_HL_F90_LIB_CORENAME       "hdf5${HDF5_LIB_INFIX}_hl_fortran")
+set (HDF5_HL_F90_C_LIB_CORENAME     "hdf5${HDF5_LIB_INFIX}_hl_f90cstub")
+set (HDF5_JAVA_JNI_LIB_CORENAME     "hdf5${HDF5_LIB_INFIX}_java")
 set (HDF5_JAVA_HDF5_LIB_CORENAME    "jarhdf5")
 set (HDF5_JAVA_TEST_LIB_CORENAME    "jartest5")
 
@@ -237,7 +244,7 @@ string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
     "\\1" H5_VERS_MINOR ${_h5public_h_contents})
 string (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
     "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
-string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._\-]*)\".*$"
+string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._-]*)\".*$"
     "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
   message (TRACE "VERSION: ${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
@@ -499,6 +506,14 @@ if (NOT BUILD_SHARED_LIBS)
 else ()
   set (tgt_file_ext "-shared")
 endif ()
+
+#-----------------------------------------------------------------------------
+# perl is used in some optional src and tests, check availability
+find_package (Perl)
+if (PERL_FOUND)
+  set (H5_PERL_FOUND YES)
+endif ()
+#-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
 # Option to Build Static executables
@@ -1107,9 +1122,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseCXX.cmake)
     include (${HDF_RESOURCES_DIR}/HDFCXXCompilerFlags.cmake)
 
-    if (CMAKE_NO_STD_NAMESPACE)
-      set (H5_NO_STD 1)
-    endif ()
     add_subdirectory (c++)
     if (HDF5_BUILD_HL_LIB)
       if (EXISTS "${HDF5_SOURCE_DIR}/hl/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/c++")

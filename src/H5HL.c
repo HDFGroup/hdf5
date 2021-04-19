@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -930,7 +930,7 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL, H5HL_get_size(H5F_t *f, haddr_t add
 
     H5HL_cache_prfx_ud_t prfx_udata;  /* User data for protecting local heap prefix */
     H5HL_prfx_t *        prfx = NULL; /* Local heap prefix */
-    H5HL_t *             heap;        /* Heap data structure */
+    H5HL_t *             heap = NULL; /* Heap data structure */
 
     /* check arguments */
     HDassert(f);
@@ -977,7 +977,7 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL, H5HL_heapsize(H5F_t *f, haddr_t add
 
     H5HL_cache_prfx_ud_t prfx_udata;  /* User data for protecting local heap prefix */
     H5HL_prfx_t *        prfx = NULL; /* Local heap prefix */
-    H5HL_t *             heap;        /* Heap data structure */
+    H5HL_t *             heap = NULL; /* Heap data structure */
 
     /* check arguments */
     HDassert(f);

@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -35,6 +35,7 @@
 
 ./.clang-format
 ./.github/CODEOWNERS  _DO_NOT_DISTRIBUTE_
+./.github/workflows/clang-format-fix.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
@@ -202,7 +203,9 @@
 
 ./config/site-specific/BlankForm
 
+./doc/branches-explained.md
 ./doc/code-conventions.md
+./doc/contributing.md
 
 ./doxygen/aliases
 ./doxygen/Doxyfile.in
@@ -997,8 +1000,6 @@
 ./src/H5SMpkg.h
 ./src/H5SMprivate.h
 ./src/H5SMtest.c
-./src/H5ST.c
-./src/H5STprivate.h
 ./src/H5T.c
 ./src/H5Tarray.c
 ./src/H5Tbit.c
@@ -1315,7 +1316,6 @@
 ./test/ttsafe_cancel.c
 ./test/ttsafe_dcreate.c
 ./test/ttsafe_error.c
-./test/ttst.c
 ./test/tunicode.c
 ./test/tvlstr.c
 ./test/tvltypes.c
@@ -1985,6 +1985,9 @@
 ./tools/testfiles/tfill.ddl
 ./tools/testfiles/tfilters.h5
 ./tools/testfiles/tfletcher32.ddl
+./tools/testfiles/tfloatsattrs.ddl
+./tools/testfiles/tfloatsattrs.h5
+./tools/testfiles/tfloatsattrs.wddl
 ./tools/testfiles/tfvalues.h5
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl
@@ -2022,7 +2025,10 @@
 ./tools/testfiles/tintsnodata.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
+./tools/testfiles/tldouble.ddl
 ./tools/testfiles/tldouble.h5
+./tools/testfiles/tldouble_scalar.ddl
+./tools/testfiles/tldouble_scalar.h5
 ./tools/testfiles/tlonglinks.ddl
 ./tools/testfiles/tlonglinks.h5
 ./tools/testfiles/tloop-1.ddl
@@ -2129,6 +2135,8 @@
 ./tools/testfiles/twithddl.exp
 ./tools/testfiles/twithddlfile.ddl
 ./tools/testfiles/twithddlfile.exp
+./tools/testfiles/tCVE_2018_11206_fill_old.h5
+./tools/testfiles/tCVE_2018_11206_fill_new.h5
 
 # h5dump test error files
 ./tools/test/h5dump/errfiles/filter_fail.err
@@ -3401,9 +3409,11 @@
 ./java/test/junit.sh.in
 ./java/test/testfiles/JUnit-TestH5.txt
 ./java/test/testfiles/JUnit-TestH5A.txt
+./java/test/testfiles/JUnit-TestH5Arw.txt
 ./java/test/testfiles/JUnit-TestH5Dparams.txt
 ./java/test/testfiles/JUnit-TestH5D.txt
 ./java/test/testfiles/JUnit-TestH5Dplist.txt
+./java/test/testfiles/JUnit-TestH5Drw.txt
 ./java/test/testfiles/JUnit-TestH5E.txt
 ./java/test/testfiles/JUnit-TestH5Edefault.txt
 ./java/test/testfiles/JUnit-TestH5Eparams.txt
@@ -3431,6 +3441,7 @@
 ./java/test/testfiles/JUnit-TestH5Pvirtual.txt
 ./java/test/testfiles/JUnit-TestH5PL.txt
 ./java/test/testfiles/JUnit-TestH5R.txt
+./java/test/testfiles/JUnit-TestH5Rref.txt
 ./java/test/testfiles/JUnit-TestH5Sbasic.txt
 ./java/test/testfiles/JUnit-TestH5S.txt
 ./java/test/testfiles/JUnit-TestH5Tparams.txt
@@ -3441,9 +3452,11 @@
 ./java/test/h5ex_g_iterate.orig
 ./java/test/TestH5.java
 ./java/test/TestH5A.java
+./java/test/TestH5Arw.java
 ./java/test/TestH5Dparams.java
 ./java/test/TestH5D.java
 ./java/test/TestH5Dplist.java
+./java/test/TestH5Drw.java
 ./java/test/TestH5E.java
 ./java/test/TestH5Edefault.java
 ./java/test/TestH5Eparams.java
@@ -3471,6 +3484,7 @@
 ./java/test/TestH5Pvirtual.java
 ./java/test/TestH5PL.java
 ./java/test/TestH5R.java
+./java/test/TestH5Rref.java
 ./java/test/TestH5Sbasic.java
 ./java/test/TestH5S.java
 ./java/test/TestH5Tparams.java

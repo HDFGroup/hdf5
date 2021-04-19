@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5T module.
  */
-#ifndef _H5Tpublic_H
-#define _H5Tpublic_H
+#ifndef H5Tpublic_H
+#define H5Tpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -289,11 +289,11 @@ typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type, 
 
 /* When this header is included from a private header, don't make calls to H5open() */
 #undef H5OPEN
-#ifndef _H5private_H
+#ifndef H5private_H
 #define H5OPEN H5open(),
-#else /* _H5private_H */
+#else /* H5private_H */
 #define H5OPEN
-#endif /* _H5private_H */
+#endif /* H5private_H */
 
 /*
  * The IEEE floating point types in various byte orders.
@@ -3067,4 +3067,4 @@ H5_DLL int H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int perm[]);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Tpublic_H */
+#endif /* H5Tpublic_H */

@@ -144,6 +144,18 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
       (The option --follow-symlinks overrides the default behavior when
        symbolic links are compared.).
 
+ Subsetting options:
+  Subsetting is available by using the fcompact form of subsetting, as follows:
+    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]
+  It is not required to use all parameters, but until the last parameter value used,
+  all of the semicolons (;) are required, even when a parameter value is not specified. Example:
+    obj1 /foo/mydataset[START;;COUNT;BLOCK]
+    obj1 /foo/mydataset[START]
+  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in
+  each dimension. START is optional and will default to 0 in each dimension.
+  Each of START, STRIDE, COUNT, and BLOCK must be a comma-separated list of integers with
+  one integer for each dimension of the dataset.
+
  Exit code:
   0 if no differences, 1 if differences found, 2 if error
 

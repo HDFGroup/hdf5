@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -21,21 +21,6 @@ include (CheckTypeSize)
 include (CheckVariableExists)
 include (TestBigEndian)
 include (CheckStructHasMember)
-
-#-----------------------------------------------------------------------------
-# APPLE/Darwin setup
-#-----------------------------------------------------------------------------
-if (APPLE)
-  list (LENGTH CMAKE_OSX_ARCHITECTURES ARCH_LENGTH)
-  if (ARCH_LENGTH GREATER 1)
-    set (CMAKE_OSX_ARCHITECTURES "" CACHE STRING "" FORCE)
-    message (FATAL_ERROR "Building Universal Binaries on OS X is NOT supported by the HDF5 project. This is"
-    "due to technical reasons. The best approach would be build each architecture in separate directories"
-    "and use the 'lipo' tool to combine them into a single executable or library. The 'CMAKE_OSX_ARCHITECTURES'"
-    "variable has been set to a blank value which will build the default architecture for this system.")
-  endif ()
-  set (${HDF_PREFIX}_AC_APPLE_UNIVERSAL_BUILD 0)
-endif ()
 
 # Check for Darwin (not just Apple - we also want to catch OpenDarwin)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -515,18 +500,12 @@ CHECK_FUNCTION_EXISTS (frexpl            ${HDF_PREFIX}_HAVE_FREXPL)
 
 CHECK_FUNCTION_EXISTS (gethostname       ${HDF_PREFIX}_HAVE_GETHOSTNAME)
 CHECK_FUNCTION_EXISTS (getrusage         ${HDF_PREFIX}_HAVE_GETRUSAGE)
-CHECK_FUNCTION_EXISTS (llround           ${HDF_PREFIX}_HAVE_LLROUND)
-CHECK_FUNCTION_EXISTS (llroundf          ${HDF_PREFIX}_HAVE_LLROUNDF)
-CHECK_FUNCTION_EXISTS (lround            ${HDF_PREFIX}_HAVE_LROUND)
-CHECK_FUNCTION_EXISTS (lroundf           ${HDF_PREFIX}_HAVE_LROUNDF)
 CHECK_FUNCTION_EXISTS (lstat             ${HDF_PREFIX}_HAVE_LSTAT)
 
 CHECK_FUNCTION_EXISTS (pread             ${HDF_PREFIX}_HAVE_PREAD)
 CHECK_FUNCTION_EXISTS (pwrite            ${HDF_PREFIX}_HAVE_PWRITE)
 CHECK_FUNCTION_EXISTS (rand_r            ${HDF_PREFIX}_HAVE_RAND_R)
 CHECK_FUNCTION_EXISTS (random            ${HDF_PREFIX}_HAVE_RANDOM)
-CHECK_FUNCTION_EXISTS (round             ${HDF_PREFIX}_HAVE_ROUND)
-CHECK_FUNCTION_EXISTS (roundf            ${HDF_PREFIX}_HAVE_ROUNDF)
 CHECK_FUNCTION_EXISTS (setsysinfo        ${HDF_PREFIX}_HAVE_SETSYSINFO)
 
 CHECK_FUNCTION_EXISTS (signal            ${HDF_PREFIX}_HAVE_SIGNAL)

@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -80,7 +80,7 @@ static int clean_file_g = -1; /*whether to cleanup temporary test     */
 /*0 is no cleanup; 1 is do cleanup      */
 
 /* the different types of file descriptors we can expect */
-typedef union _file_descr {
+typedef union {
     int   posixfd; /* POSIX file handle*/
     hid_t h5fd;    /* HDF5 file        */
 } file_descr;

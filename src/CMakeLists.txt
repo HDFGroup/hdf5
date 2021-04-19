@@ -600,14 +600,6 @@ set (H5SM_HDRS
 IDE_GENERATED_PROPERTIES ("H5SM" "${H5SM_HDRS}" "${H5SM_SOURCES}" )
 
 
-set (H5ST_SOURCES
-    ${HDF5_SRC_DIR}/H5ST.c
-)
-set (H5ST_HDRS
-)
-IDE_GENERATED_PROPERTIES ("H5ST" "${H5ST_HDRS}" "${H5ST_SOURCES}" )
-
-
 set (H5T_SOURCES
     ${HDF5_SRC_DIR}/H5T.c
     ${HDF5_SRC_DIR}/H5Tarray.c
@@ -802,7 +794,6 @@ set (common_SRCS
     ${H5S_SOURCES}
     ${H5SL_SOURCES}
     ${H5SM_SOURCES}
-    ${H5ST_SOURCES}
     ${H5T_SOURCES}
     ${H5TS_SOURCES}
     ${H5VL_SOURCES}
@@ -961,8 +952,6 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5SMpkg.h
     ${HDF5_SRC_DIR}/H5SMprivate.h
 
-    ${HDF5_SRC_DIR}/H5STprivate.h
-
     ${HDF5_SRC_DIR}/H5Tpkg.h
     ${HDF5_SRC_DIR}/H5Tprivate.h
 
@@ -1002,8 +991,7 @@ set (H5_PUBLIC_GENERATED_HEADERS
 option (HDF5_GENERATE_HEADERS "Rebuild Generated Files" ON)
 if (HDF5_GENERATE_HEADERS)
   set_source_files_properties(${H5_GENERATED_HEADERS} PROPERTIES GENERATED TRUE)
-  find_package (Perl)
-  if (PERL_FOUND)
+  if (H5_PERL_FOUND)
     execute_process (
         COMMAND ${PERL_EXECUTABLE} ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SRC_DIR}/H5err.txt OUTPUT_VARIABLE SCRIPT_OUTPUT
     )
@@ -1219,7 +1207,7 @@ if (NOT ONLY_SHARED_LIBS)
           ${HDF_EXTRA_FLAGS}
       PRIVATE
           $<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>  # Enable tracing of the API
-          $<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:H5Z_DEBUG;H5T_DEBUG;H5ST_DEBUG;H5S_DEBUG;H5O_DEBUG;H5I_DEBUG;H5HL_DEBUG;H5F_DEBUG;H5D_DEBUG;H5B2_DEBUG;H5AC_DEBUG>
+          $<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:H5Z_DEBUG;H5T_DEBUG;H5S_DEBUG;H5O_DEBUG;H5I_DEBUG;H5HL_DEBUG;H5F_DEBUG;H5D_DEBUG;H5B2_DEBUG;H5AC_DEBUG>
   )
   TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} STATIC)
   target_link_libraries (${HDF5_LIB_TARGET}
@@ -1258,7 +1246,7 @@ if (BUILD_SHARED_LIBS)
       PRIVATE
           $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:H5_HAVE_THREADSAFE>
           $<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>  # Enable tracing of the API
-          $<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:H5Z_DEBUG;H5T_DEBUG;H5ST_DEBUG;H5S_DEBUG;H5O_DEBUG;H5I_DEBUG;H5HL_DEBUG;H5F_DEBUG;H5D_DEBUG;H5B2_DEBUG;H5AC_DEBUG>
+          $<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:H5Z_DEBUG;H5T_DEBUG;H5S_DEBUG;H5O_DEBUG;H5I_DEBUG;H5HL_DEBUG;H5F_DEBUG;H5D_DEBUG;H5B2_DEBUG;H5AC_DEBUG>
   )
   TARGET_C_PROPERTIES (${HDF5_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_LIBSH_TARGET}
@@ -1380,35 +1368,44 @@ endif ()
 if (DOXYGEN_FOUND)
   set (DOXYGEN_PACKAGE ${HDF5_PACKAGE})
   set (DOXYGEN_VERSION_STRING ${HDF5_VERSION_STRING})
-  set (DOXYGEN_INCLUDE_ALIASES ${HDF5_DOXYGEN_DIR}/aliases)
+  set (DOXYGEN_INCLUDE_ALIASES_PATH ${HDF5_DOXYGEN_DIR})
+  set (DOXYGEN_INCLUDE_ALIASES aliases)
+  set (DOXYGEN_VERBATIM_VARS DOXYGEN_INCLUDE_ALIASES)
   set (DOXYGEN_PROJECT_LOGO ${HDF5_DOXYGEN_DIR}/img/HDFG-logo.png)
   set (DOXYGEN_PROJECT_BRIEF "C-API Reference")
-  set (DOXYGEN_INPUT_DIRECTORY ${HDF5_SRC_DIR} ${HDF5_DOXYGEN_DIR}/dox ${HDF5_GENERATED_SOURCE_DIR}/shared)
+  set (DOXYGEN_INPUT_DIRECTORY "${HDF5_SRC_DIR} ${HDF5_DOXYGEN_DIR}/dox ${HDF5_GENERATED_SOURCE_DIR}/shared")
   set (DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
   set (DOXYGEN_MACRO_EXPANSION YES)
   set (DOXYGEN_OUTPUT_DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs)
   set (DOXYGEN_EXAMPLES_DIRECTORY ${HDF5_DOXYGEN_DIR}/examples)
 
+# This configure and custom target work together
   # Replace variables inside @@ with the current values
-  configure_file(${HDF5_DOXYGEN_DIR}/Doxyfile.in Doxyfile @ONLY)
-
-  doxygen_add_docs(hdf5lib_doc
-#      ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS} ${HDF5_DOXYGEN_DIR}/dox
-      ${DOXYGEN_INPUT_DIRECTORY}
-      ALL
-      WORKING_DIRECTORY ${HDF5_SRC_DIR}
-      COMMENT "Generating HDF5 library Source Documentation"
-  )
-  install(
+  configure_file (${HDF5_DOXYGEN_DIR}/Doxyfile.in ${HDF5_BINARY_DIR}/Doxyfile @ONLY)
+  add_custom_target (hdf5lib_doc ALL
+        COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY ${HDF5_SRC_DIR}
+        COMMENT "Generating HDF5 library Source API documentation with Doxygen"
+        VERBATIM )
+# This cmake function requires that the non-default doxyfile settings are provided with set (DOXYGEN_xxx) commands
+# In addition the doxyfile aliases @INCLUDE option is not supported and would need to be provided in a set (DOXYGEN_ALIASES) command.
+#  doxygen_add_docs (hdf5lib_doc
+##      ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS} ${HDF5_DOXYGEN_DIR}/dox
+#      ${DOXYGEN_INPUT_DIRECTORY}
+#      ALL
+#      WORKING_DIRECTORY ${HDF5_SRC_DIR}
+#      COMMENT "Generating HDF5 library Source Documentation"
+#  )
+  install (
       DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs/html
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT Documents
   )
 
-  if(NOT TARGET doxygen)
-    add_custom_target(doxygen)
-  endif()
+  if (NOT TARGET doxygen)
+    add_custom_target (doxygen)
+  endif ()
 
-  add_dependencies(doxygen hdf5lib_doc)
+  add_dependencies (doxygen hdf5lib_doc)
 
 endif ()

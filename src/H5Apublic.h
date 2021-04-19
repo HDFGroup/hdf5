@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5A module.
  */
-#ifndef _H5Apublic_H
-#define _H5Apublic_H
+#ifndef H5Apublic_H
+#define H5Apublic_H
 
 /* Public headers needed by this file */
 #include "H5Ipublic.h" /* IDs			  		*/
@@ -1336,4 +1336,4 @@ H5_DLL hid_t H5Aopen_name(hid_t loc_id, const char *name);
 }
 #endif
 
-#endif /* _H5Apublic_H */
+#endif /* H5Apublic_H */

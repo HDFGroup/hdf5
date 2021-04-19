@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -78,8 +78,7 @@ DSetCreatPropList::getConstant()
 void
 DSetCreatPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
@@ -94,7 +93,9 @@ const DSetCreatPropList &DSetCreatPropList::DEFAULT = *getConstant();
 ///\brief       Default constructor: creates a stub dataset creation property list
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::DSetCreatPropList() : ObjCreatPropList(H5P_DATASET_CREATE) {}
+DSetCreatPropList::DSetCreatPropList() : ObjCreatPropList(H5P_DATASET_CREATE)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList copy constructor
@@ -102,7 +103,9 @@ DSetCreatPropList::DSetCreatPropList() : ObjCreatPropList(H5P_DATASET_CREATE) {}
 ///             DSetCreatPropList object
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::DSetCreatPropList(const DSetCreatPropList &orig) : ObjCreatPropList(orig) {}
+DSetCreatPropList::DSetCreatPropList(const DSetCreatPropList &orig) : ObjCreatPropList(orig)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList overloaded constructor
@@ -110,7 +113,9 @@ DSetCreatPropList::DSetCreatPropList(const DSetCreatPropList &orig) : ObjCreatPr
 ///             existing dataset creation property list.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::DSetCreatPropList(const hid_t plist_id) : ObjCreatPropList(plist_id) {}
+DSetCreatPropList::DSetCreatPropList(const hid_t plist_id) : ObjCreatPropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList::setChunk
@@ -769,8 +774,8 @@ DSetCreatPropList::setVirtual(const DataSpace &vspace, const char *src_fname, co
 // Programmer   Binh-Minh Ribler - Mar, 2017
 //--------------------------------------------------------------------------
 void
-DSetCreatPropList::setVirtual(const DataSpace &vspace, const H5std_string src_fname,
-                              const H5std_string src_dsname, const DataSpace &sspace) const
+DSetCreatPropList::setVirtual(const DataSpace &vspace, const H5std_string &src_fname,
+                              const H5std_string &src_dsname, const DataSpace &sspace) const
 {
     setVirtual(vspace, src_fname.c_str(), src_dsname.c_str(), sspace);
 }
@@ -780,6 +785,8 @@ DSetCreatPropList::setVirtual(const DataSpace &vspace, const H5std_string src_fn
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::~DSetCreatPropList() {}
+DSetCreatPropList::~DSetCreatPropList()
+{
+}
 
 } // namespace H5

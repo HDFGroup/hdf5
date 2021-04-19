@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * Purpose:     Support h5dump functions for the various tools.
  */
-#ifndef H5TOOLS_DUMP_H__
-#define H5TOOLS_DUMP_H__
+#ifndef H5TOOLS_DUMP_H
+#define H5TOOLS_DUMP_H
 
 #include "h5tools_utils.h"
 
@@ -94,4 +94,4 @@ H5TOOLS_DLL void h5tools_print_packed_bits(h5tools_str_t *buffer /*in,out*/, hid
 }
 #endif
 
-#endif /* H5TOOLS_DUMP_H__ */
+#endif /* H5TOOLS_DUMP_H */

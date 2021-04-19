@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -70,8 +70,7 @@ LinkCreatPropList::getConstant()
 void
 LinkCreatPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
@@ -86,7 +85,9 @@ const LinkCreatPropList &LinkCreatPropList::DEFAULT = *getConstant();
 ///\brief       Creates a file access property list
 // December, 2016
 //--------------------------------------------------------------------------
-LinkCreatPropList::LinkCreatPropList() : PropList(H5P_LINK_CREATE) {}
+LinkCreatPropList::LinkCreatPropList() : PropList(H5P_LINK_CREATE)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    LinkCreatPropList copy constructor
@@ -94,7 +95,9 @@ LinkCreatPropList::LinkCreatPropList() : PropList(H5P_LINK_CREATE) {}
 ///\param       original - IN: LinkCreatPropList instance to copy
 // December, 2016
 //--------------------------------------------------------------------------
-LinkCreatPropList::LinkCreatPropList(const LinkCreatPropList &original) : PropList(original) {}
+LinkCreatPropList::LinkCreatPropList(const LinkCreatPropList &original) : PropList(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    LinkCreatPropList overloaded constructor
@@ -102,7 +105,9 @@ LinkCreatPropList::LinkCreatPropList(const LinkCreatPropList &original) : PropLi
 ///             existing one.
 // December, 2016
 //--------------------------------------------------------------------------
-LinkCreatPropList::LinkCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
+LinkCreatPropList::LinkCreatPropList(const hid_t plist_id) : PropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    LinkCreatPropList::setCreateIntermediateGroup
@@ -185,6 +190,8 @@ LinkCreatPropList::getCharEncoding() const
 ///\brief       Noop destructor
 // December, 2016
 //--------------------------------------------------------------------------
-LinkCreatPropList::~LinkCreatPropList() {}
+LinkCreatPropList::~LinkCreatPropList()
+{
+}
 
 } // namespace H5

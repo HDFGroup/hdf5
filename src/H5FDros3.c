@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -266,6 +266,7 @@ static const H5FD_class_t H5FD_ros3_g = {
     H5FD__ros3_truncate,      /* truncate             */
     NULL,                     /* lock                 */
     NULL,                     /* unlock               */
+    NULL,                     /* del                  */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 

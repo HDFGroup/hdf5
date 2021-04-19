@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -70,8 +70,7 @@ ObjCreatPropList::getConstant()
 void
 ObjCreatPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
@@ -86,7 +85,9 @@ const ObjCreatPropList &ObjCreatPropList::DEFAULT = *getConstant();
 ///\brief       Creates a file access property list
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-ObjCreatPropList::ObjCreatPropList() : PropList(H5P_OBJECT_CREATE) {}
+ObjCreatPropList::ObjCreatPropList() : PropList(H5P_OBJECT_CREATE)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList copy constructor
@@ -94,7 +95,9 @@ ObjCreatPropList::ObjCreatPropList() : PropList(H5P_OBJECT_CREATE) {}
 ///\param       original - IN: ObjCreatPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-ObjCreatPropList::ObjCreatPropList(const ObjCreatPropList &original) : PropList(original) {}
+ObjCreatPropList::ObjCreatPropList(const ObjCreatPropList &original) : PropList(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList overloaded constructor
@@ -102,7 +105,9 @@ ObjCreatPropList::ObjCreatPropList(const ObjCreatPropList &original) : PropList(
 ///             existing one.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-ObjCreatPropList::ObjCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
+ObjCreatPropList::ObjCreatPropList(const hid_t plist_id) : PropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList::setAttrPhaseChange
@@ -209,6 +214,8 @@ ObjCreatPropList::getAttrCrtOrder() const
 ///\brief       Noop destructor
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-ObjCreatPropList::~ObjCreatPropList() {}
+ObjCreatPropList::~ObjCreatPropList()
+{
+}
 
 } // namespace H5

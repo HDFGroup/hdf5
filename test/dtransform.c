@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,12 +18,12 @@
 #define FLOAT_TOL 0.0001F
 
 static int init_test(hid_t file_id);
-static int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy);
-static int test_trivial(const hid_t dxpl_id_simple);
-static int test_poly(const hid_t dxpl_id_polynomial);
+static int test_copy(hid_t dxpl_id_c_to_f_copy, hid_t dxpl_id_polynomial_copy);
+static int test_trivial(hid_t dxpl_id_simple);
+static int test_poly(hid_t dxpl_id_polynomial);
 static int test_specials(hid_t file);
 static int test_set(void);
-static int test_getset(const hid_t dxpl_id_simple);
+static int test_getset(hid_t dxpl_id_simple);
 
 /* These are needed for multiple tests, so are declared here globally and are init'ed in init_test */
 hid_t dset_id_int         = -1;
@@ -938,7 +938,10 @@ test_set(void)
 error:
     if (ptrgetTest)
         HDfree(ptrgetTest);
-    H5E_BEGIN_TRY { H5Pclose(dxpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
     H5E_END_TRY
 
     return -1;

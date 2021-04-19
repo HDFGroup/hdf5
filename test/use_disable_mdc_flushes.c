@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,11 +18,9 @@
 #include "h5test.h"
 
 /* This test uses many POSIX things that are not available on
- * Windows. We're using a check for fork(2) here as a proxy for
- * all POSIX/Unix/Linux things until this test can be made
- * more platform-independent.
+ * Windows.
  */
-#ifdef H5_HAVE_FORK
+#ifdef H5_HAVE_UNISTD_H
 
 #define H5D_FRIEND /*suppress error about including H5Dpkg      */
 #define H5D_TESTING
@@ -539,7 +537,7 @@ done:
     return (ret_value);
 }
 
-#else /* H5_HAVE_FORK */
+#else /* H5_HAVE_UNISTD_H */
 
 int
 main(void)
@@ -548,4 +546,4 @@ main(void)
     HDexit(EXIT_SUCCESS);
 } /* end main() */
 
-#endif /* H5_HAVE_FORK */
+#endif /* H5_HAVE_UNISTD_H */

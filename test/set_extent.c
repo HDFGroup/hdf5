@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -121,7 +121,7 @@ main(void)
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
     /* Current VFD that does not support contigous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     /* Initialize random number seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -388,7 +388,10 @@ do_ranks(hid_t fapl, hbool_t new_format)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(dcpl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
     H5E_END_TRY
 
     return -1;
@@ -414,7 +417,10 @@ do_layouts(hid_t fapl)
             new_fapl = H5Pcopy(fapl);
 
             /* Set version bounds */
-            H5E_BEGIN_TRY { ret = H5Pset_libver_bounds(new_fapl, low, high); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5Pset_libver_bounds(new_fapl, low, high);
+            }
             H5E_END_TRY;
 
             if (ret < 0) /* Invalid low/high combinations */
@@ -440,7 +446,10 @@ do_layouts(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(new_fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(new_fapl);
+    }
     H5E_END_TRY;
     return -1;
 }
@@ -2075,7 +2084,10 @@ test_layouts(H5D_layout_t layout, hid_t fapl)
      *-------------------------------------------------------------------------
      */
 
-    H5E_BEGIN_TRY { ret = H5Dset_extent(did, dims_e); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dset_extent(did, dims_e);
+    }
     H5E_END_TRY;
 
     if (ret >= 0)
@@ -2121,7 +2133,10 @@ test_layouts(H5D_layout_t layout, hid_t fapl)
      *-------------------------------------------------------------------------
      */
 
-    H5E_BEGIN_TRY { ret = H5Dset_extent(did, dims_s); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dset_extent(did, dims_s);
+    }
     H5E_END_TRY;
 
     if (ret >= 0)
@@ -2677,6 +2692,4 @@ test_random_rank4_dump(unsigned ndim_sets, hsize_t dim_log[][4], hsize_t cdims[4
                  (unsigned)dim_log[i][1], (unsigned)dim_log[i][2], (unsigned)dim_log[i][3]);
     if (j >= 0)
         HDprintf("  First incorrect value read: ( %d, %d, %d, %d )\n", j, k, l, m);
-
-    return;
 } /* end test_random_rank4_dump */

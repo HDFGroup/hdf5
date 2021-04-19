@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,11 +18,7 @@
    EXTERNAL ROUTINES/VARIABLES:
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -187,7 +183,7 @@ test_vlstring_dataset()
         // Test scalar type dataset with 1 value.
         dset1 = root.createDataSet("test_scalar_small", vlst, ds_space);
 
-        dynstring_ds_write = (char *)HDcalloc(1, sizeof(char));
+        dynstring_ds_write = (char *)HDcalloc(2, sizeof(char));
         HDmemset(dynstring_ds_write, 'A', 1);
 
         // Write data to the dataset, then read it back.
@@ -317,8 +313,7 @@ test_vlstring_array_dataset()
         issue_fail_msg("test_vlstring_array_dataset()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } // end test_vlstring_array_dataset()
 
 /*-------------------------------------------------------------------------
@@ -531,8 +526,7 @@ test_vlstring_type()
         issue_fail_msg("test_vlstring_type()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } // end test_vlstring_type()
 
 /*-------------------------------------------------------------------------
@@ -865,7 +859,7 @@ read_scalar_dset(H5File &file, DataType &type, DataSpace &space, char *name, cha
         dset.read(&data_read, type, space, space);
         dset.close();
 
-        if (HDstrcmp(data, data_read))
+        if (HDstrcmp(data, data_read) != 0)
             TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
 
         HDfree(data_read);

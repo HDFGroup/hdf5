@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Gpublic_H
-#define _H5Gpublic_H
+#ifndef H5Gpublic_H
+#define H5Gpublic_H
 
 /* System headers needed by this file */
 #include <sys/types.h>
@@ -1157,4 +1157,4 @@ H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Gpublic_H */
+#endif /* H5Gpublic_H */

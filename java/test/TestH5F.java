@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -49,7 +48,7 @@ public class TestH5F {
             HDF5Constants.H5F_OBJ_DATASET, HDF5Constants.H5F_OBJ_GROUP,
             HDF5Constants.H5F_OBJ_DATATYPE, HDF5Constants.H5F_OBJ_ATTR,
             HDF5Constants.H5F_OBJ_ALL };
-    long H5fid = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
 
     private final void _deleteFile(String filename) {
         File file = new File(filename);
@@ -74,7 +73,7 @@ public class TestH5F {
     public void deleteH5file() throws HDF5LibraryException {
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
+            H5fid = HDF5Constants.H5I_INVALID_HID;
         }
         _deleteFile(H5_FILE);
         System.out.println();
@@ -82,7 +81,7 @@ public class TestH5F {
 
     @Test
     public void testH5Fget_create_plist() {
-        long plist = -1;
+        long plist = HDF5Constants.H5I_INVALID_HID;
 
         try {
             plist = H5.H5Fget_create_plist(H5fid);
@@ -106,7 +105,7 @@ public class TestH5F {
 
     @Test
     public void testH5Fget_access_plist() {
-        long plist = -1;
+        long plist = HDF5Constants.H5I_INVALID_HID;
 
         try {
             plist = H5.H5Fget_access_plist(H5fid);
@@ -134,7 +133,7 @@ public class TestH5F {
 
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
+            H5fid = HDF5Constants.H5I_INVALID_HID;
         }
 
         try {
@@ -159,7 +158,7 @@ public class TestH5F {
 
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
+            H5fid = HDF5Constants.H5I_INVALID_HID;
         }
 
         try {
@@ -182,8 +181,8 @@ public class TestH5F {
     public void testH5Fget_fileno_same() {
         long fileno1 = 0;
         long fileno2 = 0;
-        long fid1 = -1;
-        long fid2 = -1;
+        long fid1 = HDF5Constants.H5I_INVALID_HID;
+        long fid2 = HDF5Constants.H5I_INVALID_HID;
 
         try {
             fid1 = H5.H5Fcreate(H5_FILE2, HDF5Constants.H5F_ACC_TRUNC,
@@ -213,7 +212,7 @@ public class TestH5F {
     public void testH5Fget_fileno_diff() {
         long fileno1 = 0;
         long fileno2 = 0;
-        long fid2 = -1;
+        long fid2 = HDF5Constants.H5I_INVALID_HID;
 
         try {
             fid2 = H5.H5Fcreate(H5_FILE2, HDF5Constants.H5F_ACC_TRUNC,

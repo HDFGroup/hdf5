@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -265,7 +265,9 @@ test_refstr_wrap(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    CHECK(s, buf, "wrapping");
+    if (s == buf)
+        TestErrPrintf("%d: Should not have gotten the same pointer from reference-counted string!\n",
+                      __LINE__);
     cmp = HDstrcmp(s, buf);
     if (cmp <= 0)
         TestErrPrintf("%d: string comparison incorrect!\n", __LINE__);
@@ -375,7 +377,7 @@ test_refstr_acat(void)
 
     /* Append a large string to ref-counted string */
     large_str = HDmalloc(1024);
-    CHECK(large_str, NULL, "HDmalloc");
+    CHECK_PTR(large_str, "HDmalloc");
     HDmemset(large_str, 'a', 1024);
     large_str[1023] = '\0';
     ret             = H5RS_acat(rs, large_str);
@@ -386,7 +388,7 @@ test_refstr_acat(void)
     CHECK_PTR(s, "H5RS_get_str");
     HDsprintf(buf, "%s", "foobar");
     large_str2 = HDmalloc(1024 + 6);
-    CHECK(large_str2, NULL, "HDmalloc");
+    CHECK_PTR(large_str2, "HDmalloc");
     HDstrcpy(large_str2, "foobar");
     HDmemset(&large_str2[6], 'a', 1024);
     large_str2[1029] = '\0';

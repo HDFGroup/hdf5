@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -39,7 +39,10 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high, hbool_t s
     if (H5Pset_libver_bounds(fapl, low, high) < 0)
         TEST_ERROR
 
-    H5E_BEGIN_TRY { ret = H5Pencode2(orig_pl, NULL, &temp_size, fapl); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pencode2(orig_pl, NULL, &temp_size, fapl);
+    }
     H5E_END_TRY;
 
     if (support_virtual && high < H5F_LIBVER_V110)

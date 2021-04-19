@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -97,7 +97,7 @@ static off_t
 get_size(const char *progname, int *argno, int argc, char *argv[])
 {
     off_t retval = -1;
-    char *suffix;
+    char *suffix = NULL;
 
     if (isdigit((int)(argv[*argno][2]))) {
         retval = HDstrtol(argv[*argno] + 2, &suffix, 10);
@@ -483,7 +483,10 @@ main(int argc, char *argv[])
      * file and the new file can only be a single file, reopen the new file should fail.
      * There's nothing to do in this case.
      */
-    H5E_BEGIN_TRY { file = H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl);
+    }
     H5E_END_TRY;
 
     if (file >= 0) {

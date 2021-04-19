@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -6874,28 +6874,20 @@ main(int argc, char **argv)
      * hang in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
-    if (H5dont_atexit() < 0) {
+    if (H5dont_atexit() < 0)
         HDprintf("%d:Failed to turn off atexit processing. Continue.\n", mpi_rank);
-    };
+
     H5open();
 
     express_test = do_express_test();
-#if 0  /* JRM */
-    express_test = 0;
-#endif /* JRM */
-    if (express_test) {
-
+    if (express_test)
         virt_num_data_entries = EXPRESS_VIRT_NUM_DATA_ENTRIES;
-    }
-    else {
-
+    else
         virt_num_data_entries = STD_VIRT_NUM_DATA_ENTRIES;
-    }
 
 #ifdef H5_HAVE_MPE
-    if (MAINPROCESS) {
+    if (MAINPROCESS)
         HDprintf("    Tests compiled for MPE.\n");
-    }
     virt_num_data_entries = MPE_VIRT_NUM_DATA_ENTIES;
 #endif /* H5_HAVE_MPE */
 
@@ -6908,11 +6900,8 @@ main(int argc, char **argv)
     }
 
     if (mpi_size < 3) {
-
-        if (MAINPROCESS) {
-
+        if (MAINPROCESS)
             HDprintf("    Need at least 3 processes.  Exiting.\n");
-        }
         goto finish;
     }
 
@@ -6930,27 +6919,22 @@ main(int argc, char **argv)
     /* setup file access property list with the world communicator */
     if (FAIL == (fapl = H5Pcreate(H5P_FILE_ACCESS))) {
         nerrors++;
-        if (verbose) {
+        if (verbose)
             HDfprintf(stdout, "%d:%s: H5Pcreate() failed 1.\n", world_mpi_rank, FUNC);
-        }
     }
 
     if (H5Pset_fapl_mpio(fapl, world_mpi_comm, MPI_INFO_NULL) < 0) {
-
         nerrors++;
-        if (verbose) {
+        if (verbose)
             HDfprintf(stdout, "%d:%s: H5Pset_fapl_mpio() failed 1.\n", world_mpi_rank, FUNC);
-        }
     }
 
     /* fix the file names */
     for (u = 0; u < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++u) {
         if (h5_fixname(FILENAME[u], fapl, filenames[u], sizeof(filenames[u])) == NULL) {
-
             nerrors++;
-            if (verbose) {
+            if (verbose)
                 HDfprintf(stdout, "%d:%s: h5_fixname() failed.\n", world_mpi_rank, FUNC);
-            }
             break;
         }
     }
@@ -6958,9 +6942,8 @@ main(int argc, char **argv)
     /* close the fapl before we set it up again */
     if (H5Pclose(fapl) < 0) {
         nerrors++;
-        if (verbose) {
+        if (verbose)
             HDfprintf(stdout, "%d:%s: H5Pclose() failed.\n", world_mpi_rank, FUNC);
-        }
     }
 
     /* now create the fapl again, excluding the server process. */
@@ -6969,32 +6952,25 @@ main(int argc, char **argv)
         /* setup file access property list */
         if (FAIL == (fapl = H5Pcreate(H5P_FILE_ACCESS))) {
             nerrors++;
-            if (verbose) {
+            if (verbose)
                 HDfprintf(stdout, "%d:%s: H5Pcreate() failed 2.\n", world_mpi_rank, FUNC);
-            }
         }
 
         if (H5Pset_fapl_mpio(fapl, file_mpi_comm, MPI_INFO_NULL) < 0) {
-
             nerrors++;
-            if (verbose) {
+            if (verbose)
                 HDfprintf(stdout, "%d:%s: H5Pset_fapl_mpio() failed 2.\n", world_mpi_rank, FUNC);
-            }
         }
     }
 
     setup_rand();
 
     max_nerrors = get_max_nerrors();
-
     if (max_nerrors != 0) {
 
         /* errors in setup -- no point in continuing */
-
-        if (world_mpi_rank == 0) {
-
+        if (world_mpi_rank == 0)
             HDfprintf(stdout, "Errors in test initialization.  Exiting.\n");
-        }
         goto finish;
     }
 

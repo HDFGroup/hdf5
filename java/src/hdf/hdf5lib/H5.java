@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -512,8 +512,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param file_export_name
      *            The file name to export data into.
-     * @param file_name
-     *            The name of the HDF5 file containing the dataset.
+     * @param file_id
+     *            The identifier of the HDF5 file containing the dataset.
      * @param object_path
      *            The full path of the dataset to be exported.
      * @param binary_order
@@ -525,8 +525,29 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native void H5export_dataset(String file_export_name, String file_name,
+    public synchronized static native void H5export_dataset(String file_export_name, long file_id,
             String object_path, int binary_order) throws HDF5LibraryException;
+
+    /**
+     * H5export_attribute is a utility function to save data in a file.
+     *
+     * @param file_export_name
+     *            The file name to export data into.
+     * @param dataset_id
+     *            The identifier of the dataset containing the attribute.
+     * @param attribute_name
+     *            The attribute to be exported.
+     * @param binary_order
+     *            99 - export data as text.
+     *            1 - export data as binary Native Order.
+     *            2 - export data as binary Little Endian.
+     *            3 - export data as binary Big Endian.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5export_attribute(String file_export_name, long dataset_id,
+            String attribute_name, int binary_order) throws HDF5LibraryException;
 
     /**
      * H5is_library_threadsafe Checks to see if the library was built with thread-safety enabled.

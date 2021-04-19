@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
  * This file contains public declarations for authoring VOL connectors.
  */
 
-#ifndef _H5VLconnector_H
-#define _H5VLconnector_H
+#ifndef H5VLconnector_H
+#define H5VLconnector_H
 
 /* Public headers needed by this file */
 #include "H5public.h"   /* Generic Functions                    */
@@ -560,4 +560,4 @@ H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 }
 #endif
 
-#endif /* _H5VLconnector_H */
+#endif /* H5VLconnector_H */

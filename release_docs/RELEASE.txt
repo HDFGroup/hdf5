@@ -3,6 +3,7 @@ HDF5 version 1.13.0 currently under development
 
 
 INTRODUCTION
+============
 
 This document describes the differences between this release and the previous
 HDF5 release. It contains information on the platforms tested and known
@@ -48,6 +49,55 @@ New Features
 
     Configuration:
     -------------
+    - Removal of pre-VS2015 work-arounds
+
+      HDF5 now requires Visual Studio 2015 or greater, so old work-around
+      code and definitions have been removed, including:
+
+      * <inttypes.h>
+      * snprintf and vsnprintf
+      * llround, llroundf, lround, lroundf, round, roundf
+      * strtoll and strtoull
+      * va_copy
+      * struct timespec
+
+      (DER - 2021/03/22)
+
+    - Add CMake variable HDF5_LIB_INFIX
+
+      This infix is added to all library names after 'hdf5'.
+      e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
+      This name is used in packages on debian based systems.
+      (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
+
+      (barcode - 2021/03/22)
+
+    - On macOS, Universal Binaries can now be built, allowing native execution on
+      both Intel and Apple Silicon (ARM) based Macs.
+
+      To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+
+      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+
+    - Added a configure-time option to control certain compiler warnings
+      diagnostics
+
+      A new configure-time option was added that allows some compiler warnings
+      diagnostics to have the default operation. This is mainly intended for
+      library developers and currently only works for gcc 10 and above. The
+      diagnostics flags apply to C, C++ and Fortran compilers and will appear
+      in "H5 C Flags", H5 C++ Flags" and H5 Fortran Flags, respectively. They
+      will NOT be exported to h5cc, etc.
+
+      The default is OFF, which will disable the warnings URL and color attributes
+      for the warnings output. ON will not add the flags and allow default behavior.
+
+      Autotools:    --enable-diags
+
+      CMake:        HDF5_ENABLE_BUILD_DIAGS
+
+      (ADB - 2021/02/05, HDFFV-11213)
+
     - CMake option to build the HDF filter plugins project as an external project
 
         The HDF filter plugins project is a collection of registered compression
@@ -159,7 +209,7 @@ New Features
         HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
         pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
         or tool folder. All sources can be formatted by executing the format target;
-          make format
+        make format
 
         (ADB - 2020/08/24)
 
@@ -232,7 +282,7 @@ New Features
             YES                   NO          Default to STATIC
             NO                    YES         Default to SHARED
             NO                    NO          Default to SHARED
-        The defaults can be overriden by setting the config option
+        The defaults can be overridden by setting the config option
             HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
 
         (ADB - 2020/07/09, HDFFV-11116)
@@ -357,6 +407,59 @@ New Features
 
     Library:
     --------
+    - HSYS_GOTO_ERROR now emits the results of GetLastError() on Windows
+
+      HSYS_GOTO_ERROR is an internal macro that is used to produce error
+      messages when system calls fail. These strings include errno and the
+      the associated strerror() value, which are not particularly useful
+      when a Win32 API call fails.
+
+      On Windows, this macro has been updated to include the result of
+      GetLastError(). When a system call fails on Windows, usually only
+      one of errno and GetLastError() will be useful, however we emit both
+      for the user to parse. The Windows error message is not emitted as
+      it would be awkward to free the FormatMessage() buffer given the
+      existing HDF5 error framework. Users will have to look up the error
+      codes in MSDN.
+
+      The format string on Windows has been changed from:
+
+          "%s, errno = %d, error message = '%s'"
+
+      to:
+
+          "%s, errno = %d, error message = '%s', Win32 GetLastError() = %"PRIu32""
+
+      for those inclined to parse it for error values.
+
+        (DER - 2021/03/21)
+
+    - File locking now works on Windows
+
+      Since version 1.10.0, the HDF5 library has used a file locking scheme
+      to help enforce one reader at a time accessing an HDF5 file, which can
+      be helpful when setting up readers and writers to use the single-
+      writer/multiple-readers (SWMR) access pattern.
+
+      In the past, this was only functional on POSIX systems where flock() or
+      fcntl() were present. Windows used a no-op stub that always succeeded.
+
+      HDF5 now uses LockFileEx() and UnlockFileEx() to lock the file using the
+      same scheme as POSIX systems. We lock the entire file when we set up the
+      locks (by passing DWORDMAX as both size parameters to LockFileEx()).
+
+        (DER - 2021/03/19, HDFFV-10191)
+
+    - H5Epush_ret() now requires a trailing semicolon
+
+        H5Epush_ret() is a function-like macro that has been changed to
+        contain a `do {} while(0)` loop. Consequently, a trailing semicolon
+        is now required to end the `while` statement. Previously, a trailing
+        semi would work, but was not mandatory. This change was made to allow
+        clang-format to correctly format the source code.
+
+        (SAM - 2021/03/03)
+
     - Improved performance of H5Sget_select_elem_pointlist
 
         Modified library to cache the point after the last block of points
@@ -376,7 +479,7 @@ New Features
 
       (DER - 2020/11/24, HDFFV-11190)
 
-    - Add new public function H5Ssel_iter_reset
+    - Add a new public function H5Ssel_iter_reset
 
         This function resets a dataspace selection iterator back to an
         initial state so that it may be used for iteration once more.
@@ -499,7 +602,7 @@ New Features
         This function returns a datatype equivalent to the supplied datatype but
         with the location set to be in the file.  This datatype can then be used
         with H5Tconvert to convert data between file and in-memory representation.
-        This funcition is intended for use only by VOL connector developers.
+        This function is intended for use only by VOL connector developers.
 
         (NAF - 2019/11/08, ID-127)
 
@@ -535,7 +638,7 @@ New Features
 
 
     Java Library:
-    ----------------
+    -------------
     - Replaced HDF5AtomException with HDF5IdException
 
       Since H5E_ATOM changed to H5E_ID in the C library, the Java exception
@@ -571,11 +674,11 @@ New Features
 
     - Added ability to test java library with VOLs.
 
-        Created new CMake script that combines the java and vol test scripts.
+        Created a new CMake script that combines the java and vol test scripts.
 
         (ADB - 2020/02/03, HDFFV-10996)
 
-    - Tests fail for non-English locale.
+    - Tests fail for non-English locales.
 
         In the JUnit tests with a non-English locale, only the part before
         the decimal comma is replaced by XXXX and this leads to a comparison
@@ -647,29 +750,66 @@ New Features
 
 
     High-Level APIs:
-    ---------------
+    ----------------
     -
 
-    C Packet Table API
-    ------------------
+    C Packet Table API:
+    -------------------
     -
 
-    Internal header file
-    --------------------
+    Internal header file:
+    ---------------------
     -
 
-    Documentation
-    -------------
+    Documentation:
+    --------------
     -
 
-Support for new platforms, languages and compilers.
-=======================================
+Support for new platforms, languages and compilers
+==================================================
     -
 
 Bug Fixes since HDF5-1.12.0 release
-==================================
+===================================
     Library
     -------
+    - Fixed CVE-2018-17435
+
+        The tool h5dump produced a segfault when the size of a fill value
+        message was corrupted and caused a buffer overflow.
+
+        The problem was fixed by verifying the fill value's size
+        against the buffer size before attempting to access the buffer.
+
+        (BMR - 2021/03/15, HDFFV-10480)
+
+    - Fixed CVE-2018-14033 (same issue as CVE-2020-10811)
+
+        The tool h5dump produced a segfault when the storage size message
+        was corrupted and caused a buffer overflow.
+
+        The problem was fixed by verifying the storage size against the
+        buffer size before attempting to access the buffer.
+
+        (BMR - 2021/03/15, HDFFV-11159/HDFFV-11049)
+
+    - Remove underscores on header file guards
+
+        Header file guards used a variety of underscores at the beginning of the define.
+
+        Removed all leading (some trailing) underscores from header file guards.
+
+        (ADB - 2021/03/03, #361)
+
+    - Fixed issue with MPI communicator and info object not being
+      copied into new FAPL retrieved from H5F_get_access_plist
+
+        Added logic to copy the MPI communicator and info object into
+        the output FAPL. MPI communicator is retrieved from the VFD, while
+        the MPI info object is retrieved from the file's original FAPL.
+
+        (JTH - 2021/02/15, HDFFV-11109)
+
     - Fixed problems with vlens and refs inside compound using
       H5VLget_file_type()
 
@@ -685,7 +825,7 @@ Bug Fixes since HDF5-1.12.0 release
         and the filter is optional, it was supposed to be skipped but it was
         not skipped and the creation failed.
 
-        Allowed the creation of the dataset in such situation.
+        Allowed the creation of the dataset in such a situation.
 
         (BMR - 2020/08/13, HDFFV-10933)
 
@@ -704,8 +844,8 @@ Bug Fixes since HDF5-1.12.0 release
         H5S_NO_CLASS is an internal class value that should not have been
         exposed via a public API call.
 
-        In debug builds of the library, this can cause asserts to trip. In
-        non-debug builds, it will produce normal library errors.
+        In debug builds of the library, this can cause assert() function to 
+        trip. In non-debug builds, it will produce normal library errors.
 
         The new library behavior is for H5Sset_extent_none() to convert
         the dataspace into one of type H5S_NULL, which is better handled
@@ -759,8 +899,16 @@ Bug Fixes since HDF5-1.12.0 release
         (BMR - 2020/06/19, HDFFV-10591)
 
 
-    Java Library:
-    ----------------
+    Java Library
+    ------------
+    - JNI utility function does not handle new references.
+
+        The JNI utility function for converting reference data to string did
+        not use the new APIs. In addition to fixing that function, added new
+        java tests for using the new APIs.
+
+        (ADB - 2021/02/16, HDFFV-11212)
+
     - The H5FArray.java class, in which virtually the entire execution time
         is spent using the HDFNativeData method that converts from an array
         of bytes to an array of the destination Java type.
@@ -774,11 +922,11 @@ Bug Fixes since HDF5-1.12.0 release
 
     - Added ability to test java library with VOLs.
 
-        Created new CMake script that combines the java and vol test scripts.
+        Created a new CMake script that combines the java and vol test scripts.
 
         (ADB - 2020/02/03, HDFFV-10996)
 
-    - Tests fail for non-English locale.
+    - Tests fail for non-English locales.
 
         In the JUnit tests with a non-English locale, only the part before
         the decimal comma is replaced by XXXX and this leads to a comparison
@@ -789,6 +937,19 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Remove arbitrary warning flag groups from CMake builds
+
+      The arbitrary groups were created to reduce the quantity of warnings being
+      reported that overwhelmed testing report systems. Considerable work has
+      been accomplished to reduce the warning count and these arbitrary groups
+      are no longer needed.
+      Also the default for all warnings, HDF5_ENABLE_ALL_WARNINGS, is now ON.
+
+      Visual Studio warnings C4100, C4706, and C4127 have been moved to
+      developer warnings, HDF5_ENABLE_DEV_WARNINGS, and are disabled for normal builds.
+
+      (ADB - 2021/03/22, HDFFV-11228)
+
     - Reclassify CMake messages, to allow new modes and --log-level option
 
       CMake message commands have a mode argument. By default, STATUS mode
@@ -815,11 +976,22 @@ Bug Fixes since HDF5-1.12.0 release
 
     Tools
     -----
+    - Changed how h5dump and h5ls identify long double.
+
+        Long double support is not consistent across platforms. Tools will always
+        identify long double as 128-bit [little/big]-endian float nn-bit precision.
+        New test file created for datasets with attributes for float, double and
+        long double. In addition any unknown integer or float datatype will now
+        also show the number of bits for precision.
+        These files are also used in the java tests.
+
+        (ADB - 2021/03/24, HDFFV-11229)
+
     - Fixed tools argument parsing.
 
         Tools parsing used the length of the option from the long array to match
         the option from the command line. This incorrectly matched a shorter long
-        name option that was happened to be a subset of another long option.
+        name option that happened to be a subset of another long option.
         Changed to match whole names.
 
         (ADB - 2021/01/19, HDFFV-11106)
@@ -847,8 +1019,8 @@ Bug Fixes since HDF5-1.12.0 release
     - h5diff added a command line option to ignore attributes.
 
         h5diff would ignore all objects with a supplied path if the exclude-path argument is used.
-        Adding the exclude-attribute argument will only eclude attributes, with the supplied path,
-        from comparision.
+        Adding the exclude-attribute argument will only exclude attributes, with the supplied path,
+        from comparison.
 
         (ADB - 2020/07/20, HDFFV-5935)
 
@@ -896,19 +1068,19 @@ Bug Fixes since HDF5-1.12.0 release
 
 
     Fortran API
-    --------
+    -----------
     - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
 
         (MSB - 2020/02/18, HDFFV-11029)
 
 
     High-Level Library
-    ------
+    ------------------
     -
 
 
-    Fortran High-Level APIs:
-    ------
+    Fortran High-Level APIs
+    -----------------------
     -
 
 

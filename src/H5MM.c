@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -449,11 +449,17 @@ H5MM_xstrdup(const char *s)
 
     FUNC_ENTER_NOAPI(NULL)
 
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
     if (s) {
         if (NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         HDstrcpy(ret_value, s);
-    } /* end if */
+    }
+#else
+    if (s)
+        if (NULL == (ret_value = HDstrdup(s)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed")
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -483,10 +489,15 @@ H5MM_strdup(const char *s)
     FUNC_ENTER_NOAPI(NULL)
 
     if (!s)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "null string")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed")
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
     if (NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDstrcpy(ret_value, s);
+#else
+    if (NULL == (ret_value = HDstrdup(s)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed")
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

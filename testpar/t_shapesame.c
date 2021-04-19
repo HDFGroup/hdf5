@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -441,11 +441,8 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     VRFY((ret >= 0), "H5Dwrite() small_dataset initial write succeeded");
 
     /* sync with the other processes before checking data */
-    if (!use_collective_io) {
-
-        mrc = MPI_Barrier(MPI_COMM_WORLD);
-        VRFY((mrc == MPI_SUCCESS), "Sync after small dataset writes");
-    }
+    mrc = MPI_Barrier(MPI_COMM_WORLD);
+    VRFY((mrc == MPI_SUCCESS), "Sync after small dataset writes");
 
     /* read the small data set back to verify that it contains the
      * expected data.  Note that each process reads in the entire
@@ -515,11 +512,8 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     VRFY((ret >= 0), "H5Dwrite() large_dataset initial write succeeded");
 
     /* sync with the other processes before checking data */
-    if (!use_collective_io) {
-
-        mrc = MPI_Barrier(MPI_COMM_WORLD);
-        VRFY((mrc == MPI_SUCCESS), "Sync after large dataset writes");
-    }
+    mrc = MPI_Barrier(MPI_COMM_WORLD);
+    VRFY((mrc == MPI_SUCCESS), "Sync after large dataset writes");
 
     /* read the large data set back to verify that it contains the
      * expected data.  Note that each process reads in the entire
@@ -547,12 +541,8 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     VRFY((mis_match == FALSE), "large ds init data good.");
 
     /* sync with the other processes before changing data */
-
-    if (!use_collective_io) {
-
-        mrc = MPI_Barrier(MPI_COMM_WORLD);
-        VRFY((mrc == MPI_SUCCESS), "Sync initial values check");
-    }
+    mrc = MPI_Barrier(MPI_COMM_WORLD);
+    VRFY((mrc == MPI_SUCCESS), "Sync initial values check");
 
     return;
 

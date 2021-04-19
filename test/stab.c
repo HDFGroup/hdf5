@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -134,7 +134,7 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR
     if (H5Oget_comment_by_name(g3, "././.", comment, sizeof comment, H5P_DEFAULT) < 0)
         TEST_ERROR
-    if (HDstrcmp(comment, "hello world")) {
+    if (HDstrcmp(comment, "hello world") != 0) {
         H5_FAILED();
         HDputs("    Read the wrong comment string from the group.");
         HDprintf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
@@ -148,12 +148,18 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Check that creating groups with no-op names isn't allowed */
-    H5E_BEGIN_TRY { g1 = H5Gcreate2(fid, "/", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        g1 = H5Gcreate2(fid, "/", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (g1 >= 0)
         TEST_ERROR
 
-    H5E_BEGIN_TRY { g1 = H5Gcreate2(fid, "./././", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        g1 = H5Gcreate2(fid, "./././", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (g1 >= 0)
         TEST_ERROR
@@ -1273,7 +1279,7 @@ old_api(hid_t fapl)
     PASSED();
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
     /* Shut compiler up */
-    fapl = fapl;
+    (void)fapl;
 
     SKIPPED();
     HDputs("    Deprecated API symbols not enabled");
@@ -1358,7 +1364,10 @@ corrupt_stab_msg(void)
         TEST_ERROR
 
     /* Verify that an error is thrown when we try to access the dataset */
-    H5E_BEGIN_TRY { did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (did >= 0)
         TEST_ERROR
@@ -1416,7 +1425,7 @@ main(void)
         env_h5_drvr = "nomatch";
 
     /* VFD that does not support contigous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     /* Reset library */
     h5_reset();

@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1469,19 +1469,28 @@ verify_multiple_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Should fail to cork the attribute: aidg2; not an object */
-    H5E_BEGIN_TRY { ret = H5Odisable_mdc_flushes(aidg2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Odisable_mdc_flushes(aidg2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
 
     /* Should fail to uncork the attribute: aidd1; not an object */
-    H5E_BEGIN_TRY { ret = H5Odisable_mdc_flushes(aidd1); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Odisable_mdc_flushes(aidd1);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
 
     /* Should fail to check cork status of the attribute: aidt2; not an object */
-    H5E_BEGIN_TRY { ret = H5Oare_mdc_flushes_disabled(aidt2, &corked); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oare_mdc_flushes_disabled(aidt2, &corked);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1511,7 +1520,10 @@ verify_multiple_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Should fail to uncork the file: fid2; not an object */
-    H5E_BEGIN_TRY { ret = H5Oenable_mdc_flushes(fid2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oenable_mdc_flushes(fid2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1646,7 +1658,10 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to cork the datatype: not an object */
-    H5E_BEGIN_TRY { ret = H5Odisable_mdc_flushes(tid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Odisable_mdc_flushes(tid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1682,7 +1697,10 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to uncork the dataspace: not an object */
-    H5E_BEGIN_TRY { ret = H5Oenable_mdc_flushes(sid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oenable_mdc_flushes(sid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1696,7 +1714,10 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to check cork status of the attribute: not an object */
-    H5E_BEGIN_TRY { ret = H5Oare_mdc_flushes_disabled(aid, &corked); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oare_mdc_flushes_disabled(aid, &corked);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1736,7 +1757,10 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to cork the group again */
-    H5E_BEGIN_TRY { ret = H5Odisable_mdc_flushes(gid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Odisable_mdc_flushes(gid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1758,7 +1782,10 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to un-cork the named datatype that is not corked yet */
-    H5E_BEGIN_TRY { ret = H5Oenable_mdc_flushes(tid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oenable_mdc_flushes(tid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
