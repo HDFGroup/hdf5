@@ -428,11 +428,6 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
         else if (H5Tequal(type, H5T_NATIVE_DOUBLE) == TRUE) {
             h5tools_str_append(buffer, "native double");
         }
-#if H5_SIZEOF_LONG_DOUBLE != 0
-        else if (H5Tequal(type, H5T_NATIVE_LDOUBLE) == TRUE) {
-            h5tools_str_append(buffer, "native long double");
-        }
-#endif
         else if (H5Tequal(type, H5T_NATIVE_INT8) == TRUE) {
             h5tools_str_append(buffer, "native int8_t");
         }
