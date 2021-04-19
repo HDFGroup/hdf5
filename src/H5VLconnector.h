@@ -201,8 +201,8 @@ typedef enum H5VL_request_status_t {
 
 /* types for async request SPECIFIC callback */
 typedef enum H5VL_request_specific_t {
-    H5VL_REQUEST_GET_ERR_STACK,     /* Retrieve error stack for failed operation */
-    H5VL_REQUEST_GET_EXEC_TIME      /* Retrieve execution time for operation */
+    H5VL_REQUEST_GET_ERR_STACK, /* Retrieve error stack for failed operation */
+    H5VL_REQUEST_GET_EXEC_TIME  /* Retrieve execution time for operation */
 } H5VL_request_specific_t;
 
 /* Typedef and values for native VOL connector request optional VOL operations */
