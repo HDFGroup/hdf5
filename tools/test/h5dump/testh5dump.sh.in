@@ -130,6 +130,7 @@ $SRC_H5DUMP_TESTFILES/tfamily00010.h5
 $SRC_H5DUMP_TESTFILES/tfcontents1.h5
 $SRC_H5DUMP_TESTFILES/tfcontents2.h5
 $SRC_H5DUMP_TESTFILES/tfilters.h5
+$SRC_H5DUMP_TESTFILES/tfloatsattrs.h5
 $SRC_H5DUMP_TESTFILES/tfpformat.h5
 $SRC_H5DUMP_TESTFILES/tfvalues.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
@@ -141,6 +142,7 @@ $SRC_H5DUMP_TESTFILES/tintsattrs.h5
 $SRC_H5DUMP_TESTFILES/tints4dims.h5
 $SRC_H5DUMP_TESTFILES/tlarge_objname.h5
 $SRC_H5DUMP_TESTFILES/tldouble.h5
+$SRC_H5DUMP_TESTFILES/tldouble_scalar.h5
 $SRC_H5DUMP_TESTFILES/tlonglinks.h5
 $SRC_H5DUMP_TESTFILES/tloop.h5
 $SRC_H5DUMP_TESTFILES/tmulti-b.h5
@@ -261,6 +263,7 @@ $SRC_H5DUMP_TESTFILES/textlink.ddl
 $SRC_H5DUMP_TESTFILES/tfamily.ddl
 $SRC_H5DUMP_TESTFILES/tfill.ddl
 $SRC_H5DUMP_TESTFILES/tfletcher32.ddl
+$SRC_H5DUMP_TESTFILES/tfloatsattrs.ddl
 $SRC_H5DUMP_TESTFILES/tfpformat.ddl
 $SRC_H5DUMP_TESTFILES/tgroup-1.ddl
 $SRC_H5DUMP_TESTFILES/tgroup-2.ddl
@@ -287,6 +290,7 @@ $SRC_H5DUMP_TESTFILES/tints4dimsStride2.ddl
 $SRC_H5DUMP_TESTFILES/tintsattrs.ddl
 $SRC_H5DUMP_TESTFILES/tlarge_objname.ddl
 $SRC_H5DUMP_TESTFILES/tldouble.ddl
+$SRC_H5DUMP_TESTFILES/tldouble_scalar.ddl
 $SRC_H5DUMP_TESTFILES/tlonglinks.ddl
 $SRC_H5DUMP_TESTFILES/tloop-1.ddl
 $SRC_H5DUMP_TESTFILES/tmulti.ddl
@@ -1375,7 +1379,9 @@ TOOLTEST tgrpnullspace.ddl -p --enable-error-stack tgrpnullspace.h5
 TOOLTEST zerodim.ddl --enable-error-stack zerodim.h5
 
 # test for long double (some systems do not have long double)
-#TOOLTEST tldouble.ddl --enable-error-stack tldouble.h5
+TOOLTEST tfloatsattrs.ddl -p --enable-error-stack tfloatsattrs.h5
+TOOLTEST tldouble.ddl --enable-error-stack tldouble.h5
+TOOLTEST tldouble_scalar.ddl -p --enable-error-stack tldouble_scalar.h5
 
 # test for vms
 TOOLTEST tvms.ddl --enable-error-stack tvms.h5

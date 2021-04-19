@@ -1910,6 +1910,9 @@
 ./tools/testfiles/tfill.ddl
 ./tools/testfiles/tfilters.h5
 ./tools/testfiles/tfletcher32.ddl
+./tools/testfiles/tfloatsattrs.ddl
+./tools/testfiles/tfloatsattrs.h5
+./tools/testfiles/tfloatsattrs.wddl
 ./tools/testfiles/tfvalues.h5
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl
@@ -1949,6 +1952,8 @@
 ./tools/testfiles/tlarge_objname.h5
 ./tools/testfiles/tldouble.ddl
 ./tools/testfiles/tldouble.h5
+./tools/testfiles/tldouble_scalar.ddl
+./tools/testfiles/tldouble_scalar.h5
 ./tools/testfiles/tlonglinks.ddl
 ./tools/testfiles/tlonglinks.h5
 ./tools/testfiles/tloop-1.ddl
@@ -3295,9 +3300,11 @@
 ./java/test/junit.sh.in
 ./java/test/testfiles/JUnit-TestH5.txt
 ./java/test/testfiles/JUnit-TestH5A.txt
+./java/test/testfiles/JUnit-TestH5Arw.txt
 ./java/test/testfiles/JUnit-TestH5Dparams.txt
 ./java/test/testfiles/JUnit-TestH5D.txt
 ./java/test/testfiles/JUnit-TestH5Dplist.txt
+./java/test/testfiles/JUnit-TestH5Drw.txt
 ./java/test/testfiles/JUnit-TestH5E.txt
 ./java/test/testfiles/JUnit-TestH5Edefault.txt
 ./java/test/testfiles/JUnit-TestH5Eparams.txt
@@ -3334,9 +3341,11 @@
 ./java/test/h5ex_g_iterate.orig
 ./java/test/TestH5.java
 ./java/test/TestH5A.java
+./java/test/TestH5Arw.java
 ./java/test/TestH5Dparams.java
 ./java/test/TestH5D.java
 ./java/test/TestH5Dplist.java
+./java/test/TestH5Drw.java
 ./java/test/TestH5E.java
 ./java/test/TestH5Edefault.java
 ./java/test/TestH5Eparams.java
