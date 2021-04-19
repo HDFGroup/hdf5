@@ -35,13 +35,13 @@ typedef enum H5E_type_t { H5E_MAJOR, H5E_MINOR } H5E_type_t;
  * Information about an error; element of error stack
  */
 typedef struct H5E_error2_t {
-    hid_t       cls_id;
+    hid_t cls_id;
     /**< Class ID                           */
-    hid_t       maj_num;
+    hid_t maj_num;
     /**< Major error ID		                */
-    hid_t       min_num;
+    hid_t min_num;
     /**< Minor error number		            */
-    unsigned    line;
+    unsigned line;
     /**< Line in file where error occurs    */
     const char *func_name;
     /**< Function in which error occurred   */
