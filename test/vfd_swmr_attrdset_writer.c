@@ -33,12 +33,14 @@
  *      -- Remove sufficient attributes to allow deletion of object header continuation block
  *      -- Transition from compact to dense attribute storage
  *      -- Transition from dense to compact attribute storage
+ *
+ * Please see verify_storage_cont() on verification of
+ * compact<->dense storage and with/without continuation block.
+ *
  */
 #include <err.h>
 #include <libgen.h>
 #include <unistd.h> /* getopt(3) */
-
-#define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 
 #include "hdf5.h"
 #include "testhdf5.h"
@@ -161,8 +163,8 @@ static bool open_dsets(const state_t *s, dsets_state_t *ds);
 static bool open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *max_compact, unsigned *min_dense);
 static bool close_dsets(const dsets_state_t *ds);
 
-static bool attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned step);
-static bool attr_action(unsigned action, const state_t *s, hid_t did, unsigned step);
+static bool attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
+static bool attr_action(unsigned action, const state_t *s, hid_t did, unsigned which);
 static bool add_attr(const state_t *s, hid_t did, unsigned int which);
 static bool modify_attr(const state_t *s, hid_t did, unsigned int which);
 static bool delete_attr(hid_t did, unsigned int which);
@@ -189,15 +191,6 @@ static const hid_t badhid = H5I_INVALID_HID;
 #define ADD_ATTR        1
 #define MODIFY_ATTR     2
 #define DELETE_ATTR     3
-
-/* This will be removed when this routine is moved to vfd_swmr_common.c */
-/* Sleep for `tenths` tenths of a second */
-static void
-decisleep(uint32_t tenths)
-{ uint64_t nsec = tenths * 100 * 1000 * 1000;
-
-    H5_nanosleep(nsec);
-}
 
 /* Test program usage info */
 static void
@@ -229,7 +222,7 @@ usage(const char *progname)
 		"\n",
 		progname);
 	exit(EXIT_FAILURE);
-} /* usgae() */
+} /* usage() */
 
 /*
  * Initialize option info in state_t
@@ -911,13 +904,13 @@ error:
  */
 
 /*
- * Perform the "action" for each of the datasets specified.
+ * Perform the "action" for each of the datasets specified on the command line.
  *      ADD_ATTR    : -a <nattrs> option
  *      MODIFY_ATTR : -m option
  *      DELETE_ATTR : -d <dattrs> option
  */
 static bool 
-attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned step)
+attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
 {
     int nerrors = 0;
     bool ret = true;
@@ -925,41 +918,41 @@ attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, un
     if (s->compact) {
         HDassert(ds->compact_did != badhid);
         dbgf(2, "to compact dataset\n");
-        if(!attr_action(action, s, ds->compact_did, step))
+        if(!attr_action(action, s, ds->compact_did, which))
             ++nerrors;
     }
 
     if (s->contig) {
         HDassert(ds->contig_did != badhid);
         dbgf(2, "to contiguous dataset\n");
-        if(!attr_action(action, s, ds->contig_did, step))
+        if(!attr_action(action, s, ds->contig_did, which))
             ++nerrors;
     }
 
     if (s->chunked) {
         HDassert(ds->single_did != badhid);
         dbgf(2, "to chunked dataset: single index\n");
-        if(!attr_action(action, s, ds->single_did, step))
+        if(!attr_action(action, s, ds->single_did, which))
             ++nerrors;
 
         HDassert(ds->implicit_did != badhid);
         dbgf(2, "to chunked dataset: implicit index\n");
-        if(!attr_action(action, s, ds->implicit_did, step))
+        if(!attr_action(action, s, ds->implicit_did, which))
             ++nerrors;
 
         HDassert(ds->fa_did != badhid);
         dbgf(2, "to chunked dataset: fixed array index\n");
-        if(!attr_action(action, s, ds->fa_did, step))
+        if(!attr_action(action, s, ds->fa_did, which))
             ++nerrors;
 
         HDassert(ds->ea_did != badhid);
         dbgf(2, "to chunked dataset: extensible array index\n");
-        if(!attr_action(action, s, ds->ea_did, step))
+        if(!attr_action(action, s, ds->ea_did, which))
             ++nerrors;
 
         HDassert(ds->bt2_did != badhid);
         dbgf(2, "to chunked dataset: version 2 btree index\n");
-        if(!attr_action(action, s, ds->bt2_did, step))
+        if(!attr_action(action, s, ds->bt2_did, which))
             ++nerrors;
     }
 
@@ -971,24 +964,27 @@ attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, un
 } /* attr_dsets_action() */
 
 /*
- * Perform the attribute action on the specified dataset.
+ * Perform the action on the specified dataset.
+ *      ADD_ATTR    : add `which` attribute
+ *      MODIFY_ATTR : modify `which` attribute
+ *      DELETE_ATTR : delete `which` attribute
  */
 static bool
-attr_action(unsigned action, const state_t *s, hid_t did, unsigned step)
+attr_action(unsigned action, const state_t *s, hid_t did, unsigned which)
 {
     bool ret;
 
     switch(action) {
         case ADD_ATTR: 
-            ret = add_attr(s, did, step);
+            ret = add_attr(s, did, which);
             break;
 
         case MODIFY_ATTR: 
-            ret = modify_attr(s, did, step);
+            ret = modify_attr(s, did, which);
             break;
 
         case DELETE_ATTR: 
-            ret = delete_attr(did, step);
+            ret = delete_attr(did, which);
             break;
         
         default:
@@ -1190,10 +1186,7 @@ error:
  *
  * Also verify continuation block and compact<->dense storage if:
  *      --[-c <csteps>] is 1 
- *      **Because the storage situation is not specific for <csteps> > 1 
  *      --not -m option 
- *      **Because the storage situation is already at the state after all the addition
- *      NEED TO WRITE IT UP BETTER AT THIS LATER
  */
 static bool
 verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
@@ -1316,7 +1309,7 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
 {
     unsigned int read_which;
     char vl_which[sizeof("attr-9999999999")];
-    char *read_vl_which;
+    char *read_vl_which = NULL;
     bool is_vl = false;
     hid_t aid, atid;
     bool ret;
@@ -1340,7 +1333,10 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
         else
             HDsprintf(vl_which, "%u %u %u %u %u", which, which+1, which+2, which+3, which+4);
 
-        read_vl_which = HDmalloc(sizeof("9999999999"));
+        if((read_vl_which = HDmalloc(sizeof("9999999999"))) == NULL) {
+            printf("HDmalloc failed\n");
+            TEST_ERROR;
+        }
     }
 
     if (H5Aread(aid, atid, is_vl? (void *)&read_vl_which : (void *)&read_which) < 0) {
@@ -1364,6 +1360,9 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
     } else
         ret = (read_which == which);
 
+    if(read_vl_which)
+        HDfree(read_vl_which);
+
     return ret;
 
 error:
@@ -1371,6 +1370,9 @@ error:
         H5Aclose(aid);
         H5Tclose(atid);
     } H5E_END_TRY;
+
+    if(read_vl_which)
+        HDfree(read_vl_which);
 
     return false;
 
