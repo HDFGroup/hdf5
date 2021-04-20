@@ -22,7 +22,8 @@
         h5_fileaccess() -- in h5test.c, returns a file access template
 
  ***************************************************************************/
-
+#include <cfloat>
+#include <cmath>
 #include <iostream>
 using std::cerr;
 using std::endl;
@@ -193,8 +194,8 @@ test_simple_io(H5File &file)
 
     SUBTEST("Simple I/O");
 
-    int points[100][200];
-    int check[100][200];
+    auto points = new int[100][200];
+    auto check = new int[100][200]();
     int i, j, n;
 
     // Initialize the dataset
@@ -237,6 +238,8 @@ test_simple_io(H5File &file)
 
         // clean up and return with success
         delete[] tconv_buf;
+        delete[] points;
+        delete[] check;
         PASSED();
         return 0;
     } // end try
@@ -248,6 +251,8 @@ test_simple_io(H5File &file)
 
         // clean up and return with failure
         delete[] tconv_buf;
+        delete[] points;
+        delete[] check;
         return -1;
     }
 } // test_simple_io
@@ -416,8 +421,13 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
 static size_t
 filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes,
              size_t *buf_size, void **buf)
-// H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
 {
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+
     return nbytes;
 }
 
@@ -444,8 +454,8 @@ test_compression(H5File &file)
     const char *not_supported;
     not_supported = "    Deflate compression is not enabled.";
 #endif /* H5_HAVE_FILTER_DEFLATE */
-    int     points[100][200];
-    int     check[100][200];
+    auto points = new int[100][200];
+    auto check = new int[100][200]();
     hsize_t i, j, n;
 
     // Initialize the dataset
@@ -680,6 +690,8 @@ test_compression(H5File &file)
          */
         delete dataset;
         delete[] tconv_buf;
+        delete[] points;
+        delete[] check;
         return 0;
     } // end try
 
@@ -691,6 +703,8 @@ test_compression(H5File &file)
         // clean up and return with failure
         delete dataset;
         delete[] tconv_buf;
+        delete[] points;
+        delete[] check;
         return -1;
     }
 } // test_compression
@@ -1102,7 +1116,7 @@ test_getnativeinfo(H5File &file)
         H5O_native_info_t ninfo;
         HDmemset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
-        verify_val(ninfo.hdr.nchunks, 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
 
         // Open the dataset we created above and then close it.  This is one
@@ -1110,7 +1124,7 @@ test_getnativeinfo(H5File &file)
         dataset = file.openDataSet(DSET_DEFAULT_NAME);
         HDmemset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_ALL);
-        verify_val(ninfo.hdr.nchunks, 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
 
         PASSED();
@@ -1157,17 +1171,20 @@ test_chunk_cache(const FileAccPropList &fapl)
         // Verify that chunk cache parameters are the same
         int    mdc_nelmts = 0;
         size_t nslots_1 = 0, nslots_4 = 0, nbytes_1 = 0, nbytes_4 = 0;
-        double w0_1 = 0.0F, w0_4 = 0.0F;
+        double w0_1 = 0.0, w0_4 = 0.0;
         fapl_def.getCache(mdc_nelmts, nslots_1, nbytes_1, w0_1);
         dapl.getChunkCache(nslots_4, nbytes_4, w0_4);
         verify_val(nslots_1, nslots_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
         verify_val(nbytes_1, nbytes_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
-        verify_val(w0_1, w0_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
+        if (abs(w0_1 - w0_4) > DBL_EPSILON)
+            TestErrPrintf("%d: w0_1 and w0_4 different: w0_1=%f, "
+                          "w0_4=%f\n",
+                          __LINE__, w0_1, w0_4);
 
         // Set a link access property on dapl to verify property list inheritance
-        dapl.setNumLinks((size_t)134);
+        dapl.setNumLinks(134);
         size_t nlinks = dapl.getNumLinks();
-        verify_val(nlinks, (size_t)134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nlinks), 134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__);
 
         // Make a copy of the external fapl
         FileAccPropList fapl_local(fapl);
@@ -1175,7 +1192,7 @@ test_chunk_cache(const FileAccPropList &fapl)
         // Set new rdcc settings on fapl local
         size_t nslots_2 = nslots_1 * 2;
         size_t nbytes_2 = nbytes_1 * 2;
-        double w0_2     = w0_1 / (double)2.0F;
+        double w0_2     = w0_1 / 2.0;
         fapl_local.getCache(mdc_nelmts, nslots_2, nbytes_2, w0_2);
 
         // Create a new file using default fcpl and the passed-in fapl
@@ -1282,7 +1299,7 @@ test_virtual()
 
         // Get the current layout, should be default, H5D_CONTIGUOUS
         H5D_layout_t layout = dcpl.getLayout();
-        verify_val(layout, H5D_CONTIGUOUS, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(static_cast<long>(layout), static_cast<long>(H5D_CONTIGUOUS), "DSetCreatPropList::getLayout", __LINE__, __FILE__);
 
         // Create fixed mapping
         hsize_t dims[RANK];
@@ -1304,7 +1321,7 @@ test_virtual()
 
         // Get and verify the new layout
         layout = dcpl.getLayout();
-        verify_val(layout, H5D_VIRTUAL, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(static_cast<long>(layout), static_cast<long>(H5D_VIRTUAL), "DSetCreatPropList::getLayout", __LINE__, __FILE__);
 
         PASSED();
         return 0;

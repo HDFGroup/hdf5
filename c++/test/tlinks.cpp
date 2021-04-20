@@ -201,7 +201,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Check that its character encoding is the default.
         linfo = file.getLinkInfo("/type");
-        verify_val(linfo.cset, H5T_CSET_ASCII, "Character encoding is not default", __LINE__, __FILE__);
+        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_ASCII), "Character encoding is not default", __LINE__, __FILE__);
 
         // Create a simple dataspace.
         dims[0] = H5L_DIM1;
@@ -214,7 +214,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Check that its character encoding is the default.
         linfo = file.getLinkInfo("/dataset");
-        verify_val(linfo.cset, H5T_CSET_ASCII, "Character encoding is not default", __LINE__, __FILE__);
+        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_ASCII), "Character encoding is not default", __LINE__, __FILE__);
 
         // Create a link creation property list with the UTF-8 character encoding.
         LinkCreatPropList lcpl;
@@ -226,7 +226,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Check that its character encoding is UTF-8.
         linfo = file.getLinkInfo(GROUP2NAME);
-        verify_val(linfo.cset, H5T_CSET_UTF8, "Character encoding is not UTF-8", __LINE__, __FILE__);
+        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_UTF8), "Character encoding is not UTF-8", __LINE__, __FILE__);
 
         PASSED();
     } // end of try block
@@ -580,13 +580,14 @@ const H5std_string GROUP_NAME("/Data");
 const H5std_string DSET1_NAME("/Data/Compressed_Data");
 const H5std_string DSET2_NAME("/Data/Float_Data");
 const int          RANK = 2;
-const int          DIM1 = 2;
 
 // Operator function
 static int
 visit_obj_cb(H5Object &obj, const H5std_string name, const H5O_info2_t *oinfo, void *_op_data)
 {
     ovisit_ud_t *op_data = static_cast<ovisit_ud_t *>(_op_data);
+
+    (void)obj;
 
     // Check for correct object information
     if (strcmp(op_data->info[op_data->idx].path, name.c_str()) != 0)

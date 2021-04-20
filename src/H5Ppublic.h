@@ -100,7 +100,11 @@
 #define H5P_CRT_ORDER_INDEXED 0x0002
 
 /* Default value for all property list classes */
+#ifndef __cplusplus
 #define H5P_DEFAULT (hid_t)0
+#else
+#define H5P_DEFAULT static_cast<hid_t>(0)
+#endif
 
 #ifdef __cplusplus
 extern "C" {

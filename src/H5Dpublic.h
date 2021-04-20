@@ -28,8 +28,13 @@
 /*****************/
 
 /* Macros used to "unset" chunk cache configuration parameters */
+#ifndef __cplusplus
 #define H5D_CHUNK_CACHE_NSLOTS_DEFAULT ((size_t)-1)
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT ((size_t)-1)
+#else
+#define H5D_CHUNK_CACHE_NSLOTS_DEFAULT static_cast<size_t>(-1)
+#define H5D_CHUNK_CACHE_NBYTES_DEFAULT static_cast<size_t>(-1)
+#endif
 #define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0f)
 
 /* Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts() */

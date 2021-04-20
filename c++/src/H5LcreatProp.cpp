@@ -121,7 +121,7 @@ LinkCreatPropList::LinkCreatPropList(const hid_t plist_id) : PropList(plist_id)
 void
 LinkCreatPropList::setCreateIntermediateGroup(bool crt_intmd_group) const
 {
-    herr_t ret_value = H5Pset_create_intermediate_group(id, (unsigned)crt_intmd_group);
+    herr_t ret_value = H5Pset_create_intermediate_group(id, static_cast<unsigned>(crt_intmd_group));
     // Throw exception if H5Pset_create_intermediate_group returns failure
     if (ret_value < 0) {
         throw PropListIException("setCreateIntermediateGroup", "H5Pset_create_intermediate_group failed");
@@ -146,7 +146,7 @@ LinkCreatPropList::getCreateIntermediateGroup() const
         throw PropListIException("getCreateIntermediateGroup", "H5Pget_create_intermediate_group failed");
     }
 
-    return ((bool)crt_intmd_group);
+    return (static_cast<bool>(crt_intmd_group));
 }
 
 //--------------------------------------------------------------------------

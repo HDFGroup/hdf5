@@ -605,8 +605,8 @@ const int     STRING_LENGTH = 19; // including terminating NULL
 int
 TestHDFFV_9758()
 {
-    hid_t  strtype;
-    hid_t  compound_type;
+    hid_t  strtype          = H5I_INVALID_HID;
+    hid_t  compound_type    = H5I_INVALID_HID;
     herr_t err;
     struct s1_t {
         int    a;
@@ -620,9 +620,9 @@ TestHDFFV_9758()
 
     for (hsize_t i = 0; i < NUM_PACKETS; i++) {
         s1[i].a = static_cast<int>(i);
-        s1[i].b = 1.f * static_cast<float>(i * i);
-        s1[i].c = 1. / (i + 1);
-        HDsprintf(s1[i].d, "string%d", (int)i);
+        s1[i].b = 1.0f * static_cast<float>(i * i);
+        s1[i].c = 1.0 / static_cast<double>(i + 1);
+        HDsprintf(s1[i].d, "string%d", static_cast<int>(i));
         s1[i].e = static_cast<int>(100 + i);
     }
 

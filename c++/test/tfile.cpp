@@ -31,14 +31,14 @@ using namespace H5;
 #include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
-const hsize_t      F1_USERBLOCK_SIZE = (hsize_t)0;
+const hsize_t      F1_USERBLOCK_SIZE = 0;
 const size_t       F1_OFFSET_SIZE    = sizeof(haddr_t);
 const size_t       F1_LENGTH_SIZE    = sizeof(hsize_t);
 const unsigned     F1_SYM_LEAF_K     = 4;
 const unsigned     F1_SYM_INTERN_K   = 16;
 const H5std_string FILE1("tfile1.h5");
 
-const hsize_t      F2_USERBLOCK_SIZE = (hsize_t)512;
+const hsize_t      F2_USERBLOCK_SIZE = 512;
 const size_t       F2_OFFSET_SIZE    = 8;
 const size_t       F2_LENGTH_SIZE    = 8;
 const unsigned     F2_SYM_LEAF_K     = 8;
@@ -46,7 +46,7 @@ const unsigned     F2_SYM_INTERN_K   = 32;
 const unsigned     F2_ISTORE         = 64;
 const H5std_string FILE2("tfile2.h5");
 
-const hsize_t      F3_USERBLOCK_SIZE = (hsize_t)0;
+const hsize_t      F3_USERBLOCK_SIZE = 0;
 const size_t       F3_OFFSET_SIZE    = F2_OFFSET_SIZE;
 const size_t       F3_LENGTH_SIZE    = F2_LENGTH_SIZE;
 const unsigned     F3_SYM_LEAF_K     = F2_SYM_LEAF_K;
@@ -153,8 +153,7 @@ test_file_create()
         FileCreatPropList tmpl1 = file1->getCreatePlist();
 
         hsize_t ublock = tmpl1.getUserblock();
-        verify_val((long)ublock, (long)F1_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__,
-                   __FILE__);
+        verify_val(static_cast<long>(ublock), static_cast<long>(F1_USERBLOCK_SIZE), "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
         size_t parm1, parm2; // file-creation parameters
         tmpl1.getSizes(parm1, parm2);
@@ -209,7 +208,7 @@ test_file_create()
 
         // Get the file-creation parameters
         hsize_t ublock = tmpl1->getUserblock();
-        verify_val((long)ublock, (long)F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__,
+        verify_val(static_cast<long>(ublock), static_cast<long>(F2_USERBLOCK_SIZE), "FileCreatPropList::getUserblock", __LINE__,
                    __FILE__);
 
         size_t parm1, parm2; // file-creation parameters
@@ -242,7 +241,7 @@ test_file_create()
 
         // Get the file-creation parameters
         ublock = tmpl1->getUserblock();
-        verify_val((long)ublock, (long)F3_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__,
+        verify_val(static_cast<long>(ublock), static_cast<long>(F3_USERBLOCK_SIZE), "FileCreatPropList::getUserblock", __LINE__,
                    __FILE__);
 
         tmpl1->getSizes(parm1, parm2);
@@ -300,7 +299,7 @@ test_file_open()
 
         // Get the file-creation parameters
         hsize_t ublock = tmpl1.getUserblock();
-        verify_val((long)ublock, (long)F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__,
+        verify_val(static_cast<long>(ublock), static_cast<long>(F2_USERBLOCK_SIZE), "FileCreatPropList::getUserblock", __LINE__,
                    __FILE__);
 
         size_t parm1, parm2; // file-creation parameters
@@ -645,7 +644,7 @@ test_file_attribute()
 
         // Get the class of a file attribute's datatype
         H5T_class_t atclass = fattr1.getTypeClass();
-        verify_val(atclass, H5T_FLOAT, "Attribute::getTypeClass()", __LINE__, __FILE__);
+        verify_val(static_cast<long>(atclass), static_cast<long>(H5T_FLOAT), "Attribute::getTypeClass()", __LINE__, __FILE__);
 
         // Get and verify the number of attributes attached to a file
         int n_attrs = file5.getNumAttrs();
@@ -896,9 +895,9 @@ test_file_info()
         // Get the file's version information.
         H5F_info2_t finfo;
         tempfile.getFileInfo(finfo);
-        verify_val(finfo.super.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(finfo.free.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(finfo.sohm.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.super.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
         // Close the file.
         tempfile.close();
@@ -910,9 +909,9 @@ test_file_info()
         fcpl.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);
 
         // Verify file space information.
-        verify_val(out_strategy, H5F_FSPACE_STRATEGY_FSM_AGGR, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(out_strategy), static_cast<long>(H5F_FSPACE_STRATEGY_FSM_AGGR), "H5File::getFileInfo", __LINE__, __FILE__);
         verify_val(out_persist, FALSE, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(out_threshold, 1, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(out_threshold), 1, "H5File::getFileInfo", __LINE__, __FILE__);
 
         /* Retrieve file space page size */
         hsize_t out_fsp_psize = fcpl.getFileSpacePagesize();
@@ -943,9 +942,9 @@ test_file_info()
 
         // Get the file's version information.
         file7.getFileInfo(finfo);
-        verify_val(finfo.super.version, 2, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(finfo.free.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(finfo.sohm.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
         // Close the file.
         file7.close();
@@ -958,9 +957,9 @@ test_file_info()
 
         // Get the file's version information.
         file7.getFileInfo(finfo);
-        verify_val(finfo.super.version, 2, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(finfo.free.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(finfo.sohm.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
         // Retrieve the property values & check them.
         hsize_t userblock = fcpl2.getUserblock();
@@ -986,7 +985,7 @@ test_file_info()
 
         // Get and verify the file space info from the creation property list */
         fcpl2.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);
-        verify_val(out_strategy, strategy, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+        verify_val(static_cast<long>(out_strategy), static_cast<long>(strategy), "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
         verify_val(out_persist, persist, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
         verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
 

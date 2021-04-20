@@ -238,7 +238,11 @@ typedef struct {
  * Indicate that a string is variable length (null-terminated in C, instead of
  * fixed length)
  */
+#ifndef __cplusplus
 #define H5T_VARIABLE ((size_t)(-1))
+#else
+#define H5T_VARIABLE static_cast<size_t>(-1)
+#endif
 
 /* Opaque information */
 /**

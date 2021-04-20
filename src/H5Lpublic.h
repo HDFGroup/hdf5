@@ -44,7 +44,11 @@
 /**
  * \brief Macro to indicate operation occurs on same location
  */
+#ifndef __cplusplus
 #define H5L_SAME_LOC (hid_t)0
+#else
+#define H5L_SAME_LOC static_cast<hid_t>(0)
+#endif
 
 /**
  * \brief Current version of the H5L_class_t struct

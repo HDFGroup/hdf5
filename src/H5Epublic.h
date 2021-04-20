@@ -24,7 +24,11 @@
 #include "H5Ipublic.h"
 
 /* Value for the default error stack */
+#ifndef __cplusplus
 #define H5E_DEFAULT (hid_t)0
+#else
+#define H5E_DEFAULT static_cast<hid_t>(0)
+#endif
 
 /* Different kinds of error information */
 typedef enum H5E_type_t { H5E_MAJOR, H5E_MINOR } H5E_type_t;

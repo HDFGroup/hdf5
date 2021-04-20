@@ -165,9 +165,8 @@ H5File::p_get_file(const char *name, unsigned int flags, const FileCreatPropList
 //              constructor is needed by the library in order to return
 //              an object, H5File doesn't need it. -BMR (HDFFV-8766 partially)
 //--------------------------------------------------------------------------
-H5File::H5File(hid_t existing_id) : Group()
+H5File::H5File(hid_t existing_id) : Group(), id(existing_id)
 {
-    id = existing_id;
     incRefCount(); // increment number of references to this id
 }
 
@@ -180,9 +179,8 @@ H5File::H5File(hid_t existing_id) : Group()
 ///\param       original - IN: H5File instance to copy
 // December 2000
 //--------------------------------------------------------------------------
-H5File::H5File(const H5File &original) : Group(original)
+H5File::H5File(const H5File &original) : Group(original), id(original.getId())
 {
-    id = original.getId();
     incRefCount(); // increment number of references to this id
 }
 

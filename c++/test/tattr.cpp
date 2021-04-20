@@ -17,6 +17,8 @@
         C attribute interface (H5A)
 
  ***************************************************************************/
+#include <cfloat>
+#include <cmath>
 #include <iostream>
 using std::cerr;
 using std::endl;
@@ -93,7 +95,7 @@ struct attr4_struct {
 
 const H5std_string ATTR5_NAME("Attr5");
 const int          ATTR5_RANK = 0;
-float              attr_data5 = (float)-5.123; // Test data for 5th attribute
+float              attr_data5 = -5.123F; // Test data for 5th attribute
 
 /* Info for another attribute */
 const H5std_string ATTR1A_NAME("Attr1_a");
@@ -208,7 +210,7 @@ test_attr_basic_write()
 
         // Check storage size for attribute
         hsize_t attr_size = gr_attr.getStorageSize();
-        verify_val((long)attr_size, (long)(ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)),
+        verify_val(static_cast<long>(attr_size), static_cast<long>(ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)),
                    "Attribute::getStorageSize", __LINE__, __FILE__);
 
         // Try to create the same attribute again (should fail)
@@ -227,7 +229,7 @@ test_attr_basic_write()
 
         // Check storage size for attribute
         attr_size = gr_attr.getStorageSize();
-        verify_val((long)attr_size, (long)(ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)),
+        verify_val(static_cast<long>(attr_size), static_cast<long>(ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)),
                    "Attribute::getStorageSize", __LINE__, __FILE__);
 
         PASSED();
@@ -298,8 +300,8 @@ test_attr_getname()
         ssize_t name_size = 0; // actual length of attribute name
         name_size         = fattr1.getName(fattr1_name, buf_size + 1);
         CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
-        verify_val((size_t)name_size, FATTR1_NAME.length(), "Attribute::getName", __LINE__, __FILE__);
-        verify_val((const char *)fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(static_cast<size_t>(name_size), FATTR1_NAME.length(), "Attribute::getName", __LINE__, __FILE__);
+        verify_val(static_cast<const char *>(fattr1_name), FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
         delete[] fattr1_name;
 
         // 2. With arbitrary buf_size that is smaller than the name's length.
@@ -310,8 +312,8 @@ test_attr_getname()
         HDmemset(fattr1_name, 0, buf_size + 1);
         name_size = fattr1.getName(fattr1_name, buf_size + 1);
         CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
-        verify_val((size_t)name_size, FATTR1_NAME.size(), "Attribute::getName", __LINE__, __FILE__);
-        verify_val((const char *)fattr1_name, (const char *)short_name, "Attribute::getName", __LINE__,
+        verify_val(static_cast<size_t>(name_size), FATTR1_NAME.size(), "Attribute::getName", __LINE__, __FILE__);
+        verify_val(static_cast<const char *>(fattr1_name), static_cast<const char *>(short_name), "Attribute::getName", __LINE__,
                    __FILE__);
         delete[] fattr1_name;
 
@@ -525,7 +527,7 @@ test_attr_basic_read()
         H5O_info2_t oinfo;
         HDmemset(&oinfo, 0, sizeof(oinfo));
         dataset.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
-        verify_val(oinfo.num_attrs, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(oinfo.num_attrs), 3, "DataSet::getObjinfo", __LINE__, __FILE__);
 
         // Open an attribute for the dataset
         Attribute ds_attr = dataset.openAttribute(ATTR1_NAME);
@@ -553,7 +555,7 @@ test_attr_basic_read()
         // Verify the correct number of attributes another way
         HDmemset(&oinfo, 0, sizeof(oinfo));
         group.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
-        verify_val(oinfo.num_attrs, 1, "Group::getObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(oinfo.num_attrs), 1, "Group::getObjinfo", __LINE__, __FILE__);
 
         // Open an attribute for the group
         Attribute gr_attr = group.openAttribute(ATTR2_NAME);
@@ -678,10 +680,10 @@ test_attr_compound_read()
         H5O_info2_t oinfo;
         HDmemset(&oinfo, 0, sizeof(oinfo));
         dataset.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
-        verify_val(oinfo.num_attrs, 1, "DataSet::getObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(oinfo.num_attrs), 1, "DataSet::getObjinfo", __LINE__, __FILE__);
 
         // Open 1st attribute for the dataset
-        Attribute attr = dataset.openAttribute((unsigned)0);
+        Attribute attr = dataset.openAttribute(static_cast<unsigned>(0));
 
         /* Verify Dataspace */
 
@@ -695,14 +697,14 @@ test_attr_compound_read()
         // Get the dims of the dataspace and verify them
         int ndims = space.getSimpleExtentDims(dims);
         verify_val(ndims, ATTR4_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
-        verify_val((long)dims[0], (long)ATTR4_DIM1, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
-        verify_val((long)dims[1], (long)ATTR4_DIM2, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(static_cast<long>(dims[0]), static_cast<long>(ATTR4_DIM1), "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(static_cast<long>(dims[1]), static_cast<long>(ATTR4_DIM2), "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
 
         // Get the class of the datatype that is used by attr
         H5T_class_t type_class = attr.getTypeClass();
 
         // Verify that the type is of compound datatype
-        verify_val(type_class, H5T_COMPOUND, "Attribute::getTypeClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_COMPOUND), "Attribute::getTypeClass", __LINE__, __FILE__);
 
         // Get the compound datatype
         CompType datatype = attr.getCompType();
@@ -719,7 +721,7 @@ test_attr_compound_read()
             if (!((fieldname == ATTR4_FIELDNAME1) || (fieldname == ATTR4_FIELDNAME2) ||
                   (fieldname == ATTR4_FIELDNAME3)))
                 TestErrPrintf("%d:invalid field name for field #%d: %s\n", __LINE__, j, fieldname.c_str());
-        } /* end for */
+        }
 
         offset = datatype.getMemberOffset(0);
         verify_val(offset, attr4_field1_off, "DataType::getMemberOffset", __LINE__, __FILE__);
@@ -734,11 +736,11 @@ test_attr_compound_read()
 
         // Get and verify the type class of the first member
         type_class = datatype.getMemberClass(0);
-        verify_val(type_class, H5T_INTEGER, "DataType::getMemberClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_INTEGER), "DataType::getMemberClass", __LINE__, __FILE__);
         // Get and verify the order of this member's type
         IntType     i_type = datatype.getMemberIntType(0);
         H5T_order_t order  = i_type.getOrder();
-        verify_val(order, PredType::NATIVE_INT.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_INT.getOrder()), "DataType::getOrder", __LINE__, __FILE__);
 
         // Get and verify the size of this member's type
         size = i_type.getSize();
@@ -746,21 +748,21 @@ test_attr_compound_read()
 
         // Get and verify class, order, and size of the second member's type
         type_class = datatype.getMemberClass(1);
-        verify_val(type_class, H5T_FLOAT, "DataType::getMemberClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_FLOAT), "DataType::getMemberClass", __LINE__, __FILE__);
         FloatType f_type = datatype.getMemberFloatType(1);
         order            = f_type.getOrder();
-        verify_val(order, PredType::NATIVE_DOUBLE.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_DOUBLE.getOrder()), "DataType::getOrder", __LINE__, __FILE__);
         size = f_type.getSize();
         verify_val(size, PredType::NATIVE_DOUBLE.getSize(), "DataType::getSize", __LINE__, __FILE__);
 
         // Get and verify class, order, and size of the third member's type
         type_class = datatype.getMemberClass(2);
-        verify_val(type_class, H5T_INTEGER, "DataType::getMemberClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_INTEGER), "DataType::getMemberClass", __LINE__, __FILE__);
         // Note: H5T_INTEGER is correct here!
 
         StrType s_type = datatype.getMemberStrType(2);
         order          = s_type.getOrder();
-        verify_val(order, PredType::NATIVE_SCHAR.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_SCHAR.getOrder()), "DataType::getOrder", __LINE__, __FILE__);
         size = s_type.getSize();
         verify_val(size, PredType::NATIVE_SCHAR.getSize(), "DataType::getSize", __LINE__, __FILE__);
 
@@ -876,9 +878,6 @@ test_attr_scalar_write()
  * Return       None
  *-------------------------------------------------------------------------
  */
-/* Epsilon for floating-point comparisons */
-#define FP_EPSILON 0.000001F
-
 static void
 test_attr_scalar_read()
 {
@@ -900,17 +899,21 @@ test_attr_scalar_read()
         Attribute ds_attr = dataset.openAttribute(ATTR5_NAME);
 
         // Read attribute information
-        float read_data2 = 0.0; // Buffer for reading 1st attribute
+        float read_data2 = 0.0F; // Buffer for reading 1st attribute
         ds_attr.read(PredType::NATIVE_FLOAT, &read_data2);
-        if (HDfabs(read_data2 - attr_data5) > FP_EPSILON)
-            verify_val(read_data2, attr_data5, FP_EPSILON, "Attribute::read", __LINE__, __FILE__);
+        if (abs(read_data2 - attr_data5) > FLT_EPSILON)
+            TestErrPrintf("%d: attribute data different: read_data2=%f, "
+                          "attr_data5=%f\n",
+                          __LINE__, static_cast<double>(read_data2), static_cast<double>(attr_data5));
+
+            //verify_val(read_data2, attr_data5, FLT_EPSILON, "Attribute::read", __LINE__, __FILE__);
 
         // Get the dataspace of the attribute
         DataSpace att_space = ds_attr.getSpace();
 
         // Make certain the dataspace is scalar
         H5S_class_t space_type = att_space.getSimpleExtentType();
-        verify_val(space_type, H5S_SCALAR, "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(space_type), static_cast<long>(H5S_SCALAR), "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
 
         PASSED();
     } // end try block
@@ -1029,7 +1032,7 @@ test_attr_mult_read()
         verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
         // Open 1st attribute for the dataset
-        Attribute attr = dataset.openAttribute((unsigned)0);
+        Attribute attr = dataset.openAttribute(static_cast<unsigned>(0));
 
         /* Verify Dataspace */
 
@@ -1042,10 +1045,10 @@ test_attr_mult_read()
 
         // Get the dims of the dataspace and verify them
         hsize_t dims[ATTR_MAX_DIMS]; // Attribute dimensions
-        int     ndims = space.getSimpleExtentDims(dims);
-        if ((long)dims[0] != (long)ATTR1_DIM1)
+        (void)space.getSimpleExtentDims(dims);
+        if (static_cast<long>(dims[0]) != ATTR1_DIM1)
             TestErrPrintf("%d:attribute dimensions different: dims[0]=%d, should be %llu\n", __LINE__,
-                          (int)dims[0], ATTR1_DIM1);
+                          static_cast<int>(dims[0]), ATTR1_DIM1);
 
         /* Verify Datatype */
 
@@ -1053,14 +1056,14 @@ test_attr_mult_read()
         H5T_class_t type_class = attr.getTypeClass();
 
         // Verify that the type is of integer datatype
-        verify_val(type_class, H5T_INTEGER, "Attribute::getTypeClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_INTEGER), "Attribute::getTypeClass", __LINE__, __FILE__);
 
         // Get the integer datatype
         IntType i_type1 = attr.getIntType();
 
         // Get and verify the order of this type
         H5T_order_t order = i_type1.getOrder();
-        verify_val(order, PredType::NATIVE_INT.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_INT.getOrder()), "DataType::getOrder", __LINE__, __FILE__);
 
         // Get and verify the size of this type
         size_t size = i_type1.getSize();
@@ -1083,7 +1086,7 @@ test_attr_mult_read()
         space.close();
 
         // Open 2nd attribute for the dataset
-        attr = dataset.openAttribute((unsigned)1);
+        attr = dataset.openAttribute(static_cast<unsigned>(1));
 
         /* Verify Dataspace */
 
@@ -1095,10 +1098,10 @@ test_attr_mult_read()
         verify_val(rank, ATTR2_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
         // Get the dims of the dataspace and verify them
-        ndims = space.getSimpleExtentDims(dims);
+        (void)space.getSimpleExtentDims(dims);
 
-        verify_val((long)dims[0], (long)ATTR2_DIM1, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
-        verify_val((long)dims[1], (long)ATTR2_DIM2, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(static_cast<long>(dims[0]), static_cast<long>(ATTR2_DIM1), "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(static_cast<long>(dims[1]), static_cast<long>(ATTR2_DIM2), "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
 
         /* Verify Datatype */
 
@@ -1106,14 +1109,14 @@ test_attr_mult_read()
         type_class = attr.getTypeClass();
 
         // Verify that the type is of integer datatype
-        verify_val(type_class, H5T_INTEGER, "Attribute::getTypeClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_INTEGER), "Attribute::getTypeClass", __LINE__, __FILE__);
 
         // Get the integer datatype
         IntType i_type2 = attr.getIntType();
 
         // Get and verify the order of this type
         order = i_type2.getOrder();
-        verify_val(order, PredType::NATIVE_INT.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_INT.getOrder()), "DataType::getOrder", __LINE__, __FILE__);
 
         // Get and verify the size of this type
         size = i_type2.getSize();
@@ -1138,7 +1141,7 @@ test_attr_mult_read()
         space.close();
 
         // Open 3rd attribute for the dataset
-        attr = dataset.openAttribute((unsigned)2);
+        attr = dataset.openAttribute(static_cast<unsigned>(2));
 
         /* Verify Dataspace */
 
@@ -1150,10 +1153,10 @@ test_attr_mult_read()
         verify_val(rank, ATTR3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
         // Get the dims of the dataspace and verify them
-        ndims = space.getSimpleExtentDims(dims);
-        verify_val((long)dims[0], (long)ATTR3_DIM1, "attribute dimensions", __FILE__, __LINE__);
-        verify_val((long)dims[1], (long)ATTR3_DIM2, "attribute dimensions", __FILE__, __LINE__);
-        verify_val((long)dims[2], (long)ATTR3_DIM3, "attribute dimensions", __FILE__, __LINE__);
+        (void)space.getSimpleExtentDims(dims);
+        verify_val(static_cast<long>(dims[0]), static_cast<long>(ATTR3_DIM1), "attribute dimensions", __FILE__, __LINE__);
+        verify_val(static_cast<long>(dims[1]), static_cast<long>(ATTR3_DIM2), "attribute dimensions", __FILE__, __LINE__);
+        verify_val(static_cast<long>(dims[2]), static_cast<long>(ATTR3_DIM3), "attribute dimensions", __FILE__, __LINE__);
 
         /* Verify Datatype */
 
@@ -1161,14 +1164,14 @@ test_attr_mult_read()
         type_class = attr.getTypeClass();
 
         // Verify that the type is of compound datatype
-        verify_val(type_class, H5T_FLOAT, "Attribute::getTypeClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_FLOAT), "Attribute::getTypeClass", __LINE__, __FILE__);
 
         // Get the double datatype
         FloatType f_type = attr.getFloatType();
 
         // Get and verify the order of this type
         order = f_type.getOrder();
-        verify_val(order, PredType::NATIVE_DOUBLE.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_DOUBLE.getOrder()), "DataType::getOrder", __LINE__, __FILE__);
 
         // Get and verify the size of this type
         size = f_type.getSize();
@@ -1181,7 +1184,7 @@ test_attr_mult_read()
         for (i = 0; i < ATTR3_DIM1; i++)
             for (j = 0; j < ATTR3_DIM2; j++)
                 for (k = 0; k < ATTR3_DIM3; k++)
-                    if (attr_data3[i][j][k] != read_data3[i][j][k])
+                    if (abs(attr_data3[i][j][k] - read_data3[i][j][k]) > FLT_EPSILON)
                         TestErrPrintf("%d: attribute data different: attr_data3[%llu][%llu][%llu]=%f, "
                                       "read_data3[%llu][%llu][%llu]=%f\n",
                                       __LINE__, i, j, k, attr_data3[i][j][k], i, j, k, read_data3[i][j][k]);
@@ -1230,7 +1233,7 @@ test_attr_delete()
         verify_val(num_attrs, 1, "H5File::getNumAttrs", __LINE__, __FILE__);
 
         // Verify the name of the only file attribute left
-        Attribute fattr = fid1.openAttribute((unsigned)0);
+        Attribute fattr = fid1.openAttribute(static_cast<unsigned>(0));
         attr_name       = fattr.getName();
         verify_val(attr_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
         fattr.close();
@@ -1270,7 +1273,7 @@ test_attr_delete()
         verify_val(num_attrs, 2, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
         // Open 1st attribute for the dataset
-        Attribute attr = dataset.openAttribute((unsigned)0);
+        Attribute attr = dataset.openAttribute(static_cast<unsigned>(0));
 
         // Verify Name
         attr_name = attr.getName();
@@ -1280,7 +1283,7 @@ test_attr_delete()
         attr.close();
 
         // Open last (formally 3rd) attribute for the dataset
-        attr = dataset.openAttribute((unsigned)1);
+        attr = dataset.openAttribute(static_cast<unsigned>(1));
 
         // Verify Name
         attr_name = attr.getName();
@@ -1296,7 +1299,7 @@ test_attr_delete()
         verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
         // Open the only attribute for the dataset (formally 3rd)
-        attr = dataset.openAttribute((unsigned)0);
+        attr = dataset.openAttribute(static_cast<unsigned>(0));
 
         // Verify Name
         attr_name = attr.getName();
@@ -1370,7 +1373,7 @@ test_attr_dtype_shared()
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val((int)statbuf.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
+            verify_val(static_cast<int>(statbuf.nlink), 1, "DataType::getObjinfo", __LINE__, __FILE__);
 #endif
 
             // Create dataspace for dataset
@@ -1381,7 +1384,7 @@ test_attr_dtype_shared()
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val((int)statbuf.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
+            verify_val(static_cast<int>(statbuf.nlink), 2, "H5File::getObjinfo", __LINE__, __FILE__);
 #endif
 
             // Create attribute on dataset
@@ -1390,7 +1393,7 @@ test_attr_dtype_shared()
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val((int)statbuf.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
+            verify_val(static_cast<int>(statbuf.nlink), 3, "DataSet::getObjinfo", __LINE__, __FILE__);
 #endif
 
             // Close attribute
@@ -1402,7 +1405,7 @@ test_attr_dtype_shared()
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val((int)statbuf.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__,
+            verify_val(static_cast<int>(statbuf.nlink), 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__,
                        __FILE__);
 #endif
 
@@ -1412,7 +1415,7 @@ test_attr_dtype_shared()
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val((int)statbuf.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
+            verify_val(static_cast<int>(statbuf.nlink), 3, "DataSet::createAttribute", __LINE__, __FILE__);
 #endif
 
             // Write data into the attribute
@@ -1449,7 +1452,7 @@ test_attr_dtype_shared()
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val((int)statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
+            verify_val(static_cast<int>(statbuf.nlink), 3, "DataSet::openAttribute", __LINE__, __FILE__);
 #endif
         } // end of second enclosing
 
@@ -1459,7 +1462,7 @@ test_attr_dtype_shared()
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         // Check reference count on named datatype
         fid1.getObjinfo(TYPE1_NAME, statbuf);
-        verify_val((int)statbuf.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
+        verify_val(static_cast<int>(statbuf.nlink), 1, "H5File::unlink", __LINE__, __FILE__);
 #endif
 
         // Unlink the named datatype
@@ -1470,7 +1473,7 @@ test_attr_dtype_shared()
 
         // Check size of file
         filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-        verify_val((long)filesize, (long)empty_filesize, "Checking file size", __LINE__, __FILE__);
+        verify_val(static_cast<long>(filesize), static_cast<long>(empty_filesize), "Checking file size", __LINE__, __FILE__);
 
         PASSED();
     } // end try block
@@ -1806,7 +1809,7 @@ test_attr_corder_create_basic(FileCreatPropList &fcpl, FileAccPropList &fapl)
         // Get creation order indexing on object
         unsigned crt_order_flags = 0;
         crt_order_flags          = dcpl.getAttrCrtOrder();
-        verify_val(crt_order_flags, (unsigned)0, "DSetCreatPropList::getAttrCrtOrder", __LINE__, __FILE__);
+        verify_val(crt_order_flags, static_cast<unsigned>(0), "DSetCreatPropList::getAttrCrtOrder", __LINE__, __FILE__);
 
         // Setting invalid combination of a attribute order creation order
         // indexing on should fail
@@ -1825,7 +1828,7 @@ test_attr_corder_create_basic(FileCreatPropList &fcpl, FileAccPropList &fapl)
         // verify them
         dcpl.setAttrCrtOrder(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED);
         crt_order_flags = dcpl.getAttrCrtOrder();
-        verify_val(crt_order_flags, (unsigned)(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED),
+        verify_val(crt_order_flags, static_cast<unsigned>(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED),
                    "DSetCreatPropList::getAttrCrtOrder", __LINE__, __FILE__);
 
         // Create dataspace for dataset
@@ -1861,7 +1864,7 @@ test_attr_corder_create_basic(FileCreatPropList &fcpl, FileAccPropList &fapl)
 
         // Query the attribute creation properties
         crt_order_flags = dcpl.getAttrCrtOrder();
-        verify_val(crt_order_flags, (unsigned)(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED),
+        verify_val(crt_order_flags, static_cast<unsigned>(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED),
                    "DSetCreatPropList::getAttrCrtOrder", __LINE__, __FILE__);
 
         PASSED();

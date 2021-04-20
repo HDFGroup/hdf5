@@ -78,7 +78,7 @@ int iter_strcmp(const void *s1, const void *s2);
 int
 iter_strcmp(const void *s1, const void *s2)
 {
-    return (HDstrcmp(*(const char *const *)s1, *(const char *const *)s2));
+    return (HDstrcmp(*static_cast<const char *const *>(s1), *static_cast<const char *const *>(s2)));
 }
 
 /*-------------------------------------------------------------------------
@@ -91,7 +91,7 @@ static herr_t
 liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link_info,
          void *op_data)
 {
-    iter_info *info   = (iter_info *)op_data;
+    iter_info *info   = static_cast<iter_info *>(op_data);
     static int count  = 0;
     static int count2 = 0;
 
@@ -181,7 +181,7 @@ test_iter_group(FileAccPropList &fapl)
         check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
 
         /* Sort the dataset names */
-        HDqsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+        HDqsort(lnames, NDATASETS + 2, sizeof(char *), iter_strcmp);
 
         /* Iterate through the datasets in the root group in various ways */
 
@@ -193,10 +193,10 @@ test_iter_group(FileAccPropList &fapl)
 
         // Get the number of object in the root group
         hsize_t nobjs = root_group.getNumObjs();
-        verify_val(nobjs, (hsize_t)(NDATASETS + 2), "H5Gget_info", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nobjs), NDATASETS + 2, "H5Gget_info", __LINE__, __FILE__);
 
         H5std_string obj_name;
-        for (i = 0; i < nobjs; i++) {
+        for (i = 0; i < static_cast<int>(nobjs); i++) {
             // H5O_info2_t oinfo;                /* Object info */
 
             obj_name = root_group.getObjnameByIdx(i);
@@ -222,7 +222,7 @@ test_iter_group(FileAccPropList &fapl)
         // Attempted to iterate with negative index, should fail
         try {
             info.command = RET_ZERO;
-            idx          = (hsize_t)-1;
+            idx          = static_cast<hsize_t>(-1);
             obj_name     = root_group.getObjnameByIdx(idx);
 
             // Should FAIL but didn't, so throw an invalid action exception
@@ -360,7 +360,7 @@ const H5std_string ATTR_NAME("Units");
 const H5std_string FATTR_NAME("F attr");
 const H5std_string GATTR_NAME("G attr");
 const int          DIM1 = 2;
-void
+static void
 printelems(const Group &group, const H5std_string &dsname, const H5std_string &atname)
 {
     try {

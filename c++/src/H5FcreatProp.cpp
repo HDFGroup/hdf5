@@ -13,7 +13,16 @@
 
 #include <string>
 
+#ifdef __GNUG__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
 #include "H5Include.h"
+#ifdef __GNUG__
+#pragma GCC diagnostic pop
+#endif
+
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"

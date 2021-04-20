@@ -22,7 +22,11 @@
 #include "H5Ipublic.h"
 
 /* Define atomic datatypes */
-#define H5S_ALL       (hid_t)0
+#ifndef __cplusplus
+#define H5S_ALL (hid_t)0
+#else
+#define H5S_ALL static_cast<hid_t>(0)
+#endif
 #define H5S_UNLIMITED HSIZE_UNDEF
 
 /* Define user-level maximum number of dimensions */

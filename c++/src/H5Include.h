@@ -12,7 +12,17 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// Turn off old-style cast warnings in g++
+#ifdef __GNUG__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
 #include <hdf5.h>
+
+#ifdef __GNUG__
+#pragma GCC diagnostic pop
+#endif
 
 // These are defined in H5Opkg.h, which should not be included in the C++ API,
 // so re-define them here for now.
