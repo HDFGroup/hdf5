@@ -54,17 +54,20 @@ fi
 BIGSET_n=25                         # -n option: # of iterations
 BIGSET_few_s=20                     # -s option: # of datasets (for few_big test)
 BIGSET_many_s=500                   # -s option: # of datasets (for many_small test)
-GROUP_n=100                         # -n option: # of groups (for vfd_swmr_group_writer.c)
+GROUP_n=40                          # -n option: # of groups (for group test)
+GROUP_attr_n=1                      # -n option: # of groups (for group attribute test)
+
 if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # Setting for exhaustive run
     BIGSET_n=50
     BIGSET_few_s=40
     BIGSET_many_s=1000
     GROUP_n=400
+    GROUP_attr_n=10
 elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # Setting for quick run
     BIGSET_n=10
     BIGSET_few_s=10
     BIGSET_many_s=100
-    GROUP_n=40
+    GROUP_n=20
 fi
 
 ###############################################################################
@@ -147,7 +150,9 @@ if [ $rc -ne 0 ] ; then
 fi
 
 all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo groups"
-all_tests="${all_tests} few_big many_small"
+all_tests="${all_tests} groups_attrs few_big many_small"
+#all_tests="groups groups_attrs"
+#all_tests="groups_attrs"
 tests=${all_tests}
 
 if [ $# -gt 0 ]; then
@@ -612,7 +617,7 @@ if [ ${do_zoo:-no} = yes ]; then
 fi
 
 #
-# Make sure that we can create GROUP_n groups (40, 100, or 400 depending on the HDF5TestExpress level)
+# Make sure that we can create GROUP_n groups (20, 40, or 400 depending on the HDF5TestExpress level)
 # while a reader waits for each to appear.
 #
 if [ ${do_groups:-no} = yes ]; then
@@ -648,6 +653,81 @@ if [ ${do_groups:-no} = yes ]; then
 	rm -f vfd_swmr_group_writer.{out,rc}
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 fi
+
+grp_attr_list=(
+                "compact"
+                "dense"
+                "compact-to-dense"
+                "compact-del"
+                "dense-del"
+                "dense-del-to-compact"
+                "modify"
+                "vstr"
+                "remove-vstr"
+                "modify-vstr"
+               )
+grp_sub_attr_list=(
+                "dense-del-to-compact"
+                "modify"
+                "vstr"
+                "remove-vstr"
+                "modify-vstr"
+               )
+
+grp_short_sub_attr_list=(
+                "dense"
+                "compact-del"
+                "modify"
+                "vstr"
+                "remove-vstr"
+                "modify-vstr"
+               )
+
+echo "$HDF5TestExpress"
+if [[ "$HDF5TestExpress" -eq 1 ]] ; then       #Setting for standard run
+    grp_attr_list=("${grp_sub_attr_list[@]}")
+elif [[ "$HDF5TestExpress" -gt 1 ]] ; then     #Setting for quick run
+    grp_attr_list=("${grp_short_sub_attr_list[@]}")
+fi
+
+for options in ${grp_attr_list[*]}; do
+	if [ ${do_groups_attrs:-no} = no ]; then
+		continue
+	fi
+	echo launch vfd_swmr_group attribute: $options
+	catch_out_err_and_rc vfd_swmr_group_writer \
+	    ../vfd_swmr_group_writer -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	    #../vfd_swmr_group_writer -q -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_group_reader -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	    #../vfd_swmr_group_reader -q -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_group_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_group_writer.{out,rc}
+	rm -f vfd_swmr_group_reader.*.{out,rc}
+done
 
 for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
 	if [ ${do_many_small:-no} = no ]; then
