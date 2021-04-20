@@ -71,6 +71,13 @@ mark_as_advanced (HDF5_EXTERNAL_LIB_PREFIX)
 #   If the parent project needs to install hdf libraries, but avoid
 #   name conflicts with system versions, then a prefix may be added
 #   to ensure that the correct versions configured are used.
+set (HDF5_LIB_INFIX "" CACHE STRING "Use infix for custom library naming.")
+mark_as_advanced (HDF5_LIB_INFIX)
+# HDF5_LIB_INFIX :
+#   This infix is added to all library names after 'hdf5'.
+#   e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
+#   This name is used in packages on debian based systems.
+#   (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
 #
 # HDF5_INSTALL_BIN_DIR, HDF5_INSTALL_LIB_DIR, HDF5_INSTALL_INCLUDE_DIR, HDF5_INSTALL_DATA_DIR :
 #   Customize the 'bin', 'lib', 'include', and 'share' installation directories.
@@ -130,18 +137,18 @@ mark_as_advanced (ALLOW_UNSUPPORTED)
 #-----------------------------------------------------------------------------
 # Set the core names of all the libraries
 #-----------------------------------------------------------------------------
-set (HDF5_LIB_CORENAME              "hdf5")
-set (HDF5_TEST_LIB_CORENAME         "hdf5_test")
-set (HDF5_CPP_LIB_CORENAME          "hdf5_cpp")
-set (HDF5_HL_LIB_CORENAME           "hdf5_hl")
-set (HDF5_HL_CPP_LIB_CORENAME       "hdf5_hl_cpp")
-set (HDF5_TOOLS_LIB_CORENAME        "hdf5_tools")
-set (HDF5_F90_LIB_CORENAME          "hdf5_fortran")
-set (HDF5_F90_C_LIB_CORENAME        "hdf5_f90cstub")
-set (HDF5_F90_TEST_LIB_CORENAME     "hdf5_test_fortran")
-set (HDF5_F90_C_TEST_LIB_CORENAME   "hdf5_test_f90cstub")
-set (HDF5_HL_F90_LIB_CORENAME       "hdf5_hl_fortran")
-set (HDF5_HL_F90_C_LIB_CORENAME     "hdf5_hl_f90cstub")
+set (HDF5_LIB_CORENAME              "hdf5${HDF5_LIB_INFIX}")
+set (HDF5_TEST_LIB_CORENAME         "hdf5${HDF5_LIB_INFIX}_test")
+set (HDF5_CPP_LIB_CORENAME          "hdf5${HDF5_LIB_INFIX}_cpp")
+set (HDF5_HL_LIB_CORENAME           "hdf5${HDF5_LIB_INFIX}_hl")
+set (HDF5_HL_CPP_LIB_CORENAME       "hdf5${HDF5_LIB_INFIX}_hl_cpp")
+set (HDF5_TOOLS_LIB_CORENAME        "hdf5${HDF5_LIB_INFIX}_tools")
+set (HDF5_F90_LIB_CORENAME          "hdf5${HDF5_LIB_INFIX}_fortran")
+set (HDF5_F90_C_LIB_CORENAME        "hdf5${HDF5_LIB_INFIX}_f90cstub")
+set (HDF5_F90_TEST_LIB_CORENAME     "hdf5${HDF5_LIB_INFIX}_test_fortran")
+set (HDF5_F90_C_TEST_LIB_CORENAME   "hdf5${HDF5_LIB_INFIX}_test_f90cstub")
+set (HDF5_HL_F90_LIB_CORENAME       "hdf5${HDF5_LIB_INFIX}_hl_fortran")
+set (HDF5_HL_F90_C_LIB_CORENAME     "hdf5${HDF5_LIB_INFIX}_hl_f90cstub")
 
 #-----------------------------------------------------------------------------
 # Set the true names of all the libraries if customized by external project
@@ -412,6 +419,14 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
+# perl is used in some optional src and tests, check availability
+find_package (Perl)
+if (PERL_FOUND)
+  set (H5_PERL_FOUND YES)
+endif ()
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
 # Option to Build Static executables
 #-----------------------------------------------------------------------------
 option (BUILD_STATIC_EXECS "Build Static Executables" OFF)
@@ -460,6 +475,20 @@ endif ()
 #   find_package (DMALLOC)
 #   set (H5_HAVE_DMALLOC DMALLOC_FOUND)
 # endif ()
+
+#-----------------------------------------------------------------------------
+# Option to build documentation
+#-----------------------------------------------------------------------------
+option (HDF5_BUILD_DOC "Build documentation" OFF)
+if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
+# check if Doxygen is installed
+  find_package(Doxygen)
+  if (DOXYGEN_FOUND)
+    message(STATUS "Doxygen version: ${DOXYGEN_VERSION}")
+  else ()
+    message(STATUS "Doxygen needs to be installed to generate the doxygen documentation")
+  endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Option to indicate using a memory checker

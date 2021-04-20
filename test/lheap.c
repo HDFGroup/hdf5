@@ -189,7 +189,10 @@ main(void)
 
 error:
     HDputs("*** TESTS FAILED ***");
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     return EXIT_FAILURE;
 }

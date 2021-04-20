@@ -2776,7 +2776,10 @@ main(void)
 error:
     puts("*** TESTS FAILED ***");
 
-    H5E_BEGIN_TRY { H5Pclose(fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
     H5E_END_TRY
 
     return 1;

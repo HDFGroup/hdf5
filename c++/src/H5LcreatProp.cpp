@@ -87,7 +87,9 @@ const LinkCreatPropList &LinkCreatPropList::DEFAULT = *getConstant();
 ///\brief       Creates a file access property list
 // May 2018
 //--------------------------------------------------------------------------
-LinkCreatPropList::LinkCreatPropList() : StrCreatPropList(H5P_LINK_CREATE) {}
+LinkCreatPropList::LinkCreatPropList() : StrCreatPropList(H5P_LINK_CREATE)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    LinkCreatPropList copy constructor
@@ -95,7 +97,9 @@ LinkCreatPropList::LinkCreatPropList() : StrCreatPropList(H5P_LINK_CREATE) {}
 ///\param       original - IN: LinkCreatPropList instance to copy
 // May 2018
 //--------------------------------------------------------------------------
-LinkCreatPropList::LinkCreatPropList(const LinkCreatPropList &original) : StrCreatPropList(original) {}
+LinkCreatPropList::LinkCreatPropList(const LinkCreatPropList &original) : StrCreatPropList(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    LinkCreatPropList overloaded constructor
@@ -103,13 +107,17 @@ LinkCreatPropList::LinkCreatPropList(const LinkCreatPropList &original) : StrCre
 ///             existing one.
 // May 2018
 //--------------------------------------------------------------------------
-LinkCreatPropList::LinkCreatPropList(const hid_t plist_id) : StrCreatPropList(plist_id) {}
+LinkCreatPropList::LinkCreatPropList(const hid_t plist_id) : StrCreatPropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    LinkCreatPropList destructor
 ///\brief       Noop destructor
 // May 2018
 //--------------------------------------------------------------------------
-LinkCreatPropList::~LinkCreatPropList() {}
+LinkCreatPropList::~LinkCreatPropList()
+{
+}
 
 } // namespace H5

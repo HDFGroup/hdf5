@@ -49,6 +49,15 @@ New Features
 
     Configuration:
     -------------
+    - Add CMake variable HDF5_LIB_INFIX
+
+      This infix is added to all library names after 'hdf5'.
+      e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
+      This name is used in packages on debian based systems.
+      (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
+
+      (barcode - 2021/03/22)
+
     - On macOS, Universal Binaries can now be built, allowing native execution on
       both Intel and Apple Silicon (ARM) based Macs.
 
@@ -196,6 +205,19 @@ Bug Fixes since HDF5-1.8.22
 
     Configuration
     -------------
+    - Remove arbitrary warning flag groups from CMake builds
+
+      The arbitrary groups were created to reduce the quantity of warnings being
+      reported that overwhelmed testing report systems. Considerable work has
+      been accomplished to reduce the warning count and these arbitrary groups
+      are no longer needed.
+      Also the default for all warnings, HDF5_ENABLE_ALL_WARNINGS, is now ON.
+
+      Visual Studio warnings C4100, C4706, and C4127 have been moved to
+      developer warnings, HDF5_ENABLE_DEV_WARNINGS, and are disabled for normal builds.
+
+      (ADB - 2021/03/22, HDFFV-11228)
+
     - Reclassify CMake messages, to allow new modes and --log-level option
 
       CMake message commands have a mode argument. By default, STATUS mode
@@ -232,11 +254,22 @@ Bug Fixes since HDF5-1.8.22
 
     Tools
     -----
+    - Changed how h5dump and h5ls identify long double.
+
+        Long double support is not consistent across platforms. Tools will always
+        identify long double as 128-bit [little/big]-endian float nn-bit precision.
+        New test file created for datasets with attributes for float, double and
+        long double. In addition any unknown integer or float datatype will now
+        also show the number of bits for precision.
+        These files are also used in the java tests.
+
+        (ADB - 2021/03/24, HDFFV-11229)
+
     - Fixed tools argument parsing.
 
         Tools parsing used the length of the option from the long array to match
         the option from the command line. This incorrectly matched a shorter long
-        name option that was happened to be a subset of another long option.
+        name option that happened to be a subset of another long option.
         Changed to match whole names.
 
         (ADB - 2021/02/16, HDFFV-11106)

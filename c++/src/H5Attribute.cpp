@@ -50,7 +50,9 @@ using std::endl;
 ///\brief       Default constructor: Creates a stub attribute
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-Attribute::Attribute() : AbstractDs(), H5Location(), id(H5I_INVALID_HID) {}
+Attribute::Attribute() : AbstractDs(), H5Location(), id(H5I_INVALID_HID)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    Attribute copy constructor

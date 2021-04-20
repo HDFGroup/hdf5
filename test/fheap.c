@@ -2229,7 +2229,10 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_U
     fh2 = NULL;
 
     /* Try re-opening the heap again (should fail, as heap will be deleted) */
-    H5E_BEGIN_TRY { fh2 = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr); }
+    H5E_BEGIN_TRY
+    {
+        fh2 = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr);
+    }
     H5E_END_TRY;
     if (fh2) {
         /* Close opened heap */
@@ -2418,7 +2421,10 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam)
     tmp_cparam.id_len = 3;
 
     /* Create absolute heap */
-    H5E_BEGIN_TRY { fh = H5HF_create(f, dxpl, &tmp_cparam); }
+    H5E_BEGIN_TRY
+    {
+        fh = H5HF_create(f, dxpl, &tmp_cparam);
+    }
     H5E_END_TRY;
     if (NULL != fh)
         FAIL_STACK_ERROR
@@ -2579,7 +2585,10 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam)
     tmp_cparam.id_len = H5HF_MAX_ID_LEN + 1;
 
     /* Create absolute heap */
-    H5E_BEGIN_TRY { fh = H5HF_create(f, dxpl, &tmp_cparam); }
+    H5E_BEGIN_TRY
+    {
+        fh = H5HF_create(f, dxpl, &tmp_cparam);
+    }
     H5E_END_TRY;
     if (NULL != fh)
         FAIL_STACK_ERROR
@@ -3044,7 +3053,10 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     TESTING("inserting 'weird' sized objects into absolute heap");
 
     /* Attempt to insert 0-sized object into heap */
-    H5E_BEGIN_TRY { ret = H5HF_insert(fh, dxpl, (size_t)0, shared_wobj_g, heap_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_insert(fh, dxpl, (size_t)0, shared_wobj_g, heap_id);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -6190,7 +6202,10 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         heap_id[u] = HDrandom() + 1;
 
     /* Try removing bogus heap ID from empty heap */
-    H5E_BEGIN_TRY { ret = H5HF_remove(fh, dxpl, heap_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_remove(fh, dxpl, heap_id);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         FAIL_STACK_ERROR
@@ -6216,14 +6231,20 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     } /* end while */
 
     /* Try removing bogus heap ID from heap w/objects */
-    H5E_BEGIN_TRY { ret = H5HF_remove(fh, dxpl, heap_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_remove(fh, dxpl, heap_id);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
     H5Eclear2(H5E_DEFAULT);
 
     /* Try reading bogus heap ID from heap w/objects */
-    H5E_BEGIN_TRY { ret = H5HF_read(fh, dxpl, heap_id, shared_robj_g); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_read(fh, dxpl, heap_id, shared_robj_g);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -15781,7 +15802,10 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Verify that writing to 'huge' objects works for un-filtered heaps */
-    H5E_BEGIN_TRY { ret = H5HF_write(fh, dxpl, huge_heap_id, &id_changed, shared_wobj_g); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_write(fh, dxpl, huge_heap_id, &id_changed, shared_wobj_g);
+    }
     H5E_END_TRY;
     HDassert(!id_changed);
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -15794,7 +15818,10 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     } /* end else */
 
     /* Verify that writing to 'tiny' objects return failure (for now) */
-    H5E_BEGIN_TRY { ret = H5HF_write(fh, dxpl, tiny_heap_id, &id_changed, shared_wobj_g); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_write(fh, dxpl, tiny_heap_id, &id_changed, shared_wobj_g);
+    }
     H5E_END_TRY;
     HDassert(!id_changed);
     if (ret >= 0)

@@ -486,7 +486,10 @@ main(int argc, char *argv[])
      * driver when the new file is opened.  If the original file is a sec2 file and the
      * new file can only be a sec2 file, reopen the new file should fail.  There's
      * nothing to do in this case. */
-    H5E_BEGIN_TRY { file = H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl);
+    }
     H5E_END_TRY;
 
     if (file >= 0) {

@@ -441,7 +441,10 @@ test_reference_obj(void)
 
     /* Attempting to retrieve type of object using non-valid refs */
     for (j = 0; j < 3; j++) {
-        H5E_BEGIN_TRY { ret = H5Rget_obj_type2(dataset, H5R_OBJECT, &nvrbuf[j], &obj_type); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Rget_obj_type2(dataset, H5R_OBJECT, &nvrbuf[j], &obj_type);
+        }
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Rget_obj_type2");
     } /* end for */
@@ -673,7 +676,10 @@ test_reference_region(void)
     /*
      * Dereference an undefined reference (should fail)
      */
-    H5E_BEGIN_TRY { dset2 = H5Rdereference(dset_NA, H5R_DATASET_REGION, &rdata_NA[0]); }
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Rdereference(dset_NA, H5R_DATASET_REGION, &rdata_NA[0]);
+    }
     H5E_END_TRY;
     VERIFY(dset2, FAIL, "H5Rdereference");
 
@@ -683,7 +689,10 @@ test_reference_region(void)
 
     /* This close should fail since H5Rdereference never created
      * the id of the referenced object. */
-    H5E_BEGIN_TRY { ret = H5Dclose(dset2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dclose(dset2);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dclose");
 
@@ -810,7 +819,10 @@ test_reference_region(void)
 
     /* Attempting to retrieve type of object using non-valid refs */
     for (j = 0; j < 3; j++) {
-        H5E_BEGIN_TRY { ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &nvrbuf[j], &obj_type); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &nvrbuf[j], &obj_type);
+        }
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Rget_obj_type2");
     } /* end for */

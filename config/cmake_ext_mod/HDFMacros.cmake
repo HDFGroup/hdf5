@@ -128,10 +128,6 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
       OUTPUT_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
       OUTPUT_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
   )
-  #get_property (target_name TARGET ${libtarget} PROPERTY OUTPUT_NAME)
-  #get_property (target_name_debug TARGET ${libtarget} PROPERTY OUTPUT_NAME_DEBUG)
-  #get_property (target_name_rwdi TARGET ${libtarget} PROPERTY OUTPUT_NAME_RELWITHDEBINFO)
-  #message (STATUS "${target_name} : ${target_name_debug} : ${target_name_rwdi}")
 
   if (${libtype} MATCHES "STATIC")
     if (WIN32)

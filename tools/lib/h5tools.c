@@ -749,7 +749,10 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
         fid = H5Fopen(fname, flags, fapl_id);
     }
     else {
-        H5E_BEGIN_TRY { fid = H5Fopen(fname, flags, fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            fid = H5Fopen(fname, flags, fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -2033,12 +2036,12 @@ h5tools_is_obj_same(hid_t loc_id1, const char *name1, hid_t loc_id2, const char 
     H5O_info_t oinfo1, oinfo2;
     hbool_t    ret_val = FALSE;
 
-    if (name1 && HDstrcmp(name1, "."))
+    if (name1 && HDstrcmp(name1, ".") != 0)
         H5Oget_info_by_name(loc_id1, name1, &oinfo1, H5P_DEFAULT);
     else
         H5Oget_info(loc_id1, &oinfo1);
 
-    if (name2 && HDstrcmp(name2, "."))
+    if (name2 && HDstrcmp(name2, ".") != 0)
         H5Oget_info_by_name(loc_id2, name2, &oinfo2, H5P_DEFAULT);
     else
         H5Oget_info(loc_id2, &oinfo2);

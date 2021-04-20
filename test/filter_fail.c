@@ -167,7 +167,10 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
     }
     else {
         /* Data writing should fail */
-        H5E_BEGIN_TRY { ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, points); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, points);
+        }
         H5E_END_TRY;
         if (ret >= 0) {
             H5_FAILED();
@@ -185,7 +188,10 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
     /* Close dataset.  If the chunk cache is enabled, the flushing of chunks should fail
      * during H5Dclose.  If it is diabled, H5Dwrite should fail but H5Dclose should succeed. */
     if (cache_enabled) {
-        H5E_BEGIN_TRY { ret = H5Dclose(dataset); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Dclose(dataset);
+        }
         H5E_END_TRY;
         if (ret >= 0) {
             H5_FAILED();

@@ -35,7 +35,9 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub compound datatype
 // 2000
 //--------------------------------------------------------------------------
-CompType::CompType() : DataType() {}
+CompType::CompType() : DataType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    CompType copy constructor
@@ -43,7 +45,9 @@ CompType::CompType() : DataType() {}
 ///\param       original - IN: Original CompType instance
 // 2000
 //--------------------------------------------------------------------------
-CompType::CompType(const CompType &original) : DataType(original) {}
+CompType::CompType(const CompType &original) : DataType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    CompType overloaded constructor
@@ -51,7 +55,9 @@ CompType::CompType(const CompType &original) : DataType(original) {}
 ///\param       existing_id - IN: Id of an existing compound datatype
 // 2000
 //--------------------------------------------------------------------------
-CompType::CompType(const hid_t existing_id) : DataType(existing_id) {}
+CompType::CompType(const hid_t existing_id) : DataType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    CompType overloaded constructor
@@ -63,7 +69,9 @@ CompType::CompType(const hid_t existing_id) : DataType(existing_id) {}
 //              the compound datatype.
 // 2000
 //--------------------------------------------------------------------------
-CompType::CompType(size_t size) : DataType(H5T_COMPOUND, size) {}
+CompType::CompType(size_t size) : DataType(H5T_COMPOUND, size)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    CompType overloaded constructor
@@ -561,6 +569,8 @@ CompType::setSize(size_t size) const
 ///\brief       Properly terminates access to this compound datatype.
 // 2000
 //--------------------------------------------------------------------------
-CompType::~CompType() {}
+CompType::~CompType()
+{
+}
 
 } // namespace H5

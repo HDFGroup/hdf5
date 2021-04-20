@@ -136,7 +136,10 @@ test_vltypes_dataset_create(void)
     CHECK(ret, FAIL, "H5Pset_fill_time");
 
     /* Create a dataset, supposed to fail */
-    H5E_BEGIN_TRY { dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, dcpl, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(dataset, FAIL, "H5Dcreate2");
 
@@ -202,11 +205,17 @@ test_vltypes_funcs(void)
     ret = H5Tset_offset(type, (size_t)16);
     CHECK(ret, FAIL, "H5Tset_offset");
 
-    H5E_BEGIN_TRY { cset = H5Tget_cset(type); }
+    H5E_BEGIN_TRY
+    {
+        cset = H5Tget_cset(type);
+    }
     H5E_END_TRY;
     VERIFY(cset, FAIL, "H5Tget_cset");
 
-    H5E_BEGIN_TRY { strpad = H5Tget_strpad(type); }
+    H5E_BEGIN_TRY
+    {
+        strpad = H5Tget_strpad(type);
+    }
     H5E_END_TRY;
     VERIFY(strpad, FAIL, "H5Tget_strpad");
 
@@ -473,7 +482,10 @@ test_vltypes_vlen_atomic(void)
     CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
 
     /* Try to call H5Dvlen_get_buf with bad dataspace */
-    H5E_BEGIN_TRY { ret = H5Dvlen_get_buf_size(dataset, tid1, sid2, &size); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dvlen_get_buf_size(dataset, tid1, sid2, &size);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dvlen_get_buf_size");
 
@@ -507,7 +519,10 @@ test_vltypes_vlen_atomic(void)
 
     /* Try to reclaim read data using "bad" dataspace with no extent
      * Should fail */
-    H5E_BEGIN_TRY { ret = H5Dvlen_reclaim(tid1, sid2, xfer_pid, rdata); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dvlen_reclaim(tid1, sid2, xfer_pid, rdata);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dvlen_reclaim");
 

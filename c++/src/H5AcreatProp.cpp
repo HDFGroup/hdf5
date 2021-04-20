@@ -87,7 +87,9 @@ const AttrCreatPropList &AttrCreatPropList::DEFAULT = *getConstant();
 ///\brief       Creates a file access property list
 // May 2018
 //--------------------------------------------------------------------------
-AttrCreatPropList::AttrCreatPropList() : StrCreatPropList(H5P_ATTRIBUTE_CREATE) {}
+AttrCreatPropList::AttrCreatPropList() : StrCreatPropList(H5P_ATTRIBUTE_CREATE)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    AttrCreatPropList copy constructor
@@ -95,7 +97,9 @@ AttrCreatPropList::AttrCreatPropList() : StrCreatPropList(H5P_ATTRIBUTE_CREATE) 
 ///\param       original - IN: AttrCreatPropList instance to copy
 // May 2018
 //--------------------------------------------------------------------------
-AttrCreatPropList::AttrCreatPropList(const AttrCreatPropList &original) : StrCreatPropList(original) {}
+AttrCreatPropList::AttrCreatPropList(const AttrCreatPropList &original) : StrCreatPropList(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    AttrCreatPropList overloaded constructor
@@ -103,13 +107,17 @@ AttrCreatPropList::AttrCreatPropList(const AttrCreatPropList &original) : StrCre
 ///             existing one.
 // May 2018
 //--------------------------------------------------------------------------
-AttrCreatPropList::AttrCreatPropList(const hid_t plist_id) : StrCreatPropList(plist_id) {}
+AttrCreatPropList::AttrCreatPropList(const hid_t plist_id) : StrCreatPropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    AttrCreatPropList destructor
 ///\brief       Noop destructor
 // May 2018
 //--------------------------------------------------------------------------
-AttrCreatPropList::~AttrCreatPropList() {}
+AttrCreatPropList::~AttrCreatPropList()
+{
+}
 
 } // namespace H5
