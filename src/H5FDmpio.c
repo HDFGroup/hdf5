@@ -74,7 +74,7 @@ typedef struct H5FD_mpio_t {
 
 /* Private Prototypes */
 
-/* Callbacks */
+/* Callbacks */fffff
 static herr_t  H5FD__mpio_term(void);
 static H5FD_t *H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD__mpio_close(H5FD_t *_file);
@@ -85,7 +85,7 @@ static haddr_t H5FD__mpio_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD__mpio_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
 static herr_t  H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
                                void *buf);
-static herr_t  H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+static herr_t  H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t sffffffize,
                                 const void *buf);
 static herr_t  H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t count,
                                       H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], void *bufs[]);
@@ -1680,6 +1680,7 @@ done:
 } /* end H5FD__mpio_write() */
 
 /*-------------------------------------------------------------------------
+<<<<<<< HEAD
  * Function:    H5FD__mpio_vector_build_types
  *
  * Purpose:     Build MPI datatypes and calculate offset, base buffer, and
@@ -2019,6 +2020,8 @@ done:
 } /* end H5FD__mpio_vector_build_types() */
 
 /*-------------------------------------------------------------------------
+=======
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
  * Function:    H5FD__mpio_read_vector()
  *
  * Purpose:     The behaviour of this function dependes on the value of
@@ -2047,6 +2050,13 @@ done:
  *              In this case, simply walk the vector, and issue an
  *              independent read for each entry.
  *
+<<<<<<< HEAD
+=======
+ *              WARNING: At present, this function makes no provision
+ *              entries of size greater than 2 GB in the vector.  This
+ *              will have to be fixed before release.
+ *
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
  * Return:      Success:    SUCCEED.
  *              Failure:    FAIL.
  *
@@ -2061,22 +2071,42 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 {
     H5FD_mpio_t *              file              = (H5FD_mpio_t *)_file;
     hbool_t                    vector_was_sorted = TRUE;
+<<<<<<< HEAD
     haddr_t *                  s_addrs           = NULL;
     size_t *                   s_sizes           = NULL;
     void **                    s_bufs            = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
     void *                     mpi_bufs_base     = NULL;
+=======
+    hbool_t                    fixed_size        = FALSE;
+    size_t                     size;
+    H5FD_mem_t *               s_types           = NULL;
+    haddr_t *                  s_addrs           = NULL;
+    size_t *                   s_sizes           = NULL;
+    void **                    s_bufs            = NULL;
+    int *                      mpi_block_lengths = NULL;
+    char                       unused            = 0; /* Unused, except for non-NULL pointer value */
+    void *                     mpi_bufs_base     = NULL;
+    MPI_Aint                   mpi_bufs_base_Aint;
+    MPI_Aint *                 mpi_bufs          = NULL;
+    MPI_Aint *                 mpi_displacments  = NULL;
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
     MPI_Datatype               buf_type          = MPI_BYTE; /* MPI description of the selection in memory */
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
     hbool_t                    file_type_created = FALSE;
     int                        i;
+<<<<<<< HEAD
+=======
+    int                        j;
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
     int                        mpi_code; /* MPI return code */
     MPI_Offset                 mpi_off = 0;
     MPI_Status                 mpi_stat;      /* Status from I/O operation */
     H5FD_mpio_xfer_t           xfer_mode;     /* I/O transfer mode */
     H5FD_mpio_collective_opt_t coll_opt_mode; /* whether we are doing collective or independent I/O */
     int                        size_i;
+<<<<<<< HEAD
 #if MPI_VERSION >= 3
     MPI_Count bytes_read = 0; /* Number of bytes read in */
     MPI_Count type_size;      /* MPI datatype used for I/O's size */
@@ -2094,12 +2124,20 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     hbool_t H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     herr_t ret_value = SUCCEED;
+=======
+    herr_t                     ret_value = SUCCEED;
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 
     FUNC_ENTER_STATIC
 
 #ifdef H5FDmpio_DEBUG
+<<<<<<< HEAD
     if (H5FD_mpio_debug_t_flag)
         HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
+=======
+    if (H5FD_mpio_Debug[(int)'t'])
+        HDfprintf(stdout, "%s: Entering\n", FUNC);
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 #endif
 
     /* Sanity checks */
@@ -2116,9 +2154,30 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     HDassert((count == 0) || (sizes[0] != 0));
     HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
+<<<<<<< HEAD
     /* Get the transfer mode from the API context
      *
      * This flag is set to H5FD_MPIO_COLLECTIVE if the API call is
+=======
+
+    /* sort the vector I/O request into increasing address order if required
+     *
+     * If the vector is already sorted, the base addresses of types, addrs, sizes,
+     * and bufs will be returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
+     *
+     * If the vector was not already sorted, new, sorted versions of types, addrs, sizes, and bufs
+     * are allocated, populated, and returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
+     * In this case, this function must free the memory allocated for the sorted vectors.
+     */
+    if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, bufs, &s_types, &s_addrs,
+                                &s_sizes, &s_bufs) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
+
+
+    /* Get the transfer mode from the API context
+     *
+     * This flag is set to H5FD_MPIO_COLLECTIVE if the API call is 
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
      * collective, and to H5FD_MPIO_INDEPENDENT if it is not.
      *
      * While this doesn't mean that we are actually about to do a collective
@@ -2128,6 +2187,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+<<<<<<< HEAD
         /* Build MPI types, etc. */
         if (H5FD__mpio_vector_build_types(count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs,
                                           &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **)&s_bufs,
@@ -2149,6 +2209,134 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
             HDfprintf(stdout, "%s: mpi_off = %ld  size_i = %d\n", __func__, (long)mpi_off, size_i);
+=======
+
+        if (count > 0) { /* create MPI derived types describing the vector write */
+
+            if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
+                (NULL == (mpi_displacments = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint)))) ||
+                (NULL == (mpi_bufs = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint))))) {
+
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc mpi block lengths / displacement")
+            }
+
+            /* when we setup mpi_bufs[] below, all addresses are offsets from
+             * mpi_bufs_base.
+             *
+             * Since these offsets must all be positive, we must scan through
+             * s_bufs[] to find the smallest value, and choose that for
+             * mpi_bufs_base.
+             */
+
+            j = 0; /* guess at the index of the smallest value of s_bufs[] */
+
+            for (i = 1; i < (int)count; i++) {
+
+                if (s_bufs[i] < s_bufs[j]) {
+
+                    j = i;
+                }
+            }
+
+            mpi_bufs_base = s_bufs[j];
+
+            if (MPI_SUCCESS != (mpi_code = MPI_Get_address(mpi_bufs_base, &mpi_bufs_base_Aint)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_Get_address for s_bufs[] to mpi_bufs_base failed", mpi_code)
+
+            size_i = 1;
+
+            fixed_size = FALSE;
+
+            /* load the mpi_block_lengths and mpi_displacements arrays */
+            for (i = 0; i < (int)count; i++) {
+
+                if (!fixed_size) {
+
+                    if (sizes[i] == 0) {
+
+                        fixed_size = TRUE;
+                        size       = sizes[i - 1];
+                    }
+                    else {
+
+                        size = s_sizes[i];
+                    }
+                }
+
+                /* There is an obvious possibility of an overflow here, as size_t
+                 * will typically be 64 bits, where as int will typically be 32 bits.
+                 * This must be fixed, but it should be good enough for initial
+                 * correctness testing.
+                 *                                        JRM -- 3/17/21
+                 */
+                mpi_block_lengths[i] = (int)size;
+                mpi_displacments[i]  = (MPI_Aint)s_addrs[i];
+
+                /* convert s_bufs[i] to MPI_Aint... */
+                if (MPI_SUCCESS != (mpi_code = MPI_Get_address(s_bufs[i], &(mpi_bufs[i]))))
+
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Get_address for s_bufs[] - mpi_bufs_base failed", mpi_code)
+
+                /*... and then subtract mpi_bufs_base_Aint from it. */
+#if ((MPI_VERSION > 3) || ((MPI_VERSION == 3) && (MPI_SUBVERSION >= 1)))
+                mpi_bufs[i] = MPI_Aint_diff(mpi_bufs[i], mpi_bufs_base_Aint);
+#else
+                mpi_bufs[i] = mpi_bufs[i] - mpi_bufs_base_Aint;
+#endif
+            }
+
+
+            /* create the memory MPI derived types */
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_bufs,
+                                                                    MPI_BYTE, &buf_type)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for buf_type failed", mpi_code)
+
+            buf_type_created = TRUE;
+
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&buf_type)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for buf_type failed", mpi_code)
+
+
+            /* create the file MPI derived type */
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
+                                                                    mpi_displacments, MPI_BYTE, &file_type)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
+
+            file_type_created = TRUE;
+
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for file_type failed", mpi_code)
+        }
+        else {
+
+            /* setup for null participation in the collective operation. */
+
+            buf_type  = MPI_BYTE;
+            file_type = MPI_BYTE;
+
+            /* Set non-NULL pointer for I/O operation */
+            mpi_bufs_base = (void *)(&unused);
+
+            /* MPI count to read */
+            size_i = 0;
+        }
+
+        /* Portably initialize MPI status variable */
+        HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
+
+        /* some numeric conversions */
+        if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
+
+#ifdef H5FDmpio_DEBUG
+        if (H5FD_mpio_Debug[(int)'r'])
+            HDfprintf(stdout, "%s: mpi_off = %ld  size_i = %d\n", FUNC, (long)mpi_off, size_i);
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 #endif
 
         /* Setup the file view. */
@@ -2156,16 +2344,20 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
 
+<<<<<<< HEAD
         /* Reset mpi_off to 0 since the view now starts at the data offset */
         if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
 
+=======
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
         /* Get the collective_opt property to check whether the application wants to do IO individually.
          */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
 
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
 
+<<<<<<< HEAD
             /* Read the data. */
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
@@ -2195,12 +2387,33 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             } /* end if */
             else if (MPI_SUCCESS != (mpi_code = MPI_File_read_at_all(file->f, mpi_off, mpi_bufs_base, size_i,
                                                                      buf_type, &mpi_stat)))
+=======
+        /* Read the data. */
+#ifdef H5FDmpio_DEBUG
+        if (H5FD_mpio_Debug[(int)'r'])
+            HDfprintf(stdout, "%s: using MPIO collective mode\n", FUNC);
+#endif
+
+        if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
+#ifdef H5FDmpio_DEBUG
+            if (H5FD_mpio_Debug[(int)'r'])
+                HDfprintf(stdout, "%s: doing MPI collective IO\n", FUNC);
+#endif
+
+            if (MPI_SUCCESS != (mpi_code = MPI_File_read_at_all(file->f, mpi_off, mpi_bufs_base, size_i,
+                                                                buf_type, &mpi_stat)))
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
         } /* end if */
         else if (size_i > 0) {
 #ifdef H5FDmpio_DEBUG
+<<<<<<< HEAD
             if (H5FD_mpio_debug_r_flag)
                 HDfprintf(stdout, "%s: doing MPI independent IO\n", __func__);
+=======
+            if (H5FD_mpio_Debug[(int)'r'])
+                HDfprintf(stdout, "%s: doing MPI independent IO\n", FUNC);
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 #endif
 
             if (MPI_SUCCESS !=
@@ -2214,6 +2427,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         if (MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+<<<<<<< HEAD
 
         /* Only retrieve bytes read if this rank _actually_ participated in I/O */
         if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
@@ -2316,10 +2530,43 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             /* Calculate I/O size */
             if (!fixed_size) {
                 if (sizes[i] == 0) {
+=======
+    }
+    else if (count > 0) {
+
+        /* The read is part of an independent operation. As a result,
+         * we can't use MPI_File_set_view() (since it it a collective operation),
+         * and thus there is no point in setting up an MPI derived type, as
+         * (to the best of my knowlege) MPI I/O doesn't have support for
+         * non-contiguous I/O in independent mode.
+         *
+         * Thus we have to read in each element of the vector in a separate
+         * MPI_File_read_at() call.
+         */
+
+        fixed_size = FALSE;
+
+#ifdef H5FDmpio_DEBUG
+        if (H5FD_mpio_Debug[(int)'r'])
+            HDfprintf(stdout, "%s: doing MPI independent IO\n", FUNC);
+#endif
+
+        for (i = 0; i < (int)count; i++) {
+
+            if (H5FD_mpi_haddr_to_MPIOff(s_addrs[i], &mpi_off) < 0)
+
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
+
+            if (!fixed_size) {
+
+                if (sizes[i] == 0) {
+
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
                     fixed_size = TRUE;
                     size       = sizes[i - 1];
                 }
                 else {
+<<<<<<< HEAD
                     size = sizes[i];
                 }
             }
@@ -2384,10 +2631,24 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                 /* Read is past the max address, fill in zeroes */
                 HDmemset((char *)bufs[i], 0, size);
             }
+=======
+
+                    size = s_sizes[i];
+                }
+            }
+
+            size_i = (int)size; /* todo: fix potential for overflow */
+
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_File_read_at(file->f, mpi_off, s_bufs[i], size_i, MPI_BYTE, &mpi_stat)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
         }
     }
 
 done:
+<<<<<<< HEAD
     if (buf_type_created) {
         MPI_Type_free(&buf_type);
     }
@@ -2407,14 +2668,71 @@ done:
             s_sizes = NULL;
         }
         if (s_bufs) {
+=======
+
+    if (!vector_was_sorted) { /* free sorted vectors if they exist */
+
+        if (s_types) {
+
+            HDfree(s_types);
+            s_types = NULL;
+        }
+
+        if (s_addrs) {
+
+            HDfree(s_addrs);
+            s_addrs = NULL;
+        }
+
+        if (s_sizes) {
+
+            HDfree(s_sizes);
+            s_sizes = NULL;
+        }
+
+        if (s_bufs) {
+
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
             HDfree(s_bufs);
             s_bufs = NULL;
         }
     }
 
+<<<<<<< HEAD
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
         HDfprintf(stdout, "%s: Leaving, proc %d: ret_value = %d\n", __func__, file->mpi_rank, ret_value);
+=======
+    if (mpi_block_lengths) {
+
+        HDfree(mpi_block_lengths);
+        mpi_block_lengths = NULL;
+    }
+
+    if (mpi_displacments) {
+
+        HDfree(mpi_displacments);
+        mpi_displacments = NULL;
+    }
+
+    if (mpi_bufs) {
+
+        HDfree(mpi_bufs);
+        mpi_bufs = NULL;
+    }
+
+    if (buf_type_created) {
+        MPI_Type_free(&buf_type);
+    }
+
+    if (file_type_created) {
+        MPI_Type_free(&file_type);
+    }
+
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_Debug[(int)'t'])
+        HDfprintf(stdout, "%s: Leaving, proc %d: ret_value = %d\n", FUNC, file->mpi_rank, ret_value);
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2450,6 +2768,13 @@ done:
  *              In this case, simply walk the vector, and issue an
  *              independent write for each entry.
  *
+<<<<<<< HEAD
+=======
+ *              WARNING: At present, this function makes no provision
+ *              entries of size greater than 2 GB in the vector.  This
+ *              will have to be fixed before release.
+ *
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
  * Return:      Success:    SUCCEED.
  *              Failure:    FAIL.
  *
@@ -2460,6 +2785,7 @@ done:
  */
 static herr_t
 H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t count, H5FD_mem_t types[],
+<<<<<<< HEAD
                         haddr_t addrs[], size_t sizes[], const void *bufs[])
 {
     H5FD_mpio_t *              file              = (H5FD_mpio_t *)_file;
@@ -2469,29 +2795,60 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     const void **              s_bufs            = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
     const void *               mpi_bufs_base     = NULL;
+=======
+                        haddr_t addrs[], size_t sizes[], void *bufs[])
+{
+    H5FD_mpio_t *              file              = (H5FD_mpio_t *)_file;
+    hbool_t                    vector_was_sorted = TRUE;
+    hbool_t                    fixed_size        = FALSE;
+    size_t                     size;
+    H5FD_mem_t *               s_types           = NULL;
+    haddr_t *                  s_addrs           = NULL;
+    size_t *                   s_sizes           = NULL;
+    void **                    s_bufs            = NULL;
+    int *                      mpi_block_lengths = NULL;
+    char                       unused            = 0; /* Unused, except for non-NULL pointer value */
+    void *                     mpi_bufs_base     = NULL;
+    MPI_Aint                   mpi_bufs_base_Aint;
+    MPI_Aint *                 mpi_bufs          = NULL;
+    MPI_Aint *                 mpi_displacments  = NULL;
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
     MPI_Datatype               buf_type          = MPI_BYTE; /* MPI description of the selection in memory */
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
     hbool_t                    file_type_created = FALSE;
     int                        i;
+<<<<<<< HEAD
+=======
+    int                        j;
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
     int                        mpi_code; /* MPI return code */
     MPI_Offset                 mpi_off = 0;
     MPI_Status                 mpi_stat;      /* Status from I/O operation */
     H5FD_mpio_xfer_t           xfer_mode;     /* I/O transfer mode */
     H5FD_mpio_collective_opt_t coll_opt_mode; /* whether we are doing collective or independent I/O */
     int                        size_i;
+<<<<<<< HEAD
 #ifdef H5FDmpio_DEBUG
     hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
     hbool_t H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     haddr_t max_addr  = 0;
     herr_t  ret_value = SUCCEED;
+=======
+    herr_t                     ret_value = SUCCEED;
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 
     FUNC_ENTER_STATIC
 
 #ifdef H5FDmpio_DEBUG
+<<<<<<< HEAD
     if (H5FD_mpio_debug_t_flag)
         HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
+=======
+    if (H5FD_mpio_Debug[(int)'t'])
+        HDfprintf(stdout, "%s: Entering\n", FUNC);
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 #endif
 
     /* Sanity checks */
@@ -2508,13 +2865,37 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     HDassert((count == 0) || (sizes[0] != 0));
     HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
     /* Verify that no data is written when between MPI_Barrier()s during file flush */
 
     HDassert(!H5CX_get_mpi_file_flushing());
 
+<<<<<<< HEAD
     /* Get the transfer mode from the API context
      *
      * This flag is set to H5FD_MPIO_COLLECTIVE if the API call is
+=======
+    /* sort the vector I/O request into increasing address order if required
+     *
+     * If the vector is already sorted, the base addresses of types, addrs, sizes,
+     * and bufs will be returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
+     *
+     * If the vector was not already sorted, new, sorted versions of types, addrs, sizes, and bufs
+     * are allocated, populated, and returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
+     * In this case, this function must free the memory allocated for the sorted vectors.
+     */
+    if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, bufs, &s_types, &s_addrs,
+                                &s_sizes, &s_bufs) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
+
+
+    /* Get the transfer mode from the API context
+     *
+     * This flag is set to H5FD_MPIO_COLLECTIVE if the API call is 
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
      * collective, and to H5FD_MPIO_INDEPENDENT if it is not.
      *
      * While this doesn't mean that we are actually about to do a collective
@@ -2524,6 +2905,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+<<<<<<< HEAD
         /* Build MPI types, etc. */
         if (H5FD__mpio_vector_build_types(count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs,
                                           &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **)&s_bufs,
@@ -2550,14 +2932,139 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                 HDfree(s_bufs);
                 s_bufs = NULL;
             }
+=======
+
+        if (count > 0) { /* create MPI derived types describing the vector write */
+
+            if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
+                (NULL == (mpi_displacments = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint)))) ||
+                (NULL == (mpi_bufs = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint))))) {
+
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc mpi block lengths / displacement")
+            }
+
+            /* when we setup mpi_bufs[] below, all addresses are offsets from
+             * mpi_bufs_base.
+             *
+             * Since these offsets must all be positive, we must scan through
+             * s_bufs[] to find the smallest value, and choose that for
+             * mpi_bufs_base.
+             */
+
+            j = 0; /* guess at the index of the smallest value of s_bufs[] */
+
+            for (i = 1; i < (int)count; i++) {
+
+                if (s_bufs[i] < s_bufs[j]) {
+
+                    j = i;
+                }
+            }
+
+            mpi_bufs_base = s_bufs[j];
+
+            if (MPI_SUCCESS != (mpi_code = MPI_Get_address(mpi_bufs_base, &mpi_bufs_base_Aint)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_Get_address for s_bufs[] to mpi_bufs_base failed", mpi_code)
+
+            size_i = 1;
+
+            fixed_size = FALSE;
+
+            /* load the mpi_block_lengths and mpi_displacements arrays */
+            for (i = 0; i < (int)count; i++) {
+
+                if (!fixed_size) {
+
+                    if (sizes[i] == 0) {
+
+                        fixed_size = TRUE;
+                        size       = sizes[i - 1];
+                    }
+                    else {
+
+                        size = s_sizes[i];
+                    }
+                }
+
+                /* There is an obvious possibility of an overflow here, as size_t
+                 * will typically be 64 bits, where as int will typically be 32 bits.
+                 * This must be fixed, but it should be good enough for initial
+                 * correctness testing.
+                 *                                        JRM -- 3/17/21
+                 */
+                mpi_block_lengths[i] = (int)size;
+                mpi_displacments[i]  = (MPI_Aint)s_addrs[i];
+
+                /* convert s_bufs[i] to MPI_Aint... */
+                if (MPI_SUCCESS != (mpi_code = MPI_Get_address(s_bufs[i], &(mpi_bufs[i]))))
+
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Get_address for s_bufs[] - mpi_bufs_base failed", mpi_code)
+
+                /*... and then subtract mpi_bufs_base_Aint from it. */
+#if ((MPI_VERSION > 3) || ((MPI_VERSION == 3) && (MPI_SUBVERSION >= 1)))
+                mpi_bufs[i] = MPI_Aint_diff(mpi_bufs[i], mpi_bufs_base_Aint);
+#else
+                mpi_bufs[i] = mpi_bufs[i] - mpi_bufs_base_Aint;
+#endif
+            }
+
+
+            /* create the memory MPI derived types */
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_bufs,
+                                                                    MPI_BYTE, &buf_type)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for buf_type failed", mpi_code)
+
+            buf_type_created = TRUE;
+
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&buf_type)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for buf_type failed", mpi_code)
+
+            /* create the file MPI derived type */
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
+                                                                    mpi_displacments, MPI_BYTE, &file_type)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
+
+            file_type_created = TRUE;
+
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for file_type failed", mpi_code)
+        }
+        else {
+
+            /* setup for null participation in the collective operation. */
+
+            buf_type  = MPI_BYTE;
+            file_type = MPI_BYTE;
+
+            /* Set non-NULL pointer for I/O operation */
+            mpi_bufs_base = (void *)(&unused);
+
+            /* MPI count to write */
+            size_i = 0;
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
         }
 
         /* Portably initialize MPI status variable */
         HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
 
+<<<<<<< HEAD
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
             HDfprintf(stdout, "%s: mpi_off = %ld  size_i = %d\n", __func__, (long)mpi_off, size_i);
+=======
+        /* some numeric conversions */
+        if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
+
+#ifdef H5FDmpio_DEBUG
+        if (H5FD_mpio_Debug[(int)'w'])
+            HDfprintf(stdout, "%s: mpi_off = %ld  size_i = %d\n", FUNC, (long)mpi_off, size_i);
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 #endif
 
         /* Setup the file view. */
@@ -2565,6 +3072,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
 
+<<<<<<< HEAD
         /* Reset mpi_off to 0 since the view now starts at the data offset */
         if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
@@ -2578,12 +3086,29 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
             HDfprintf(stdout, "%s: using MPIO collective mode\n", __func__);
+=======
+        /* Get the collective_opt property to check whether the application wants to do IO individually.
+         */
+        if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
+
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
+
+        /* Write the data. */
+#ifdef H5FDmpio_DEBUG
+        if (H5FD_mpio_Debug[(int)'w'])
+            HDfprintf(stdout, "%s: using MPIO collective mode\n", FUNC);
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 #endif
 
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
+<<<<<<< HEAD
             if (H5FD_mpio_debug_w_flag)
                 HDfprintf(stdout, "%s: doing MPI collective IO\n", __func__);
+=======
+            if (H5FD_mpio_Debug[(int)'w'])
+                HDfprintf(stdout, "%s: doing MPI collective IO\n", FUNC);
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 #endif
 
             if (MPI_SUCCESS != (mpi_code = MPI_File_write_at_all(file->f, mpi_off, mpi_bufs_base, size_i,
@@ -2592,8 +3117,13 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         } /* end if */
         else if (size_i > 0) {
 #ifdef H5FDmpio_DEBUG
+<<<<<<< HEAD
             if (H5FD_mpio_debug_w_flag)
                 HDfprintf(stdout, "%s: doing MPI independent IO\n", __func__);
+=======
+            if (H5FD_mpio_Debug[(int)'w'])
+                HDfprintf(stdout, "%s: doing MPI independent IO\n", FUNC);
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 #endif
 
             if (MPI_SUCCESS !=
@@ -2607,6 +3137,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     }
     else if (count > 0) {
+<<<<<<< HEAD
         hbool_t fixed_size = FALSE;
         size_t  size;
 
@@ -2638,10 +3169,41 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             /* Calculate I/O size */
             if (!fixed_size) {
                 if (sizes[i] == 0) {
+=======
+
+        /* The write is part of an independent operation. As a result,
+         * we can't use MPI_File_set_view() (since it it a collective operation),
+         * and thus there is no point in setting up an MPI derived type, as
+         * (to the best of my knowlege) MPI I/O doesn't have support for
+         * non-contiguous I/O in independent mode.
+         *
+         * Thus we have to write out each element of the vector in a separate
+         * MPI_File_write_at() call.
+         */
+
+        fixed_size = FALSE;
+
+#ifdef H5FDmpio_DEBUG
+        if (H5FD_mpio_Debug[(int)'w'])
+            HDfprintf(stdout, "%s: doing MPI independent IO\n", FUNC);
+#endif
+
+        for (i = 0; i < (int)count; i++) {
+
+            if (H5FD_mpi_haddr_to_MPIOff(s_addrs[i], &mpi_off) < 0)
+
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
+
+            if (!fixed_size) {
+
+                if (sizes[i] == 0) {
+
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
                     fixed_size = TRUE;
                     size       = sizes[i - 1];
                 }
                 else {
+<<<<<<< HEAD
                     size = sizes[i];
                 }
             }
@@ -2671,6 +3233,19 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             /* Check if this is the highest address written to so far */
             if (addrs[i] + size > max_addr)
                 max_addr = addrs[i] + size;
+=======
+
+                    size = s_sizes[i];
+                }
+            }
+
+            size_i = (int)size; /* todo: fix potential for overflow */
+
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_File_write_at(file->f, mpi_off, s_bufs[i], size_i, MPI_BYTE, &mpi_stat)))
+
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
         }
     }
 
@@ -2683,6 +3258,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
      */
     file->eof = HADDR_UNDEF;
 
+<<<<<<< HEAD
     /* check to see if the local eof has changed been extended, and update if so */
     if (max_addr > file->local_eof)
         file->local_eof = max_addr;
@@ -2705,11 +3281,47 @@ done:
             s_sizes = NULL;
         }
         if (s_bufs) {
+=======
+    /* check to see if the local eof has changed been extended, and update if so.
+     * Since the vector write request has been sorted in increasing address order,
+     * we need only look at the address and size of the last element in the vector.
+     */
+    if ((count > 0) && ((s_addrs[count - 1] + (haddr_t)(s_sizes[count - 1])) > file->local_eof)) {
+
+        file->local_eof = (s_addrs[count - 1] + (haddr_t)(s_sizes[count - 1]));
+    }
+
+done:
+
+    if (!vector_was_sorted) { /* free sorted vectors if they exist */
+
+        if (s_types) {
+
+            HDfree(s_types);
+            s_types = NULL;
+        }
+
+        if (s_addrs) {
+
+            HDfree(s_addrs);
+            s_addrs = NULL;
+        }
+
+        if (s_sizes) {
+
+            HDfree(s_sizes);
+            s_sizes = NULL;
+        }
+
+        if (s_bufs) {
+
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
             HDfree(s_bufs);
             s_bufs = NULL;
         }
     }
 
+<<<<<<< HEAD
     /* Make sure we cleaned up */
     HDassert(vector_was_sorted || !s_addrs);
     HDassert(vector_was_sorted || !s_sizes);
@@ -2718,6 +3330,37 @@ done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
         HDfprintf(stdout, "%s: Leaving, proc %d: ret_value = %d\n", __func__, file->mpi_rank, ret_value);
+=======
+    if (mpi_block_lengths) {
+
+        HDfree(mpi_block_lengths);
+        mpi_block_lengths = NULL;
+    }
+
+    if (mpi_displacments) {
+
+        HDfree(mpi_displacments);
+        mpi_displacments = NULL;
+    }
+
+    if (mpi_bufs) {
+
+        HDfree(mpi_bufs);
+        mpi_bufs = NULL;
+    }
+
+    if (buf_type_created) {
+        MPI_Type_free(&buf_type);
+    }
+
+    if (file_type_created) {
+        MPI_Type_free(&file_type);
+    }
+
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_Debug[(int)'t'])
+        HDfprintf(stdout, "%s: Leaving, proc %d: ret_value = %d\n", FUNC, file->mpi_rank, ret_value);
+>>>>>>> 5a61dfb242 (Added vector read / write support to the MPIO VFD, with associated)
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -412,19 +412,48 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
      * objects being written within the file by the application performing
      * SWMR write operations.
      */
-    if (!(file->access_flags & H5F_ACC_SWMR_READ)) {
+    if ((!(file->access_flags & H5F_ACC_SWMR_READ)) && (count > 0)) {
         haddr_t eoa;
+
+        extend_sizes = FALSE;
+        extend_types = FALSE;
 
         for (i = 0; i < count; i++) {
 
-            if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, types[i])))
+            if (!extend_sizes) {
+
+                if (sizes[i] == 0) {
+
+                    extend_sizes = TRUE;
+                    size         = sizes[i - 1];
+                }
+                else {
+
+                    size = sizes[i];
+                }
+            }
+
+            if (!extend_types) {
+
+                if (types[i] == H5FD_MEM_NOLIST) {
+
+                    extend_types = TRUE;
+                    type         = types[i - 1];
+                }
+                else {
+
+                    type = types[i];
+                }
+            }
+
+            if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
 
-            if ((addrs[i] + sizes[i]) > eoa)
+            if ((addrs[i] + size) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                             "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu", (int)i,
-                            (unsigned long long)(addrs[i]), (int)i, (unsigned long long)sizes[i],
+                            (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
                             (unsigned long long)eoa)
         }
     }
@@ -589,17 +618,46 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
         addrs_cooked = TRUE;
     }
 
+    extend_sizes = FALSE;
+    extend_types = FALSE;
+
     for (i = 0; i < count; i++) {
 
-        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, types[i])))
+        if (!extend_sizes) {
+
+            if (sizes[i] == 0) {
+
+                extend_sizes = TRUE;
+                size         = sizes[i - 1];
+            }
+            else {
+
+                size = sizes[i];
+            }
+        }
+
+        if (!extend_types) {
+
+            if (types[i] == H5FD_MEM_NOLIST) {
+
+                extend_types = TRUE;
+                type         = types[i - 1];
+            }
+            else {
+
+                type = types[i];
+            }
+        }
+
+        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
 
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
 
-        if ((addrs[i] + sizes[i]) > eoa)
+        if ((addrs[i] + size) > eoa)
 
             HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, \
                         eoa = %llu",
-                        (int)i, (unsigned long long)(addrs[i]), (int)i, (unsigned long long)sizes[i],
+                        (int)i, (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
                         (unsigned long long)eoa)
     }
 
