@@ -1462,6 +1462,7 @@
 ./testpar/t_pshutdown.c
 ./testpar/t_prestart.c
 ./testpar/t_span_tree.c
+./testpar/t_vfd.c
 ./testpar/t_init_term.c
 ./testpar/t_2Gio.c
 ./testpar/testpar.h

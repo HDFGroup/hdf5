@@ -145,6 +145,10 @@ H5_DLL herr_t  H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
 H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 H5_DLL herr_t  H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 
+H5_DLL herr_t H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t types[],
+                                      haddr_t addrs[], size_t sizes[], void *bufs[], H5FD_mem_t **s_types_ptr,
+                                      haddr_t **s_addrs_ptr, size_t **s_sizes_ptr, void ***s_bufs_ptr);
+
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL
 /* General routines */
