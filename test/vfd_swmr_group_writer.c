@@ -531,6 +531,7 @@ modify_attr(state_t *s, hid_t g, const char* aname_fmt,unsigned int which) {
         goto error;
     }
  
+#if 0
     // Add later.
     //H5T_sign_t h5t_sign = H5Tget_sign(amtype);
     /* Unlikely, still make sure -no overflow. */
@@ -539,7 +540,8 @@ modify_attr(state_t *s, hid_t g, const char* aname_fmt,unsigned int which) {
         printf("number of iteration is too big, it causes overflow\n");
         goto error;
     }
-    modify_value = (-1)*((int)which); 
+#endif
+    modify_value = which+10000; 
 
     if (H5Awrite(aid,amtype,&modify_value) <0) {
         H5_FAILED(); AT();
@@ -1533,14 +1535,16 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which) {
             goto error;
         }
 
+#if 0
         if((unsigned int)((int)which)!=which) {
             H5_FAILED(); AT();
             printf("the unsigned %u causes overflow when casted to signed.\n",which);  
             printf("number of iteration is too big, it causes overflow.\n");
             goto error;
         }
+#endif
 
-        if(read_which != (-1)*(int)which) {
+        if(read_which != (which+10000)) {
             H5_FAILED(); AT();
             dbgf(2, "reader: the modified_attr() expected value is  %d\n", (-1)*(int)which);
             dbgf(2, "reader: the modified_attr() actual value is %d\n", read_which);
@@ -2974,13 +2978,15 @@ main(int argc, char **argv)
             if(wg_ret == false)  {
                 H5_FAILED(); AT();
                 printf("write_group failed at step %d\n",step);
-            
 
                 /* At communication interval, notifies the reader about the failture and quit */
                 if (s.use_named_pipes && s.attr_test !=true && step % s.csteps == 0) {
                 //if(1){
+                #if 0
                     s.np_notify = -1;
                     HDwrite(fd_writer_to_reader, &(s.np_notify), sizeof(int));
+                #endif
+                    np_send_error(&s,true);
                 }
                 goto error;
             }
@@ -2989,6 +2995,12 @@ main(int argc, char **argv)
                 /* At communication interval, notifies the reader and waits for its response */
                 if (s.use_named_pipes && s.attr_test != true  && step % s.csteps == 0) {
 
+                    if(np_wr_send_receive(&s) == false) {
+                        H5_FAILED(); AT();
+                        dbgf(2, "writer: write group - verification failed.\n");
+                        goto error;
+                    }
+#if 0
                     /* Bump up the value of notify to notice the reader to start to read */
                     s.np_notify++;
                     if (HDwrite(fd_writer_to_reader, &(s.np_notify), sizeof(int)) < 0) {
@@ -3026,6 +3038,7 @@ main(int argc, char **argv)
                         printf("received message %d, expecting %d\n", s.np_notify, s.np_verify);
                         goto error;
                     }
+#endif
                 }
             }
         }
@@ -3035,6 +3048,11 @@ main(int argc, char **argv)
 
             /* At communication interval, waits for the writer to finish creation before starting verification */
             if (s.use_named_pipes && s.attr_test != true && step % s.csteps == 0) {
+                if(false == np_rd_receive(&s)) {
+                    H5_FAILED(); AT();
+                    goto error;
+                }
+#if 0
                 /* The writer should have bumped up the value of notify.
                  * Do the same with verify and confirm it */
                 s.np_verify++;
@@ -3057,6 +3075,7 @@ main(int argc, char **argv)
                     printf("received message %d, expecting %d\n", s.np_notify, s.np_verify);
                     goto error;
                 }
+#endif
             }
 
              /* For the default test, wait for a few ticks for the update to happen */
@@ -3072,8 +3091,9 @@ main(int argc, char **argv)
                 /* At communication interval, tell the writer about the failure and exit */
                 if (s.use_named_pipes && s.attr_test != true && step % s.csteps == 0) {
                 //if(1){
-                    s.np_notify = -1;
-                    HDwrite(fd_reader_to_writer, &(s.np_notify), sizeof(int));
+                    np_send_error(&s,false);
+                    //s.np_notify = -1;
+                    //HDwrite(fd_reader_to_writer, &(s.np_notify), sizeof(int));
                 }
                 goto error;
 
@@ -3085,11 +3105,15 @@ main(int argc, char **argv)
                // TO THINK:  reader will never have a chance to acknowledge the writer when attribute verfication occurs.
                // RESOLVED, no need to carry out the following for the attribute operation. It is done in the attribute level.
                 if (s.use_named_pipes && s.attr_test!=true && step % s.csteps == 0) {
+#if 0
                     if (HDwrite(fd_reader_to_writer, &(s.np_notify), sizeof(int)) < 0) {
                         H5_FAILED(); AT();
                         printf("HDwrite failed\n");
                         goto error;
                     }
+#endif
+                    if(np_rd_send(&s)==false) 
+                        goto error;
                 }
             }
            
