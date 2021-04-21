@@ -64,8 +64,8 @@ test_transfplist()
         char *  c_to_f_read = static_cast<char *>(HDmalloc(tran_len + 1));
         HDmemset(c_to_f_read, 0, tran_len + 1);
         dxpl_c_to_f_copy.getDataTransform(c_to_f_read, tran_len + 1);
-        verify_val(const_cast<const char *>(c_to_f_read), const_cast<const char *>(c_to_f), "DSetMemXferPropList::getDataTransform",
-                   __LINE__, __FILE__);
+        verify_val(const_cast<const char *>(c_to_f_read), const_cast<const char *>(c_to_f),
+                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
         HDfree(c_to_f_read);
 
         //
@@ -79,8 +79,8 @@ test_transfplist()
         c_to_f_read = static_cast<char *>(HDmalloc(tran_len + 1));
         HDmemset(c_to_f_read, 0, tran_len + 1);
         dxpl_c_to_f.getDataTransform(c_to_f_read, tran_len + 1);
-        verify_val(const_cast<const char *>(c_to_f_read), const_cast<const char *>(c_to_f), "DSetMemXferPropList::getDataTransform",
-                   __LINE__, __FILE__);
+        verify_val(const_cast<const char *>(c_to_f_read), const_cast<const char *>(c_to_f),
+                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
         HDfree(c_to_f_read);
 
         // Get and verify the expression with:

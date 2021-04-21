@@ -76,7 +76,8 @@ DataType::DataType(const hid_t existing_id) : H5Object(), id(existing_id), encod
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType(const H5T_class_t type_class, size_t size) : H5Object(), id(H5Tcreate(type_class, size)), encoded_buf(NULL), buf_size(0)
+DataType::DataType(const H5T_class_t type_class, size_t size)
+    : H5Object(), id(H5Tcreate(type_class, size)), encoded_buf(NULL), buf_size(0)
 {
     if (id < 0) {
         throw DataTypeIException("DataType constructor", "H5Tcreate failed");
@@ -95,7 +96,9 @@ DataType::DataType(const H5T_class_t type_class, size_t size) : H5Object(), id(H
 // Programmer   Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
 DataType::DataType(const H5Location &loc, const void *ref, H5R_type_t ref_type, const PropList &plist)
-    : H5Object(), id(H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference")), encoded_buf(NULL), buf_size(0)
+    : H5Object(),
+      id(H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference")),
+      encoded_buf(NULL), buf_size(0)
 {
 }
 
@@ -143,7 +146,8 @@ DataType::DataType(const DataType &original) : H5Object(), id(original.id), enco
 //              unnecessarily and will produce undefined behavior.
 //              -BMR, Apr 2015
 //--------------------------------------------------------------------------
-DataType::DataType(const PredType &pred_type) : H5Object(), id(H5Tcopy(pred_type.getId())), encoded_buf(NULL), buf_size(0)
+DataType::DataType(const PredType &pred_type)
+    : H5Object(), id(H5Tcopy(pred_type.getId())), encoded_buf(NULL), buf_size(0)
 {
     if (id < 0)
         throw DataTypeIException("DataType constructor", "H5Tcopy failed");
@@ -163,7 +167,8 @@ DataType::DataType(const PredType &pred_type) : H5Object(), id(H5Tcopy(pred_type
 //              improve usability.
 //              -BMR, Dec 2016
 //--------------------------------------------------------------------------
-DataType::DataType(const H5Location &loc, const char *dtype_name) : H5Object(), id(p_opentype(loc, dtype_name)), encoded_buf(NULL), buf_size(0)
+DataType::DataType(const H5Location &loc, const char *dtype_name)
+    : H5Object(), id(p_opentype(loc, dtype_name)), encoded_buf(NULL), buf_size(0)
 {
 }
 

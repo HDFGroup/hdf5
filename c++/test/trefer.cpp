@@ -268,22 +268,26 @@ test_reference_obj()
         // Create reference to dataset and test getRefObjType
         file1->reference(&wbuf[0], "/Group1/Dataset1");
         H5O_type_t refobj_type = dataset.getRefObjType(&wbuf[0], H5R_OBJECT);
-        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_DATASET), "DataSet::getRefObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_DATASET),
+                   "DataSet::getRefObjType", __LINE__, __FILE__);
 
         // Create reference to dataset and test getRefObjType
         file1->reference(&wbuf[1], "/Group1/Dataset2");
         refobj_type = dataset.getRefObjType(&wbuf[1], H5R_OBJECT);
-        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_DATASET), "DataSet::getRefObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_DATASET),
+                   "DataSet::getRefObjType", __LINE__, __FILE__);
 
         // Create reference to group
         file1->reference(&wbuf[2], "/Group1");
         refobj_type = dataset.getRefObjType(&wbuf[2], H5R_OBJECT);
-        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_GROUP), "DataSet::getRefObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_GROUP),
+                   "DataSet::getRefObjType", __LINE__, __FILE__);
 
         // Create reference to named datatype
         file1->reference(&wbuf[3], "/Group1/Datatype1");
         refobj_type = dataset.getRefObjType(&wbuf[3], H5R_OBJECT);
-        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_NAMED_DATATYPE), "DataSet::getRefObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_NAMED_DATATYPE),
+                   "DataSet::getRefObjType", __LINE__, __FILE__);
 
         // Write selection to disk
         dataset.write(wbuf, PredType::STD_REF_OBJ);
@@ -315,7 +319,8 @@ test_reference_obj()
         dset2.read(tbuf, PredType::NATIVE_UINT);
 
         for (tu32 = reinterpret_cast<unsigned *>(tbuf), i = 0; i < SPACE1_DIM1; i++, tu32++)
-            verify_val(*tu32, static_cast<uint32_t>(i * 3), "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+            verify_val(*tu32, static_cast<uint32_t>(i * 3), "DataSpace::getSimpleExtentNpoints", __LINE__,
+                       __FILE__);
 
         // Close dereferenced dataset
         dset2.close();
@@ -353,7 +358,8 @@ test_reference_obj()
         H5T_class_t tclass;
 
         tclass = dtype1.getClass();
-        verify_val(static_cast<long>(tclass), static_cast<long>(H5T_COMPOUND), "DataType::getClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(tclass), static_cast<long>(H5T_COMPOUND), "DataType::getClass", __LINE__,
+                   __FILE__);
         int n_members = dtype1.getNmembers();
         verify_val(n_members, 3, "CompType::getNmembers", __LINE__, __FILE__);
 
@@ -486,7 +492,8 @@ test_reference_group()
         H5O_info2_t oinfo;
         HDmemset(&oinfo, 0, sizeof(oinfo));
         group.getObjinfo(".", H5_INDEX_NAME, H5_ITER_INC, 0, oinfo);
-        verify_val(static_cast<long>(oinfo.type), static_cast<long>(H5O_TYPE_DATASET), "Group::getObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(oinfo.type), static_cast<long>(H5O_TYPE_DATASET), "Group::getObjinfo",
+                   __LINE__, __FILE__);
 
         // Check for out of bound query by index
         try {
@@ -607,7 +614,8 @@ test_reference_region_1D()
 
         // Get and verify object type
         H5O_type_t obj_type = dset1.getRefObjType(&wbuf[0], H5R_DATASET_REGION);
-        verify_val(static_cast<long>(obj_type), static_cast<long>(H5O_TYPE_DATASET), "DataSet::getRefObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(obj_type), static_cast<long>(H5O_TYPE_DATASET), "DataSet::getRefObjType",
+                   __LINE__, __FILE__);
 
         /* Select sequence of ten points for second reference */
         coord1[0][0] = 16;
@@ -658,12 +666,14 @@ test_reference_region_1D()
 
             // Get and verify object type
             obj_type = dset1.getRefObjType(&rbuf[0], H5R_DATASET_REGION);
-            verify_val(static_cast<long>(obj_type), static_cast<long>(H5O_TYPE_DATASET), "DataSet::getRefObjType", __LINE__, __FILE__);
+            verify_val(static_cast<long>(obj_type), static_cast<long>(H5O_TYPE_DATASET),
+                       "DataSet::getRefObjType", __LINE__, __FILE__);
 
             // Get dataspace of dset3 the verify number of elements
             sid1  = dset3.getSpace();
             nelms = sid1.getSimpleExtentNpoints();
-            verify_val(static_cast<long>(nelms), 100, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+            verify_val(static_cast<long>(nelms), 100, "DataSpace::getSimpleExtentNpoints", __LINE__,
+                       __FILE__);
         } // End of test DataSet::dereference
 
         { // Test DataSet constructor -by dereference
@@ -674,7 +684,8 @@ test_reference_region_1D()
             // Get dataspace of newds then verify number of elements
             sid1  = newds.getSpace();
             nelms = sid1.getSimpleExtentNpoints();
-            verify_val(static_cast<long>(nelms), 100, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+            verify_val(static_cast<long>(nelms), 100, "DataSpace::getSimpleExtentNpoints", __LINE__,
+                       __FILE__);
 
             // Close objects for this mini test
             newds.close();
@@ -685,7 +696,8 @@ test_reference_region_1D()
         dset3.read(drbuf, PredType::STD_U8LE);
 
         for (tu8 = const_cast<uint8_t *>(drbuf), i = 0; i < SPACE3_DIM1; i++, tu8++)
-            verify_val(*tu8, static_cast<uint8_t>(i), "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+            verify_val(*tu8, static_cast<uint8_t>(i), "DataSpace::getSimpleExtentNpoints", __LINE__,
+                       __FILE__);
 
         /*
          * Test getting the referenced region

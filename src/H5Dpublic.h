@@ -35,7 +35,7 @@
 #define H5D_CHUNK_CACHE_NSLOTS_DEFAULT static_cast<size_t>(-1)
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT static_cast<size_t>(-1)
 #endif
-#define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0f)
+#define H5D_CHUNK_CACHE_W0_DEFAULT (-1.0f)
 
 /* Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts() */
 #define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS (0x0002u)

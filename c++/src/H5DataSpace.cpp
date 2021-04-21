@@ -104,7 +104,8 @@ DataSpace::DataSpace(H5S_class_t type) : IdComponent(), id(H5Screate(type))
 ///\exception   H5::DataSpaceIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace(int rank, const hsize_t *dims, const hsize_t *maxdims) : IdComponent(), id(H5Screate_simple(rank, dims, maxdims))
+DataSpace::DataSpace(int rank, const hsize_t *dims, const hsize_t *maxdims)
+    : IdComponent(), id(H5Screate_simple(rank, dims, maxdims))
 {
     if (id < 0) {
         throw DataSpaceIException("DataSpace constructor", "H5Screate_simple failed");

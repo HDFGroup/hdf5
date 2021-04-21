@@ -372,7 +372,8 @@ test_vlstrings_special()
             size_t rlen = HDstrlen(rdata[ii]);
             if (wlen != rlen) {
                 TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n",
-                              static_cast<int>(ii), static_cast<unsigned>(wlen), static_cast<int>(ii), static_cast<unsigned>(rlen));
+                              static_cast<int>(ii), static_cast<unsigned>(wlen), static_cast<int>(ii),
+                              static_cast<unsigned>(rlen));
                 continue;
             }
             if (HDstrcmp(wdata[ii], rdata[ii]) != 0) {
@@ -467,22 +468,26 @@ test_vlstring_type()
         // Change padding and verify it.
         vlst.setStrpad(H5T_STR_NULLPAD);
         H5T_str_t pad = vlst.getStrpad();
-        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__, __FILE__);
+        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__,
+                   __FILE__);
 
         // Convert to variable-length string.
         vlst.setSize(H5T_VARIABLE);
 
         // Check if datatype is VL string.
         H5T_class_t type_class = vlst.getClass();
-        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_STRING), "DataType::getClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_STRING), "DataType::getClass",
+                   __LINE__, __FILE__);
         bool is_variable_str = vlst.isVariableStr();
         verify_val(is_variable_str, true, "DataType::isVariableStr", __LINE__, __FILE__);
 
         // Check default character set and padding.
         H5T_cset_t cset = vlst.getCset();
-        verify_val(static_cast<long>(cset), static_cast<long>(H5T_CSET_ASCII), "StrType::getCset", __LINE__, __FILE__);
+        verify_val(static_cast<long>(cset), static_cast<long>(H5T_CSET_ASCII), "StrType::getCset", __LINE__,
+                   __FILE__);
         pad = vlst.getStrpad();
-        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__, __FILE__);
+        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__,
+                   __FILE__);
 
         // Commit variable-length string datatype to storage.
         vlst.commit(*file1, VLSTR_TYPE);
@@ -510,9 +515,11 @@ test_vlstring_type()
 
         // Verify character set and padding
         cset = vlst2.getCset();
-        verify_val(static_cast<long>(cset), static_cast<long>(H5T_CSET_ASCII), "StrType::getCset", __LINE__, __FILE__);
+        verify_val(static_cast<long>(cset), static_cast<long>(H5T_CSET_ASCII), "StrType::getCset", __LINE__,
+                   __FILE__);
         pad = vlst2.getStrpad();
-        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__, __FILE__);
+        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__,
+                   __FILE__);
 
         // Close datatype and file
         vlst2.close();
@@ -583,8 +590,8 @@ test_compact_vlstring()
                 continue;
             }
             if (HDstrcmp(wdata[i], rdata[i]) != 0) {
-                TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", static_cast<int>(i), wdata[i],
-                              static_cast<int>(i), rdata[i]);
+                TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
+                              static_cast<int>(i), wdata[i], static_cast<int>(i), rdata[i]);
                 continue;
             }
         }

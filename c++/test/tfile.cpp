@@ -153,7 +153,8 @@ test_file_create()
         FileCreatPropList tmpl1 = file1->getCreatePlist();
 
         hsize_t ublock = tmpl1.getUserblock();
-        verify_val(static_cast<long>(ublock), static_cast<long>(F1_USERBLOCK_SIZE), "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ublock), static_cast<long>(F1_USERBLOCK_SIZE),
+                   "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
         size_t parm1, parm2; // file-creation parameters
         tmpl1.getSizes(parm1, parm2);
@@ -208,8 +209,8 @@ test_file_create()
 
         // Get the file-creation parameters
         hsize_t ublock = tmpl1->getUserblock();
-        verify_val(static_cast<long>(ublock), static_cast<long>(F2_USERBLOCK_SIZE), "FileCreatPropList::getUserblock", __LINE__,
-                   __FILE__);
+        verify_val(static_cast<long>(ublock), static_cast<long>(F2_USERBLOCK_SIZE),
+                   "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
         size_t parm1, parm2; // file-creation parameters
         tmpl1->getSizes(parm1, parm2);
@@ -241,8 +242,8 @@ test_file_create()
 
         // Get the file-creation parameters
         ublock = tmpl1->getUserblock();
-        verify_val(static_cast<long>(ublock), static_cast<long>(F3_USERBLOCK_SIZE), "FileCreatPropList::getUserblock", __LINE__,
-                   __FILE__);
+        verify_val(static_cast<long>(ublock), static_cast<long>(F3_USERBLOCK_SIZE),
+                   "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
         tmpl1->getSizes(parm1, parm2);
         verify_val(parm1, F3_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
@@ -299,8 +300,8 @@ test_file_open()
 
         // Get the file-creation parameters
         hsize_t ublock = tmpl1.getUserblock();
-        verify_val(static_cast<long>(ublock), static_cast<long>(F2_USERBLOCK_SIZE), "FileCreatPropList::getUserblock", __LINE__,
-                   __FILE__);
+        verify_val(static_cast<long>(ublock), static_cast<long>(F2_USERBLOCK_SIZE),
+                   "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
         size_t parm1, parm2; // file-creation parameters
         tmpl1.getSizes(parm1, parm2);
@@ -644,7 +645,8 @@ test_file_attribute()
 
         // Get the class of a file attribute's datatype
         H5T_class_t atclass = fattr1.getTypeClass();
-        verify_val(static_cast<long>(atclass), static_cast<long>(H5T_FLOAT), "Attribute::getTypeClass()", __LINE__, __FILE__);
+        verify_val(static_cast<long>(atclass), static_cast<long>(H5T_FLOAT), "Attribute::getTypeClass()",
+                   __LINE__, __FILE__);
 
         // Get and verify the number of attributes attached to a file
         int n_attrs = file5.getNumAttrs();
@@ -909,7 +911,8 @@ test_file_info()
         fcpl.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);
 
         // Verify file space information.
-        verify_val(static_cast<long>(out_strategy), static_cast<long>(H5F_FSPACE_STRATEGY_FSM_AGGR), "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(out_strategy), static_cast<long>(H5F_FSPACE_STRATEGY_FSM_AGGR),
+                   "H5File::getFileInfo", __LINE__, __FILE__);
         verify_val(out_persist, FALSE, "H5File::getFileInfo", __LINE__, __FILE__);
         verify_val(static_cast<long>(out_threshold), 1, "H5File::getFileInfo", __LINE__, __FILE__);
 
@@ -985,7 +988,8 @@ test_file_info()
 
         // Get and verify the file space info from the creation property list */
         fcpl2.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);
-        verify_val(static_cast<long>(out_strategy), static_cast<long>(strategy), "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+        verify_val(static_cast<long>(out_strategy), static_cast<long>(strategy),
+                   "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
         verify_val(out_persist, persist, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
         verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
 

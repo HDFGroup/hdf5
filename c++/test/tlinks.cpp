@@ -201,7 +201,8 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Check that its character encoding is the default.
         linfo = file.getLinkInfo("/type");
-        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_ASCII), "Character encoding is not default", __LINE__, __FILE__);
+        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_ASCII),
+                   "Character encoding is not default", __LINE__, __FILE__);
 
         // Create a simple dataspace.
         dims[0] = H5L_DIM1;
@@ -214,7 +215,8 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Check that its character encoding is the default.
         linfo = file.getLinkInfo("/dataset");
-        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_ASCII), "Character encoding is not default", __LINE__, __FILE__);
+        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_ASCII),
+                   "Character encoding is not default", __LINE__, __FILE__);
 
         // Create a link creation property list with the UTF-8 character encoding.
         LinkCreatPropList lcpl;
@@ -226,7 +228,8 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Check that its character encoding is UTF-8.
         linfo = file.getLinkInfo(GROUP2NAME);
-        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_UTF8), "Character encoding is not UTF-8", __LINE__, __FILE__);
+        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_UTF8),
+                   "Character encoding is not UTF-8", __LINE__, __FILE__);
 
         PASSED();
     } // end of try block

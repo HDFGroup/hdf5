@@ -605,8 +605,8 @@ const int     STRING_LENGTH = 19; // including terminating NULL
 int
 TestHDFFV_9758()
 {
-    hid_t  strtype          = H5I_INVALID_HID;
-    hid_t  compound_type    = H5I_INVALID_HID;
+    hid_t  strtype       = H5I_INVALID_HID;
+    hid_t  compound_type = H5I_INVALID_HID;
     herr_t err;
     struct s1_t {
         int    a;

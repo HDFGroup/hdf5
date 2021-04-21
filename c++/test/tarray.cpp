@@ -83,7 +83,8 @@ test_array_compound_array()
         for (idxj = 0; idxj < ARRAY1_DIM1; idxj++) {
             wdata[idxi][idxj].i = static_cast<int>(idxi * 10 + idxj);
             for (idxk = 0; idxk < ARRAY1_DIM1; idxk++) {
-                float temp                = static_cast<float>(idxi) * 10.0F + static_cast<float>(idxj) * 2.5F + static_cast<float>(idxk);
+                float temp = static_cast<float>(idxi) * 10.0F + static_cast<float>(idxj) * 2.5F +
+                             static_cast<float>(idxk);
                 wdata[idxi][idxj].f[idxk] = temp;
             }
         } // end for
@@ -388,7 +389,8 @@ test_array_info()
         for (idxj = 0; idxj < ARRAY1_DIM1; idxj++) {
             wdata[idxi][idxj].i = static_cast<int>(idxi * 10 + idxj);
             for (idxk = 0; idxk < ARRAY1_DIM1; idxk++) {
-                float temp                = static_cast<float>(idxi) * 10.0F + static_cast<float>(idxj) * 2.5F + static_cast<float>(idxk);
+                float temp = static_cast<float>(idxi) * 10.0F + static_cast<float>(idxj) * 2.5F +
+                             static_cast<float>(idxk);
                 wdata[idxi][idxj].f[idxk] = temp;
             }
         } // end for

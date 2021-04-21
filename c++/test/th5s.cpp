@@ -263,7 +263,8 @@ test_h5s_scalar_write()
         // Verify extent type
         H5S_class_t ext_type; // Extent type
         ext_type = sid1.getSimpleExtentType();
-        verify_val(static_cast<long>(ext_type), static_cast<long>(H5S_SCALAR), "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ext_type), static_cast<long>(H5S_SCALAR),
+                   "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
 
         // Create and write a dataset
         DataSet dataset = fid1.createDataSet("Dataset1", PredType::NATIVE_UINT, sid1);

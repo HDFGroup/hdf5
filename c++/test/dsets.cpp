@@ -195,8 +195,8 @@ test_simple_io(H5File &file)
     SUBTEST("Simple I/O");
 
     auto points = new int[100][200];
-    auto check = new int[100][200]();
-    int i, j, n;
+    auto check  = new int[100][200]();
+    int  i, j, n;
 
     // Initialize the dataset
     for (i = n = 0; i < 100; i++) {
@@ -454,8 +454,8 @@ test_compression(H5File &file)
     const char *not_supported;
     not_supported = "    Deflate compression is not enabled.";
 #endif /* H5_HAVE_FILTER_DEFLATE */
-    auto points = new int[100][200];
-    auto check = new int[100][200]();
+    auto    points = new int[100][200];
+    auto    check  = new int[100][200]();
     hsize_t i, j, n;
 
     // Initialize the dataset
@@ -1299,7 +1299,8 @@ test_virtual()
 
         // Get the current layout, should be default, H5D_CONTIGUOUS
         H5D_layout_t layout = dcpl.getLayout();
-        verify_val(static_cast<long>(layout), static_cast<long>(H5D_CONTIGUOUS), "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(static_cast<long>(layout), static_cast<long>(H5D_CONTIGUOUS),
+                   "DSetCreatPropList::getLayout", __LINE__, __FILE__);
 
         // Create fixed mapping
         hsize_t dims[RANK];
@@ -1321,7 +1322,8 @@ test_virtual()
 
         // Get and verify the new layout
         layout = dcpl.getLayout();
-        verify_val(static_cast<long>(layout), static_cast<long>(H5D_VIRTUAL), "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(static_cast<long>(layout), static_cast<long>(H5D_VIRTUAL), "DSetCreatPropList::getLayout",
+                   __LINE__, __FILE__);
 
         PASSED();
         return 0;
