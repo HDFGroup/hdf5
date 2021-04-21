@@ -68,15 +68,37 @@ static void
 usage(const char *progname)
 {
     fprintf(stderr, "usage: %s [-S] [-a steps] [-b] [-c]\n"
-                "    [-n iterations] [-N] [-q] [-u numb_ticks]\n"
+                "    [-n iterations] [-N] [-q] [-u numb_ticks] [-A at_pattern]\n"
         "\n"
         "-S:             do not use VFD SWMR\n"
         "-a steps:       `steps` between adding attributes\n"
         "-b:             write data in big-endian byte order\n"
         "-c steps:       `steps` between communication between the writer and reader\n"
         "-n ngroups:     the number of groups\n"
-        "-N:             do not use named pipes, mainly for running the writer and reader seperately\n"
-        "-u numb_tcks:   `numb_ticks` for the reader to wait before verification\n"
+        "-N:             do not use named pipes, \n"
+        "                mainly for running the writer and reader seperately\n"
+        "-u numb_ticks:  `numb_ticks` for the reader to wait before verification\n"
+        "-A at_pattern:  `at_pattern' for different attribute tests\n"
+        "              The value of `at_pattern` is one of the following:\n"
+        "              `compact`              - Attributes added in compact storage\n"
+        "              `dense`                - An attribute added in dense storage\n"
+        "              `compact-to-dense`     - Attributes added first in compact\n"
+        "                                       then in dense storage\n"
+        "              `compact-del`          - Attributes added and then one\n"
+        "                                       attribute deleted, in compact \n"
+        "              `dense-del`            - Attributes added until the storage\n"
+        "                                       is dense then an attribute deleted\n"
+        "                                       the storge still in dense\n"
+        "              `dense-del-to-compact` - Attributes added until the storage\n" 
+        "                                       is dense, then several attributes \n"
+        "                                       deleted, the storage changed to\n"
+        "                                       compact\n"
+        "              `modify`               - An attribute added then modified\n"
+        "              `vstr`                 - A VL string attribute added\n"
+        "              `remove-vstr`          - A VL string attribute added then\n"
+        "                                       deleted\n"
+        "              `modify-vstr`          - A VL string attribute added then \n"
+        "                                       modified \n"
         "-q:             silence printouts, few messages\n"
         "\n",
             progname);
@@ -89,16 +111,6 @@ state_init(state_t *s, int argc, char **argv)
     unsigned long tmp;
     int           ch;
     const hsize_t dims = 1;
-
-#if 0
-    char tfile[PATH_MAX];
-    char *end;
-
-    *s = ALL_HID_INITIALIZER;
-    esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
-    esnprintf(s->progname, sizeof(s->progname), "%s", HDbasename(tfile));
-#endif
-
     char          *tfile = NULL;
     char *        end;
 
@@ -229,7 +241,18 @@ error:
     return false;
 }
 
-
+/* Named Pipe Subroutine: np_wr_send_receive
+ * Description:
+ *   The writer sends a message to the reader,  
+ *   then waits for max_lag ticks,
+ *   then checks the returned message from the reader. 
+ * Return:
+ *   True  if succeed
+ *   False if an error occurs in any step above. 
+ *         An error is mostly caused by an unexpected
+ *         notification number from the message sent 
+ *         by the reader.
+ */ 
 static bool np_wr_send_receive(state_t *s) {
 
     unsigned int i;
@@ -278,6 +301,18 @@ error:
 
 }
 
+/* Named Pipe Subroutine: np_rd_receive
+ * Description:
+ *   The reader receives a message from the writer,  
+ *   then checks if the notification number from
+ *   the writer is expected.
+ * Return:
+ *   True  if succeed
+ *   False if an error occurs in any step above. 
+ *         An error is mostly caused by an unexpected
+ *         notification number from the message sent 
+ *         by the writer.
+ */ 
 static bool np_rd_receive(state_t *s) {
 
     /* The writer should have bumped up the value of notify.
@@ -309,6 +344,13 @@ error:
     return false;
 }
 
+/* Named Pipe Subroutine: np_rd_send
+ * Description:
+ *   The reader sends an acknowledging message to the writer  
+ * Return:
+ *   True  if succeed
+ *   False if an error occurs in sending the message. 
+ */ 
 static bool np_rd_send(state_t *s) {
 
     if (HDwrite(s->np_fd_r_to_w, &(s->np_notify), sizeof(int)) < 0) {
@@ -320,6 +362,15 @@ static bool np_rd_send(state_t *s) {
         return true;
 }
 
+/* Named Pipe Subroutine: np_send_error
+ * Description:
+ *   An error (notification number is 1) message is sent 
+ *   either from the reader or the writer.
+ *   A boolean input parameter is used to choose
+ *   either reader or writer. 
+ * Return:
+ *     None
+ */
 static void np_send_error(state_t *s,bool writer) {
     s->np_notify = -1;
     if(writer) 
@@ -328,26 +379,55 @@ static void np_send_error(state_t *s,bool writer) {
         HDwrite(s->np_fd_r_to_w, &(s->np_notify), sizeof(int));
 }
 
-static bool 
-add_attr(state_t *s, hid_t oid,unsigned int which,unsigned num_attrs,const char*aname_fmt) {
+/*-------------------------------------------------------------------------
+ * Function:    add_attr
+ *
+ * Purpose:     Add attributes to a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t oid
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of groups generated so far, use to generate 
+ *              newly created group name. The group name is "group-which".
+ *
+ *              unsigned num_attrs
+ *              The number of attributes to be created
+ *
+ *              const char*aname_fmt
+ *              The attribute name template used to create unique attribute names.
+ *
+ *              unsigned int g_which
+ *              This parameter is used to generate correct group name in a key
+ *              debugging message.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ *-------------------------------------------------------------------------
+*/ 
 
-    //char attrname[sizeof("attr-d-9999999999-999")];
+static bool 
+add_attr(state_t *s, 
+         hid_t oid,
+         unsigned int which,
+         unsigned num_attrs,
+         const char*aname_fmt,
+         unsigned int g_which) {
+
     char attrname[VS_ATTR_NAME_LEN];
-    //char* attrname_base= "attr-%u-%u";
     unsigned u;
-    //int i;
     unsigned attr_value;
     hid_t aid = H5I_INVALID_HID;
     hid_t amtype = H5I_INVALID_HID;
     hid_t atype = s->filetype;
     hid_t sid = s->one_by_one_sid;
 
-// Just for debugging
-#if 0
-if(which == 1)
-    goto error;
-#endif
-
+    /* Need to obtain native datatype for H5Aread */
     if((amtype = H5Tget_native_type(atype,H5T_DIR_ASCEND)) <0) {
         H5_FAILED(); AT();
         printf("H5Tget_native_type failed\n");
@@ -357,8 +437,7 @@ if(which == 1)
     for (u = 0; u < num_attrs; u++) {
 
         /* Create attribute */
-        //HDsprintf(attrname, "attr-%u-%u", which,u);
-        //HDsprintf(attrname, attrname_base, which,u);
+        /* Construct attribute name like attr-0-0 */
         HDsprintf(attrname, aname_fmt, which,u);
         if((aid = H5Acreate2(oid, attrname, atype, sid, H5P_DEFAULT, 
             H5P_DEFAULT)) < 0) { 
@@ -373,7 +452,8 @@ if(which == 1)
         attr_value = u+which+1;
 #endif
 
-        dbgf(1, "setting attribute %s on group %u to %u\n", attrname, which, u+which);
+        dbgf(1, "setting attribute %s on group %u to %u\n", attrname, g_which, u+which);
+
         /* Write data into the attribute */
         if (H5Awrite(aid, amtype, &attr_value) < 0) {
             H5_FAILED(); AT();
@@ -388,11 +468,16 @@ if(which == 1)
             goto error;
         }
 
+        /* Writer sends a message to reader: an attribute is successfully generated. 
+           then wait for the reader to verify and send an acknowledgement message back.*/
         if (s->use_named_pipes && s->attr_test == true) {
-            dbgf(2, "writer: write attr - ready to send the message: %d\n", s->np_notify+1);
+            dbgf(2, "writer: write attr - ready to send/receive message: %d\n", s->np_notify+1);
             if(np_wr_send_receive(s) == false) {
                 H5_FAILED(); AT();
                 dbgf(2, "writer: write attr - verification failed.\n");
+                /* Note: This is (mostly) because the verification failure message
+                 *       from the reader. So don't send the error message back to
+                 *       the reader. Just stop the test. */
                 goto error2;
             }
         }
@@ -407,6 +492,7 @@ if(which == 1)
     return true;
 
 error:
+    /* Writer needs to send an error message to the reader to stop the test*/
     if(s->use_named_pipes && s->attr_test == true) 
         np_send_error(s,true);
 
@@ -416,7 +502,6 @@ error2:
         H5Tclose(amtype);
     } H5E_END_TRY;
 
-///dbgf(2, "writer: LEAVE FUNC: write attr - verification failed.\n");
     return false;
 
 }
@@ -598,7 +683,7 @@ add_default_group_attr(state_t *s, hid_t g, unsigned int which) {
 
     const char* aname_format ="attr-%u";
 
-    return add_attr(s,g,which,1,aname_format);
+    return add_attr(s,g,which,1,aname_format,which);
 
 }
 
@@ -872,7 +957,7 @@ add_attrs_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
     }
     
     /* Add attributes, until just before converting to dense storage */
-    return add_attr(s,g,which,max_compact,aname_format);
+    return add_attr(s,g,which,max_compact,aname_format,which);
 
 
 error:
@@ -898,7 +983,7 @@ add_attrs_compact_dense(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
 
     /* Add another attribute, the storage becomes dense. */
     if(ret_value == true) 
-        ret_value = add_attr(s,g,which+max_compact,1,aname_format);
+        ret_value = add_attr(s,g,which+max_compact,1,aname_format,which);
 
     return ret_value;
 
@@ -1290,7 +1375,7 @@ write_group(state_t *s, unsigned int which)
 
 
 static bool
-vrfy_attr(state_t *s, hid_t g, unsigned int which,  char* aname) {
+vrfy_attr(state_t *s, hid_t g, unsigned int which,  char* aname, unsigned int g_which) {
 
     unsigned int read_which;
     hid_t aid = H5I_INVALID_HID;
@@ -1310,7 +1395,7 @@ vrfy_attr(state_t *s, hid_t g, unsigned int which,  char* aname) {
         dbgf(1, "Reader: finish reading the message: %d\n",s->np_notify);
     }
 
-    dbgf(1, "verifying attribute %s on group %u equals %u\n", aname, which,
+    dbgf(1, "verifying attribute %s on group %u equals %u\n", aname, g_which,
         which);
 
 
@@ -1463,7 +1548,7 @@ verify_default_group_attr(state_t*s,hid_t g, unsigned int which)
     const char* aname_format = "attr-%u";
     //bool ret_value = false;
     HDsprintf(attrname, aname_format, which);
-    return vrfy_attr(s,g,which,attrname);
+    return vrfy_attr(s,g,which,attrname,which);
 
 }
 
@@ -1823,7 +1908,7 @@ verify_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
     for (u = 0; u < max_c; u++) {
 
         HDsprintf(attrname, aname_format, which,u);
-        if(false == vrfy_attr(s,g,u+which,attrname)) {
+        if(false == vrfy_attr(s,g,u+which,attrname,which)) {
             ret = false;
             break;
         }
@@ -1843,7 +1928,7 @@ verify_attrs_compact_dense(state_t *s, hid_t g, unsigned max_c, unsigned int whi
     if(ret == true) { 
         //HDsprintf(attrname, aname_format, which,0);
         HDsprintf(attrname, aname_format, max_c+which,0);
-        ret = vrfy_attr(s,g,which+max_c,attrname);
+        ret = vrfy_attr(s,g,which+max_c,attrname,which);
         if(ret == false) 
             dbgf(1,"verify_attrs_compact_dense failed \n");
     }
