@@ -49,6 +49,13 @@ New Features
 
     Configuration:
     -------------
+    - CMake no longer builds the C++ library by default
+
+      HDF5_BUILD_CPP_LIB now defaults to OFF, which is in line with the
+      Autotools build defaults.
+
+      (DER - 2021/04/20)
+
     - Removal of pre-VS2015 work-arounds
 
       HDF5 now requires Visual Studio 2015 or greater, so old work-around
