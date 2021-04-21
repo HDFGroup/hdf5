@@ -245,40 +245,37 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t H5_ATTR_UNUSED dxpl_id,
-                      void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                      void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (get_type) {
+    switch (args->op_type) {
         /* H5Aget_space */
         case H5VL_ATTR_GET_SPACE: {
-            hid_t *ret_id = HDva_arg(arguments, hid_t *);
             H5A_t *attr   = (H5A_t *)obj;
 
-            if ((*ret_id = H5A_get_space(attr)) < 0)
+            if ((args->args.get_space.space_id = H5A_get_space(attr)) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get space ID of attribute")
             break;
         }
 
         /* H5Aget_type */
         case H5VL_ATTR_GET_TYPE: {
-            hid_t *ret_id = HDva_arg(arguments, hid_t *);
             H5A_t *attr   = (H5A_t *)obj;
 
-            if ((*ret_id = H5A__get_type(attr)) < 0)
+            if ((args->args.get_type.type_id = H5A__get_type(attr)) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of attribute")
             break;
         }
 
         /* H5Aget_create_plist */
         case H5VL_ATTR_GET_ACPL: {
-            hid_t *ret_id = HDva_arg(arguments, hid_t *);
             H5A_t *attr   = (H5A_t *)obj;
 
-            if ((*ret_id = H5A__get_create_plist(attr)) < 0)
+            if ((args->args.get_acpl.acpl_id = H5A__get_create_plist(attr)) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get creation property list for attr")
 
             break;
@@ -286,40 +283,37 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t H5_ATTR_UNUSED 
 
         /* H5Aget_name */
         case H5VL_ATTR_GET_NAME: {
-            const H5VL_loc_params_t *loc_params = HDva_arg(arguments, const H5VL_loc_params_t *);
-            size_t                   buf_size   = HDva_arg(arguments, size_t);
-            char *                   buf        = HDva_arg(arguments, char *);
-            ssize_t *                ret_val    = HDva_arg(arguments, ssize_t *);
+            H5VL_attr_get_name_args_t *get_name_args = &args->args.get_name;
             H5A_t *                  attr       = NULL;
 
-            if (H5VL_OBJECT_BY_SELF == loc_params->type) {
+            if (H5VL_OBJECT_BY_SELF == get_name_args->loc_params.type) {
                 attr = (H5A_t *)obj;
                 /* Call private function in turn */
-                if (0 > (*ret_val = H5A__get_name(attr, buf_size, buf)))
+                if (0 > (get_name_args->attr_name_len = H5A__get_name(attr, get_name_args->buf_size, get_name_args->buf)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
             }
-            else if (H5VL_OBJECT_BY_IDX == loc_params->type) {
+            else if (H5VL_OBJECT_BY_IDX == get_name_args->loc_params.type) {
                 H5G_loc_t loc;
 
                 /* check arguments */
-                if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
+                if (H5G_loc_real(obj, get_name_args->loc_params.obj_type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Open the attribute on the object header */
-                if (NULL == (attr = H5A__open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name,
-                                                     loc_params->loc_data.loc_by_idx.idx_type,
-                                                     loc_params->loc_data.loc_by_idx.order,
-                                                     loc_params->loc_data.loc_by_idx.n)))
+                if (NULL == (attr = H5A__open_by_idx(&loc, get_name_args->loc_params.loc_data.loc_by_idx.name,
+                                                     get_name_args->loc_params.loc_data.loc_by_idx.idx_type,
+                                                     get_name_args->loc_params.loc_data.loc_by_idx.order,
+                                                     get_name_args->loc_params.loc_data.loc_by_idx.n)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
                 /* Get the length of the name */
-                *ret_val = (ssize_t)HDstrlen(attr->shared->name);
+                get_name_args->attr_name_len = (ssize_t)HDstrlen(attr->shared->name);
 
                 /* Copy the name into the user's buffer, if given */
-                if (buf) {
-                    HDstrncpy(buf, attr->shared->name, MIN((size_t)(*ret_val + 1), buf_size));
-                    if ((size_t)(*ret_val) >= buf_size)
-                        buf[buf_size - 1] = '\0';
+                if (get_name_args->buf) {
+                    HDstrncpy(get_name_args->buf, attr->shared->name, MIN((size_t)(get_name_args->attr_name_len + 1), get_name_args->buf_size));
+                    if ((size_t)(get_name_args->attr_name_len) >= get_name_args->buf_size)
+                        get_name_args->buf[get_name_args->buf_size - 1] = '\0';
                 } /* end if */
 
                 /* Release resources */
@@ -334,52 +328,50 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t H5_ATTR_UNUSED 
 
         /* H5Aget_info */
         case H5VL_ATTR_GET_INFO: {
-            const H5VL_loc_params_t *loc_params = HDva_arg(arguments, const H5VL_loc_params_t *);
-            H5A_info_t *             ainfo      = HDva_arg(arguments, H5A_info_t *);
+            H5VL_attr_get_info_args_t *get_info_args = &args->args.get_info;
             H5A_t *                  attr       = NULL;
 
-            if (H5VL_OBJECT_BY_SELF == loc_params->type) {
+            if (H5VL_OBJECT_BY_SELF == get_info_args->loc_params.type) {
                 attr = (H5A_t *)obj;
-                if (H5A__get_info(attr, ainfo) < 0)
+                if (H5A__get_info(attr, get_info_args->ainfo) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get attribute info")
             }
-            else if (H5VL_OBJECT_BY_NAME == loc_params->type) {
-                char *    attr_name = HDva_arg(arguments, char *);
+            else if (H5VL_OBJECT_BY_NAME == get_info_args->loc_params.type) {
                 H5G_loc_t loc;
 
                 /* check arguments */
-                if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
+                if (H5G_loc_real(obj, get_info_args->loc_params.obj_type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Open the attribute on the object header */
                 if (NULL ==
-                    (attr = H5A__open_by_name(&loc, loc_params->loc_data.loc_by_name.name, attr_name)))
+                    (attr = H5A__open_by_name(&loc, get_info_args->loc_params.loc_data.loc_by_name.name, get_info_args->attr_name)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
                 /* Get the attribute information */
-                if (H5A__get_info(attr, ainfo) < 0)
+                if (H5A__get_info(attr, get_info_args->ainfo) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
                 /* Release resources */
                 if (attr && H5A__close(attr) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
             }
-            else if (H5VL_OBJECT_BY_IDX == loc_params->type) {
+            else if (H5VL_OBJECT_BY_IDX == get_info_args->loc_params.type) {
                 H5G_loc_t loc;
 
                 /* check arguments */
-                if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
+                if (H5G_loc_real(obj, get_info_args->loc_params.obj_type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Open the attribute on the object header */
-                if (NULL == (attr = H5A__open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name,
-                                                     loc_params->loc_data.loc_by_idx.idx_type,
-                                                     loc_params->loc_data.loc_by_idx.order,
-                                                     loc_params->loc_data.loc_by_idx.n)))
+                if (NULL == (attr = H5A__open_by_idx(&loc, get_info_args->loc_params.loc_data.loc_by_idx.name,
+                                                     get_info_args->loc_params.loc_data.loc_by_idx.idx_type,
+                                                     get_info_args->loc_params.loc_data.loc_by_idx.order,
+                                                     get_info_args->loc_params.loc_data.loc_by_idx.n)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
                 /* Get the attribute information */
-                if (H5A__get_info(attr, ainfo) < 0)
+                if (H5A__get_info(attr, get_info_args->ainfo) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
                 /* Release resources */
@@ -393,11 +385,10 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t H5_ATTR_UNUSED 
         }
 
         case H5VL_ATTR_GET_STORAGE_SIZE: {
-            hsize_t *ret  = HDva_arg(arguments, hsize_t *);
             H5A_t *  attr = (H5A_t *)obj;
 
-            /* Set return value */
-            *ret = attr->shared->data_size;
+            /* Set storage size */
+            args->args.get_storage_size.data_size = attr->shared->data_size;
             break;
         }
 

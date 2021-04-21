@@ -48,7 +48,51 @@
 /* Public Typedefs */
 /*******************/
 
-/* types for attribute GET callback */
+/* Types for different ways that objects are located in an HDF5 container */
+typedef enum H5VL_loc_type_t {
+    H5VL_OBJECT_BY_SELF,
+    H5VL_OBJECT_BY_NAME,
+    H5VL_OBJECT_BY_IDX,
+    H5VL_OBJECT_BY_TOKEN
+} H5VL_loc_type_t;
+
+typedef struct H5VL_loc_by_name {
+    const char *name;
+    hid_t       lapl_id;
+} H5VL_loc_by_name_t;
+
+typedef struct H5VL_loc_by_idx {
+    const char *    name;
+    H5_index_t      idx_type;
+    H5_iter_order_t order;
+    hsize_t         n;
+    hid_t           lapl_id;
+} H5VL_loc_by_idx_t;
+
+typedef struct H5VL_loc_by_token {
+    H5O_token_t *token;
+} H5VL_loc_by_token_t;
+
+/* Structure to hold parameters for object locations.
+ * Either: BY_SELF, BY_NAME, BY_IDX, BY_TOKEN
+ *
+ * Note: Leave loc_by_token as the first union member so we
+ *       can perform the simplest initialization of the struct
+ *       without raising warnings.
+ *
+ * Note: BY_SELF requires no union members.
+ */
+typedef struct H5VL_loc_params_t {
+    H5I_type_t      obj_type;
+    H5VL_loc_type_t type;
+    union {
+        H5VL_loc_by_token_t loc_by_token;
+        H5VL_loc_by_name_t  loc_by_name;
+        H5VL_loc_by_idx_t   loc_by_idx;
+    } loc_data;
+} H5VL_loc_params_t;
+
+/* Types for attribute 'get' operations */
 typedef enum H5VL_attr_get_t {
     H5VL_ATTR_GET_ACPL,         /* creation property list              */
     H5VL_ATTR_GET_INFO,         /* info                                */
@@ -57,6 +101,55 @@ typedef enum H5VL_attr_get_t {
     H5VL_ATTR_GET_STORAGE_SIZE, /* storage size                        */
     H5VL_ATTR_GET_TYPE          /* datatype                            */
 } H5VL_attr_get_t;
+
+/* Parameters for attribute 'get_name' operation */
+typedef struct H5VL_attr_get_name_args_t {
+    H5VL_loc_params_t loc_params;    /* Location parameters for object access */
+    size_t            buf_size;      /* Size of attribute name buffer */
+    char *            buf;           /* Buffer for attribute name */
+    ssize_t           attr_name_len; /* Actual length of attribute name */
+} H5VL_attr_get_name_args_t;
+
+/* Parameters for attribute 'get_info' operation */
+typedef struct H5VL_attr_get_info_args_t {
+    H5VL_loc_params_t loc_params; /* Location parameters for object access */
+    const char *attr_name;        /* Attribute name (for get_info_by_name) */
+    H5A_info_t *ainfo;            /* Attribute info */
+} H5VL_attr_get_info_args_t;
+
+/* Parameters for attribute 'get' operations */
+typedef struct H5VL_attr_get_args_t {
+    H5VL_attr_get_t op_type;    /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_ATTR_GET_ACPL */
+        struct {
+            hid_t acpl_id;      /* Attribute creation property list ID */
+        } get_acpl;
+
+        /* H5VL_ATTR_GET_INFO */
+        H5VL_attr_get_info_args_t get_info;     /* Attribute info */
+
+        /* H5VL_ATTR_GET_NAME */
+        H5VL_attr_get_name_args_t get_name;     /* Attribute name */
+
+        /* H5VL_ATTR_GET_SPACE */
+        struct {
+            hid_t space_id;     /* Dataspace ID */
+        } get_space;
+
+        /* H5VL_ATTR_GET_STORAGE_SIZE */
+        struct {
+            hsize_t data_size;  /* Size of attribute in file */
+        } get_storage_size;
+
+        /* H5VL_ATTR_GET_TYPE */
+        struct {
+            hid_t type_id;      /* Datatype ID */
+        } get_type;
+    } args;
+} H5VL_attr_get_args_t;
 
 /* types for attribute SPECFIC callback */
 typedef enum H5VL_attr_specific_t {
@@ -221,50 +314,6 @@ typedef enum H5VL_blob_specific_t {
 typedef int H5VL_blob_optional_t;
 /* (No optional blob VOL operations currently) */
 
-/* Types for different ways that objects are located in an HDF5 container */
-typedef enum H5VL_loc_type_t {
-    H5VL_OBJECT_BY_SELF,
-    H5VL_OBJECT_BY_NAME,
-    H5VL_OBJECT_BY_IDX,
-    H5VL_OBJECT_BY_TOKEN
-} H5VL_loc_type_t;
-
-typedef struct H5VL_loc_by_name {
-    const char *name;
-    hid_t       lapl_id;
-} H5VL_loc_by_name_t;
-
-typedef struct H5VL_loc_by_idx {
-    const char *    name;
-    H5_index_t      idx_type;
-    H5_iter_order_t order;
-    hsize_t         n;
-    hid_t           lapl_id;
-} H5VL_loc_by_idx_t;
-
-typedef struct H5VL_loc_by_token {
-    H5O_token_t *token;
-} H5VL_loc_by_token_t;
-
-/* Structure to hold parameters for object locations.
- * Either: BY_SELF, BY_NAME, BY_IDX, BY_TOKEN
- *
- * Note: Leave loc_by_token as the first union member so we
- *       can perform the simplest initialization of the struct
- *       without raising warnings.
- *
- * Note: BY_SELF requires no union members.
- */
-typedef struct H5VL_loc_params_t {
-    H5I_type_t      obj_type;
-    H5VL_loc_type_t type;
-    union {
-        H5VL_loc_by_token_t loc_by_token;
-        H5VL_loc_by_name_t  loc_by_name;
-        H5VL_loc_by_idx_t   loc_by_idx;
-    } loc_data;
-} H5VL_loc_params_t;
-
 /* Info for H5VL_FILE_GET_CONT_INFO */
 typedef struct H5VL_file_cont_info_t {
     unsigned version;       /* version information (keep first) */
@@ -307,7 +356,7 @@ typedef struct H5VL_attr_class_t {
                   hid_t dxpl_id, void **req);
     herr_t (*read)(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req);
     herr_t (*write)(void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*get)(void *obj, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_attr_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, H5VL_attr_optional_t opt_type, hid_t dxpl_id, void **req,
