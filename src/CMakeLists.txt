@@ -1065,7 +1065,7 @@ if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c")
         OUTPUT     gen_SRCS.stamp1
         COMMAND    ${HDF5_BATCH_CMD}
         ARGS       ${HDF5_BINARY_DIR}/${HDF5_BATCH_H5DETECT_SCRIPT}
-        BYPRODUCTS H5Tinit.c
+        BYPRODUCTS H5Tinit.c gen_SRCS.stamp1
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E echo "Executed batch command to create H5Tinit.c"
         COMMAND    ${CMAKE_COMMAND}
@@ -1081,7 +1081,7 @@ if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c")
     add_custom_command (TARGET H5detect POST_BUILD
         COMMAND    ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5detect>
         ARGS       H5Tinit.c
-        BYPRODUCTS H5Tinit.c
+        BYPRODUCTS H5Tinit.c gen_SRCS.stamp1
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E touch gen_SRCS.stamp1
         DEPENDS H5detect
@@ -1093,7 +1093,7 @@ if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c")
       add_custom_command (TARGET H5detect POST_BUILD
           COMMAND    ${CMAKE_COMMAND}
           ARGS       -E copy_if_different H5Tinit.c shared/H5Tinit.c
-          BYPRODUCTS shared/H5Tinit.c
+          BYPRODUCTS shared/H5Tinit.c shared/shared_gen_SRCS.stamp1
           COMMAND    ${CMAKE_COMMAND}
           ARGS       -E touch shared/shared_gen_SRCS.stamp1
           DEPENDS H5detect H5Tinit.c
@@ -1118,7 +1118,7 @@ else ()
         OUTPUT     shared/shared_gen_SRCS.stamp1
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different H5Tinit.c shared/H5Tinit.c
-        BYPRODUCTS shared/H5Tinit.c
+        BYPRODUCTS shared/H5Tinit.c shared/shared_gen_SRCS.stamp1
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E touch shared/shared_gen_SRCS.stamp1
         DEPENDS H5Tinit.c
@@ -1157,7 +1157,7 @@ endif ()
 add_custom_command (TARGET H5make_libsettings POST_BUILD
     COMMAND    ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5make_libsettings>
     ARGS       H5lib_settings.c
-    BYPRODUCTS H5lib_settings.c
+    BYPRODUCTS H5lib_settings.c gen_SRCS.stamp2
     COMMAND    ${CMAKE_COMMAND}
     ARGS       -E touch gen_SRCS.stamp2
     DEPENDS H5make_libsettings
@@ -1169,7 +1169,7 @@ if (BUILD_SHARED_LIBS)
   add_custom_command (TARGET H5make_libsettings POST_BUILD
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E copy_if_different H5lib_settings.c shared/H5lib_settings.c
-      BYPRODUCTS shared/H5lib_settings.c
+      BYPRODUCTS shared/H5lib_settings.c shared/shared_gen_SRCS.stamp2
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E touch shared/shared_gen_SRCS.stamp2
       DEPENDS H5make_libsettings H5lib_settings.c
