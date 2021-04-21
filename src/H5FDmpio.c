@@ -1618,7 +1618,6 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     HDassert((count == 0) || (sizes[0] != 0));
     HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
-
     /* sort the vector I/O request into increasing address order if required
      *
      * If the vector is already sorted, the base addresses of types, addrs, sizes,
@@ -1632,10 +1631,9 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                                 &s_sizes, &s_bufs) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
-
     /* Get the transfer mode from the API context
      *
-     * This flag is set to H5FD_MPIO_COLLECTIVE if the API call is 
+     * This flag is set to H5FD_MPIO_COLLECTIVE if the API call is
      * collective, and to H5FD_MPIO_INDEPENDENT if it is not.
      *
      * While this doesn't mean that we are actually about to do a collective
@@ -1713,14 +1711,13 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
                     HMPI_GOTO_ERROR(FAIL, "MPI_Get_address for s_bufs[] - mpi_bufs_base failed", mpi_code)
 
-                /*... and then subtract mpi_bufs_base_Aint from it. */
+                    /*... and then subtract mpi_bufs_base_Aint from it. */
 #if ((MPI_VERSION > 3) || ((MPI_VERSION == 3) && (MPI_SUBVERSION >= 1)))
                 mpi_bufs[i] = MPI_Aint_diff(mpi_bufs[i], mpi_bufs_base_Aint);
 #else
                 mpi_bufs[i] = mpi_bufs[i] - mpi_bufs_base_Aint;
 #endif
             }
-
 
             /* create the memory MPI derived types */
             if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_bufs,
@@ -1733,7 +1730,6 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&buf_type)))
 
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for buf_type failed", mpi_code)
-
 
             /* create the file MPI derived type */
             if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
@@ -1784,7 +1780,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
 
-        /* Read the data. */
+            /* Read the data. */
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_Debug[(int)'r'])
             HDfprintf(stdout, "%s: using MPIO collective mode\n", FUNC);
@@ -2023,7 +2019,6 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     HDassert((count == 0) || (sizes[0] != 0));
     HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
-
     /* Verify that no data is written when between MPI_Barrier()s during file flush */
 
     HDassert(!H5CX_get_mpi_file_flushing());
@@ -2041,10 +2036,9 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                                 &s_sizes, &s_bufs) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
-
     /* Get the transfer mode from the API context
      *
-     * This flag is set to H5FD_MPIO_COLLECTIVE if the API call is 
+     * This flag is set to H5FD_MPIO_COLLECTIVE if the API call is
      * collective, and to H5FD_MPIO_INDEPENDENT if it is not.
      *
      * While this doesn't mean that we are actually about to do a collective
@@ -2122,14 +2116,13 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 
                     HMPI_GOTO_ERROR(FAIL, "MPI_Get_address for s_bufs[] - mpi_bufs_base failed", mpi_code)
 
-                /*... and then subtract mpi_bufs_base_Aint from it. */
+                    /*... and then subtract mpi_bufs_base_Aint from it. */
 #if ((MPI_VERSION > 3) || ((MPI_VERSION == 3) && (MPI_SUBVERSION >= 1)))
                 mpi_bufs[i] = MPI_Aint_diff(mpi_bufs[i], mpi_bufs_base_Aint);
 #else
                 mpi_bufs[i] = mpi_bufs[i] - mpi_bufs_base_Aint;
 #endif
             }
-
 
             /* create the memory MPI derived types */
             if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_bufs,
@@ -2192,7 +2185,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
 
-        /* Write the data. */
+            /* Write the data. */
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_Debug[(int)'w'])
             HDfprintf(stdout, "%s: using MPIO collective mode\n", FUNC);

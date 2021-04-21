@@ -1540,7 +1540,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t t
             (*s_types_ptr)[j] = types[MIN(i, fixed_type_index)];
             (*s_addrs_ptr)[j] = addrs[i];
             (*s_sizes_ptr)[j] = sizes[MIN(i, fixed_size_index)];
-            (*s_bufs_ptr)[j] = bufs[i];
+            (*s_bufs_ptr)[j]  = bufs[i];
         }
     }
 
