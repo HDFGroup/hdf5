@@ -1461,6 +1461,7 @@ H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dx
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -7162,6 +7163,7 @@ H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE7("e", "*x*#iVyixx", obj, loc_params, connector_id, opt_type, dxpl_id, req, arguments);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -7199,7 +7201,7 @@ H5VLobject_optional_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t
     herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xiVyix", obj, connector_id, opt_type, dxpl_id, req);
+    H5TRACE6("e", "*x*#iVyix", obj, loc_params, connector_id, opt_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -7246,6 +7248,8 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
     herr_t            ret_value       = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*s*sIui*siVyii", app_file, app_func, app_line, loc_id, name, lapl_id, opt_type, dxpl_id,
+             es_id);
 
     /* Check arguments */
     /* name is verified in H5VL_setup_name_args() */
@@ -7273,7 +7277,7 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(FUNC, "*s*sIui*siVxii", app_file, app_func, app_line, loc_id, name, lapl_id, opt_type, dxpl_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(FUNC, "*s*sIui*siVyii", app_file, app_func, app_line, loc_id, name, lapl_id, opt_type, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
