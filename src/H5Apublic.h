@@ -126,8 +126,8 @@ H5_DLL herr_t H5Aclose(hid_t attr_id);
  *          The attribute identifier returned by this function must be released
  *          with H5Aclose() resource leaks will develop.
  *
- * \note The \p acpl and \p aapl parameters are currently not used; specify
- *       #H5P_DEFAULT.
+ * \note The \p aapl parameter is currently not used; specify #H5P_DEFAULT.
+ *
  * \note If \p loc_id is a file identifier, the attribute will be attached
  *       that file’s root group.
  *
