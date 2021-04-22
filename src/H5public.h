@@ -116,52 +116,109 @@ extern "C" {
  */
 #define H5_VERS_INFO "HDF5 library version: 1.13.0"
 
-/**
- * \todo Add missing documentation
- */
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
 /* macros for comparing the version */
 /**
- * \todo Add missing documentation
+ * \brief Determines whether the version of the library being used is greater
+ *        than or equal to the specified version
+ *
+ * \param[in] Maj Major version number - A non-negative integer value
+ * \param[in] Min Minor version number - A non-negative integer value
+ * \param[in] Rel Release version number - A non-negative integer value
+ * \returns A value of 1 is returned if the library version is greater than
+ *          or equal to the version number specified.\n
+ *          A value of 0 is returned if the library version is less than the
+ *          version number specified.\n
+ *          A library version is greater than the specified version number if
+ *          its major version is larger than the specified major version
+ *          number. If the major version numbers are the same, it is greater
+ *          than the specified version number if its minor version is larger
+ *          than the specified minor version number. If the minor version
+ *          numbers are the same, then a library version would be greater than
+ *          the specified version number if its release number is larger than
+ *          the specified release number.
+ *
+ * \details The #H5_VERSION_GE and #H5_VERSION_LE macros are used at compile
+ *          time to conditionally include or exclude code based on the version
+ *          of the HDF5 library against which an application will be linked.
+ *
+ *          The #H5_VERSION_GE macro compares the version of the HDF5 library
+ *          being used against the version number specified in the parameters.
+ *
+ *          For more information about release versioning, see \ref_h5lib_relver.
+ *
+ * \since 1.8.7
+ *
  */
 #define H5_VERSION_GE(Maj, Min, Rel)                                                                         \
     (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE >= Rel)) ||                       \
      ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR > Min)) || (H5_VERS_MAJOR > Maj))
 
 /**
- * \todo Add missing documentation
+ * \brief Determines whether the version of the library being used is less
+ *        than or equal to the specified version
+ *
+ * \param[in] Maj Major version number - A non-negative integer value
+ * \param[in] Min Minor version number - A non-negative integer value
+ * \param[in] Rel Release version number - A non-negative integer value
+ * \returns A value of 1 is returned if the library version is less than
+ *          or equal to the version number specified.\n
+ *          A value of 0 is returned if the library version is greater than the
+ *          version number specified.\n
+ *          A library version is less than the specified version number if
+ *          its major version is smaller than the specified major version
+ *          number. If the major version numbers are the same, it is smaller
+ *          than the specified version number if its minor version is smaller
+ *          than the specified minor version number. If the minor version
+ *          numbers are the same, then a library version would be smaller than
+ *          the specified version number if its release number is smaller than
+ *          the specified release number.
+ *
+ * \details The #H5_VERSION_GE and #H5_VERSION_LE macros are used at compile
+ *          time to conditionally include or exclude code based on the version
+ *          of the HDF5 library against which an application will be linked.
+ *
+ *          The #H5_VERSION_LE macro compares the version of the HDF5 library
+ *          being used against the version number specified in the parameters.
+ *
+ *          For more information about release versioning, see \ref_h5lib_relver.
+ *
+ * \since 1.8.7
+ *
  */
 #define H5_VERSION_LE(Maj, Min, Rel)                                                                         \
     (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) ||                       \
      ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
 
-/*
+/**
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
  * zero for failure) while successful return is non-negative (often zero).
  * The negative failure value is most commonly -1, but don't bet on it.  The
  * proper way to detect failure is something like:
- *
- *  if((dset = H5Dopen2(file, name)) < 0)
- *      fprintf(stderr, "unable to open the requested dataset\n");
+ * \code
+ * if((dset = H5Dopen2(file, name)) < 0)
+ *    fprintf(stderr, "unable to open the requested dataset\n");
+ * \endcode
  */
 typedef int herr_t;
 
-/*
+/**
  * Boolean type.  Successful return values are zero (false) or positive
  * (true). The typical true value is 1 but don't bet on it.  Boolean
- * functions cannot fail.  Functions that return `htri_t' however return zero
+ * functions cannot fail.  Functions that return #htri_t however return zero
  * (false), positive (true), or negative (failure). The proper way to test
- * for truth from a htri_t function is:
- *
- *  if ((retval = H5Tcommitted(type)) > 0) {
- *      printf("data type is committed\n");
- *  } else if (!retval) {
- *      printf("data type is not committed\n");
- *  } else {
- *      printf("error determining whether data type is committed\n");
- *  }
+ * for truth from a #htri_t function is:
+ * \code
+ * if ((retval = H5Tcommitted(type)) > 0) {
+ *     printf("data type is committed\n");
+ * } else if (!retval) {
+ *     printf("data type is not committed\n");
+ * } else {
+ *     printf("error determining whether data type is committed\n");
+ * }
+ * \endcode
  */
 #ifdef H5_HAVE_STDBOOL_H
 #include <stdbool.h>

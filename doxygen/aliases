@@ -231,6 +231,7 @@ ALIASES += ref_dld_filters="<a href=\"https://portal.hdfgroup.org/display/HDF5/H
 ALIASES += ref_file_image_ops="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations\">HDF5 File Image Operations</a>"
 ALIASES += ref_filter_pipe="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+Data+Flow+Pipeline+for+H5Dread\">Data Flow Pipeline for H5Dread()</a>"
 ALIASES += ref_group_impls="<a href\"https://portal.hdfgroup.org/display/HDF5/Groups\">Group implementations in HDF5<a>"
+ALIASES += ref_h5lib_relver="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+Library+Release+Version+Numbers\">HDF5 Library Release Version Numbers</a>"
 ALIASES += ref_mdc_in_hdf5="<a href=\"https://portal.hdfgroup.org/display/HDF5/Metadata+Caching+in+HDF5\">Metadata Caching in HDF5</a>"
 ALIASES += ref_mdc_logging="<a href=\"https://portal.hdfgroup.org/display/HDF5/H5F_START_MDC_LOGGING\">Metadata Cache Logging</a>"
 ALIASES += ref_news_112="<a href=\"https://portal.hdfgroup.org/display/HDF5/New+Features+in+HDF5+Release+1.12\">New Features in HDF5 Release 1.12</a>"

@@ -451,9 +451,10 @@ H5_DLL herr_t H5Grefresh(hid_t group_id);
  *          Failure to release a group with this call will result in
  *          resource leaks.
  *
- * \since 1.0.0
+ * \par Example
+ * \snippet H5F_examples.c mount
  *
- * \version 1.4.0 Fortran function introduced in this release
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Gclose(hid_t group_id);
@@ -604,9 +605,13 @@ typedef struct H5G_stat_t {
  *          See H5Gcreate_anon() for a discussion of the differences between
  *          H5Gcreate1() and H5Gcreate_anon().
  *
- * \since 1.0.0
+ * \par Example
+ * \snippet H5F_examples.c mount
+ *
  * \version 1.8.0 Function H5Gcreate() renamed to H5Gcreate1() and deprecated
  *                in this release.
+ * \since 1.0.0
+ *
  */
 H5_DLL hid_t H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint);
 /**

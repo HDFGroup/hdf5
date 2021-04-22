@@ -27,18 +27,35 @@
  * Information struct for H5Aget_info() / H5Aget_info_by_idx()
  */
 typedef struct {
-    hbool_t           corder_valid; /* Indicate if creation order is valid */
-    H5O_msg_crt_idx_t corder;       /* Creation order                 */
-    H5T_cset_t        cset;         /* Character set of attribute name */
-    hsize_t           data_size;    /* Size of raw data		  */
+    hbool_t           corder_valid; /**< Indicate if creation order is valid */
+    H5O_msg_crt_idx_t corder;       /**< Creation order                 */
+    H5T_cset_t        cset;         /**< Character set of attribute name */
+    hsize_t           data_size;    /**< Size of raw data		  */
 } H5A_info_t;
 //! <!-- [H5A_info_t_snip] -->
 
+//! <!-- [H5A_operator2_t_snip] -->
 /**
- * Typedef for H5Aiterate2() callbacks
+ * Typedef for H5Aiterate2() / H5Aiterate_by_name() callbacks
+ * \param[in] location_id The identifier for the group, dataset
+ *            or named datatype being iterated over
+ * \param[in] attr_name The name of the current object attribute
+ * \param[in] ainfo The attribute’s info struct
+ * \param[in,out] op_data A pointer to the operator data passed in to
+ *                H5Aiterate2() or H5Aiterate_by_name()
+ * \returns The return values from an operator are:
+ *          \li Zero causes the iterator to continue, returning zero when
+ *              all attributes have been processed.
+ *          \li Positive causes the iterator to immediately return that
+ *              positive value, indicating short-circuit success. The
+ *              iterator can be restarted at the next attribute.
+ *          \li Negative causes the iterator to immediately return that value,
+ *              indicating failure. The iterator can be restarted at the next
+ *              attribute.
  */
 typedef herr_t (*H5A_operator2_t)(hid_t location_id /*in*/, const char *attr_name /*in*/,
                                   const H5A_info_t *ainfo /*in*/, void *op_data /*in,out*/);
+//! <!-- [H5A_operator2_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -668,30 +685,12 @@ H5_DLL hid_t H5Aget_type(hid_t attr_id);
  *          the value returned identifies the parameter to be operated on
  *          in the next step of the iteration.
  *
- *          The #H5A_operator2_t prototype for the \p op parameter is a
- *          user defined function where:
- *          The operation receives the location identifier for the group or
- *          dataset being iterated over, \p location_id; the name of the
- *          current object attribute, \p attr_name; the attribute’s info
- *          struct, \p ainfo; and a pointer to the operator data passed
- *          into H5Aiterate2(), \p op_data.
- *
- *          Valid return values from an operator and the resulting
- *          H5Aiterate2() and \p op behavior are as follows:
- *
- *          \li Zero causes the iterator to continue, returning zero when
- *              all attributes have been processed.
- *          \li A positive value causes the iterator to immediately return
- *              that positive value, indicating short-circuit success. The
- *              iterator can be restarted at the next attribute, as
- *              indicated by the return value of \p idx.
- *          \li A negative value causes the iterator to immediately return
- *              that value, indicating failure. The iterator can be
- *              restarted at the next attribute, as indicated by the return
- *              value of \p idx.
+ *          \p op is a user-defined function whose prototype is defined
+ *          as follows:
+ *          \snippet this H5A_operator2_t_snip
+ *          \click4more
  *
  * \note This function is also available through the H5Aiterate() macro.
- * \todo Add snippet for H5A_operator2_t
  *
  * \since 1.8.0
  *
@@ -760,13 +759,10 @@ H5_DLL herr_t H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t ord
  *          the value returned identifies the parameter to be operated on in
  *          the next step of the iteration.
  *
- *          The #H5A_operator2_t prototype for the \p op parameter is a
- *          user defined function where:
- *          The operation receives the location identifier for the group or
- *          dataset being iterated over, \p location_id; the name of the
- *          current object attribute, \p attr_name; the attribute’s info
- *          struct, \p ainfo; and a pointer to the operator data passed
- *          into H5Aiterate_by_name(), \p op_data.
+ *          \p op is a user-defined function whose prototype is defined
+ *          as follows:
+ *          \snippet this H5A_operator2_t_snip
+ *          \click4more
  *
  *          Valid return values from an operator and the resulting
  *          H5Aiterate_by_name() and \p op behavior are as follows:
@@ -786,7 +782,6 @@ H5_DLL herr_t H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t ord
  *          information regarding the properties of links required to access
  *          the object, \p obj_name.
  *
- * \todo Add snippet to show H5Aoperator2_t.
  * \since 1.8.0
  *
  */
@@ -1149,9 +1144,28 @@ H5_DLL herr_t H5Aclose_async(const char *app_file, const char *app_func, unsigne
 
 /* Typedefs */
 
-/* Typedef for H5Aiterate1() callbacks */
+//! <!-- [H5A_operator1_t_snip] -->
+/**
+ * \brief Typedef for H5Aiterate1() callbacks
+ *
+ * \param[in] location_id The identifier for the group, dataset
+ *            or named datatype being iterated over
+ * \param[in] attr_name The name of the current object attribute
+ * \param[in,out] operator_data A pointer to the operator data passed in to
+ *                H5Aiterate1()
+ * \returns The return values from an operator are:
+ *          \li Zero causes the iterator to continue, returning zero when
+ *              all attributes have been processed.
+ *          \li Positive causes the iterator to immediately return that
+ *              positive value, indicating short-circuit success. The
+ *              iterator can be restarted at the next attribute.
+ *          \li Negative causes the iterator to immediately return that value,
+ *              indicating failure. The iterator can be restarted at the next
+ *              attribute.
+ */
 typedef herr_t (*H5A_operator1_t)(hid_t location_id /*in*/, const char *attr_name /*in*/,
                                   void *operator_data /*in,out*/);
+//! <!-- [H5A_operator1_t_snip] -->
 
 /* Function prototypes */
 /* --------------------------------------------------------------------------*/
@@ -1227,8 +1241,6 @@ H5_DLL int H5Aget_num_attrs(hid_t loc_id);
  *
  * \brief Calls a user’s function for each attribute on an object
  *
- * \todo make prototype parameter match function (idx vs attr_num)
- *
  * \loc_id
  * \param[in,out] idx     Starting (in) and ending (out) attribute index
  * \param[in]     op      User's function to pass each attribute to
@@ -1250,29 +1262,12 @@ H5_DLL int H5Aget_num_attrs(hid_t loc_id);
  *          \p op, is returned in \p idx. If \p idx is the null pointer,
  *          then all attributes are processed.
  *
- *          The prototype for #H5A_operator1_t is a user defined function
- *          where:
- *          The operation receives the identifier for the group, dataset
- *          or named datatype being iterated over, \p loc_id, the name of
- *          the current object attribute, \p attr_name, and the pointer to
- *          the operator data passed in to H5Aiterate1(), \p op_data.
- *
- *          The return values from an operator are:
- *
- *          \li Zero causes the iterator to continue, returning zero when
- *              all attributes have been processed.
- *          \li Positive causes the iterator to immediately return that
- *              positive value, indicating short-circuit success. The
- *              iterator can be restarted at the next attribute.
- *          \li Negative causes the iterator to immediately return that value,
- *              indicating failure. The iterator can be restarted at the next
- *              attribute.
- *
- * \todo Add snippet to show H5A_operator1_t.
+ *          \p op is a user-defined function whose prototype is defined as follows:
+ *          \snippet this H5A_operator1_t_snip
+ *          \click4more
  *
  * \version 1.8.0 The function \p H5Aiterate was renamed to H5Aiterate1()
  *                and deprecated in this release.
- *
  * \since 1.0.0
  *
  */
