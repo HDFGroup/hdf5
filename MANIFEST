@@ -47,7 +47,6 @@
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
 
-./bin/COPYING
 ./bin/bbrelease       _DO_NOT_DISTRIBUTE_
 ./bin/buildhdf5
 ./bin/pkgscrpts/build_and_package_hdf5_binaries.sh  _DO_NOT_DISTRIBUTE_
@@ -116,7 +115,6 @@
 ./bin/batch/ray_ctestS.lsf.in.cmake
 ./bin/batch/raybsub
 
-./config/COPYING
 ./config/BlankForm
 ./config/apple
 ./config/cce-fflags
@@ -246,7 +244,6 @@
 #
 #------------------------------------------------------------------------------
 
-./fortran/COPYING
 ./fortran/Makefile.am
 ./fortran/Makefile.in
 
@@ -405,7 +402,6 @@
 #
 #------------------------------------------------------------------------------
 
-./c++/COPYING
 ./c++/Makefile.am
 ./c++/Makefile.in
 
@@ -541,7 +537,6 @@
 #
 #------------------------------------------------------------------------------
 
-./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
 ./release_docs/HISTORY-1_8.txt
 ./release_docs/INSTALL
@@ -560,7 +555,6 @@
 ./src/hdf5.lnt        _DO_NOT_DISTRIBUTE_
 ./src/hdf5-win.lnt      _DO_NOT_DISTRIBUTE_
 ./src/hdf5-lin.lnt      _DO_NOT_DISTRIBUTE_
-./src/COPYING
 ./src/H5.c
 ./src/H5checksum.c
 ./src/H5dbg.c
@@ -927,7 +921,6 @@
 ./src/libhdf5.settings.in
 ./src/H5win32defs.h
 
-./test/COPYING
 ./test/H5srcdir.h
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
@@ -1105,7 +1098,6 @@
 ./test/testfiles/error_test_2
 ./test/testfiles/links_env.out
 
-./testpar/COPYING
 ./testpar/Makefile.am
 ./testpar/Makefile.in
 ./testpar/t_cache.c
@@ -1130,7 +1122,6 @@
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 
-./tools/COPYING
 ./tools/Makefile.am
 ./tools/Makefile.in
 
@@ -2276,7 +2267,6 @@
 ./tools/testfiles/h5mkgrp_single_p.ls
 ./tools/testfiles/h5mkgrp_single_l.ls
 
-./tools/perform/COPYING
 ./tools/perform/Makefile.am
 ./tools/perform/Makefile.in
 ./tools/perform/build_h5perf_alone.sh
@@ -2300,7 +2290,6 @@
 ./tools/perform/zip_perf.c
 
 # high level libraries
-./hl/COPYING
 ./hl/Makefile.am
 ./hl/Makefile.in
 ./hl/examples/Makefile.am
@@ -2329,7 +2318,6 @@
 ./hl/examples/ptExampleFL.c
 ./hl/examples/run-hl-ex.sh
 ./hl/examples/run-hlc-ex.sh.in
-./hl/src/COPYING
 ./hl/src/Makefile.am
 ./hl/src/Makefile.in
 ./hl/src/H5DO.c
@@ -2356,7 +2344,6 @@
 ./hl/src/H5TBprivate.h
 ./hl/src/H5TBpublic.h
 ./hl/src/hdf5_hl.h
-./hl/test/COPYING
 ./hl/test/H5srcdir_str.h.in
 ./hl/test/Makefile.am
 ./hl/test/Makefile.in
@@ -2390,7 +2377,6 @@
 ./hl/test/usa.wri
 
 # tools
-./hl/tools/COPYING
 ./hl/tools/Makefile.am
 ./hl/tools/Makefile.in
 ./hl/tools/gif2h5/Makefile.am
@@ -2411,7 +2397,6 @@
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
 
 # hl fortran
-./hl/fortran/COPYING
 ./hl/fortran/Makefile.am
 ./hl/fortran/Makefile.in
 ./hl/fortran/examples/Makefile.am
@@ -2440,7 +2425,6 @@
 ./hl/fortran/test/tsttable.f90
 
 # hl c++
-./hl/c++/COPYING
 ./hl/c++/Makefile.am
 ./hl/c++/Makefile.in
 ./hl/c++/examples/Makefile.am
