@@ -57,9 +57,9 @@ macro (ADD_VFD_TEST vfdname resultcode)
           WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}/${vfdname}
       )
     endforeach ()
-    set_tests_properties (MPI_TEST_VFD-${vfdname}-pflush1 PROPERTIES WILL_FAIL "true")
+    set_tests_properties (MPI_TEST_VFD-${vfdname}-t_pflush1 PROPERTIES WILL_FAIL "true")
     #set_property (TEST MPI_TEST_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
-    set_tests_properties (MPI_TEST_VFD-${vfdname}-pflush2 PROPERTIES DEPENDS MPI_TEST_VFD-${vfdname}-pflush1)
+    set_tests_properties (MPI_TEST_VFD-${vfdname}-t_pflush2 PROPERTIES DEPENDS MPI_TEST_VFD-${vfdname}-t_pflush1)
   endif ()
 endmacro ()
 
