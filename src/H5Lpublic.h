@@ -201,8 +201,6 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name, const char 
  *
  * \return \herr_t
  *
- * \todo We need to get the location ID story straight!
- *
  * \details H5Lmove() moves a link within an HDF5 file. The original link,
  *          \p src_name, is removed from \p src_loc and the new link,
  *          \p dst_name, is inserted at dst_loc. This change is
@@ -321,8 +319,6 @@ H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc, const 
  *
  * \return \herr_t
  *
- * \todo We need to get the location ID story straight!
- *
  * \details H5Lcreate_hard() creates a new hard link to a pre-existing object
  *          in an HDF5 file.
  *
@@ -377,8 +373,6 @@ H5_DLL herr_t H5Lcreate_hard_async(const char *app_file, const char *app_func, u
  * \lapl_id
  *
  * \return \herr_t
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lcreate_soft() creates a new soft link to an object in an HDF5
  *          file.
@@ -450,8 +444,6 @@ H5_DLL herr_t H5Lcreate_soft_async(const char *app_file, const char *app_func, u
  *
  * \return \herr_t
  *
- * \todo We need to get the location ID story straight!
- *
  * \details H5Ldelete() removes the link specified by \p name from the location
  *          \p loc_id.
  *
@@ -499,8 +491,6 @@ H5_DLL herr_t H5Ldelete_async(const char *app_file, const char *app_func, unsign
  *
  * \return \herr_t
  *
- * \todo We need to get the location ID story straight!
- *
  * \details H5Ldelete_by_idx() removes the \Emph{n}-th link in a group
  *          according to the specified order, \p order, in the specified index,
  *          \p index.
@@ -535,8 +525,6 @@ H5_DLL herr_t H5Ldelete_by_idx_async(const char *app_file, const char *app_func,
  * \lapl_id
  *
  * \return \herr_t
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lget_val() returns tha value of link \p name. For smbolic links,
  *          this is the path to which the link points, including the null
@@ -595,8 +583,6 @@ H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size
  *
  * \return \herr_t
  *
- * \todo We need to get the location ID story straight!
- *
  * \details H5Lget_val_by_idx() retrieves the value of the \Emph{n}-th link in
  *          a group, according to the specified order, \p order, within an
  *          index, \p index.
@@ -649,8 +635,6 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  * \lapl_id
  *
  * \return \herr_t
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lexists() allows an application to determine whether the link \p
  *          name exists in the location specified by \p loc_id. The link may be
@@ -745,8 +729,6 @@ H5_DLL herr_t H5Lexists_async(const char *app_file, const char *app_func, unsign
  * \lapl_id
  *
  * \return \herr_t
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lget_info2() returns information about the specified link through
  *          the \p linfo argument.
@@ -854,8 +836,6 @@ H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo, h
  * \since 1.12.0
  *
  * \see H5Lget_info2()
- *
- * \todo Document H5Lget_info_by_idx()
  *
  */
 H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
@@ -1725,8 +1705,6 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
  *
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Lget_info2() or the macro H5Lget_info().
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lget_info1() returns information about the specified link through
  *          the \p linfo argument.

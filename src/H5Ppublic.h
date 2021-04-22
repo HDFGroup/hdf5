@@ -1974,9 +1974,6 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
  *
  * \brief Returns the number of filters in the pipeline
  *
- * \todo Signature for H5Pget_nfilters() is different in H5Pocpl.c than in
- *       H5Ppublic.h.
- *
  * \ocpl_id{plist_id}
  *
  * \return  Returns the number of filters in the pipeline if successful;
@@ -1985,8 +1982,8 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
  * \details H5Pget_nfilters() returns the number of filters defined in the
  *          filter pipeline associated with the property list \p plist_id.
  *
- *          In each pipeline, the filters are numbered from 0 through N-1,
- *          where N is the value returned by this function. During output to
+ *          In each pipeline, the filters are numbered from 0 through \Code{N-1},
+ *          where \c N is the value returned by this function. During output to
  *          the file, the filters are applied in increasing order; during
  *          input from the file, they are applied in decreasing order.
  *
@@ -8059,12 +8056,34 @@ H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intm
 /**
  * \ingroup GCPL
  *
- * \todo Add missing documentation
+ * \brief Returns the estimated link count and average link name length in a group
+ *
+ * \gcpl_id{plist_id}
+ * \param[out] est_num_entries The estimated number of links in the group
+ *             referenced by \p plist_id
+ * \param[out] est_name_len The estimated average length of line names in the group
+ *             referenced by \p plist_id
+ * \return \herr_t
+ *
+ * \details H5Pget_est_link_info() retrieves two settings from the group creation
+ *          property list \p plist_id: the estimated number of links that are
+ *          expected to be inserted into a group created with the property list
+ *          and the estimated average length of those link names.
+ *
+ *          The estimated number of links is returned in \p est_num_entries. The
+ *          limit for \p est_num_entries is 64 K.
+ *
+ *          The estimated average length of the anticipated link names is returned
+ *          in \p est_name_len. The limit for \p est_name_len is 64 K.
+ *
+ *          See \ref_group_impls for a discussion of the available types of HDF5
+ *          group structures.
+ *
+ * \since 1.8.0
  *
  */
 H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */,
                                    unsigned *est_name_len /* out */);
-
 /**
  * \ingroup GCPL
  *
@@ -8176,19 +8195,16 @@ H5_DLL herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*ou
  *          The values for these two settings are multiplied to compute the
  *          initial local heap size (for old-style groups, if the local heap
  *          size hint is not set) or the initial object header size for
- *          (new-style compact groups; see <a
- *          href="https://portal.hdfgroup.org/display/HDF5/Groups">Group
- *          implementations in HDF5</a>). Accurately setting these parameters
- *          will help reduce wasted file space.
+ *          (new-style compact groups; see \ref_group_impls). Accurately setting
+ *          these parameters will help reduce wasted file space.
  *
  *          If a group is expected to have many links and to be stored in dense
  *          format, set \p est_num_entries to 0 (zero) for maximum
  *          efficiency. This will prevent the group from being created in the
  *          compact format.
  *
- *          See <a href="https://portal.hdfgroup.org/display/HDF5/Groups">Group
- *          implementations in HDF5</a> in the H5G API introduction for a
- *          discussion of the available types of HDF5 group structures.
+ *          See \ref_group_impls for a discussion of the available types of HDF5
+ *          group structures.
  *
  * \since 1.8.0
  *
@@ -9510,6 +9526,9 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *va
  *
  * \return \herr_t
  *
+ * \deprecated  As of HDF5-1.12 this function has been deprecated in favor of
+ *              H5Pencode2() or the macro H5Pencode().
+ *
  * \details H5Pencode1() encodes the property list \p plist_id into the
  *          binary buffer \p buf.
  *
@@ -9530,10 +9549,7 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *va
  *          Some properties cannot be encoded, particularly properties that are
  *          reliant on local context.
  *
- *
  * \since 1.10.0
- * \deprecated  As of HDF5-1.12 this function has been deprecated in favor of
- *              H5Pencode2() or the macro H5Pencode().
  *
  */
 H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
@@ -9542,8 +9558,7 @@ H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
  *
  * \brief Returns information about a filter in a pipeline (DEPRECATED)
  *
- * \todo H5Pget_filter1() prototype does not match source in H5Pocpl.c.
- *       Also, it is not in a deprecated file. Is that okay?
+ *
  *
  * \plist_id{plist_id}
  * \param[in] filter        Sequence number within the filter pipeline of
@@ -9557,6 +9572,8 @@ H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
  *
  * \return Returns the filter identifier if successful;  Otherwise returns
  *         a negative value. See: #H5Z_filter_t
+ *
+ * \deprecated When was this function deprecated?
  *
  * \details H5Pget_filter1() returns information about a filter, specified
  *          by its filter number, in a filter pipeline, specified by the
@@ -9688,9 +9705,9 @@ H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsigned *f
  *
  * \return \herr_t
  *
+ * \deprecated When was this function deprecated?
+ *
  * \details Maps to the function H5Pset_file_space_strategy().
- * \todo The code is in H5Pdeprecate.c, need to figure out when it was
- *       released and when it was deprecated.
  *
  */
 H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
@@ -9706,10 +9723,10 @@ H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, 
  *
  *  \return \herr_t
  *
+ * \deprecated When was this function deprecated?
+ *
  * \details Maps to the function H5Pget_file_space_strategy()
  *
- * \todo The code is in H5Pdeprecate.c, need to figure out when it was released
- *       and when it was deprecated.
  *
  */
 H5_DLL herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
