@@ -62,7 +62,7 @@ if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # Setting for exhaustive run
     BIGSET_few_s=40
     BIGSET_many_s=1000
     GROUP_n=400
-    GROUP_attr_n=10
+    GROUP_attr_n=4
 elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # Setting for quick run
     BIGSET_n=10
     BIGSET_few_s=10
@@ -669,7 +669,6 @@ grp_attr_list=(
 grp_sub_attr_list=(
                 "dense-del-to-compact"
                 "modify"
-                "vstr"
                 "remove-vstr"
                 "modify-vstr"
                )
@@ -678,7 +677,6 @@ grp_short_sub_attr_list=(
                 "dense"
                 "compact-del"
                 "modify"
-                "vstr"
                 "remove-vstr"
                 "modify-vstr"
                )

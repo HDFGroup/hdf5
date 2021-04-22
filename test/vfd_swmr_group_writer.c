@@ -346,7 +346,7 @@ error:
 
 /* Named Pipe Subroutine: np_rd_send
  * Description:
- *   The reader sends an acknowledging message to the writer  
+ *   The reader sends an acknowledgement to the writer  
  * Return:
  *   True  if succeed
  *   False if an error occurs in sending the message. 
@@ -1666,7 +1666,7 @@ error2:
 /*-------------------------------------------------------------------------
  * Function:    vrfy_attr
  *
- * Purpose:     Verify is a group attribute value is as expected..
+ * Purpose:     Verify is a group attribute value is as expected.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
@@ -1679,8 +1679,8 @@ error2:
  *              The number of iterations for group creation, use to generate 
  *              newly created group name. The group name is "group-which".
  *
- *              const char*aname_fmt
- *              The attribute name template used to create unique attribute names.
+ *              const char*aname
+ *              The attribute name 
  *
  *              unsigned int g_which
  *              This parameter is used to generate correct group name in a key
@@ -1703,15 +1703,22 @@ vrfy_attr(state_t *s,
     hid_t aid = H5I_INVALID_HID;
     hid_t amtype = H5I_INVALID_HID;
 
+    /* The reader receives a message from the writer.Then sleep
+     * for a few ticks or stop the test if receiving an error 
+     * message.
+     */ 
     if(s->use_named_pipes && true == s->attr_test) {
         if(false == np_rd_receive(s)) {
             H5_FAILED(); AT();
+            /* Since receiving the error message from the writer,
+             * just stop the test. */
             goto error2;
         }
         decisleep(s->tick_len * s->update_interval);
         dbgf(1, "Reader: finish reading the message: %d\n",s->np_notify);
     }
 
+    /* Go ahead to read the attribute. */
     dbgf(1, "verifying attribute %s on group %u equals %u\n", aname, g_which,
         which);
 
@@ -1747,6 +1754,7 @@ vrfy_attr(state_t *s,
         goto error;
     }
 
+    /* If the read value is expected, send back an OK message to the writer. */
     if(s->use_named_pipes && s->attr_test == true) {
         if(np_rd_send(s)==false) 
             goto error;
@@ -1759,12 +1767,39 @@ error:
         H5Tclose(amtype);
         H5Aclose(aid);
     } H5E_END_TRY;
+
+    /* Send back an error message to the writer so that the writer can stop. */
     if(s->use_named_pipes && s->attr_test == true) 
         np_send_error(s,false);
 error2:
     return false;
 
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_default_group_attr
+ *
+ * Purpose:     Check if the reader can retrieve the correct value of a
+ *              group attribute corrected by the writer.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The expected attribute value. It is also used to construct the
+ *              group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is used for the "dense" storage test.
+ *              It is also used by the group-only test.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 verify_default_group_attr(state_t*s,hid_t g, unsigned int which)
@@ -1776,6 +1811,31 @@ verify_default_group_attr(state_t*s,hid_t g, unsigned int which)
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    verify_modify_attr
+ *
+ * Purpose:     Check if the reader can retrieve the correct value of 
+ *              an attribute in a group, first the original value then
+ *              the modified value.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The expected attribute value. It is also used to construct the
+ *              group name. The modified attribute value can be derived from
+ *              the expected attribute value. 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is used for the "modified" test.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 verify_modify_attr(state_t *s, hid_t g, unsigned int which) {
@@ -1787,9 +1847,16 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which) {
     hid_t amtype = H5I_INVALID_HID;
     char attrname[VS_ATTR_NAME_LEN];
 
+    /* First verify the original attribute value */
     ret = verify_default_group_attr(s,g,which);
  
+    /* Then the modified value */
     if(ret == true) {
+
+        /* The reader receives a message from the writer.Then sleep
+         * for a few ticks or stop the test if receiving an error 
+         * message.
+         */ 
         if(s->use_named_pipes && true == s->attr_test) {
             if(false == np_rd_receive(s)) {
                 H5_FAILED(); AT();
@@ -1799,8 +1866,8 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which) {
             dbgf(1, "Reader: finish reading the message: %d\n",s->np_notify);
         }
 
+        /* Go ahead to read the attribute. */
         esnprintf(attrname, sizeof(attrname), aname_fmt, which);
-
         if ((amtype = H5Tget_native_type(s->filetype,H5T_DIR_ASCEND)) < 0) {
             H5_FAILED(); AT();
             printf("H5Tget_native_type failed\n");
@@ -1831,6 +1898,7 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which) {
             goto error;
         }
 
+        /* verify the modified value */
         if(read_which != (which+10000)) {
             H5_FAILED(); AT();
             dbgf(2, "reader: the modified_attr() expected value is  %d\n", (-1)*(int)which);
@@ -1839,6 +1907,7 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which) {
             goto error;
         }
 
+        /* The reader sends an OK message back to the writer. */
         if(s->use_named_pipes && s->attr_test == true) {
             if(np_rd_send(s)==false) 
                 goto error2;
@@ -1855,6 +1924,7 @@ error:
         H5Tclose(amtype);
     } H5E_END_TRY;
 
+    /* The reader needs to send an error message back to the writer to stop the test.*/
     if(s->use_named_pipes && s->attr_test == true) 
         np_send_error(s,false);
 
@@ -1862,6 +1932,36 @@ error2:
 
     return false;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_group_vlstr_attr
+ *
+ * Purpose:     Check if the reader can retrieve the correct value of  
+ *              a variable length string attribute created by the writer.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              Use to derieve the expected attribute value. It is also used 
+ *              to construct the group name.
+ *
+ *              bool vrfy_mod
+ *              true if this function is used for the modified VL string test.
+ *              false if this function is just used for the VL string test.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is an internal function used by 
+ *              both the "vlstr" and the "modify-vstr" tests.
+ *-------------------------------------------------------------------------
+*/ 
+
 
 static bool
 verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
@@ -1873,6 +1973,10 @@ verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
     char *astr_val_exp;
     char * astr_val;
 
+    /* The reader receives a message from the writer.Then sleep
+     * for a few ticks or stop the test if the received message 
+     * is an error message.
+     */ 
     if(s->use_named_pipes && true == s->attr_test) {
         if(false == np_rd_receive(s)) {
             H5_FAILED(); AT();
@@ -1882,6 +1986,7 @@ verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
         dbgf(1, "Reader: finish reading the message: %d\n",s->np_notify);
     }
 
+    /* Go ahead to read the VL string attribute. */
     astr_val_exp = HDmalloc(VS_ATTR_NAME_LEN);
     if (astr_val_exp == NULL) {
         H5_FAILED(); AT();
@@ -1890,6 +1995,9 @@ verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
     }
 
     esnprintf(name, sizeof(name), "attr-%u", which);
+
+    /* Construct the expected VL string value,depending if
+     * it is the modified value or the original value. */ 
     if(vrfy_mod == true)  
         HDsprintf(astr_val_exp,"%u%c",which,'A');
     else 
@@ -1906,7 +2014,7 @@ verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
         goto error;
     }
 
-    /* Create a datatype to refer to. */
+    /* Create a VL string datatype  */
     if ((atype = H5Tcopy(H5T_C_S1)) < 0) {
         H5_FAILED(); AT();
         printf("Cannot create variable length datatype.\n");
@@ -1949,6 +2057,7 @@ verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
     H5free_memory(astr_val);
     HDfree(astr_val_exp);
 
+    /* Reader sends an OK message back to the reader */
     if(s->use_named_pipes && s->attr_test == true) {
         if(np_rd_send(s)==false) 
             goto error2;
@@ -1966,6 +2075,8 @@ error:
         H5free_memory(astr_val);
     if(astr_val_exp)
         HDfree(astr_val_exp);
+
+    /* The reader sends an error message to the writer to stop the test.*/
     if(s->use_named_pipes && s->attr_test == true) 
         np_send_error(s,false);
 
@@ -2069,11 +2180,9 @@ static bool
 verify_attrs_compact_dense(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
 
     const char* aname_format = "attr-d-%u-%u";
-    //char attrname[sizeof("attr-d-9999999999-999")];
     char attrname[VS_ATTR_NAME_LEN];
     bool ret = verify_attrs_compact(s,g,max_c,which);
     if(ret == true) { 
-        //HDsprintf(attrname, aname_format, which,0);
         HDsprintf(attrname, aname_format, max_c+which,0);
         ret = vrfy_attr(s,g,which+max_c,attrname,which);
         if(ret == false) 
@@ -2086,34 +2195,13 @@ static bool
 verify_del_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
 
     const char* aname_format = "attr-%u-%u";
-    //char attrname[sizeof("attr-d-9999999999-999")];
     char attrname[VS_ATTR_NAME_LEN];
     bool ret = verify_attrs_compact(s,g,max_c,which);
     if(ret == true) { 
-        // The writer only deletes the attribute attr-which-0
+        /* The writer only deletes the attribute attr-which-0 */
         HDsprintf(attrname,aname_format,which,0);
-        // Add error handling later.
-        //es = disable_estack();
         ret = verify_del_one_attr(s,g,attrname);
     }
-#if 0
-        attr_exists = H5Aexists_by_name(g,".",attrname,H5P_DEFAULT);
-        restore_estack(es);
-        if(attr_exists == FALSE) { 
-            dbgf(1,"verify_del_attrs_compact() test: \n");
-            dbgf(1,"  attribute %s on group %u is successfully deleted. \n",attrname,which);
-            ret = true;
-        }
-        else if(attr_exists == TRUE) {
-            dbgf(1,"verify_del_attrs_compact() test failed \n");
-            ret = false;
-        }
-        else{
-            dbgf(1,"H5Aexists_by_name failed \n");
-            ret = false;
-        }
-    }
-#endif
     return ret;
 }
 
@@ -2121,32 +2209,12 @@ static bool
 verify_del_attrs_compact_dense(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
 
     const char* aname_format = "attr-d-%u-%u";
-    //char attrname[sizeof("attr-d-9999999999-999")];
     char attrname[VS_ATTR_NAME_LEN];
     bool ret = verify_attrs_compact_dense(s,g,max_c,which);
     if(ret == true) { 
-        // The writer only deletes the attribute attr-which-0
+        /* The writer only deletes the attribute attr-d-which-0 */
         HDsprintf(attrname,aname_format,max_c+which,0);
-        // Add error handling later.
         ret = verify_del_one_attr(s,g,attrname);
-#if 0
-        es = disable_estack();
-        attr_exists = H5Aexists_by_name(g,".",attrname,H5P_DEFAULT);
-        restore_estack(es);
-        if(attr_exists == FALSE) { 
-            dbgf(1,"verify_del_attrs_compact_dense() test: \n");
-            dbgf(1,"  attribute %s on group %u is successfully deleted. \n",attrname,which);
-            ret = true;
-        }
-        else if(attr_exists == TRUE) {
-            dbgf(1,"verify_del_attrs_compact_dense() test failed \n");
-            ret = false;
-        }
-        else{
-            dbgf(1,"H5Aexists_by_name failed \n");
-            ret = false;
-        }
-#endif
     }
     return ret;
 
@@ -2160,56 +2228,18 @@ verify_del_attrs_compact_dense_compact(state_t *s,
     unsigned u;
     const char* aname_format = "attr-%u-%u";
     char attrname[VS_ATTR_NAME_LEN];
-    //char attrname[sizeof("attr-9999999999-999")];
+
     bool ret = verify_attrs_compact_dense(s,g,max_c,which);
     if(ret == true) { 
         u = max_c + 1;
         for(u--;u>=(min_d-1);u--) {
             HDsprintf(attrname, aname_format, which,max_c-u);
             ret = verify_del_one_attr(s,g,attrname);
-#if 0
-            es = disable_estack();
-            attr_exists = H5Aexists_by_name(g,".",attrname,H5P_DEFAULT);
-            restore_estack(es);
-            if(attr_exists == FALSE) { 
-                dbgf(1,"verify_del_attrs_compact_dense_compact() test: \n");
-                dbgf(1,"  attribute %s on group %u is successfully deleted. \n",attrname,which);
-                ret = true;
-            }
-            else if(attr_exists == TRUE) {
-                dbgf(1,"verify_del_attrs_compact_dense_compact() test failed \n");
-                ret = false;
-            }
-            else{
-                dbgf(1,"H5Aexists_by_name failed \n");
-                ret = false;
-            }
-#endif
         }
 
-        // The writer only deletes the attribute attr-which-0
+        /* Just verify the one deleted attribute by the writer.*/
         HDsprintf(attrname,aname_format,max_c+which,0);
         ret = verify_del_one_attr(s,g,attrname);
-        // Add error handling later.
-        //
-#if 0
-        es = disable_estack();
-        attr_exists = H5Aexists_by_name(g,".",attrname,H5P_DEFAULT);
-        restore_estack(es);
-        if(attr_exists == FALSE) { 
-            dbgf(1,"verify_del_attrs_compact_dense() test: \n");
-            dbgf(1,"  attribute %s on group %u is successfully deleted. \n",attrname,which);
-            ret = true;
-        }
-        else if(attr_exists == TRUE) {
-            dbgf(1,"verify_del_attrs_compact_dense() test failed \n");
-            ret = false;
-        }
-        else{
-            dbgf(1,"H5Aexists_by_name failed \n");
-            ret = false;
-        }
-#endif
     }
     return ret;
 
@@ -2307,7 +2337,6 @@ verify_group(state_t *s, unsigned int which)
     hid_t g = H5I_INVALID_HID;
     bool result = true;
 
-    //assert(which < s->nsteps);
     if (which >= s->nsteps) {
         H5_FAILED(); AT();
         printf("Number of created groups is out of bounds\n");
@@ -2363,351 +2392,6 @@ error:
 
 }
 
-// Temp Name pipe works.
-#if 0
-static bool
-verify_group(state_t *s, unsigned int which)
-{
-    char name[sizeof("/group-9999999999")];
-    hid_t g;
-    estack_state_t es;
-    bool result = true;
-    bool gopen_ret = true;
-
-    assert(which < s->nsteps);
-
-    esnprintf(name, sizeof(name), "/group-%d", which);
-
-    if(true == s->attr_test) {
-        s->np_verify++;
-        /* Receive the notify that the writer bumped up the value */
-        if (HDread(s->np_fd_w_to_r, &(s->np_notify), sizeof(int)) < 0)
-            err(EXIT_FAILURE, "read failed");
-        if (s->np_notify != s->np_verify)
-            errx(EXIT_FAILURE, "received message %d, expecting %d", s->np_notify, s->np_verify);
-        decisleep(3*(s->tick_len));
-     dbgf(1, "Reader: finish reading the message: %d\n",s->np_notify);
-
-   }
- 
-    es = disable_estack();
-    g = H5Gopen(s->file, name, H5P_DEFAULT);
-    restore_estack(es);
-
-    if (g < 0) 
-        gopen_ret = false;
-//if(gopen_ret == true) {   
-if(s->attr_test == true) {
-    if(gopen_ret == false) {
-                    dbgf(1, "reader: the gopen verfication failed \n",which);
-                    
-                    s->np_notify = 0;
-    }
-                if (HDwrite(s->np_fd_r_to_w, &(s->np_notify), sizeof(int)) < 0)
-                    err(EXIT_FAILURE, "write failed");
-
-                    dbgf(1, "reader: finish sending back the message: %d\n.", s->np_notify);
-    }
-
-if(gopen_ret == true) {
-    if (s->asteps != 0 && which % s->asteps == 0)
-        result = verify_group_attribute(s, g, which);
-    else
-        result = true;
-
-
-//}
-
-    if (H5Gclose(g) < 0)
-        errx(EXIT_FAILURE, "H5Gclose failed");
-}
-else
-   result = false;
-
-    return result;
-}
-
-#endif
-
-
-#if 0
-static bool
-add_group_attribute(state_t *s, hid_t g, hid_t sid, unsigned int which)
-{
-    hid_t aid;
-    char name[sizeof("attr-9999999999")];
-
-    esnprintf(name, sizeof(name), "attr-%u", which);
-
-    dbgf(1, "setting attribute %s on group %u to %u\n", name, which, which);
-
-    if ((aid = H5Acreate2(g, name, s->filetype, sid, H5P_DEFAULT,
-            H5P_DEFAULT)) < 0)
-        errx(EXIT_FAILURE, "H5Acreate2 failed");
-
-    if (H5Awrite(aid, H5T_NATIVE_UINT, &which) < 0)
-        errx(EXIT_FAILURE, "H5Awrite failed");
-    if (H5Aclose(aid) < 0)
-        errx(EXIT_FAILURE, "H5Aclose failed");
-}
-
-
-static bool
-write_group(state_t *s, unsigned int which)
-{
-    char name[sizeof("/group-9999999999")];
-    hid_t g;
-
-    assert(which < s->nsteps);
-
-    esnprintf(name, sizeof(name), "/group-%d", which);
-
-    g = H5Gcreate2(s->file, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-    if (g < 0)
-        errx(EXIT_FAILURE, "H5Gcreate(, \"%s\", ) failed", name);
-
-    if (s->asteps != 0 && which % s->asteps == 0)
-        add_group_attribute(s, g, s->one_by_one_sid, which);
-
-    if (H5Gclose(g) < 0)
-        errx(EXIT_FAILURE, "H5Gclose failed");
-}
-
-static bool
-verify_group_attribute(hid_t g, unsigned int which)
-{
-    estack_state_t es;
-    unsigned int read_which;
-    hid_t aid;
-    char name[sizeof("attr-9999999999")];
-
-    esnprintf(name, sizeof(name), "attr-%u", which);
-
-    dbgf(1, "verifying attribute %s on group %u equals %u\n", name, which,
-        which);
-
-    es = disable_estack();
-    if ((aid = H5Aopen(g, name, H5P_DEFAULT)) < 0) {
-        restore_estack(es);
-        return false;
-    }
-
-    if (H5Aread(aid, H5T_NATIVE_UINT, &read_which) < 0) {
-        restore_estack(es);
-        if (H5Aclose(aid) < 0)
-            errx(EXIT_FAILURE, "H5Aclose failed");
-        return false;
-    }
-
-    restore_estack(es);
-
-    if (H5Aclose(aid) < 0)
-        errx(EXIT_FAILURE, "H5Aclose failed");
-
-    return read_which == which;
-}
-
-static bool
-verify_group(state_t *s, unsigned int which)
-{
-    char name[sizeof("/group-9999999999")];
-    hid_t g;
-    estack_state_t es;
-    bool result;
-
-    assert(which < s->nsteps);
-
-    esnprintf(name, sizeof(name), "/group-%d", which);
-
-    es = disable_estack();
-    g = H5Gopen(s->file, name, H5P_DEFAULT);
-    restore_estack(es);
-
-    if (g < 0)
-        return false;
-
-    if (s->asteps != 0 && which % s->asteps == 0)
-        result = verify_group_attribute(g, which);
-    else
-        result = true;
-
-    if (H5Gclose(g) < 0)
-        errx(EXIT_FAILURE, "H5Gclose failed");
-
-    return result;
-}
-
-#endif
-
-//OLDWORK
-#if 0
-static bool
-add_group_attribute(const state_t *s, hid_t g, hid_t sid, unsigned int which)
-{
-    hid_t aid;
-    char  name[sizeof("attr-9999999999")];
-
-    esnprintf(name, sizeof(name), "attr-%u", which);
-
-    dbgf(1, "setting attribute %s on group %u to %u\n", name, which, which);
-
-    if ((aid = H5Acreate2(g, name, s->filetype, sid, H5P_DEFAULT,
-            H5P_DEFAULT)) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Acreate2 failed\n");
-        goto error;
-    }
-
-    if (H5Awrite(aid, H5T_NATIVE_UINT, &which) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Awrite failed\n");
-        goto error;
-    }
-
-    if (H5Aclose(aid) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Aclose failed\n");
-        goto error;
-    }
-
-    return true;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Aclose(aid);
-    } H5E_END_TRY;
-
-    return false;
-}
-
-static bool
-write_group(state_t *s, unsigned int which)
-{
-    char name[sizeof("/group-9999999999")];
-    hid_t g = H5I_INVALID_HID;
-    bool result = true;
-
-    if (which >= s->nsteps) {
-        H5_FAILED(); AT();
-        printf("group order is out of bounds\n");
-        goto error;
-    }
-
-    esnprintf(name, sizeof(name), "/group-%d", which);
-
-    if ((g = H5Gcreate2(s->file, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Gcreate2 failed\n");
-        goto error;
-    }
-
-    if (s->asteps != 0 && which % s->asteps == 0)
-        result = add_group_attribute(s, g, s->one_by_one_sid, which);
-
-    if (H5Gclose(g) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Gclose failed\n");
-        goto error;
-    }
-
-    return result;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Gclose(g);
-    } H5E_END_TRY;
-
-    return false;
-}
-
-static bool
-verify_group_attribute(hid_t g, unsigned int which)
-{
-    unsigned int read_which;
-    hid_t aid;
-    char name[sizeof("attr-9999999999")];
-
-    esnprintf(name, sizeof(name), "attr-%u", which);
-
-    dbgf(1, "verifying attribute %s on group %u equals %u\n", name, which, which);
-
-    if ((aid = H5Aopen(g, name, H5P_DEFAULT)) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Aopen failed\n");
-        goto error;
-    }
-
-    if (H5Aread(aid, H5T_NATIVE_UINT, &read_which) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Aread failed\n");
-        goto error;
-    }
-
-    if (read_which != which) {
-        H5_FAILED(); AT();
-        printf("H5Aread wrong value\n");
-        goto error;
-    }
-
-    if (H5Aclose(aid) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Aread failed\n");
-        goto error;
-    }
-
-    return true;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Aclose(aid);
-    } H5E_END_TRY;
-
-    return false;
-}
-
-static bool
-verify_group(state_t *s, unsigned int which)
-{
-    char name[sizeof("/group-9999999999")];
-    hid_t g = H5I_INVALID_HID;
-    bool result = true;
-
-    if (which >= s->nsteps) {
-        H5_FAILED(); AT();
-        printf("Group order is out of bounds\n");
-        goto error;
-    }
-
-    esnprintf(name, sizeof(name), "/group-%d", which);
-
-    if ((g = H5Gopen(s->file, name, H5P_DEFAULT)) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Gopen failed\n");
-        goto error;
-    }
-
-    if (s->asteps != 0 && which % s->asteps == 0)
-        result = verify_group_attribute(g, which);
-    else
-        result = true;
-
-    if (H5Gclose(g) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Gclose failed\n");
-        goto error;
-    }
-
-    return result;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Gclose(g);
-    } H5E_END_TRY;
-
-    return false;
-}
-
 int
 main(int argc, char **argv)
 {
@@ -2721,373 +2405,6 @@ main(int argc, char **argv)
     const char *fifo_reader_to_writer = "./fifo_group_reader_to_writer";
     int fd_writer_to_reader = -1, fd_reader_to_writer = -1;
     int notify = 0, verify = 0;
-    unsigned int i;
-
-    if (!state_init(&s, argc, argv)) {
-        H5_FAILED(); AT();
-        printf("state_init failed\n");
-        goto error;
-    }
-
-    personality = strstr(s.progname, "vfd_swmr_group_");
-
-    if (personality != NULL && strcmp(personality, "vfd_swmr_group_writer") == 0)
-        writer = true;
-    else if (personality != NULL && strcmp(personality, "vfd_swmr_group_reader") == 0)
-        writer = false;
-    else {
-        H5_FAILED(); AT();
-        printf("unknown personality, expected vfd_swmr_group_{reader,writer}\n");
-        goto error;
-    }
-
-    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./group-shadow");
-
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, &config)) < 0) {
-        H5_FAILED(); AT();
-        printf("vfd_swmr_create_fapl failed\n");
-        goto error;
-    }
-
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Pcreate failed\n");
-        goto error;
-    }
-
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Pset_file_space_strategy failed\n");
-        goto error;
-    }
-
-    if (writer)
-        s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);
-    else
-        s.file = H5Fopen(s.filename, H5F_ACC_RDONLY, fapl);
-
-    if (s.file < 0) {
-        H5_FAILED(); AT();
-        printf("H5Fcreate/open failed\n");
-        goto error;
-    }
-
-    /* Use two named pipes(FIFO) to coordinate the writer and reader for
-     * two-way communication so that the two sides can move forward together.
-     * One is for the writer to write to the reader.
-     * The other one is for the reader to signal the writer.  */
-    if (s.use_named_pipes && writer) {
-        /* Writer creates two named pipes(FIFO) */
-        if (HDmkfifo(fifo_writer_to_reader, 0600) < 0) {
-            H5_FAILED(); AT();
-            printf("HDmkfifo failed\n");
-            goto error;
-        }
-
-        if (HDmkfifo(fifo_reader_to_writer, 0600) < 0) {
-            H5_FAILED(); AT();
-            printf("HDmkfifo failed\n");
-            goto error;
-        }
-
-    }
-
-    /* Both the writer and reader open the pipes */
-    if (s.use_named_pipes && (fd_writer_to_reader = HDopen(fifo_writer_to_reader, O_RDWR)) < 0) {
-        H5_FAILED(); AT();
-        printf("HDopen failed\n");
-        goto error;
-    }
-
-    if (s.use_named_pipes && (fd_reader_to_writer = HDopen(fifo_reader_to_writer, O_RDWR)) < 0) {
-        H5_FAILED(); AT();
-        printf("HDopen failed\n");
-        goto error;
-    }
-
-    if (writer) {
-        for (step = 0; step < s.nsteps; step++) {
-            dbgf(2, "writer: step %d\n", step);
-
-            if (!write_group(&s, step)) {
-                H5_FAILED(); AT();
-                printf("write_group failed\n");
-
-                /* At communication interval, notifies the reader about the failture and quit */
-                if (s.use_named_pipes && (step % s.csteps == 0)) {
-                    notify = -1;
-                    HDwrite(fd_writer_to_reader, &notify, sizeof(int));
-                }
-
-                goto error;
-            } else {
-                /* At communication interval, notifies the reader and waits for its response */
-                if (s.use_named_pipes && (step % s.csteps == 0)) {
-                    /* Bump up the value of notify to notice the reader to start to read */
-                    notify++;
-                    if (HDwrite(fd_writer_to_reader, &notify, sizeof(int)) < 0) {
-                        H5_FAILED(); AT();
-                        printf("HDwrite failed\n");
-                        goto error;
-                    }
-
-                    /* During the wait, writer makes repeated HDF5 API calls
-                     * to trigger EOT at approximately the correct time */
-                    for(i = 0; i < config.max_lag + 1; i++) {
-                        decisleep(config.tick_len);
-                        H5E_BEGIN_TRY {
-                            H5Aexists(s.file, "nonexistent");
-                        } H5E_END_TRY;
-                    }
-
-                    /* Receive the same value from the reader and verify it before
-                     * going to the next step */
-                    verify++;
-                    if (HDread(fd_reader_to_writer, &notify, sizeof(int)) < 0) {
-                        H5_FAILED(); AT();
-                        printf("HDread failed\n");
-                        goto error;
-                    }
-
-                    if (notify == -1) {
-                        H5_FAILED(); AT();
-                        printf("reader failed to verify group\n");
-                        goto error;
-                    }
-
-                    if (notify != verify) {
-                        H5_FAILED(); AT();
-                        printf("received message %d, expecting %d\n", notify, verify);
-                        goto error;
-                    }
-                }
-            }
-        }
-    }
-    else {
-        for (step = 0; step < s.nsteps; step++) {
-            dbgf(2, "reader: step %d\n", step);
-
-            /* At communication interval, waits for the writer to finish creation before starting verification
-             */
-            if (s.use_named_pipes && (step % s.csteps == 0)) {
-                /* The writer should have bumped up the value of notify.
-                 * Do the same with verify and confirm it */
-                verify++;
-
-                /* Receive the notify that the writer bumped up the value */
-                if (HDread(fd_writer_to_reader, &notify, sizeof(int)) < 0) {
-                    H5_FAILED(); AT();
-                    printf("HDread failed\n");
-                    goto error;
-                }
-
-                if (notify == -1) {
-                    H5_FAILED(); AT();
-                    printf("writer failed to create group\n");
-                    goto error;
-                }
-
-                if (notify != verify) {
-                    H5_FAILED(); AT();
-                    printf("received message %d, expecting %d\n", notify, verify);
-                    goto error;
-                }
-            }
-
-            /* Wait for a few ticks for the update to happen */
-            if (s.use_named_pipes)
-                decisleep(config.tick_len * s.update_interval);
-
-            /* Start to verify group */
-            if (!verify_group(&s, step)) {
-                H5_FAILED(); AT();
-                printf("verify_group failed\n");
-
-                /* At communication interval, tell the writer about the failure and exit */
-                if (s.use_named_pipes && (step % s.csteps == 0)) {
-                    notify = -1;
-                    HDwrite(fd_reader_to_writer, &notify, sizeof(int));
-                }
-
-                goto error;
-            } else {
-                if (s.use_named_pipes && (step % s.csteps == 0)) {
-                    /* Send back the same nofity value for acknowledgement to tell the writer
-                     * move to the next step */
-                    if (HDwrite(fd_reader_to_writer, &notify, sizeof(int)) < 0) {
-                        H5_FAILED(); AT();
-                        printf("HDwrite failed\n");
-                        goto error;
-                    }
-                }
-            }
-        }
-    }
-
-    if (H5Pclose(fapl) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Pclose failed\n");
-        goto error;
-    }
-
-    if (H5Pclose(fcpl) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Pclose failed\n");
-        goto error;
-    }
-
-    if (H5Fclose(s.file) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Fclose failed\n");
-        goto error;
-    }
-
-    /* Both the writer and reader close the named pipes */
-    if (s.use_named_pipes && HDclose(fd_writer_to_reader) < 0) {
-        H5_FAILED(); AT();
-        printf("HDclose failed\n");
-        goto error;
-    }
-
-    if (s.use_named_pipes && HDclose(fd_reader_to_writer) < 0) {
-        H5_FAILED(); AT();
-        printf("HDclose failed\n");
-        goto error;
-    }
-
-    /* Reader finishes last and deletes the named pipes */
-    if(s.use_named_pipes && !writer) {
-        if(HDremove(fifo_writer_to_reader) != 0) {
-            H5_FAILED(); AT();
-            printf("HDremove failed\n");
-            goto error;
-        }
-
-        if(HDremove(fifo_reader_to_writer) != 0) {
-            H5_FAILED(); AT();
-            printf("HDremove failed\n");
-            goto error;
-        }
-    }
-
-    return EXIT_SUCCESS;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(s.file);
-    } H5E_END_TRY;
-
-    if (s.use_named_pipes && fd_writer_to_reader >= 0)
-        HDclose(fd_writer_to_reader);
-
-    if (s.use_named_pipes && fd_reader_to_writer >= 0)
-        HDclose(fd_reader_to_writer);
-
-    if(s.use_named_pipes && !writer) {
-        HDremove(fifo_writer_to_reader);
-        HDremove(fifo_reader_to_writer);
-    }
-
-    return EXIT_FAILURE;
-}
-#endif
-
-int
-main(int argc, char **argv)
-{
-
-#if 0
-    hid_t fapl, fcpl;
-    herr_t ret;
-    unsigned step;
-    bool writer;
-    state_t s;
-    const char *personality;
-    H5F_vfd_swmr_config_t config;
-    const char *fifo_writer_to_reader = "./fifo_group_writer_to_reader";
-    const char *fifo_reader_to_writer = "./fifo_group_reader_to_writer";
-    int fd_writer_to_reader, fd_reader_to_writer;
-    // notify = 0 and verify = 0 are for error.
-    int notify = 1, verify = 1;
-    unsigned int i;
-
-    state_init(&s, argc, argv);
-
-    personality = strstr(s.progname, "vfd_swmr_group_");
-
-    if (personality != NULL &&
-        strcmp(personality, "vfd_swmr_group_writer") == 0)
-        writer = true;
-    else if (personality != NULL &&
-             strcmp(personality, "vfd_swmr_group_reader") == 0)
-        writer = false;
-    else {
-        errx(EXIT_FAILURE,
-             "unknown personality, expected vfd_swmr_group_{reader,writer}");
-    }
-
-    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./group-shadow");
-
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, &config);
-
-    if (fapl < 0)
-        errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
-
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        errx(EXIT_FAILURE, "H5Pcreate");
-
-    ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1);
-    if (ret < 0)
-        errx(EXIT_FAILURE, "H5Pset_file_space_strategy");
-
-    if (writer)
-        s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);
-    else
-        s.file = H5Fopen(s.filename, H5F_ACC_RDONLY, fapl);
-
-    if (s.file == badhid)
-        errx(EXIT_FAILURE, writer ? "H5Fcreate" : "H5Fopen");
-
-    /* Use two named pipes(FIFO) to coordinate the writer and reader for
-     * two-way communication so that the two sides can move forward together.
-     * One is for the writer to write to the reader.
-     * The other one is for the reader to signal the writer.  */
-    if (writer) {
-        /* Writer creates two named pipes(FIFO) */
-        if (HDmkfifo(fifo_writer_to_reader, 0600) < 0)
-            errx(EXIT_FAILURE, "HDmkfifo");
-
-        if (HDmkfifo(fifo_reader_to_writer, 0600) < 0)
-            errx(EXIT_FAILURE, "HDmkfifo");
-    }
-
-    /* Both the writer and reader open the pipes */
-    if ((fd_writer_to_reader = HDopen(fifo_writer_to_reader, O_RDWR)) < 0)
-        errx(EXIT_FAILURE, "fifo_writer_to_reader open failed");
-
-    if ((fd_reader_to_writer = HDopen(fifo_reader_to_writer, O_RDWR)) < 0)
-        errx(EXIT_FAILURE, "fifo_reader_to_writer open failed");
-
-#endif
-
-    hid_t fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID;
-    unsigned step;
-    bool writer = false;
-    state_t s;
-    const char *personality;
-    H5F_vfd_swmr_config_t config;
-    const char *fifo_writer_to_reader = "./fifo_group_writer_to_reader";
-    const char *fifo_reader_to_writer = "./fifo_group_reader_to_writer";
-    int fd_writer_to_reader = -1, fd_reader_to_writer = -1;
-    int notify = 0, verify = 0;
-    unsigned int i;
     bool wg_ret = false;
     bool vg_ret = false;
 
@@ -3178,18 +2495,15 @@ main(int argc, char **argv)
     }
 
     if(s.use_named_pipes) {
-    s.np_fd_w_to_r = fd_writer_to_reader;
-    s.np_fd_r_to_w = fd_reader_to_writer;
-    s.np_notify = notify;
-    s.np_verify = verify;
-    s.tick_len  = config.tick_len;
-    s.max_lag   = config.max_lag;
+        s.np_fd_w_to_r = fd_writer_to_reader;
+        s.np_fd_r_to_w = fd_reader_to_writer;
+        s.np_notify = notify;
+        s.np_verify = verify;
+        s.tick_len  = config.tick_len;
+        s.max_lag   = config.max_lag;
     }
 
-    // TODO: use a different name for s pointer(sp?) in subroutine, 
-    // TODO: since its name is also defined as s.
-
-    // For attribute test, force the named pipe to communicate for every step.
+    /* For attribute test, force the named pipe to communicate for every step. */
     if (s.at_pattern != ' ') {
        s.attr_test = true;
        if(s.use_named_pipes)
@@ -3206,14 +2520,8 @@ main(int argc, char **argv)
                 printf("write_group failed at step %d\n",step);
 
                 /* At communication interval, notifies the reader about the failture and quit */
-                if (s.use_named_pipes && s.attr_test !=true && step % s.csteps == 0) {
-                //if(1){
-                #if 0
-                    s.np_notify = -1;
-                    HDwrite(fd_writer_to_reader, &(s.np_notify), sizeof(int));
-                #endif
+                if (s.use_named_pipes && s.attr_test !=true && step % s.csteps == 0) 
                     np_send_error(&s,true);
-                }
                 goto error;
             }
             else {
@@ -3226,45 +2534,6 @@ main(int argc, char **argv)
                         dbgf(2, "writer: write group - verification failed.\n");
                         goto error;
                     }
-#if 0
-                    /* Bump up the value of notify to notice the reader to start to read */
-                    s.np_notify++;
-                    if (HDwrite(fd_writer_to_reader, &(s.np_notify), sizeof(int)) < 0) {
-                        H5_FAILED(); AT();
-                        printf("HDwrite failed\n");
-                        goto error;
-                    }
-
-                    /* During the wait, writer makes repeated HDF5 API calls
-                     * to trigger EOT at approximately the correct time */
-                    for(i = 0; i < config.max_lag + 1; i++) {
-                        decisleep(config.tick_len);
-                        H5E_BEGIN_TRY {
-                            H5Aexists(s.file, "nonexistent");
-                        } H5E_END_TRY;
-                    }
-
-                    /* Receive the same value from the reader and verify it before
-                     * going to the next step */
-                    (s.np_verify)++;
-                    if (HDread(fd_reader_to_writer, &(s.np_notify), sizeof(int)) < 0){
-                        H5_FAILED(); AT();
-                        printf("HDread failed\n");
-                        goto error;
-                    }
-
-                    if (s.np_notify == -1) {
-                        H5_FAILED(); AT();
-                        printf("reader failed to verify group\n");
-                        goto error;
-                    }
-
-                    if (s.np_notify != s.np_verify) {
-                        H5_FAILED(); AT();
-                        printf("received message %d, expecting %d\n", s.np_notify, s.np_verify);
-                        goto error;
-                    }
-#endif
                 }
             }
         }
@@ -3278,30 +2547,6 @@ main(int argc, char **argv)
                     H5_FAILED(); AT();
                     goto error;
                 }
-#if 0
-                /* The writer should have bumped up the value of notify.
-                 * Do the same with verify and confirm it */
-                s.np_verify++;
-
-                /* Receive the notify that the writer bumped up the value */
-                if (HDread(fd_writer_to_reader, &(s.np_notify), sizeof(int)) < 0) {
-                    H5_FAILED(); AT();
-                    printf("HDread failed\n");
-                    goto error;
-                }
-
-                if (s.np_notify == -1) {
-                    H5_FAILED(); AT();
-                    printf("writer failed to create group\n");
-                    goto error;
-                }
-
-                if (s.np_notify != s.np_verify) {
-                    H5_FAILED(); AT();
-                    printf("received message %d, expecting %d\n", s.np_notify, s.np_verify);
-                    goto error;
-                }
-#endif
             }
 
              /* For the default test, wait for a few ticks for the update to happen */
@@ -3314,13 +2559,10 @@ main(int argc, char **argv)
 
                 printf("verify_group failed\n");
                 H5_FAILED(); AT();
+
                 /* At communication interval, tell the writer about the failure and exit */
-                if (s.use_named_pipes && s.attr_test != true && step % s.csteps == 0) {
-                //if(1){
+                if (s.use_named_pipes && s.attr_test != true && step % s.csteps == 0) 
                     np_send_error(&s,false);
-                    //s.np_notify = -1;
-                    //HDwrite(fd_reader_to_writer, &(s.np_notify), sizeof(int));
-                }
                 goto error;
 
             }
@@ -3328,16 +2570,7 @@ main(int argc, char **argv)
 
                 /* Send back the same nofity value for acknowledgement to tell the writer
                  * move to the next step. */
-               // TO THINK:  reader will never have a chance to acknowledge the writer when attribute verfication occurs.
-               // RESOLVED, no need to carry out the following for the attribute operation. It is done in the attribute level.
                 if (s.use_named_pipes && s.attr_test!=true && step % s.csteps == 0) {
-#if 0
-                    if (HDwrite(fd_reader_to_writer, &(s.np_notify), sizeof(int)) < 0) {
-                        H5_FAILED(); AT();
-                        printf("HDwrite failed\n");
-                        goto error;
-                    }
-#endif
                     if(np_rd_send(&s)==false) 
                         goto error;
                 }
