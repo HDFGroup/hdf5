@@ -392,7 +392,7 @@ static void np_send_error(state_t *s,bool writer) {
  *              HDF5 object ID (in this file: means group ID)
  *
  *              unsigned int which
- *              The number of groups generated so far, use to generate 
+ *              The number of iterations for group creation, use to generate 
  *              newly created group name. The group name is "group-which".
  *
  *              unsigned num_attrs
@@ -506,186 +506,69 @@ error2:
 
 }
 
-// Temp named pipe works.
-#if 0
-static bool 
-add_attr(state_t *s, hid_t oid,unsigned int which,unsigned num_attrs,const char*aname_fmt,bool sl) {
-
-    //char attrname[sizeof("attr-d-9999999999-999")];
-    char attrname[VS_ATTR_NAME_LEN];
-    //char* attrname_base= "attr-%u-%u";
-    unsigned u;
-    int i;
-    unsigned attr_value;
-    hid_t aid = H5I_INVALID_HID;
-    hid_t amtype = H5I_INVALID_HID;
-    hid_t atype = s->filetype;
-    hid_t sid = s->one_by_one_sid;
-
-    if((amtype = H5Tget_native_type(atype,H5T_DIR_ASCEND)) <0) {
-        H5_FAILED(); AT();
-        printf("H5Tget_native_type failed\n");
-        goto error;
-    }
-
-    /* Add attributes, until just before converting to dense storage */
-    for (u = 0; u < num_attrs; u++) {
-
-        /* Create attribute */
-        //HDsprintf(attrname, "attr-%u-%u", which,u);
-        //HDsprintf(attrname, attrname_base, which,u);
-        HDsprintf(attrname, aname_fmt, which,u);
-        if((aid = H5Acreate2(oid, attrname, atype, sid, H5P_DEFAULT, 
-            H5P_DEFAULT)) < 0) { 
-            H5_FAILED(); AT();
-            printf("H5Acreate2 failed\n");
-            goto error;
-        }
-
-        attr_value = u+which;
-
-        dbgf(1, "setting attribute %s on group %u to %u\n", attrname, which, u+which);
-        /* Write data into the attribute */
-        if (H5Awrite(aid, amtype, &attr_value) < 0) {
-            H5_FAILED(); AT();
-            printf("H5Awrite failed\n");
-            goto error;
-        }
-
-        /* Close attribute */
-        if(H5Aclose(aid) < 0) {
-            H5_FAILED(); AT();
-            printf("H5Aclose failed\n");
-            goto error;
-        }
-
-             if (s->attr_test == true) {
-                /* Bump up the value of notify to notice the reader to start to read */
-                s->np_notify++;
-                
-                
-                dbgf(2, "writer: ready to send the message: %d.\n", s->np_notify);
-
-                if (HDwrite(s->np_fd_w_to_r, &(s->np_notify), sizeof(int)) < 0)
-                    err(EXIT_FAILURE, "write failed");
-
-                /* During the wait, writer makes repeated HDF5 API calls
-                 * to trigger EOT at approximately the correct time */
-                for(i = 0; i < s->max_lag + 1; i++) {
-                    decisleep(s->tick_len);
-                    H5Aexists(s->file, "nonexistent");
-                }
-
-                /* Receive the same value from the reader and verify it before
-                 * going to the next step */
-                (s->np_verify)++;
-                dbgf(2, "writer: ready to receive the message: %d.\n", s->np_verify);
-                if (HDread(s->np_fd_r_to_w, &(s->np_notify), sizeof(int)) < 0)
-                    err(EXIT_FAILURE, "read failed");
-
-                dbgf(2, "writer: finish receiving the message: %d.\n", s->np_notify);
-                if (s->np_notify != s->np_verify)
-                    errx(EXIT_FAILURE, "received message %d, expecting %d", s->np_notify, s->np_verify);
-            }
-       
-    } /* end for */
-
-    H5Tclose(amtype);
-}
-#endif
-
-static bool 
-modify_attr(state_t *s, hid_t g, const char* aname_fmt,unsigned int which) {
-
-    //char attrname[sizeof("attr-d-9999999999-999")];
-    char attrname[VS_ATTR_NAME_LEN];
-    hid_t aid = H5I_INVALID_HID;   
-    hid_t amtype = H5I_INVALID_HID;
-    int modify_value;
-
-    HDsprintf(attrname,aname_fmt,which,0);
-    if((aid = H5Aopen(g,attrname,H5P_DEFAULT))<0) {
-        H5_FAILED(); AT();
-        printf("H5Aopen failed\n");
-        goto error;
-    }
-
-    if((amtype = H5Tget_native_type(s->filetype,H5T_DIR_ASCEND))<0) {
-        H5_FAILED(); AT();
-        printf("H5Tget_native_type failed\n");
-        goto error;
-    }
- 
-#if 0
-    // Add later.
-    //H5T_sign_t h5t_sign = H5Tget_sign(amtype);
-    /* Unlikely, still make sure -no overflow. */
-    if((unsigned int)((int)which)!=which) {
-        printf("the number of %u causes of overflow when casted to an integer\n",which);  
-        printf("number of iteration is too big, it causes overflow\n");
-        goto error;
-    }
-#endif
-    modify_value = which+10000; 
-
-    if (H5Awrite(aid,amtype,&modify_value) <0) {
-        H5_FAILED(); AT();
-        printf("H5Awrite failed\n");
-        goto error;
-    }
-    if (H5Tclose(amtype) < 0) {
-        H5_FAILED(); AT();
-        goto error;
-    }
-    if (H5Aclose(aid) < 0) {
-        H5_FAILED(); AT();
-        goto error;
-    }
-
-    if (s->use_named_pipes && s->attr_test == true) {
-        dbgf(2, "writer: modify attr - ready to send the message: %d\n", s->np_notify+1);
-        if(np_wr_send_receive(s) == false) {
-                H5_FAILED(); AT();
-                dbgf(2, "writer: write attr - verification failed.\n");
-                goto error2;
-        }
-    }
-
-    return true;
-error:
-    if(s->use_named_pipes && s->attr_test == true)
-        np_send_error(s,true);
-    H5E_BEGIN_TRY {
-        H5Aclose(aid);
-        H5Tclose(aid);
-    } H5E_END_TRY;
-
-error2:
-    return false;
-
-}
-
-
-#if 0
-static bool 
-temp_add_default_group_attr(state_t *s, hid_t g, unsigned int which) {
-
-    const char* aname_format ="attr-%u";
-
-    add_attr(s,g,which,1,aname_format,false);
-
-}
-#endif
-
+/*-------------------------------------------------------------------------
+ * Function:    add_default_group_attr
+ *
+ * Purpose:     Add an attribute to a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *              The group name is "group-which" and the attribute name
+ *              is "attr-which".
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is used for the "dense" storage test.
+ *              It is also used by the group-only test.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool 
 add_default_group_attr(state_t *s, hid_t g, unsigned int which) {
 
     const char* aname_format ="attr-%u";
 
+    /* Note: Since we only add one attribute, the parameter for
+    *        the number of attributes is 1. */
     return add_attr(s,g,which,1,aname_format,which);
 
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    add_vlstr_attr
+ *
+ * Purpose:     Add a variable length string  attribute to a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *              The group name is "group-which" and the attribute name
+ *              is "attr-which".
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is for the "vstr" test.
+ *-------------------------------------------------------------------------
+*/ 
 
 
 static bool 
@@ -697,13 +580,15 @@ add_vlstr_attr(state_t*s, hid_t g, unsigned int which) {
     char *astr_val = NULL;
     hid_t sid = s->one_by_one_sid;
 
+    /* Allocate buffer for the VL string value */
     astr_val = HDmalloc(VS_ATTR_NAME_LEN);
     if (astr_val == NULL) {
         H5_FAILED(); AT();
-        printf("Allocate memory for buffer failed.\n");
+        printf("Allocate memory for VL string failed.\n");
         goto error;
     }
 
+    /* Assign the VL string value and the attribute name.. */
     HDsprintf(astr_val,"%u",which);
     esnprintf(name, sizeof(name), "attr-%u", which);
 
@@ -722,6 +607,7 @@ add_vlstr_attr(state_t*s, hid_t g, unsigned int which) {
         goto error;
     }
 
+    /* Generate the VL string attribute.*/
     if ((aid = H5Acreate2(g, name, atype, sid, H5P_DEFAULT,
                           H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
@@ -729,15 +615,11 @@ add_vlstr_attr(state_t*s, hid_t g, unsigned int which) {
         goto error;
     }
 
-    dbgf(1, "astr_val is  %s \n", astr_val);
-    //if (H5Awrite(aid, H5T_NATIVE_UINT, &which) < 0)
-    //if (H5Awrite(aid, H5T_NATIVE_UINT, astr_val) < 0)
     if (H5Awrite(aid, atype, &astr_val) < 0) {
         H5_FAILED(); AT();
         printf("H5Awrite failed.\n");
         goto error;
     }
-
 
     if (H5Tclose(atype) < 0) {
         H5_FAILED(); AT();
@@ -752,6 +634,8 @@ add_vlstr_attr(state_t*s, hid_t g, unsigned int which) {
 
     HDfree(astr_val);
 
+    /* Writer sends a message to reader: a VL string attribute is successfully generated. 
+       then wait for the reader to verify and send an acknowledgement message back. */
     if (s->use_named_pipes && s->attr_test == true) {
         dbgf(2, "writer: write attr - ready to send the message: %d\n", s->np_notify+1);
         if(np_wr_send_receive(s) == false) {
@@ -764,6 +648,7 @@ add_vlstr_attr(state_t*s, hid_t g, unsigned int which) {
     return true;
 
 error:
+    /* Writer needs to send an error message to the reader to stop the test*/
     if(s->use_named_pipes && s->attr_test == true) 
         np_send_error(s,true);
     H5E_BEGIN_TRY {
@@ -778,17 +663,56 @@ error2:
     return false;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    del_one_attr
+ *
+ * Purpose:     delete one attribute in a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t obj_id 
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              bool is_dense
+ *              if the deleted attribute is for checking the dense storage
+ * 
+ *              bool is_vl
+ *              if the deleted attribute is a VL string
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *              The group name is "group-which" and the attribute names
+ *              according to if this attribute is a VL string or for checking
+ *              the dense storage or the storage transition from dense to
+ *              compact.
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ *-------------------------------------------------------------------------
+*/ 
+
 static bool 
 del_one_attr(state_t *s, hid_t obj_id,bool is_dense,bool is_vl,unsigned int which) {
 
-    //char attrname[sizeof("attr-d-9999999999-999")];
     char attrname[VS_ATTR_NAME_LEN];
-    const char* aname_format_d = "attr-d-%u-%u";
-    const char* aname_format = "attr-%u-%u";
-    const char* aname_format_vl="attr-%u";
 
+    /*attribute name template for the dense storage related deletion operation */
+    const char* aname_format_d = "attr-d-%u-%u";
+
+    /*attribute name template used for general attribute deletion operation */
+    const char* aname_format = "attr-%u-%u";
+
+    /*attribute name template used for VL string attribute deletion operation */
+    const char* aname_format_vl="attr-%u";
     
     dbgf(2, "writer: coming to delete the attribute.\n");
+
+    /* Construct the attribute name */
     if(is_dense == true)  
        HDsprintf(attrname, aname_format_d, which,0);
     else if(is_vl == true)
@@ -796,13 +720,15 @@ del_one_attr(state_t *s, hid_t obj_id,bool is_dense,bool is_vl,unsigned int whic
     else
        HDsprintf(attrname, aname_format, which,0);
     
-    /* Delete attribute */
+    /* Delete the attribute */
     if(H5Adelete(obj_id, attrname) <0) {
         H5_FAILED(); AT();
         printf("H5Adelete() failed\n");
         goto error;
     }
 
+    /* Writer sends a message to reader: an attribute is successfully generated. 
+       then wait for the reader to verify and send an acknowledgement message back. */
     if(s->use_named_pipes && s->attr_test == true) {
         dbgf(2, "writer: delete attr - ready to send the message: %d\n", s->np_notify+1);
         if(np_wr_send_receive(s) == false) {
@@ -822,12 +748,40 @@ error2:
     return false;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    add_del_vlstr_attr
+ *
+ * Purpose:     Add a variable length string attribute 
+ *              then delete this attribute in this a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *              The group name is "group-which" and the attribute name
+ *              is "attr-which".
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is for the "remove-vstr" test.
+ *-------------------------------------------------------------------------
+*/ 
+
 
 static bool
 add_del_vlstr_attr(state_t *s, hid_t g, unsigned int which) {
 
     bool ret_value = false;
 
+    /* Add a VL string attribute then delete it. */
     ret_value = add_vlstr_attr(s,g,which);
     if(ret_value == true) 
         ret_value = del_one_attr(s,g,false,true,which);
@@ -836,25 +790,142 @@ add_del_vlstr_attr(state_t *s, hid_t g, unsigned int which) {
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    modify_attr
+ *
+ * Purpose:     Modify the value of an attribute in a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              const char*aname_fmt
+ *              The attribute name template used to create unique attribute names.
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group name. The group name is "group-which".
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ *-------------------------------------------------------------------------
+*/ 
+
+
+static bool 
+modify_attr(state_t *s, hid_t g, const char* aname_fmt,unsigned int which) {
+
+    char attrname[VS_ATTR_NAME_LEN];
+    hid_t aid = H5I_INVALID_HID;   
+    hid_t amtype = H5I_INVALID_HID;
+    unsigned int modify_value;
+
+    HDsprintf(attrname,aname_fmt,which,0);
+    if((aid = H5Aopen(g,attrname,H5P_DEFAULT))<0) {
+        H5_FAILED(); AT();
+        printf("H5Aopen failed\n");
+        goto error;
+    }
+
+    if((amtype = H5Tget_native_type(s->filetype,H5T_DIR_ASCEND))<0) {
+        H5_FAILED(); AT();
+        printf("H5Tget_native_type failed\n");
+        goto error;
+    }
+ 
+    /* Make a large number to verify the change easily */
+    modify_value = which+10000; 
+
+    if (H5Awrite(aid,amtype,&modify_value) <0) {
+        H5_FAILED(); AT();
+        printf("H5Awrite failed\n");
+        goto error;
+    }
+    if (H5Tclose(amtype) < 0) {
+        H5_FAILED(); AT();
+        goto error;
+    }
+    if (H5Aclose(aid) < 0) {
+        H5_FAILED(); AT();
+        goto error;
+    }
+
+    /* Writer sends a message to reader: an attribute is successfully modified. 
+           then wait for the reader to verify and send an acknowledgement message back.*/
+    if (s->use_named_pipes && s->attr_test == true) {
+        dbgf(2, "writer: modify attr - ready to send the message: %d\n", s->np_notify+1);
+        if(np_wr_send_receive(s) == false) {
+            H5_FAILED(); AT();
+            dbgf(2, "writer: write attr - verification failed.\n");
+            /* Note: This is (mostly) because the verification failure message
+             *       from the reader. So don't send the error message back to
+             *       the reader. Just stop the test. */
+            goto error2;
+        }
+    }
+
+    return true;
+error:
+    /* Writer needs to send an error message to the reader to stop the test*/
+    if(s->use_named_pipes && s->attr_test == true)
+        np_send_error(s,true);
+    H5E_BEGIN_TRY {
+        H5Aclose(aid);
+        H5Tclose(aid);
+    } H5E_END_TRY;
+
+error2:
+    return false;
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    modify_vlstr_attr
+ *
+ * Purpose:     Modify the value of an VL string attribute in a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group name. The group name is "group-which".
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ *-------------------------------------------------------------------------
+*/ 
+
+
+
 static bool 
 modify_vlstr_attr(state_t*s,hid_t g, unsigned int which) {
 
     hid_t aid = H5I_INVALID_HID;
     hid_t atype = H5I_INVALID_HID;
-    //char name[sizeof("attr-9999999999")];
     char name[VS_ATTR_NAME_LEN];
     char *astr_val = NULL;
 
-    //astr_val = malloc(sizeof("9999999999!"));
     astr_val = HDmalloc(VS_ATTR_NAME_LEN);
     if (astr_val == NULL) {
         H5_FAILED(); AT();
-        printf("Allocate memory for buffer failed.\n");
+        printf("Allocate memory for VL string failed.\n");
         goto error;
     }
 
+    /* Change the VL string value and create the attribute name. */
     HDsprintf(astr_val,"%u%c",which,'A');
-    //const char *astr_val="test";
     esnprintf(name, sizeof(name), "attr-%u", which);
 
     dbgf(1, "setting attribute %s on group %u to %u\n", name, which, which);
@@ -872,17 +943,15 @@ modify_vlstr_attr(state_t*s,hid_t g, unsigned int which) {
         goto error;
     }
 
-    //if ((aid = H5Acreate2(g, name, s->filetype, sid, H5P_DEFAULT,
+    /* Open this attribute. */
     if ((aid = H5Aopen(g, name, H5P_DEFAULT))<0) {
         H5_FAILED(); AT();
         printf("H5Aopen failed.\n");
         goto error;
     }
 
-    dbgf(1, "astr_val is  %s \n", astr_val);
+    dbgf(1, "The modified VL string value  is  %s \n", astr_val);
 
-    //if (H5Awrite(aid, H5T_NATIVE_UINT, &which) < 0)
-    //if (H5Awrite(aid, H5T_NATIVE_UINT, astr_val) < 0)
     if (H5Awrite(aid, atype, &astr_val) < 0) {
         H5_FAILED(); AT();
         printf("H5Awrite failed.\n");
@@ -903,6 +972,8 @@ modify_vlstr_attr(state_t*s,hid_t g, unsigned int which) {
 
     HDfree(astr_val);
 
+    /* Writer sends a message to reader: a VL string attribute is successfully generated. 
+       then wait for the reader to verify and send an acknowledgement message back. */
     if (s->use_named_pipes && s->attr_test == true) {
         dbgf(2, "writer: modify vl attr - ready to send the message: %d\n", s->np_notify+1);
         if(np_wr_send_receive(s) == false) {
@@ -931,17 +1002,76 @@ error2:
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    add_modify_vlstr_attr
+ *
+ * Purpose:     Add a variable length string attribute 
+ *              then modify this attribute in this a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *              The group name is "group-which" and the attribute name
+ *              is "attr-which".
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is for the "modify-vstr" test.
+ *-------------------------------------------------------------------------
+*/ 
+
 static bool
 add_modify_vlstr_attr(state_t *s, hid_t g, unsigned int which) {
 
     bool ret_value = false;
-    //const char* aname_format ="attr-%u";
     ret_value = add_vlstr_attr(s,g,which);
     if (true == ret_value) 
         ret_value = modify_vlstr_attr(s,g,which);
 
     return ret_value;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    add_attrs_compact
+ *
+ * Purpose:     Add some attributes to the group.
+ *              the number of attributes should be the maximal number of 
+ *              attributes that the compact storage can hold
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              hid_t gcpl
+ *              Object creation property list ID 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *              The group name is "group-which" and the attribute name
+ *              is "attr-which".
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is for the "modify-vstr" test. 
+ *              For attribute compact/dense storage, check the reference
+ *              manual of H5Pget_attr_phase_change.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool 
 add_attrs_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
@@ -950,19 +1080,55 @@ add_attrs_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
     unsigned min_dense = 0;
     const char* aname_format="attr-%u-%u";
     
+    /* Obtain the maximal number of attributes to be stored in compact
+     * storage and the minimal number of attributes to be stored in
+     * dense storage. */
     if(H5Pget_attr_phase_change(gcpl, &max_compact, &min_dense)<0) {
         H5_FAILED(); AT();
         printf("H5Pget_attr_phase_change() failed\n");
         goto error;
     }
     
-    /* Add attributes, until just before converting to dense storage */
+    /* Add max_compact attributes, these attributes are stored in
+     * compact storage. */
     return add_attr(s,g,which,max_compact,aname_format,which);
 
-
 error:
+    if(s->use_named_pipes && s->attr_test == true)
+        np_send_error(s,true);
     return false;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    add_attrs_compact_dense
+ *
+ * Purpose:     Add some attributes to the group.
+ *              First, the number of attributes should be the maximal number 
+ *              of attributes that the compact storage can hold.
+ *              Then,  add another atribute, the storage becomes dense.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              hid_t gcpl
+ *              Object creation property list ID 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is for the "compact-to-dense" test. 
+ *              For attribute compact/dense storage, check the reference
+ *              manual of H5Pget_attr_phase_change.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool 
 add_attrs_compact_dense(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
@@ -988,53 +1154,73 @@ add_attrs_compact_dense(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
     return ret_value;
 
 error:
+    if(s->use_named_pipes && s->attr_test == true)
+        np_send_error(s,true);
     return false;
 }
 
-#if 0
-static bool 
-del_one_attr(state_t *s, hid_t obj_id,bool is_dense,unsigned int which) {
-
-    char attrname[sizeof("attr-d-9999999999-999")];
-    const char* aname_format_d = "attr-d-%u-%u";
-    const char* aname_format = "attr-%u-%u";
-
-    if(is_dense == true)  
-       HDsprintf(attrname, aname_format_d, which,0);
-//printf("attrname is %s\n",attrname);
-    else 
-       HDsprintf(attrname, aname_format, which,0);
-    
-    /* Delete attribute */
-    H5Adelete(obj_id, attrname);
-    nanosleep(&(s->update_interval), NULL); 
-
-
-}
-#endif
+/*-------------------------------------------------------------------------
+ * Function:    del_attrs_compact_dense_compact
+ *
+ * Purpose:     delete some attributes in the group.
+ *              The number of attributes are deleted in such a way
+ *              that the attribute storage changes from compact to
+ *              dense then to compact again.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              hid_t gcpl
+ *              Object creation property list ID 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is an internal function used by the 
+ *              "dense-del-to-compact" test. 
+ *              For attribute compact/dense storage, check the reference
+ *              manual of H5Pget_attr_phase_change.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
-del_attrs_compact_dense_compact(state_t *s, hid_t obj_id,hid_t gcpl,unsigned int which) {
+del_attrs_compact_dense_compact(state_t *s, 
+                                hid_t obj_id,
+                                hid_t gcpl,
+                                unsigned int which) {
     
     unsigned max_compact = 0;
     unsigned min_dense = 0;
     unsigned u = 0;
 
-    //char attrname[sizeof("attr-d-9999999999-999")];
     char attrname[VS_ATTR_NAME_LEN];
     const char* aname_format="attr-%u-%u";
     const char* adname_format="attr-d-%u-%u";
 
+    /* Obtain the maximal number of attributes to be stored in compact
+     * storage and the minimal number of attributes to be stored in
+     * dense storage. */
     if (H5Pget_attr_phase_change(gcpl, &max_compact, &min_dense) < 0) {
         H5_FAILED(); AT();
         printf("H5Pget_attr_phase_change failed\n");
         goto error;
     }
     u= max_compact +1;
+
 #if 0
     if(max_compact < min_dense) 
         printf("Minimum number of attributes stored in dense storage should be less than maximum number of attributes stored in compact storage.\n");
 #endif
+
+    // delete a number of attributes so that the attribute storage just becomes dense.
     for(u--;u>=(min_dense-1);u--) {
         HDsprintf(attrname, aname_format, which,max_compact-u);
         if (H5Adelete(obj_id,attrname) < 0) {
@@ -1042,6 +1228,11 @@ del_attrs_compact_dense_compact(state_t *s, hid_t obj_id,hid_t gcpl,unsigned int
             printf("H5Adelete failed\n");
             goto error;
         }
+
+        /* For each attribute deletion, we want to ensure the verification
+         * from the reader. 
+         * So writer sends a message to reader: an attribute is successfully deleted. 
+           then wait for reader to verify and send an acknowledgement message back. */
         if(s->use_named_pipes && s->attr_test == true) {
             dbgf(2, "writer: delete attr - ready to send the message: %d\n", s->np_notify+1);
             if(np_wr_send_receive(s) == false) {
@@ -1052,14 +1243,21 @@ del_attrs_compact_dense_compact(state_t *s, hid_t obj_id,hid_t gcpl,unsigned int
         }
     }
 
-    // The writer only deletes the attribute attr-which-0
+    /* The writer deletes another attribute, the storage is
+     * still dense. However, the attribute to be deleted
+     * doesn't follow the previous for loop. It may be 
+     * in different location in the object header. Just add
+     * a litter variation to check if this operation is successful. 
+     * The attribute name to be deleted is attr-max_compact+which-0
+     */
+     
     HDsprintf(attrname,adname_format,max_compact+which,0);
-    /// CHECK HERE, add H5Adelete()
     if (H5Adelete(obj_id,attrname) < 0) {
             H5_FAILED(); AT();
             printf("H5Adelete failed\n");
             goto error;
     }
+    /* Again we need to notify the reader via Named pipe. */
     if(s->use_named_pipes && s->attr_test == true) {
         dbgf(2, "writer: delete attr - ready to send the message: %d\n", s->np_notify+1);
         if(np_wr_send_receive(s) == false) {
@@ -1069,13 +1267,16 @@ del_attrs_compact_dense_compact(state_t *s, hid_t obj_id,hid_t gcpl,unsigned int
         }
     }
 
-    
-   
-// May H5Oget_info3 -- obtain the number of attributes. 
-//Check the number of attributes >=min_dense. 
-//We may use the internal function  
-//is_dense = H5O__is_attr_dense_test(dataset) to check if it is dense in the future. 
-//
+    /* The following comments are left here in case in the future we want to
+     * use HDF5 function to verify the attribute storage */
+#if 0   
+    // May H5Oget_info3 -- obtain the number of attributes. 
+    //Check the number of attributes >=min_dense. 
+    //We may use the internal function  
+    //is_dense = H5O__is_attr_dense_test(dataset) to check if it is dense in the future. 
+    //
+#endif
+
     return true;
 
 error: 
@@ -1086,6 +1287,36 @@ error2:
     return false;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    add_del_attrs_compact
+ *
+ * Purpose:     Add some attributes to the group and then delete one attribute.
+ *              First, the number of attributes to be added should be the 
+ *              maximal number of attributes that the compact storage can hold.
+ *              Then,  delete one atribute, the storage is still compact.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              hid_t gcpl
+ *              Object creation property list ID 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is for the "compact-del" test. 
+ *              For attribute compact/dense storage, check the reference
+ *              manual of H5Pget_attr_phase_change.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool 
 add_del_attrs_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
@@ -1100,6 +1331,39 @@ add_del_attrs_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
     return ret_value;
 
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    add_del_attrs_compact_dense
+ *
+ * Purpose:     Add some attributes to the group and then delete one attribute.
+ *              First, the number of attributes to be added exceeds 
+ *              the maximal number of attributes that the compact storage can hold.
+ *              The storage changes from compact to dense.
+ *              Then,  delete one atribute, the storage is still dense.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              hid_t gcpl
+ *              Object creation property list ID 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is for the "dense-del" test. 
+ *              For attribute compact/dense storage, check the reference
+ *              manual of H5Pget_attr_phase_change.
+ *-------------------------------------------------------------------------
+*/ 
+
 
 static bool 
 add_del_attrs_compact_dense(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
@@ -1121,21 +1385,87 @@ add_del_attrs_compact_dense(state_t *s, hid_t g, hid_t gcpl, unsigned int which)
     return ret_value;
 
 error:
+    if(s->use_named_pipes && s->attr_test == true)
+        np_send_error(s,true);
     return false;
 
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    add_del_attrs_compact_dense_compact
+ *
+ * Purpose:     Add attributes to the group and then delete some of them.
+ *              First, the number of attributes to be added exceeds 
+ *              the maximal number of attributes that the compact storage can hold.
+ *              The storage changes from compact to dense.
+ *              Then,  delete some attributes, the storage changes from
+ *              dense to compact again. 
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              hid_t gcpl
+ *              Object creation property list ID 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is for the "dense-del-to-compact" test. 
+ *              For attribute compact/dense storage, check the reference
+ *              manual of H5Pget_attr_phase_change.
+ *-------------------------------------------------------------------------
+*/ 
+
+
 static bool 
-add_del_attrs_compact_dense_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
+add_del_attrs_compact_dense_compact(state_t *s, 
+                                    hid_t g, 
+                                    hid_t gcpl, 
+                                    unsigned int which) {
 
     bool ret_value = false;
     ret_value = add_attrs_compact_dense(s,g,gcpl,which);
     if(ret_value == true) 
         ret_value = del_attrs_compact_dense_compact(s,g,gcpl,which);
-    
 
     return ret_value;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    add_modify_default_group_attr
+ *
+ * Purpose:     Add an attribute then modify the value to a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *              The group name is "group-which" and the attribute name
+ *              is "attr-which".
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is used for the "modify" storage test.
+ *-------------------------------------------------------------------------
+*/ 
+
 
 static bool
 add_modify_default_group_attr(state_t *s, hid_t g, unsigned int which) {
@@ -1148,6 +1478,34 @@ add_modify_default_group_attr(state_t *s, hid_t g, unsigned int which) {
     return ret_value;
 
 } 
+
+/*-------------------------------------------------------------------------
+ * Function:    add_group_attribute
+ *
+ * Purpose:     Check the attribute test pattern and then call the
+ *              correponding test function..
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              hid_t gcpl
+ *              Object creation property list ID 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group and attribute names. 
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the write_group() function.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 add_group_attribute(state_t *s, hid_t g,  hid_t gcpl, unsigned int which)
@@ -1190,30 +1548,30 @@ add_group_attribute(state_t *s, hid_t g,  hid_t gcpl, unsigned int which)
             ret_value = add_default_group_attr(s, g, which);
             break;
     }
-//printf("add_group_attribute return value %d\n",(int)ret_value);
     return ret_value;
 
 }
 
-#if 0
-{
-    hid_t aid;
-    char name[sizeof("attr-9999999999")];
-
-    esnprintf(name, sizeof(name), "attr-%u", which);
-
-    dbgf(1, "setting attribute %s on group %u to %u\n", name, which, which);
-
-    if ((aid = H5Acreate2(g, name, s->filetype, sid, H5P_DEFAULT,
-            H5P_DEFAULT)) < 0)
-        errx(EXIT_FAILURE, "H5Acreate2 failed");
-
-    if (H5Awrite(aid, H5T_NATIVE_UINT, &which) < 0)
-        errx(EXIT_FAILURE, "H5Awrite failed");
-    if (H5Aclose(aid) < 0)
-        errx(EXIT_FAILURE, "H5Aclose failed");
-}
-#endif
+/*-------------------------------------------------------------------------
+ * Function:    write_group
+ *
+ * Purpose:     Create a group and carry out attribute operations(add,delete etc.)
+ *              according to the attribute test pattern.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the main() function.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 write_group(state_t *s, unsigned int which)
@@ -1223,7 +1581,6 @@ write_group(state_t *s, unsigned int which)
     hid_t gcpl = H5I_INVALID_HID;
     bool result = true;
 
-    //assert(which < s->nsteps);
     if (which >= s->nsteps) {
         H5_FAILED(); AT();
         printf("Number of created groups is out of bounds\n");
@@ -1252,29 +1609,30 @@ write_group(state_t *s, unsigned int which)
                         H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("H5Gcreate2 failed\n");
-        //np_send_error(s,true);
         goto error;
     }
 
-    /* If an attribute test is turned on, the NP writer sends a message */
+    /* If an attribute test is turned on and named pipes are used,
+     * the writer should send and receive messages after the group creation.
+     * This will distinguish an attribute operation error from an
+     * group creation error. 
+     * Writer sends a message to reader: an attribute is successfully generated. 
+     * then wait for the reader to verify and send an acknowledgement message back.*/
     if (s->use_named_pipes && s->attr_test == true) {
         dbgf(2, "writer: ready to send the message: %d\n", s->np_notify+1);
         if(np_wr_send_receive(s) == false) {
             H5_FAILED(); AT();
+            /* Note: This is (mostly) because the verification failure message
+             *       from the reader. So don't send the error message back to
+             *       the reader. Just stop the test. */
             goto error2;
         }
     }
-#if 0
-dbgf(1,"Writer: pass group creation\n");        
-#endif
+    
+    /* Then carry out the attribute operation. */
     if (s->asteps != 0 && which % s->asteps == 0) 
         result = add_group_attribute(s, g, gcpl,which);
-#if 0
-if(result == true) 
-printf("Group: successfully receiving the verification from the reader.\n");    
-else
-printf("Group: Fail to receive the verficiation from the reader.\n");
-#endif
+
     if (H5Gclose(g) < 0) {
         H5_FAILED(); AT();
         printf("H5Gclose failed\n");
@@ -1290,8 +1648,7 @@ printf("Group: Fail to receive the verficiation from the reader.\n");
     return result;
 
 error:
-    // Consistent
-    // But if receiving an error message,no need to send the error again.
+    /* Writer needs to send an error message to the reader to stop the test*/
     if(s->use_named_pipes && s->attr_test == true)
         np_send_error(s,true);
 
@@ -1306,85 +1663,45 @@ error2:
 
 }
 
-// Temp name pipe works.
-#if 0
-static bool
-write_group(state_t *s, unsigned int which)
-{
-    char name[sizeof("/group-9999999999")];
-    hid_t g;
-    hid_t gcpl;
-    int i;
-
-    assert(which < s->nsteps);
-
-    esnprintf(name, sizeof(name), "/group-%d", which);
-    gcpl = H5Pcreate(H5P_GROUP_CREATE);
-    if(gcpl <0) 
-        errx(EXIT_FAILURE, "H5Pcreate failed");
-    if(s->at_pattern =='d') 
-        H5Pset_attr_phase_change(gcpl, 0, 0);
-
-    g = H5Gcreate2(s->file, name, H5P_DEFAULT, gcpl, H5P_DEFAULT);
-    // TODO: before the failure, needs to check if the reader is waiting for the pipe.
-    if (g < 0)
-        errx(EXIT_FAILURE, "H5Gcreate(, \"%s\", ) failed", name);
-             if (s->attr_test == true) {
-                /* Bump up the value of notify to notice the reader to start to read */
-                s->np_notify++;
-                
-                
-                dbgf(2, "writer: ready to send the message: %d.\n", s->np_notify);
-
-                if (HDwrite(s->np_fd_w_to_r, &(s->np_notify), sizeof(int)) < 0)
-                    err(EXIT_FAILURE, "write failed");
-
-                /* During the wait, writer makes repeated HDF5 API calls
-                 * to trigger EOT at approximately the correct time */
-                for(i = 0; i < s->max_lag + 1; i++) {
-                    decisleep(s->tick_len);
-                    H5Aexists(s->file, "nonexistent");
-                }
-
-                /* Receive the same value from the reader and verify it before
-                 * going to the next step */
-                (s->np_verify)++;
-                dbgf(2, "writer: ready to receive the message: %d.\n", s->np_verify);
-                if (HDread(s->np_fd_r_to_w, &(s->np_notify), sizeof(int)) < 0)
-                    err(EXIT_FAILURE, "read failed");
-
-                dbgf(2, "writer: finish receiving the message: %d.\n", s->np_notify);
-                if (s->np_notify != s->np_verify)
-                    errx(EXIT_FAILURE, "received message %d, expecting %d", s->np_notify, s->np_verify);
-            }
-
-    if (s->asteps != 0 && which % s->asteps == 0) {
-        add_group_attribute(s, g, gcpl,which);
-    }
-    
-
-    if(H5Pclose(gcpl) <0) 
-        errx(EXIT_FAILURE, "H5Pcreate failed");
-
-    if (H5Gclose(g) < 0)
-        errx(EXIT_FAILURE, "H5Gclose failed");
-
-}
-
-#endif
-
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_attr
+ *
+ * Purpose:     Verify is a group attribute value is as expected..
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t oid
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              newly created group name. The group name is "group-which".
+ *
+ *              const char*aname_fmt
+ *              The attribute name template used to create unique attribute names.
+ *
+ *              unsigned int g_which
+ *              This parameter is used to generate correct group name in a key
+ *              debugging message.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
-vrfy_attr(state_t *s, hid_t g, unsigned int which,  char* aname, unsigned int g_which) {
+vrfy_attr(state_t *s, 
+          hid_t g, 
+          unsigned int which,  
+          const char* aname, 
+          unsigned int g_which) {
 
     unsigned int read_which;
     hid_t aid = H5I_INVALID_HID;
     hid_t amtype = H5I_INVALID_HID;
-
-    //char name[sizeof("attr-d-9999999999-999")];
-
-    //esnprintf(name, sizeof(name), "attr-%u", which);
-    //esnprintf(name, sizeof(name), aname_fmt, which);
 
     if(s->use_named_pipes && true == s->attr_test) {
         if(false == np_rd_receive(s)) {
@@ -1397,16 +1714,6 @@ vrfy_attr(state_t *s, hid_t g, unsigned int which,  char* aname, unsigned int g_
 
     dbgf(1, "verifying attribute %s on group %u equals %u\n", aname, g_which,
         which);
-
-
-#if 0
-    if (H5Sget_simple_extent_npoints(s->one_by_one_sid)!=1) {
-        dbgf(1, "The number of elements of %s on group %u should be 1, exit.\n"
-             name,which);
-        restore_estack(es);
-        return false;
-    }
-#endif
 
     if ((amtype = H5Tget_native_type(s->filetype,H5T_DIR_ASCEND)) <0) {
         H5_FAILED(); AT();
@@ -1459,94 +1766,11 @@ error2:
 
 }
 
-// Temp name pipe works
-#if 0
-static bool
-vrfy_attr(state_t *s, hid_t g, unsigned int which,  char* aname, bool sl) {
-
-    estack_state_t es;
-    unsigned int read_which;
-    hid_t aid;
-    hid_t amtype;
-    bool ret_value = true;
-    //char name[sizeof("attr-d-9999999999-999")];
-
-    //esnprintf(name, sizeof(name), "attr-%u", which);
-    //esnprintf(name, sizeof(name), aname_fmt, which);
-    dbgf(1, "verifying attribute %s on group %u equals %u\n", aname, which,
-        which);
-
-    if(true == s->attr_test) {
-        s->np_verify++;
-        /* Receive the notify that the writer bumped up the value */
-        if (HDread(s->np_fd_w_to_r, &(s->np_notify), sizeof(int)) < 0)
-            err(EXIT_FAILURE, "read failed");
-        if (s->np_notify != s->np_verify)
-            errx(EXIT_FAILURE, "received message %d, expecting %d", s->np_notify, s->np_verify);
-        decisleep(3*(s->tick_len));
-     dbgf(1, "Reader: finish reading the message: %d\n",s->np_notify);
-
-   }
-    
-    es = disable_estack();
-
-#if 0
-    if (H5Sget_simple_extent_npoints(s->one_by_one_sid)!=1) {
-        dbgf(1, "The number of elements of %s on group %u should be 1, exit.\n"
-             name,which);
-        restore_estack(es);
-        return false;
-    }
-#endif
-
-    amtype = H5Tget_native_type(s->filetype,H5T_DIR_ASCEND);
-    if ((aid = H5Aopen(g, aname, H5P_DEFAULT)) < 0) {
-        restore_estack(es);
-        ret_value = false;
-    }
-
-    if(ret_value == true) {
-    if (H5Aread(aid, amtype, &read_which) < 0) {
-        restore_estack(es);
-        if (H5Aclose(aid) < 0)
-            errx(EXIT_FAILURE, "H5Aclose failed");
-        ret_value =  false;
-    }
-    }
-
-    restore_estack(es);
-
-    if (H5Aclose(aid) < 0)
-        errx(EXIT_FAILURE, "H5Aclose failed");
-
-    if(ret_value == true) 
-        ret_value = (read_which == which);
-
-    if(s->attr_test == true) {
-    if(ret_value == false) {
-                    dbgf(2, "reader: the add_attribute verfication failed %d\n", which);
-                    dbgf(2, "reader: the add_attribute verfication failed, the value is %d\n", read_which);
-                    
-                    s->np_notify = 0;
-    }
-                if (HDwrite(s->np_fd_r_to_w, &(s->np_notify), sizeof(int)) < 0)
-                    err(EXIT_FAILURE, "write failed");
-
-                    dbgf(2, "reader: finish sending back the message: %d\n.", s->np_notify);
-    }
- 
-    return ret_value;
-     
-}
-#endif
-
 static bool
 verify_default_group_attr(state_t*s,hid_t g, unsigned int which)
 {
-    //char attrname[sizeof("attr-9999999999")];
     char attrname[VS_ATTR_NAME_LEN];
     const char* aname_format = "attr-%u";
-    //bool ret_value = false;
     HDsprintf(attrname, aname_format, which);
     return vrfy_attr(s,g,which,attrname,which);
 
@@ -1558,11 +1782,9 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which) {
 
     bool ret = false;
     const char* aname_fmt ="attr-%u";
-    estack_state_t es;
-    int read_which;
+    unsigned int read_which;
     hid_t aid = H5I_INVALID_HID;
     hid_t amtype = H5I_INVALID_HID;
-    //char aname[sizeof("attr-d-9999999999-999")];
     char attrname[VS_ATTR_NAME_LEN];
 
     ret = verify_default_group_attr(s,g,which);
@@ -1578,17 +1800,6 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which) {
         }
 
         esnprintf(attrname, sizeof(attrname), aname_fmt, which);
-    //dbgf(1, "verifying attribute %s on group %u equals %u\n", aname, which,
-    //    which);
-
-#if 0
-    if (H5Sget_simple_extent_npoints(s->one_by_one_sid)!=1) {
-        dbgf(1, "The number of elements of %s on group %u should be 1, exit.\n"
-             name,which);
-        restore_estack(es);
-        return false;
-    }
-#endif
 
         if ((amtype = H5Tget_native_type(s->filetype,H5T_DIR_ASCEND)) < 0) {
             H5_FAILED(); AT();
@@ -1619,15 +1830,6 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which) {
             printf("H5Aclose failed\n");
             goto error;
         }
-
-#if 0
-        if((unsigned int)((int)which)!=which) {
-            H5_FAILED(); AT();
-            printf("the unsigned %u causes overflow when casted to signed.\n",which);  
-            printf("number of iteration is too big, it causes overflow.\n");
-            goto error;
-        }
-#endif
 
         if(read_which != (which+10000)) {
             H5_FAILED(); AT();
@@ -1661,30 +1863,15 @@ error2:
     return false;
 }
 
-#if 0
-static bool
-verify_default_group_attr(state_t*s,hid_t g, unsigned int which)
-{
-    char attrname[sizeof("attr-9999999999")];
-    const char* aname_format = "attr-%u";
-    HDsprintf(attrname, aname_format, which);
-    return vrfy_attr(s,g,which,attrname,false);
-}
-#endif
-
 static bool
 verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
 {
-    estack_state_t es;
-    //unsigned int read_which;
-    bool ret = false;
     hid_t aid = H5I_INVALID_HID;
     hid_t atype = H5I_INVALID_HID;
-    //char name[sizeof("attr-9999999999")];
     char name[VS_ATTR_NAME_LEN];
 
-    char *astr_val_exp = NULL;
-    char * astr_val = NULL;
+    char *astr_val_exp;
+    char * astr_val;
 
     if(s->use_named_pipes && true == s->attr_test) {
         if(false == np_rd_receive(s)) {
@@ -1694,15 +1881,6 @@ verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
         decisleep(s->tick_len * s->update_interval);
         dbgf(1, "Reader: finish reading the message: %d\n",s->np_notify);
     }
-
-#if 0
-    astr_val = malloc(VS_ATTR_NAME_LEN);
-    if (astr_val == NULL) {
-        H5_FAILED(); AT();
-        printf("Allocate memory for buffer failed.\n");
-        goto error;
-    }
-#endif
 
     astr_val_exp = HDmalloc(VS_ATTR_NAME_LEN);
     if (astr_val_exp == NULL) {
@@ -1722,7 +1900,6 @@ verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
 
     dbgf(1,"expected vl attr is= %s\n",astr_val_exp);
 
-    es = disable_estack();
     if ((aid = H5Aopen(g, name, H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("H5Aopen failed\n");
@@ -1756,8 +1933,6 @@ verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
         printf("The vl add_attribute verification failed\n");
         goto error;
     }
-
-    //restore_estack(es);
 
     if(H5Tclose(atype) <0) {
         H5_FAILED(); AT();
@@ -1803,7 +1978,6 @@ error2:
 static bool
 verify_del_one_attr(state_t *s,hid_t g, const char *aname) {
 
-    //bool ret = false;
     htri_t attr_exists = FALSE;
 
     if(s->use_named_pipes && true == s->attr_test) {
@@ -1814,7 +1988,6 @@ verify_del_one_attr(state_t *s,hid_t g, const char *aname) {
         decisleep(s->tick_len * s->update_interval);
         dbgf(1, "Reader: finish reading the message: %d\n",s->np_notify);
     }
-
 
     attr_exists = H5Aexists_by_name(g,".",aname,H5P_DEFAULT);
     if(attr_exists == FALSE) { 
@@ -1848,38 +2021,14 @@ error2:
 static bool
 verify_remove_vlstr_attr(state_t* s,hid_t g, unsigned int which)
 {
-    estack_state_t es;
     bool ret = false;
-    htri_t attr_exists = FALSE;
-    //char attrname[sizeof("attr-9999999999")];
     char attrname[VS_ATTR_NAME_LEN];
     const char* aname_format = "attr-%u";
 
     ret = verify_group_vlstr_attr(s,g,which,false);
     if(ret == true) {
         HDsprintf(attrname,aname_format,which);
-        // Add error handling later.
         ret = verify_del_one_attr(s,g,attrname);
-#if 0
-        es = disable_estack();
-        attr_exists = H5Aexists_by_name(g,".",attrname,H5P_DEFAULT);
-        restore_estack(es);
-
-        if(attr_exists == FALSE) { 
-            dbgf(1,"verify_remove_vlstr_attr test: \n");
-            dbgf(1,"  attribute %s on group %u is successfully deleted. \n",attrname,which);
-            ret = true;
-        }
-        else if(attr_exists == TRUE) {
-            dbgf(1,"verify_remove_vlstr_attr test failed \n");
-            ret = false;
-        }
-        else{
-            dbgf(1,"H5Aexists_by_name failed \n");
-            ret = false;
-        }
- 
-#endif
     }
     return ret;
 }
@@ -1889,7 +2038,6 @@ verify_modify_vlstr_attr(state_t *s, hid_t g, unsigned int which){
 
     bool ret = false;
 
-    // May change the sid with state_t s
     ret = verify_group_vlstr_attr(s,g,which,false);
     if(ret == true) 
         ret = verify_group_vlstr_attr(s,g,which,true);
@@ -1903,7 +2051,6 @@ verify_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
     unsigned u;
     bool ret = true;
     const char* aname_format = "attr-%u-%u";
-    //char attrname[sizeof("attr-9999999999-999")];
     char attrname[VS_ATTR_NAME_LEN];
     for (u = 0; u < max_c; u++) {
 
@@ -1938,8 +2085,6 @@ verify_attrs_compact_dense(state_t *s, hid_t g, unsigned max_c, unsigned int whi
 static bool 
 verify_del_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
 
-    estack_state_t es;
-    htri_t attr_exists = FALSE;
     const char* aname_format = "attr-%u-%u";
     //char attrname[sizeof("attr-d-9999999999-999")];
     char attrname[VS_ATTR_NAME_LEN];
@@ -1975,8 +2120,6 @@ verify_del_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which
 static bool 
 verify_del_attrs_compact_dense(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
 
-    estack_state_t es;
-    htri_t attr_exists = FALSE;
     const char* aname_format = "attr-d-%u-%u";
     //char attrname[sizeof("attr-d-9999999999-999")];
     char attrname[VS_ATTR_NAME_LEN];
@@ -2014,9 +2157,7 @@ verify_del_attrs_compact_dense_compact(state_t *s,
                                        unsigned max_c, 
                                        unsigned min_d, 
                                        unsigned int which) {
-    estack_state_t es;
     unsigned u;
-    htri_t attr_exists = FALSE;
     const char* aname_format = "attr-%u-%u";
     char attrname[VS_ATTR_NAME_LEN];
     //char attrname[sizeof("attr-9999999999-999")];
