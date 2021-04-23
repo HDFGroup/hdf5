@@ -155,7 +155,6 @@ if [ $rc -ne 0 ] ; then
     exit 0
 fi
 
-<<<<<<< HEAD
 all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo groups attrdset"
 all_tests="${all_tests} groups_attrs few_big many_small"
 tests=${all_tests}
@@ -757,13 +756,11 @@ for options in ${grp_attr_list[*]}; do
 	fi
 	echo launch vfd_swmr_group attribute: $options
 	catch_out_err_and_rc vfd_swmr_group_writer \
-	    ../vfd_swmr_group_writer -c 1 -n $GROUP_attr_n -a 1 -A $options &
-	    #../vfd_swmr_group_writer -q -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	    ../vfd_swmr_group_writer -q -c 1 -n $GROUP_attr_n -a 1 -A $options &
 	pid_writer=$!
 
 	catch_out_err_and_rc vfd_swmr_group_reader \
-	    ../vfd_swmr_group_reader -c 1 -n $GROUP_attr_n -a 1 -A $options &
-	    #../vfd_swmr_group_reader -q -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	    ../vfd_swmr_group_reader -q -c 1 -n $GROUP_attr_n -a 1 -A $options &
 	pid_reader=$!
 
 	# Wait for the reader to finish before signalling the
