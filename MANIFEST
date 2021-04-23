@@ -250,6 +250,7 @@
 ./doxygen/examples/H5.format.2.0.html
 ./doxygen/examples/H5.format.html
 ./doxygen/examples/H5A_examples.c
+./doxygen/examples/H5D_examples.c
 ./doxygen/examples/H5Fclose.c
 ./doxygen/examples/H5Fcreate.c
 ./doxygen/examples/H5F_examples.c
