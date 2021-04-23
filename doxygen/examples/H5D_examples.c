@@ -39,13 +39,13 @@ main(void)
             goto fail_fspace;
         }
         // create a 1D dataspace
-        if ((fspace = H5Screate_simple(1, (hsize_t[]){10}, NULL )) == H5I_INVALID_HID) {
+        if ((fspace = H5Screate_simple(1, (hsize_t[]){10}, NULL)) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_fspace;
         }
         // create a 32-bit integer dataset
-        if ((dset = H5Dcreate2(file, dset_name, H5T_STD_I32LE, fspace, lcpl, H5P_DEFAULT, H5P_DEFAULT))
-                == H5I_INVALID_HID) {
+        if ((dset = H5Dcreate2(file, dset_name, H5T_STD_I32LE, fspace, lcpl, H5P_DEFAULT, H5P_DEFAULT)) ==
+            H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_dset;
         }
@@ -69,8 +69,8 @@ fail_file:;
         unsigned mode        = H5F_ACC_RDONLY;
         char     file_name[] = "d1.h5";
         // assume a priori knowledge of dataset name and size
-        char dset_name[]     = "σύνολο/δεδομένων";
-        int elts[10];
+        char dset_name[] = "σύνολο/δεδομένων";
+        int  elts[10];
 
         if ((file = H5Fopen(file_name, mode, H5P_DEFAULT)) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
@@ -98,10 +98,10 @@ fail_file:;
         __label__ fail_update, fail_fspace, fail_dset, fail_file;
         hid_t file, dset, fspace;
 
-        unsigned mode        = H5F_ACC_RDWR;
-        char     file_name[] = "d1.h5";
-        char dset_name[]     = "σύνολο/δεδομένων";
-        int new_elts[6][2]  = {{-1, 1}, {-2, 2}, {-3, 3}, {-4, 4}, {-5, 5}, {-6, 6}};
+        unsigned mode           = H5F_ACC_RDWR;
+        char     file_name[]    = "d1.h5";
+        char     dset_name[]    = "σύνολο/δεδομένων";
+        int      new_elts[6][2] = {{-1, 1}, {-2, 2}, {-3, 3}, {-4, 4}, {-5, 5}, {-6, 6}};
 
         if ((file = H5Fopen(file_name, mode, H5P_DEFAULT)) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
@@ -142,10 +142,10 @@ fail_file:;
         __label__ fail_delete, fail_file;
         hid_t file;
 
-        unsigned mode        = H5F_ACC_RDWR;
-        char     file_name[] = "d1.h5";
-        char group_name[]    = "σύνολο";
-        char dset_name[]     = "σύνολο/δεδομένων";
+        unsigned mode         = H5F_ACC_RDWR;
+        char     file_name[]  = "d1.h5";
+        char     group_name[] = "σύνολο";
+        char     dset_name[]  = "σύνολο/δεδομένων";
 
         if ((file = H5Fopen(file_name, mode, H5P_DEFAULT)) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
