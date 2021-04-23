@@ -122,7 +122,7 @@ if (NOT ONLY_SHARED_LIBS)
       COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 files"
   )
   add_custom_target (H5HLgen ALL
-      DEPENDS ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
+      DEPENDS H5HL_buildiface ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
   )
   set_source_files_properties (
       ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90
@@ -139,7 +139,7 @@ if (BUILD_SHARED_LIBS)
       COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 shared files"
   )
   add_custom_target (H5HLgenSH ALL
-      DEPENDS ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/shared/H5TBff_gen.F90
+      DEPENDS H5HL_buildiface ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/shared/H5TBff_gen.F90
   )
   set_source_files_properties (
       ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90

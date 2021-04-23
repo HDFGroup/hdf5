@@ -224,7 +224,7 @@ if (NOT ONLY_SHARED_LIBS)
       COMMENT "Generating the H5_gen.F90 file"
   )
   add_custom_target (H5gen ALL
-      DEPENDS ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
+      DEPENDS H5_buildiface ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
   )
   set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5_gen.F90 PROPERTIES GENERATED TRUE)
 endif ()
@@ -239,7 +239,7 @@ if (BUILD_SHARED_LIBS)
       COMMENT "Generating the H5_gen.F90 shared file"
   )
   add_custom_target (H5genSH ALL
-      DEPENDS ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
+      DEPENDS H5_buildiface ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
   )
   set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90 PROPERTIES GENERATED TRUE)
 endif ()
