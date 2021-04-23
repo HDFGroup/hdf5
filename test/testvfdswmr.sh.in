@@ -654,6 +654,16 @@ if [ ${do_groups:-no} = yes ]; then
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 fi
 
+# The group attribute test takes longer. 
+# So for standard run and quick run, we
+# shorten the number of tests. The standard
+# run covers all the features we need to 
+# test. The quick run doesn't cover the
+# attribute storage change between dense and 
+# compact.
+# The exhaustive run tries to test a feature
+# per test from scratch.
+# 
 grp_attr_list=(
                 "compact"
                 "dense"
@@ -675,13 +685,11 @@ grp_sub_attr_list=(
 
 grp_short_sub_attr_list=(
                 "dense"
-                "compact-del"
                 "modify"
                 "remove-vstr"
                 "modify-vstr"
                )
 
-echo "$HDF5TestExpress"
 if [[ "$HDF5TestExpress" -eq 1 ]] ; then       #Setting for standard run
     grp_attr_list=("${grp_sub_attr_list[@]}")
 elif [[ "$HDF5TestExpress" -gt 1 ]] ; then     #Setting for quick run

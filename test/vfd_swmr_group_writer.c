@@ -2086,11 +2086,39 @@ error2:
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    verify_del_one_attr
+ *
+ * Purpose:     verify if an attribute is successfully deleted.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              const char* aname
+ *              The name of the attribute to be deleted.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is an internal function used by "remove-vlstr",
+ *              "compact-del","dense-del",dense-del-to-compact"  tests.
+ *-------------------------------------------------------------------------
+*/ 
+
+
 static bool
 verify_del_one_attr(state_t *s,hid_t g, const char *aname) {
 
     htri_t attr_exists = FALSE;
 
+    /* The reader receives a message from the writer.Then sleep
+     * for a few ticks or stop the test if the received message 
+     * is an error message.
+     */ 
     if(s->use_named_pipes && true == s->attr_test) {
         if(false == np_rd_receive(s)) {
             H5_FAILED(); AT();
@@ -2100,6 +2128,7 @@ verify_del_one_attr(state_t *s,hid_t g, const char *aname) {
         dbgf(1, "Reader: finish reading the message: %d\n",s->np_notify);
     }
 
+    /* Check if the deleted attribute still exists. */
     attr_exists = H5Aexists_by_name(g,".",aname,H5P_DEFAULT);
     if(attr_exists == FALSE) { 
         dbgf(1,"verify_del_attrs_compact() test: \n");
@@ -2114,6 +2143,7 @@ verify_del_one_attr(state_t *s,hid_t g, const char *aname) {
         goto error;
     }
 
+    /* Reader sends an OK message back to the reader */
     if(s->use_named_pipes && s->attr_test == true) {
         if(np_rd_send(s)==false) 
             goto error;
@@ -2122,12 +2152,42 @@ verify_del_one_attr(state_t *s,hid_t g, const char *aname) {
 
     return true;
 error: 
+    /* The reader sends an error message to the writer to stop the test.*/
     if(s->use_named_pipes && s->attr_test == true)
         np_send_error(s,false);
 
 error2:
     return false;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_remove_vlstr_attr
+ *
+ * Purpose:     Verify if an variable length string attribute is   
+ *              successfully deleted by the writer.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              Use to derieve the expected attribute value added 
+ *              by the writer. It is also used to construct
+ *              the attribute name.
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is for the "remove-vstr" test.
+ *              Also note this function first verifies if
+ *              a variable length attribute is added then
+ *              it verifies if it is deleted successfully.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 verify_remove_vlstr_attr(state_t* s,hid_t g, unsigned int which)
@@ -2144,6 +2204,35 @@ verify_remove_vlstr_attr(state_t* s,hid_t g, unsigned int which)
     return ret;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    verify_modify_vlstr_attr
+ *
+ * Purpose:     Verify if an variable length string attribute is   
+ *              successfully modified by the writer.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              Use to derieve the expected attribute value added 
+ *              by the writer. It is also used to construct
+ *              the attribute name.
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is for the "modify-vstr" test.
+ *              Also note this function first verifies if
+ *              a variable length attribute is added then
+ *              it verifies if it is modified successfully.
+ *-------------------------------------------------------------------------
+*/ 
+
 static bool 
 verify_modify_vlstr_attr(state_t *s, hid_t g, unsigned int which){
 
@@ -2156,6 +2245,36 @@ verify_modify_vlstr_attr(state_t *s, hid_t g, unsigned int which){
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    verify_attrs_compact
+ *
+ * Purpose:     verify if attributes are successfully added for the compact
+ *              storage.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigend max_c
+ *              The maximal number of attributes the compact storage
+ *              can hold
+ *
+ *              unsigned int which
+ *              Use to derieve the expected attribute value added 
+ *              by the writer. It is also used to construct the 
+ *              attribute names. 
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is used by the "compact" test.
+ *-------------------------------------------------------------------------
+*/ 
+
 static bool 
 verify_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
 
@@ -2163,6 +2282,8 @@ verify_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
     bool ret = true;
     const char* aname_format = "attr-%u-%u";
     char attrname[VS_ATTR_NAME_LEN];
+
+    /* Need to verify the added attribute one by one. */
     for (u = 0; u < max_c; u++) {
 
         HDsprintf(attrname, aname_format, which,u);
@@ -2176,74 +2297,266 @@ verify_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    verify_attrs_compact_dense
+ *
+ * Purpose:     verify if attributes are successfully added first in the 
+ *              compact storage then in the dense storage.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigend max_c
+ *              The maximal number of attributes the compact storage
+ *              can hold
+ *
+ *              unsigned int which
+ *              Use to derieve the expected attribute value added 
+ *              by the writer. It is also used to construct
+ *              attribute names.
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is used by the "compact-dense" test.
+ *-------------------------------------------------------------------------
+*/ 
+
+
 static bool 
 verify_attrs_compact_dense(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
 
     const char* aname_format = "attr-d-%u-%u";
     char attrname[VS_ATTR_NAME_LEN];
+
     bool ret = verify_attrs_compact(s,g,max_c,which);
+
     if(ret == true) { 
+
+        /* Now the storage is in dense. Verify if the
+         * retrieved value is correct. */
         HDsprintf(attrname, aname_format, max_c+which,0);
         ret = vrfy_attr(s,g,which+max_c,attrname,which);
         if(ret == false) 
             dbgf(1,"verify_attrs_compact_dense failed \n");
+
     }
     return ret;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_del_attrs_compact
+ *
+ * Purpose:     verify if an attribute in compact storage is successfully 
+ *              deleted.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigend max_c
+ *              The maximal number of attributes the compact storage
+ *              can hold
+ *
+ *              unsigned int which
+ *              Use to derieve the expected attribute value added 
+ *              by the writer. It is also used to construct
+ *              attribute names.
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is used by the "compact-del" test.
+ *              Also note this function first verifies if
+ *              attributes are successfully added in compact storage then
+ *              it verifies if one added attribute is deleted  successfully.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool 
 verify_del_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
 
     const char* aname_format = "attr-%u-%u";
     char attrname[VS_ATTR_NAME_LEN];
+
     bool ret = verify_attrs_compact(s,g,max_c,which);
+
     if(ret == true) { 
         /* The writer only deletes the attribute attr-which-0 */
         HDsprintf(attrname,aname_format,which,0);
         ret = verify_del_one_attr(s,g,attrname);
     }
+
     return ret;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    verify_del_attrs_compact_dense
+ *
+ * Purpose:     verify if an attribute in dense storage is successfully 
+ *              deleted.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigend max_c
+ *              The maximal number of attributes the compact storage
+ *              can hold
+ *
+ *              unsigned int which
+ *              Use to derieve the expected attribute value added 
+ *              by the writer. It is also used to construct
+ *              attribute names.
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is used by the "dense-del" test.
+ *              Also note this function first verifies if
+ *              attributes are successfully added in compact storage then
+ *              in dense storage. Afterwards, 
+ *              it verifies if one added attribute is deleted successfully.
+ *-------------------------------------------------------------------------
+*/ 
+
+
 static bool 
-verify_del_attrs_compact_dense(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
+verify_del_attrs_compact_dense(state_t *s, 
+                               hid_t g, 
+                               unsigned max_c, 
+                               unsigned int which) {
 
     const char* aname_format = "attr-d-%u-%u";
     char attrname[VS_ATTR_NAME_LEN];
+
     bool ret = verify_attrs_compact_dense(s,g,max_c,which);
+
     if(ret == true) { 
         /* The writer only deletes the attribute attr-d-which-0 */
         HDsprintf(attrname,aname_format,max_c+which,0);
         ret = verify_del_one_attr(s,g,attrname);
     }
+
     return ret;
 
 }
+ 
+/*-------------------------------------------------------------------------
+ * Function:    verify_del_attrs_compact_dense_compact
+ *
+ * Purpose:     verify that the attributes are deleted successfully
+ *              even the attribute storage changes from dense to
+ *              compact.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigend max_c
+ *              The maximal number of attributes the compact storage
+ *              can hold
+ *
+ *              unsigend min_d
+ *              The minimal number of attributes to be stored in
+ *              dense storage
+ *
+ *              unsigned int which
+ *              Use to derieve the expected attribute value added 
+ *              by the writer. It is also used to construct
+ *              attribute names.
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is used by the "dense-del-to-compact" test.
+ *              Also note this function first verifies if
+ *              attributes are successfully added in compact storage then
+ *              in dense storage. Afterwards, 
+ *              it verifies if some added attributes are deleted successfully
+ *              until the storage changes from dense to compact.
+ *-------------------------------------------------------------------------
+*/ 
+
+
 static bool 
 verify_del_attrs_compact_dense_compact(state_t *s, 
                                        hid_t g, 
                                        unsigned max_c, 
                                        unsigned min_d, 
                                        unsigned int which) {
+
     unsigned u;
     const char* aname_format = "attr-%u-%u";
     char attrname[VS_ATTR_NAME_LEN];
 
+    /* Verify the attributes are added correctly from
+     * compact to dense storage*/
     bool ret = verify_attrs_compact_dense(s,g,max_c,which);
+
     if(ret == true) { 
+
+        /* Then verify the deletion of attributes 
+         * from dense to compact.
+         */
         u = max_c + 1;
         for(u--;u>=(min_d-1);u--) {
             HDsprintf(attrname, aname_format, which,max_c-u);
             ret = verify_del_one_attr(s,g,attrname);
         }
 
-        /* Just verify the one deleted attribute by the writer.*/
+        /* Just verify one more deleted attribute by the writer.
+           The storage is still compact. */
         HDsprintf(attrname,aname_format,max_c+which,0);
         ret = verify_del_one_attr(s,g,attrname);
     }
+
     return ret;
 
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_group_attribute
+ *
+ * Purpose:     Check the attribute test pattern and then call the
+ *              correponding verification function.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate 
+ *              group and attribute names. 
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the verify_group() function.
+ *-------------------------------------------------------------------------
+*/ 
+
 
 static bool
 verify_group_attribute(state_t *s, hid_t g, unsigned int which)
@@ -2253,6 +2566,12 @@ verify_group_attribute(state_t *s, hid_t g, unsigned int which)
     unsigned max_compact = 0;
     unsigned min_dense = 0;
     hid_t gcpl = H5I_INVALID_HID;
+
+    /* For tests "compact","compact-to-dense","compact-del",
+     *           "dense-del", "dense-del-to-compact",
+     *     the maximal number of attributes for the compact storage
+     *     and the minimal number of attributes for the dense storage
+     *     are needed. So obtain them here */
     switch (test_pattern) {
         case 'c':
         case 't':
@@ -2284,6 +2603,8 @@ verify_group_attribute(state_t *s, hid_t g, unsigned int which)
         default:
            break;
     }
+
+    /* Distribute the verification test. */
     switch (test_pattern) {
         case 'c':
             ret = verify_attrs_compact(s, g, max_compact, which);
@@ -2330,12 +2651,51 @@ error:
     return false;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    verify_group
+ *
+ * Purpose:     verify the success of group creation and 
+ *              carry out the test for attribute operations(add,delete etc.)
+ *              according to the attribute test pattern.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the main() function.
+ *-------------------------------------------------------------------------
+*/ 
+
+
+
 static bool
 verify_group(state_t *s, unsigned int which)
 {
     char name[sizeof("/group-9999999999")];
     hid_t g = H5I_INVALID_HID;
     bool result = true;
+
+    /* The reader receives a message from the writer.Then sleep
+     * for a few ticks or stop the test if the received message 
+     * is an error message.
+     */ 
+    if(s->use_named_pipes && true == s->attr_test) {
+
+        if(false == np_rd_receive(s)) {
+            H5_FAILED(); AT();
+            goto error2;
+        }
+        decisleep(s->tick_len * s->update_interval);
+        dbgf(1, "reader: finish reading the message: %d\n",s->np_notify);
+
+    }
 
     if (which >= s->nsteps) {
         H5_FAILED(); AT();
@@ -2345,32 +2705,23 @@ verify_group(state_t *s, unsigned int which)
 
     esnprintf(name, sizeof(name), "/group-%d", which);
 
-    if(s->use_named_pipes && true == s->attr_test) {
-        if(false == np_rd_receive(s)) {
-            H5_FAILED(); AT();
-            goto error;
-        }
-        decisleep(s->tick_len * s->update_interval);
-        dbgf(1, "reader: finish reading the message: %d\n",s->np_notify);
-
-    }
  
     if((g = H5Gopen(s->file, name, H5P_DEFAULT)) <0) {
         H5_FAILED(); AT();
         printf("H5Gopen failed\n");
-        if(s->use_named_pipes && s->attr_test == true) {
-            dbgf(1, "Reader: the H5Gopen verfication failed for group %s \n",name);
-            np_send_error(s,false);     
-        } 
         goto error;
     }
 
+    /* Reader sends an OK message back to the reader */
     if(s->use_named_pipes && s->attr_test == true) {
+
         if(np_rd_send(s)==false) 
             goto error;
         dbgf(1, "Reader: finish sending back the message: %d\n",s->np_notify);
         
     }
+
+    /* Check if we need to skip the attribute test for this group. */
     if (s->asteps != 0 && which % s->asteps == 0)
         result = verify_group_attribute(s, g, which);
     else
@@ -2383,10 +2734,18 @@ verify_group(state_t *s, unsigned int which)
     }
 
     return result;
+
 error:
+
     H5E_BEGIN_TRY {
         H5Gclose(g);
     } H5E_END_TRY;
+
+    /* The reader sends an error message to the writer to stop the test.*/
+    if(s->use_named_pipes && s->attr_test == true)
+        np_send_error(s,false);
+
+error2:
 
     return false;
 
@@ -2494,6 +2853,7 @@ main(int argc, char **argv)
         goto error;
     }
 
+    /* Pass the named pipe information to the struct of state_t s, for attribute tests.*/
     if(s.use_named_pipes) {
         s.np_fd_w_to_r = fd_writer_to_reader;
         s.np_fd_r_to_w = fd_reader_to_writer;
@@ -2503,12 +2863,13 @@ main(int argc, char **argv)
         s.max_lag   = config.max_lag;
     }
 
-    /* For attribute test, force the named pipe to communicate for every step. */
+    /* For attribute test, force the named pipe to communicate in every step. */
     if (s.at_pattern != ' ') {
        s.attr_test = true;
        if(s.use_named_pipes)
             s.csteps = 1;
     }
+
     if (writer) {
         for (step = 0; step < s.nsteps; step++) {
             dbgf(2, "writer: step %d\n", step);
@@ -2549,7 +2910,7 @@ main(int argc, char **argv)
                 }
             }
 
-             /* For the default test, wait for a few ticks for the update to happen */
+            /* For the default test, wait for a few ticks for the update to happen */
             if(s.use_named_pipes && s.attr_test== false) 
                 decisleep(config.tick_len * s.update_interval);
 
