@@ -1005,10 +1005,10 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     if (fspace->serial_sect_count > 0) {
         hsize_t old_tot_sect_count; /* Total section count from header */
         hsize_t H5_ATTR_NDEBUG_UNUSED
-                                      old_serial_sect_count; /* Total serializable section count from header */
-        hsize_t H5_ATTR_NDEBUG_UNUSED old_ghost_sect_count;  /* Total ghost section count from header */
-        hsize_t H5_ATTR_NDEBUG_UNUSED old_tot_space;         /* Total space managed from header */
-        unsigned                      sect_cnt_size;         /* The size of the section size counts */
+            old_serial_sect_count;                          /* Total serializable section count from header */
+        hsize_t H5_ATTR_NDEBUG_UNUSED old_ghost_sect_count; /* Total ghost section count from header */
+        hsize_t H5_ATTR_NDEBUG_UNUSED old_tot_space;        /* Total space managed from header */
+        unsigned                      sect_cnt_size;        /* The size of the section size counts */
 
         /* Compute the size of the section counts */
         sect_cnt_size = H5VM_limit_enc_size((uint64_t)fspace->serial_sect_count);
@@ -1053,8 +1053,10 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
                 /* Call 'deserialize' callback for this section */
                 des_flags = 0;
                 HDassert(fspace->sect_cls[sect_type].deserialize);
-                if (NULL == (new_sect = (*fspace->sect_cls[sect_type].deserialize)(
-                                 &fspace->sect_cls[sect_type], image, sect_addr, sect_size, &des_flags)))
+                if (NULL ==
+                    (new_sect =
+                         (*fspace->sect_cls[sect_type].deserialize)(&fspace->sect_cls[sect_type], image,
+                                                                    sect_addr, sect_size, &des_flags)))
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTDECODE, NULL, "can't deserialize section")
 
                 /* Update offset in serialization image */

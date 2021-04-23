@@ -110,8 +110,7 @@ static herr_t H5VL_pass_through_attr_write(void *attr, hid_t mem_type_id, const 
                                            void **req);
 static herr_t H5VL_pass_through_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_attr_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                              H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req,
-                                              va_list arguments);
+                                              H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_attr_optional(void *obj, H5VL_attr_optional_t opt_type, hid_t dxpl_id,
                                               void **req, va_list arguments);
 static herr_t H5VL_pass_through_attr_close(void *attr, hid_t dxpl_id, void **req);
@@ -1049,8 +1048,7 @@ H5VL_pass_through_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t dxpl_id,
  */
 static herr_t
 H5VL_pass_through_attr_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req,
-                                va_list arguments)
+                                H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     herr_t               ret_value;
@@ -1059,8 +1057,7 @@ H5VL_pass_through_attr_specific(void *obj, const H5VL_loc_params_t *loc_params,
     printf("------- PASS THROUGH VOL ATTRIBUTE Specific\n");
 #endif
 
-    ret_value = H5VLattr_specific(o->under_object, loc_params, o->under_vol_id, specific_type, dxpl_id, req,
-                                  arguments);
+    ret_value = H5VLattr_specific(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)

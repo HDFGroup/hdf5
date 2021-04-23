@@ -93,12 +93,10 @@ H5_DLL herr_t H5VLattr_read(void *attr, hid_t connector_id, hid_t dtype_id, void
                             void **req);
 H5_DLL herr_t H5VLattr_write(void *attr, hid_t connector_id, hid_t dtype_id, const void *buf, hid_t dxpl_id,
                              void **req);
-H5_DLL herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id,
+                           void **req);
 H5_DLL herr_t H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                                H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req,
-                                va_list arguments);
-H5_DLL herr_t H5VLattr_specific_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                                       H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, ...);
+                                H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_attr_optional_t opt_type, hid_t dxpl_id,
                                 void **req, va_list arguments);
 H5_DLL herr_t H5VLattr_optional_vararg(void *obj, hid_t connector_id, H5VL_attr_optional_t opt_type,

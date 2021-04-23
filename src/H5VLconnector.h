@@ -113,51 +113,99 @@ typedef struct H5VL_attr_get_name_args_t {
 /* Parameters for attribute 'get_info' operation */
 typedef struct H5VL_attr_get_info_args_t {
     H5VL_loc_params_t loc_params; /* Location parameters for object access */
-    const char *attr_name;        /* Attribute name (for get_info_by_name) */
-    H5A_info_t *ainfo;            /* Attribute info */
+    const char *      attr_name;  /* Attribute name (for get_info_by_name) */
+    H5A_info_t *      ainfo;      /* Attribute info */
 } H5VL_attr_get_info_args_t;
 
 /* Parameters for attribute 'get' operations */
 typedef struct H5VL_attr_get_args_t {
-    H5VL_attr_get_t op_type;    /* Operation to perform */
+    H5VL_attr_get_t op_type; /* Operation to perform */
 
     /* Parameters for each operation */
     union {
         /* H5VL_ATTR_GET_ACPL */
         struct {
-            hid_t acpl_id;      /* Attribute creation property list ID */
+            hid_t acpl_id; /* Attribute creation property list ID */
         } get_acpl;
 
         /* H5VL_ATTR_GET_INFO */
-        H5VL_attr_get_info_args_t get_info;     /* Attribute info */
+        H5VL_attr_get_info_args_t get_info; /* Attribute info */
 
         /* H5VL_ATTR_GET_NAME */
-        H5VL_attr_get_name_args_t get_name;     /* Attribute name */
+        H5VL_attr_get_name_args_t get_name; /* Attribute name */
 
         /* H5VL_ATTR_GET_SPACE */
         struct {
-            hid_t space_id;     /* Dataspace ID */
+            hid_t space_id; /* Dataspace ID */
         } get_space;
 
         /* H5VL_ATTR_GET_STORAGE_SIZE */
         struct {
-            hsize_t data_size;  /* Size of attribute in file */
+            hsize_t data_size; /* Size of attribute in file */
         } get_storage_size;
 
         /* H5VL_ATTR_GET_TYPE */
         struct {
-            hid_t type_id;      /* Datatype ID */
+            hid_t type_id; /* Datatype ID */
         } get_type;
     } args;
 } H5VL_attr_get_args_t;
 
 /* types for attribute SPECFIC callback */
 typedef enum H5VL_attr_specific_t {
-    H5VL_ATTR_DELETE, /* H5Adelete(_by_name/idx)             */
-    H5VL_ATTR_EXISTS, /* H5Aexists(_by_name)                 */
-    H5VL_ATTR_ITER,   /* H5Aiterate(_by_name)                */
-    H5VL_ATTR_RENAME  /* H5Arename(_by_name)                 */
+    H5VL_ATTR_DELETE,        /* H5Adelete(_by_name)  */
+    H5VL_ATTR_DELETE_BY_IDX, /* H5Adelete_by_idx     */
+    H5VL_ATTR_EXISTS,        /* H5Aexists(_by_name)  */
+    H5VL_ATTR_ITER,          /* H5Aiterate(_by_name) */
+    H5VL_ATTR_RENAME         /* H5Arename(_by_name)  */
 } H5VL_attr_specific_t;
+
+/* Parameters for attribute 'iterate' operation */
+typedef struct H5VL_attr_iterate_args_t {
+    H5_index_t      idx_type; /* Type of index to iterate over */
+    H5_iter_order_t order;    /* Order of index iteration */
+    hsize_t *       idx;      /* Start/stop iteration index */
+    H5A_operator2_t op;       /* Iteration callback function */
+    void *          op_data;  /* Iteration callback context */
+} H5VL_attr_iterate_args_t;
+
+/* Parameters for attribute 'delete_by_idx' operation */
+typedef struct H5VL_attr_delete_by_idx_args_t {
+    H5_index_t      idx_type; /* Type of index to iterate over */
+    H5_iter_order_t order;    /* Order of index iteration */
+    hsize_t         n;        /* Iteration index */
+} H5VL_attr_delete_by_idx_args_t;
+
+/* Parameters for attribute 'specific' operations */
+typedef struct H5VL_attr_specific_args_t {
+    H5VL_attr_specific_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_ATTR_DELETE */
+        struct {
+            const char *name; /* Name of attribute to delete */
+        } del;
+
+        /* H5VL_ATTR_DELETE_BY_IDX */
+        H5VL_attr_delete_by_idx_args_t delete_by_idx;
+
+        /* H5VL_ATTR_EXISTS */
+        struct {
+            const char *name;   /* Name of attribute to check */
+            hbool_t *   exists; /* Whether attribute exists */
+        } exists;
+
+        /* H5VL_ATTR_ITER */
+        H5VL_attr_iterate_args_t iterate;
+
+        /* H5VL_ATTR_RENAME */
+        struct {
+            const char *old_name; /* Name of attribute to rename */
+            const char *new_name; /* New attribute name */
+        } rename;
+    } args;
+} H5VL_attr_specific_args_t;
 
 /* Typedef for VOL connector attribute optional VOL operations */
 typedef int H5VL_attr_optional_t;
@@ -357,8 +405,8 @@ typedef struct H5VL_attr_class_t {
     herr_t (*read)(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req);
     herr_t (*write)(void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req);
-    herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_attr_specific_t specific_type,
-                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_attr_specific_args_t *args,
+                       hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, H5VL_attr_optional_t opt_type, hid_t dxpl_id, void **req,
                        va_list arguments);
     herr_t (*close)(void *attr, hid_t dxpl_id, void **req);
