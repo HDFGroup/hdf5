@@ -1143,7 +1143,7 @@ TARGET_C_PROPERTIES (H5make_libsettings STATIC)
 target_link_libraries (H5make_libsettings
     PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>" $<$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:MinGW>>:ws2_32.lib>
 )
-target_compile_options(H5detect
+target_compile_options(H5make_libsettings
     PRIVATE "$<$<PLATFORM_ID:Emscripten>:-O0>"
 )
 
@@ -1189,7 +1189,7 @@ option (HDF5_ENABLE_DEBUG_APIS "Turn on extra debug output in all packages" OFF)
 if (NOT ONLY_SHARED_LIBS)
   set (gen_SRCS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c ${HDF5_SRC_BINARY_DIR}/H5lib_settings.c)
   add_custom_target (gen_${HDF5_LIB_TARGET} ALL
-    DEPENDS ${gen_SRCS} ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1 ${HDF5_SRC_BINARY_DIR}/gen_SRCS.stamp2
+    DEPENDS H5make_libsettings ${gen_SRCS} ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1 ${HDF5_SRC_BINARY_DIR}/gen_SRCS.stamp2
     COMMENT "Generation target files"
   )
 
@@ -1228,7 +1228,7 @@ endif ()
 if (BUILD_SHARED_LIBS)
   set (shared_gen_SRCS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c ${HDF5_SRC_BINARY_DIR}/shared/H5lib_settings.c)
   add_custom_target (gen_${HDF5_LIBSH_TARGET} ALL
-    DEPENDS ${shared_gen_SRCS} ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1 ${HDF5_SRC_BINARY_DIR}/shared/shared_gen_SRCS.stamp2
+    DEPENDS H5make_libsettings ${shared_gen_SRCS} ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1 ${HDF5_SRC_BINARY_DIR}/shared/shared_gen_SRCS.stamp2
     COMMENT "Shared generation target files"
   )
 
