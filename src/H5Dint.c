@@ -2859,6 +2859,7 @@ H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id
     H5S_t *           space;               /* Dataspace for iteration */
     H5T_t *           type;                /* Datatype */
     H5S_sel_iter_op_t dset_op;             /* Operator for iteration */
+    H5VL_dataset_get_args_t vol_cb_args;   /* Arguments to VOL callback */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2874,10 +2875,14 @@ H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id
     /* Save the dataset */
     vlen_bufsize.dset_vol_obj = vol_obj;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                 = H5VL_DATASET_GET_SPACE;
+    vol_cb_args.args.get_space.space_id = H5I_INVALID_HID;
+
     /* Get a copy of the dataset's dataspace */
-    if (H5VL_dataset_get(vol_obj, H5VL_DATASET_GET_SPACE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                         &vlen_bufsize.fspace_id) < 0)
+    if (H5VL_dataset_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace")
+    vlen_bufsize.fspace_id = vol_cb_args.args.get_space.space_id;
     if (NULL == (vlen_bufsize.fspace = (H5S_t *)H5I_object(vlen_bufsize.fspace_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataspace")
 
@@ -3943,7 +3948,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__refresh(hid_t dset_id, H5D_t *dset)
+H5D__refresh(H5D_t *dset, hid_t dset_id)
 {
     H5D_virtual_held_file_t *head            = NULL;    /* Pointer to list of files held open */
     hbool_t                  virt_dsets_held = FALSE;   /* Whether virtual datasets' files are held open */

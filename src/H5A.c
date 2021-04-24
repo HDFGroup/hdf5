@@ -2340,11 +2340,14 @@ H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type            = H5VL_ATTR_EXISTS;
     vol_cb_args.args.exists.name   = attr_name;
-    vol_cb_args.args.exists.exists = attr_exists;
+    vol_cb_args.args.exists.exists = FALSE;
 
     /* Check if the attribute exists */
     if (H5VL_attr_specific(vol_obj, loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+    /* Set return value */
+   *attr_exists = vol_cb_args.args.exists.exists;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

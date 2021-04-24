@@ -613,6 +613,7 @@ H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);  /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                      /* Location parameters */
+    H5VL_dataset_get_args_t vol_cb_args;               /* Arguments to VOL callback */
     H5O_token_t       obj_token = {0};                 /* Object token */
     H5I_type_t        opened_type;                     /* Opened object type */
     void *            opened_obj    = NULL;            /* Opened object */
@@ -662,10 +663,14 @@ H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
     if (NULL == (opened_obj = H5VL_vol_object(opened_obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                 = H5VL_DATASET_GET_SPACE;
+    vol_cb_args.args.get_space.space_id = H5I_INVALID_HID;
+
     /* Get dataspace from object */
-    if (H5VL_dataset_get(opened_obj, H5VL_DATASET_GET_SPACE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                         &space_id) < 0)
+    if (H5VL_dataset_get(opened_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "unable to get dataspace from dataset")
+    space_id = vol_cb_args.args.get_space.space_id;
     if (NULL == (space = (struct H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace")
 

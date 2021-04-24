@@ -2903,6 +2903,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_ATTR_DELETE");
                                     break;
 
+                                case H5VL_ATTR_DELETE_BY_IDX:
+                                    H5RS_acat(rs, "H5VL_ATTR_DELETE_BY_IDX");
+                                    break;
+
                                 case H5VL_ATTR_EXISTS:
                                     H5RS_acat(rs, "H5VL_ATTR_EXISTS");
                                     break;

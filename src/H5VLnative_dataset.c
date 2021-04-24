@@ -336,31 +336,26 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t H5_ATTR_UNUSED dxpl_id,
-                         void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_dataset_get(void *obj, H5VL_dataset_get_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                         void H5_ATTR_UNUSED **req)
 {
     H5D_t *dset      = (H5D_t *)obj;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (get_type) {
+    switch (args->op_type) {
         /* H5Dget_space */
         case H5VL_DATASET_GET_SPACE: {
-            hid_t *ret_id = HDva_arg(arguments, hid_t *);
-
-            if ((*ret_id = H5D__get_space(dset)) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get space ID of dataset")
+            if ((args->args.get_space.space_id = H5D__get_space(dset)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get space ID of dataset")
 
             break;
         }
 
         /* H5Dget_space_status */
         case H5VL_DATASET_GET_SPACE_STATUS: {
-            H5D_space_status_t *allocation = HDva_arg(arguments, H5D_space_status_t *);
-
-            /* Read data space address and return */
-            if (H5D__get_space_status(dset, allocation) < 0)
+            if (H5D__get_space_status(dset, &args->args.get_space_status.status) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status")
 
             break;
@@ -368,40 +363,31 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t H5_ATTR_U
 
         /* H5Dget_type */
         case H5VL_DATASET_GET_TYPE: {
-            hid_t *ret_id = HDva_arg(arguments, hid_t *);
-
-            if ((*ret_id = H5D__get_type(dset)) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
+            if ((args->args.get_type.type_id = H5D__get_type(dset)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
 
             break;
         }
 
         /* H5Dget_create_plist */
         case H5VL_DATASET_GET_DCPL: {
-            hid_t *ret_id = HDva_arg(arguments, hid_t *);
-
-            if ((*ret_id = H5D_get_create_plist(dset)) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get creation property list for dataset")
+            if ((args->args.get_dcpl.dcpl_id = H5D_get_create_plist(dset)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get creation property list for dataset")
 
             break;
         }
 
         /* H5Dget_access_plist */
         case H5VL_DATASET_GET_DAPL: {
-            hid_t *ret_id = HDva_arg(arguments, hid_t *);
-
-            if ((*ret_id = H5D_get_access_plist(dset)) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get access property list for dataset")
+            if ((args->args.get_dapl.dapl_id = H5D_get_access_plist(dset)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get access property list for dataset")
 
             break;
         }
 
         /* H5Dget_storage_size */
         case H5VL_DATASET_GET_STORAGE_SIZE: {
-            hsize_t *ret = HDva_arg(arguments, hsize_t *);
-
-            /* Set return value */
-            if (H5D__get_storage_size(dset, ret) < 0)
+            if (H5D__get_storage_size(dset, &args->args.get_storage_size.storage_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of dataset's storage")
             break;
         }
@@ -424,39 +410,33 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type, hid_t H5_ATTR_UNUSED dxpl_id,
-                              void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                              void H5_ATTR_UNUSED **req)
 {
     H5D_t *dset      = (H5D_t *)obj;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (specific_type) {
-        /* H5Dspecific_space */
-        case H5VL_DATASET_SET_EXTENT: { /* H5Dset_extent (H5Dextend - deprecated) */
-            const hsize_t *size = HDva_arg(arguments, const hsize_t *);
-
-            if (H5D__set_extent(dset, size) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
+    switch (args->op_type) {
+        /* H5Dset_extent (H5Dextend - deprecated) */
+        case H5VL_DATASET_SET_EXTENT: {
+            if (H5D__set_extent(dset, args->args.set_extent.size) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set extent of dataset")
             break;
         }
 
-        case H5VL_DATASET_FLUSH: { /* H5Dflush */
-            hid_t dset_id = HDva_arg(arguments, hid_t);
-
-            /* Flush the dataset */
-            if (H5D__flush(dset, dset_id) < 0)
+        /* H5Dflush */
+        case H5VL_DATASET_FLUSH: {
+            if (H5D__flush(dset, args->args.flush.dset_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush dataset")
 
             break;
         }
 
-        case H5VL_DATASET_REFRESH: { /* H5Drefresh */
-            hid_t dset_id = HDva_arg(arguments, hid_t);
-
-            /* Refresh the dataset */
-            if ((H5D__refresh(dset_id, dset)) < 0)
+        /* H5Drefresh */
+        case H5VL_DATASET_REFRESH: {
+            if (H5D__refresh(dset, args->args.refresh.dset_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to refresh dataset")
 
             break;
