@@ -197,18 +197,22 @@ if (UNIX)
     #       testvdsswmr.sh: vds_swmr*
     add_test (H5SHELL-testflushrefresh ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testflushrefresh.sh)
     set_tests_properties (H5SHELL-testflushrefresh PROPERTIES
+            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
     add_test (H5SHELL-test_usecases ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_usecases.sh)
     set_tests_properties (H5SHELL-test_usecases PROPERTIES
+            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
     add_test (H5SHELL-testswmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.sh)
     set_tests_properties (H5SHELL-testswmr PROPERTIES
+            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
     add_test (H5SHELL-testvdsswmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.sh)
     set_tests_properties (H5SHELL-testvdsswmr PROPERTIES
+            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
 

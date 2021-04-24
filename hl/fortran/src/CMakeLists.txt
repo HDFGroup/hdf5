@@ -114,15 +114,15 @@ set (HDF5_HL_F90_F_BASE_SOURCES
 )
 
 if (NOT ONLY_SHARED_LIBS)
-  add_custom_command (
-      OUTPUT ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
+  add_custom_command (TARGET H5HL_buildiface POST_BUILD
+      BYPRODUCTS $H5LTff_gen.F90 H5TBff_gen.F90
       COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5HL_buildiface>
       WORKING_DIRECTORY ${HDF5_HL_F90_BINARY_DIR}/static
       DEPENDS ${HDF5_HL_F90_F_BASE_SOURCES}
       COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 files"
   )
   add_custom_target (H5HLgen ALL
-      DEPENDS ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
+      DEPENDS H5HL_buildiface ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
   )
   set_source_files_properties (
       ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90
@@ -131,15 +131,15 @@ if (NOT ONLY_SHARED_LIBS)
   )
 endif ()
 if (BUILD_SHARED_LIBS)
-  add_custom_command (
-      OUTPUT ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/shared/H5TBff_gen.F90
+  add_custom_command (TARGET H5HL_buildiface POST_BUILD
+      BYPRODUCTS H5LTff_gen.F90 H5TBff_gen.F90
       COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5HL_buildiface>
       WORKING_DIRECTORY ${HDF5_HL_F90_BINARY_DIR}/shared
       DEPENDS ${HDF5_HL_F90_F_BASE_SOURCES}
       COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 shared files"
   )
   add_custom_target (H5HLgenSH ALL
-      DEPENDS ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/shared/H5TBff_gen.F90
+      DEPENDS H5HL_buildiface ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/shared/H5TBff_gen.F90
   )
   set_source_files_properties (
       ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90
