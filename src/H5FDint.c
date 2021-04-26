@@ -1487,7 +1487,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t t
         /* verify no duplicate entries */
         i = 1;
 
-        while ((*vector_was_sorted) && (i < (int)(count - 1))) {
+        while (i < (int)(count - 1)) {
 
             HDassert(H5F_addr_lt(srt_tmp[i - 1].addr, srt_tmp[i].addr));
 
