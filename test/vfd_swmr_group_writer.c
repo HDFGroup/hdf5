@@ -35,6 +35,7 @@ typedef struct {
    unsigned int nsteps;
    unsigned int update_interval;
    bool use_vfd_swmr;
+   bool old_style_grp;
    bool use_named_pipes;
    char at_pattern;
    bool attr_test;
@@ -52,6 +53,7 @@ typedef struct {
         .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
         .filetype = H5T_NATIVE_UINT32, .asteps = 10, .csteps = 10, .nsteps = 100, .update_interval = READER_WAIT_TICKS,   \
         .use_vfd_swmr = true,                                                                                \
+        .old_style_grp = false,                                                                              \
         .use_named_pipes = true                                                                              \
         , .at_pattern = ' '                 \
         , .attr_test = false                \
@@ -67,10 +69,11 @@ typedef struct {
 static void
 usage(const char *progname)
 {
-    fprintf(stderr, "usage: %s [-S] [-a steps] [-b] [-c]\n"
+    fprintf(stderr, "usage: %s [-S] [-G] [-a steps] [-b] [-c]\n"
                 "    [-n iterations] [-N] [-q] [-u numb_ticks] [-A at_pattern]\n"
         "\n"
         "-S:             do not use VFD SWMR\n"
+        "-G:             old-style type of group\n"
         "-a steps:       `steps` between adding attributes\n"
         "-b:             write data in big-endian byte order\n"
         "-c steps:       `steps` between communication between the writer and reader\n"
@@ -127,10 +130,13 @@ state_init(state_t *s, int argc, char **argv)
     if (tfile)
         HDfree(tfile);
 
-    while ((ch = getopt(argc, argv, "Sa:bc:n:Nqu:A:")) != -1) {
+    while ((ch = getopt(argc, argv, "SGa:bc:n:Nqu:A:")) != -1) {
         switch (ch) {
             case 'S':
                 s->use_vfd_swmr = false;
+                break;
+            case 'G':
+                s->old_style_grp = true;
                 break;
             case 'a':
             case 'c':
@@ -1080,13 +1086,17 @@ add_attrs_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which) {
     unsigned min_dense = 0;
     const char* aname_format="attr-%u-%u";
     
-    /* Obtain the maximal number of attributes to be stored in compact
-     * storage and the minimal number of attributes to be stored in
-     * dense storage. */
-    if(H5Pget_attr_phase_change(gcpl, &max_compact, &min_dense)<0) {
-        H5_FAILED(); AT();
-        printf("H5Pget_attr_phase_change() failed\n");
-        goto error;
+    if(s->old_style_grp) 
+        max_compact = 2;
+    else {
+        /* Obtain the maximal number of attributes to be stored in compact
+         * storage and the minimal number of attributes to be stored in
+         * dense storage. */
+        if(H5Pget_attr_phase_change(gcpl, &max_compact, &min_dense)<0) {
+            H5_FAILED(); AT();
+            printf("H5Pget_attr_phase_change() failed\n");
+            goto error;
+        }
     }
     
     /* Add max_compact attributes, these attributes are stored in
@@ -1580,6 +1590,7 @@ write_group(state_t *s, unsigned int which)
     hid_t g = H5I_INVALID_HID;
     hid_t gcpl = H5I_INVALID_HID;
     bool result = true;
+    H5G_info_t group_info;
 
     if (which >= s->nsteps) {
         H5_FAILED(); AT();
@@ -1589,19 +1600,23 @@ write_group(state_t *s, unsigned int which)
 
     esnprintf(name, sizeof(name), "/group-%d", which);
 
-    gcpl = H5Pcreate(H5P_GROUP_CREATE);
-    if(gcpl <0) {
-        H5_FAILED(); AT();
-        printf("H5Pcreate failed\n");
-        goto error;
-    }
-
-    /* If we test the dense storage, change the attribute phase. */
-    if(s->at_pattern =='d') {
-        if(H5Pset_attr_phase_change(gcpl, 0, 0) <0) {
+    if(s->old_style_grp) 
+        gcpl = H5P_DEFAULT;
+    else {
+        gcpl = H5Pcreate(H5P_GROUP_CREATE);
+        if(gcpl <0) {
             H5_FAILED(); AT();
-            printf("H5Pset_attr_phase_change failed for the dense storage.\n");
+            printf("H5Pcreate failed\n");
             goto error;
+        }
+
+        /* If we test the dense storage, change the attribute phase. */
+        if(s->at_pattern =='d') {
+            if(H5Pset_attr_phase_change(gcpl, 0, 0) <0) {
+                H5_FAILED(); AT();
+                printf("H5Pset_attr_phase_change failed for the dense storage.\n");
+                goto error;
+            }
         }
     }
 
@@ -1612,6 +1627,29 @@ write_group(state_t *s, unsigned int which)
         goto error;
     }
 
+    if(H5Gget_info(g,&group_info) <0) {
+        H5_FAILED(); AT();
+        printf("H5Gget_info failed\n");
+        goto error;
+    }
+ 
+    if(s->old_style_grp) {
+        if(group_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+            H5_FAILED(); AT();
+            printf("Old-styled group test: but the group is not in old-style. \n");
+            goto error;
+        }
+        dbgf(2,"Writer: group is created with the old-style.\n");
+    }
+    else {
+        if(group_info.storage_type == H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+            H5_FAILED(); AT();
+            printf("The created group should NOT be in old-style . \n");
+            goto error;
+        }
+        dbgf(2,"Writer: group is created with the new-style.\n");
+
+    }
     /* If an attribute test is turned on and named pipes are used,
      * the writer should send and receive messages after the group creation.
      * This will distinguish an attribute operation error from an
@@ -1639,7 +1677,7 @@ write_group(state_t *s, unsigned int which)
         goto error;
     }
 
-    if(H5Pclose(gcpl) <0) {
+    if(!s->old_style_grp && H5Pclose(gcpl) <0) {
         H5_FAILED(); AT();
         printf("H5Pclose failed\n");
         goto error;
@@ -1656,7 +1694,8 @@ error2:
 
     H5E_BEGIN_TRY {
         H5Gclose(g);
-        H5Pclose(gcpl);
+        if(!s->old_style_grp)
+            H5Pclose(gcpl);
     } H5E_END_TRY;
 
     return false;
@@ -2571,27 +2610,33 @@ verify_group_attribute(state_t *s, hid_t g, unsigned int which)
      *           "dense-del", "dense-del-to-compact",
      *     the maximal number of attributes for the compact storage
      *     and the minimal number of attributes for the dense storage
-     *     are needed. So obtain them here */
+     *     are needed. So obtain them here 
+     * When testing the old-style group creation case, only max_compact
+     * matters. To reduce the testing time, we set max_compact to 2.*/
     switch (test_pattern) {
         case 'c':
         case 't':
         case 'C':
         case 'D':
         case 'T':
-            if((gcpl = H5Gget_create_plist(g)) < 0) {
-                H5_FAILED(); AT();
-                printf("H5Gget_create_plist failed\n");
-                goto error;
-            }
-            if (H5Pget_attr_phase_change(gcpl,&max_compact,&min_dense) < 0) {
-                H5_FAILED(); AT();
-                printf("H5Pget_attr_phase_change failed\n");
-                goto error;
-            }
-            if(H5Pclose(gcpl) < 0) {
-                H5_FAILED(); AT();
-                printf("H5Pclose failed\n");
-                goto error;
+            if(s->old_style_grp) 
+                max_compact = 2;
+            else {
+                if((gcpl = H5Gget_create_plist(g)) < 0) {
+                    H5_FAILED(); AT();
+                    printf("H5Gget_create_plist failed\n");
+                    goto error;
+                }
+                if (H5Pget_attr_phase_change(gcpl,&max_compact,&min_dense) < 0) {
+                    H5_FAILED(); AT();
+                    printf("H5Pget_attr_phase_change failed\n");
+                    goto error;
+                }
+                if(H5Pclose(gcpl) < 0) {
+                    H5_FAILED(); AT();
+                    printf("H5Pclose failed\n");
+                    goto error;
+                }
             }
             break;
         case 'v':
@@ -2681,6 +2726,7 @@ verify_group(state_t *s, unsigned int which)
     char name[sizeof("/group-9999999999")];
     hid_t g = H5I_INVALID_HID;
     bool result = true;
+    H5G_info_t group_info;
 
     /* The reader receives a message from the writer.Then sleep
      * for a few ticks or stop the test if the received message 
@@ -2710,6 +2756,31 @@ verify_group(state_t *s, unsigned int which)
         H5_FAILED(); AT();
         printf("H5Gopen failed\n");
         goto error;
+    }
+
+    if(H5Gget_info(g,&group_info) <0) {
+        H5_FAILED(); AT();
+        printf("H5Gget_info failed\n");
+        goto error;
+    }
+ 
+    dbgf(2,"Storage info is %d\n",group_info.storage_type);
+    if(s->old_style_grp) {
+        if(group_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+            H5_FAILED(); AT();
+            printf("Reader - Old-styled group: but the group is not in old-style. \n");
+            goto error;
+        }
+        dbgf(2,"Reader: verify that the group is created with the old-style.\n");
+    }
+    else {
+        if(group_info.storage_type == H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+            H5_FAILED(); AT();
+            printf("Reader - The created group should NOT be in old-style . \n");
+            goto error;
+        }
+        dbgf(2,"Reader: verify that the group is created with the new-style.\n");
+
     }
 
     /* Reader sends an OK message back to the reader */
@@ -2790,8 +2861,12 @@ main(int argc, char **argv)
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
     init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./group-shadow");
 
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, &config)) < 0) {
+    /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
+     * as the second parameter of H5Pset_libver_bound() that is called by
+     * vfd_swmr_create_fapl. Otherwise, the latest file format(H5F_LIBVER_LATEST) 
+     * should be used as the second parameter of H5Pset_libver_bound().
+     * Also pass the use_vfd_swmr, only_meta_page, config to vfd_swmr_create_fapl().*/
+    if ((fapl = vfd_swmr_create_fapl(!s.old_style_grp, s.use_vfd_swmr, true, &config)) < 0) {
         H5_FAILED(); AT();
         printf("vfd_swmr_create_fapl failed\n");
         goto error;

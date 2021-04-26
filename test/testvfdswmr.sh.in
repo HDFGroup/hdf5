@@ -156,7 +156,7 @@ if [ $rc -ne 0 ] ; then
 fi
 
 all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo groups attrdset"
-all_tests="${all_tests} groups_attrs few_big many_small"
+all_tests="${all_tests} groups_attrs os_groups_attrs few_big many_small"
 tests=${all_tests}
 
 if [ $# -gt 0 ]; then
@@ -786,6 +786,71 @@ for options in ${grp_attr_list[*]}; do
 	rm -f vfd_swmr_group_writer.{out,rc}
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 done
+
+# The following tests are for add/del/modify attributes for
+# groups created with the old-style. 
+# Check https://portal.hdfgroup.org/display/HDF5/Groups for 
+# the detailed group implementation note. 
+# The 'compact' and 'compact-del' are the attribute addition
+# and deletion tests. Other test names have the same meaning 
+# as those of the new-style group tests.
+# 
+os_grp_attr_list=(
+                "compact"
+                "compact-del"
+                "modify"
+                "vstr"
+                "remove-vstr"
+                "modify-vstr"
+               )
+os_grp_sub_attr_list=(
+                "modify"
+                "remove-vstr"
+                "modify-vstr"
+               )
+if [[ "$HDF5TestExpress" -gt 0 ]] ; then       #Setting for standard run
+    os_grp_attr_list=("${os_grp_sub_attr_list[@]}")
+fi
+
+for options in ${os_grp_attr_list[*]}; do
+	if [ ${do_os_groups_attrs:-no} = no ]; then
+		continue
+	fi
+	echo launch vfd_swmr_group attribute with old-style group: $options
+	catch_out_err_and_rc vfd_swmr_group_writer \
+	    ../vfd_swmr_group_writer -q -G -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_group_reader -q -G -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_group_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_group_writer.{out,rc}
+	rm -f vfd_swmr_group_reader.*.{out,rc}
+done
+
+
+
 
 for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
 	if [ ${do_many_small:-no} = no ]; then
