@@ -47,6 +47,33 @@
 /* Local Typedefs */
 /******************/
 
+/*************************************************************************
+ *
+ * H5FD_vsrt_tmp_t
+ *
+ * Structure used to store vector I/O request addresses and the associated
+ * indexes in the addrs[] array for the purpose of determine the sorted
+ * order.
+ *
+ * This is done by allocating an array of H5FD_vsrt_tmp_t of length
+ * count, loading it with the contents of the addrs[] array and the
+ * associated indicies, and then sorting it.
+ *
+ * This sorted array of H5FD_vsrt_tmp_t is then used to populate sorted
+ * versions of the types[], addrs[], sizes[] and bufs[] vectors.
+ *
+ * addr:        haddr_t containing the value of addrs[i],
+ *
+ * index:       integer containing the value of i used to obtain the
+ *              value of the addr field from the addrs[] vector.
+ *
+ *************************************************************************/
+
+typedef struct H5FD_vsrt_tmp_t {
+    haddr_t addr;
+    int     index;
+} H5FD_vsrt_tmp_t;
+
 /********************/
 /* Package Typedefs */
 /********************/
@@ -348,19 +375,48 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
      * objects being written within the file by the application performing
      * SWMR write operations.
      */
-    if (!(file->access_flags & H5F_ACC_SWMR_READ)) {
+    if ((!(file->access_flags & H5F_ACC_SWMR_READ)) && (count > 0)) {
         haddr_t eoa;
+
+        extend_sizes = FALSE;
+        extend_types = FALSE;
 
         for (i = 0; i < count; i++) {
 
-            if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, types[i])))
+            if (!extend_sizes) {
+
+                if (sizes[i] == 0) {
+
+                    extend_sizes = TRUE;
+                    size         = sizes[i - 1];
+                }
+                else {
+
+                    size = sizes[i];
+                }
+            }
+
+            if (!extend_types) {
+
+                if (types[i] == H5FD_MEM_NOLIST) {
+
+                    extend_types = TRUE;
+                    type         = types[i - 1];
+                }
+                else {
+
+                    type = types[i];
+                }
+            }
+
+            if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
 
-            if ((addrs[i] + sizes[i]) > eoa)
+            if ((addrs[i] + size) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                             "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu", (int)i,
-                            (unsigned long long)(addrs[i]), (int)i, (unsigned long long)sizes[i],
+                            (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
                             (unsigned long long)eoa)
         }
     }
@@ -525,17 +581,46 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
         addrs_cooked = TRUE;
     }
 
+    extend_sizes = FALSE;
+    extend_types = FALSE;
+
     for (i = 0; i < count; i++) {
 
-        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, types[i])))
+        if (!extend_sizes) {
+
+            if (sizes[i] == 0) {
+
+                extend_sizes = TRUE;
+                size         = sizes[i - 1];
+            }
+            else {
+
+                size = sizes[i];
+            }
+        }
+
+        if (!extend_types) {
+
+            if (types[i] == H5FD_MEM_NOLIST) {
+
+                extend_types = TRUE;
+                type         = types[i - 1];
+            }
+            else {
+
+                type = types[i];
+            }
+        }
+
+        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
 
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
 
-        if ((addrs[i] + sizes[i]) > eoa)
+        if ((addrs[i] + size) > eoa)
 
             HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, \
                         eoa = %llu",
-                        (int)i, (unsigned long long)(addrs[i]), (int)i, (unsigned long long)sizes[i],
+                        (int)i, (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
                         (unsigned long long)eoa)
     }
 
@@ -1248,3 +1333,258 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_driver_query() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_sort_vector_io_req
+ *
+ * Purpose:     Determine whether the supplied vector I/O request is
+ *              sorted.
+ *
+ *              if is is, set *vector_was_sorted to TRUE, set:
+ *
+ *                 *s_types_ptr = types
+ *                 *s_addrs_ptr = addrs
+ *                 *s_sizes_ptr = sizes
+ *                 *s_bufs_ptr = bufs
+ *
+ *              and return.
+ *
+ *              If it is not sorted, duplicate the type, addrs, sizes,
+ *              and bufs vectors, storing the base addresses of the new
+ *              vectors in *s_types_ptr, *s_addrs_ptr, *s_sizes_ptr, and
+ *              *s_bufs_ptr respectively.  Determine the sorted order
+ *              of the vector I/O request, and load it into the new
+ *              vectors in sorted order.
+ *
+ *              Note that in this case, it is the callers responsibility
+ *              to free the sorted vectors.
+ *
+ *                                            JRM -- 3/15/21
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static int
+H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
+{
+    haddr_t addr_1    = ((const H5FD_vsrt_tmp_t *)element_1)->addr;
+    haddr_t addr_2    = ((const H5FD_vsrt_tmp_t *)element_2)->addr;
+    int     ret_value = 0; /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(H5F_addr_defined(addr_1));
+    HDassert(H5F_addr_defined(addr_2));
+
+    if (H5F_addr_gt(addr_1, addr_2)) {
+
+        ret_value = 1;
+    }
+    else if (H5F_addr_lt(addr_1, addr_2)) {
+
+        ret_value = -1;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__vsrt_tmp_cmp() */
+
+herr_t
+H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                        size_t sizes[], void *bufs[], H5FD_mem_t **s_types_ptr, haddr_t **s_addrs_ptr,
+                        size_t **s_sizes_ptr, void ***s_bufs_ptr)
+{
+    herr_t                  ret_value = SUCCEED; /* Return value */
+    int                     i;
+    struct H5FD_vsrt_tmp_t *srt_tmp = NULL;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(vector_was_sorted);
+
+    HDassert((types) || (count == 0));
+    HDassert((addrs) || (count == 0));
+    HDassert((sizes) || (count == 0));
+    HDassert((bufs) || (count == 0));
+
+    /* verify that the first elements of the sizes and types arrays are
+     * valid.
+     */
+    HDassert((count == 0) || (sizes[0] != 0));
+    HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+
+    HDassert((count == 0) || ((s_types_ptr) && (NULL == *s_types_ptr)));
+    HDassert((count == 0) || ((s_addrs_ptr) && (NULL == *s_addrs_ptr)));
+    HDassert((count == 0) || ((s_sizes_ptr) && (NULL == *s_sizes_ptr)));
+    HDassert((count == 0) || ((s_bufs_ptr) && (NULL == *s_bufs_ptr)));
+
+    *vector_was_sorted = TRUE;
+
+    /* if count <= 1, vector is sorted by definition */
+    if (count > 1) {
+
+        /* scan the addrs array to see if it is sorted */
+        i = 1;
+
+        while ((*vector_was_sorted) && (i < (int)(count - 1))) {
+
+            if (H5F_addr_gt(addrs[i - 1], addrs[i])) {
+
+                *vector_was_sorted = FALSE;
+            }
+            else if (H5F_addr_eq(addrs[i - 1], addrs[i])) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector")
+            }
+            i++;
+        }
+    }
+
+    if (*vector_was_sorted) {
+
+        *s_types_ptr = types;
+        *s_addrs_ptr = addrs;
+        *s_sizes_ptr = sizes;
+        *s_bufs_ptr  = bufs;
+    }
+    else {
+
+        /* must sort the addrs array in increasing addr order, while
+         * maintaining the association between each addr, and the
+         * sizes[], types[], and bufs[] values at the same index.
+         *
+         * Do this by allocating an array of struct H5FD_vsrt_tmp_t, where
+         * each instance of H5FD_vsrt_tmp_t has two fields, addr and index.
+         * Load the array with the contents of the addrs array and
+         * the index of the associated entry. Sort the array, allocate
+         * the s_types_ptr, s_addrs_ptr, s_sizes_ptr, and s_bufs_ptr
+         * arrays and populate them using the mapping provided by
+         * the sorted array of H5FD_vsrt_tmp_t.
+         */
+        int    j;
+        int    fixed_size_index = (int)count;
+        int    fixed_type_index = (int)count;
+        size_t srt_tmp_size;
+
+        srt_tmp_size = ((size_t)count * sizeof(struct H5FD_vsrt_tmp_t));
+
+        if (NULL == (srt_tmp = (H5FD_vsrt_tmp_t *)HDmalloc(srt_tmp_size)))
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp")
+
+        for (i = 0; i < (int)count; i++) {
+
+            srt_tmp[i].addr  = addrs[i];
+            srt_tmp[i].index = i;
+        }
+
+        /* sort the srt_tmp array */
+        HDqsort(srt_tmp, (size_t)count, sizeof(struct H5FD_vsrt_tmp_t), H5FD__vsrt_tmp_cmp);
+
+        /* verify no duplicate entries */
+        i = 1;
+
+        while (i < (int)(count - 1)) {
+
+            HDassert(H5F_addr_lt(srt_tmp[i - 1].addr, srt_tmp[i].addr));
+
+            if (H5F_addr_eq(addrs[i - 1], addrs[i])) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector")
+            }
+            i++;
+        }
+
+        if ((NULL == (*s_types_ptr = (H5FD_mem_t *)HDmalloc((size_t)count * sizeof(H5FD_mem_t)))) ||
+            (NULL == (*s_addrs_ptr = (haddr_t *)HDmalloc((size_t)count * sizeof(haddr_t)))) ||
+            (NULL == (*s_sizes_ptr = (size_t *)HDmalloc((size_t)count * sizeof(size_t)))) ||
+            (NULL == (*s_bufs_ptr = (void *)HDmalloc((size_t)count * sizeof(void *))))) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted vector(s)")
+        }
+
+        HDassert(sizes[0] != 0);
+        HDassert(types[0] != H5FD_MEM_NOLIST);
+
+        /* scan the sizes and types vectors to determine if the fixed size / type
+         * optimization is in use, and if so, to determine the index of the last
+         * valid value on each vector.
+         */
+        i = 0;
+        while ((i < (int)count) && ((fixed_size_index == (int)count) || (fixed_type_index == (int)count))) {
+
+            if ((fixed_size_index == (int)count) && (sizes[i] == 0)) {
+
+                fixed_size_index = i - 1;
+            }
+
+            if ((fixed_type_index == (int)count) && (types[i] == H5FD_MEM_NOLIST)) {
+
+                fixed_type_index = i - 1;
+            }
+
+            i++;
+        }
+
+        HDassert((fixed_size_index >= 0) && (fixed_size_index <= (int)count));
+        HDassert((fixed_type_index >= 0) && (fixed_size_index <= (int)count));
+
+        /* populate the sorted vectors */
+        for (i = 0; i < (int)count; i++) {
+
+            j = srt_tmp[i].index;
+
+            (*s_types_ptr)[j] = types[MIN(i, fixed_type_index)];
+            (*s_addrs_ptr)[j] = addrs[i];
+            (*s_sizes_ptr)[j] = sizes[MIN(i, fixed_size_index)];
+            (*s_bufs_ptr)[j]  = bufs[i];
+        }
+    }
+
+done:
+    if (srt_tmp) {
+
+        HDfree(srt_tmp);
+        srt_tmp = NULL;
+    }
+
+    /* On failure, free the sorted vectors if they were allocated.
+     * Note that we only allocate these vectors if the original array
+     * was not sorted -- thus we check both for failure, and for
+     * the flag indicating that the original vector was not sorted
+     * in increasing address order.
+     */
+    if ((ret_value != SUCCEED) && (!(*vector_was_sorted))) {
+
+        /* free space allocated for sorted vectors */
+        if (*s_types_ptr) {
+
+            HDfree(*s_types_ptr);
+            *s_types_ptr = NULL;
+        }
+
+        if (*s_addrs_ptr) {
+
+            HDfree(*s_addrs_ptr);
+            *s_addrs_ptr = NULL;
+        }
+
+        if (*s_sizes_ptr) {
+
+            HDfree(*s_sizes_ptr);
+            *s_sizes_ptr = NULL;
+        }
+
+        if (*s_bufs_ptr) {
+
+            HDfree(*s_bufs_ptr);
+            *s_bufs_ptr = NULL;
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_sort_vector_io_req() */
