@@ -1368,18 +1368,20 @@ if (NOT WIN32)
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
       COMPONENT libraries
   )
-  #legacy requires a different name
-  configure_file (
-      ${HDF_RESOURCES_DIR}/libh5cc.in
-      ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
-      @ONLY
-  )
-  install (
-      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
-      DESTINATION ${HDF5_INSTALL_BIN_DIR}
-      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT libraries
-  )
+  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+    #legacy requires a different name
+    configure_file (
+        ${HDF_RESOURCES_DIR}/libh5cc.in
+        ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
+        @ONLY
+    )
+    install (
+        FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
+        DESTINATION ${HDF5_INSTALL_BIN_DIR}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+        COMPONENT libraries
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
