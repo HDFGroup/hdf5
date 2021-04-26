@@ -308,7 +308,7 @@ H5I__unwrap(void *object, H5I_type_t type)
 herr_t
 H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 {
-    H5I_clear_type_ud_t udata;               /* udata struct for callback */
+    H5I_clear_type_ud_t udata; /* udata struct for callback */
     H5I_id_info_t *     item      = NULL;
     H5I_id_info_t *     tmp       = NULL;
     herr_t              ret_value = SUCCEED; /* Return value */
@@ -370,9 +370,9 @@ done:
 static herr_t
 H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
 {
-    H5I_id_info_t *      info      = (H5I_id_info_t *)_info;        /* Current ID info being worked with */
-    H5I_clear_type_ud_t *udata     = (H5I_clear_type_ud_t *)_udata; /* udata struct */
-    hbool_t              mark      = FALSE;
+    H5I_id_info_t *      info  = (H5I_id_info_t *)_info;        /* Current ID info being worked with */
+    H5I_clear_type_ud_t *udata = (H5I_clear_type_ud_t *)_udata; /* udata struct */
+    hbool_t              mark  = FALSE;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -485,12 +485,12 @@ H5I__destroy_type(H5I_type_t type)
     }
     H5E_END_TRY /* don't care about errors */
 
-    /* Check if we should release the ID class */
-    if (type_info->cls->flags & H5I_CLASS_IS_APPLICATION)
-        type_info->cls = H5MM_xfree_const(type_info->cls);
+        /* Check if we should release the ID class */
+        if (type_info->cls->flags & H5I_CLASS_IS_APPLICATION)
+            type_info->cls = H5MM_xfree_const(type_info->cls);
 
     HASH_CLEAR(hh, type_info->hash_table);
-    type_info->hash_table     = NULL;
+    type_info->hash_table = NULL;
 
     type_info = H5MM_xfree(type_info);
 
@@ -1581,7 +1581,7 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
 
     /* Only iterate through ID list if it is initialized and there are IDs in type */
     if (type_info && type_info->init_count > 0 && type_info->id_count > 0) {
-        H5I_iterate_ud_t iter_udata;  /* User data for iteration callback */
+        H5I_iterate_ud_t iter_udata; /* User data for iteration callback */
         H5I_id_info_t *  item = NULL;
         H5I_id_info_t *  tmp  = NULL;
 
@@ -1758,7 +1758,7 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
 
     /* Only iterate through ID list if it is initialized and there are IDs in type */
     if (type_info->init_count > 0 && type_info->id_count > 0) {
-        H5I_get_id_ud_t udata;       /* User data */
+        H5I_get_id_ud_t udata; /* User data */
         H5I_id_info_t * item = NULL;
         H5I_id_info_t * tmp  = NULL;
 
