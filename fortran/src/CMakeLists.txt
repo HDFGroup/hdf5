@@ -88,7 +88,7 @@ if (NOT ONLY_SHARED_LIBS)
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E copy_if_different ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90 ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
-      DEPENDS ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
+      DEPENDS H5match_types ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
   )
   set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h PROPERTIES GENERATED TRUE)
   set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90 PROPERTIES GENERATED TRUE)
@@ -101,7 +101,7 @@ if (BUILD_SHARED_LIBS)
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E copy_if_different ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90 ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
-      DEPENDS ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
+      DEPENDS H5match_types ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
   )
   set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h PROPERTIES GENERATED TRUE)
   set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90 PROPERTIES GENERATED TRUE)
@@ -134,10 +134,19 @@ set (f90CStub_C_HDRS
     # generated files
     ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
 )
+add_custom_target (H5gen_i ALL
+    DEPENDS H5match_types ${f90CStub_C_HDRS}
+)
+set_source_files_properties (${f90CStub_C_HDRS} PROPERTIES GENERATED TRUE)
+
 set (f90CStub_C_SHHDRS
     # generated files
     ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
 )
+add_custom_target (H5gen_iSH ALL
+    DEPENDS H5match_types ${f90CStub_C_SHHDRS}
+)
+set_source_files_properties (${f90CStub_C_SHHDRS} PROPERTIES GENERATED TRUE)
 
 if (NOT ONLY_SHARED_LIBS)
   add_library (${HDF5_F90_C_LIB_TARGET} STATIC ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS})
