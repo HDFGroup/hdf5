@@ -139,10 +139,8 @@ static void *H5VL_pass_through_datatype_commit(void *obj, const H5VL_loc_params_
                                                hid_t tapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_pass_through_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
                                              hid_t tapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL_pass_through_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id,
-                                             void **req, va_list arguments);
-static herr_t H5VL_pass_through_datatype_specific(void *obj, H5VL_datatype_specific_t specific_type,
-                                                  hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_pass_through_datatype_get(void *dt, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
+static herr_t H5VL_pass_through_datatype_specific(void *obj, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_datatype_optional(void *obj, H5VL_datatype_optional_t opt_type, hid_t dxpl_id,
                                                   void **req, va_list arguments);
 static herr_t H5VL_pass_through_datatype_close(void *dt, hid_t dxpl_id, void **req);
@@ -1477,8 +1475,7 @@ H5VL_pass_through_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req,
-                               va_list arguments)
+H5VL_pass_through_datatype_get(void *dt, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)dt;
     herr_t               ret_value;
@@ -1487,7 +1484,7 @@ H5VL_pass_through_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxp
     printf("------- PASS THROUGH VOL DATATYPE Get\n");
 #endif
 
-    ret_value = H5VLdatatype_get(o->under_object, o->under_vol_id, get_type, dxpl_id, req, arguments);
+    ret_value = H5VLdatatype_get(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
@@ -1507,8 +1504,8 @@ H5VL_pass_through_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxp
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_datatype_specific(void *obj, H5VL_datatype_specific_t specific_type, hid_t dxpl_id,
-                                    void **req, va_list arguments)
+H5VL_pass_through_datatype_specific(void *obj, H5VL_datatype_specific_args_t *args, hid_t dxpl_id,
+                                    void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     hid_t                under_vol_id;
@@ -1523,8 +1520,7 @@ H5VL_pass_through_datatype_specific(void *obj, H5VL_datatype_specific_t specific
      */
     under_vol_id = o->under_vol_id;
 
-    ret_value =
-        H5VLdatatype_specific(o->under_object, o->under_vol_id, specific_type, dxpl_id, req, arguments);
+    ret_value = H5VLdatatype_specific(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)

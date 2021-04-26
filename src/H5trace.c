@@ -3031,6 +3031,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5VL_datatype_get_t get = (H5VL_datatype_get_t)HDva_arg(ap, int);
 
                             switch (get) {
+                                case H5VL_DATATYPE_GET_BINARY_SIZE:
+                                    H5RS_acat(rs, "H5VL_DATATYPE_GET_BINARY_SIZE");
+                                    break;
+
                                 case H5VL_DATATYPE_GET_BINARY:
                                     H5RS_acat(rs, "H5VL_DATATYPE_GET_BINARY");
                                     break;

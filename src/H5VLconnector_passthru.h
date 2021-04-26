@@ -128,12 +128,8 @@ H5_DLL void * H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params
                                   hid_t dxpl_id, void **req);
 H5_DLL void * H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                                 const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_t get_type, hid_t dxpl_id,
-                               void **req, va_list arguments);
-H5_DLL herr_t H5VLdatatype_get_vararg(void *dt, hid_t connector_id, H5VL_datatype_get_t get_type,
-                                      hid_t dxpl_id, void **req, ...);
-H5_DLL herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_t specific_type,
-                                    hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLdatatype_specific_vararg(void *obj, hid_t connector_id,
                                            H5VL_datatype_specific_t specific_type, hid_t dxpl_id, void **req,
                                            ...);

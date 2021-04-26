@@ -266,7 +266,7 @@ H5VL__native_group_specific(void *obj, H5VL_group_specific_t specific_type, hid_
             hid_t group_id = HDva_arg(arguments, hid_t);
 
             /* Call private function to refresh group object */
-            if ((H5O_refresh_metadata(group_id, grp->oloc)) < 0)
+            if ((H5O_refresh_metadata(&grp->oloc, group_id)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to refresh group")
 
             break;

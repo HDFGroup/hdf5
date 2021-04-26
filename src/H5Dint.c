@@ -3973,7 +3973,7 @@ H5D__refresh(H5D_t *dset, hid_t dset_id)
     } /* end if */
 
     /* Refresh dataset object */
-    if ((H5O_refresh_metadata(dset_id, dset->oloc)) < 0)
+    if ((H5O_refresh_metadata(&dset->oloc, dset_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh dataset")
 
 done:

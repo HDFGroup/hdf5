@@ -294,12 +294,58 @@ typedef int H5VL_dataset_optional_t;
 
 /* Values for datatype 'get' operation */
 typedef enum H5VL_datatype_get_t {
-    H5VL_DATATYPE_GET_BINARY, /* get serialized form of transient type    */
-    H5VL_DATATYPE_GET_TCPL    /* datatype creation property list          */
+    H5VL_DATATYPE_GET_BINARY_SIZE, /* Get size of serialized form of transient type */
+    H5VL_DATATYPE_GET_BINARY,      /* Get serialized form of transient type         */
+    H5VL_DATATYPE_GET_TCPL         /* Datatype creation property list               */
 } H5VL_datatype_get_t;
 
+/* Parameters for datatype 'get' operations */
+typedef struct H5VL_datatype_get_args_t {
+    H5VL_datatype_get_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_DATATYPE_GET_BINARY_SIZE */
+        struct {
+            size_t size;        /* Size of serialized form of datatype */
+        } get_binary_size;
+
+        /* H5VL_DATATYPE_GET_BINARY */
+        struct {
+            void *buf;          /* Buffer to store serialized form of datatype */
+            size_t buf_size;    /* Size of serialized datatype buffer */
+        } get_binary;
+
+        /* H5VL_DATATYPE_GET_TCPL */
+        struct {
+            hid_t tcpl_id; /* Named datatype creation property list ID */
+        } get_tcpl;
+    } args;
+} H5VL_datatype_get_args_t;
+
 /* Values for datatype 'specific' operation */
-typedef enum H5VL_datatype_specific_t { H5VL_DATATYPE_FLUSH, H5VL_DATATYPE_REFRESH } H5VL_datatype_specific_t;
+typedef enum H5VL_datatype_specific_t {
+    H5VL_DATATYPE_FLUSH,
+    H5VL_DATATYPE_REFRESH
+} H5VL_datatype_specific_t;
+
+/* Parameters for datatype 'specific' operations */
+typedef struct H5VL_datatype_specific_args_t {
+    H5VL_datatype_specific_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_DATATYPE_FLUSH */
+        struct {
+            hid_t type_id;      /* Named datatype ID */
+        } flush;
+
+        /* H5VL_DATATYPE_REFRESH */
+        struct {
+            hid_t type_id;      /* Named datatype ID */
+        } refresh;
+    } args;
+} H5VL_datatype_specific_args_t;
 
 /* Typedef and values for native VOL connector named datatype optional VOL operations */
 typedef int H5VL_datatype_optional_t;
@@ -497,9 +543,8 @@ typedef struct H5VL_datatype_class_t {
                     hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
     void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t tapl_id,
                   hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_datatype_specific_t specific_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*get)(void *obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
+    herr_t (*specific)(void *obj, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, H5VL_datatype_optional_t opt_type, hid_t dxpl_id, void **req,
                        va_list arguments);
     herr_t (*close)(void *dt, hid_t dxpl_id, void **req);
