@@ -29,9 +29,6 @@
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Ipkg.h"      /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
-#ifndef H5_USE_ID_HASH_TABLE
-#include "H5SLprivate.h" /* Skip Lists                               */
-#endif
 #include "H5Tprivate.h"  /* Datatypes                                */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
@@ -136,11 +133,7 @@ H5I_term_package(void)
 
         /* Count the number of types still in use */
         for (i = 0; i < H5I_next_type_g; i++)
-#ifdef H5_USE_ID_HASH_TABLE
             if ((type_info = H5I_type_info_array_g[i]) && type_info->hash_table)
-#else
-            if ((type_info = H5I_type_info_array_g[i]) && type_info->ids)
-#endif
                 in_use++;
 
         /* If no types are still being used then clean up */
@@ -148,11 +141,7 @@ H5I_term_package(void)
             for (i = 0; i < H5I_next_type_g; i++) {
                 type_info = H5I_type_info_array_g[i];
                 if (type_info) {
-#ifdef H5_USE_ID_HASH_TABLE
                     HDassert(NULL == type_info->hash_table);
-#else
-                    HDassert(NULL == type_info->ids);
-#endif
                     type_info                = H5MM_xfree(type_info);
                     H5I_type_info_array_g[i] = NULL;
                     in_use++;
@@ -209,12 +198,7 @@ H5I_register_type(const H5I_class_t *cls)
         type_info->id_count     = 0;
         type_info->nextid       = cls->reserved;
         type_info->last_id_info = NULL;
-#ifdef H5_USE_ID_HASH_TABLE
         type_info->hash_table   = NULL;
-#else
-        if (NULL == (type_info->ids = H5SL_create(H5SL_TYPE_HID, NULL)))
-            HGOTO_ERROR(H5E_ID, H5E_CANTCREATE, FAIL, "skip list creation failed")
-#endif
     }
 
     /* Increment the count of the times this type has been initialized */
@@ -222,15 +206,9 @@ H5I_register_type(const H5I_class_t *cls)
 
 done:
     /* Clean up on error */
-    if (ret_value < 0) {
-        if (type_info) {
-#ifndef H5_USE_ID_HASH_TABLE
-            if (type_info->ids)
-                H5SL_close(type_info->ids);
-#endif
+    if (ret_value < 0)
+        if (type_info)
             H5MM_free(type_info);
-        }
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register_type() */
@@ -331,10 +309,8 @@ herr_t
 H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 {
     H5I_clear_type_ud_t udata;               /* udata struct for callback */
-#ifdef H5_USE_ID_HASH_TABLE
     H5I_id_info_t *     item      = NULL;
     H5I_id_info_t *     tmp       = NULL;
-#endif
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -350,8 +326,6 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
     /* Finish constructing udata */
     udata.force   = force;
     udata.app_ref = app_ref;
-
-#ifdef H5_USE_ID_HASH_TABLE
 
     /* Set marking flag */
     H5I_marking_g = TRUE;
@@ -375,12 +349,6 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
             item = H5FL_FREE(H5I_id_info_t, item);
         }
     }
-
-#else
-    /* Attempt to free all ids in the type */
-    if (H5SL_try_free_safe(udata.type_info->ids, H5I__clear_type_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, FAIL, "can't free ids in type")
-#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -468,13 +436,8 @@ H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
 
         /* Remove ID if requested */
         if (mark) {
-#ifdef H5_USE_ID_HASH_TABLE
             /* Mark ID for deletion */
             info->marked = TRUE;
-#else
-            /* Free ID info */
-            info = H5FL_FREE(H5I_id_info_t, info);
-#endif
 
             /* Decrement the number of IDs in the type */
             udata->type_info->id_count--;
@@ -526,14 +489,8 @@ H5I__destroy_type(H5I_type_t type)
     if (type_info->cls->flags & H5I_CLASS_IS_APPLICATION)
         type_info->cls = H5MM_xfree_const(type_info->cls);
 
-#ifdef H5_USE_ID_HASH_TABLE
     HASH_CLEAR(hh, type_info->hash_table);
     type_info->hash_table     = NULL;
-#else
-    if (H5SL_close(type_info->ids) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTCLOSEOBJ, FAIL, "can't close skip list")
-    type_info->ids = NULL;
-#endif
 
     type_info = H5MM_xfree(type_info);
 
@@ -594,12 +551,7 @@ H5I__register(H5I_type_t type, const void *object, hbool_t app_ref, H5I_future_r
     info->marked     = FALSE;
 
     /* Insert into the type */
-#ifdef H5_USE_ID_HASH_TABLE
     HASH_ADD(hh, type_info->hash_table, id, sizeof(hid_t), info);
-#else
-    if (H5SL_insert(type_info->ids, info, &info->id) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert ID node into skip list")
-#endif
     type_info->id_count++;
     type_info->nextid++;
 
@@ -711,12 +663,7 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
     info->marked     = FALSE;
 
     /* Insert into the type */
-#ifdef H5_USE_ID_HASH_TABLE
     HASH_ADD(hh, type_info->hash_table, id, sizeof(hid_t), info);
-#else
-    if (H5SL_insert(type_info->ids, info, &info->id) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTINSERT, FAIL, "can't insert ID node into skip list")
-#endif
     type_info->id_count++;
 
     /* Set the most recent ID to this object */
@@ -970,7 +917,6 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     /* Sanity check */
     HDassert(type_info);
 
-#ifdef H5_USE_ID_HASH_TABLE
     /* Delete or mark the node */
     HASH_FIND(hh, type_info->hash_table, &id, sizeof(hid_t), info);
     if (info) {
@@ -982,11 +928,6 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     }
     else
         HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, NULL, "can't remove ID node from hash table")
-#else
-    /* Get the ID node for the ID */
-    if (NULL == (info = (H5I_id_info_t *)H5SL_remove(type_info->ids, &id)))
-        HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, NULL, "can't remove ID node from skip list")
-#endif
 
     /* Check if this ID was the last one accessed */
     if (type_info->last_id_info == info)
@@ -996,12 +937,8 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
     H5_GCC_DIAG_ON("cast-qual")
 
-#ifdef H5_USE_ID_HASH_TABLE
     if (!H5I_marking_g)
         info = H5FL_FREE(H5I_id_info_t, info);
-#else
-    info = H5FL_FREE(H5I_id_info_t, info);
-#endif
 
     /* Decrement the number of IDs in the type */
     (type_info->id_count)--;
@@ -1645,12 +1582,8 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
     /* Only iterate through ID list if it is initialized and there are IDs in type */
     if (type_info && type_info->init_count > 0 && type_info->id_count > 0) {
         H5I_iterate_ud_t iter_udata;  /* User data for iteration callback */
-#ifdef H5_USE_ID_HASH_TABLE
         H5I_id_info_t *  item = NULL;
         H5I_id_info_t *  tmp  = NULL;
-#else
-        herr_t           iter_status; /* Iteration status */
-#endif
 
         /* Set up iterator user data */
         iter_udata.user_func  = func;
@@ -1658,7 +1591,6 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
         iter_udata.app_ref    = app_ref;
         iter_udata.obj_type   = type;
 
-#ifdef H5_USE_ID_HASH_TABLE
         /* Iterate over IDs */
         HASH_ITER(hh, type_info->hash_table, item, tmp)
         {
@@ -1670,11 +1602,6 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
                     break;
             }
         }
-#else
-        /* Iterate over IDs */
-        if ((iter_status = H5SL_iterate(type_info->ids, H5I__iterate_cb, &iter_udata)) < 0)
-            HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed")
-#endif
     }
 
 done:
@@ -1715,12 +1642,8 @@ H5I__find_id(hid_t id)
     if (type_info->last_id_info && type_info->last_id_info->id == id)
         id_info = type_info->last_id_info;
     else {
-#ifdef H5_USE_ID_HASH_TABLE
         HASH_FIND(hh, type_info->hash_table, &id, sizeof(hid_t), id_info);
-#else
-        /* Locate the ID node for the ID */
-        id_info = (H5I_id_info_t *)H5SL_search(type_info->ids, &id);
-#endif
+
         /* Remember this ID */
         type_info->last_id_info = id_info;
     }
@@ -1836,12 +1759,8 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
     /* Only iterate through ID list if it is initialized and there are IDs in type */
     if (type_info->init_count > 0 && type_info->id_count > 0) {
         H5I_get_id_ud_t udata;       /* User data */
-#ifdef H5_USE_ID_HASH_TABLE
         H5I_id_info_t * item = NULL;
         H5I_id_info_t * tmp  = NULL;
-#else
-        herr_t          iter_status; /* Iteration status */
-#endif
 
         /* Set up iterator user data */
         udata.object   = object;
@@ -1849,7 +1768,6 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
         udata.ret_id   = H5I_INVALID_HID;
 
         /* Iterate over IDs for the ID type */
-#ifdef H5_USE_ID_HASH_TABLE
         HASH_ITER(hh, type_info->hash_table, item, tmp)
         {
             int ret = H5I__find_id_cb((void *)item, NULL, (void *)&udata);
@@ -1858,10 +1776,7 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
             if (H5_ITER_STOP == ret)
                 break;
         }
-#else
-        if ((iter_status = H5SL_iterate(type_info->ids, H5I__find_id_cb, &udata)) < 0)
-            HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed")
-#endif
+
         *id = udata.ret_id;
     }
 
