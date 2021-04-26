@@ -663,13 +663,11 @@ rct_free_cb(void *_obj, void H5_ATTR_UNUSED **_ctx)
          */
         obj->list->objects[i].freeing = TRUE;
 
-#if 0
         /* Decrement the reference count on the object */
         ret = H5Idec_ref(obj->list->objects[i].id);
         CHECK(ret, FAIL, "H5Idec_ref");
         if (ret == FAIL)
             goto error;
-#endif
 
         /* Unset the "freeing" flag */
         obj->list->objects[i].freeing = FALSE;

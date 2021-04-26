@@ -77,7 +77,7 @@ typedef struct {
 /********************/
 
 static void * H5I__unwrap(void *object, H5I_type_t type);
-static htri_t H5I__clear_type_cb(void *_id, void *key, void *udata);
+static herr_t H5I__mark_node(void *_id, void *key, void *udata);
 static void * H5I__remove_common(H5I_type_info_t *type_info, hid_t id);
 static int    H5I__dec_ref(hid_t id, void **request);
 static int    H5I__dec_app_ref(hid_t id, void **request);
@@ -352,16 +352,30 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
     udata.app_ref = app_ref;
 
 #ifdef H5_USE_ID_HASH_TABLE
-    /* This is a "delete-safe" iteration */
+
+    /* Set marking flag */
+    H5I_marking_g = TRUE;
+
+    /* Mark nodes for deletion */
     HASH_ITER(hh, udata.type_info->hash_table, item, tmp)
     {
-        htri_t ret = H5I__clear_type_cb((void *)item, NULL, (void *)&udata);
-
-        if (FAIL == ret)
-            HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed while clearing the ID type")
-        if (TRUE == ret)
-            HASH_DELETE(hh, udata.type_info->hash_table, item);
+        if (!item->marked)
+            if (H5I__mark_node((void *)item, NULL, (void *)&udata) < 0)
+                HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed while clearing the ID type")
     }
+
+    /* Unset marking flag */
+    H5I_marking_g = FALSE;
+
+    /* Perform sweep */
+    HASH_ITER(hh, udata.type_info->hash_table, item, tmp)
+    {
+        if (item->marked) {
+            HASH_DELETE(hh, udata.type_info->hash_table, item);
+            item = H5FL_FREE(H5I_id_info_t, item);
+        }
+    }
+
 #else
     /* Attempt to free all ids in the type */
     if (H5SL_try_free_safe(udata.type_info->ids, H5I__clear_type_cb, &udata) < 0)
@@ -373,24 +387,24 @@ done:
 } /* end H5I_clear_type() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5I__clear_type_cb
+ * Function:    H5I__mark_node
  *
- * Purpose:     Attempts to free the specified ID, calling the free
- *              function for the object.
+ * Purpose:     Attempts to mark the node for freeing and calls the free
+ *              function for the object, if any
  *
- * Return:      TRUE/FALSE/FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Neil Fortner
  *              Friday, July 10, 2015
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
-H5I__clear_type_cb(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
+static herr_t
+H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
 {
     H5I_id_info_t *      info      = (H5I_id_info_t *)_info;        /* Current ID info being worked with */
     H5I_clear_type_ud_t *udata     = (H5I_clear_type_ud_t *)_udata; /* udata struct */
-    htri_t               ret_value = FALSE;                         /* Return value */
+    hbool_t              mark      = FALSE;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -419,12 +433,12 @@ H5I__clear_type_cb(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
 #endif /* H5I_DEBUG */
 
                     /* Indicate node should be removed from list */
-                    ret_value = TRUE;
+                    mark = TRUE;
                 }
             }
             else {
                 /* Indicate node should be removed from list */
-                ret_value = TRUE;
+                mark = TRUE;
             }
         }
         else {
@@ -442,28 +456,33 @@ H5I__clear_type_cb(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
 #endif /* H5I_DEBUG */
 
                     /* Indicate node should be removed from list */
-                    ret_value = TRUE;
+                    mark = TRUE;
                 }
             }
             else {
                 /* Indicate node should be removed from list */
-                ret_value = TRUE;
+                mark = TRUE;
             }
         }
         H5_GCC_DIAG_ON("cast-qual")
 
         /* Remove ID if requested */
-        if (ret_value) {
+        if (mark) {
+#ifdef H5_USE_ID_HASH_TABLE
+            /* Mark ID for deletion */
+            info->marked = TRUE;
+#else
             /* Free ID info */
             info = H5FL_FREE(H5I_id_info_t, info);
+#endif
 
             /* Decrement the number of IDs in the type */
             udata->type_info->id_count--;
         }
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I__clear_type_cb() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5I__mark_node() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5I__destroy_type
@@ -952,10 +971,15 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     HDassert(type_info);
 
 #ifdef H5_USE_ID_HASH_TABLE
-    /* Delete the node */
+    /* Delete or mark the node */
     HASH_FIND(hh, type_info->hash_table, &id, sizeof(hid_t), info);
-    if (info)
-        HASH_DELETE(hh, type_info->hash_table, info);
+    if (info) {
+        HDassert(!info->marked);
+        if (!H5I_marking_g)
+            HASH_DELETE(hh, type_info->hash_table, info);
+        else
+            info->marked = TRUE;
+    }
     else
         HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, NULL, "can't remove ID node from hash table")
 #else
@@ -972,7 +996,12 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
     H5_GCC_DIAG_ON("cast-qual")
 
+#ifdef H5_USE_ID_HASH_TABLE
+    if (!H5I_marking_g)
+        info = H5FL_FREE(H5I_id_info_t, info);
+#else
     info = H5FL_FREE(H5I_id_info_t, info);
+#endif
 
     /* Decrement the number of IDs in the type */
     (type_info->id_count)--;
@@ -1633,11 +1662,13 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
         /* Iterate over IDs */
         HASH_ITER(hh, type_info->hash_table, item, tmp)
         {
-            int ret = H5I__iterate_cb((void *)item, NULL, (void *)&iter_udata);
-            if (H5_ITER_ERROR == ret)
-                HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed")
-            if (H5_ITER_STOP == ret)
-                break;
+            if (!item->marked) {
+                int ret = H5I__iterate_cb((void *)item, NULL, (void *)&iter_udata);
+                if (H5_ITER_ERROR == ret)
+                    HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed")
+                if (H5_ITER_STOP == ret)
+                    break;
+            }
         }
 #else
         /* Iterate over IDs */
