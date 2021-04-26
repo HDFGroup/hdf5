@@ -85,6 +85,7 @@ typedef struct H5I_id_info_t {
     H5I_future_discard_func_t discard_cb; /* 'discard' callback for future object */
 
 #ifdef H5_USE_ID_HASH_TABLE
+    hbool_t        marked;    /* Marked for deletion */
     UT_hash_handle hh;        /* Hash table handle (must be LAST) */
 #endif
 } H5I_id_info_t;

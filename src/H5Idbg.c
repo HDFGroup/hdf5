@@ -88,6 +88,9 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     HDfprintf(stderr, "         id = %" PRIdHID "\n", info->id);
     HDfprintf(stderr, "         count = %u\n", info->count);
     HDfprintf(stderr, "         obj   = 0x%8p\n", info->object);
+#ifdef H5_USE_ID_HASH_TABLE
+    HDfprintf(stderr, "         marked = %d\n", info->marked);
+#endif
 
     /* Get the group location, so we get get the name */
     switch (type) {

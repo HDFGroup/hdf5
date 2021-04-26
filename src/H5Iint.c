@@ -98,6 +98,9 @@ int              H5I_next_type_g = (int)H5I_NTYPES;
 /* Declare a free list to manage the H5I_id_info_t struct */
 H5FL_DEFINE_STATIC(H5I_id_info_t);
 
+/* Whether deletes are actually marks (for mark-and-sweep) */
+hbool_t H5I_marking_g = FALSE;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -569,6 +572,7 @@ H5I__register(H5I_type_t type, const void *object, hbool_t app_ref, H5I_future_r
     info->is_future  = (NULL != realize_cb);
     info->realize_cb = realize_cb;
     info->discard_cb = discard_cb;
+    info->marked     = FALSE;
 
     /* Insert into the type */
 #ifdef H5_USE_ID_HASH_TABLE
@@ -685,6 +689,7 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
     info->is_future  = FALSE;
     info->realize_cb = NULL;
     info->discard_cb = NULL;
+    info->marked     = FALSE;
 
     /* Insert into the type */
 #ifdef H5_USE_ID_HASH_TABLE
