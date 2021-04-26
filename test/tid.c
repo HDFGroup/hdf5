@@ -663,11 +663,13 @@ rct_free_cb(void *_obj, void H5_ATTR_UNUSED **_ctx)
          */
         obj->list->objects[i].freeing = TRUE;
 
+#if 0
         /* Decrement the reference count on the object */
         ret = H5Idec_ref(obj->list->objects[i].id);
         CHECK(ret, FAIL, "H5Idec_ref");
         if (ret == FAIL)
             goto error;
+#endif
 
         /* Unset the "freeing" flag */
         obj->list->objects[i].freeing = FALSE;
@@ -715,7 +717,7 @@ test_remove_clear_type(void)
     for (i = 0; i < RCT_NITER; i++) {
 
         /* The number of members in the type, according to the HDF5 library */
-        hsize_t nmembers = 1234567;
+        hsize_t nmembers = 1234567; /* (init to fake number) */
 
         /* The number of objects found while scanning through the object list */
         int found;
@@ -801,7 +803,7 @@ test_remove_clear_type(void)
         if (ret == FAIL)
             goto error;
         VERIFY(nmembers, found, "The number of members remaining in the type did not match our count");
-        if (nmembers != found)
+        if (nmembers != (hsize_t)found)
             goto error;
 
         /*****************************************
@@ -1386,8 +1388,8 @@ test_ids(void)
         TestErrPrintf("H5Iget_type test failed\n");
     if (test_id_type_list() < 0)
         TestErrPrintf("ID type list test failed\n");
-//    if (test_remove_clear_type() < 0)
-//        TestErrPrintf("ID remove during H5Iclear_type test failed\n");
+    if (test_remove_clear_type() < 0)
+        TestErrPrintf("ID remove during H5Iclear_type test failed\n");
     if (test_future_ids() < 0)
         TestErrPrintf("Future ID test failed\n");
 }
