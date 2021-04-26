@@ -32,6 +32,15 @@
 /* Other private headers needed by this file */
 #include "H5SLprivate.h" /* Skip Lists                               */
 
+/* uthash is an external, header-only hash table implementation.
+ *
+ * We include the file directly in src/ and #define a few functions
+ * to use our internal memory calls.
+ */
+#define uthash_malloc(sz)    H5MM_malloc(sz)
+#define uthash_free(ptr, sz) H5MM_free(ptr) /* Ignoring sz is intentional */
+#include "uthash.h"
+
 /**************************/
 /* Package Private Macros */
 /**************************/
@@ -61,6 +70,8 @@
 /* Package Private Typedefs */
 /****************************/
 
+#define H5_USE_ID_HASH_TABLE
+
 /* ID information structure used */
 typedef struct H5I_id_info_t {
     hid_t       id;        /* ID for this info */
@@ -72,6 +83,10 @@ typedef struct H5I_id_info_t {
     hbool_t                   is_future;  /* Whether this ID represents a future object */
     H5I_future_realize_func_t realize_cb; /* 'realize' callback for future object */
     H5I_future_discard_func_t discard_cb; /* 'discard' callback for future object */
+
+#ifdef H5_USE_ID_HASH_TABLE
+    UT_hash_handle hh;        /* Hash table handle (must be LAST) */
+#endif
 } H5I_id_info_t;
 
 /* Type information structure used */
@@ -81,7 +96,11 @@ typedef struct H5I_type_info_t {
     uint64_t           id_count;     /* Current number of IDs held */
     uint64_t           nextid;       /* ID to use for the next object */
     H5I_id_info_t *    last_id_info; /* Info for most recent ID looked up */
+#ifdef H5_USE_ID_HASH_TABLE
+    H5I_id_info_t *    hash_table;   /* Hash table pointer for this ID type */
+#else
     H5SL_t *           ids;          /* Pointer to skip list that stores IDs */
+#endif
 } H5I_type_info_t;
 
 /*****************************/
@@ -91,12 +110,13 @@ typedef struct H5I_type_info_t {
 /* Array of pointers to ID types */
 H5_DLLVAR H5I_type_info_t *H5I_type_info_array_g[H5I_MAX_NUM_TYPES];
 
-/* Variable to keep track of the number of types allocated.  Its value is the */
-/* next type ID to be handed out, so it is always one greater than the number */
-/* of types. */
-/* Starts at 1 instead of 0 because it makes trace output look nicer.  If more */
-/* types (or IDs within a type) are needed, adjust TYPE_BITS in H5Ipkg.h       */
-/* and/or increase size of hid_t */
+/* Variable to keep track of the number of types allocated.  Its value is the
+ * next type ID to be handed out, so it is always one greater than the number
+ * of types.
+ * Starts at 1 instead of 0 because it makes trace output look nicer.  If more
+ * types (or IDs within a type) are needed, adjust TYPE_BITS in H5Ipkg.h
+ * and/or increase size of hid_t
+ */
 H5_DLLVAR int H5I_next_type_g;
 
 /******************************/
