@@ -29,15 +29,37 @@
 #define H5_MY_PKG_ERR  H5E_DATASET
 #define H5_MY_PKG_INIT YES
 
-/**
- * \defgroup H5D H5D
- * \brief Group Interface
- * \details The HDF5 Dataset Interface, H5D, provides a mechanism for managing
- *          HDF5 datasets, including the transfer of data between memory and
- *          disk and the description of dataset properties.
+/**\defgroup H5D H5D
  *
- *          A Dataset is used by other HDF5 APIs, either by name or by a handle,
- *          which is obtained by either creating or opening the dataset.
+ * Use the functions in this module to manage HDF5 datasets, including the
+ * transfer of data between memory and disk and the description of dataset
+ * properties. Datasets are used by other HDF5 APIs and referenced either by
+ * name or by a handle. Such handles can be obtained by either creating or
+ * opening the dataset.
+ *
+ * Typical stages in the HDF5 dataset life cycle are shown below in introductory
+ * examples.
+ *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5D_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet H5D_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5D_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet H5D_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
  */
 
 #endif /* H5Dmodule_H */
