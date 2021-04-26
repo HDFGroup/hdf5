@@ -1605,7 +1605,7 @@ write_group(state_t *s, unsigned int which)
         }
     }
 
-    if ((g = H5Gcreate2(s->file, name, H5P_DEFAULT, H5P_DEFAULT, 
+    if ((g = H5Gcreate2(s->file, name, H5P_DEFAULT, gcpl, 
                         H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("H5Gcreate2 failed\n");
