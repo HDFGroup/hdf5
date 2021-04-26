@@ -69,7 +69,7 @@ fail_file:;
         unsigned mode        = H5F_ACC_RDONLY;
         char     file_name[] = "d1.h5";
         // assume a priori knowledge of dataset name and size
-        char dset_name[]     = "σύνολο/δεδομένων";
+        char dset_name[] = "σύνολο/δεδομένων";
         int  elts[10];
 
         if ((file = H5Fopen(file_name, mode, H5P_DEFAULT)) == H5I_INVALID_HID) {
