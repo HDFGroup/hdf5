@@ -22,98 +22,102 @@
 #include "H5Ipublic.h"
 
 /* Define atomic datatypes */
-#define H5S_ALL       (hid_t)0
-#define H5S_UNLIMITED HSIZE_UNDEF
+#define H5S_ALL       (hid_t)0    /**< Selection "reflector" */
+#define H5S_UNLIMITED HSIZE_UNDER /**< Unlimited extent      */
 
-/* Define user-level maximum number of dimensions */
+/**
+ * The maximum dataspace rank or number of dimensions
+ */
 #define H5S_MAX_RANK 32
 
 /* Flags for selection iterators */
 #define H5S_SEL_ITER_GET_SEQ_LIST_SORTED                                                                     \
-    0x0001 /* Retrieve elements from iterator                                                                \
-            * in increasing offset order, for                                                                \
-            * each call to retrieve sequences.                                                               \
-            * Currently, this only applies to                                                                \
-            * point selections, as hyperslab                                                                 \
-            * selections are always returned                                                                 \
-            * in increasing offset order.                                                                    \
-            *                                                                                                \
-            * Note that the order is only                                                                    \
-            * increasing for each call to                                                                    \
-            * get_seq_list, the next set of                                                                  \
-            * sequences could start with an                                                                  \
-            * earlier offset than the previous                                                               \
-            * one.                                                                                           \
+    0x0001 /**< Retrieve elements from iterator in increasing offset order, for
+            * each call to retrieve sequences. Currently, this only applies to
+            * point selections, as hyperslab selections are always returned in
+            * increasing offset order. Note that the order is only increasing
+            * for each call to H5Sget_seq_list(), the next set of sequences
+            * could start with an earlier offset than the previous one.
             */
 #define H5S_SEL_ITER_SHARE_WITH_DATASPACE                                                                    \
-    0x0002 /* Don't copy the dataspace                                                                       \
-            * selection when creating the                                                                    \
-            * selection iterator.                                                                            \
-            *                                                                                                \
-            * This can improve performance                                                                   \
-            * of creating the iterator, but                                                                  \
-            * the dataspace _MUST_NOT_ be                                                                    \
-            * modified or closed until the                                                                   \
-            * selection iterator is closed                                                                   \
-            * or the iterator's behavior                                                                     \
-            * will be undefined.                                                                             \
+    0x0002 /**< Don't copy the dataspace selection when creating the selection
+            * iterator. This can improve performance of creating the iterator,
+            * but the dataspace \Bold{MUST NOT} be modified or closed until the
+            * selection iterator is closed or the iterator's behavior will be
+            * undefined.
             */
 
-/* Different types of dataspaces */
+/**
+ * Types of dataspaces
+ */
 typedef enum H5S_class_t {
-    H5S_NO_CLASS = -1, /*error                                      */
-    H5S_SCALAR   = 0,  /*scalar variable                            */
-    H5S_SIMPLE   = 1,  /*simple dataspace                           */
-    H5S_NULL     = 2   /*null dataspace                             */
+    H5S_NO_CLASS = -1, /**< Error                                      */
+    H5S_SCALAR   = 0,  /**< Singleton (scalar)                         */
+    H5S_SIMPLE   = 1,  /**< Regular grid                               */
+    H5S_NULL     = 2   /**< Empty set                                  */
 } H5S_class_t;
 
-/* Different ways of combining selections */
+/**
+ * Different ways of combining selections
+ */
 typedef enum H5S_seloper_t {
-    H5S_SELECT_NOOP = -1, /* error                                     */
-    H5S_SELECT_SET  = 0,  /* Select "set" operation 		     */
-    H5S_SELECT_OR,        /* Binary "or" operation for hyperslabs
+    H5S_SELECT_NOOP = -1, /**< Error                                     */
+    H5S_SELECT_SET  = 0,  /**< Select "set" operation 		             */
+    H5S_SELECT_OR,        /**< Binary "or" operation for hyperslabs
                            * (add new selection to existing selection)
+                           * \code
                            * Original region:  AAAAAAAAAA
                            * New region:             BBBBBBBBBB
                            * A or B:           CCCCCCCCCCCCCCCC
+                           * \endcode
                            */
-    H5S_SELECT_AND,       /* Binary "and" operation for hyperslabs
+    H5S_SELECT_AND,       /**< Binary "and" operation for hyperslabs
                            * (only leave overlapped regions in selection)
+                           * \code
                            * Original region:  AAAAAAAAAA
                            * New region:             BBBBBBBBBB
                            * A and B:                CCCC
+                           * \endcode
                            */
-    H5S_SELECT_XOR,       /* Binary "xor" operation for hyperslabs
+    H5S_SELECT_XOR,       /**< Binary "xor" operation for hyperslabs
                            * (only leave non-overlapped regions in selection)
+                           * \code
                            * Original region:  AAAAAAAAAA
                            * New region:             BBBBBBBBBB
                            * A xor B:          CCCCCC    CCCCCC
+                           * \endcode
                            */
-    H5S_SELECT_NOTB,      /* Binary "not" operation for hyperslabs
+    H5S_SELECT_NOTB,      /**< Binary "not" operation for hyperslabs
                            * (only leave non-overlapped regions in original selection)
+                           * \code
                            * Original region:  AAAAAAAAAA
                            * New region:             BBBBBBBBBB
                            * A not B:          CCCCCC
+                           * \endcode
                            */
-    H5S_SELECT_NOTA,      /* Binary "not" operation for hyperslabs
+    H5S_SELECT_NOTA,      /**< Binary "not" operation for hyperslabs
                            * (only leave non-overlapped regions in new selection)
+                           * \code
                            * Original region:  AAAAAAAAAA
                            * New region:             BBBBBBBBBB
                            * B not A:                    CCCCCC
+                           * \endcode
                            */
-    H5S_SELECT_APPEND,    /* Append elements to end of point selection */
-    H5S_SELECT_PREPEND,   /* Prepend elements to beginning of point selection */
-    H5S_SELECT_INVALID    /* Invalid upper bound on selection operations */
+    H5S_SELECT_APPEND,    /**< Append elements to end of point selection */
+    H5S_SELECT_PREPEND,   /**< Prepend elements to beginning of point selection */
+    H5S_SELECT_INVALID    /**< Invalid upper bound on selection operations */
 } H5S_seloper_t;
 
-/* Enumerated type for the type of selection */
+/**
+ * Selection type
+ */
 typedef enum {
-    H5S_SEL_ERROR      = -1, /* Error			*/
-    H5S_SEL_NONE       = 0,  /* Nothing selected 		*/
-    H5S_SEL_POINTS     = 1,  /* Points / elements selected	*/
-    H5S_SEL_HYPERSLABS = 2,  /* Hyperslab selected           */
-    H5S_SEL_ALL        = 3,  /* Entire extent selected	*/
-    H5S_SEL_N                /*THIS MUST BE LAST		*/
+    H5S_SEL_ERROR      = -1, /**< Error                                 */
+    H5S_SEL_NONE       = 0,  /**< Empty selection                       */
+    H5S_SEL_POINTS     = 1,  /**< Set of points                         */
+    H5S_SEL_HYPERSLABS = 2,  /**< Hyperslab                             */
+    H5S_SEL_ALL        = 3,  /**< Everything	                        */
+    H5S_SEL_N                /**< Sentinel \internal THIS MUST BE LAST	*/
 } H5S_sel_type;
 
 #ifdef __cplusplus
