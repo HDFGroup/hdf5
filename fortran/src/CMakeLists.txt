@@ -135,7 +135,6 @@ set (f90CStub_C_HDRS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
 )
-set_source_files_properties (${f90CStub_C_HDRS} PROPERTIES LANGUAGE C)
 
 set (f90CStub_CGEN_HDRS
     # generated files
