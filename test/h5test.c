@@ -1892,7 +1892,9 @@ dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hi
 }
 
 /* Dummy VFD with the minimum parameters to make a VFD that can be registered */
+#define DUMMY_VFD_VALUE (H5FD_class_value_t)155
 static const H5FD_class_t H5FD_dummy_g = {
+    DUMMY_VFD_VALUE,     /* value        */
     "dummy",             /* name         */
     1,                   /* maxaddr      */
     H5F_CLOSE_WEAK,      /* fc_degree    */

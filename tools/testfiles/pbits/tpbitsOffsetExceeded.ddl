@@ -28,6 +28,12 @@ usage: h5dump [OPTIONS] files
                           HDF5 file specified
      --vol-info           VOL-specific info to pass to the VOL connector used for
                           opening the HDF5 file specified
+     --vfd-value          Value (ID) of the VFL driver to use for opening the
+                          HDF5 file specified
+     --vfd-name           Name of the VFL driver to use for opening the
+                          HDF5 file specified
+     --vfd-info           VFD-specific info to pass to the VFL driver used for
+                          opening the HDF5 file specified
 --------------- Object Options ---------------
      -a P, --attribute=P  Print the specified attribute
                           If an attribute name contains a slash (/), escape the

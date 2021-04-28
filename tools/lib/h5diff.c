@@ -648,14 +648,16 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
      *-------------------------------------------------------------------------
      */
     /* open file 1 */
-    if (opts->custom_vol[0]) {
-        if ((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->vol_info[0]), NULL)) < 0) {
+    if (opts->custom_vol[0] || opts->custom_vfd[0]) {
+        if ((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, opts->custom_vol[0] ? &(opts->vol_info[0]) : NULL,
+                                         opts->custom_vfd[0] ? &(opts->vfd_info[0]) : NULL)) < 0) {
             parallel_print("h5diff: unable to create fapl for input file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
         }
     }
 
-    if ((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, fapl1_id, FALSE, NULL, (size_t)0)) < 0) {
+    if ((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, fapl1_id, (fapl1_id != H5P_DEFAULT), NULL,
+                                  (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname1);
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "<%s>: unable to open file\n", fname1);
     }
@@ -663,14 +665,16 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
 
     /* open file 2 */
 
-    if (opts->custom_vol[1]) {
-        if ((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->vol_info[1]), NULL)) < 0) {
+    if (opts->custom_vol[1] || opts->custom_vfd[1]) {
+        if ((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, opts->custom_vol[1] ? &(opts->vol_info[1]) : NULL,
+                                         opts->custom_vfd[1] ? &(opts->vfd_info[1]) : NULL)) < 0) {
             parallel_print("h5diff: unable to create fapl for output file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create output fapl\n");
         }
     }
 
-    if ((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, fapl2_id, FALSE, NULL, (size_t)0)) < 0) {
+    if ((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, fapl2_id, (fapl2_id != H5P_DEFAULT), NULL,
+                                  (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname2);
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "<%s>: unable to open file\n", fname2);
     }

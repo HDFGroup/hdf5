@@ -69,11 +69,7 @@ typedef struct H5VL_wrap_ctx_t {
  */
 typedef struct {
     /* IN */
-    H5VL_get_connector_kind_t kind; /* Which kind of connector search to make */
-    union {
-        const char *       name;  /* The name of the VOL connector to check */
-        H5VL_class_value_t value; /* The value of the VOL connector to check */
-    } u;
+    H5PL_vol_key_t key;
 
     /* OUT */
     hid_t found_id; /* The connector ID, if we found a match */
@@ -341,15 +337,15 @@ H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
 
     FUNC_ENTER_STATIC_NOERR
 
-    if (H5VL_GET_CONNECTOR_BY_NAME == op_data->kind) {
-        if (0 == HDstrcmp(cls->name, op_data->u.name)) {
+    if (H5VL_GET_CONNECTOR_BY_NAME == op_data->key.kind) {
+        if (0 == HDstrcmp(cls->name, op_data->key.u.name)) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */
     }     /* end if */
     else {
-        HDassert(H5VL_GET_CONNECTOR_BY_VALUE == op_data->kind);
-        if (cls->value == op_data->u.value) {
+        HDassert(H5VL_GET_CONNECTOR_BY_VALUE == op_data->key.kind);
+        if (cls->value == op_data->key.u.value) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */
@@ -1299,9 +1295,9 @@ H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_
                     "callback is provided")
 
     /* Set up op data for iteration */
-    op_data.kind     = H5VL_GET_CONNECTOR_BY_NAME;
-    op_data.u.name   = cls->name;
-    op_data.found_id = H5I_INVALID_HID;
+    op_data.key.kind   = H5VL_GET_CONNECTOR_BY_NAME;
+    op_data.key.u.name = cls->name;
+    op_data.found_id   = H5I_INVALID_HID;
 
     /* Check if connector is already registered */
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
@@ -1350,9 +1346,9 @@ H5VL__register_connector_by_name(const char *name, hbool_t app_ref, hid_t vipl_i
     FUNC_ENTER_PACKAGE
 
     /* Set up op data for iteration */
-    op_data.kind     = H5VL_GET_CONNECTOR_BY_NAME;
-    op_data.u.name   = name;
-    op_data.found_id = H5I_INVALID_HID;
+    op_data.key.kind   = H5VL_GET_CONNECTOR_BY_NAME;
+    op_data.key.u.name = name;
+    op_data.found_id   = H5I_INVALID_HID;
 
     /* Check if connector is already registered */
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, app_ref) < 0)
@@ -1410,12 +1406,12 @@ H5VL__register_connector_by_value(H5VL_class_value_t value, hbool_t app_ref, hid
     FUNC_ENTER_PACKAGE
 
     /* Set up op data for iteration */
-    op_data.kind     = H5VL_GET_CONNECTOR_BY_VALUE;
-    op_data.u.value  = value;
-    op_data.found_id = H5I_INVALID_HID;
+    op_data.key.kind    = H5VL_GET_CONNECTOR_BY_VALUE;
+    op_data.key.u.value = value;
+    op_data.found_id    = H5I_INVALID_HID;
 
     /* Check if connector is already registered */
-    if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
+    if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, app_ref) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VOL ids")
 
     /* If connector alread registered, increment ref count on ID and return ID */
@@ -1449,8 +1445,9 @@ done:
  *
  * Purpose:     Checks if a connector with a particular name is registered.
  *
- * Return:      Success:    0
- *              Failure:    -1
+ * Return:      >0 if a VOL connector with that name has been registered
+ *              0 if a VOL connector with that name has NOT been registered
+ *              <0 on errors
  *
  * Programmer:  Dana Robinson
  *              June 17, 2017
@@ -1466,9 +1463,9 @@ H5VL__is_connector_registered_by_name(const char *name)
     FUNC_ENTER_PACKAGE
 
     /* Set up op data for iteration */
-    op_data.kind     = H5VL_GET_CONNECTOR_BY_NAME;
-    op_data.u.name   = name;
-    op_data.found_id = H5I_INVALID_HID;
+    op_data.key.kind   = H5VL_GET_CONNECTOR_BY_NAME;
+    op_data.key.u.name = name;
+    op_data.found_id   = H5I_INVALID_HID;
 
     /* Find connector with name */
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
@@ -1488,8 +1485,9 @@ done:
  * Purpose:     Checks if a connector with a particular value (ID) is
  *              registered.
  *
- * Return:      Success:    0
- *              Failure:    -1
+ * Return:      >0 if a VOL connector with that value has been registered
+ *              0 if a VOL connector with that value hasn't been registered
+ *              <0 on errors
  *
  *-------------------------------------------------------------------------
  */
@@ -1502,9 +1500,9 @@ H5VL__is_connector_registered_by_value(H5VL_class_value_t value)
     FUNC_ENTER_PACKAGE
 
     /* Set up op data for iteration */
-    op_data.kind     = H5VL_GET_CONNECTOR_BY_VALUE;
-    op_data.u.value  = value;
-    op_data.found_id = H5I_INVALID_HID;
+    op_data.key.kind    = H5VL_GET_CONNECTOR_BY_VALUE;
+    op_data.key.u.value = value;
+    op_data.found_id    = H5I_INVALID_HID;
 
     /* Find connector with value */
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
@@ -1635,9 +1633,9 @@ H5VL__peek_connector_id_by_name(const char *name)
     FUNC_ENTER_PACKAGE
 
     /* Set up op data for iteration */
-    op_data.kind     = H5VL_GET_CONNECTOR_BY_NAME;
-    op_data.u.name   = name;
-    op_data.found_id = H5I_INVALID_HID;
+    op_data.key.kind   = H5VL_GET_CONNECTOR_BY_NAME;
+    op_data.key.u.name = name;
+    op_data.found_id   = H5I_INVALID_HID;
 
     /* Find connector with name */
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
@@ -1671,9 +1669,9 @@ H5VL__peek_connector_id_by_value(H5VL_class_value_t value)
     FUNC_ENTER_PACKAGE
 
     /* Set up op data for iteration */
-    op_data.kind     = H5VL_GET_CONNECTOR_BY_VALUE;
-    op_data.u.value  = value;
-    op_data.found_id = H5I_INVALID_HID;
+    op_data.key.kind    = H5VL_GET_CONNECTOR_BY_VALUE;
+    op_data.key.u.value = value;
+    op_data.found_id    = H5I_INVALID_HID;
 
     /* Find connector with value */
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)

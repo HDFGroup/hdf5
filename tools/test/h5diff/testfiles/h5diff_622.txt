@@ -37,6 +37,18 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
                            HDF5 file specified
    --vol-info-2            VOL-specific info to pass to the VOL connector used for
                            opening the second HDF5 file specified
+   --vfd-value-1           Value (ID) of the VFL driver to use for opening the
+                           first HDF5 file specified
+   --vfd-name-1            Name of the VFL driver to use for opening the first
+                           HDF5 file specified
+   --vfd-info-1            VFD-specific info to pass to the VFL driver used for
+                           opening the first HDF5 file specified
+   --vfd-value-2           Value (ID) of the VFL driver to use for opening the
+                           second HDF5 file specified
+   --vfd-name-2            Name of the VFL driver to use for opening the second
+                           HDF5 file specified
+   --vfd-info-2            VFD-specific info to pass to the VFL driver used for
+                           opening the second HDF5 file specified
    --follow-symlinks
          Follow symbolic links (soft links and external links and compare the)
          links' target objects.

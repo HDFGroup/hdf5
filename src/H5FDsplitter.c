@@ -131,6 +131,7 @@ static herr_t  H5FD__splitter_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__splitter_unlock(H5FD_t *_file);
 
 static const H5FD_class_t H5FD_splitter_g = {
+    H5FD_SPLITTER_VALUE,          /* value                */
     "splitter",                   /* name                 */
     MAXADDR,                      /* maxaddr              */
     H5F_CLOSE_WEAK,               /* fc_degree            */
@@ -138,7 +139,7 @@ static const H5FD_class_t H5FD_splitter_g = {
     H5FD__splitter_sb_size,       /* sb_size              */
     H5FD__splitter_sb_encode,     /* sb_encode            */
     H5FD__splitter_sb_decode,     /* sb_decode            */
-    sizeof(H5FD_splitter_fapl_t), /* fapl_size          */
+    sizeof(H5FD_splitter_fapl_t), /* fapl_size            */
     H5FD__splitter_fapl_get,      /* fapl_get             */
     H5FD__splitter_fapl_copy,     /* fapl_copy            */
     H5FD__splitter_fapl_free,     /* fapl_free            */
@@ -149,7 +150,7 @@ static const H5FD_class_t H5FD_splitter_g = {
     H5FD__splitter_close,         /* close                */
     H5FD__splitter_cmp,           /* cmp                  */
     H5FD__splitter_query,         /* query                */
-    H5FD__splitter_get_type_map,  /* get_type_map        */
+    H5FD__splitter_get_type_map,  /* get_type_map         */
     H5FD__splitter_alloc,         /* alloc                */
     H5FD__splitter_free,          /* free                 */
     H5FD__splitter_get_eoa,       /* get_eoa              */

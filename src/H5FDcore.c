@@ -151,6 +151,7 @@ static herr_t  H5FD__core_unlock(H5FD_t *_file);
 static herr_t  H5FD__core_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_core_g = {
+    H5FD_CORE_VALUE,          /* value                */
     "core",                   /* name                 */
     MAXADDR,                  /* maxaddr              */
     H5F_CLOSE_WEAK,           /* fc_degree            */

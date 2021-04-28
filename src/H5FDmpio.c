@@ -95,43 +95,44 @@ static MPI_Comm H5FD__mpio_communicator(const H5FD_t *_file);
 static const H5FD_class_mpi_t H5FD_mpio_g = {
     {
         /* Start of superclass information */
-        "mpio",                /* name                  */
-        HADDR_MAX,             /* maxaddr               */
-        H5F_CLOSE_SEMI,        /* fc_degree             */
-        H5FD__mpio_term,       /* terminate             */
-        NULL,                  /* sb_size               */
-        NULL,                  /* sb_encode             */
-        NULL,                  /* sb_decode             */
-        0,                     /* fapl_size             */
-        NULL,                  /* fapl_get              */
-        NULL,                  /* fapl_copy             */
-        NULL,                  /* fapl_free             */
-        0,                     /* dxpl_size             */
-        NULL,                  /* dxpl_copy             */
-        NULL,                  /* dxpl_free             */
-        H5FD__mpio_open,       /* open                  */
-        H5FD__mpio_close,      /* close                 */
-        NULL,                  /* cmp                   */
-        H5FD__mpio_query,      /* query                 */
-        NULL,                  /* get_type_map          */
-        NULL,                  /* alloc                 */
-        NULL,                  /* free                  */
-        H5FD__mpio_get_eoa,    /* get_eoa               */
-        H5FD__mpio_set_eoa,    /* set_eoa               */
-        H5FD__mpio_get_eof,    /* get_eof               */
-        H5FD__mpio_get_handle, /* get_handle            */
-        H5FD__mpio_read,       /* read                  */
-        H5FD__mpio_write,      /* write                 */
-        H5FD__mpio_flush,      /* flush                 */
-        H5FD__mpio_truncate,   /* truncate              */
-        NULL,                  /* lock                  */
-        NULL,                  /* unlock                */
-        H5FD__mpio_delete,     /* del                   */
-        H5FD_FLMAP_DICHOTOMY   /* fl_map                */
+        H5_VFD_MPIO,           /* value                */
+        "mpio",                /* name                 */
+        HADDR_MAX,             /* maxaddr              */
+        H5F_CLOSE_SEMI,        /* fc_degree            */
+        H5FD__mpio_term,       /* terminate            */
+        NULL,                  /* sb_size              */
+        NULL,                  /* sb_encode            */
+        NULL,                  /* sb_decode            */
+        0,                     /* fapl_size            */
+        NULL,                  /* fapl_get             */
+        NULL,                  /* fapl_copy            */
+        NULL,                  /* fapl_free            */
+        0,                     /* dxpl_size            */
+        NULL,                  /* dxpl_copy            */
+        NULL,                  /* dxpl_free            */
+        H5FD__mpio_open,       /* open                 */
+        H5FD__mpio_close,      /* close                */
+        NULL,                  /* cmp                  */
+        H5FD__mpio_query,      /* query                */
+        NULL,                  /* get_type_map         */
+        NULL,                  /* alloc                */
+        NULL,                  /* free                 */
+        H5FD__mpio_get_eoa,    /* get_eoa              */
+        H5FD__mpio_set_eoa,    /* set_eoa              */
+        H5FD__mpio_get_eof,    /* get_eof              */
+        H5FD__mpio_get_handle, /* get_handle           */
+        H5FD__mpio_read,       /* read                 */
+        H5FD__mpio_write,      /* write                */
+        H5FD__mpio_flush,      /* flush                */
+        H5FD__mpio_truncate,   /* truncate             */
+        NULL,                  /* lock                 */
+        NULL,                  /* unlock               */
+        H5FD__mpio_delete,     /* del                  */
+        H5FD_FLMAP_DICHOTOMY   /* fl_map               */
     },                         /* End of superclass information */
-    H5FD__mpio_mpi_rank,       /* get_rank              */
-    H5FD__mpio_mpi_size,       /* get_size              */
-    H5FD__mpio_communicator    /* get_comm              */
+    H5FD__mpio_mpi_rank,       /* get_rank             */
+    H5FD__mpio_mpi_size,       /* get_size             */
+    H5FD__mpio_communicator    /* get_comm             */
 };
 
 #ifdef H5FDmpio_DEBUG
@@ -1881,4 +1882,5 @@ H5FD__mpio_communicator(const H5FD_t *_file)
 
     FUNC_LEAVE_NOAPI(file->comm)
 } /* end H5FD__mpio_communicator() */
+
 #endif /* H5_HAVE_PARALLEL */

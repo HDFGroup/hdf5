@@ -141,6 +141,7 @@ static herr_t  H5FD__sec2_unlock(H5FD_t *_file);
 static herr_t  H5FD__sec2_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_sec2_g = {
+    H5FD_SEC2_VALUE,       /* value                */
     "sec2",                /* name                 */
     MAXADDR,               /* maxaddr              */
     H5F_CLOSE_WEAK,        /* fc_degree            */

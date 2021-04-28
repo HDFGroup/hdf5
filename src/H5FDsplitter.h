@@ -17,7 +17,8 @@
 #ifndef H5FDsplitter_H
 #define H5FDsplitter_H
 
-#define H5FD_SPLITTER (H5FD_splitter_init())
+#define H5FD_SPLITTER       (H5FD_splitter_init())
+#define H5FD_SPLITTER_VALUE H5_VFD_SPLITTER
 
 /* The version of the H5FD_splitter_vfd_config_t structure used */
 #define H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION 1
