@@ -209,7 +209,11 @@ install (
 )
 
 if (NOT WIN32 AND NOT MINGW)
-  set (_PKG_CONFIG_COMPILER ${CMAKE_CXX_COMPILER})
+  if (HDF5_ENABLE_PARALLEL AND MPI_CXX_FOUND)
+    set (_PKG_CONFIG_COMPILER ${MPI_CXX_COMPILER})
+  else ()
+    set (_PKG_CONFIG_COMPILER ${CMAKE_CXX_COMPILER})
+  endif ()
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5c++
