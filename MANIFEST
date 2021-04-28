@@ -1287,6 +1287,8 @@
 ./test/ntypes.c
 ./test/null_vol_connector.c
 ./test/null_vol_connector.h
+./test/null_vfd_plugin.c
+./test/null_vfd_plugin.h
 ./test/objcopy.c
 ./test/objcopy_ref.c
 ./test/ohdr.c
@@ -1395,6 +1397,7 @@
 ./test/vds_swmr_reader.c
 ./test/vds_swmr_writer.c
 ./test/vfd.c
+./test/vfd_plugin.c
 ./test/vol.c
 ./test/vol_plugin.c
 

@@ -105,6 +105,7 @@ static herr_t  H5FD__family_delete(const char *filename, hid_t fapl_id);
 
 /* The class struct */
 static const H5FD_class_t H5FD_family_g = {
+    H5FD_FAMILY_VALUE,          /* value                */
     "family",                   /* name                 */
     HADDR_MAX,                  /* maxaddr              */
     H5F_CLOSE_WEAK,             /* fc_degree            */

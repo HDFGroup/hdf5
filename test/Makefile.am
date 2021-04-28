@@ -94,7 +94,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
     mirror_vfd
 if HAVE_SHARED_CONDITIONAL
-  check_PROGRAMS+= filter_plugin vol_plugin
+  check_PROGRAMS+= filter_plugin vfd_plugin vol_plugin
 endif
 
 # These programs generate test files for the tests.  They don't need to be
@@ -128,6 +128,12 @@ if HAVE_SHARED_CONDITIONAL
   libfilter_plugin4_groups_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libfilter_plugin3_dsets_la_LIBADD=$(LIBHDF5)
   libfilter_plugin4_groups_la_LIBADD=$(LIBHDF5)
+
+  # VFD plugin test libraries
+  #
+  # null_vfd_plugin is used for testing basic VFD plugin functionality.
+  libnull_vfd_plugin_la_SOURCES=null_vfd_plugin.c
+  libnull_vfd_plugin_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 
   # VOL plugin test libraries
   #

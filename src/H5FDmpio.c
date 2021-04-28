@@ -92,6 +92,7 @@ static herr_t  H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
 
 /* The MPIO file driver information */
 static const H5FD_class_t H5FD_mpio_g = {
+    H5_VFD_MPIO,           /* value                 */
     "mpio",                /* name                  */
     HADDR_MAX,             /* maxaddr               */
     H5F_CLOSE_SEMI,        /* fc_degree             */

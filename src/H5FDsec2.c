@@ -143,6 +143,7 @@ static herr_t  H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
                               void **output);
 
 static const H5FD_class_t H5FD_sec2_g = {
+    H5FD_SEC2_VALUE,       /* value                */
     "sec2",                /* name                 */
     MAXADDR,               /* maxaddr              */
     H5F_CLOSE_WEAK,        /* fc_degree            */

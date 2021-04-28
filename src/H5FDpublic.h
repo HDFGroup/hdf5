@@ -28,6 +28,39 @@
 
 #define H5FD_VFD_DEFAULT 0 /* Default VFL driver value */
 
+/* VFD identifier values
+ * These are H5FD_class_value_t values, NOT hid_t values!
+ */
+#define H5_VFD_INVALID  ((H5FD_class_value_t)(-1))
+#define H5_VFD_SEC2     ((H5FD_class_value_t)(0))
+#define H5_VFD_CORE     ((H5FD_class_value_t)(1))
+#define H5_VFD_LOG      ((H5FD_class_value_t)(2))
+#define H5_VFD_FAMILY   ((H5FD_class_value_t)(3))
+#define H5_VFD_MULTI    ((H5FD_class_value_t)(4))
+#define H5_VFD_STDIO    ((H5FD_class_value_t)(5))
+#define H5_VFD_SPLITTER ((H5FD_class_value_t)(6))
+#ifdef H5_HAVE_PARALLEL
+#define H5_VFD_MPIO ((H5FD_class_value_t)(7))
+#endif
+#ifdef H5_HAVE_DIRECT
+#define H5_VFD_DIRECT ((H5FD_class_value_t)(8))
+#endif
+#ifdef H5_HAVE_MIRROR_VFD
+#define H5_VFD_MIRROR ((H5FD_class_value_t)(9))
+#endif
+#ifdef H5_HAVE_LIBHDFS
+#define H5_VFD_HDFS ((H5FD_class_value_t)(10))
+#endif
+#ifdef H5_HAVE_ROS3_VFD
+#define H5_VFD_ROS3 ((H5FD_class_value_t)(11))
+#endif
+
+/* VFD IDs below this value are reserved for library use. */
+#define H5_VFD_RESERVED 256
+
+/* Maximum VFD ID */
+#define H5_VFD_MAX 65535
+
 /* Define VFL driver features that can be enabled on a per-driver basis */
 /* These are returned with the 'query' function pointer in H5FD_class_t */
 /*
@@ -213,6 +246,23 @@
 /* Public Typedefs */
 /*******************/
 
+/*
+ * File driver identifiers.
+ *
+ * Values 0 through 255 are for drivers defined by the HDF5 library.
+ * Values 256 through 511 are available for testing new drivers.
+ * Subsequent values should be obtained from the HDF5 development
+ * team at mailto:help@hdfgroup.org.
+ */
+typedef int H5FD_class_value_t;
+
+/* A free list is a singly-linked list of address/size pairs. */
+typedef struct H5FD_free_t {
+    haddr_t             addr;
+    hsize_t             size;
+    struct H5FD_free_t *next;
+} H5FD_free_t;
+
 /* Types of allocation requests: see H5Fpublic.h  */
 typedef enum H5F_mem_t H5FD_mem_t;
 
@@ -337,6 +387,7 @@ extern "C" {
 #endif
 
 /* Function prototypes */
+
 /* Allows querying a VFD ID for features before the file is opened */
 H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/);
 

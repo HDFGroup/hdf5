@@ -87,6 +87,12 @@ typedef struct {
     const void *driver_info; /* Driver info, for open callbacks */
 } H5FD_driver_prop_t;
 
+/* Which kind of VFD field to use for searching */
+typedef enum H5FD_get_driver_kind_t {
+    H5FD_GET_DRIVER_BY_NAME, /* Name field is set */
+    H5FD_GET_DRIVER_BY_VALUE /* Value field is set */
+} H5FD_get_driver_kind_t;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -97,6 +103,7 @@ typedef struct {
 
 /* Forward declarations for prototype arguments */
 struct H5F_t;
+union H5PL_key_t;
 
 H5_DLL int    H5FD_term_interface(void);
 H5_DLL herr_t H5FD_locate_signature(H5FD_t *file, haddr_t *sig_addr);
@@ -107,10 +114,15 @@ H5_DLL herr_t        H5FD_sb_load(H5FD_t *file, const char *name, const uint8_t 
 H5_DLL void *        H5FD_fapl_get(H5FD_t *file);
 H5_DLL herr_t        H5FD_free_driver_info(hid_t driver_id, const void *driver_info);
 H5_DLL hid_t         H5FD_register(const void *cls, size_t size, hbool_t app_ref);
+H5_DLL hid_t         H5FD_register_driver_by_name(const char *name, hbool_t app_ref);
+H5_DLL hid_t         H5FD_register_driver_by_value(H5FD_class_value_t value, hbool_t app_ref);
+H5_DLL htri_t        H5FD_is_driver_registered_by_name(const char *driver_name, hid_t *registered_id);
+H5_DLL htri_t        H5FD_is_driver_registered_by_value(H5FD_class_value_t driver_value, hid_t *registered_id);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 H5_DLL herr_t  H5FD_close(H5FD_t *file);
 H5_DLL int     H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
 H5_DLL herr_t  H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/);
+H5_DLL herr_t  H5FD_check_plugin_load(const H5FD_class_t *cls, const union H5PL_key_t *key, hbool_t *success);
 H5_DLL haddr_t H5FD_alloc(H5FD_t *file, H5FD_mem_t type, struct H5F_t *f, hsize_t size, haddr_t *frag_addr,
                           hsize_t *frag_size);
 H5_DLL herr_t  H5FD_free(H5FD_t *file, H5FD_mem_t type, struct H5F_t *f, haddr_t addr, hsize_t size);
