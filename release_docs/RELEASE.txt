@@ -422,7 +422,7 @@ New Features
       On the first call to a given fapl, the log location is set to NULL so
       the segfault does not occur.
 
-      The string is now handled property and the sefault no longer occurs.
+      The string is now handled properly and the segfault no longer occurs.
 
         (DER - 2021/04/27, HDFFV-11239)
       
