@@ -243,8 +243,20 @@
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine H5_HAVE_LIBZ @H5_HAVE_LIBZ@
 
+/* Define to 1 if you have the `llround' function. */
+#cmakedefine H5_HAVE_LLROUND @H5_HAVE_LLROUND@
+
+/* Define to 1 if you have the `llroundf' function. */
+#cmakedefine H5_HAVE_LLROUNDF @H5_HAVE_LLROUNDF@
+
 /* Define to 1 if you have the `longjmp' function. */
 #cmakedefine H5_HAVE_LONGJMP @H5_HAVE_LONGJMP@
+
+/* Define to 1 if you have the `lround' function. */
+#cmakedefine H5_HAVE_LROUND @H5_HAVE_LROUND@
+
+/* Define to 1 if you have the `lroundf' function. */
+#cmakedefine H5_HAVE_LROUNDF @H5_HAVE_LROUNDF@
 
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine H5_HAVE_LSEEK64 @H5_HAVE_LSEEK64@
@@ -306,6 +318,12 @@
 /* Define whether the Read-Only S3 virtual file driver (VFD) should be
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
+
+/* Define to 1 if you have the `round' function. */
+#cmakedefine H5_HAVE_ROUND @H5_HAVE_ROUND@
+
+/* Define to 1 if you have the `roundf' function. */
+#cmakedefine H5_HAVE_ROUNDF @H5_HAVE_ROUNDF@
 
 /* Define to 1 if you have the `setjmp' function. */
 #cmakedefine H5_HAVE_SETJMP @H5_HAVE_SETJMP@
