@@ -65,7 +65,6 @@ typedef struct {
         , .np_verify = 0   }
 
 
-//TODO: add at_pattern description
 static void
 usage(const char *progname)
 {
@@ -85,19 +84,19 @@ usage(const char *progname)
         "              The value of `at_pattern` is one of the following:\n"
         "              `compact`              - Attributes added in compact storage\n"
         "              `dense`                - An attribute added in dense storage\n"
-        "              `compact-to-dense`     - Attributes added first in compact\n"
-        "                                       then in dense storage\n"
         "              `compact-del`          - Attributes added and then one\n"
         "                                       attribute deleted, in compact \n"
         "              `dense-del`            - Attributes added until the storage\n"
         "                                       is dense then an attribute deleted\n"
         "                                       the storge still in dense\n"
+        "              `compact-add-to-dense` - Attributes added first in compact\n"
+        "                                       then in dense storage\n"
         "              `dense-del-to-compact` - Attributes added until the storage\n" 
         "                                       is dense, then several attributes \n"
         "                                       deleted, the storage changed to\n"
         "                                       compact\n"
         "              `modify`               - An attribute added then modified\n"
-        "              `vstr`                 - A VL string attribute added\n"
+        "              `add-vstr`             - A VL string attribute added\n"
         "              `remove-vstr`          - A VL string attribute added then\n"
         "                                       deleted\n"
         "              `modify-vstr`          - A VL string attribute added then \n"
@@ -178,7 +177,7 @@ state_init(state_t *s, int argc, char **argv)
                     s->at_pattern = 'c';
                 else if (strcmp(optarg, "dense") == 0)
                     s->at_pattern = 'd';
-                else if (strcmp(optarg, "compact-to-dense") == 0) 
+                else if (strcmp(optarg, "compact-add-to-dense") == 0) 
                     s->at_pattern = 't';
                 else if (strcmp(optarg, "compact-del") == 0) 
                     s->at_pattern = 'C';
@@ -188,7 +187,7 @@ state_init(state_t *s, int argc, char **argv)
                     s->at_pattern = 'T';
                 else if (strcmp(optarg, "modify") == 0) 
                     s->at_pattern = 'M';
-                else if (strcmp(optarg,"vstr") ==0)
+                else if (strcmp(optarg,"add-vstr") ==0)
                     s->at_pattern = 'v';
                 else if (strcmp(optarg, "remove-vstr") == 0) 
                     s->at_pattern = 'r';
@@ -1225,10 +1224,6 @@ del_attrs_compact_dense_compact(state_t *s,
     }
     u= max_compact +1;
 
-#if 0
-    if(max_compact < min_dense) 
-        printf("Minimum number of attributes stored in dense storage should be less than maximum number of attributes stored in compact storage.\n");
-#endif
 
     // delete a number of attributes so that the attribute storage just becomes dense.
     for(u--;u>=(min_dense-1);u--) {
@@ -1701,6 +1696,62 @@ error2:
     return false;
 
 }
+/*-------------------------------------------------------------------------
+ * Function:    check_attr_storage_type
+ *
+ * Purpose:     Check if the attribute storage type is correct
+ *
+ * Parameters:  hid_t oid
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              bool is_compact
+ *              true if the attribute is stored in compact storage
+ *              false if the attribute is stored in dense storage
+ * 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ *-------------------------------------------------------------------------
+*/ 
+
+static bool
+check_attr_storage_type(hid_t g, 
+                        bool is_compact) {
+
+    H5O_native_info_t ninfo;
+
+    /* Get the object information */
+    if(H5Oget_native_info(g, &ninfo, H5O_NATIVE_INFO_HDR|H5O_NATIVE_INFO_META_SIZE) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Oget_native_info failed\n");
+        goto error;
+    }
+
+    if(is_compact) {
+        if(ninfo.meta_size.attr.index_size != 0 ||
+            ninfo.meta_size.attr.heap_size != 0) {
+            H5_FAILED(); AT();
+            printf("Should be in compact storage,but it is not.\n");
+            goto error;
+        }
+    }
+    else {
+        if(ninfo.meta_size.attr.index_size == 0 || 
+            ninfo.meta_size.attr.heap_size == 0) {
+            H5_FAILED(); AT();
+            printf("Should be in dense storage,but it is not.\n");
+            goto error;
+        }
+    }
+
+    return true;
+
+error:
+    return false;
+
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    vrfy_attr
@@ -1725,6 +1776,16 @@ error2:
  *              This parameter is used to generate correct group name in a key
  *              debugging message.
  *
+ *              bool check_storage
+ *              a flag to indicate if the storage check is on
+ *
+ *              bool is_compact
+ *              true if the attribute is stored in compact storage
+ *              false if the attribute is stored in dense storage
+ *              Note: this parameter is not used if the check_storage
+ *              is set to false.
+ *
+ *
  * Return:      Success:    true
  *              Failure:    false
  *
@@ -1736,7 +1797,9 @@ vrfy_attr(state_t *s,
           hid_t g, 
           unsigned int which,  
           const char* aname, 
-          unsigned int g_which) {
+          unsigned int g_which,
+          bool check_storage,
+          bool is_compact) {
 
     unsigned int read_which;
     hid_t aid = H5I_INVALID_HID;
@@ -1793,6 +1856,17 @@ vrfy_attr(state_t *s,
         goto error;
     }
 
+    
+    if(!s->old_style_grp && check_storage == true) {
+        if(false == check_attr_storage_type(g,is_compact)) {
+            H5_FAILED(); AT();
+            printf("The attribute storage type is wrong. \n");
+            goto error;
+        }
+        dbgf(2, "reader: finish checking the storage type: %d\n", s->np_notify);
+
+    }
+
     /* If the read value is expected, send back an OK message to the writer. */
     if(s->use_named_pipes && s->attr_test == true) {
         if(np_rd_send(s)==false) 
@@ -1846,7 +1920,7 @@ verify_default_group_attr(state_t*s,hid_t g, unsigned int which)
     char attrname[VS_ATTR_NAME_LEN];
     const char* aname_format = "attr-%u";
     HDsprintf(attrname, aname_format, which);
-    return vrfy_attr(s,g,which,attrname,which);
+    return vrfy_attr(s,g,which,attrname,which,false,true);
 
 }
 
@@ -2150,7 +2224,12 @@ error2:
 
 
 static bool
-verify_del_one_attr(state_t *s,hid_t g, const char *aname) {
+verify_del_one_attr(state_t *s,
+                    hid_t g, 
+                    const char *aname,
+                    bool check_storage,
+                    bool is_compact) {
+ 
 
     htri_t attr_exists = FALSE;
 
@@ -2180,6 +2259,16 @@ verify_del_one_attr(state_t *s,hid_t g, const char *aname) {
     else{
         dbgf(1,"H5Aexists_by_name failed \n");
         goto error;
+    }
+
+    if(!s->old_style_grp && check_storage == true) {
+        if(false == check_attr_storage_type(g,is_compact)) {
+            H5_FAILED(); AT();
+            printf("The attribute storage type is wrong. \n");
+            goto error;
+        }
+        dbgf(2, "reader: finish checking the storage type: %d\n", s->np_notify);
+
     }
 
     /* Reader sends an OK message back to the reader */
@@ -2238,7 +2327,7 @@ verify_remove_vlstr_attr(state_t* s,hid_t g, unsigned int which)
     ret = verify_group_vlstr_attr(s,g,which,false);
     if(ret == true) {
         HDsprintf(attrname,aname_format,which);
-        ret = verify_del_one_attr(s,g,attrname);
+        ret = verify_del_one_attr(s,g,attrname,false,false);
     }
     return ret;
 }
@@ -2326,7 +2415,7 @@ verify_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
     for (u = 0; u < max_c; u++) {
 
         HDsprintf(attrname, aname_format, which,u);
-        if(false == vrfy_attr(s,g,u+which,attrname,which)) {
+        if(false == vrfy_attr(s,g,u+which,attrname,which,true,true)) {
             ret = false;
             break;
         }
@@ -2380,7 +2469,7 @@ verify_attrs_compact_dense(state_t *s, hid_t g, unsigned max_c, unsigned int whi
         /* Now the storage is in dense. Verify if the
          * retrieved value is correct. */
         HDsprintf(attrname, aname_format, max_c+which,0);
-        ret = vrfy_attr(s,g,which+max_c,attrname,which);
+        ret = vrfy_attr(s,g,which+max_c,attrname,which,true,false);
         if(ret == false) 
             dbgf(1,"verify_attrs_compact_dense failed \n");
 
@@ -2432,7 +2521,7 @@ verify_del_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which
     if(ret == true) { 
         /* The writer only deletes the attribute attr-which-0 */
         HDsprintf(attrname,aname_format,which,0);
-        ret = verify_del_one_attr(s,g,attrname);
+        ret = verify_del_one_attr(s,g,attrname,true,true);
     }
 
     return ret;
@@ -2487,7 +2576,7 @@ verify_del_attrs_compact_dense(state_t *s,
     if(ret == true) { 
         /* The writer only deletes the attribute attr-d-which-0 */
         HDsprintf(attrname,aname_format,max_c+which,0);
-        ret = verify_del_one_attr(s,g,attrname);
+        ret = verify_del_one_attr(s,g,attrname,true,false);
     }
 
     return ret;
@@ -2558,13 +2647,16 @@ verify_del_attrs_compact_dense_compact(state_t *s,
         u = max_c + 1;
         for(u--;u>=(min_d-1);u--) {
             HDsprintf(attrname, aname_format, which,max_c-u);
-            ret = verify_del_one_attr(s,g,attrname);
+            if(u==(min_d-1))
+                ret = verify_del_one_attr(s,g,attrname,true,true);
+            else
+                ret = verify_del_one_attr(s,g,attrname,true,false);
         }
 
         /* Just verify one more deleted attribute by the writer.
            The storage is still compact. */
         HDsprintf(attrname,aname_format,max_c+which,0);
-        ret = verify_del_one_attr(s,g,attrname);
+        ret = verify_del_one_attr(s,g,attrname,true,true);
     }
 
     return ret;
@@ -2938,7 +3030,11 @@ main(int argc, char **argv)
         s.max_lag   = config.max_lag;
     }
 
-    /* For attribute test, force the named pipe to communicate in every step. */
+    /* For attribute test, force the named pipe to communicate in every step. 
+     * This will avoid the fake verification error from the reader when using the named pipe. 
+     * If the named pipe is not forced to communicate in every step, the reader may go ahead
+     * to verify the group and the attribute operations before the writer has a chance to
+     * carry out the corresponding operations. */
     if (s.at_pattern != ' ') {
        s.attr_test = true;
        if(s.use_named_pipes)

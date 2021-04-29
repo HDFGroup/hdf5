@@ -721,12 +721,12 @@ fi
 grp_attr_list=(
                 "compact"
                 "dense"
-                "compact-to-dense"
                 "compact-del"
                 "dense-del"
+                "compact-add-to-dense"
                 "dense-del-to-compact"
                 "modify"
-                "vstr"
+                "add-vstr"
                 "remove-vstr"
                 "modify-vstr"
                )
@@ -799,7 +799,7 @@ os_grp_attr_list=(
                 "compact"
                 "compact-del"
                 "modify"
-                "vstr"
+                "add-vstr"
                 "remove-vstr"
                 "modify-vstr"
                )
