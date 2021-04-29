@@ -142,7 +142,7 @@ state_init(state_t *s, int argc, char **argv)
             case 'n':
             case 'u':
                 errno = 0;
-                tmp = strtoul(optarg, &end, 0);
+                tmp = HDstrtoul(optarg, &end, 0);
                 if (end == optarg || *end != '\0') {
                     H5_FAILED(); AT();
                     printf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
@@ -173,25 +173,25 @@ state_init(state_t *s, int argc, char **argv)
                 s->use_named_pipes = false;
                 break;
             case 'A':
-                if (strcmp(optarg, "compact") == 0)
+                if (HDstrcmp(optarg, "compact") == 0)
                     s->at_pattern = 'c';
-                else if (strcmp(optarg, "dense") == 0)
+                else if (HDstrcmp(optarg, "dense") == 0)
                     s->at_pattern = 'd';
-                else if (strcmp(optarg, "compact-add-to-dense") == 0) 
+                else if (HDstrcmp(optarg, "compact-add-to-dense") == 0) 
                     s->at_pattern = 't';
-                else if (strcmp(optarg, "compact-del") == 0) 
+                else if (HDstrcmp(optarg, "compact-del") == 0) 
                     s->at_pattern = 'C';
-                else if (strcmp(optarg, "dense-del") == 0) 
+                else if (HDstrcmp(optarg, "dense-del") == 0) 
                     s->at_pattern = 'D';
-                else if (strcmp(optarg, "dense-del-to-compact") == 0) 
+                else if (HDstrcmp(optarg, "dense-del-to-compact") == 0) 
                     s->at_pattern = 'T';
-                else if (strcmp(optarg, "modify") == 0) 
+                else if (HDstrcmp(optarg, "modify") == 0) 
                     s->at_pattern = 'M';
-                else if (strcmp(optarg,"add-vstr") ==0)
+                else if (HDstrcmp(optarg,"add-vstr") ==0)
                     s->at_pattern = 'v';
-                else if (strcmp(optarg, "remove-vstr") == 0) 
+                else if (HDstrcmp(optarg, "remove-vstr") == 0) 
                     s->at_pattern = 'r';
-                else if (strcmp(optarg, "modify-vstr") == 0) 
+                else if (HDstrcmp(optarg, "modify-vstr") == 0) 
                     s->at_pattern = 'm';
                 else {
                     H5_FAILED(); AT();
@@ -2936,13 +2936,13 @@ main(int argc, char **argv)
         goto error;
     }
 
-    personality = strstr(s.progname, "vfd_swmr_group_");
+    personality = HDstrstr(s.progname, "vfd_swmr_group_");
 
     if (personality != NULL &&
-        strcmp(personality, "vfd_swmr_group_writer") == 0)
+        HDstrcmp(personality, "vfd_swmr_group_writer") == 0)
         writer = true;
     else if (personality != NULL &&
-             strcmp(personality, "vfd_swmr_group_reader") == 0)
+             HDstrcmp(personality, "vfd_swmr_group_reader") == 0)
         writer = false;
     else {
         H5_FAILED(); AT();
