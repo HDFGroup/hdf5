@@ -1225,7 +1225,7 @@ del_attrs_compact_dense_compact(state_t *s,
     u= max_compact +1;
 
 
-    // delete a number of attributes so that the attribute storage just becomes dense.
+    /* delete a number of attributes so that the attribute storage just becomes dense.*/
     for(u--;u>=(min_dense-1);u--) {
         HDsprintf(attrname, aname_format, which,max_compact-u);
         if (H5Adelete(obj_id,attrname) < 0) {
