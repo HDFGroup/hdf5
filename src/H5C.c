@@ -3545,382 +3545,382 @@ done:
         HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+        FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C_unprotect() */
+    } /* H5C_unprotect() */
 
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C_unsettle_entry_ring
- *
- * Purpose:     Advise the metadata cache that the specified entry's free space
- *              manager ring is no longer settled (if it was on entry).
- *
- *              If the target free space manager ring is already
- *              unsettled, do nothing, and return SUCCEED.
- *
- *              If the target free space manager ring is settled, and
- *              we are not in the process of a file shutdown, mark
- *              the ring as unsettled, and return SUCCEED.
- *
- *              If the target free space manager is settled, and we
- *              are in the process of a file shutdown, post an error
- *              message, and return FAIL.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              January 3, 2017
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_unsettle_entry_ring(void *_entry)
-{
-    H5C_cache_entry_t *entry = (H5C_cache_entry_t *)_entry; /* Entry whose ring to unsettle */
-    H5C_t *            cache;                               /* Cache for file */
-    herr_t             ret_value = SUCCEED;                 /* Return value */
+    /*-------------------------------------------------------------------------
+     *
+     * Function:    H5C_unsettle_entry_ring
+     *
+     * Purpose:     Advise the metadata cache that the specified entry's free space
+     *              manager ring is no longer settled (if it was on entry).
+     *
+     *              If the target free space manager ring is already
+     *              unsettled, do nothing, and return SUCCEED.
+     *
+     *              If the target free space manager ring is settled, and
+     *              we are not in the process of a file shutdown, mark
+     *              the ring as unsettled, and return SUCCEED.
+     *
+     *              If the target free space manager is settled, and we
+     *              are in the process of a file shutdown, post an error
+     *              message, and return FAIL.
+     *
+     * Return:      Non-negative on success/Negative on failure
+     *
+     * Programmer:  Quincey Koziol
+     *              January 3, 2017
+     *
+     *-------------------------------------------------------------------------
+     */
+    herr_t H5C_unsettle_entry_ring(void *_entry)
+    {
+        H5C_cache_entry_t *entry = (H5C_cache_entry_t *)_entry; /* Entry whose ring to unsettle */
+        H5C_t *            cache;                               /* Cache for file */
+        herr_t             ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+        FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity checks */
-    HDassert(entry);
-    HDassert(entry->ring != H5C_RING_UNDEFINED);
-    HDassert((H5C_RING_USER == entry->ring) || (H5C_RING_RDFSM == entry->ring) ||
-             (H5C_RING_MDFSM == entry->ring));
-    cache = entry->cache_ptr;
-    HDassert(cache);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
+        /* Sanity checks */
+        HDassert(entry);
+        HDassert(entry->ring != H5C_RING_UNDEFINED);
+        HDassert((H5C_RING_USER == entry->ring) || (H5C_RING_RDFSM == entry->ring) ||
+                 (H5C_RING_MDFSM == entry->ring));
+        cache = entry->cache_ptr;
+        HDassert(cache);
+        HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
-    switch (entry->ring) {
-        case H5C_RING_USER:
-            /* Do nothing */
-            break;
-
-        case H5C_RING_RDFSM:
-            if (cache->rdfsm_settled) {
-                if (cache->flush_in_progress || cache->close_warning_received)
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected rdfsm ring unsettle")
-                cache->rdfsm_settled = FALSE;
-            } /* end if */
-            break;
-
-        case H5C_RING_MDFSM:
-            if (cache->mdfsm_settled) {
-                if (cache->flush_in_progress || cache->close_warning_received)
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected mdfsm ring unsettle")
-                cache->mdfsm_settled = FALSE;
-            } /* end if */
-            break;
-
-        default:
-            HDassert(FALSE); /* this should be un-reachable */
-            break;
-    } /* end switch */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_unsettle_entry_ring() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_unsettle_ring()
- *
- * Purpose:     Advise the metadata cache that the specified free space
- *              manager ring is no longer settled (if it was on entry).
- *
- *              If the target free space manager ring is already
- *              unsettled, do nothing, and return SUCCEED.
- *
- *              If the target free space manager ring is settled, and
- *              we are not in the process of a file shutdown, mark
- *              the ring as unsettled, and return SUCCEED.
- *
- *              If the target free space manager is settled, and we
- *              are in the process of a file shutdown, post an error
- *              message, and return FAIL.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              10/15/16
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_unsettle_ring(H5F_t *f, H5C_ring_t ring)
-{
-    H5C_t *cache_ptr;
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
-    HDassert((H5C_RING_RDFSM == ring) || (H5C_RING_MDFSM == ring));
-    cache_ptr = f->shared->cache;
-    HDassert(H5C__H5C_T_MAGIC == cache_ptr->magic);
-
-    switch (ring) {
-        case H5C_RING_RDFSM:
-            if (cache_ptr->rdfsm_settled) {
-                if (cache_ptr->close_warning_received)
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected rdfsm ring unsettle")
-                cache_ptr->rdfsm_settled = FALSE;
-            } /* end if */
-            break;
-
-        case H5C_RING_MDFSM:
-            if (cache_ptr->mdfsm_settled) {
-                if (cache_ptr->close_warning_received)
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected mdfsm ring unsettle")
-                cache_ptr->mdfsm_settled = FALSE;
-            } /* end if */
-            break;
-
-        default:
-            HDassert(FALSE); /* this should be un-reachable */
-            break;
-    } /* end switch */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_unsettle_ring() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_validate_resize_config()
- *
- * Purpose:    Run a sanity check on the specified sections of the
- *             provided instance of struct H5C_auto_size_ctl_t.
- *
- *        Do nothing and return SUCCEED if no errors are detected,
- *        and flag an error and return FAIL otherwise.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              3/23/05
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if (config_ptr == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL config_ptr on entry")
-
-    if (config_ptr->version != H5C__CURR_AUTO_SIZE_CTL_VER)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown config version")
-
-    if ((tests & H5C_RESIZE_CFG__VALIDATE_GENERAL) != 0) {
-
-        if (config_ptr->max_size > H5C__MAX_MAX_CACHE_SIZE)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "max_size too big")
-
-        if (config_ptr->min_size < H5C__MIN_MAX_CACHE_SIZE)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_size too small")
-
-        if (config_ptr->min_size > config_ptr->max_size)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_size > max_size")
-
-        if (config_ptr->set_initial_size && ((config_ptr->initial_size < config_ptr->min_size) ||
-                                             (config_ptr->initial_size > config_ptr->max_size)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "initial_size must be in the interval [min_size, max_size]")
-
-        if ((config_ptr->min_clean_fraction < (double)0.0f) ||
-            (config_ptr->min_clean_fraction > (double)1.0f))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_clean_fraction must be in the interval [0.0, 1.0]")
-
-        if (config_ptr->epoch_length < H5C__MIN_AR_EPOCH_LENGTH)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too small")
-
-        if (config_ptr->epoch_length > H5C__MAX_AR_EPOCH_LENGTH)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too big")
-    } /* H5C_RESIZE_CFG__VALIDATE_GENERAL */
-
-    if ((tests & H5C_RESIZE_CFG__VALIDATE_INCREMENT) != 0) {
-        if ((config_ptr->incr_mode != H5C_incr__off) && (config_ptr->incr_mode != H5C_incr__threshold))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid incr_mode")
-
-        if (config_ptr->incr_mode == H5C_incr__threshold) {
-            if ((config_ptr->lower_hr_threshold < (double)0.0f) ||
-                (config_ptr->lower_hr_threshold > (double)1.0f))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "lower_hr_threshold must be in the range [0.0, 1.0]")
-
-            if (config_ptr->increment < (double)1.0f)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "increment must be greater than or equal to 1.0")
-
-            /* no need to check max_increment, as it is a size_t,
-             * and thus must be non-negative.
-             */
-        } /* H5C_incr__threshold */
-
-        switch (config_ptr->flash_incr_mode) {
-            case H5C_flash_incr__off:
-                /* nothing to do here */
+        switch (entry->ring) {
+            case H5C_RING_USER:
+                /* Do nothing */
                 break;
 
-            case H5C_flash_incr__add_space:
-                if ((config_ptr->flash_multiple < (double)0.1f) ||
-                    (config_ptr->flash_multiple > (double)10.0f))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "flash_multiple must be in the range [0.1, 10.0]")
-                if ((config_ptr->flash_threshold < (double)0.1f) ||
-                    (config_ptr->flash_threshold > (double)1.0f))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "flash_threshold must be in the range [0.1, 1.0]")
+            case H5C_RING_RDFSM:
+                if (cache->rdfsm_settled) {
+                    if (cache->flush_in_progress || cache->close_warning_received)
+                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected rdfsm ring unsettle")
+                    cache->rdfsm_settled = FALSE;
+                } /* end if */
+                break;
+
+            case H5C_RING_MDFSM:
+                if (cache->mdfsm_settled) {
+                    if (cache->flush_in_progress || cache->close_warning_received)
+                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected mdfsm ring unsettle")
+                    cache->mdfsm_settled = FALSE;
+                } /* end if */
                 break;
 
             default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid flash_incr_mode")
+                HDassert(FALSE); /* this should be un-reachable */
                 break;
         } /* end switch */
-    }     /* H5C_RESIZE_CFG__VALIDATE_INCREMENT */
-
-    if ((tests & H5C_RESIZE_CFG__VALIDATE_DECREMENT) != 0) {
-
-        if ((config_ptr->decr_mode != H5C_decr__off) && (config_ptr->decr_mode != H5C_decr__threshold) &&
-            (config_ptr->decr_mode != H5C_decr__age_out) &&
-            (config_ptr->decr_mode != H5C_decr__age_out_with_threshold)) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid decr_mode")
-        }
-
-        if (config_ptr->decr_mode == H5C_decr__threshold) {
-            if (config_ptr->upper_hr_threshold > (double)1.0f)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "upper_hr_threshold must be <= 1.0")
-
-            if ((config_ptr->decrement > (double)1.0f) || (config_ptr->decrement < (double)0.0f))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "decrement must be in the interval [0.0, 1.0]")
-
-            /* no need to check max_decrement as it is a size_t
-             * and thus must be non-negative.
-             */
-        } /* H5C_decr__threshold */
-
-        if ((config_ptr->decr_mode == H5C_decr__age_out) ||
-            (config_ptr->decr_mode == H5C_decr__age_out_with_threshold)) {
-
-            if (config_ptr->epochs_before_eviction < 1)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction must be positive")
-            if (config_ptr->epochs_before_eviction > H5C__MAX_EPOCH_MARKERS)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction too big")
-
-            if ((config_ptr->apply_empty_reserve) &&
-                ((config_ptr->empty_reserve > (double)1.0f) || (config_ptr->empty_reserve < (double)0.0f)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty_reserve must be in the interval [0.0, 1.0]")
-
-            /* no need to check max_decrement as it is a size_t
-             * and thus must be non-negative.
-             */
-        } /* H5C_decr__age_out || H5C_decr__age_out_with_threshold */
-
-        if (config_ptr->decr_mode == H5C_decr__age_out_with_threshold) {
-            if ((config_ptr->upper_hr_threshold > (double)1.0f) ||
-                (config_ptr->upper_hr_threshold < (double)0.0f))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "upper_hr_threshold must be in the interval [0.0, 1.0]")
-        } /* H5C_decr__age_out_with_threshold */
-    }     /* H5C_RESIZE_CFG__VALIDATE_DECREMENT */
-
-    if ((tests & H5C_RESIZE_CFG__VALIDATE_INTERACTIONS) != 0) {
-        if ((config_ptr->incr_mode == H5C_incr__threshold) &&
-            ((config_ptr->decr_mode == H5C_decr__threshold) ||
-             (config_ptr->decr_mode == H5C_decr__age_out_with_threshold)) &&
-            (config_ptr->lower_hr_threshold >= config_ptr->upper_hr_threshold))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "conflicting threshold fields in config")
-    } /* H5C_RESIZE_CFG__VALIDATE_INTERACTIONS */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_validate_resize_config() */
+        FUNC_LEAVE_NOAPI(ret_value)
+    } /* H5C_unsettle_entry_ring() */
 
-/*-------------------------------------------------------------------------
- * Function:    H5C_create_flush_dependency()
- *
- * Purpose:     Initiates a parent<->child entry flush dependency.  The parent
- *              entry must be pinned or protected at the time of call, and must
- *              have all dependencies removed before the cache can shut down.
- *
- * Note:        Flush dependencies in the cache indicate that a child entry
- *              must be flushed to the file before its parent.  (This is
- *              currently used to implement Single-Writer/Multiple-Reader (SWMR)
- *              I/O access for data structures in the file).
- *
- *              Creating a flush dependency between two entries will also pin
- *              the parent entry.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              3/05/09
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_create_flush_dependency(void *parent_thing, void *child_thing)
-{
-    H5C_t *            cache_ptr;
-    H5C_cache_entry_t *parent_entry = (H5C_cache_entry_t *)parent_thing; /* Ptr to parent thing's entry */
-    H5C_cache_entry_t *child_entry  = (H5C_cache_entry_t *)child_thing;  /* Ptr to child thing's entry */
-    herr_t             ret_value    = SUCCEED;                           /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(parent_entry);
-    HDassert(parent_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(H5F_addr_defined(parent_entry->addr));
-    HDassert(child_entry);
-    HDassert(child_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(H5F_addr_defined(child_entry->addr));
-    cache_ptr = parent_entry->cache_ptr;
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(cache_ptr == child_entry->cache_ptr);
-#ifndef NDEBUG
-    /* Make sure the parent is not already a parent */
+    /*-------------------------------------------------------------------------
+     * Function:    H5C_unsettle_ring()
+     *
+     * Purpose:     Advise the metadata cache that the specified free space
+     *              manager ring is no longer settled (if it was on entry).
+     *
+     *              If the target free space manager ring is already
+     *              unsettled, do nothing, and return SUCCEED.
+     *
+     *              If the target free space manager ring is settled, and
+     *              we are not in the process of a file shutdown, mark
+     *              the ring as unsettled, and return SUCCEED.
+     *
+     *              If the target free space manager is settled, and we
+     *              are in the process of a file shutdown, post an error
+     *              message, and return FAIL.
+     *
+     * Return:      Non-negative on success/Negative on failure
+     *
+     * Programmer:  John Mainzer
+     *              10/15/16
+     *
+     *-------------------------------------------------------------------------
+     */
+    herr_t H5C_unsettle_ring(H5F_t * f, H5C_ring_t ring)
     {
-        unsigned u;
+        H5C_t *cache_ptr;
+        herr_t ret_value = SUCCEED; /* Return value */
 
-        for (u = 0; u < child_entry->flush_dep_nparents; u++)
-            HDassert(child_entry->flush_dep_parent[u] != parent_entry);
-    }  /* end block */
-#endif /* NDEBUG */
+        FUNC_ENTER_NOAPI(FAIL)
 
-    /* More sanity checks */
-    if (child_entry == parent_entry)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Child entry flush dependency parent can't be itself")
-    if (!(parent_entry->is_protected || parent_entry->is_pinned))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Parent entry isn't pinned or protected")
+        /* Sanity checks */
+        HDassert(f);
+        HDassert(f->shared);
+        HDassert(f->shared->cache);
+        HDassert((H5C_RING_RDFSM == ring) || (H5C_RING_MDFSM == ring));
+        cache_ptr = f->shared->cache;
+        HDassert(H5C__H5C_T_MAGIC == cache_ptr->magic);
 
-    /* Check for parent not pinned */
-    if (!parent_entry->is_pinned) {
-        /* Sanity check */
-        HDassert(parent_entry->flush_dep_nchildren == 0);
-        HDassert(!parent_entry->pinned_from_client);
-        HDassert(!parent_entry->pinned_from_cache);
+        switch (ring) {
+            case H5C_RING_RDFSM:
+                if (cache_ptr->rdfsm_settled) {
+                    if (cache_ptr->close_warning_received)
+                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected rdfsm ring unsettle")
+                    cache_ptr->rdfsm_settled = FALSE;
+                } /* end if */
+                break;
 
-        /* Pin the parent entry */
-        parent_entry->is_pinned = TRUE;
-        H5C__UPDATE_STATS_FOR_PIN(cache_ptr, parent_entry)
-    } /* end else */
+            case H5C_RING_MDFSM:
+                if (cache_ptr->mdfsm_settled) {
+                    if (cache_ptr->close_warning_received)
+                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected mdfsm ring unsettle")
+                    cache_ptr->mdfsm_settled = FALSE;
+                } /* end if */
+                break;
 
-    /* Mark the entry as pinned from the cache's action (possibly redundantly) */
-    parent_entry->pinned_from_cache = TRUE;
+            default:
+                HDassert(FALSE); /* this should be un-reachable */
+                break;
+        } /* end switch */
 
-    /* Check if we need to resize the child's parent array */
-    if (child_entry->flush_dep_nparents >= child_entry->flush_dep_parent_nalloc) {
-        if (child_entry->flush_dep_parent_nalloc == 0) {
-            /* Array does not exist yet, allocate it */
-            HDassert(!child_entry->flush_dep_parent);
+done:
+        FUNC_LEAVE_NOAPI(ret_value)
+    } /* H5C_unsettle_ring() */
+
+    /*-------------------------------------------------------------------------
+     * Function:    H5C_validate_resize_config()
+     *
+     * Purpose:    Run a sanity check on the specified sections of the
+     *             provided instance of struct H5C_auto_size_ctl_t.
+     *
+     *        Do nothing and return SUCCEED if no errors are detected,
+     *        and flag an error and return FAIL otherwise.
+     *
+     * Return:      Non-negative on success/Negative on failure
+     *
+     * Programmer:  John Mainzer
+     *              3/23/05
+     *
+     *-------------------------------------------------------------------------
+     */
+    herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr, unsigned int tests)
+    {
+        herr_t ret_value = SUCCEED; /* Return value */
+
+        FUNC_ENTER_NOAPI(FAIL)
+
+        if (config_ptr == NULL)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL config_ptr on entry")
+
+        if (config_ptr->version != H5C__CURR_AUTO_SIZE_CTL_VER)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown config version")
+
+        if ((tests & H5C_RESIZE_CFG__VALIDATE_GENERAL) != 0) {
+
+            if (config_ptr->max_size > H5C__MAX_MAX_CACHE_SIZE)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "max_size too big")
+
+            if (config_ptr->min_size < H5C__MIN_MAX_CACHE_SIZE)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_size too small")
+
+            if (config_ptr->min_size > config_ptr->max_size)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_size > max_size")
+
+            if (config_ptr->set_initial_size && ((config_ptr->initial_size < config_ptr->min_size) ||
+                                                 (config_ptr->initial_size > config_ptr->max_size)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "initial_size must be in the interval [min_size, max_size]")
+
+            if ((config_ptr->min_clean_fraction < (double)0.0f) ||
+                (config_ptr->min_clean_fraction > (double)1.0f))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "min_clean_fraction must be in the interval [0.0, 1.0]")
+
+            if (config_ptr->epoch_length < H5C__MIN_AR_EPOCH_LENGTH)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too small")
+
+            if (config_ptr->epoch_length > H5C__MAX_AR_EPOCH_LENGTH)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too big")
+        } /* H5C_RESIZE_CFG__VALIDATE_GENERAL */
+
+        if ((tests & H5C_RESIZE_CFG__VALIDATE_INCREMENT) != 0) {
+            if ((config_ptr->incr_mode != H5C_incr__off) && (config_ptr->incr_mode != H5C_incr__threshold))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid incr_mode")
+
+            if (config_ptr->incr_mode == H5C_incr__threshold) {
+                if ((config_ptr->lower_hr_threshold < (double)0.0f) ||
+                    (config_ptr->lower_hr_threshold > (double)1.0f))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "lower_hr_threshold must be in the range [0.0, 1.0]")
+
+                if (config_ptr->increment < (double)1.0f)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "increment must be greater than or equal to 1.0")
+
+                /* no need to check max_increment, as it is a size_t,
+                 * and thus must be non-negative.
+                 */
+            } /* H5C_incr__threshold */
+
+            switch (config_ptr->flash_incr_mode) {
+                case H5C_flash_incr__off:
+                    /* nothing to do here */
+                    break;
+
+                case H5C_flash_incr__add_space:
+                    if ((config_ptr->flash_multiple < (double)0.1f) ||
+                        (config_ptr->flash_multiple > (double)10.0f))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                    "flash_multiple must be in the range [0.1, 10.0]")
+                    if ((config_ptr->flash_threshold < (double)0.1f) ||
+                        (config_ptr->flash_threshold > (double)1.0f))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                    "flash_threshold must be in the range [0.1, 1.0]")
+                    break;
+
+                default:
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid flash_incr_mode")
+                    break;
+            } /* end switch */
+        }     /* H5C_RESIZE_CFG__VALIDATE_INCREMENT */
+
+        if ((tests & H5C_RESIZE_CFG__VALIDATE_DECREMENT) != 0) {
+
+            if ((config_ptr->decr_mode != H5C_decr__off) && (config_ptr->decr_mode != H5C_decr__threshold) &&
+                (config_ptr->decr_mode != H5C_decr__age_out) &&
+                (config_ptr->decr_mode != H5C_decr__age_out_with_threshold)) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid decr_mode")
+            }
+
+            if (config_ptr->decr_mode == H5C_decr__threshold) {
+                if (config_ptr->upper_hr_threshold > (double)1.0f)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "upper_hr_threshold must be <= 1.0")
+
+                if ((config_ptr->decrement > (double)1.0f) || (config_ptr->decrement < (double)0.0f))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "decrement must be in the interval [0.0, 1.0]")
+
+                /* no need to check max_decrement as it is a size_t
+                 * and thus must be non-negative.
+                 */
+            } /* H5C_decr__threshold */
+
+            if ((config_ptr->decr_mode == H5C_decr__age_out) ||
+                (config_ptr->decr_mode == H5C_decr__age_out_with_threshold)) {
+
+                if (config_ptr->epochs_before_eviction < 1)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction must be positive")
+                if (config_ptr->epochs_before_eviction > H5C__MAX_EPOCH_MARKERS)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction too big")
+
+                if ((config_ptr->apply_empty_reserve) && ((config_ptr->empty_reserve > (double)1.0f) ||
+                                                          (config_ptr->empty_reserve < (double)0.0f)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "empty_reserve must be in the interval [0.0, 1.0]")
+
+                /* no need to check max_decrement as it is a size_t
+                 * and thus must be non-negative.
+                 */
+            } /* H5C_decr__age_out || H5C_decr__age_out_with_threshold */
+
+            if (config_ptr->decr_mode == H5C_decr__age_out_with_threshold) {
+                if ((config_ptr->upper_hr_threshold > (double)1.0f) ||
+                    (config_ptr->upper_hr_threshold < (double)0.0f))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "upper_hr_threshold must be in the interval [0.0, 1.0]")
+            } /* H5C_decr__age_out_with_threshold */
+        }     /* H5C_RESIZE_CFG__VALIDATE_DECREMENT */
+
+        if ((tests & H5C_RESIZE_CFG__VALIDATE_INTERACTIONS) != 0) {
+            if ((config_ptr->incr_mode == H5C_incr__threshold) &&
+                ((config_ptr->decr_mode == H5C_decr__threshold) ||
+                 (config_ptr->decr_mode == H5C_decr__age_out_with_threshold)) &&
+                (config_ptr->lower_hr_threshold >= config_ptr->upper_hr_threshold))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "conflicting threshold fields in config")
+        } /* H5C_RESIZE_CFG__VALIDATE_INTERACTIONS */
+
+done:
+        FUNC_LEAVE_NOAPI(ret_value)
+    } /* H5C_validate_resize_config() */
+
+    /*-------------------------------------------------------------------------
+     * Function:    H5C_create_flush_dependency()
+     *
+     * Purpose:     Initiates a parent<->child entry flush dependency.  The parent
+     *              entry must be pinned or protected at the time of call, and must
+     *              have all dependencies removed before the cache can shut down.
+     *
+     * Note:        Flush dependencies in the cache indicate that a child entry
+     *              must be flushed to the file before its parent.  (This is
+     *              currently used to implement Single-Writer/Multiple-Reader (SWMR)
+     *              I/O access for data structures in the file).
+     *
+     *              Creating a flush dependency between two entries will also pin
+     *              the parent entry.
+     *
+     * Return:      Non-negative on success/Negative on failure
+     *
+     * Programmer:  Quincey Koziol
+     *              3/05/09
+     *
+     *-------------------------------------------------------------------------
+     */
+    herr_t H5C_create_flush_dependency(void *parent_thing, void *child_thing)
+    {
+        H5C_t *            cache_ptr;
+        H5C_cache_entry_t *parent_entry = (H5C_cache_entry_t *)parent_thing; /* Ptr to parent thing's entry */
+        H5C_cache_entry_t *child_entry  = (H5C_cache_entry_t *)child_thing;  /* Ptr to child thing's entry */
+        herr_t             ret_value    = SUCCEED;                           /* Return value */
+
+        FUNC_ENTER_NOAPI(FAIL)
+
+        /* Sanity checks */
+        HDassert(parent_entry);
+        HDassert(parent_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+        HDassert(H5F_addr_defined(parent_entry->addr));
+        HDassert(child_entry);
+        HDassert(child_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+        HDassert(H5F_addr_defined(child_entry->addr));
+        cache_ptr = parent_entry->cache_ptr;
+        HDassert(cache_ptr);
+        HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+        HDassert(cache_ptr == child_entry->cache_ptr);
+#ifndef NDEBUG
+        /* Make sure the parent is not already a parent */
+        {
+            unsigned u;
+
+            for (u = 0; u < child_entry->flush_dep_nparents; u++)
+                HDassert(child_entry->flush_dep_parent[u] != parent_entry);
+        } /* end block */
+#endif    /* NDEBUG */
+
+        /* More sanity checks */
+        if (child_entry == parent_entry)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL,
+                        "Child entry flush dependency parent can't be itself")
+        if (!(parent_entry->is_protected || parent_entry->is_pinned))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Parent entry isn't pinned or protected")
+
+        /* Check for parent not pinned */
+        if (!parent_entry->is_pinned) {
+            /* Sanity check */
+            HDassert(parent_entry->flush_dep_nchildren == 0);
+            HDassert(!parent_entry->pinned_from_client);
+            HDassert(!parent_entry->pinned_from_cache);
+
+            /* Pin the parent entry */
+            parent_entry->is_pinned = TRUE;
+            H5C__UPDATE_STATS_FOR_PIN(cache_ptr, parent_entry)
+        } /* end else */
+
+        /* Mark the entry as pinned from the cache's action (possibly redundantly) */
+        parent_entry->pinned_from_cache = TRUE;
+
+        /* Check if we need to resize the child's parent array */
+        if (child_entry->flush_dep_nparents >= child_entry->flush_dep_parent_nalloc) {
+            if (child_entry->flush_dep_parent_nalloc == 0) {
+                /* Array does not exist yet, allocate it */
+                HDassert(!child_entry->flush_dep_parent);
 
                 if (NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_MALLOC(
                                  parent, H5C_FLUSH_DEP_PARENT_INIT * sizeof(H5C_cache_entry_t *))))
