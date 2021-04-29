@@ -272,8 +272,26 @@ New Features
 
       The string is now handled properly and the segfault no longer occurs.
 
+<<<<<<< HEAD
         (DER - 2021/04/27, HDFFV-11239)
       
+=======
+    Library:
+    --------
+    - H5Pset_fapl_log() no longer crashes when passed an invalid fapl ID
+
+      When passed an invalid fapl ID, H5Pset_fapl_log() would usually
+      segfault when attempting to free an uninitialized pointer in the error
+      handling code. This behavior is more common in release builds or
+      when the memory sanitization checks were not selected as a build
+      option.
+
+      The pointer is now correctly initialized and the API call now
+      produces a normal HDF5 error when fed an invalid fapl ID.
+
+        (DER - 2021/04/28, HDFFV-11240)
+
+>>>>>>> 138bc52... Fix for a segfault when H5Pset_fapl_log is passed an invalid fapl ID (#607)
     - HSYS_GOTO_ERROR now emits the results of GetLastError() on Windows
 
       HSYS_GOTO_ERROR is an internal macro that is used to produce error
