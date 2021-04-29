@@ -322,18 +322,16 @@ herr_t
 H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, size_t buf_size)
 {
     H5FD_log_fapl_t fa;        /* File access property list information */
-    H5P_genplist_t *plist;     /* Property list pointer */
+    H5P_genplist_t *plist = NULL;     /* Property list pointer */
     herr_t          ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sULz", fapl_id, logfile, flags, buf_size);
 
-    /* Do this first, so that we don't try to free a wild pointer if
-     * H5P_object_verify() fails.
-     */
+    /* Initialize. */
     HDmemset(&fa, 0, sizeof(H5FD_log_fapl_t));
 
-    /* Check arguments */
+    /* Check arguments. */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
