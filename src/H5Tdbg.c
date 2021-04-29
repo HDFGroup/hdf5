@@ -91,6 +91,13 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
     if (H5DEBUG(T) && path->stats.ncalls > 0) {
         hsize_t nbytes;
         char    bandwidth[32];
+        struct {
+            char *user;
+            char *system;
+            char *elapsed;
+        } timestrs = {H5_timer_get_time_string(path->stats.times.user),
+                      H5_timer_get_time_string(path->stats.times.system),
+                      H5_timer_get_time_string(path->stats.times.elapsed)};
 
         if (nprint && 0 == (*nprint)++) {
             HDfprintf(H5DEBUG(T), "H5T: type conversion statistics:\n");
@@ -108,12 +115,14 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
             nbytes = H5T_get_size(path->dst);
         else
             nbytes = 0;
-
         nbytes *= path->stats.nelmts;
         H5_bandwidth(bandwidth, (double)nbytes, path->stats.times.elapsed);
         HDfprintf(H5DEBUG(T), "   %-16s %10" PRIdHSIZE " %10u %8s %8s %8s %10s\n", path->name,
                   path->stats.nelmts, path->stats.ncalls, timestrs.user, timestrs.system, timestrs.elapsed,
                   bandwidth);
+        HDfree(timestrs.user);
+        HDfree(timestrs.system);
+        HDfree(timestrs.elapsed);
     }
 #endif
 
