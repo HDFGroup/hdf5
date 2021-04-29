@@ -111,10 +111,10 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
 
         nbytes *= path->stats.nelmts;
         H5_bandwidth(bandwidth, (double)nbytes, path->stats.times.elapsed);
-        HDfprintf(H5DEBUG(T), "   %-16s %10Hd %10d %8T %8T %8T %10s\n", path->name, path->stats.nelmts,
-                  path->stats.ncalls, path->stats.times.user, path->stats.times.system,
-                  path->stats.times.elapsed, bandwidth);
-    } /* end if */
+        HDfprintf(H5DEBUG(T), "   %-16s %10" PRIdHSIZE " %10u %8s %8s %8s %10s\n", path->name,
+                  path->stats.nelmts, path->stats.ncalls, timestrs.user, timestrs.system, timestrs.elapsed,
+                  bandwidth);
+    }
 #endif
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -394,7 +394,8 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 
             HDfprintf(stream, "\n\"%s\" = 0x", dt->shared->u.enumer.name[i]);
             for (k = 0; k < base_size; k++)
-                HDfprintf(stream, "%02p", ((uint8_t *)dt->shared->u.enumer.value + (i * base_size) + k));
+                HDfprintf(stream, "%02" PRIx8,
+                          *((uint8_t *)dt->shared->u.enumer.value + (i * base_size) + k));
         } /* end for */
         HDfprintf(stream, "\n");
     }

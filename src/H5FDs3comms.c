@@ -1267,8 +1267,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         rangebytesstr = (char *)H5MM_malloc(sizeof(char) * (S3COMMS_MAX_RANGE_STRING_SIZE + 1));
         if (rangebytesstr == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc range format string.");
-        ret = HDsnprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE),
-                         "bytes=" H5_PRINTF_HADDR_FMT "-" H5_PRINTF_HADDR_FMT, offset, offset + len - 1);
+        ret = HDsnprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE), "bytes=%" PRIuHADDR "-%" PRIuHADDR,
+                         offset, offset + len - 1);
         if (ret <= 0 || ret >= S3COMMS_MAX_RANGE_STRING_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
@@ -1276,8 +1276,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         rangebytesstr = (char *)H5MM_malloc(sizeof(char) * (S3COMMS_MAX_RANGE_STRING_SIZE + 1));
         if (rangebytesstr == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc range format string.");
-        ret = HDsnprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE), "bytes=" H5_PRINTF_HADDR_FMT "-",
-                         offset);
+        ret = HDsnprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE), "bytes=%" PRIuHADDR "-", offset);
         if (ret <= 0 || ret >= S3COMMS_MAX_RANGE_STRING_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
@@ -1952,7 +1951,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
         for (buffer_i = 0; buffer_i < 128; buffer_i++)
             buffer[buffer_i] = 0;
 
-        line_buffer = fgets(line_buffer, 128, file);
+        line_buffer = HDfgets(line_buffer, 128, file);
         if (line_buffer == NULL) /* reached end of file */
             goto done;
     } while (HDstrncmp(line_buffer, profile_line, HDstrlen(profile_line)));

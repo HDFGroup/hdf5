@@ -441,11 +441,11 @@ H5D__bt2_unfilt_debug(FILE *stream, int indent, int fwidth, const void *_record,
     HDassert(ctx->chunk_size == record->nbytes);
     HDassert(0 == record->filter_mask);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Chunk address:", record->chunk_addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Chunk address:", record->chunk_addr);
 
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
     for (u = 0; u < ctx->ndims; u++)
-        HDfprintf(stream, "%s%Hd", u ? ", " : "", record->scaled[u] * ctx->dim[u]);
+        HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", record->scaled[u] * ctx->dim[u]);
     HDfputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -555,13 +555,13 @@ H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth, const void *_record, c
     HDassert(H5F_addr_defined(record->chunk_addr));
     HDassert(0 != record->nbytes);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Chunk address:", record->chunk_addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Chunk address:", record->chunk_addr);
     HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth, "Chunk size:", (unsigned)record->nbytes);
     HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "Filter mask:", record->filter_mask);
 
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
     for (u = 0; u < ctx->ndims; u++)
-        HDfprintf(stream, "%s%Hd", u ? ", " : "", record->scaled[u] * ctx->dim[u]);
+        HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", record->scaled[u] * ctx->dim[u]);
     HDfputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1467,7 +1467,7 @@ H5D__bt2_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
     HDassert(storage);
     HDassert(stream);
 
-    HDfprintf(stream, "    Address: %a\n", storage->idx_addr);
+    HDfprintf(stream, "    Address: %" PRIuHADDR "\n", storage->idx_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__bt2_idx_dump() */

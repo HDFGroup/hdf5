@@ -1958,7 +1958,8 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     f2size = HDftell(f2ptr);
 
     if (f1size != f2size) {
-        HDfprintf(stderr, "Files differ in size, %llu vs. %llu\n", f1size, f2size);
+        HDfprintf(stderr, "Files differ in size, %" PRIuHSIZE " vs. %" PRIuHSIZE "\n", (hsize_t)f1size,
+                  (hsize_t)f2size);
         ret_value = -1;
         goto done;
     }
@@ -1976,7 +1977,7 @@ h5_compare_file_bytes(char *f1name, char *f2name)
             goto done;
         }
         if (f1char != f2char) {
-            HDfprintf(stderr, "Mismatch @ 0x%llX: 0x%X != 0x%X\n", ii, f1char, f2char);
+            HDfprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n", (hsize_t)ii, f1char, f2char);
             ret_value = -1;
             goto done;
         }

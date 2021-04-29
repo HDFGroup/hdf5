@@ -2293,7 +2293,6 @@ test_swmr_write_big(hbool_t newest_format)
         FAIL_STACK_ERROR;
 
     /* Pop API context */
-
     if (api_ctx_pushed && H5CX_pop() < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
@@ -2357,16 +2356,18 @@ accum_printf(const H5F_t *f)
         HDprintf("=====================================================\n");
         HDprintf(" accumulator allocated size == %zu\n", accum->alloc_size);
         HDprintf(" accumulated data size      == %zu\n", accum->size);
-        HDfprintf(stdout, " accumulator dirty?         == %t\n", accum->dirty);
+        HDfprintf(stdout, " accumulator dirty?         == %s\n", accum->dirty ? "TRUE" : "FALSE");
         HDprintf("=====================================================\n");
-        HDfprintf(stdout, " start of accumulated data, loc = %a\n", accum->loc);
+        HDfprintf(stdout, " start of accumulated data, loc = %" PRIuHADDR "\n", accum->loc);
         if (accum->dirty) {
-            HDfprintf(stdout, " start of dirty region, loc = %a\n", (haddr_t)(accum->loc + accum->dirty_off));
-            HDfprintf(stdout, " end of dirty region,   loc = %a\n",
+            HDfprintf(stdout, " start of dirty region, loc = %" PRIuHADDR "\n",
+                      (haddr_t)(accum->loc + accum->dirty_off));
+            HDfprintf(stdout, " end of dirty region,   loc = %" PRIuHADDR "\n",
                       (haddr_t)(accum->loc + accum->dirty_off + accum->dirty_len));
         } /* end if */
-        HDfprintf(stdout, " end of accumulated data,   loc = %a\n", (haddr_t)(accum->loc + accum->size));
-        HDfprintf(stdout, " end of accumulator allocation,   loc = %a\n",
+        HDfprintf(stdout, " end of accumulated data,   loc = %" PRIuHADDR "\n",
+                  (haddr_t)(accum->loc + accum->size));
+        HDfprintf(stdout, " end of accumulator allocation,   loc = %" PRIuHADDR "\n",
                   (haddr_t)(accum->loc + accum->alloc_size));
         HDprintf("=====================================================\n");
     }

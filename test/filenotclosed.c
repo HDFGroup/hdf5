@@ -80,7 +80,7 @@ main(void)
     contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
     if (!contig_addr_vfd) {
         SKIPPED();
-        puts("    Temporary skipped for a spilt/multi driver");
+        HDputs("    Temporary skipped for a spilt/multi driver");
         HDexit(EXIT_SUCCESS);
     }
 

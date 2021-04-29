@@ -650,7 +650,6 @@ done:
  * Purpose:     Copies a message from _MESG to _DEST in file
  *
  * Return:      Success:        Ptr to _DEST
- *
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
@@ -719,9 +718,9 @@ done:
 } /* H5O__attr_post_copy_file() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_attr_get_crt_index
+ * Function:    H5O_attr_get_crt_index
  *
- * Purpose:	Get creation index from the message
+ * Purpose:     Get creation index from the message
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -748,9 +747,9 @@ H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
 } /* end H5O_attr_get_crt_index() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_attr_set_crt_index
+ * Function:    H5O_attr_set_crt_index
  *
- * Purpose:	Set creation index from the message
+ * Purpose:     Set creation index from the message
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -844,8 +843,9 @@ H5O__attr_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidt
             break;
     } /* end switch */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Character Set of Name:", s);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth, "Object opened:", mesg->obj_opened);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object:", mesg->oloc.addr);
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Object opened:", mesg->obj_opened ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Object:", mesg->oloc.addr);
 
     /* Check for attribute creation order index on the attribute */
     if (mesg->shared->crt_idx != H5O_MAX_CRT_ORDER_IDX)

@@ -217,6 +217,7 @@ walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSE
     }
 
     error_flag_g = -1;
+
     return SUCCEED;
 }
 

@@ -17,7 +17,6 @@
  *                  Quincey Koziol
  *                  Jul 24 2007
  *
- *
  * Purpose:         Dump debugging information about a dataspace
  *
  *-------------------------------------------------------------------------

@@ -2770,17 +2770,17 @@ write_permitted_check(int
 /*-------------------------------------------------------------------------
  * Function:    check_insert_entry()
  *
- * Purpose:    Verify that H5C_insert_entry behaves as expected.
- *        Test the behaviour with different flags.
+ * Purpose:     Verify that H5C_insert_entry behaves as expected.
+ *              Test the behaviour with different flags.
  *
- *        This test was added primarily to test basic insert
- *        pinned entry functionallity, but I through in explicit
- *        tests for other functionallity that is tested implicitly
- *        elsewhere.
+ *              This test was added primarily to test basic insert
+ *              pinned entry functionallity, but I through in explicit
+ *              tests for other functionallity that is tested implicitly
+ *              elsewhere.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              8/10/06
  *
  * Modifications:
@@ -4448,7 +4448,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 #if 0  /* JRM */
     /* This gets used a lot, so lets leave it in. */
 
-    HDfprintf(stdout, "check_flush_cache__multi_entry_test: test %d\n", 
+    HDfprintf(stdout, "check_flush_cache__multi_entry_test: test %d\n",
               test_num);
 #endif /* JRM */
 
@@ -8230,7 +8230,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
                 if ( entry_ptr->at_main_addr != check[i].at_main_addr ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                               "(%d,%d) at main addr (expected) = %d (%d).\n",
                               (int)(check[i].entry_type),
                               (int)(check[i].entry_index),
@@ -8240,7 +8240,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
                 if ( entry_ptr->is_dirty != check[i].is_dirty ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                               "entry_ptr->is_dirty (expected) = %d (%d).\n",
                               (int)(entry_ptr->is_dirty),
                               (int)(check[i].is_dirty));
@@ -8248,7 +8248,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
                 if ( entry_ptr->header.is_dirty != check[i].is_dirty ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                           "entry_ptr->header.is_dirty (expected) = %d (%d).\n",
                           (int)(entry_ptr->header.is_dirty),
                           (int)(check[i].is_dirty));
@@ -8256,7 +8256,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
                 if ( entry_ptr->is_protected != check[i].is_protected ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                               "entry_ptr->is_protected (expected) = %d (%d).\n",
                               (int)(entry_ptr->is_protected),
                               (int)(check[i].is_protected));
@@ -8264,7 +8264,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
                 if ( entry_ptr->header.is_protected != check[i].is_protected ) {
 
-                     HDfprintf(stdout, 
+                     HDfprintf(stdout,
                        "entry_ptr->header.is_protected (expected) = %d (%d).\n",
                        (int)(entry_ptr->is_protected),
                        (int)(check[i].is_protected));
@@ -8272,7 +8272,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
                 if ( entry_ptr->is_pinned != check[i].is_pinned ) {
 
-                     HDfprintf(stdout, 
+                     HDfprintf(stdout,
                               "entry_ptr->is_pinned (expected) = %d (%d).\n",
                               (int)(entry_ptr->is_pinned),
                               (int)(check[i].is_pinned));
@@ -8280,7 +8280,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
                 if ( entry_ptr->header.is_pinned != check[i].is_pinned ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                           "entry_ptr->header.is_pinned (expected) = %d (%d).\n",
                           (int)(entry_ptr->header.is_pinned),
                           (int)(check[i].is_pinned));

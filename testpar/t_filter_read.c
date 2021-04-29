@@ -71,10 +71,10 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     hs_size[0] = size[0] = HS_DIM1;
     hs_size[1]           = HS_DIM2;
 
-    size[1] = hs_size[1] * mpi_size;
+    size[1] = hs_size[1] * (hsize_t)mpi_size;
 
     hs_offset[0] = 0;
-    hs_offset[1] = hs_size[1] * mpi_rank;
+    hs_offset[1] = hs_size[1] * (hsize_t)mpi_rank;
 
     /* Create the data space */
     sid = H5Screate_simple(2, size, NULL);
@@ -208,7 +208,9 @@ test_filter_read(void)
     unsigned      disable_partial_chunk_filters; /* Whether filters are disabled on partial chunks */
     herr_t        hrc;
     const char *  filename;
-    hsize_t       fletcher32_size; /* Size of dataset with Fletcher32 checksum */
+#ifdef H5_HAVE_FILTER_FLETCHER32
+    hsize_t fletcher32_size; /* Size of dataset with Fletcher32 checksum */
+#endif
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     hsize_t deflate_size; /* Size of dataset with deflate filter */

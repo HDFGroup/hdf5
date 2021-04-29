@@ -880,10 +880,12 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfork
 #define HDfork() fork()
 #endif /* HDfork */
+#ifndef HDfprintf
+#define HDfprintf fprintf
+#endif
 #ifndef HDfpathconf
 #define HDfpathconf(F, N) fpathconf(F, N)
 #endif /* HDfpathconf */
-H5_DLL int HDfprintf(FILE *stream, const char *fmt, ...);
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
 #endif /* HDfputc */
@@ -1216,7 +1218,7 @@ typedef off_t       h5_stat_size_t;
 #define HDpread(F, B, C, O) pread(F, B, C, O)
 #endif /* HDpread */
 #ifndef HDprintf
-#define HDprintf(...) HDfprintf(stdout, __VA_ARGS__)
+#define HDprintf printf
 #endif /* HDprintf */
 #ifndef HDputc
 #define HDputc(C, F) putc(C, F)
@@ -1428,6 +1430,9 @@ H5_DLL void HDsrand(unsigned int seed);
 #ifndef HDstrcspn
 #define HDstrcspn(X, Y) strcspn(X, Y)
 #endif /* HDstrcspn */
+#ifndef HDstrdup
+#define HDstrdup(S) strdup(S)
+#endif /* HDstrdup */
 #ifndef HDstrerror
 #define HDstrerror(N) strerror(N)
 #endif /* HDstrerror */
@@ -1588,9 +1593,6 @@ H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #ifndef HDva_start
 #define HDva_start(A, P) va_start(A, P)
 #endif /* HDva_start */
-#ifndef HDvasprintf
-#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
-#endif /* HDvasprintf */
 #ifndef HDvfprintf
 #define HDvfprintf(F, FMT, A) vfprintf(F, FMT, A)
 #endif /* HDvfprintf */
@@ -1618,18 +1620,6 @@ H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
 #endif /* HDwrite */
-
-/*
- * And now for a couple non-Posix functions...  Watch out for systems that
- * define these in terms of macros.
- */
-#if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *                   strdup(const char *s);
-#endif
-
-#ifndef HDstrdup
-#define HDstrdup(S) strdup(S)
-#endif /* HDstrdup */
 
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */

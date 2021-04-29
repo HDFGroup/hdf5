@@ -663,7 +663,7 @@ main(void)
     int nerrors = 0;
 
     /* Run tests w/weak file close */
-    puts("Testing dangling objects with weak file close:");
+    HDputs("Testing dangling objects with weak file close:");
     nerrors += test_dangle_dataset(H5F_CLOSE_WEAK);
     nerrors += test_dangle_group(H5F_CLOSE_WEAK);
     nerrors += test_dangle_datatype1(H5F_CLOSE_WEAK);
@@ -671,7 +671,7 @@ main(void)
     nerrors += test_dangle_attribute(H5F_CLOSE_WEAK);
 
     /* Run tests w/semi file close */
-    puts("Testing dangling objects with semi file close:");
+    HDputs("Testing dangling objects with semi file close:");
     nerrors += test_dangle_dataset(H5F_CLOSE_SEMI);
     nerrors += test_dangle_group(H5F_CLOSE_SEMI);
     nerrors += test_dangle_datatype1(H5F_CLOSE_SEMI);
@@ -679,7 +679,7 @@ main(void)
     nerrors += test_dangle_attribute(H5F_CLOSE_SEMI);
 
     /* Run tests w/strong file close */
-    puts("Testing dangling objects with strong file close:");
+    HDputs("Testing dangling objects with strong file close:");
     nerrors += test_dangle_dataset(H5F_CLOSE_STRONG);
     nerrors += test_dangle_group(H5F_CLOSE_STRONG);
     nerrors += test_dangle_datatype1(H5F_CLOSE_STRONG);
@@ -692,11 +692,11 @@ main(void)
     /* Check for errors */
     if (nerrors)
         goto error;
-    puts("All dangling ID tests passed.");
+    HDputs("All dangling ID tests passed.");
 
     return 0;
 
 error:
-    puts("***** DANGLING ID TESTS FAILED *****");
+    HDputs("***** DANGLING ID TESTS FAILED *****");
     return 1;
 }

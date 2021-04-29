@@ -5257,7 +5257,7 @@ test_select_hyper_union_stagger(void)
     CHECK(error, FAIL, "H5Fclose");
 
     /* Initialize intput buffer */
-    memset(data_out, 0, 7 * 7 * sizeof(int));
+    HDmemset(data_out, 0, 7 * 7 * sizeof(int));
 
     /* Open file */
     file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -5555,7 +5555,7 @@ test_select_hyper_valid_combination(void)
 
     /* Output message about test being performed */
     MESSAGE(6, ("Testing Selection Combination Validity\n"));
-    assert(SPACE9_DIM2 >= POINT1_NPOINTS);
+    HDassert(SPACE9_DIM2 >= POINT1_NPOINTS);
 
     /* Create dataspace for single point selection */
     single_pt_sid = H5Screate_simple(SPACE9_RANK, dims2D, NULL);
@@ -14705,7 +14705,7 @@ test_internal_consistency(void)
 
     /* Output message about test being performed */
     MESSAGE(6, ("Testing Consistency of Internal States\n"));
-    assert(SPACE9_DIM2 >= POINT1_NPOINTS);
+    HDassert(SPACE9_DIM2 >= POINT1_NPOINTS);
 
     /* Create dataspace for "all" selection */
     all_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);

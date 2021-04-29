@@ -1190,7 +1190,7 @@ print_file_info(const iter_t *iter)
     HDprintf("\t# of unique links: %lu\n", iter->uniq_links);
     HDprintf("\t# of unique other: %lu\n", iter->uniq_others);
     HDprintf("\tMax. # of links to object: %lu\n", iter->max_links);
-    HDfprintf(stdout, "\tMax. # of objects in group: %Hu\n", iter->max_fanout);
+    HDfprintf(stdout, "\tMax. # of objects in group: %" PRIuHSIZE "\n", iter->max_fanout);
 
     return 0;
 } /* print_file_info() */
@@ -1213,40 +1213,40 @@ static herr_t
 print_file_metadata(const iter_t *iter)
 {
     HDfprintf(stdout, "File space information for file metadata (in bytes):\n");
-    HDfprintf(stdout, "\tSuperblock: %Hu\n", iter->super_size);
-    HDfprintf(stdout, "\tSuperblock extension: %Hu\n", iter->super_ext_size);
-    HDfprintf(stdout, "\tUser block: %Hu\n", iter->ublk_size);
+    HDfprintf(stdout, "\tSuperblock: %" PRIuHSIZE "\n", iter->super_size);
+    HDfprintf(stdout, "\tSuperblock extension: %" PRIuHSIZE "\n", iter->super_ext_size);
+    HDfprintf(stdout, "\tUser block: %" PRIuHSIZE "\n", iter->ublk_size);
 
     HDfprintf(stdout, "\tObject headers: (total/unused)\n");
-    HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n", iter->group_ohdr_info.total_size,
+    HDfprintf(stdout, "\t\tGroups: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->group_ohdr_info.total_size,
               iter->group_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n", iter->dset_ohdr_info.total_size,
-              iter->dset_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n", iter->dtype_ohdr_info.total_size,
+    HDfprintf(stdout, "\t\tDatasets(exclude compact data): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+              iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
+    HDfprintf(stdout, "\t\tDatatypes: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->dtype_ohdr_info.total_size,
               iter->dtype_ohdr_info.free_size);
 
     HDfprintf(stdout, "\tGroups:\n");
-    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->groups_btree_storage_size);
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->groups_heap_storage_size);
+    HDfprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
 
     HDfprintf(stdout, "\tAttributes:\n");
-    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->attrs_btree_storage_size);
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->attrs_heap_storage_size);
+    HDfprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->attrs_btree_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->attrs_heap_storage_size);
 
     HDfprintf(stdout, "\tChunked datasets:\n");
-    HDfprintf(stdout, "\t\tIndex: %Hu\n", iter->datasets_index_storage_size);
+    HDfprintf(stdout, "\t\tIndex: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
 
     HDfprintf(stdout, "\tDatasets:\n");
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->datasets_heap_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
     HDfprintf(stdout, "\tShared Messages:\n");
-    HDfprintf(stdout, "\t\tHeader: %Hu\n", iter->SM_hdr_storage_size);
-    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->SM_index_storage_size);
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->SM_heap_storage_size);
+    HDfprintf(stdout, "\t\tHeader: %" PRIuHSIZE "\n", iter->SM_hdr_storage_size);
+    HDfprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->SM_index_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->SM_heap_storage_size);
 
     HDfprintf(stdout, "\tFree-space managers:\n");
-    HDfprintf(stdout, "\t\tHeader: %Hu\n", iter->free_hdr);
-    HDfprintf(stdout, "\t\tAmount of free space: %Hu\n", iter->free_space);
+    HDfprintf(stdout, "\t\tHeader: %" PRIuHSIZE "\n", iter->free_hdr);
+    HDfprintf(stdout, "\t\tAmount of free space: %" PRIuHSIZE "\n", iter->free_space);
 
     return 0;
 } /* print_file_metadata() */
@@ -1324,11 +1324,11 @@ print_group_metadata(const iter_t *iter)
 {
     HDprintf("File space information for groups' metadata (in bytes):\n");
 
-    HDfprintf(stdout, "\tObject headers (total/unused): %Hu/%Hu\n", iter->group_ohdr_info.total_size,
-              iter->group_ohdr_info.free_size);
+    HDfprintf(stdout, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+              iter->group_ohdr_info.total_size, iter->group_ohdr_info.free_size);
 
-    HDfprintf(stdout, "\tB-tree/List: %Hu\n", iter->groups_btree_storage_size);
-    HDfprintf(stdout, "\tHeap: %Hu\n", iter->groups_heap_storage_size);
+    HDfprintf(stdout, "\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
+    HDfprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
 
     return 0;
 } /* print_group_metadata() */
@@ -1362,7 +1362,7 @@ print_dataset_info(const iter_t *iter)
                 HDprintf("\t\t# of dataset with rank %u: %lu\n", u, iter->dset_rank_count[u]);
 
         HDprintf("1-D Dataset information:\n");
-        HDfprintf(stdout, "\tMax. dimension size of 1-D datasets: %Hu\n", iter->max_dset_dims);
+        HDfprintf(stdout, "\tMax. dimension size of 1-D datasets: %" PRIuHSIZE "\n", iter->max_dset_dims);
         HDprintf("\tSmall 1-D datasets (with dimension sizes 0 to %u):\n", sdsets_threshold - 1);
         total = 0;
         for (u = 0; u < (unsigned)sdsets_threshold; u++) {
@@ -1394,8 +1394,9 @@ print_dataset_info(const iter_t *iter)
         } /* end if */
 
         HDprintf("Dataset storage information:\n");
-        HDfprintf(stdout, "\tTotal raw data size: %Hu\n", iter->dset_storage_size);
-        HDfprintf(stdout, "\tTotal external raw data size: %Hu\n", iter->dset_external_storage_size);
+        HDfprintf(stdout, "\tTotal raw data size: %" PRIuHSIZE "\n", iter->dset_storage_size);
+        HDfprintf(stdout, "\tTotal external raw data size: %" PRIuHSIZE "\n",
+                  iter->dset_external_storage_size);
 
         HDprintf("Dataset layout information:\n");
         for (u = 0; u < H5D_NLAYOUTS; u++)
@@ -1439,11 +1440,11 @@ print_dset_metadata(const iter_t *iter)
 {
     HDprintf("File space information for datasets' metadata (in bytes):\n");
 
-    HDfprintf(stdout, "\tObject headers (total/unused): %Hu/%Hu\n", iter->dset_ohdr_info.total_size,
-              iter->dset_ohdr_info.free_size);
+    HDfprintf(stdout, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+              iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
 
-    HDfprintf(stdout, "\tIndex for Chunked datasets: %Hu\n", iter->datasets_index_storage_size);
-    HDfprintf(stdout, "\tHeap: %Hu\n", iter->datasets_heap_storage_size);
+    HDfprintf(stdout, "\tIndex for Chunked datasets: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
+    HDfprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
     return 0;
 } /* print_dset_metadata() */
@@ -1557,7 +1558,7 @@ print_freespace_info(const iter_t *iter)
     unsigned      u;     /* Local index variable */
 
     HDfprintf(stdout, "Free-space persist: %s\n", iter->fs_persist ? "TRUE" : "FALSE");
-    HDfprintf(stdout, "Free-space section threshold: %Hu bytes\n", iter->fs_threshold);
+    HDfprintf(stdout, "Free-space section threshold: %" PRIuHSIZE " bytes\n", iter->fs_threshold);
     HDprintf("Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
     total = 0;
     for (u = 0; u < SIZE_SMALL_SECTS; u++) {
@@ -1605,7 +1606,7 @@ print_storage_summary(const iter_t *iter)
     double  percent    = 0.0f;
 
     HDfprintf(stdout, "File space management strategy: %s\n", FS_STRATEGY_NAME[iter->fs_strategy]);
-    HDfprintf(stdout, "File space page size: %Hu bytes\n", iter->fsp_size);
+    HDfprintf(stdout, "File space page size: %" PRIuHSIZE " bytes\n", iter->fsp_size);
     HDprintf("Summary of file space information:\n");
     total_meta =
         iter->super_size + iter->super_ext_size + iter->ublk_size + iter->group_ohdr_info.total_size +
@@ -1614,27 +1615,28 @@ print_storage_summary(const iter_t *iter)
         iter->datasets_index_storage_size + iter->datasets_heap_storage_size + iter->SM_hdr_storage_size +
         iter->SM_index_storage_size + iter->SM_heap_storage_size + iter->free_hdr;
 
-    HDfprintf(stdout, "  File metadata: %Hu bytes\n", total_meta);
-    HDfprintf(stdout, "  Raw data: %Hu bytes\n", iter->dset_storage_size);
+    HDfprintf(stdout, "  File metadata: %" PRIuHSIZE " bytes\n", total_meta);
+    HDfprintf(stdout, "  Raw data: %" PRIuHSIZE " bytes\n", iter->dset_storage_size);
 
     percent = ((double)iter->free_space / (double)iter->filesize) * (double)100.0f;
-    HDfprintf(stdout, "  Amount/Percent of tracked free space: %Hu bytes/%3.1f%\n", iter->free_space,
-              percent);
+    HDfprintf(stdout, "  Amount/Percent of tracked free space: %" PRIuHSIZE " bytes/%3.1f%%\n",
+              iter->free_space, percent);
 
     if (iter->filesize < (total_meta + iter->dset_storage_size + iter->free_space)) {
         unaccount = (total_meta + iter->dset_storage_size + iter->free_space) - iter->filesize;
-        HDfprintf(stdout, "  ??? File has %Hu more bytes accounted for than its size! ???\n", unaccount);
+        HDfprintf(stdout, "  ??? File has %" PRIuHSIZE " more bytes accounted for than its size! ???\n",
+                  unaccount);
     }
     else {
         unaccount = iter->filesize - (total_meta + iter->dset_storage_size + iter->free_space);
-        HDfprintf(stdout, "  Unaccounted space: %Hu bytes\n", unaccount);
+        HDfprintf(stdout, "  Unaccounted space: %" PRIuHSIZE " bytes\n", unaccount);
     }
 
-    HDfprintf(stdout, "Total space: %Hu bytes\n",
+    HDfprintf(stdout, "Total space: %" PRIuHSIZE " bytes\n",
               total_meta + iter->dset_storage_size + iter->free_space + unaccount);
 
     if (iter->nexternal)
-        HDfprintf(stdout, "External raw data: %Hu bytes\n", iter->dset_external_storage_size);
+        HDfprintf(stdout, "External raw data: %" PRIuHSIZE " bytes\n", iter->dset_external_storage_size);
 
     return 0;
 } /* print_storage_summary() */

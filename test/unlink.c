@@ -578,7 +578,7 @@ test_filespace(hid_t fapl)
     size_t rdcc_nbytes;
     double rdcc_w0;
 
-    puts("Testing file space gets reused:");
+    HDputs("Testing file space gets reused:");
 
     /* Open file */
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);

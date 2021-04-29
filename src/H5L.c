@@ -2760,16 +2760,16 @@ done:
 } /* end H5L__exists_inter_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_exists_tolerant
+ * Function:    H5L_exists_tolerant
  *
- * Purpose:	Returns whether a link exists in a group
+ * Purpose:     Returns whether a link exists in a group
  *
- * Note:	Same as H5L_exists, except that missing links are reported
- *		as 'FALSE' instead of causing failures
+ * Note:        Same as H5L_exists, except that missing links are reported
+ *              as 'FALSE' instead of causing failures
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
+ * Return:      Non-negative (TRUE/FALSE) on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, December 31 2015
  *
  *-------------------------------------------------------------------------

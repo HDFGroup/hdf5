@@ -513,7 +513,7 @@ test_mpio_1wMr(char *filename, int special_request)
      * ==================================================*/
     irank = 0;
     for (i = 0; i < DIMSIZE; i++)
-        writedata[i] = irank * DIMSIZE + i;
+        writedata[i] = (uint8_t)(irank * DIMSIZE + i);
     mpi_off = irank * DIMSIZE;
 
     /* Only one process writes */

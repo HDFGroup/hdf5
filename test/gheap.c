@@ -41,9 +41,9 @@
         nerrors++;                                                                                           \
         if (nerrors <= GHEAP_REPEATED_ERR_LIM) {                                                             \
             H5_FAILED();                                                                                     \
-            puts(MSG);                                                                                       \
+            HDputs(MSG);                                                                                     \
             if (nerrors == GHEAP_REPEATED_ERR_LIM)                                                           \
-                puts("    Suppressing further errors...");                                                   \
+                HDputs("    Suppressing further errors...");                                                 \
         } /* end if */                                                                                       \
     }     /* end GHEAP_REPEATED_ERR */
 

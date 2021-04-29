@@ -2230,5 +2230,5 @@ test_array(void)
 void
 cleanup_array(void)
 {
-    remove(FILENAME);
+    HDremove(FILENAME);
 } /* end cleanup_array() */

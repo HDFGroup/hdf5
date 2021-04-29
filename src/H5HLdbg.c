@@ -64,10 +64,9 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL,
         H5E_THROW(H5E_CANTPROTECT, "unable to load/protect local heap");
 
     HDfprintf(stream, "%*sLocal Heap...\n", indent, "");
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-              "Header size (in bytes):", (unsigned long)h->prfx_size);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Address of heap data:", h->dblk_addr);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Data bytes allocated for heap:", h->dblk_size);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Header size (in bytes):", h->prfx_size);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of heap data:", h->dblk_addr);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Data bytes allocated for heap:", h->dblk_size);
 
     /* Traverse the free list and check that all free blocks fall within
      * the heap and that no two free blocks point to the same region of
@@ -81,7 +80,7 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL,
         char temp_str[32];
 
         HDsnprintf(temp_str, sizeof(temp_str), "Block #%d:", free_block);
-        HDfprintf(stream, "%*s%-*s %8Zu, %8Zu\n", indent + 3, "", MAX(0, fwidth - 9), temp_str,
+        HDfprintf(stream, "%*s%-*s %8zu, %8zu\n", indent + 3, "", MAX(0, fwidth - 9), temp_str,
                   freelist->offset, freelist->size);
         if ((freelist->offset + freelist->size) > h->dblk_size)
             HDfprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");

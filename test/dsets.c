@@ -375,13 +375,13 @@ test_create(hid_t file)
     dims[0] = 256;
     dims[1] = 512;
     space   = H5Screate_simple(2, dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /* Create a small data space for compact dataset */
     small_dims[0] = 16;
     small_dims[1] = 8;
     small_space   = H5Screate_simple(2, small_dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /*
      * Create a dataset using the default dataset creation properties.    We're
@@ -450,13 +450,13 @@ test_create(hid_t file)
      * layout.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
 
     /* Attempt to create a dataset with invalid chunk sizes */
     csize[0] = dims[0] * 2;
     csize[1] = dims[1] * 2;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
     H5E_BEGIN_TRY
     {
         dataset = H5Dcreate2(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, create_parms,
@@ -472,7 +472,7 @@ test_create(hid_t file)
     csize[0] = 5;
     csize[1] = 100;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     dataset =
         H5Dcreate2(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, create_parms, H5P_DEFAULT);
@@ -494,11 +494,11 @@ test_create(hid_t file)
      * Create a compact dataset, then close it.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
     status = H5Pset_layout(create_parms, H5D_COMPACT);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Pset_alloc_time(create_parms, H5D_ALLOC_TIME_EARLY);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     dataset = H5Dcreate2(file, DSET_COMPACT_NAME, H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT, create_parms,
                          H5P_DEFAULT);
@@ -571,7 +571,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         /* Create a small conversion buffer to test strip mining */
         tconv_buf = HDmalloc((size_t)1000);
         xfer      = H5Pcreate(H5P_DATASET_XFER);
-        assert(xfer >= 0);
+        HDassert(xfer >= 0);
         if (H5Pset_buffer(xfer, (size_t)1000, tconv_buf, NULL) < 0)
             goto error;
 
@@ -4383,9 +4383,9 @@ test_nbit_compound_3(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
-        if (new_data[i].i != orig_data[i].i || strcmp(new_data[i].str, orig_data[i].str) != 0 ||
-            strcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 || new_data[i].v.len != orig_data[i].v.len ||
-            new_data[i].r != orig_data[i].r) {
+        if (new_data[i].i != orig_data[i].i || HDstrcmp(new_data[i].str, orig_data[i].str) != 0 ||
+            HDstrcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 ||
+            new_data[i].v.len != orig_data[i].v.len || new_data[i].r != orig_data[i].r) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu\n", (unsigned long)i);
@@ -4601,7 +4601,7 @@ test_nbit_int_size(hid_t file)
     if ((dset_size = H5Dget_storage_size(dataset)) < DSET_DIM1 * DSET_DIM2 * (precision / 8) ||
         dset_size > DSET_DIM1 * DSET_DIM2 * (precision / 8) + 1 * KB) {
         H5_FAILED();
-        HDfprintf(stdout, "    Line %d: wrong dataset size: %Hu\n", __LINE__, dset_size);
+        HDfprintf(stdout, "    Line %d: wrong dataset size: %" PRIuHSIZE "\n", __LINE__, dset_size);
         goto error;
     }
 
@@ -4811,7 +4811,7 @@ test_nbit_flt_size(hid_t file)
     if ((dset_size = H5Dget_storage_size(dataset)) < DSET_DIM1 * DSET_DIM2 * (precision / 8) ||
         dset_size > DSET_DIM1 * DSET_DIM2 * (precision / 8) + 1 * KB) {
         H5_FAILED();
-        HDfprintf(stdout, "    Line %d: wrong dataset size: %Hu\n", __LINE__, dset_size);
+        HDfprintf(stdout, "    Line %d: wrong dataset size: %" PRIuHSIZE "\n", __LINE__, dset_size);
         goto error;
     } /* end if */
 
@@ -4822,8 +4822,14 @@ test_nbit_flt_size(hid_t file)
 
     PASSED();
 
+    HDfree(orig);
+    HDfree(orig_data);
+
     return SUCCEED;
 error:
+    HDfree(orig);
+    HDfree(orig_data);
+
     return FAIL;
 } /* end test_nbit_flt_size() */
 
@@ -7892,7 +7898,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     TESTING(testname);
 
-    assert(NPOINTS < 100);
+    HDassert(NPOINTS < 100);
 
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
 
@@ -8414,13 +8420,13 @@ test_deprec(hid_t file)
     dims[0] = 256;
     dims[1] = 512;
     space   = H5Screate_simple(2, dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /* Create a small data space for compact dataset */
     small_dims[0] = 16;
     small_dims[1] = 8;
     small_space   = H5Screate_simple(2, small_dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /*
      * Create a dataset using the default dataset creation properties.    We're
@@ -8479,7 +8485,7 @@ test_deprec(hid_t file)
      * layout.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
 
     /* Add the deflate filter, if available */
 #if defined H5_HAVE_FILTER_DEFLATE
@@ -8515,7 +8521,7 @@ test_deprec(hid_t file)
     csize[0] = dims[0] * 2;
     csize[1] = dims[1] * 2;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
     H5E_BEGIN_TRY
     {
         dataset = H5Dcreate1(file, DSET_DEPREC_NAME_CHUNKED, H5T_NATIVE_DOUBLE, space, create_parms);
@@ -8530,7 +8536,7 @@ test_deprec(hid_t file)
     csize[0] = 5;
     csize[1] = 100;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     if ((dataset = H5Dcreate1(file, DSET_DEPREC_NAME_CHUNKED, H5T_NATIVE_DOUBLE, space, create_parms)) < 0)
         goto error;
@@ -8555,11 +8561,11 @@ test_deprec(hid_t file)
      * Create a compact dataset, then close it.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
     status = H5Pset_layout(create_parms, H5D_COMPACT);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Pset_alloc_time(create_parms, H5D_ALLOC_TIME_EARLY);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     if ((dataset = H5Dcreate1(file, DSET_DEPREC_NAME_COMPACT, H5T_NATIVE_DOUBLE, small_space, create_parms)) <
         0)

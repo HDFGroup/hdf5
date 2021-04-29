@@ -619,13 +619,13 @@ main(int argc, char *argv[])
     else {
         int i;
         for (i = 1, size_of_test = 0; i < argc; i++) {
-            if (!strcmp(argv[i], "small")) {
+            if (!HDstrcmp(argv[i], "small")) {
                 size_of_test |= TEST_SMALL;
             }
-            else if (!strcmp(argv[i], "medium")) {
+            else if (!HDstrcmp(argv[i], "medium")) {
                 size_of_test |= TEST_MEDIUM;
             }
-            else if (!strcmp(argv[i], "large")) {
+            else if (!HDstrcmp(argv[i], "large")) {
                 size_of_test |= TEST_LARGE;
             }
             else {

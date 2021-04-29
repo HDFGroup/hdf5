@@ -2556,7 +2556,7 @@ test_compound_12(void)
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
-        puts("  Tries to cut off the last member. Should have failed.");
+        HDputs("  Tries to cut off the last member. Should have failed.");
         goto error;
     }
 

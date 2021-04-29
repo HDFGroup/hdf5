@@ -91,7 +91,7 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
     for (u = 0; u < buf_size; u += 16) {
         uint8_t c;
 
-        HDfprintf(stream, "%*s %8d: ", indent, "", u + buf_offset);
+        HDfprintf(stream, "%*s %8zu: ", indent, "", u + buf_offset);
 
         /* Print the hex values */
         for (v = 0; v < 16; v++) {

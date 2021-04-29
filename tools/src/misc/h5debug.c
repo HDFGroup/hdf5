@@ -337,7 +337,7 @@ main(int argc, char *argv[])
     /*
      * Read the signature at the specified file position.
      */
-    HDfprintf(stdout, "Reading signature at address %a (rel)\n", addr);
+    HDfprintf(stdout, "Reading signature at address %" PRIuHADDR " (rel)\n", addr);
     if (H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), sig) < 0) {
         HDfprintf(stderr, "cannot read signature\n");
         exit_value = 3;

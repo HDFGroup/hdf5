@@ -1272,7 +1272,7 @@ H5AC__propagate_and_apply_candidate_list(H5F_t *f)
         if (aux_ptr->write_done)
             (aux_ptr->write_done)();
 
-        /* to prevent "messages from the past" we must synchronize all
+        /* To prevent "messages from the past" we must synchronize all
          * processes again before we go on.
          */
         if (MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
@@ -1901,28 +1901,22 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
 
         /* Check for error on the write operation */
         if (result < 0)
-
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
 
         /* this code exists primarily for the test bed -- it allows us to
          * enforce POSIX semantics on the server that pretends to be a
          * file system in our parallel tests.
          */
-        if (aux_ptr->write_done) {
-
+        if (aux_ptr->write_done)
             (aux_ptr->write_done)();
-        }
     } /* end if */
 
     /* Propagate cleaned entries to other ranks. */
     if (H5AC__propagate_flushed_and_still_clean_entries_list(f) < 0)
-
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate clean entries list.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC__rsp__p0_only__flush() */
 
 /*-------------------------------------------------------------------------

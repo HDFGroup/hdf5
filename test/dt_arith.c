@@ -359,7 +359,7 @@ static int without_hardware_g = 0;
                                                                                                              \
         for (n = 0; n < 2; n++) {                                                                            \
             if (n == 1) {                                                                                    \
-                memset(value, 0, SRC_SIZE * sizeof(unsigned char));                                          \
+                HDmemset(value, 0, SRC_SIZE * sizeof(unsigned char));                                        \
                 /* -0 */                                                                                     \
                 H5T__bit_set(value, (size_t)(SRC_PREC - 1), (size_t)1, TRUE);                                \
                 CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                     \
@@ -566,7 +566,7 @@ generates_sigfpe(void)
 
     HDfflush(stdout);
     HDfflush(stderr);
-    if ((pid = fork()) < 0) {
+    if ((pid = HDfork()) < 0) {
         HDperror("fork");
         HDexit(EXIT_FAILURE);
     }
@@ -580,7 +580,7 @@ generates_sigfpe(void)
         HDexit(EXIT_SUCCESS);
     }
 
-    while (pid != waitpid(pid, &status, 0))
+    while (pid != HDwaitpid(pid, &status, 0))
         /*void*/;
     if (WIFEXITED(status) && 0 == WEXITSTATUS(status)) {
         HDputs("Floating-point overflow cases will be tested.");
@@ -2391,7 +2391,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
         }
 
         /* Make certain that there isn't some weird number of destination bits */
-        assert(dst_nbits % 8 == 0);
+        HDassert(dst_nbits % 8 == 0);
 
         /* Are the two results the same? */
         for (k = (dst_size - (dst_nbits / 8)); k < dst_size; k++)
@@ -2949,12 +2949,12 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
      */
     HDfflush(stdout);
     HDfflush(stderr);
-    if ((child_pid = fork()) < 0) {
+    if ((child_pid = HDfork()) < 0) {
         HDperror("fork");
         return 1;
     }
     else if (child_pid > 0) {
-        while (child_pid != waitpid(child_pid, &status, 0)) /*void*/
+        while (child_pid != HDwaitpid(child_pid, &status, 0)) /*void*/
             ;
         if (WIFEXITED(status) && 255 == WEXITSTATUS(status)) {
             return 0; /*child exit after catching SIGFPE*/
@@ -3023,7 +3023,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     if (sizeof(float) == sizeof(double))
         HDputs("Sizeof(float)==sizeof(double) - some tests may not be sensible.");
     if (OTHER == src_type || OTHER == dst_type) {
-        if (!strcmp(name, "noop"))
+        if (!HDstrcmp(name, "noop"))
             HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, src_type_name,
                        dst_type_name);
         else if (run_test == TEST_SPECIAL)
@@ -3042,7 +3042,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
         goto error;
     }
     else {
-        if (!strcmp(name, "noop"))
+        if (!HDstrcmp(name, "noop"))
             HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, src_type_name,
                        dst_type_name);
         else if (run_test == TEST_SPECIAL)
@@ -4351,7 +4351,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         }
 
         /* Make certain that there isn't some weird number of destination bits */
-        assert(dst_nbits % 8 == 0);
+        HDassert(dst_nbits % 8 == 0);
 
         /* For Intel machines, the size of "long double" is 12 bytes, precision
          * is 80 bits; for AMD processors, the size of "long double" is 16 bytes,
@@ -5010,7 +5010,7 @@ run_fp_tests(const char *name)
 {
     int nerrors = 0;
 
-    if (!strcmp(name, "noop")) {
+    if (!HDstrcmp(name, "noop")) {
         nerrors += test_conv_flt_1("noop", TEST_NOOP, H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT);
         nerrors += test_conv_flt_1("noop", TEST_NOOP, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE);
 #if H5_SIZEOF_LONG_DOUBLE != 0
@@ -5247,7 +5247,7 @@ run_fp_int_conv(const char *name)
 #endif
 
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
-        if (!strcmp(name, "hw")) { /* Hardware conversion */
+        if (!HDstrcmp(name, "hw")) { /* Hardware conversion */
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_LLONG);
         }
