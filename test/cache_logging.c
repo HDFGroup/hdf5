@@ -59,6 +59,12 @@ test_logging_api(void)
     if (H5Pset_mdc_log_options(fapl, is_enabled, LOG_LOCATION, start_on_access) < 0)
         TEST_ERROR;
 
+    /* Ensure that setting the property twice doesn't cause problems
+     * (addresses a previous bug).
+     */
+    if (H5Pset_mdc_log_options(fapl, is_enabled, LOG_LOCATION, start_on_access) < 0)
+        TEST_ERROR;
+
     /* Check to make sure that the property list getter returns the correct
      * location string buffer size;
      */
