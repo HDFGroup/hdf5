@@ -417,7 +417,7 @@ New Features
     - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
 
       The size_hint value is ultimately stored in a uint32_t struct field,
-      so specifying a value larger than this on a 64-bit field can cause
+      so specifying a value larger than this on a 64-bit machine can cause
       undefined behavior including crashing the system.
 
       The documentation for this API call was also incorrect, stating that
