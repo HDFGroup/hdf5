@@ -38,6 +38,7 @@ typedef struct {
    bool old_style_grp;
    bool use_named_pipes;
    char grp_op_pattern;
+   bool grp_op_test;
    char at_pattern;
    bool attr_test;
    uint32_t max_lag;
@@ -57,6 +58,7 @@ typedef struct {
         .old_style_grp = false,                                                                              \
         .use_named_pipes = true                                                                              \
         , .grp_op_pattern = ' '               \
+        , .grp_op_test = false               \
         , .at_pattern = ' '                 \
         , .attr_test = false                \
         , .tick_len  = 4                    \
@@ -67,7 +69,6 @@ typedef struct {
         , .np_verify = 0   }
 
 
-//TODO: add at_pattern description
 static void
 usage(const char *progname)
 {
@@ -132,7 +133,7 @@ state_init(state_t *s, int argc, char **argv)
     if (tfile)
         HDfree(tfile);
 
-    while ((ch = getopt(argc, argv, "SGa:bc:n:Nqu:A:")) != -1) {
+    while ((ch = getopt(argc, argv, "SGa:bc:n:Nqu:A:O:")) != -1) {
         switch (ch) {
             case 'S':
                 s->use_vfd_swmr = false;
@@ -182,9 +183,9 @@ state_init(state_t *s, int argc, char **argv)
                     s->grp_op_pattern = 'd';
                 else if (strcmp(optarg, "grp-move") == 0) 
                     s->grp_op_pattern = 'm';
-                else if (strcmp(optarg, "grp-insertion-links") == 0) 
+                else if (strcmp(optarg, "grp-ins-links") == 0) 
                     s->grp_op_pattern = 'i';
-                else if (strcmp(optarg, "grp-deletion-links") == 0) 
+                else if (strcmp(optarg, "grp-del-links") == 0) 
                     s->grp_op_pattern = 'D';
                 else if (strcmp(optarg, "grp-compact-t-dense") == 0) 
                     s->grp_op_pattern = 't';
@@ -235,28 +236,41 @@ state_init(state_t *s, int argc, char **argv)
     argc -= optind;
     argv += optind;
 
-    /* space for attributes */
-    if ((s->one_by_one_sid = H5Screate_simple(1, &dims, &dims)) < 0) {
-        H5_FAILED(); AT();
-        printf("H5Screate_simple failed\n");
-        goto error;
-    }
+    if(s->grp_op_pattern != ' ')
+        s->grp_op_test = true;
+    if(s->at_pattern != ' ')
+        s->attr_test = true;
 
-    if( s->csteps < 1 || s->csteps > s->nsteps) {
-        H5_FAILED(); AT();
-        printf("communication interval is out of bounds\n");
-        goto error;
-    }
-
-    if( s->asteps < 1 || s->asteps > s->nsteps) {
+    if(!s->grp_op_test && !s->attr_test) {
+    if (s->asteps < 1 || s->asteps > s->nsteps) {
         H5_FAILED(); AT();
         printf("attribute interval is out of bounds\n");
+        goto error;
+    }
+    }
+
+    if(s->grp_op_test && s->attr_test) {
+        printf("Cannot test both group operation and attribute tests!\n");
+        printf("Attribute tests are ignored.\n");
+    }
+
+    if (s->csteps < 1 || s->csteps > s->nsteps) {
+        H5_FAILED(); AT();
+        printf("communication interval is out of bounds\n");
         goto error;
     }
 
     if (argc > 0) {
         H5_FAILED(); AT();
         printf("unexpected command-line arguments\n");
+        goto error;
+    }
+
+
+    /* space for attributes */
+    if ((s->one_by_one_sid = H5Screate_simple(1, &dims, &dims)) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Screate_simple failed\n");
         goto error;
     }
 
@@ -2844,6 +2858,8 @@ error2:
     return false;
 
 }
+
+
 /*-------------------------------------------------------------------------
  * Function:    create_group
  *
@@ -2868,43 +2884,331 @@ error2:
 static bool
 create_group(state_t *s, unsigned int which) {
 
+    char name[sizeof("/group-9999999999")];
+    hid_t g = H5I_INVALID_HID;
+    H5G_info_t group_info;
 
+    if (which >= s->nsteps) {
+        H5_FAILED(); AT();
+        printf("Number of created groups is out of bounds\n");
+        goto error;
+    }
+
+    esnprintf(name, sizeof(name), "/group-%d", which);
+    if ((g = H5Gcreate2(s->file, name, H5P_DEFAULT, H5P_DEFAULT, 
+                        H5P_DEFAULT)) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Gcreate2 failed\n");
+        goto error;
+    }
+
+    if(H5Gget_info(g,&group_info) <0) {
+        H5_FAILED(); AT();
+        printf("H5Gget_info failed\n");
+        goto error;
+    }
+ 
+    if(s->old_style_grp) {
+        if(group_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+            H5_FAILED(); AT();
+            printf("Old-styled group test: but the group is not in old-style. \n");
+            goto error;
+        }
+        dbgf(2,"Writer: group is created with the old-style.\n");
+    }
+    else {
+        if(group_info.storage_type == H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+            H5_FAILED(); AT();
+            printf("The created group should NOT be in old-style . \n");
+            goto error;
+        }
+        dbgf(2,"Writer: group is created with the new-style.\n");
+
+    }
+
+    if (H5Gclose(g) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Gclose failed\n");
+        goto error;
+    }
+
+    /* If a grp_op_test is turned on and named pipes are used,
+     * the writer should send and receive messages after the group creation.
+     * This will distinguish an attribute operation error from an
+     * group creation error. 
+     * Writer sends a message to reader: an attribute is successfully generated. 
+     * then wait for the reader to verify and send an acknowledgement message back.*/
+    if (s->use_named_pipes && s->grp_op_test == true) {
+        dbgf(2, "CG writer: ready to send the message: %d\n", s->np_notify+1);
+        if(np_wr_send_receive(s) == false) {
+            H5_FAILED(); AT();
+            /* Note: This is (mostly) because the verification failure message
+             *       from the reader. So don't send the error message back to
+             *       the reader. Just stop the test. */
+            goto error2;
+        }
+    }
+    
+    return true;
+
+error:
+    /* Writer needs to send an error message to the reader to stop the test*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,true);
+
+error2: 
+
+    H5E_BEGIN_TRY {
+        H5Gclose(g);
+    } H5E_END_TRY;
 
     return false;
+
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    create_group
+ *
+ * Purpose:     Create a group and carry out attribute operations(add,delete etc.)
+ *              according to the attribute test pattern.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the main() function.
+ *-------------------------------------------------------------------------
+*/ 
+
+static bool
+delete_one_link(state_t *s, 
+                hid_t obj_id, 
+                const char *name, 
+                unsigned int which) {
+
+    if (which >= s->nsteps) {
+        H5_FAILED(); AT();
+        printf("Number of created groups is out of bounds\n");
+        goto error;
+    }
+
+    if(H5Ldelete(obj_id,name,H5P_DEFAULT) <0) {
+        H5_FAILED(); AT();
+        printf("H5Ldelete failed\n");
+        goto error;
+    }
+
+    /* If a grp_op_test is turned on and named pipes are used,
+     * the writer should send and receive messages after the group creation.
+     * This will distinguish an attribute operation error from an
+     * group creation error. 
+     * Writer sends a message to reader: an attribute is successfully generated. 
+     * then wait for the reader to verify and send an acknowledgement message back.*/
+    if (s->use_named_pipes && s->grp_op_test == true) {
+        dbgf(2, "writer: ready to send the message: %d\n", s->np_notify+1);
+        if(np_wr_send_receive(s) == false) {
+            H5_FAILED(); AT();
+            /* Note: This is (mostly) because the verification failure message
+             *       from the reader. So don't send the error message back to
+             *       the reader. Just stop the test. */
+            goto error2;
+        }
+    }
+    
+    return true;
+
+error:
+    /* Writer needs to send an error message to the reader to stop the test*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,true);
+
+error2: 
+
+    return false;
+
+}
+
 
 static bool
 delete_group(state_t *s, unsigned int which) {
+ 
+    char name[sizeof("/group-9999999999")];
+    bool ret_value = create_group(s,which);
+    if(ret_value == true) {
+        esnprintf(name, sizeof(name), "/group-%d", which);
+        ret_value = delete_one_link(s,s->file,name,which);
+    }
 
+    return ret_value;
 
+}
+
+static bool
+move_one_group(state_t *s, 
+                hid_t obj_id, 
+                const char *name, 
+                const char *newname, 
+                unsigned int which) {
+
+    if (which >= s->nsteps) {
+        H5_FAILED(); AT();
+        printf("Number of created groups is out of bounds\n");
+        goto error;
+    }
+
+    if(H5Lmove(obj_id,name,obj_id,newname,H5P_DEFAULT,H5P_DEFAULT)<0){
+        H5_FAILED(); AT();
+        printf("H5Ldelete failed\n");
+        goto error;
+    }
+
+    /* If a grp_op_test is turned on and named pipes are used,
+     * the writer should send and receive messages after the group creation.
+     * This will distinguish an attribute operation error from an
+     * group creation error. 
+     * Writer sends a message to reader: an attribute is successfully generated. 
+     * then wait for the reader to verify and send an acknowledgement message back.*/
+    if (s->use_named_pipes && s->grp_op_test == true) {
+        dbgf(2, "writer: ready to send the message: %d\n", s->np_notify+1);
+        if(np_wr_send_receive(s) == false) {
+            H5_FAILED(); AT();
+            /* Note: This is (mostly) because the verification failure message
+             *       from the reader. So don't send the error message back to
+             *       the reader. Just stop the test. */
+            goto error2;
+        }
+    }
+    
+    return true;
+
+error:
+    /* Writer needs to send an error message to the reader to stop the test*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,true);
+
+error2: 
 
     return false;
+
 }
+
 
 static bool
 move_group(state_t *s, unsigned int which) {
 
+    char name[sizeof("/group-9999999999")];
+    char new_name[sizeof("/new-group-9999999999")];
+    bool ret_value = create_group(s,which);
+    if(ret_value == true) {
+        esnprintf(name, sizeof(name), "/group-%d", which);
+        esnprintf(new_name, sizeof(new_name), "/new-group-%d", which);
+        ret_value = move_one_group(s,s->file,name,new_name,which);
+    }
 
+    return ret_value;
+
+}
+
+
+static bool
+insert_one_link(state_t *s, 
+             hid_t obj_id,
+             const char *name,
+             const char *newname,
+             bool is_hard,
+             unsigned int which) {
+
+    if (which >= s->nsteps) {
+        H5_FAILED(); AT();
+        printf("Number of created groups is out of bounds\n");
+        goto error;
+    }
+
+    if (is_hard) {
+        if(H5Lcreate_hard(obj_id,name,obj_id,newname,H5P_DEFAULT,H5P_DEFAULT)<0){
+            printf("H5Lcreate_hard failed\n");
+            goto error;
+        }
+    }
+    else {
+        if(H5Lcreate_soft(name,obj_id,newname,H5P_DEFAULT,H5P_DEFAULT)<0) {
+            H5_FAILED(); AT();
+            printf("H5Lcreate_soft failed.\n");
+            goto error;
+        }
+    }
+
+    /* If a grp_op_test is turned on and named pipes are used,
+     * the writer should send and receive messages after the group creation.
+     * This will distinguish an attribute operation error from an
+     * group creation error. 
+     * Writer sends a message to reader: an attribute is successfully generated. 
+     * then wait for the reader to verify and send an acknowledgement message back.*/
+    if (s->use_named_pipes && s->grp_op_test == true) {
+        dbgf(2, "writer: ready to send the message: %d\n", s->np_notify+1);
+        if(np_wr_send_receive(s) == false) {
+            H5_FAILED(); AT();
+            /* Note: This is (mostly) because the verification failure message
+             *       from the reader. So don't send the error message back to
+             *       the reader. Just stop the test. */
+            goto error2;
+        }
+    }
+    
+    return true;
+
+error:
+    /* Writer needs to send an error message to the reader to stop the test*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,true);
+
+error2: 
 
     return false;
+
 }
 
 static bool
-insert_link(state_t *s, unsigned int which) {
+insert_links(state_t *s, unsigned int which) {
 
+    char name[sizeof("/group-9999999999")];
+    char hd_name[sizeof("/hd-group-9999999999")];
+    char st_name[sizeof("/st-group-9999999999")];
 
+    bool ret_value = create_group(s,which);
+    if(ret_value == true) {
+        esnprintf(name, sizeof(name), "/group-%d", which);
+        esnprintf(hd_name, sizeof(hd_name), "/hd-group-%d", which);
+        esnprintf(st_name, sizeof(st_name), "/st-group-%d", which);
+        ret_value = insert_one_link(s,s->file,name,hd_name,true,which);
+        if(ret_value == true) 
+            ret_value = insert_one_link(s,s->file,name,st_name,false,which);
+    }
 
+    return ret_value;
 
-    return false;
 }
 
 static bool
-delete_link(state_t *s, unsigned int which) {
+delete_links(state_t *s, unsigned int which) {
 
+    char name[sizeof("/group-9999999999")];
+    bool ret_value = create_group(s,which);
+    if(ret_value == true) {
+        // TO DO
+        esnprintf(name, sizeof(name), "/group-%d", which);
+        ret_value = delete_one_link(s,s->file,name,which);
+    }
 
+    return ret_value;
 
-
-    return false;
 }
 
 static bool
@@ -2963,10 +3267,10 @@ group_operations(state_t *s, unsigned int which)
             ret_value = move_group(s, which);
             break;
         case 'i':
-            ret_value = insert_link(s, which);
+            ret_value = insert_links(s, which);
             break;
         case 'D':
-            ret_value = delete_link(s, which);
+            ret_value = delete_links(s, which);
             break;
         case 't':
             ret_value = transit_storage_compact_to_dense(s, which);
@@ -2986,37 +3290,328 @@ group_operations(state_t *s, unsigned int which)
 static bool
 vrfy_create_group(state_t *s, unsigned int which){
 
+    char name[sizeof("/group-9999999999")];
+    hid_t g = H5I_INVALID_HID;
+    H5G_info_t group_info;
 
+    dbgf(2, "CG reader: ready to send the message: \n");
+    /* The reader receives a message from the writer.Then sleep
+     * for a few ticks or stop the test if the received message 
+     * is an error message.
+     */ 
+    if(s->use_named_pipes && true == s->grp_op_test) {
+
+        if(false == np_rd_receive(s)) {
+            H5_FAILED(); AT();
+            goto error2;
+        }
+        decisleep(s->tick_len * s->update_interval);
+        dbgf(1, "reader: finish reading the message: %d\n",s->np_notify);
+
+    }
+
+    if (which >= s->nsteps) {
+        H5_FAILED(); AT();
+        printf("Number of created groups is out of bounds\n");
+        goto error;
+    }
+
+    esnprintf(name, sizeof(name), "/group-%d", which);
+
+ 
+    if((g = H5Gopen(s->file, name, H5P_DEFAULT)) <0) {
+        H5_FAILED(); AT();
+        printf("H5Gopen failed\n");
+        goto error;
+    }
+
+    if(H5Gget_info(g,&group_info) <0) {
+        H5_FAILED(); AT();
+        printf("H5Gget_info failed\n");
+        goto error;
+    }
+ 
+    dbgf(2,"Storage info is %d\n",group_info.storage_type);
+    if(s->old_style_grp) {
+        if(group_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+            H5_FAILED(); AT();
+            printf("Reader - Old-styled group: but the group is not in old-style. \n");
+            goto error;
+        }
+        dbgf(2,"Reader: verify that the group is created with the old-style.\n");
+    }
+    else {
+        if(group_info.storage_type == H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+            H5_FAILED(); AT();
+            printf("Reader - The created group should NOT be in old-style . \n");
+            goto error;
+        }
+        dbgf(2,"Reader: verify that the group is created with the new-style.\n");
+
+    }
+
+    if (H5Gclose(g) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Gclose failed\n");
+        goto error;
+    }
+
+
+    /* Reader sends an OK message back to the reader */
+    if(s->use_named_pipes && s->grp_op_test == true) {
+
+        if(np_rd_send(s)==false) 
+            goto error;
+        dbgf(1, "Reader: finish sending back the message: %d\n",s->np_notify);
+        
+    }
+
+    return true;
+
+error:
+
+    H5E_BEGIN_TRY {
+        H5Gclose(g);
+    } H5E_END_TRY;
+
+    /* The reader sends an error message to the writer to stop the test.*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,false);
+
+error2:
 
     return false;
+}
+
+static bool vrfy_one_link_exist(state_t *s,
+                                hid_t obj_id, 
+                                const char* name,
+                                bool expect_exist) {
+
+    int link_exists = 0;
+
+    dbgf(2, "LE reader: ready to send the message: \n");
+    /* The reader receives a message from the writer.Then sleep
+     * for a few ticks or stop the test if the received message 
+     * is an error message.
+     */ 
+    if(s->use_named_pipes && true == s->grp_op_test) {
+
+        if(false == np_rd_receive(s)) {
+            H5_FAILED(); AT();
+            goto error2;
+        }
+        decisleep(s->tick_len * s->update_interval);
+        dbgf(1, "reader: finish reading the message: %d\n",s->np_notify);
+
+    }
+
+    link_exists = H5Lexists(obj_id,name,H5P_DEFAULT);
+
+    if(link_exists<0) {
+        H5_FAILED(); AT();
+        printf("H5Lexists error\n");
+        goto error;
+    }
+    else if(link_exists == 1) {
+        if(expect_exist == false) {
+            H5_FAILED(); AT();
+            printf("This link should be moved or deleted but it still exists.\n");
+            goto error;
+        }       
+    }
+    else if (link_exists == 0) {
+        if(expect_exist == true) {
+            H5_FAILED(); AT();
+            printf("This link should exist but it is moved or deleted.\n");
+            goto error;
+        }      
+    }
+
+    /* Reader sends an OK message back to the reader */
+    if(s->use_named_pipes && s->grp_op_test == true) {
+        if(np_rd_send(s)==false) 
+            goto error;
+        dbgf(1, "Reader: finish sending back the message: %d\n",s->np_notify);
+        
+    }
+
+    return true;
+
+error:
+
+    /* The reader sends an error message to the writer to stop the test.*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,false);
+
+error2:
+
+    return false;
+
 }
 
 static bool
 vrfy_delete_group(state_t *s, unsigned int which){
 
+    bool ret_value = false;
+    char name[sizeof("/group-9999999999")];
+    ret_value = vrfy_create_group(s,which);
+    if(ret_value == true) {
+        esnprintf(name, sizeof(name), "/group-%d", which);
+        ret_value = vrfy_one_link_exist(s,s->file,name,false);
+    }
+    return ret_value;
+}
 
+static bool
+vrfy_move_one_group(state_t *s, 
+                    hid_t  obj_id,
+                    const char* name,
+                    const char* newname,
+                    unsigned int which){
+
+    hid_t g = H5I_INVALID_HID;
+    H5G_info_t group_info;
+    int link_exists = 0;
+
+    dbgf(2, "CG reader: ready to send the message: \n");
+    /* The reader receives a message from the writer.Then sleep
+     * for a few ticks or stop the test if the received message 
+     * is an error message.
+     */ 
+    if(s->use_named_pipes && true == s->grp_op_test) {
+
+        if(false == np_rd_receive(s)) {
+            H5_FAILED(); AT();
+            goto error2;
+        }
+        decisleep(s->tick_len * s->update_interval);
+        dbgf(1, "reader: finish reading the message: %d\n",s->np_notify);
+
+    }
+
+    if (which >= s->nsteps) {
+        H5_FAILED(); AT();
+        printf("Number of created groups is out of bounds\n");
+        goto error;
+    }
+
+    link_exists = H5Lexists(obj_id,name,H5P_DEFAULT);
+    if(link_exists<0) {
+        H5_FAILED(); AT();
+        printf("H5Lexists error\n");
+        goto error;
+    }
+    else if(link_exists == 1) {
+        H5_FAILED(); AT();
+        printf("This link should be moved but it still exists.\n");
+        goto error;
+    }
+
+ 
+    if((g = H5Gopen(obj_id, newname, H5P_DEFAULT)) <0) {
+        H5_FAILED(); AT();
+        printf("H5Gopen failed\n");
+        goto error;
+    }
+
+    if(H5Gget_info(g,&group_info) <0) {
+        H5_FAILED(); AT();
+        printf("H5Gget_info failed\n");
+        goto error;
+    }
+ 
+    dbgf(2,"Storage info is %d\n",group_info.storage_type);
+    if(s->old_style_grp) {
+        if(group_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+            H5_FAILED(); AT();
+            printf("Reader - Old-styled group: but the group is not in old-style. \n");
+            goto error;
+        }
+        dbgf(2,"Reader: verify that the group is created with the old-style.\n");
+    }
+    else {
+        if(group_info.storage_type == H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+            H5_FAILED(); AT();
+            printf("Reader - The created group should NOT be in old-style . \n");
+            goto error;
+        }
+        dbgf(2,"Reader: verify that the group is created with the new-style.\n");
+
+    }
+
+    if (H5Gclose(g) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Gclose failed\n");
+        goto error;
+    }
+
+
+    /* Reader sends an OK message back to the reader */
+    if(s->use_named_pipes && s->grp_op_test == true) {
+
+        if(np_rd_send(s)==false) 
+            goto error;
+        dbgf(1, "Reader: finish sending back the message: %d\n",s->np_notify);
+        
+    }
+
+    return true;
+
+error:
+
+    H5E_BEGIN_TRY {
+        H5Gclose(g);
+    } H5E_END_TRY;
+
+    /* The reader sends an error message to the writer to stop the test.*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,false);
+
+error2:
 
     return false;
 }
+
+
 
 static bool
 vrfy_move_group(state_t *s, unsigned int which){
 
+    char name[sizeof("/group-9999999999")];
+    char new_name[sizeof("/new-group-9999999999")];
+    bool ret_value = vrfy_create_group(s,which);
+    if(ret_value == true) {
+        esnprintf(name, sizeof(name), "/group-%d", which);
+        esnprintf(new_name, sizeof(new_name), "/new-group-%d", which);
+        ret_value = vrfy_move_one_group(s,s->file,name,new_name,which);
+    }
 
+    return ret_value;
 
-    return false;
 }
 
 static bool
-vrfy_insert_link(state_t *s, unsigned int which){
+vrfy_insert_links(state_t *s, unsigned int which){
 
+    bool ret_value = false;
+    char hd_name[sizeof("/hd-group-9999999999")];
+    char st_name[sizeof("/st-group-9999999999")];
 
+    ret_value = vrfy_create_group(s,which);
+    if(ret_value == true) {
+        esnprintf(hd_name, sizeof(hd_name), "/hd-group-%d", which);
+        esnprintf(st_name, sizeof(st_name), "/st-group-%d", which);
+        ret_value = vrfy_one_link_exist(s,s->file,hd_name,true);
+        if(ret_value == true) 
+            ret_value = vrfy_one_link_exist(s,s->file,st_name,true);
+    }
+    return ret_value;
 
-    return false;
 }
 
 static bool
-vrfy_delete_link(state_t *s, unsigned int which){
+vrfy_delete_links(state_t *s, unsigned int which){
 
 
 
@@ -3080,10 +3675,10 @@ verify_group_operations(state_t *s, unsigned int which)
             ret_value = vrfy_move_group(s, which);
             break;
         case 'i':
-            ret_value = vrfy_insert_link(s, which);
+            ret_value = vrfy_insert_links(s, which);
             break;
         case 'D':
-            ret_value = vrfy_delete_link(s, which);
+            ret_value = vrfy_delete_links(s, which);
             break;
         case 't':
             ret_value = vrfy_transit_storage_compact_to_dense(s, which);
@@ -3221,9 +3816,12 @@ main(int argc, char **argv)
     }
 
     /* For attribute test, force the named pipe to communicate in every step. */
-    if (s.at_pattern != ' ') {
-       s.attr_test = true;
-       if(s.use_named_pipes)
+    if (s.attr_test && s.use_named_pipes) {
+            s.csteps = 1;
+    }
+
+    /* For group operation test, force the named pipe to communicate in every step. */
+    if (s.grp_op_test && s.use_named_pipes) {
             s.csteps = 1;
     }
 
@@ -3238,14 +3836,16 @@ main(int argc, char **argv)
                 printf("write_group failed at step %d\n",step);
 
                 /* At communication interval, notifies the reader about the failture and quit */
-                if (s.use_named_pipes && s.attr_test !=true && step % s.csteps == 0) 
+                if (s.use_named_pipes && s.attr_test !=true &&
+                    s.grp_op_test !=true && step % s.csteps == 0) 
                     np_send_error(&s,true);
                 goto error;
             }
             else {
 
                 /* At communication interval, notifies the reader and waits for its response */
-                if (s.use_named_pipes && s.attr_test != true  && step % s.csteps == 0) {
+                if (s.use_named_pipes && s.attr_test != true  &&
+                    s.grp_op_test !=true && step % s.csteps == 0) {
 
                     if(np_wr_send_receive(&s) == false) {
                         H5_FAILED(); AT();
@@ -3260,7 +3860,8 @@ main(int argc, char **argv)
             dbgf(1, "reader: step %d\n", step);
 
             /* At communication interval, waits for the writer to finish creation before starting verification */
-            if (s.use_named_pipes && s.attr_test != true && step % s.csteps == 0) {
+            if (s.use_named_pipes && s.attr_test != true && 
+                s.grp_op_test !=true && step % s.csteps == 0) {
                 if(false == np_rd_receive(&s)) {
                     H5_FAILED(); AT();
                     goto error;
@@ -3279,7 +3880,8 @@ main(int argc, char **argv)
                 H5_FAILED(); AT();
 
                 /* At communication interval, tell the writer about the failure and exit */
-                if (s.use_named_pipes && s.attr_test != true && step % s.csteps == 0) 
+                if (s.use_named_pipes && s.attr_test != true && 
+                    s.grp_op_test != true && step % s.csteps == 0) 
                     np_send_error(&s,false);
                 goto error;
 
@@ -3288,7 +3890,8 @@ main(int argc, char **argv)
 
                 /* Send back the same nofity value for acknowledgement to tell the writer
                  * move to the next step. */
-                if (s.use_named_pipes && s.attr_test!=true && step % s.csteps == 0) {
+                if (s.use_named_pipes && s.attr_test!=true && 
+                    s.grp_op_test != true && step % s.csteps == 0) {
                     if(np_rd_send(&s)==false) 
                         goto error;
                 }
