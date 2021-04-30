@@ -4088,13 +4088,31 @@ test_misc23(void)
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gcreate1");
 
+    /* Make sure that size_hint values that can't fit into a 32-bit
+     * unsigned integer are rejected. Only necessary on systems where
+     * size_t is a 64-bit type.
+     */
+    if (SIZE_MAX > UINT32_MAX) {
+        H5E_BEGIN_TRY
+        {
+            tmp_id = H5Gcreate1(file_id, "/size_hint_too_large", SIZE_MAX);
+        }
+        H5E_END_TRY;
+        VERIFY(tmp_id, FAIL, "H5Gcreate1");
+    }
+
+    /* Make sure the largest size_hint value works */
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gcreate1(file_id, "/largest_size_hint", UINT32_MAX);
+    }
+    H5E_END_TRY;
+    CHECK(tmp_id, FAIL, "H5Gcreate1");
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
     tmp_id = H5Gcreate1(file_id, "/A/grp", (size_t)0);
     CHECK(tmp_id, FAIL, "H5Gcreate1");
-
-    /* Check that the largest size hint is acceptable */
-    tmp_id = H5Gcreate1(file_id, "/enormous_size_hint", SIZE_MAX);
-    CHECK(tmp_id, FAIL, "H5Gcreate1");
-
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
@@ -4107,7 +4125,6 @@ test_misc23(void)
 
     tmp_id = H5Dcreate1(file_id, "/A/dset", type_id, space_id, create_id);
     CHECK(tmp_id, FAIL, "H5Dcreate1");
-
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
