@@ -4088,6 +4088,19 @@ test_misc23(void)
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gcreate1");
 
+    /* Make sure that size_hint values that can't fit into a 32-bit
+     * unsigned integer are rejected. Only necessary on systems where
+     * size_t is a 64-bit type.
+     */
+    if (SIZE_MAX > UINT32_MAX) {
+        H5E_BEGIN_TRY
+        {
+            tmp_id = H5Gcreate1(file_id, "/size_hint_too_large", SIZE_MAX);
+        }
+        H5E_END_TRY;
+        VERIFY(tmp_id, FAIL, "H5Gcreate1");
+    }
+
     tmp_id = H5Gcreate1(file_id, "/A/grp", (size_t)0);
     CHECK(tmp_id, FAIL, "H5Gcreate1");
 
