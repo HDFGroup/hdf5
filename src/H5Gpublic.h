@@ -592,8 +592,7 @@ typedef struct H5G_stat_t {
  *          group, is not limited.
  *
  *          \p size_hint is a hint for the number of bytes to reserve to store
- *          the names which will be eventually added to the new group. This
- *          value must be between 0 and UINT32_MAX (inclusive). If this
+ *          the names which will be eventually added to the new group. If this
  *          parameter is zero, a default value will be used.
  *
  *          The return value is a group identifier for the open group. This

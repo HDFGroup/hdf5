@@ -142,9 +142,8 @@ H5G_map_obj_type(H5O_type_t obj_type)
  *		and it's object ID is returned.
  *
  *		The SIZE_HINT parameter specifies how much file space to reserve
- *		to store the names that will appear in this group. This number
- *		must be less than or equal to UINT32_MAX. If zero is supplied
- *		for the SIZE_HINT then a default size is chosen.
+ *		to store the names that will appear in this group. If zero is
+ *		supplied for the SIZE_HINT then a default size is chosen.
  *
  * Note:	Deprecated in favor of H5Gcreate2
  *
@@ -174,8 +173,6 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     /* Check arguments */
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name given")
-    if (size_hint > UINT32_MAX)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "size_hint cannot be larger than UINT32_MAX")
 
     /* Check if we need to create a non-standard GCPL */
     if (size_hint > 0) {
@@ -199,7 +196,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get group info")
 
         /* Set the non-default local heap size hint */
-        H5_CHECKED_ASSIGN(ginfo.lheap_size_hint, uint32_t, size_hint, size_t);
+        ginfo.lheap_size_hint = size_hint;
         if (H5P_set(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5I_INVALID_HID, "can't set group info")
     }

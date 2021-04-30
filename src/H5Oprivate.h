@@ -684,7 +684,7 @@ typedef struct H5O_bogus_t {
  */
 typedef struct H5O_ginfo_t {
     /* "Old" format group info (not stored) */
-    uint32_t lheap_size_hint; /* Local heap size hint              */
+    size_t lheap_size_hint; /* Local heap size hint              */
 
     /* "New" format group info (stored) */
 
