@@ -95,8 +95,8 @@ static h5tool_format_t ls_dataformat = {
 
     0, /*skip_first */
 
-    0,                           /*obj_hidefileno */
-    "-%lu:" H5_PRINTF_HADDR_FMT, /*obj_format */
+    0,                  /*obj_hidefileno */
+    "-%lu:%" PRIuHADDR, /*obj_format */
 
     0,            /*dset_hidefileno */
     "DSET-%s ",   /*dset_format */

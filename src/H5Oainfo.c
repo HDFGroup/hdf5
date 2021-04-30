@@ -499,18 +499,18 @@ H5O__ainfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Number of attributes:", ainfo->nattrs);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-              "Track creation order of attributes:", ainfo->track_corder);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-              "Index creation order of attributes:", ainfo->index_corder);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Number of attributes:", ainfo->nattrs);
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Track creation order of attributes:", ainfo->track_corder ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Index creation order of attributes:", ainfo->index_corder ? "TRUE" : "FALSE");
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Max. creation index value:", (unsigned)ainfo->max_crt_idx);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' attribute storage fractal heap address:", ainfo->fheap_addr);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' attribute storage name index v2 B-tree address:", ainfo->name_bt2_addr);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' attribute storage creation order index v2 B-tree address:", ainfo->corder_bt2_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

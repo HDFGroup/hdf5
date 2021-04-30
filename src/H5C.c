@@ -596,18 +596,18 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
                       cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
 
-            HDfprintf(stdout, "%scache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n", cache_ptr->prefix,
+            HDfprintf(stdout, "%scache size increased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
                       old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
         case flash_increase:
             HDassert(old_max_cache_size < new_max_cache_size);
 
-            HDfprintf(stdout, "%sflash cache resize(%d) -- size threshold = %Zu.\n", cache_ptr->prefix,
+            HDfprintf(stdout, "%sflash cache resize(%d) -- size threshold = %zu.\n", cache_ptr->prefix,
                       (int)((cache_ptr->resize_ctl).flash_incr_mode),
                       cache_ptr->flash_size_increase_threshold);
 
-            HDfprintf(stdout, "%s cache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n", cache_ptr->prefix,
+            HDfprintf(stdout, "%s cache size increased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
                       old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
@@ -648,7 +648,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
                               cache_ptr->prefix, hit_rate);
             }
 
-            HDfprintf(stdout, "%s    cache size decreased from (%Zu/%Zu) to (%Zu/%Zu).\n", cache_ptr->prefix,
+            HDfprintf(stdout, "%s    cache size decreased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
                       old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
@@ -905,7 +905,7 @@ H5C_dest(H5F_t *f)
 
     if (cache_ptr->get_entry_ptr_from_addr_counter > 0) {
 
-        HDfprintf(stdout, "*** %ld calls to H5C_get_entry_ptr_from_add(). ***\n",
+        HDfprintf(stdout, "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
                   cache_ptr->get_entry_ptr_from_addr_counter);
     }
 #endif /* H5C_DO_SANITY_CHECKS */
@@ -970,8 +970,7 @@ H5C_evict(H5F_t *f)
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict entries in the cache")
 
-    /* Disable the slist,
-     */
+    /* Disable the slist */
     if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist disabled failed")
@@ -984,8 +983,8 @@ done:
  * Function:    H5C_expunge_entry
  *
  * Purpose:     Use this function to tell the cache to expunge an entry
- *         from the cache without writing it to disk even if it is
- *         dirty.  The entry may not be either pinned or protected.
+ *              from the cache without writing it to disk even if it is
+ *              dirty.  The entry may not be either pinned or protected.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1756,7 +1755,7 @@ done:
  * Function:    H5C_mark_entry_unserialized
  *
  * Purpose:    Mark a pinned or protected entry as unserialized.  The target
- *        entry MUST be either pinned or protected, and MAY be both.
+ *             entry MUST be either pinned or protected, and MAY be both.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1802,7 +1801,7 @@ done:
  * Function:    H5C_mark_entry_serialized
  *
  * Purpose:    Mark a pinned entry as serialized.  The target entry MUST be
- *        pinned.
+ *             pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -3066,15 +3065,15 @@ done:
  * Function:    H5C_unpin_entry()
  *
  * Purpose:    Unpin a cache entry.  The entry can be either protected or
- *         unprotected at the time of call, but must be pinned.
+ *             unprotected at the time of call, but must be pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  John Mainzer
  *              3/22/06
  *
- * Changes:    Added extreme sanity checks on entry and exit.
-                                JRM -- 4/26/14
+ * Changes:     Added extreme sanity checks on entry and exit.
+ *                                      JRM -- 4/26/14
  *
  *-------------------------------------------------------------------------
  */
@@ -3691,7 +3690,7 @@ done:
      * Function:    H5C_validate_resize_config()
      *
      * Purpose:    Run a sanity check on the specified sections of the
-     *        provided instance of struct H5C_auto_size_ctl_t.
+     *             provided instance of struct H5C_auto_size_ctl_t.
      *
      *        Do nothing and return SUCCEED if no errors are detected,
      *        and flag an error and return FAIL otherwise.
@@ -3846,11 +3845,11 @@ done:
     /*-------------------------------------------------------------------------
      * Function:    H5C_create_flush_dependency()
      *
-     * Purpose:    Initiates a parent<->child entry flush dependency.  The parent
+     * Purpose:     Initiates a parent<->child entry flush dependency.  The parent
      *              entry must be pinned or protected at the time of call, and must
      *              have all dependencies removed before the cache can shut down.
      *
-     * Note:    Flush dependencies in the cache indicate that a child entry
+     * Note:        Flush dependencies in the cache indicate that a child entry
      *              must be flushed to the file before its parent.  (This is
      *              currently used to implement Single-Writer/Multiple-Reader (SWMR)
      *              I/O access for data structures in the file).

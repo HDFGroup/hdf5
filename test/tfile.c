@@ -3987,7 +3987,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
 
     /* Free memb_name */
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-        free(memb_name[mt]);
+        HDfree(memb_name[mt]);
 
     return 0;
 

@@ -10089,14 +10089,14 @@ main(void)
     if (nerrors)
         goto error;
 
-    puts("All v2 B-tree tests passed.");
+    HDputs("All v2 B-tree tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
 
     H5E_BEGIN_TRY
     {

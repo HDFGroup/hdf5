@@ -139,21 +139,21 @@ parse_option(int argc, char *const argv[])
                 HDexit(EXIT_SUCCESS);
                 break;
             case 'b': /* number of planes to write/read */
-                if ((blocksize_g = atoi(optarg)) <= 0) {
+                if ((blocksize_g = HDatoi(optarg)) <= 0) {
                     HDfprintf(stderr, "bad blocksize %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
                 };
                 break;
             case 'n': /* number of planes to write/read */
-                if ((nlinkedblock_g = atoi(optarg)) < 2) {
+                if ((nlinkedblock_g = HDatoi(optarg)) < 2) {
                     HDfprintf(stderr, "bad number of linked blocks %s, must be greater than 1.\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
                 };
                 break;
             case 'p': /* number of planes to write/read */
-                if ((part_size_g = atoi(optarg)) <= 0) {
+                if ((part_size_g = HDatoi(optarg)) <= 0) {
                     HDfprintf(stderr, "bad partition size %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
@@ -402,7 +402,7 @@ main(int argc, char *argv[])
             Hgoto_error(1);
         };
     };
-    mypid = getpid();
+    mypid = HDgetpid();
 
     /* ============= */
     /* launch reader */
@@ -438,7 +438,7 @@ main(int argc, char *argv[])
     /* If readwrite, collect exit code of child process */
     /* ================================================ */
     if (launch_g == UC_READWRITE) {
-        if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
+        if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0) {
             HDperror("waitpid");
             Hgoto_error(1);
         }

@@ -648,14 +648,14 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %Zu/%Zu\n", indent, "", fwidth, "Number of filters:", pline->nused,
+    HDfprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth, "Number of filters:", pline->nused,
               pline->nalloc);
 
     /* Loop over all the filters */
     for (i = 0; i < pline->nused; i++) {
         char name[32];
 
-        HDsnprintf(name, sizeof(name), "Filter at position %u", (unsigned)i);
+        HDsnprintf(name, sizeof(name), "Filter at position %zu", i);
         HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth, name);
         HDfprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
                   "Filter identification:", (unsigned)(pline->filter[i].id));
@@ -666,7 +666,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
             HDfprintf(stream, "%*s%-*s NONE\n", indent + 3, "", MAX(0, fwidth - 3), "Filter name:");
         HDfprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
                   "Flags:", pline->filter[i].flags);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
                   "Num CD values:", pline->filter[i].cd_nelmts);
 
         /* Filter parameters */

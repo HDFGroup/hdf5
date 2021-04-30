@@ -716,9 +716,11 @@ deserialize(const void *image, size_t len, void *udata, hbool_t *dirty, int32_t 
         else {
             if ((*(((const char *)image) + 2)) != (char)(idx & 0xFF)) {
                 HDfprintf(stdout, "type = %d, idx = %d, addr = 0x%lx.\n", type, idx, (long)addr);
-                HDfprintf(stdout, "*image = 0x%x 0x%x 0x%x\n", (int)(*((const char *)image)),
-                          (int)(*(((const char *)image) + 1)), (int)(*(((const char *)image) + 2)));
-                HDfprintf(stdout, "expected *image = 0x%x\n", (int)(idx & 0xFF), (int)((idx & 0xFF00) >> 8));
+                HDfprintf(stdout, "*image = 0x%" PRIx8 " 0x%" PRIx8 " 0x%" PRIx8 "\n",
+                          (*((const uint8_t *)image)), (*(((const uint8_t *)image) + 1)),
+                          (*(((const uint8_t *)image) + 2)));
+                HDfprintf(stdout, "expected *image = 0x%02" PRIx32 "%02" PRIx32 "\n", (uint32_t)idx & 0xFF,
+                          (((uint32_t)idx & 0xFF00) >> 8));
             } /* end if */
             HDassert((*((const char *)image)) == (char)(type & 0xFF));
             HDassert((*(((const char *)image) + 1)) == (char)((idx & 0xFF00) >> 8));

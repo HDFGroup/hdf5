@@ -2840,7 +2840,7 @@ test_misc16(void)
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf(
                 "Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                (unsigned)__LINE__, (int)i, (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
+                (unsigned)__LINE__, (int)i, (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if (HDstrcmp(wdata[i], rdata[i]) != 0) {
@@ -2925,7 +2925,7 @@ test_misc17(void)
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf(
                 "Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                (unsigned)__LINE__, (int)i, (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
+                (unsigned)__LINE__, (int)i, (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if (HDstrcmp(wdata[i], rdata[i]) != 0) {

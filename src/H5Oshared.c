@@ -83,12 +83,12 @@
 /*-------------------------------------------------------------------------
  * Function:	H5O_shared_read
  *
- * Purpose:	Reads a message referred to by a shared message.
+ * Purpose:     Reads a message referred to by a shared message.
  *
- * Return:	Success:	Ptr to message in native format.  The message
- *				should be freed by calling H5O_msg_reset().
+ * Return:      Success:    Ptr to message in native format. The message
+ *                          should be freed by calling H5O_msg_reset().
  *
- *		Failure:	NULL
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *		Sep 24 2003
@@ -192,7 +192,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O__shared_link_adj
  *
- * Purpose:	Changes the link count for the object referenced by a shared
+ * Purpose:     Changes the link count for the object referenced by a shared
  *              message.
  *
  *              This function changes the object header link count and is
@@ -286,7 +286,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_shared_decode
  *
- * Purpose:	Decodes a shared object message
+ * Purpose:     Decodes a shared object message
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -373,7 +373,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_shared_encode
  *
- * Purpose:	Encodes message _MESG into buffer BUF.
+ * Purpose:     Encodes message _MESG into buffer BUF.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -419,9 +419,9 @@ H5O_shared_encode(const H5F_t *f, uint8_t *buf /*out*/, const H5O_shared_t *sh_m
 } /* end H5O_shared_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_set_shared
+ * Function:    H5O_set_shared
  *
- * Purpose:	Sets the shared component for a message.
+ * Purpose:     Sets the shared component for a message.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -448,10 +448,10 @@ H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src)
 /*-------------------------------------------------------------------------
  * Function:	H5O_shared_size
  *
- * Purpose:	Returns the length of a shared object message.
+ * Purpose:     Returns the length of a shared object message.
  *
- * Return:	Success:	Length
- *		Failure:	0
+ * Return:      Success:    Length
+ *              Failure:    0
  *
  * Programmer:	Robb Matzke
  *              Thursday, April  2, 1998
@@ -466,15 +466,15 @@ H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (sh_mesg->type == H5O_SHARE_TYPE_COMMITTED) {
-        ret_value = (size_t)1 +                 /*version			*/
-                    (size_t)1 +                 /*the type field		*/
-                    (size_t)H5F_SIZEOF_ADDR(f); /*sharing by another obj hdr	*/
+        ret_value = (size_t)1 +                 /* Version                      */
+                    (size_t)1 +                 /* Type field                   */
+                    (size_t)H5F_SIZEOF_ADDR(f); /* Sharing by another obj hdr   */
     }                                           /* end if */
     else {
         HDassert(sh_mesg->type == H5O_SHARE_TYPE_SOHM);
-        ret_value = 1 +               /*version			*/
-                    1 +               /*the type field		*/
-                    H5O_FHEAP_ID_LEN; /* Shared in the heap		*/
+        ret_value = 1 +               /* Version              */
+                    1 +               /* Type field           */
+                    H5O_FHEAP_ID_LEN; /* Shared in the heap   */
     }                                 /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -540,7 +540,7 @@ H5O__shared_link(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type, H5O_shar
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
+    /* Check args */
     HDassert(f);
     HDassert(sh_mesg);
 
@@ -702,7 +702,8 @@ H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth)
 
         case H5O_SHARE_TYPE_COMMITTED:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Obj Hdr");
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object address:", mesg->u.loc.oh_addr);
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                      "Object address:", mesg->u.loc.oh_addr);
             break;
 
         case H5O_SHARE_TYPE_SOHM:

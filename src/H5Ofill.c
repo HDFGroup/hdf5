@@ -944,7 +944,7 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream, int in
             break;
 
     } /* end switch */
-    HDfprintf(stream, "%*s%-*s %Zd\n", indent, "", fwidth, "Size:", fill->size);
+    HDfprintf(stream, "%*s%-*s %zd\n", indent, "", fwidth, "Size:", fill->size);
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Data type:");
     if (fill->type) {
         H5T_debug(fill->type, stream);

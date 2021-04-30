@@ -485,12 +485,12 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
     for (i = 0; i < n_external_files; i++) {
         if (HDsnprintf(exname, AEF_EXNAME_MAX_LEN, "ext%d.data", i + 1) > AEF_EXNAME_MAX_LEN) {
             HDfprintf(stderr, "External file %d overflows name buffer\n", i + 1);
-            fflush(stderr);
+            HDfflush(stderr);
             return -1;
         }
         if (H5Pset_external(dcpl_id, exname, offset, max_ext_size) < 0) {
             HDfprintf(stderr, "Problem adding external file %s\n", exname);
-            fflush(stderr);
+            HDfflush(stderr);
             return -1;
         }
     }

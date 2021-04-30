@@ -2567,19 +2567,19 @@ H5SM_table_debug(H5F_t *f, haddr_t table_addr, FILE *stream, int indent, int fwi
                        ? "List"
                        : (table->indexes[x].index_type == H5SM_BTREE ? "B-Tree" : "Unknown")));
 
-        HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", fwidth,
                   "Address of index:", table->indexes[x].index_addr);
-        HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", fwidth,
                   "Address of index's heap:", table->indexes[x].heap_addr);
         HDfprintf(stream, "%*s%-*s 0x%08x\n", indent + 3, "", fwidth,
                   "Message type flags:", table->indexes[x].mesg_types);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", fwidth,
                   "Minimum size of messages:", table->indexes[x].min_mesg_size);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", fwidth,
                   "Number of messages:", table->indexes[x].num_messages);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", fwidth,
                   "Maximum list size:", table->indexes[x].list_max);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", fwidth,
                   "Minimum B-tree size:", table->indexes[x].btree_min);
     } /* end for */
 
@@ -2667,16 +2667,16 @@ H5SM_list_debug(H5F_t *f, haddr_t list_addr, FILE *stream, int indent, int fwidt
             HDassert(fh);
 
             HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth, "Location:", "in heap");
-            HDfprintf(stream, "%*s%-*s 0x%Zx\n", indent + 3, "", fwidth,
-                      "Heap ID:", list->messages[x].u.heap_loc.fheap_id);
-            HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", fwidth,
+            HDfprintf(stream, "%*s%-*s 0x%" PRIx64 "\n", indent + 3, "", fwidth,
+                      "Heap ID:", list->messages[x].u.heap_loc.fheap_id.val);
+            HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent + 3, "", fwidth,
                       "Reference count:", list->messages[x].u.heap_loc.ref_count);
         } /* end if */
         else if (list->messages[x].location == H5SM_IN_OH) {
             HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth, "Location:", "in object header");
-            HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", fwidth,
                       "Object header address:", list->messages[x].u.mesg_loc.oh_addr);
-            HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", fwidth,
                       "Message creation index:", list->messages[x].u.mesg_loc.oh_addr);
             HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", fwidth,
                       "Message type ID:", list->messages[x].msg_type_id);

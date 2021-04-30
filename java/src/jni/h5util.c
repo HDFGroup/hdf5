@@ -1059,7 +1059,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                     H5_LIBRARY_ERROR(ENVONLY);
 
                 /* Print object data and close object */
-                if (HDsprintf(this_str, "%u-%lu", (unsigned)oi.type, oi.addr) < 0)
+                if (HDsprintf(this_str, "%u-%llu", (unsigned)oi.type, oi.addr) < 0)
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
 
                 if (H5Oclose(obj) < 0)

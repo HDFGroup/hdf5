@@ -412,9 +412,9 @@ H5O__stab_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "B-tree address:", stab->btree_addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "B-tree address:", stab->btree_addr);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Name heap address:", stab->heap_addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Name heap address:", stab->heap_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__stab_debug() */

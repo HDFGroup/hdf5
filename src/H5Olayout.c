@@ -1203,31 +1203,32 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
                               (unsigned)mesg->u.chunk.idx_type);
                     break;
             } /* end switch */
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                       "Index address:", mesg->storage.u.chunk.idx_addr);
             break;
 
         case H5D_CONTIGUOUS:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Contiguous");
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                       "Data address:", mesg->storage.u.contig.addr);
-            HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Data Size:", mesg->storage.u.contig.size);
+            HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+                      "Data Size:", mesg->storage.u.contig.size);
             break;
 
         case H5D_COMPACT:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Compact");
-            HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
                       "Data Size:", mesg->storage.u.compact.size);
             break;
 
         case H5D_VIRTUAL:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Virtual");
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                       "Global heap address:", mesg->storage.u.virt.serial_list_hobjid.addr);
-            HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
                       "Global heap index:", mesg->storage.u.virt.serial_list_hobjid.idx);
             for (u = 0; u < mesg->storage.u.virt.list_nused; u++) {
-                HDfprintf(stream, "%*sMapping %u:\n", indent, "", u);
+                HDfprintf(stream, "%*sMapping %zu:\n", indent, "", u);
                 HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
                           "Virtual selection:", "<Not yet implemented>");
                 HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,

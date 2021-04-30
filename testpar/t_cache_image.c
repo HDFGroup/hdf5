@@ -3916,9 +3916,8 @@ main(int argc, char **argv)
      * hang in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
-    if (H5dont_atexit() < 0) {
+    if (H5dont_atexit() < 0)
         HDprintf("%d:Failed to turn off atexit processing. Continue.\n", mpi_rank);
-    };
 
     H5open();
 
@@ -3930,11 +3929,8 @@ main(int argc, char **argv)
     }
 
     if (mpi_size < 2) {
-
-        if (mpi_rank == 0) {
-
+        if (mpi_rank == 0)
             HDprintf("    Need at least 2 processes.  Exiting.\n");
-        }
         goto finish;
     }
 

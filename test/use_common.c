@@ -66,7 +66,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
         switch (c) {
             case 'h':
                 usage(opts->progname);
-                exit(EXIT_SUCCESS);
+                HDexit(EXIT_SUCCESS);
                 break;
             case 'f': /* usecase data file name */
                 opts->filename = HDstrdup(optarg);
@@ -440,7 +440,7 @@ read_uc_file(hbool_t towait, options_t *opts)
 {
     hid_t     fid;                            /* File ID for new HDF5 file */
     hid_t     dsid;                           /* dataset ID */
-    UC_CTYPE *buffer, *bufptr;                /* read data buffer */
+    UC_CTYPE *buffer = NULL, *bufptr = NULL;  /* read data buffer */
     hid_t     f_sid;                          /* dataset file space id */
     hid_t     m_sid;                          /* memory space id */
     int       rank;                           /* rank */
@@ -602,6 +602,8 @@ read_uc_file(hbool_t towait, options_t *opts)
         HDfprintf(stderr, "H5Fclose failed\n");
         return -1;
     }
+
+    HDfree(buffer);
 
     if (nreadererr)
         return -1;

@@ -532,7 +532,7 @@ test_attrname(hid_t fid, const char *string)
     CHECK(attr_id, FAIL, "H5Acreate2");
     size = H5Aget_name(attr_id, (size_t)MAX_STRING_LENGTH, read_buf);
     CHECK(size, FAIL, "H5Aget_name");
-    ret = strcmp(read_buf, string);
+    ret = HDstrcmp(read_buf, string);
     VERIFY(ret, 0, "strcmp");
     read_buf[0] = '\0';
 
@@ -541,7 +541,7 @@ test_attrname(hid_t fid, const char *string)
     CHECK(ret, FAIL, "H5Awrite");
     ret = H5Aread(attr_id, dtype_id, read_buf);
     CHECK(ret, FAIL, "H5Aread");
-    ret = strcmp(read_buf, string);
+    ret = HDstrcmp(read_buf, string);
     VERIFY(ret, 0, "strcmp");
 
     /* Clean up */
@@ -682,7 +682,7 @@ test_enum(hid_t H5_ATTR_UNUSED fid, const char *string)
     VERIFY(val, E1_WHITE, "H5Tenum_valueof");
     ret = H5Tenum_nameof(type_id, &val, readbuf, (size_t)MAX_STRING_LENGTH);
     CHECK(ret, FAIL, "H5Tenum_nameof");
-    ret = strcmp(readbuf, string);
+    ret = HDstrcmp(readbuf, string);
     VERIFY(ret, 0, "strcmp");
 
     /* Close the datatype */
@@ -709,7 +709,7 @@ test_opaque(hid_t H5_ATTR_UNUSED fid, const char *string)
 
     /* Read the tag back. */
     read_buf = H5Tget_tag(type_id);
-    ret      = strcmp(read_buf, string);
+    ret      = HDstrcmp(read_buf, string);
     VERIFY(ret, 0, "H5Tget_tag");
     H5free_memory(read_buf);
 

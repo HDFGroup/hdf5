@@ -1982,7 +1982,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
     if (H5Gget_objinfo(file_id, "/group1/link_to_group2", TRUE, &sb_hard2) < 0)
         FAIL_STACK_ERROR
 
-    if (HDmemcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno))) {
+    if (HDmemcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
         H5_FAILED();
         HDputs("    Hard link test failed.  Link seems not to point to the ");
         HDputs("    expected file location.");
@@ -1995,7 +1995,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
     if (H5Gget_objinfo(file_id, "/group2/link_to_group1", TRUE, &sb_hard2) < 0)
         FAIL_STACK_ERROR
 
-    if (HDmemcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno))) {
+    if (HDmemcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
         H5_FAILED();
         HDputs("    Hard link test failed.  Link seems not to point to the ");
         HDputs("    expected file location.");
@@ -2012,7 +2012,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
 
     if (H5Gget_linkval(group2_id, "soft_link_to_group1", sb_soft1.linklen, tmpstr) < 0)
         FAIL_STACK_ERROR
-    if (HDstrcmp("link_to_group1", tmpstr))
+    if (HDstrcmp("link_to_group1", tmpstr) != 0)
         TEST_ERROR
 
     /* Test the dangling soft link */
@@ -2025,7 +2025,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
 
     if (H5Gget_linkval(group2_id, "dangle_soft_link", sb_soft2.linklen, tmpstr) < 0)
         FAIL_STACK_ERROR
-    if (HDstrcmp("dangle", tmpstr))
+    if (HDstrcmp("dangle", tmpstr) != 0)
         TEST_ERROR
 
     /* Test H5Gmove and H5Gmove2 */
@@ -9675,7 +9675,7 @@ lapl_udata(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Now use the same ud link to access group_b */
-    strcpy(group_b_name, "group_b");
+    HDstrcpy(group_b_name, "group_b");
     if (H5Pset(plist_id, DEST_PROP_NAME, group_b_name) < 0)
         TEST_ERROR
 
@@ -9980,7 +9980,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     H5E_END_TRY
 
     /* Create a user-defined link to the group. */
-    strcpy(group_name, "/group");
+    HDstrcpy(group_name, "/group");
     if (H5Lcreate_ud(fid, "/ud_link", (H5L_type_t)UD_CBFAIL_TYPE, &group_name, HDstrlen(group_name) + 1,
                      H5P_DEFAULT, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR

@@ -506,7 +506,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_copy
  *
- * Purpose:     Test copyinging an error stack
+ * Purpose:     Test copying an error stack
  *
  * Return:      Success:    0
  *              Failure:    -1

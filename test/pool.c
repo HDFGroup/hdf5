@@ -784,11 +784,11 @@ main(void)
 
     if (nerrors)
         goto error;
-    puts("All memory pool tests passed.");
+    HDputs("All memory pool tests passed.");
 
     return 0;
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     return 1;
 }

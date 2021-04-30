@@ -3787,7 +3787,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    puts("All getname tests passed.");
+    HDputs("All getname tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 
@@ -3800,7 +3800,7 @@ error:
     }
     H5E_END_TRY;
 
-    puts("***** GET NAME TESTS FAILED *****");
+    HDputs("***** GET NAME TESTS FAILED *****");
 
     return 1;
 }
