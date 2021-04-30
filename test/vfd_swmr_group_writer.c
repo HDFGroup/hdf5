@@ -37,6 +37,7 @@ typedef struct {
    bool use_vfd_swmr;
    bool old_style_grp;
    bool use_named_pipes;
+   char grp_op_pattern;
    char at_pattern;
    bool attr_test;
    uint32_t max_lag;
@@ -55,6 +56,7 @@ typedef struct {
         .use_vfd_swmr = true,                                                                                \
         .old_style_grp = false,                                                                              \
         .use_named_pipes = true                                                                              \
+        , .grp_op_pattern = ' '               \
         , .at_pattern = ' '                 \
         , .attr_test = false                \
         , .tick_len  = 4                    \
@@ -171,6 +173,27 @@ state_init(state_t *s, int argc, char **argv)
                 break;
             case 'N':
                 s->use_named_pipes = false;
+                break;
+            case 'O':
+                if (strcmp(optarg, "grp-creation") == 0) 
+                    s->grp_op_pattern = 'c';
+                else if (strcmp(optarg, "grp-deletion") == 0) 
+                    s->grp_op_pattern = 'd';
+                else if (strcmp(optarg, "grp-move") == 0) 
+                    s->grp_op_pattern = 'm';
+                else if (strcmp(optarg, "grp-insertion-links") == 0) 
+                    s->grp_op_pattern = 'i';
+                else if (strcmp(optarg, "grp-deletion-links") == 0) 
+                    s->grp_op_pattern = 'D';
+                else if (strcmp(optarg, "grp-compact-t-dense") == 0) 
+                    s->grp_op_pattern = 't';
+                else if (strcmp(optarg, "grp-dense-t-compact") == 0) 
+                    s->grp_op_pattern = 'T';
+                else {
+                    H5_FAILED(); AT();
+                    printf("Invalid -O argument \"%s\"", optarg);
+                    goto error;
+                }
                 break;
             case 'A':
                 if (HDstrcmp(optarg, "compact") == 0)
@@ -2913,6 +2936,265 @@ error2:
     return false;
 
 }
+/*-------------------------------------------------------------------------
+ * Function:    create_group
+ *
+ * Purpose:     Create a group and carry out attribute operations(add,delete etc.)
+ *              according to the attribute test pattern.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the main() function.
+ *-------------------------------------------------------------------------
+*/ 
+
+static bool
+create_group(state_t *s, unsigned int which) {
+
+
+
+    return false;
+}
+
+static bool
+delete_group(state_t *s, unsigned int which) {
+
+
+
+    return false;
+}
+
+static bool
+move_group(state_t *s, unsigned int which) {
+
+
+
+    return false;
+}
+
+static bool
+insert_link(state_t *s, unsigned int which) {
+
+
+
+
+    return false;
+}
+
+static bool
+delete_link(state_t *s, unsigned int which) {
+
+
+
+
+    return false;
+}
+
+static bool
+transit_storage_compact_to_dense(state_t *s, unsigned int which) {
+
+
+
+
+    return false;
+}
+
+static bool
+transit_storage_dense_to_compact(state_t *s, unsigned int which) {
+
+
+
+
+    return false;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    group_operations
+ *
+ * Purpose:     Create a group and carry out attribute operations(add,delete etc.)
+ *              according to the attribute test pattern.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the main() function.
+ *-------------------------------------------------------------------------
+*/ 
+static bool
+group_operations(state_t *s, unsigned int which)
+{
+
+    bool ret_value = false;
+    char test_pattern = s->grp_op_pattern;
+
+    switch (test_pattern) {
+        case 'c':
+            ret_value = create_group(s, which);
+            break;
+        case 'd':
+            ret_value = delete_group(s, which);
+            break;
+        case 'm':
+            ret_value = move_group(s, which);
+            break;
+        case 'i':
+            ret_value = insert_link(s, which);
+            break;
+        case 'D':
+            ret_value = delete_link(s, which);
+            break;
+        case 't':
+            ret_value = transit_storage_compact_to_dense(s, which);
+            break;
+        case 'T':
+            ret_value = transit_storage_dense_to_compact(s, which);
+            break;
+        case ' ':
+        default:
+            ret_value = write_group(s, which);
+            break;
+    }
+    return ret_value;
+
+}
+
+static bool
+vrfy_create_group(state_t *s, unsigned int which){
+
+
+
+    return false;
+}
+
+static bool
+vrfy_delete_group(state_t *s, unsigned int which){
+
+
+
+    return false;
+}
+
+static bool
+vrfy_move_group(state_t *s, unsigned int which){
+
+
+
+    return false;
+}
+
+static bool
+vrfy_insert_link(state_t *s, unsigned int which){
+
+
+
+    return false;
+}
+
+static bool
+vrfy_delete_link(state_t *s, unsigned int which){
+
+
+
+    return false;
+}
+
+
+static bool
+vrfy_transit_storage_compact_to_dense(state_t *s, unsigned int which){
+
+
+
+    return false;
+}
+
+static bool
+vrfy_transit_storage_dense_to_compact(state_t *s, unsigned int which){
+
+
+
+    return false;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_group_operations
+ *
+ * Purpose:     verify the success of group creation and 
+ *              carry out the test for attribute operations(add,delete etc.)
+ *              according to the attribute test pattern.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the main() function.
+ *-------------------------------------------------------------------------
+*/ 
+
+
+static bool
+verify_group_operations(state_t *s, unsigned int which)
+{
+    bool ret_value = false;
+    char test_pattern = s->grp_op_pattern;
+
+    switch (test_pattern) {
+        case 'c':
+            ret_value = vrfy_create_group(s, which);
+            break;
+        case 'd':
+            ret_value = vrfy_delete_group(s, which);
+            break;
+        case 'm':
+            ret_value = vrfy_move_group(s, which);
+            break;
+        case 'i':
+            ret_value = vrfy_insert_link(s, which);
+            break;
+        case 'D':
+            ret_value = vrfy_delete_link(s, which);
+            break;
+        case 't':
+            ret_value = vrfy_transit_storage_compact_to_dense(s, which);
+            break;
+        case 'T':
+            ret_value = vrfy_transit_storage_dense_to_compact(s, which);
+            break;
+        case ' ':
+        default:
+            ret_value = verify_group(s, which);
+            break;
+    }
+    return ret_value;
+
+
+}
+
+
+
 
 int
 main(int argc, char **argv)
@@ -3045,7 +3327,7 @@ main(int argc, char **argv)
         for (step = 0; step < s.nsteps; step++) {
             dbgf(2, "writer: step %d\n", step);
 
-            wg_ret = write_group(&s, step);
+            wg_ret = group_operations(&s, step);
 
             if(wg_ret == false)  {
                 H5_FAILED(); AT();
@@ -3085,11 +3367,11 @@ main(int argc, char **argv)
             if(s.use_named_pipes && s.attr_test== false) 
                 decisleep(config.tick_len * s.update_interval);
 
-            vg_ret = verify_group(&s, step);
+            vg_ret = verify_group_operations(&s, step);
 
             if (vg_ret == false) {
 
-                printf("verify_group failed\n");
+                printf("verify_group_operations  failed\n");
                 H5_FAILED(); AT();
 
                 /* At communication interval, tell the writer about the failure and exit */
