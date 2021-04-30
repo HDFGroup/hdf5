@@ -284,6 +284,24 @@ New Features
 
     Library:
     --------
+    - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
+
+      The size_hint value is ultimately stored in a uint32_t struct field,
+      so specifying a value larger than this on a 64-bit machine can cause
+      undefined behavior including crashing the system.
+
+      The documentation for this API call was also incorrect, stating that
+      passing a negative value would cause the library to use a default
+      value. Instead, passing a "negative" value actually passes a very large
+      value, which is probably not what the user intends and can cause
+      crashes on 64-bit systems.
+
+      The Doxygen documentation has been updated and passing values larger
+      than UINT32_MAX for size_hint will now produce a normal HDF5 error.
+      
+        (DER - 2021/04/29, HDFFV-11241)
+
+
     - H5Pset_fapl_log() no longer crashes when passed an invalid fapl ID
 
       When passed an invalid fapl ID, H5Pset_fapl_log() would usually
