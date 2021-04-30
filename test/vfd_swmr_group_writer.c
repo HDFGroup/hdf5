@@ -3123,6 +3123,12 @@ main(int argc, char **argv)
         goto error;
     }
 
+    if (H5Sclose(s.one_by_one_sid) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Sclose failed\n");
+        goto error;
+    }
+
     if (H5Fclose(s.file) < 0) {
         H5_FAILED(); AT();
         printf("H5Fclose failed\n");
@@ -3163,6 +3169,7 @@ error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl);
         H5Pclose(fcpl);
+        H5Sclose(s.one_by_one_sid);
         H5Fclose(s.file);
     } H5E_END_TRY;
 
