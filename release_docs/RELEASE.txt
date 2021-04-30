@@ -414,19 +414,21 @@ New Features
 
     Library:
     --------
-    - H5Gcreate1() now handles large size_hint parameters correctly
+    - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
 
-      On 64-bit systems, large values of the size_t size_hint parameter
-      would be passed through a uint32_t struct field, causing a crash
-      on 64-bit Windows w/ MSVC and probably incorrect behavior or crashes
-      on other 64-bit systems.
+      The size_hint value is ultimately stored in a uint32_t struct field,
+      so specifying a value larger than this on a 64-bit field can cause
+      undefined behavior including crashing the system.
 
       The documentation for this API call was also incorrect, stating that
       passing a negative value would cause the library to use a default
       value. Instead, passing a "negative" value actually passes a very large
       value, which is probably not what the user intends and can cause
       crashes on 64-bit systems.
-     
+
+      The Doxygen documentation has been updated and passing values larger
+      than UINT32_MAX for size_hint will now produce a normal HDF5 error.
+      
         (DER - 2021/04/29, HDFFV-11241)
 
 
