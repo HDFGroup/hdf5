@@ -147,21 +147,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED dxpl_id,
-                      void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                      void H5_ATTR_UNUSED **req)
 {
     H5F_t *f         = NULL;    /* File struct */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (get_type) {
+    switch (args->op_type) {
         /* "get container info" */
         case H5VL_FILE_GET_CONT_INFO: {
-            H5VL_file_cont_info_t *info = HDva_arg(arguments, H5VL_file_cont_info_t *);
-
-            /* Retrieve the file's container info */
-            if (H5F__get_cont_info((H5F_t *)obj, info) < 0)
+            if (H5F__get_cont_info((H5F_t *)obj, args->args.get_cont_info.info) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file container info")
 
             break;
@@ -169,31 +166,22 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED 
 
         /* H5Fget_access_plist */
         case H5VL_FILE_GET_FAPL: {
-            H5P_genplist_t *new_plist; /* New property list */
-            hid_t *         plist_id = HDva_arg(arguments, hid_t *);
-
-            f = (H5F_t *)obj;
-
-            /* Retrieve the file's access property list */
-            if ((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
+            if ((args->args.get_fapl.fapl_id = H5F_get_access_plist((H5F_t *)obj, TRUE)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file access property list")
 
-            if (NULL == (new_plist = (H5P_genplist_t *)H5I_object(*plist_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
             break;
         }
 
         /* H5Fget_create_plist */
         case H5VL_FILE_GET_FCPL: {
             H5P_genplist_t *plist; /* Property list */
-            hid_t *         plist_id = HDva_arg(arguments, hid_t *);
 
             f = (H5F_t *)obj;
             if (NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
             /* Create the property list object to return */
-            if ((*plist_id = H5P_copy_plist(plist, TRUE)) < 0)
+            if ((args->args.get_fcpl.fcpl_id = H5P_copy_plist(plist, TRUE)) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
 
             break;
@@ -201,8 +189,6 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED 
 
         /* H5Fget_intent */
         case H5VL_FILE_GET_INTENT: {
-            unsigned *intent_flags = HDva_arg(arguments, unsigned *);
-
             f = (H5F_t *)obj;
 
             /* HDF5 uses some flags internally that users don't know about.
@@ -210,18 +196,18 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED 
              * or H5F_ACC_RDONLY and any SWMR flags.
              */
             if (H5F_INTENT(f) & H5F_ACC_RDWR) {
-                *intent_flags = H5F_ACC_RDWR;
+                args->args.get_intent.flags = H5F_ACC_RDWR;
 
                 /* Check for SWMR write access on the file */
                 if (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-                    *intent_flags |= H5F_ACC_SWMR_WRITE;
+                    args->args.get_intent.flags |= H5F_ACC_SWMR_WRITE;
             } /* end if */
             else {
-                *intent_flags = H5F_ACC_RDONLY;
+                args->args.get_intent.flags = H5F_ACC_RDONLY;
 
                 /* Check for SWMR read access on the file */
                 if (H5F_INTENT(f) & H5F_ACC_SWMR_READ)
-                    *intent_flags |= H5F_ACC_SWMR_READ;
+                    args->args.get_intent.flags |= H5F_ACC_SWMR_READ;
             } /* end else */
 
             break;
@@ -229,71 +215,47 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED 
 
         /* H5Fget_fileno */
         case H5VL_FILE_GET_FILENO: {
-            unsigned long *fno       = HDva_arg(arguments, unsigned long *);
-            unsigned long  my_fileno = 0;
-
-            f = (H5F_t *)obj;
-            H5F_GET_FILENO(f, my_fileno);
-            *fno = my_fileno; /* sigh */
+            H5F_GET_FILENO((H5F_t *)obj, args->args.get_fileno.fileno);
 
             break;
         }
 
         /* H5Fget_name */
         case H5VL_FILE_GET_NAME: {
-            H5I_type_t type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
-            size_t     size = HDva_arg(arguments, size_t);
-            char *     name = HDva_arg(arguments, char *);
-            ssize_t *  ret  = HDva_arg(arguments, ssize_t *);
-            size_t     len;
+            H5VL_file_get_name_args_t *file_args = &args->args.get_name;
 
-            if (H5VL_native_get_file_struct(obj, type, &f) < 0)
+            if (H5VL_native_get_file_struct(obj, file_args->type, &f) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-            len = HDstrlen(H5F_OPEN_NAME(f));
+            file_args->file_name_len = HDstrlen(H5F_OPEN_NAME(f));
 
-            if (name) {
-                HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1, size));
-                if (len >= size)
-                    name[size - 1] = '\0';
+            if (file_args->buf) {
+                HDstrncpy(file_args->buf, H5F_OPEN_NAME(f),
+                          MIN(file_args->file_name_len + 1, file_args->buf_size));
+                if (file_args->file_name_len >= file_args->buf_size)
+                    file_args->buf[file_args->buf_size - 1] = '\0';
             } /* end if */
 
-            /* Set the return value for the API call */
-            *ret = (ssize_t)len;
             break;
         }
 
         /* H5Fget_obj_count */
         case H5VL_FILE_GET_OBJ_COUNT: {
-            unsigned types     = HDva_arg(arguments, unsigned);
-            ssize_t *ret       = HDva_arg(arguments, ssize_t *);
-            size_t   obj_count = 0; /* Number of opened objects */
+            if (H5F_get_obj_count((H5F_t *)obj, args->args.get_obj_count.types, TRUE,
+                                  &args->args.get_obj_count.count) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve object count")
 
-            f = (H5F_t *)obj;
-            /* Perform the query */
-            if (H5F_get_obj_count(f, types, TRUE, &obj_count) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
-
-            /* Set the return value */
-            *ret = (ssize_t)obj_count;
             break;
         }
 
         /* H5Fget_obj_ids */
         case H5VL_FILE_GET_OBJ_IDS: {
-            unsigned types     = HDva_arg(arguments, unsigned);
-            size_t   max_objs  = HDva_arg(arguments, size_t);
-            hid_t *  oid_list  = HDva_arg(arguments, hid_t *);
-            ssize_t *ret       = HDva_arg(arguments, ssize_t *);
-            size_t   obj_count = 0; /* Number of opened objects */
+            H5VL_file_get_obj_ids_args_t *file_args = &args->args.get_obj_ids;
 
-            f = (H5F_t *)obj;
-            /* Perform the query */
-            if (H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_count) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_obj_ids failed")
+            if (H5F_get_obj_ids((H5F_t *)obj, file_args->types, file_args->max_objs, file_args->oid_list,
+                                TRUE, &file_args->count) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve object IDs")
 
-            /* Set the return value */
-            *ret = (ssize_t)obj_count;
             break;
         }
 
@@ -315,22 +277,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t H5_ATTR_UNUSED dxpl_id,
-                           void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                           void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (specific_type) {
+    switch (args->op_type) {
         /* H5Fflush */
         case H5VL_FILE_FLUSH: {
-            H5I_type_t  type  = (H5I_type_t)HDva_arg(arguments, int);  /* enum work-around */
-            H5F_scope_t scope = (H5F_scope_t)HDva_arg(arguments, int); /* enum work-around */
-            H5F_t *     f     = NULL;                                  /* File to flush */
+            H5F_t *f = NULL; /* File to flush */
 
             /* Get the file for the object */
-            if (H5VL_native_get_file_struct(obj, type, &f) < 0)
+            if (H5VL_native_get_file_struct(obj, args->args.flush.obj_type, &f) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
             /* Nothing to do if the file is read only. This determination is
@@ -341,7 +301,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t 
              */
             if (H5F_ACC_RDWR & H5F_INTENT(f)) {
                 /* Flush other files, depending on scope */
-                if (H5F_SCOPE_GLOBAL == scope) {
+                if (H5F_SCOPE_GLOBAL == args->args.flush.scope) {
                     /* Call the flush routine for mounted file hierarchies */
                     if (H5F_flush_mounts(f) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
@@ -353,90 +313,55 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t 
                                     "unable to flush file's cached information")
                 } /* end else */
             }     /* end if */
+
             break;
         }
 
         /* H5Freopen */
         case H5VL_FILE_REOPEN: {
-            void **ret      = HDva_arg(arguments, void **);
-            H5F_t *new_file = NULL;
+            H5F_t *new_file;
 
             /* Reopen the file through the VOL connector */
             if (NULL == (new_file = H5F__reopen((H5F_t *)obj)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
             new_file->id_exists = TRUE;
 
-            *ret = (void *)new_file;
-            break;
-        }
-
-        /* H5Fmount */
-        case H5VL_FILE_MOUNT: {
-            H5I_type_t  type    = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
-            const char *name    = HDva_arg(arguments, const char *);
-            H5F_t *     child   = HDva_arg(arguments, H5F_t *);
-            hid_t       fmpl_id = HDva_arg(arguments, hid_t);
-            H5G_loc_t   loc;
-
-            if (H5G_loc_real(obj, type, &loc) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-            /* Do the mount */
-            if (H5F__mount(&loc, name, child, fmpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
-
-            break;
-        }
-
-        /* H5Funmount */
-        case H5VL_FILE_UNMOUNT: {
-            H5I_type_t  type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
-            const char *name = HDva_arg(arguments, const char *);
-            H5G_loc_t   loc;
-
-            if (H5G_loc_real(obj, type, &loc) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-            /* Unmount */
-            if (H5F__unmount(&loc, name) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
+            /* Set 'out' value */
+            args->args.reopen.file = new_file;
 
             break;
         }
 
         /* H5Fis_accessible */
         case H5VL_FILE_IS_ACCESSIBLE: {
-            hid_t       fapl_id = HDva_arg(arguments, hid_t);
-            const char *name    = HDva_arg(arguments, const char *);
-            htri_t *    result  = HDva_arg(arguments, htri_t *);
+            htri_t result;
 
-            /* Call private routine */
-            if ((*result = H5F__is_hdf5(name, fapl_id)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "error in HDF5 file check")
+            if ((result = H5F__is_hdf5(args->args.is_accessible.filename, args->args.is_accessible.fapl_id)) <
+                0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "error in HDF5 file check")
+
+            /* Set 'out' value */
+            args->args.is_accessible.accessible = (hbool_t)result;
+
             break;
         }
 
         /* H5Fdelete */
         case H5VL_FILE_DELETE: {
-            hid_t       fapl_id = HDva_arg(arguments, hid_t);
-            const char *name    = HDva_arg(arguments, const char *);
-            herr_t *    ret     = HDva_arg(arguments, herr_t *);
+            if (H5F__delete(args->args.del.filename, args->args.del.fapl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTDELETEFILE, FAIL, "error in HDF5 file deletion")
 
-            /* Call private routine */
-            if ((*ret = H5F_delete(name, fapl_id)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTDELETEFILE, FAIL, "error in HDF5 file check")
             break;
         }
 
         /* Check if two files are the same */
         case H5VL_FILE_IS_EQUAL: {
-            H5F_t *  file2    = (H5F_t *)HDva_arg(arguments, void *);
-            hbool_t *is_equal = HDva_arg(arguments, hbool_t *);
-
-            if (!obj || !file2)
-                *is_equal = FALSE;
+            if (!obj || !args->args.is_equal.obj2)
+                args->args.is_equal.same_file = FALSE;
             else
-                *is_equal = (((H5F_t *)obj)->shared == file2->shared);
+                args->args.is_equal.same_file =
+                    (((H5F_t *)obj)->shared == ((H5F_t *)args->args.is_equal.obj2)->shared);
+
             break;
         }
 

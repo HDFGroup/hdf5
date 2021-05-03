@@ -284,17 +284,15 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t H5_ATTR_UNUSE
         /* H5Aget_name */
         case H5VL_ATTR_GET_NAME: {
             H5VL_attr_get_name_args_t *get_name_args = &args->args.get_name;
-            H5A_t *                    attr          = NULL;
 
             if (H5VL_OBJECT_BY_SELF == get_name_args->loc_params.type) {
-                attr = (H5A_t *)obj;
-                /* Call private function in turn */
-                if (0 > (get_name_args->attr_name_len =
-                             H5A__get_name(attr, get_name_args->buf_size, get_name_args->buf)))
+                if (H5A__get_name((H5A_t *)obj, get_name_args->buf_size, get_name_args->buf,
+                                  &get_name_args->attr_name_len) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
             }
             else if (H5VL_OBJECT_BY_IDX == get_name_args->loc_params.type) {
                 H5G_loc_t loc;
+                H5A_t *   attr;
 
                 /* check arguments */
                 if (H5G_loc_real(obj, get_name_args->loc_params.obj_type, &loc) < 0)
@@ -308,13 +306,13 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t H5_ATTR_UNUSE
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
                 /* Get the length of the name */
-                get_name_args->attr_name_len = (ssize_t)HDstrlen(attr->shared->name);
+                get_name_args->attr_name_len = HDstrlen(attr->shared->name);
 
                 /* Copy the name into the user's buffer, if given */
                 if (get_name_args->buf) {
                     HDstrncpy(get_name_args->buf, attr->shared->name,
-                              MIN((size_t)(get_name_args->attr_name_len + 1), get_name_args->buf_size));
-                    if ((size_t)(get_name_args->attr_name_len) >= get_name_args->buf_size)
+                              MIN((get_name_args->attr_name_len + 1), get_name_args->buf_size));
+                    if (get_name_args->attr_name_len >= get_name_args->buf_size)
                         get_name_args->buf[get_name_args->buf_size - 1] = '\0';
                 } /* end if */
 

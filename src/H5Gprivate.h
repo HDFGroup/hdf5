@@ -144,7 +144,7 @@ struct H5O_link_t;
  * The "location" of an object in a group hierarchy.  This points to an object
  * location and a group hierarchy path for the object.
  */
-typedef struct {
+typedef struct H5G_loc_t {
     struct H5O_loc_t *oloc; /* Object header location            */
     H5G_name_t *      path; /* Group hierarchy path              */
 } H5G_loc_t;

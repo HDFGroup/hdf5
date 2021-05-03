@@ -1271,14 +1271,14 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
     vol_cb_args.args.get_name.loc_params.obj_type = H5I_get_type(attr_id);
     vol_cb_args.args.get_name.buf_size            = buf_size;
     vol_cb_args.args.get_name.buf                 = buf;
-    vol_cb_args.args.get_name.attr_name_len       = (-1);
+    vol_cb_args.args.get_name.attr_name_len       = 0;
 
     /* Get the attribute name */
     if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, (-1), "unable to get attribute name")
 
     /* Set the return value */
-    ret_value = vol_cb_args.args.get_name.attr_name_len;
+    ret_value = (ssize_t)vol_cb_args.args.get_name.attr_name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1343,14 +1343,14 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     vol_cb_args.args.get_name.loc_params.obj_type                     = H5I_get_type(loc_id);
     vol_cb_args.args.get_name.buf_size                                = size;
     vol_cb_args.args.get_name.buf                                     = name;
-    vol_cb_args.args.get_name.attr_name_len                           = (-1);
+    vol_cb_args.args.get_name.attr_name_len                           = 0;
 
     /* Get the name */
     if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get name")
 
     /* Set the return value */
-    ret_value = vol_cb_args.args.get_name.attr_name_len;
+    ret_value = (ssize_t)vol_cb_args.args.get_name.attr_name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2347,7 +2347,7 @@ H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
     /* Set return value */
-   *attr_exists = vol_cb_args.args.exists.exists;
+    *attr_exists = vol_cb_args.args.exists.exists;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

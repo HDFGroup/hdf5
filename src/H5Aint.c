@@ -844,7 +844,6 @@ done:
         const void *buf;           IN: Buffer of data to write
  RETURNS
     Non-negative on success/Negative on failure
-
  DESCRIPTION
     This function writes a complete attribute to disk.
 --------------------------------------------------------------------------*/
@@ -949,31 +948,33 @@ done:
  NAME
     H5A__get_name
  PURPOSE
-    Private function for H5Aget_name.  Gets a copy of the name for an
-    attribute
+    Gets a copy of the name for an attribute
  RETURNS
-    This function returns the length of the attribute's name (which may be
-    longer than 'buf_size') on success or negative for failure.
+    Non-negative on success/Negative on failure
  DESCRIPTION
         This function retrieves the name of an attribute for an attribute ID.
     Up to 'buf_size' characters are stored in 'buf' followed by a '\0' string
     terminator.  If the name of the attribute is longer than 'buf_size'-1,
     the string terminator is stored in the last position of the buffer to
     properly terminate the string.
+        This function returns the length of the attribute's name (which may be
+    longer than 'buf_size') in the 'attr_name_len' parameter.
 --------------------------------------------------------------------------*/
-ssize_t
-H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
+herr_t
+H5A__get_name(H5A_t *attr, size_t buf_size, char *buf, size_t *attr_name_len)
 {
-    size_t  copy_len, nbytes;
-    ssize_t ret_value = -1; /* Return value */
+    size_t copy_len, nbytes;
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* get the real attribute length */
-    nbytes = HDstrlen(attr->shared->name);
-    HDassert((ssize_t)nbytes >= 0); /*overflow, pretty unlikely --rpm*/
+    /* Sanity checks */
+    HDassert(attr);
+    HDassert(attr_name_len);
 
-    /* compute the string length which will fit into the user's buffer */
+    /* Get the real attribute length */
+    nbytes = HDstrlen(attr->shared->name);
+
+    /* Compute the string length which will fit into the user's buffer */
     copy_len = MIN(buf_size - 1, nbytes);
 
     /* Copy all/some of the name */
@@ -984,10 +985,10 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
         buf[copy_len] = '\0';
     } /* end if */
 
-    /* Set return value */
-    ret_value = (ssize_t)nbytes;
+    /* Set actual attribute name length */
+    *attr_name_len = nbytes;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__get_name() */
 
 /*-------------------------------------------------------------------------
@@ -1091,13 +1092,10 @@ done:
  NAME
     H5A__get_create_plist
  PURPOSE
-    private version of H5Aget_create_plist
+    Private version of H5Aget_create_plist
  RETURNS
     This function returns the ID of a copy of the attribute's creation
     property list, or negative on failure.
-
- ERRORS
-
  DESCRIPTION
         This function returns a copy of the creation property list for
     an attribute.  The resulting ID must be closed with H5Pclose() or

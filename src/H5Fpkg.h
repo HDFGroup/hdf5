@@ -416,10 +416,9 @@ H5_DLL herr_t  H5F__close(H5F_t *f);
 H5_DLL herr_t  H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL herr_t  H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
 H5_DLL herr_t  H5F__parse_file_lock_env_var(htri_t *use_locks);
+H5_DLL herr_t  H5F__delete(const char *filename, hid_t fapl_id);
 
 /* File mount related routines */
-H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
-H5_DLL herr_t H5F__unmount(H5G_loc_t *loc, const char *name);
 H5_DLL herr_t H5F__close_mounts(H5F_t *f);
 H5_DLL herr_t H5F__mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
 

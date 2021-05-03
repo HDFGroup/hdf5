@@ -141,7 +141,8 @@ done:
 htri_t
 H5Fis_hdf5(const char *name)
 {
-    htri_t ret_value; /* Return value */
+    H5VL_file_specific_args_t vol_cb_args; /* Arguments to VOL callback */
+    htri_t                    ret_value;   /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE1("t", "*s", name);
@@ -150,10 +151,18 @@ H5Fis_hdf5(const char *name)
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, (-1), "no file name specified")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                       = H5VL_FILE_IS_ACCESSIBLE;
+    vol_cb_args.args.is_accessible.filename   = name;
+    vol_cb_args.args.is_accessible.fapl_id    = H5P_FILE_ACCESS_DEFAULT;
+    vol_cb_args.args.is_accessible.accessible = FALSE;
+
     /* Check if file is accessible */
-    if (H5VL_file_specific(NULL, H5VL_FILE_IS_ACCESSIBLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                           H5P_FILE_ACCESS_DEFAULT, name, &ret_value) < 0)
+    if (H5VL_file_specific(NULL, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, (-1), "unable to determine if file is accessible as HDF5")
+
+    /* Set return value */
+    ret_value = (htri_t)vol_cb_args.args.is_accessible.accessible;
 
 done:
     FUNC_LEAVE_API(ret_value)

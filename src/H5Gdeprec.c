@@ -860,11 +860,11 @@ done:
 herr_t
 H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs /*out*/)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5I_type_t        id_type; /* Type of ID */
-    H5VL_loc_params_t loc_params;
-    H5G_info_t        grp_info;            /* Group information */
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *       vol_obj = NULL;      /* Object of loc_id */
+    H5VL_group_get_args_t vol_cb_args;         /* Arguments to VOL callback */
+    H5I_type_t            id_type;             /* Type of ID */
+    H5G_info_t            grp_info;            /* Group information */
+    herr_t                ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", loc_id, num_objs);
@@ -876,17 +876,14 @@ H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs /*out*/)
     if (!num_objs)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad pointer to # of objects")
 
-    /* Fill in location struct fields */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = id_type;
-
-    /* Get group location */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    /* Set up VOL callback & object access arguments */
+    vol_cb_args.op_type = H5VL_GROUP_GET_INFO;
+    if (H5VL_setup_self_args(loc_id, &vol_obj, &vol_cb_args.args.get_info.loc_params) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments")
+    vol_cb_args.args.get_info.ginfo = &grp_info;
 
     /* Retrieve the group's information */
-    if (H5VL_group_get(vol_obj, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params,
-                       &grp_info) < 0)
+    if (H5VL_group_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info")
 
     /* Set the number of objects [i.e. links] in the group */

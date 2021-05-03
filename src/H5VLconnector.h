@@ -106,9 +106,9 @@ typedef enum H5VL_attr_get_t {
 /* Parameters for attribute 'get_name' operation */
 typedef struct H5VL_attr_get_name_args_t {
     H5VL_loc_params_t loc_params;    /* Location parameters for object access */
-    size_t            buf_size;      /* Size of attribute name buffer */
-    char *            buf;           /* Buffer for attribute name */
-    ssize_t           attr_name_len; /* Actual length of attribute name */
+    size_t            buf_size;      /* Size of attribute name buffer (IN) */
+    char *            buf;           /* Buffer for attribute name (OUT) */
+    size_t            attr_name_len; /* Actual length of attribute name (OUT) */
 } H5VL_attr_get_name_args_t;
 
 /* Parameters for attribute 'get_info' operation */
@@ -194,7 +194,7 @@ typedef struct H5VL_attr_specific_args_t {
         /* H5VL_ATTR_EXISTS */
         struct {
             const char *name;   /* Name of attribute to check */
-            hbool_t exists;     /* Whether attribute exists */
+            hbool_t     exists; /* Whether attribute exists */
         } exists;
 
         /* H5VL_ATTR_ITER */
@@ -229,32 +229,32 @@ typedef struct H5VL_dataset_get_args_t {
     union {
         /* H5VL_DATASET_GET_DAPL */
         struct {
-            hid_t dapl_id;     /* Dataset access property list ID */
+            hid_t dapl_id; /* Dataset access property list ID */
         } get_dapl;
 
         /* H5VL_DATASET_GET_DCPL */
         struct {
-            hid_t dcpl_id;     /* Dataset creation property list ID */
+            hid_t dcpl_id; /* Dataset creation property list ID */
         } get_dcpl;
 
         /* H5VL_DATASET_GET_SPACE */
         struct {
-            hid_t space_id;     /* Dataspace ID */
+            hid_t space_id; /* Dataspace ID */
         } get_space;
 
         /* H5VL_DATASET_GET_SPACE_STATUS */
         struct {
-            H5D_space_status_t status;     /* Storage space allocation status */
+            H5D_space_status_t status; /* Storage space allocation status */
         } get_space_status;
 
         /* H5VL_DATASET_GET_STORAGE_SIZE */
         struct {
-            hsize_t storage_size;     /* Size of dataset's storage */
+            hsize_t storage_size; /* Size of dataset's storage */
         } get_storage_size;
 
         /* H5VL_DATASET_GET_TYPE */
         struct {
-            hid_t type_id;     /* Datatype ID */
+            hid_t type_id; /* Datatype ID */
         } get_type;
     } args;
 } H5VL_dataset_get_args_t;
@@ -274,17 +274,17 @@ typedef struct H5VL_dataset_specific_args_t {
     union {
         /* H5VL_DATASET_SET_EXTENT */
         struct {
-            const hsize_t *size;        /* New dataspace extent */
+            const hsize_t *size; /* New dataspace extent */
         } set_extent;
 
         /* H5VL_DATASET_FLUSH */
         struct {
-            hid_t dset_id;              /* Dataset ID */
+            hid_t dset_id; /* Dataset ID */
         } flush;
 
         /* H5VL_DATASET_REFRESH */
         struct {
-            hid_t dset_id;              /* Dataset ID */
+            hid_t dset_id; /* Dataset ID */
         } refresh;
     } args;
 } H5VL_dataset_specific_args_t;
@@ -307,13 +307,13 @@ typedef struct H5VL_datatype_get_args_t {
     union {
         /* H5VL_DATATYPE_GET_BINARY_SIZE */
         struct {
-            size_t size;        /* Size of serialized form of datatype */
+            size_t size; /* Size of serialized form of datatype */
         } get_binary_size;
 
         /* H5VL_DATATYPE_GET_BINARY */
         struct {
-            void *buf;          /* Buffer to store serialized form of datatype */
-            size_t buf_size;    /* Size of serialized datatype buffer */
+            void * buf;      /* Buffer to store serialized form of datatype */
+            size_t buf_size; /* Size of serialized datatype buffer */
         } get_binary;
 
         /* H5VL_DATATYPE_GET_TCPL */
@@ -325,8 +325,8 @@ typedef struct H5VL_datatype_get_args_t {
 
 /* Values for datatype 'specific' operation */
 typedef enum H5VL_datatype_specific_t {
-    H5VL_DATATYPE_FLUSH,
-    H5VL_DATATYPE_REFRESH
+    H5VL_DATATYPE_FLUSH,  /* H5Tflush */
+    H5VL_DATATYPE_REFRESH /* H5Trefresh */
 } H5VL_datatype_specific_t;
 
 /* Parameters for datatype 'specific' operations */
@@ -337,12 +337,12 @@ typedef struct H5VL_datatype_specific_args_t {
     union {
         /* H5VL_DATATYPE_FLUSH */
         struct {
-            hid_t type_id;      /* Named datatype ID */
+            hid_t type_id; /* Named datatype ID */
         } flush;
 
         /* H5VL_DATATYPE_REFRESH */
         struct {
-            hid_t type_id;      /* Named datatype ID */
+            hid_t type_id; /* Named datatype ID */
         } refresh;
     } args;
 } H5VL_datatype_specific_args_t;
@@ -350,6 +350,15 @@ typedef struct H5VL_datatype_specific_args_t {
 /* Typedef and values for native VOL connector named datatype optional VOL operations */
 typedef int H5VL_datatype_optional_t;
 /* (No optional named datatype VOL operations currently) */
+
+/* Info for H5VL_FILE_GET_CONT_INFO */
+typedef struct H5VL_file_cont_info_t {
+    unsigned version;       /* version information (keep first) */
+    uint64_t feature_flags; /* Container feature flags          */
+                            /* (none currently defined)         */
+    size_t token_size;      /* Size of tokens                   */
+    size_t blob_id_size;    /* Size of blob IDs                 */
+} H5VL_file_cont_info_t;
 
 /* Values for file 'get' operation */
 typedef enum H5VL_file_get_t {
@@ -363,16 +372,113 @@ typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_OBJ_IDS    /* object ids in file                   */
 } H5VL_file_get_t;
 
+/* Parameters for file 'get_name' operation */
+typedef struct H5VL_file_get_name_args_t {
+    H5I_type_t type;          /* ID type of object pointer */
+    size_t     buf_size;      /* Size of file name buffer (IN) */
+    char *     buf;           /* Buffer for file name (OUT) */
+    size_t     file_name_len; /* Actual length of file name (OUT) */
+} H5VL_file_get_name_args_t;
+
+/* Parameters for file 'get_obj_ids' operation */
+typedef struct H5VL_file_get_obj_ids_args_t {
+    unsigned types;    /* Type of objects to count */
+    size_t   max_objs; /* Size of array of object IDs */
+    hid_t *  oid_list; /* Array of object IDs (OUT) */
+    size_t   count;    /* # of objects (OUT) */
+} H5VL_file_get_obj_ids_args_t;
+
+/* Parameters for file 'get' operations */
+typedef struct H5VL_file_get_args_t {
+    H5VL_file_get_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_FILE_GET_CONT_INFO */
+        struct {
+            H5VL_file_cont_info_t *info; /* Container info */
+        } get_cont_info;
+
+        /* H5VL_FILE_GET_FAPL */
+        struct {
+            hid_t fapl_id; /* File access property list */
+        } get_fapl;
+
+        /* H5VL_FILE_GET_FCPL */
+        struct {
+            hid_t fcpl_id; /* File creation property list */
+        } get_fcpl;
+
+        /* H5VL_FILE_GET_FILENO */
+        struct {
+            unsigned long fileno; /* File "number" */
+        } get_fileno;
+
+        /* H5VL_FILE_GET_INTENT */
+        struct {
+            unsigned flags; /* File open/create intent flags */
+        } get_intent;
+
+        /* H5VL_FILE_GET_NAME */
+        H5VL_file_get_name_args_t get_name;
+
+        /* H5VL_FILE_GET_OBJ_COUNT */
+        struct {
+            unsigned types; /* Type of objects to count */
+            size_t   count; /* # of objects (OUT) */
+        } get_obj_count;
+
+        /* H5VL_FILE_GET_OBJ_IDS */
+        H5VL_file_get_obj_ids_args_t get_obj_ids;
+    } args;
+} H5VL_file_get_args_t;
+
 /* Values for file 'specific' operation */
 typedef enum H5VL_file_specific_t {
     H5VL_FILE_FLUSH,         /* Flush file                       */
     H5VL_FILE_REOPEN,        /* Reopen the file                  */
-    H5VL_FILE_MOUNT,         /* Mount a file                     */
-    H5VL_FILE_UNMOUNT,       /* Unmount a file                   */
     H5VL_FILE_IS_ACCESSIBLE, /* Check if a file is accessible    */
     H5VL_FILE_DELETE,        /* Delete a file                    */
     H5VL_FILE_IS_EQUAL       /* Check if two files are the same  */
 } H5VL_file_specific_t;
+
+/* Parameters for file 'specific' operations */
+typedef struct H5VL_file_specific_args_t {
+    H5VL_file_specific_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_FILE_FLUSH */
+        struct {
+            H5I_type_t  obj_type; /* Type of object to use */
+            H5F_scope_t scope;    /* Scope of flush operation */
+        } flush;
+
+        /* H5VL_FILE_REOPEN */
+        struct {
+            void *file; /* File object for new file */
+        } reopen;
+
+        /* H5VL_FILE_IS_ACCESSIBLE */
+        struct {
+            const char *filename;   /* Name of file to check */
+            hid_t       fapl_id;    /* File access property list to use */
+            hbool_t     accessible; /* Whether file is accessible with FAPL settings (OUT) */
+        } is_accessible;
+
+        /* H5VL_FILE_DELETE */
+        struct {
+            const char *filename; /* Name of file to delete */
+            hid_t       fapl_id;  /* File access property list to use */
+        } del;
+
+        /* H5VL_FILE_IS_EQUAL */
+        struct {
+            void *  obj2;      /* Second file object to compare against */
+            hbool_t same_file; /* Whether files are the same (OUT) */
+        } is_equal;
+    } args;
+} H5VL_file_specific_args_t;
 
 /* Typedef for VOL connector file optional VOL operations */
 typedef int H5VL_file_optional_t;
@@ -383,8 +489,68 @@ typedef enum H5VL_group_get_t {
     H5VL_GROUP_GET_INFO  /* group info                       */
 } H5VL_group_get_t;
 
+/* Parameters for group 'get_info' operation */
+typedef struct H5VL_group_get_info_args_t {
+    H5VL_loc_params_t loc_params; /* Location parameters for object access */
+    H5G_info_t *      ginfo;      /* Group info (OUT) */
+} H5VL_group_get_info_args_t;
+
+/* Parameters for group 'get' operations */
+typedef struct H5VL_group_get_args_t {
+    H5VL_group_get_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_GROUP_GET_GCPL */
+        struct {
+            hid_t gcpl_id; /* Group creation property list (OUT) */
+        } get_gcpl;
+
+        /* H5VL_GROUP_GET_INFO */
+        H5VL_group_get_info_args_t get_info; /* Group info */
+    } args;
+} H5VL_group_get_args_t;
+
 /* Values for group 'specific' operation */
-typedef enum H5VL_group_specific_t { H5VL_GROUP_FLUSH, H5VL_GROUP_REFRESH } H5VL_group_specific_t;
+typedef enum H5VL_group_specific_t {
+    H5VL_GROUP_MOUNT,   /* Mount a file on a group          */
+    H5VL_GROUP_UNMOUNT, /* Unmount a file on a group        */
+    H5VL_GROUP_FLUSH,   /* H5Gflush                         */
+    H5VL_GROUP_REFRESH  /* H5Grefresh                       */
+} H5VL_group_specific_t;
+
+/* Parameters for group 'mount' operation */
+typedef struct H5VL_group_spec_mount_args_t {
+    const char *name;       /* Name of location to mount child file */
+    void *      child_file; /* Pointer to child file object */
+    hid_t       fmpl_id;    /* File mount property list to use */
+} H5VL_group_spec_mount_args_t;
+
+/* Parameters for group 'specific' operations */
+typedef struct H5VL_group_specific_args_t {
+    H5VL_group_specific_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_GROUP_MOUNT */
+        H5VL_group_spec_mount_args_t mount;
+
+        /* H5VL_GROUP_UNMOUNT */
+        struct {
+            const char *name; /* Name of location to unmount child file */
+        } unmount;
+
+        /* H5VL_GROUP_FLUSH */
+        struct {
+            hid_t grp_id; /* Group ID */
+        } flush;
+
+        /* H5VL_GROUP_REFRESH */
+        struct {
+            hid_t grp_id; /* Group ID */
+        } refresh;
+    } args;
+} H5VL_group_specific_args_t;
 
 /* Typedef for VOL connector group optional VOL operations */
 typedef int H5VL_group_optional_t;
@@ -470,15 +636,6 @@ typedef enum H5VL_blob_specific_t {
 typedef int H5VL_blob_optional_t;
 /* (No optional blob VOL operations currently) */
 
-/* Info for H5VL_FILE_GET_CONT_INFO */
-typedef struct H5VL_file_cont_info_t {
-    unsigned version;       /* version information (keep first) */
-    uint64_t feature_flags; /* Container feature flags          */
-                            /* (none currently defined)         */
-    size_t token_size;      /* Size of tokens                   */
-    size_t blob_id_size;    /* Size of blob IDs                 */
-} H5VL_file_cont_info_t;
-
 /* VOL connector info fields & callbacks */
 typedef struct H5VL_info_class_t {
     size_t size;                     /* Size of the VOL info                         */
@@ -555,9 +712,8 @@ typedef struct H5VL_file_class_t {
     void *(*create)(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id,
                     void **req);
     void *(*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*get)(void *obj, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
+    herr_t (*specific)(void *obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, H5VL_file_optional_t opt_type, hid_t dxpl_id, void **req,
                        va_list arguments);
     herr_t (*close)(void *file, hid_t dxpl_id, void **req);
@@ -569,9 +725,8 @@ typedef struct H5VL_group_class_t {
                     hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
     void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t gapl_id,
                   hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_group_specific_t specific_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*get)(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req);
+    herr_t (*specific)(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, H5VL_group_optional_t opt_type, hid_t dxpl_id, void **req,
                        va_list arguments);
     herr_t (*close)(void *grp, hid_t dxpl_id, void **req);

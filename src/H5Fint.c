@@ -2360,11 +2360,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_delete(const char *filename, hid_t fapl_id)
+H5F__delete(const char *filename, hid_t fapl_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     HDassert(filename);
 
@@ -2374,7 +2374,7 @@ H5F_delete(const char *filename, hid_t fapl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_delete() */
+} /* end H5F__delete() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_try_close

@@ -3127,14 +3127,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_FILE_REOPEN");
                                     break;
 
-                                case H5VL_FILE_MOUNT:
-                                    H5RS_acat(rs, "H5VL_FILE_MOUNT");
-                                    break;
-
-                                case H5VL_FILE_UNMOUNT:
-                                    H5RS_acat(rs, "H5VL_FILE_UNMOUNT");
-                                    break;
-
                                 case H5VL_FILE_IS_ACCESSIBLE:
                                     H5RS_acat(rs, "H5VL_FILE_IS_ACCESSIBLE");
                                     break;
@@ -3179,6 +3171,14 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5VL_group_specific_t specific = (H5VL_group_specific_t)HDva_arg(ap, int);
 
                             switch (specific) {
+                                case H5VL_GROUP_MOUNT:
+                                    H5RS_acat(rs, "H5VL_GROUP_MOUNT");
+                                    break;
+
+                                case H5VL_GROUP_UNMOUNT:
+                                    H5RS_acat(rs, "H5VL_GROUP_UNMOUNT");
+                                    break;
+
                                 case H5VL_GROUP_FLUSH:
                                     H5RS_acat(rs, "H5VL_GROUP_FLUSH");
                                     break;

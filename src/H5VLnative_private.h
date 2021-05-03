@@ -67,7 +67,8 @@ H5_DLL herr_t H5VL__native_dataset_read(void *dset, hid_t mem_type_id, hid_t mem
 H5_DLL herr_t H5VL__native_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                          hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
 H5_DLL herr_t H5VL__native_dataset_get(void *dset, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VL__native_dataset_specific(void *dset, H5VL_dataset_specific_args_t *args, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL__native_dataset_specific(void *dset, H5VL_dataset_specific_args_t *args, hid_t dxpl_id,
+                                            void **req);
 H5_DLL herr_t H5VL__native_dataset_optional(void *dset, H5VL_dataset_optional_t opt_type, hid_t dxpl_id,
                                             void **req, va_list arguments);
 H5_DLL herr_t H5VL__native_dataset_close(void *dset, hid_t dxpl_id, void **req);
@@ -79,7 +80,8 @@ H5_DLL void * H5VL__native_datatype_commit(void *obj, const H5VL_loc_params_t *l
 H5_DLL void * H5VL__native_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
                                          hid_t tapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_datatype_get(void *dt, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VL__native_datatype_specific(void *dt, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL__native_datatype_specific(void *dt, H5VL_datatype_specific_args_t *args, hid_t dxpl_id,
+                                             void **req);
 H5_DLL herr_t H5VL__native_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* File callbacks */
@@ -87,10 +89,9 @@ H5_DLL void * H5VL__native_file_create(const char *name, unsigned flags, hid_t f
                                        hid_t dxpl_id, void **req);
 H5_DLL void * H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id,
                                      void **req);
-H5_DLL herr_t H5VL__native_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl_id, void **req,
-                                    va_list arguments);
-H5_DLL herr_t H5VL__native_file_specific(void *file, H5VL_file_specific_t specific_type, hid_t dxpl_id,
-                                         void **req, va_list arguments);
+H5_DLL herr_t H5VL__native_file_get(void *file, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL__native_file_specific(void *file, H5VL_file_specific_args_t *args, hid_t dxpl_id,
+                                         void **req);
 H5_DLL herr_t H5VL__native_file_optional(void *file, H5VL_file_optional_t opt_type, hid_t dxpl_id, void **req,
                                          va_list arguments);
 H5_DLL herr_t H5VL__native_file_close(void *file, hid_t dxpl_id, void **req);
@@ -101,10 +102,9 @@ H5_DLL void * H5VL__native_group_create(void *obj, const H5VL_loc_params_t *loc_
                                         void **req);
 H5_DLL void * H5VL__native_group_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
                                       hid_t gapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VL__native_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req,
-                                     va_list arguments);
-H5_DLL herr_t H5VL__native_group_specific(void *obj, H5VL_group_specific_t specific_type, hid_t dxpl_id,
-                                          void **req, va_list arguments);
+H5_DLL herr_t H5VL__native_group_get(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL__native_group_specific(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_id,
+                                          void **req);
 H5_DLL herr_t H5VL__native_group_optional(void *obj, H5VL_group_optional_t opt_type, hid_t dxpl_id,
                                           void **req, va_list arguments);
 H5_DLL herr_t H5VL__native_group_close(void *grp, hid_t dxpl_id, void **req);

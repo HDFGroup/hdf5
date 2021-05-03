@@ -755,6 +755,7 @@ typedef struct H5F_t H5F_t;
 /* Forward declarations (for prototypes & type definitions) */
 struct H5B_class_t;
 struct H5UC_t;
+struct H5G_loc_t;
 struct H5O_loc_t;
 struct H5HG_heap_t;
 struct H5VL_class_t;
@@ -830,7 +831,6 @@ H5_DLL herr_t H5F_init(void);
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/);
 H5_DLL hid_t  H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref);
-H5_DLL herr_t H5F_delete(const char *filename, hid_t fapl_id);
 
 /* Functions that retrieve values from the file struct */
 H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);
@@ -908,7 +908,9 @@ H5_DLL haddr_t H5F_shared_get_eoa(const H5F_shared_t *f_sh, H5FD_mem_t type);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
 H5_DLL herr_t  H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle);
 
-/* Functions that check file mounting information */
+/* File mounting routines */
+H5_DLL herr_t  H5F_mount(const struct H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
+H5_DLL herr_t  H5F_unmount(const struct H5G_loc_t *loc, const char *name);
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
 H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 H5_DLL herr_t  H5F_traverse_mount(struct H5O_loc_t *oloc /*in,out*/);
