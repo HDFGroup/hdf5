@@ -1106,7 +1106,7 @@ modify_attr(const state_t *s, hid_t did, unsigned int which)
             TEST_ERROR;
         }
 
-        HDsprintf(val, "%u %u %u %u %u", which, which+1, which+2, which+3, which+4);
+        HDsprintf(val, "%u %c", which, 'M');
 
         tid = vl_tid;
     } else {
@@ -1331,7 +1331,7 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
         if(action == ADD_ATTR)
             HDsprintf(vl_which, "%u", which);
         else
-            HDsprintf(vl_which, "%u %u %u %u %u", which, which+1, which+2, which+3, which+4);
+            HDsprintf(vl_which, "%u %c", which, 'M');
 
         if((read_vl_which = HDmalloc(sizeof("9999999999"))) == NULL) {
             printf("HDmalloc failed\n");

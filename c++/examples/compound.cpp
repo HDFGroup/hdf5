@@ -17,11 +17,7 @@
  * and read back fields' subsets.
  */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cout;
 using std::endl;
 

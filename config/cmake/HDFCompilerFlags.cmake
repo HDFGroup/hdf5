@@ -32,6 +32,20 @@ if (CMAKE_COMPILER_IS_GNUCC)
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstdarg-opt")
     endif ()
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0)
+      #-----------------------------------------------------------------------------
+      # Option to allow the user to enable build extended diagnostics
+      #
+      # This should NOT be on by default as it can cause process issues.
+      #-----------------------------------------------------------------------------
+      option (HDF5_ENABLE_BUILD_DIAGS "Enable color and URL extended diagnostic messages" OFF)
+      if (HDF5_ENABLE_BUILD_DIAGS)
+        message (STATUS "... default color and URL extended diagnostic messages enabled")
+      else ()
+        message (STATUS "... disable color and URL extended diagnostic messages")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-urls=never -fno-diagnostics-color")
+      endif ()
+    endif ()
   endif ()
 endif ()
 

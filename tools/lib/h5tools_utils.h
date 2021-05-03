@@ -12,13 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Bill Wendling <wendling@ncsa.uiuc.edu>
+ * Programmer:  Bill Wendling
  *              Tuesday, 6. March 2001
  *
  * Purpose:     Support functions for the various tools.
  */
-#ifndef H5TOOLS_UTILS_H__
-#define H5TOOLS_UTILS_H__
+#ifndef H5TOOLS_UTILS_H
+#define H5TOOLS_UTILS_H
 
 #include "hdf5.h"
 
@@ -191,4 +191,4 @@ H5TOOLS_DLL herr_t h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int deli
 }
 #endif
 
-#endif /* H5TOOLS_UTILS_H__ */
+#endif /* H5TOOLS_UTILS_H */

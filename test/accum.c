@@ -139,7 +139,7 @@ main(void)
     nerrors += test_random_write(f);
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -160,7 +160,7 @@ main(void)
 
 error:
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     HDputs("*** TESTS FAILED ***");
     return 1;
@@ -1964,8 +1964,8 @@ test_random_write(H5F_t *f)
     /* Choose random # seed */
     seed = (unsigned)HDtime(NULL);
 #if 0
-    /* seed = (unsigned)1155438845; */
-    HDfprintf(stderr, "Random # seed was: %u\n", seed);
+/* seed = (unsigned)1155438845; */
+HDfprintf(stderr, "Random # seed was: %u\n", seed);
 #endif
     HDsrandom(seed);
 
@@ -2303,7 +2303,7 @@ test_swmr_write_big(hbool_t newest_format)
         FAIL_STACK_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -2321,7 +2321,7 @@ error:
     H5Fclose(fid);
 
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     H5Pclose(fapl);
 

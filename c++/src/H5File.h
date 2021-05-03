@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5File_H
-#define __H5File_H
+#ifndef H5File_H
+#define H5File_H
 
 namespace H5 {
 
@@ -39,7 +39,7 @@ class H5_DLLCPP H5File : public Group {
                   const FileAccPropList &access_plist = FileAccPropList::DEFAULT);
 
     // Close this file.
-    virtual void close();
+    virtual void close() H5_OVERRIDE;
 
     // Gets a copy of the access property list of this file.
     FileAccPropList getAccessPlist() const;
@@ -96,16 +96,16 @@ class H5_DLLCPP H5File : public Group {
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const H5_OVERRIDE
     {
         return ("H5File");
     }
 
     // Throw file exception.
-    virtual void throwException(const H5std_string &func_name, const H5std_string &msg) const;
+    virtual void throwException(const H5std_string &func_name, const H5std_string &msg) const H5_OVERRIDE;
 
     // For CommonFG to get the file id.
-    virtual hid_t getLocId() const;
+    virtual hid_t getLocId() const H5_OVERRIDE;
 
     // Default constructor
     H5File();
@@ -114,15 +114,15 @@ class H5_DLLCPP H5File : public Group {
     H5File(const H5File &original);
 
     // Gets the HDF5 file id.
-    virtual hid_t getId() const;
+    virtual hid_t getId() const H5_OVERRIDE;
 
     // H5File destructor.
-    virtual ~H5File();
+    virtual ~H5File() H5_OVERRIDE;
 
   protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     // Sets the HDF5 file id.
-    virtual void p_setId(const hid_t new_id);
+    virtual void p_setId(const hid_t new_id) H5_OVERRIDE;
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
   private:
@@ -136,4 +136,4 @@ class H5_DLLCPP H5File : public Group {
 }; // end of H5File
 } // namespace H5
 
-#endif // __H5File_H
+#endif // H5File_H

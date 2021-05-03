@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5FileAccPropList_H
-#define __H5FileAccPropList_H
+#ifndef H5FileAccPropList_H
+#define H5FileAccPropList_H
 
 namespace H5 {
 
@@ -122,6 +122,12 @@ class H5_DLLCPP FileAccPropList : public PropList {
     // Returns garbage collecting references setting.
     unsigned getGcReferences() const;
 
+    // Sets file locking parameters.
+    void setFileLocking(hbool_t use_file_locking, hbool_t ignore_when_disabled) const;
+
+    // Gets file locking parameters.
+    void getFileLocking(hbool_t &use_file_locking, hbool_t &ignore_when_disabled) const;
+
     // Sets bounds on versions of library format to be used when creating
     // or writing objects.
     void setLibverBounds(H5F_libver_t libver_low, H5F_libver_t libver_high) const;
@@ -131,7 +137,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const H5_OVERRIDE
     {
         return ("FileAccPropList");
     }
@@ -144,7 +150,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
     FileAccPropList(const hid_t plist_id);
 
     // Noop destructor
-    virtual ~FileAccPropList();
+    virtual ~FileAccPropList() H5_OVERRIDE;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -162,4 +168,4 @@ class H5_DLLCPP FileAccPropList : public PropList {
 }; // end of FileAccPropList
 } // namespace H5
 
-#endif // __H5FileAccPropList_H
+#endif // H5FileAccPropList_H

@@ -38,7 +38,7 @@ GetWord(GIFBYTE *MemGif)
 }
 
 GIFBYTE
-GetByte(GIFBYTE *MemGif)
+GetByte(const GIFBYTE *MemGif)
 {
     return *MemGif;
 }
@@ -65,7 +65,7 @@ ReadGifHeader(GIFHEAD * GifHead, /* Pointer to GIF header structure  */
         GifHead->HeaderDump[i] = *(*MemGif2)++;
     }
 
-    if (strncmp((const char *)GifHead->HeaderDump, "GIF", (size_t)3)) {
+    if (strncmp((const char *)GifHead->HeaderDump, "GIF", (size_t)3) != 0) {
         printf("The file does not appear to be a valid GIF file.\n");
         exit(EXIT_FAILURE);
     }

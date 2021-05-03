@@ -15,14 +15,14 @@
  *
  * Created:             H5Gpublic.h
  *                      Jul 11 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Public declarations for the H5G package
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Gpublic_H
-#define _H5Gpublic_H
+#ifndef H5Gpublic_H
+#define H5Gpublic_H
 
 /* System headers needed by this file */
 #include <sys/types.h>
@@ -161,4 +161,4 @@ H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Gpublic_H */
+#endif /* H5Gpublic_H */

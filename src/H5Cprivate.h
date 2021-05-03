@@ -13,26 +13,24 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Cprivate.h
- *			6/3/04
- *			John Mainzer
+ * Created:   H5Cprivate.h
+ *            6/3/04
+ *            John Mainzer
  *
- * Purpose:		Constants and typedefs available to the rest of the
- *			library.
- *
- * Modifications:
+ * Purpose:   Constants and typedefs available to the rest of the
+ *            library.
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5Cprivate_H
-#define _H5Cprivate_H
+#ifndef H5Cprivate_H
+#define H5Cprivate_H
 
-#include "H5Cpublic.h" /* public prototypes		        */
+#include "H5Cpublic.h" /* public prototypes            */
 
 /* Private headers needed by this header */
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Fprivate.h" /* File access				*/
+#include "H5private.h"  /* Generic Functions            */
+#include "H5Fprivate.h" /* File access                  */
 
 /**************************/
 /* Library Private Macros */
@@ -46,7 +44,7 @@
  * or decrease it if appropriate.  Its purposes is to detect corrupt
  * object sizes, so it probably doesn't matter if it is a bit big.
  *
- *					JRM - 5/17/04
+ *                    JRM - 5/17/04
  */
 #define H5C_MAX_ENTRY_SIZE ((size_t)(32 * 1024 * 1024))
 
@@ -2470,4 +2468,4 @@ H5_DLL herr_t H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_cl
 H5_DLL herr_t H5C_validate_index_list(H5C_t *cache_ptr);
 #endif /* NDEBUG */
 
-#endif /* !_H5Cprivate_H */
+#endif /* H5Cprivate_H */

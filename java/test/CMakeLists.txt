@@ -96,7 +96,7 @@ HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig" "${PROJECT_BINARY_
 
 add_custom_target(${HDF5_JAVA_TEST_LIB_TARGET}_files ALL COMMENT "Copying files needed by ${HDF5_JAVA_TEST_LIB_TARGET} tests" DEPENDS ${${HDF5_JAVA_TEST_LIB_TARGET}_files_list})
 
-if (WIN32 OR MINGW)
+if (WIN32)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
 else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
@@ -191,9 +191,11 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
         vol_pass_through2
     )
 
+    # native VOL = 0
+    # pass-through VOL = 1
     set (vol_native native)
     set (vol_pass_through1 "pass_through under_vol=0\;under_info={}")
-    set (vol_pass_through2 "pass_through under_vol=505\;under_info={under_vol=0\;under_info={}}")
+    set (vol_pass_through2 "pass_through under_vol=1\;under_info={under_vol=0\;under_info={}}")
 
     foreach (voltest ${VOL_LIST})
       file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${voltest}")

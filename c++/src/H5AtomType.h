@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5AtomType_H
-#define __H5AtomType_H
+#ifndef H5AtomType_H
+#define H5AtomType_H
 
 namespace H5 {
 
@@ -58,7 +58,7 @@ class H5_DLLCPP AtomType : public DataType {
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const H5_OVERRIDE
     {
         return ("AtomType");
     }
@@ -68,7 +68,7 @@ class H5_DLLCPP AtomType : public DataType {
     AtomType(const AtomType &original);
 
     // Noop destructor
-    virtual ~AtomType();
+    virtual ~AtomType() H5_OVERRIDE;
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
   protected:
@@ -83,4 +83,4 @@ class H5_DLLCPP AtomType : public DataType {
 }; // end of AtomType
 } // namespace H5
 
-#endif // __H5AtomType_H
+#endif // H5AtomType_H

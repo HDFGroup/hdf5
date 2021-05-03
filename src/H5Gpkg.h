@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Robb Matzke <matzke@llnl.gov>
+ * Programmer: Robb Matzke
  *             Thursday, September 18, 1997
  *
  * Purpose:     This file contains declarations which are visible
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5G package!"
 #endif
 
-#ifndef _H5Gpkg_H
-#define _H5Gpkg_H
+#ifndef H5Gpkg_H
+#define H5Gpkg_H
 
 /* Get package's private header */
 #include "H5Gprivate.h"
@@ -480,4 +480,4 @@ H5_DLL herr_t H5G__verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent
 H5_DLL herr_t H5G__verify_cached_stabs_test(hid_t gid);
 #endif /* H5G_TESTING */
 
-#endif /* _H5Gpkg_H */
+#endif /* H5Gpkg_H */

@@ -42,11 +42,6 @@ testphdf5_SOURCES=testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 # The tests all depend on the hdf5 library and the test library
 LDADD = $(LIBH5TEST) $(LIBHDF5)
 
-# Test with just the native connector, with a single pass-through connector
-# and with a doubly-stacked pass-through.
-VOL_LIST = native "pass_through under_vol=0;under_info={}" \
-           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
-
 # Temporary files
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf

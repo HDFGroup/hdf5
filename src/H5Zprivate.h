@@ -11,12 +11,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Thursday, April 16, 1998
  */
 
-#ifndef _H5Zprivate_H
-#define _H5Zprivate_H
+#ifndef H5Zprivate_H
+#define H5Zprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5Z_filter_info_t H5Z_filter_info_t;

@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5FileCreatPropList_H
-#define __H5FileCreatPropList_H
+#ifndef H5FileCreatPropList_H
+#define H5FileCreatPropList_H
 
 namespace H5 {
 
@@ -78,7 +78,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const H5_OVERRIDE
     {
         return ("FileCreatPropList");
     }
@@ -91,7 +91,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
     FileCreatPropList(const hid_t plist_id);
 
     // Noop destructor
-    virtual ~FileCreatPropList();
+    virtual ~FileCreatPropList() H5_OVERRIDE;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -109,4 +109,4 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 }; // end of FileCreatPropList
 } // namespace H5
 
-#endif // __H5FileCreatPropList_H
+#endif // H5FileCreatPropList_H

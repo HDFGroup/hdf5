@@ -16,8 +16,8 @@
  * a particular header file and include that here, don't fill this file with
  * lots of gunk...
  */
-#ifndef _HDF5_H
-#define _HDF5_H
+#ifndef HDF5_H
+#define HDF5_H
 
 #include "H5public.h"
 #include "H5Apublic.h"  /* Attributes                               */
@@ -37,6 +37,7 @@
 #include "H5Rpublic.h"  /* References                               */
 #include "H5Spublic.h"  /* Dataspaces                               */
 #include "H5Tpublic.h"  /* Datatypes                                */
+#include "H5TSpublic.h" /* Thread-safety                            */
 #include "H5VLpublic.h" /* Virtual Object Layer                     */
 #include "H5Zpublic.h"  /* Data filters                             */
 

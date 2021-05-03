@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:  Quincey Koziol
  *              April 14, 2011
  *
  * Purpose:     This program is run to generate an HDF5 data file with objects

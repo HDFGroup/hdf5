@@ -11,10 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgoup.org>
- *              Tuesday, July 27, 2010
- *
- * Purpose:	ID testing functions.
+/*
+ * H5Itest.c - ID testing functions
  */
 
 /****************/
@@ -28,7 +26,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
-#include "H5ACprivate.h" /* Metadata cache                           */
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Gprivate.h"  /* Groups                                   */
@@ -105,7 +102,7 @@ done:
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_ATOM, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTRESET, (-1), "can't reset API context")
 
     FUNC_LEAVE_NOAPI(ret_value)

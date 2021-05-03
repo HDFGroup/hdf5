@@ -15,8 +15,8 @@
 #error "Do not include this file outside the H5Z package!"
 #endif
 
-#ifndef _H5Zpkg_H
-#define _H5Zpkg_H
+#ifndef H5Zpkg_H
+#define H5Zpkg_H
 
 /* Include private header file */
 #include "H5Zprivate.h" /* Filter functions                */
@@ -54,4 +54,4 @@ H5_DLLVAR H5Z_class2_t H5Z_SZIP[1];
 /* Package internal routines */
 H5_DLL herr_t H5Z__unregister(H5Z_filter_t filter_id);
 
-#endif /* _H5Zpkg_H */
+#endif /* H5Zpkg_H */

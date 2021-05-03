@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5DSetMemXferPropList_H
-#define __H5DSetMemXferPropList_H
+#ifndef H5DSetMemXferPropList_H
+#define H5DSetMemXferPropList_H
 
 namespace H5 {
 
@@ -100,7 +100,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const H5_OVERRIDE
     {
         return ("DSetMemXferPropList");
     }
@@ -113,7 +113,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
     DSetMemXferPropList(const hid_t plist_id);
 
     // Noop destructor
-    virtual ~DSetMemXferPropList();
+    virtual ~DSetMemXferPropList() H5_OVERRIDE;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -131,4 +131,4 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 }; // end of DSetMemXferPropList
 } // namespace H5
 
-#endif // __H5DSetMemXferPropList_H
+#endif // H5DSetMemXferPropList_H

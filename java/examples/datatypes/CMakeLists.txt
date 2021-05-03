@@ -24,7 +24,7 @@ set (HDF_JAVA_EXAMPLES
     H5Ex_T_VLString
 )
 
-if (WIN32 OR MINGW)
+if (WIN32)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
 else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")

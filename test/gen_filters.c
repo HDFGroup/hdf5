@@ -37,7 +37,7 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned 
  *
  *		Failure:	-1
  *
- * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
+ * Programmer:  Pedro Vicente
  *              Thursday, March 25, 2004
  *
  *-------------------------------------------------------------------------
@@ -243,12 +243,12 @@ main(void)
 
     if (nerrors)
         goto error;
-    printf("All tests passed.\n");
+    HDprintf("All tests passed.\n");
 
     return 0;
 
 error:
     nerrors = MAX(1, nerrors);
-    printf("***** %d GEN_FILTERS FAILURES *****\n", nerrors);
+    HDprintf("***** %d GEN_FILTERS FAILURES *****\n", nerrors);
     return 1;
 }

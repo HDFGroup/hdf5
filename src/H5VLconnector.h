@@ -14,8 +14,8 @@
  * This file contains public declarations for authoring VOL connectors.
  */
 
-#ifndef _H5VLconnector_H
-#define _H5VLconnector_H
+#ifndef H5VLconnector_H
+#define H5VLconnector_H
 
 /* Public headers needed by this file */
 #include "H5public.h"   /* Generic Functions                    */
@@ -495,4 +495,4 @@ H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 }
 #endif
 
-#endif /* _H5VLconnector_H */
+#endif /* H5VLconnector_H */

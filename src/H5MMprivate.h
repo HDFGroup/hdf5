@@ -15,14 +15,14 @@
  *
  * Created:             H5MMprivate.h
  *                      Jul 10 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Private header for memory management.
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5MMprivate_H
-#define _H5MMprivate_H
+#ifndef H5MMprivate_H
+#define H5MMprivate_H
 
 #include "H5MMpublic.h"
 
@@ -53,4 +53,4 @@ H5_DLL void   H5MM_sanity_check_all(void);
 H5_DLL void   H5MM_final_sanity_check(void);
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
-#endif /* _H5MMprivate_H */
+#endif /* H5MMprivate_H */

@@ -95,12 +95,12 @@ AC_CONFIG_COMMANDS([pubconf], [
   sed 's/#define /#define H5_/' <src/H5config.h |\
     sed 's/#undef /#undef H5_/' >pubconf
   if test ! -f src/H5pubconf.h; then
-    /bin/mv -f pubconf src/H5pubconf.h
+    mv -f pubconf src/H5pubconf.h
   elif (diff pubconf src/H5pubconf.h >/dev/null); then
     rm -f pubconf
     echo "src/H5pubconf.h is unchanged"
   else
-    /bin/mv -f pubconf src/H5pubconf.h
+    mv -f pubconf src/H5pubconf.h
   fi
   echo "Post process src/libhdf5.settings"
   sed '/^#/d' < src/libhdf5.settings > libhdf5.settings.TMP
@@ -2094,6 +2094,51 @@ AC_ARG_ENABLE([production],
 
 
 ## ----------------------------------------------------------------------
+## Check if the compiler should include build diagnostics
+##
+AC_MSG_CHECKING([enable build diagnostics])
+AC_ARG_ENABLE([diags],
+              [AS_HELP_STRING([--enable-diags=(yes|no|<custom>)],
+                              [Allow default enhanced diagnostics to the build.
+                               This is independent of the build mode and optimization
+                               level.
+                               [default=no]
+                               ])],
+              [DIAGS=$enableval])
+
+## Set default
+if test "X-$DIAGS" = X- ; then
+  DIAGS=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([DIAGS])
+
+case "X-$DIAGS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $DIAGS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DIAGS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DIAGS_FCFLAGS"
+    AC_MSG_RESULT([yes])
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_DIAGS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_DIAGS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_DIAGS_FCFLAGS"
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $DIAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DIAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DIAGS"
+    DIAGS="custom ($DIAGS)"
+    AC_MSG_RESULT([$DIAGS])
+    ;;
+esac
+
+
+## ----------------------------------------------------------------------
 ## Check if the compiler should include symbols
 ##
 AC_MSG_CHECKING([enable debugging symbols])
@@ -2206,10 +2251,6 @@ AC_ARG_ENABLE([developer-warnings],
 if test "X-$DEV_WARNINGS" = X- ; then
   DEV_WARNINGS=no
 fi
-
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([DEV_WARNINGS])
 
 case "X-$DEV_WARNINGS" in
   X-yes)

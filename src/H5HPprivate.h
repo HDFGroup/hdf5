@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5HP module
  */
-#ifndef _H5HPprivate_H
-#define _H5HPprivate_H
+#ifndef H5HPprivate_H
+#define H5HPprivate_H
 
 /**************************************/
 /* Public headers needed by this file */
@@ -65,4 +65,4 @@ H5_DLL herr_t  H5HP_incr(H5HP_t *heap, unsigned amt, void *obj);
 H5_DLL herr_t  H5HP_decr(H5HP_t *heap, unsigned amt, void *obj);
 H5_DLL herr_t  H5HP_close(H5HP_t *heap);
 
-#endif /* _H5HPprivate_H */
+#endif /* H5HPprivate_H */

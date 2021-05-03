@@ -2011,7 +2011,7 @@ open_members(H5FD_multi_t *file)
 }
 H5_GCC_DIAG_ON("format-nonliteral")
 
-#ifdef _H5private_H
+#ifdef H5private_H
 /*
  * This is not related to the functionality of the driver code.
  * It is added here to trigger warning if HDF5 private definitions are included

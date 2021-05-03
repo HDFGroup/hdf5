@@ -19,8 +19,8 @@
 #error "Do not include this file outside the H5R package!"
 #endif
 
-#ifndef _H5Rpkg_H
-#define _H5Rpkg_H
+#ifndef H5Rpkg_H
+#define H5Rpkg_H
 
 /* Get package's private header */
 #include "H5Rprivate.h"
@@ -134,4 +134,4 @@ H5_DLL herr_t H5R__encode_token_region_compat(H5F_t *f, const H5O_token_t *obj_t
 H5_DLL herr_t H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbytes,
                                               H5O_token_t *obj_token, size_t token_size, H5S_t **space_ptr);
 
-#endif /* _H5Rpkg_H */
+#endif /* H5Rpkg_H */

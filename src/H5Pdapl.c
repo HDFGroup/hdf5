@@ -1292,7 +1292,7 @@ H5Pset_append_flush(hid_t plist_id, unsigned ndims, const hsize_t *boundary, H5D
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIu*hx*x", plist_id, ndims, boundary, func, udata);
+    H5TRACE5("e", "iIu*hDA*x", plist_id, ndims, boundary, func, udata);
 
     /* Check arguments */
     if (0 == ndims)
@@ -1353,7 +1353,7 @@ H5Pget_append_flush(hid_t plist_id, unsigned ndims, hsize_t boundary[], H5D_appe
     herr_t             ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIu*h*x**x", plist_id, ndims, boundary, func, udata);
+    H5TRACE5("e", "iIu*h*DA**x", plist_id, ndims, boundary, func, udata);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
