@@ -47,8 +47,7 @@ static herr_t reg_opt_op_optional(void *obj, int opt_type, hid_t dxpl_id, void *
 static herr_t reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, int opt_type,
                                     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req,
                                     va_list arguments);
-static herr_t reg_opt_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req,
-                                   va_list arguments);
+static herr_t reg_opt_datatype_get(void *obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
 #define REG_OPT_VOL_NAME  "reg_opt"
 #define REG_OPT_VOL_VALUE ((H5VL_class_value_t)502)
 static const H5VL_class_t reg_opt_vol_g = {
@@ -535,20 +534,18 @@ reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, int opt_ty
  *-------------------------------------------------------------------------
  */
 static herr_t
-reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_t get_type, hid_t H5_ATTR_UNUSED dxpl_id,
-                     void H5_ATTR_UNUSED **req, va_list arguments)
+reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                     void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    if (H5VL_DATATYPE_GET_BINARY == get_type) {
-        ssize_t *nalloc = HDva_arg(arguments, ssize_t *);
-        void *   buf    = HDva_arg(arguments, void *);
-        size_t   size   = HDva_arg(arguments, size_t);
-
-        if (H5Tencode(H5T_NATIVE_INT, (unsigned char *)buf, &size) < 0)
+    if (H5VL_DATATYPE_GET_BINARY_SIZE == args->op_type) {
+        if (H5Tencode(H5T_NATIVE_INT, NULL, &args->args.get_binary_size.size) < 0)
             ret_value = FAIL;
-        else
-            *nalloc = (ssize_t)size;
+    } /* end if */
+    else if (H5VL_DATATYPE_GET_BINARY == args->op_type) {
+        if (H5Tencode(H5T_NATIVE_INT, args->args.get_binary.buf, &args->args.get_binary.buf_size) < 0)
+            ret_value = FAIL;
     } /* end if */
     else
         ret_value = FAIL;
