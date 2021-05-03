@@ -225,18 +225,25 @@ hid_t
 copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, trav_table_t *travt,
                     pack_opt_t *options)
 {
-    named_dt_t *dt     = *named_dt_head_p; /* Stack pointer */
-    named_dt_t *dt_ret = NULL;             /* Datatype to return */
-    H5O_info_t  oinfo;                     /* Object info of input dtype */
+    named_dt_t *dt     = NULL; /* Stack pointer */
+    named_dt_t *dt_ret = NULL; /* Datatype to return */
+    H5O_info2_t oinfo;         /* Object info of input dtype */
+    int         token_cmp;
     hid_t       ret_value = H5I_INVALID_HID;
 
     if (H5Oget_info2(type_in, &oinfo, H5O_INFO_BASIC) < 0)
         H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5Oget_info failed");
 
     if (*named_dt_head_p) {
-        /* Stack already exists, search for the datatype */
-        while (dt && dt->addr_in != oinfo.addr)
-            dt = dt->next;
+        /* Search the stack for the datatype. */
+        for (dt = *named_dt_head_p; dt != NULL; dt = dt->next) {
+            if (H5Otoken_cmp(type_in, &dt->obj_token, &oinfo.token, &token_cmp) < 0)
+                H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to compare object tokens");
+
+            if (token_cmp == 0)
+                break; // found it!
+        }
+
         dt_ret = dt;
     }
     else {
