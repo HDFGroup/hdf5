@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, March 31, 1998
  *
  * Purpose:     Tests the global heap.  The global heap is the set of all
@@ -42,9 +42,9 @@
         nerrors++;                                                                                           \
         if (nerrors <= GHEAP_REPEATED_ERR_LIM) {                                                             \
             H5_FAILED();                                                                                     \
-            puts(MSG);                                                                                       \
+            HDputs(MSG);                                                                                     \
             if (nerrors == GHEAP_REPEATED_ERR_LIM)                                                           \
-                puts("    Suppressing further errors...");                                                   \
+                HDputs("    Suppressing further errors...");                                                 \
         } /* end if */                                                                                       \
     }     /* end GHEAP_REPEATED_ERR */
 
@@ -129,7 +129,7 @@ test_1(hid_t fapl)
             HDputs("    Unable to read object");
             nerrors++;
         }
-        else if (HDmemcmp(in, out, size)) {
+        else if (HDmemcmp(in, out, size) != 0) {
             H5_FAILED();
             HDputs("    Value read doesn't match value written");
             nerrors++;
@@ -229,7 +229,7 @@ test_2(hid_t fapl)
             HDputs("    Unable to read object");
             nerrors++;
         }
-        else if (memcmp(in, out, size)) {
+        else if (HDmemcmp(in, out, size) != 0) {
             H5_FAILED();
             HDputs("    Value read doesn't match value written");
             nerrors++;
@@ -604,7 +604,7 @@ main(void)
     HDputs("All global heap tests passed.");
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -619,7 +619,7 @@ error:
     H5E_END_TRY;
 
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     HDputs("*** TESTS FAILED ***");
     HDexit(EXIT_FAILURE);

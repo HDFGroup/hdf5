@@ -15,8 +15,8 @@
 #error "Do not include this file outside the H5O package!"
 #endif
 
-#ifndef _H5Opkg_H
-#define _H5Opkg_H
+#ifndef H5Opkg_H
+#define H5Opkg_H
 
 /* Get package's private header */
 #include "H5Oprivate.h" /* Object headers		  	*/
@@ -639,4 +639,4 @@ H5_DLL herr_t H5O__assert(const H5O_t *oh);
 #endif /* H5O_DEBUG */
 H5_DLL herr_t H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth);
 
-#endif /* _H5Opkg_H */
+#endif /* H5Opkg_H */

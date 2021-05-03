@@ -16,8 +16,8 @@
  *          is part of the H5VL package.
  */
 
-#ifndef _H5VLmodule_H
-#define _H5VLmodule_H
+#ifndef H5VLmodule_H
+#define H5VLmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -27,4 +27,19 @@
 #define H5_MY_PKG_ERR  H5E_VOL
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5VLmodule_H */
+/**
+ * \defgroup H5VL H5VL
+ * \brief Virtual Object Layer Interface
+ * \todo Describe concisely what the functions in this module are about.
+ *
+ * \defgroup H5VLDEF Definitions
+ * \ingroup H5VL
+ * \defgroup H5VLDEV VOL Developer
+ * \ingroup H5VL
+ * \defgroup H5VLNAT Native VOL
+ * \ingroup H5VL
+ * \defgroup H5VLPT Pass-through VOL
+ * \ingroup H5VL
+ */
+
+#endif /* H5VLmodule_H */

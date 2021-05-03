@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke <matzke@llnl.gov>
+/* Programmer:    Robb Matzke
  *        Friday, October 10, 1997
  *
  * Purpose:    Hyperslab operations are rather complex, so this file
@@ -177,7 +177,7 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
     } /* end else */
     HDsprintf(s, "Testing hyperslab fill %-11s variable hyperslab", dim);
     HDprintf("%-70s", s);
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Allocate array */
     if (NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
@@ -366,7 +366,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
 
     HDsprintf(s, "Testing hyperslab copy %-11s %s", dim, sub);
     HDprintf("%-70s", s);
-    fflush(stdout);
+    HDfflush(stdout);
 
     /*
      * Allocate arrays
@@ -575,7 +575,7 @@ test_multifill(size_t nx)
     hsize_t i, j;
 
     HDprintf("%-70s", "Testing multi-byte fill value");
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Initialize the source and destination */
     if (NULL == (src = (struct a_struct *)HDmalloc(nx * sizeof(*src))))
@@ -687,7 +687,7 @@ test_endian(size_t nx)
     hsize_t  i, j;
 
     HDprintf("%-70s", "Testing endian conversion by stride");
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Initialize arrays */
     if (NULL == (src = (uint8_t *)HDmalloc(nx * 4)))
@@ -773,7 +773,7 @@ test_transpose(size_t nx, size_t ny)
 
     HDsprintf(s, "Testing 2d transpose by stride %4lux%-lud", (unsigned long)nx, (unsigned long)ny);
     HDprintf("%-70s", s);
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Initialize */
     if (NULL == (src = (int *)HDmalloc(nx * ny * sizeof(*src))))
@@ -872,7 +872,7 @@ test_sub_super(size_t nx, size_t ny)
     HDsprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)(2 * nx),
               (unsigned long)(2 * ny), (unsigned long)nx, (unsigned long)ny);
     HDprintf("%-70s", s);
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Initialize */
     if (NULL == (full = (uint8_t *)HDmalloc(4 * nx * ny)))
@@ -922,7 +922,7 @@ test_sub_super(size_t nx, size_t ny)
     HDsprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)nx, (unsigned long)ny,
               (unsigned long)(2 * nx), (unsigned long)(2 * ny));
     HDprintf("%-70s", s);
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Setup stride */
     size[0]       = nx;

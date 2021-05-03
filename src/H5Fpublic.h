@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5F module.
  */
-#ifndef _H5Fpublic_H
-#define _H5Fpublic_H
+#ifndef H5Fpublic_H
+#define H5Fpublic_H
 
 /* Public header files needed by this file */
 #include "H5public.h"
@@ -24,19 +24,19 @@
 
 /* When this header is included from a private header, don't make calls to H5check() */
 #undef H5CHECK
-#ifndef _H5private_H
+#ifndef H5private_H
 #define H5CHECK H5check(),
-#else /* _H5private_H */
+#else /* H5private_H */
 #define H5CHECK
-#endif /* _H5private_H */
+#endif /* H5private_H */
 
 /* When this header is included from a private HDF5 header, don't make calls to H5open() */
 #undef H5OPEN
-#ifndef _H5private_H
+#ifndef H5private_H
 #define H5OPEN H5open(),
-#else /* _H5private_H */
+#else /* H5private_H */
 #define H5OPEN
-#endif /* _H5private_H */
+#endif /* H5private_H */
 
 /*
  * These are the bits that can be passed to the `flags' argument of
@@ -408,4 +408,4 @@ H5_DLL htri_t H5Fis_hdf5(const char *filename);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Fpublic_H */
+#endif /* H5Fpublic_H */

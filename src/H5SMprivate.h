@@ -12,14 +12,14 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	James Laird <jlaird@ncsa.uiuc.edu>
+ * Programmer:	James Laird
  *		Thursday, March 2, 2006
  *
  * Purpose:	This file contains private declarations for the H5SM
  *              shared object header messages module.
  */
-#ifndef _H5SMprivate_H
-#define _H5SMprivate_H
+#ifndef H5SMprivate_H
+#define H5SMprivate_H
 
 #include "H5Oprivate.h" /* Object headers			*/
 #include "H5Pprivate.h" /* Property lists			*/
@@ -66,4 +66,4 @@ H5_DLL herr_t H5SM_table_debug(H5F_t *f, haddr_t table_addr, FILE *stream, int i
 H5_DLL herr_t H5SM_list_debug(H5F_t *f, haddr_t list_addr, FILE *stream, int indent, int fwidth,
                               haddr_t table_addr);
 
-#endif /*_H5SMprivate_H*/
+#endif /*H5SMprivate_H*/

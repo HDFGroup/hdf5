@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Lpublic_H
-#define _H5Lpublic_H
+#ifndef H5Lpublic_H
+#define H5Lpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"  /* Generic Functions			*/
@@ -256,4 +256,4 @@ H5_DLL herr_t H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Lpublic_H */
+#endif /* H5Lpublic_H */

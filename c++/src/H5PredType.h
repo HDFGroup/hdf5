@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5PredType_H
-#define __H5PredType_H
+#ifndef H5PredType_H
+#define H5PredType_H
 
 namespace H5 {
 
@@ -435,11 +435,11 @@ class H5_DLLCPP PredType : public AtomType {
 #if H5_SIZEOF_UINT_FAST64_T != 0
     static PredType *NATIVE_UINT_FAST64_;
 #endif /* H5_SIZEOF_UINT_FAST64_T */
-       // End of Declaration of pointers
+    // End of Declaration of pointers
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end of PredType
 } // namespace H5
 
-#endif // __H5PredType_H
+#endif // H5PredType_H

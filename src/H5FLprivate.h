@@ -15,16 +15,14 @@
  *
  * Created:		H5FLprivate.h
  *			Mar 23 2000
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Private non-prototype header.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5FLprivate_H
-#define _H5FLprivate_H
+#ifndef H5FLprivate_H
+#define H5FLprivate_H
 
 /* Public headers needed by this file */
 #ifdef LATER

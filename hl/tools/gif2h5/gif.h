@@ -157,8 +157,8 @@ int ReadGifApplication(GIFAPPLICATION *, GIFBYTE **);
 int ReadGifComment(GIFCOMMENT *, GIFBYTE **);
 
 /* HDFGIFWR.C */
-int hdfWriteGIF(FILE *fp, GIFBYTE *pic, int ptype, int w, int h, GIFBYTE *rmap, GIFBYTE *gmap, GIFBYTE *bmap,
-                GIFBYTE *pc2ncmap, int numcols, int colorstyle, int BitsPerPixel);
+int hdfWriteGIF(FILE *fp, GIFBYTE *pic, int ptype, int w, int h, const GIFBYTE *rmap, const GIFBYTE *gmap,
+                const GIFBYTE *bmap, const GIFBYTE *pc2ncmap, int numcols, int colorstyle, int BitsPerPixel);
 
 /* WRITEHDF.C */
 int WriteHDF(GIFTOMEM, GIFCHAR *);
@@ -176,7 +176,7 @@ int ReadHDF(GIFBYTE **data, GIFBYTE palette[256][3], hsize_t *image_size, GIFCHA
             GIFCHAR *dset_name, GIFCHAR *pal_name);
 
 GIFBYTE *Decompress(GIFIMAGEDESC *, GIFHEAD *);
-GIFBYTE  GetByte(GIFBYTE *);
+GIFBYTE  GetByte(const GIFBYTE *);
 GIFWORD  GetWord(GIFBYTE *);
 
 void cleanup(GIFBYTE *);

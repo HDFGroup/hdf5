@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5VarLenType_H
-#define __H5VarLenType_H
+#ifndef H5VarLenType_H
+#define H5VarLenType_H
 
 namespace H5 {
 
@@ -61,4 +61,4 @@ class H5_DLLCPP VarLenType : public DataType {
 }; // end of VarLenType
 } // namespace H5
 
-#endif // __H5VarLenType_H
+#endif // H5VarLenType_H

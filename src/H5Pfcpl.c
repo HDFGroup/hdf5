@@ -959,8 +959,7 @@ H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type
     herr_t          ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iIu*Iu*Iu", plist_id, index_num, mesg_type_flags,
-             min_mesg_size);
+    H5TRACE4("e", "iIu*Iu*Iu", plist_id, index_num, mesg_type_flags, min_mesg_size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))

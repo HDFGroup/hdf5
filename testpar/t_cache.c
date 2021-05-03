@@ -1253,7 +1253,7 @@ reset_server_counters(void)
         success = FALSE;
         nerrors++;
         if (verbose) {
-            HDfprintf(stdout, "%d:%s: actual/total reads mismatch (%ld/%ld).\n", world_mpi_rank, FUNC,
+            HDfprintf(stdout, "%d:%s: actual/total reads mismatch (%ld/%d).\n", world_mpi_rank, FUNC,
                       actual_total_reads, total_reads);
         }
     }
@@ -1263,7 +1263,7 @@ reset_server_counters(void)
         success = FALSE;
         nerrors++;
         if (verbose) {
-            HDfprintf(stdout, "%d:%s: actual/total writes mismatch (%ld/%ld).\n", world_mpi_rank, FUNC,
+            HDfprintf(stdout, "%d:%s: actual/total writes mismatch (%ld/%d).\n", world_mpi_rank, FUNC,
                       actual_total_writes, total_writes);
         }
     }
@@ -1661,7 +1661,7 @@ serve_write_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: data[i].len = %Zu != mssg->len = %d.\n", world_mpi_rank, FUNC,
+                HDfprintf(stdout, "%d:%s: data[i].len = %zu != mssg->len = %d.\n", world_mpi_rank, FUNC,
                           data[target_index].len, mssg_ptr->len);
             }
         }
@@ -1790,11 +1790,11 @@ serve_total_writes_request(struct mssg_t *mssg_ptr)
 
         if (success) {
 
-            HDfprintf(stdout, "%d request total writes %ld.\n", (int)(mssg_ptr->src), total_writes);
+            HDfprintf(stdout, "%d request total writes %d.\n", (int)(mssg_ptr->src), total_writes);
         }
         else {
 
-            HDfprintf(stdout, "%d request total writes %ld -- FAILED.\n", (int)(mssg_ptr->src), total_writes);
+            HDfprintf(stdout, "%d request total writes %d -- FAILED.\n", (int)(mssg_ptr->src), total_writes);
         }
     }
 
@@ -1860,11 +1860,11 @@ serve_total_reads_request(struct mssg_t *mssg_ptr)
 
         if (success) {
 
-            HDfprintf(stdout, "%d request total reads %ld.\n", (int)(mssg_ptr->src), total_reads);
+            HDfprintf(stdout, "%d request total reads %d.\n", (int)(mssg_ptr->src), total_reads);
         }
         else {
 
-            HDfprintf(stdout, "%d request total reads %ld -- FAILED.\n", (int)(mssg_ptr->src), total_reads);
+            HDfprintf(stdout, "%d request total reads %d -- FAILED.\n", (int)(mssg_ptr->src), total_reads);
         }
     }
 
@@ -4181,7 +4181,7 @@ take_down_cache(hid_t fid, H5C_t *cache_ptr)
     }
 
     /* Pop API context */
-    H5CX_pop();
+    H5CX_pop(FALSE);
 
     if (success) {
 
@@ -4393,7 +4393,7 @@ verify_entry_writes(haddr_t addr, int expected_entry_writes)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: rep/exp entry 0x%llx writes mismatch (%ld/%ld).\n", world_mpi_rank,
+                HDfprintf(stdout, "%d:%s: rep/exp entry 0x%llx writes mismatch (%d/%d).\n", world_mpi_rank,
                           FUNC, (long long)addr, reported_entry_writes, expected_entry_writes);
             }
         }
@@ -4485,8 +4485,8 @@ verify_total_reads(int expected_total_reads)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: reported/expected total reads mismatch (%ld/%ld).\n",
-                          world_mpi_rank, FUNC, reported_total_reads, expected_total_reads);
+                HDfprintf(stdout, "%d:%s: reported/expected total reads mismatch (%ld/%d).\n", world_mpi_rank,
+                          FUNC, reported_total_reads, expected_total_reads);
             }
         }
     }
@@ -6513,15 +6513,15 @@ trace_file_check(int metadata_write_strategy)
                         HDfprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank,
                                   FUNC, i);
                         if (expected_line_len == 0) {
-                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC,
+                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, FUNC,
                                       "<EMPTY>", expected_line_len);
-                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC, buffer,
+                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, FUNC, buffer,
                                       actual_line_len);
                         }
                         if (actual_line_len == 0) {
-                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC,
+                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, FUNC,
                                       (*expected_output)[i], expected_line_len);
-                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC,
+                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, FUNC,
                                       "<EMPTY>", actual_line_len);
                         }
                     }
@@ -6537,9 +6537,9 @@ trace_file_check(int metadata_write_strategy)
                     if (verbose) {
                         HDfprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank,
                                   FUNC, i);
-                        HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC,
+                        HDfprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, FUNC,
                                   (*expected_output)[i], expected_line_len);
-                        HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC, buffer,
+                        HDfprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, FUNC, buffer,
                                   actual_line_len);
                     }
                 }
@@ -6868,28 +6868,20 @@ main(int argc, char **argv)
      * hang in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
-    if (H5dont_atexit() < 0) {
+    if (H5dont_atexit() < 0)
         HDprintf("%d:Failed to turn off atexit processing. Continue.\n", mpi_rank);
-    };
+
     H5open();
 
     express_test = do_express_test();
-#if 0  /* JRM */
-    express_test = 0;
-#endif /* JRM */
-    if (express_test) {
-
+    if (express_test)
         virt_num_data_entries = EXPRESS_VIRT_NUM_DATA_ENTRIES;
-    }
-    else {
-
+    else
         virt_num_data_entries = STD_VIRT_NUM_DATA_ENTRIES;
-    }
 
 #ifdef H5_HAVE_MPE
-    if (MAINPROCESS) {
+    if (MAINPROCESS)
         HDprintf("    Tests compiled for MPE.\n");
-    }
     virt_num_data_entries = MPE_VIRT_NUM_DATA_ENTIES;
 #endif /* H5_HAVE_MPE */
 
@@ -6902,11 +6894,8 @@ main(int argc, char **argv)
     }
 
     if (mpi_size < 3) {
-
-        if (MAINPROCESS) {
-
+        if (MAINPROCESS)
             HDprintf("    Need at least 3 processes.  Exiting.\n");
-        }
         goto finish;
     }
 
@@ -6924,27 +6913,22 @@ main(int argc, char **argv)
     /* setup file access property list with the world communicator */
     if (FAIL == (fapl = H5Pcreate(H5P_FILE_ACCESS))) {
         nerrors++;
-        if (verbose) {
+        if (verbose)
             HDfprintf(stdout, "%d:%s: H5Pcreate() failed 1.\n", world_mpi_rank, FUNC);
-        }
     }
 
     if (H5Pset_fapl_mpio(fapl, world_mpi_comm, MPI_INFO_NULL) < 0) {
-
         nerrors++;
-        if (verbose) {
+        if (verbose)
             HDfprintf(stdout, "%d:%s: H5Pset_fapl_mpio() failed 1.\n", world_mpi_rank, FUNC);
-        }
     }
 
     /* fix the file names */
     for (u = 0; u < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++u) {
         if (h5_fixname(FILENAME[u], fapl, filenames[u], sizeof(filenames[u])) == NULL) {
-
             nerrors++;
-            if (verbose) {
+            if (verbose)
                 HDfprintf(stdout, "%d:%s: h5_fixname() failed.\n", world_mpi_rank, FUNC);
-            }
             break;
         }
     }
@@ -6952,9 +6936,8 @@ main(int argc, char **argv)
     /* close the fapl before we set it up again */
     if (H5Pclose(fapl) < 0) {
         nerrors++;
-        if (verbose) {
+        if (verbose)
             HDfprintf(stdout, "%d:%s: H5Pclose() failed.\n", world_mpi_rank, FUNC);
-        }
     }
 
     /* now create the fapl again, excluding the server process. */
@@ -6963,32 +6946,25 @@ main(int argc, char **argv)
         /* setup file access property list */
         if (FAIL == (fapl = H5Pcreate(H5P_FILE_ACCESS))) {
             nerrors++;
-            if (verbose) {
+            if (verbose)
                 HDfprintf(stdout, "%d:%s: H5Pcreate() failed 2.\n", world_mpi_rank, FUNC);
-            }
         }
 
         if (H5Pset_fapl_mpio(fapl, file_mpi_comm, MPI_INFO_NULL) < 0) {
-
             nerrors++;
-            if (verbose) {
+            if (verbose)
                 HDfprintf(stdout, "%d:%s: H5Pset_fapl_mpio() failed 2.\n", world_mpi_rank, FUNC);
-            }
         }
     }
 
     setup_rand();
 
     max_nerrors = get_max_nerrors();
-
     if (max_nerrors != 0) {
 
         /* errors in setup -- no point in continuing */
-
-        if (world_mpi_rank == 0) {
-
+        if (world_mpi_rank == 0)
             HDfprintf(stdout, "Errors in test initialization.  Exiting.\n");
-        }
         goto finish;
     }
 

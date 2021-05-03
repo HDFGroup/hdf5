@@ -11,9 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
 #include "H5DSprivate.h"
 #include "H5LTprivate.h"
 #include "H5IMprivate.h"
@@ -34,17 +31,12 @@ static hid_t  H5DS_get_REFLIST_type(void);
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 04, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5DSset_scale(hid_t dsid, const char *dimname)
 {
@@ -105,17 +97,12 @@ H5DSset_scale(hid_t dsid, const char *dimname)
  *           If DSID is not a Dimension Scale
  *           If DID is a Dimension Scale (A Dimension Scale cannot have scales)
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: December 20, 2004
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
 {
@@ -558,19 +545,12 @@ out:
  * Note that a scale may be associated with more than dimension of the same dataset.
  * If so, the detach operation only deletes one of the associations, for DID.
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: December 20, 2004
  *
- * Comments:
- *
- * Modifications: Function didn't delete DIMENSION_LIST attribute, when
- *                all dimension scales were detached from a dataset; added.
- *                                                           2010/05/13 EIP
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
 {
@@ -944,17 +924,12 @@ out:
  *           If DSID is not a Dimension Scale
  *           If DID is a Dimension Scale (A Dimension Scale cannot have scales)
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: February 18, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 htri_t
 H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
 {
@@ -1263,17 +1238,12 @@ out:
  *       C. Negative causes the iterator to immediately return that value,
  *           indicating failure.
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 31, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visitor, void *visitor_data)
 {
@@ -1433,17 +1403,12 @@ out:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 11, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5DSset_label(hid_t did, unsigned int idx, const char *label)
 {
@@ -1459,6 +1424,9 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
         char **      buf;       /* discarding the 'const' qualifier in the free */
         char const **const_buf; /* buf calls */
     } u;
+
+    HDmemset(&u, 0, sizeof(u));
+
     /*-------------------------------------------------------------------------
      * parameter checking
      *-------------------------------------------------------------------------
@@ -1638,15 +1606,9 @@ out:
  *
  * Return: 0 if no label found, size of label if found, Failure: FAIL
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 11, 2005
- *
- * Comments:
- *
- * Modifications:
- *     JIRA HDFFV-7673: Added a check to see if the label name exists,
- *     if not then returns zero. July 30, 2011. MSB
  *
  *-------------------------------------------------------------------------
  */
@@ -1793,19 +1755,12 @@ out:
  *
  * Return: size of name if found, zero if not found,  Failure: FAIL
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 04, 2005
  *
- * Comments:
- *
- * Modifications:
- *  The size of the name returned should not include the NULL termination
- *  in its value so as to be consistent with other HDF5 APIs.
- *
  *-------------------------------------------------------------------------
  */
-
 ssize_t
 H5DSget_scale_name(hid_t did, char *name, size_t size)
 {
@@ -1917,46 +1872,44 @@ out:
  *
  * Return: 1, is, 0, not, FAIL, error
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 04, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 htri_t
 H5DSis_scale(hid_t did)
 {
-    hid_t      tid = -1;     /* attribute type ID */
-    hid_t      aid = -1;     /* attribute ID */
-    herr_t     has_class;    /* has the "CLASS" attribute */
-    htri_t     is_ds;        /* boolean return value */
-    H5I_type_t it;           /* ID type */
-    char *     buf;          /* Name of attribute */
-    hsize_t    storage_size; /* Size of storage for attribute */
+    hid_t       tid = -1;    /* attribute type ID */
+    hid_t       aid = -1;    /* attribute ID */
+    herr_t      attr_class;  /* has the "CLASS" attribute */
+    htri_t      is_ds = -1;  /* set to "not a dimension scale" */
+    H5I_type_t  it;          /* type of identifier */
+    char *      buf = NULL;  /* buffer to read name of attribute */
+    size_t      string_size; /* size of storage for the attribute */
+    H5T_class_t type_class;
+    H5T_str_t   strpad;
 
-    /*-------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
      * parameter checking
      *-------------------------------------------------------------------------
      */
     /* get ID type */
     if ((it = H5Iget_type(did)) < 0)
-        return FAIL;
+        goto out;
 
     if (H5I_DATASET != it)
-        return FAIL;
+        goto out;
 
     /* try to find the attribute "CLASS" on the dataset */
-    if ((has_class = H5LT_find_attribute(did, "CLASS")) < 0)
-        return FAIL;
+    if ((attr_class = H5LT_find_attribute(did, "CLASS")) < 0)
+        goto out;
 
-    if (has_class == 0)
+    if (attr_class == 0) {
         is_ds = 0;
-
+        goto out;
+    }
     else {
         if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
             goto out;
@@ -1964,19 +1917,33 @@ H5DSis_scale(hid_t did)
         if ((tid = H5Aget_type(aid)) < 0)
             goto out;
 
-        /* check to make sure attribute is a string */
-        if (H5T_STRING != H5Tget_class(tid))
+        /* check to make sure attribute is a string;
+           if not, then it is not dimension scale  */
+        if ((type_class = H5Tget_class(tid)) < 0)
             goto out;
-
-        /* check to make sure string is null-terminated */
-        if (H5T_STR_NULLTERM != H5Tget_strpad(tid))
+        if (H5T_STRING != type_class) {
+            is_ds = 0;
             goto out;
-
-        /* allocate buffer large enough to hold string */
-        if ((storage_size = H5Aget_storage_size(aid)) == 0)
+        }
+        /* check to make sure string is null-terminated;
+           if not, then it is not dimension scale */
+        if ((strpad = H5Tget_strpad(tid)) < 0)
             goto out;
+        if (H5T_STR_NULLTERM != strpad) {
+            is_ds = 0;
+            goto out;
+        }
 
-        buf = (char *)HDmalloc((size_t)storage_size * sizeof(char) + 1);
+        /* According to Spec string is ASCII and its size should be 16 to hold
+           "DIMENSION_SCALE" string */
+        if ((string_size = H5Tget_size(tid)) == 0)
+            goto out;
+        if (string_size != 16) {
+            is_ds = 0;
+            goto out;
+        }
+
+        buf = (char *)HDmalloc((size_t)string_size * sizeof(char));
         if (buf == NULL)
             goto out;
 
@@ -1987,8 +1954,6 @@ H5DSis_scale(hid_t did)
         /* compare strings */
         if (HDstrncmp(buf, DIMENSION_SCALE_CLASS, MIN(HDstrlen(DIMENSION_SCALE_CLASS), HDstrlen(buf))) == 0)
             is_ds = 1;
-        else
-            is_ds = 0;
 
         HDfree(buf);
 
@@ -1998,18 +1963,17 @@ H5DSis_scale(hid_t did)
         if (H5Aclose(aid) < 0)
             goto out;
     }
-
-    return is_ds;
-
-    /* error zone */
 out:
-    H5E_BEGIN_TRY
-    {
-        H5Aclose(aid);
-        H5Tclose(tid);
+    if (is_ds < 0) {
+        HDfree(buf);
+        H5E_BEGIN_TRY
+        {
+            H5Aclose(aid);
+            H5Tclose(tid);
+        }
+        H5E_END_TRY;
     }
-    H5E_END_TRY;
-    return FAIL;
+    return is_ds;
 }
 
 /*-------------------------------------------------------------------------
@@ -2021,17 +1985,12 @@ out:
  *   Success: number of scales
  *   Failure: FAIL
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 13, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 int
 H5DSget_num_scales(hid_t did, unsigned int idx)
 {
@@ -2144,17 +2103,12 @@ out:
  *
  * Return: true, false, fail
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 19, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
 H5DS_is_reserved(hid_t did)
 {
@@ -2235,17 +2189,12 @@ out:
  *
  * Return: Type identifier on success and negative on failure
  *
- * Programmer: epourmal@hdfgroup.org
+ * Programmer: Elena Pourmal
  *
  * Date: May 22, 2010
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 static hid_t
 H5DS_get_REFLIST_type(void)
 {

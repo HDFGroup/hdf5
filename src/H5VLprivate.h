@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5VLprivate_H
-#define _H5VLprivate_H
+#ifndef H5VLprivate_H
+#define H5VLprivate_H
 
 /* Include package's public header */
 #include "H5VLpublic.h" /* Generic Functions                    */
@@ -267,4 +267,4 @@ H5_DLL herr_t H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_t
 /* Generic functions */
 H5_DLL herr_t H5VL_optional(const H5VL_object_t *vol_obj, int op_type, hid_t dxpl_id, void **req, ...);
 
-#endif /* _H5VLprivate_H */
+#endif /* H5VLprivate_H */

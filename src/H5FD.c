@@ -226,7 +226,7 @@ H5FDregister(const H5FD_class_t *cls)
     hid_t      ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "*x", cls);
+    H5TRACE1("i", "*FC", cls);
 
     /* Check arguments */
     if (!cls)
@@ -652,7 +652,7 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_t *ret_value = NULL;
 
     FUNC_ENTER_API(NULL)
-    H5TRACE4("*x", "*sIuia", name, flags, fapl_id, maxaddr);
+    H5TRACE4("*#", "*sIuia", name, flags, fapl_id, maxaddr);
 
     /* Check arguments */
     if (H5P_DEFAULT == fapl_id)
@@ -888,7 +888,7 @@ H5FDclose(H5FD_t *file)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*x", file);
+    H5TRACE1("e", "*#", file);
 
     /* Check arguments */
     if (!file)
@@ -979,7 +979,7 @@ H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
     int ret_value = -1;
 
     FUNC_ENTER_API(-1) /* return value is arbitrary */
-    H5TRACE2("Is", "*x*x", f1, f2);
+    H5TRACE2("Is", "*#*#", f1, f2);
 
     /* Call private function */
     ret_value = H5FD_cmp(f1, f2);
@@ -1049,7 +1049,7 @@ H5FDquery(const H5FD_t *file, unsigned long *flags /*out*/)
     int ret_value = 0;
 
     FUNC_ENTER_API((-1))
-    H5TRACE2("Is", "*xx", file, flags);
+    H5TRACE2("Is", "*#x", file, flags);
 
     /* Check arguments */
     if (!file)
@@ -1142,7 +1142,7 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     haddr_t ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_API(HADDR_UNDEF)
-    H5TRACE4("a", "*xMtih", file, type, dxpl_id, size);
+    H5TRACE4("a", "*#Mtih", file, type, dxpl_id, size);
 
     /* Check arguments */
     if (!file)
@@ -1192,7 +1192,7 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xMtiah", file, type, dxpl_id, addr, size);
+    H5TRACE5("e", "*#Mtiah", file, type, dxpl_id, addr, size);
 
     /* Check arguments */
     if (!file)
@@ -1235,7 +1235,7 @@ H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
     haddr_t ret_value;
 
     FUNC_ENTER_API(HADDR_UNDEF)
-    H5TRACE2("a", "*xMt", file, type);
+    H5TRACE2("a", "*#Mt", file, type);
 
     /* Check arguments */
     if (!file)
@@ -1283,7 +1283,7 @@ H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*xMta", file, type, addr);
+    H5TRACE3("e", "*#Mta", file, type, addr);
 
     /* Check arguments */
     if (!file)
@@ -1331,7 +1331,7 @@ H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
     haddr_t ret_value;
 
     FUNC_ENTER_API(HADDR_UNDEF)
-    H5TRACE2("a", "*xMt", file, type);
+    H5TRACE2("a", "*#Mt", file, type);
 
     /* Check arguments */
     if (!file)
@@ -1482,7 +1482,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xMtiazx", file, type, dxpl_id, addr, size, buf);
+    H5TRACE6("e", "*#Mtiazx", file, type, dxpl_id, addr, size, buf);
 
     /* Check arguments */
     if (!file)
@@ -1528,7 +1528,7 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xMtiaz*x", file, type, dxpl_id, addr, size, buf);
+    H5TRACE6("e", "*#Mtiaz*x", file, type, dxpl_id, addr, size, buf);
 
     /* Check arguments */
     if (!file)
@@ -1572,7 +1572,7 @@ H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*xib", file, dxpl_id, closing);
+    H5TRACE3("e", "*#ib", file, dxpl_id, closing);
 
     /* Check arguments */
     if (!file)
@@ -1639,7 +1639,7 @@ H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*xib", file, dxpl_id, closing);
+    H5TRACE3("e", "*#ib", file, dxpl_id, closing);
 
     /* Check arguments */
     if (!file)
@@ -1705,7 +1705,7 @@ H5FDlock(H5FD_t *file, hbool_t rw)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "*xb", file, rw);
+    H5TRACE2("e", "*#b", file, rw);
 
     /* Check arguments */
     if (!file)
@@ -1764,7 +1764,7 @@ H5FDunlock(H5FD_t *file)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*x", file);
+    H5TRACE1("e", "*#", file);
 
     /* Check arguments */
     if (!file)
@@ -1850,7 +1850,7 @@ H5FDget_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*xi**x", file, fapl_id, file_handle);
+    H5TRACE3("e", "*#i**x", file, fapl_id, file_handle);
 
     /* Check arguments */
     if (!file)

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Robb Matzke <matzke@llnl.gov>
+ * Programmer:    Robb Matzke
  *        Tuesday, December  9, 1997
  *
  * Purpose:    Tests the dataset interface (H5D)
@@ -373,13 +373,13 @@ test_create(hid_t file)
     dims[0] = 256;
     dims[1] = 512;
     space   = H5Screate_simple(2, dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /* Create a small data space for compact dataset */
     small_dims[0] = 16;
     small_dims[1] = 8;
     small_space   = H5Screate_simple(2, small_dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /*
      * Create a dataset using the default dataset creation properties.    We're
@@ -448,13 +448,13 @@ test_create(hid_t file)
      * layout.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
 
     /* Attempt to create a dataset with invalid chunk sizes */
     csize[0] = dims[0] * 2;
     csize[1] = dims[1] * 2;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
     H5E_BEGIN_TRY
     {
         dataset = H5Dcreate2(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, create_parms,
@@ -470,7 +470,7 @@ test_create(hid_t file)
     csize[0] = 5;
     csize[1] = 100;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     dataset =
         H5Dcreate2(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, create_parms, H5P_DEFAULT);
@@ -492,11 +492,11 @@ test_create(hid_t file)
      * Create a compact dataset, then close it.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
     status = H5Pset_layout(create_parms, H5D_COMPACT);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Pset_alloc_time(create_parms, H5D_ALLOC_TIME_EARLY);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     dataset = H5Dcreate2(file, DSET_COMPACT_NAME, H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT, create_parms,
                          H5P_DEFAULT);
@@ -540,7 +540,8 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     TESTING("simple I/O");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
-    if (HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
+    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+        HDstrcmp(env_h5_drvr, "family") != 0) {
         h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
         /* Set up data array */
@@ -568,7 +569,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         /* Create a small conversion buffer to test strip mining */
         tconv_buf = HDmalloc((size_t)1000);
         xfer      = H5Pcreate(H5P_DATASET_XFER);
-        assert(xfer >= 0);
+        HDassert(xfer >= 0);
         if (H5Pset_buffer(xfer, (size_t)1000, tconv_buf, NULL) < 0)
             goto error;
 
@@ -700,7 +701,8 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     TESTING("dataset offset with user block");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
-    if (HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
+    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+        HDstrcmp(env_h5_drvr, "family") != 0) {
         h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
         /* Set up data array */
@@ -3053,7 +3055,7 @@ test_missing_filter(hid_t file)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -3062,7 +3064,7 @@ test_missing_filter(hid_t file)
 
 error:
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     return FAIL;
 } /* end test_missing_filter() */
@@ -3224,7 +3226,7 @@ test_nbit_int(hid_t file)
     /* Initialize data, assuming size of long long >= size of int */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power           = HDpow(2.0f, (double)(precision - 1));
+            power           = HDpow(2.0, (double)(precision - 1));
             orig_data[i][j] = (int)(((long long)HDrandom() % (long long)power) << offset);
 
             /* even-numbered values are negtive */
@@ -3601,7 +3603,7 @@ test_nbit_array(hid_t file)
         for (j = 0; j < (size_t)size[1]; j++)
             for (m = 0; m < (size_t)adims[0]; m++)
                 for (n = 0; n < (size_t)adims[1]; n++) {
-                    power = HDpow(2.0F, (double)precision);
+                    power = HDpow(2.0, (double)precision);
                     orig_data[i][j][m][n] =
                         (unsigned int)(((long long)HDrandom() % (long long)power) << offset);
                 } /* end for */
@@ -3797,11 +3799,11 @@ test_nbit_compound(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power             = HDpow(2.0F, (double)(precision[0] - 1));
+            power             = HDpow(2.0, (double)(precision[0] - 1));
             orig_data[i][j].i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
-            power             = HDpow(2.0F, (double)(precision[1] - 1));
+            power             = HDpow(2.0, (double)(precision[1] - 1));
             orig_data[i][j].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-            power             = HDpow(2.0F, (double)(precision[2] - 1));
+            power             = HDpow(2.0, (double)(precision[2] - 1));
             orig_data[i][j].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
             orig_data[i][j].f = float_val[i][j];
 
@@ -4079,32 +4081,32 @@ test_nbit_compound_2(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power               = HDpow(2.0F, (double)(precision[0] - 1));
+            power               = HDpow(2.0, (double)(precision[0] - 1));
             orig_data[i][j].a.i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
-            power               = HDpow(2.0F, (double)(precision[1] - 1));
+            power               = HDpow(2.0, (double)(precision[1] - 1));
             orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-            power               = HDpow(2.0F, (double)(precision[2] - 1));
-            orig_data[i][j].a.s = (short)(-((long long)HDrandom() % (long long)power) << offset[2]);
+            power               = HDpow(2.0, (double)(precision[2] - 1));
+            orig_data[i][j].a.s = (short)(-(((long long)HDrandom() % (long long)power) << offset[2]));
             orig_data[i][j].a.f = float_val[i][j];
 
-            power             = HDpow(2.0F, (double)precision[3]);
+            power             = HDpow(2.0, (double)precision[3]);
             orig_data[i][j].v = (unsigned int)(((long long)HDrandom() % (long long)power) << offset[3]);
 
             for (m = 0; m < (size_t)array_dims[0]; m++)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
-                    power                   = HDpow(2.0F, (double)(precision[4] - 1));
+                    power                   = HDpow(2.0, (double)(precision[4] - 1));
                     orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() % (long long)power) << offset[4]);
                 } /* end for */
 
             for (m = 0; m < (size_t)array_dims[0]; m++)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
-                    power = HDpow(2.0F, (double)(precision[0] - 1));
+                    power = HDpow(2.0, (double)(precision[0] - 1));
                     orig_data[i][j].d[m][n].i =
-                        (int)(-((long long)HDrandom() % (long long)power) << offset[0]);
-                    power = HDpow(2.0F, (double)(precision[1] - 1));
+                        (int)(-(((long long)HDrandom() % (long long)power) << offset[0]));
+                    power = HDpow(2.0, (double)(precision[1] - 1));
                     orig_data[i][j].d[m][n].c =
                         (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-                    power = HDpow(2.0F, (double)(precision[2] - 1));
+                    power = HDpow(2.0, (double)(precision[2] - 1));
                     orig_data[i][j].d[m][n].s =
                         (short)(((long long)HDrandom() % (long long)power) << offset[2]);
                     orig_data[i][j].d[m][n].f = float_val[i][j];
@@ -4335,7 +4337,7 @@ test_nbit_compound_3(hid_t file)
 
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++) {
-        power = HDpow(2.0F, 17.0F - 1.0F);
+        power = HDpow(2.0, 17.0 - 1.0);
         HDmemset(&orig_data[i], 0, sizeof(orig_data[i]));
         orig_data[i].i = (int)(HDrandom() % (long)power);
         HDstrcpy(orig_data[i].str, "fixed-length C string");
@@ -4379,9 +4381,9 @@ test_nbit_compound_3(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
-        if (new_data[i].i != orig_data[i].i || strcmp(new_data[i].str, orig_data[i].str) != 0 ||
-            strcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 || new_data[i].v.len != orig_data[i].v.len ||
-            new_data[i].r != orig_data[i].r) {
+        if (new_data[i].i != orig_data[i].i || HDstrcmp(new_data[i].str, orig_data[i].str) != 0 ||
+            HDstrcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 ||
+            new_data[i].v.len != orig_data[i].v.len || new_data[i].r != orig_data[i].r) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu\n", (unsigned long)i);
@@ -4524,7 +4526,7 @@ test_nbit_int_size(hid_t file)
      */
     for (i = 0; i < DSET_DIM1; i++)
         for (j = 0; j < DSET_DIM2; j++) {
-            power      = HDpow(2.0F, (double)(precision - 1));
+            power      = HDpow(2.0, (double)(precision - 1));
             orig[i][j] = HDrandom() % (int)power << offset;
         }
 
@@ -5188,7 +5190,7 @@ test_scaleoffset_float(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0F, -3.0F)) {
+            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0, -3.0)) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
                 HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -5334,7 +5336,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0F, -3.0F)) {
+        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0, -3.0)) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -5455,7 +5457,7 @@ test_scaleoffset_double(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0F, -7.0F)) {
+            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0, -7.0)) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
                 HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -5601,7 +5603,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0F, -7.0F)) {
+        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0, -7.0)) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -6916,6 +6918,7 @@ error:
 static herr_t
 test_filter_delete(hid_t file)
 {
+#ifdef H5_HAVE_FILTER_DEFLATE
     H5Z_filter_t filtn;                    /* filter identification number */
     hid_t        dsid          = -1;       /* dataset ID */
     hid_t        sid           = -1;       /* dataspace ID */
@@ -6927,6 +6930,7 @@ test_filter_delete(hid_t file)
     unsigned     flags;                    /* flags for filter */
     herr_t       ret;                      /* generic return value */
     int          i;
+#endif
 
     TESTING("filter deletion");
 
@@ -7031,9 +7035,7 @@ test_filter_delete(hid_t file)
         goto error;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
+
     return SUCCEED;
 
 error:
@@ -7046,6 +7048,10 @@ error:
     }
     H5E_END_TRY;
     return FAIL;
+#else
+    SKIPPED();
+    return SUCCEED;
+#endif
 } /* end test_filter_delete() */
 
 /*-------------------------------------------------------------------------
@@ -7689,9 +7695,9 @@ error:
 static H5_ATTR_CONST long
 gcd(long l0, long r0)
 {
-    long magnitude, remainder;
-    bool negative = ((l0 < 0) != (r0 < 0));
-    long l = HDlabs(l0), r = HDlabs(r0);
+    long    magnitude, remainder;
+    hbool_t negative = ((l0 < 0) != (r0 < 0));
+    long    l = HDlabs(l0), r = HDlabs(r0);
 
     do {
         if (l < r) {
@@ -7781,7 +7787,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     TESTING(testname);
 
-    assert(NPOINTS < 100);
+    HDassert(NPOINTS < 100);
 
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
 
@@ -8303,13 +8309,13 @@ test_deprec(hid_t file)
     dims[0] = 256;
     dims[1] = 512;
     space   = H5Screate_simple(2, dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /* Create a small data space for compact dataset */
     small_dims[0] = 16;
     small_dims[1] = 8;
     small_space   = H5Screate_simple(2, small_dims, NULL);
-    assert(space >= 0);
+    HDassert(space >= 0);
 
     /*
      * Create a dataset using the default dataset creation properties.    We're
@@ -8368,7 +8374,7 @@ test_deprec(hid_t file)
      * layout.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
 
     /* Add the deflate filter, if available */
 #if defined H5_HAVE_FILTER_DEFLATE
@@ -8404,7 +8410,7 @@ test_deprec(hid_t file)
     csize[0] = dims[0] * 2;
     csize[1] = dims[1] * 2;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
     H5E_BEGIN_TRY
     {
         dataset = H5Dcreate1(file, DSET_DEPREC_NAME_CHUNKED, H5T_NATIVE_DOUBLE, space, create_parms);
@@ -8419,7 +8425,7 @@ test_deprec(hid_t file)
     csize[0] = 5;
     csize[1] = 100;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     if ((dataset = H5Dcreate1(file, DSET_DEPREC_NAME_CHUNKED, H5T_NATIVE_DOUBLE, space, create_parms)) < 0)
         goto error;
@@ -8444,11 +8450,11 @@ test_deprec(hid_t file)
      * Create a compact dataset, then close it.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    assert(create_parms >= 0);
+    HDassert(create_parms >= 0);
     status = H5Pset_layout(create_parms, H5D_COMPACT);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Pset_alloc_time(create_parms, H5D_ALLOC_TIME_EARLY);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     if ((dataset = H5Dcreate1(file, DSET_DEPREC_NAME_COMPACT, H5T_NATIVE_DOUBLE, small_space, create_parms)) <
         0)
@@ -12393,6 +12399,9 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
 
     TESTING("Version 2 B-tree chunk index header flush dependencies handled correctly");
 
+    /* Initialize struct */
+    HDmemset(&info, 0, sizeof(info));
+
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
@@ -15074,7 +15083,7 @@ main(void)
         envval = "nomatch";
 
     /* Current VFD that does not support contigous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi"));
+    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));

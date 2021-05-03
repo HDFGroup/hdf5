@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5EnumType_H
-#define __H5EnumType_H
+#ifndef H5EnumType_H
+#define H5EnumType_H
 
 namespace H5 {
 
@@ -87,4 +87,4 @@ class H5_DLLCPP EnumType : public DataType {
 }; // end of EnumType
 } // namespace H5
 
-#endif // __H5EnumType_H
+#endif // H5EnumType_H

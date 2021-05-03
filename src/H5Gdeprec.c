@@ -800,7 +800,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *o
     herr_t             ret_value; /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*Isx*x", loc_id, name, idx_p, op, op_data);
+    H5TRACE5("e", "i*s*IsGi*x", loc_id, name, idx_p, op, op_data);
 
     /* Check args */
     if (!name || !*name)

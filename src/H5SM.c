@@ -1755,7 +1755,7 @@ H5SM__decr_ref(void *record, void *op_data, hbool_t *changed)
  */
 static herr_t
 H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, const H5O_shared_t *mesg,
-                        unsigned *cache_flags, size_t * /*out*/ mesg_size, void ** /*out*/ encoded_mesg)
+                        unsigned *cache_flags, size_t *mesg_size /*out*/, void **encoded_mesg /*out*/)
 {
     H5SM_list_t *   list = NULL;
     H5SM_mesg_key_t key;

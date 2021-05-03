@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5HLprivate_H
-#define _H5HLprivate_H
+#ifndef H5HLprivate_H
+#define H5HLprivate_H
 
 /* Private headers needed by this file. */
 #include "H5private.h"   /* Generic Functions                */

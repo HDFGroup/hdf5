@@ -877,7 +877,7 @@ H5Ecreate_stack(void)
     hid_t  ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE0("i","");
+    H5TRACE0("i", "");
 
     /* Allocate a new error stack */
     if (NULL == (stk = H5FL_CALLOC(H5E_t)))
@@ -916,7 +916,7 @@ H5Eget_current_stack(void)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5I_INVALID_HID)
-    H5TRACE0("i","");
+    H5TRACE0("i", "");
 
     /* Get the current stack */
     if (NULL == (stk = H5E__get_current_stack()))
@@ -1335,8 +1335,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE8("e", "i*s*sIuiii*s", err_stack, file, func, line, cls_id, maj_id,
-             min_id, fmt);
+    H5TRACE8("e", "i*s*sIuiii*s", err_stack, file, func, line, cls_id, maj_id, min_id, fmt);
 
     if (err_stack == H5E_DEFAULT)
         estack = NULL;
@@ -1564,7 +1563,7 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*x**x", estack_id, func, client_data);
+    H5TRACE3("e", "i*EA**x", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
@@ -1622,7 +1621,7 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE3("e", "ix*x", estack_id, func, client_data);
+    H5TRACE3("e", "iEA*x", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in

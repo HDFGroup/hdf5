@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <slu@hdfgroup.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
  * Purpose:	The public header file for the direct driver.
@@ -23,7 +23,7 @@
 #ifdef H5_HAVE_DIRECT
 #define H5FD_DIRECT (H5FD_direct_init())
 #else
-#define H5FD_DIRECT (-1)
+#define H5FD_DIRECT (H5I_INVALID_HID)
 #endif /* H5_HAVE_DIRECT */
 
 #ifdef H5_HAVE_DIRECT

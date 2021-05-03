@@ -15,15 +15,15 @@
  *
  * Created:             H5Gprivate.h
  *                      Jul 11 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Library-visible declarations.
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5Gprivate_H
-#define _H5Gprivate_H
+#ifndef H5Gprivate_H
+#define H5Gprivate_H
 
 /* Include package's public header */
 #include "H5Gpublic.h"
@@ -283,4 +283,4 @@ H5_DLL herr_t H5G_root_loc(H5F_t *f, H5G_loc_t *loc);
 H5_DLL herr_t H5G_root_free(H5G_t *grp);
 H5_DLL H5G_t *H5G_rootof(H5F_t *f);
 
-#endif /* _H5Gprivate_H */
+#endif /* H5Gprivate_H */

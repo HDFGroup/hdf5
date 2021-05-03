@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Cpp_H
-#define __H5Cpp_H
+#ifndef H5Cpp_H
+#define H5Cpp_H
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -58,4 +58,4 @@
 #define HOFFSET(TYPE, MEMBER) ((size_t) & ((TYPE *)0)->MEMBER)
 #endif
 
-#endif // __H5Cpp_H
+#endif // H5Cpp_H

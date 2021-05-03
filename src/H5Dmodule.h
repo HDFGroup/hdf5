@@ -18,8 +18,8 @@
  *		H5D package.  Including this header means that the source file
  *		is part of the H5D package.
  */
-#ifndef _H5Dmodule_H
-#define _H5Dmodule_H
+#ifndef H5Dmodule_H
+#define H5Dmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,15 @@
 #define H5_MY_PKG_ERR  H5E_DATASET
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5Dmodule_H */
+/**
+ * \defgroup H5D H5D
+ * \brief Group Interface
+ * \details The HDF5 Dataset Interface, H5D, provides a mechanism for managing
+ *          HDF5 datasets, including the transfer of data between memory and
+ *          disk and the description of dataset properties.
+ *
+ *          A Dataset is used by other HDF5 APIs, either by name or by a handle,
+ *          which is obtained by either creating or opening the dataset.
+ */
+
+#endif /* H5Dmodule_H */

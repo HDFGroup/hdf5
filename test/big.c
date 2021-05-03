@@ -93,17 +93,17 @@ static int  test_family(hid_t fapl);
 static hsize_t values_used[WRT_N];
 
 /*-------------------------------------------------------------------------
- * Function:	randll
+ * Function:    randll
  *
- * Purpose:	Create a random long long value.
- * 		Ensures that a write at this value doesn't overlap any
- *		previous write.
+ * Purpose:    Create a random long long value.
+ *         Ensures that a write at this value doesn't overlap any
+ *         previous write.
  *
- * Return:	Success:	Random value
+ * Return:    Success:    Random value
  *
- *		Failure:	Random value which overlaps another write
+ *            Failure:    Random value which overlaps another write
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
  *
  * Modifications:
@@ -141,17 +141,17 @@ randll(hsize_t limit, int current_index)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	is_sparse
+ * Function:    is_sparse
  *
- * Purpose:	Determines if the file system of the current working
- *		directory supports holes.
+ * Purpose:    Determines if the file system of the current working
+ *             directory supports holes.
  *
- * Return:	Success:	Non-zero if holes are supported; zero
- *				otherwise.
+ * Return:    Success:    Non-zero if holes are supported; zero
+ *                otherwise.
  *
- *		Failure:	zero
+ *            Failure:    zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, July 15, 1998
  *
  * Modifications:
@@ -184,17 +184,17 @@ is_sparse(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	supports_big
+ * Function:    supports_big
  *
- * Purpose:	Determines if the file system of the current working
- *		directory supports big files.
+ * Purpose:    Determines if the file system of the current working
+ *             directory supports big files.
  *
- * Return:	Success:	Non-zero if big files are supported; zero
- *				otherwise.
+ * Return:    Success:    Non-zero if big files are supported; zero
+ *                otherwise.
  *
- *		Failure:	zero
+ *            Failure:    zero
  *
- * Programmer:	Raymond Lu
+ * Programmer:    Raymond Lu
  *              Wednesday, April 18, 2007
  *
  * Modifications:
@@ -254,17 +254,17 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	enough_room
+ * Function:    enough_room
  *
- * Purpose:	Tries to create a bunch of sparse files to see if quotas will
- *		get in the way.  Some systems also have problems opening
- *		enough files and we'll check that too.
+ * Purpose:    Tries to create a bunch of sparse files to see if quotas will
+ *        get in the way.  Some systems also have problems opening
+ *        enough files and we'll check that too.
  *
- * Return:	Success:	Non-zero
+ * Return:    Success:    Non-zero
  *
- *		Failure:	zero
+ *            Failure:    zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, August  6, 1998
  *
  * Modifications:
@@ -322,20 +322,20 @@ done:
 H5_GCC_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
- * Function:	writer
+ * Function:    writer
  *
- * Purpose:	Creates a *big* dataset.
+ * Purpose:    Creates a *big* dataset.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	>0
+ *            Failure:    >0
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April  8, 1998
  *
  * Modifications:
- * 	Robb Matzke, 15 Jul 1998
- *	Addresses are written to the file DNAME instead of stdout.
+ *     Robb Matzke, 15 Jul 1998
+ *     Addresses are written to the file DNAME instead of stdout.
  *
  *-------------------------------------------------------------------------
  */
@@ -475,15 +475,15 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	reader
+ * Function:    reader
  *
- * Purpose:	Reads some data from random locations in the dataset.
+ * Purpose:    Reads some data from random locations in the dataset.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- * 		Failure:	>0
+ *            Failure:    >0
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Friday, April 10, 1998
  *
  * Modifications:
@@ -583,13 +583,13 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	usage
+ * Function:    usage
  *
- * Purpose:	Print command usage
+ * Purpose:    Print command usage
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	Albert Chent
+ * Programmer:    Albert Chent
  *              Mar 28, 2002
  *
  * Modifications:
@@ -747,22 +747,22 @@ error:
 } /* end test_family() */
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
  * Purpose:
  *
- * Return:	Success:
+ * Return:    Success:
  *
- *		Failure:
+ *            Failure:
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Friday, April 10, 1998
  *
  * Modifications:
- *		Albert Cheng, 2002/03/28
- *		Added command option -fsize.
- *		Albert Cheng, 2002/04/19
- *		Added command option -c.
+ *        Albert Cheng, 2002/03/28
+ *        Added command option -fsize.
+ *        Albert Cheng, 2002/04/19
+ *        Added command option -c.
  *
  *              Raymond Lu, 2007/05/25
  *              Added similar tests for SEC2 and STDIO drivers.

@@ -468,13 +468,8 @@ H5VM_hyper_fill(unsigned n, const hsize_t *_size, const hsize_t *total_size, con
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VM_hyper_copy(unsigned n, const hsize_t *_size,
-
-                /*destination*/
-                const hsize_t *dst_size, const hsize_t *dst_offset, void *_dst,
-
-                /*source*/
-                const hsize_t *src_size, const hsize_t *src_offset, const void *_src)
+H5VM_hyper_copy(unsigned n, const hsize_t *_size, const hsize_t *dst_size, const hsize_t *dst_offset,
+                void *_dst, const hsize_t *src_size, const hsize_t *src_offset, const void *_src)
 {
     const uint8_t *src = (const uint8_t *)_src;  /*cast for ptr arithmtc */
     uint8_t *      dst = (uint8_t *)_dst;        /*cast for ptr arithmtc */
@@ -824,13 +819,9 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size, const hss
  *-------------------------------------------------------------------------
  */
 static void
-H5VM_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
-
-                  /* destination */
-                  unsigned dst_n, const hsize_t *dst_size, const hsize_t *dst_stride, void *_dst,
-
-                  /* source */
-                  unsigned src_n, const hsize_t *src_size, const hsize_t *src_stride, const void *_src)
+H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size, unsigned dst_n, const hsize_t *dst_size,
+                   const hsize_t *dst_stride, void *_dst, unsigned src_n, const hsize_t *src_size,
+                   const hsize_t *src_stride, const void *_src)
 {
     uint8_t *      dst = (uint8_t *)_dst;
     const uint8_t *src = (const uint8_t *)_src;

@@ -16,11 +16,7 @@
    ttypes.cpp - HDF5 C++ testing the general datatype functionality
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -806,8 +802,7 @@ test_named()
         issue_fail_msg("test_named", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (ds_type)
-        delete ds_type;
+    delete ds_type;
 } // test_named
 
 /*-------------------------------------------------------------------------

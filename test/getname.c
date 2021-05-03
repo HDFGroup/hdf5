@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
+ * Programmer:  Pedro Vicente
  *              April 12, 2002
  *
  * Purpose:     Tests the "ID to name" functionality
@@ -68,11 +68,11 @@ check_name(hid_t id, const char *chk_name, const char *chk_user_path)
         TEST_ERROR
 
     /* Check on name from H5Iget_name() */
-    if (HDstrcmp(name, chk_name))
+    if (HDstrcmp(name, chk_name) != 0)
         goto error;
 
     /* Check on user path */
-    if (HDstrcmp(user_path, chk_user_path))
+    if (HDstrcmp(user_path, chk_user_path) != 0)
         goto error;
 
     /* Check that if user path is hidden, the name from H5Iget_name() and the user path should be different */
@@ -1439,7 +1439,7 @@ test_main(hid_t file_id, hid_t fapl)
             /* Check that name is longer */
             if (name_len <= SMALL_NAME_BUF_SIZE)
                 TEST_ERROR
-            if (HDstrcmp(name2, "/"))
+            if (HDstrcmp(name2, "/") != 0)
                 TEST_ERROR
         }
 
@@ -1481,7 +1481,7 @@ test_main(hid_t file_id, hid_t fapl)
             TEST_ERROR
 
         /* Verify */
-        if (HDstrcmp(name3, "/g17"))
+        if (HDstrcmp(name3, "/g17") != 0)
             TEST_ERROR
         *name3 = '\0';
 
@@ -1491,7 +1491,7 @@ test_main(hid_t file_id, hid_t fapl)
             TEST_ERROR
 
         /* Verify */
-        if (HDstrcmp(name3, "/g"))
+        if (HDstrcmp(name3, "/g") != 0)
             TEST_ERROR
 
         HDfree(name3);
@@ -3787,7 +3787,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    puts("All getname tests passed.");
+    HDputs("All getname tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 
@@ -3800,7 +3800,7 @@ error:
     }
     H5E_END_TRY;
 
-    puts("***** GET NAME TESTS FAILED *****");
+    HDputs("***** GET NAME TESTS FAILED *****");
 
     return 1;
 }

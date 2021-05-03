@@ -15,8 +15,8 @@
  * This file contains function prototypes for each exported function in the
  * H5P module.
  */
-#ifndef _H5Ppublic_H
-#define _H5Ppublic_H
+#ifndef H5Ppublic_H
+#define H5Ppublic_H
 
 /* System headers needed by this file */
 
@@ -39,11 +39,11 @@
 
 /* When this header is included from a private HDF5 header, don't make calls to H5open() */
 #undef H5OPEN
-#ifndef _H5private_H
+#ifndef H5private_H
 #define H5OPEN H5open(),
-#else /* _H5private_H */
+#else /* H5private_H */
 #define H5OPEN
-#endif /* _H5private_H */
+#endif /* H5private_H */
 
 /*
  * The library's property list classes
@@ -546,4 +546,4 @@ H5_DLL herr_t       H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *str
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Ppublic_H */
+#endif /* H5Ppublic_H */
