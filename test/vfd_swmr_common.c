@@ -391,7 +391,7 @@ vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_p
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             return H5I_INVALID_HID;
     }
-    else {/* Currently this is used only for old-styled group implementation tests.*/
+    else { /* Currently this is used only for old-styled group implementation tests.*/
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
             return H5I_INVALID_HID;
     }
