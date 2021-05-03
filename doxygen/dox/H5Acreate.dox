@@ -1,0 +1,9 @@
+/**
+ * \ingroup H5A
+ * \def H5Acreate()
+ * H5Acreate() is a macro that is mapped to either H5Acreate1() or
+ * H5Acreate2().
+ *
+ *
+ * \todo Standardize the way we describe these macros!
+ */

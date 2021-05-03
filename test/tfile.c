@@ -3955,7 +3955,7 @@ test_filespace_info(const char *env_h5_drvr)
     MESSAGE(5, ("Testing file creation public routines: H5Pget/set_file_space_strategy & "
                 "H5Pget/set_file_space_page_size\n"));
 
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     fapl = h5_fileaccess();
     h5_fixname(FILESPACE_NAME[0], fapl, filename, sizeof filename);
@@ -5312,7 +5312,12 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
     group = H5Gcreate2(file, "/G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
+    //! [H5Oget_native_info_snip]
+
     ret = H5Oget_native_info(group, &ninfo, H5O_NATIVE_INFO_HDR);
+
+    //! [H5Oget_native_info_snip]
+
     CHECK(ret, FAIL, "H5Oget_native)info");
     VERIFY(ninfo.hdr.version, oh_vers_mod, "H5Oget_native_info");
 
@@ -5333,10 +5338,15 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
 
+    //! [H5Oget_native_info_by_name_snip]
+
     /*
      * Make sure the root group still has the correct object header version
      */
     ret = H5Oget_native_info_by_name(file, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+
+    //! [H5Oget_native_info_by_name_snip]
+
     CHECK(ret, FAIL, "H5Oget_native_info_by_name");
     VERIFY(ninfo.hdr.version, oh_vers_create, "H5Oget_native_info_by_name");
 
