@@ -29,4 +29,10 @@
 #define H5_MY_PKG_ERR  H5E_OHDR
 #define H5_MY_PKG_INIT YES
 
+/**\defgroup H5O H5O
+ * \brief Object Interface
+ *
+ * \todo Describe concisely what the functions in this module are about.
+ *
+ */
 #endif /* H5Omodule_H */
