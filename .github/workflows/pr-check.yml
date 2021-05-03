@@ -3,7 +3,7 @@ name: hdf5 dev CI
 # Controls when the action will run. Triggers the workflow on push or pull request
 on:
   pull_request:
-    branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
+    branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8, feature/vfd_swmr ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
