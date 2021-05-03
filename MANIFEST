@@ -58,7 +58,6 @@
 ./m4/ax_try_compile_java.m4
 ./m4/ax_try_run_java.m4
 
-./bin/COPYING
 ./bin/bbrelease         _DO_NOT_DISTRIBUTE_
 ./bin/buildhdf5
 ./bin/checkapi        _DO_NOT_DISTRIBUTE_
@@ -117,7 +116,6 @@
 ./bin/pkgscrpts/makeInternalREADME.pl      _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeOuterREADME.pl         _DO_NOT_DISTRIBUTE_
 
-./config/COPYING
 ./config/BlankForm
 ./config/apple
 ./config/cce-fflags
@@ -263,7 +261,6 @@
 #
 #------------------------------------------------------------------------------
 
-./fortran/COPYING
 ./fortran/Makefile.am
 ./fortran/robodoc.rc
 
@@ -395,7 +392,6 @@
 #
 #------------------------------------------------------------------------------
 
-./c++/COPYING
 ./c++/Makefile.am
 
 ./c++/examples/chunks.cpp
@@ -526,7 +522,6 @@
 #
 #------------------------------------------------------------------------------
 
-./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
 ./release_docs/HISTORY-1_8_0-1_10_0.txt
 ./release_docs/HISTORY-1_10_0-1_12_0.txt
@@ -549,7 +544,6 @@
 ./src/hdf5.lnt        _DO_NOT_DISTRIBUTE_
 ./src/hdf5-win.lnt      _DO_NOT_DISTRIBUTE_
 ./src/hdf5-lin.lnt      _DO_NOT_DISTRIBUTE_
-./src/COPYING
 ./src/H5.c
 ./src/H5checksum.c
 ./src/H5dbg.c
@@ -1061,7 +1055,6 @@
 ./src/libhdf5.settings.in
 
 ./test/AtomicWriterReader.txt
-./test/COPYING
 ./test/H5srcdir.h
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
@@ -1319,11 +1312,12 @@
 ./test/vds_swmr_reader.c
 ./test/vds_swmr_writer.c
 ./test/vfd_swmr.c
+./test/vfd_swmr_addrem_writer.c
+./test/vfd_swmr_attrdset_writer.c
+./test/vfd_swmr_bigset_writer.c
 ./test/vfd_swmr_common.c
 ./test/vfd_swmr_common.h
 ./test/vfd_swmr_generator.c
-./test/vfd_swmr_addrem_writer.c
-./test/vfd_swmr_bigset_writer.c
 ./test/vfd_swmr_group_writer.c
 ./test/vfd_swmr_reader.c
 ./test/vfd_swmr_remove_reader.c
@@ -1440,7 +1434,6 @@
 ./test/testfiles/plist_files/strcpl_64be
 ./test/testfiles/plist_files/strcpl_64le
 
-./testpar/COPYING
 ./testpar/Makefile.am
 ./testpar/t_bigio.c
 ./testpar/t_cache.c
@@ -1472,7 +1465,6 @@
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 
-./tools/COPYING
 ./tools/Makefile.am
 ./tools/src/Makefile.am
 ./tools/test/Makefile.am
@@ -2859,7 +2851,6 @@
 ./tools/testfiles/h5mkgrp_single_p.ls
 ./tools/testfiles/h5mkgrp_single_l.ls
 
-./tools/test/perform/COPYING
 ./tools/test/perform/Makefile.am
 ./tools/test/perform/build_h5perf_alone.sh
 ./tools/test/perform/build_h5perf_serial_alone.sh
@@ -2884,7 +2875,6 @@
 ./tools/test/perform/zip_perf.c
 
 # Utils directory
-./utils/COPYING
 ./utils/Makefile.am
 
 # Mirror VFD utilities
@@ -2896,7 +2886,6 @@
 ./utils/mirror_vfd/mirror_writer.c
 
 # high level libraries
-./hl/COPYING
 ./hl/Makefile.am
 ./hl/examples/Makefile.am
 ./hl/examples/ex_ds1.c
@@ -2923,7 +2912,6 @@
 ./hl/examples/ptExampleFL.c
 ./hl/examples/run-hl-ex.sh
 ./hl/examples/run-hlc-ex.sh.in
-./hl/src/COPYING
 ./hl/src/Makefile.am
 ./hl/src/H5DO.c
 ./hl/src/H5DOpublic.h
@@ -2952,7 +2940,6 @@
 ./hl/src/H5TBprivate.h
 ./hl/src/H5TBpublic.h
 ./hl/src/hdf5_hl.h
-./hl/test/COPYING
 ./hl/test/H5srcdir_str.h.in
 ./hl/test/Makefile.am
 ./hl/test/dsdata.txt
@@ -2988,7 +2975,6 @@
 ./hl/test/usa.wri
 
 # tools
-./hl/tools/COPYING
 ./hl/tools/Makefile.am
 ./hl/tools/gif2h5/Makefile.am
 ./hl/tools/gif2h5/decompress.c
@@ -3053,7 +3039,6 @@
 ./hl/tools/testfiles/w-help1.ddl
 
 # hl fortran
-./hl/fortran/COPYING
 ./hl/fortran/Makefile.am
 ./hl/fortran/examples/Makefile.am
 ./hl/fortran/examples/run-hlfortran-ex.sh.in
@@ -3078,7 +3063,6 @@
 ./hl/fortran/test/tsttable.F90
 
 # hl c++
-./hl/c++/COPYING
 ./hl/c++/Makefile.am
 ./hl/c++/examples/Makefile.am
 ./hl/c++/examples/ptExampleFL.cpp
@@ -3091,7 +3075,6 @@
 ./hl/c++/test/Makefile.am
 
 # java
-./java/COPYING
 ./java/Makefile.am
 ./java/CMakeLists.txt
 
