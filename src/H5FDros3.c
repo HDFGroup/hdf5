@@ -1539,7 +1539,7 @@ done:
  */
 static herr_t
 H5FD_ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
-                size_t size, void *buf)
+               size_t size, void *buf)
 {
     H5FD_ros3_t *file      = (H5FD_ros3_t *)_file;
     size_t       filesize  = 0;
@@ -1562,8 +1562,7 @@ H5FD_ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
 
     filesize = H5FD_s3comms_s3r_get_filesize(file->s3r_handle);
 
-    if ((addr > filesize) || ((addr + size) > filesize))
-{
+    if ((addr > filesize) || ((addr + size) > filesize)) {
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "range exceeds file address")
     }
 

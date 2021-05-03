@@ -53,8 +53,8 @@ typedef struct {
 #define CORRUPTED_ATNAMELEN_FILE "memleak_H5O_dtype_decode_helper_H5Odtype.h5"
 #define DSET_NAME                "image"
 typedef struct searched_err_t {
-    char message[256];
-    bool found;
+    char    message[256];
+    hbool_t found;
 } searched_err_t;
 
 /* Call back function for test_corrupted_attnamelen */
@@ -218,9 +218,14 @@ test_iter_group(hid_t fapl, hbool_t new_format)
                                          dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Lget_name_by_idx");
 
+        //! [H5Oget_info_by_idx3_snip]
+
         ret = H5Oget_info_by_idx3(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo,
                                   H5O_INFO_BASIC, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Oget_info_by_idx");
+
+        //! [H5Oget_info_by_idx3_snip]
+
     } /* end for */
 
     H5E_BEGIN_TRY
@@ -580,7 +585,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
     H5O_info2_t      oinfo;
     herr_t           ret; /* Generic return value        */
 
-    if (HDstrcmp(name, test_info->name)) {
+    if (HDstrcmp(name, test_info->name) != 0) {
         TestErrPrintf("name = '%s', test_info = '%s'\n", name, test_info->name);
         return (H5_ITER_ERROR);
     } /* end if */
@@ -947,7 +952,7 @@ test_links(hid_t fapl)
         else if (!HDstrcmp(obj_name, "softlink"))
             VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
         else
-            CHECK(0, 0, "unknown object name");
+            ERROR("unknown object name");
     } /* end for */
 
     ret = H5Gclose(gid);
@@ -981,8 +986,8 @@ find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_
         return H5_ITER_ERROR;
 
     /* If the searched error message is found, stop the iteration */
-    if (err_desc->desc != NULL && strcmp(err_desc->desc, searched_err->message) == 0) {
-        searched_err->found = true;
+    if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, searched_err->message) == 0) {
+        searched_err->found = TRUE;
         status              = H5_ITER_STOP;
     }
 
@@ -1028,14 +1033,14 @@ test_corrupted_attnamelen(void)
     if (err_status == -1) {
         /* Initialize client data */
         HDstrcpy(err_caught.message, err_message);
-        err_caught.found = false;
+        err_caught.found = FALSE;
 
         /* Look for the correct error message */
         ret = H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, find_err_msg_cb, &err_caught);
         CHECK(ret, FAIL, "H5Ewalk2");
 
         /* Fail if the indicated message is not found */
-        CHECK(err_caught.found, false, "test_corrupted_attnamelen: Expected error not found");
+        CHECK(err_caught.found, FALSE, "test_corrupted_attnamelen: Expected error not found");
     }
 
     /* Close the dataset and file */
@@ -1117,7 +1122,7 @@ test_links_deprec(hid_t fapl)
         else if (!HDstrcmp(obj_name, "softlink"))
             VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
         else
-            CHECK(0, 0, "unknown object name");
+            ERROR("unknown object name");
     } /* end for */
 
     ret = H5Gclose(gid);

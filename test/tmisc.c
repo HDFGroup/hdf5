@@ -129,7 +129,6 @@ typedef struct {
 #ifndef H5_HAVE_PARALLEL
 #define MISC8_DSETNAME2  "Dataset2"
 #define MISC8_DSETNAME3  "Dataset3"
-#define MISC8_DSETNAME4  "Dataset4"
 #define MISC8_DSETNAME6  "Dataset6"
 #define MISC8_DSETNAME7  "Dataset7"
 #define MISC8_DSETNAME9  "Dataset9"
@@ -518,7 +517,6 @@ test_misc2_write_attribute(void)
 
     HDfree(string_att1);
     HDfree(string_att2);
-    return;
 }
 
 static void
@@ -564,8 +562,6 @@ test_misc2_read_attribute(const char *filename, const char *att_name)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 /****************************************************************
 **
@@ -2093,11 +2089,11 @@ test_misc12(void)
     CHECK(ret, FAIL, "H5Dread");
 
     for (i = 0; i < MISC12_SPACE1_DIM1; i++)
-        if (HDstrcmp(wdata[i], rdata[i]))
+        if (HDstrcmp(wdata[i], rdata[i]) != 0)
             TestErrPrintf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n", __LINE__, i, wdata[i], i,
                           rdata[i]);
     for (; i < (MISC12_SPACE1_DIM1 + MISC12_APPEND_SIZE); i++)
-        if (HDstrcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]))
+        if (HDstrcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]) != 0)
             TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n", __LINE__, i - MISC12_SPACE1_DIM1,
                           wdata1[i - MISC12_SPACE1_DIM1], i, rdata[i]);
 
@@ -2844,7 +2840,7 @@ test_misc16(void)
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf(
                 "Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                (unsigned)__LINE__, (int)i, (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
+                (unsigned)__LINE__, (int)i, (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if (HDstrcmp(wdata[i], rdata[i]) != 0) {
@@ -2929,7 +2925,7 @@ test_misc17(void)
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf(
                 "Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                (unsigned)__LINE__, (int)i, (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
+                (unsigned)__LINE__, (int)i, (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if (HDstrcmp(wdata[i], rdata[i]) != 0) {
@@ -3617,7 +3613,7 @@ test_misc19(void)
 
     /* Get a VOL class to register */
     vol_cls = h5_get_dummy_vol_class();
-    CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
+    CHECK_PTR(vol_cls, "h5_get_dummy_vol_class");
 
     /* Register a VOL connector */
     volid = H5VLregister_connector(vol_cls, H5P_DEFAULT);
@@ -4092,9 +4088,31 @@ test_misc23(void)
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gcreate1");
 
+    /* Make sure that size_hint values that can't fit into a 32-bit
+     * unsigned integer are rejected. Only necessary on systems where
+     * size_t is a 64-bit type.
+     */
+    if (SIZE_MAX > UINT32_MAX) {
+        H5E_BEGIN_TRY
+        {
+            tmp_id = H5Gcreate1(file_id, "/size_hint_too_large", SIZE_MAX);
+        }
+        H5E_END_TRY;
+        VERIFY(tmp_id, FAIL, "H5Gcreate1");
+    }
+
+    /* Make sure the largest size_hint value works */
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gcreate1(file_id, "/largest_size_hint", UINT32_MAX);
+    }
+    H5E_END_TRY;
+    CHECK(tmp_id, FAIL, "H5Gcreate1");
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
     tmp_id = H5Gcreate1(file_id, "/A/grp", (size_t)0);
     CHECK(tmp_id, FAIL, "H5Gcreate1");
-
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
@@ -4107,7 +4125,6 @@ test_misc23(void)
 
     tmp_id = H5Dcreate1(file_id, "/A/dset", type_id, space_id, create_id);
     CHECK(tmp_id, FAIL, "H5Dcreate1");
-
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

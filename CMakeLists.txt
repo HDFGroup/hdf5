@@ -232,6 +232,7 @@ set (HDF5_JAVA_LIB_DIR             ${HDF5_SOURCE_DIR}/java/lib)
 set (HDF5_JAVA_LOGGING_JAR         ${HDF5_SOURCE_DIR}/java/lib/slf4j-api-1.7.25.jar)
 set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-1.7.25.jar)
 set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-1.7.25.jar)
+set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
 
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
@@ -569,6 +570,20 @@ endif ()
 #   find_package (DMALLOC)
 #   set (H5_HAVE_DMALLOC DMALLOC_FOUND)
 # endif ()
+
+#-----------------------------------------------------------------------------
+# Option to build documentation
+#-----------------------------------------------------------------------------
+option (HDF5_BUILD_DOC "Build documentation" OFF)
+if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
+# check if Doxygen is installed
+  find_package(Doxygen)
+  if (DOXYGEN_FOUND)
+    message(STATUS "Doxygen version: ${DOXYGEN_VERSION}")
+  else ()
+    message(STATUS "Doxygen needs to be installed to generate the doxygen documentation")
+  endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Option to indicate using a memory checker
@@ -1006,6 +1021,21 @@ if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools
   option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
   if (HDF5_BUILD_TOOLS)
     add_subdirectory (tools)
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Include filter plugins
+#-----------------------------------------------------------------------------
+include (CMakePlugins.cmake)
+
+if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES)
+  if (HDF5_ENABLE_PLUGIN_SUPPORT AND PLUGIN_FOUND)
+    PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
+#    option (HDF5_TEST_PLUGIN "Execute plugin tests" ON)
+#    mark_as_advanced (HDF5_TEST_PLUGIN)
+
+#    TEST_PLUGIN_LIBRARY ()
   endif ()
 endif ()
 
