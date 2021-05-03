@@ -314,54 +314,6 @@ H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
  */
 H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
 
-<<<<<<< HEAD
-||||||| 12082e728d
-/* Symbols defined for compatibility with previous versions of the HDF5 API.
- *
- * Use of these symbols is deprecated.
- */
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-
-/**
- * The filter table maps filter identification numbers to structs that
- * contain a pointers to the filter function and timing statistics.
- */
-//! [H5Z_class1_t_snip]
-typedef struct H5Z_class1_t {
-    H5Z_filter_t         id;        /**< Filter ID number			     */
-    const char *         name;      /**< Comment for debugging		     */
-    H5Z_can_apply_func_t can_apply; /**< The "can apply" callback for a filter */
-    H5Z_set_local_func_t set_local; /**< The "set local" callback for a filter */
-    H5Z_func_t           filter;    /**< The actual filter function		     */
-} H5Z_class1_t;
-//! [H5Z_class1_t_snip]
-
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-=======
-/* Symbols defined for compatibility with previous versions of the HDF5 API.
- *
- * Use of these symbols is deprecated.
- */
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-
-/**
- * The filter table maps filter identification numbers to structs that
- * contain a pointers to the filter function and timing statistics.
- */
-//! <!-- [H5Z_class1_t_snip] -->
-typedef struct H5Z_class1_t {
-    H5Z_filter_t         id;        /**< Filter ID number			     */
-    const char *         name;      /**< Comment for debugging		     */
-    H5Z_can_apply_func_t can_apply; /**< The "can apply" callback for a filter */
-    H5Z_set_local_func_t set_local; /**< The "set local" callback for a filter */
-    H5Z_func_t           filter;    /**< The actual filter function		     */
-} H5Z_class1_t;
-//! <!-- [H5Z_class1_t_snip] -->
-
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
->>>>>>> origin/develop
 #ifdef __cplusplus
 }
 #endif
