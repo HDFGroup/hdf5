@@ -327,6 +327,11 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
     udata.force   = force;
     udata.app_ref = app_ref;
 
+    /* Clearing a type is done in two phases (mark-and-sweep). This is because
+     * the type's free callback can free other IDs, potentially corrupting
+     * the data structure during the traversal.
+     */
+
     /* Set marking flag */
     H5I_marking_g = TRUE;
 
