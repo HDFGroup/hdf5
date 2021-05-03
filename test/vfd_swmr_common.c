@@ -72,6 +72,15 @@ below_speed_limit(struct timespec *last, const struct timespec *ival)
     return result;
 }
 
+/* Sleep for `tenths` tenths of a second. */
+void
+decisleep(uint32_t tenths)
+{
+    uint64_t nsec = tenths * 100 * 1000 * 1000;
+
+    H5_nanosleep(nsec);
+}
+
 /* Like vsnprintf(3), but abort the program with an error message on
  * `stderr` if the buffer is too small or some other error occurs.
  */
@@ -380,6 +389,10 @@ vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_p
 
     if (use_latest_format) {
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            return H5I_INVALID_HID;
+    }
+    else {/* Currently this is used only for old-styled group implementation tests.*/
+        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
             return H5I_INVALID_HID;
     }
 
