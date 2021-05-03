@@ -3391,7 +3391,7 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
                     H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - c:%ld b:%ld s:%ld", j,
                                   curr_pos, curr_idx, cnt_idx, blk_idx, str_idx);
                     dim_size = opts->dims[j]; /* Current dimension size */
-                    /* elmnt_cnt *= dim_size;    /* Total number of elements in dimension */
+                    // elmnt_cnt *= dim_size;    /* Total number of elements in dimension */
                     H5TOOLS_DEBUG("... sset loop:%d with elmnt_cnt:%ld - (prev_dim_size:%ld - dim_size:%ld) "
                                   "- str_cnt:%ld",
                                   j, elmnt_cnt, prev_dim_size, dim_size, str_cnt);
