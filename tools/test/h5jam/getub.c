@@ -138,14 +138,15 @@ main(int argc, const char *argv[])
     } /* end if */
 
     /* close things and exit */
+    HDfree(filename);
     HDfree(buf);
     HDclose(fd);
 
     return EXIT_SUCCESS;
 
 error:
-    if (buf)
-        HDfree(buf);
+    HDfree(filename);
+    HDfree(buf);
     if (fd >= 0)
         HDclose(fd);
     return EXIT_FAILURE;
