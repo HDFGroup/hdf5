@@ -17,8 +17,8 @@
  *---------------------------------------------------------------------------*/
 
 /* avoid re-inclusion */
-#ifndef _H5Iprivate_H
-#define _H5Iprivate_H
+#ifndef H5Iprivate_H
+#define H5Iprivate_H
 
 /* Include package's public header */
 #include "H5Ipublic.h"
@@ -99,4 +99,4 @@ H5_DLL herr_t H5I_register_using_existing_id(H5I_type_t type, void *object, hboo
 /* Debugging functions */
 H5_DLL herr_t H5I_dump_ids_for_type(H5I_type_t type);
 
-#endif /* _H5Iprivate_H */
+#endif /* H5Iprivate_H */

@@ -98,7 +98,7 @@ create_dset1(hid_t file)
     hid_t   dcpl             = H5I_INVALID_HID;
     hsize_t dims[RANK]       = {DSET1_DIM1, DSET1_DIM2};
     hsize_t chunk_dims[RANK] = {CHUNK1_DIM1, CHUNK1_DIM2};
-    int **  data; /* data for writing */
+    int **  data             = NULL; /* data for writing */
 
     /* Create the data space. */
     if ((dataspace = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -134,6 +134,7 @@ create_dset1(hid_t file)
     H5Dclose(dataset);
     H5Pclose(dcpl);
     H5Sclose(dataspace);
+    HDfree(data);
     return 0;
 
 error:
@@ -144,6 +145,7 @@ error:
         H5Sclose(dataspace);
     }
     H5E_END_TRY;
+    HDfree(data);
 
     return 1;
 }
@@ -160,7 +162,7 @@ create_dset2(hid_t file)
     hid_t   dcpl             = H5I_INVALID_HID;
     hsize_t dims[RANK]       = {DSET2_DIM1, DSET2_DIM2};
     hsize_t chunk_dims[RANK] = {CHUNK2_DIM1, CHUNK2_DIM2};
-    int **  data; /* data for writing */
+    int **  data             = NULL; /* data for writing */
 
     /* Create the data space. */
     if ((dataspace = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -195,6 +197,7 @@ create_dset2(hid_t file)
     H5Dclose(dataset);
     H5Pclose(dcpl);
     H5Sclose(dataspace);
+    HDfree(data);
 
     return 0;
 
@@ -206,6 +209,7 @@ error:
         H5Sclose(dataspace);
     }
     H5E_END_TRY;
+    HDfree(data);
 
     return 1;
 }
@@ -259,11 +263,11 @@ check_partial_chunks_perf(hid_t file)
     end_t = H5_get_time();
 
     if ((end_t - start_t) > (double)0.0f)
-        printf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %lu\n",
+        printf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %zu\n",
                (end_t - start_t), nbytes_global);
     else
         printf("1. Partial chunks: no total read time because timer is not available; number of bytes being "
-               "read from file is %lu\n",
+               "read from file is %zu\n",
                nbytes_global);
 
     H5Dclose(dataset);
@@ -337,11 +341,11 @@ check_hash_value_perf(hid_t file)
     end_t = H5_get_time();
 
     if ((end_t - start_t) > (double)0.0f)
-        printf("2. Hash value: total read time is %lf; number of bytes being read from file is %lu\n",
+        printf("2. Hash value: total read time is %lf; number of bytes being read from file is %zu\n",
                (end_t - start_t), nbytes_global);
     else
         printf("2. Hash value: no total read time because timer is not available; number of bytes being read "
-               "from file is %lu\n",
+               "from file is %zu\n",
                nbytes_global);
 
     H5Dclose(dataset);

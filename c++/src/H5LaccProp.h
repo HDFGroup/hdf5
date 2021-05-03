@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5LinkAccPropList_H
-#define __H5LinkAccPropList_H
+#ifndef H5LinkAccPropList_H
+#define H5LinkAccPropList_H
 
 namespace H5 {
 
@@ -32,7 +32,7 @@ class H5_DLLCPP LinkAccPropList : public PropList {
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const H5_OVERRIDE
     {
         return ("LinkAccPropList");
     }
@@ -52,7 +52,7 @@ class H5_DLLCPP LinkAccPropList : public PropList {
     size_t getNumLinks() const;
 
     // Noop destructor
-    virtual ~LinkAccPropList();
+    virtual ~LinkAccPropList() H5_OVERRIDE;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -70,4 +70,4 @@ class H5_DLLCPP LinkAccPropList : public PropList {
 }; // end of LinkAccPropList
 } // namespace H5
 
-#endif // __H5LinkAccPropList_H
+#endif // H5LinkAccPropList_H

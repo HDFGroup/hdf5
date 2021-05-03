@@ -96,8 +96,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "i*siiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id,
-             dapl_id);
+    H5TRACE7("i", "i*siiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id, dapl_id);
 
     /* Check arguments */
     if (!name)
@@ -662,7 +661,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op, void *op
     herr_t            ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xiix*x", buf, type_id, space_id, op, operator_data);
+    H5TRACE5("e", "*xiiDO*x", buf, type_id, space_id, op, operator_data);
 
     /* Check args */
     if (NULL == op)
@@ -1052,8 +1051,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *of
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "iih*h*Iu*a*h", dset_id, fspace_id, chk_index, offset,
-             filter_mask, addr, size);
+    H5TRACE7("e", "iih*h*Iu*a*h", dset_id, fspace_id, chk_index, offset, filter_mask, addr, size);
 
     /* Check arguments */
     if (NULL == offset && NULL == filter_mask && NULL == addr && NULL == size)

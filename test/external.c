@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, March  3, 1998
  *
  * Purpose:    Tests datasets stored in external raw files.
@@ -72,7 +72,7 @@ files_have_same_contents(const char *name1, const char *name2)
             break;
         }
 
-        if (HDmemcmp(buf1, buf2, (size_t)n1))
+        if (HDmemcmp(buf1, buf2, (size_t)n1) != 0)
             break;
 
     } /* end while */
@@ -474,7 +474,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-__add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, hsize_t max_ext_size)
+add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, hsize_t max_ext_size)
 {
     char         exname[AEF_EXNAME_MAX_LEN + 1];
     unsigned int i = 0;
@@ -485,12 +485,12 @@ __add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset,
     for (i = 0; i < n_external_files; i++) {
         if (HDsnprintf(exname, AEF_EXNAME_MAX_LEN, "ext%d.data", i + 1) > AEF_EXNAME_MAX_LEN) {
             HDfprintf(stderr, "External file %d overflows name buffer\n", i + 1);
-            fflush(stderr);
+            HDfflush(stderr);
             return -1;
         }
         if (H5Pset_external(dcpl_id, exname, offset, max_ext_size) < 0) {
             HDfprintf(stderr, "Problem adding external file %s\n", exname);
-            fflush(stderr);
+            HDfflush(stderr);
             return -1;
         }
     }
@@ -528,7 +528,7 @@ test_multiple_files(hid_t file)
 
     max_ext_size = (hsize_t)(sizeof(int) * max_size[0] / n_external_files);
 
-    if (__add_external_files(dcpl, n_external_files, 0, max_ext_size) < 0) {
+    if (add_external_files(dcpl, n_external_files, 0, max_ext_size) < 0) {
         FAIL_STACK_ERROR;
     }
 
@@ -552,7 +552,7 @@ test_multiple_files(hid_t file)
 
     max_ext_size -= 1;
 
-    if (__add_external_files(dcpl, n_external_files, 0, max_ext_size) < 0) {
+    if (add_external_files(dcpl, n_external_files, 0, max_ext_size) < 0) {
         FAIL_STACK_ERROR;
     }
 
@@ -965,7 +965,7 @@ test_path_absolute(hid_t fapl)
     hid_t   dset  = -1;        /* dataset                              */
     size_t  i     = 0;         /* miscellaneous counter                */
     char    cwdpath[1024];     /* working directory                    */
-    char    filename[1024];    /* file name                            */
+    char    filename[1088];    /* file name                            */
     int     part[PART_SIZE];   /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
     hsize_t cur_size;          /* current data space size              */
@@ -1059,7 +1059,6 @@ test_path_relative(hid_t fapl)
     hid_t   space = -1;        /* data space                           */
     hid_t   dset  = -1;        /* dataset                              */
     size_t  i     = 0;         /* miscellaneous counters               */
-    char    cwdpath[1024];     /* working directory                    */
     char    filename[1024];    /* file name                            */
     int     part[PART_SIZE];   /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
@@ -1084,8 +1083,6 @@ test_path_relative(hid_t fapl)
     /* Create the dataset */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
-    if (NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
-        TEST_ERROR
     for (i = 0; i < N_EXT_FILES; i++) {
         HDsnprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
@@ -1158,7 +1155,6 @@ test_path_relative_cwd(hid_t fapl)
     hid_t   dset2 = -1;        /* dataset, opened a second time        */
     hid_t   dset3 = -1;        /* dataset, opened with different prefix    */
     size_t  i     = 0;         /* miscellaneous counters               */
-    char    cwdpath[1024];     /* working directory                    */
     char    filename[1024];    /* file name                            */
     int     part[PART_SIZE];   /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
@@ -1184,8 +1180,6 @@ test_path_relative_cwd(hid_t fapl)
     /* Create the dataset */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
-    if (NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
-        TEST_ERROR
     for (i = 0; i < N_EXT_FILES; i++) {
         HDsnprintf(filename, sizeof(filename), "..%sextern_%dr.raw", H5_DIR_SEPS, (int)i + 1);
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)

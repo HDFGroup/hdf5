@@ -492,7 +492,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
     }
 #else  /* NDEBUG */
     SKIPPED();
-    puts("    Not tested when assertions are disabled");
+    HDputs("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
 
     /*
@@ -1782,7 +1782,7 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -1805,7 +1805,7 @@ error:
     H5E_END_TRY;
 
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     HDexit(EXIT_FAILURE);
 } /* end main() */

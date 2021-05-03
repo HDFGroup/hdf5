@@ -28,61 +28,101 @@ $Source = "";
 # usually the same as the package name.
 #
 %TypeString = ("haddr_t"                    => "a",
+               "H5A_info_t"                 => "Ai",
+               "H5A_operator1_t"            => "Ao",
+               "H5A_operator2_t"            => "AO",
                "hbool_t"                    => "b",
+               "H5AC_cache_config_t"        => "Cc",
+               "H5AC_cache_image_config_t"  => "CC",
                "double"                     => "d",
                "H5D_alloc_time_t"           => "Da",
+               "H5D_append_cb_t"            => "DA",
                "H5FD_mpio_collective_opt_t" => "Dc",
                "H5D_fill_time_t"            => "Df",
                "H5D_fill_value_t"           => "DF",
+               "H5D_gather_func_t"          => "Dg",
                "H5FD_mpio_chunk_opt_t"      => "Dh",
                "H5D_mpio_actual_io_mode_t"  => "Di",
+               "H5FD_file_image_callbacks_t" => "DI",
                "H5D_chunk_index_t"          => "Dk",
                "H5D_layout_t"               => "Dl",
                "H5D_mpio_no_collective_cause_t" => "Dn",
                "H5D_mpio_actual_chunk_opt_mode_t" => "Do",
+               "H5D_operator_t"             => "DO",
                "H5D_space_status_t"         => "Ds",
-               "H5D_vds_view_t"             => "Dv",
+               "H5D_scatter_func_t"         => "DS",
                "H5FD_mpio_xfer_t"           => "Dt",
-               "H5FD_splitter_vfd_config_t" => "Dr",
+               "H5D_vds_view_t"             => "Dv",
                "herr_t"                     => "e",
+               "H5E_auto1_t"                => "Ea",
+               "H5E_auto2_t"                => "EA",
                "H5E_direction_t"            => "Ed",
                "H5E_error_t"                => "Ee",
-               "H5E_type_t"                 => "Et",
                "H5ES_status_t"              => "Es",
+               "H5E_type_t"                 => "Et",
+               "H5FD_class_t"               => "FC",
                "H5F_close_degree_t"         => "Fd",
                "H5F_fspace_strategy_t"      => "Ff",
-               "H5F_file_space_type_t"      => "Ff",
+               "H5F_flush_cb_t"             => "FF",
+               "H5F_info2_t"                => "FI",
                "H5F_mem_t"                  => "Fm",
                "H5F_scope_t"                => "Fs",
-               "H5F_fspace_type_t"          => "Ft",
+               "H5F_file_space_type_t"      => "Ft",
                "H5F_libver_t"               => "Fv",
+               "H5G_iterate_t"              => "Gi",
                "H5G_obj_t"                  => "Go",
                "H5G_stat_t"                 => "Gs",
                "hsize_t"                    => "h",
+               "H5_alloc_stats_t"           => "Ha",
+               "H5_atclose_func_t"          => "Hc",
                "hssize_t"                   => "Hs",
-               "H5E_major_t"                => "i",
-               "H5E_minor_t"                => "i",
-               "H5_iter_order_t"            => "Io",
-               "H5_index_t"                 => "Ii",
+               "H5E_major_t"                => "i",     # H5E_major_t is typedef'd to hid_t
+               "H5E_minor_t"                => "i",     # H5E_minor_t is typedef'd to hid_t
                "hid_t"                      => "i",
+               "H5I_future_discard_func_t"  => "ID",
+               "H5I_free_t"                 => "If",
+               "H5_index_t"                 => "Ii",
+               "H5I_iterate_func_t"         => "II",
+               "H5_iter_order_t"            => "Io",
+               "H5I_future_realize_func_t"  => "IR",
                "int"                        => "Is",
                "int32_t"                    => "Is",
+               "H5I_search_func_t"          => "IS",
+               "H5I_type_t"                 => "It",
                "unsigned"                   => "Iu",
                "unsigned int"               => "Iu",
                "uint32_t"                   => "Iu",
-               "uint64_t"                   => "UL",
-               "H5I_type_t"                 => "It",
                "H5O_token_t"                => "k",
+               "H5L_iterate1_t"             => "Li",
+               "H5L_iterate2_t"             => "LI",
                "H5G_link_t"                 => "Ll", #Same as H5L_type_t now
                "H5L_type_t"                 => "Ll",
+               "H5L_elink_traverse_t"       => "Lt",
+               "H5MM_allocate_t"            => "Ma",
                "MPI_Comm"                   => "Mc",
+               "H5MM_free_t"                => "Mf",
                "MPI_Info"                   => "Mi",
+               "H5M_iterate_t"              => 'MI',
                "H5FD_mem_t"                 => "Mt",
                "off_t"                      => "o",
+               "H5O_iterate1_t"             => "Oi",
+               "H5O_iterate2_t"             => "OI",
+               "H5O_mcdt_search_cb_t"       => "Os",
                "H5O_type_t"                 => "Ot",
                "H5P_class_t"                => "p",
-               "hobj_ref_t"                 => "Ro",
+               "H5P_cls_create_func_t"      => "Pc",
+               "H5P_prp_create_func_t"      => "PC",
+               "H5P_prp_delete_func_t"      => "PD",
+               "H5P_prp_get_func_t"         => "PG",
+               "H5P_iterate_t"              => "Pi",
+               "H5P_cls_close_func_t"       => "Pl",
+               "H5P_prp_close_func_t"       => "PL",
+               "H5P_prp_compare_func_t"     => "PM",
+               "H5P_cls_copy_func_t"        => "Po",
+               "H5P_prp_copy_func_t"        => "PO",
+               "H5P_prp_set_func_t"         => "PS",
                "hdset_reg_ref_t"            => "Rd",
+               "hobj_ref_t"                 => "Ro",
                "H5R_ref_t"                  => "Rr",
                "H5R_type_t"                 => "Rt",
                "char"                       => "s",
@@ -92,124 +132,83 @@ $Source = "";
                "H5S_sel_type"               => "St",
                "htri_t"                     => "t",
                "H5T_cset_t",                => "Tc",
+               "H5T_conv_t"                 => "TC",
                "H5T_direction_t",           => "Td",
+               "H5T_pers_t"                 => "Te",
+               "H5T_conv_except_func_t"     => "TE",
                "H5T_norm_t"                 => "Tn",
                "H5T_order_t"                => "To",
                "H5T_pad_t"                  => "Tp",
-               "H5T_pers_t"                 => "Te",
                "H5T_sign_t"                 => "Ts",
                "H5T_class_t"                => "Tt",
                "H5T_str_t"                  => "Tz",
                "unsigned long"              => "Ul",
                "unsigned long long"         => "UL",
-               "H5VL_subclass_t"            => "VS",
-               "H5VL_get_conn_lvl_t"        => "VL",
+               "uint64_t"                   => "UL",
                "H5VL_attr_get_t"            => "Va",
-               "H5VL_attr_optional_t"       => "Vs",
+               "H5VL_blob_optional_t"       => "VA",
                "H5VL_attr_specific_t"       => "Vb",
                "H5VL_blob_specific_t"       => "VB",
-               "H5VL_class_value_t"         => "VC",
                "H5VL_dataset_get_t"         => "Vc",
+               "H5VL_class_value_t"         => "VC",
                "H5VL_dataset_specific_t"    => "Vd",
-               "H5VL_dataset_optional_t"    => "Vt",
                "H5VL_datatype_get_t"        => "Ve",
                "H5VL_datatype_specific_t"   => "Vf",
-               "H5VL_datatype_optional_t"   => "Vu",
                "H5VL_file_get_t"            => "Vg",
                "H5VL_file_specific_t"       => "Vh",
-               "H5VL_file_optional_t"       => "Vv",
                "H5VL_group_get_t"           => "Vi",
                "H5VL_group_specific_t"      => "Vj",
-               "H5VL_group_optional_t"      => "Vw",
                "H5VL_link_create_type_t"    => "Vk",
                "H5VL_link_get_t"            => "Vl",
+               "H5VL_get_conn_lvl_t"        => "VL",
                "H5VL_link_specific_t"       => "Vm",
-               "H5VL_link_optional_t"       => "Vx",
                "H5VL_object_get_t"          => "Vn",
+               "H5VL_request_notify_t"      => "VN",
                "H5VL_object_specific_t"     => "Vo",
-               "H5VL_object_optional_t"     => "Vy",
                "H5VL_request_specific_t"    => "Vr",
+               "H5VL_attr_optional_t"       => "Vs",
+               "H5VL_subclass_t"            => "VS",
+               "H5VL_dataset_optional_t"    => "Vt",
+               "H5VL_datatype_optional_t"   => "Vu",
+               "H5VL_file_optional_t"       => "Vv",
+               "H5VL_group_optional_t"      => "Vw",
+               "H5VL_link_optional_t"       => "Vx",
+               "H5VL_object_optional_t"     => "Vy",
                "H5VL_request_optional_t"    => "Vz",
-               "H5VL_blob_optional_t"       => "VA",
-               "void"                       => "x",
-               "FILE"                       => "x",
-               "H5_alloc_stats_t"           => "x",
-               "H5A_operator_t"             => "x",
-               "H5A_operator1_t"            => "x",
-               "H5A_operator2_t"            => "x",
-               "H5A_info_t"                 => "x",
-               "H5AC_cache_config_t"        => "x",
-               "H5AC_cache_image_config_t"  => "x",
-               "H5D_append_cb_t"            => "x",
-               "H5D_gather_func_t"          => "x",
-               "H5D_operator_t"             => "x",
-               "H5D_scatter_func_t"         => "x",
-               "H5E_auto_t"                 => "x",
-               "H5E_auto1_t"                => "x",
-               "H5E_auto2_t"                => "x",
-               "H5E_walk_t"                 => "x",
-               "H5E_walk1_t"                => "x",
-               "H5E_walk2_t"                => "x",
-               "H5F_flush_cb_t"             => "x",
-               "H5F_info1_t"                => "x",
-               "H5F_info2_t"                => "x",
-               "H5F_retry_info_t"           => "x",
-               "H5F_vfd_swmr_config_t"      => "x",
-               "H5FD_t"                     => "x",
-               "H5FD_class_t"               => "x",
-               "H5FD_stream_fapl_t"         => "x",
-               "H5FD_ros3_fapl_t"           => "x",
-               "H5FD_hdfs_fapl_t"           => "x",
-               "H5FD_file_image_callbacks_t" => "x",
-               "H5FD_mirror_fapl_t"         => "x",
-               "H5G_iterate_t"              => "x",
-               "H5G_info_t"                 => "x",
-               "H5I_free_t"                 => "x",
-               "H5I_iterate_func_t"         => "x",
-               "H5I_search_func_t"          => "x",
-               "H5L_class_t"                => "x",
-               "H5L_elink_traverse_t"       => "x",
-               "H5L_info1_t"                => "x",
-               "H5L_info2_t"                => "x",
-               "H5L_iterate1_t"             => "x",
-               "H5L_iterate2_t"             => "x",
-               "H5M_iterate_t"              => 'x',
-               "H5MM_allocate_t"            => "x",
-               "H5MM_free_t"                => "x",
-               "H5O_info1_t"                => "x",
-               "H5O_info2_t"                => "x",
-               "H5O_native_info_t"          => "x",
-               "H5O_iterate1_t"             => "x",
-               "H5O_iterate2_t"             => "x",
-               "H5O_mcdt_search_cb_t"       => "x",
-               "H5P_cls_create_func_t"      => "x",
-               "H5P_cls_copy_func_t"        => "x",
-               "H5P_cls_close_func_t"       => "x",
-               "H5P_iterate_t"              => "x",
-               "H5P_prp_create_func_t"      => "x",
-               "H5P_prp_copy_func_t"        => "x",
-               "H5P_prp_close_func_t"       => "x",
-               "H5P_prp_delete_func_t"      => "x",
-               "H5P_prp_get_func_t"         => "x",
-               "H5P_prp_set_func_t"         => "x",
-               "H5P_prp_compare_func_t"     => "x",
-               "H5T_cdata_t"                => "x",
-               "H5T_conv_t"                 => "x",
-               "H5T_conv_except_func_t"     => "x",
-               "H5VL_t"                     => "x",
-               "H5VL_class_t"               => "x",
-               "H5VL_loc_params_t"          => "x",
-               "H5VL_request_notify_t"      => "x",
-               "H5Z_func_t"                 => "x",
-               "H5Z_filter_func_t"          => "x",
                "va_list"                    => "x",
+               "void"                       => "x",
                "size_t"                     => "z",
                "H5Z_SO_scale_type_t"        => "Za",
                "H5Z_class_t"                => "Zc",
                "H5Z_EDC_t"                  => "Ze",
                "H5Z_filter_t"               => "Zf",
+               "H5Z_filter_func_t"          => "ZF",
                "ssize_t"                    => "Zs",
+# Types below must be defined here, as they appear in function arguments,
+# but they are not yet supported in the H5_trace_args() routine yet.  If
+# they are used as an actual parameter type (and not just as a pointer to
+# to the type), they must have a "real" abbreviation added (like the ones
+# above), moved to the section of entries above, and support for displaying
+# the type must be added to H5_trace_args().
+               "H5ES_err_info_t"            => "#",
+               "H5FD_t"                     => "#",
+               "H5FD_hdfs_fapl_t"           => "#",
+               "H5FD_mirror_fapl_t"         => "#",
+               "H5FD_ros3_fapl_t"           => "#",
+               "H5FD_splitter_vfd_config_t" => "#",
+               "H5L_class_t"                => "#",
+               "H5VL_class_t"               => "#",
+               "H5VL_loc_params_t"          => "#",
+               "H5VL_request_status_t"      => "#",
               );
+
+
+##############################################################################
+# Maximum length of H5TRACE macro line
+# If the ColumnLimit in .clang-format is changed, this value will need to be updated
+#
+my $max_trace_macro_line_len = 110;
+
 
 ##############################################################################
 # Print an error message.
@@ -241,7 +240,9 @@ sub argstring ($$$) {
 
   # Normalize the data type by removing redundant white space,
   # certain type qualifiers, and indirection.
-  $atype =~ s/^\bconst\b//;
+  $atype =~ s/^\bconst\b//;     # Leading const
+  $atype =~ s/\s*const\s*//;    # const after type, possibly in the middle of '*'s
+  $atype =~ s/^\bstatic\b//;
   $atype =~ s/\bH5_ATTR_UNUSED\b//g;
   $atype =~ s/\bH5_ATTR_DEPRECATED_USED\b//g;
   $atype =~ s/\bH5_ATTR_NDEBUG_UNUSED\b//g;
@@ -265,53 +266,65 @@ sub argstring ($$$) {
     --$ptr;
     $tstr = $TypeString{"$atype*"};
   } elsif (!exists $TypeString{$atype}) {
-    errmesg $file, $func, "untraceable type \`$atype", '*'x$ptr, "\'";
+# Defer throwing error until type is actually used
+#    errmesg $file, $func, "untraceable type \`$atype", '*'x$ptr, "\'";
   } else {
     $tstr = $TypeString{$atype};
   }
-  return ("*" x $ptr) . ($array?"[$array]":"") . $tstr;
+  return ("*" x $ptr) . ($array ? "[$array]" : "") . $tstr;
 }
 
 ##############################################################################
 # Given information about an API function, rewrite that function with
 # updated tracing information.
 #
-sub rewrite_func ($$$$$) {
-  my ($file, $type, $name, $args, $body) = @_;
-  my ($arg,$trace);
-  my (@arg_name, @arg_str);
+my $file_api = 0;
+my $file_args = 0;
+my $total_api = 0;
+my $total_args = 0;
+sub rewrite_func ($$$$$$$$) {
+  my ($file, $begin, $type, $aftertype, $name, $args, $close, $body) = @_;
+  my ($arg, $trace, $argtrace);
+  my (@arg_name, @arg_str, @arg_type);
   local $_;
+
+  # Keep copy of original arguments
+  my $orig_args = $args;
 
   # Parse return value
   my $rettype = argstring $file, $name, $type;
-  goto error if $rettype =~ /!/;
 
   # Parse arguments
   if ($args eq "void") {
-    $trace = "H5TRACE0(\"$rettype\",\"\");\n";
+    $trace = "H5TRACE0(\"$rettype\", \"\");\n";
+    $argtrace = "H5ARG_TRACE0(\"\")";
   } else {
     # Split arguments.  First convert `/*in,out*/' to get rid of the
-    # comma, then split the arguments on commas.
-    $args =~ s/(\/\*\s*in),\s*(out\s*\*\/)/$1_$2/g;
+    # comma and remove lines beginning with a '#', then split the arguments
+    # on commas.
+    $args =~ s/(\/\*\s*in),\s*(out\s*\*\/)/$1_$2/g;     # Get rid of comma in 'in,out'
+    $args =~ s/H5FL_TRACK_PARAMS//g; # Remove free list macro
+    $args =~ s/\n#.*?\n/\n/g;        # Remove lines beginning with '#'
     my @args = split /,[\s\n]*/, $args;
     my $argno = 0;
     my %names;
 
     for $arg (@args) {
-      if($arg=~/\w*\.{3}\w*/){
+      if($arg=~/\w*\.{3}\w*/){  # Skip "..." for varargs parameter
         next;
       }
-      unless ($arg=~/^(([a-z_A-Z]\w*\s+)+\**)
+      unless ($arg=~/^((\s*[a-z_A-Z](\w|\*)*\s+)+(\s*\*\s*|\s*const\s*|\s*volatile\s*)*)
               ([a-z_A-Z]\w*)(\[.*?\])?
               (\s*\/\*\s*(in|out|in_out)\s*\*\/)?\s*$/x) {
         errmesg $file, $name, "unable to parse \`$arg\'";
         goto error;
       } else {
-        my ($atype, $aname, $array, $adir) = ($1, $3, $4, $6);
+        my ($atype, $aname, $array, $adir) = ($1, $5, $6, $8);
         $names{$aname} = $argno++;
         $adir ||= "in";
         $atype =~ s/\s+$//;
         push @arg_name, $aname;
+        push @arg_type, $atype;
 
         if ($adir eq "out") {
           push @arg_str, "x";
@@ -332,71 +345,173 @@ sub rewrite_func ($$$$$) {
         }
       }
     }
+
+    # Compose the trace macro
     $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\", \"";
+    $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(FUNC, \"";
     $trace .= join("", @arg_str) . "\"";
-    my $len = 4 + length $trace;
+    $argtrace .= join("", @arg_str) . "\"";
+    my $len = 4 + length $trace;        # Add 4, for indenting the line
     for (@arg_name) {
-      if ($len + length >= 77) {
-        $trace .= ",\n             $_";
-        $len = 13 + length;
+      # Wrap lines that will be longer than the limit, after ');' is added
+      if ($len + length >= ($max_trace_macro_line_len - 2)) {
+        # Wrap line, with indention
+        $trace .= ",\n             ";
+        $len = 13;              # Set to 13, for indention
+
+        # Indent an extra space to account for extra digit in 'H5TRACE' macro
+        if (scalar(@arg_str) >= 10) {
+          $trace .= " ";
+          $len++;
+        }
       } else {
-        $trace .= ", $_";
-        $len += 1 + length;
+        $trace .= ", ";
+        $len += 2;     # Add 2, for ', '
       }
+
+      # Append argument
+      $trace .= "$_";
+      $argtrace .= ", $_";
+      $len += length;     # Add length of appended argument name
     }
+
+    # Append final ');' for macro
     $trace .= ");\n";
-  }
-  goto error if grep {/!/} @arg_str;
-
-  # The H5TRACE() statement
-  if ($body =~ /\/\*[ \t]*NO[ \t]*TRACE[ \t]*\*\//) {
-    # Ignored due to NO TRACE comment.
-  } elsif ($body =~ s/((\n[ \t]*)H5TRACE\d+\s*\(.*?\);)\n/"$2$trace"/es) {
-    # Replaced an H5TRACE macro.
-  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*[ \t]*(\(.*?\))?;??)\n/"$1$2$trace"/es) {
-    # Added an H5TRACE macro after a FUNC_ENTER macro.
-  } else {
-    errmesg $file, $name, "unable to insert tracing information";
-    print "body = ", $body, "\n";
-    goto error;
+    $argtrace .= ")";
   }
 
-  
+  # Check for API / non-API routine name
+  if( $name =~ /H5[A-Z]{0,2}[a-z].*/) {
+      # The H5TRACE() statement, for API routines
+      if ($body =~ /\/\*[ \t]*NO[ \t]*TRACE[ \t]*\*\//) {
+        # Ignored due to NO TRACE comment.
+      } else {
+          # Check for known, but unsupported type
+          if ( $trace =~ /(^#)|([^*]#)/ ) {
+            # Check for unsupported return type
+            if ( $type =~ /(^#)|([^*]#)/ ) {
+              errmesg $file, $name, "unsupported type in return type\nAdd to TypeString hash in trace script and update H5_trace_args()";
+              print "type = '$type'\n";
+            }
+
+            # Check for unsupported argument type
+            $index = 0;
+            for (@arg_str) {
+              if ( $_ =~ /(^#)|([^*]#)/ ) {
+                errmesg $file, $name, "unsupported type in args\nAdd to TypeString hash in trace script and update H5_trace_args()";
+                print "type = $arg_type[$index]\n";
+              }
+              $index++;
+            }
+            goto error;
+          }
+
+          # Check for unknown (and therefore unsupported) type
+          if ( $trace =~ /(^!)|([^*]!)/ ) {
+            # Check for unsupported return type
+            if ( $type =~ /(^!)|([^*]!)/ ) {
+              errmesg $file, $name, "unknown type in return type\nAdd to TypeString hash in trace script and also update H5_trace_args() if used by value";
+              print "type = '$type'\n";
+            }
+
+            # Check for unsupported argument type
+            $index = 0;
+            for (@arg_str) {
+              if ( $_ =~ /(^!)|([^*]!)/ ) {
+                errmesg $file, $name, "unknown type in args\nAdd to TypeString hash in trace script and also update H5_trace_args() if used by value";
+                print "type = $arg_type[$index]\n";
+              }
+              $index++;
+            }
+            goto error;
+          }
+
+          if ($body =~ s/((\n[ \t]*)H5TRACE\d+\s*\(.*?\);)\n/"$2$trace"/es) {
+            # Replaced an H5TRACE macro.
+          } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*[ \t]*(\(.*?\))?;??)\n/"$1$2$trace"/es) {
+            # Added an H5TRACE macro after a FUNC_ENTER macro.
+          } else {
+            errmesg $file, $name, "unable to insert tracing information";
+            print "body = ", $body, "\n";
+            goto error;
+          }
+      }
+
+    #Increment # of API routines modified
+    $file_api++;
+  }
+
+  # Check for H5ARG_TRACE macros in non-API routines
+  if ( $body =~ /H5ARG_TRACE/ ) {
+      # Check for untraceable type (deferred until $argtrace used)
+      if ( $argtrace =~ /(^!)|([^*]!)/ ) {
+        errmesg $file, $name, "untraceable type in args";
+        print "args = '$orig_args'\n";
+        goto error;
+      }
+
+      # Replace / update H5ARG_TRACE macro.
+      $body =~ s/(H5ARG_TRACE(\d+\s*\(.*?\))?)/"$argtrace"/esg;
+
+    #Increment # of non-API routines modified
+    $file_args++;
+  }
+
  error:
-  return "\n$type\n$name($args)\n$body";
+  return "\n$begin$type$aftertype$name($orig_args)$close$body";
 }
 
 ##############################################################################
 # Process each source file, rewriting API functions with updated
 # tracing information.
 #
-my $total_api = 0;
 for $file (@ARGV) {
+  $file_api = 0;
+  $file_args = 0;
+
   # Ignore some files that do not need tracing macros
-  unless ($file eq "H5FDmulti.c" or $file eq "src/H5FDmulti.c" or $file eq "H5FDstdio.c" or $file eq "src/H5FDstdio.c") {
-  
+  unless ($file eq "H5FDmulti.c" or $file eq "src/H5FDmulti.c" or $file eq "H5FDstdio.c" or $file eq "src/H5FDstdio.c" or $file eq "src/H5TS.c") {
+
     # Snarf up the entire file
     open SOURCE, $file or die "$file: $!\n";
     $Source = join "", <SOURCE>;
     close SOURCE;
 
-    # Make modifications
+    # Make a copy of the original data
     my $original = $Source;
-    my $napi = $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
-                              (H5[A-Z]{0,2}[^_A-Z0-9]\w*)      #name
-                              \s*\((.*?)\)\s*               #args
-                              (\{.*?\n\}[^\n]*)             #body
-                           /rewrite_func($file,$1,$3,$4,$5)/segx;
-    $total_api += $napi;
+
+    # Check which style of function declaration is used in this file
+    if ( $Source =~ /BEGIN_FUNC/ ) {
+        # Make modifications
+        $Source =~ s/\n(BEGIN_FUNC.*?\n)                      #begin
+                        ([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)  #type
+                        (.*?\n)                               #aftertype
+                         (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
+                         \s*\((.*?)\)\s*                      #args
+                         (\))                                 #close
+                         (\n.*?\nEND_FUNC\([^\n]*)            #body
+                         /rewrite_func($file,$1,$2,$4,$5,$6,$7,$8)/segx;
+    } else {
+        # Make modifications
+        $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
+                         (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
+                         \s*\((.*?)\)\s*                      #args
+                         (\{.*?\n\}[^\n]*)                    #body
+                         /rewrite_func($file,"",$1,"\n",$3,$4,"\n",$5)/segx;
+    }
 
 # If the source changed then print out the new version
     if ($original ne $Source) {
-      printf "%s: instrumented %d API function%s\n", 
-             $file, $napi, 1==$napi?"":"s";
+      printf "%s: instrumented %d API function%s and %d argument list%s\n",
+             $file, $file_api, (1 == $file_api ? "" : "s"),
+             $file_args, (1 == $file_args ? "" : "s");
       rename $file, "$file~" or die "unable to make backup";
       open SOURCE, ">$file" or die "unable to modify source";
       print SOURCE $Source;
       close SOURCE;
+
+      $total_api += $file_api;
+      $total_args += $file_args;
     }
   }
 }
@@ -408,6 +523,9 @@ if ($found_errors eq 1) {
     printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     exit 1;
 } else {
-    printf "Finished processing HDF5 API calls\n";
+    printf "Finished processing HDF5 API calls:\n";
+    printf "\tinstrumented %d API function%s and %d argument list%s\n",
+             $total_api, (1 == $total_api ? "" : "s"),
+             $total_args, (1 == $total_args ? "" : "s");
 }
 

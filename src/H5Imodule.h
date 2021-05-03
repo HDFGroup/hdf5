@@ -11,22 +11,27 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *		Saturday, September 12, 2015
+ * Programmer:  Quincey Koziol
+ *              Saturday, September 12, 2015
  *
- * Purpose:	This file contains declarations which define macros for the
- *		H5I package.  Including this header means that the source file
- *		is part of the H5I package.
+ * Purpose:     This file contains declarations which define macros for the
+ *              H5I package.  Including this header means that the source file
+ *              is part of the H5I package.
  */
-#ifndef _H5Imodule_H
-#define _H5Imodule_H
+#ifndef H5Imodule_H
+#define H5Imodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
- *      reporting macros.
+ * reporting macros.
  */
 #define H5I_MODULE
 #define H5_MY_PKG      H5I
 #define H5_MY_PKG_ERR  H5E_ATOM
 #define H5_MY_PKG_INIT NO
 
-#endif /* _H5Imodule_H */
+/**\defgroup H5I H5I
+ * \brief Identifier Interface
+ * \todo Describe concisely what the functions in this module are about.
+ */
+
+#endif /* H5Imodule_H */

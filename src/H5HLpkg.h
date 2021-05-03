@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5HL package!"
 #endif
 
-#ifndef _H5HLpkg_H
-#define _H5HLpkg_H
+#ifndef H5HLpkg_H
+#define H5HLpkg_H
 
 /* Get package's private header */
 #include "H5HLprivate.h"
@@ -145,4 +145,4 @@ H5_DLL H5HL_dblk_t *H5HL__dblk_new(H5HL_t *heap);
 H5_DLL herr_t       H5HL__dblk_dest(H5HL_dblk_t *dblk);
 H5_DLL herr_t       H5HL__dblk_realloc(H5F_t *f, H5HL_t *heap, size_t new_heap_size);
 
-#endif /* _H5HLpkg_H */
+#endif /* H5HLpkg_H */

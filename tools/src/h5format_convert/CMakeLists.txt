@@ -6,7 +6,7 @@ project (HDF5_TOOLS_SRC_H5FC C)
 # --------------------------------------------------------------------
 if (NOT ONLY_SHARED_LIBS)
   add_executable (h5format_convert ${HDF5_TOOLS_SRC_H5FC_SOURCE_DIR}/h5format_convert.c)
-  target_include_directories (h5format_convert PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5format_convert PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5format_convert PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   TARGET_C_PROPERTIES (h5format_convert STATIC)
   target_link_libraries (h5format_convert PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
@@ -17,7 +17,7 @@ if (NOT ONLY_SHARED_LIBS)
 endif ()
 if (BUILD_SHARED_LIBS)
   add_executable (h5format_convert-shared ${HDF5_TOOLS_SRC_H5FC_SOURCE_DIR}/h5format_convert.c)
-  target_include_directories (h5format_convert-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5format_convert-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5format_convert-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   TARGET_C_PROPERTIES (h5format_convert-shared SHARED)
   target_link_libraries (h5format_convert-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
@@ -25,6 +25,17 @@ if (BUILD_SHARED_LIBS)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5format_convert-shared")
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5format_convert-shared)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5FORMAT_SRC_FORMAT h5format_convert)
+  else ()
+    clang_format (HDF5_H5FORMAT_SRC_FORMAT h5format_convert-shared)
+  endif ()
 endif ()
 
 ##############################################################################

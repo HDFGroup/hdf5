@@ -15,8 +15,8 @@
  * This file contains private information about the H5L module
  * for dealing with links in an HDF5 file.
  */
-#ifndef _H5Lprivate_H
-#define _H5Lprivate_H
+#ifndef H5Lprivate_H
+#define H5Lprivate_H
 
 /* Include package's public header */
 #include "H5Lpublic.h"
@@ -139,4 +139,4 @@ H5_DLL herr_t H5L_register(const H5L_class_t *cls);
 H5_DLL herr_t H5L_unregister(H5L_type_t id);
 H5_DLL const H5L_class_t *H5L_find_class(H5L_type_t id);
 
-#endif /* _H5Lprivate_H */
+#endif /* H5Lprivate_H */

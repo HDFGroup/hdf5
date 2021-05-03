@@ -1223,7 +1223,7 @@ H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ix*x", lapl_id, func, op_data);
+    H5TRACE3("e", "iLt*x", lapl_id, func, op_data);
 
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */
@@ -1267,7 +1267,7 @@ H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*x**x", lapl_id, func, op_data);
+    H5TRACE3("e", "i*Lt**x", lapl_id, func, op_data);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))

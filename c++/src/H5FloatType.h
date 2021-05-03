@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5FloatType_H
-#define __H5FloatType_H
+#ifndef H5FloatType_H
+#define H5FloatType_H
 
 namespace H5 {
 
@@ -36,7 +36,7 @@ class H5_DLLCPP FloatType : public AtomType {
 
     // Returns an FloatType object via DataType* by decoding the
     // binary object description of this type.
-    virtual DataType *decode() const;
+    virtual DataType *decode() const H5_OVERRIDE;
 
     // Retrieves the exponent bias of a floating-point type.
     size_t getEbias() const;
@@ -64,7 +64,7 @@ class H5_DLLCPP FloatType : public AtomType {
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const H5_OVERRIDE
     {
         return ("FloatType");
     }
@@ -79,9 +79,9 @@ class H5_DLLCPP FloatType : public AtomType {
     FloatType(const FloatType &original);
 
     // Noop destructor.
-    virtual ~FloatType();
+    virtual ~FloatType() H5_OVERRIDE;
 
 }; // end of FloatType
 } // namespace H5
 
-#endif // __H5FloatType_H
+#endif // H5FloatType_H

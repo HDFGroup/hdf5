@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5CppDoc_H
-#define __H5CppDoc_H
+#ifndef H5CppDoc_H
+#define H5CppDoc_H
 
 //-------------------------------------------------------------------------
 // The following section will be used to generate the 'Mainpage'
@@ -92,4 +92,4 @@
 ///        This example shows how to work with groups.
 ///\example     h5group.cpp
 
-#endif // __H5CppDoc_H
+#endif // H5CppDoc_H

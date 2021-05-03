@@ -405,7 +405,7 @@
   # --------------------------------------------------------------------
   HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
 
-  if (WIN32 OR MINGW)
+  if (WIN32)
     configure_file(${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
     #file (READ ${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     #file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")

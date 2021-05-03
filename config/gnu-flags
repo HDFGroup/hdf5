@@ -158,6 +158,15 @@ if test "X-gcc" = "X-$cc_vendor"; then
         DEBUG_CFLAGS="-ftrapv -fno-common"
     fi
 
+    ########################
+    # Enhanced Diagnostics #
+    ########################
+
+    if test $cc_vers_major -ge 10; then
+        NO_DIAGS_CFLAGS="-fdiagnostics-urls=never -fno-diagnostics-color"
+    fi
+    DIAGS_CFLAGS=
+
     ###########
     # Symbols #
     ###########

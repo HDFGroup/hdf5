@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5D package!"
 #endif
 
-#ifndef _H5Dpkg_H
-#define _H5Dpkg_H
+#ifndef H5Dpkg_H
+#define H5Dpkg_H
 
 /* Get package's private header */
 #include "H5Dprivate.h"
@@ -741,4 +741,4 @@ H5_DLL herr_t H5D__layout_type_test(hid_t did, H5D_layout_t *layout_type);
 H5_DLL herr_t H5D__current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused);
 #endif /* H5D_TESTING */
 
-#endif /*_H5Dpkg_H*/
+#endif /*H5Dpkg_H*/

@@ -12,11 +12,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, March 27, 1998
  */
-#ifndef _H5HGprivate_H
-#define _H5HGprivate_H
+#ifndef H5HGprivate_H
+#define H5HGprivate_H
 
 /* Private headers needed by this file. */
 #include "H5Fprivate.h" /* File access				*/
@@ -72,4 +72,4 @@ H5_DLL herr_t H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int f
 
 bool H5HG_trap(const char *);
 
-#endif /* _H5HGprivate_H */
+#endif /* H5HGprivate_H */

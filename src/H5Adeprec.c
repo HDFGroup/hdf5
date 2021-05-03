@@ -379,7 +379,7 @@ H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
     herr_t         ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5_ITER_ERROR)
-    H5TRACE4("e", "i*Iux*x", loc_id, attr_num, op, op_data);
+    H5TRACE4("e", "i*IuAo*x", loc_id, attr_num, op, op_data);
 
     /* check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))

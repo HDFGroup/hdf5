@@ -136,43 +136,6 @@ done:
 } /* end H5FD_mpi_get_comm() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_get_mpi_info
- *
- * Purpose:	Retrieves the file's mpi info
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *              4/4/17
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_get_mpi_info(H5FD_t *file, void **mpi_info)
-{
-    const H5FD_class_mpi_t *cls;
-    herr_t                  ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(file);
-    cls = (const H5FD_class_mpi_t *)(file->cls);
-    HDassert(cls);
-    HDassert(cls->get_mpi_info); /* All MPI drivers must implement this */
-
-    /* Dispatch to driver */
-    if ((ret_value = (cls->get_mpi_info)(file, mpi_info)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_mpi_info request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_get_mpi_info() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_mpi_MPIOff_to_haddr
  *
  * Purpose:     Convert an MPI_Offset value to haddr_t.

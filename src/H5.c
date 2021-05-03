@@ -14,6 +14,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#include "H5module.h" /* This source code file is part of the H5 module */
 
 /***********/
 /* Headers */
@@ -43,17 +44,27 @@
 /* Package Typedefs */
 /********************/
 
+/* Node for list of 'atclose' routines to invoke at library shutdown */
+typedef struct H5_atclose_node_t {
+    H5_atclose_func_t         func; /* Function to invoke */
+    void *                    ctx;  /* Context to pass to function */
+    struct H5_atclose_node_t *next; /* Pointer to next node in list */
+} H5_atclose_node_t;
+
 /********************/
 /* Local Prototypes */
 /********************/
-static void H5_debug_mask(const char *);
+static void H5__debug_mask(const char *);
 #ifdef H5_HAVE_PARALLEL
-static int H5_mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *flag);
+static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *flag);
 #endif /*H5_HAVE_PARALLEL*/
 
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -84,6 +95,39 @@ H5_debug_t     H5_debug_g; /* debugging info */
 /* Local Variables */
 /*******************/
 
+/* Linked list of registered 'atclose' functions to invoke at library shutdown */
+static H5_atclose_node_t *H5_atclose_head = NULL;
+
+/* Declare a free list to manage the H5_atclose_node_t struct */
+H5FL_DEFINE_STATIC(H5_atclose_node_t);
+
+/*--------------------------------------------------------------------------
+NAME
+    H5__init_package -- Initialize interface-specific information
+USAGE
+    herr_t H5__init_package()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+--------------------------------------------------------------------------*/
+herr_t
+H5__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Run the library initialization routine, if it hasn't already ran */
+    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {
+        if (H5_init_library() < 0)
+            HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "unable to initialize library")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5__init_package() */
+
 /*--------------------------------------------------------------------------
  * NAME
  *   H5_init_library -- Initialize library-global information
@@ -102,6 +146,11 @@ herr_t
 H5_init_library(void)
 {
     herr_t ret_value = SUCCEED;
+
+    /* Set the 'library initialized' flag as early as possible, to avoid
+     * possible re-entrancy.
+     */
+    H5_INIT_GLOBAL = TRUE;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -132,7 +181,7 @@ H5_init_library(void)
             int key_val;
 
             if (MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(
-                                    MPI_COMM_NULL_COPY_FN, (MPI_Comm_delete_attr_function *)H5_mpi_delete_cb,
+                                    MPI_COMM_NULL_COPY_FN, (MPI_Comm_delete_attr_function *)H5__mpi_delete_cb,
                                     &key_val, NULL)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Comm_create_keyval failed", mpi_code)
 
@@ -228,8 +277,8 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
 
     /* Debugging? */
-    H5_debug_mask("-all");
-    H5_debug_mask(HDgetenv("HDF5_DEBUG"));
+    H5__debug_mask("-all");
+    H5__debug_mask(HDgetenv("HDF5_DEBUG"));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -272,6 +321,28 @@ H5_term_library(void)
 
     /* Check if we should display error output */
     (void)H5Eget_auto2(H5E_DEFAULT, &func, NULL);
+
+    /* Iterate over the list of 'atclose' callbacks that have been registered */
+    if (H5_atclose_head) {
+        H5_atclose_node_t *curr_atclose; /* Current 'atclose' node */
+
+        /* Iterate over all 'atclose' nodes, making callbacks */
+        curr_atclose = H5_atclose_head;
+        while (curr_atclose) {
+            H5_atclose_node_t *tmp_atclose; /* Temporary pointer to 'atclose' node */
+
+            /* Invoke callback, providing context */
+            (*curr_atclose->func)(curr_atclose->ctx);
+
+            /* Advance to next node and free this one */
+            tmp_atclose  = curr_atclose;
+            curr_atclose = curr_atclose->next;
+            H5FL_FREE(H5_atclose_node_t, tmp_atclose);
+        } /* end while */
+
+        /* Reset list head, in case library is re-initialized */
+        H5_atclose_head = NULL;
+    } /* end if */
 
     /*
      * Terminate each interface. The termination functions return a positive
@@ -340,6 +411,7 @@ H5_term_library(void)
          */
         if (pending == 0) {
             pending += DOWN(AC);
+            /* Shut down the "pluggable" interfaces, before the plugin framework */
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(VL);
@@ -452,7 +524,7 @@ H5dont_atexit(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
-    H5TRACE0("e","");
+    H5TRACE0("e", "");
 
     if (H5_dont_atexit_g)
         ret_value = FAIL;
@@ -485,7 +557,7 @@ H5garbage_collect(void)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE0("e","");
+    H5TRACE0("e", "");
 
     /* Call the garbage collection routines in the library */
     if (H5FL_garbage_coll() < 0)
@@ -529,8 +601,8 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "IsIsIsIsIsIs", reg_global_lim, reg_list_lim, arr_global_lim,
-             arr_list_lim, blk_global_lim, blk_list_lim);
+    H5TRACE6("e", "IsIsIsIsIsIs", reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim,
+             blk_list_lim);
 
     /* Call the free list function to actually set the limits */
     if (H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim,
@@ -564,12 +636,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, size_t *fac_size)
+H5get_free_list_sizes(size_t *reg_size /*out*/, size_t *arr_size /*out*/, size_t *blk_size /*out*/,
+                      size_t *fac_size /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*z*z*z*z", reg_size, arr_size, blk_size, fac_size);
+    H5TRACE4("e", "xxxx", reg_size, arr_size, blk_size, fac_size);
 
     /* Call the free list function to actually get the sizes */
     if (H5FL_get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) < 0)
@@ -604,12 +677,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_alloc_stats(H5_alloc_stats_t *stats)
+H5get_alloc_stats(H5_alloc_stats_t *stats /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*x", stats);
+    H5TRACE1("e", "x", stats);
 
     /* Call the internal allocation stat routine to get the values */
     if (H5MM_get_alloc_stats(stats) < 0)
@@ -620,7 +693,7 @@ done:
 } /* end H5get_alloc_stats() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5_debug_mask
+ * Function:    H5__debug_mask
  *
  * Purpose:     Set runtime debugging flags according to the string S.  The
  *              string should contain file numbers and package names
@@ -643,7 +716,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-H5_debug_mask(const char *s)
+H5__debug_mask(const char *s)
 {
     FILE *  stream = stderr;
     char    pkg_name[32], *rest;
@@ -724,15 +797,12 @@ H5_debug_mask(const char *s)
             s++;
         } /* end if-else */
     }     /* end while */
-
-    return;
-
-} /* end H5_debug_mask() */
+} /* end H5__debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5_mpi_delete_cb
+ * Function:	H5__mpi_delete_cb
  *
  * Purpose:	Callback attribute on MPI_COMM_SELF to terminate the HDF5
  *              library when the communicator is destroyed, i.e. on MPI_Finalize.
@@ -742,8 +812,8 @@ H5_debug_mask(const char *s)
  *-------------------------------------------------------------------------
  */
 static int
-H5_mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void H5_ATTR_UNUSED *attr_val,
-                 int H5_ATTR_UNUSED *flag)
+H5__mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void H5_ATTR_UNUSED *attr_val,
+                  int H5_ATTR_UNUSED *flag)
 {
     H5_term_library();
     return MPI_SUCCESS;
@@ -767,12 +837,12 @@ H5_mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void H
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
+H5get_libversion(unsigned *majnum /*out*/, unsigned *minnum /*out*/, unsigned *relnum /*out*/)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Iu*Iu*Iu", majnum, minnum, relnum);
+    H5TRACE3("e", "xxx", majnum, minnum, relnum);
 
     /* Set the version information */
     if (majnum)
@@ -890,7 +960,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             HDstrncat(lib_str, "-", (size_t)1);
             HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
         } /* end if */
-        if (HDstrcmp(lib_str, H5_lib_vers_info_g)) {
+        if (HDstrcmp(lib_str, H5_lib_vers_info_g) != 0) {
             HDfputs("Warning!  Library version information error.\n"
                     "The HDF5 library version information are not "
                     "consistent in its source code.\nThis is NOT a fatal error "
@@ -937,6 +1007,45 @@ done:
 } /* end H5open() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5atclose
+ *
+ * Purpose:	Register a callback for the library to invoke when it's
+ *		closing.  Callbacks are invoked in LIFO order.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5atclose(H5_atclose_func_t func, void *ctx)
+{
+    H5_atclose_node_t *new_atclose;         /* New 'atclose' node */
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "Hc*x", func, ctx);
+
+    /* Check arguments */
+    if (NULL == func)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL func pointer")
+
+    /* Allocate space for the 'atclose' node */
+    if (NULL == (new_atclose = H5FL_MALLOC(H5_atclose_node_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate 'atclose' node")
+
+    /* Set up 'atclose' node */
+    new_atclose->func = func;
+    new_atclose->ctx  = ctx;
+
+    /* Connector to linked-list of 'atclose' nodes */
+    new_atclose->next = H5_atclose_head;
+    H5_atclose_head   = new_atclose;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5atclose() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5close
  *
  * Purpose:	Terminate the library and release all resources.
@@ -954,7 +1063,7 @@ H5close(void)
      * this function for an uninitialized library.
      */
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
-    H5TRACE0("e","");
+    H5TRACE0("e", "");
 
     H5_term_library();
 
@@ -1073,22 +1182,57 @@ H5free_memory(void *mem)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5is_library_threadsafe(hbool_t *is_ts)
+H5is_library_threadsafe(hbool_t *is_ts /*out*/)
 {
+    herr_t ret_value = SUCCEED; /* Return value */
+
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*b", is_ts);
+    H5TRACE1("e", "x", is_ts);
 
-    HDassert(is_ts);
-
-    /* At this time, it is impossible for this to fail. */
+    if (is_ts) {
 #ifdef H5_HAVE_THREADSAFE
-    *is_ts = TRUE;
+        *is_ts = TRUE;
 #else  /* H5_HAVE_THREADSAFE */
-    *is_ts = FALSE;
+        *is_ts = FALSE;
 #endif /* H5_HAVE_THREADSAFE */
+    }
+    else
+        ret_value = FAIL;
 
-    FUNC_LEAVE_API_NOINIT(SUCCEED)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5is_library_threadsafe() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5is_library_terminating
+ *
+ * Purpose:	Checks to see if the library is shutting down.
+ *
+ * Note:	Useful for plugins to detect when the library is terminating.
+ *		For example, a VOL connector could check if a "file close"
+ *		callback was the result of the library shutdown process, or
+ *		an API action from the application.
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5is_library_terminating(hbool_t *is_terminating /*out*/)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE1("e", "x", is_terminating);
+
+    HDassert(is_terminating);
+
+    if (is_terminating)
+        *is_terminating = H5_TERM_GLOBAL;
+    else
+        ret_value = FAIL;
+
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5is_library_terminating() */
 
 #if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API) &&         \
     defined(H5_HAVE_WIN_THREADS)

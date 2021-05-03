@@ -218,7 +218,7 @@ H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I
     H5I_type_t   ret_value = H5I_BADID; /* Return value */
 
     FUNC_ENTER_API(H5I_BADID)
-    H5TRACE3("It", "zIux", hash_size, reserved, free_func);
+    H5TRACE3("It", "zIuIf", hash_size, reserved, free_func);
 
     /* Generate a new H5I_type_t value */
 
@@ -1906,7 +1906,7 @@ H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
     void *          ret_value; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE3("*x", "Itx*x", type, func, key);
+    H5TRACE3("*x", "ItIS*x", type, func, key);
 
     /* Check arguments */
     if (H5I_IS_LIB_TYPE(type))
@@ -1998,7 +1998,7 @@ H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data)
     herr_t               ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "Itx*x", type, op, op_data);
+    H5TRACE3("e", "ItII*x", type, op, op_data);
 
     /* Set up udata struct */
     int_udata.op      = op;

@@ -12,11 +12,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Bill Wendling <wendling@ncsa.uiuc.edu>
+ * Programmer:  Bill Wendling
  *              Monday, 19. February 2001
  */
-#ifndef H5TOOLS_STR_H__
-#define H5TOOLS_STR_H__
+#ifndef H5TOOLS_STR_H
+#define H5TOOLS_STR_H
 
 typedef struct h5tools_str_t {
     char * s;      /*allocate string       */
@@ -46,4 +46,4 @@ H5TOOLS_DLL char *h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *
                                      hid_t type, void *vp, h5tools_context_t *ctx);
 H5TOOLS_DLL char *h5tools_str_replace(const char *string, const char *substr, const char *replacement);
 
-#endif /* H5TOOLS_STR_H__ */
+#endif /* H5TOOLS_STR_H */

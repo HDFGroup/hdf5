@@ -3464,11 +3464,14 @@ main(void)
      * currently disabled for multi/split drivers.
      */
     if ((0 == HDstrcmp(env_h5_drvr, "multi")) || (0 == HDstrcmp(env_h5_drvr, "split"))) {
-
-        SKIPPED()
         HDputs("Skip VFD SWMR test because paged aggregation is disabled for multi/split drivers");
         HDexit(EXIT_SUCCESS);
-    } /* end if */
+    }
+
+#ifdef H5_HAVE_PARALLEL
+    HDputs("Skip VFD SWMR test because paged aggregation is disabled in parallel HDF5");
+    HDexit(EXIT_SUCCESS);
+#endif
 
     /* Set up */
     h5_reset();
@@ -3476,7 +3479,7 @@ main(void)
     if ((fapl = h5_fileaccess()) < 0) {
         nerrors++;
         PUTS_ERROR("Can't get VFD-dependent fapl")
-    } /* end if */
+    }
 
     nerrors += test_fapl();
 

@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5B2 package!"
 #endif
 
-#ifndef _H5B2pkg_H
-#define _H5B2pkg_H
+#ifndef H5B2pkg_H
+#define H5B2pkg_H
 
 /* Get package's private header */
 #include "H5B2private.h"
@@ -453,4 +453,4 @@ H5_DLL int    H5B2__get_node_depth_test(H5B2_t *bt2, void *udata);
 H5_DLL herr_t H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo);
 #endif /* H5B2_TESTING */
 
-#endif /* _H5B2pkg_H */
+#endif /* H5B2pkg_H */

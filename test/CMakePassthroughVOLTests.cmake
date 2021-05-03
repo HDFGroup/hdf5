@@ -23,9 +23,11 @@ set (VOL_LIST
     vol_pass_through2
 )
 
+# native VOL = 0
+# pass-through VOL = 1
 set (vol_native native)
 set (vol_pass_through1 "pass_through under_vol=0\;under_info={}")
-set (vol_pass_through2 "pass_through under_vol=505\;under_info={under_vol=0\;under_info={}}")
+set (vol_pass_through2 "pass_through under_vol=1\;under_info={under_vol=0\;under_info={}}")
 
 foreach (voltest ${VOL_LIST})
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${voltest}")

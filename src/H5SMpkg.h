@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  James Laird <jlaird@ncsa.uiuc.edu>
+ * Programmer:  James Laird
  *              Thursday, March 30, 2006
  *
  * Purpose:     This file contains declarations which are visible only within
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5SM package!"
 #endif
 
-#ifndef _H5SMpkg_H
-#define _H5SMpkg_H
+#ifndef H5SMpkg_H
+#define H5SMpkg_H
 
 /* Get package's private header */
 #include "H5SMprivate.h" /* Shared Object Header Messages	*/
@@ -277,4 +277,4 @@ herr_t H5SM_list_free(H5SM_list_t *list);
 H5_DLL herr_t H5SM__get_mesg_count_test(H5F_t *f, unsigned type_id, size_t *mesg_count);
 #endif /* H5SM_TESTING */
 
-#endif /* _H5SMpkg_H */
+#endif /* H5SMpkg_H */

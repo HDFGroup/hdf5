@@ -11,15 +11,15 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		Saturday, September 12, 2015
  *
  * Purpose:	This file contains declarations which define macros for the
  *		H5FD driver package.  Including this header means that the source file
  *		is part of the H5FD driver package.
  */
-#ifndef _H5FDdrvr_module_H
-#define _H5FDdrvr_module_H
+#ifndef H5FDdrvr_module_H
+#define H5FDdrvr_module_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_INIT YES
 #define H5_PKG_SINGLE_SOURCE
 
-#endif /* _H5FDdrvr_module_H */
+#endif /* H5FDdrvr_module_H */

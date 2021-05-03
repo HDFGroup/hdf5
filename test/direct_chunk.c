@@ -2326,7 +2326,7 @@ main(void)
             need_comma = TRUE;
         } /* end if */
         HDprintf(":\n");
-        fflush(stdout);
+        HDfflush(stdout);
 
         nerrors += test_single_chunk(config);
     } /* end for */

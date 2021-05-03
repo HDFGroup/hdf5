@@ -1068,7 +1068,7 @@ test_path_api_calls(void)
 
     /* Get the path */
     if ((path_len = H5PLget(0, path, 256)) <= 0) {
-        HDfprintf(stderr, "    get 0 len: %u : %s\n", path_len, path);
+        HDfprintf(stderr, "    get 0 len: %zd : %s\n", path_len, path);
         TEST_ERROR;
     }
     if (HDstrcmp(path, "a_path_0") != 0) {

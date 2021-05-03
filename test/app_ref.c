@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner <nfortne2@hdfgroup.org>
+ * Programmer:  Neil Fortner
  *              Thursday, August 14, 2008
  *
  * Purpose: Tests closing the library after reference counts have been
