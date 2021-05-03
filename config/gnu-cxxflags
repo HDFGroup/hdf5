@@ -144,6 +144,15 @@ if test "X-g++" = "X-$cxx_vendor"; then
         DEBUG_CXXFLAGS="-ftrapv -fno-common"
     fi
 
+    ########################
+    # Enhanced Diagnostics #
+    ########################
+
+    if test $cxx_vers_major -ge 10; then
+        NO_DIAGS_CXXFLAGS="-fdiagnostics-urls=never -fno-diagnostics-color"
+    fi
+    DIAGS_CXXFLAGS=
+
     ###########
     # Symbols #
     ###########

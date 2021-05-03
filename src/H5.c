@@ -411,6 +411,7 @@ H5_term_library(void)
          */
         if (pending == 0) {
             pending += DOWN(AC);
+            /* Shut down the "pluggable" interfaces, before the plugin framework */
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(VL);

@@ -507,6 +507,14 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
+# perl is used in some optional src and tests, check availability
+find_package (Perl)
+if (PERL_FOUND)
+  set (H5_PERL_FOUND YES)
+endif ()
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
 # Option to Build Static executables
 #-----------------------------------------------------------------------------
 option (BUILD_STATIC_EXECS "Build Static Executables" OFF)
@@ -517,12 +525,18 @@ if (BUILD_STATIC_EXECS)
   endif ()
 endif ()
 
+option (HDF5_ENABLE_ANALYZER_TOOLS "enable the use of Clang tools" OFF)
+mark_as_advanced (HDF5_ENABLE_ANALYZER_TOOLS)
 if (HDF5_ENABLE_ANALYZER_TOOLS)
   include (${HDF5_SOURCE_DIR}/config/sanitizer/tools.cmake)
 endif ()
+option (HDF5_ENABLE_SANITIZERS "execute the Clang sanitizer" OFF)
+mark_as_advanced (HDF5_ENABLE_SANITIZERS)
 if (HDF5_ENABLE_SANITIZERS)
   include (${HDF5_SOURCE_DIR}/config/sanitizer/sanitizers.cmake)
 endif ()
+option (HDF5_ENABLE_FORMATTERS "format source files" OFF)
+mark_as_advanced (HDF5_ENABLE_FORMATTERS)
 if (HDF5_ENABLE_FORMATTERS)
   include (${HDF5_SOURCE_DIR}/config/sanitizer/formatting.cmake)
 endif ()
@@ -1029,7 +1043,9 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
   if (HDF5_BUILD_FORTRAN)
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
 
-    message (STATUS "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
+    endif ()
     include (${HDF_RESOURCES_DIR}/HDFFortranCompilerFlags.cmake)
     include (${HDF_RESOURCES_DIR}/HDF5UseFortran.cmake)
     set (LINK_Fortran_LIBS ${LINK_LIBS})
@@ -1071,7 +1087,7 @@ endif ()
 # Option to build HDF5 C++ Library
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
-  option (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" ON)
+  option (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF)
   if (HDF5_BUILD_CPP_LIB)
     # check for unsupported options
     if (HDF5_ENABLE_PARALLEL)

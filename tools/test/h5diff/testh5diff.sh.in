@@ -500,18 +500,20 @@ TOOLTEST() {
     # Run test.
     TESTING $H5DIFF $@
     (
-    #echo "#############################"
-    #echo "Expected output for '$H5DIFF $@'"
-    #echo "#############################"
-    cd $TESTDIR
-    eval $RUNCMD $H5DIFF_BIN "$@"
+        #echo "#############################"
+        #echo "Expected output for '$H5DIFF $@'"
+        #echo "#############################"
+        cd $TESTDIR
+        eval $RUNCMD $H5DIFF_BIN "$@"
     ) >$actual 2>$actual_err
     EXIT_CODE=$?
+
     # save actual and actual_err in case they are needed later.
     cp $actual $actual_sav
     STDOUT_FILTER $actual
     cp $actual_err $actual_err_sav
     STDERR_FILTER $actual_err
+
     # don't add exit code check in pmode, as it causes failure. (exit code
     # is from mpirun not tool)
     # if any problem occurs relate to an exit code, it will be caught in
@@ -545,22 +547,23 @@ TOOLTEST() {
         # is done by serial mode.
         grep -v "EXIT CODE:" $expect_sorted > $expect_sorted.noexit
         mv $expect_sorted.noexit $expect_sorted
-    if $CMP $expect_sorted $actual_sorted; then
-        echo " PASSED"
-    else
-        echo "*FAILED*"
-        nerrors="`expr $nerrors + 1`"
-        if test yes = "$verbose"; then
-        echo "====Expected result ($expect_sorted) differs from actual result ($actual_sorted)"
-        $DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
-        echo "====The actual output ($actual_sav)"
-        sed 's/^/    /' < $actual_sav
-        echo "====The actual stderr ($actual_err_sav)"
-        sed 's/^/    /' < $actual_err_sav
-        echo "====End of actual stderr ($actual_err_sav)"
-        echo ""
+
+        if $CMP $expect_sorted $actual_sorted; then
+            echo " PASSED"
+        else
+            echo "*FAILED*"
+            nerrors="`expr $nerrors + 1`"
+            if test yes = "$verbose"; then
+            echo "====Expected result ($expect_sorted) differs from actual result ($actual_sorted)"
+            $DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
+            echo "====The actual output ($actual_sav)"
+            sed 's/^/    /' < $actual_sav
+            echo "====The actual stderr ($actual_err_sav)"
+            sed 's/^/    /' < $actual_err_sav
+            echo "====End of actual stderr ($actual_err_sav)"
+            echo ""
+            fi
         fi
-    fi
     fi
 
     # Clean up output file
@@ -1197,6 +1200,11 @@ TOOLTEST h5diff_646.txt -v --use-system-epsilon -p 0.05 h5diff_basic1.h5 h5diff_
 # ##############################################################################
 TOOLTEST h5diff_800.txt -v h5diff_dset1.h5 h5diff_dset2.h5 /g1/array /g1/array
 TOOLTEST h5diff_801.txt -v h5diff_dset1.h5 h5diff_dset3.h5 /g1/array /g1/array
+
+# ##############################################################################
+# # dataset subsets
+# ##############################################################################
+#TRILABS_227 TOOLTEST h5diff_830.txt --enable-error-stack -v h5diff_dset1.h5 h5diff_dset2.h5 /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;]
 
 # ##############################################################################
 # VDS tests
