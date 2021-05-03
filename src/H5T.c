@@ -1891,27 +1891,29 @@ H5Tcopy(hid_t obj_id)
             break;
 
         case H5I_DATASET: {
-            H5VL_object_t *vol_obj;     /* Object for obj_id */
-            H5VL_dataset_get_args_t vol_cb_args;              /* Arguments to VOL callback */
+            H5VL_object_t *         vol_obj;     /* Object for obj_id */
+            H5VL_dataset_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
             /* The argument is a dataset handle */
             if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(obj_id, H5I_DATASET)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "type_id is not a dataset ID")
 
             /* Set up VOL callback arguments */
-            vol_cb_args.op_type                 = H5VL_DATASET_GET_TYPE;
+            vol_cb_args.op_type               = H5VL_DATASET_GET_TYPE;
             vol_cb_args.args.get_type.type_id = H5I_INVALID_HID;
 
             /* Get the datatype from the dataset
              * NOTE: This will have to be closed after we're done with it.
              */
             if (H5VL_dataset_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "unable to get datatype from the dataset")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID,
+                            "unable to get datatype from the dataset")
             dset_tid = vol_cb_args.args.get_type.type_id;
 
             /* Unwrap the type ID */
             if (NULL == (dt = (H5T_t *)H5I_object(dset_tid)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5I_INVALID_HID, "received invalid datatype from the dataset")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5I_INVALID_HID,
+                            "received invalid datatype from the dataset")
         } break;
 
         case H5I_UNINIT:

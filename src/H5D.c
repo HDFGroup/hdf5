@@ -557,9 +557,9 @@ H5D__get_space_api_common(hid_t dset_id, void **token_ptr, H5VL_object_t **_vol_
 {
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
-        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    H5VL_dataset_get_args_t vol_cb_args;              /* Arguments to VOL callback */
-    hid_t ret_value = H5I_INVALID_HID;                /* Return value         */
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);    /* Ptr to object ptr for loc_id */
+    H5VL_dataset_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
+    hid_t                   ret_value = H5I_INVALID_HID; /* Return value         */
 
     FUNC_ENTER_STATIC
 
@@ -671,9 +671,9 @@ done:
 herr_t
 H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation /*out*/)
 {
-    H5VL_object_t *vol_obj;                     /* Object for loc_id */
-    H5VL_dataset_get_args_t vol_cb_args;              /* Arguments to VOL callback */
-    herr_t         ret_value = SUCCEED; /* Return value         */
+    H5VL_object_t *         vol_obj;             /* Object for loc_id */
+    H5VL_dataset_get_args_t vol_cb_args;         /* Arguments to VOL callback */
+    herr_t                  ret_value = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", dset_id, allocation);
@@ -683,7 +683,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation /*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type                 = H5VL_DATASET_GET_SPACE_STATUS;
+    vol_cb_args.op_type                      = H5VL_DATASET_GET_SPACE_STATUS;
     vol_cb_args.args.get_space_status.status = H5D_SPACE_STATUS_ERROR;
 
     /* Get dataspace status */
@@ -713,9 +713,9 @@ done:
 hid_t
 H5Dget_type(hid_t dset_id)
 {
-    H5VL_object_t *vol_obj;                     /* Object for loc_id */
-    H5VL_dataset_get_args_t vol_cb_args;        /* Arguments to VOL callback */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value         */
+    H5VL_object_t *         vol_obj;                     /* Object for loc_id */
+    H5VL_dataset_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
+    hid_t                   ret_value = H5I_INVALID_HID; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dset_id);
@@ -758,9 +758,9 @@ done:
 hid_t
 H5Dget_create_plist(hid_t dset_id)
 {
-    H5VL_object_t *vol_obj;                     /* Object for loc_id */
-    H5VL_dataset_get_args_t vol_cb_args;              /* Arguments to VOL callback */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value         */
+    H5VL_object_t *         vol_obj;                     /* Object for loc_id */
+    H5VL_dataset_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
+    hid_t                   ret_value = H5I_INVALID_HID; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dset_id);
@@ -820,9 +820,9 @@ done:
 hid_t
 H5Dget_access_plist(hid_t dset_id)
 {
-    H5VL_object_t *vol_obj;                     /* Object for loc_id */
-    H5VL_dataset_get_args_t vol_cb_args;              /* Arguments to VOL callback */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value         */
+    H5VL_object_t *         vol_obj;                     /* Object for loc_id */
+    H5VL_dataset_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
+    hid_t                   ret_value = H5I_INVALID_HID; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dset_id);
@@ -864,9 +864,9 @@ done:
 hsize_t
 H5Dget_storage_size(hid_t dset_id)
 {
-    H5VL_object_t *vol_obj;                     /* Object for loc_id */
-    H5VL_dataset_get_args_t vol_cb_args;              /* Arguments to VOL callback */
-    hsize_t        ret_value = 0; /* Return value                 */
+    H5VL_object_t *         vol_obj;       /* Object for loc_id */
+    H5VL_dataset_get_args_t vol_cb_args;   /* Arguments to VOL callback */
+    hsize_t                 ret_value = 0; /* Return value                 */
 
     FUNC_ENTER_API(0)
     H5TRACE1("h", "i", dset_id);
@@ -876,7 +876,7 @@ H5Dget_storage_size(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid dataset identifier")
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type               = H5VL_DATASET_GET_STORAGE_SIZE;
+    vol_cb_args.op_type                            = H5VL_DATASET_GET_STORAGE_SIZE;
     vol_cb_args.args.get_storage_size.storage_size = 0;
 
     /* Get the storage size */
@@ -1724,7 +1724,7 @@ H5D__set_extent_api_common(hid_t dset_id, const hsize_t size[], void **token_ptr
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_dataset_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
-    herr_t ret_value = SUCCEED;                       /* Return value                 */
+    herr_t                       ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_STATIC
 
@@ -1829,9 +1829,9 @@ done:
 herr_t
 H5Dflush(hid_t dset_id)
 {
-    H5VL_object_t *vol_obj;             /* Object for loc_id */
+    H5VL_object_t *              vol_obj;             /* Object for loc_id */
     H5VL_dataset_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
-    herr_t         ret_value = SUCCEED; /* Return value                 */
+    herr_t                       ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
@@ -1845,7 +1845,7 @@ H5Dflush(hid_t dset_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type              = H5VL_DATASET_FLUSH;
+    vol_cb_args.op_type            = H5VL_DATASET_FLUSH;
     vol_cb_args.args.flush.dset_id = dset_id;
 
     /* Flush dataset information cached in memory
@@ -1871,9 +1871,9 @@ done:
 herr_t
 H5Drefresh(hid_t dset_id)
 {
-    H5VL_object_t *vol_obj;             /* Object for loc_id */
+    H5VL_object_t *              vol_obj;             /* Object for loc_id */
     H5VL_dataset_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
-    herr_t         ret_value = SUCCEED; /* Return value                 */
+    herr_t                       ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);

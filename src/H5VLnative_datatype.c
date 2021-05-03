@@ -226,8 +226,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_datatype_specific(void *obj, H5VL_datatype_specific_args_t *args,
-                               hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL__native_datatype_specific(void *obj, H5VL_datatype_specific_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                               void H5_ATTR_UNUSED **req)
 {
     H5T_t *dt        = (H5T_t *)obj;
     herr_t ret_value = SUCCEED; /* Return value */

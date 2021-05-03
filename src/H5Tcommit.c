@@ -790,8 +790,8 @@ H5Tget_create_plist(hid_t dtype_id)
     } /* end if */
     /* If the datatype is committed, retrieve further information */
     else {
-        H5VL_object_t *vol_obj = type->vol_obj;
-        H5VL_datatype_get_args_t vol_cb_args;              /* Arguments to VOL callback */
+        H5VL_object_t *          vol_obj = type->vol_obj;
+        H5VL_datatype_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Set up VOL callback arguments */
         vol_cb_args.op_type               = H5VL_DATATYPE_GET_TCPL;
@@ -838,14 +838,14 @@ H5Tflush(hid_t type_id)
 
     /* Flush metadata for named datatype */
     if (dt->vol_obj) {
-        H5VL_datatype_specific_args_t vol_cb_args;              /* Arguments to VOL callback */
+        H5VL_datatype_specific_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Set up collective metadata if appropriate */
         if (H5CX_set_loc(type_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
         /* Set up VOL callback arguments */
-        vol_cb_args.op_type               = H5VL_DATATYPE_FLUSH;
+        vol_cb_args.op_type            = H5VL_DATATYPE_FLUSH;
         vol_cb_args.args.flush.type_id = type_id;
 
         if (H5VL_datatype_specific(dt->vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
@@ -885,14 +885,14 @@ H5Trefresh(hid_t type_id)
 
     /* Refresh the datatype's metadata */
     if (dt->vol_obj) {
-        H5VL_datatype_specific_args_t vol_cb_args;              /* Arguments to VOL callback */
+        H5VL_datatype_specific_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Set up collective metadata if appropriate */
         if (H5CX_set_loc(type_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
         /* Set up VOL callback arguments */
-        vol_cb_args.op_type               = H5VL_DATATYPE_REFRESH;
+        vol_cb_args.op_type              = H5VL_DATATYPE_REFRESH;
         vol_cb_args.args.refresh.type_id = type_id;
 
         if (H5VL_datatype_specific(dt->vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
@@ -1241,16 +1241,16 @@ H5T_update_shared(H5T_t *dt)
 H5T_t *
 H5T_construct_datatype(H5VL_object_t *vol_obj)
 {
-    H5T_t * dt        = NULL; /* Datatype object from VOL connector */
-    H5VL_datatype_get_args_t vol_cb_args;              /* Arguments to VOL callback */
-    size_t nalloc;              /* Size required to store serialized form of datatype */
-    void *  buf       = NULL;   /* Buffer to store serialized datatype */
-    H5T_t * ret_value = NULL;
+    H5T_t *                  dt = NULL;        /* Datatype object from VOL connector */
+    H5VL_datatype_get_args_t vol_cb_args;      /* Arguments to VOL callback */
+    size_t                   nalloc;           /* Size required to store serialized form of datatype */
+    void *                   buf       = NULL; /* Buffer to store serialized datatype */
+    H5T_t *                  ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type               = H5VL_DATATYPE_GET_BINARY_SIZE;
+    vol_cb_args.op_type                   = H5VL_DATATYPE_GET_BINARY_SIZE;
     vol_cb_args.args.get_binary_size.size = 0;
 
     /* get required buf size for encoding the datatype */
@@ -1263,8 +1263,8 @@ H5T_construct_datatype(H5VL_object_t *vol_obj)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type               = H5VL_DATATYPE_GET_BINARY;
-    vol_cb_args.args.get_binary.buf = buf;
+    vol_cb_args.op_type                  = H5VL_DATATYPE_GET_BINARY;
+    vol_cb_args.args.get_binary.buf      = buf;
     vol_cb_args.args.get_binary.buf_size = nalloc;
 
     /* get binary description of the datatype */

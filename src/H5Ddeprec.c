@@ -233,15 +233,15 @@ done:
 herr_t
 H5Dextend(hid_t dset_id, const hsize_t size[])
 {
-    H5VL_object_t *vol_obj;                   /* Object for loc_id */
-    H5VL_dataset_get_args_t vol_get_cb_args;       /* Arguments to VOL callback */
-    H5VL_dataset_specific_args_t vol_spec_cb_args; /* Arguments to VOL callback */
-    hid_t          sid     = H5I_INVALID_HID; /* Dataspace ID */
-    H5S_t *        ds      = NULL;            /* Dataspace struct */
-    int            ndims;                     /* Dataset/space rank */
-    hsize_t        dset_dims[H5S_MAX_RANK];   /* Current dataset dimensions */
-    int            i;                         /* Local index variable */
-    herr_t         ret_value = SUCCEED;       /* Return value */
+    H5VL_object_t *              vol_obj;                 /* Object for loc_id */
+    H5VL_dataset_get_args_t      vol_get_cb_args;         /* Arguments to VOL callback */
+    H5VL_dataset_specific_args_t vol_spec_cb_args;        /* Arguments to VOL callback */
+    hid_t                        sid = H5I_INVALID_HID;   /* Dataspace ID */
+    H5S_t *                      ds  = NULL;              /* Dataspace struct */
+    int                          ndims;                   /* Dataset/space rank */
+    hsize_t                      dset_dims[H5S_MAX_RANK]; /* Current dataset dimensions */
+    int                          i;                       /* Local index variable */
+    herr_t                       ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
