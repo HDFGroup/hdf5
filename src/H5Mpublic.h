@@ -106,7 +106,7 @@ extern "C" {
  *          name specifies the name of the link to the map object relative to
  *          \p loc_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL hid_t H5Mcreate(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id,
@@ -127,7 +127,7 @@ H5_DLL hid_t H5Mcreate_async(const char *app_file, const char *app_func, unsigne
  *
  * \details
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL hid_t H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id, hid_t mapl_id);
@@ -147,7 +147,7 @@ H5_DLL hid_t H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, 
  *          H5Mclose() when the application is not longer interested in
  *          accessing it.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL hid_t H5Mopen(hid_t loc_id, const char *name, hid_t mapl_id);
@@ -173,7 +173,7 @@ H5_DLL hid_t H5Mopen_async(const char *app_file, const char *app_func, unsigned 
  *          It is illegal to subsequently use that same map identifier in calls
  *          to other map functions.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Mclose(hid_t map_id);
@@ -197,7 +197,7 @@ H5_DLL herr_t H5Mclose_async(const char *app_file, const char *app_func, unsigne
  *          map object specified by \p map_id and returns identifier for the
  *          datatype.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL hid_t H5Mget_key_type(hid_t map_id);
@@ -214,7 +214,7 @@ H5_DLL hid_t H5Mget_key_type(hid_t map_id);
  *          a map object specified by \p map_id and returns identifier for the
  *          datatype .
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL hid_t H5Mget_val_type(hid_t map_id);
@@ -230,7 +230,7 @@ H5_DLL hid_t H5Mget_val_type(hid_t map_id);
  * \details H5Mget_create_plist() returns an identifier for a copy of the
  *          creation property list for a map object specified by \p map_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL hid_t H5Mget_create_plist(hid_t map_id);
@@ -246,7 +246,7 @@ H5_DLL hid_t H5Mget_create_plist(hid_t map_id);
  * \details H5Mget_access_plist() returns an identifier for a copy of the access
  *          property list for a map object specified by \p map_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL hid_t H5Mget_access_plist(hid_t map_id);
@@ -264,7 +264,7 @@ H5_DLL hid_t H5Mget_access_plist(hid_t map_id);
  * \details H5Mget_count() retrieves the number of key-value pairs stored in a
  *          map specified by map_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Mget_count(hid_t map_id, hsize_t *count, hid_t dxpl_id);
@@ -294,7 +294,7 @@ H5_DLL herr_t H5Mget_count(hid_t map_id, hsize_t *count, hid_t dxpl_id);
  *          Any further options can be specified through the property list
  *          \p dxpl_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Mput(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id,
@@ -335,7 +335,7 @@ H5_DLL herr_t H5Mput_async(const char *app_file, const char *app_func, unsigned 
  *          Any further options can be specified through the property list
  *          \p dxpl_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Mget(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value,
@@ -369,7 +369,7 @@ H5_DLL herr_t H5Mget_async(const char *app_file, const char *app_func, unsigned 
  *          Any further options can be specified through the property list
  *          \p dxpl_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hbool_t *exists, hid_t dxpl_id);
@@ -407,7 +407,7 @@ H5_DLL herr_t H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hb
  *
  *          Any further options can be specified through the property list \p dxpl_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, void *op_data,
@@ -448,7 +448,7 @@ H5_DLL herr_t H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_
  *
  *          Any further options can be specified through the property list \p dxpl_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_mem_type_id,
@@ -473,7 +473,7 @@ H5_DLL herr_t H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *id
  *
  *          Any further options can be specified through the property list \p dxpl_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t dxpl_id);
