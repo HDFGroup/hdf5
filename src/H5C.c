@@ -21,8 +21,8 @@
  *              things which exist on disk, and which may be
  *              unambiguously referenced by their disk addresses.
  *
- *		For a detailed overview of the cache, please see the
- *		header comment for H5C_t in H5Cpkg.h.
+ *        For a detailed overview of the cache, please see the
+ *        header comment for H5C_t in H5Cpkg.h.
  *
  *-------------------------------------------------------------------------
  */
@@ -33,7 +33,7 @@
  *
  *    Code Changes:
  *
- *	 - Change protect/unprotect to lock/unlock.
+ *     - Change protect/unprotect to lock/unlock.
  *
  *     - Flush entries in increasing address order in
  *       H5C__make_space_in_cache().
@@ -45,7 +45,7 @@
  *       I/O overhead.  Can't do this just yet as some entries are not
  *       contiguous.  Do this in parallel only or in serial as well?
  *
- *	 - Fix nodes in memory to point directly to the skip list node from
+ *     - Fix nodes in memory to point directly to the skip list node from
  *         the LRU list, eliminating skip list lookups when evicting objects
  *         from the cache.
  *

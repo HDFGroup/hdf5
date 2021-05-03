@@ -47,14 +47,12 @@ New Features
 
     Configuration:
     -------------
-    - Add CMake variable HDF5_LIB_INFIX
+    - CMake no longer builds the C++ library by default
 
-      This infix is added to all library names after 'hdf5'.
-      e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
-      This name is used in packages on debian based systems.
-      (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
+      HDF5_BUILD_CPP_LIB now defaults to OFF, which is in line with the
+      Autotools build defaults.
 
-      (barcode - 2021/03/22)
+      (DER - 2021/04/20)
 
     - Removal of pre-VS2015 work-arounds
 
@@ -69,6 +67,15 @@ New Features
       * struct timespec
 
       (DER - 2021/03/22)
+
+    - Add CMake variable HDF5_LIB_INFIX
+
+      This infix is added to all library names after 'hdf5'.
+      e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
+      This name is used in packages on debian based systems.
+      (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
+
+      (barcode - 2021/03/22)
 
     - On macOS, Universal Binaries can now be built, allowing native execution on
       both Intel and Apple Silicon (ARM) based Macs.
@@ -585,6 +592,17 @@ Bug Fixes since HDF5-1.12.0 release
 
     Tools
     -----
+    - Changed how h5dump and h5ls identify long double.
+
+        Long double support is not consistent across platforms. Tools will always
+        identify long double as 128-bit [little/big]-endian float nn-bit precision.
+        New test file created for datasets with attributes for float, double and
+        long double. In addition any unknown integer or float datatype will now
+        also show the number of bits for precision.
+        These files are also used in the java tests.
+
+        (ADB - 2021/03/24, HDFFV-11229)
+
     - Fixed tools argument parsing.
 
         Tools parsing used the length of the option from the long array to match
