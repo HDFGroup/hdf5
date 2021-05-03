@@ -556,11 +556,37 @@ typedef struct H5VL_group_specific_args_t {
 typedef int H5VL_group_optional_t;
 
 /* link create types for VOL */
-typedef enum H5VL_link_create_type_t {
+typedef enum H5VL_link_create_t {
     H5VL_LINK_CREATE_HARD,
     H5VL_LINK_CREATE_SOFT,
     H5VL_LINK_CREATE_UD
-} H5VL_link_create_type_t;
+} H5VL_link_create_t;
+
+/* Parameters for link 'create' operations */
+typedef struct H5VL_link_create_args_t {
+    H5VL_link_create_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_LINK_CREATE_HARD */
+        struct {
+            void *curr_obj;                     /* Current object */
+            H5VL_loc_params_t curr_loc_params; /* Location parameters for current object */
+        } hard;
+
+        /* H5VL_LINK_CREATE_SOFT */
+        struct {
+            const char *target;         /* Target of soft link */
+        } soft;
+
+        /* H5VL_LINK_CREATE_UD */
+        struct {
+            H5L_type_t type;       /* Type of link to create */
+            const void *buf;       /* Buffer that contains link info */
+            size_t     buf_size;   /* Size of link info buffer */
+        } ud;
+    } args;
+} H5VL_link_create_args_t;
 
 /* Values for link 'get' operation */
 typedef enum H5VL_link_get_t {
@@ -734,8 +760,8 @@ typedef struct H5VL_group_class_t {
 
 /* H5L routines */
 typedef struct H5VL_link_class_t {
-    herr_t (*create)(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
-                     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*create)(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
+                     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
     herr_t (*copy)(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
                    const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
                    void **req);

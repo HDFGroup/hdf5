@@ -136,9 +136,9 @@ static herr_t H5VL__group_specific(void *obj, const H5VL_class_t *cls, H5VL_grou
 static herr_t H5VL__group_optional(void *obj, const H5VL_class_t *cls, H5VL_group_optional_t opt_type,
                                    hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__group_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
-static herr_t H5VL__link_create(H5VL_link_create_type_t create_type, void *obj,
+static herr_t H5VL__link_create(H5VL_link_create_args_t *args, void *obj,
                                 const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls, hid_t lcpl_id,
-                                hid_t lapl_id, hid_t dxpl_id, void **req, va_list arguments);
+                                hid_t lapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
                               const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
                               hid_t lapl_id, hid_t dxpl_id, void **req);
@@ -5153,9 +5153,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__link_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
-                  const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req,
-                  va_list arguments)
+H5VL__link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
+                  const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -5166,7 +5165,7 @@ H5VL__link_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'link create' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->link_cls.create)(create_type, obj, loc_params, lcpl_id, lapl_id, dxpl_id, req, arguments) < 0)
+    if ((cls->link_cls.create)(args, obj, loc_params, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "link create failed")
 
 done:
@@ -5184,31 +5183,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_link_create(H5VL_link_create_type_t create_type, const H5VL_object_t *vol_obj,
-                 const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req,
-                 ...)
+H5VL_link_create(H5VL_link_create_args_t *args, const H5VL_object_t *vol_obj,
+                 const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
-    H5VL_object_t tmp_vol_obj;               /* Temporary object */
-    va_list       arguments;                 /* Argument list passed from the API call */
-    hbool_t       arg_started     = FALSE;   /* Whether the va_list has been started */
+    H5VL_object_t tmp_vol_obj;               /* Temporary VOL object */
     hbool_t       vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t        ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Start the varargs, so they can be copied */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-
     /* Special case for hard links */
-    if (H5VL_LINK_CREATE_HARD == create_type && NULL == vol_obj->data) {
-        va_list tmp_arguments; /* Copy of argument list passed in */
-
-        /* Get the VOL data pointer from the varargs */
-        HDva_copy(tmp_arguments, arguments);
-        tmp_vol_obj.data = HDva_arg(tmp_arguments, void *);
-        HDva_end(tmp_arguments);
-    } /* end if */
+    if (H5VL_LINK_CREATE_HARD == args->op_type && NULL == vol_obj->data)
+        /* Get the VOL data pointer from the arguments */
+        tmp_vol_obj.data = args->args.hard.curr_obj;
     else
         /* Use the VOL object passed in */
         tmp_vol_obj.data = vol_obj->data;
@@ -5220,15 +5207,10 @@ H5VL_link_create(H5VL_link_create_type_t create_type, const H5VL_object_t *vol_o
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__link_create(create_type, vol_obj->data, loc_params, vol_obj->connector->cls, lcpl_id, lapl_id,
-                          dxpl_id, req, arguments) < 0)
+    if (H5VL__link_create(args, vol_obj->data, loc_params, vol_obj->connector->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "link create failed")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -5249,73 +5231,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
-                hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req /*out*/,
-                va_list arguments)
+H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
+                hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE9("e", "Vk*x*#iiiixx", create_type, obj, loc_params, connector_id, lcpl_id, lapl_id, dxpl_id, req,
-             arguments);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__link_create(create_type, obj, loc_params, cls, lcpl_id, lapl_id, dxpl_id, req, arguments) < 0)
+    if (H5VL__link_create(args, obj, loc_params, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLlink_create() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLlink_create_vararg
- *
- * Purpose:     Creates a link
- *
- * Note:	The 'obj' parameter is allowed to be NULL
- *
- * Note:        Same as H5VLlink_create, but uses varargs instead of a va_list
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLlink_create_vararg(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
-                       hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req /*out*/,
-                       ...)
-{
-    H5VL_class_t *cls;                   /* VOL connector's class struct */
-    va_list       arguments;             /* Argument list passed from the API call */
-    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
-    herr_t        ret_value   = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API_NOINIT
-    H5TRACE8("e", "Vk*x*#iiiix", create_type, obj, loc_params, connector_id, lcpl_id, lapl_id, dxpl_id, req);
-
-    /* Get class pointer */
-    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-    /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if (H5VL__link_create(create_type, obj, loc_params, cls, lcpl_id, lapl_id, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "unable to create link")
-
-done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
-    FUNC_LEAVE_API_NOINIT(ret_value)
-} /* end H5VLlink_create_vararg() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL__link_copy

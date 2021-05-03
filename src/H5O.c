@@ -832,8 +832,8 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
     H5VL_object_t *   vol_obj1 = NULL; /* object of obj_id */
     H5VL_object_t *   vol_obj2 = NULL; /* object of new_loc_id */
     H5VL_object_t     tmp_vol_obj;     /* Temporary object */
-    H5VL_loc_params_t loc_params1;
-    H5VL_loc_params_t loc_params2;
+    H5VL_link_create_args_t vol_cb_args;        /* Arguments to VOL callback */
+    H5VL_loc_params_t new_loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -864,13 +864,11 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, obj_id, TRUE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    loc_params1.type     = H5VL_OBJECT_BY_SELF;
-    loc_params1.obj_type = H5I_get_type(obj_id);
-
-    loc_params2.type                         = H5VL_OBJECT_BY_NAME;
-    loc_params2.obj_type                     = H5I_get_type(new_loc_id);
-    loc_params2.loc_data.loc_by_name.name    = new_name;
-    loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
+    /* Set up new location struct */
+    new_loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    new_loc_params.obj_type                     = H5I_get_type(new_loc_id);
+    new_loc_params.loc_data.loc_by_name.name    = new_name;
+    new_loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* Get the first location object */
     if (NULL == (vol_obj1 = H5VL_vol_object(obj_id)))
@@ -881,18 +879,28 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Make sure that the VOL connectors are the same */
-    if (vol_obj1 && vol_obj2)
-        if (vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "Objects are accessed through different VOL connectors and can't be linked")
+    if (vol_obj1 && vol_obj2) {
+        int same_connector = 0;
+
+        /* Check if both objects are associated with the same VOL connector */
+        if (H5VL_cmp_connector_cls(&same_connector, vol_obj1->connector->cls, vol_obj2->connector->cls) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
+        if (same_connector)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
+    } /* end if */
 
     /* Construct a temporary VOL object */
     tmp_vol_obj.data      = vol_obj2->data;
     tmp_vol_obj.connector = vol_obj1->connector;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_CREATE_HARD;
+    vol_cb_args.args.hard.curr_obj = vol_obj1->data;
+    vol_cb_args.args.hard.curr_loc_params.type     = H5VL_OBJECT_BY_SELF;
+    vol_cb_args.args.hard.curr_loc_params.obj_type = H5I_get_type(obj_id);
+
     /* Create a link to the object */
-    if (H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, lapl_id,
-                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, vol_obj1->data, &loc_params1) < 0)
+    if (H5VL_link_create(&vol_cb_args, &tmp_vol_obj, &new_loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:

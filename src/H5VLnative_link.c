@@ -68,20 +68,20 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
+H5VL__native_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
                          hid_t lcpl_id, hid_t H5_ATTR_UNUSED lapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
-                         void H5_ATTR_UNUSED **req, va_list arguments)
+                         void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (create_type) {
+    switch (args->op_type) {
         case H5VL_LINK_CREATE_HARD: {
             H5G_loc_t          cur_loc;
             H5G_loc_t          link_loc;
-            void *             cur_obj    = HDva_arg(arguments, void *);
-            H5VL_loc_params_t *cur_params = HDva_arg(arguments, H5VL_loc_params_t *);
+            void *             cur_obj    = args->args.hard.curr_obj;
+            H5VL_loc_params_t *cur_params = &args->args.hard.curr_loc_params;
 
             if (NULL != cur_obj && H5G_loc_real(cur_obj, cur_params->obj_type, &cur_loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
@@ -104,46 +104,37 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj, const H
                                 "source and destination should be in the same file.")
 
                 /* Create the link */
-                if ((ret_value =
-                         H5L__create_hard(cur_loc_p, cur_params->loc_data.loc_by_name.name, link_loc_p,
-                                          loc_params->loc_data.loc_by_name.name, lcpl_id)) < 0)
+                if (H5L__create_hard(cur_loc_p, cur_params->loc_data.loc_by_name.name, link_loc_p, loc_params->loc_data.loc_by_name.name, lcpl_id) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
             }      /* end if */
             else { /* H5Olink */
                 /* Link to the object */
                 if (H5L_link(&link_loc, loc_params->loc_data.loc_by_name.name, &cur_loc, lcpl_id) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create link")
+                    HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
             } /* end else */
+
             break;
         }
 
         case H5VL_LINK_CREATE_SOFT: {
-            char *    target_name = HDva_arg(arguments, char *);
             H5G_loc_t link_loc; /* Group location for new link */
 
             if (H5G_loc_real(obj, loc_params->obj_type, &link_loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+            if (H5L__create_soft(args->args.soft.target, &link_loc, loc_params->loc_data.loc_by_name.name, lcpl_id) < 0)
+                HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create link")
 
-            /* Create the link */
-            if ((ret_value = H5L__create_soft(target_name, &link_loc, loc_params->loc_data.loc_by_name.name,
-                                              lcpl_id)) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
             break;
         }
 
         case H5VL_LINK_CREATE_UD: {
             H5G_loc_t  link_loc; /* Group location for new link */
-            H5L_type_t link_type  = (H5L_type_t)HDva_arg(arguments, int);
-            void *     udata      = HDva_arg(arguments, void *);
-            size_t     udata_size = HDva_arg(arguments, size_t);
 
             if (H5G_loc_real(obj, loc_params->obj_type, &link_loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-            /* Create link */
-            if (H5L__create_ud(&link_loc, loc_params->loc_data.loc_by_name.name, udata, udata_size, link_type,
-                               lcpl_id) < 0)
+            if (H5L__create_ud(&link_loc, loc_params->loc_data.loc_by_name.name, args->args.ud.buf, args->args.ud.buf_size, args->args.ud.type, lcpl_id) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+
             break;
         }
 

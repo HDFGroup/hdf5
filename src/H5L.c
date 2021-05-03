@@ -330,10 +330,15 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Make sure that the VOL connectors are the same */
-    if (vol_obj1 && vol_obj2)
-        if (vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "Objects are accessed through different VOL connectors and can't be linked")
+    if (vol_obj1 && vol_obj2) {
+        int same_connector = 0;
+
+        /* Check if both objects are associated with the same VOL connector */
+        if (H5VL_cmp_connector_cls(&same_connector, vol_obj1->connector->cls, vol_obj2->connector->cls) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
+        if (same_connector)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
+    } /* end if */
 
     /* Construct a temporary source VOL object */
     if (vol_obj1) {
@@ -428,10 +433,15 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Make sure that the VOL connectors are the same */
-    if (vol_obj1 && vol_obj2)
-        if (vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "Objects are accessed through different VOL connectors and can't be linked")
+    if (vol_obj1 && vol_obj2) {
+        int same_connector = 0;
+
+        /* Check if both objects are associated with the same VOL connector */
+        if (H5VL_cmp_connector_cls(&same_connector, vol_obj1->connector->cls, vol_obj2->connector->cls) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
+        if (same_connector)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
+    } /* end if */
 
     /* Construct a temporary source VOL object */
     if (vol_obj1) {
@@ -470,6 +480,7 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    H5VL_link_create_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED;            /* Return value */
 
@@ -484,6 +495,7 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_target parameter cannot be an empty string")
     if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
+    /* link_name is verified in H5VL_setup_name_args() */
 
     /* Get the link creation property list */
     if (H5P_DEFAULT == lcpl_id)
@@ -496,14 +508,16 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* link_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
     if (H5VL_setup_name_args(link_loc_id, link_name, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_CREATE_SOFT;
+    vol_cb_args.args.soft.target = link_target;
+
     /* Create the link */
-    if (H5VL_link_create(H5VL_LINK_CREATE_SOFT, *vol_obj_ptr, &loc_params, lcpl_id, lapl_id,
-                         H5P_DATASET_XFER_DEFAULT, token_ptr, link_target) < 0)
+    if (H5VL_link_create(&vol_cb_args, *vol_obj_ptr, &loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create soft link")
 
 done:
@@ -598,31 +612,31 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id, const char *new_name,
+H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t link_loc_id, const char *link_name,
                             hid_t lcpl_id, hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * vol_obj1 = NULL;                /* Object of cur_loc_id */
-    H5VL_object_t * vol_obj2 = NULL;                /* Object of new_loc_id */
+    H5VL_object_t * curr_vol_obj = NULL;                /* Object of cur_loc_id */
+    H5VL_object_t * link_vol_obj = NULL;                /* Object of link_loc_id */
     H5VL_object_t   tmp_vol_obj;                    /* Temporary object */
     H5VL_object_t * tmp_vol_obj_ptr = &tmp_vol_obj; /* Ptr to temporary object */
     H5VL_object_t **tmp_vol_obj_ptr_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj_ptr); /* Ptr to ptr to temporary object */
-    H5VL_loc_params_t loc_params1;         /* Location parameters for cur_loc_id object access */
-    H5VL_loc_params_t loc_params2;         /* Location parameters for new_loc_id object access */
+    H5VL_link_create_args_t vol_cb_args;        /* Arguments to VOL callback */
+    H5VL_loc_params_t link_loc_params;         /* Location parameters for link_loc_id object access */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    if (cur_loc_id == H5L_SAME_LOC && new_loc_id == H5L_SAME_LOC)
+    if (cur_loc_id == H5L_SAME_LOC && link_loc_id == H5L_SAME_LOC)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should not be both H5L_SAME_LOC")
     if (!cur_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cur_name parameter cannot be NULL")
     if (!*cur_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cur_name parameter cannot be an empty string")
-    if (!new_name)
+    if (!link_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new_name parameter cannot be NULL")
-    if (!*new_name)
+    if (!*link_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new_name parameter cannot be an empty string")
     if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
@@ -638,49 +652,55 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t new_lo
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, cur_loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* Set up current & new location structs */
-    loc_params1.type                         = H5VL_OBJECT_BY_NAME;
-    loc_params1.obj_type                     = H5I_get_type(cur_loc_id);
-    loc_params1.loc_data.loc_by_name.name    = cur_name;
-    loc_params1.loc_data.loc_by_name.lapl_id = lapl_id;
-
-    loc_params2.type                         = H5VL_OBJECT_BY_NAME;
-    loc_params2.obj_type                     = H5I_get_type(new_loc_id);
-    loc_params2.loc_data.loc_by_name.name    = new_name;
-    loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
+    /* Set up new location struct */
+    link_loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    link_loc_params.obj_type                     = H5I_get_type(link_loc_id);
+    link_loc_params.loc_data.loc_by_name.name    = link_name;
+    link_loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     if (H5L_SAME_LOC != cur_loc_id)
         /* Get the current location object */
-        if (NULL == (vol_obj1 = (H5VL_object_t *)H5VL_vol_object(cur_loc_id)))
+        if (NULL == (curr_vol_obj = (H5VL_object_t *)H5VL_vol_object(cur_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-    if (H5L_SAME_LOC != new_loc_id)
+    if (H5L_SAME_LOC != link_loc_id)
         /* Get the new location object */
-        if (NULL == (vol_obj2 = (H5VL_object_t *)H5VL_vol_object(new_loc_id)))
+        if (NULL == (link_vol_obj = (H5VL_object_t *)H5VL_vol_object(link_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Make sure that the VOL connectors are the same */
-    if (vol_obj1 && vol_obj2)
-        if (vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "Objects are accessed through different VOL connectors and can't be linked")
+    if (curr_vol_obj && link_vol_obj) {
+        int same_connector = 0;
+
+        /* Check if both objects are associated with the same VOL connector */
+        if (H5VL_cmp_connector_cls(&same_connector, curr_vol_obj->connector->cls, link_vol_obj->connector->cls) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
+        if (same_connector)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
+    } /* end if */
 
     /* Construct a temporary VOL object */
-    if (vol_obj1)
-        (*tmp_vol_obj_ptr_ptr)->connector = vol_obj1->connector;
+    if (curr_vol_obj)
+        (*tmp_vol_obj_ptr_ptr)->connector = curr_vol_obj->connector;
     else {
-        HDassert(vol_obj2);
+        HDassert(link_vol_obj);
 
-        (*tmp_vol_obj_ptr_ptr)->connector = vol_obj2->connector;
+        (*tmp_vol_obj_ptr_ptr)->connector = link_vol_obj->connector;
     } /* end else */
-    if (vol_obj2)
-        (*tmp_vol_obj_ptr_ptr)->data = vol_obj2->data;
+    if (link_vol_obj)
+        (*tmp_vol_obj_ptr_ptr)->data = link_vol_obj->data;
     else
         (*tmp_vol_obj_ptr_ptr)->data = NULL;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_CREATE_HARD;
+    vol_cb_args.args.hard.curr_obj = (curr_vol_obj ? curr_vol_obj->data : NULL);
+    vol_cb_args.args.hard.curr_loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    vol_cb_args.args.hard.curr_loc_params.obj_type                     = (H5L_SAME_LOC != cur_loc_id ?  H5I_get_type(cur_loc_id) : H5I_BADID);
+    vol_cb_args.args.hard.curr_loc_params.loc_data.loc_by_name.name    = cur_name;
+    vol_cb_args.args.hard.curr_loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+
     /* Create the link */
-    if (H5VL_link_create(H5VL_LINK_CREATE_HARD, *tmp_vol_obj_ptr_ptr, &loc_params2, lcpl_id, lapl_id,
-                         H5P_DATASET_XFER_DEFAULT, token_ptr, (vol_obj1 ? vol_obj1->data : NULL),
-                         &loc_params1) < 0)
+    if (H5VL_link_create(&vol_cb_args, *tmp_vol_obj_ptr_ptr, &link_loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create hard link")
 
 done:
@@ -713,8 +733,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id, const c
     H5TRACE6("e", "i*si*sii", cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id, lapl_id);
 
     /* Creates a hard link synchronously */
-    if (H5L__create_hard_api_common(cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id, lapl_id, NULL,
-                                    NULL) < 0)
+    if (H5L__create_hard_api_common(cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id, lapl_id, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to synchronously create hard link")
 
 done:
@@ -755,8 +774,7 @@ H5Lcreate_hard_async(const char *app_file, const char *app_func, unsigned app_li
         token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Creates a hard link asynchronously */
-    if (H5L__create_hard_api_common(cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id, lapl_id, token_ptr,
-                                    &vol_obj_ptr) < 0)
+    if (H5L__create_hard_api_common(cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id, lapl_id, token_ptr, &vol_obj_ptr) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to asynchronously create hard link")
 
     /* If a token was created, add the token to the event set */
@@ -796,14 +814,14 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
                    hid_t lcpl_id, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
+    H5VL_link_create_args_t vol_cb_args;        /* Arguments to VOL callback */
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     char *            norm_obj_name = NULL; /* Pointer to normalized current name */
     void *            ext_link_buf  = NULL; /* Buffer to contain external link */
     size_t            buf_size;             /* Size of buffer to hold external link */
     size_t            file_name_len;        /* Length of file name string */
     size_t            norm_obj_name_len;    /* Length of normalized object name string */
     uint8_t *         p;                    /* Pointer into external link buffer */
-    H5L_type_t        link_type = H5L_TYPE_EXTERNAL;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -855,10 +873,15 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_CREATE_UD;
+    vol_cb_args.args.ud.type = H5L_TYPE_EXTERNAL;
+    vol_cb_args.args.ud.buf = ext_link_buf;
+    vol_cb_args.args.ud.buf_size = buf_size;
+
     /* Create an external link */
-    if (H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj, &loc_params, lcpl_id, lapl_id,
-                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)link_type, ext_link_buf,
-                         buf_size) < 0)
+    if (H5VL_link_create(&vol_cb_args, vol_obj, &loc_params, lcpl_id, lapl_id,
+                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create external link")
 
 done:
@@ -897,7 +920,8 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type, con
              size_t udata_size, hid_t lcpl_id, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
+    H5VL_link_create_args_t vol_cb_args;        /* Arguments to VOL callback */
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -931,9 +955,14 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type, con
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Create external link */
-    if (H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj, &loc_params, lcpl_id, lapl_id,
-                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)link_type, udata, udata_size) < 0)
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_CREATE_UD;
+    vol_cb_args.args.ud.type = link_type;
+    vol_cb_args.args.ud.buf = udata;
+    vol_cb_args.args.ud.buf_size = udata_size;
+
+    /* Create user-defined link */
+    if (H5VL_link_create(&vol_cb_args, vol_obj, &loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -1199,7 +1228,7 @@ herr_t
 H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size_t size, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1254,7 +1283,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
                   void *buf /*out*/, size_t size, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1422,7 +1451,7 @@ herr_t
 H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo /*out*/, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1473,7 +1502,7 @@ H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
                     hsize_t n, H5L_info2_t *linfo /*out*/, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1670,7 +1699,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
                    hsize_t n, char *name /*out*/, size_t size, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     ssize_t           ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
@@ -1870,7 +1899,7 @@ H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
                     hsize_t *idx_p, H5L_iterate2_t op, void *op_data, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1943,7 +1972,7 @@ herr_t
 H5Lvisit2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterate2_t op, void *op_data)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     H5I_type_t        id_type;   /* Type of ID */
     herr_t            ret_value; /* Return value */
 
@@ -2011,7 +2040,7 @@ H5Lvisit_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
                   H5L_iterate2_t op, void *op_data, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
