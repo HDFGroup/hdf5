@@ -110,16 +110,13 @@ test_vlstr_free_custom(void *_mem, void *info)
 static void
 test_vlstrings_basic(void)
 {
-    const char
-        *
-            wdata[SPACE1_DIM1] =
-                {
-                    "Four score and seven years ago our forefathers brought forth on this continent a new "
-                    "nation,",
-                    "conceived in liberty and dedicated to the proposition that all men are created equal.",
-                    "Now we are engaged in a great civil war,",
-                    "testing whether that nation or any nation so conceived and so dedicated can long "
-                    "endure."};  /* Information
+    const char *wdata[SPACE1_DIM1] = {
+        "Four score and seven years ago our forefathers brought forth on this continent a new "
+        "nation,",
+        "conceived in liberty and dedicated to the proposition that all men are created equal.",
+        "Now we are engaged in a great civil war,",
+        "testing whether that nation or any nation so conceived and so dedicated can long "
+        "endure."};              /* Information
                                     to
                                     write
                                   */
