@@ -50,14 +50,14 @@ typedef enum H5T_bkg_t {
 /**
  * Type conversion client data
  */
-//! [H5T_cdata_t_snip]
+//! <!-- [H5T_cdata_t_snip] -->
 typedef struct H5T_cdata_t {
     H5T_cmd_t command;  /**< what should the conversion function do?    */
     H5T_bkg_t need_bkg; /**< is the background buffer needed?	     */
     hbool_t   recalc;   /**< recalculate private data		     */
     void *    priv;     /**< private data				     */
 } H5T_cdata_t;
-//! [H5T_cdata_t_snip]
+//! <!-- [H5T_cdata_t_snip] -->
 
 /**
  * Conversion function persistence
@@ -71,10 +71,10 @@ typedef enum H5T_pers_t {
 /**
  * All datatype conversion functions are...
  */
-//! [H5T_conv_t_snip]
+//! <!-- [H5T_conv_t_snip] -->
 typedef herr_t (*H5T_conv_t)(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                              size_t bkg_stride, void *buf, void *bkg, hid_t dset_xfer_plist);
-//! [H5T_conv_t_snip]
+//! <!-- [H5T_conv_t_snip] -->
 
 /********************/
 /* Public Variables */

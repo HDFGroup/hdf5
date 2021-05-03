@@ -365,10 +365,8 @@ H5_DLL hid_t H5Sdecode(const void *buf);
  *
  * \note Motivation: This function was introduced in HDF5-1.12 as part of the
  *       H5Sencode() format change to enable 64-bit selection encodings and
- *       a dataspace selection that is tied to a file. See the New Features
- *       in HDF5 Release 1.12 as well as the H5Sencode() / H5Sdecode() Format Change RFC.
- *
- * \todo Fix the references.
+ *       a dataspace selection that is tied to a file. See the \ref_news_112
+ *       as well as the \ref_sencode_fmt_change.
  *
  * \since 1.12.0
  *
@@ -1070,7 +1068,7 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  *          buffer as:
  *          \n      0 0 0 0 13 5 11 17 7 21 29 21
  *
- * \version 1.6.4 C coord parameter type changed to \p const #hsize_t.
+ * \version 1.6.4 C coord parameter type changed to \p const hsize_t.
  * \version 1.6.4 Fortran \p coord parameter type changed to \p INTEGER(HSIZE_T).
  * \since 1.0.0
  *

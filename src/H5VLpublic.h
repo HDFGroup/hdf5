@@ -93,9 +93,9 @@
  *          connectors. Subsequent values should be obtained from the HDF5
  *          development team at mailto:help@hdfgroup.org.
  */
-//! [H5VL_class_value_t_snip]
+//! <!-- [H5VL_class_value_t_snip] -->
 typedef int H5VL_class_value_t;
-//! [H5VL_class_value_t_snip]
+//! <!-- [H5VL_class_value_t_snip] -->
 
 /**
  * \ingroup H5VLDEF
@@ -156,11 +156,10 @@ extern "C" {
  *          uncommon, as most VOL-specific properties are added to the file
  *          access property list via the connector's API calls which set the
  *          VOL connector for the file open/create. For more information, see
- *          the VOL documentation.
- *
- * \todo Fix the reference to VOL documentation.
+ *          \ref_vol_doc.
  *
  * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vipl_id);
 /**
@@ -195,11 +194,10 @@ H5_DLL hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vi
  *          uncommon, as most VOL-specific properties are added to the file
  *          access property list via the connector's API calls which set the
  *          VOL connector for the file open/create. For more information, see
- *          the VOL documentation.
- *
- * \todo Fix the reference to VOL documentation.
+ *          the \ref_vol_doc.
  *
  * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5VLregister_connector_by_value(H5VL_class_value_t connector_value, hid_t vipl_id);
 /**

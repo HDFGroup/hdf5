@@ -1053,6 +1053,7 @@ if (LOCAL_BATCH_TEST)
   endif ()
 endif ()
 
+set (lib_prog_deps)
 if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c")
   add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
   target_include_directories (H5detect PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -1064,6 +1065,7 @@ if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c")
   target_compile_options(H5detect
       PRIVATE "$<$<PLATFORM_ID:Emscripten>:-O0>"
   )
+  set (lib_prog_deps ${lib_prog_deps} H5detect)
 
   if (HDF5_BATCH_H5DETECT)
     configure_file (
@@ -1155,6 +1157,7 @@ target_link_libraries (H5make_libsettings
 target_compile_options(H5make_libsettings
     PRIVATE "$<$<PLATFORM_ID:Emscripten>:-O0>"
 )
+set (lib_prog_deps ${lib_prog_deps} H5make_libsettings)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
@@ -1198,7 +1201,7 @@ option (HDF5_ENABLE_DEBUG_APIS "Turn on extra debug output in all packages" OFF)
 if (NOT ONLY_SHARED_LIBS)
   set (gen_SRCS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c ${HDF5_SRC_BINARY_DIR}/H5lib_settings.c)
   add_custom_target (gen_${HDF5_LIB_TARGET} ALL
-    DEPENDS H5make_libsettings ${gen_SRCS} ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1 ${HDF5_SRC_BINARY_DIR}/gen_SRCS.stamp2
+    DEPENDS ${lib_prog_deps} ${gen_SRCS} ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1 ${HDF5_SRC_BINARY_DIR}/gen_SRCS.stamp2
     COMMENT "Generation target files"
   )
 
@@ -1237,7 +1240,7 @@ endif ()
 if (BUILD_SHARED_LIBS)
   set (shared_gen_SRCS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c ${HDF5_SRC_BINARY_DIR}/shared/H5lib_settings.c)
   add_custom_target (gen_${HDF5_LIBSH_TARGET} ALL
-    DEPENDS H5make_libsettings ${shared_gen_SRCS} ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1 ${HDF5_SRC_BINARY_DIR}/shared/shared_gen_SRCS.stamp2
+    DEPENDS ${lib_prog_deps} ${shared_gen_SRCS} ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1 ${HDF5_SRC_BINARY_DIR}/shared/shared_gen_SRCS.stamp2
     COMMENT "Shared generation target files"
   )
 
@@ -1358,7 +1361,11 @@ install (
 )
 
 if (NOT WIN32)
-  set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
+  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+    set (_PKG_CONFIG_COMPILER ${MPI_C_COMPILER})
+  else ()
+    set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
+  endif ()
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5cc
@@ -1370,6 +1377,20 @@ if (NOT WIN32)
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
       COMPONENT libraries
   )
+  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+    #legacy requires a different name
+    configure_file (
+        ${HDF_RESOURCES_DIR}/libh5cc.in
+        ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
+        @ONLY
+    )
+    install (
+        FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
+        DESTINATION ${HDF5_INSTALL_BIN_DIR}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+        COMPONENT libraries
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -1387,6 +1408,7 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
   set (DOXYGEN_MACRO_EXPANSION YES)
   set (DOXYGEN_OUTPUT_DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs)
+  set (DOXYGEN_EXAMPLES_DIRECTORY ${HDF5_DOXYGEN_DIR}/examples)
 
 # This configure and custom target work together
   # Replace variables inside @@ with the current values

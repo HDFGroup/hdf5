@@ -79,7 +79,7 @@ typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata, 
  * "user-defined" link class. Users should populate the struct with callback
  * functions defined elsewhere.
  */
-//! [H5L_class_t_snip]
+//! <!-- [H5L_class_t_snip] -->
 typedef struct {
     int                 version;     /**< Version number of this struct       */
     H5L_type_t          id;          /**< Link type ID                        */
@@ -91,7 +91,7 @@ typedef struct {
     H5L_delete_func_t   del_func;    /**< Callback for link deletion          */
     H5L_query_func_t    query_func;  /**< Callback for queries                */
 } H5L_class_t;
-//! [H5L_class_t_snip]
+//! <!-- [H5L_class_t_snip] -->
 
 /********************/
 /* Public Variables */

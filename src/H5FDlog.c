@@ -328,11 +328,14 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sULz", fapl_id, logfile, flags, buf_size);
 
+    /* Do this first, so that we don't try to free a wild pointer if
+     * H5P_object_verify() fails.
+     */
+    HDmemset(&fa, 0, sizeof(H5FD_log_fapl_t));
+
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
-    HDmemset(&fa, 0, sizeof(H5FD_log_fapl_t));
 
     /* Duplicate the log file string
      * A little wasteful, since this string will just be copied later, but

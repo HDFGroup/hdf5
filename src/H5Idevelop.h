@@ -32,16 +32,16 @@
 /**
  * The type of the realize_cb callback for H5Iregister_future
  */
-//! [H5I_future_realize_func_t_snip]
+//! <!-- [H5I_future_realize_func_t_snip] -->
 typedef herr_t (*H5I_future_realize_func_t)(void *future_object, hid_t *actual_object_id);
-//! [H5I_future_realize_func_t_snip]
+//! <!-- [H5I_future_realize_func_t_snip] -->
 
 /**
  * The type of the discard_cb callback for H5Iregister_future
  */
-//! [H5I_future_discard_func_t_snip]
+//! <!-- [H5I_future_discard_func_t_snip] -->
 typedef herr_t (*H5I_future_discard_func_t)(void *future_object);
-//! [H5I_future_discard_func_t_snip]
+//! <!-- [H5I_future_discard_func_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -89,7 +89,7 @@ extern "C" {
  *
  * \details The \p realize_cb parameter is a function pointer that will be
  *          invoked by the HDF5 library to convert a future object into an
- *          actual object.   The \realize_cb function may be invoked by
+ *          actual object.   The \p realize_cb function may be invoked by
  *          H5Iobject_verify() to return the actual object for a user-defined
  *          ID class (i.e. an ID class registered with H5Iregister_type()) or
  *          internally by the HDF5 library in order to use or get information
