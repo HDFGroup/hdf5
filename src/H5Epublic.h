@@ -38,9 +38,9 @@ typedef struct H5E_error2_t {
     hid_t cls_id;
     /**< Class ID                           */
     hid_t maj_num;
-    /**< Major error ID		                */
+    /**< Major error ID                        */
     hid_t min_num;
-    /**< Minor error number		            */
+    /**< Minor error number                    */
     unsigned line;
     /**< Line in file where error occurs    */
     const char *func_name;
@@ -308,7 +308,7 @@ H5_DLL hid_t H5Eget_current_stack(void);
  *          If \p close_source_stack is \c TRUE, the source error stack
  *          will be closed.
  *
- * \since 1.14.0
+ * \since 1.13.0
  */
 H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack);
 /**
