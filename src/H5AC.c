@@ -15,7 +15,7 @@
  *
  * Created:             H5AC.c
  *                      Jul  9 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Functions in this file implement a cache for
  *                      things which exist on disk.  All "things" associated
@@ -133,8 +133,8 @@ static const H5AC_class_t *const H5AC_class_s[] = {
  *
  * Purpose:     Initialize the interface from some other layer.
  *
- * Return:      Success:    non-negative
- *              Failure:    negative
+ * Return:      Success:        non-negative
+ *              Failure:        negative
  *
  * Programmer:  Quincey Koziol
  *              Saturday, January 18, 2003
@@ -154,7 +154,7 @@ done:
 } /* end H5AC_init() */
 
 /*-------------------------------------------------------------------------
- * Function     H5AC__init_package
+ * Function:    H5AC__init_package
  *
  * Purpose:     Initialize interface-specific information
  *
@@ -193,9 +193,9 @@ H5AC__init_package(void)
  *
  * Purpose:     Terminate this interface.
  *
- * Return:      Success:    Positive if anything was done that might
- *                affect other interfaces; zero otherwise.
- *              Failure:    Negative.
+ * Return:      Success:        Positive if anything was done that might
+ *                              affect other interfaces; zero otherwise.
+ *              Failure:        Negative.
  *
  * Programmer:  Quincey Koziol
  *              Thursday, July 18, 2002
@@ -264,7 +264,6 @@ H5AC_cache_image_pending(const H5F_t *f)
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  * Changes:     Added code to configrue the metadata cache for VFD SWMR
@@ -470,7 +469,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -499,18 +497,28 @@ H5AC_dest(H5F_t *f)
 
     /* Check if log messages are being emitted */
     if (H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to get logging status")
-    if (log_enabled && curr_logging)
+    if (log_enabled && curr_logging) {
+
         if (H5C_log_write_destroy_cache_msg(f->shared->cache) < 0)
+
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    }
+
     /* Tear down logging */
-    if (log_enabled)
+    if (log_enabled) {
+
         if (H5C_log_tear_down(f->shared->cache) < 0)
+
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging tear-down failed")
+    }
 
 #ifdef H5_HAVE_PARALLEL
+
     /* destroying the cache, so clear all collective entries */
     if (H5C_clear_coll_entries(f->shared->cache, FALSE) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed")
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
@@ -531,25 +539,39 @@ H5AC_dest(H5F_t *f)
 
     /* Destroy the cache */
     if (H5C_dest(f) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
+
     f->shared->cache = NULL;
 
 #ifdef H5_HAVE_PARALLEL
+
     if (aux_ptr != NULL) {
+
         if (aux_ptr->d_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->d_slist_ptr) == 0);
             H5SL_close(aux_ptr->d_slist_ptr);
+
         } /* end if */
+
         if (aux_ptr->c_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
             H5SL_close(aux_ptr->c_slist_ptr);
+
         } /* end if */
+
         if (aux_ptr->candidate_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
             H5SL_close(aux_ptr->candidate_slist_ptr);
+
         } /* end if */
+
         aux_ptr->magic = 0;
         aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
+
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -587,7 +609,6 @@ H5AC_evict(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't evict cache")
 
 done:
-
     /* If currently logging, generate a message */
     if (f->shared->cache->log_info->logging)
         if (H5C_log_write_evict_cache_msg(f->shared->cache, ret_value) < 0)
@@ -652,7 +673,6 @@ done:
  *              request to flush all items and something was protected.
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -770,7 +790,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -910,9 +929,10 @@ H5AC_mark_entry_dirty(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_entry_dirty_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_entry_dirty_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_dirty() */
@@ -962,9 +982,10 @@ H5AC_mark_entry_clean(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_entry_clean_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_entry_clean_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_clean() */
@@ -1003,9 +1024,10 @@ H5AC_mark_entry_unserialized(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_unserialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_unserialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_unserialized() */
@@ -1043,9 +1065,10 @@ H5AC_mark_entry_serialized(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_serialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_serialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_serialized() */
@@ -1059,7 +1082,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -1143,9 +1165,10 @@ H5AC_pin_protected_entry(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_pin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_pin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_pin_protected_entry() */
@@ -1223,10 +1246,11 @@ H5AC_create_flush_dependency(void *parent_thing, void *child_thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_create_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing, (H5AC_info_t *)child_thing,
-                                        ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_create_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing,
+                                            (H5AC_info_t *)child_thing, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_create_flush_dependency() */
@@ -1250,7 +1274,6 @@ done:
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Sep  2 1997
  *
  *-------------------------------------------------------------------------
@@ -1355,9 +1378,10 @@ H5AC_resize_entry(void *thing, size_t new_size)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_resize_entry_msg(cache_ptr, entry_ptr, new_size, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_resize_entry_msg(cache_ptr, entry_ptr, new_size, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_resize_entry() */
@@ -1397,9 +1421,10 @@ H5AC_unpin_entry(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_unpin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_unpin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_unpin_entry() */
@@ -1439,10 +1464,11 @@ H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_destroy_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing, (H5AC_info_t *)child_thing,
-                                         ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_destroy_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing,
+                                             (H5AC_info_t *)child_thing, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_destroy_flush_dependency() */
@@ -1480,7 +1506,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Sep  2 1997
  *
  *-------------------------------------------------------------------------
@@ -2491,8 +2516,8 @@ H5AC_set_ring(H5AC_ring_t ring, H5AC_ring_t *orig_ring)
  *              Note that this function simply passes the call on to
  *              the metadata cache proper, and returns the result.
  *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
  *
  * Programmer:  Quincey Koziol
  *              September 17, 2016
@@ -2592,9 +2617,10 @@ H5AC_remove_entry(void *_entry)
 
 done:
     /* If currently logging, generate a message */
-    if (cache->log_info->logging)
-        if (H5C_log_write_remove_entry_msg(cache, entry, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache != NULL && cache->log_info != NULL)
+        if (cache->log_info->logging)
+            if (H5C_log_write_remove_entry_msg(cache, entry, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_remove_entry() */

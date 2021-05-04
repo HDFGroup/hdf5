@@ -25,7 +25,7 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5I_FRIEND    /*suppress error about including H5Ipkg      */
+#define H5I_FRIEND /*suppress error about including H5Ipkg      */
 
 /***********/
 /* Headers */
