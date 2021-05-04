@@ -2353,31 +2353,6 @@ done:
 } /* end H5F__close() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_delete
- *
- * Purpose:     Deletes a file.
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_delete(const char *filename, hid_t fapl_id)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    HDassert(filename);
-
-    /* Delete the file */
-    if (H5FD_delete(filename, fapl_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_delete() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5F_try_close
  *
  * Purpose:     Attempts to close a file due to one of several actions:

@@ -101,42 +101,40 @@ static herr_t  H5FD__family_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 static herr_t  H5FD__family_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__family_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__family_unlock(H5FD_t *_file);
-static herr_t  H5FD__family_delete(const char *filename, hid_t fapl_id);
 
 /* The class struct */
 static const H5FD_class_t H5FD_family_g = {
-    "family",                   /* name                 */
-    HADDR_MAX,                  /* maxaddr              */
-    H5F_CLOSE_WEAK,             /* fc_degree            */
+    "family",                   /* name            */
+    HADDR_MAX,                  /* maxaddr        */
+    H5F_CLOSE_WEAK,             /* fc_degree        */
     H5FD__family_term,          /* terminate            */
-    H5FD__family_sb_size,       /* sb_size              */
-    H5FD__family_sb_encode,     /* sb_encode            */
-    H5FD__family_sb_decode,     /* sb_decode            */
-    sizeof(H5FD_family_fapl_t), /* fapl_size            */
-    H5FD__family_fapl_get,      /* fapl_get             */
-    H5FD__family_fapl_copy,     /* fapl_copy            */
-    H5FD__family_fapl_free,     /* fapl_free            */
-    0,                          /* dxpl_size            */
-    NULL,                       /* dxpl_copy            */
-    NULL,                       /* dxpl_free            */
-    H5FD__family_open,          /* open                 */
-    H5FD__family_close,         /* close                */
-    H5FD__family_cmp,           /* cmp                  */
-    H5FD__family_query,         /* query                */
-    NULL,                       /* get_type_map         */
-    NULL,                       /* alloc                */
-    NULL,                       /* free                 */
-    H5FD__family_get_eoa,       /* get_eoa              */
-    H5FD__family_set_eoa,       /* set_eoa              */
-    H5FD__family_get_eof,       /* get_eof              */
+    H5FD__family_sb_size,       /* sb_size        */
+    H5FD__family_sb_encode,     /* sb_encode        */
+    H5FD__family_sb_decode,     /* sb_decode        */
+    sizeof(H5FD_family_fapl_t), /* fapl_size        */
+    H5FD__family_fapl_get,      /* fapl_get        */
+    H5FD__family_fapl_copy,     /* fapl_copy        */
+    H5FD__family_fapl_free,     /* fapl_free        */
+    0,                          /* dxpl_size        */
+    NULL,                       /* dxpl_copy        */
+    NULL,                       /* dxpl_free        */
+    H5FD__family_open,          /* open            */
+    H5FD__family_close,         /* close        */
+    H5FD__family_cmp,           /* cmp            */
+    H5FD__family_query,         /* query        */
+    NULL,                       /* get_type_map        */
+    NULL,                       /* alloc        */
+    NULL,                       /* free            */
+    H5FD__family_get_eoa,       /* get_eoa        */
+    H5FD__family_set_eoa,       /* set_eoa        */
+    H5FD__family_get_eof,       /* get_eof        */
     H5FD__family_get_handle,    /* get_handle           */
-    H5FD__family_read,          /* read                 */
-    H5FD__family_write,         /* write                */
-    H5FD__family_flush,         /* flush                */
-    H5FD__family_truncate,      /* truncate             */
+    H5FD__family_read,          /* read            */
+    H5FD__family_write,         /* write        */
+    H5FD__family_flush,         /* flush        */
+    H5FD__family_truncate,      /* truncate        */
     H5FD__family_lock,          /* lock                 */
     H5FD__family_unlock,        /* unlock               */
-    H5FD__family_delete,        /* del                  */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 
@@ -1345,94 +1343,3 @@ H5FD__family_unlock(H5FD_t *_file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__family_unlock() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__family_delete
- *
- * Purpose:     Delete a file
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__family_delete(const char *filename, hid_t fapl_id)
-{
-    H5P_genplist_t *          plist;
-    const H5FD_family_fapl_t *fa;
-    hid_t                     memb_fapl_id = H5I_INVALID_HID;
-    unsigned                  current_member;
-    char *                    member_name  = NULL;
-    char *                    temp         = NULL;
-    herr_t                    delete_error = FAIL;
-    herr_t                    ret_value    = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    HDassert(filename);
-
-    /* Get the driver info (for the member fapl)
-     * The family_open call accepts H5P_DEFAULT, so we'll accept that here, too.
-     */
-    if (H5P_FILE_ACCESS_DEFAULT == fapl_id)
-        memb_fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    else {
-        if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-        if (NULL == (fa = (const H5FD_family_fapl_t *)H5P_peek_driver_info(plist)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad family VFD driver info")
-        memb_fapl_id = fa->memb_fapl_id;
-    }
-
-    /* Allocate space for the string buffers */
-    if (NULL == (member_name = (char *)H5MM_malloc(H5FD_FAM_MEMB_NAME_BUF_SIZE)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate member name")
-    if (NULL == (temp = (char *)H5MM_malloc(H5FD_FAM_MEMB_NAME_BUF_SIZE)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate temporary member name")
-
-    /* Sanity check to make sure that generated names are unique */
-    HDsnprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 0);
-    HDsnprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 1);
-    if (!HDstrcmp(member_name, temp))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "provided file name cannot generate unique sub-files")
-
-    /* Delete all the family members */
-    current_member = 0;
-    while (1) {
-        /* Fix up the filename with the current member's number */
-        HDsnprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, current_member);
-
-        /* Attempt to delete the member files. If the first file throws an error
-         * we always consider this an error. With subsequent member files, however,
-         * errors usually mean that we hit the last member file so we ignore them.
-         *
-         * Note that this means that any missing files in the family will leave
-         * undeleted members behind.
-         */
-        H5E_BEGIN_TRY
-        {
-            delete_error = H5FD_delete(member_name, memb_fapl_id);
-        }
-        H5E_END_TRY;
-        if (FAIL == delete_error) {
-            if (0 == current_member)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete member file")
-            else
-                H5E_clear_stack(NULL);
-            break;
-        }
-        current_member++;
-    } /* end while */
-
-done:
-    if (member_name)
-        H5MM_xfree(member_name);
-    if (temp)
-        H5MM_xfree(temp);
-
-    /* Don't close memb_fapl_id - We didn't bump its reference count since we're
-     * only using it in this call.
-     */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__family_delete() */
