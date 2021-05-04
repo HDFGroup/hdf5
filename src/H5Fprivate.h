@@ -759,6 +759,7 @@ struct H5O_loc_t;
 struct H5HG_heap_t;
 struct H5VL_class_t;
 struct H5P_genplist_t;
+struct H5S_t;
 
 /* Forward declarations for anonymous H5F objects */
 
@@ -920,6 +921,14 @@ H5_DLL herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t siz
 H5_DLL herr_t H5F_shared_block_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size,
                                      const void *buf);
 H5_DLL herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
+
+/* Functions that operate on selections of elements in the file */
+H5_DLL herr_t H5F_shared_select_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t type,
+                                     struct H5S_t *mem_spaces[], struct H5S_t *file_spaces[],
+                                     haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */);
+H5_DLL herr_t H5F_shared_select_write(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t type,
+                                      struct H5S_t *mem_spaces[], struct H5S_t *file_spaces[],
+                                      haddr_t offsets[], size_t element_sizes[], const void *bufs[]);
 
 /* Functions that flush or evict */
 H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t *f, haddr_t tag);
