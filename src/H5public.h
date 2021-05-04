@@ -511,7 +511,7 @@ H5_DLL herr_t H5open(void);
  *          If the HDF5 library is initialized and closed more than once, the
  *          \p func callback must be registered within each open/close cycle.
  *
- * \since 1.12.1
+ * \since 1.13.0
  */
 H5_DLL herr_t H5atclose(H5_atclose_func_t func, void *ctx);
 /**
@@ -735,7 +735,7 @@ H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
  *          after it has been closed.  The value of \p is_terminating is
  *          undefined if this routine fails.
  *
- * \since 1.12.1
+ * \since 1.13.0
  */
 H5_DLL herr_t H5is_library_terminating(hbool_t *is_terminating);
 /**
