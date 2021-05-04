@@ -30,7 +30,6 @@
 #include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Ipkg.h"      /* IDs                                      */
 #include "H5RSprivate.h" /* Reference-counted strings                */
-#include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5Tprivate.h"  /* Datatypes                                */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
@@ -86,6 +85,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     HDfprintf(stderr, "         id = %" PRIdHID "\n", info->id);
     HDfprintf(stderr, "         count = %u\n", info->count);
     HDfprintf(stderr, "         obj   = 0x%8p\n", info->object);
+    HDfprintf(stderr, "         marked = %d\n", info->marked);
 
     /* Get the group location, so we get get the name */
     switch (type) {
@@ -173,6 +173,9 @@ H5I_dump_ids_for_type(H5I_type_t type)
 
     if (type_info) {
 
+        H5I_id_info_t *item = NULL;
+        H5I_id_info_t *tmp  = NULL;
+
         /* Header */
         HDfprintf(stderr, "     init_count = %u\n", type_info->init_count);
         HDfprintf(stderr, "     reserved   = %u\n", type_info->cls->reserved);
@@ -182,7 +185,17 @@ H5I_dump_ids_for_type(H5I_type_t type)
         /* List */
         if (type_info->id_count > 0) {
             HDfprintf(stderr, "     List:\n");
-            H5SL_iterate(type_info->ids, H5I__id_dump_cb, &type);
+            /* Normally we care about the callback's return value
+             * (H5I_ITER_CONT, etc.), but this is an iteration over all
+             * the IDs so we don't care.
+             *
+             * XXX: Update this to emit an error message on errors?
+             */
+            HDfprintf(stderr, "     (HASH TABLE)\n");
+            HASH_ITER(hh, type_info->hash_table, item, tmp)
+            {
+                H5I__id_dump_cb((void *)item, NULL, (void *)&type);
+            }
         }
     }
     else
