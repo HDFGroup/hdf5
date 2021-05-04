@@ -448,6 +448,19 @@ CONTENTS
 
             $ make -j -l6
 
+4.4. Building doxygen
+        One can optionally build the doxygen files for the HDF5 C library.
+        By default, this option is disabled. To build the html files, specify
+        '--enable-doxygen'.
+
+            $ ./configure --enable-doxygen
+
+        Configuration will halt if the required applications are not available.
+        To build:
+
+            $ make doxygen
+
+
 4.5. Testing
         HDF5 comes with various test suites, all of which can be run by
         specifying:
