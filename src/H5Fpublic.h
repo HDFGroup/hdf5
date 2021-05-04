@@ -47,27 +47,23 @@
  * We're assuming that these constants are used rather early in the hdf5
  * session.
  */
-#define H5F_ACC_RDONLY (H5CHECK H5OPEN 0x0000u) /**< absence of rdwr => rd-only */
-#define H5F_ACC_RDWR   (H5CHECK H5OPEN 0x0001u) /**< open for read and write    */
-#define H5F_ACC_TRUNC  (H5CHECK H5OPEN 0x0002u) /**< overwrite existing files   */
-#define H5F_ACC_EXCL   (H5CHECK H5OPEN 0x0004u) /**< fail if file already exists*/
+#define H5F_ACC_RDONLY (H5CHECK H5OPEN 0x0000u) /**< Absence of RDWR: read-only */
+#define H5F_ACC_RDWR   (H5CHECK H5OPEN 0x0001u) /**< Open for read and write    */
+#define H5F_ACC_TRUNC  (H5CHECK H5OPEN 0x0002u) /**< Overwrite existing files   */
+#define H5F_ACC_EXCL   (H5CHECK H5OPEN 0x0004u) /**< Fail if file already exists*/
 /* NOTE: 0x0008u was H5F_ACC_DEBUG, now deprecated */
-#define H5F_ACC_CREAT (H5CHECK H5OPEN 0x0010u) /**< create non-existing files  */
+#define H5F_ACC_CREAT (H5CHECK H5OPEN 0x0010u) /**< Create non-existing files  */
 #define H5F_ACC_SWMR_WRITE                                                                                   \
-    (H5CHECK 0x0020u) /**< indicate that this file is open for writing in a                                  \
-                           single-writer/multi-reader (SWMR)  scenario.                                      \
-                           Note that the process(es) opening the file for reading must                       \
-                           open the file with RDONLY access, and use the special "SWMR_READ"                 \
-                           access flag. */
+    (H5CHECK 0x0020u) /**< Indicate that this file is open for writing in a                                  \
+                       *   single-writer/multi-reader (SWMR)  scenario.                                      \
+                       *   Note that the process(es) opening the file for reading                            \
+                       *   must open the file with #H5F_ACC_RDONLY and use the                               \
+                       *   #H5F_ACC_SWMR_READ access flag. */
 #define H5F_ACC_SWMR_READ                                                                                    \
-    (H5CHECK 0x0040u) /**< indicate that this file is                                                        \
-                       * open for reading in a                                                               \
-                       * single-writer/multi-reader (SWMR)                                                   \
-                       * scenario.  Note that the                                                            \
-                       * process(es) opening the file                                                        \
-                       * for SWMR reading must also                                                          \
-                       * open the file with the RDONLY                                                       \
-                       * flag.  */
+    (H5CHECK 0x0040u) /**< Indicate that this file is open for reading in a                                  \
+                       * single-writer/multi-reader (SWMR) scenario. Note that                               \
+                       * the process(es) opening the file for SWMR reading must                              \
+                       * also open the file with the #H5F_ACC_RDONLY flag.  */
 
 /**
  * Default property list identifier
@@ -91,7 +87,7 @@
 #define H5F_FAMILY_DEFAULT (hsize_t)0
 
 #ifdef H5_HAVE_PARALLEL
-/*
+/**
  * Use this constant string as the MPI_Info key to set H5Fmpio debug flags.
  * To turn on H5Fmpio debug flags, set the MPI_Info value with this key to
  * have the value of a string consisting of the characters that turn on the
@@ -101,11 +97,12 @@
 #endif /* H5_HAVE_PARALLEL */
 
 /**
- * The difference between a single file and a set of mounted files
+ * The scope of an operation such as H5Fflush(), e.g.,
+ * a single file vs. a set of mounted files
  */
 typedef enum H5F_scope_t {
-    H5F_SCOPE_LOCAL  = 0, /**< specified file handle only        */
-    H5F_SCOPE_GLOBAL = 1  /**< entire virtual file            */
+    H5F_SCOPE_LOCAL  = 0, /**< The specified file handle only */
+    H5F_SCOPE_GLOBAL = 1  /**< The entire virtual file        */
 } H5F_scope_t;
 
 /**
@@ -117,16 +114,16 @@ typedef enum H5F_scope_t {
  * How does file close behave?
  */
 typedef enum H5F_close_degree_t {
-    H5F_CLOSE_DEFAULT = 0, /**< Use the degree pre-defined by underlining VFL */
+    H5F_CLOSE_DEFAULT = 0, /**< Use the degree pre-defined by underlying VFD */
     H5F_CLOSE_WEAK    = 1, /**< File closes only after all opened objects are closed */
-    H5F_CLOSE_SEMI    = 2, /**< If no opened objects, file is close; otherwise, file close fails */
+    H5F_CLOSE_SEMI    = 2, /**< If no opened objects, file is closed; otherwise, file close fails */
     H5F_CLOSE_STRONG  = 3  /**< If there are opened objects, close them first, then close file */
 } H5F_close_degree_t;
 
 /**
  * Current "global" information about file
  */
-//! [H5F_info2_t_snip]
+//! <!-- [H5F_info2_t_snip] -->
 typedef struct H5F_info2_t {
     struct {
         unsigned version;        /**< Superblock version # */
@@ -144,7 +141,7 @@ typedef struct H5F_info2_t {
         H5_ih_info_t msgs_info; /**< Shared object header message index & heap size */
     } sohm;
 } H5F_info2_t;
-//! [H5F_info2_t_snip]
+//! <!-- [H5F_info2_t_snip] -->
 
 /**
  * Types of allocation requests. The values larger than #H5FD_MEM_DEFAULT
@@ -176,12 +173,12 @@ typedef enum H5F_mem_t {
 /**
  * Free space section information
  */
-//! [H5F_sect_info_t_snip]
+//! <!-- [H5F_sect_info_t_snip] -->
 typedef struct H5F_sect_info_t {
     haddr_t addr; /**< Address of free space section */
     hsize_t size; /**< Size of free space section */
 } H5F_sect_info_t;
-//! [H5F_sect_info_t_snip]
+//! <!-- [H5F_sect_info_t_snip] -->
 
 /**
  * Library's format versions
@@ -200,6 +197,7 @@ typedef enum H5F_libver_t {
 /**
  * File space handling strategy
  */
+//! <!-- [H5F_fspace_strategy_t_snip] -->
 typedef enum H5F_fspace_strategy_t {
     H5F_FSPACE_STRATEGY_FSM_AGGR = 0, /**< Mechanisms: free-space managers, aggregators, and virtual file
                                          drivers This is the library default when not set */
@@ -209,6 +207,7 @@ typedef enum H5F_fspace_strategy_t {
     H5F_FSPACE_STRATEGY_NONE = 3, /**< Mechanisms: virtual file drivers */
     H5F_FSPACE_STRATEGY_NTYPES    /**< Sentinel */
 } H5F_fspace_strategy_t;
+//! <!-- [H5F_fspace_strategy_t_snip] -->
 
 /**
  * File space handling strategy for release 1.10.0
@@ -225,7 +224,7 @@ typedef enum H5F_file_space_type_t {
     H5F_FILE_SPACE_NTYPES           /**< Sentinel */
 } H5F_file_space_type_t;
 
-//! [H5F_retry_info_t_snip]
+//! <!-- [H5F_retry_info_t_snip] -->
 #define H5F_NUM_METADATA_READ_RETRY_TYPES 21
 
 /**
@@ -236,7 +235,7 @@ typedef struct H5F_retry_info_t {
     unsigned  nbins;
     uint32_t *retries[H5F_NUM_METADATA_READ_RETRY_TYPES];
 } H5F_retry_info_t;
-//! [H5F_retry_info_t_snip]
+//! <!-- [H5F_retry_info_t_snip] -->
 
 /**
  * Callback for H5Pset_object_flush_cb() in a file access property list
@@ -273,11 +272,6 @@ extern "C" {
  *
  */
 H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
-/**
- * \example H5Fcreate.c
- *          After creating an HDF5 file with H5Fcreate(), we close it with
- *          H5Fclose().
- */
 /**
  * \ingroup H5F
  *
@@ -318,7 +312,8 @@ H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
  *          this file identifier should be closed by calling H5Fclose() when
  *          it is no longer needed.
  *
- * \include H5Fcreate.c
+ * \par Example
+ * \snippet H5F_examples.c minimal
  *
  * \note  #H5F_ACC_TRUNC and #H5F_ACC_EXCL are mutually exclusive; use
  *        exactly one.
@@ -402,6 +397,9 @@ H5_DLL hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_
  *          The return value is a file identifier for the open file; this file
  *          identifier should be closed by calling H5Fclose() when it is no
  *          longer needed.
+ *
+ * \par Example
+ * \snippet H5F_examples.c open
  *
  * \note  #H5F_ACC_RDWR and #H5F_ACC_RDONLY are mutually exclusive; use
  *        exactly one.
@@ -494,6 +492,9 @@ H5_DLL hid_t H5Freopen(hid_t file_id);
  *          global or local. Valid values are as follows:
  *          \scopes
  *
+ * \par Example
+ * \snippet H5F_examples.c flush
+ *
  * \attention HDF5 does not possess full control over buffering. H5Fflush()
  *            flushes the internal HDF5 buffers then asks the operating system
  *            (the OS) to flush the system buffers for the open files. After
@@ -502,11 +503,6 @@ H5_DLL hid_t H5Freopen(hid_t file_id);
  *
  */
 H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
-/**
- * \example H5Fclose.c
- *          After creating an HDF5 file with H5Fcreate(), we close it with
- *          H5Fclose().
- */
 /**
  * \ingroup H5F
  *
@@ -523,8 +519,8 @@ H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
  *          identifier, or shared datatype identifier), the file will be fully
  *          closed and access will end.
  *
- *          Use H5Fclose() as shown in the following example:
- * \include H5Fclose.c
+ * \par Example
+ * \snippet H5F_examples.c minimal
  *
  * \note \Bold{Delayed close:} Note the following deviation from the
  *       above-described behavior. If H5Fclose() is called for a file but one
@@ -642,7 +638,7 @@ H5_DLL hid_t H5Fget_access_plist(hid_t file_id);
  * \note The function will not return an error if intent is NULL; it will
  *       simply do nothing.
  *
- * \version 1.10.0 C function enhanced to work with SWMR functionality.
+ * \version 1.10.0 Function enhanced to work with SWMR functionality.
  *
  * \since 1.8.0
  *
@@ -694,7 +690,7 @@ H5_DLL herr_t H5Fget_fileno(hid_t file_id, unsigned long *fileno);
  *          \c (#H5F_OBJ_DATASET|#H5F_OBJ_GROUP) would call for datasets and
  *          groups.
  *
- * \version 1.6.8, 1.8.2 C function return type changed to \c ssize_t.
+ * \version 1.6.8, 1.8.2 Function return type changed to \c ssize_t.
  * \version 1.6.5 #H5F_OBJ_LOCAL has been added as a qualifier on the types
  *                of objects to be counted. #H5F_OBJ_LOCAL restricts the
  *                search to objects opened through current file identifier.
@@ -732,9 +728,9 @@ H5_DLL ssize_t H5Fget_obj_count(hid_t file_id, unsigned types);
  *          To retrieve a count of open objects, use the H5Fget_obj_count()
  *          function. This count can be used to set the \p max_objs parameter.
  *
- * \version 1.8.2 C function return type changed to \c ssize_t and \p
+ * \version 1.8.2 Function return type changed to \c ssize_t and \p
  *                max_objs parameter datatype changed to \c size_t.
- * \version 1.6.8 C function return type changed to \c ssize_t and \p
+ * \version 1.6.8 Function return type changed to \c ssize_t and \p
  *                max_objs parameter datatype changed to \c size_t.
  * \since 1.6.0
  *
@@ -784,6 +780,9 @@ H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
  *          If the object specified by \p loc is a dataset, named datatype or
  *          attribute, then the file will be mounted at the location where the
  *          attribute, dataset, or named datatype is attached.
+ *
+ * \par Example
+ * \snippet H5F_examples.c mount
  *
  * \note To date, no file mount properties have been defined in HDF5. The
  *       proper value to pass for \p plist is #H5P_DEFAULT, indicating the
@@ -854,8 +853,6 @@ H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
  *          the HDF5 portion of the file. I.e., size includes the user block,
  *          if any, the HDF5 portion of the file, and any data that may have
  *          been appended beyond the data written through the HDF5 library.
- *
- * \version 1.6.3 Fortran subroutine introduced in this release.
  *
  * \since 1.6.3
  *
@@ -935,17 +932,13 @@ H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
  *
  * \note \Bold{Recommended Reading:} This function is part of the file image
  *       operations feature set. It is highly recommended to study the guide
- *       "HDF5 File Image Operations" before using this feature set.\n See the
- *       "See Also" section below for links to other elements of HDF5 file
- *       image operations. \todo Fix the references.
+ *       \ref_file_image_ops before using this feature set.
  *
  * \attention H5Pget_file_image() will fail, returning a negative value, if the
  *            file is too large for the supplied buffer.
  *
  * \see H5LTopen_file_image(), H5Pset_file_image(), H5Pget_file_image(),
  *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks()
- *
- * \version 1.8.13 Fortran subroutine added in this release.
  *
  * \since 1.8.0
  *
@@ -963,196 +956,17 @@ H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
  *                        \ref H5AC-cache-config-t "here".
  * \return \herr_t
  *
+ * \note The \c in direction applies only to the H5AC_cache_config_t::version
+ *       field. All other fields are out parameters.
+ *
  * \details H5Fget_mdc_config() loads the current metadata cache configuration
  *          into the instance of H5AC_cache_config_t pointed to by the \p config_ptr
- *          parameter.
- *
- *          Note that the \c version field of \p config_ptr must be initialized
- *          --this allows the library to support old versions of the H5AC_cache_config_t
- *          structure.
- *
- * \par General configuration section
- *  <table>
- *    <tr>
- *      <td><em>int</em> <code>version</code> </td>
- *      <td>IN: Integer field indicating the the version of the H5AC_cache_config_t in use. This field should
- *        be set to #H5AC__CURR_CACHE_CONFIG_VERSION (defined in H5ACpublic.h).</td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>rpt_fcn_enabled</code> </td>
- *      <td><p>OUT: Boolean flag indicating whether the adaptive cache resize report function is enabled. This
- *          field should almost always be set to disabled (<code>0</code>). Since resize algorithm activity is
- *          reported via stdout, it MUST be set to disabled (<code>0</code>) on Windows machines.</p><p>The
- *          report function is not supported code, and can be expected to change between versions of the
- *          library. Use it at your own risk.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>open_trace_file</code> </td>
- *      <td>OUT: Boolean field indicating whether the <code>trace_file_name</code> field should be used to
- *        open a trace file for the cache. This field will always be set to <code>0</code> in this
- *        context.</td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>close_trace_file</code> </td>
- *      <td>OUT: Boolean field indicating whether the current trace file (if any) should be closed. This field
- *        will always be set to <code>0</code> in this context.</td></tr>
- *    <tr>
- *      <td><em>char*</em><code>trace_file_name</code> </td>
- *      <td>OUT: Full path name of the trace file to be opened if the <code>open_trace_file</code> field is
- *        set to <code>1</code>. This field will always be set to the empty string in this context.</td></tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>evictions_enabled</code> </td>
- *      <td>OUT: Boolean flag indicating whether metadata cache entry evictions are
- *        enabled.</td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>set_initial_size</code> </td>
- *      <td>OUT: Boolean flag indicating whether the cache should be created with a user specified initial
- *        maximum size.<p>If the configuration is loaded from the cache, this flag will always be set
- *          to <code>0</code>.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>size_t</em> <code>initial_size</code> </td>
- *      <td>OUT: Initial maximum size of the cache in bytes, if applicable.<p>If the configuration is loaded
- *        from the cache, this field will contain the cache maximum size as of the time of the
- *          call.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>min_clean_fraction</code> </td>
- *      <td>OUT: Float value specifying the minimum fraction of the cache that must be kept either clean or
- *        empty when possible.</td>
- *    </tr>
- *    <tr>
- *      <td><em>size_t</em> <code>max_size</code> </td>
- *      <td>OUT: Upper bound (in bytes) on the range of values that the adaptive cache resize code can select
- *        as the maximum cache size.</td>
- *    </tr>
- *    <tr>
- *      <td><em>size_t</em> <code>min_size</code> </td>
- *      <td>OUT: Lower bound (in bytes) on the range of values that the adaptive cache resize code can select
- *        as the maximum cache size.</td>
- *    </tr>
- *    <tr>
- *      <td><em>long int</em> <code>epoch_length</code> </td>
- *      <td>OUT: Number of cache accesses between runs of the adaptive cache resize
- *        code.</td>
- *    </tr>
- *  </table>
- *
- * \par Increment configuration section
- *  <table>
- *    <tr>
- *      <td><em>enum H5C_cache_incr_mode</em> <code>incr_mode</code> </td>
- *      <td>OUT: Enumerated value indicating the operational mode of the automatic cache size increase code.
- *        At present, only the following values are legal:<p>\c H5C_incr__off: Automatic cache size increase
- *        is disabled.</p><p>\c H5C_incr__threshold: Automatic cache size increase is enabled using the hit
- *        rate threshold algorithm.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>lower_hr_threshold</code> </td>
- *      <td>OUT: Hit rate threshold used in the hit rate threshold cache size increase algorithm.</td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>increment</code> </td>
- *      <td>OUT: The factor by which the current maximum cache size is multiplied to obtain an initial new
- *        maximum cache size if a size increase is triggered in the hit rate threshold cache size increase
- *        algorithm.</td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>apply_max_increment</code> </td>
- *      <td>OUT: Boolean flag indicating whether an upper limit will be applied to the size of cache size
- *        increases.</td>
- *    </tr>
- *    <tr>
- *      <td><em>size_t</em> <code>max_increment</code> </td>
- *      <td>OUT: The maximum number of bytes by which the maximum cache size can be increased in a single step
- *        -- if applicable.</td>
- *    </tr>
- *    <tr>
- *      <td><em>enum H5C_cache_flash_incr_mode</em> <code>flash_incr_mode</code> </td>
- *      <td>OUT: Enumerated value indicating the operational mode of the flash cache size increase code. At
- *        present, only the following values are legal:<p>\c H5C_flash_incr__off: Flash cache size increase is
- *        disabled.</p><p>\c H5C_flash_incr__add_space: Flash cache size increase is enabled using the add
- *        space algorithm.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>flash_threshold</code> </td>
- *      <td>OUT: The factor by which the current maximum cache size is multiplied to obtain the minimum size
- *        entry / entry size increase which may trigger a flash cache size
- *        increase.</td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>flash_multiple</code> </td>
- *      <td>OUT: The factor by which the size of the triggering entry / entry size increase is multiplied to
- *        obtain the initial cache size increment. This increment may be reduced to reflect existing free
- *        space in the cache and the <code>max_size</code> field above.</td>
- *    </tr>
- * </table>
- *
- * \par Decrement configuration section
- *  <table>
- *    <tr><td colspan="2"><strong>Decrement configuration
- *          section:</strong></td>
- *    </tr>
- *    <tr>
- *      <td><em>enum H5C_cache_decr_mode</em> <code>decr_mode</code> </td>
- *      <td>OUT: Enumerated value indicating the operational mode of the automatic cache size decrease code.
- *        At present, the following values are legal:<p>H5C_decr__off: Automatic cache size decrease is
- *        disabled, and the remaining decrement fields are ignored.</p><p>H5C_decr__threshold: Automatic
- *        cache size decrease is enabled using the hit rate threshold algorithm.</p><p>H5C_decr__age_out:
- *        Automatic cache size decrease is enabled using the ageout algorithm.</p>
- *        <p>H5C_decr__age_out_with_threshold: Automatic cache size decrease is enabled using the ageout
- *        with hit rate threshold algorithm</p></td>
- *    </tr>
- *    <tr><td><em>double</em> <code>upper_hr_threshold</code> </td>
- *      <td>OUT: Upper hit rate threshold. This value is only used if the decr_mode is either
- *        H5C_decr__threshold or H5C_decr__age_out_with_threshold.</td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>decrement</code> </td>
- *      <td>OUT: Factor by which the current max cache size is multiplied to obtain an initial value for the
- *        new cache size when cache size reduction is triggered in the hit rate threshold cache size reduction
- *        algorithm.</td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>apply_max_decrement</code> </td>
- *      <td>OUT: Boolean flag indicating whether an upper limit should be applied to the size of cache size
- *        decreases.</td>
- *    </tr>
- *    <tr>
- *      <td><em>size_t</em> <code>max_decrement</code> </td>
- *      <td>OUT: The maximum number of bytes by which cache size can be decreased if any single step, if
- *        applicable.</td>
- *    </tr>
- *    <tr>
- *      <td><em>int</em> <code>epochs_before_eviction</code> </td>
- *      <td>OUT: The minimum number of epochs that an entry must reside unaccessed in cache before being
- *        evicted under either of the ageout cache size reduction algorithms.</td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>apply_empty_reserve</code> </td>
- *      <td>OUT: Boolean flag indicating whether an empty reserve should be maintained under either of the
- *        ageout cache size reduction algorithms.</td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>empty_reserve</code> </td>
- *      <td>OUT: Empty reserve for use with the ageout cache size reduction algorithms, if applicable.</td>
- *    </tr>
- *  </table>
- *
- * \par Parallel configuration section
- *  <table>
- *    <tr><td><em>int</em> <code>dirty_bytes_threshold</code> </td>
- *      <td>OUT: Threshold number of bytes of dirty metadata generation for triggering synchronizations of the
- *        metadata caches serving the target file in the parallel case.<p>Synchronization occurs whenever the
- *        number of bytes of dirty metadata created since the last synchronization exceeds this
- *        limit.</p></td>
- *    </tr>
- *  </table>
+ *          parameter.\n
+ *          The fields of the H5AC_cache_config_t structure are shown below:
+ *          \snippet H5ACpublic.h H5AC_cache_config_t_snip
+ *          \click4more
  *
  * \since 1.8.0
- *
- * \todo Fix the reference!
  *
  */
 H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
@@ -1170,240 +984,11 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  *
  * \details H5Fset_mdc_config() attempts to configure the file's metadata cache
  *          according configuration supplied in \p config_ptr.
- *
- * \par General configuration fields
- *  <table>
- *    <tr>
- *      <td><em>int</em> <code>version</code></td>
- *      <td>IN: Integer field indicating the the version of the H5AC_cache_config_t in use. This
- *        field should be set to #H5AC__CURR_CACHE_CONFIG_VERSION (defined
- *        in H5ACpublic.h).</td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>rpt_fcn_enabled</code></td>
- *      <td>IN: Boolean flag indicating whether the adaptive cache resize report function is enabled. This
- *        field should almost always be set to disabled (<code>0</code>). Since resize algorithm activity is
- *        reported via stdout, it MUST be set to disabled (<code>0</code>) on Windows machines.<p>The report
- *        function is not supported code, and can be expected to change between versions of the library. Use
- *        it at your own risk.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>open_trace_File</code></td>
- *      <td>IN: Boolean field indicating whether the <code>trace_file_name</code> field should be used to open
- *        a trace file for the cache.<p>The trace file is a debuging feature that allows the capture of top
- *        level metadata cache requests for purposes of debugging and/or optimization. This field should
- *        <p>This field should only normally be set to <code>0</code>, as trace file collection imposes
- *        considerable overhead.</p> be set to <code>1</code> when the <code>trace_file_name</code> contains
- *        the full path of the desired trace file, and either there is no open trace file on the cache, or the
- *        <code>close_trace_file</code> field is also <code>1</code>.</p><p>The trace file feature is
- *        unsupported unless used at the direction of The HDF Group. It is intended to allow The HDF Group to
- *        collect a trace of cache activity in cases of occult failures and/or poor performance seen in the
- *        field, so as to aid in reproduction in the lab. If you use it absent the direction of The HDF Group,
- *        you are on your own.</p></td>
- *    </tr>
- *    <tr><td><em>hbool_t</em> <code>close_trace_file</code></td>
- *      <td>IN: Boolean field indicating whether the current trace file (if any) should be closed.<p>See the
- *        above comments on the <code>open_trace_file</code> field. This field should be set to
- *        <code>0</code> unless there is an open trace file on the cache that you wish to close.</p><p>The
- *        trace file feature is unsupported unless used at the direction of The HDF Group. It is intended to
- *        allow The HDF Group to collect a trace of cache activity in cases of occult failures and/or poor
- *        performance seen in the field, so as to aid in reproduction in the lab. If you use it absent the
- *        direction of The HDF Group, you are on your own.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>char</em> <code>trace_file_name[]</code></td>
- *      <td>IN: Full path of the trace file to be opened if the <code>open_trace_file</code> field is set
- *        to <code>1</code>.<p>In the parallel case, an ascii representation of the mpi rank of the process
- *        will be appended to the file name to yield a unique trace file name for each process.</p><p>The
- *        length of the path must not exceed #H5AC__MAX_TRACE_FILE_NAME_LEN characters.</p><p>The trace file
- *        feature is unsupported unless used at the direction of The HDF Group. It is intended to allow The
- *        HDF Group to collect a trace of cache activity in cases of occult failures and/or poor performance
- *        seen in the field, so as to aid in reproduction in the lab. If you use it absent the direction of
- *        The HDF Group, you are on your own.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>evictions_enabled</code></td>
- *      <td>IN: A boolean flag indicating whether evictions from the metadata cache are enabled. This flag is
- *        initially set to enabled (<code>1</code>).<p>In rare circumstances, the raw data throughput
- *        requirements may be so high that the user wishes to postpone metadata writes so as to reserve I/O
- *        throughput for raw data. The <code>evictions_enabled</code> field exists to allow this. However,
- *        this is an extreme step, and you have no business doing it unless you have read the User Guide
- *        section on metadata caching, and have considered all other options carefully.</p><p>The
- *        <code>evictions_enabled</code> field may not be set to disabled (<code>0</code>) unless all adaptive
- *        cache resizing code is disabled via the <code>incr_mode</code>, <code>flash_incr_mode</code>, and
- *        <code>decr_mode</code> fields.</p><p>When this flag is set to disabled (<code>0</code>), the
- *        metadata cache will not attempt to evict entries to make space for new entries, and thus will grow
- *        without bound.</p><p>Evictions will be re-enabled when this field is set back to <code>1</code>.
- *        This should be done as soon as possible.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>set_initial_size</code></td>
- *      <td>IN: Boolean flag indicating whether the cache should be forced to the user specified initial
- *        size.</td>
- *    </tr>
- *    <tr>
- *      <td><em>size_t</em> <code>initial_size</code></td>
- *      <td>IN: If <code>set_initial_size</code> is set to <code>1</code>, then <code>initial_size</code> must
- *        contain the desired initial size in bytes. This value must lie in the closed interval
- *        <code>[min_size, max_size]</code>. (see below)</td>
- *    </tr>
- *    <tr><td><em>double</em> <code>min_clean_fraction</code></td>
- *      <td>IN: This field specifies the minimum fraction of the cache that must be kept either clean or
- *        empty.<p>The value must lie in the interval [0.0, 1.0]. 0.01 is a good place to start in the serial
- *        case. In the parallel case, a larger value is needed -- see <a
- *        href="/display/HDF5/Metadata+Caching+in+HDF5">Metadata Caching in HDF5</a> in the collection
- *        "Advanced Topics in HDF5."</p></td>
- *    </tr>
- *    <tr><td><em>size_t</em> <code>max_size</code></td>
- *      <td>IN: Upper bound (in bytes) on the range of values that the adaptive cache resize code can select
- *        as the maximum cache size.</td>
- *    </tr>
- *    <tr>
- *      <td><em>size_t</em> <code>min_size</code></td>
- *      <td>IN: Lower bound (in bytes) on the range of values that the adaptive cache resize code can select
- *        as the maximum cache size.</td>
- *    </tr>
- *    <tr><td><em>long int</em> <code>epoch_length</code></td>
- *      <td>IN: Number of cache accesses between runs of the adaptive cache resize code. 50,000 is a good
- *        starting number.</td>
- *    </tr>
- *  </table>
- *
- * \par Increment configuration fields
- *  <table>
- *    <tr>
- *      <td><em>enum H5C_cache_incr_mode</em> <code>incr_mode</code></td>
- *      <td>IN: Enumerated value indicating the operational mode of the automatic cache size increase code. At
- *        present, only two values are legal:<p>\c H5C_incr__off: Automatic cache size increase is disabled,
- *        and the remaining increment fields are ignored.</p><p>\c H5C_incr__threshold: Automatic cache size
- *        increase is enabled using the hit rate threshold algorithm.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>lower_hr_threshold</code></td>
- *      <td>IN: Hit rate threshold used by the hit rate threshold cache size increment algorithm.<p>When the
- *        hit rate over an epoch is below this threshold and the cache is full, the maximum size of the
- *        cache is multiplied by increment (below), and then clipped as necessary to stay within max_size, and
- *        possibly max_increment.</p><p>This field must lie in the interval [0.0, 1.0]. 0.8 or 0.9 is a good
- *        starting point.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>increment</code></td>
- *      <td>IN: Factor by which the hit rate threshold cache size increment algorithm multiplies the current
- *        maximum cache size to obtain a tentative new cache size.<p>The actual cache size increase will be
- *        clipped to satisfy the max_size specified in the general configuration, and possibly max_increment
- *        below.</p><p>The parameter must be greater than or equal to 1.0 -- 2.0 is a reasonable
- *        value.</p><p>If you set it to 1.0, you will effectively disable cache size increases.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>apply_max_increment</code></td>
- *      <td>IN: Boolean flag indicating whether an upper limit should be applied to the size of cache size
- *        increases.</td>
- *    </tr>
- *    <tr>
- *      <td><em>size_t</em> <code>max_increment</code></td>
- *      <td>IN: Maximum number of bytes by which cache size can be increased in a single step -- if
- *        applicable.</td>
- *    </tr>
- *    <tr>
- *      <td><em>enum H5C_cache_flash_incr_mode</em> <code>flash_incr_mode</code></td>
- *      <td>IN: Enumerated value indicating the operational mode of the flash cache size increase code. At
- *        present, only the following values are legal:<p>\c H5C_flash_incr__off: Flash cache size increase is
- *        disabled.</p><p>\c H5C_flash_incr__add_space: Flash cache size increase is enabled using the add
- *        space algorithm.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>flash_threshold</code></td>
- *      <td>IN: The factor by which the current maximum cache size is multiplied to obtain the minimum size
- *        entry / entry size increase which may trigger a flash cache size increase.<p>At present, this value
- *        must lie in the range [0.1, 1.0].</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>flash_multiple</code></td>
- *      <td>IN: The factor by which the size of the triggering entry / entry size increase is multiplied to
- *        obtain the initial cache size increment. This increment may be reduced to reflect existing free
- *        space in the cache and the <code>max_size</code> field above.<p>At present, this field must lie in
- *        the range [0.1, 10.0].</p></td>
- *    </tr>
- *  </table>
- *
- * \par Decrement configuration fields
- *  <table>
- *    <tr>
- *      <td><em>enum H5C_cache_decr_mode</em> <code>decr_mode</code></td>
- *      <td>IN: Enumerated value indicating the operational mode of the automatic cache size decrease code. At
- *        present, the following values are legal:<p>\c H5C_decr__off: Automatic cache size decrease is
- *        disabled.</p><p>\c H5C_decr__threshold: Automatic cache size decrease is enabled using the hit
- *        rate threshold algorithm.</p><p>\c H5C_decr__age_out: Automatic cache size decrease is enabled using
- *        the ageout algorithm.</p><p>\c H5C_decr__age_out_with_threshold: Automatic cache size decrease is
- * enabled using the ageout with hit rate threshold algorithm</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>upper_hr_threshold</code></td>
- *      <td>IN: Hit rate threshold for the hit rate threshold and ageout with hit rate threshold cache size
- *        decrement algorithms.<p>When \c decr_mode is \c H5C_decr__threshold, and the hit rate over a given
- *        epoch exceeds the supplied threshold, the current maximum cache size is multiplied by decrement to
- *        obtain a tentative new (and smaller) maximum cache size.</p><p>When \c decr_mode is \c
- *        H5C_decr__age_out_with_threshold, there is no attempt to find and evict aged out entries unless the
- *        hit rate in the previous epoch exceeded the supplied threshold.</p><p>This field must lie in the
- *        interval [0.0, 1.0].</p><p>For \c H5C_incr__threshold, .9995 or .99995 is a good place to
- *        start.</p><p>For \c H5C_decr__age_out_with_threshold, .999 might be more useful.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>decrement</code></td>
- *      <td>IN: In the hit rate threshold cache size decrease algorithm, this parameter contains the factor by
- *        which the current max cache size is multiplied to produce a tentative new cache size.<p>The actual
- *        cache size decrease will be clipped to satisfy the min_size specified in the general configuration,
- *        and possibly max_decrement below.</p><p>The parameter must be be in the interval
- *        [0.0, 1.0].</p><p>If you set it to 1.0, you will effectively disable cache size decreases. 0.9 is a
- *        reasonable starting point.</p></td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>apply_max_decrement</code></td>
- *      <td>IN: Boolean flag indicating whether an upper limit should be applied to the size of cache size
- *        decreases.</td>
- *    </tr>
- *    <tr>
- *      <td><em>size_t</em> <code>max_decrement</code></td>
- *      <td>IN: Maximum number of bytes by which the maximum cache size can be decreased in any single step --
- *        if applicable.</td>
- *    </tr>
- *    <tr>
- *      <td><em>int</em> <code>epochs_before_eviction</code></td>
- *      <td>IN: In the ageout based cache size reduction algorithms, this field contains the minimum number of
- *        epochs an entry must remain unaccessed in cache before the cache size reduction algorithm tries to
- *        evict it. 3 is a reasonable value.</td>
- *    </tr>
- *    <tr>
- *      <td><em>hbool_t</em> <code>apply_empty_reserve</code></td>
- *      <td>IN: Boolean flag indicating whether the ageout based decrement algorithms will maintain a empty
- *        reserve when decreasing cache size.</td>
- *    </tr>
- *    <tr>
- *      <td><em>double</em> <code>empty_reserve</code></td>
- *      <td>IN: Empty reserve as a fraction of maximum cache size if applicable.<p>When so directed, the
- *        ageout based algorithms will not decrease the maximum cache size unless the empty reserve can be
- *        met.</p><p>The parameter must lie in the interval [0.0, 1.0]. 0.1 or 0.05 is a good place to
- *        start.</p></td>
- *    </tr>
- *  </table>
- *
- * \par Parallel configuration fields
- *  <table>
- *    <tr>
- *      <td><em>int</em> <code>dirty_bytes_threshold</code></td>
- *      <td>IN: Threshold number of bytes of dirty metadata generation for triggering synchronizations of the
- *        metadata caches serving the target file in the parallel case.<p>Synchronization occurs whenever the
- *        number of bytes of dirty metadata created since the last synchronization exceeds this
- *        limit.</p><p>This field only applies to the parallel case. While it is ignored elsewhere, it can
- *        still draw a value out of bounds error.</p><p>It must be consistant across all caches on any given
- *        file.</p><p>By default, this field is set to 256 KB. It shouldn't be more than half the current
- *        maximum cache size times the minimum clean fraction.</p></td>
- *    </tr>
- *  </table>
+ *          \snippet H5ACpublic.h H5AC_cache_config_t_snip
+ *          \click4more
  *
  * \since 1.8.0
  *
- * \todo Fix the MDC document reference!
  */
 H5_DLL herr_t H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
 /**
@@ -1482,13 +1067,12 @@ H5_DLL herr_t H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
  * is enabled. However, the call should be useful if you choose to control metadata cache size from your
  * program.
  *
- * See "Metadata Caching in HDF5" for details about the metadata cache and the adaptive cache resizing
+ * See \ref_mdc_in_hdf5 for details about the metadata cache and the adaptive cache resizing
  * algorithms. If you have not read, understood, and thought about the material covered in that
  * documentation,
  * you should not be using this API call.
  * \endparblock
  *
- * \todo Fix the MDC document reference!
  */
 H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
 /**
@@ -1784,6 +1368,9 @@ H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);
  *          For the parameters \p low and \p high, see the description for
  *          H5Pset_libver_bounds().
  *
+ * \par Example
+ * \snippet H5F_examples.c libver_bounds
+ *
  * \since 1.10.2
  *
  */
@@ -1822,7 +1409,7 @@ H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t
  *          list, and H5Fget_mdc_logging_status() will return the current state of
  *          the logging flags.
  *
- *          The log format is described in the \Emph{Metadata Cache Logging} document.
+ *          The log format is described in the \ref_mdc_logging document.
  *
  * \note Logging can only be started or stopped if metadata cache logging was enabled
  *       via H5Pset_mdc_log_options().\n
@@ -1835,8 +1422,6 @@ H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t
  *       enabled will be considered an error.
  *
  * \since 1.10.0
- *
- * \todo Fix the document reference!
  *
  */
 H5_DLL herr_t H5Fstart_mdc_logging(hid_t file_id);
@@ -1874,7 +1459,7 @@ H5_DLL herr_t H5Fstart_mdc_logging(hid_t file_id);
  *          list, and H5Fget_mdc_logging_status() will return the current state of
  *          the logging flags.
  *
- *          The log format is described in the \Emph{Metadata Cache Logging} document.
+ *          The log format is described in the \ref_mdc_logging document.
  *
  * \note Logging can only be started or stopped if metadata cache logging was enabled
  *       via H5Pset_mdc_log_options().\n
@@ -1920,7 +1505,7 @@ H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
  *          list, and H5Fget_mdc_logging_status() will return the current state of
  *          the logging flags.
  *
- *          The log format is described in the \Emph{Metadata Cache Logging} document.
+ *          The log format is described in the \ref_mdc_logging document.
  *
  * \note Unlike H5Fstart_mdc_logging() and H5Fstop_mdc_logging(), this function can
  *       be called on any open file identifier.
@@ -1931,7 +1516,7 @@ H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled, hboo
 /**
  * \ingroup SWMR
  *
- * \todo Finish this!
+ * \todo UFO?
  */
 H5_DLL herr_t H5Fformat_convert(hid_t fid);
 /**
@@ -1985,7 +1570,7 @@ H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], u
  * \brief Obtains information about a cache image if it exists
  *
  * \file_id
- * \param[out] image_addr Offset of the cache image if it exists, or #HADDR_UNDEF if it does not
+ * \param[out] image_addr Offset of the cache image if it exists, or \c HADDR_UNDEF if it does not
  * \param[out] image_size Length of the cache image if it exists, or 0 if it does not
  * \returns \herr_t
  *
@@ -2125,11 +1710,10 @@ H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
  * the desired behavior.
  * \endparblock
  *
- * \see Enabling a Strict Consistency Semantics Model in Parallel HDF5
+ * \see \ref_cons_semantics
  *
  * \since 1.8.9
  *
- * \todo Fix the reference!
  */
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
 /**
@@ -2149,11 +1733,10 @@ H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
  *          Upon successful return, \p flag will be set to \c 1 if file access is set
  *          to atomic mode and \c 0 if file access is set to nonatomic mode.
  *
- * \see Enabling a Strict Consistency Semantics Model in Parallel HDF5
+ * \see \ref_cons_semantics
  *
  * \since 1.8.9
  *
- * \todo Fix the reference!
  */
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #endif /* H5_HAVE_PARALLEL */
@@ -2165,14 +1748,14 @@ H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /* Macros */
-#define H5F_ACC_DEBUG (H5CHECK H5OPEN 0x0000u) /*print debug info (deprecated)*/
+#define H5F_ACC_DEBUG (H5CHECK H5OPEN 0x0000u) /**< Print debug info \deprecated In which version? */
 
 /* Typedefs */
 
 /**
  * Current "global" information about file
  */
-//! [H5F_info1_t_snip]
+//! <!-- [H5F_info1_t_snip] -->
 typedef struct H5F_info1_t {
     hsize_t super_ext_size; /**< Superblock extension size */
     struct {
@@ -2180,7 +1763,7 @@ typedef struct H5F_info1_t {
         H5_ih_info_t msgs_info; /**< Shared object header message index & heap size */
     } sohm;
 } H5F_info1_t;
-//! [H5F_info1_t_snip]
+//! <!-- [H5F_info1_t_snip] -->
 
 /* Function prototypes */
 /**
@@ -2218,7 +1801,7 @@ typedef struct H5F_info1_t {
  *              header indexes. Each index might be either a B-tree or
  *              a list.
  *
- * \version 1.10.0 C function H5Fget_info() renamed to H5Fget_info1() and
+ * \version 1.10.0 Function H5Fget_info() renamed to H5Fget_info1() and
  *                 deprecated in this release.
  *
  * \since 1.8.0
