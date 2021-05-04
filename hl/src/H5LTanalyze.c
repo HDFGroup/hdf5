@@ -916,7 +916,7 @@ char *yytext;
 #include "H5LTparse.h"
 
 static char *trim_quotes(const char *);
-int my_yyinput(char *, int);
+static int my_yyinput(char *, int);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r=my_yyinput(b, ms))
 #define token(x)        (int)x
@@ -2554,7 +2554,7 @@ trim_quotes(const char *quoted)
     return trimmed;
 }
 
-int my_yyinput(char *buf, int max_size)
+static int my_yyinput(char *buf, int max_size)
 {
    int ret;
 
