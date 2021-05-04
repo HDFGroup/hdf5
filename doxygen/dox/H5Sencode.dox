@@ -1,0 +1,5 @@
+/**
+ * \ingroup H5S
+ * \def H5Sencode()
+ * H5Sencode() is a macro that is mapped to either H5Sencode1() or H5Sencode2().
+*/

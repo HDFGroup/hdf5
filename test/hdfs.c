@@ -19,7 +19,7 @@
  *
  *     Demonstrates basic use cases and fapl interaction.
  *
- * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
+ * Programmer: Jacob Smith
  *             2018-04-23
  */
 
@@ -29,7 +29,6 @@
 #ifdef H5_HAVE_LIBHDFS
 #define HDFS_TEST_DEBUG        0
 #define HDFS_TEST_MAX_BUF_SIZE 256
-#endif /* H5_HAVE_LIBHDFS */
 
 /*****************************************************************************
  *
@@ -231,9 +230,10 @@
  */
 #define JSERR_STR(expected, actual, reason)                                                                  \
     {                                                                                                        \
+        const char *_reason = reason;                                                                        \
         JSFAILED_AT()                                                                                        \
-        if ((reason) != NULL) {                                                                              \
-            HDprintf("%s\n", (reason));                                                                      \
+        if (_reason != NULL) {                                                                               \
+            HDprintf("%s\n", _reason);                                                                       \
         }                                                                                                    \
         else {                                                                                               \
             HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
@@ -303,7 +303,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -348,7 +348,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -359,11 +359,8 @@
  * OTHER MACROS AND DEFINITIONS *
  ********************************/
 
-/* copied from src/hdfs.c
- */
-#ifdef H5_HAVE_LIBHDFS
+/* copied from src/hdfs.c */
 #define MAXADDR (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
-#endif /*  H5_HAVE_LIBHDFS */
 
 #define HDFS_NAMENODE_NAME_MAX_SIZE 128
 
@@ -371,12 +368,10 @@
  * FILE-LOCAL GLOBAL VARIABLES *
  *******************************/
 
-#ifdef H5_HAVE_LIBHDFS
 static const char filename_missing[]    = "/tmp/missing.txt";
 static const char filename_bard[]       = "/tmp/t8.shakespeare.txt";
 static const char filename_raven[]      = "/tmp/Poe_Raven.txt";
 static const char filename_example_h5[] = "/tmp/t.h5";
-#endif /*  H5_HAVE_LIBHDFS */
 
 static H5FD_hdfs_fapl_t default_fa = {
     1,           /* fa version */
@@ -386,6 +381,7 @@ static H5FD_hdfs_fapl_t default_fa = {
     "",          /* kerberos path */
     1024,        /* buffer size */
 };
+#endif /*  H5_HAVE_LIBHDFS */
 
 /******************
  * TEST FUNCTIONS *
@@ -415,6 +411,14 @@ static H5FD_hdfs_fapl_t default_fa = {
 static int
 test_fapl_config_validation(void)
 {
+#ifndef H5_HAVE_LIBHDFS
+    TESTING("HDFS fapl configuration validation");
+    SKIPPED();
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
+    return 0;
+
+#else
     /*********************
      * test-local macros *
      *********************/
@@ -560,9 +564,10 @@ test_fapl_config_validation(void)
             JSVERIFY(config.version, fa_fetch.version, "version number mismatch")
             JSVERIFY(config.namenode_port, fa_fetch.namenode_port, "namenode port mismatch")
             JSVERIFY(config.stream_buffer_size, fa_fetch.stream_buffer_size, "streambuffer size mismatch")
-            JSVERIFY_STR(config.namenode_name, fa_fetch.namenode_name, NULL)
-            JSVERIFY_STR(config.user_name, fa_fetch.user_name, NULL)
-            JSVERIFY_STR(config.kerberos_ticket_cache, fa_fetch.kerberos_ticket_cache, NULL)
+            JSVERIFY_STR(config.namenode_name, fa_fetch.namenode_name, "node name mismatch")
+            JSVERIFY_STR(config.user_name, fa_fetch.user_name, "user name mismatch")
+            JSVERIFY_STR(config.kerberos_ticket_cache, fa_fetch.kerberos_ticket_cache,
+                         "kerberos ticket cache mismatch")
         }
 
         /*-----------------------------
@@ -590,6 +595,7 @@ error:
         H5E_END_TRY;
     }
     return 1;
+#endif /* H5_HAVE_LIBHDFS */
 
 } /* end test_fapl_config_validation() */
 
@@ -615,14 +621,22 @@ error:
 static int
 test_hdfs_fapl(void)
 {
+#ifndef H5_HAVE_LIBHDFS
+    TESTING("HDFS fapl ");
+    SKIPPED();
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
+    return 0;
+
+#else
     /************************
      * test-local variables *
      ************************/
 
-    hid_t            fapl_id      = -1; /* file access property list ID */
-    hid_t            driver_id    = -1; /* ID for this VFD              */
-    unsigned long    driver_flags = 0;  /* VFD feature flags            */
-    H5FD_hdfs_fapl_t hdfs_fa_0    = {
+    hid_t fapl_id = -1;             /* file access property list ID */
+    hid_t driver_id = -1;           /* ID for this VFD              */
+    unsigned long driver_flags = 0; /* VFD feature flags            */
+    H5FD_hdfs_fapl_t hdfs_fa_0 = {
         1,    /* version*/
         "",   /* node name */
         9000, /* node port */
@@ -667,6 +681,7 @@ error:
     H5E_END_TRY;
 
     return 1;
+#endif /* H5_HAVE_LIBHDFS */
 
 } /* end test_hdfs_fapl() */
 
@@ -695,8 +710,8 @@ test_vfd_open(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD-level open");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -717,10 +732,10 @@ test_vfd_open(void)
     struct test_condition {
         const char *message;
         const char *url;
-        unsigned    flags;
-        int         which_fapl;
-        haddr_t     maxaddr;
-        hbool_t     might_use_other_driver;
+        unsigned flags;
+        int which_fapl;
+        haddr_t maxaddr;
+        hbool_t might_use_other_driver;
     };
 
     /************************
@@ -809,11 +824,11 @@ test_vfd_open(void)
             FALSE,
         },
     };
-    unsigned i                        = 0;
+    unsigned i = 0;
     unsigned failing_conditions_count = 10;
-    H5FD_t * fd                       = NULL;
-    hid_t    fapl_hdfs                = -1;
-    hid_t    fapl_unconfigured        = -1;
+    H5FD_t *fd = NULL;
+    hid_t fapl_hdfs = -1;
+    hid_t fapl_unconfigured = -1;
 
     TESTING("HDFS VFD-level open");
 
@@ -831,8 +846,8 @@ test_vfd_open(void)
     /* all the test cases that will _not_ open
      */
     for (i = 0; i < failing_conditions_count; i++) {
-        struct test_condition T       = failing_conditions[i];
-        hid_t                 fapl_id = H5P_DEFAULT;
+        struct test_condition T = failing_conditions[i];
+        hid_t fapl_id = H5P_DEFAULT;
 
         fd = NULL;
 
@@ -951,8 +966,8 @@ test_eof_eoa(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS eof/eoa gets and sets");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -970,7 +985,7 @@ test_eof_eoa(void)
      ************************/
 
     H5FD_t *fd_shakespeare = NULL;
-    hid_t   fapl_id        = -1;
+    hid_t fapl_id = -1;
 
     TESTING("HDFS eof/eoa gets and sets");
 
@@ -991,7 +1006,7 @@ test_eof_eoa(void)
 
     /* verify as found
      */
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), NULL)
+    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EOF mismatch")
     JSVERIFY(H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), H5FDget_eof(fd_shakespeare, H5FD_MEM_DRAW),
              "mismatch between DEFAULT and RAW memory types")
     JSVERIFY(0, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA should be unset by H5FDopen")
@@ -1064,16 +1079,16 @@ test_H5FDread_without_eoa_set_fails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
 
-    char         buffer[HDFS_TEST_MAX_BUF_SIZE];
-    unsigned int i                = 0;
-    H5FD_t *     file_shakespeare = NULL;
-    hid_t        fapl_id          = -1;
+    char buffer[HDFS_TEST_MAX_BUF_SIZE];
+    unsigned int i = 0;
+    H5FD_t *file_shakespeare = NULL;
+    hid_t fapl_id = -1;
 
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
 
@@ -1166,8 +1181,8 @@ test_read(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read/range-gets");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1181,10 +1196,10 @@ test_read(void)
      *************************/
     struct testcase {
         const char *message;  /* purpose of test case */
-        haddr_t     eoa_set;  /* set file EOA to this prior to read */
-        size_t      addr;     /* offset of read in file */
-        size_t      len;      /* length of read in file */
-        herr_t      success;  /* expected return value of read function */
+        haddr_t eoa_set;      /* set file EOA to this prior to read */
+        size_t addr;          /* offset of read in file */
+        size_t len;           /* length of read in file */
+        herr_t success;       /* expected return value of read function */
         const char *expected; /* expected contents of buffer; failure ignores */
     };
 
@@ -1241,14 +1256,14 @@ test_read(void)
             NULL,
         },
     };
-    unsigned        testcase_count = 6;
-    unsigned        test_i         = 0;
+    unsigned testcase_count = 6;
+    unsigned test_i = 0;
     struct testcase test;
-    herr_t          open_return = FAIL;
-    char            buffer[HDFS_TEST_MAX_BUF_SIZE];
-    unsigned int    i          = 0;
-    H5FD_t *        file_raven = NULL;
-    hid_t           fapl_id    = -1;
+    herr_t open_return = FAIL;
+    char buffer[HDFS_TEST_MAX_BUF_SIZE];
+    unsigned int i = 0;
+    H5FD_t *file_raven = NULL;
+    hid_t fapl_id = -1;
 
     TESTING("HDFS VFD read/range-gets");
 
@@ -1273,7 +1288,7 @@ test_read(void)
                           HADDR_UNDEF); /* Demonstrate success with "automatic" value */
     FAIL_IF(NULL == file_raven)
 
-    JSVERIFY(6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), NULL)
+    JSVERIFY(6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), "EOF mismatch")
 
     /*********
      * TESTS *
@@ -1285,7 +1300,7 @@ test_read(void)
          * per-test setup *
          * -------------- */
 
-        test        = cases[test_i];
+        test = cases[test_i];
         open_return = FAIL;
 
         FAIL_IF(HDFS_TEST_MAX_BUF_SIZE < test.len) /* buffer too small! */
@@ -1380,8 +1395,8 @@ test_noops_and_autofails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD always-fail and no-op routines");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1398,8 +1413,8 @@ test_noops_and_autofails(void)
      * test-local variables *
      ************************/
 
-    hid_t      fapl_id  = -1;
-    H5FD_t *   file     = NULL;
+    hid_t fapl_id = -1;
+    H5FD_t *file = NULL;
     const char data[36] = "The Force shall be with you, always";
 
     TESTING("HDFS VFD always-fail and no-op routines");
@@ -1432,15 +1447,6 @@ test_noops_and_autofails(void)
 
     H5E_BEGIN_TRY{
         JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY;
-
-    /* no-op calls to `lock()` and `unlock()`
-     */
-    JSVERIFY(SUCCEED, H5FDlock(file, TRUE), "lock always succeeds; has no effect")
-    JSVERIFY(SUCCEED, H5FDlock(file, FALSE), NULL)
-    JSVERIFY(SUCCEED, H5FDunlock(file), NULL)
-    /* Lock/unlock with null file or similar error crashes tests.
-     * HDassert in calling heirarchy, `H5FD[un]lock()` and `H5FD_[un]lock()`
-     */
 
     /************
      * TEARDOWN *
@@ -1535,8 +1541,8 @@ test_H5F_integration(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS file access through HD5F library (H5F API)");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1553,7 +1559,7 @@ test_H5F_integration(void)
      * test-local variables *
      ************************/
 
-    hid_t file    = -1;
+    hid_t file = -1;
     hid_t fapl_id = -1;
 
     TESTING("HDFS file access through HD5F library (H5F API)");
@@ -1604,7 +1610,7 @@ error:
 
 #if HDFS_TEST_DEBUG
     HDprintf("\nerror!");
-    fflush(stdout);
+    HDfflush(stdout);
 #endif /* HDFS_TEST_DEBUG */
 
     if (fapl_id >= 0) {
@@ -1647,6 +1653,7 @@ main(void)
      * commence tests *
      ******************/
 
+#ifdef H5_HAVE_LIBHDFS
     static char hdfs_namenode_name[HDFS_NAMENODE_NAME_MAX_SIZE] = "";
     const char *hdfs_namenode_name_env                          = NULL;
 
@@ -1658,6 +1665,7 @@ main(void)
         HDstrncpy(/* TODO: error-check? */
                   default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
     }
+#endif /* H5_HAVE_LIBHDFS */
 
     h5_reset();
 
