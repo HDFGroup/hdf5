@@ -5238,6 +5238,7 @@ H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE8("e", "*!*x*#iiiix", args, obj, loc_params, connector_id, lcpl_id, lapl_id, dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -5549,6 +5550,7 @@ H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
