@@ -191,7 +191,8 @@ static const H5FD_class_t H5FD_mirror_g = {
     H5FD__mirror_truncate,  /* truncate             */
     H5FD__mirror_lock,      /* lock                 */
     H5FD__mirror_unlock,    /* unlock               */
-    NULL,                  /* dedup                */
+    NULL,                   /* del                  */
+    NULL,                   /* dedup                */
     H5FD_FLMAP_DICHOTOMY    /* fl_map               */
 };
 

@@ -266,6 +266,7 @@ static const H5FD_class_t H5FD_ros3_g = {
     H5FD__ros3_truncate,      /* truncate             */
     NULL,                     /* lock                 */
     NULL,                     /* unlock               */
+    NULL,                     /* del                  */
     NULL,                     /* dedup                */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };

@@ -299,6 +299,7 @@ typedef struct H5FD_class_t {
     herr_t (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t (*lock)(H5FD_t *file, hbool_t rw);
     herr_t (*unlock)(H5FD_t *file);
+    herr_t (*del)(const char *name, hid_t fapl);
     H5FD_t *(*dedup)(H5FD_t *, H5FD_t *, hid_t);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
 } H5FD_class_t;
@@ -382,6 +383,7 @@ H5_DLL herr_t  H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDlock(H5FD_t *file, hbool_t rw);
 H5_DLL herr_t  H5FDunlock(H5FD_t *file);
+H5_DLL herr_t  H5FDdelete(const char *name, hid_t fapl_id);
 
 /* Allows querying a VFD ID for features before the file is opened */
 H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/);

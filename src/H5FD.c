@@ -2007,3 +2007,37 @@ H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDdriver_query() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDdelete
+ *
+ * Purpose:     Deletes a file
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDdelete(const char *filename, hid_t fapl_id)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "*si", filename, fapl_id);
+
+    /* Check arguments */
+    if (!filename || !*filename)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no file name specified")
+
+    if (H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+    /* Call private function */
+    if (H5FD_delete(filename, fapl_id) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDdelete() */

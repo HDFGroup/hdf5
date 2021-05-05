@@ -1771,6 +1771,7 @@
 ./tools/src/misc/Makefile.am
 ./tools/src/misc/h5clear.c
 ./tools/src/misc/h5debug.c
+./tools/src/misc/h5delete.c
 ./tools/src/misc/h5mkgrp.c
 ./tools/src/misc/h5repart.c
 ./tools/test/misc/Makefile.am

@@ -413,16 +413,16 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if (f->shared->efc)
         efc_size = H5F__efc_max_nfiles(f->shared->efc);
     if (H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't set elink file cache size")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set elink file cache size")
     if (f->shared->pb_ptr != NULL) {
         if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &(f->shared->pb_ptr->max_size)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't set page buffer size")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set page buffer size")
         if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &(f->shared->pb_ptr->min_meta_perc)) <
             0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID,
                         "can't set minimum metadata fraction of page buffer")
         if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &(f->shared->pb_ptr->min_raw_perc)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID,
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
                         "can't set minimum raw data fraction of page buffer")
     } /* end if */
 
@@ -431,9 +431,9 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 
 #ifdef H5_HAVE_PARALLEL
     if (H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->shared->coll_md_read)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't set collective metadata read flag")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set collective metadata read flag")
     if (H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->shared->coll_md_write)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't set collective metadata read flag")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set collective metadata read flag")
 #endif /* H5_HAVE_PARALLEL */
     if (H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) <
         0)
@@ -2440,6 +2440,31 @@ H5F__close(H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__close() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_delete
+ *
+ * Purpose:     Deletes a file.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_delete(const char *filename, hid_t fapl_id)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(filename);
+
+    /* Delete the file */
+    if (H5FD_delete(filename, fapl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_delete() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_try_close
