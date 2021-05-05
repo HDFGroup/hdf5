@@ -1835,12 +1835,23 @@ test_log(void)
     hsize_t       file_size = 0;
     unsigned int  flags     = H5FD_LOG_ALL;
     size_t        buf_size  = 4 * KB;
+    herr_t        ret       = SUCCEED;
 
     TESTING("LOG file driver");
 
-    /* Set property list and file name for log driver. */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
+
+    /* Make sure calling with an invalid fapl doesn't crash */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_fapl_log(H5I_INVALID_HID, LOG_FILENAME, 0, 0);
+    }
+    H5E_END_TRY;
+    if (SUCCEED == ret)
+        TEST_ERROR;
+
+    /* Set property list and file name for log driver. */
     if (H5Pset_fapl_log(fapl, LOG_FILENAME, flags, buf_size) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);

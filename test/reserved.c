@@ -126,7 +126,7 @@ rsrv_heap(void)
     /* If we can read a dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
      */
-    if (dataset_id == H5I_BADID)
+    if (dataset_id == H5I_INVALID_HID)
         TEST_ERROR;
 
     if (H5Dclose(dataset_id) < 0)
@@ -268,7 +268,7 @@ rsrv_ohdr(void)
     /* If we can read the dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
      */
-    if (dataset_id == H5I_BADID)
+    if (dataset_id == H5I_INVALID_HID)
         TEST_ERROR;
 
     if (H5Dclose(dataset_id) < 0)
@@ -432,7 +432,7 @@ rsrv_vlen(void)
     /* If we can read the dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
      */
-    if (dataset_id == H5I_BADID)
+    if (dataset_id == H5I_INVALID_HID)
         TEST_ERROR;
 
     if (H5Dclose(dataset_id) < 0)

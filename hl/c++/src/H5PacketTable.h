@@ -35,7 +35,7 @@ class H5_HLCPPDLL PacketTable {
      */
     PacketTable()
     {
-        table_id = H5I_BADID;
+        table_id = H5I_INVALID_HID;
     }
 
     /* "Open" Constructor
