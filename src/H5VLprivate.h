@@ -244,7 +244,7 @@ H5_DLL herr_t H5VL_link_move(const H5VL_object_t *src_vol_obj, const H5VL_loc_pa
                              const H5VL_object_t *dst_vol_obj, const H5VL_loc_params_t *loc_params2,
                              hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL_link_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
-                            H5VL_link_get_t get_type, hid_t dxpl_id, void **req, ...);
+                            H5VL_link_get_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL_link_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
                                  H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, ...);
 H5_DLL herr_t H5VL_link_optional(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,

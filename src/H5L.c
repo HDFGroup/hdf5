@@ -51,6 +51,50 @@ typedef struct {
     H5L_info2_t *linfo; /* Buffer to return to user */
 } H5L_trav_gi_t;
 
+/* User data for path traversal routine for getting link value by index */
+typedef struct {
+    /* In */
+    H5_index_t      idx_type; /* Index to use */
+    H5_iter_order_t order;    /* Order to iterate in index */
+    hsize_t         n;        /* Offset of link within index */
+    size_t          size;     /* Size of user buffer */
+
+    /* Out */
+    void *buf; /* User buffer */
+} H5L_trav_gvbi_t;
+
+/* User data for path traversal routine for getting link info by index */
+typedef struct {
+    /* In */
+    H5_index_t      idx_type; /* Index to use */
+    H5_iter_order_t order;    /* Order to iterate in index */
+    hsize_t         n;        /* Offset of link within index */
+
+    /* Out */
+    H5L_info2_t *linfo; /* Buffer to return to user */
+} H5L_trav_gibi_t;
+
+/* User data for path traversal routine for removing link by index */
+typedef struct {
+    /* In */
+    H5_index_t      idx_type; /* Index to use */
+    H5_iter_order_t order;    /* Order to iterate in index */
+    hsize_t         n;        /* Offset of link within index */
+} H5L_trav_rmbi_t;
+
+/* User data for path traversal routine for getting name by index */
+typedef struct {
+    /* In */
+    H5_index_t      idx_type; /* Index to use */
+    H5_iter_order_t order;    /* Order to iterate in index */
+    hsize_t         n;        /* Offset of link within index */
+    size_t          size;     /* Size of name buffer */
+
+    /* Out */
+    char *  name;     /* Buffer to return name to user */
+    size_t name_len;  /* Length of full name */
+} H5L_trav_gnbi_t;
+
 /* User data for path traversal callback to creating a link */
 typedef struct {
     H5F_t *           file;      /* Pointer to the file */
@@ -1228,6 +1272,7 @@ herr_t
 H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size_t size, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1242,18 +1287,23 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size_t size, hid_t
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type                     = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name    = name;
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
-    /* Get the location object */
+    /* Get the VOL object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_GET_VAL;
+    vol_cb_args.args.get_val.buf = buf;
+    vol_cb_args.args.get_val.buf_size = size;
+
     /* Get the link value */
-    if (H5VL_link_get(vol_obj, &loc_params, H5VL_LINK_GET_VAL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf,
-                      size) < 0)
+    if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link value for '%s'", name)
 
 done:
@@ -1283,6 +1333,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
                   void *buf /*out*/, size_t size, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1301,6 +1352,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name     = group_name;
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
@@ -1309,13 +1361,17 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
     loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
-    /* get the location object */
+    /* Get the VOL object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_GET_VAL;
+    vol_cb_args.args.get_val.buf = buf;
+    vol_cb_args.args.get_val.buf_size = size;
+
     /* Get the link value */
-    if (H5VL_link_get(vol_obj, &loc_params, H5VL_LINK_GET_VAL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf,
-                      size) < 0)
+    if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
@@ -1451,6 +1507,7 @@ herr_t
 H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo /*out*/, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1465,18 +1522,22 @@ H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo /*out*/, hid_t l
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type                     = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name    = name;
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
-    /* get the location object */
+    /* Get the location object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_GET_INFO;
+    vol_cb_args.args.get_info.linfo = linfo;
+
     /* Get the link information */
-    if (H5VL_link_get(vol_obj, &loc_params, H5VL_LINK_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                      linfo) < 0)
+    if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1502,6 +1563,7 @@ H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
                     hsize_t n, H5L_info2_t *linfo /*out*/, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1520,6 +1582,7 @@ H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name     = group_name;
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
@@ -1528,13 +1591,16 @@ H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
-    /* get the location object */
+    /* Get the location object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_GET_INFO;
+    vol_cb_args.args.get_info.linfo = linfo;
+
     /* Get the link information */
-    if (H5VL_link_get(vol_obj, &loc_params, H5VL_LINK_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                      linfo) < 0)
+    if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1699,6 +1765,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
                    hsize_t n, char *name /*out*/, size_t size, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     ssize_t           ret_value = -1; /* Return value */
 
@@ -1717,7 +1784,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, (-1), "can't set access property list info")
 
-    /* Fill in location struct fields */
+    /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name     = group_name;
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
@@ -1726,14 +1793,22 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
-    /* Get the location object */
+    /* Get the VOL object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_GET_NAME;
+    vol_cb_args.args.get_name.name_size      = size;
+    vol_cb_args.args.get_name.name           = name;
+    vol_cb_args.args.get_name.name_len = 0;
+
     /* Get the link information */
-    if (H5VL_link_get(vol_obj, &loc_params, H5VL_LINK_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                      name, size, &ret_value) < 0)
+    if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, (-1), "unable to get link name")
+
+    /* Set the return value */
+    ret_value = (ssize_t)vol_cb_args.args.get_name.name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3917,8 +3992,8 @@ H5L__get_name_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist")
 
     /* Query link */
-    if ((udata->name_len = H5G_obj_get_name_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n,
-                                                   udata->name, udata->size)) < 0)
+    if (H5G_obj_get_name_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n,
+                                                   udata->name, udata->size, &udata->name_len) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found")
 
 done:
@@ -3939,18 +4014,19 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
+herr_t
 H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
-                     hsize_t n, char *name /*out*/, size_t size)
+                     hsize_t n, char *name /*out*/, size_t size, size_t *link_name_len)
 {
-    H5L_trav_gnbi_t udata;            /* User data for callback */
-    ssize_t         ret_value = FAIL; /* Return value */
+    H5L_trav_gnbi_t udata;      /* User data for callback */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
     HDassert(group_name && *group_name);
+    HDassert(link_name_len);
 
     /* Set up user data for callback */
     udata.idx_type = idx_type;
@@ -3958,15 +4034,14 @@ H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
     udata.n        = n;
     udata.name     = name;
     udata.size     = size;
-    udata.name_len = -1;
+    udata.name_len = 0;
 
     /* Traverse the group hierarchy to locate the link to get name of */
-    if (H5G_traverse(loc, group_name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__get_name_by_idx_cb, &udata) <
-        0)
+    if (H5G_traverse(loc, group_name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__get_name_by_idx_cb, &udata) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get name")
 
     /* Set the return value */
-    ret_value = udata.name_len;
+    *link_name_len = udata.name_len;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

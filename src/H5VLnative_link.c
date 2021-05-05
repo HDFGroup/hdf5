@@ -240,8 +240,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_t get_type,
-                      hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_args_t *args,
+                      hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t loc;
     herr_t    ret_value = SUCCEED; /* Return value */
@@ -251,20 +251,17 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
     if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-    switch (get_type) {
+    switch (args->op_type) {
         /* H5Lget_info/H5Lget_info_by_idx */
         case H5VL_LINK_GET_INFO: {
-            H5L_info2_t *linfo2 = HDva_arg(arguments, H5L_info2_t *);
-
             /* Get the link information */
-            if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Lget_info */
-                if (H5L_get_info(&loc, loc_params->loc_data.loc_by_name.name, linfo2) < 0)
+            if (loc_params->type == H5VL_OBJECT_BY_NAME) {
+                if (H5L_get_info(&loc, loc_params->loc_data.loc_by_name.name, args->args.get_info.linfo) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
             }                                                  /* end if */
-            else if (loc_params->type == H5VL_OBJECT_BY_IDX) { /* H5Lget_info_by_idx */
-                if (H5L__get_info_by_idx(
-                        &loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
-                        loc_params->loc_data.loc_by_idx.order, loc_params->loc_data.loc_by_idx.n, linfo2) < 0)
+            else if (loc_params->type == H5VL_OBJECT_BY_IDX) {
+                if (H5L__get_info_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
+                        loc_params->loc_data.loc_by_idx.order, loc_params->loc_data.loc_by_idx.n, args->args.get_info.linfo) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
             } /* end else-if */
             else
@@ -275,15 +272,8 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
 
         /* H5Lget_name_by_idx */
         case H5VL_LINK_GET_NAME: {
-            char *   name = HDva_arg(arguments, char *);
-            size_t   size = HDva_arg(arguments, size_t);
-            ssize_t *ret  = HDva_arg(arguments, ssize_t *);
-
-            /* Get the link name */
-            if ((*ret = H5L__get_name_by_idx(&loc, loc_params->loc_data.loc_by_idx.name,
-                                             loc_params->loc_data.loc_by_idx.idx_type,
-                                             loc_params->loc_data.loc_by_idx.order,
-                                             loc_params->loc_data.loc_by_idx.n, name, size)) < 0)
+            if (H5L__get_name_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
+                                     loc_params->loc_data.loc_by_idx.order, loc_params->loc_data.loc_by_idx.n, args->args.get_name.name, args->args.get_name.name_size, &args->args.get_name.name_len) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
 
             break;
@@ -291,20 +281,16 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
 
         /* H5Lget_val/H5Lget_val_by_idx */
         case H5VL_LINK_GET_VAL: {
-            void * buf  = HDva_arg(arguments, void *);
-            size_t size = HDva_arg(arguments, size_t);
-
             /* Get the link information */
-            if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Lget_val */
-                if (H5L__get_val(&loc, loc_params->loc_data.loc_by_name.name, buf, size) < 0)
+            if (loc_params->type == H5VL_OBJECT_BY_NAME) {
+                if (H5L__get_val(&loc, loc_params->loc_data.loc_by_name.name, args->args.get_val.buf, args->args.get_val.buf_size) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link value")
             }
-            else if (loc_params->type == H5VL_OBJECT_BY_IDX) { /* H5Lget_val_by_idx */
-
+            else if (loc_params->type == H5VL_OBJECT_BY_IDX) {
                 if (H5L__get_val_by_idx(&loc, loc_params->loc_data.loc_by_idx.name,
                                         loc_params->loc_data.loc_by_idx.idx_type,
                                         loc_params->loc_data.loc_by_idx.order,
-                                        loc_params->loc_data.loc_by_idx.n, buf, size) < 0)
+                                        loc_params->loc_data.loc_by_idx.n, args->args.get_val.buf, args->args.get_val.buf_size) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link val")
             }
             else

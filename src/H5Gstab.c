@@ -706,22 +706,22 @@ done:
  *
  * Purpose:     Returns the name of objects in the group by giving index.
  *
- * Return:	Success:        Non-negative, length of name
- *		Failure:	Negative
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *	        Nov 20, 2002
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
-H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n, char *name, size_t size)
+herr_t
+H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n, char *name, size_t name_size,
+                          size_t *name_len)
 {
     H5HL_t *         heap = NULL;         /* Pointer to local heap */
     H5O_stab_t       stab;                /* Info about local heap & B-tree */
     H5G_bt_it_gnbi_t udata;               /* Iteration information */
     hbool_t          udata_valid = FALSE; /* Whether iteration information is valid */
-    ssize_t          ret_value   = -1;    /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
@@ -768,13 +768,13 @@ H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound")
 
     /* Get the length of the name */
-    ret_value = (ssize_t)HDstrlen(udata.name);
+    *name_len = HDstrlen(udata.name);
 
     /* Copy the name into the user's buffer, if given */
     if (name) {
-        HDstrncpy(name, udata.name, MIN((size_t)(ret_value + 1), size));
-        if ((size_t)ret_value >= size)
-            name[size - 1] = '\0';
+        HDstrncpy(name, udata.name, MIN((*name_len + 1), name_size));
+        if (*name_len >= name_size)
+            name[name_size - 1] = '\0';
     } /* end if */
 
 done:

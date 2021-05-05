@@ -62,8 +62,9 @@ H5_DLL herr_t  H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name, 
 H5_DLL herr_t  H5L__exists(const H5G_loc_t *loc, const char *name, hbool_t *exists);
 H5_DLL herr_t  H5L__get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
                                     H5_iter_order_t order, hsize_t n, H5L_info2_t *linfo /*out*/);
-H5_DLL ssize_t H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
-                                    H5_iter_order_t order, hsize_t n, char *name /*out*/, size_t size);
+H5_DLL herr_t H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
+                                    H5_iter_order_t order, hsize_t n, char *name /*out*/, size_t size,
+                                    size_t *name_len);
 H5_DLL herr_t  H5L__get_val(const H5G_loc_t *loc, const char *name, void *buf /*out*/, size_t size);
 H5_DLL herr_t  H5L__get_val_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
                                    H5_iter_order_t order, hsize_t n, void *buf /*out*/, size_t size);

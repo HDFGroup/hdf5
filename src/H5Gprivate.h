@@ -229,8 +229,9 @@ H5_DLL herr_t H5G_link_to_info(const struct H5O_loc_t *link_loc, const struct H5
  */
 H5_DLL herr_t  H5G_obj_insert(const struct H5O_loc_t *grp_oloc, const char *name, struct H5O_link_t *obj_lnk,
                               hbool_t adj_link, H5O_type_t obj_type, const void *crt_info);
-H5_DLL ssize_t H5G_obj_get_name_by_idx(const struct H5O_loc_t *oloc, H5_index_t idx_type,
-                                       H5_iter_order_t order, hsize_t n, char *name, size_t size);
+H5_DLL herr_t H5G_obj_get_name_by_idx(const struct H5O_loc_t *oloc, H5_index_t idx_type,
+                                       H5_iter_order_t order, hsize_t n, char *name, size_t name_size,
+                                       size_t *name_len);
 H5_DLL herr_t  H5G_obj_remove(const struct H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *name);
 H5_DLL herr_t  H5G_obj_remove_by_idx(const struct H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
                                      H5_index_t idx_type, H5_iter_order_t order, hsize_t n);

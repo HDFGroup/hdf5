@@ -555,7 +555,7 @@ typedef struct H5VL_group_specific_args_t {
 /* Typedef for VOL connector group optional VOL operations */
 typedef int H5VL_group_optional_t;
 
-/* link create types for VOL */
+/* Link create types for VOL */
 typedef enum H5VL_link_create_t {
     H5VL_LINK_CREATE_HARD,
     H5VL_LINK_CREATE_SOFT,
@@ -594,6 +594,32 @@ typedef enum H5VL_link_get_t {
     H5VL_LINK_GET_NAME, /* link name                         */
     H5VL_LINK_GET_VAL   /* link value                        */
 } H5VL_link_get_t;
+
+/* Parameters for link 'get' operations */
+typedef struct H5VL_link_get_args_t {
+    H5VL_link_get_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_LINK_GET_INFO */
+        struct {
+            H5L_info2_t *linfo;      /* Pointer to link's info (OUT) */
+        } get_info;
+
+        /* H5VL_LINK_GET_NAME */
+        struct {
+            size_t name_size;   /* Size of link name buffer (IN) */
+            char * name;        /* Buffer for link name (OUT) */
+            size_t name_len;    /* Actual length of link name (OUT) */
+        } get_name;
+
+        /* H5VL_LINK_GET_VAL */
+        struct {
+            void *buf;          /* Buffer for link value */
+            size_t buf_size;   /* Size of link value buffer */
+        } get_val;
+    } args;
+} H5VL_link_get_args_t;
 
 /* Values for link 'specific' operation */
 typedef enum H5VL_link_specific_t {
@@ -768,8 +794,8 @@ typedef struct H5VL_link_class_t {
     herr_t (*move)(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
                    const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
                    void **req);
-    herr_t (*get)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_t get_type, hid_t dxpl_id,
-                  void **req, va_list arguments);
+    herr_t (*get)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_args_t *args, hid_t dxpl_id,
+                  void **req);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_optional_t opt_type,

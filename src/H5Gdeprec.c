@@ -631,6 +631,7 @@ herr_t
 H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf /*out*/)
 {
     H5VL_object_t *   vol_obj; /* Object of loc_id */
+    H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -645,6 +646,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf /*out*/)
     if (H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
+    /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type                     = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name    = name;
@@ -654,9 +656,13 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf /*out*/)
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_GET_VAL;
+    vol_cb_args.args.get_val.buf = buf;
+    vol_cb_args.args.get_val.buf_size = size;
+
     /* Get the link value */
-    if (H5VL_link_get(vol_obj, &loc_params, H5VL_LINK_GET_VAL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf,
-                      size) < 0)
+    if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
@@ -1150,6 +1156,7 @@ ssize_t
 H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name /*out*/, size_t size)
 {
     H5VL_object_t *   vol_obj; /* Object of loc_id */
+    H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;
     ssize_t           ret_value; /* Return value */
 
@@ -1160,7 +1167,7 @@ H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name /*out*/, size_t size
     if (H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, (-1), "can't set collective metadata read info")
 
-    /* Fill in location struct fields */
+    /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name     = ".";
     loc_params.loc_data.loc_by_idx.idx_type = H5_INDEX_NAME;
@@ -1173,10 +1180,18 @@ H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name /*out*/, size_t size
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_GET_NAME;
+    vol_cb_args.args.get_name.name_size      = size;
+    vol_cb_args.args.get_name.name           = name;
+    vol_cb_args.args.get_name.name_len = 0;
+
     /* Call internal function */
-    if (H5VL_link_get(vol_obj, &loc_params, H5VL_LINK_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                      name, size, &ret_value) < 0)
+    if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, (-1), "can't get object name")
+
+    /* Set the return value */
+    ret_value = (ssize_t)vol_cb_args.args.get_name.name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
