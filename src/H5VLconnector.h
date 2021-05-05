@@ -628,6 +628,37 @@ typedef enum H5VL_link_specific_t {
     H5VL_LINK_ITER    /* H5Literate/visit(_by_name)              */
 } H5VL_link_specific_t;
 
+/* Parameters for link 'iterate' operation */
+typedef struct H5VL_link_iterate_args_t {
+    hbool_t         recursive;
+    H5_index_t      idx_type;
+    H5_iter_order_t order;
+    hsize_t *       idx_p;
+    H5L_iterate2_t  op;
+    void *          op_data;
+} H5VL_link_iterate_args_t;
+
+/* Parameters for link 'specific' operations */
+typedef struct H5VL_link_specific_args_t {
+    H5VL_link_specific_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_LINK_DELETE */
+        struct {
+            int unused;         /* Unused field, to quiet compiler */
+        } del;
+
+        /* H5VL_LINK_EXISTS */
+        struct {
+            hbool_t exists;     /* Whether link exists */
+        } exists;
+
+        /* H5VL_LINK_ITER */
+        H5VL_link_iterate_args_t iterate;
+    } args;
+} H5VL_link_specific_args_t;
+
 /* Typedef and values for native VOL connector link optional VOL operations */
 typedef int H5VL_link_optional_t;
 /* (No optional link VOL operations currently) */
@@ -796,8 +827,8 @@ typedef struct H5VL_link_class_t {
                    void **req);
     herr_t (*get)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_args_t *args, hid_t dxpl_id,
                   void **req);
-    herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_t specific_type,
-                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_args_t *args,
+                       hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_optional_t opt_type,
                        hid_t dxpl_id, void **req, va_list arguments);
 } H5VL_link_class_t;

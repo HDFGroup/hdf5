@@ -120,8 +120,7 @@ H5_DLL herr_t H5VL__native_link_move(void *src_obj, const H5VL_loc_params_t *loc
 H5_DLL herr_t H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_args_t *args,
                                     hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                         H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req,
-                                         va_list arguments);
+                                         H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req);
 
 /* Object callbacks */
 H5_DLL void *H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type,

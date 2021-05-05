@@ -317,35 +317,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_t specific_type,
-                           hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_args_t *args,
+                           hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (specific_type) {
+    switch (args->op_type) {
         case H5VL_LINK_EXISTS: {
-            hbool_t * exists = HDva_arg(arguments, hbool_t *);
             H5G_loc_t loc;
 
             if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-            /* Check for the existence of the link */
-            if (H5L__exists(&loc, loc_params->loc_data.loc_by_name.name, exists) < 0)
+            if (H5L__exists(&loc, loc_params->loc_data.loc_by_name.name, &args->args.exists.exists) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to specific link info")
+
             break;
         }
 
         case H5VL_LINK_ITER: {
+            H5VL_link_iterate_args_t *iter_args = &args->args.iterate;
             H5G_loc_t       loc;
-            hbool_t         recursive = (hbool_t)HDva_arg(arguments, unsigned);
-            H5_index_t      idx_type  = (H5_index_t)HDva_arg(arguments, int);      /* enum work-around */
-            H5_iter_order_t order     = (H5_iter_order_t)HDva_arg(arguments, int); /* enum work-around */
-            hsize_t *       idx_p     = HDva_arg(arguments, hsize_t *);
-            H5L_iterate2_t  op        = HDva_arg(arguments, H5L_iterate2_t);
-            void *          op_data   = HDva_arg(arguments, void *);
 
             /* Get the location */
             if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
@@ -353,28 +346,28 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
 
             /* Visit or iterate over the links */
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
-                if (recursive) {
+                if (iter_args->recursive) {
                     /* H5Lvisit */
-                    if ((ret_value = H5G_visit(&loc, ".", idx_type, order, op, op_data)) < 0)
+                    if ((ret_value = H5G_visit(&loc, ".", iter_args->idx_type, iter_args->order, iter_args->op, iter_args->op_data)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
                 } /* end if */
                 else {
                     /* H5Literate */
-                    if ((ret_value = H5L_iterate(&loc, ".", idx_type, order, idx_p, op, op_data)) < 0)
+                    if ((ret_value = H5L_iterate(&loc, ".", iter_args->idx_type, iter_args->order, iter_args->idx_p, iter_args->op, iter_args->op_data)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "error iterating over links")
                 } /* end else */
             }     /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) {
-                if (recursive) {
+                if (iter_args->recursive) {
                     /* H5Lvisit_by_name */
-                    if ((ret_value = H5G_visit(&loc, loc_params->loc_data.loc_by_name.name, idx_type, order,
-                                               op, op_data)) < 0)
+                    if ((ret_value = H5G_visit(&loc, loc_params->loc_data.loc_by_name.name, iter_args->idx_type, iter_args->order,
+                                               iter_args->op, iter_args->op_data)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
                 } /* end if */
                 else {
                     /* H5Literate_by_name */
-                    if ((ret_value = H5L_iterate(&loc, loc_params->loc_data.loc_by_name.name, idx_type, order,
-                                                 idx_p, op, op_data)) < 0)
+                    if ((ret_value = H5L_iterate(&loc, loc_params->loc_data.loc_by_name.name, iter_args->idx_type, iter_args->order,
+                                                 iter_args->idx_p, iter_args->op, iter_args->op_data)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "error iterating over links")
                 } /* end else */
             }     /* end else-if */

@@ -142,6 +142,7 @@ H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
             void *op_data)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    H5VL_link_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;
     H5I_type_t        id_type; /* Type of ID */
     H5L_shim_data_t   shim_data;
@@ -181,10 +182,17 @@ H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
     shim_data.real_op      = op;
     shim_data.real_op_data = op_data;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_ITER;
+    vol_cb_args.args.iterate.recursive = FALSE;
+    vol_cb_args.args.iterate.idx_type = idx_type;
+    vol_cb_args.args.iterate.order = order;
+    vol_cb_args.args.iterate.idx_p = idx_p;
+    vol_cb_args.args.iterate.op = H5L__iterate2_shim;
+    vol_cb_args.args.iterate.op_data = &shim_data;
+
     /* Iterate over the links */
-    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT,
-                                        H5_REQUEST_NULL, (unsigned)FALSE, (int)idx_type, (int)order, idx_p,
-                                        H5L__iterate2_shim, (void *)&shim_data)) < 0)
+    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -220,6 +228,7 @@ H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
                     hsize_t *idx_p, H5L_iterate1_t op, void *op_data, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    H5VL_link_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;
     H5L_shim_data_t   shim_data;
     hbool_t           is_native_vol_obj;
@@ -265,10 +274,17 @@ H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     shim_data.real_op      = op;
     shim_data.real_op_data = op_data;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_ITER;
+    vol_cb_args.args.iterate.recursive = FALSE;
+    vol_cb_args.args.iterate.idx_type = idx_type;
+    vol_cb_args.args.iterate.order = order;
+    vol_cb_args.args.iterate.idx_p = idx_p;
+    vol_cb_args.args.iterate.op = H5L__iterate2_shim;
+    vol_cb_args.args.iterate.op_data = &shim_data;
+
     /* Iterate over the links */
-    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT,
-                                        H5_REQUEST_NULL, FALSE, idx_type, order, idx_p, H5L__iterate2_shim,
-                                        (void *)&shim_data)) < 0)
+    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -490,6 +506,7 @@ herr_t
 H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterate1_t op, void *op_data)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    H5VL_link_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;
     H5I_type_t        id_type; /* Type of ID */
     H5L_shim_data_t   shim_data;
@@ -529,10 +546,18 @@ H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
     shim_data.real_op      = op;
     shim_data.real_op_data = op_data;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_ITER;
+    vol_cb_args.args.iterate.recursive = TRUE;
+    vol_cb_args.args.iterate.idx_type = idx_type;
+    vol_cb_args.args.iterate.order = order;
+    vol_cb_args.args.iterate.idx_p = NULL;
+    vol_cb_args.args.iterate.op = H5L__iterate2_shim;
+    vol_cb_args.args.iterate.op_data = &shim_data;
+
     /* Iterate over the links */
-    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT,
-                                        H5_REQUEST_NULL, TRUE, idx_type, order, NULL, H5L__iterate2_shim,
-                                        (void *)&shim_data)) < 0)
+    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                        H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
 
 done:
@@ -574,6 +599,7 @@ H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
                   H5L_iterate1_t op, void *op_data, hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    H5VL_link_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;
     H5L_shim_data_t   shim_data;
     hbool_t           is_native_vol_obj;
@@ -619,10 +645,18 @@ H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
     shim_data.real_op      = op;
     shim_data.real_op_data = op_data;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_ITER;
+    vol_cb_args.args.iterate.recursive = TRUE;
+    vol_cb_args.args.iterate.idx_type = idx_type;
+    vol_cb_args.args.iterate.order = order;
+    vol_cb_args.args.iterate.idx_p = NULL;
+    vol_cb_args.args.iterate.op = H5L__iterate2_shim;
+    vol_cb_args.args.iterate.op_data = &shim_data;
+
     /* Visit the links */
-    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT,
-                                        H5_REQUEST_NULL, TRUE, idx_type, order, NULL, H5L__iterate2_shim,
-                                        (void *)&shim_data)) < 0)
+    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                        H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
 
 done:

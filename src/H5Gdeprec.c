@@ -587,6 +587,7 @@ herr_t
 H5Gunlink(hid_t loc_id, const char *name)
 {
     H5VL_object_t *   vol_obj; /* Object of loc_id */
+    H5VL_link_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -610,9 +611,11 @@ H5Gunlink(hid_t loc_id, const char *name)
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_LINK_DELETE;
+
     /* Delete the link */
-    if (H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_DELETE, H5P_DATASET_XFER_DEFAULT,
-                           H5_REQUEST_NULL) < 0)
+    if (H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "couldn't delete link")
 
 done:

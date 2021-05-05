@@ -182,10 +182,7 @@ H5_DLL herr_t H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1,
 H5_DLL herr_t H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                            H5VL_link_get_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                                H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req,
-                                va_list arguments);
-H5_DLL herr_t H5VLlink_specific_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                                       H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, ...);
+                                H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                                 H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLlink_optional_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,

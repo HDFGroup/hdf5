@@ -148,8 +148,7 @@ static herr_t H5VL__link_move(void *src_obj, const H5VL_loc_params_t *loc_params
 static herr_t H5VL__link_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                              H5VL_link_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL__link_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-                                  H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req,
-                                  va_list arguments);
+                                  H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL__link_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                   H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req,
                                   va_list arguments);
@@ -364,6 +363,7 @@ H5VL__common_optional_op(hid_t id, H5I_type_t id_type, H5VL_reg_opt_oper_t reg_o
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
+    /* (Must return value from callback, for iterators) */
     if ((ret_value = (*reg_opt_op)((*vol_obj_ptr)->data, (*vol_obj_ptr)->connector->cls, opt_type, dxpl_id,
                                    req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute optional callback")
@@ -1500,6 +1500,7 @@ H5VL__attr_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'attr specific' method")
 
     /* Call the corresponding VOL callback */
+    /* (Must return value from callback, for iterators) */
     if ((ret_value = (cls->attr_cls.specific)(obj, loc_params, args, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute 'specific' callback")
 
@@ -1532,8 +1533,8 @@ H5VL_attr_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value =
-             H5VL__attr_specific(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req)) < 0)
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = H5VL__attr_specific(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute 'specific' callback")
 
 done:
@@ -1571,6 +1572,7 @@ H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
+    /* (Must return value from callback, for iterators) */
     if ((ret_value = H5VL__attr_specific(obj, loc_params, cls, args, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute 'specific' callback")
 
@@ -1601,6 +1603,7 @@ H5VL__attr_optional(void *obj, const H5VL_class_t *cls, H5VL_attr_optional_t opt
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'attr optional' method")
 
     /* Call the corresponding VOL callback */
+    /* (Must return value from callback, for iterators) */
     if ((ret_value = (cls->attr_cls.optional)(obj, opt_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
 
@@ -1635,6 +1638,7 @@ H5VL_attr_optional(const H5VL_object_t *vol_obj, H5VL_attr_optional_t opt_type, 
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
+    /* (Must return value from callback, for iterators) */
     HDva_start(arguments, req);
     arg_started = TRUE;
     if ((ret_value = H5VL__attr_optional(vol_obj->data, vol_obj->connector->cls, opt_type, dxpl_id, req,
@@ -1680,6 +1684,7 @@ H5VLattr_optional(void *obj, hid_t connector_id, H5VL_attr_optional_t opt_type, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
+    /* (Must return value from callback, for iterators) */
     if ((ret_value = H5VL__attr_optional(obj, cls, opt_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
 
@@ -4858,6 +4863,7 @@ H5VL__group_optional(void *obj, const H5VL_class_t *cls, H5VL_group_optional_t o
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'group optional' method")
 
     /* Call the corresponding VOL callback */
+    /* (Must return value from callback, for iterators) */
     if ((ret_value = (cls->group_cls.optional)(obj, opt_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group optional callback")
 
@@ -4892,6 +4898,7 @@ H5VL_group_optional(const H5VL_object_t *vol_obj, H5VL_group_optional_t opt_type
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
+    /* (Must return value from callback, for iterators) */
     HDva_start(arguments, req);
     arg_started = TRUE;
     if ((ret_value = H5VL__group_optional(vol_obj->data, vol_obj->connector->cls, opt_type, dxpl_id, req,
@@ -4937,6 +4944,7 @@ H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_group_optional_t opt_type
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
+    /* (Must return value from callback, for iterators) */
     if ((ret_value = H5VL__group_optional(obj, cls, opt_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group optional callback")
 
@@ -5578,7 +5586,7 @@ done:
  */
 static herr_t
 H5VL__link_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-                    H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
+                    H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -5589,7 +5597,8 @@ H5VL__link_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'link specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((ret_value = (cls->link_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = (cls->link_cls.specific)(obj, loc_params, args, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link specific callback")
 
 done:
@@ -5608,10 +5617,8 @@ done:
  */
 herr_t
 H5VL_link_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
-                   H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, ...)
+                   H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
@@ -5623,17 +5630,11 @@ H5VL_link_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if ((ret_value = H5VL__link_specific(vol_obj->data, loc_params, vol_obj->connector->cls, specific_type,
-                                         dxpl_id, req, arguments)) < 0)
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = H5VL__link_specific(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link specific callback")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -5653,13 +5654,12 @@ done:
  */
 herr_t
 H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                  H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req /*out*/, va_list arguments)
+                  H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE7("e", "*x*#iVmixx", obj, loc_params, connector_id, specific_type, dxpl_id, req, arguments);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5668,56 +5668,13 @@ H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__link_specific(obj, loc_params, cls, specific_type, dxpl_id, req, arguments)) < 0)
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = H5VL__link_specific(obj, loc_params, cls, args, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLlink_specific() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLlink_specific_vararg
- *
- * Purpose:     Performs a connector-specific operation on a link
- *
- * Note:        Same as H5VLlink_specific, but uses varargs instead of a va_list
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLlink_specific_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                         H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req /*out*/, ...)
-{
-    H5VL_class_t *cls;                   /* VOL connector's class struct */
-    va_list       arguments;             /* Argument list passed from the API call */
-    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
-    herr_t        ret_value   = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*x*#iVmix", obj, loc_params, connector_id, specific_type, dxpl_id, req);
-
-    /* Check args and get class pointer */
-    if (NULL == obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
-    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-    /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if ((ret_value = H5VL__link_specific(obj, loc_params, cls, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link specific callback")
-
-done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
-    FUNC_LEAVE_API_NOINIT(ret_value)
-} /* end H5VLlink_specific_vararg() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL__link_optional
@@ -6331,6 +6288,7 @@ H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'object specific' method")
 
     /* Call the corresponding VOL callback */
+    /* (Must return value from callback, for iterators) */
     if ((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "object specific failed")
 
@@ -6365,6 +6323,7 @@ H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
+    /* (Must return value from callback, for iterators) */
     HDva_start(arguments, req);
     arg_started = TRUE;
     if ((ret_value = H5VL__object_specific(vol_obj->data, loc_params, vol_obj->connector->cls, specific_type,
@@ -6415,6 +6374,7 @@ H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no `object specific' method")
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
+    /* (Must return value from callback, for iterators) */
     if ((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object specific callback")
 
@@ -7283,9 +7243,8 @@ H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'async specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((ret_value = (cls->request_cls.specific)(req, specific_type, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request specific callback")
+    if ((cls->request_cls.specific)(req, specific_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7316,10 +7275,8 @@ H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t spec
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, specific_type);
     arg_started = TRUE;
-    if ((ret_value =
-             H5VL__request_specific(vol_obj->data, vol_obj->connector->cls, specific_type, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request specific callback")
+    if (H5VL__request_specific(vol_obj->data, vol_obj->connector->cls, specific_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -7353,9 +7310,8 @@ H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_t spec
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__request_specific(req, cls, specific_type, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request specific callback")
+    if (H5VL__request_specific(req, cls, specific_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -7391,9 +7347,8 @@ H5VLrequest_specific_vararg(void *req, hid_t connector_id, H5VL_request_specific
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, specific_type);
     arg_started = TRUE;
-    if ((ret_value = H5VL__request_specific(req, cls, specific_type, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request specific callback")
+    if (H5VL__request_specific(req, cls, specific_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -7430,9 +7385,8 @@ H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_request_optional
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'async optional' method")
 
     /* Call the corresponding VOL callback */
-    if ((ret_value = (cls->request_cls.optional)(req, opt_type, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request optional callback")
+    if ((cls->request_cls.optional)(req, opt_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request optional callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7463,9 +7417,8 @@ H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_request_optional_t opt_
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, opt_type);
     arg_started = TRUE;
-    if ((ret_value = H5VL__request_optional(vol_obj->data, vol_obj->connector->cls, opt_type, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request optional callback")
+    if (H5VL__request_optional(vol_obj->data, vol_obj->connector->cls, opt_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request optional callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -7505,9 +7458,8 @@ H5VLrequest_optional_vararg(void *req, hid_t connector_id, H5VL_request_optional
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, opt_type);
     arg_started = TRUE;
-    if ((ret_value = H5VL__request_optional(req, cls, opt_type, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request optional callback")
+    if (H5VL__request_optional(req, cls, opt_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request optional callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -7541,9 +7493,8 @@ H5VLrequest_optional(void *req, hid_t connector_id, H5VL_request_optional_t opt_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__request_optional(req, cls, opt_type, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request optional callback")
+    if (H5VL__request_optional(req, cls, opt_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -7897,8 +7848,7 @@ H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specif
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, specific_type);
     arg_started = TRUE;
-    if ((ret_value = H5VL__blob_specific(vol_obj->data, vol_obj->connector->cls, blob_id, specific_type,
-                                         arguments)) < 0)
+    if (H5VL__blob_specific(vol_obj->data, vol_obj->connector->cls, blob_id, specific_type, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback")
 
 done:
@@ -8048,8 +7998,7 @@ H5VL_blob_optional(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_option
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, opt_type);
     arg_started = TRUE;
-    if ((ret_value =
-             H5VL__blob_optional(vol_obj->data, vol_obj->connector->cls, blob_id, opt_type, arguments)) < 0)
+    if (H5VL__blob_optional(vol_obj->data, vol_obj->connector->cls, blob_id, opt_type, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob optional callback")
 
 done:
@@ -8321,8 +8270,7 @@ H5VL_token_to_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const H5O_t
     HDassert(token_str);
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__token_to_str(vol_obj->data, obj_type, vol_obj->connector->cls, token, token_str)) <
-        0)
+    if (H5VL__token_to_str(vol_obj->data, obj_type, vol_obj->connector->cls, token, token_str) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "token serialization failed")
 
 done:
@@ -8429,8 +8377,7 @@ H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const cha
     HDassert(token_str);
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value =
-             H5VL__token_from_str(vol_obj->data, obj_type, vol_obj->connector->cls, token_str, token)) < 0)
+    if (H5VL__token_from_str(vol_obj->data, obj_type, vol_obj->connector->cls, token_str, token) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "token deserialization failed")
 
 done:
@@ -8497,7 +8444,7 @@ H5VL__optional(void *obj, const H5VL_class_t *cls, int op_type, hid_t dxpl_id, v
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'optional' method")
 
     /* Call the corresponding VOL callback */
-    if ((ret_value = (cls->optional)(obj, op_type, dxpl_id, req, arguments)) < 0)
+    if ((cls->optional)(obj, op_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, ret_value, "unable to execute optional callback")
 
 done:
@@ -8532,8 +8479,7 @@ H5VL_optional(const H5VL_object_t *vol_obj, int op_type, hid_t dxpl_id, void **r
     /* Call the corresponding internal VOL routine */
     HDva_start(arguments, req);
     arg_started = TRUE;
-    if ((ret_value =
-             H5VL__optional(vol_obj->data, vol_obj->connector->cls, op_type, dxpl_id, req, arguments)) < 0)
+    if (H5VL__optional(vol_obj->data, vol_obj->connector->cls, op_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute optional callback")
 
 done:
@@ -8574,7 +8520,7 @@ H5VLoptional(void *obj, hid_t connector_id, int op_type, hid_t dxpl_id, void **r
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__optional(obj, cls, op_type, dxpl_id, req, arguments)) < 0)
+    if (H5VL__optional(obj, cls, op_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, ret_value, "unable to execute optional callback")
 
 done:
