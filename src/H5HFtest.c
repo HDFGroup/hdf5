@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Thursday, February  3, 2006
  *
  * Purpose:	Fractal heap testing functions.
@@ -178,9 +178,9 @@ H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
 
 /* Don't worry about comparing the filter names right now... */
 /* (they are expanded during the encode/decode process, but aren't copied
- *      during the H5Z_append operation, generating false positive failures)
+ *      during the H5Z_append operation, generating false positive failures -QAK)
  */
-#ifdef QAK
+#if 0
             /* Check filter name */
             HDfprintf(stderr, "%s: Check 1.0\n", "H5HF_cmp_cparam_test");
             HDfprintf(stderr, "%s: cparam1->pline.filter[%Zu].name = %s\n", "H5HF_cmp_cparam_test", u,
@@ -195,7 +195,7 @@ H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
                 if ((ret_value = HDstrcmp(cparam1->pline.filter[u].name, cparam2->pline.filter[u].name)))
                     HGOTO_DONE(ret_value)
             } /* end if */
-#endif        /* QAK */
+#endif
 
             /* Check # of filter parameters */
             if (cparam1->pline.filter[u].cd_nelmts < cparam2->pline.filter[u].cd_nelmts)

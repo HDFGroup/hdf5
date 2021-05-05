@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer: Quincey Koziol
  *	       Thursday, September 30, 2004
  */
 
@@ -310,9 +310,6 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, March  4, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t

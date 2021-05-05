@@ -793,6 +793,7 @@
 ./src/H5FDlog.h
 ./src/H5FDmirror.c
 ./src/H5FDmirror.h
+./src/H5FDmirror_priv.h
 ./src/H5FDmodule.h
 ./src/H5FDmpi.c
 ./src/H5FDmpi.h

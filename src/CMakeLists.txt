@@ -891,6 +891,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5FApkg.h
     ${HDF5_SRC_DIR}/H5FAprivate.h
 
+    ${HDF5_SRC_DIR}/H5FDmirror_priv.h
     ${HDF5_SRC_DIR}/H5FDpkg.h
     ${HDF5_SRC_DIR}/H5FDprivate.h
     ${HDF5_SRC_DIR}/H5FDvfd_swmr_private.h

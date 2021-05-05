@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Robb Matzke <matzke@llnl.gov>
+ * Programmer: Robb Matzke
  *	       Friday, October 10, 1997
  */
 
@@ -58,8 +58,6 @@ static void H5VM_stride_copy2(hsize_t nelmts, hsize_t elmt_size, unsigned dst_n,
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -101,11 +99,6 @@ H5VM_stride_optimize1(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, co
  *
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
- *
- * Modifications:
- *              Unrolled loops for common cases
- *              Quincey Koziol
- *		?, ? ?, 2001?
  *
  *-------------------------------------------------------------------------
  */
@@ -237,11 +230,6 @@ H5VM_stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, co
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
  *
- * Modifications:
- *              Unrolled loops for common cases
- *              Quincey Koziol
- *		?, ? ?, 2001?
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -338,8 +326,6 @@ H5VM_hyper_stride(unsigned n, const hsize_t *size, const hsize_t *total_size, co
  * Programmer:	Robb Matzke
  *		Friday, October 17, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -387,8 +373,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -459,11 +443,6 @@ H5VM_hyper_fill(unsigned n, const hsize_t *_size, const hsize_t *total_size, con
  *
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
- *
- * Modifications:
- *              Unrolled loops for common cases
- *              Quincey Koziol
- *		?, ? ?, 2001?
  *
  *-------------------------------------------------------------------------
  */
@@ -621,8 +600,6 @@ H5VM_hyper_copy(unsigned n, const hsize_t *_size, const hsize_t *dst_size, const
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -679,8 +656,6 @@ H5VM_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
  *
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -748,8 +723,6 @@ H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -813,8 +786,6 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size, const hss
  *
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -883,8 +854,6 @@ H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size, unsigned dst_n, const hsiz
  * Programmer:	Quincey Koziol
  *		Thursday, June 18, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -937,8 +906,6 @@ H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count)
  *
  * Programmer:	Quincey Koziol
  *		Monday, April 28, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1016,8 +983,6 @@ H5VM_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
  *
  * Programmer:	Quincey Koziol
  *		Tuesday, June 22, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1097,8 +1062,6 @@ H5VM_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down, hsize_t *co
  *
  * Programmer:	Quincey Koziol
  *		Wednesday, April 16, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
