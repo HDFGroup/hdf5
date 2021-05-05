@@ -171,7 +171,7 @@ static const H5FD_class_t H5FD_sec2_g = {
     H5FD__sec2_truncate,   /* truncate             */
     H5FD__sec2_lock,       /* lock                 */
     H5FD__sec2_unlock,     /* unlock               */
-    NULL,                 /* dedup                */
+    NULL,                  /* dedup                */
     H5FD_FLMAP_DICHOTOMY   /* fl_map               */
 };
 
