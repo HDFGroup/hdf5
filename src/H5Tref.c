@@ -441,7 +441,6 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
         H5VL_file_get_args_t vol_cb_args;               /* Arguments to VOL callback */
         char *               file_name = NULL;          /* Actual file name */
         char                 file_name_buf_static[256]; /* File name */
-        ssize_t              file_name_len;             /* Size of file name buffer */
 
         /* Pass the correct encoding version for the selection depending on the
          * file libver bounds, this is later retrieved in H5S hyper encode */
@@ -533,7 +532,6 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf, s
     char                  file_name_buf_static[256] = {'\0'}; /* File name */
     char *                file_name_buf_dyn =
         NULL; /* Pointer to dynamically allocated buffer for file name, if static buffer is too small */
-    ssize_t  file_name_len;       /* Size of file name buffer */
     unsigned flags     = 0;       /* References flags */
     herr_t   ret_value = SUCCEED; /* Return value */
 
