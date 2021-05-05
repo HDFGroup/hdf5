@@ -78,7 +78,6 @@
  *		    Failure:	negative
  *
  * Programmer:	Raymond Lu
- *              slu@ncsa.uiuc.edu
  *              July 14, 2004
  *
  *-------------------------------------------------------------------------

@@ -569,197 +569,301 @@ out:
 /* There was a rare bug where, if an id free callback being called by
  * H5I_clear_type() removed another id in that type, a segfault could occur.
  * This test tests for that error (and freeing ids "out of order" within
- * H5Iclear_type() in general). */
-/* Macro definitions */
-#define TEST_RCT_MAX_NOBJS 25
-#define TEST_RCT_MIN_NOBJS 5
-#define TEST_RCT_NITER     50
+ * H5Iclear_type() in general).
+ *
+ * NB: RCT = "remove clear type"
+ */
 
-/* Structure to hold the list of objects */
-typedef struct {
-    struct test_rct_obj_t *list;      /* List of objects */
-    long                   nobjs;     /* Number of objects in list */
-    long                   nobjs_rem; /* Number of objects in list that have not been freed */
-} test_rct_list_t;
+/* Macro definitions */
+#define RCT_MAX_NOBJS 25 /* Maximum number of objects in the list */
+#define RCT_MIN_NOBJS 5
+#define RCT_NITER     50 /* Number of times we cycle through object creation and deletion */
+
+/* Structure to hold the master list of objects */
+typedef struct rct_obj_list_t {
+
+    /* Pointer to the objects */
+    struct rct_obj_t *objects;
+
+    /* The number of objects in the list */
+    long count;
+
+    /* The number of objects in the list that have not been freed */
+    long remaining;
+} rct_obj_list_t;
 
 /* Structure for an object */
-typedef struct test_rct_obj_t {
-    hid_t   id;      /* ID for this object */
-    int     nfrees;  /* Number of times this object has been freed */
-    hbool_t freeing; /* Whether we are currently freeing this object directly (through H5Idec_ref()) */
-    test_rct_list_t *obj_list; /* List of all objects */
-} test_rct_obj_t;
+typedef struct rct_obj_t {
+    /* The ID for this object */
+    hid_t id;
 
-/* Free callback */
+    /* The number of times this object has been freed */
+    int nfrees;
+
+    /* Whether we are currently freeing this object directly
+     * through H5Idec_ref().
+     */
+    hbool_t freeing;
+
+    /* Pointer to the master list of all objects */
+    rct_obj_list_t *list;
+} rct_obj_t;
+
+/* Free callback passed to H5Iclear_type()
+ *
+ * When invoked on a closing object, frees a random unfreed ID in the
+ * master list of objects.
+ */
 static herr_t
-test_rct_free(void *_obj)
+rct_free_cb(void *_obj, void H5_ATTR_UNUSED **_ctx)
 {
-    test_rct_obj_t *obj = (test_rct_obj_t *)_obj;
-    long            rem_idx, i;
-    herr_t          ret; /* return value */
+    rct_obj_t *obj = (rct_obj_t *)_obj;
+    long       remove_nth;
+    long       i;
+    herr_t     ret;
 
     /* Mark this object as freed */
     obj->nfrees++;
-    obj->obj_list->nobjs_rem--;
 
-    /* Check freeing and nobjs_rem */
-    if (!obj->freeing && (obj->obj_list->nobjs_rem > 0)) {
-        /* Remove a random object from the list */
-        rem_idx = HDrandom() % obj->obj_list->nobjs_rem;
+    /* Decrement the number of objects in the list that have not been freed */
+    obj->list->remaining--;
 
-        /* Scan the list, finding the rem_idx'th object that has not been
-         * freed */
-        for (i = 0; i < obj->obj_list->nobjs; i++)
-            if (obj->obj_list->list[i].nfrees == 0) {
-                if (rem_idx == 0)
+    /* If this object isn't already being freed by a callback free call and
+     * the master object list still contains objects to free, pick another
+     * object and free it.
+     */
+    if (!obj->freeing && (obj->list->remaining > 0)) {
+
+        /* Pick a random object from the list. This is done by picking a
+         * random number between 0 and the # of remaining unfreed objects
+         * and then scanning through the list to find that nth unfreed
+         * object.
+         */
+        remove_nth = HDrandom() % obj->list->remaining;
+        for (i = 0; i < obj->list->count; i++)
+            if (obj->list->objects[i].nfrees == 0) {
+                if (remove_nth == 0)
                     break;
                 else
-                    rem_idx--;
-            } /* end if */
-        if (i == obj->obj_list->nobjs) {
-            ERROR("invalid obj_list");
-            goto out;
-        } /* end if */
-        else {
-            /* Remove the object.  Mark as "freeing" so its own callback does
-             * not free another object. */
-            obj->obj_list->list[i].freeing = TRUE;
-            ret                            = H5Idec_ref(obj->obj_list->list[i].id);
-            CHECK(ret, FAIL, "H5Idec_ref");
-            if (ret == FAIL)
-                goto out;
-            obj->obj_list->list[i].freeing = FALSE;
-        } /* end else */
-    }     /* end if */
+                    remove_nth--;
+            }
 
-    /* Verify nobjs_rem is non-negative */
-    if (obj->obj_list->nobjs_rem < 0) {
-        ERROR("invalid nobjs_rem");
-        goto out;
-    } /* end if */
+        /* Badness if we scanned through the list and didn't manage to
+         * select one to delete (the list stats were probably updated
+         * incorrectly).
+         */
+        if (i == obj->list->count) {
+            ERROR("invalid obj_list");
+            goto error;
+        }
+
+        /* Mark the object we're about to free so its own callback does
+         * not free another object. We don't want to recursively free the
+         * entire list when we free the first ID.
+         */
+        obj->list->objects[i].freeing = TRUE;
+
+        /* Decrement the reference count on the object */
+        ret = H5Idec_ref(obj->list->objects[i].id);
+        CHECK(ret, FAIL, "H5Idec_ref");
+        if (ret == FAIL)
+            goto error;
+
+        /* Unset the "freeing" flag */
+        obj->list->objects[i].freeing = FALSE;
+    }
+
+    /* Verify the number of objects remaining in the master list is non-negative */
+    if (obj->list->remaining < 0) {
+        ERROR("invalid number of objects remaining");
+        goto error;
+    }
 
     return 0;
 
-out:
+error:
     return -1;
-} /* end test_rct_free() */
+} /* end rct_free_cb() */
 
 /* Test function */
 static int
 test_remove_clear_type(void)
 {
-    H5I_type_t      obj_type;
-    test_rct_list_t obj_list;
-    test_rct_obj_t  list[TEST_RCT_MAX_NOBJS];
-    long            i, j;
-    long            nobjs_found;
-    hsize_t         nmembers;
-    herr_t          ret; /* return value */
+    H5I_type_t     obj_type;
+    rct_obj_list_t obj_list;
+    rct_obj_t *    objects = NULL; /* Convenience pointer to objects stored in master list */
+    size_t         list_size;
+    long           i, j;
+    herr_t         ret; /* return value */
 
-    /* Register type */
-    obj_type = H5Iregister_type((size_t)8, 0, test_rct_free);
+    /* Register a user-defined type with our custom ID-deleting callback */
+    obj_type = H5Iregister_type((size_t)8, 0, rct_free_cb);
     CHECK(obj_type, H5I_BADID, "H5Iregister_type");
     if (obj_type == H5I_BADID)
-        goto out;
+        goto error;
 
-    /* Init obj_list.list */
-    obj_list.list = list;
+    /* Create an array to hold the objects in the master list */
+    list_size        = RCT_MAX_NOBJS * sizeof(rct_obj_t);
+    obj_list.objects = HDmalloc(list_size);
+    CHECK_PTR(obj_list.objects, "HDcalloc");
+    if (NULL == obj_list.objects)
+        goto error;
 
-    for (i = 0; i < TEST_RCT_NITER; i++) {
-        /* Build object list */
-        obj_list.nobjs = obj_list.nobjs_rem =
-            TEST_RCT_MIN_NOBJS + (HDrandom() % (long)(TEST_RCT_MAX_NOBJS - TEST_RCT_MIN_NOBJS + 1));
-        for (j = 0; j < obj_list.nobjs; j++) {
-            list[j].nfrees   = 0;
-            list[j].freeing  = FALSE;
-            list[j].obj_list = &obj_list;
-            list[j].id       = H5Iregister(obj_type, &list[j]);
-            CHECK(list[j].id, FAIL, "H5Iregister");
-            if (list[j].id == FAIL)
-                goto out;
+    /* Set a convenience pointer to the object array */
+    objects = obj_list.objects;
+
+    for (i = 0; i < RCT_NITER; i++) {
+
+        /* The number of members in the type, according to the HDF5 library */
+        hsize_t nmembers = 1234567;
+
+        /* The number of objects found while scanning through the object list */
+        int found;
+
+        /*********************
+         * Build object list *
+         *********************/
+
+        HDmemset(obj_list.objects, 0, list_size);
+
+        /* The number of objects used is a random number between the min and max */
+        obj_list.count = obj_list.remaining =
+            RCT_MIN_NOBJS + (HDrandom() % (long)(RCT_MAX_NOBJS - RCT_MIN_NOBJS + 1));
+
+        /* Create the actual objects */
+        for (j = 0; j < obj_list.count; j++) {
+
+            /* Object setup */
+            objects[j].nfrees  = 0;
+            objects[j].freeing = FALSE;
+            objects[j].list    = &obj_list;
+
+            /* Register an ID for it */
+            objects[j].id = H5Iregister(obj_type, &objects[j]);
+            CHECK(objects[j].id, FAIL, "H5Iregister");
+            if (objects[j].id == FAIL)
+                goto error;
+
+            /* Bump the reference count by 1 (to 2) 50% of the time */
             if (HDrandom() % 2) {
-                ret = H5Iinc_ref(list[j].id);
+                ret = H5Iinc_ref(objects[j].id);
                 CHECK(ret, FAIL, "H5Iinc_ref");
                 if (ret == FAIL)
-                    goto out;
-            } /* end if */
-        }     /* end for */
+                    goto error;
+            }
+        }
 
-        /* Clear the type */
+        /******************************************
+         * Clear the type with force set to FALSE *
+         ******************************************/
+
+        /* Clear the type. Since force is FALSE, only
+         * IDs with a reference count of 1 will be cleared.
+         */
         ret = H5Iclear_type(obj_type, FALSE);
         CHECK(ret, FAIL, "H5Iclear_type");
         if (ret == FAIL)
-            goto out;
+            goto error;
 
-        /* Verify list */
-        nobjs_found = 0;
-        for (j = 0; j < obj_list.nobjs; j++) {
-            if (list[j].nfrees == 0)
-                nobjs_found++;
+        /* Verify that the object struct fields are sane and count the
+         * number of unfreed objects
+         */
+        found = 0;
+        for (j = 0; j < obj_list.count; j++) {
+
+            if (objects[j].nfrees == 0) {
+                /* Count unfreed objects */
+                found++;
+            }
             else {
-                VERIFY(list[j].nfrees, (long)1, "list[j].nfrees");
-                if (list[j].nfrees != (long)1)
-                    goto out;
-            } /* end else */
-            VERIFY(list[j].freeing, FALSE, "list[j].freeing");
-            if (list[j].freeing != FALSE)
-                goto out;
-        } /* end for */
+                /* Every freed object should have been freed exactly once */
+                VERIFY(objects[j].nfrees, 1, "object freed more than once");
+                if (objects[j].nfrees != 1)
+                    goto error;
+            }
 
-        /* Verify number of objects */
-        VERIFY(obj_list.nobjs_rem, nobjs_found, "obj_list.nobjs_rem");
-        if (obj_list.nobjs_rem != nobjs_found)
-            goto out;
+            /* No object should still be marked as "freeing" */
+            VERIFY(objects[j].freeing, FALSE, "object marked as freeing");
+            if (objects[j].freeing != FALSE)
+                goto error;
+        }
+
+        /* Verify the number of unfreed objects we found during our scan
+         * matches the number stored in the list
+         */
+        VERIFY(obj_list.remaining, found, "incorrect number of objects remaining");
+        if (obj_list.remaining != found)
+            goto error;
+
+        /* Make sure the HDF5 library confirms our count */
         ret = H5Inmembers(obj_type, &nmembers);
         CHECK(ret, FAIL, "H5Inmembers");
         if (ret == FAIL)
-            goto out;
-        VERIFY(nmembers, (size_t)nobjs_found, "H5Inmembers");
-        if (nmembers != (size_t)nobjs_found)
-            goto out;
+            goto error;
+        VERIFY(nmembers, found, "The number of members remaining in the type did not match our count");
+        if (nmembers != found)
+            goto error;
 
-        /* Clear the type with force set to TRUE */
+        /*****************************************
+         * Clear the type with force set to TRUE *
+         *****************************************/
+
+        /* Clear the type. Since force is TRUE, all IDs will be cleared. */
         ret = H5Iclear_type(obj_type, TRUE);
         CHECK(ret, FAIL, "H5Iclear_type");
         if (ret == FAIL)
-            goto out;
+            goto error;
 
-        /* Verify list */
-        for (j = 0; j < obj_list.nobjs; j++) {
-            VERIFY(list[j].nfrees, (long)1, "list[j].nfrees");
-            if (list[j].nfrees != (long)1)
-                goto out;
-            VERIFY(list[j].freeing, FALSE, "list[j].freeing");
-            if (list[j].freeing != FALSE)
-                goto out;
-        } /* end for */
+        /* Verify that the object struct fields are sane */
+        for (j = 0; j < obj_list.count; j++) {
 
-        /* Verify number of objects is 0 */
-        VERIFY(obj_list.nobjs_rem, (long)0, "obj_list.nobjs_rem");
-        if (obj_list.nobjs_rem != (long)0)
-            goto out;
+            /* Every object should have been freed exactly once */
+            VERIFY(objects[j].nfrees, 1, "object freed more than once");
+            if (objects[j].nfrees != 1)
+                goto error;
+
+            /* No object should still be marked as "freeing" */
+            VERIFY(objects[j].freeing, FALSE, "object marked as freeing");
+            if (objects[j].freeing != FALSE)
+                goto error;
+        }
+
+        /* Verify the number of objects is 0 */
+        VERIFY(obj_list.remaining, 0, "objects remaining was not zero");
+        if (obj_list.remaining != 0)
+            goto error;
+
+        /* Make sure the HDF5 library confirms zero members in the type */
         ret = H5Inmembers(obj_type, &nmembers);
         CHECK(ret, FAIL, "H5Inmembers");
         if (ret == FAIL)
-            goto out;
-        VERIFY(nmembers, (size_t)0, "H5Inmembers");
-        if (nmembers != (size_t)0)
-            goto out;
-    } /* end for */
+            goto error;
+        VERIFY(nmembers, 0, "The number of members remaining in the type was not zero");
+        if (nmembers != 0)
+            goto error;
+    }
 
-    /* Destroy type */
+    /* Destroy the type */
     ret = H5Idestroy_type(obj_type);
     CHECK(ret, FAIL, "H5Idestroy_type");
     if (ret == FAIL)
-        goto out;
+        goto error;
+
+    /* Free the object array */
+    HDfree(obj_list.objects);
 
     return 0;
 
-out:
-    /* Cleanup.  For simplicity, just destroy the types and ignore errors. */
+error:
+    /* Cleanup. For simplicity, just destroy the types and ignore errors. */
     H5E_BEGIN_TRY
-    H5Idestroy_type(obj_type);
+    {
+        H5Idestroy_type(obj_type);
+    }
     H5E_END_TRY
+
+    HDfree(obj_list.objects);
+
     return -1;
 } /* end test_remove_clear_type() */
 

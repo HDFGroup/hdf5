@@ -1055,12 +1055,12 @@ H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
 
     /* Get the plist structure and family offset */
     if (NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
     if (H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get offset for family driver")
 
     if (offset > (file->memb_size * file->nmembs))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "offset is bigger than file size")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "offset is bigger than file size")
     memb = (int)(offset / file->memb_size);
 
     ret_value = H5FD_get_vfd_handle(file->memb[memb], fapl, file_handle);

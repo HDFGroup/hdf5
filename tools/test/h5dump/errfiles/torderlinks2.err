@@ -28,7 +28,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     minor: Link traversal failure
   #009: (file name) line (number) in H5G__traverse_ud(): traversal callback returned invalid ID
     major: Symbol table
-    minor: Unable to find atom information (already closed?)
+    minor: Unable to find ID information (already closed?)
   #010: (file name) line (number) in H5L__extern_traverse(): unable to open external file, external link file name = 'fname'
     major: Links
     minor: Unable to open file

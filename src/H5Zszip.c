@@ -115,14 +115,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, April  7, 2003
  *
- * Modifications: Used new logic to set the size of the scanline parameter.
- *                Now SZIP compression can be applied to the chunk
- *                of any shape and size with only one restriction: the number
- *                of elements in the chunk has to be not less than number
- *                of elements (pixels) in the block (cd_values[H5Z_SZIP_PARM_PPB]
- *                parameter).
- *                           Elena Pourmal, July 20, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -147,7 +139,7 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get the plist structure */
     if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get datatype */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

@@ -748,8 +748,6 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
  * Programmer:  Xiaowen Wu
  *              Friday, February 4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -801,8 +799,6 @@ done:
  *
  * Programmer:    Xiaowen Wu
  *              Wednesday, April 13, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -931,8 +927,6 @@ H5Z_scaleoffset_set_parms_fillval(H5P_genplist_t *dcpl_plist, H5T_t *type, enum 
  * Programmer:    Xiaowen Wu
  *              Friday, February 4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -957,7 +951,7 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get the plist structure */
     if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get datatype */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

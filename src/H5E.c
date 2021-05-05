@@ -181,17 +181,17 @@ H5E__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the error class IDs */
+    /* Initialize the ID group for the error class IDs */
     if (H5I_register_type(H5I_ERRCLS_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
-    /* Initialize the atom group for the major error IDs */
+    /* Initialize the ID group for the major error IDs */
     if (H5I_register_type(H5I_ERRMSG_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
-    /* Initialize the atom group for the error stacks */
+    /* Initialize the ID group for the error stacks */
     if (H5I_register_type(H5I_ERRSTK_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
 #ifndef H5_HAVE_THREADSAFE
     H5E_stack_g[0].nused = 0;
@@ -837,13 +837,13 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
+H5Eget_msg(hid_t msg_id, H5E_type_t *type /*out*/, char *msg_str /*out*/, size_t size)
 {
     H5E_msg_t *msg;            /* Pointer to error message */
     ssize_t    ret_value = -1; /* Return value */
 
     FUNC_ENTER_API_NOCLEAR((-1))
-    H5TRACE4("Zs", "i*Et*sz", msg_id, type, msg_str, size);
+    H5TRACE4("Zs", "ixxz", msg_id, type, msg_str, size);
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(msg_id, H5I_ERROR_MSG)))
@@ -1014,9 +1014,9 @@ done:
  * Purpose:     Replaces current stack with specified stack. This closes the
  *              stack ID also.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 15, 2003
  *
  *-------------------------------------------------------------------------
@@ -1119,9 +1119,9 @@ done:
  *
  * Purpose:     Closes an error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 14, 2003
  *
  *-------------------------------------------------------------------------
@@ -1254,9 +1254,9 @@ H5E__get_num(const H5E_t *estack)
  *
  * Purpose:     Deletes some error messages from the top of error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -1309,9 +1309,9 @@ done:
  *              function name, file name, and error description strings must
  *              be statically allocated.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *		Monday, October 18, 1999
  *
  * Notes:       Basically a new public API wrapper around the H5E__push_stack
@@ -1409,9 +1409,9 @@ done:
  *
  * Purpose:     Clears the error stack for the specified error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Wednesday, July 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -1453,9 +1453,9 @@ done:
  *              prints error messages. Users are encouraged to write their
  *              own more specific error handlers.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1498,9 +1498,9 @@ done:
  * Purpose:     Walks the error stack for the current thread and calls some
  *              function for each error along the way.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1548,7 +1548,7 @@ done:
  *              Either (or both) arguments may be null in which case the
  *              value is not returned.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Saturday, February 28, 1998
@@ -1556,14 +1556,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
+H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func /*out*/, void **client_data /*out*/)
 {
     H5E_t *       estack;              /* Error stack to operate on */
     H5E_auto_op_t op;                  /* Error stack function */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*EA**x", estack_id, func, client_data);
+    H5TRACE3("e", "ixx", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
@@ -1605,7 +1605,7 @@ done:
  *              Automatic stack traversal is always in the H5E_WALK_DOWNWARD
  *              direction.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
@@ -1663,7 +1663,7 @@ done:
  *              or the H5E_auto_t typedef.  The IS_STACK parameter is set
  *              to 1 for the first case and 0 for the latter case.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, September  8, 2004

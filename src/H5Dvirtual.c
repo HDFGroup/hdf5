@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner <nfortne2@hdfgroup.org>
+ * Programmer:  Neil Fortner
  *              Wednesday, January 28, 2015
  *
  * Purpose:
@@ -395,8 +395,8 @@ done:
  * Purpose:     Store virtual dataset layout information, for new dataset
  *
  * Note:        We assume here that the contents of the heap block cannot
- *		change!  If this ever stops being the case we must change
- *		this code to allow overwrites of the heap block.  -NAF
+ *        change!  If this ever stops being the case we must change
+ *        this code to allow overwrites of the heap block.  -NAF
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
@@ -895,7 +895,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
     HDassert(source_dset->dset_name);
 
     /* Check if we need to open the source file */
-    if (HDstrcmp(source_dset->file_name, ".")) {
+    if (HDstrcmp(source_dset->file_name, ".") != 0) {
         unsigned intent; /* File access permissions */
 
         /* Get the virtual dataset's file open flags ("intent") */
@@ -2228,7 +2228,7 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
 
     /* Get dataset access property list */
     if (NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dapl ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for dapl ID")
 
     /* Get view option */
     if (H5P_get(dapl, H5D_ACS_VDS_VIEW_NAME, &storage->view) < 0)
@@ -2277,7 +2277,7 @@ done:
 hbool_t
 H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 {
-    hbool_t ret_value; /* Return value */
+    hbool_t ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2361,7 +2361,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage, cons
     hssize_t select_nelmts;              /* Number of elements in selection */
     hsize_t  bounds_start[H5S_MAX_RANK]; /* Selection bounds start */
     hsize_t  bounds_end[H5S_MAX_RANK];   /* Selection bounds end */
-    int      rank;
+    int      rank        = 0;
     hbool_t  bounds_init = FALSE; /* Whether bounds_start, bounds_end, and rank are valid */
     size_t   i, j, k;             /* Local index variables */
     herr_t   ret_value = SUCCEED; /* Return value */

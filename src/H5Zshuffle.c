@@ -53,8 +53,6 @@ const H5Z_class2_t H5Z_SHUFFLE[1] = {{
  * Programmer:	Quincey Koziol
  *              Monday, April  7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -71,7 +69,7 @@ H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_i
 
     /* Get the plist structure */
     if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get datatype */
     if (NULL == (type = (const H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -110,10 +108,6 @@ done:
  *
  * Programmer:	Kent Yang
  *              Wednesday, November 13, 2002
- *
- * Modifications:
- *              Quincey Koziol, November 13, 2002
- *              Cleaned up code.
  *
  *-------------------------------------------------------------------------
  */
@@ -183,24 +177,31 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                         case 0:
                             do {
                                 DUFF_GUTS
+                                /* FALLTHROUGH */
                                 H5_ATTR_FALLTHROUGH
                                 case 7:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 6:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 5:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 4:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 3:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 2:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 1:
                                     DUFF_GUTS
@@ -247,24 +248,31 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                         case 0:
                             do {
                                 DUFF_GUTS
+                                /* FALLTHROUGH */
                                 H5_ATTR_FALLTHROUGH
                                 case 7:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 6:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 5:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 4:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 3:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 2:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 1:
                                     DUFF_GUTS

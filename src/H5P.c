@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *
  * Purpose:	Generic Property Functions
  */
@@ -117,11 +117,11 @@ H5Pcopy(hid_t id)
         if ((copy_class = H5P__copy_pclass((H5P_genclass_t *)obj)) == NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, H5I_INVALID_HID, "can't copy property class");
 
-        /* Get an atom for the copied class */
+        /* Get an ID for the copied class */
         if ((ret_value = H5I_register(H5I_GENPROP_CLS, copy_class, TRUE)) < 0) {
             H5P__close_class(copy_class);
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID,
-                        "unable to atomize property list class");
+                        "unable to register property list class");
         } /* end if */
     }     /* end else */
 
@@ -196,9 +196,9 @@ H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func_t cls_create
                                             copy_data, cls_close, close_data)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, H5I_INVALID_HID, "unable to create property list class")
 
-    /* Get an atom for the class */
+    /* Get an ID for the class */
     if ((ret_value = H5I_register(H5I_GENPROP_CLS, pclass, TRUE)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize property list class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register property list class")
 
 done:
     if (H5I_INVALID_HID == ret_value && pclass)
@@ -756,14 +756,14 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Pget_size(hid_t id, const char *name, size_t *size)
+H5Pget_size(hid_t id, const char *name, size_t *size /*out*/)
 {
     H5P_genclass_t *pclass;    /* Property class to query */
     H5P_genplist_t *plist;     /* Property list to query */
     herr_t          ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*s*z", id, name, size);
+    H5TRACE3("e", "i*sx", id, name, size);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -926,9 +926,9 @@ H5Pget_class(hid_t plist_id)
     if (H5P__access_class(pclass, H5P_MOD_INC_REF) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, H5I_INVALID_HID, "Can't increment class ID ref count");
 
-    /* Get an atom for the class */
+    /* Get an ID for the class */
     if ((ret_value = H5I_register(H5I_GENPROP_CLS, pclass, TRUE)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize property list class");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register property list class");
 
 done:
     if (H5I_INVALID_HID == ret_value && pclass)
@@ -961,14 +961,14 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Pget_nprops(hid_t id, size_t *nprops)
+H5Pget_nprops(hid_t id, size_t *nprops /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list to query */
     H5P_genclass_t *pclass;              /* Property class to query */
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*z", id, nprops);
+    H5TRACE2("e", "ix", id, nprops);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -1262,13 +1262,13 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Pget(hid_t plist_id, const char *name, void *value)
+H5Pget(hid_t plist_id, const char *name, void *value /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*s*x", plist_id, name, value);
+    H5TRACE3("e", "i*sx", plist_id, name, value);
 
     /* Check arguments. */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -1580,9 +1580,9 @@ H5Pget_class_parent(hid_t pclass_id)
     if (H5P__access_class(parent, H5P_MOD_INC_REF) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, H5I_INVALID_HID, "Can't increment class ID ref count")
 
-    /* Get an atom for the class */
+    /* Get an ID for the class */
     if ((ret_value = H5I_register(H5I_GENPROP_CLS, parent, TRUE)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize property list class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register property list class")
 
 done:
     if (H5I_INVALID_HID == ret_value && parent)

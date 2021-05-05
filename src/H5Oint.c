@@ -264,16 +264,7 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Aug  5 1997
- *
- * Changes:     2018 August 17
- *              Jacob Smith
- *              Refactor out the operations into two separate steps --
- *              preparation and application -- to facilitate overriding the
- *              library-default size allocated for the object header. This
- *              function is retained as a wrapper, to minimize changes to
- *              unaffected calling functions.
  *
  *-------------------------------------------------------------------------
  */
@@ -846,7 +837,6 @@ done:
  *              Failure:    -1
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
@@ -962,7 +952,6 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
@@ -1010,7 +999,6 @@ done:
  *        Failure:    NULL
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Dec 31 2002
  *
  *-------------------------------------------------------------------------
@@ -1198,7 +1186,6 @@ done:
  *        Failure:    NULL
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -1244,7 +1231,6 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -1279,7 +1265,6 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Dec 31 2002
  *
  *-------------------------------------------------------------------------
@@ -1475,7 +1460,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *              <koziol@ncsa.uiuc.edu>
  *              Tuesday, January 21, 2003
  *
  *-------------------------------------------------------------------------
@@ -1513,7 +1497,7 @@ H5O_bogus_oh(H5F_t *f, H5O_t *oh, unsigned bogus_id, unsigned mesg_flags)
         else if (bogus_id == H5O_BOGUS_INVALID_ID)
             type = H5O_MSG_BOGUS_INVALID;
         else
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID for 'bogus' message")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "invalid ID for 'bogus' message")
 
         /* Allocate space in the object header for bogus message */
         if (H5O__msg_alloc(f, oh, type, &mesg_flags, bogus, &idx) < 0)
@@ -1546,7 +1530,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Mar 19 2003
  *
  *-------------------------------------------------------------------------
@@ -1608,7 +1591,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Mar 19 2003
  *
  *-------------------------------------------------------------------------
@@ -1708,10 +1690,9 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
         /* Set type to "unknown" */
         *obj_type = H5O_TYPE_UNKNOWN;
     }
-    else {
+    else
         /* Set object type */
         *obj_type = obj_class->type;
-    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__obj_type_real() */
@@ -1892,7 +1873,6 @@ H5O_loc_reset(H5O_loc_t *loc)
  *            Failure:    Negative
  *
  * Programmer:    Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
@@ -2232,7 +2212,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 
         /* Set the object's reference count */
         oinfo->rc = oh->nlink;
-    } /* end if */
+    }
 
     /* Get time information, if requested */
     if (fields & H5O_INFO_TIME) {
@@ -2526,8 +2506,8 @@ H5O_get_oh_addr(const H5O_t *oh)
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_flags
  *
- * Programmer:    Jacob Smith
- *        2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2542,12 +2522,12 @@ H5O_get_oh_flags(const H5O_t *oh)
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_mtime
  *
- * Purpose:    Retrieve an object's modification time. Assumes that the
+ * Purpose:     Retrieve an object's modification time. Assumes that the
  *              caller has verified that accessing this variable is appropriate
  *              to the header in question.
  *
- * Programmer:    Jacob Smith
- *        2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2563,8 +2543,8 @@ H5O_get_oh_mtime(const H5O_t *oh)
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_version
  *
- * Programmer:    Jacob Smith
- *        2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2812,7 +2792,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
 
     /* Get an ID for the visited object */
     if ((obj_id = H5VL_wrap_register(opened_type, obj, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register visited object")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register visited object")
 
     /* Make callback for starting object */
     if ((ret_value = op(obj_id, ".", &oinfo, op_data)) < 0)
@@ -2896,7 +2876,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -2931,7 +2910,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -2944,7 +2922,8 @@ H5O__dec_rc(H5O_t *oh)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(oh);
+    if (!oh)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object header")
 
     /* Decrement reference count */
     oh->rc--;
@@ -2967,7 +2946,6 @@ done:
  * Return:     Non-negative on success/Negative on failure
  *
  * Programmer: Quincey Koziol
- *             koziol@hdfgroup.org
  *             Oct 08 2010
  *
  *-------------------------------------------------------------------------
@@ -3031,7 +3009,6 @@ H5O_get_proxy(const H5O_t *oh)
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Jan 15 2003
  *
  *-------------------------------------------------------------------------

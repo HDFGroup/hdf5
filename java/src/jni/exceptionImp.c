@@ -442,8 +442,8 @@ defineHDF5LibraryException(hid_t maj_num)
         return "hdf/hdf5lib/exceptions/HDF5LowLevelIOException";
     else if (H5E_FUNC == err_num)
         return "hdf/hdf5lib/exceptions/HDF5FunctionEntryExitException";
-    else if (H5E_ATOM == err_num)
-        return "hdf/hdf5lib/exceptions/HDF5AtomException";
+    else if (H5E_ID == err_num)
+        return "hdf/hdf5lib/exceptions/HDF5IdException";
     else if (H5E_CACHE == err_num)
         return "hdf/hdf5lib/exceptions/HDF5MetaDataCacheException";
     else if (H5E_BTREE == err_num)

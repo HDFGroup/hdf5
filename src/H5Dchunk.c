@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:     Quincey Koziol <koziol@hdfgroup.org>
+/* Programmer:     Quincey Koziol
  *               Thursday, April 24, 2008
  *
  * Purpose:    Abstract indexed (chunked) I/O functions.  The logical
@@ -278,25 +278,23 @@ static ssize_t H5D__nonexistent_readvv(const H5D_io_info_t *io_info, size_t chun
                                        hsize_t chunk_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                                        size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 
-/* format convert cb */
+/* Format convert cb */
 static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* Helper routines */
-static herr_t  H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims,
-                                        const hsize_t *max_dims);
-static void *  H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
-static void *  H5D__chunk_mem_xfree(void *chk, const void *pline);
-static void *  H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline);
-static herr_t  H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
-static herr_t  H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *udata);
-static hbool_t H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *udata);
-static herr_t  H5D__free_chunk_info(void *item, void *key, void *opdata);
-static herr_t  H5D__create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
-static herr_t  H5D__create_chunk_file_map_all(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
-static herr_t  H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
-
-static herr_t H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm);
-
+static herr_t   H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims,
+                                         const hsize_t *max_dims);
+static void *   H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
+static void *   H5D__chunk_mem_xfree(void *chk, const void *pline);
+static void *   H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline);
+static herr_t   H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
+static herr_t   H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *udata);
+static hbool_t  H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *udata);
+static herr_t   H5D__free_chunk_info(void *item, void *key, void *opdata);
+static herr_t   H5D__create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
+static herr_t   H5D__create_chunk_file_map_all(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
+static herr_t   H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
+static herr_t   H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm);
 static herr_t   H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
 static herr_t   H5D__chunk_file_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
                                    void *fm);
@@ -319,6 +317,7 @@ static herr_t H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_
 static int    H5D__chunk_cmp_addr(const void *addr1, const void *addr2);
 #endif /* H5_HAVE_PARALLEL */
 
+/* Debugging helper routine callback */
 static int H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /*********************/
@@ -917,7 +916,7 @@ H5D__chunk_init(H5F_t *f, const H5D_t *const dset, hid_t dapl_id)
     H5D_CHUNK_STORAGE_INDEX_CHK(sc);
 
     if (NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for fapl ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for fapl ID")
 
     /* Use the properties in dapl_id if they have been set, otherwise use the properties from the file */
     if (H5P_get(dapl, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &rdcc->nslots) < 0)
@@ -3605,10 +3604,10 @@ H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
 {
     const H5D_rdcc_t *rdcc  = &(dset->shared->cache.chunk);
     size_t            total = rdcc->nbytes_max;
-    const int         nmeth = 2;           /*number of methods        */
-    int               w[1];                /*weighting as an interval    */
-    H5D_rdcc_ent_t *  p[2], *cur;          /*list pointers            */
-    H5D_rdcc_ent_t *  n[2];                /*list next pointers        */
+    const int         nmeth = 2;           /* Number of methods */
+    int               w[1];                /* Weighting as an interval */
+    H5D_rdcc_ent_t *  p[2], *cur;          /* List pointers */
+    H5D_rdcc_ent_t *  n[2];                /* List next pointers */
     int               nerrors   = 0;       /* Accumulated error count during preemptions */
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -4546,9 +4545,8 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 #ifndef NDEBUG
             /* None of the chunks should be allocated */
-            if (H5D_CHUNK_IDX_NONE != sc->idx_type) {
+            if (H5D_CHUNK_IDX_NONE != sc->idx_type)
                 HDassert(!H5F_addr_defined(udata.chunk_block.offset));
-            }
 
             /* Make sure the chunk is really in the dataset and outside the
              * original dimensions */
@@ -5122,8 +5120,8 @@ H5D__chunk_cmp_addr(const void *addr1, const void *addr2)
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Pedro Vicente, pvn@ncsa.uiuc.edu
- *         March 26, 2002
+ * Programmer:    Pedro Vicente
+ *              March 26, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -5244,7 +5242,7 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:    Pedro Vicente
  * Algorithm:    Robb Matzke
  *         March 27, 2002
  *
@@ -6338,10 +6336,10 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
         if (NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
-        /* Atomize */
+        /* Register */
         if ((sid_buf = H5I_register(H5I_DATASPACE, buf_space, FALSE)) < 0) {
             (void)H5S_close(buf_space);
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
         } /* end if */
 
         /* Set initial buffer sizes */

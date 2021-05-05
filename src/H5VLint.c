@@ -453,7 +453,7 @@ H5VL__set_def_conn(void)
 
     /* Get default file access pclass */
     if (NULL == (def_fapclass = (H5P_genclass_t *)H5I_object(H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_VOL, H5E_BADATOM, FAIL, "can't find object for default file access property class ID")
+        HGOTO_ERROR(H5E_VOL, H5E_BADID, FAIL, "can't find object for default file access property class ID")
 
     /* Change the default VOL for the default file access pclass */
     if (H5P_reset_vol_class(def_fapclass, &H5VL_def_conn_s) < 0)
@@ -462,7 +462,7 @@ H5VL__set_def_conn(void)
 
     /* Get default file access plist */
     if (NULL == (def_fapl = (H5P_genplist_t *)H5I_object(H5P_FILE_ACCESS_DEFAULT)))
-        HGOTO_ERROR(H5E_VOL, H5E_BADATOM, FAIL, "can't find object for default fapl ID")
+        HGOTO_ERROR(H5E_VOL, H5E_BADID, FAIL, "can't find object for default fapl ID")
 
     /* Change the default VOL for the default FAPL */
     if (H5P_set_vol(def_fapl, H5VL_def_conn_s.connector_id, H5VL_def_conn_s.connector_info) < 0)

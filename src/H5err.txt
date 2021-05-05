@@ -50,7 +50,7 @@ MAJOR, H5E_LIB, General library infrastructure
 MAJOR, H5E_FILE, File accessibility
 MAJOR, H5E_IO, Low-level I/O
 MAJOR, H5E_FUNC, Function entry/exit
-MAJOR, H5E_ATOM, Object atom
+MAJOR, H5E_ID, Object ID
 MAJOR, H5E_CACHE, Object cache
 MAJOR, H5E_LINK, Links
 MAJOR, H5E_BTREE, B-Tree node
@@ -88,7 +88,7 @@ SECTION, RESOURCE, Resource errors
 SECTION, FILEACC, File accessibility errors
 SECTION, FILE, Generic low-level file I/O errors
 SECTION, FUNC, Function entry/exit interface errors
-SECTION, ATOM, Object atom related errors
+SECTION, ID, Object ID related errors
 SECTION, CACHE, Cache related errors
 SECTION, LINK, Link related errors
 SECTION, BTREE, B-tree related errors
@@ -154,13 +154,13 @@ MINOR, FUNC, H5E_CANTINIT, Unable to initialize object
 MINOR, FUNC, H5E_ALREADYINIT, Object already initialized
 MINOR, FUNC, H5E_CANTRELEASE, Unable to release object
 
-# Object atom related errors
-MINOR, ATOM, H5E_BADATOM, Unable to find atom information (already closed?)
-MINOR, ATOM, H5E_BADGROUP, Unable to find ID group information
-MINOR, ATOM, H5E_CANTREGISTER, Unable to register new atom
-MINOR, ATOM, H5E_CANTINC, Unable to increment reference count
-MINOR, ATOM, H5E_CANTDEC, Unable to decrement reference count
-MINOR, ATOM, H5E_NOIDS, Out of IDs for group
+# Object ID related errors
+MINOR, ID, H5E_BADID, Unable to find ID information (already closed?)
+MINOR, ID, H5E_BADGROUP, Unable to find ID group information
+MINOR, ID, H5E_CANTREGISTER, Unable to register new ID
+MINOR, ID, H5E_CANTINC, Unable to increment reference count
+MINOR, ID, H5E_CANTDEC, Unable to decrement reference count
+MINOR, ID, H5E_NOIDS, Out of IDs for group
 
 # Cache related errors
 MINOR, CACHE, H5E_CANTFLUSH, Unable to flush data from cache

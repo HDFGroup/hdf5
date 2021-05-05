@@ -248,7 +248,7 @@ H5FDregister(const H5FD_class_t *cls)
 
     /* Create the new class ID */
     if ((ret_value = H5FD_register(cls, sizeof(H5FD_class_t), TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file driver ID")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file driver ID")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -298,7 +298,7 @@ H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
 
     /* Create the new class ID */
     if ((ret_value = H5I_register(H5I_VFL, saved, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file driver ID")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file driver ID")
 
 done:
     if (H5I_INVALID_HID == ret_value)
@@ -371,7 +371,7 @@ H5FD_get_class(hid_t id)
 
         /* Get the plist structure */
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, NULL, "can't find object for ID")
 
         if (TRUE == H5P_isa_class(id, H5P_FILE_ACCESS)) {
             H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
@@ -504,9 +504,9 @@ H5FD_sb_load(H5FD_t *file, const char *name, const uint8_t *buf)
     /* Check if driver matches driver information saved. Unfortunately, we can't push this
      * function to each specific driver because we're checking if the driver is correct.
      */
-    if (!HDstrncmp(name, "NCSAfami", (size_t)8) && HDstrcmp(file->cls->name, "family"))
+    if (!HDstrncmp(name, "NCSAfami", (size_t)8) && HDstrcmp(file->cls->name, "family") != 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "family driver should be used")
-    if (!HDstrncmp(name, "NCSAmult", (size_t)8) && HDstrcmp(file->cls->name, "multi"))
+    if (!HDstrncmp(name, "NCSAmult", (size_t)8) && HDstrcmp(file->cls->name, "multi") != 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "multi driver should be used")
 
     /* Decode driver information */
@@ -1715,7 +1715,7 @@ H5FDlock(H5FD_t *file, hbool_t rw)
 
     /* Call private function */
     if (H5FD_lock(file, rw) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file lock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "file lock request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1743,7 +1743,7 @@ H5FD_lock(H5FD_t *file, hbool_t rw)
 
     /* Dispatch to driver */
     if (file->cls->lock && (file->cls->lock)(file, rw) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "driver lock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "driver lock request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1774,7 +1774,7 @@ H5FDunlock(H5FD_t *file)
 
     /* Call private function */
     if (H5FD_unlock(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file unlock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "file unlock request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1802,7 +1802,7 @@ H5FD_unlock(H5FD_t *file)
 
     /* Dispatch to driver */
     if (file->cls->unlock && (file->cls->unlock)(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "driver unlock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "driver unlock request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1845,12 +1845,12 @@ H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum)
  *--------------------------------------------------------------------------
  */
 herr_t
-H5FDget_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle)
+H5FDget_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle /*out*/)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*#i**x", file, fapl_id, file_handle);
+    H5TRACE3("e", "*#ix", file, fapl_id, file_handle);
 
     /* Check arguments */
     if (!file)
@@ -2000,7 +2000,7 @@ H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/)
 
     /* Check for the driver to query and then query it */
     if (NULL == (driver = (H5FD_class_t *)H5I_object_verify(driver_id, H5I_VFL)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a VFL ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "not a VFL ID")
     if (H5FD_driver_query(driver, flags) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "driver flag query failed")
 

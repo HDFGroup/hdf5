@@ -1104,10 +1104,10 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
-        H5S_hyper_span_t * curr_span; /* Current hyperslab span node */
-        H5S_hyper_span_t **ispan;     /* Iterator's hyperslab span nodes */
-        hsize_t *          abs_arr;   /* Absolute hyperslab span position */
-        int                curr_dim;  /* Temporary rank holder */
+        H5S_hyper_span_t * curr_span = NULL; /* Current hyperslab span node */
+        H5S_hyper_span_t **ispan;            /* Iterator's hyperslab span nodes */
+        hsize_t *          abs_arr;          /* Absolute hyperslab span position */
+        int                curr_dim;         /* Temporary rank holder */
 
         /* Set the rank of the fastest changing dimension */
         ndims    = iter->rank;
@@ -1296,10 +1296,10 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
-        H5S_hyper_span_t * curr_span; /* Current hyperslab span node */
-        H5S_hyper_span_t **ispan;     /* Iterator's hyperslab span nodes */
-        hsize_t *          abs_arr;   /* Absolute hyperslab span position */
-        int                curr_dim;  /* Temporary rank holder */
+        H5S_hyper_span_t * curr_span = NULL; /* Current hyperslab span node */
+        H5S_hyper_span_t **ispan;            /* Iterator's hyperslab span nodes */
+        hsize_t *          abs_arr;          /* Absolute hyperslab span position */
+        int                curr_dim;         /* Temporary rank holder */
 
         /* Set the rank of the fastest changing dimension */
         ndims    = iter->rank;
@@ -2138,24 +2138,31 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
                 case 0:
                     do {
                         DUFF_GUTS
+                        /* FALLTHROUGH */
                         H5_ATTR_FALLTHROUGH
                         case 7:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 6:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 5:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 4:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 3:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 2:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 1:
                             DUFF_GUTS
@@ -4766,13 +4773,13 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblo
 --------------------------------------------------------------------------*/
 herr_t
 H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks,
-                              hsize_t buf[/*numblocks*/])
+                              hsize_t buf[/*numblocks*/] /*out*/)
 {
     H5S_t *space;     /* Dataspace to modify selection of */
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihh*[a2]h", spaceid, startblock, numblocks, buf);
+    H5TRACE4("e", "ihhx", spaceid, startblock, numblocks, buf);
 
     /* Check args */
     if (buf == NULL)
@@ -5388,7 +5395,7 @@ H5S__hyper_spans_shape_same_helper(const H5S_hyper_span_info_t *span_info1,
 {
     hbool_t ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(span_info1);
@@ -7004,9 +7011,8 @@ H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset)
 {
     hbool_t  non_zero_offset = FALSE; /* Whether any offset is non-zero */
     unsigned u;                       /* Local index variable */
-    herr_t   ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(space);
@@ -7053,8 +7059,7 @@ H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset)
         } /* end if */
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_adjust_s() */
 
 /*--------------------------------------------------------------------------
@@ -9666,7 +9671,7 @@ H5S__hyper_regular_and_single_block(H5S_t *space, const hsize_t start[], const h
     unsigned u;                     /* Local index variable */
     herr_t   ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(space);
@@ -10103,7 +10108,7 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], cons
         case H5S_SEL_POINTS:          /* Can't combine hyperslab operations and point selections currently */
             if (op == H5S_SELECT_SET) /* Allow only "set" operation to proceed */
                 break;
-            /* Else fall through to error */
+            /* FALLTHROUGH (to error) */
             H5_ATTR_FALLTHROUGH
 
         case H5S_SEL_ERROR:
@@ -10268,7 +10273,7 @@ done:
     Specify a hyperslab to combine with the current hyperslab selection, and
     store the result in the new hyperslab selection.
  USAGE
-    herr_t H5S_combine_hyperslab(new_space, old_space, op, start, stride, count, block)
+    herr_t H5S_combine_hyperslab(old_space, op, start, stride, count, block, new_space)
         H5S_t *old_space;            IN: The old space the selection is performed on
         H5S_seloper_t op;            IN: Operation to perform on current selection
         const hsize_t start[];       IN: Offset of start of hyperslab
@@ -10573,9 +10578,9 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], co
     if (H5S_combine_hyperslab(space, op, start, stride, count, block, &new_space) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, H5I_INVALID_HID, "unable to set hyperslab selection")
 
-    /* Atomize */
+    /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, new_space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID")
 
 done:
     if (ret_value < 0 && new_space)
@@ -10715,9 +10720,9 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     if (NULL == (new_space = H5S__combine_select(space1, op, space2)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, H5I_INVALID_HID, "unable to create hyperslab selection")
 
-    /* Atomize */
+    /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, new_space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID")
 
 done:
     if (ret_value < 0 && new_space)
@@ -12353,14 +12358,15 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t block[])
+H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[] /*out*/, hsize_t stride[] /*out*/,
+                         hsize_t count[] /*out*/, hsize_t block[] /*out*/)
 {
     H5S_t *  space;               /* Dataspace to query */
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*h*h*h*h", spaceid, start, stride, count, block);
+    H5TRACE5("e", "ixxxx", spaceid, start, stride, count, block);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
