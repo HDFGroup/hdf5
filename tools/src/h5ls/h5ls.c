@@ -1315,7 +1315,7 @@ dump_dataset_values(hid_t dset)
     h5tool_format_t * info    = &ls_dataformat;
     H5R_ref_t *       ref_buf = NULL;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     f_type = H5Dget_type(dset);
     space  = H5Dget_space(dset);
@@ -1456,7 +1456,7 @@ done:
 
     PRINTVALSTREAM(rawoutstream, "\n");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -1484,7 +1484,7 @@ dump_attribute_values(hid_t attr)
     h5tool_format_t * info    = &ls_dataformat;
     H5R_ref_t *       ref_buf = NULL;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     f_type = H5Aget_type(attr);
     space  = H5Aget_space(attr);
@@ -1632,7 +1632,7 @@ done:
 
     PRINTVALSTREAM(rawoutstream, "\n");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -1661,7 +1661,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t * info = &ls_dataformat;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1740,7 +1740,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
         H5TOOLS_DEBUG("Attribute open failed");
         h5tools_str_close(&buffer);
     }
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return 0;
 }
@@ -2088,7 +2088,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t * info = &ls_dataformat;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2242,7 +2242,7 @@ done:
     }
     h5tools_str_close(&buffer);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return 0;
 } /* end list_obj() */
