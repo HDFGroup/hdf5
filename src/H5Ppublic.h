@@ -5055,22 +5055,22 @@ H5_DLL herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts);
  *
  * <table>
  *   <tr>
- *     <td>#H5FD_MEM_SUPER</td>	<td>Super block data</td>
+ *     <td>#H5FD_MEM_SUPER</td>    <td>Super block data</td>
  *   </tr>
  *   <tr>
- *     <td>#H5FD_MEM_BTREE</td>	<td>B-tree data</td>
+ *     <td>#H5FD_MEM_BTREE</td>    <td>B-tree data</td>
  *   </tr>
  *   <tr>
- *     <td>#H5FD_MEM_DRAW</td>	<td>Dataset raw data</td>
+ *     <td>#H5FD_MEM_DRAW</td>    <td>Dataset raw data</td>
  *   </tr>
  *   <tr>
- *     <td>#H5FD_MEM_GHEAP</td>	<td>Global heap data</td>
+ *     <td>#H5FD_MEM_GHEAP</td>    <td>Global heap data</td>
  *   </tr>
  *   <tr>
- *     <td>#H5FD_MEM_LHEAP</td>	<td>Local Heap data</td>
+ *     <td>#H5FD_MEM_LHEAP</td>    <td>Local Heap data</td>
  *   </tr>
  *   <tr>
- *     <td>#H5FD_MEM_OHDR</td>	<td>Object header data</td>
+ *     <td>#H5FD_MEM_OHDR</td>    <td>Object header data</td>
  *   </tr>
  * </table>
  *
@@ -8417,7 +8417,7 @@ H5_DLL herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint);
  *          buffer is too small it will be reallocated to a larger size, though
  *          this may result in an additional I/O.
  *
- * \since 1.12.?
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Pset_map_iterate_hints(hid_t mapl_id, size_t key_prefetch_size, size_t key_alloc_size);
@@ -8436,7 +8436,7 @@ H5_DLL herr_t H5Pset_map_iterate_hints(hid_t mapl_id, size_t key_prefetch_size, 
  * \details H5Pget_map_iterate() returns the map iterate hints, \p key_prefetch_size
  *          and \p key_alloc_size, as set by H5Pset_map_iterate_hints().
  *
- * \since 1.12.?
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size /*out*/,

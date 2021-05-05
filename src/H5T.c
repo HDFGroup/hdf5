@@ -1512,7 +1512,8 @@ H5T__unlock_cb(void *_dt, hid_t H5_ATTR_UNUSED id, void *_udata)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(dt && dt->shared);
+    HDassert(dt);
+    HDassert(dt->shared);
 
     if (H5T_STATE_IMMUTABLE == dt->shared->state) {
         dt->shared->state = H5T_STATE_RDONLY;
