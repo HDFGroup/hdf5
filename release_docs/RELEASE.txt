@@ -680,7 +680,9 @@ Bug Fixes since HDF5-1.12.0 release
 
     Documentation
     -------------
-    -
+    - Updated doxygen comments with changes for release
+
+      (ADB - 2021/05/03)
 
 
     F90 APIs

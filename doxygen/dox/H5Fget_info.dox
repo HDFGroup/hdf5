@@ -6,9 +6,8 @@
  * Similarly, the macro for the \ref H5F_info_t struct is mapped to either
  * H5F_info1_t or H5F_info2_t.
  *
- * Such macros are provided to facilitate application
- * compatibility. Their use and mappings are fully described in "API Compatibility
- * Macros in HDF5".
+ * Such macros are provided to facilitate application compatibility.
+ * Their use and mappings are fully described in \ref api-compat-macros.
  *
  * When both the HDF5 library and the application are built and installed with
  * no specific compatibility flags, H5Fget_info() is mapped to the most recent
@@ -36,8 +35,6 @@
  * \li \Code{H5Fget_info_vers=1}: H5Fget_info1()
  * \li \Code{H5F_info_t_vers=2}: H5F_info2_t
  * \li \Code{H5F_info_t_vers=1}: H5F_info1_t
- *
- * \todo Fix the reference.
  *
  * \version 1.10.0 The C function H5Fget_info() and H5F_info_t renamed to
  *          H5Fget_info1() and H5F_info1_t, respectively, and deprecated
