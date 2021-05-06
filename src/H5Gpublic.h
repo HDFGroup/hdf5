@@ -569,8 +569,8 @@ typedef struct H5G_stat_t {
  *
  * \fgdta_loc_id
  * \param[in] name      Name of the group to create
- * \param[in] size_hint Optional parameter indicating the number of bytes
- *                      to reserve for the names that will appear in the group
+ * \param[in] size_hint The number of bytes to reserve for the names
+ *                      that will appear in the group
  *
  * \return \hid_t{group}
  *
@@ -592,11 +592,9 @@ typedef struct H5G_stat_t {
  *          group, is not limited.
  *
  *          \p size_hint is a hint for the number of bytes to reserve to store
- *          the names which will be eventually added to the new group. Passing a
- *          value of zero for \p size_hint is usually adequate since the library
- *          is able to dynamically resize the name heap, but a correct hint may
- *          result in better performance. If a non-positive value is supplied
- *          for \p size_hint, then a default size is chosen.
+ *          the names which will be eventually added to the new group. This
+ *          value must be between 0 and UINT32_MAX (inclusive). If this
+ *          parameter is zero, a default value will be used.
  *
  *          The return value is a group identifier for the open group. This
  *          group identifier should be closed by calling H5Gclose() when it is

@@ -1442,13 +1442,13 @@ done:
 htri_t
 H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 {
-    H5MF_free_section_t * node = NULL;               /* Free space section pointer */
-    H5MF_sect_ud_t        udata;                     /* User data for callback */
-    H5FS_section_class_t *sect_cls;                  /* Section class */
-    H5AC_ring_t           orig_ring = H5AC_RING_INV; /* Original ring value */
-    H5AC_ring_t           fsm_ring  = H5AC_RING_INV; /* Ring of FSM */
-    H5F_mem_page_t        fs_type;                   /* Free space type */
-    htri_t                ret_value = FALSE;         /* Return value */
+    H5MF_free_section_t *       node = NULL;               /* Free space section pointer */
+    H5MF_sect_ud_t              udata;                     /* User data for callback */
+    const H5FS_section_class_t *sect_cls;                  /* Section class */
+    H5AC_ring_t                 orig_ring = H5AC_RING_INV; /* Original ring value */
+    H5AC_ring_t                 fsm_ring  = H5AC_RING_INV; /* Ring of FSM */
+    H5F_mem_page_t              fs_type;                   /* Free space type */
+    htri_t                      ret_value = FALSE;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG

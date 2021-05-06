@@ -971,6 +971,8 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Zprivate.h
 
     ${HDF5_SRC_DIR}/H5win32defs.h
+
+    ${HDF5_SRC_DIR}/uthash.h
 )
 
 set (H5_GENERATED_HEADERS
@@ -1352,7 +1354,11 @@ install (
 )
 
 if (NOT WIN32)
-  set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
+  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+    set (_PKG_CONFIG_COMPILER ${MPI_C_COMPILER})
+  else ()
+    set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
+  endif ()
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5cc
@@ -1364,14 +1370,28 @@ if (NOT WIN32)
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
       COMPONENT libraries
   )
+  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+    #legacy requires a different name
+    configure_file (
+        ${HDF_RESOURCES_DIR}/libh5cc.in
+        ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
+        @ONLY
+    )
+    install (
+        FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
+        DESTINATION ${HDF5_INSTALL_BIN_DIR}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+        COMPONENT libraries
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-  set (DOXYGEN_PACKAGE ${HDF5_PACKAGE})
-  set (DOXYGEN_VERSION_STRING ${HDF5_VERSION_STRING})
+  set (DOXYGEN_PACKAGE ${HDF5_PACKAGE_NAME})
+  set (DOXYGEN_VERSION_STRING ${HDF5_PACKAGE_VERSION_STRING})
   set (DOXYGEN_INCLUDE_ALIASES_PATH ${HDF5_DOXYGEN_DIR})
   set (DOXYGEN_INCLUDE_ALIASES aliases)
   set (DOXYGEN_VERBATIM_VARS DOXYGEN_INCLUDE_ALIASES)
@@ -1381,7 +1401,15 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
   set (DOXYGEN_MACRO_EXPANSION YES)
   set (DOXYGEN_OUTPUT_DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs)
-  set (DOXYGEN_EXAMPLES_DIRECTORY ${HDF5_DOXYGEN_DIR}/examples)
+  set (DOXYGEN_EXAMPLES_DIRECTORY "${HDF5_DOXYGEN_DIR}/examples ${HDF5_SRC_DIR} ${HDF5_SOURCE_DIR}/examples ${HDF5_TEST_SRC_DIR}")
+  set (DOXYGEN_LAYOUT_FILE ${HDF5_DOXYGEN_DIR}/hdf5doxy_layout.xml)
+  set (DOXYGEN_HTML_HEADER ${HDF5_DOXYGEN_DIR}/hdf5_header.html)
+  set (DOXYGEN_HTML_FOOTER ${HDF5_DOXYGEN_DIR}/hdf5_footer.html)
+  set (DOXYGEN_HTML_EXTRA_STYLESHEET ${HDF5_DOXYGEN_DIR}/hdf5doxy.css)
+  set (DOXYGEN_HTML_EXTRA_FILES "${HDF5_DOXYGEN_DIR}/hdf5_navtree_hacks.js ${HDF5_DOXYGEN_DIR}/img/ftv2node.png ${HDF5_DOXYGEN_DIR}/img/ftv2pnode.png")
+  set (DOXYGEN_SERVER_BASED_SEARCH NO)
+  set (DOXYGEN_EXTERNAL_SEARCH NO)
+  set (DOXYGEN_SEARCHENGINE_URL)
 
 # This configure and custom target work together
   # Replace variables inside @@ with the current values
