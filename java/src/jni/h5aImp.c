@@ -1133,7 +1133,7 @@ H5AreadVL_asstr(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
     for (i = 0; i < (size_t)n; i++) {
         h5str.s[0] = '\0';
 
-        if (!h5str_sprintf(ENVONLY, &h5str, aid, tid, &(((char *)readBuf)[i * typeSize]), typeSize, 0))
+        if (!h5str_sprintf(ENVONLY, &h5str, aid, tid, &(((char *)readBuf)[i * typeSize]), 0))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
         if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, h5str.s)))
@@ -1425,7 +1425,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref(JNIEnv *env, jclass clss, jlong attr_id, j
     for (i = 0; i < n; i++) {
         h5str.s[0] = '\0';
 
-        if (!h5str_sprintf(ENVONLY, &h5str, (hid_t)attr_id, (hid_t)mem_type_id, (void *)&ref_data[i], 0, 0))
+        if (!h5str_sprintf(ENVONLY, &h5str, (hid_t)attr_id, (hid_t)mem_type_id, (void *)&ref_data[i], 0))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
         if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, h5str.s)))

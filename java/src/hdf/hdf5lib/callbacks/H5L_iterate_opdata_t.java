@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -13,6 +12,10 @@
 
 package hdf.hdf5lib.callbacks;
 
+/**
+ * Data class for link callback for H5Lvisit/H5Lvisit_by_name.
+ *
+ */
 public interface H5L_iterate_opdata_t {
 
 }

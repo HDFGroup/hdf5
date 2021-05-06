@@ -1,0 +1,13 @@
+JUnit version 4.11
+.testH5Aread_128bit_floats
+.testH5Aread_64bit_floats
+.testH5Aread_8bit_ints
+.testH5Aread_32bit_ints
+.testH5Aread_64bit_ints
+.testH5Aread_32bit_floats
+.testH5Aread_16bit_ints
+
+Time:  XXXX
+
+OK (7 tests)
+
