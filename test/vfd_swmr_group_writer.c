@@ -72,8 +72,8 @@ typedef struct {
 static void
 usage(const char *progname)
 {
-    fprintf(stderr, "usage: %s [-S] [-G] [-a steps] [-b] [-c]\n"
-                "    [-n iterations] [-N] [-q] [-u numb_ticks] [-A at_pattern]\n"
+    fprintf(stderr, "usage: %s [-S] [-G] [-a steps] [-b] [-c] [-n iterations]\n"
+                "    [-N] [-q] [-u numb_ticks] [-A at_pattern] [-O grp_op_pattern]\n"
         "\n"
         "-S:             do not use VFD SWMR\n"
         "-G:             old-style type of group\n"
@@ -105,6 +105,29 @@ usage(const char *progname)
         "                                       deleted\n"
         "              `modify-vstr`          - A VL string attribute added then \n"
         "                                       modified \n"
+        "-O grp_op_pattern:  `grp_op_pattern' for different group operation tests\n"
+        "              The value of `grp_op_pattern` is one of the following:\n"
+        "              `grp-creation`         - A group is created.\n"
+        "              `grp-deletion`         - An existing group is deleted.\n"
+        "              `grp-move`             - A group is moved to become \n"
+        "                                       another group. \n"
+        "              `grp-ins-links`        - Links are inserted, including\n"
+        "                                       both hard and soft links. \n"
+        "              `grp-del-links`        - Links are deleted, including\n"
+        "                                       both hard ans soft links. \n"
+        "              `grp-compact-t-dense`  - Links are inserted to the group.\n" 
+        "                                       The link storage of this group \n"
+        "                                       changed from compact to dense. \n"
+        "                                       The links include both hard and\n"
+        "                                       soft links.                    \n"
+        "              `grp-dense-t-compact`  - Links are inserted to the group\n"
+        "                                       The link storage of this group \n"
+        "                                       changed from compact to dense. \n"
+        "                                       Then several links are deleted.\n"
+        "                                       The link storage changed from  \n"
+        "                                       dense to compact again.        \n"
+        "                                       The links include both hard and\n"
+        "                                       soft links.                    \n"
         "-q:             silence printouts, few messages\n"
         "\n",
             progname);
@@ -177,19 +200,19 @@ state_init(state_t *s, int argc, char **argv)
                 s->use_named_pipes = false;
                 break;
             case 'O':
-                if (strcmp(optarg, "grp-creation") == 0) 
+                if (HDstrcmp(optarg, "grp-creation") == 0) 
                     s->grp_op_pattern = 'c';
-                else if (strcmp(optarg, "grp-deletion") == 0) 
+                else if (HDstrcmp(optarg, "grp-deletion") == 0) 
                     s->grp_op_pattern = 'd';
-                else if (strcmp(optarg, "grp-move") == 0) 
+                else if (HDstrcmp(optarg, "grp-move") == 0) 
                     s->grp_op_pattern = 'm';
-                else if (strcmp(optarg, "grp-ins-links") == 0) 
+                else if (HDstrcmp(optarg, "grp-ins-links") == 0) 
                     s->grp_op_pattern = 'i';
-                else if (strcmp(optarg, "grp-del-links") == 0) 
+                else if (HDstrcmp(optarg, "grp-del-links") == 0) 
                     s->grp_op_pattern = 'D';
-                else if (strcmp(optarg, "grp-compact-t-dense") == 0) 
+                else if (HDstrcmp(optarg, "grp-compact-t-dense") == 0) 
                     s->grp_op_pattern = 't';
-                else if (strcmp(optarg, "grp-dense-t-compact") == 0) 
+                else if (HDstrcmp(optarg, "grp-dense-t-compact") == 0) 
                     s->grp_op_pattern = 'T';
                 else {
                     H5_FAILED(); AT();
@@ -241,12 +264,12 @@ state_init(state_t *s, int argc, char **argv)
     if(s->at_pattern != ' ')
         s->attr_test = true;
 
-    if(!s->grp_op_test && !s->attr_test) {
-    if (s->asteps < 1 || s->asteps > s->nsteps) {
-        H5_FAILED(); AT();
-        printf("attribute interval is out of bounds\n");
-        goto error;
-    }
+    if(!s->grp_op_test) {
+        if (s->asteps < 1 || s->asteps > s->nsteps) {
+            H5_FAILED(); AT();
+            printf("attribute interval is out of bounds\n");
+            goto error;
+        }
     }
 
     if(s->grp_op_test && s->attr_test) {
@@ -490,10 +513,6 @@ add_attr(state_t *s,
         }
 
         attr_value = u+which;
-#if 0
-        // Just for debugging to check if error handling works.
-        attr_value = u+which+1;
-#endif
 
         dbgf(1, "setting attribute %s on group %u to %u\n", attrname, g_which, u+which);
 
@@ -1631,7 +1650,7 @@ write_group(state_t *s, unsigned int which)
         goto error;
     }
 
-    esnprintf(name, sizeof(name), "/group-%d", which);
+    esnprintf(name, sizeof(name), "/group-%u", which);
 
     if(s->old_style_grp) 
         gcpl = H5P_DEFAULT;
@@ -1818,8 +1837,8 @@ error:
  *              a flag to indicate if the storage check is on
  *
  *              bool is_compact
- *              true if the attribute is stored in compact storage
- *              false if the attribute is stored in dense storage
+ *              true if the attribute storage should be in compact 
+ *              false if the attribute storage should be in dense 
  *              Note: this parameter is not used if the check_storage
  *              is set to false.
  *
@@ -1888,12 +1907,11 @@ vrfy_attr(state_t *s,
 
     if(read_which != which) {
         H5_FAILED(); AT();
-        dbgf(2, "reader: the add_attribute verfication failed,expected value is  %d\n", which);
-        dbgf(2, "reader: the add_attribute verfication failed, the value is %d\n", read_which);
+        printf("reader: the add_attribute verfication failed,expected value is  %d\n", which);
+        printf("reader: the add_attribute verfication failed, the value is %d\n", read_which);
         printf("The add_attribute verification failed\n");
         goto error;
     }
-
     
     if(!s->old_style_grp && check_storage == true) {
         if(false == check_attr_storage_type(g,is_compact)) {
@@ -2052,8 +2070,8 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which) {
         /* verify the modified value */
         if(read_which != (which+10000)) {
             H5_FAILED(); AT();
-            dbgf(2, "reader: the modified_attr() expected value is  %d\n", (-1)*(int)which);
-            dbgf(2, "reader: the modified_attr() actual value is %d\n", read_which);
+            printf("reader: the modified_attr() expected value is  %d\n", which+10000);
+            printf("reader: the modified_attr() actual value is %d\n", read_which);
             printf("The modify_attribute verification failed.\n");
             goto error;
         }
@@ -2187,8 +2205,8 @@ verify_group_vlstr_attr(state_t*s, hid_t g, unsigned int which, bool vrfy_mod)
     dbgf(1,"read attr is= %s\n",astr_val);
     if (HDstrcmp(astr_val, astr_val_exp) != 0) {
         H5_FAILED(); AT();
-        dbgf(2, "reader: the vl add_attribute verfication failed,expected value is  %s\n", astr_val_exp);
-        dbgf(2, "reader: the vl add_attribute verfication failed, the value is %s\n", astr_val);
+        printf("reader: the vl add_attribute verfication failed,expected value is  %s\n", astr_val_exp);
+        printf("reader: the vl add_attribute verfication failed, the value is %s\n", astr_val);
         printf("The vl add_attribute verification failed\n");
         goto error;
     }
@@ -2240,7 +2258,7 @@ error2:
 /*-------------------------------------------------------------------------
  * Function:    verify_del_one_attr
  *
- * Purpose:     verify if an attribute is successfully deleted.
+ * Purpose:     Verify if an attribute is successfully deleted.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
@@ -2252,6 +2270,16 @@ error2:
  *              const char* aname
  *              The name of the attribute to be deleted.
  *
+ *              bool check_storage
+ *              a flag to indicate if the storage check is on
+ *
+ *              bool is_compact
+ *              true if after this attribute is deleted,
+ *              the storage should still be in compact, false
+ *              if the storage should be in dense.
+ *              Note: this parameter is not used if the check_storage
+ *              is set to false.
+ 
  * Return:      Success:    true
  *              Failure:    false
  *
@@ -2291,11 +2319,12 @@ verify_del_one_attr(state_t *s,
         dbgf(1,"  attribute %s is successfully deleted. \n",aname);
     }
     else if(attr_exists == TRUE) {
-        dbgf(1,"verify_del_attrs_compact() test failed \n");
+        printf("The supposed deleted attribute %s still exists \n",aname);
+        printf("verify_del_attrs_compact() test failed \n");
         goto error;
     }
     else{
-        dbgf(1,"H5Aexists_by_name failed \n");
+        printf("H5Aexists_by_name failed \n");
         goto error;
     }
 
@@ -2414,7 +2443,7 @@ verify_modify_vlstr_attr(state_t *s, hid_t g, unsigned int which){
 /*-------------------------------------------------------------------------
  * Function:    verify_attrs_compact
  *
- * Purpose:     verify if attributes are successfully added for the compact
+ * Purpose:     Verify if attributes are successfully added for the compact
  *              storage.
  *
  * Parameters:  state_t *s
@@ -2466,7 +2495,7 @@ verify_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which) {
 /*-------------------------------------------------------------------------
  * Function:    verify_attrs_compact_dense
  *
- * Purpose:     verify if attributes are successfully added first in the 
+ * Purpose:     Verify if attributes are successfully added first in the 
  *              compact storage then in the dense storage.
  *
  * Parameters:  state_t *s
@@ -2508,8 +2537,6 @@ verify_attrs_compact_dense(state_t *s, hid_t g, unsigned max_c, unsigned int whi
          * retrieved value is correct. */
         HDsprintf(attrname, aname_format, max_c+which,0);
         ret = vrfy_attr(s,g,which+max_c,attrname,which,true,false);
-        if(ret == false) 
-            dbgf(1,"verify_attrs_compact_dense failed \n");
 
     }
     return ret;
@@ -2518,7 +2545,7 @@ verify_attrs_compact_dense(state_t *s, hid_t g, unsigned max_c, unsigned int whi
 /*-------------------------------------------------------------------------
  * Function:    verify_del_attrs_compact
  *
- * Purpose:     verify if an attribute in compact storage is successfully 
+ * Purpose:     Verify if an attribute in compact storage is successfully 
  *              deleted.
  *
  * Parameters:  state_t *s
@@ -2568,7 +2595,7 @@ verify_del_attrs_compact(state_t *s, hid_t g, unsigned max_c, unsigned int which
 /*-------------------------------------------------------------------------
  * Function:    verify_del_attrs_compact_dense
  *
- * Purpose:     verify if an attribute in dense storage is successfully 
+ * Purpose:     Verify if an attribute in dense storage is successfully 
  *              deleted.
  *
  * Parameters:  state_t *s
@@ -2879,7 +2906,7 @@ verify_group(state_t *s, unsigned int which)
         goto error;
     }
 
-    esnprintf(name, sizeof(name), "/group-%d", which);
+    esnprintf(name, sizeof(name), "/group-%u", which);
 
  
     if((g = H5Gopen(s->file, name, H5P_DEFAULT)) <0) {
@@ -2913,7 +2940,7 @@ verify_group(state_t *s, unsigned int which)
 
     }
 
-    /* Reader sends an OK message back to the reader */
+    /* Reader sends an OK message back to the writer */
     if(s->use_named_pipes && s->attr_test == true) {
 
         if(np_rd_send(s)==false) 
@@ -2952,12 +2979,10 @@ error2:
 
 }
 
-
 /*-------------------------------------------------------------------------
- * Function:    create_group
+ * Function:    create_group_id
  *
- * Purpose:     Create a group and carry out attribute operations(add,delete etc.)
- *              according to the attribute test pattern.
+ * Purpose:     Create a group and return the group ID.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
@@ -2965,7 +2990,182 @@ error2:
  *
  *              unsigned int which
  *              The number of iterations for group creation  
+ *              This is used to generate the group name.
  *
+ *              bool dense_to_compact 
+ *              true if this function is used to test the transition from dense to
+ *              compact, false if the test is from compact to dense.
+ *
+ * Return:      Success:    the group ID
+ *              Failure:    -1
+ *
+ * Note:        Only used by testing the link storage transit functions.
+ *-------------------------------------------------------------------------
+*/ 
+
+static hid_t
+create_group_id(state_t *s, unsigned int which, bool dense_to_compact) {
+
+    char name[sizeof("/group-9999999999")];
+    hid_t g     = H5I_INVALID_HID;
+    hid_t gcpl  = H5I_INVALID_HID;
+    H5G_info_t group_info;
+
+    if (which >= s->nsteps) {
+        H5_FAILED(); AT();
+        printf("Number of created groups is out of bounds\n");
+        goto error;
+    }
+
+    gcpl = H5Pcreate(H5P_GROUP_CREATE);
+    if(gcpl <0) {
+        H5_FAILED(); AT();
+        printf("H5Pcreate failed\n");
+        goto error;
+    }
+
+    if(dense_to_compact) {
+        if(H5Pset_link_phase_change(gcpl, 2, 2) <0) {
+            H5_FAILED(); AT();
+            printf("H5Pset_link_phase_change failed for dense to compact.\n");
+            goto error;
+        }
+    }
+    else {
+        if(H5Pset_link_phase_change(gcpl, 1, 1) <0) {
+            H5_FAILED(); AT();
+            printf("H5Pset_attr_phase_change failed for compact to dense.\n");
+            goto error;
+        }
+    }
+
+    esnprintf(name, sizeof(name), "/group-%u", which);
+    if ((g = H5Gcreate2(s->file, name, H5P_DEFAULT, gcpl, 
+                        H5P_DEFAULT)) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Gcreate2 failed\n");
+        goto error;
+    }
+
+    if(H5Gget_info(g,&group_info) <0) {
+        H5_FAILED(); AT();
+        printf("H5Gget_info failed\n");
+        goto error;
+    }
+ 
+    /* The storage type should always be compact when a group is created. */
+    if(group_info.storage_type != H5G_STORAGE_TYPE_COMPACT) {
+        H5_FAILED(); AT();
+        printf("New-style group link storage test:. \n");
+        printf("    still be compact after group creation. \n");
+        goto error;
+    }
+    
+    if (H5Pclose(gcpl) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Pclose failed\n");
+        goto error;
+    }
+
+    /* If a grp_op_test is turned on and named pipes are used,
+     * the writer should send and receive messages after the group creation.
+     * Writer sends a message to reader: a group is successfully created. 
+     * then wait for the reader to verify and send an acknowledgement message back.*/
+    if (s->use_named_pipes && s->grp_op_test == true) {
+        dbgf(2, "Writer: ready to send the message: %d\n", s->np_notify+1);
+        if(np_wr_send_receive(s) == false) {
+            H5_FAILED(); AT();
+            /* Note: This is (mostly) because the verification failure message
+             *       from the reader. So don't send the error message back to
+             *       the reader. Just stop the test. */
+            goto error2;
+        }
+    }
+    
+    return g;
+
+error:
+    /* Writer needs to send an error message to the reader to stop the test*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,true);
+
+error2: 
+
+    H5E_BEGIN_TRY {
+        H5Pclose(gcpl);
+    } H5E_END_TRY;
+
+    return -1;
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    close_group_id
+ *
+ * Purpose:     Verify is a group is closed successfully.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              The ID of the group to be closed. 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is used by the link storage transit functions.
+ *-------------------------------------------------------------------------
+*/ 
+
+static bool
+close_group_id(state_t *s, hid_t g) {
+
+    if (H5Gclose(g) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Gclose failed\n");
+        goto error;
+    }
+
+    /* If a grp_op_test is turned on and named pipes are used, for
+     * link storage test,
+     * Writer sends a message to reader: the group is successfully closed. 
+     * then wait for the reader to verify and send an acknowledgement message back.*/
+    if (s->use_named_pipes && s->grp_op_test == true) {
+        dbgf(2, "Writer: ready to send the message: %d\n", s->np_notify+1);
+        if(np_wr_send_receive(s) == false) {
+            H5_FAILED(); AT();
+            goto error2;
+        }
+    }
+    
+    return true;
+
+error:
+    /* Writer needs to send an error message to the reader to stop the test*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,true);
+
+error2: 
+
+    return false;
+
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    create_group
+ *
+ * Purpose:     Create a group 
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              This is used to generate the group name.
  *
  * Return:      Success:    true
  *              Failure:    false
@@ -2987,7 +3187,7 @@ create_group(state_t *s, unsigned int which) {
         goto error;
     }
 
-    esnprintf(name, sizeof(name), "/group-%d", which);
+    esnprintf(name, sizeof(name), "/group-%u", which);
     if ((g = H5Gcreate2(s->file, name, H5P_DEFAULT, H5P_DEFAULT, 
                         H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
@@ -3016,7 +3216,6 @@ create_group(state_t *s, unsigned int which) {
             goto error;
         }
         dbgf(2,"Writer: group is created with the new-style.\n");
-
     }
 
     if (H5Gclose(g) < 0) {
@@ -3025,19 +3224,12 @@ create_group(state_t *s, unsigned int which) {
         goto error;
     }
 
-    /* If a grp_op_test is turned on and named pipes are used,
-     * the writer should send and receive messages after the group creation.
-     * This will distinguish an attribute operation error from an
-     * group creation error. 
-     * Writer sends a message to reader: an attribute is successfully generated. 
+    /* Writer sends a message to reader,  
      * then wait for the reader to verify and send an acknowledgement message back.*/
     if (s->use_named_pipes && s->grp_op_test == true) {
-        dbgf(2, "CG writer: ready to send the message: %d\n", s->np_notify+1);
+        dbgf(2, "Writer: ready to send the message: %d\n", s->np_notify+1);
         if(np_wr_send_receive(s) == false) {
             H5_FAILED(); AT();
-            /* Note: This is (mostly) because the verification failure message
-             *       from the reader. So don't send the error message back to
-             *       the reader. Just stop the test. */
             goto error2;
         }
     }
@@ -3059,15 +3251,28 @@ error2:
 
 }
 
+
+
 /*-------------------------------------------------------------------------
- * Function:    create_group
+ * Function:    delete_one_link
  *
- * Purpose:     Create a group and carry out attribute operations(add,delete etc.)
- *              according to the attribute test pattern.
+ * Purpose:     Delete a link(either hard/soft) in group operation tests.
+ *              according to the group test pattern.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
  *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t obj_id 
+ *              The HDF5 object ID that the deleted link is attached to.
+ *
+ *              const char *name 
+ *              The name of the link to be deleted.
+ *
+ *              short link_storage
+ *              <=0: link storage is ignored.
+ *              1: link storage should be compact after link deletion..
+ *              >1: link storage should be dense after link deletion.
  *
  *              unsigned int which
  *              The number of iterations for group creation  
@@ -3076,7 +3281,7 @@ error2:
  * Return:      Success:    true
  *              Failure:    false
  *
- * Note:        This is called by the main() function.
+ * Note:        This is used by delete_groups() and delete_links() functions.
  *-------------------------------------------------------------------------
 */ 
 
@@ -3084,7 +3289,10 @@ static bool
 delete_one_link(state_t *s, 
                 hid_t obj_id, 
                 const char *name, 
+                short link_storage,
                 unsigned int which) {
+
+    H5G_info_t group_info;
 
     if (which >= s->nsteps) {
         H5_FAILED(); AT();
@@ -3098,19 +3306,44 @@ delete_one_link(state_t *s,
         goto error;
     }
 
-    /* If a grp_op_test is turned on and named pipes are used,
-     * the writer should send and receive messages after the group creation.
-     * This will distinguish an attribute operation error from an
-     * group creation error. 
-     * Writer sends a message to reader: an attribute is successfully generated. 
+    if(link_storage >0) {
+     
+        if(s->old_style_grp) {
+            H5_FAILED(); AT();
+            printf("Old style group doesn't support the indexed storage.\n");
+            goto error;
+        }
+
+        if(H5Gget_info(obj_id,&group_info) <0) {
+            H5_FAILED(); AT();
+            printf("H5Gget_info failed\n");
+            goto error;
+        }
+
+        if(link_storage == 1) {
+
+            if(group_info.storage_type != H5G_STORAGE_TYPE_COMPACT) {
+                H5_FAILED(); AT();
+                printf("The group link storage should be compact. \n");
+                goto error;
+            }
+        }
+        else {
+
+            if(group_info.storage_type != H5G_STORAGE_TYPE_DENSE) {
+                H5_FAILED(); AT();
+                printf("The group link storage should be dense. \n");
+                goto error;
+            }
+        }
+    }
+
+    /* Writer sends a message to reader:  
      * then wait for the reader to verify and send an acknowledgement message back.*/
     if (s->use_named_pipes && s->grp_op_test == true) {
         dbgf(2, "writer: ready to send the message: %d\n", s->np_notify+1);
         if(np_wr_send_receive(s) == false) {
             H5_FAILED(); AT();
-            /* Note: This is (mostly) because the verification failure message
-             *       from the reader. So don't send the error message back to
-             *       the reader. Just stop the test. */
             goto error2;
         }
     }
@@ -3128,6 +3361,27 @@ error2:
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    delete_group
+ *
+ * Purpose:     Delete a group and carry out group operations(add,delete etc.)
+ *              according to the group operation test pattern.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              This is used to generate the group name
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 delete_group(state_t *s, unsigned int which) {
@@ -3135,20 +3389,49 @@ delete_group(state_t *s, unsigned int which) {
     char name[sizeof("/group-9999999999")];
     bool ret_value = create_group(s,which);
     if(ret_value == true) {
-        esnprintf(name, sizeof(name), "/group-%d", which);
-        ret_value = delete_one_link(s,s->file,name,which);
+        esnprintf(name, sizeof(name), "/group-%u", which);
+        ret_value = delete_one_link(s,s->file,name,0,which);
     }
 
     return ret_value;
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    move_one_group
+ *
+ * Purpose:     A helper function used by the move_group operation.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t obj_id
+ *              ID of the object this group is attached to
+ *
+ *              const char *name 
+ *              The original group name
+ *
+ *              const char *newname 
+ *              The new group name
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the move_group() function.
+ *-------------------------------------------------------------------------
+*/ 
+
 static bool
 move_one_group(state_t *s, 
-                hid_t obj_id, 
-                const char *name, 
-                const char *newname, 
-                unsigned int which) {
+               hid_t obj_id, 
+               const char *name, 
+               const char *newname, 
+               unsigned int which) {
 
     if (which >= s->nsteps) {
         H5_FAILED(); AT();
@@ -3162,19 +3445,12 @@ move_one_group(state_t *s,
         goto error;
     }
 
-    /* If a grp_op_test is turned on and named pipes are used,
-     * the writer should send and receive messages after the group creation.
-     * This will distinguish an attribute operation error from an
-     * group creation error. 
-     * Writer sends a message to reader: an attribute is successfully generated. 
+    /* Writer sends a message to reader:  
      * then wait for the reader to verify and send an acknowledgement message back.*/
     if (s->use_named_pipes && s->grp_op_test == true) {
         dbgf(2, "writer: ready to send the message: %d\n", s->np_notify+1);
         if(np_wr_send_receive(s) == false) {
             H5_FAILED(); AT();
-            /* Note: This is (mostly) because the verification failure message
-             *       from the reader. So don't send the error message back to
-             *       the reader. Just stop the test. */
             goto error2;
         }
     }
@@ -3192,6 +3468,25 @@ error2:
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    move_group
+ *
+ * Purpose:     Move a group to another group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              used to generate the group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 move_group(state_t *s, unsigned int which) {
@@ -3200,8 +3495,8 @@ move_group(state_t *s, unsigned int which) {
     char new_name[sizeof("/new-group-9999999999")];
     bool ret_value = create_group(s,which);
     if(ret_value == true) {
-        esnprintf(name, sizeof(name), "/group-%d", which);
-        esnprintf(new_name, sizeof(new_name), "/new-group-%d", which);
+        esnprintf(name, sizeof(name), "/group-%u", which);
+        esnprintf(new_name, sizeof(new_name), "/new-group-%u", which);
         ret_value = move_one_group(s,s->file,name,new_name,which);
     }
 
@@ -3209,14 +3504,54 @@ move_group(state_t *s, unsigned int which) {
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    insert_one_link
+ *
+ * Purpose:     A helper function used to attach a link to a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t obj_id
+ *              ID of the object this link is attached to
+ *
+ *              const char *name 
+ *              The name of the target object used by creating links
+ *
+ *              const char *newname 
+ *              The name of the linked objects
+ *
+ *              bool is_hard
+ *              true if inserting a hard link
+ *              false if inserting a soft link
+ *
+ *              short link_storage
+ *              <=0: link storage is ignored.
+ *              1: link storage should be compact.
+ *              >1: link storage should be dense.
+ 
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the insert_links and link storage transit functions.
+ *              For link storage, we test at both the writer and the reader.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 insert_one_link(state_t *s, 
-             hid_t obj_id,
-             const char *name,
-             const char *newname,
-             bool is_hard,
-             unsigned int which) {
+                hid_t obj_id,
+                const char *name,
+                const char *newname,
+                bool is_hard,
+                short link_storage,
+                unsigned int which) {
+
+    H5G_info_t group_info;
 
     if (which >= s->nsteps) {
         H5_FAILED(); AT();
@@ -3224,33 +3559,79 @@ insert_one_link(state_t *s,
         goto error;
     }
 
+    /* For storage transit and insert_links cases, we
+     * create links in different style, just add a little
+     * variation of the tests.*/
     if (is_hard) {
-        if(H5Lcreate_hard(obj_id,name,obj_id,newname,H5P_DEFAULT,H5P_DEFAULT)<0){
-            printf("H5Lcreate_hard failed\n");
-            goto error;
+        if(link_storage >0) {
+            if(H5Lcreate_hard(s->file,name,obj_id,newname,H5P_DEFAULT,H5P_DEFAULT)<0){
+                H5_FAILED(); AT();
+                printf("H5Lcreate_hard failed\n");
+                goto error;
+            }
+        }
+        else {
+            if(H5Lcreate_hard(obj_id,name,obj_id,newname,H5P_DEFAULT,H5P_DEFAULT)<0){
+                H5_FAILED(); AT();
+                printf("H5Lcreate_hard failed\n");
+                goto error;
+            }
         }
     }
     else {
-        if(H5Lcreate_soft(name,obj_id,newname,H5P_DEFAULT,H5P_DEFAULT)<0) {
-            H5_FAILED(); AT();
-            printf("H5Lcreate_soft failed.\n");
-            goto error;
+        if(link_storage >0) {
+            if(H5Lcreate_soft("/",obj_id,newname,H5P_DEFAULT,H5P_DEFAULT)<0) {
+                H5_FAILED(); AT();
+                printf("H5Lcreate_soft failed\n");
+                goto error;
+            }
+        }
+        else {
+            if(H5Lcreate_soft(name,obj_id,newname,H5P_DEFAULT,H5P_DEFAULT)<0) {
+                H5_FAILED(); AT();
+                printf("H5Lcreate_soft failed.\n");
+                goto error;
+            }
         }
     }
 
-    /* If a grp_op_test is turned on and named pipes are used,
-     * the writer should send and receive messages after the group creation.
-     * This will distinguish an attribute operation error from an
-     * group creation error. 
-     * Writer sends a message to reader: an attribute is successfully generated. 
+    if(link_storage >0) {
+
+        if(s->old_style_grp) {
+            H5_FAILED(); AT();
+            printf("Old style group doesn't support dense or compact storage.\n");
+            goto error;
+        }
+
+        if(H5Gget_info(obj_id,&group_info) <0) {
+            H5_FAILED(); AT();
+            printf("H5Gget_info failed\n");
+            goto error;
+        }
+
+        if(link_storage == 1) {
+            if(group_info.storage_type != H5G_STORAGE_TYPE_COMPACT) {
+                H5_FAILED(); AT();
+                printf("The group link storage should be compact. \n");
+                goto error;
+            }
+        }
+        else {
+            if(group_info.storage_type != H5G_STORAGE_TYPE_DENSE) {
+                H5_FAILED(); AT();
+                printf("The group link storage should be dense. \n");
+                goto error;
+            }
+        }
+
+    }
+
+    /* Writer sends a message to reader, 
      * then wait for the reader to verify and send an acknowledgement message back.*/
     if (s->use_named_pipes && s->grp_op_test == true) {
         dbgf(2, "writer: ready to send the message: %d\n", s->np_notify+1);
         if(np_wr_send_receive(s) == false) {
             H5_FAILED(); AT();
-            /* Note: This is (mostly) because the verification failure message
-             *       from the reader. So don't send the error message back to
-             *       the reader. Just stop the test. */
             goto error2;
         }
     }
@@ -3267,6 +3648,26 @@ error2:
     return false;
 
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    insert_links
+ *
+ * Purpose:     create links with a group.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations   
+ *              used to generate the group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 insert_links(state_t *s, unsigned int which) {
@@ -3277,56 +3678,221 @@ insert_links(state_t *s, unsigned int which) {
 
     bool ret_value = create_group(s,which);
     if(ret_value == true) {
-        esnprintf(name, sizeof(name), "/group-%d", which);
-        esnprintf(hd_name, sizeof(hd_name), "/hd-group-%d", which);
-        esnprintf(st_name, sizeof(st_name), "/st-group-%d", which);
-        ret_value = insert_one_link(s,s->file,name,hd_name,true,which);
+        esnprintf(name, sizeof(name), "/group-%u", which);
+        esnprintf(hd_name, sizeof(hd_name), "/hd-group-%u", which);
+        esnprintf(st_name, sizeof(st_name), "/st-group-%u", which);
+        ret_value = insert_one_link(s,s->file,name,hd_name,true,0,which);
         if(ret_value == true) 
-            ret_value = insert_one_link(s,s->file,name,st_name,false,which);
+            ret_value = insert_one_link(s,s->file,name,st_name,false,0,which);
     }
 
     return ret_value;
 
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    delete_links
+ *
+ * Purpose:     create links with a group and then delete them successfully.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations   
+ *              used to generate the group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 delete_links(state_t *s, unsigned int which) {
 
     char name[sizeof("/group-9999999999")];
-    bool ret_value = create_group(s,which);
+    char hd_name[sizeof("/hd-group-9999999999")];
+    char st_name[sizeof("/st-group-9999999999")];
+
+    bool ret_value = insert_links(s,which);
     if(ret_value == true) {
-        // TO DO
-        esnprintf(name, sizeof(name), "/group-%d", which);
-        ret_value = delete_one_link(s,s->file,name,which);
+        esnprintf(name, sizeof(name), "/group-%u", which);
+        esnprintf(hd_name, sizeof(hd_name), "/hd-group-%u", which);
+        esnprintf(st_name, sizeof(st_name), "/st-group-%u", which);
+        ret_value = delete_one_link(s, s->file, hd_name,0, which);
+        if(ret_value == true) 
+            ret_value = delete_one_link(s, s->file, st_name,0, which);
     }
 
     return ret_value;
-
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    transit_storage_compact_to_dense
+ *
+ * Purpose:     Add links so that the link storage transits from 
+ *              compact to dense.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations used to generate the group name. 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 transit_storage_compact_to_dense(state_t *s, unsigned int which) {
 
+    char name[sizeof("/group-9999999999")];
+    char hd_name[sizeof("/hd-group-9999999999")];
+    char st_name[sizeof("/st-group-9999999999")];
 
+    hid_t g = create_group_id(s,which,false);
+    if (g < 0) { 
+        H5_FAILED(); AT();
+        printf("create_group_id failed\n");
+        goto error;
+    }
 
+    /* First insert a hard link, compact storage. */
+    esnprintf(name, sizeof(name), "/group-%u", which);
+    esnprintf(hd_name, sizeof(hd_name), "hd-group-%u", which);
+    if(insert_one_link(s,g,name,hd_name,true,1,which) == false) {
+        H5_FAILED(); AT();
+        printf("insert_one_link for compact storage failed\n");
+        goto error;
+    }
 
-    return false;
-}
+    /* Then insert a soft link, the storage becomes dense. */
+    esnprintf(st_name, sizeof(st_name), "st-group-%u", which);
+    if(insert_one_link(s,g,name,st_name,false,2,which) == false) {
+        H5_FAILED(); AT();
+        printf("insert_one_link for dense storage failed\n");
+        goto error;
+    }
 
-static bool
-transit_storage_dense_to_compact(state_t *s, unsigned int which) {
+    if(close_group_id(s,g) == false) { 
+        H5_FAILED(); AT();
+        printf("insert_one_link for dense storage failed\n");
+        goto error;
+    }
 
+    return true;
 
-
+error: 
+    H5E_BEGIN_TRY {
+        H5Gclose(g);
+    } H5E_END_TRY;
 
     return false;
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    transit_storage_dense_to_compact
+ *
+ * Purpose:     Add or delete links so that the link storage transits from 
+ *              compact to dense then to compact.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations used to generate the group name. 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
+
+static bool
+transit_storage_dense_to_compact(state_t *s, unsigned int which) {
+
+    char name[sizeof("/group-9999999999")];
+    char hd_name[sizeof("/hd-group-9999999999")];
+    char st_name[sizeof("st-group-9999999999")];
+    char st2_name[sizeof("st2-group-9999999999")];
+
+    hid_t g = create_group_id(s,which,true);
+    if (g < 0) { 
+        H5_FAILED(); AT();
+        printf("create_group_id failed\n");
+        goto error;
+    }
+
+    /* Insert a link, storage is compact. */
+    esnprintf(name, sizeof(name), "/group-%u", which);
+    esnprintf(hd_name, sizeof(hd_name), "hd-group-%u", which);
+    if(insert_one_link(s,g,name,hd_name,true,1,which) == false) {
+        H5_FAILED(); AT();
+        printf("insert_one_link for compact storage failed\n");
+        goto error;
+    }
+
+    /* Insert a link, storage is still compact. */
+    esnprintf(st_name, sizeof(st_name), "st-group-%u", which);
+    if(insert_one_link(s,g,name,st_name,false,1,which) == false) {
+        H5_FAILED(); AT();
+        printf("insert_one_link for compact storage failed\n");
+        goto error;
+    }
+
+    /* Insert a link, storage becomes dense. */
+    esnprintf(st2_name, sizeof(st2_name), "st2-group-%u", which);
+    if(insert_one_link(s,g,name,st2_name,false,2,which) == false) {
+        H5_FAILED(); AT();
+        printf("insert_one_link for dense storage failed\n");
+        goto error;
+    }
+
+    /* Delete a link, storage is still dense */
+    if(delete_one_link(s, g, st_name,2, which) == false) {
+        H5_FAILED(); AT();
+        printf("delete_one_link for dense storage failed\n");
+        goto error;
+    }
+
+    /* Delete another link, storage becomes compact */
+    if(delete_one_link(s, g, st2_name,1, which) == false) {
+        H5_FAILED(); AT();
+        printf("delete_one_link for compact storage failed\n");
+        goto error;
+    }
+
+    if(close_group_id(s,g) == false) { 
+        H5_FAILED(); AT();
+        printf("insert_one_link for dense storage failed\n");
+        goto error;
+    }
+
+    return true;
+
+error: 
+    H5E_BEGIN_TRY {
+        H5Gclose(g);
+    } H5E_END_TRY;
+
+    return false;
+
+}
+
+/*-------------------------------------------------------------------------
  * Function:    group_operations
  *
- * Purpose:     Create a group and carry out attribute operations(add,delete etc.)
- *              according to the attribute test pattern.
+ * Purpose:     Carry out group and attribute operations(add,delete etc.)
+ *              according to the group operation and attribute test patterns.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
@@ -3339,7 +3905,8 @@ transit_storage_dense_to_compact(state_t *s, unsigned int which) {
  * Return:      Success:    true
  *              Failure:    false
  *
- * Note:        This is called by the main() function.
+ * Note:        This is called by the main() function. The check of attribute
+ *              operations is inside the write_group() function.
  *-------------------------------------------------------------------------
 */ 
 static bool
@@ -3380,6 +3947,26 @@ group_operations(state_t *s, unsigned int which)
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_create_group
+ *
+ * Purpose:     Verify if a group can be created successfully.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              used to generate the group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the verify_group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
+
 static bool
 vrfy_create_group(state_t *s, unsigned int which){
 
@@ -3387,7 +3974,8 @@ vrfy_create_group(state_t *s, unsigned int which){
     hid_t g = H5I_INVALID_HID;
     H5G_info_t group_info;
 
-    dbgf(2, "CG reader: ready to send the message: \n");
+    dbgf(2, "reader: ready to send the message: \n");
+
     /* The reader receives a message from the writer.Then sleep
      * for a few ticks or stop the test if the received message 
      * is an error message.
@@ -3409,8 +3997,7 @@ vrfy_create_group(state_t *s, unsigned int which){
         goto error;
     }
 
-    esnprintf(name, sizeof(name), "/group-%d", which);
-
+    esnprintf(name, sizeof(name), "/group-%u", which);
  
     if((g = H5Gopen(s->file, name, H5P_DEFAULT)) <0) {
         H5_FAILED(); AT();
@@ -3450,7 +4037,7 @@ vrfy_create_group(state_t *s, unsigned int which){
     }
 
 
-    /* Reader sends an OK message back to the reader */
+    /* Reader sends an OK message back to the writer */
     if(s->use_named_pipes && s->grp_op_test == true) {
 
         if(np_rd_send(s)==false) 
@@ -3476,14 +4063,269 @@ error2:
     return false;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_create_group_id
+ *
+ * Purpose:     Verify if a group is created successfully and return the group
+ *              ID. 
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              used to generate the group name.
+ *
+ *              bool dense_to_compact 
+ *              true if this function is used to test the transition from dense to
+ *              compact, false if the test is from compact to dense.
+ *
+ * Return:      Success:    the group ID
+ *              Failure:    -1
+ *
+ * Note:        This function is used by the link storage transit functions.
+ *-------------------------------------------------------------------------
+*/ 
+
+static hid_t
+vrfy_create_group_id(state_t *s, unsigned int which, bool dense_to_compact){
+
+    char name[sizeof("/group-9999999999")];
+    hid_t g = H5I_INVALID_HID;
+    hid_t gcpl = H5I_INVALID_HID;
+    H5G_info_t group_info;
+    unsigned max_compact = 0;
+    unsigned min_dense = 0;
+ 
+    dbgf(2, "reader: ready to receive a message: \n");
+    /* The reader receives a message from the writer.Then sleep
+     * for a few ticks or stop the test if the received message 
+     * is an error message.
+     */ 
+    if(s->use_named_pipes && true == s->grp_op_test) {
+
+        if(false == np_rd_receive(s)) {
+            H5_FAILED(); AT();
+            goto error2;
+        }
+        decisleep(s->tick_len * s->update_interval);
+        dbgf(1, "reader: finish reading the message: %d\n",s->np_notify);
+
+    }
+
+    if (which >= s->nsteps) {
+        H5_FAILED(); AT();
+        printf("Number of the created groups is out of bounds\n");
+        goto error;
+    }
+
+    esnprintf(name, sizeof(name), "/group-%u", which);
+ 
+    if((g = H5Gopen(s->file, name, H5P_DEFAULT)) <0) {
+        H5_FAILED(); AT();
+        printf("H5Gopen failed\n");
+        goto error;
+    }
+
+    if((gcpl = H5Gget_create_plist(g)) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Gget_create_plist failed\n");
+        goto error;
+    }
+
+    if (H5Pget_link_phase_change(gcpl,&max_compact,&min_dense) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Pget_link_phase_change failed\n");
+        goto error;
+    }
+
+    if(dense_to_compact) {
+        if(max_compact != 2) {
+            H5_FAILED(); AT();
+            printf("For storage check from dense to compact:\n");
+            printf("    The max_compact should be 2.\n");
+            printf("    But the actual value is %d.\n",max_compact);
+            goto error;
+        }
+        else if (min_dense != 2) {
+            H5_FAILED(); AT();
+            printf("For storage check from dense to compact:\n");
+            printf("    The min_dense should be 2.\n");
+            printf("    But the actual value is %d.\n",min_dense);
+            goto error;
+        }
+    }
+    else {
+         if(max_compact != 1) {
+            H5_FAILED(); AT();
+            printf("For storage check from dense to compact:\n");
+            printf("    The max_compact should be 1.\n");
+            printf("    But the actual value is %d.\n",max_compact);
+            goto error;
+        }
+        else if (min_dense != 1) {
+            H5_FAILED(); AT();
+            printf("For storage check from dense to compact:\n");
+            printf("    The min_dense should be 1.\n");
+            printf("    But the actual value is %d.\n",min_dense);
+            goto error;
+        }
+
+    }
+
+    if(H5Pclose(gcpl) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Pclose failed\n");
+        goto error;
+    }
+
+    if(H5Gget_info(g,&group_info) <0) {
+        H5_FAILED(); AT();
+        printf("H5Gget_info failed\n");
+        goto error;
+    }
+
+    /* When the group is created, the storage type is always compact. */
+    if(group_info.storage_type != H5G_STORAGE_TYPE_COMPACT) {
+        H5_FAILED(); AT();
+        printf("Old-styled group test: but the group is not in old-style. \n");
+        goto error;
+    }
+ 
+    dbgf(2,"Storage info is %d\n",group_info.storage_type);
+
+    /* Reader sends an OK message back to the reader */
+    if(s->use_named_pipes && s->grp_op_test == true) {
+
+        if(np_rd_send(s)==false) 
+            goto error;
+        dbgf(1, "Reader: finish sending back the message: %d\n",s->np_notify);
+        
+    }
+
+    return g;
+
+error:
+
+    H5E_BEGIN_TRY {
+        H5Gclose(g);
+        H5Pclose(gcpl);
+    } H5E_END_TRY;
+
+    /* The reader sends an error message to the writer to stop the test.*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,false);
+
+error2:
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_close_group_id
+ *
+ * Purpose:     Verify if a group is closed successfully.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t g
+ *              The ID of the group to be closed. 
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is used by the link storage transit functions.
+ *-------------------------------------------------------------------------
+*/ 
+
+static bool
+vrfy_close_group_id(state_t *s, hid_t g) {
+
+    /* The reader receives a message from the writer.Then sleep
+     * for a few ticks or stop the test if the received message 
+     * is an error message.
+     */ 
+    if(s->use_named_pipes && true == s->grp_op_test) {
+
+        if(false == np_rd_receive(s)) {
+            H5_FAILED(); AT();
+            goto error2;
+        }
+        decisleep(s->tick_len * s->update_interval);
+        dbgf(1, "reader: finish reading the message: %d\n",s->np_notify);
+
+    }
+
+    if (H5Gclose(g) < 0) {
+        H5_FAILED(); AT();
+        printf("H5Gclose failed\n");
+        goto error;
+    }
+
+    /* Reader sends an OK message back to the reader */
+    if(s->use_named_pipes && s->grp_op_test == true) {
+
+        if(np_rd_send(s)==false) 
+            goto error;
+        dbgf(1, "Reader: finish sending back the message: %d\n",s->np_notify);
+        
+    }
+
+    return true;
+
+error:
+
+    /* The reader sends an error message to the writer to stop the test.*/
+    if(s->use_named_pipes && s->grp_op_test == true)
+        np_send_error(s,false);
+
+error2:
+    return false;
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_one_link_exist
+ *
+ * Purpose:     Verify if a link exists or not. The link storage is
+ *              also checked.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t obj_id
+ *              The ID of the object the link is attached to
+ *
+ *              bool expect_exist
+ *              A flag that indicates if this link is expected to exist 
+ *
+ *              short link_storage
+ *              <=0: link storage check is ignored.
+ *              1: link storage is expected to be compact.
+ *              >1: link storage is expected to be dense.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        Helper function to check if links are inserted or deleted.
+ *              The link storage is also checked.
+ *-------------------------------------------------------------------------
+*/ 
+
 static bool vrfy_one_link_exist(state_t *s,
                                 hid_t obj_id, 
                                 const char* name,
-                                bool expect_exist) {
+                                bool expect_exist,
+                                short link_storage) {
 
     int link_exists = 0;
+    H5G_info_t group_info;
 
-    dbgf(2, "LE reader: ready to send the message: \n");
+    dbgf(2, "reader: ready to send the message: \n");
     /* The reader receives a message from the writer.Then sleep
      * for a few ticks or stop the test if the received message 
      * is an error message.
@@ -3521,6 +4363,37 @@ static bool vrfy_one_link_exist(state_t *s,
         }      
     }
 
+    if(link_storage >0) {
+     
+        if(s->old_style_grp) {
+            H5_FAILED(); AT();
+            printf("Old style group doesn't support the indexed storage.\n");
+            goto error;
+        }
+
+        if(H5Gget_info(obj_id,&group_info) <0) {
+            H5_FAILED(); AT();
+            printf("H5Gget_info failed\n");
+            goto error;
+        }
+
+        if(link_storage == 1) {
+            if(group_info.storage_type != H5G_STORAGE_TYPE_COMPACT) {
+                H5_FAILED(); AT();
+                printf("The group link storage should be compact. \n");
+                goto error;
+            }
+        }
+        else {
+            if(group_info.storage_type != H5G_STORAGE_TYPE_DENSE) {
+                H5_FAILED(); AT();
+                printf("The group link storage should be dense. \n");
+                goto error;
+            }
+        }
+
+    }
+
     /* Reader sends an OK message back to the reader */
     if(s->use_named_pipes && s->grp_op_test == true) {
         if(np_rd_send(s)==false) 
@@ -3543,18 +4416,68 @@ error2:
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_delete_group
+ *
+ * Purpose:     Verify if a group can be deleted successfully.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              used to generate the group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the verify_group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
+
 static bool
 vrfy_delete_group(state_t *s, unsigned int which){
 
     bool ret_value = false;
     char name[sizeof("/group-9999999999")];
+
     ret_value = vrfy_create_group(s,which);
     if(ret_value == true) {
-        esnprintf(name, sizeof(name), "/group-%d", which);
-        ret_value = vrfy_one_link_exist(s,s->file,name,false);
+        esnprintf(name, sizeof(name), "/group-%u", which);
+        ret_value = vrfy_one_link_exist(s,s->file,name,false,0);
     }
+
     return ret_value;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_move_one_group
+ *
+ * Purpose:     A helper function to verify the move_group operation successfully.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              hid_t obj_id
+ *              ID of the object this group is attached to
+ *
+ *              const char *name 
+ *              The original group name
+ *
+ *              const char *newname 
+ *              The new group name
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the verify_move_group() function.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 vrfy_move_one_group(state_t *s, 
@@ -3567,7 +4490,7 @@ vrfy_move_one_group(state_t *s,
     H5G_info_t group_info;
     int link_exists = 0;
 
-    dbgf(2, "CG reader: ready to send the message: \n");
+    dbgf(2, "reader: ready to send the message: \n");
     /* The reader receives a message from the writer.Then sleep
      * for a few ticks or stop the test if the received message 
      * is an error message.
@@ -3666,7 +4589,25 @@ error2:
     return false;
 }
 
-
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_move_group
+ *
+ * Purpose:     Verify if a group can be moved successfully.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              used to generate the group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the verify_group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 vrfy_move_group(state_t *s, unsigned int which){
@@ -3675,14 +4616,35 @@ vrfy_move_group(state_t *s, unsigned int which){
     char new_name[sizeof("/new-group-9999999999")];
     bool ret_value = vrfy_create_group(s,which);
     if(ret_value == true) {
-        esnprintf(name, sizeof(name), "/group-%d", which);
-        esnprintf(new_name, sizeof(new_name), "/new-group-%d", which);
+        esnprintf(name, sizeof(name), "/group-%u", which);
+        esnprintf(new_name, sizeof(new_name), "/new-group-%u", which);
         ret_value = vrfy_move_one_group(s,s->file,name,new_name,which);
     }
 
     return ret_value;
 
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_insert_links
+ *
+ * Purpose:     Verify if the links are inserted successfully.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              used to generate the group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the verify_group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
+
 
 static bool
 vrfy_insert_links(state_t *s, unsigned int which){
@@ -3692,40 +4654,212 @@ vrfy_insert_links(state_t *s, unsigned int which){
     char st_name[sizeof("/st-group-9999999999")];
 
     ret_value = vrfy_create_group(s,which);
+
     if(ret_value == true) {
-        esnprintf(hd_name, sizeof(hd_name), "/hd-group-%d", which);
-        esnprintf(st_name, sizeof(st_name), "/st-group-%d", which);
-        ret_value = vrfy_one_link_exist(s,s->file,hd_name,true);
+        esnprintf(hd_name, sizeof(hd_name), "/hd-group-%u", which);
+        esnprintf(st_name, sizeof(st_name), "/st-group-%u", which);
+        ret_value = vrfy_one_link_exist(s,s->file,hd_name,true,0);
         if(ret_value == true) 
-            ret_value = vrfy_one_link_exist(s,s->file,st_name,true);
+            ret_value = vrfy_one_link_exist(s,s->file,st_name,true,0);
     }
+
     return ret_value;
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_delete_links
+ *
+ * Purpose:     Verify if the links created with a group are deleted successfully.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              used to generate the group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the verify_group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
+
 static bool
 vrfy_delete_links(state_t *s, unsigned int which){
 
+    bool ret_value = false;
+    char hd_name[sizeof("/hd-group-9999999999")];
+    char st_name[sizeof("/st-group-9999999999")];
 
+    /* First verify if the links are inserted correctly */
+    ret_value = vrfy_insert_links(s,which);
 
-    return false;
+    /* Then if these links are deleted correctly. */
+    if(ret_value == true) {
+        esnprintf(hd_name, sizeof(hd_name), "/hd-group-%u", which);
+        esnprintf(st_name, sizeof(st_name), "/st-group-%u", which);
+        ret_value = vrfy_one_link_exist(s,s->file,hd_name,false,0);
+        if(ret_value == true)
+            ret_value = vrfy_one_link_exist(s,s->file,st_name,false,0);
+    }
+
+    return ret_value;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_transit_storage_compact_to_dense
+ *
+ * Purpose:     Verify if the link storage successfully transits from 
+ *              compact to dense.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              used to generate the group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the verify_group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
 
 static bool
 vrfy_transit_storage_compact_to_dense(state_t *s, unsigned int which){
 
+    hid_t g = H5I_INVALID_HID;
+    char hd_name[sizeof("hd-group-9999999999")];
+    char st_name[sizeof("st-group-9999999999")];
 
+    g = vrfy_create_group_id(s,which,false);
+    if(g < 0) {
+        H5_FAILED(); AT();
+        printf("verify create_group_id failed\n");
+        goto error;
+    }
 
+    esnprintf(hd_name, sizeof(hd_name), "hd-group-%u", which);
+    if(vrfy_one_link_exist(s,g,hd_name,true,1) == false) {
+        H5_FAILED(); AT();
+        printf("verify the compact storage failed for 'link compact to dense' test\n");
+        goto error;
+    }
+
+    esnprintf(st_name, sizeof(st_name), "st-group-%u", which);
+    if(vrfy_one_link_exist(s,g,st_name,true,2) == false) {
+        H5_FAILED(); AT();
+        printf("verify the dense link storage failed for 'link compact to dense' test\n");
+        goto error;
+    }
+
+    if(vrfy_close_group_id(s, g) == false) {
+        H5_FAILED(); AT();
+        printf("verify the group close for 'link compact to dense' test\n");
+        goto error;
+    }
+    return true;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Gclose(g);
+    } H5E_END_TRY;
     return false;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    vrfy_transit_storage_dense_to_compact
+ *
+ * Purpose:     Verify if the link storage successfully transits from 
+ *              compact to dense then to compact.
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters 
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation  
+ *              used to generate the group name.
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the verify_group_operations() function.
+ *-------------------------------------------------------------------------
+*/ 
+
 
 static bool
 vrfy_transit_storage_dense_to_compact(state_t *s, unsigned int which){
 
+    hid_t g = H5I_INVALID_HID;
+    char hd_name[sizeof("hd-group-9999999999")];
+    char st_name[sizeof("st-group-9999999999")];
+    char st2_name[sizeof("st2-group-9999999999")];
 
+    g = vrfy_create_group_id(s,which,true);
+    if(g < 0) {
+        H5_FAILED(); AT();
+        printf("verify create_group_id failed\n");
+        goto error;
+    }
 
+    /* Add a link, verify it is still the compact storage */
+    esnprintf(hd_name, sizeof(hd_name), "hd-group-%u", which);
+    if(vrfy_one_link_exist(s,g,hd_name,true,1) == false) {
+        H5_FAILED(); AT();
+        printf("verify the compact storage failed for 'link compact to dense' test\n");
+        goto error;
+    }
+
+    /* Add another link, verify it is still the compact storage */
+    esnprintf(st_name, sizeof(st_name), "st-group-%u", which);
+    if(vrfy_one_link_exist(s,g,st_name,true,1) == false) {
+        H5_FAILED(); AT();
+        printf("verify the compact link storage failed for 'link compact to dense' test\n");
+        goto error;
+    }
+
+    /* Add the third link, verify it becomes the dense storage */
+    esnprintf(st2_name, sizeof(st2_name), "st2-group-%u", which);
+    if(vrfy_one_link_exist(s,g,st2_name,true,2) == false) {
+        H5_FAILED(); AT();
+        printf("verify the dense link storage failed for 'link compact to dense' test\n");
+        goto error;
+    }
+
+    /* Remove a link, verify the link doesn't exist and still dense storage */
+    if(vrfy_one_link_exist(s,g,st_name,false,2) == false) {
+        H5_FAILED(); AT();
+        printf("verify the dense link storage failed for 'link compact to dense' test\n");
+        goto error;
+    }
+
+    /* Remove a link, verify the link doesn't exist and it becomes compact storage */
+    if(vrfy_one_link_exist(s,g,st2_name,false,1) == false) {
+        H5_FAILED(); AT();
+        printf("verify the compact link storage failed for 'link compact to dense' test\n");
+        goto error;
+    }
+
+    if(vrfy_close_group_id(s, g) == false) {
+        H5_FAILED(); AT();
+        printf("verify the group close for 'link compact to dense' test\n");
+        goto error;
+    }
+    return true;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Gclose(g);
+    } H5E_END_TRY;
     return false;
+
 }
 
 /*-------------------------------------------------------------------------
@@ -3785,7 +4919,6 @@ verify_group_operations(state_t *s, unsigned int which)
             break;
     }
     return ret_value;
-
 
 }
 
@@ -3913,14 +5046,12 @@ main(int argc, char **argv)
      * If the named pipe is not forced to communicate in every step, the reader may go ahead
      * to verify the group and the attribute operations before the writer has a chance to
      * carry out the corresponding operations. */
-    if (s.attr_test && s.use_named_pipes) {
+    if (s.attr_test && s.use_named_pipes) 
             s.csteps = 1;
-    }
 
     /* For group operation test, force the named pipe to communicate in every step. */
-    if (s.grp_op_test && s.use_named_pipes) {
+    if (s.grp_op_test && s.use_named_pipes) 
             s.csteps = 1;
-    }
 
     if (writer) {
         for (step = 0; step < s.nsteps; step++) {
@@ -3946,7 +5077,7 @@ main(int argc, char **argv)
 
                     if(np_wr_send_receive(&s) == false) {
                         H5_FAILED(); AT();
-                        dbgf(2, "writer: write group - verification failed.\n");
+                        printf("writer: write group - verification failed.\n");
                         goto error;
                     }
                 }
@@ -3973,7 +5104,7 @@ main(int argc, char **argv)
 
             if (vg_ret == false) {
 
-                printf("verify_group_operations  failed\n");
+                printf("verify_group_operations failed\n");
                 H5_FAILED(); AT();
 
                 /* At communication interval, tell the writer about the failure and exit */
