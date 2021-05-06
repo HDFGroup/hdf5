@@ -3417,12 +3417,13 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
                         curr_pos += k0 * stride * prev_total_dim_size;
                     H5TOOLS_DEBUG("4:curr_idx=%lld, curr_pos=%lld", curr_idx, curr_pos);
                 }
-                /*
-                 * Calculate the number of elements represented by a unit change in a
-                 * certain index position.
-                 */
-                calc_acc_pos((unsigned)opts->rank, curr_pos, opts->acc, opts->pos);
             }
+            /*
+             * Calculate the number of elements represented by a unit change in a
+             * certain index position.
+             */
+            calc_acc_pos((unsigned)opts->rank, curr_pos, opts->acc, opts->pos);
+
             for (int i = 0; i < opts->rank; i++) {
                 H5TOOLS_DEBUG("pos loop:%d with opts->pos=%lld opts->sm_pos=%lld", i, opts->pos[i],
                               opts->sm_pos[i]);
