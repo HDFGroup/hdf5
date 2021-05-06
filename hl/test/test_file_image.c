@@ -51,7 +51,7 @@
  *-------------------------------------------------------------------------
  */
 static int
-test_file_image(size_t open_images, size_t nflags, unsigned *flags)
+test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
 {
     hid_t * file_id, *dset_id, file_space, plist; /* HDF5 ids */
     hsize_t dims1[RANK]    = {2, 3};              /* original dimension of datasets */
@@ -509,6 +509,8 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
     } /* end for */
 
     /* release temporary working buffers */
+    for (i = 0; i < open_images; i++)
+        HDfree(filename[i]);
     HDfree(filename);
     HDfree(file_id);
     HDfree(dset_id);

@@ -315,9 +315,9 @@ typedef struct H5FD_free_t {
  * are declared here and the driver appends private fields in memory.
  */
 struct H5FD_t {
-    hid_t               driver_id;     /* Driver ID for this file */
-    const H5FD_class_t *cls;           /* Constant class info */
-    unsigned long       fileno;        /* File 'serial' number */
+    hid_t               driver_id;     /*driver ID for this file   */
+    const H5FD_class_t *cls;           /*constant class info       */
+    unsigned long       fileno;        /* File 'serial' number     */
     unsigned            access_flags;  /* File access flags (from create or open) */
     unsigned long       feature_flags; /* VFL Driver feature Flags */
     haddr_t             maxaddr;       /* For this file, overrides class */

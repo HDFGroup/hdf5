@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5Bprivate_H
-#define _H5Bprivate_H
+#ifndef H5Bprivate_H
+#define H5Bprivate_H
 
 /* Private headers needed by this file */
 #include "H5private.h"   /* Generic Functions			*/
@@ -157,4 +157,4 @@ H5_DLL herr_t        H5B_shared_free(void *_shared);
 H5_DLL herr_t H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5B_class_t *type,
                         void *udata);
 H5_DLL htri_t H5B_valid(H5F_t *f, const H5B_class_t *type, haddr_t addr);
-#endif /* _H5Bprivate_H */
+#endif /* H5Bprivate_H */

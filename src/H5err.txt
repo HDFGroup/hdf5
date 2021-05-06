@@ -46,6 +46,7 @@
 MAJOR, H5E_ARGS, Invalid arguments to routine
 MAJOR, H5E_RESOURCE, Resource unavailable
 MAJOR, H5E_INTERNAL, Internal error (too specific to document in detail)
+MAJOR, H5E_LIB, General library infrastructure
 MAJOR, H5E_FILE, File accessibility
 MAJOR, H5E_IO, Low-level I/O
 MAJOR, H5E_FUNC, Function entry/exit
@@ -102,6 +103,7 @@ SECTION, FSPACE, Free space errors
 SECTION, PIPELINE, I/O pipeline errors
 SECTION, SYSTEM, System level errors
 SECTION, PLUGIN, Plugin errors
+SECTION, MAP, Map related errors
 SECTION, NONE, No error
 
 # Minor errors

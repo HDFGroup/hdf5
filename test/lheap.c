@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
  *
  * Purpose:    Test local heaps used by symbol tables (groups).
@@ -103,7 +103,7 @@ main(void)
         if (j > 4)
             buf[j] = '\0';
 
-        if (UFAIL == (obj[i] = H5HL_insert(f, heap, strlen(buf) + 1, buf))) {
+        if (UFAIL == (obj[i] = H5HL_insert(f, heap, HDstrlen(buf) + 1, buf))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -155,7 +155,7 @@ main(void)
             goto error;
         }
 
-        if (strcmp(s, buf)) {
+        if (HDstrcmp(s, buf) != 0) {
             H5_FAILED();
             HDprintf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
             HDprintf("    got: \"%s\"\n", s);
@@ -201,7 +201,7 @@ main(void)
         TEST_ERROR
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop() < 0)
+    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -219,7 +219,7 @@ error:
     H5E_END_TRY;
 
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     return EXIT_FAILURE;
 }

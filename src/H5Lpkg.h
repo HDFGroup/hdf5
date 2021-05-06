@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: James Laird <matzke@llnl.gov>
+ * Programmer: James Laird
  *             Friday, December 1, 2005
  *
  * Purpose:     This file contains declarations which are visible
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5L package!"
 #endif
 
-#ifndef _H5Lpkg_H
-#define _H5Lpkg_H
+#ifndef H5Lpkg_H
+#define H5Lpkg_H
 
 /* Get package's private header */
 #include "H5Lprivate.h"
@@ -52,4 +52,4 @@ H5_DLL herr_t H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name, c
 H5_DLL herr_t H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t *src_oloc,
                                   H5O_link_t *dst_lnk, H5O_copy_t *cpy_info);
 
-#endif /* _H5Lpkg_H */
+#endif /* H5Lpkg_H */

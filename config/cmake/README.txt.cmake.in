@@ -17,6 +17,18 @@ The contents of this directory are:
     README.txt              - This file
     @HDF5_PACKAGE_NAME@-@HDF5_PACKAGE_VERSION@-@BINARY_SYSTEM_NAME@.@BINARY_INSTALL_ENDING@    - HDF5 Install Package
 
+This binary was built with the ZLIB and SZIP/Libaec external libraries and are
+included for convenience.  Libaec is an unrestricted open-source replacement for SZIP
+(version 1.0.4, Encoder ENABLED).
+
+The official ZLIB and SZIP/Libaec pages are at:
+
+    ZLIB: https://git.savannah.gnu.org/cgit/gzip.git/
+        https://git.savannah.gnu.org/cgit/gzip.git/tree/COPYING
+    SZIP/Libaec: https://gitlab.dkrz.de/k202009/libaec
+        https://gitlab.dkrz.de/k202009/libaec/-/blob/master/Copyright.txt
+
+
 Installation
 ===========================================================================
 1. Execute @HDF5_PACKAGE_NAME@-@HDF5_PACKAGE_VERSION@-@BINARY_SYSTEM_NAME@.@BINARY_INSTALL_ENDING@

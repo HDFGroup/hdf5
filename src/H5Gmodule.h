@@ -11,15 +11,15 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		Saturday, September 12, 2015
  *
  * Purpose:	This file contains declarations which define macros for the
  *		H5G package.  Including this header means that the source file
  *		is part of the H5G package.
  */
-#ifndef _H5Gmodule_H
-#define _H5Gmodule_H
+#ifndef H5Gmodule_H
+#define H5Gmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,11 @@
 #define H5_MY_PKG_ERR  H5E_SYM
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5Gmodule_H */
+/**
+ * \defgroup H5G H5G
+ * \brief Group Interface
+ * \details The HDF5 Group Interface, H5G, provides a mechanism for managing
+ *          HDF5 groups and their members, which are other HDF5 objects.
+ */
+
+#endif /* H5Gmodule_H */

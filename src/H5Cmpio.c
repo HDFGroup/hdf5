@@ -105,9 +105,9 @@ static herr_t H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned 
  *
  *              We construct the table as follows.  Let:
  *
- *                  n = num_candidates / mpi_size;
+ *                      n = num_candidates / mpi_size;
  *
- *                  m = num_candidates % mpi_size;
+ *                      m = num_candidates % mpi_size;
  *
  *              Now allocate an array of integers of length mpi_size + 1,
  *              and call this array candidate_assignment_table.
@@ -127,10 +127,10 @@ static herr_t H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned 
  *              Once the table is constructed, we determine the first and
  *              last entry this process is to flush as follows:
  *
- *                  first_entry_to_flush = candidate_assignment_table[mpi_rank]
+ *              first_entry_to_flush = candidate_assignment_table[mpi_rank]
  *
  *              last_entry_to_flush =
- *                  candidate_assignment_table[mpi_rank + 1] - 1;
+ *                      candidate_assignment_table[mpi_rank + 1] - 1;
  *
  *              With these values determined, we simply scan through the
  *              candidate list, marking all entries in the range
@@ -737,7 +737,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
      * of the pre_serialize / serialize routines, this may
      * cease to be the case -- requiring a review of this
      * point.
-     *                    JRM -- 4/7/15
+     *                                  JRM -- 4/7/15
      */
     entries_cleared  = 0;
     entries_examined = 0;
@@ -885,15 +885,16 @@ H5C__collective_write(H5F_t *f)
 {
     H5AC_t *         cache_ptr;
     H5FD_mpio_xfer_t orig_xfer_mode = H5FD_MPIO_COLLECTIVE;
+    void *           base_buf;
     int              count;
     int *            length_array = NULL;
     MPI_Aint *       buf_array    = NULL;
     MPI_Aint *       offset_array = NULL;
-    MPI_Datatype     btype;
-    hbool_t          btype_created = FALSE;
-    MPI_Datatype     ftype;
-    hbool_t          ftype_created = FALSE;
+    MPI_Datatype     btype        = MPI_BYTE;
+    MPI_Datatype     ftype        = MPI_BYTE;
     int              mpi_code;
+    char             unused = 0; /* Unused, except for non-NULL pointer value */
+    size_t           buf_count;
     herr_t           ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -908,19 +909,16 @@ H5C__collective_write(H5F_t *f)
     if (H5CX_get_io_xfer_mode(&orig_xfer_mode) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
+    /* Set transfer mode */
+    if (H5CX_set_io_xfer_mode(H5FD_MPIO_COLLECTIVE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
+
     /* Get number of entries in collective write list */
     count = (int)H5SL_count(cache_ptr->coll_write_list);
-
     if (count > 0) {
-        H5FD_mpio_xfer_t   xfer_mode = H5FD_MPIO_COLLECTIVE;
         H5SL_node_t *      node;
         H5C_cache_entry_t *entry_ptr;
-        void *             base_buf;
         int                i;
-
-        /* Set new transfer mode */
-        if (H5CX_set_io_xfer_mode(xfer_mode) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
 
         /* Allocate arrays */
         if (NULL == (length_array = (int *)H5MM_malloc((size_t)count * sizeof(int))))
@@ -948,7 +946,6 @@ H5C__collective_write(H5F_t *f)
         node = H5SL_next(node);
         i    = 1;
         while (node) {
-
             if (NULL == (entry_ptr = (H5C_cache_entry_t *)H5SL_item(node)))
                 HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't retrieve skip list item")
 
@@ -966,9 +963,6 @@ H5C__collective_write(H5F_t *f)
         if (MPI_SUCCESS !=
             (mpi_code = MPI_Type_create_hindexed(count, length_array, buf_array, MPI_BYTE, &btype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-
-        btype_created = TRUE;
-
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&btype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
@@ -976,74 +970,27 @@ H5C__collective_write(H5F_t *f)
         if (MPI_SUCCESS !=
             (mpi_code = MPI_Type_create_hindexed(count, length_array, offset_array, MPI_BYTE, &ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-
-        ftype_created = TRUE;
-
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
-        /* Pass buf type, file type to the file driver */
-        if (H5CX_set_mpi_coll_datatypes(btype, ftype) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O properties")
-
-        /* Write data */
-        /*
-         * At present the page buffer is disabled in the parallel case, and
-         * thus VFD SWMR can't be used either.  Thus, for now, there is
-         * no point in setting the page buffer hints.
-         *
-         * More to the point, since we are actually writing a derived type
-         * containing multiple metadata cache entries, we couldn't set it
-         * to a meaningful value.
-         *
-         * When we enable the page buffer in parallel, we will have to
-         * revisit this.
-         *                                 JRM -- 3/30/20
-         */
-        if (H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)0, (size_t)1, base_buf) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to write entries collectively")
-
+        /* MPI count to write */
+        buf_count = 1;
     } /* end if */
     else {
-        MPI_Status mpi_stat;
-        MPI_File * mpi_fh_p;
-        MPI_File   mpi_fh;
-        MPI_Info * info_p;
-        MPI_Info   info;
+        /* Set non-NULL pointer for I/O operation */
+        base_buf = &unused;
 
-        /* This should be rewritten to call H5F_block_write, with the correct
-         *      buffer and file datatypes (null ones).  -QAK, 2018/02/21
-         */
-        if (H5F_get_mpi_handle(f, (MPI_File **)&mpi_fh_p) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get mpi file handle")
-
-        mpi_fh = *(MPI_File *)mpi_fh_p;
-
-        if (H5F_get_mpi_info(f, &info_p) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file info")
-
-        info = *info_p;
-
-        /* just to match up with the 1st MPI_File_set_view from
-         * H5FD_mpio_write()
-         */
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
-
-        /* just to match up with MPI_File_write_at_all from H5FD_mpio_write() */
-        HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_File_write_at_all(mpi_fh, (MPI_Offset)0, NULL, 0, MPI_BYTE, &mpi_stat)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
-
-        /* just to match up with the 2nd MPI_File_set_view (reset) in
-         * H5FD_mpio_write()
-         */
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+        /* MPI count to write */
+        buf_count = 0;
     } /* end else */
+
+    /* Pass buf type, file type to the file driver */
+    if (H5CX_set_mpi_coll_datatypes(btype, ftype) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O properties")
+
+    /* Write data */
+    if (H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)0, buf_count, base_buf) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write entries collectively")
 
 done:
     /* Free arrays */
@@ -1052,9 +999,9 @@ done:
     offset_array = (MPI_Aint *)H5MM_xfree(offset_array);
 
     /* Free MPI Types */
-    if (btype_created && MPI_SUCCESS != (mpi_code = MPI_Type_free(&btype)))
+    if (MPI_BYTE != btype && MPI_SUCCESS != (mpi_code = MPI_Type_free(&btype)))
         HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    if (ftype_created && MPI_SUCCESS != (mpi_code = MPI_Type_free(&ftype)))
+    if (MPI_BYTE != ftype && MPI_SUCCESS != (mpi_code = MPI_Type_free(&ftype)))
         HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
 
     /* Reset transfer mode in API context, if changed */

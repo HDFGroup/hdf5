@@ -14,8 +14,8 @@
  * This file contains public declarations for the H5PL module.
  */
 
-#ifndef _H5PLpublic_H
-#define _H5PLpublic_H
+#ifndef H5PLpublic_H
+#define H5PLpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h" /* Generic Functions                    */
@@ -60,4 +60,4 @@ H5_DLL herr_t  H5PLsize(unsigned int *num_paths /*out*/);
 }
 #endif
 
-#endif /* _H5PLpublic_H */
+#endif /* H5PLpublic_H */

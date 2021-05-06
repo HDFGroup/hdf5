@@ -15,7 +15,7 @@
  *
  * Created:             debug.c
  *                      Jul 18 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Debugs an existing HDF5 file at a low level.
  *
@@ -67,7 +67,6 @@
  * Return:  Non-NULL on success/NULL on failure
  *
  * Programmer:  Quincey Koziol
- *    koziol@hdfgroup.org
  *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -149,7 +148,6 @@ get_H5B2_class(const uint8_t *sig)
  * Return:  Non-NULL on success/NULL on failure
  *
  * Programmer:  Quincey Koziol
- *    koziol@hdfgroup.org
  *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -191,7 +189,6 @@ get_H5EA_class(const uint8_t *sig)
  * Return:  Non-NULL on success/NULL on failure
  *
  * Programmer:  Quincey Koziol
- *    koziol@hdfgroup.org
  *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -233,7 +230,6 @@ get_H5FA_class(const uint8_t *sig)
  *              Failure:        exit (non-zero)
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -250,8 +246,8 @@ main(int argc, char *argv[])
     haddr_t        extra[10];
     uint8_t        sig[H5F_SIGNATURE_LEN];
     size_t         u;
-    H5E_auto2_t    func;
-    void *         edata;
+    H5E_auto2_t    func           = NULL;
+    void *         edata          = NULL;
     hbool_t        api_ctx_pushed = FALSE; /* Whether API context pushed */
     herr_t         status         = SUCCEED;
     int            exit_value     = 0;
@@ -825,7 +821,7 @@ done:
 
     /* Pop API context */
     if (api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     H5Eset_auto2(H5E_DEFAULT, func, edata);
 

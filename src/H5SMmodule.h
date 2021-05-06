@@ -11,15 +11,15 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		Saturday, September 12, 2015
  *
  * Purpose:	This file contains declarations which define macros for the
  *		H5SM package.  Including this header means that the source file
  *		is part of the H5SM package.
  */
-#ifndef _H5SMmodule_H
-#define _H5SMmodule_H
+#ifndef H5SMmodule_H
+#define H5SMmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_SOHM
 #define H5_MY_PKG_INIT NO
 
-#endif /* _H5SMmodule_H */
+#endif /* H5SMmodule_H */

@@ -11,12 +11,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Thursday, April 16, 1998
  */
 
-#ifndef _H5Zpublic_H
-#define _H5Zpublic_H
+#ifndef H5Zpublic_H
+#define H5Zpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"

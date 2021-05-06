@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Monday, August  2, 1999
  *
  * Purpose:	The public header file for the mpio driver.
@@ -25,7 +25,7 @@
 #ifdef H5_HAVE_PARALLEL
 #define H5FD_MPIO (H5FD_mpio_init())
 #else
-#define H5FD_MPIO (-1)
+#define H5FD_MPIO (H5I_INVALID_HID)
 #endif /* H5_HAVE_PARALLEL */
 
 #ifdef H5_HAVE_PARALLEL

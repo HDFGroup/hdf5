@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5LDpublic_H
-#define _H5LDpublic_H
+#ifndef H5LDpublic_H
+#define H5LDpublic_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,4 +27,4 @@ H5_HLDLL herr_t H5LDget_dset_elmts(hid_t did, const hsize_t *prev_dims, const hs
 }
 #endif
 
-#endif /* _H5LDpublic_H */
+#endif /* H5LDpublic_H */

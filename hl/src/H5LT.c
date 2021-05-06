@@ -11,11 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "H5LTprivate.h"
 
 /* For Lex and Yacc */
@@ -1305,7 +1300,8 @@ out:
  */
 
 static herr_t
-find_dataset(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *op_data)
+find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5L_info2_t *linfo,
+             void *op_data)
 {
     /* Define a default zero value for return. This will cause the iterator to continue if
      * the dataset is not found yet.
@@ -1317,8 +1313,8 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *op_
         return ret;
 
     /* Shut the compiler up */
-    loc_id = loc_id;
-    linfo  = linfo;
+    (void)loc_id;
+    (void)linfo;
 
     /* Define a positive value for return value if the dataset was found. This will
      * cause the iterator to immediately return that positive value,
@@ -1379,7 +1375,7 @@ H5_GCC_DIAG_ON("cast-qual")
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: July 23, 2001
  *
@@ -1471,7 +1467,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: July 25, 2001
  *
@@ -1849,7 +1845,8 @@ H5LTset_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data)
+find_attr(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo,
+          void *op_data)
 {
     int ret = H5_ITER_CONT;
 
@@ -1858,8 +1855,8 @@ find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data
         return H5_ITER_CONT;
 
     /* Shut compiler up */
-    loc_id = loc_id;
-    ainfo  = ainfo;
+    (void)loc_id;
+    (void)ainfo;
 
     /* Define a positive value for return value if the attribute was found. This will
      * cause the iterator to immediately return that positive value,

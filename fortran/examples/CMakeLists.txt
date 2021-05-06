@@ -46,7 +46,7 @@ foreach (example ${examples})
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
             "${HDF5_SRC_DIR}"
-            "${HDF5_BINARY_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/static"
     )
@@ -61,7 +61,7 @@ foreach (example ${examples})
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/shared"
             "${HDF5_SRC_DIR}"
-            "${HDF5_BINARY_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/shared"
     )
@@ -87,7 +87,7 @@ foreach (example ${F2003_examples})
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
             "${HDF5_SRC_DIR}"
-            "${HDF5_BINARY_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/static"
     )
@@ -102,7 +102,7 @@ foreach (example ${F2003_examples})
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/shared"
             "${HDF5_SRC_DIR}"
-            "${HDF5_BINARY_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/shared"
     )
@@ -128,7 +128,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
             "${HDF5_SRC_DIR}"
-            "${HDF5_BINARY_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/static"
             "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
@@ -149,7 +149,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/shared"
             "${HDF5_SRC_DIR}"
-            "${HDF5_BINARY_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/shared"
             "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"

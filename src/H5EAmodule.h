@@ -18,8 +18,8 @@
  *		H5EA package.  Including this header means that the source file
  *		is part of the H5EA package.
  */
-#ifndef _H5EAmodule_H
-#define _H5EAmodule_H
+#ifndef H5EAmodule_H
+#define H5EAmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_EARRAY
 #define H5_MY_PKG_INIT NO
 
-#endif /* _H5EAmodule_H */
+#endif /* H5EAmodule_H */

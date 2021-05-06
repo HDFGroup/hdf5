@@ -15,15 +15,15 @@
  *
  * Created:		H5MPprivate.h
  *			May  2 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Private header for memory pool routines.
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5MPprivate_H
-#define _H5MPprivate_H
+#ifndef H5MPprivate_H
+#define H5MPprivate_H
 
 /* Include package's public header (not yet) */
 /* #include "H5MPpublic.h" */
@@ -54,4 +54,4 @@ H5_DLL void *       H5MP_malloc(H5MP_pool_t *mp, size_t request);
 H5_DLL void *       H5MP_free(H5MP_pool_t *mp, void *spc);
 H5_DLL herr_t       H5MP_close(H5MP_pool_t *mp);
 
-#endif /* _H5MPprivate_H */
+#endif /* H5MPprivate_H */

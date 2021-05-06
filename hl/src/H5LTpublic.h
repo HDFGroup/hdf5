@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5LTpublic_H
-#define _H5LTpublic_H
+#ifndef H5LTpublic_H
+#define H5LTpublic_H
 
 /* Flag definitions for H5LTopen_file_image() */
 #define H5LT_FILE_IMAGE_OPEN_RW   0x0001 /* Open image for read-write */

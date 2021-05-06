@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Library_H
-#define __H5Library_H
+#ifndef H5Library_H
+#define H5Library_H
 
 namespace H5 {
 
@@ -69,4 +69,4 @@ class H5_DLLCPP H5Library {
 }; // end of H5Library
 } // namespace H5
 
-#endif // __H5Library_H
+#endif // H5Library_H

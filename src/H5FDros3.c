@@ -398,7 +398,7 @@ H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa)
     herr_t          ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa);
+    H5TRACE2("e", "i*#", fapl_id, fa);
 
     HDassert(fa != NULL);
 
@@ -493,7 +493,7 @@ H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_out)
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa_out);
+    H5TRACE2("e", "i*#", fapl_id, fa_out);
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5Pget_fapl_ros3() called.\n");
@@ -1538,10 +1538,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
-               haddr_t addr, /* start offset   */
-               size_t  size, /* length of read */
-               void *  buf)    /* out            */
+H5FD_ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
+               size_t size, void *buf)
 {
     H5FD_ros3_t *file      = (H5FD_ros3_t *)_file;
     size_t       filesize  = 0;

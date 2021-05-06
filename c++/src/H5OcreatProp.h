@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5ObjCreatPropList_H
-#define __H5ObjCreatPropList_H
+#ifndef H5ObjCreatPropList_H
+#define H5ObjCreatPropList_H
 
 namespace H5 {
 
@@ -44,7 +44,7 @@ class H5_DLLCPP ObjCreatPropList : public PropList {
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const H5_OVERRIDE
     {
         return ("ObjCreatPropList");
     }
@@ -57,7 +57,7 @@ class H5_DLLCPP ObjCreatPropList : public PropList {
     ObjCreatPropList(const hid_t plist_id);
 
     // Noop destructor
-    virtual ~ObjCreatPropList();
+    virtual ~ObjCreatPropList() H5_OVERRIDE;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -75,4 +75,4 @@ class H5_DLLCPP ObjCreatPropList : public PropList {
 }; // end of ObjCreatPropList
 } // namespace H5
 
-#endif // __H5ObjCreatPropList_H
+#endif // H5ObjCreatPropList_H

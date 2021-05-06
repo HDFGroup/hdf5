@@ -14,8 +14,8 @@
 /*
  *  Header file for error values, etc.
  */
-#ifndef _H5Eprivate_H
-#define _H5Eprivate_H
+#ifndef H5Eprivate_H
+#define H5Eprivate_H
 
 #include "H5Epublic.h"
 
@@ -239,4 +239,4 @@ H5_DLL herr_t H5E_printf_stack(H5E_t *estack, const char *file, const char *func
 H5_DLL herr_t H5E_clear_stack(H5E_t *estack);
 H5_DLL herr_t H5E_dump_api_stack(hbool_t is_api);
 
-#endif /* _H5Eprivate_H */
+#endif /* H5Eprivate_H */

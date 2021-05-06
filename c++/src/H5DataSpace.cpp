@@ -11,11 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 #include <string>
 
 #include "H5Include.h"
@@ -73,8 +69,7 @@ DataSpace::getConstant()
 void
 DataSpace::deleteConstants()
 {
-    if (ALL_ != 0)
-        delete ALL_;
+    delete ALL_;
 }
 
 //--------------------------------------------------------------------------

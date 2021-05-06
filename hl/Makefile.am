@@ -47,11 +47,6 @@ endif
 if BUILD_HDF5_HL_CONDITIONAL
    SUBDIRS=src $(TEST_DIR) $(TOOLS_DIR) $(CXX_DIR) $(FORTRAN_DIR)
 
-# Test with just the native connector, with a single pass-through connector
-# and with a doubly-stacked pass-through.
-VOL_LIST = native "pass_through under_vol=0;under_info={}" \
-           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
-
 endif
 DIST_SUBDIRS=src test tools c++ fortran examples
 

@@ -2723,7 +2723,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_c
     herr_t          ret_value = SUCCEED; /*return value                   */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "Te*siix", pers, name, src_id, dst_id, func);
+    H5TRACE5("e", "Te*siiTC", pers, name, src_id, dst_id, func);
 
     /* Check args */
     if (H5T_PERS_HARD != pers && H5T_PERS_SOFT != pers)
@@ -2876,7 +2876,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "Te*siix", pers, name, src_id, dst_id, func);
+    H5TRACE5("e", "Te*siiTC", pers, name, src_id, dst_id, func);
 
     /* Check arguments */
     if (src_id > 0 && (NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE))))
@@ -2917,7 +2917,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
     H5T_conv_t  ret_value; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE3("x", "ii**x", src_id, dst_id, pcdata);
+    H5TRACE3("TC", "ii**!", src_id, dst_id, pcdata);
 
     /* Check args */
     if (NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) ||

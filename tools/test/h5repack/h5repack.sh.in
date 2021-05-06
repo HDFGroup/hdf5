@@ -271,6 +271,12 @@ SKIP() {
     echo " -SKIP-"
 }
 
+##############################################################################
+##############################################################################
+###           T H E   T E S T S  M A C R O S                               ###
+##############################################################################
+##############################################################################
+
 # Call the h5diff tool
 #
 DIFFTEST()
@@ -620,6 +626,7 @@ VERIFY_INVALIDBOUNDS()
 
 # -----------------------------------------------------------------------------
 # Expect h5diff to fail
+# Use only by VERIFY_EXTERNAL_CONSOLIDATION
 # -----------------------------------------------------------------------------
 DIFFFAIL()
 {
@@ -629,7 +636,7 @@ DIFFFAIL()
         $RUNSERIAL $H5DIFF_BIN -q  "$@"
     )
     RET=$?
-    if [ $RET == 0 ] ; then
+    if [ $RET -eq 0 ] ; then
          echo "*FAILED*"
          nerrors="`expr $nerrors + 1`"
     else
@@ -1356,44 +1363,28 @@ TOOLTEST_STAT SPT $arg
 # layout options (these files have no filters)
 #########################################################
 VERIFY_LAYOUT_DSET dset2_chunk_20x10 h5repack_layout.h5 dset2 CHUNKED --layout dset2:CHUNK=20x10
-
 VERIFY_LAYOUT_ALL chunk_20x10 h5repack_layout.h5 CHUNKED -l CHUNK=20x10
-
 VERIFY_LAYOUT_DSET dset2_conti h5repack_layout.h5 dset2 CONTIGUOUS -l dset2:CONTI
-
 VERIFY_LAYOUT_ALL conti h5repack_layout.h5 CONTIGUOUS -l CONTI
-
 VERIFY_LAYOUT_DSET dset2_compa h5repack_layout.h5 dset2 COMPACT -l dset2:COMPA
-
 VERIFY_LAYOUT_ALL compa h5repack_layout.h5 COMPACT -l COMPA
-
 TOOLTESTM dset2_chunk_20x10-errstk h5repack_layout.h5 --layout=dset2:CHUNK=20x10x5 --enable-error-stack
 
 ################################################################
 # layout conversions (file has no filters)
 ###############################################################
-
 VERIFY_LAYOUT_DSET dset_compa_conti h5repack_layout.h5 dset_compact CONTIGUOUS -l dset_compact:CONTI
-
 VERIFY_LAYOUT_DSET dset_compa_chunk h5repack_layout.h5 dset_compact CHUNKED -l dset_compact:CHUNK=2x5
-
 VERIFY_LAYOUT_DSET dset_compa_compa h5repack_layout.h5 dset_compact COMPACT -l dset_compact:COMPA
-
 VERIFY_LAYOUT_DSET dset_conti_compa h5repack_layout.h5 dset_contiguous COMPACT -l dset_contiguous:COMPA
-
 VERIFY_LAYOUT_DSET dset_conti_chunk h5repack_layout.h5 dset_contiguous CHUNKED -l dset_contiguous:CHUNK=3x6
-
 VERIFY_LAYOUT_DSET dset_conti_conti h5repack_layout.h5 dset_contiguous CONTIGUOUS -l dset_contiguous:CONTI
-
 VERIFY_LAYOUT_DSET chunk_compa h5repack_layout.h5 dset_chunk COMPACT -l dset_chunk:COMPA
-
 VERIFY_LAYOUT_DSET chunk_conti h5repack_layout.h5 dset_chunk CONTIGUOUS -l dset_chunk:CONTI
-
 VERIFY_LAYOUT_DSET chunk_18x13 h5repack_layout.h5 dset_chunk CHUNKED -l dset_chunk:CHUNK=18x13
 
 # test convert small size dataset ( < 1k) to compact layout without -m
 VERIFY_LAYOUT_DSET contig_small_compa h5repack_layout2.h5 contig_small COMPACT -l contig_small:COMPA
-
 VERIFY_LAYOUT_DSET contig_small_fixed_compa h5repack_layout2.h5 chunked_small_fixed COMPACT -l chunked_small_fixed:COMPA
 
 #---------------------------------------------------------------------------
@@ -1421,6 +1412,7 @@ VERIFY_LAYOUT_DSET chunk2compa h5repack_layout3.h5 chunk_unlimit1 CHUNK -l chunk
 # chunk dim is bigger than dataset dim. ( dset size < 64k )
 VERIFY_LAYOUT_DSET error1 h5repack_layout3.h5 chunk_unlimit1 H5S_UNLIMITED -f chunk_unlimit1:NONE
 # chunk dim is bigger than dataset dim. ( dset size > 64k )
+
 VERIFY_LAYOUT_DSET error2 h5repack_layout3.h5 chunk_unlimit2 H5S_UNLIMITED -f chunk_unlimit2:NONE
 
 # chunk dims are smaller than dataset dims. ( dset size < 64k )
@@ -1435,7 +1427,6 @@ TOOLTEST error4 h5repack_layout3.h5 -f NONE
 # (dset size < 64K) and with unlimited max dims on a condition as follow.
 # (HDFFV-8214)
 #--------------------------------------------------------------------------
-
 # chunk dim is bigger than dataset dim. should succeed.
 VERIFY_LAYOUT_DSET ckdim_biger h5repack_layout3.h5 chunk_unlimit2 CONTI -l chunk_unlimit2:CONTI
 # chunk dim is smaller than dataset dim. should succeed.
@@ -1466,7 +1457,6 @@ else
 fi
 
 # several global filters
-
 arg="h5repack_layout.h5 --filter GZIP=1 --filter SHUF"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
@@ -1562,9 +1552,15 @@ else
  VERIFY_LAYOUT_VDS vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
 fi
 
-#########################################################
-# Testing version bounds
-#########################################################
+################################################################
+# reference new api conversions
+###############################################################
+#TOOLTEST_DUMP attrregion tattrreg.h5
+#TOOLTEST_DUMP dataregion tdatareg.h5
+
+##############################################################################
+###    V E R S I O N  B O U N D S  T E S T S
+##############################################################################
 # -j 0 -k 2, superblock will be 0
 VERIFY_SUPERBLOCK 0 2 0 h5repack_layout.h5 -j 0 -k 2 h5repack_layout.h5
 # -j 1 -k 2, superblock will be 2
@@ -1574,9 +1570,9 @@ VERIFY_SUPERBLOCK 2 2 3 h5repack_layout.h5 -j 2 -k 2 h5repack_layout.h5
 # -j 0 -k 1, file cannot be opened
 VERIFY_INVALIDBOUNDS 0 1 bounds_latest_latest.h5
 
-########################################
-# Testing external storage
-########################################
+##############################################################################
+###    E X T E R N A L  S T O R A G E  T E S T S
+##############################################################################
 VERIFY_EXTERNAL_CONSOLIDATION -l CONTI
 
 # Clean up temporary files/directories

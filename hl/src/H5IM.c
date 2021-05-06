@@ -13,8 +13,6 @@
 
 #include "H5IMprivate.h"
 #include "H5LTprivate.h"
-#include <string.h>
-#include <stdlib.h>
 
 /*-------------------------------------------------------------------------
  * Function: H5IMmake_image_8bit
@@ -23,7 +21,7 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: June 13, 2001
  *
@@ -75,7 +73,7 @@ H5IMmake_image_8bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t 
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: June 13, 2001
  *
@@ -151,7 +149,7 @@ H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
  *
  * Return:
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: May 28, 2001
  *
@@ -162,7 +160,8 @@ H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_palette(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data)
+find_palette(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo,
+             H5_ATTR_UNUSED void *op_data)
 {
     int ret = H5_ITER_CONT;
 
@@ -171,9 +170,9 @@ find_palette(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_d
         return -1;
 
     /* Shut compiler up */
-    loc_id  = loc_id;
-    ainfo   = ainfo;
-    op_data = op_data;
+    (void)loc_id;
+    (void)ainfo;
+    (void)op_data;
 
     /* Define a positive value for return value if the attribute was found. This will
      * cause the iterator to immediately return that positive value,
@@ -192,7 +191,7 @@ find_palette(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_d
  *
  * Return: Success: 1, Failure: 0
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: May 11, 2001
  *
@@ -218,7 +217,7 @@ H5IM_find_palette(hid_t loc_id)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: July 25, 2001
  *
@@ -386,7 +385,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: June 13, 2001
  *
@@ -433,7 +432,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: May 01, 2001
  *
@@ -485,7 +484,7 @@ H5IMmake_palette(hid_t loc_id, const char *pal_name, const hsize_t *pal_dims, co
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: May 01, 2001
  *
@@ -655,7 +654,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: September 10, 2001
  *
@@ -752,7 +751,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: July 22, 2001
  *
@@ -837,7 +836,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: July 22, 2001
  *
@@ -946,7 +945,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: August 30, 2001
  *
@@ -1048,7 +1047,7 @@ out:
  *
  * Return: true, false, fail
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: August 30, 2001
  *
@@ -1148,7 +1147,7 @@ out:
  *
  * Return: true, false, fail
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: August 30, 2001
  *

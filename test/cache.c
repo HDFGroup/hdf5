@@ -42024,8 +42024,6 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    return;
-
 } /* check_stats__smoke_check_1() */
 
 #endif /* H5C_COLLECT_CACHE_STATS */
@@ -42415,7 +42413,7 @@ takedown_cache(H5F_t *file_ptr, hbool_t dump_stats, hbool_t dump_detailed_stats)
         }
 
         /* Pop API context */
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
         if ((!try_core_file_driver) || (core_file_driver_failed)) {
 
@@ -42432,8 +42430,6 @@ takedown_cache(H5F_t *file_ptr, hbool_t dump_stats, hbool_t dump_detailed_stats)
             }
         }
     }
-
-    return;
 
 } /* takedown_cache() */
 

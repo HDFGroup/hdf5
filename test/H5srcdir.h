@@ -17,8 +17,8 @@
  *
  * Purpose:     srcdir querying support.
  */
-#ifndef _H5SRCDIR_H
-#define _H5SRCDIR_H
+#ifndef H5SRCDIR_H
+#define H5SRCDIR_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,4 +33,4 @@ H5TEST_DLL const char *H5_get_srcdir_filename(const char *filename);
 }
 #endif
 
-#endif /* _H5SRCDIR_H */
+#endif /* H5SRCDIR_H */

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		Wednesday, April 11, 2007
  *
  * Purpose:	This file contains declarations which are visible only within
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5E package!"
 #endif
 
-#ifndef _H5Epkg_H
-#define _H5Epkg_H
+#ifndef H5Epkg_H
+#define H5Epkg_H
 
 /* Get package's private header */
 #include "H5Eprivate.h"
@@ -140,4 +140,4 @@ H5_DLL herr_t  H5E__get_auto(const H5E_t *estack, H5E_auto_op_t *op, void **clie
 H5_DLL herr_t  H5E__set_auto(H5E_t *estack, const H5E_auto_op_t *op, void *client_data);
 H5_DLL herr_t  H5E__pop(H5E_t *err_stack, size_t count);
 
-#endif /* _H5Epkg_H */
+#endif /* H5Epkg_H */

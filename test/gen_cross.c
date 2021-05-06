@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Thursday, March 23, 2006
  *
  *  This program writes floating-point data to the HDF5 file.  It generates
@@ -928,7 +928,7 @@ create_deflate_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
 #else  /* H5_HAVE_FILTER_DEFLATE */
     const char *not_supported = "Deflate filter is not enabled. Can't create the dataset.";
 
-    puts(not_supported);
+    HDputs(not_supported);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     return 0;

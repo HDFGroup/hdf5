@@ -14,8 +14,8 @@
 /*
  * This file contains public declarations for the H5S module.
  */
-#ifndef _H5Spublic_H
-#define _H5Spublic_H
+#ifndef H5Spublic_H
+#define H5Spublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -187,4 +187,4 @@ H5_DLL herr_t H5Sencode1(hid_t obj_id, void *buf, size_t *nalloc);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Spublic_H */
+#endif /* H5Spublic_H */

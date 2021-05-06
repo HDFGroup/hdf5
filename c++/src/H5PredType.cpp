@@ -27,6 +27,7 @@
 #include "H5DataType.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
+#include "H5private.h"
 
 namespace H5 {
 
@@ -89,7 +90,7 @@ PredType::operator=(const PredType &rhs)
 // These dummy functions do not inherit from DataType - they'll
 // throw an DataTypeIException if invoked.
 void
-PredType::commit(H5Location &loc, const char *name)
+PredType::commit(H5_ATTR_UNUSED H5Location &loc, H5_ATTR_UNUSED const char *name)
 {
     throw DataTypeIException("PredType::commit",
                              "Error: Attempted to commit a predefined datatype.  Invalid operation!");

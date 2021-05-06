@@ -222,7 +222,7 @@ H5VL__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the VL IDs */
+    /* Initialize the ID group for the VL IDs */
     if (H5I_register_type(H5I_VOL_CLS) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize H5VL interface")
 
@@ -710,7 +710,7 @@ H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t app_
 
     /* Register VOL object as _object_ type, for future object API calls */
     if ((ret_value = H5I_register(type, vol_obj, app_ref)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize handle")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register handle")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2022,7 +2022,7 @@ H5VL_reset_lib_state(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Pop the API context off the stack */
-    if (H5CX_pop() < 0)
+    if (H5CX_pop(FALSE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't pop API context")
 
 done:

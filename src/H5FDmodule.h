@@ -11,15 +11,15 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		Saturday, September 12, 2015
  *
  * Purpose:	This file contains declarations which define macros for the
  *		H5FD package.  Including this header means that the source file
  *		is part of the H5FD package.
  */
-#ifndef _H5FDmodule_H
-#define _H5FDmodule_H
+#ifndef H5FDmodule_H
+#define H5FDmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -29,4 +29,4 @@
 #define H5_MY_PKG_ERR  H5E_VFL
 #define H5_MY_PKG_INIT YES
 
-#endif /* _H5FDmodule_H */
+#endif /* H5FDmodule_H */

@@ -288,7 +288,7 @@ test_page_buffer_access(void)
 
         /* Pop API context */
         if (api_ctx_pushed) {
-            ret = H5CX_pop();
+            ret = H5CX_pop(FALSE);
             VRFY((ret == 0), "H5CX_pop()");
             api_ctx_pushed = FALSE;
         }
@@ -422,7 +422,7 @@ test_page_buffer_access(void)
 
     /* Pop API context */
     if (api_ctx_pushed) {
-        ret = H5CX_pop();
+        ret = H5CX_pop(FALSE);
         VRFY((ret == 0), "H5CX_pop()");
         api_ctx_pushed = FALSE;
     }
@@ -579,7 +579,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
 
     /* Pop API context */
     if (api_ctx_pushed) {
-        ret = H5CX_pop();
+        ret = H5CX_pop(FALSE);
         VRFY((ret == 0), "H5CX_pop()");
         api_ctx_pushed = FALSE;
     }
@@ -743,7 +743,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
 
     /* Pop API context */
     if (api_ctx_pushed) {
-        ret = H5CX_pop();
+        ret = H5CX_pop(FALSE);
         VRFY((ret == 0), "H5CX_pop()");
         api_ctx_pushed = FALSE;
     }

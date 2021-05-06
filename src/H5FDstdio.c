@@ -1201,7 +1201,7 @@ H5FD_stdio_unlock(H5FD_t *_file)
     return 0;
 } /* end H5FD_stdio_unlock() */
 
-#ifdef _H5private_H
+#ifdef H5private_H
 /*
  * This is not related to the functionality of the driver code.
  * It is added here to trigger warning if HDF5 private definitions are included
