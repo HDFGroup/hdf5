@@ -246,9 +246,9 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 {
     H5VL_object_t *      vol_obj      = NULL;              /* Object of loc_id */
     H5I_type_t           vol_obj_type = H5I_BADID;         /* Object type of loc_id */
+    H5VL_object_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t    loc_params;                       /* Location parameters */
     H5O_token_t          obj_token = {0};                  /* Object token */
-    H5O_type_t           obj_type;                         /* Object type */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference buffer */
     H5G_obj_t            ret_value;                        /* Return value */
 
@@ -278,13 +278,16 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
     loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type                    = vol_obj_type;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_OBJECT_GET_TYPE;
+    vol_cb_args.args.get_type.obj_type = H5O_TYPE_UNKNOWN;
+
     /* Retrieve object's type */
-    if (H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                        &obj_type) < 0)
+    if (H5VL_object_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5G_UNKNOWN, "can't retrieve object type")
 
     /* Set return value */
-    ret_value = H5G_map_obj_type(obj_type);
+    ret_value = H5G_map_obj_type(vol_cb_args.args.get_type.obj_type);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -493,6 +496,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H5O_type_t *obj
 {
     H5VL_object_t *      vol_obj      = NULL;                    /* Object of loc_id */
     H5I_type_t           vol_obj_type = H5I_BADID;               /* Object type of loc_id */
+    H5VL_object_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t    loc_params;                             /* Location parameters */
     H5O_token_t          obj_token = {0};                        /* Object token */
     const unsigned char *buf       = (const unsigned char *)ref; /* Reference pointer */
@@ -524,10 +528,17 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H5O_type_t *obj
     loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type                    = vol_obj_type;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_OBJECT_GET_TYPE;
+    vol_cb_args.args.get_type.obj_type = H5O_TYPE_UNKNOWN;
+
     /* Retrieve object's type */
-    if (H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                        obj_type) < 0)
+    if (H5VL_object_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve object type")
+
+    /* Set return value */
+    if(obj_type)
+        *obj_type = vol_cb_args.args.get_type.obj_type;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -709,6 +720,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name /*out*/, 
 {
     H5VL_object_t *      vol_obj      = NULL;                    /* Object of loc_id */
     H5I_type_t           vol_obj_type = H5I_BADID;               /* Object type of loc_id */
+    H5VL_object_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t    loc_params;                             /* Location parameters */
     H5O_token_t          obj_token = {0};                        /* Object token */
     const unsigned char *buf       = (const unsigned char *)ref; /* Reference pointer */
@@ -740,10 +752,18 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name /*out*/, 
     loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type                    = vol_obj_type;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_OBJECT_GET_NAME;
+    vol_cb_args.args.get_name.buf_size = size;
+    vol_cb_args.args.get_name.buf      = name;
+    vol_cb_args.args.get_name.name_len = 0;
+
     /* Retrieve object's name */
-    if (H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                        &ret_value, name, size) < 0)
+    if (H5VL_object_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "can't retrieve object name")
+
+    /* Set return value */
+    ret_value = (ssize_t)vol_cb_args.args.get_name.name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)

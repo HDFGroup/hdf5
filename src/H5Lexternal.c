@@ -174,29 +174,29 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
     /* Make callback if it exists */
     if (cb_info.func) {
         const char *parent_file_name; /* Parent file name */
-        ssize_t     group_name_len;   /* Length of parent group name */
+        size_t     group_name_len = 0;   /* Length of parent group name */
 
         /* Get parent file name */
         parent_file_name = H5F_OPEN_NAME(loc.oloc->file);
 
         /* Query length of parent group name */
-        if ((group_name_len = H5G_get_name(&loc, NULL, (size_t)0, NULL)) < 0)
+        if (H5G_get_name(&loc, NULL, (size_t)0, &group_name_len, NULL) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "unable to retrieve length of group name")
 
         /* Account for null terminator */
         group_name_len++;
 
         /* Check if we need to allocate larger buffer */
-        if ((size_t)group_name_len > sizeof(local_group_name)) {
-            if (NULL == (parent_group_name = (char *)H5MM_malloc((size_t)group_name_len)))
+        if (group_name_len > sizeof(local_group_name)) {
+            if (NULL == (parent_group_name = (char *)H5MM_malloc(group_name_len)))
                 HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, H5I_INVALID_HID,
-                            "can't allocate buffer to hold group name, group_name_len = %zd", group_name_len)
+                            "can't allocate buffer to hold group name, group_name_len = %zu", group_name_len)
         } /* end if */
         else
             parent_group_name = local_group_name;
 
         /* Get parent group name */
-        if (H5G_get_name(&loc, parent_group_name, (size_t)group_name_len, NULL) < 0)
+        if (H5G_get_name(&loc, parent_group_name, group_name_len, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "unable to retrieve group name")
 
         /* Make callback */

@@ -195,9 +195,7 @@ H5_DLL herr_t H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *loc_params
                               void *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name,
                               hid_t connector_id, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                             H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-H5_DLL herr_t H5VLobject_get_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                                    H5VL_object_get_t get_type, hid_t dxpl_id, void **req, ...);
+                             H5VL_object_get_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                                   H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req,
                                   va_list arguments);

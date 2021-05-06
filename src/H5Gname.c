@@ -468,11 +468,11 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
-H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, hbool_t *cached)
+herr_t
+H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, size_t *name_len,
+    hbool_t *cached)
 {
-    ssize_t len       = 0;  /* Length of object's name */
-    ssize_t ret_value = -1; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -481,13 +481,19 @@ H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, hbool_t *cac
 
     /* If the user path is available and it's not "hidden", use it */
     if (loc->path->user_path_r != NULL && loc->path->obj_hidden == 0) {
+        size_t len;  /* Length of object's name */
+
         len = H5RS_len(loc->path->user_path_r);
 
         if (name) {
-            HDstrncpy(name, H5RS_get_str(loc->path->user_path_r), MIN((size_t)(len + 1), size));
-            if ((size_t)len >= size)
+            HDstrncpy(name, H5RS_get_str(loc->path->user_path_r), MIN((len + 1), size));
+            if (len >= size)
                 name[size - 1] = '\0';
         } /* end if */
+
+        /* Set name length, if requested */
+        if(name_len)
+            *name_len = len;
 
         /* Indicate that the name is cached, if requested */
         /* (Currently only used for testing - QAK, 2010/07/26) */
@@ -496,7 +502,7 @@ H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, hbool_t *cac
     } /* end if */
     else if (!loc->path->obj_hidden) {
         /* Search for name of object */
-        if ((len = H5G_get_name_by_addr(loc->oloc->file, loc->oloc, name, size)) < 0)
+        if (H5G_get_name_by_addr(loc->oloc->file, loc->oloc, name, size, name_len) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
 
         /* Indicate that the name is _not_ cached, if requested */
@@ -504,9 +510,6 @@ H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, hbool_t *cac
         if (cached)
             *cached = FALSE;
     } /* end else */
-
-    /* Set return value */
-    ret_value = len;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1152,28 +1155,29 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
-H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size)
+herr_t
+H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, size_t *name_len)
 {
     H5G_gnba_iter_t udata;             /* User data for iteration  */
+    size_t          len;               /* Length of path name */
     H5G_loc_t       root_loc;          /* Root group's location    */
     hbool_t         found_obj = FALSE; /* If we found the object   */
     herr_t          status;            /* Status from iteration    */
-    ssize_t         ret_value = -1;    /* Return value             */
+    herr_t          ret_value = SUCCEED;    /* Return value             */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
 
-    FUNC_ENTER_NOAPI((-1))
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Construct a group location for root group of the file */
     if (H5G_root_loc(f, &root_loc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, (-1), "can't get root group's location")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get root group's location")
 
     /* Check for root group being the object looked for */
     if (root_loc.oloc->addr == loc->addr && root_loc.oloc->file == loc->file) {
         if (NULL == (udata.path = H5MM_strdup("")))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, (-1), "can't duplicate path string")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "can't duplicate path string")
         found_obj = TRUE;
     } /* end if */
     else {
@@ -1184,7 +1188,7 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size)
         /* Visit all the links in the file */
         if ((status = H5G_visit(&root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G__get_name_by_addr_cb,
                                 &udata)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_BADITER, (-1), "group traversal failed while looking for object name")
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group traversal failed while looking for object name")
         else if (status > 0)
             found_obj = TRUE;
     } /* end else */
@@ -1192,7 +1196,7 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size)
     /* Check for finding the object */
     if (found_obj) {
         /* Set the length of the full path */
-        ret_value = (ssize_t)(HDstrlen(udata.path) + 1); /* Length of path + 1 (for "/") */
+        len = HDstrlen(udata.path) + 1; /* Length of path + 1 (for "/") */
 
         /* If there's a buffer provided, copy into it, up to the limit of its size */
         if (name) {
@@ -1202,12 +1206,16 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size)
             /* Append the rest of the path */
             /* (less one character, for the initial path separator) */
             HDstrncat(name, udata.path, (size - 2));
-            if ((size_t)ret_value >= size)
+            if (len >= size)
                 name[size - 1] = '\0';
         } /* end if */
     }     /* end if */
     else
-        ret_value = 0;
+        len = 0;
+
+    /* Set path name length, if given */
+    if(name_len)
+        *name_len = len;
 
 done:
     /* Release resources */

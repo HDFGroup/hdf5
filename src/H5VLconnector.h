@@ -671,6 +671,37 @@ typedef enum H5VL_object_get_t {
     H5VL_OBJECT_GET_INFO  /* H5Oget_info(_by_idx|name)         */
 } H5VL_object_get_t;
 
+/* Parameters for object 'get' operations */
+typedef struct H5VL_object_get_args_t {
+    H5VL_object_get_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_OBJECT_GET_FILE */
+        struct {
+            void *file;        /* File object */
+        } get_file;
+
+        /* H5VL_OBJECT_GET_NAME */
+        struct {
+            size_t buf_size;    /* Size of name buffer (IN) */
+            char *buf;          /* Buffer for name (OUT) */
+            size_t name_len;    /* Actual length of name (OUT) */
+        } get_name;
+
+        /* H5VL_OBJECT_GET_TYPE */
+        struct {
+            H5O_type_t obj_type;        /* Type of object (OUT) */
+        } get_type;
+
+        /* H5VL_OBJECT_GET_INFO */
+        struct {
+            H5O_info2_t *oinfo;         /* Pointer to object info (OUT) */
+            unsigned     fields;        /* Flags for fields to retrieve */
+        } get_info;
+    } args;
+} H5VL_object_get_args_t;
+
 /* Values for object 'specific' operation */
 typedef enum H5VL_object_specific_t {
     H5VL_OBJECT_CHANGE_REF_COUNT, /* H5Oincr/decr_refcount             */
@@ -840,8 +871,8 @@ typedef struct H5VL_object_class_t {
     herr_t (*copy)(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void *dst_obj,
                    const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id,
                    hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_t get_type, hid_t dxpl_id,
-                  void **req, va_list arguments);
+    herr_t (*get)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_args_t *args, hid_t dxpl_id,
+                  void **req);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_optional_t opt_type,
