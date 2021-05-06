@@ -305,8 +305,8 @@ H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't get encode size")
 
                 /* Size on disk, memory size is different */
-                dt->shared->size = MAX(H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE + cont_info.blob_id_size,
-                                       ref_encode_size);
+                dt->shared->size =
+                    MAX(sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE + cont_info.blob_id_size, ref_encode_size);
                 dt->shared->u.atomic.prec = 8 * dt->shared->size;
 
                 /* Set up the function pointers to access the information on
@@ -732,7 +732,7 @@ H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t
     }
     else {
         /* Skip the size / header */
-        p = (const uint8_t *)src_buf + H5R_ENCODE_HEADER_SIZE + H5_SIZEOF_UINT32_T;
+        p = (const uint8_t *)src_buf + H5R_ENCODE_HEADER_SIZE + sizeof(uint32_t);
 
         /* Check if blob ID is "nil" */
         if (H5VL_blob_specific(src_file, (void *)p, H5VL_BLOB_ISNULL, isnull) < 0)
@@ -768,7 +768,7 @@ H5T__ref_disk_setnull(H5VL_object_t *dst_file, void *dst_buf, void *bg_buf)
     /* TODO Should get rid of bg stuff */
     if (p_bg) {
         /* Skip the size / header */
-        p_bg += (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE);
+        p_bg += (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE);
 
         /* Remove blob for old data */
         if (H5VL_blob_specific(dst_file, (void *)p_bg, H5VL_BLOB_DELETE) < 0)
@@ -872,8 +872,8 @@ H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_
     blob_size -= H5R_ENCODE_HEADER_SIZE;
 
     /* Skip the size */
-    p += H5_SIZEOF_UINT32_T;
-    HDassert(src_size > (H5R_ENCODE_HEADER_SIZE + H5_SIZEOF_UINT32_T));
+    p += sizeof(uint32_t);
+    HDassert(src_size > (H5R_ENCODE_HEADER_SIZE + sizeof(uint32_t)));
 
     /* Retrieve blob */
     if (H5VL_blob_get(src_file, p, q, blob_size, NULL) < 0)
@@ -916,9 +916,9 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
         size_t p_buf_size_left = dst_size;
 
         /* Skip the size / header */
-        p_bg += (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE);
-        HDassert(p_buf_size_left > (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE));
-        p_buf_size_left -= (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE);
+        p_bg += (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE);
+        HDassert(p_buf_size_left > (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE));
+        p_buf_size_left -= (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE);
 
         /* Remove blob for old data */
         if (H5VL_blob_specific(dst_file, (void *)p_bg, H5VL_BLOB_DELETE) < 0)
@@ -930,12 +930,12 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     p += H5R_ENCODE_HEADER_SIZE;
     q += H5R_ENCODE_HEADER_SIZE;
     src_size -= H5R_ENCODE_HEADER_SIZE;
-    buf_size_left -= H5_SIZEOF_UINT32_T;
+    buf_size_left -= sizeof(uint32_t);
 
     /* Set the size */
     UINT32ENCODE(q, src_size);
-    HDassert(buf_size_left > H5_SIZEOF_UINT32_T);
-    buf_size_left -= H5_SIZEOF_UINT32_T;
+    HDassert(buf_size_left > sizeof(uint32_t));
+    buf_size_left -= sizeof(uint32_t);
 
     /* Store blob */
     if (H5VL_blob_put(dst_file, p, src_size, q, NULL) < 0)

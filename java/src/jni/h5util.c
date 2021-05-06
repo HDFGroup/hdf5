@@ -237,7 +237,7 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                     HDmemcpy(cptr, &tmp_double, sizeof(double));
                     break;
                 }
-#if H5_SIZEOF_LONG_DOUBLE != 0 && H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
                 case sizeof(long double): {
                     long double tmp_ldouble = 0.0;
 
@@ -816,7 +816,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
                     break;
                 }
-#if H5_SIZEOF_LONG_DOUBLE != 0 && H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
                 case sizeof(long double): {
                     long double tmp_ldouble = 0.0;
 

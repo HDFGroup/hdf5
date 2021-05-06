@@ -319,11 +319,9 @@ h5ltset_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
         else if ((size_t)*sizeof_val == sizeof(double))
             ret = H5LT_set_attribute_numerical(c_loc_id, c_name, c_attrname, c_size, H5T_NATIVE_DOUBLE,
                                                (const double *)buf);
-#if H5_SIZEOF_LONG_DOUBLE != 0
         else if ((size_t)*sizeof_val == sizeof(long double))
             ret = H5LT_set_attribute_numerical(c_loc_id, c_name, c_attrname, c_size, H5T_NATIVE_LDOUBLE,
                                                (const long double *)buf);
-#endif
         else
             goto done;
     }
@@ -413,10 +411,8 @@ h5ltget_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
             ret = H5LTget_attribute(c_loc_id, c_name, c_attrname, H5T_NATIVE_FLOAT, buf);
         else if ((size_t)*sizeof_val == sizeof(double))
             ret = H5LTget_attribute(c_loc_id, c_name, c_attrname, H5T_NATIVE_DOUBLE, buf);
-#if H5_SIZEOF_LONG_DOUBLE != 0
         else if ((size_t)*sizeof_val == sizeof(long double))
             ret = H5LTget_attribute(c_loc_id, c_name, c_attrname, H5T_NATIVE_LDOUBLE, buf);
-#endif
         else
             goto done;
     }

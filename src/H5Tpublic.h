@@ -850,13 +850,11 @@ H5_DLLVAR hid_t H5T_VAX_F64_g;
  * C-style \Code{double}
  */
 #define H5T_NATIVE_DOUBLE (H5OPEN H5T_NATIVE_DOUBLE_g)
-#if H5_SIZEOF_LONG_DOUBLE != 0
 /**
  * \ingroup PDTNAT
  * C-style \Code{long double}
  */
 #define H5T_NATIVE_LDOUBLE (H5OPEN H5T_NATIVE_LDOUBLE_g)
-#endif
 /**
  * \ingroup PDTNAT
  * HDF5 8-bit bitfield based on native types
@@ -919,9 +917,7 @@ H5_DLLVAR hid_t H5T_NATIVE_LLONG_g;
 H5_DLLVAR hid_t H5T_NATIVE_ULLONG_g;
 H5_DLLVAR hid_t H5T_NATIVE_FLOAT_g;
 H5_DLLVAR hid_t H5T_NATIVE_DOUBLE_g;
-#if H5_SIZEOF_LONG_DOUBLE != 0
 H5_DLLVAR hid_t H5T_NATIVE_LDOUBLE_g;
-#endif
 H5_DLLVAR hid_t H5T_NATIVE_B8_g;
 H5_DLLVAR hid_t H5T_NATIVE_B16_g;
 H5_DLLVAR hid_t H5T_NATIVE_B32_g;

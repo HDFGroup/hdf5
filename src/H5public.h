@@ -254,52 +254,6 @@ typedef long long ssize_t;
 #endif
 #endif
 
-/* int64_t type is used for creation order field for links.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_INT64_T >= 8
-#elif H5_SIZEOF_INT >= 8
-typedef int           int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 8
-typedef long               int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef long long          int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_LONG_LONG
-#else
-#error "nothing appropriate for int64_t"
-#endif
-
-/* uint64_t type is used for fields for H5O_info_t.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_UINT64_T >= 8
-#ifndef UINT64_MAX
-#define UINT64_MAX ((uint64_t)-1)
-#endif
-#elif H5_SIZEOF_INT >= 8
-typedef unsigned      uint64_t;
-#define UINT64_MAX UINT_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 8
-typedef unsigned long      uint64_t;
-#define UINT64_MAX ULONG_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef unsigned long long uint64_t;
-#define UINT64_MAX ULLONG_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG_LONG
-#else
-#error "nothing appropriate for uint64_t"
-#endif
-
 /*
  * The sizes of file objects have their own types defined here, use a minimum
  * 64-bit type.
@@ -367,27 +321,6 @@ typedef unsigned long long haddr_t;
 #define H5_PRINTF_HADDR_FMT "%" PRIuHADDR
 #define HADDR_MAX           (HADDR_UNDEF - 1)
 
-/* uint32_t type is used for creation order field for messages.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_UINT32_T >= 4
-#elif H5_SIZEOF_SHORT >= 4
-typedef short         uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_SHORT
-#elif H5_SIZEOF_INT >= 4
-typedef unsigned int       uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 4
-typedef unsigned long      uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_LONG
-#else
-#error "nothing appropriate for uint32_t"
-#endif
-
-//! <!-- [H5_iter_order_t_snip] -->
 /**
  * Common iteration orders
  */
