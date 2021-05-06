@@ -15,7 +15,7 @@
  *
  * Created:             H5Ofsinfo.c
  *                      Feb 2009
- *            Vailin Choi
+ *                      Vailin Choi
  *
  * Purpose:             File space info message.
  *
@@ -130,7 +130,6 @@ H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
 
         /* Map version 0 (deprecated) to version 1 message */
         switch (strategy) {
-
             case H5F_FILE_SPACE_ALL_PERSIST:
                 fsinfo->strategy  = H5F_FSPACE_STRATEGY_FSM_AGGR;
                 fsinfo->persist   = TRUE;
@@ -177,10 +176,9 @@ H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
                         &(fsinfo->eoa_pre_fsm_fsalloc)); /* EOA before free-space header and section info */
 
         /* Decode addresses of free space managers, if persisting */
-        if (fsinfo->persist) {
+        if (fsinfo->persist)
             for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
                 H5F_addr_decode(f, &p, &(fsinfo->fs_addr[ptype - 1]));
-        } /* end if */
 
         fsinfo->mapped = FALSE;
     }
@@ -229,11 +227,10 @@ H5O_fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     H5F_addr_encode(f, &p, fsinfo->eoa_pre_fsm_fsalloc); /* EOA before free-space header and section info */
 
     /* Store addresses of free-space managers, if persisting */
-    if (fsinfo->persist) {
+    if (fsinfo->persist)
         /* Addresses of free-space managers */
         for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
             H5F_addr_encode(f, &p, fsinfo->fs_addr[ptype - 1]);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_fsinfo_encode() */
@@ -334,6 +331,79 @@ H5O__fsinfo_free(void *mesg)
 } /* end H5O__fsinfo_free() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O__fsinfo_debug
+ *
+ * Purpose:     Prints debugging info for a message.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__fsinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int indent, int fwidth)
+{
+    const H5O_fsinfo_t *fsinfo = (const H5O_fsinfo_t *)_mesg;
+    H5F_mem_page_t      ptype; /* Free-space types for iteration */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* check args */
+    HDassert(f);
+    HDassert(fsinfo);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+
+    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "File space strategy:");
+    switch (fsinfo->strategy) {
+        case H5F_FSPACE_STRATEGY_FSM_AGGR:
+            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_FSM_AGGR");
+            break;
+
+        case H5F_FSPACE_STRATEGY_PAGE:
+            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_PAGE");
+            break;
+
+        case H5F_FSPACE_STRATEGY_AGGR:
+            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_AGGR");
+            break;
+
+        case H5F_FSPACE_STRATEGY_NONE:
+            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_NONE");
+            break;
+
+        case H5F_FSPACE_STRATEGY_NTYPES:
+        default:
+            HDfprintf(stream, "%s\n", "unknown");
+    } /* end switch */
+
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Free-space persist:", fsinfo->persist ? "TRUE" : "FALSE");
+
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+              "Free-space section threshold:", fsinfo->threshold);
+
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+              "File space page size:", fsinfo->page_size);
+
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+              "Page end metadata threshold:", fsinfo->pgend_meta_thres);
+
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+              "eoa_pre_fsm_fsalloc:", fsinfo->eoa_pre_fsm_fsalloc);
+
+    if (fsinfo->persist) {
+        for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                      "Free space manager address:", fsinfo->fs_addr[ptype - 1]);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O__fsinfo_debug() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5O_fsinfo_set_version
  *
  * Purpose:     Set the version to encode the fsinfo message with.
@@ -403,74 +473,3 @@ H5O_fsinfo_check_version(H5F_libver_t high, H5O_fsinfo_t *fsinfo)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_fsinfo_check_version() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5O__fsinfo_debug
- *
- * Purpose:     Prints debugging info for a message.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; Feb 2009
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O__fsinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int indent, int fwidth)
-{
-    const H5O_fsinfo_t *fsinfo = (const H5O_fsinfo_t *)_mesg;
-    H5F_mem_page_t      ptype; /* Free-space types for iteration */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* check args */
-    HDassert(f);
-    HDassert(fsinfo);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "File space strategy:");
-    switch (fsinfo->strategy) {
-        case H5F_FSPACE_STRATEGY_FSM_AGGR:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_FSM_AGGR");
-            break;
-
-        case H5F_FSPACE_STRATEGY_PAGE:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_PAGE");
-            break;
-
-        case H5F_FSPACE_STRATEGY_AGGR:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_AGGR");
-            break;
-
-        case H5F_FSPACE_STRATEGY_NONE:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_NONE");
-            break;
-
-        case H5F_FSPACE_STRATEGY_NTYPES:
-        default:
-            HDfprintf(stream, "%s\n", "unknown");
-    } /* end switch */
-
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth, "Free-space persist:", fsinfo->persist);
-
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-              "Free-space section threshold:", fsinfo->threshold);
-
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "File space page size:", fsinfo->page_size);
-
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Page end metadata threshold:", fsinfo->pgend_meta_thres);
-
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-              "eoa_pre_fsm_fsalloc:", fsinfo->eoa_pre_fsm_fsalloc);
-
-    if (fsinfo->persist) {
-        for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                      "Free space manager address:", fsinfo->fs_addr[ptype - 1]);
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O__fsinfo_debug() */

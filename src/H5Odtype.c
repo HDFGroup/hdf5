@@ -1635,9 +1635,8 @@ H5O__dtype_shared_post_copy_upd(const H5O_loc_t H5_ATTR_UNUSED *src_oloc, const 
         dt_dst->oloc.file = dt_dst->sh_loc.file;
         dt_dst->oloc.addr = dt_dst->sh_loc.u.loc.oh_addr;
     } /* end if */
-    else {
+    else
         HDassert(!H5T_is_named(dt_dst));
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

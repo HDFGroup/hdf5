@@ -13,7 +13,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:	    H5Oattribute.c
+ * Created:     H5Oattribute.c
  *
  * Purpose:     Object header attribute routines.
  *
@@ -141,7 +141,6 @@ static herr_t H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg,
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  4 2006
  *
  *-------------------------------------------------------------------------
@@ -383,7 +382,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -528,7 +526,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2006
  *
  *-------------------------------------------------------------------------
@@ -711,7 +708,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  2 2007
  *
  *-------------------------------------------------------------------------
@@ -785,7 +781,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  4 2006
  *
  *-------------------------------------------------------------------------
@@ -943,7 +938,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  5 2006
  *
  *-------------------------------------------------------------------------
@@ -989,7 +983,6 @@ H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/,
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  5 2006
  *
  *-------------------------------------------------------------------------
@@ -1451,7 +1444,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -1723,7 +1715,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
  *-------------------------------------------------------------------------

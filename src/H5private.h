@@ -890,10 +890,12 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfork
 #define HDfork() fork()
 #endif /* HDfork */
+#ifndef HDfprintf
+#define HDfprintf fprintf
+#endif
 #ifndef HDfpathconf
 #define HDfpathconf(F, N) fpathconf(F, N)
 #endif /* HDfpathconf */
-H5_DLL int HDfprintf(FILE *stream, const char *fmt, ...);
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
 #endif /* HDfputc */
@@ -1229,7 +1231,7 @@ typedef off_t       h5_stat_size_t;
 #define HDpread(F, B, C, O) pread(F, B, C, O)
 #endif /* HDpread */
 #ifndef HDprintf
-#define HDprintf(...) HDfprintf(stdout, __VA_ARGS__)
+#define HDprintf printf
 #endif /* HDprintf */
 #ifndef HDpthread_attr_destroy
 #define HDpthread_attr_destroy(A) pthread_attr_destroy(A)
@@ -1492,6 +1494,9 @@ H5_DLL void HDsrand(unsigned int seed);
 #ifndef HDstrcspn
 #define HDstrcspn(X, Y) strcspn(X, Y)
 #endif /* HDstrcspn */
+#ifndef HDstrdup
+#define HDstrdup(S) strdup(S)
+#endif /* HDstrdup */
 #ifndef HDstrerror
 #define HDstrerror(N) strerror(N)
 #endif /* HDstrerror */
@@ -1547,6 +1552,9 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDstrtoull
 #define HDstrtoull(S, R, N) strtoull(S, R, N)
 #endif /* HDstrtoul */
+#ifndef HDstrtoumax
+#define HDstrtoumax(S, R, N) strtoumax(S, R, N)
+#endif /* HDstrtoumax */
 #ifndef HDstrxfrm
 #define HDstrxfrm(X, Y, Z) strxfrm(X, Y, Z)
 #endif /* HDstrxfrm */
@@ -1638,6 +1646,13 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDutime
 #define HDutime(S, T) utime(S, T)
 #endif /* HDutime */
+#ifndef HDvasprintf
+#ifdef H5_HAVE_VASPRINTF
+#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
+#else
+H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+#endif /* H5_HAVE_VASPRINTF */
+#endif /* HDvasprintf */
 #ifndef HDva_arg
 #define HDva_arg(A, T) va_arg(A, T)
 #endif /* HDva_arg */
@@ -1650,9 +1665,6 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDva_start
 #define HDva_start(A, P) va_start(A, P)
 #endif /* HDva_start */
-#ifndef HDvasprintf
-#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
-#endif /* HDvasprintf */
 #ifndef HDvfprintf
 #define HDvfprintf(F, FMT, A) vfprintf(F, FMT, A)
 #endif /* HDvfprintf */
@@ -1680,18 +1692,6 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
 #endif /* HDwrite */
-
-/*
- * And now for a couple non-Posix functions...  Watch out for systems that
- * define these in terms of macros.
- */
-#if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *                   strdup(const char *s);
-#endif
-
-#ifndef HDstrdup
-#define HDstrdup(S) strdup(S)
-#endif /* HDstrdup */
 
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */

@@ -15,7 +15,7 @@
  *
  * Created:             H5Obogus.c
  *                      Jan 21 2003
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             "bogus" message.  This message is guaranteed to never
  *                      be found in a valid HDF5 file and is only used to
@@ -101,7 +101,6 @@ const H5O_msg_class_t H5O_MSG_BOGUS_INVALID[1] = {{
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Jan 21 2003
  *
  *-------------------------------------------------------------------------
@@ -148,7 +147,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Jan 21 2003
  *
  *-------------------------------------------------------------------------
@@ -183,7 +181,6 @@ H5O_bogus_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
  *              Failure:        Negative
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Jan 21 2003
  *
  *-------------------------------------------------------------------------
@@ -205,10 +202,7 @@ H5O_bogus_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Jan 21 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

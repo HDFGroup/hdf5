@@ -15,7 +15,7 @@
  *
  * Created:             H5Ostab.c
  *                      Aug  6 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Symbol table messages.
  *
@@ -84,7 +84,6 @@ H5FL_DEFINE_STATIC(H5O_stab_t);
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -112,10 +111,9 @@ H5O__stab_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     ret_value = stab;
 
 done:
-    if (ret_value == NULL) {
+    if (ret_value == NULL)
         if (stab != NULL)
             stab = H5FL_FREE(H5O_stab_t, stab);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__stab_decode() */
@@ -128,7 +126,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -163,7 +160,6 @@ H5O__stab_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -204,7 +200,6 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -399,10 +394,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -420,9 +412,9 @@ H5O__stab_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "B-tree address:", stab->btree_addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "B-tree address:", stab->btree_addr);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Name heap address:", stab->heap_addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Name heap address:", stab->heap_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__stab_debug() */

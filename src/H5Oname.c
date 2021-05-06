@@ -15,7 +15,7 @@
  *
  * Created:             H5Oname.c
  *                      Aug 12 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Object name message.
  *
@@ -73,7 +73,6 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
  *
  *-------------------------------------------------------------------------
@@ -116,10 +115,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -152,10 +148,7 @@ H5O_name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, 
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -203,10 +196,7 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -225,7 +215,7 @@ H5O_name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
     ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5O_name_size() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__name_reset
@@ -236,7 +226,6 @@ H5O_name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
  *
  *-------------------------------------------------------------------------
@@ -265,10 +254,7 @@ H5O__name_reset(void *_mesg)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 12 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -277,7 +263,7 @@ H5O__name_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
 {
     const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);

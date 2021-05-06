@@ -80,7 +80,6 @@
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  2 2006
  *
  *-------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  *
  * Created:		H5HFiblock.c
  *			Apr 10 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Indirect block routines for fractal heaps.
  *
@@ -90,7 +90,6 @@ H5FL_SEQ_DEFINE(H5HF_indirect_ptr_t);
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 17 2006
  *
  *-------------------------------------------------------------------------
@@ -156,7 +155,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 17 2006
  *
  *-------------------------------------------------------------------------
@@ -187,7 +185,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
@@ -223,7 +220,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
@@ -304,7 +300,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
@@ -335,7 +330,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  2 2006
  *
  *-------------------------------------------------------------------------
@@ -486,7 +480,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
@@ -669,7 +662,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Jun 12 2006
  *
  *-------------------------------------------------------------------------
@@ -804,7 +796,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
@@ -895,7 +886,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -962,7 +952,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  6 2006
  *
  *-------------------------------------------------------------------------
@@ -1111,7 +1100,6 @@ done:
  * Return:	Pointer to indirect block on success, NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
@@ -1240,7 +1228,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 17 2006
  *
  *-------------------------------------------------------------------------
@@ -1292,7 +1279,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 30 2006
  *
  *-------------------------------------------------------------------------
@@ -1356,7 +1342,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
@@ -1574,7 +1559,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 10 2006
  *
  *-------------------------------------------------------------------------
@@ -1608,7 +1592,6 @@ H5HF_man_iblock_entry_addr(H5HF_indirect_t *iblock, unsigned entry, haddr_t *chi
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  7 2006
  *
  *-------------------------------------------------------------------------
@@ -1796,7 +1779,6 @@ done:
  * Return:	Non-negative on success / Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@lbl.gov
  *		Jan 14 2018
  *
  *-------------------------------------------------------------------------
@@ -1869,7 +1851,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  6 2006
  *
  *-------------------------------------------------------------------------

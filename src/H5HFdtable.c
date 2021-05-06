@@ -15,7 +15,7 @@
  *
  * Created:		H5HFdtable.c
  *			Apr 10 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		"Doubling table" routines for fractal heaps.
  *
@@ -73,7 +73,6 @@
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  6 2006
  *
  *-------------------------------------------------------------------------
@@ -137,7 +136,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  6 2006
  *
  *-------------------------------------------------------------------------
@@ -153,9 +151,6 @@ H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsi
     HDassert(dtable);
     HDassert(row);
     HDassert(col);
-#ifdef QAK
-    HDfprintf(stderr, "%s: off = %Hu\n", "H5HF_dtable_lookup", off);
-#endif /* QAK */
 
     /* Check for offset in first row */
     if (off < dtable->num_id_first_row) {
@@ -166,9 +161,6 @@ H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsi
         unsigned high_bit = H5VM_log2_gen(off);       /* Determine the high bit in the offset */
         hsize_t  off_mask = ((hsize_t)1) << high_bit; /* Compute mask for determining column */
 
-#ifdef QAK
-        HDfprintf(stderr, "%s: high_bit = %u, off_mask = %Hu\n", "H5HF_dtable_lookup", high_bit, off_mask);
-#endif /* QAK */
         *row = (high_bit - dtable->first_row_bits) + 1;
         H5_CHECKED_ASSIGN(*col, unsigned, ((off - off_mask) / dtable->row_block_size[*row]), hsize_t);
     } /* end else */
@@ -184,7 +176,6 @@ H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsi
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
@@ -222,7 +213,6 @@ H5HF_dtable_dest(H5HF_dtable_t *dtable)
  * Return:	Non-negative on success (can't fail)
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 25 2006
  *
  *-------------------------------------------------------------------------
@@ -257,7 +247,6 @@ H5HF_dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
  * Return:	Non-negative on success (can't fail)
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
@@ -287,7 +276,6 @@ H5HF_dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
  * Return:	Non-zero span size on success/zero on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 25 2006
  *
  *-------------------------------------------------------------------------
@@ -317,12 +305,6 @@ H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row, unsigned 
     end_entry = (start_entry + num_entries) - 1;
     end_row   = end_entry / dtable->cparam.width;
     end_col   = end_entry % dtable->cparam.width;
-#ifdef QAK
-    HDfprintf(stderr, "%s: start_row = %u, start_col = %u, start_entry = %u\n",
-              "H5HF_sect_indirect_span_size", start_row, start_col, start_entry);
-    HDfprintf(stderr, "%s: end_row = %u, end_col = %u, end_entry = %u\n", "H5HF_sect_indirect_span_size",
-              end_row, end_col, end_entry);
-#endif /* QAK */
 
     /* Initialize accumulated span size */
     acc_span_size = 0;
@@ -351,8 +333,5 @@ H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row, unsigned 
         acc_span_size = dtable->row_block_size[start_row] * ((end_col - start_col) + 1);
     } /* end else */
 
-#ifdef QAK
-    HDfprintf(stderr, "%s: acc_span_size = %Hu\n", "H5HF_dtable_span_size", acc_span_size);
-#endif /* QAK */
     FUNC_LEAVE_NOAPI(acc_span_size)
 } /* end H5HF_sect_indirect_span_size() */

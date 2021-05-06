@@ -13,12 +13,12 @@
 
 #include "H5Zmodule.h" /* This source code file is part of the H5Z module */
 
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5VMprivate.h" /* H5VM_array_fill			*/
-#include "H5Zpkg.h"      /* Data filters				*/
+#include "H5private.h"   /* Generic Functions                   */
+#include "H5Eprivate.h"  /* Error handling                      */
+#include "H5Iprivate.h"  /* IDs                                 */
+#include "H5MMprivate.h" /* Memory management                   */
+#include "H5VMprivate.h" /* H5VM_array_fill                     */
+#include "H5Zpkg.h"      /* Data filters                                */
 
 /* Token types */
 typedef enum {
@@ -371,7 +371,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     }
 
 /*
- *  Programmer: Bill Wendling <wendling@ncsa.uiuc.edu>
+ *  Programmer: Bill Wendling
  *              25. August 2003
  */
 
@@ -396,7 +396,9 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
  * Purpose:     Rollback the H5Z_token to the previous H5Z_token retrieved. There
  *              should only need to be one level of rollback necessary
  *              for our grammar.
+ *
  * Return:      Always succeeds.
+ *
  * Programmer:  Bill Wendling
  *              26. August 2003
  *
@@ -596,7 +598,7 @@ H5Z_xform_destroy_parse_tree(H5Z_node *tree)
  * Purpose:     Entry function for parsing the expression string.
  *
  * Return:      Success:    Valid H5Z_node ptr to an expression tree.
- *              NULLure:    NULL
+ *              Failure:    NULL
  *
  * Programmer:  Bill Wendling
  *              26. August 2003
@@ -633,7 +635,8 @@ done:
  *                  expr     :=  term | term '+' term | term '-' term
  *
  * Return:      Success:    Valid H5Z_node ptr to expression tree
- *              NULLure:    NULL
+ *              Failure:    NULL
+ *
  * Programmer:  Bill Wendling
  *              26. August 2003
  *
@@ -724,7 +727,8 @@ done:
  *                  term :=  factor | factor '*' factor | factor '/' factor
  *
  * Return:      Success:    Valid H5Z_node ptr to expression tree
- *              NULLure:    NULL
+ *              Failure:    NULL
+ *
  * Programmer:  Bill Wendling
  *              26. August 2003
  *
@@ -822,7 +826,8 @@ done:
  *                               '(' expr ')'
  *
  * Return:      Success:    Valid H5Z_node ptr to expression tree
- *              NULLure:    NULL
+ *              Failure:    NULL
+ *
  * Programmer:  Bill Wendling
  *              26. August 2003
  *
@@ -963,8 +968,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Z_new_node
  * Purpose:     Create and initialize a new H5Z_node structure.
+ *
  * Return:      Success:    Valid H5Z_node ptr
- *              NULLure:    NULL
+ *              Failure:    NULL
+ *
  * Programmer:  Bill Wendling
  *              26. August 2003
  *
@@ -989,12 +996,12 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_xform_eval
- * Purpose: 	If the transform is trivial, this function applies it.
- * 		Otherwise, it calls H5Z_xform_eval_full to do the full
- * 		transform.
+ * Purpose:     If the transform is trivial, this function applies it.
+ *              Otherwise, it calls H5Z__xform_eval_full to do the full
+ *              transform.
  * Return:      SUCCEED if transform applied successfully, FAIL otherwise
  * Programmer:  Leon Arber
- * 		5/1/04
+ *              5/1/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1104,15 +1111,20 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_xform_eval_full
- * Purpose: 	Does a full evaluation of the parse tree contained in tree
- * 		and applies this transform to array.
- * Return:      Nothing
- * Programmer:  Leon Arber
- * 		5/1/04
  *
- * Notes:   In the case of a polynomial data transform (ie, the left and right subtree
- * are both of type H5Z_XFORM_SYMBOL), the convention is that the left hand side
- * will accumulate changes and, at the end, the new data will be copied from the lhs.
+ * Purpose:     Does a full evaluation of the parse tree contained in tree
+ *              and applies this transform to array.
+ *
+ * Notes:       In the case of a polynomial data transform (ie, the left and right
+ *              subtree are both of type H5Z_XFORM_SYMBOL), the convention is
+ *              that the left hand side will accumulate changes and, at the end,
+ *              the new data will be copied from the lhs.
+ *
+ * Return:      Nothing
+ *
+ * Programmer:  Leon Arber
+ *              5/1/04
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1202,7 +1214,9 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_find_type
+ *
  * Return:      Native type of datatype that is passed in
+ *
  * Programmer:  Leon Arber, 4/20/04
  *
  *-------------------------------------------------------------------------
@@ -1271,8 +1285,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Z_xform_copy_tree
  * Purpose:     Makes a copy of the parse tree passed in.
+ *
  * Return:      A pointer to a root for a new parse tree which is a copy
  *              of the one passed in.
+ *
  * Programmer:  Leon Arber
  *              April 1, 2004.
  *
@@ -1339,6 +1355,7 @@ done:
  * Purpose:     Internal function to facilitate the condition check in
  *              H5Z_xform_reduce_tree to reduce the bulkiness of the code.
  * Return:      TRUE or FALSE
+ *
  * Programmer:  Raymond Lu
  *              15 March 2012
  *
@@ -1366,7 +1383,9 @@ H5Z_op_is_numbs(H5Z_node *_tree)
  *              H5Z_xform_reduce_tree to reduce the bulkiness of the code.
  *              The difference from H5Z_op_is_numbs is that the left child
  *              can be empty, like -x or +x.
+ *
  * Return:      TRUE or FALSE
+ *
  * Programmer:  Raymond Lu
  *              15 March 2012
  *
@@ -1398,9 +1417,9 @@ H5Z_op_is_numbs2(H5Z_node *_tree)
  *              and trivial arithemtic calculations.
  *
  * Return:      None.
+ *
  * Programmer:  Leon Arber
  *              April 1, 2004.
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1450,7 +1469,9 @@ H5Z_xform_reduce_tree(H5Z_node *tree)
  *              integer or floating point values, this function does that
  *              operation, free the left and right subtrees, and replaces
  *              the root with the result of the operation.
+ *
  * Return:      None.
+ *
  * Programmer:  Leon Arber
  *              April 1, 2004.
  *
@@ -1514,6 +1535,7 @@ H5Z_xform_create(const char *expr)
                     "unable to allocate memory for data transform expression")
 
     /* Find the number of times "x" is used in this equation, and allocate room for storing that many points
+     * A more sophisticated check is needed to support scientific notation.
      */
     for (i = 0; i < HDstrlen(expr); i++)
         if (HDisalpha(expr[i]))
@@ -1728,7 +1750,7 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
  * Function: H5Z_xform_extract_xform_str
  *
  * Purpose: Extracts the pointer to the data transform strings from the
- * 		data transform property.`
+ *              data transform property.`
  * Return:
  *          Pointer to a copy of the string in the data_xform property.
  *

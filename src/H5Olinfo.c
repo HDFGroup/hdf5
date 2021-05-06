@@ -15,7 +15,7 @@
  *
  * Created:             H5Olinfo.c
  *                      Aug 23 2005
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             Link Information messages.
  *
@@ -100,7 +100,6 @@ H5FL_DEFINE_STATIC(H5O_linfo_t);
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
  *-------------------------------------------------------------------------
@@ -174,7 +173,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
  *-------------------------------------------------------------------------
@@ -229,7 +227,6 @@ H5O_linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
  *-------------------------------------------------------------------------
@@ -269,7 +266,6 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
  *-------------------------------------------------------------------------
@@ -430,7 +426,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sept 26 2006
  *
  *-------------------------------------------------------------------------
@@ -535,7 +530,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
  *-------------------------------------------------------------------------
@@ -554,17 +548,18 @@ H5O__linfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-              "Track creation order of links:", linfo->track_corder);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-              "Index creation order of links:", linfo->index_corder);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Number of links:", linfo->nlinks);
-    HDfprintf(stream, "%*s%-*s %Hd\n", indent, "", fwidth, "Max. creation order value:", linfo->max_corder);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Track creation order of links:", linfo->track_corder ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Index creation order of links:", linfo->index_corder ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Number of links:", linfo->nlinks);
+    HDfprintf(stream, "%*s%-*s %" PRId64 "\n", indent, "", fwidth,
+              "Max. creation order value:", linfo->max_corder);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' link storage fractal heap address:", linfo->fheap_addr);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' link storage name index v2 B-tree address:", linfo->name_bt2_addr);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' link storage creation order index v2 B-tree address:", linfo->corder_bt2_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

@@ -15,7 +15,7 @@
  *
  * Created:		H5HFdbg.c
  *			Feb 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Dump debugging information about a fractal heap
  *
@@ -75,7 +75,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth);
+static herr_t H5HF__dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth);
 
 /*********************/
 /* Package Variables */
@@ -97,7 +97,6 @@ static herr_t H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int i
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 20 2015
  *
  *-------------------------------------------------------------------------
@@ -154,30 +153,29 @@ H5HF_id_print(H5HF_t *fh, const void *_id, FILE *stream, int indent, int fwidth)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve heap ID length")
 
     /* Display the heap ID */
-    HDfprintf(stream, "%*s%-*s (%c, %Hu, %Zu)\n", indent, "", fwidth, "Heap ID info: (type, offset, length)",
-              id_type, obj_off, obj_len);
+    HDfprintf(stream, "%*s%-*s (%c, %" PRIuHSIZE " , %zu)\n", indent, "", fwidth,
+              "Heap ID info: (type, offset, length)", id_type, obj_off, obj_len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_id_print() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_dtable_debug
+ * Function:	H5HF__dtable_debug
  *
  * Purpose:	Prints debugging info about a doubling table
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 28 2006
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth)
+H5HF__dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /*
      * Check arguments.
@@ -192,9 +190,9 @@ H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwi
      */
     /* Creation parameter values */
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Doubling table width:", dtable->cparam.width);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
               "Starting block size:", dtable->cparam.start_block_size);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
               "Max. direct block size:", dtable->cparam.max_direct_size);
     HDfprintf(stream, "%*s%-*s %u (bits)\n", indent, "", fwidth,
               "Max. index size:", dtable->cparam.max_index);
@@ -202,7 +200,8 @@ H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwi
               "Starting # of rows in root indirect block:", dtable->cparam.start_root_rows);
 
     /* Run-time varying parameter values */
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Table's root address:", dtable->table_addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+              "Table's root address:", dtable->table_addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Current # of rows in root indirect block:", dtable->curr_root_rows);
 
@@ -213,11 +212,11 @@ H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwi
               "Max. # of direct rows in any indirect block:", dtable->max_direct_rows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "# of bits for IDs in first row:", dtable->first_row_bits);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
               "# of IDs in first row:", dtable->num_id_first_row);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_dtable_debug() */
+} /* end H5HF__dtable_debug() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF_hdr_print
@@ -227,7 +226,6 @@ H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwi
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb 23 2012
  *
  *-------------------------------------------------------------------------
@@ -253,42 +251,47 @@ H5HF_hdr_print(const H5HF_hdr_t *hdr, hbool_t dump_internal, FILE *stream, int i
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
               "Heap is:", hdr->man_dtable.curr_root_rows > 0 ? "Indirect" : "Direct");
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-              "Objects stored in 'debugging' format:", hdr->debug_objs);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth, "'Write once' flag:", hdr->write_once);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-              "'Huge' object IDs have wrapped:", hdr->huge_ids_wrapped);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Objects stored in 'debugging' format:", hdr->debug_objs ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "'Write once' flag:", hdr->write_once ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "'Huge' object IDs have wrapped:", hdr->huge_ids_wrapped ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
               "Free space in managed blocks:", hdr->total_man_free);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Managed space data block size:", hdr->man_size);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+              "Managed space data block size:", hdr->man_size);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
               "Total managed space allocated:", hdr->man_alloc_size);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
               "Offset of managed space iterator:", hdr->man_iter_off);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
               "Number of managed objects in heap:", hdr->man_nobjs);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "Address of free space manager for managed blocks:", hdr->fs_addr);
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
               "Max. size of managed object:", (unsigned long)hdr->max_man_size);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "'Huge' object space used:", hdr->huge_size);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+              "'Huge' object space used:", hdr->huge_size);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
               "Number of 'huge' objects in heap:", hdr->huge_nobjs);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "ID of next 'huge' object:", hdr->huge_next_id);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+              "ID of next 'huge' object:", hdr->huge_next_id);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "Address of v2 B-tree for 'huge' objects:", hdr->huge_bt2_addr);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "'Tiny' object space used:", hdr->tiny_size);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+              "'Tiny' object space used:", hdr->tiny_size);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
               "Number of 'tiny' objects in heap:", hdr->tiny_nobjs);
 
     HDfprintf(stream, "%*sManaged Objects Doubling-Table Info...\n", indent, "");
-    H5HF_dtable_debug(&hdr->man_dtable, stream, indent + 3, MAX(0, fwidth - 3));
+    H5HF__dtable_debug(&hdr->man_dtable, stream, indent + 3, MAX(0, fwidth - 3));
 
     /* Print information about I/O filters */
     if (hdr->filter_len > 0) {
         HDfprintf(stream, "%*sI/O filter Info...\n", indent, "");
         if (hdr->man_dtable.curr_root_rows == 0) {
-            HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
+            HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
                       "Compressed size of root direct block:", hdr->pline_root_direct_size);
             HDfprintf(stream, "%*s%-*s %x\n", indent + 3, "", MAX(0, fwidth - 3),
                       "Filter mask for root direct block:", hdr->pline_root_direct_filter_mask);
@@ -304,7 +307,7 @@ H5HF_hdr_print(const H5HF_hdr_t *hdr, hbool_t dump_internal, FILE *stream, int i
         HDfprintf(stream, "%*s%-*s %x\n", indent + 3, "", MAX(0, fwidth - 3),
                   "Root indirect block flags:", hdr->root_iblock_flags);
         HDfprintf(stream, "%*s%-*s %p\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Root indirect block pointer:", hdr->root_iblock);
+                  "Root indirect block pointer:", (void *)hdr->root_iblock);
         if (hdr->root_iblock)
             H5HF_iblock_print(hdr->root_iblock, dump_internal, stream, indent + 3, fwidth);
     } /* end if */
@@ -320,7 +323,6 @@ H5HF_hdr_print(const H5HF_hdr_t *hdr, hbool_t dump_internal, FILE *stream, int i
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 24 2006
  *
  *-------------------------------------------------------------------------
@@ -364,7 +366,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 13 2006
  *
  *-------------------------------------------------------------------------
@@ -417,7 +418,7 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
         len = end - start;
 
         HDsnprintf(temp_str, sizeof(temp_str), "Section #%u:", (unsigned)udata->sect_count);
-        HDfprintf(udata->stream, "%*s%-*s %8Zu, %8Zu\n", udata->indent + 3, "", MAX(0, udata->fwidth - 9),
+        HDfprintf(udata->stream, "%*s%-*s %8zu, %8zu\n", udata->indent + 3, "", MAX(0, udata->fwidth - 9),
                   temp_str, start, len);
         udata->sect_count++;
 
@@ -447,7 +448,6 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 28 2006
  *
  *-------------------------------------------------------------------------
@@ -492,12 +492,12 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "Address of fractal heap that owns this block:", hdr->heap_addr);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
               "Offset of direct block in heap:", dblock->block_off);
     blk_prefix_size = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Size of block header:", blk_prefix_size);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of block header:", blk_prefix_size);
 
     /* Allocate space for the free space markers */
     if (NULL == (marker = (uint8_t *)H5MM_calloc(dblock->size)))
@@ -569,7 +569,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb 23 2012
  *
  *-------------------------------------------------------------------------
@@ -601,11 +600,11 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *st
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "Address of fractal heap that owns this block:", hdr->heap_addr);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
               "Offset of indirect block in heap:", iblock->block_off);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Size of indirect block:", iblock->size);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of indirect block:", iblock->size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Current # of rows:", iblock->nrows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Max. # of rows:", iblock->max_rows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
@@ -625,11 +624,11 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *st
 
             HDsnprintf(temp_str, sizeof(temp_str), "Col #%u:", (unsigned)v);
             if (hdr->filter_len > 0)
-                HDfprintf(stream, "%*s%-*s %9a/%6Zu/%x\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
-                          iblock->ents[off].addr, iblock->filt_ents[off].size,
+                HDfprintf(stream, "%*s%-*s %9" PRIuHADDR "/%6zu/%x\n", indent + 6, "", MAX(0, fwidth - 6),
+                          temp_str, iblock->ents[off].addr, iblock->filt_ents[off].size,
                           iblock->filt_ents[off].filter_mask);
             else
-                HDfprintf(stream, "%*s%-*s %9a\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
+                HDfprintf(stream, "%*s%-*s %9" PRIuHADDR "\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
                           iblock->ents[off].addr);
         } /* end for */
     }     /* end for */
@@ -649,7 +648,7 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *st
                 size_t off = (u * hdr->man_dtable.cparam.width) + v;
 
                 HDsnprintf(temp_str, sizeof(temp_str), "Col #%u:", (unsigned)v);
-                HDfprintf(stream, "%*s%-*s %9a\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
+                HDfprintf(stream, "%*s%-*s %9" PRIuHADDR "\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
                           iblock->ents[off].addr);
             } /* end for */
         }     /* end for */
@@ -662,12 +661,12 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *st
         HDfprintf(stream, "%*sFractal Indirect Block Internal Information:\n", indent, "");
 
         /* Print general information */
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
                   "Reference count:", iblock->rc);
 
         /* Print parent's information */
         HDfprintf(stream, "%*s%-*s %p\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Parent indirect block address:", iblock->parent);
+                  "Parent indirect block address:", (void *)iblock->parent);
         if (iblock->parent)
             H5HF_iblock_print(iblock->parent, TRUE, stream, indent + 6, fwidth);
     } /* end if */
@@ -683,7 +682,6 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *st
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  7 2006
  *
  *-------------------------------------------------------------------------
@@ -692,10 +690,10 @@ herr_t
 H5HF_iblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, haddr_t hdr_addr,
                   unsigned nrows)
 {
-    H5HF_hdr_t *     hdr    = NULL;       /* Fractal heap header info */
-    H5HF_indirect_t *iblock = NULL;       /* Fractal heap direct block info */
-    hbool_t          did_protect;         /* Whether we protected the indirect block or not */
-    herr_t           ret_value = SUCCEED; /* Return value */
+    H5HF_hdr_t *     hdr         = NULL;    /* Fractal heap header info */
+    H5HF_indirect_t *iblock      = NULL;    /* Fractal heap direct block info */
+    hbool_t          did_protect = FALSE;   /* Whether we protected the indirect block or not */
+    herr_t           ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -741,7 +739,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 13 2006
  *
  *-------------------------------------------------------------------------
@@ -769,14 +766,10 @@ H5HF_sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
              : (sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW
                     ? "first row"
                     : (sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW ? "normal row" : "unknown"))));
-    HDfprintf(udata->stream, "%*s%-*s %a\n", udata->indent, "", udata->fwidth,
+    HDfprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
               "Section address:", sect->sect_info.addr);
-    HDfprintf(udata->stream, "%*s%-*s %Hu\n", udata->indent, "", udata->fwidth,
+    HDfprintf(udata->stream, "%*s%-*s %" PRIuHSIZE "\n", udata->indent, "", udata->fwidth,
               "Section size:", sect->sect_info.size);
-#ifdef QAK
-    HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
-              "Section state:", (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
-#endif /* QAK */
 
     /* Dump section-specific debugging information */
     if (H5FS_sect_debug(udata->fspace, _sect, udata->stream, udata->indent + 3, MAX(0, udata->fwidth - 3)) <
@@ -795,7 +788,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  9 2006
  *
  *-------------------------------------------------------------------------

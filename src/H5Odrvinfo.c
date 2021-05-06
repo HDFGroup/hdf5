@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+/* Programmer:  Quincey Koziol
  *              Thursday, March  1, 2007
  *
  * Purpose:	A message holding driver info settings
@@ -247,7 +247,6 @@ H5O_drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_s
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  1 2007
  *
  *-------------------------------------------------------------------------
@@ -295,7 +294,7 @@ H5O__drvinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int
     HDassert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Driver name:", mesg->name);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Buffer size:", mesg->len);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Buffer size:", mesg->len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__drvinfo_debug() */

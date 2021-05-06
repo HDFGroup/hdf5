@@ -15,7 +15,7 @@
  *
  * Created:             H5Oginfo.c
  *                      Aug 23 2005
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             Group Information messages.
  *
@@ -84,7 +84,6 @@ H5FL_DEFINE_STATIC(H5O_ginfo_t);
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
@@ -156,7 +155,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
@@ -208,7 +206,6 @@ H5O_ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
@@ -249,7 +246,6 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
@@ -309,7 +305,6 @@ H5O__ginfo_free(void *mesg)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------

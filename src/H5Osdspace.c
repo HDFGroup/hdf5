@@ -209,19 +209,6 @@ done:
         This function encodes the native memory form of the simple
     dimensionality message in the "raw" disk form.
 
- MODIFICATIONS
-        Robb Matzke, 1998-04-09
-        The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
-        instead of just four bytes.
-
-        Robb Matzke, 1998-07-20
-        Added a version number and reformatted the message for aligment.
-
-        Raymond Lu
-        April 8, 2004
-        Added the type of dataspace into this header message using a reserved
-        byte.
-
 --------------------------------------------------------------------------*/
 static herr_t
 H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
@@ -334,10 +321,6 @@ done:
     success.  (Not counting the message type or size fields, only the data
     portion of the message).  It doesn't take into account alignment.
 
- MODIFICATIONS
-        Robb Matzke, 1998-04-09
-        The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
-        instead of just four bytes.
 --------------------------------------------------------------------------*/
 static size_t
 H5O_sdspace_size(const H5F_t *f, const void *_mesg)
@@ -507,7 +490,7 @@ H5O__sdspace_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int 
 
         HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
         for (u = 0; u < sdim->rank; u++)
-            HDfprintf(stream, "%s%Hu", u ? ", " : "", sdim->size[u]);
+            HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->size[u]);
         HDfprintf(stream, "}\n");
 
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
@@ -517,7 +500,7 @@ H5O__sdspace_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int 
                 if (H5S_UNLIMITED == sdim->max[u])
                     HDfprintf(stream, "%sUNLIM", u ? ", " : "");
                 else
-                    HDfprintf(stream, "%s%Hu", u ? ", " : "", sdim->max[u]);
+                    HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->max[u]);
             } /* end for */
             HDfprintf(stream, "}\n");
         } /* end if */

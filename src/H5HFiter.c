@@ -15,7 +15,7 @@
  *
  * Created:		H5HFiter.c
  *			Apr 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Block iteration routines for fractal heaps.
  *
@@ -77,7 +77,6 @@ H5FL_DEFINE(H5HF_block_loc_t);
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
@@ -107,7 +106,6 @@ H5HF_man_iter_init(H5HF_block_iter_t *biter)
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
@@ -266,7 +264,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
@@ -298,7 +295,6 @@ H5HF_man_iter_set_entry(const H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigne
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
@@ -358,7 +354,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
@@ -418,7 +413,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
@@ -453,7 +447,6 @@ H5HF_man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries)
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
@@ -500,7 +493,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
@@ -555,7 +547,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
@@ -593,7 +584,6 @@ H5HF_man_iter_curr(H5HF_block_iter_t *biter, unsigned *row, unsigned *col, unsig
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 25 2006
  *
  *-------------------------------------------------------------------------
@@ -632,7 +622,6 @@ H5HF_man_iter_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t *offset)
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 25 2006
  *
  *-------------------------------------------------------------------------

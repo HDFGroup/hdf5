@@ -219,8 +219,8 @@ main(int argc, const char *argv[])
     unsigned           flag    = 0;
     unsigned           verbose = 0;
     unsigned           parents = 0;
-    hid_t              ocpl_id = (-1); /* Object copy property list */
-    hid_t              lcpl_id = (-1); /* Link creation property list */
+    hid_t              ocpl_id = H5I_INVALID_HID; /* Object copy property list */
+    hid_t              lcpl_id = H5I_INVALID_HID; /* Link creation property list */
     int                opt;
     int                li_ret;
     h5tool_link_info_t linkinfo;

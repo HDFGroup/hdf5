@@ -15,7 +15,7 @@
  *
  * Created:		H5HFhuge.c
  *			Aug  7 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Routines for "huge" objects in fractal heap
  *
@@ -86,7 +86,6 @@ static herr_t  H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  7 2006
  *
  *-------------------------------------------------------------------------
@@ -168,7 +167,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  7 2006
  *
  *-------------------------------------------------------------------------
@@ -189,10 +187,6 @@ H5HF_huge_init(H5HF_hdr_t *hdr)
      *  the file in the heap ID (which will speed up accessing it) and we don't
      *  have any I/O pipeline filters.
      */
-#ifdef QAK
-    HDfprintf(stderr, "%s: hdr->id_len = %u\n", "H5HF_huge_init", (unsigned)hdr->id_len);
-    HDfprintf(stderr, "%s: hdr->filter_len = %u\n", "H5HF_huge_init", (unsigned)hdr->filter_len);
-#endif /* QAK */
     if (hdr->filter_len > 0) {
         if ((hdr->id_len - 1) >= (unsigned)(hdr->sizeof_addr + hdr->sizeof_size + 4 + hdr->sizeof_size)) {
             /* Indicate that v2 B-tree doesn't have to be used to locate object */
@@ -242,7 +236,6 @@ H5HF_huge_init(H5HF_hdr_t *hdr)
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 15 2006
  *
  *-------------------------------------------------------------------------
@@ -289,7 +282,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  7 2006
  *
  *-------------------------------------------------------------------------
@@ -305,9 +297,6 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
     herr_t   ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
-#ifdef QAK
-    HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
-#endif /* QAK */
 
     /*
      * Check arguments.
@@ -355,11 +344,6 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
         if (H5Z_pipeline(&(hdr->pline), 0, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &write_size,
                          &write_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed")
-#ifdef QAK
-        HDfprintf(stderr, "%s: nbytes = %Zu, write_size = %Zu, write_buf = %p\n", FUNC, nbytes, write_size,
-                  write_buf);
-        HDfprintf(stderr, "%s: obj_size = %Zu, obj = %p\n", FUNC, obj_size, obj);
-#endif /* QAK */
 
         /* Update size of object on disk */
         write_size = nbytes;
@@ -393,10 +377,6 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
             obj_rec.len         = write_size;
             obj_rec.filter_mask = filter_mask;
             obj_rec.obj_size    = obj_size;
-#ifdef QAK
-            HDfprintf(stderr, "%s: obj_rec = {%a, %Hu, %x, %Hu}\n", FUNC, obj_rec.addr, obj_rec.len,
-                      obj_rec.filter_mask, obj_rec.obj_size);
-#endif /* QAK */
 
             /* Insert record for object in v2 B-tree */
             if (H5B2_insert(hdr->huge_bt2, &obj_rec) < 0)
@@ -416,9 +396,6 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
             /* Initialize record for tracking object in v2 B-tree */
             obj_rec.addr = obj_addr;
             obj_rec.len  = write_size;
-#ifdef QAK
-            HDfprintf(stderr, "%s: obj_rec = {%a, %Hu}\n", FUNC, obj_rec.addr, obj_rec.len);
-#endif /* QAK */
 
             /* Insert record for object in v2 B-tree */
             if (H5B2_insert(hdr->huge_bt2, &obj_rec) < 0)
@@ -448,11 +425,6 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
             filt_indir_rec.filter_mask = filter_mask;
             filt_indir_rec.obj_size    = obj_size;
             filt_indir_rec.id          = new_id;
-#ifdef QAK
-            HDfprintf(stderr, "%s: filt_indir_rec = {%a, %Hu, %x, %Hu, %Hu}\n", FUNC, filt_indir_rec.addr,
-                      filt_indir_rec.len, filt_indir_rec.filter_mask, filt_indir_rec.obj_size,
-                      filt_indir_rec.id);
-#endif /* QAK */
 
             /* Set pointer to record to insert */
             ins_rec = &filt_indir_rec;
@@ -462,10 +434,6 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
             indir_rec.addr = obj_addr;
             indir_rec.len  = write_size;
             indir_rec.id   = new_id;
-#ifdef QAK
-            HDfprintf(stderr, "%s: indir_rec = {%a, %Hu, %Hu}\n", FUNC, indir_rec.addr, indir_rec.len,
-                      indir_rec.id);
-#endif /* QAK */
 
             /* Set pointer to record to insert */
             ins_rec = &indir_rec;
@@ -500,7 +468,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  8 2006
  *
  *-------------------------------------------------------------------------
@@ -591,7 +558,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  8 2006
  *
  *-------------------------------------------------------------------------
@@ -677,7 +643,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  8 2006
  *
  *-------------------------------------------------------------------------
@@ -828,7 +793,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb 21 2007
  *
  *-------------------------------------------------------------------------
@@ -906,7 +870,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sept 11 2006
  *
  *-------------------------------------------------------------------------
@@ -941,7 +904,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sept 11 2006
  *
  *-------------------------------------------------------------------------
@@ -976,7 +938,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  8 2006
  *
  *-------------------------------------------------------------------------
@@ -1084,7 +1045,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  8 2006
  *
  *-------------------------------------------------------------------------
@@ -1147,7 +1107,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  8 2006
  *
  *-------------------------------------------------------------------------

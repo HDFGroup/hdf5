@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Wednesday, September 30, 1998
  *
  * Purpose:    The fill message indicates a bit pattern to use for
@@ -276,11 +276,10 @@ H5O_fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
             /* Set the "defined" flag */
             fill->fill_defined = TRUE;
         } /* end else */
-        else {
+        else
             /* Set the "defined" flag */
             fill->fill_defined = TRUE;
-        } /* end else */
-    }     /* end else */
+    } /* end else */
 
     /* Set return value */
     ret_value = (void *)fill;
@@ -939,7 +938,7 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream, int in
             break;
 
     } /* end switch */
-    HDfprintf(stream, "%*s%-*s %Zd\n", indent, "", fwidth, "Size:", fill->size);
+    HDfprintf(stream, "%*s%-*s %zd\n", indent, "", fwidth, "Size:", fill->size);
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Data type:");
     if (fill->type) {
         H5T_debug(fill->type, stream);
@@ -974,7 +973,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed)
     hid_t       src_id = -1, dst_id = -1; /* Datatype identifiers    */
     herr_t      ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(fill);
     HDassert(dset_type);

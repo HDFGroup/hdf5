@@ -15,7 +15,7 @@
  *
  * Created:		H5B2int.c
  *			Feb 27 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Internal routines for managing v2 B-trees.
  *
@@ -87,7 +87,6 @@ H5FL_SEQ_EXTERN(H5B2_node_info_t);
  *              record to locate is greater than all records to search).
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
  *
  *-------------------------------------------------------------------------
@@ -130,7 +129,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 28 2006
  *
  *-------------------------------------------------------------------------
@@ -336,7 +334,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
  *
  *-------------------------------------------------------------------------
@@ -419,7 +416,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
  *-------------------------------------------------------------------------
@@ -691,7 +687,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
  *-------------------------------------------------------------------------
@@ -1118,7 +1113,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
  *-------------------------------------------------------------------------
@@ -1294,7 +1288,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
  *-------------------------------------------------------------------------
@@ -1561,7 +1554,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 23 2015
  *
  *-------------------------------------------------------------------------
@@ -1620,7 +1612,6 @@ done:
  * Return:	Value from callback, non-negative on success, negative on error
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 11 2005
  *
  *-------------------------------------------------------------------------
@@ -1743,7 +1734,6 @@ done:
  * Return:	Value from callback, non-negative on success, negative on error
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
  *-------------------------------------------------------------------------
@@ -1915,7 +1905,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *		koziol@lbl.gov
  *		Dec  1 2016
  *
  *-------------------------------------------------------------------------
@@ -1944,7 +1933,7 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, const H5B2_node_ptr_t
 
     /* If the node is in the cache, check for retargeting its parent */
     if (node_status & H5AC_ES__IN_CACHE) {
-        void ** parent_ptr;          /* Pointer to child node's parent */
+        void ** parent_ptr  = NULL;  /* Pointer to child node's parent */
         hbool_t update_deps = FALSE; /* Whether to update flush dependencies */
 
         /* Get child node pointer */

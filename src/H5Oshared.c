@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke <matzke@llnl.gov>
+ * Programmer:	Robb Matzke
  *		Wednesday, April  1, 1998
  *
  * Purpose:	Functions that operate on a shared message.  The shared
@@ -95,7 +95,6 @@ static herr_t H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh, const H5O_msg_class
  *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 24 2003
  *
  *-------------------------------------------------------------------------
@@ -209,7 +208,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 26 2003
  *
  *-------------------------------------------------------------------------
@@ -432,7 +430,6 @@ H5O__shared_encode(const H5F_t *f, uint8_t *buf /*out*/, const H5O_shared_t *sh_
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 26 2003
  *
  *-------------------------------------------------------------------------
@@ -638,7 +635,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
  *              May 24 2007
  *
  *-------------------------------------------------------------------------
@@ -711,7 +707,8 @@ H5O__shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth
 
         case H5O_SHARE_TYPE_COMMITTED:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Obj Hdr");
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object address:", mesg->u.loc.oh_addr);
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                      "Object address:", mesg->u.loc.oh_addr);
             break;
 
         case H5O_SHARE_TYPE_SOHM:
