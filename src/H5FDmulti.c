@@ -1958,7 +1958,7 @@ compute_next(H5FD_multi_t *file)
  *      tmp in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static int
 open_members(H5FD_multi_t *file)
 {
@@ -1996,6 +1996,7 @@ open_members(H5FD_multi_t *file)
 
     return 0;
 }
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_multi_delete
@@ -2043,7 +2044,6 @@ H5FD_multi_delete(const char *filename, hid_t fapl_id)
 
     return 0;
 } /* end H5FD_multi_delete() */
-H5_GCC_DIAG_ON("format-nonliteral")
 
 #ifdef H5private_H
 /*
