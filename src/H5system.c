@@ -1095,7 +1095,7 @@ done:
 static size_t
 H5__find_last_file_separator(const char *path, size_t len, hbool_t *no_separator)
 {
-    size_t i;
+    size_t i = len;
 
     FUNC_ENTER_STATIC_NOERR
 

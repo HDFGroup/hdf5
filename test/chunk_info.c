@@ -127,7 +127,7 @@ void reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size);
 static int         verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type,
                                       hsize_t exp_num_chunks);
 static int         verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
-                                         hsize_t *exp_offset, unsigned exp_flt_msk);
+                                         const hsize_t *exp_offset, unsigned exp_flt_msk);
 static int         verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size,
                                                   unsigned exp_flt_msk);
 static int         verify_empty_chunk_info(hid_t dset, hsize_t *offset);
@@ -169,8 +169,8 @@ reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size)
  *-------------------------------------------------------------------------
  */
 static int
-verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size, hsize_t *exp_offset,
-                      unsigned exp_flt_msk)
+verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
+                      const hsize_t *exp_offset, unsigned exp_flt_msk)
 {
     unsigned read_flt_msk  = 0;      /* Read filter mask */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
@@ -302,7 +302,7 @@ index_type_str(H5D_chunk_index_t idx_type)
  *-------------------------------------------------------------------------
  */
 static int
-verify_selected_chunks(hid_t dset, hid_t plist, hsize_t *start, hsize_t *end)
+verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsize_t *end)
 {
     int      read_buf[CHUNK_NX][CHUNK_NY];
     int      expected_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY]; /* Expected data */
@@ -335,8 +335,9 @@ verify_selected_chunks(hid_t dset, hid_t plist, hsize_t *start, hsize_t *end)
 
             /* Verify that read chunk is the same as the corresponding written one */
             if (HDmemcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
-                HDfprintf(stderr, "Read chunk differs from written chunk at offset (%d,%d)\n", offset[0],
-                          offset[1]);
+                HDfprintf(stderr,
+                          "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
+                          offset[0], offset[1]);
                 return FAIL;
             }
         }
@@ -363,7 +364,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-write_selected_chunks(hid_t dset, hid_t plist, hsize_t *start, hsize_t *end, unsigned flt_msk)
+write_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsize_t *end, unsigned flt_msk)
 {
     int     direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY]; /* Data in chunks */
     hsize_t offset[2];                                  /* Offset coordinates of a chunk */
@@ -420,7 +421,7 @@ verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsi
     /* Ensure the correct chunk indexing scheme is used */
     if (idx_type != exp_idx_type) {
         char msg[256];
-        sprintf(msg, "Should be using %s.\n", index_type_str(idx_type));
+        HDsprintf(msg, "Should be using %s.\n", index_type_str(idx_type));
         FAIL_PUTS_ERROR(msg);
     }
 

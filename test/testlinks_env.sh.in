@@ -34,8 +34,8 @@ echo "$ENVCMD $RUNSERIAL $TEST_BIN"
 $ENVCMD $RUNSERIAL $TEST_BIN
 exitcode=$?
 if [ $exitcode -eq 0 ]; then
-        echo "Test for HDF5_EXT_PREFIX PASSED"
-    else
+    echo "Test for HDF5_EXT_PREFIX PASSED"
+else
     nerrors="`expr $nerrors + 1`"
     echo "***Error encountered for HDF5_EXT_PREFIX test***"
 fi
