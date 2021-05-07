@@ -543,7 +543,7 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
         amount_free = 0;
 
     HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of available space for data used:",
-              ((double)100.0f * (double)((dblock->size - blk_prefix_size) - amount_free) /
+              (100.0 * (double)((dblock->size - blk_prefix_size) - amount_free) /
                (double)(dblock->size - blk_prefix_size)));
 
     /*
