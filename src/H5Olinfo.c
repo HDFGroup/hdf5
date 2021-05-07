@@ -36,9 +36,9 @@
 /* PRIVATE PROTOTYPES */
 static void * H5O__linfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static herr_t H5O_linfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_linfo_copy(const void *_mesg, void *_dest);
-static size_t H5O_linfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__linfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void * H5O__linfo_copy(const void *_mesg, void *_dest);
+static size_t H5O__linfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__linfo_free(void *_mesg);
 static herr_t H5O__linfo_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
 static void *H5O__linfo_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
@@ -55,9 +55,9 @@ const H5O_msg_class_t H5O_MSG_LINFO[1] = {{
     sizeof(H5O_linfo_t),       /*native message size           */
     0,                         /* messages are sharable?       */
     H5O__linfo_decode,         /*decode message                */
-    H5O_linfo_encode,          /*encode message                */
-    H5O_linfo_copy,            /*copy the native value         */
-    H5O_linfo_size,            /*size of symbol table entry    */
+    H5O__linfo_encode,         /*encode message                */
+    H5O__linfo_copy,           /*copy the native value         */
+    H5O__linfo_size,           /*size of symbol table entry    */
     NULL,                      /*default reset method          */
     H5O__linfo_free,           /* free method			*/
     H5O__linfo_delete,         /* file delete method		*/
@@ -166,7 +166,7 @@ done:
 } /* end H5O__linfo_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_linfo_encode
+ * Function:    H5O__linfo_encode
  *
  * Purpose:     Encodes a message.
  *
@@ -178,12 +178,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_linfo_t *linfo = (const H5O_linfo_t *)_mesg;
     unsigned char      index_flags; /* Flags for encoding link index info */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -215,10 +215,10 @@ H5O_linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
         HDassert(!H5F_addr_defined(linfo->corder_bt2_addr));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_linfo_encode() */
+} /* end H5O__linfo_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_linfo_copy
+ * Function:    H5O__linfo_copy
  *
  * Purpose:     Copies a message from _MESG to _DEST, allocating _DEST if
  *              necessary.
@@ -232,13 +232,13 @@ H5O_linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_linfo_copy(const void *_mesg, void *_dest)
+H5O__linfo_copy(const void *_mesg, void *_dest)
 {
     const H5O_linfo_t *linfo     = (const H5O_linfo_t *)_mesg;
     H5O_linfo_t *      dest      = (H5O_linfo_t *)_dest;
     void *             ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(linfo);
@@ -253,10 +253,10 @@ H5O_linfo_copy(const void *_mesg, void *_dest)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_linfo_copy() */
+} /* end H5O__linfo_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_linfo_size
+ * Function:    H5O__linfo_size
  *
  * Purpose:     Returns the size of the raw message in bytes not counting
  *              the message type or size fields, but only the data fields.
@@ -271,12 +271,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_linfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__linfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_linfo_t *linfo     = (const H5O_linfo_t *)_mesg;
     size_t             ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Set return value */
     ret_value =
@@ -289,7 +289,7 @@ H5O_linfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
                                : 0); /* Address of v2 B-tree for indexing creation order values of links */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_linfo_size() */
+} /* end H5O__linfo_size() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5O__linfo_free
@@ -379,7 +379,7 @@ H5O__linfo_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t *fi
     HDassert(cpy_info);
 
     /* Copy the source message */
-    if (NULL == (linfo_dst = (H5O_linfo_t *)H5O_linfo_copy(linfo_src, NULL)))
+    if (NULL == (linfo_dst = (H5O_linfo_t *)H5O__linfo_copy(linfo_src, NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "memory allocation failed")
 
     /* If we are performing a 'shallow hierarchy' copy, and the links in this

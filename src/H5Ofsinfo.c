@@ -25,17 +25,17 @@
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions    */
-#include "H5Eprivate.h"  /* Error handling    */
+#include "H5Eprivate.h"  /* Error handling       */
 #include "H5Fpkg.h"      /* File access          */
-#include "H5FLprivate.h" /* Free lists              */
-#include "H5Opkg.h"      /* Object headers    */
+#include "H5FLprivate.h" /* Free lists           */
+#include "H5Opkg.h"      /* Object headers       */
 
 /* PRIVATE PROTOTYPES */
-static void * H5O_fsinfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
-                                size_t p_size, const uint8_t *p);
-static herr_t H5O_fsinfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_fsinfo_copy(const void *_mesg, void *_dest);
-static size_t H5O_fsinfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static void * H5O__fsinfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
+                                 size_t p_size, const uint8_t *p);
+static herr_t H5O__fsinfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void * H5O__fsinfo_copy(const void *_mesg, void *_dest);
+static size_t H5O__fsinfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__fsinfo_free(void *mesg);
 static herr_t H5O__fsinfo_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -45,22 +45,22 @@ const H5O_msg_class_t H5O_MSG_FSINFO[1] = {{
     "fsinfo",             /* message name for debugging        */
     sizeof(H5O_fsinfo_t), /* native message size               */
     0,                    /* messages are sharable?            */
-    H5O_fsinfo_decode,    /* decode message                    */
-    H5O_fsinfo_encode,    /* encode message                    */
-    H5O_fsinfo_copy,      /* copy the native value             */
-    H5O_fsinfo_size,      /* size of free-space manager info message */
-    NULL,                 /* default reset method             */
-    H5O__fsinfo_free,     /* free method                */
-    NULL,                 /* file delete method            */
-    NULL,                 /* link method                */
-    NULL,                 /* set share method            */
-    NULL,                 /* can share method            */
+    H5O__fsinfo_decode,   /* decode message                    */
+    H5O__fsinfo_encode,   /* encode message                    */
+    H5O__fsinfo_copy,     /* copy the native value             */
+    H5O__fsinfo_size,     /* size of free-space manager info message */
+    NULL,                 /* default reset method              */
+    H5O__fsinfo_free,     /* free method                       */
+    NULL,                 /* file delete method                */
+    NULL,                 /* link method                       */
+    NULL,                 /* set share method                  */
+    NULL,                 /* can share method                  */
     NULL,                 /* pre copy native value to file     */
-    NULL,                 /* copy native value to file        */
+    NULL,                 /* copy native value to file         */
     NULL,                 /* post copy native value to file    */
-    NULL,                 /* get creation index            */
-    NULL,                 /* set creation index            */
-    H5O__fsinfo_debug     /* debug the message                */
+    NULL,                 /* get creation index                */
+    NULL,                 /* set creation index                */
+    H5O__fsinfo_debug     /* debug the message                 */
 }};
 
 /* Format version bounds for fsinfo message */
@@ -78,7 +78,7 @@ static const unsigned H5O_fsinfo_ver_bounds[] = {
 H5FL_DEFINE_STATIC(H5O_fsinfo_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fsinfo_decode
+ * Function:    H5O__fsinfo_decode
  *
  * Purpose:     Decode a message and return a pointer to a newly allocated one.
  *
@@ -90,15 +90,15 @@ H5FL_DEFINE_STATIC(H5O_fsinfo_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                  unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
+                   unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_fsinfo_t * fsinfo = NULL;    /* File space info message */
     H5F_mem_page_t ptype;            /* Memory type for iteration */
     unsigned       vers;             /* message version */
     void *         ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -191,10 +191,10 @@ done:
         fsinfo = H5FL_FREE(H5O_fsinfo_t, fsinfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fsinfo_decode() */
+} /* end H5O__fsinfo_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fsinfo_encode
+ * Function:    H5O__fsinfo_encode
  *
  * Purpose:     Encodes a message.
  *
@@ -205,12 +205,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_fsinfo_t *fsinfo = (const H5O_fsinfo_t *)_mesg;
     H5F_mem_page_t      ptype; /* Memory type for iteration */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -233,10 +233,10 @@ H5O_fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
             H5F_addr_encode(f, &p, fsinfo->fs_addr[ptype - 1]);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_fsinfo_encode() */
+} /* end H5O__fsinfo_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fsinfo_copy
+ * Function:    H5O__fsinfo_copy
  *
  * Purpose:     Copies a message from _MESG to _DEST, allocating _DEST if
  *              necessary.
@@ -249,13 +249,13 @@ H5O_fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fsinfo_copy(const void *_mesg, void *_dest)
+H5O__fsinfo_copy(const void *_mesg, void *_dest)
 {
     const H5O_fsinfo_t *fsinfo    = (const H5O_fsinfo_t *)_mesg;
     H5O_fsinfo_t *      dest      = (H5O_fsinfo_t *)_dest;
     void *              ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(fsinfo);
@@ -270,10 +270,10 @@ H5O_fsinfo_copy(const void *_mesg, void *_dest)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fsinfo_copy() */
+} /* end H5O__fsinfo_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fsinfo_size
+ * Function:    H5O__fsinfo_size
  *
  * Purpose:     Returns the size of the raw message in bytes not counting
  *              the message type or size fields, but only the data fields.
@@ -287,12 +287,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_fsinfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__fsinfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_fsinfo_t *fsinfo    = (const H5O_fsinfo_t *)_mesg;
     size_t              ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     ret_value = 3                            /* Version, strategy & persist */
                 + (size_t)H5F_SIZEOF_SIZE(f) /* Free-space section threshold */
@@ -305,7 +305,7 @@ H5O_fsinfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const voi
         ret_value += (H5F_MEM_PAGE_NTYPES - 1) * (size_t)H5F_SIZEOF_ADDR(f);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fsinfo_size() */
+} /* end H5O__fsinfo_size() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__fsinfo_free

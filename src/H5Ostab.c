@@ -95,7 +95,7 @@ H5O__stab_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     H5O_stab_t *stab      = NULL;
     void *      ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);

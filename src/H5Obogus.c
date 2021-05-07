@@ -38,8 +38,8 @@
 /* PRIVATE PROTOTYPES */
 static void * H5O__bogus_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static herr_t H5O_bogus_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static size_t H5O_bogus_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__bogus_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static size_t H5O__bogus_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__bogus_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
 /* This message derives from H5O message class */
@@ -49,9 +49,9 @@ const H5O_msg_class_t H5O_MSG_BOGUS_VALID[1] = {{
     0,                     /*native message size           */
     H5O_SHARE_IS_SHARABLE, /* messages are sharable?       */
     H5O__bogus_decode,     /*decode message                */
-    H5O_bogus_encode,      /*encode message                */
+    H5O__bogus_encode,     /*encode message                */
     NULL,                  /*copy the native value         */
-    H5O_bogus_size,        /*raw message size              */
+    H5O__bogus_size,       /*raw message size              */
     NULL,                  /*free internal memory          */
     NULL,                  /*free method			*/
     NULL,                  /* file delete method		*/
@@ -73,9 +73,9 @@ const H5O_msg_class_t H5O_MSG_BOGUS_INVALID[1] = {{
     0,                     /*native message size           */
     H5O_SHARE_IS_SHARABLE, /* messages are sharable?       */
     H5O__bogus_decode,     /*decode message                */
-    H5O_bogus_encode,      /*encode message                */
+    H5O__bogus_encode,     /*encode message                */
     NULL,                  /*copy the native value         */
-    H5O_bogus_size,        /*raw message size              */
+    H5O__bogus_size,       /*raw message size              */
     NULL,                  /*free internal memory          */
     NULL,                  /*free method                   */
     NULL,                  /* file delete method           */
@@ -140,7 +140,7 @@ done:
 } /* end H5O__bogus_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_bogus_encode
+ * Function:    H5O__bogus_encode
  *
  * Purpose:     Encodes a "bogus" message.
  *
@@ -152,10 +152,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_bogus_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                 const void H5_ATTR_UNUSED *mesg)
+H5O__bogus_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
+                  const void H5_ATTR_UNUSED *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -166,10 +166,10 @@ H5O_bogus_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
     UINT32ENCODE(p, H5O_BOGUS_VALUE);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_bogus_encode() */
+} /* end H5O__bogus_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_bogus_size
+ * Function:    H5O__bogus_size
  *
  * Purpose:     Returns the size of the raw message in bytes not
  *              counting the message typ or size fields, but only the data
@@ -186,13 +186,13 @@ H5O_bogus_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_bogus_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
-               const void H5_ATTR_UNUSED *mesg)
+H5O__bogus_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
+                const void H5_ATTR_UNUSED *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(4)
-} /* end H5O_bogus_size() */
+} /* end H5O__bogus_size() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__bogus_debug

@@ -32,9 +32,9 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O__name_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static herr_t H5O_name_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_name_copy(const void *_mesg, void *_dest);
-static size_t H5O_name_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__name_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void * H5O__name_copy(const void *_mesg, void *_dest);
+static size_t H5O__name_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__name_reset(void *_mesg);
 static herr_t H5O__name_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -45,9 +45,9 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
     sizeof(H5O_name_t), /*native message size           */
     0,                  /* messages are sharable?       */
     H5O__name_decode,   /*decode message                */
-    H5O_name_encode,    /*encode message                */
-    H5O_name_copy,      /*copy the native value         */
-    H5O_name_size,      /*raw message size              */
+    H5O__name_encode,   /*encode message                */
+    H5O__name_copy,     /*copy the native value         */
+    H5O__name_size,     /*raw message size              */
     H5O__name_reset,    /*free internal memory          */
     NULL,               /* free method			*/
     NULL,               /* file delete method		*/
@@ -108,7 +108,7 @@ done:
 } /* end H5O__name_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_name_encode
+ * Function:    H5O__name_encode
  *
  * Purpose:     Encodes a name message.
  *
@@ -120,11 +120,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
+                 const void *_mesg)
 {
     const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -135,10 +136,10 @@ H5O_name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, 
     HDstrcpy((char *)p, mesg->s);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5O__name_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_name_copy
+ * Function:    H5O__name_copy
  *
  * Purpose:     Copies a message from _MESG to _DEST, allocating _DEST if
  *              necessary.
@@ -153,13 +154,13 @@ H5O_name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, 
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_name_copy(const void *_mesg, void *_dest)
+H5O__name_copy(const void *_mesg, void *_dest)
 {
     const H5O_name_t *mesg      = (const H5O_name_t *)_mesg;
     H5O_name_t *      dest      = (H5O_name_t *)_dest;
     void *            ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(mesg);
@@ -181,10 +182,10 @@ done:
             dest = (H5O_name_t *)H5MM_xfree(dest);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_name_copy() */
+} /* end H5O__name_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_name_size
+ * Function:    H5O__name_size
  *
  * Purpose:     Returns the size of the raw message in bytes not
  *              counting the message typ or size fields, but only the data
@@ -201,12 +202,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_name_t *mesg      = (const H5O_name_t *)_mesg;
     size_t            ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -215,7 +216,7 @@ H5O_name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
     ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_name_size() */
+} /* end H5O__name_size() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__name_reset
