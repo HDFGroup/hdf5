@@ -55,7 +55,7 @@ char prop3_def[10] = "Ten chars"; /* Property 3 default value */
 #define PROP3_DEF_VALUE (&prop3_def)
 
 #define PROP4_NAME "Property 4"
-double prop4_def = 1.41F; /* Property 4 default value */
+double prop4_def = 1.41; /* Property 4 default value */
 #define PROP4_SIZE      sizeof(prop4_def)
 #define PROP4_DEF_VALUE (&prop4_def)
 
