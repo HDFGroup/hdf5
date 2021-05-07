@@ -147,8 +147,7 @@ H5_DLL herr_t H5VL__native_introspect_opt_query(void *obj, H5VL_subclass_t cls, 
 /* Blob callbacks */
 H5_DLL herr_t H5VL__native_blob_put(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
 H5_DLL herr_t H5VL__native_blob_get(void *obj, const void *blob_id, void *buf, size_t size, void *ctx);
-H5_DLL herr_t H5VL__native_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_t specific_type,
-                                         va_list arguments);
+H5_DLL herr_t H5VL__native_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_args_t *args);
 
 /* Token callbacks */
 H5_DLL herr_t H5VL__native_token_cmp(void *obj, const H5O_token_t *token1, const H5O_token_t *token2,

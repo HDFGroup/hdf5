@@ -182,7 +182,7 @@ static herr_t H5VL__blob_put(void *obj, const H5VL_class_t *cls, const void *buf
 static herr_t H5VL__blob_get(void *obj, const H5VL_class_t *cls, const void *blob_id, void *buf, size_t size,
                              void *ctx);
 static herr_t H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id,
-                                  H5VL_blob_specific_t specific_type, va_list arguments);
+                                  H5VL_blob_specific_args_t *args);
 static herr_t H5VL__blob_optional(void *obj, const H5VL_class_t *cls, void *blob_id,
                                   H5VL_blob_optional_t opt_type, va_list arguments);
 static herr_t H5VL__token_cmp(void *obj, const H5VL_class_t *cls, const H5O_token_t *token1,
@@ -7631,8 +7631,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob_specific_t specific_type,
-                    va_list arguments)
+H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob_specific_args_t *args)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -7648,7 +7647,7 @@ H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'blob specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->blob_cls.specific)(obj, blob_id, specific_type, arguments) < 0)
+    if ((cls->blob_cls.specific)(obj, blob_id, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback")
 
 done:
@@ -7666,10 +7665,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specific_t specific_type, ...)
+H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specific_args_t *args)
 {
-    va_list arguments;             /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;   /* Whether the va_list has been started */
     herr_t  ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -7679,16 +7676,10 @@ H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specif
     HDassert(blob_id);
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, specific_type);
-    arg_started = TRUE;
-    if (H5VL__blob_specific(vol_obj->data, vol_obj->connector->cls, blob_id, specific_type, arguments) < 0)
+    if (H5VL__blob_specific(vol_obj->data, vol_obj->connector->cls, blob_id, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_blob_specific() */
 
@@ -7702,14 +7693,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_t specific_type,
-                  va_list arguments)
+H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_args_t *args)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*xVBx", obj, connector_id, blob_id, specific_type, arguments);
 
     /* Get class pointer */
     if (NULL == obj)
@@ -7718,55 +7707,12 @@ H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specif
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding VOL callback */
-    if (H5VL__blob_specific(obj, cls, blob_id, specific_type, arguments) < 0)
+    if (H5VL__blob_specific(obj, cls, blob_id, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "blob specific operation failed")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLblob_specific() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLblob_specific_vararg
- *
- * Purpose: Specific operation on blobs through the VOL
- *
- * Note:        Same as H5VLblob_specific, but uses varargs instead of a va_list
- *
- * Return:      SUCCEED / FAIL
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLblob_specific_vararg(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_t specific_type,
-                         ...)
-{
-    H5VL_class_t *cls;                   /* VOL connector's class struct */
-    va_list       arguments;             /* Argument list passed from the API call */
-    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
-    herr_t        ret_value   = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xi*xVB", obj, connector_id, blob_id, specific_type);
-
-    /* Get class pointer */
-    if (NULL == obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
-    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-    /* Call the corresponding VOL callback */
-    HDva_start(arguments, specific_type);
-    arg_started = TRUE;
-    if (H5VL__blob_specific(obj, cls, blob_id, specific_type, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "blob specific operation failed")
-
-done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
-    FUNC_LEAVE_API_NOINIT(ret_value)
-} /* end H5VLblob_specific_vararg() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__blob_optional

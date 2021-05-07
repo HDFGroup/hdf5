@@ -848,6 +848,7 @@ H5T__vlen_disk_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, size_
 static herr_t
 H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull)
 {
+    H5VL_blob_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     uint8_t *vl        = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t   ret_value = SUCCEED;        /* Return value */
 
@@ -861,9 +862,16 @@ H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull)
     /* Skip the sequence's length */
     vl += 4;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_BLOB_ISNULL;
+    vol_cb_args.args.is_null.isnull = FALSE;
+
     /* Check if blob ID is "nil" */
-    if (H5VL_blob_specific(file, vl, H5VL_BLOB_ISNULL, isnull) < 0)
+    if (H5VL_blob_specific(file, vl, &vol_cb_args) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to check if a blob ID is 'nil'")
+
+    /* Set return value */
+    *isnull = vol_cb_args.args.is_null.isnull;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -884,6 +892,7 @@ done:
 static herr_t
 H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *bg)
 {
+    H5VL_blob_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     uint8_t *vl        = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t   ret_value = SUCCEED;        /* Return value */
 
@@ -902,8 +911,11 @@ H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *bg)
     /* Set the length of the sequence */
     UINT32ENCODE(vl, 0);
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_BLOB_SETNULL;
+
     /* Set blob ID to "nil" */
-    if (H5VL_blob_specific(file, vl, H5VL_BLOB_SETNULL) < 0)
+    if (H5VL_blob_specific(file, vl, &vol_cb_args) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set a blob ID to 'nil'")
 
 done:
@@ -1020,9 +1032,15 @@ H5T__vlen_disk_delete(H5VL_object_t *file, const void *_vl)
         UINT32DECODE(vl, seq_len);
 
         /* Delete object, if length > 0 */
-        if (seq_len > 0)
-            if (H5VL_blob_specific(file, (void *)vl, H5VL_BLOB_DELETE) < 0) /* Casting away 'const' OK -QAK */
+        if (seq_len > 0) {
+            H5VL_blob_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
+
+            /* Set up VOL callback arguments */
+            vol_cb_args.op_type           = H5VL_BLOB_DELETE;
+
+            if (H5VL_blob_specific(file, (void *)vl, &vol_cb_args) < 0) /* Casting away 'const' OK -QAK */
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to delete blob")
+        } /* end if */
     } /* end if */
 
 done:
