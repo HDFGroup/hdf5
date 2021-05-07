@@ -459,8 +459,8 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     (cache_ptr->resize_ctl).max_increment       = H5C__DEF_AR_MAX_INCREMENT;
 
     (cache_ptr->resize_ctl).flash_incr_mode = H5C_flash_incr__off;
-    (cache_ptr->resize_ctl).flash_multiple  = 1.0f;
-    (cache_ptr->resize_ctl).flash_threshold = 0.25f;
+    (cache_ptr->resize_ctl).flash_multiple  = 1.0;
+    (cache_ptr->resize_ctl).flash_threshold = 0.25;
 
     (cache_ptr->resize_ctl).decr_mode              = H5C_decr__off;
     (cache_ptr->resize_ctl).upper_hr_threshold     = H5C__DEF_AR_UPPER_THRESHHOLD;
@@ -2718,7 +2718,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
             break;
 
         case H5C_incr__threshold:
-            if ((config_ptr->lower_hr_threshold <= (double)0.0f) || (config_ptr->increment <= (double)1.0f) ||
+            if ((config_ptr->lower_hr_threshold <= 0.0) || (config_ptr->increment <= 1.0) ||
                 ((config_ptr->apply_max_increment) && (config_ptr->max_increment <= 0)))
                 cache_ptr->size_increase_possible = FALSE;
             break;
@@ -2738,21 +2738,21 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
             break;
 
         case H5C_decr__threshold:
-            if ((config_ptr->upper_hr_threshold >= (double)1.0f) || (config_ptr->decrement >= (double)1.0f) ||
+            if ((config_ptr->upper_hr_threshold >= 1.0) || (config_ptr->decrement >= 1.0) ||
                 ((config_ptr->apply_max_decrement) && (config_ptr->max_decrement <= 0)))
                 cache_ptr->size_decrease_possible = FALSE;
             break;
 
         case H5C_decr__age_out:
-            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= (double)1.0f)) ||
+            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= 1.0)) ||
                 ((config_ptr->apply_max_decrement) && (config_ptr->max_decrement <= 0)))
                 cache_ptr->size_decrease_possible = FALSE;
             break;
 
         case H5C_decr__age_out_with_threshold:
-            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= (double)1.0f)) ||
+            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= 1.0)) ||
                 ((config_ptr->apply_max_decrement) && (config_ptr->max_decrement <= 0)) ||
-                (config_ptr->upper_hr_threshold >= (double)1.0f))
+                (config_ptr->upper_hr_threshold >= 1.0))
                 cache_ptr->size_decrease_possible = FALSE;
             break;
 
@@ -3730,10 +3730,8 @@ done:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                             "initial_size must be in the interval [min_size, max_size]")
 
-            if ((config_ptr->min_clean_fraction < (double)0.0f) ||
-                (config_ptr->min_clean_fraction > (double)1.0f))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "min_clean_fraction must be in the interval [0.0, 1.0]")
+        if ((config_ptr->min_clean_fraction < 0.0) || (config_ptr->min_clean_fraction > 1.0))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_clean_fraction must be in the interval [0.0, 1.0]")
 
             if (config_ptr->epoch_length < H5C__MIN_AR_EPOCH_LENGTH)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too small")
@@ -3746,15 +3744,13 @@ done:
             if ((config_ptr->incr_mode != H5C_incr__off) && (config_ptr->incr_mode != H5C_incr__threshold))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid incr_mode")
 
-            if (config_ptr->incr_mode == H5C_incr__threshold) {
-                if ((config_ptr->lower_hr_threshold < (double)0.0f) ||
-                    (config_ptr->lower_hr_threshold > (double)1.0f))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "lower_hr_threshold must be in the range [0.0, 1.0]")
+        if (config_ptr->incr_mode == H5C_incr__threshold) {
+            if ((config_ptr->lower_hr_threshold < 0.0) || (config_ptr->lower_hr_threshold > 1.0))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "lower_hr_threshold must be in the range [0.0, 1.0]")
 
-                if (config_ptr->increment < (double)1.0f)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "increment must be greater than or equal to 1.0")
+            if (config_ptr->increment < 1.0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "increment must be greater than or equal to 1.0")
 
                 /* no need to check max_increment, as it is a size_t,
                  * and thus must be non-negative.
@@ -3766,16 +3762,14 @@ done:
                     /* nothing to do here */
                     break;
 
-                case H5C_flash_incr__add_space:
-                    if ((config_ptr->flash_multiple < (double)0.1f) ||
-                        (config_ptr->flash_multiple > (double)10.0f))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                    "flash_multiple must be in the range [0.1, 10.0]")
-                    if ((config_ptr->flash_threshold < (double)0.1f) ||
-                        (config_ptr->flash_threshold > (double)1.0f))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                    "flash_threshold must be in the range [0.1, 1.0]")
-                    break;
+            case H5C_flash_incr__add_space:
+                if ((config_ptr->flash_multiple < 0.1) || (config_ptr->flash_multiple > 10.0))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "flash_multiple must be in the range [0.1, 10.0]")
+                if ((config_ptr->flash_threshold < 0.1) || (config_ptr->flash_threshold > 1.0))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "flash_threshold must be in the range [0.1, 1.0]")
+                break;
 
                 default:
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid flash_incr_mode")
@@ -3792,12 +3786,12 @@ done:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid decr_mode")
             }
 
-            if (config_ptr->decr_mode == H5C_decr__threshold) {
-                if (config_ptr->upper_hr_threshold > (double)1.0f)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "upper_hr_threshold must be <= 1.0")
+        if (config_ptr->decr_mode == H5C_decr__threshold) {
+            if (config_ptr->upper_hr_threshold > 1.0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "upper_hr_threshold must be <= 1.0")
 
-                if ((config_ptr->decrement > (double)1.0f) || (config_ptr->decrement < (double)0.0f))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "decrement must be in the interval [0.0, 1.0]")
+            if ((config_ptr->decrement > 1.0) || (config_ptr->decrement < 0.0))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "decrement must be in the interval [0.0, 1.0]")
 
                 /* no need to check max_decrement as it is a size_t
                  * and thus must be non-negative.
@@ -3812,31 +3806,29 @@ done:
                 if (config_ptr->epochs_before_eviction > H5C__MAX_EPOCH_MARKERS)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction too big")
 
-                if ((config_ptr->apply_empty_reserve) && ((config_ptr->empty_reserve > (double)1.0f) ||
-                                                          (config_ptr->empty_reserve < (double)0.0f)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "empty_reserve must be in the interval [0.0, 1.0]")
+            if ((config_ptr->apply_empty_reserve) &&
+                ((config_ptr->empty_reserve > 1.0) || (config_ptr->empty_reserve < 0.0)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty_reserve must be in the interval [0.0, 1.0]")
 
                 /* no need to check max_decrement as it is a size_t
                  * and thus must be non-negative.
                  */
             } /* H5C_decr__age_out || H5C_decr__age_out_with_threshold */
 
-            if (config_ptr->decr_mode == H5C_decr__age_out_with_threshold) {
-                if ((config_ptr->upper_hr_threshold > (double)1.0f) ||
-                    (config_ptr->upper_hr_threshold < (double)0.0f))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "upper_hr_threshold must be in the interval [0.0, 1.0]")
-            } /* H5C_decr__age_out_with_threshold */
-        }     /* H5C_RESIZE_CFG__VALIDATE_DECREMENT */
+        if (config_ptr->decr_mode == H5C_decr__age_out_with_threshold) {
+            if ((config_ptr->upper_hr_threshold > 1.0) || (config_ptr->upper_hr_threshold < 0.0))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "upper_hr_threshold must be in the interval [0.0, 1.0]")
+        } /* H5C_decr__age_out_with_threshold */
+    }     /* H5C_RESIZE_CFG__VALIDATE_DECREMENT */
 
-        if ((tests & H5C_RESIZE_CFG__VALIDATE_INTERACTIONS) != 0) {
-            if ((config_ptr->incr_mode == H5C_incr__threshold) &&
-                ((config_ptr->decr_mode == H5C_decr__threshold) ||
-                 (config_ptr->decr_mode == H5C_decr__age_out_with_threshold)) &&
-                (config_ptr->lower_hr_threshold >= config_ptr->upper_hr_threshold))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "conflicting threshold fields in config")
-        } /* H5C_RESIZE_CFG__VALIDATE_INTERACTIONS */
+    if ((tests & H5C_RESIZE_CFG__VALIDATE_INTERACTIONS) != 0) {
+        if ((config_ptr->incr_mode == H5C_incr__threshold) &&
+            ((config_ptr->decr_mode == H5C_decr__threshold) ||
+             (config_ptr->decr_mode == H5C_decr__age_out_with_threshold)) &&
+            (config_ptr->lower_hr_threshold >= config_ptr->upper_hr_threshold))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "conflicting threshold fields in config")
+    } /* H5C_RESIZE_CFG__VALIDATE_INTERACTIONS */
 
 done:
         FUNC_LEAVE_NOAPI(ret_value)
