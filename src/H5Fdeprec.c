@@ -15,7 +15,7 @@
  *
  * Created:	H5Fdeprec.c
  *		October 1 2009
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5F interface.  These
  *              functions are here for compatibility purposes and may be
@@ -87,7 +87,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
+H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo /*out*/)
 {
     H5VL_object_t *vol_obj = NULL;
     H5I_type_t     type;
@@ -95,7 +95,7 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*!", obj_id, finfo);
+    H5TRACE2("e", "ix", obj_id, finfo);
 
     /* Check args */
     if (!finfo)

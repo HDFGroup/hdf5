@@ -62,7 +62,7 @@
 static herr_t H5HF__huge_bt2_create(H5HF_hdr_t *hdr);
 
 /* Local 'huge' object support routines */
-static hsize_t H5HF_huge_new_id(H5HF_hdr_t *hdr);
+static hsize_t H5HF__huge_new_id(H5HF_hdr_t *hdr);
 static herr_t  H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_operator_t op,
                                   void *op_data);
 
@@ -113,32 +113,32 @@ H5HF__huge_bt2_create(H5HF_hdr_t *hdr)
     if (hdr->huge_ids_direct) {
         if (hdr->filter_len > 0) {
             bt2_cparam.rrec_size =
-                (size_t)((unsigned)hdr->sizeof_addr     /* Address of object */
-                         + (unsigned)hdr->sizeof_size   /* Length of object */
-                         + (unsigned)4                  /* Filter mask for filtered object */
-                         + (unsigned)hdr->sizeof_size); /* Size of de-filtered object in memory */
+                (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
+                           + (unsigned)hdr->sizeof_size   /* Length of object */
+                           + (unsigned)4                  /* Filter mask for filtered object */
+                           + (unsigned)hdr->sizeof_size); /* Size of de-filtered object in memory */
             bt2_cparam.cls = H5HF_HUGE_BT2_FILT_DIR;
         } /* end if */
         else {
-            bt2_cparam.rrec_size = (size_t)((unsigned)hdr->sizeof_addr     /* Address of object */
-                                            + (unsigned)hdr->sizeof_size); /* Length of object */
+            bt2_cparam.rrec_size = (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
+                                              + (unsigned)hdr->sizeof_size); /* Length of object */
             bt2_cparam.cls       = H5HF_HUGE_BT2_DIR;
         } /* end else */
     }     /* end if */
     else {
         if (hdr->filter_len > 0) {
             bt2_cparam.rrec_size =
-                (size_t)((unsigned)hdr->sizeof_addr     /* Address of filtered object */
-                         + (unsigned)hdr->sizeof_size   /* Length of filtered object */
-                         + (unsigned)4                  /* Filter mask for filtered object */
-                         + (unsigned)hdr->sizeof_size   /* Size of de-filtered object in memory */
-                         + (unsigned)hdr->sizeof_size); /* Unique ID for object */
+                (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of filtered object */
+                           + (unsigned)hdr->sizeof_size   /* Length of filtered object */
+                           + (unsigned)4                  /* Filter mask for filtered object */
+                           + (unsigned)hdr->sizeof_size   /* Size of de-filtered object in memory */
+                           + (unsigned)hdr->sizeof_size); /* Unique ID for object */
             bt2_cparam.cls = H5HF_HUGE_BT2_FILT_INDIR;
         } /* end if */
         else {
-            bt2_cparam.rrec_size = (size_t)((unsigned)hdr->sizeof_addr     /* Address of object */
-                                            + (unsigned)hdr->sizeof_size   /* Length of object */
-                                            + (unsigned)hdr->sizeof_size); /* Unique ID for object */
+            bt2_cparam.rrec_size = (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
+                                              + (unsigned)hdr->sizeof_size   /* Length of object */
+                                              + (unsigned)hdr->sizeof_size); /* Unique ID for object */
             bt2_cparam.cls       = H5HF_HUGE_BT2_INDIR;
         } /* end else */
     }     /* end else */
@@ -160,7 +160,7 @@ done:
 } /* end H5HF__huge_bt2_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_huge_init
+ * Function:	H5HF__huge_init
  *
  * Purpose:	Initialize information for tracking 'huge' objects
  *
@@ -172,9 +172,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_huge_init(H5HF_hdr_t *hdr)
+H5HF__huge_init(H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -225,10 +225,10 @@ H5HF_huge_init(H5HF_hdr_t *hdr)
     hdr->huge_bt2 = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_huge_init() */
+} /* end H5HF__huge_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_huge_new_id
+ * Function:	H5HF__huge_new_id
  *
  * Purpose:	Determine a new ID for an indirectly accessed 'huge' object
  *              (either filtered or not)
@@ -241,12 +241,12 @@ H5HF_huge_init(H5HF_hdr_t *hdr)
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5HF_huge_new_id(H5HF_hdr_t *hdr)
+H5HF__huge_new_id(H5HF_hdr_t *hdr)
 {
     hsize_t new_id;        /* New object's ID */
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -272,7 +272,7 @@ H5HF_huge_new_id(H5HF_hdr_t *hdr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_huge_new_id() */
+} /* end H5HF__huge_new_id() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__huge_insert
@@ -415,7 +415,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
         hsize_t                        new_id;         /* New ID for object */
 
         /* Get new ID for object */
-        if (0 == (new_id = H5HF_huge_new_id(hdr)))
+        if (0 == (new_id = H5HF__huge_new_id(hdr)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't generate new ID for object")
 
         if (hdr->filter_len > 0) {
@@ -453,7 +453,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
     hdr->huge_nobjs++;
 
     /* Mark heap header as modified */
-    if (H5HF_hdr_dirty(hdr) < 0)
+    if (H5HF__hdr_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
 
 done:
@@ -1030,7 +1030,7 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     hdr->huge_nobjs--;
 
     /* Mark heap header as modified */
-    if (H5HF_hdr_dirty(hdr) < 0)
+    if (H5HF__hdr_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
 
 done:
@@ -1090,7 +1090,7 @@ H5HF__huge_term(H5HF_hdr_t *hdr)
         hdr->huge_ids_wrapped = FALSE;
 
         /* Mark heap header as modified */
-        if (H5HF_hdr_dirty(hdr) < 0)
+        if (H5HF__hdr_dirty(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
     } /* end if */
 

@@ -178,7 +178,7 @@ done:
 } /* end H5HF__iblock_unpin() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_iblock_incr
+ * Function:	H5HF__iblock_incr
  *
  * Purpose:	Increment reference count on shared indirect block
  *
@@ -190,11 +190,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_iblock_incr(H5HF_indirect_t *iblock)
+H5HF__iblock_incr(H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(iblock);
@@ -210,7 +210,7 @@ H5HF_iblock_incr(H5HF_indirect_t *iblock)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_iblock_incr() */
+} /* end H5HF__iblock_incr() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__iblock_decr
@@ -283,7 +283,7 @@ H5HF__iblock_decr(H5HF_indirect_t *iblock)
         } /* end if */
         else {
             /* Destroy the indirect block */
-            if (H5HF_man_iblock_dest(iblock) < 0)
+            if (H5HF__man_iblock_dest(iblock) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
         } /* end else */
     }     /* end if */
@@ -293,7 +293,7 @@ done:
 } /* end H5HF__iblock_decr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_iblock_dirty
+ * Function:	H5HF__iblock_dirty
  *
  * Purpose:	Mark indirect block as dirty
  *
@@ -305,11 +305,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_iblock_dirty(H5HF_indirect_t *iblock)
+H5HF__iblock_dirty(H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(iblock);
@@ -320,7 +320,7 @@ H5HF_iblock_dirty(H5HF_indirect_t *iblock)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_iblock_dirty() */
+} /* end H5HF__iblock_dirty() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__man_iblock_root_create
@@ -402,7 +402,7 @@ H5HF__man_iblock_root_create(H5HF_hdr_t *hdr, size_t min_dblock_size)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
         dblock->fd_parent = iblock;
 
-        if (H5HF_man_iblock_attach(iblock, 0, hdr->man_dtable.table_addr) < 0)
+        if (H5HF__man_iblock_attach(iblock, 0, hdr->man_dtable.table_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL,
                         "can't attach root direct block to parent indirect block")
 
@@ -430,9 +430,9 @@ H5HF__man_iblock_root_create(H5HF_hdr_t *hdr, size_t min_dblock_size)
     } /* end if */
 
     /* Start iterator at correct location */
-    if (H5HF_hdr_start_iter(hdr, iblock,
-                            (hsize_t)(have_direct_block ? hdr->man_dtable.cparam.start_block_size : 0),
-                            have_direct_block) < 0)
+    if (H5HF__hdr_start_iter(hdr, iblock,
+                             (hsize_t)(have_direct_block ? hdr->man_dtable.cparam.start_block_size : 0),
+                             have_direct_block) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize block iterator")
 
     /* Check for skipping over direct blocks, in order to get to large enough block */
@@ -443,7 +443,7 @@ H5HF__man_iblock_root_create(H5HF_hdr_t *hdr, size_t min_dblock_size)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't add skipped blocks to heap's free space")
 
     /* Mark indirect block as modified */
-    if (H5HF_iblock_dirty(iblock) < 0)
+    if (H5HF__iblock_dirty(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark indirect block as dirty")
 
     /* Unprotect root indirect block (it's pinned by the iterator though) */
@@ -465,7 +465,7 @@ H5HF__man_iblock_root_create(H5HF_hdr_t *hdr, size_t min_dblock_size)
         acc_dblock_free -= hdr->man_dtable.row_tot_dblock_free[0];
 
     /* Extend heap to cover new root indirect block */
-    if (H5HF_hdr_adjust_heap(hdr, hdr->man_dtable.row_block_off[nrows], (hssize_t)acc_dblock_free) < 0)
+    if (H5HF__hdr_adjust_heap(hdr, hdr->man_dtable.row_block_off[nrows], (hssize_t)acc_dblock_free) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block")
 
 done:
@@ -505,7 +505,7 @@ H5HF__man_iblock_root_double(H5HF_hdr_t *hdr, size_t min_dblock_size)
     FUNC_ENTER_PACKAGE
 
     /* Get "new block" iterator information */
-    if (H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
+    if (H5HF__man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location")
     next_size = hdr->man_dtable.row_block_size[next_row];
 
@@ -525,7 +525,7 @@ H5HF__man_iblock_root_double(H5HF_hdr_t *hdr, size_t min_dblock_size)
         skip_direct_rows = TRUE;
 
         /* Make certain we allocate at least the required row for the block requested */
-        min_nrows = 1 + H5HF_dtable_size_to_row(&hdr->man_dtable, min_dblock_size);
+        min_nrows = 1 + H5HF__dtable_size_to_row(&hdr->man_dtable, min_dblock_size);
 
         /* Set the information for the next block, of the appropriate size */
         new_next_entry = (min_nrows - 1) * hdr->man_dtable.cparam.width;
@@ -638,7 +638,7 @@ H5HF__man_iblock_root_double(H5HF_hdr_t *hdr, size_t min_dblock_size)
     } /* end if */
 
     /* Mark indirect block as dirty */
-    if (H5HF_iblock_dirty(iblock) < 0)
+    if (H5HF__iblock_dirty(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark indirect block as dirty")
 
     /* Update other shared header info */
@@ -646,8 +646,8 @@ H5HF__man_iblock_root_double(H5HF_hdr_t *hdr, size_t min_dblock_size)
     hdr->man_dtable.table_addr     = new_addr;
 
     /* Extend heap to cover new root indirect block */
-    if (H5HF_hdr_adjust_heap(hdr, 2 * hdr->man_dtable.row_block_off[new_nrows - 1],
-                             (hssize_t)acc_dblock_free) < 0)
+    if (H5HF__hdr_adjust_heap(hdr, 2 * hdr->man_dtable.row_block_off[new_nrows - 1],
+                              (hssize_t)acc_dblock_free) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block")
 
 done:
@@ -769,7 +769,7 @@ H5HF__man_iblock_root_halve(H5HF_indirect_t *iblock)
     } /* end if */
 
     /* Mark indirect block as dirty */
-    if (H5HF_iblock_dirty(iblock) < 0)
+    if (H5HF__iblock_dirty(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark indirect block as dirty")
 
     /* Update other shared header info */
@@ -777,8 +777,8 @@ H5HF__man_iblock_root_halve(H5HF_indirect_t *iblock)
     hdr->man_dtable.table_addr     = new_addr;
 
     /* Shrink heap to only cover new root indirect block */
-    if (H5HF_hdr_adjust_heap(hdr, 2 * hdr->man_dtable.row_block_off[new_nrows - 1],
-                             -(hssize_t)acc_dblock_free) < 0)
+    if (H5HF__hdr_adjust_heap(hdr, 2 * hdr->man_dtable.row_block_off[new_nrows - 1],
+                              -(hssize_t)acc_dblock_free) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce space to cover root direct block")
 
 done:
@@ -856,12 +856,12 @@ H5HF__man_iblock_root_revert(H5HF_indirect_t *root_iblock)
     hdr->man_dtable.table_addr     = dblock_addr;
 
     /* Reset 'next block' iterator */
-    if (H5HF_hdr_reset_iter(hdr, (hsize_t)dblock_size) < 0)
+    if (H5HF__hdr_reset_iter(hdr, (hsize_t)dblock_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
 
     /* Extend heap to just cover first direct block */
-    if (H5HF_hdr_adjust_heap(hdr, (hsize_t)hdr->man_dtable.cparam.start_block_size,
-                             (hssize_t)hdr->man_dtable.row_tot_dblock_free[0]) < 0)
+    if (H5HF__hdr_adjust_heap(hdr, (hsize_t)hdr->man_dtable.cparam.start_block_size,
+                              (hssize_t)hdr->man_dtable.row_tot_dblock_free[0]) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block")
 
     /* Scan free space sections to reset any 'parent' pointers */
@@ -918,11 +918,11 @@ H5HF__man_iblock_alloc_row(H5HF_hdr_t *hdr, H5HF_free_section_t **sec_node)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTREVIVE, FAIL, "can't revive indirect section")
 
     /* Get a pointer to the indirect block covering the section */
-    if (NULL == (iblock = H5HF_sect_row_get_iblock(old_sec_node)))
+    if (NULL == (iblock = H5HF__sect_row_get_iblock(old_sec_node)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve indirect block for row section")
 
     /* Hold indirect block in memory, until direct block can point to it */
-    if (H5HF_iblock_incr(iblock) < 0)
+    if (H5HF__iblock_incr(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
     iblock_held = TRUE;
 
@@ -985,7 +985,7 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
 
     /* Share common heap information */
     iblock->hdr = hdr;
-    if (H5HF_hdr_incr(hdr) < 0)
+    if (H5HF__hdr_incr(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared heap header")
 
     /* Set info for indirect block */
@@ -1054,7 +1054,7 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     iblock->par_entry = par_entry;
     if (iblock->parent) {
         /* Attach new block to parent */
-        if (H5HF_man_iblock_attach(iblock->parent, par_entry, *addr_p) < 0)
+        if (H5HF__man_iblock_attach(iblock->parent, par_entry, *addr_p) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL,
                         "can't attach indirect block to parent indirect block")
 
@@ -1086,7 +1086,7 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
 done:
     if (ret_value < 0)
         if (iblock)
-            if (H5HF_man_iblock_dest(iblock) < 0)
+            if (H5HF__man_iblock_dest(iblock) < 0)
                 HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1272,7 +1272,7 @@ done:
 } /* end H5HF__man_iblock_unprotect() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iblock_attach
+ * Function:	H5HF__man_iblock_attach
  *
  * Purpose:	Attach a child block (direct or indirect) to an indirect block
  *
@@ -1284,11 +1284,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry, haddr_t child_addr)
+H5HF__man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry, haddr_t child_addr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1298,7 +1298,7 @@ H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry, haddr_t child_ad
     HDassert(!H5F_addr_defined(iblock->ents[entry].addr));
 
     /* Increment the reference count on this indirect block */
-    if (H5HF_iblock_incr(iblock) < 0)
+    if (H5HF__iblock_incr(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
 
     /* Point at the child block */
@@ -1327,12 +1327,12 @@ H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry, haddr_t child_ad
     iblock->nchildren++;
 
     /* Mark indirect block as modified */
-    if (H5HF_iblock_dirty(iblock) < 0)
+    if (H5HF__iblock_dirty(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark indirect block as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_iblock_attach() */
+} /* end H5HF__man_iblock_attach() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__man_iblock_detach
@@ -1449,7 +1449,7 @@ H5HF__man_iblock_detach(H5HF_indirect_t *iblock, unsigned entry)
     /* If the indirect block wasn't removed already (by reverting it) */
     if (!iblock->removed_from_cache) {
         /* Mark indirect block as modified */
-        if (H5HF_iblock_dirty(iblock) < 0)
+        if (H5HF__iblock_dirty(iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark indirect block as dirty")
 
         /* Check for last child being removed from indirect block */
@@ -1552,7 +1552,7 @@ done:
 } /* end H5HF__man_iblock_detach() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iblock_entry_addr
+ * Function:	H5HF__man_iblock_entry_addr
  *
  * Purpose:	Retrieve the address of an indirect block's child
  *
@@ -1564,9 +1564,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iblock_entry_addr(H5HF_indirect_t *iblock, unsigned entry, haddr_t *child_addr)
+H5HF__man_iblock_entry_addr(H5HF_indirect_t *iblock, unsigned entry, haddr_t *child_addr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -1578,7 +1578,7 @@ H5HF_man_iblock_entry_addr(H5HF_indirect_t *iblock, unsigned entry, haddr_t *chi
     *child_addr = iblock->ents[entry].addr;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_man_iblock_entry_addr() */
+} /* end H5HF__man_iblock_entry_addr() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__man_iblock_delete
@@ -1653,7 +1653,7 @@ H5HF__man_iblock_delete(H5HF_hdr_t *hdr, haddr_t iblock_addr, unsigned iblock_nr
                     row_block_size = (hsize_t)hdr->man_dtable.row_block_size[row];
 
                     /* Compute # of rows in next child indirect block to use */
-                    child_nrows = H5HF_dtable_size_to_rows(&hdr->man_dtable, row_block_size);
+                    child_nrows = H5HF__dtable_size_to_rows(&hdr->man_dtable, row_block_size);
 
                     /* Delete child indirect block */
                     if (H5HF__man_iblock_delete(hdr, iblock->ents[entry].addr, child_nrows, iblock, entry) <
@@ -1803,7 +1803,7 @@ H5HF__man_iblock_parent_info(const H5HF_hdr_t *hdr, hsize_t block_off, hsize_t *
     HDassert(ret_entry);
 
     /* Look up row & column for object */
-    if (H5HF_dtable_lookup(&hdr->man_dtable, block_off, &row, &col) < 0)
+    if (H5HF__dtable_lookup(&hdr->man_dtable, block_off, &row, &col) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of block")
 
     /* Sanity check - first lookup must be an indirect block */
@@ -1827,7 +1827,7 @@ H5HF__man_iblock_parent_info(const H5HF_hdr_t *hdr, hsize_t block_off, hsize_t *
         prev_col = col;
 
         /* Look up row & column in new indirect block for object */
-        if (H5HF_dtable_lookup(&hdr->man_dtable, (block_off - par_block_off), &row, &col) < 0)
+        if (H5HF__dtable_lookup(&hdr->man_dtable, (block_off - par_block_off), &row, &col) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of block")
     } /* end while */
 
@@ -1844,7 +1844,7 @@ done:
 } /* end H5HF__man_iblock_par_info() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iblock_dest
+ * Function:	H5HF__man_iblock_dest
  *
  * Purpose:	Destroys a fractal heap indirect block in memory.
  *
@@ -1856,11 +1856,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iblock_dest(H5HF_indirect_t *iblock)
+H5HF__man_iblock_dest(H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1870,7 +1870,7 @@ H5HF_man_iblock_dest(H5HF_indirect_t *iblock)
 
     /* Decrement reference count on shared info */
     HDassert(iblock->hdr);
-    if (H5HF_hdr_decr(iblock->hdr) < 0)
+    if (H5HF__hdr_decr(iblock->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
     if (iblock->parent)
         if (H5HF__iblock_decr(iblock->parent) < 0)
@@ -1890,4 +1890,4 @@ H5HF_man_iblock_dest(H5HF_indirect_t *iblock)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_iblock_dest() */
+} /* end H5HF__man_iblock_dest() */

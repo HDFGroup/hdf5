@@ -66,7 +66,7 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_dtable_init
+ * Function:	H5HF__dtable_init
  *
  * Purpose:	Initialize values for doubling table
  *
@@ -78,14 +78,14 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_dtable_init(H5HF_dtable_t *dtable)
+H5HF__dtable_init(H5HF_dtable_t *dtable)
 {
     hsize_t tmp_block_size;      /* Temporary block size */
     hsize_t acc_block_off;       /* Accumulated block offset */
     size_t  u;                   /* Local index variable */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -126,10 +126,10 @@ H5HF_dtable_init(H5HF_dtable_t *dtable)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_dtable_init() */
+} /* end H5HF__dtable_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_dtable_lookup
+ * Function:	H5HF__dtable_lookup
  *
  * Purpose:	Compute the row & col of an offset in a doubling-table
  *
@@ -141,9 +141,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsigned *col)
+H5HF__dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsigned *col)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -166,10 +166,10 @@ H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsi
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_dtable_lookup() */
+} /* end H5HF__dtable_lookup() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_dtable_dest
+ * Function:	H5HF__dtable_dest
  *
  * Purpose:	Release information for doubling table
  *
@@ -181,9 +181,9 @@ H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsi
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_dtable_dest(H5HF_dtable_t *dtable)
+H5HF__dtable_dest(H5HF_dtable_t *dtable)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -203,10 +203,10 @@ H5HF_dtable_dest(H5HF_dtable_t *dtable)
     H5MM_xfree(dtable->row_max_dblock_free);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_dtable_dest() */
+} /* end H5HF__dtable_dest() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_dtable_size_to_row
+ * Function:	H5HF__dtable_size_to_row
  *
  * Purpose:	Compute row that can hold block of a certain size
  *
@@ -218,11 +218,11 @@ H5HF_dtable_dest(H5HF_dtable_t *dtable)
  *-------------------------------------------------------------------------
  */
 unsigned
-H5HF_dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
+H5HF__dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
 {
     unsigned row = 0; /* Row where block will fit */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -237,10 +237,10 @@ H5HF_dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
             1;
 
     FUNC_LEAVE_NOAPI(row)
-} /* end H5HF_dtable_size_to_row() */
+} /* end H5HF__dtable_size_to_row() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_dtable_size_to_rows
+ * Function:	H5HF__dtable_size_to_rows
  *
  * Purpose:	Compute # of rows of indirect block of a given size
  *
@@ -252,11 +252,11 @@ H5HF_dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
  *-------------------------------------------------------------------------
  */
 unsigned
-H5HF_dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
+H5HF__dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
 {
     unsigned rows = 0; /* # of rows required for indirect block */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -266,10 +266,10 @@ H5HF_dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
     rows = (H5VM_log2_gen(size) - dtable->first_row_bits) + 1;
 
     FUNC_LEAVE_NOAPI(rows)
-} /* end H5HF_dtable_size_to_rows() */
+} /* end H5HF__dtable_size_to_rows() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_dtable_span_size
+ * Function:	H5HF__dtable_span_size
  *
  * Purpose:	Compute the size covered by a span of entries
  *
@@ -281,8 +281,8 @@ H5HF_dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row, unsigned start_col,
-                      unsigned num_entries)
+H5HF__dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row, unsigned start_col,
+                       unsigned num_entries)
 {
     unsigned start_entry;       /* Entry for first block covered */
     unsigned end_row;           /* Row for last block covered */
@@ -290,7 +290,7 @@ H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row, unsigned 
     unsigned end_entry;         /* Entry for last block covered */
     hsize_t  acc_span_size = 0; /* Accumulated span size */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -334,4 +334,4 @@ H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row, unsigned 
     } /* end else */
 
     FUNC_LEAVE_NOAPI(acc_span_size)
-} /* end H5HF_sect_indirect_span_size() */
+} /* end H5HF__dtable_span_size() */

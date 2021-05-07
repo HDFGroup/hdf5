@@ -68,7 +68,7 @@
 H5FL_DEFINE(H5HF_block_loc_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_init
+ * Function:	H5HF__man_iter_init
  *
  * Purpose:	Initialize a block iterator for walking over all the blocks
  *              in a fractal heap.  (initialization finishes when iterator is
@@ -82,9 +82,9 @@ H5FL_DEFINE(H5HF_block_loc_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iter_init(H5HF_block_iter_t *biter)
+H5HF__man_iter_init(H5HF_block_iter_t *biter)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -95,7 +95,7 @@ H5HF_man_iter_init(H5HF_block_iter_t *biter)
     HDmemset(biter, 0, sizeof(H5HF_block_iter_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_man_iter_init() */
+} /* end H5HF__man_iter_init() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__man_iter_start_offset
@@ -213,7 +213,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
         biter->curr->context = iblock;
 
         /* Hold the indirect block with the location */
-        if (H5HF_iblock_incr(biter->curr->context) < 0)
+        if (H5HF__iblock_incr(biter->curr->context) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL,
                         "can't increment reference count on shared indirect block")
 
@@ -257,7 +257,7 @@ done:
 } /* end H5HF__man_iter_start_offset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_set_entry
+ * Function:	H5HF__man_iter_set_entry
  *
  * Purpose:	Set the current entry for the iterator
  *
@@ -269,9 +269,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iter_set_entry(const H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned entry)
+H5HF__man_iter_set_entry(const H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned entry)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -284,10 +284,10 @@ H5HF_man_iter_set_entry(const H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigne
     biter->curr->col   = entry % hdr->man_dtable.cparam.width;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_man_iter_set_entry() */
+} /* end H5HF__man_iter_set_entry() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_start_entry
+ * Function:	H5HF__man_iter_start_entry
  *
  * Purpose:	Initialize a block iterator to a particular location within
  *              an indirect block
@@ -300,13 +300,13 @@ H5HF_man_iter_set_entry(const H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigne
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iter_start_entry(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, H5HF_indirect_t *iblock,
-                          unsigned start_entry)
+H5HF__man_iter_start_entry(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, H5HF_indirect_t *iblock,
+                           unsigned start_entry)
 {
     H5HF_block_loc_t *new_loc   = NULL;    /* Pointer to new block location */
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -329,7 +329,7 @@ H5HF_man_iter_start_entry(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, H5HF_indire
     new_loc->up      = NULL;
 
     /* Increment reference count on indirect block */
-    if (H5HF_iblock_incr(new_loc->context) < 0)
+    if (H5HF__iblock_incr(new_loc->context) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
 
     /* Make new location the current location */
@@ -343,10 +343,10 @@ done:
         new_loc = H5FL_FREE(H5HF_block_loc_t, new_loc);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_iter_start_entry() */
+} /* end H5HF__man_iter_start_entry() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_reset
+ * Function:	H5HF__man_iter_reset
  *
  * Purpose:	Reset a block iterator to it's initial state, freeing any
  *              location context it currently has
@@ -359,11 +359,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iter_reset(H5HF_block_iter_t *biter)
+H5HF__man_iter_reset(H5HF_block_iter_t *biter)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -403,10 +403,10 @@ H5HF_man_iter_reset(H5HF_block_iter_t *biter)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_iter_reset() */
+} /* end H5HF__man_iter_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_next
+ * Function:	H5HF__man_iter_next
  *
  * Purpose:	Advance to the next block within the current block of the heap
  *
@@ -418,9 +418,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries)
+H5HF__man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -437,10 +437,10 @@ H5HF_man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries)
     /*    HDassert(biter->curr->row <= biter->curr->context->nrows); */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_man_iter_next() */
+} /* end H5HF__man_iter_next() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_up
+ * Function:	H5HF__man_iter_up
  *
  * Purpose:	Move iterator up one level
  *
@@ -452,12 +452,12 @@ H5HF_man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iter_up(H5HF_block_iter_t *biter)
+H5HF__man_iter_up(H5HF_block_iter_t *biter)
 {
     H5HF_block_loc_t *up_loc;              /* Pointer to 'up' block location */
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -483,10 +483,10 @@ H5HF_man_iter_up(H5HF_block_iter_t *biter)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_iter_up() */
+} /* end H5HF__man_iter_up() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_down
+ * Function:	H5HF__man_iter_down
  *
  * Purpose:	Move iterator down one level
  *
@@ -498,12 +498,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iter_down(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
+H5HF__man_iter_down(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
 {
     H5HF_block_loc_t *down_loc  = NULL;    /* Pointer to new 'down' block location */
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -526,7 +526,7 @@ H5HF_man_iter_down(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
     down_loc->up      = biter->curr;
 
     /* Increment reference count on indirect block */
-    if (H5HF_iblock_incr(down_loc->context) < 0)
+    if (H5HF__iblock_incr(down_loc->context) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
 
     /* Make down location the current location */
@@ -537,10 +537,10 @@ done:
         down_loc = H5FL_FREE(H5HF_block_loc_t, down_loc);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_iter_down() */
+} /* end H5HF__man_iter_down() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_curr
+ * Function:	H5HF__man_iter_curr
  *
  * Purpose:	Retrieve information about the current block iterator location
  *
@@ -552,10 +552,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_iter_curr(H5HF_block_iter_t *biter, unsigned *row, unsigned *col, unsigned *entry,
-                   H5HF_indirect_t **block)
+H5HF__man_iter_curr(H5HF_block_iter_t *biter, unsigned *row, unsigned *col, unsigned *entry,
+                    H5HF_indirect_t **block)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -574,48 +574,10 @@ H5HF_man_iter_curr(H5HF_block_iter_t *biter, unsigned *row, unsigned *col, unsig
         *block = biter->curr->context;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_man_iter_curr() */
+} /* end H5HF__man_iter_curr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_offset
- *
- * Purpose:	Retrieve offset of iterator in heap
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 25 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5HF_man_iter_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t *offset)
-{
-    hsize_t curr_offset; /* For computing offset in heap */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /*
-     * Check arguments.
-     */
-    HDassert(biter);
-    HDassert(biter->ready);
-    HDassert(biter->curr->context);
-    HDassert(offset);
-
-    /* Compute the offset in the heap */
-    curr_offset = biter->curr->context->block_off;
-    curr_offset += hdr->man_dtable.row_block_off[biter->curr->row];
-    curr_offset += biter->curr->col * hdr->man_dtable.row_block_size[biter->curr->row];
-
-    /* Assign the return value */
-    *offset = curr_offset;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_man_iter_offset() */
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_ready
+ * Function:	H5HF__man_iter_ready
  *
  * Purpose:	Query if iterator is ready to use
  *
@@ -627,9 +589,9 @@ H5HF_man_iter_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t *offset)
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5HF_man_iter_ready(H5HF_block_iter_t *biter)
+H5HF__man_iter_ready(H5HF_block_iter_t *biter)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -637,4 +599,4 @@ H5HF_man_iter_ready(H5HF_block_iter_t *biter)
     HDassert(biter);
 
     FUNC_LEAVE_NOAPI(biter->ready)
-} /* end H5HF_man_iter_ready() */
+} /* end H5HF__man_iter_ready() */

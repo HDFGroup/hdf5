@@ -58,7 +58,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_data);
+static herr_t H5HF__tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_data);
 
 /*********************/
 /* Package Variables */
@@ -73,7 +73,7 @@ static herr_t H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operato
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_tiny_init
+ * Function:    H5HF__tiny_init
  *
  * Purpose:     Initialize information for tracking 'tiny' objects
  *
@@ -85,9 +85,9 @@ static herr_t H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operato
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_tiny_init(H5HF_hdr_t *hdr)
+H5HF__tiny_init(H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -115,10 +115,10 @@ H5HF_tiny_init(H5HF_hdr_t *hdr)
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_tiny_init() */
+} /* end H5HF__tiny_init() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_tiny_insert
+ * Function:    H5HF__tiny_insert
  *
  * Purpose:     Pack a 'tiny' object in a heap ID
  *
@@ -130,13 +130,13 @@ H5HF_tiny_init(H5HF_hdr_t *hdr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_tiny_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
+H5HF__tiny_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
 {
     uint8_t *id = (uint8_t *)_id; /* Pointer to ID buffer */
     size_t   enc_obj_size;        /* Encoded object size */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -168,15 +168,15 @@ H5HF_tiny_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
     hdr->tiny_nobjs++;
 
     /* Mark heap header as modified */
-    if (H5HF_hdr_dirty(hdr) < 0)
+    if (H5HF__hdr_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_tiny_insert() */
+} /* end H5HF__tiny_insert() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_tiny_get_obj_len
+ * Function:    H5HF__tiny_get_obj_len
  *
  * Purpose:     Get the size of a 'tiny' object in a fractal heap
  *
@@ -188,11 +188,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
+H5HF__tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
 {
     size_t enc_obj_size; /* Encoded object size */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -214,10 +214,10 @@ H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
     *obj_len_p = enc_obj_size + 1;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_tiny_get_obj_len() */
+} /* end H5HF__tiny_get_obj_len() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_tiny_op_real
+ * Function:    H5HF__tiny_op_real
  *
  * Purpose:     Internal routine to perform operation on 'tiny' object
  *
@@ -229,12 +229,12 @@ H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_data)
+H5HF__tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_data)
 {
     size_t enc_obj_size;        /* Encoded object size */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -244,8 +244,8 @@ H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
     HDassert(op);
 
     /* Get the object's encoded length */
-    /* H5HF_tiny_obj_len can't fail */
-    ret_value = H5HF_tiny_get_obj_len(hdr, id, &enc_obj_size);
+    /* H5HF__tiny_obj_len can't fail */
+    ret_value = H5HF__tiny_get_obj_len(hdr, id, &enc_obj_size);
 
     /* Advance past flag byte(s) */
     if (!hdr->tiny_len_extended)
@@ -264,10 +264,10 @@ H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_tiny_op_real() */
+} /* end H5HF__tiny_op_real() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_tiny_read
+ * Function:    H5HF__tiny_read
  *
  * Purpose:     Read a 'tiny' object from the heap
  *
@@ -279,11 +279,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
+H5HF__tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -293,15 +293,15 @@ H5HF_tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
     HDassert(obj);
 
     /* Call the internal 'op' routine */
-    if (H5HF_tiny_op_real(hdr, id, H5HF_op_read, obj) < 0)
+    if (H5HF__tiny_op_real(hdr, id, H5HF__op_read, obj) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_tiny_read() */
+} /* end H5HF__tiny_read() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_tiny_op
+ * Function:    H5HF__tiny_op
  *
  * Purpose:     Operate directly on a 'tiny' object
  *
@@ -313,11 +313,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_tiny_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_data)
+H5HF__tiny_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_data)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -327,15 +327,15 @@ H5HF_tiny_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_da
     HDassert(op);
 
     /* Call the internal 'op' routine routine */
-    if (H5HF_tiny_op_real(hdr, id, op, op_data) < 0)
+    if (H5HF__tiny_op_real(hdr, id, op, op_data) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_tiny_op() */
+} /* end H5HF__tiny_op() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_tiny_remove
+ * Function:    H5HF__tiny_remove
  *
  * Purpose:     Remove a 'tiny' object from the heap statistics
  *
@@ -347,12 +347,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_tiny_remove(H5HF_hdr_t *hdr, const uint8_t *id)
+H5HF__tiny_remove(H5HF_hdr_t *hdr, const uint8_t *id)
 {
     size_t enc_obj_size;        /* Encoded object size */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -361,17 +361,17 @@ H5HF_tiny_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     HDassert(id);
 
     /* Get the object's encoded length */
-    /* H5HF_tiny_obj_len can't fail */
-    ret_value = H5HF_tiny_get_obj_len(hdr, id, &enc_obj_size);
+    /* H5HF__tiny_obj_len can't fail */
+    ret_value = H5HF__tiny_get_obj_len(hdr, id, &enc_obj_size);
 
     /* Update statistics about heap */
     hdr->tiny_size -= enc_obj_size;
     hdr->tiny_nobjs--;
 
     /* Mark heap header as modified */
-    if (H5HF_hdr_dirty(hdr) < 0)
+    if (H5HF__hdr_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_tiny_remove() */
+} /* end H5HF__tiny_remove() */
