@@ -32,11 +32,11 @@
 #define ONE_MB (ONE_KB * ONE_KB)
 #define ONE_GB (ONE_MB * ONE_KB)
 
-#define MICROSECOND 1000000.0F
+#define MICROSECOND 1000000.0
 
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes, t)                                                                                 \
-    ((fabs(t) < (double)0.0000000001F) ? (double)0.0F : ((((double)bytes) / (double)ONE_MB) / (t)))
+    ((fabs(t) < 0.0000000001) ? 0.0 : ((((double)bytes) / (double)ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE 1
@@ -169,7 +169,7 @@ write_file(Bytef *source, uLongf sourceLen)
 
     /* destination buffer needs to be at least 0.1% larger than sourceLen
      * plus 12 bytes */
-    destLen = (uLongf)((double)sourceLen + ((double)sourceLen * (double)0.1F)) + 12;
+    destLen = (uLongf)((double)sourceLen + ((double)sourceLen * 0.1)) + 12;
     dest    = (Bytef *)HDmalloc(destLen);
 
     if (!dest)
@@ -179,8 +179,8 @@ write_file(Bytef *source, uLongf sourceLen)
     compress_buffer(dest, &destLen, source, sourceLen);
     HDgettimeofday(&timer_stop, NULL);
 
-    compression_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
-                        ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / (double)MICROSECOND);
+    compression_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
+                        ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
 
     if (report_once_flag) {
         HDfprintf(stdout, "\tCompression Ratio: %g\n", ((double)destLen) / (double)sourceLen);
