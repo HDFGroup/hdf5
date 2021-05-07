@@ -23,7 +23,7 @@
 
 /* Define atomic datatypes */
 #define H5S_ALL       (hid_t)0    /**< Selection "reflector" */
-#define H5S_UNLIMITED HSIZE_UNDER /**< Unlimited extent      */
+#define H5S_UNLIMITED HSIZE_UNDEF /**< Unlimited extent      */
 
 /**
  * The maximum dataspace rank or number of dimensions
