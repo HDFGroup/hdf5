@@ -148,7 +148,11 @@ install (
 )
 
 if (NOT WIN32 AND NOT MINGW)
-  set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
+  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+    set (_PKG_CONFIG_COMPILER ${MPI_C_COMPILER})
+  else ()
+    set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
+  endif ()
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5hlcc

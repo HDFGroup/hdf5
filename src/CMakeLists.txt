@@ -1128,7 +1128,11 @@ install (
 )
 
 if (NOT WIN32)
-  set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
+  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+    set (_PKG_CONFIG_COMPILER ${MPI_C_COMPILER})
+  else ()
+    set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
+  endif ()
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5cc
@@ -1140,6 +1144,20 @@ if (NOT WIN32)
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
       COMPONENT libraries
   )
+  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+    #legacy requires a different name
+    configure_file (
+        ${HDF_RESOURCES_DIR}/libh5cc.in
+        ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
+        @ONLY
+    )
+    install (
+        FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
+        DESTINATION ${HDF5_INSTALL_BIN_DIR}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+        COMPONENT libraries
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -1153,10 +1171,11 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_VERBATIM_VARS DOXYGEN_INCLUDE_ALIASES)
   set (DOXYGEN_PROJECT_LOGO ${HDF5_DOXYGEN_DIR}/img/HDFG-logo.png)
   set (DOXYGEN_PROJECT_BRIEF "C-API Reference")
-  set (DOXYGEN_INPUT_DIRECTORY "${HDF5_SRC_DIR} ${HDF5_DOXYGEN_DIR}/dox ${HDF5_GENERATED_SOURCE_DIR}/shared")
+  set (DOXYGEN_INPUT_DIRECTORY "${HDF5_SRC_DIR} ${HDF5_DOXYGEN_DIR}/dox ${HDF5_GENERATED_SOURCE_DIR}")
   set (DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
   set (DOXYGEN_MACRO_EXPANSION YES)
   set (DOXYGEN_OUTPUT_DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs)
+  set (DOXYGEN_EXAMPLES_DIRECTORY ${HDF5_DOXYGEN_DIR}/examples)
 
 # This configure and custom target work together
   # Replace variables inside @@ with the current values

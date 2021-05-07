@@ -49,6 +49,13 @@ New Features
 
     Configuration:
     -------------
+    - CMake no longer builds the C++ library by default
+
+      HDF5_BUILD_CPP_LIB now defaults to OFF, which is in line with the
+      Autotools build defaults.
+
+      (DER - 2021/04/20)
+
     - Add CMake variable HDF5_LIB_INFIX
 
       This infix is added to all library names after 'hdf5'.
@@ -149,12 +156,11 @@ New Features
 
     Fortran Library:
     ----------------
-    - None
-
+    -
 
     C++ Library:
     ------------
-    - None
+    -
 
 
     Parallel Library:
