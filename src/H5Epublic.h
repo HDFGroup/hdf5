@@ -295,6 +295,26 @@ H5_DLL hid_t H5Eget_current_stack(void);
  * --------------------------------------------------------------------------
  * \ingroup H5E
  *
+ * \brief Appends one error stack to another, optionally closing the source
+ *        stack.
+ *
+ * \estack_id{dst_stack_id}
+ * \estack_id{src_stack_id}
+ * \param[in] close_source_stack Flag to indicate whether to close the source stack
+ * \return \herr_t
+ *
+ * \details H5Eappend_stack() appends the messages from error stack
+ *          \p src_stack_id to the error stack \p dst_stack_id.
+ *          If \p close_source_stack is \c TRUE, the source error stack
+ *          will be closed.
+ *
+ * \since 1.13.0
+ */
+H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
  * \brief Closes an error stack handle
  *
  * \estack_id{stack_id}
