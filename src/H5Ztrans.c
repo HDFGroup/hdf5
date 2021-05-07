@@ -1538,10 +1538,20 @@ H5Z_xform_create(const char *expr)
                     "unable to allocate memory for data transform expression")
 
     /* Find the number of times "x" is used in this equation, and allocate room for storing that many points
+     * A more sophisticated check is needed to support scientific notation.
      */
-    for (i = 0; i < HDstrlen(expr); i++)
-        if (HDisalpha(expr[i]))
+    for (i = 0; i < HDstrlen(expr); i++) {
+        if (HDisalpha(expr[i])) {
+            if ((i > 0) && (i < (HDstrlen(expr) - 1))) {
+                if (((expr[i] == 'E') || (expr[i] == 'e')) &&
+                    (HDisdigit(expr[i - 1]) || (expr[i - 1] == '.')) &&
+                    (HDisdigit(expr[i + 1]) || (expr[i + 1] == '-') || (expr[i + 1] == '+')))
+                    continue;
+            }
+
             count++;
+        }
+    }
 
     /* When there are no "x"'s in the equation (ie, simple transform case),
      * we don't need to allocate any space since no array will have to be

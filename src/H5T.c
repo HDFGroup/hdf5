@@ -3408,8 +3408,8 @@ done:
  * Note:      Common code for both H5T_copy and H5T_copy_reopen, as part of
  *            the const-correct datatype copying routines.
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3462,8 +3462,8 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3490,8 +3490,8 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3521,8 +3521,8 @@ done:
  *
  * Note:      Common code for both H5T_copy and H5T_copy_reopen.
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3794,8 +3794,8 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:	David Young
- *	        January 18, 2020
+ * Programmer:  David Young
+ *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -5270,7 +5270,10 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     } /* end else-if */
 
     /* Set the flag to indicate both source and destination types are compound types
-     * for the optimization of data reading (in H5Dio.c). */
+     * for the optimization of data reading (in H5Dio.c).
+     * Make sure that path->are_compounds is only TRUE for compound types.
+     */
+    path->are_compounds = FALSE;
     if (H5T_COMPOUND == H5T_get_class(src, TRUE) && H5T_COMPOUND == H5T_get_class(dst, TRUE))
         path->are_compounds = TRUE;
 
