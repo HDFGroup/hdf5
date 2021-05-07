@@ -451,7 +451,7 @@ build_match_list(const char *objname1, trav_info_t *info1, const char *objname2,
 done:
     *table_out = table;
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -483,7 +483,7 @@ trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
     const char *       ext_path;
     herr_t             ret_value = SUCCEED;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /* init linkinfo struct */
     HDmemset(&lnk_info, 0, sizeof(h5tool_link_info_t));
 
@@ -567,7 +567,7 @@ trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
 done:
     if (lnk_info.trg_path)
         HDfree(lnk_info.trg_path);
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -615,7 +615,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     trav_table_t *match_list = NULL;
     diff_err_t    ret_value  = H5DIFF_NO_ERR;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /* init filenames */
     HDmemset(filenames, 0, MAX_FILENAME * 2);
     /* init link info struct */
