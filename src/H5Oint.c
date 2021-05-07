@@ -571,7 +571,7 @@ H5O_open(H5O_loc_t *loc)
 
 #ifdef H5O_DEBUG
     if (H5DEBUG(O))
-        HDfprintf(H5DEBUG(O), "> %a\n", loc->addr);
+        HDfprintf(H5DEBUG(O), "> %" PRIuHADDR "\n", loc->addr);
 #endif
 
     /* Turn off the variable for holding file or increment open-lock counters */
@@ -802,10 +802,10 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
 #ifdef H5O_DEBUG
     if (H5DEBUG(O)) {
         if (FALSE == H5F_ID_EXISTS(loc->file) && 1 == H5F_NREFS(loc->file))
-            HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n", loc->addr,
+            HDfprintf(H5DEBUG(O), "< %" PRIuHADDR " auto %lu remaining\n", loc->addr,
                       (unsigned long)H5F_NOPEN_OBJS(loc->file));
         else
-            HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
+            HDfprintf(H5DEBUG(O), "< %" PRIuHADDR "\n", loc->addr);
     }
 #endif
 

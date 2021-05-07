@@ -15,7 +15,7 @@
  *
  * Created:	H5Ddeprec.c
  *		April 5 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5D interface.  These
  *              functions are here for compatibility purposes and may be
@@ -137,13 +137,13 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
-    /* Create the dataset through the VOL */
+    /* Create the dataset */
     if (NULL == (dset = H5VL_dataset_create(vol_obj, &loc_params, name, H5P_LINK_CREATE_DEFAULT, type_id,
                                             space_id, dcpl_id, H5P_DATASET_ACCESS_DEFAULT,
                                             H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
-    /* Get an atom for the dataset */
+    /* Register the new dataset to get an ID for it */
     if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
@@ -202,9 +202,9 @@ H5Dopen1(hid_t loc_id, const char *name)
                                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset")
 
-    /* Get an atom for the dataset */
+    /* Get an ID for the dataset */
     if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset atom")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset ID")
 
 done:
     if (H5I_INVALID_HID == ret_value)

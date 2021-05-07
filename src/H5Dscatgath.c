@@ -370,7 +370,7 @@ H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_tg
     size_t         vec_size;           /* Vector length */
     size_t         ret_value = nelmts; /* Number of elements gathered */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(buf);

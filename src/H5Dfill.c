@@ -15,7 +15,7 @@
  *
  * Created:		H5Dfill.c
  *			Jun 19 2007
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Fill value operations for datasets
  *
@@ -642,7 +642,7 @@ done:
 static herr_t
 H5D__fill_release(H5D_fill_buf_info_t *fb_info)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(fb_info);

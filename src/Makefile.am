@@ -19,9 +19,6 @@
 include $(top_srcdir)/config/commence.am
 include $(top_srcdir)/config/lt_vers.am
 
-# include Doxygen rules (requires autoconf-archive >2016-03-20)
-@DX_RULES@
-
 # How to build H5detect for number format detection.
 # Use -g to force no optimization since many compilers (e.g., Intel) takes
 # a long time to compile it with any optimization on.  H5detect is used

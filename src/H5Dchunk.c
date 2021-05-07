@@ -4978,9 +4978,9 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Resulted in division by zero")
     num_blocks = (size_t)(chunk_info->num_io / (size_t)mpi_size); /* value should be the same on all procs */
 
-    /* after evenly distributing the blocks between processes, are
-       there any leftover blocks for each individual process
-       (round-robin) */
+    /* After evenly distributing the blocks between processes, are there any
+     * leftover blocks for each individual process (round-robin)?
+     */
     leftover_blocks = (size_t)(chunk_info->num_io % (size_t)mpi_size);
 
     /* Cast values to types needed by MPI */

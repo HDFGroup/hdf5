@@ -138,7 +138,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
     /* Create the dataset */
     if (NULL == (dset = H5VL_dataset_create(vol_obj, &loc_params, name, lcpl_id, type_id, space_id, dcpl_id,
                                             dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5I_INVALID_HID, "unable to create dataset")
 
     /* Get an ID for the dataset */
     if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
@@ -187,9 +187,9 @@ done:
 hid_t
 H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id)
 {
-    void *            dset    = NULL; /* dset object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
+    void *            dset    = NULL;              /* dset object from VOL connector */
+    H5VL_object_t *   vol_obj = NULL;              /* Object for loc_id */
+    H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -222,7 +222,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
                                     dcpl_id, dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
-    /* Get an atom for the dataset */
+    /* Get an ID for the dataset */
     if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
@@ -374,13 +374,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
+H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL;    /* Dataset structure    */
     herr_t         ret_value = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Ds", dset_id, allocation);
+    H5TRACE2("e", "ix", dset_id, allocation);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -704,14 +704,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size)
+H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size /*out*/)
 {
     H5VL_object_t *vol_obj;   /* Dataset for this operation */
     hbool_t        supported; /* Whether 'get vlen buf size' operation is supported by VOL connector */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iii*h", dataset_id, type_id, space_id, size);
+    H5TRACE4("e", "iiix", dataset_id, type_id, space_id, size);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(dataset_id)))
@@ -727,7 +727,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *s
     supported = FALSE;
     if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_DATASET, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE,
                                   &supported) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'get vlen buf size' operation")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check for 'get vlen buf size' operation")
     if (supported) {
         /* Make the 'get_vlen_buf_size' callback */
         if (H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE, H5P_DATASET_XFER_DEFAULT,
@@ -911,13 +911,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_chunk_index_type(hid_t dset_id, H5D_chunk_index_t *idx_type)
+H5Dget_chunk_index_type(hid_t dset_id, H5D_chunk_index_t *idx_type /*out*/)
 {
     H5VL_object_t *vol_obj;             /* Dataset for this operation   */
     herr_t         ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Dk", dset_id, idx_type);
+    H5TRACE2("e", "ix", dset_id, idx_type);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -950,13 +950,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_nbytes)
+H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_nbytes /*out*/)
 {
     H5VL_object_t *vol_obj;             /* Dataset for this operation   */
     herr_t         ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*h*h", dset_id, offset, chunk_nbytes);
+    H5TRACE3("e", "i*hx", dset_id, offset, chunk_nbytes);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -1043,15 +1043,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *offset, unsigned *filter_mask,
-                  haddr_t *addr, hsize_t *size)
+H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *offset /*out*/,
+                  unsigned *filter_mask /*out*/, haddr_t *addr /*out*/, hsize_t *size /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL; /* Dataset for this operation */
     hsize_t        nchunks   = 0;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "iih*h*Iu*a*h", dset_id, fspace_id, chk_index, offset, filter_mask, addr, size);
+    H5TRACE7("e", "iihxxxx", dset_id, fspace_id, chk_index, offset, filter_mask, addr, size);
 
     /* Check arguments */
     if (NULL == offset && NULL == filter_mask && NULL == addr && NULL == size)
@@ -1100,14 +1100,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filter_mask, haddr_t *addr,
-                           hsize_t *size)
+H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filter_mask /*out*/,
+                           haddr_t *addr /*out*/, hsize_t *size /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL; /* Dataset for this operation */
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*h*Iu*a*h", dset_id, offset, filter_mask, addr, size);
+    H5TRACE5("e", "i*hxxx", dset_id, offset, filter_mask, addr, size);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))

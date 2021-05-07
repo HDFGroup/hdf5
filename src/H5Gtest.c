@@ -798,7 +798,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
- *              nfortne2@hdfgroup.org
  *              April 6 2011
  *
  *-------------------------------------------------------------------------
