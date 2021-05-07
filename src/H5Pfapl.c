@@ -1686,7 +1686,7 @@ H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts, size_t rdcc_nslots, 
     H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Check arguments */
-    if (rdcc_w0 < (double)0.0f || rdcc_w0 > (double)1.0f)
+    if (rdcc_w0 < 0.0 || rdcc_w0 > 1.0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "raw data cache w0 value must be between 0.0 and 1.0 inclusive")
 

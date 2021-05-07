@@ -1119,7 +1119,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     unsigned               filavail;      /* flag indicating if fill value is defined or not */
     H5Z_SO_scale_type_t    scale_type   = H5Z_SO_FLOAT_DSCALE; /* scale type */
     int                    scale_factor = 0;                   /* scale factor */
-    double                 D_val        = 0.0f;                /* decimal scale factor */
+    double                 D_val        = 0.0;                 /* decimal scale factor */
     uint32_t               minbits      = 0;                   /* minimum number of bits to store values */
     unsigned long long     minval       = 0;                   /* minimum value of input buffer */
     enum H5Z_scaleoffset_t type;                 /* memory type corresponding to dataset datatype */

@@ -6521,7 +6521,7 @@ test_set_local(hid_t fapl)
     for (i = 0; i < DSET_DIM1; i++)
         for (j = 0; j < DSET_DIM2; j++) {
             points[i][j]     = (int)n++;
-            points_dbl[i][j] = (double)1.5F * n++;
+            points_dbl[i][j] = 1.5 * n++;
         }
 
     /* Open file */
@@ -6717,7 +6717,7 @@ test_set_local(hid_t fapl)
         for (j = 0; j < dims[1]; j++) {
             /* If the difference between two values is greater than 0.001%, they're
              * considered not equal. */
-            if (!H5_DBL_REL_EQUAL(points_dbl[i][j], check_dbl[i][j], (double)0.00001F)) {
+            if (!H5_DBL_REL_EQUAL(points_dbl[i][j], check_dbl[i][j], 0.00001)) {
                 H5_FAILED();
                 HDprintf("    Line %d: Read different values than written.\n", __LINE__);
                 HDprintf("    At index %lu,%lu\n", (unsigned long)(i), (unsigned long)(j));
@@ -8804,7 +8804,7 @@ test_chunk_cache(hid_t fapl)
     /* Set new rdcc settings on fapl */
     nslots_2 = nslots_1 * 2;
     nbytes_2 = nbytes_1 * 2;
-    w0_2     = w0_1 / (double)2.0F;
+    w0_2     = w0_1 / 2.0;
     if (H5Pset_cache(fapl_local, 0, nslots_2, nbytes_2, w0_2) < 0)
         FAIL_STACK_ERROR
 

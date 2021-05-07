@@ -1157,7 +1157,7 @@ test_chunk_cache(const FileAccPropList &fapl)
         // Verify that chunk cache parameters are the same
         int    mdc_nelmts = 0;
         size_t nslots_1 = 0, nslots_4 = 0, nbytes_1 = 0, nbytes_4 = 0;
-        double w0_1 = 0.0F, w0_4 = 0.0F;
+        double w0_1 = 0.0, w0_4 = 0.0;
         fapl_def.getCache(mdc_nelmts, nslots_1, nbytes_1, w0_1);
         dapl.getChunkCache(nslots_4, nbytes_4, w0_4);
         verify_val(nslots_1, nslots_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
@@ -1175,7 +1175,7 @@ test_chunk_cache(const FileAccPropList &fapl)
         // Set new rdcc settings on fapl local
         size_t nslots_2 = nslots_1 * 2;
         size_t nbytes_2 = nbytes_1 * 2;
-        double w0_2     = w0_1 / (double)2.0F;
+        double w0_2     = w0_1 / 2.0;
         fapl_local.getCache(mdc_nelmts, nslots_2, nbytes_2, w0_2);
 
         // Create a new file using default fcpl and the passed-in fapl
