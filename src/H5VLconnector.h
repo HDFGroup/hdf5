@@ -81,7 +81,8 @@ typedef enum H5VL_dataset_get_t {
 typedef enum H5VL_dataset_specific_t {
     H5VL_DATASET_SET_EXTENT, /* H5Dset_extent                       */
     H5VL_DATASET_FLUSH,      /* H5Dflush                            */
-    H5VL_DATASET_REFRESH     /* H5Drefresh                          */
+    H5VL_DATASET_REFRESH,    /* H5Drefresh                          */
+    H5VL_DATASET_WAIT        /* H5Dwait                             */
 } H5VL_dataset_specific_t;
 
 /* Typedef for VOL connector dataset optional VOL operations */
@@ -120,7 +121,8 @@ typedef enum H5VL_file_specific_t {
     H5VL_FILE_UNMOUNT,       /* Unmount a file                   */
     H5VL_FILE_IS_ACCESSIBLE, /* Check if a file is accessible    */
     H5VL_FILE_DELETE,        /* Delete a file                    */
-    H5VL_FILE_IS_EQUAL       /* Check if two files are the same  */
+    H5VL_FILE_IS_EQUAL,      /* Check if two files are the same  */
+    H5VL_FILE_WAIT           /* Wait for async operations to complete */
 } H5VL_file_specific_t;
 
 /* Typedef for VOL connector file optional VOL operations */
@@ -184,11 +186,25 @@ typedef enum H5VL_object_specific_t {
 /* Typedef for VOL connector object optional VOL operations */
 typedef int H5VL_object_optional_t;
 
+/* Status values for async request operations */
+typedef enum H5VL_request_status_t {
+    H5VL_REQUEST_STATUS_IN_PROGRESS, /* Operation has not yet completed                       */
+    H5VL_REQUEST_STATUS_SUCCEED,     /* Operation has completed, successfully                 */
+    H5VL_REQUEST_STATUS_FAIL,        /* Operation has completed, but failed                   */
+    H5VL_REQUEST_STATUS_CANT_CANCEL, /* An attempt to cancel this operation was made, but it  */
+                                     /*  can't be canceled immediately.  The operation has    */
+                                     /*  not completed successfully or failed, and is not yet */
+                                     /*  in progress.  Another attempt to cancel it may be    */
+                                     /*  attempted and may (or may not) succeed.              */
+    H5VL_REQUEST_STATUS_CANCELED     /* Operation has not completed and was canceled          */
+} H5VL_request_status_t;
+
 /* types for async request SPECIFIC callback */
 typedef enum H5VL_request_specific_t {
-    H5VL_REQUEST_WAITANY,  /* Wait until any request completes */
-    H5VL_REQUEST_WAITSOME, /* Wait until at least one requesst completes */
-    H5VL_REQUEST_WAITALL   /* Wait until all requests complete */
+    H5VL_REQUEST_WAITANY,      /* Wait until any request completes */
+    H5VL_REQUEST_WAITSOME,     /* Wait until at least one requesst completes */
+    H5VL_REQUEST_WAITALL,      /* Wait until all requests complete */
+    H5VL_REQUEST_GET_ERR_STACK /* Retrieve error stack for failed operation */
 } H5VL_request_specific_t;
 
 /* Typedef and values for native VOL connector request optional VOL operations */
@@ -438,10 +454,14 @@ typedef struct H5VL_token_class_t {
     herr_t (*from_str)(void *obj, H5I_type_t obj_type, const char *token_str, H5O_token_t *token);
 } H5VL_token_class_t;
 
-/* Class information for each VOL connector */
+/**
+ * \ingroup H5VLDEV
+ * Class information for each VOL connector
+ */
+//! <!-- [H5VL_class_t_snip] -->
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
-    unsigned int       version;          /* VOL connector class struct version #     */
+    unsigned           version;          /* VOL connector class struct version #     */
     H5VL_class_value_t value;            /* Value to identify connector              */
     const char *       name;             /* Connector name (MUST be unique!)         */
     unsigned           cap_flags;        /* Capability flags for connector           */
@@ -471,6 +491,7 @@ typedef struct H5VL_class_t {
     herr_t (*optional)(void *obj, int op_type, hid_t dxpl_id, void **req,
                        va_list arguments); /* Optional callback */
 } H5VL_class_t;
+//! <!-- [H5VL_class_t_snip] -->
 
 /********************/
 /* Public Variables */

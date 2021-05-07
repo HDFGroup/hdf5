@@ -80,6 +80,7 @@ MAJOR, H5E_PLUGIN, Plugin for dynamically loaded library
 MAJOR, H5E_PAGEBUF, Page Buffering
 MAJOR, H5E_CONTEXT, API Context
 MAJOR, H5E_MAP, Map
+MAJOR, H5E_EVENTSET, Event Set
 MAJOR, H5E_NONE_MAJOR, No error
 
 # Sections (for grouping minor errors)
@@ -104,6 +105,7 @@ SECTION, PIPELINE, I/O pipeline errors
 SECTION, SYSTEM, System level errors
 SECTION, PLUGIN, Plugin errors
 SECTION, MAP, Map related errors
+SECTION, ASYNC, Asynchronous I/O errors
 SECTION, NONE, No error
 
 # Minor errors
@@ -203,6 +205,7 @@ MINOR, BTREE, H5E_CANTINSERT, Unable to insert object
 MINOR, BTREE, H5E_CANTLIST, Unable to list node
 MINOR, BTREE, H5E_CANTMODIFY, Unable to modify record
 MINOR, BTREE, H5E_CANTREMOVE, Unable to remove object
+MINOR, BTREE, H5E_CANTFIND, Unable to check for record
 
 # Object header related errors
 MINOR, OHDR, H5E_LINKCOUNT, Bad object header link count
@@ -281,6 +284,12 @@ MINOR, SYSTEM, H5E_SYSERRSTR, System error message
 
 # Plugin errors
 MINOR, PLUGIN, H5E_OPENERROR, Can't open directory or file
+
+# Map related errors
+MINOR, MAP, H5E_CANTPUT, Can't put value
+
+# Asynchronous operation errors
+MINOR, ASYNC, H5E_CANTWAIT, Can't wait on operation
 
 # No error, for backward compatibility */
 MINOR, NONE, H5E_NONE_MINOR, No error

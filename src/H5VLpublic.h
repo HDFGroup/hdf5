@@ -25,42 +25,97 @@
 /* Public Macros */
 /*****************/
 
+/**
+ * \ingroup H5VLDEF
+ * \brief Version # of VOL class struct & callbacks
+ *
+ * \details Each VOL connector must set the 'version' field in the H5VL_class_t
+ *          struct to the version of the H5VL_class_t struct that the connector
+ *          implements.  The HDF5 library will reject connectors with
+ *          incompatible structs.
+ */
+#define H5VL_VERSION 2
+
 /* VOL connector identifier values
  * These are H5VL_class_value_t values, NOT hid_t values!
  */
-#define H5_VOL_INVALID  (-1)  /* Invalid ID for VOL connector ID */
-#define H5_VOL_NATIVE   0     /* Native HDF5 file format VOL connector */
-#define H5_VOL_RESERVED 256   /* VOL connector IDs below this value are reserved for library use */
-#define H5_VOL_MAX      65535 /* Maximum VOL connector ID */
+/**
+ * \ingroup H5VLDEF
+ * Invalid ID for VOL connector ID
+ */
+#define H5_VOL_INVALID (-1)
+/**
+ * \ingroup H5VLDEF
+ * Native HDF5 file format VOL connector
+ */
+#define H5_VOL_NATIVE 0
+/**
+ * \ingroup H5VLDEF
+ * VOL connector IDs below this value are reserved for library use
+ */
+#define H5_VOL_RESERVED 256
+/**
+ * \ingroup H5VLDEF
+ * Maximum VOL connector ID
+ */
+#define H5_VOL_MAX 65535
+
+/* Flags to return from H5VLquery_optional API and 'opt_query' callbacks */
+/* Note: Operations which access multiple objects' data or metadata in a
+ *      container should be registered as file-level optional operations.
+ *      (e.g. "H5Dwrite_multi" takes a list of datasets to write data to, so
+ *      a VOL connector that implemented it should register it as an optional
+ *      file operation, and pass-through VOL connectors that are stacked above
+ *      the connector that registered it should assume that dataset elements
+ *      for _any_ dataset in the file could be written to)
+ */
+#define H5VL_OPT_QUERY_SUPPORTED       0x0001 /* VOL connector supports this operation */
+#define H5VL_OPT_QUERY_READ_DATA       0x0002 /* Operation reads data for object */
+#define H5VL_OPT_QUERY_WRITE_DATA      0x0004 /* Operation writes data for object */
+#define H5VL_OPT_QUERY_QUERY_METADATA  0x0008 /* Operation reads metadata for object */
+#define H5VL_OPT_QUERY_MODIFY_METADATA 0x0010 /* Operation modifies metadata for object */
+#define H5VL_OPT_QUERY_COLLECTIVE                                                                            \
+    0x0020 /* Operation is collective (operations without this flag are assumed to be independent) */
+#define H5VL_OPT_QUERY_NO_ASYNC  0x0040 /* Operation may NOT be executed asynchronously */
+#define H5VL_OPT_QUERY_MULTI_OBJ 0x0080 /* Operation involves multiple objects */
 
 /*******************/
 /* Public Typedefs */
 /*******************/
 
-/*
- * VOL connector identifiers.  Values 0 through 255 are for connectors defined
- * by the HDF5 library.  Values 256 through 511 are available for testing new
- * connectors. Subsequent values should be obtained from the HDF5 development
- * team at help@hdfgroup.org.
+/**
+ * \ingroup H5VLDEF
+ *
+ * \brief VOL connector identifiers.
+ *
+ * \details Values 0 through 255 are for connectors defined by the HDF5
+ *          library. Values 256 through 511 are available for testing new
+ *          connectors. Subsequent values should be obtained from the HDF5
+ *          development team at mailto:help@hdfgroup.org.
  */
+//! <!-- [H5VL_class_value_t_snip] -->
 typedef int H5VL_class_value_t;
+//! <!-- [H5VL_class_value_t_snip] -->
 
-/* Enum type for each VOL subclass */
-/* (Used for various queries, etc) */
+/**
+ * \ingroup H5VLDEF
+ * \details Enum type for each VOL subclass
+ *          (Used for various queries, etc)
+ */
 typedef enum H5VL_subclass_t {
-    H5VL_SUBCLS_NONE,     /* Operations outside of a subclass */
-    H5VL_SUBCLS_INFO,     /* 'Info' subclass */
-    H5VL_SUBCLS_WRAP,     /* 'Wrap' subclass */
-    H5VL_SUBCLS_ATTR,     /* 'Attribute' subclass */
-    H5VL_SUBCLS_DATASET,  /* 'Dataset' subclass */
-    H5VL_SUBCLS_DATATYPE, /* 'Named datatype' subclass */
-    H5VL_SUBCLS_FILE,     /* 'File' subclass */
-    H5VL_SUBCLS_GROUP,    /* 'Group' subclass */
-    H5VL_SUBCLS_LINK,     /* 'Link' subclass */
-    H5VL_SUBCLS_OBJECT,   /* 'Object' subclass */
-    H5VL_SUBCLS_REQUEST,  /* 'Request' subclass */
-    H5VL_SUBCLS_BLOB,     /* 'Blob' subclass */
-    H5VL_SUBCLS_TOKEN     /* 'Token' subclass */
+    H5VL_SUBCLS_NONE,     /**< Operations outside of a subclass */
+    H5VL_SUBCLS_INFO,     /**< 'Info' subclass */
+    H5VL_SUBCLS_WRAP,     /**< 'Wrap' subclass */
+    H5VL_SUBCLS_ATTR,     /**< 'Attribute' subclass */
+    H5VL_SUBCLS_DATASET,  /**< 'Dataset' subclass */
+    H5VL_SUBCLS_DATATYPE, /**< 'Named datatype' subclass */
+    H5VL_SUBCLS_FILE,     /**< 'File' subclass */
+    H5VL_SUBCLS_GROUP,    /**< 'Group' subclass */
+    H5VL_SUBCLS_LINK,     /**< 'Link' subclass */
+    H5VL_SUBCLS_OBJECT,   /**< 'Object' subclass */
+    H5VL_SUBCLS_REQUEST,  /**< 'Request' subclass */
+    H5VL_SUBCLS_BLOB,     /**< 'Blob' subclass */
+    H5VL_SUBCLS_TOKEN     /**< 'Token' subclass */
 } H5VL_subclass_t;
 
 /********************/
