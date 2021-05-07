@@ -161,8 +161,7 @@ static herr_t H5VL__object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_
 static herr_t H5VL__object_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                H5VL_object_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-                                    H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req,
-                                    va_list arguments);
+                                    H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL__object_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                     H5VL_object_optional_t opt_type, hid_t dxpl_id, void **req,
                                     va_list arguments);
@@ -6223,7 +6222,7 @@ done:
  */
 static herr_t
 H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-                      H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
+                      H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -6235,7 +6234,7 @@ H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL
 
     /* Call the corresponding VOL callback */
     /* (Must return value from callback, for iterators) */
-    if ((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+    if ((ret_value = (cls->object_cls.specific)(obj, loc_params, args, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "object specific failed")
 
 done:
@@ -6254,10 +6253,8 @@ done:
  */
 herr_t
 H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
-                     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, ...)
+                     H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
@@ -6270,17 +6267,10 @@ H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_
 
     /* Call the corresponding internal VOL routine */
     /* (Must return value from callback, for iterators) */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if ((ret_value = H5VL__object_specific(vol_obj->data, loc_params, vol_obj->connector->cls, specific_type,
-                                           dxpl_id, req, arguments)) < 0)
+    if ((ret_value = H5VL__object_specific(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "object specific failed")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -6300,14 +6290,12 @@ done:
  */
 herr_t
 H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                    H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req /*out*/,
-                    va_list arguments)
+                    H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE7("e", "*x*#iVoixx", obj, loc_params, connector_id, specific_type, dxpl_id, req, arguments);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6315,66 +6303,14 @@ H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if (NULL == cls->object_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no `object specific' method")
-
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     /* (Must return value from callback, for iterators) */
-    if ((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+    if ((ret_value = (cls->object_cls.specific)(obj, loc_params, args, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLobject_specific() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLobject_specific_vararg
- *
- * Purpose:     Performs a connector-specific operation on an object
- *
- * Note:        Same as H5VLobject_specific, but uses varargs instead of a va_list
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLobject_specific_vararg(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                           H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req /*out*/, ...)
-{
-    H5VL_class_t *cls;                   /* VOL connector's class struct */
-    va_list       arguments;             /* Argument list passed from the API call */
-    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
-    herr_t        ret_value   = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*x*#iVoix", obj, loc_params, connector_id, specific_type, dxpl_id, req);
-
-    /* Check args and get class pointer */
-    if (NULL == obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
-    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-    /* Check if the corresponding VOL callback exists */
-    if (NULL == cls->object_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no `object specific' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if ((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object specific callback")
-
-done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
-    FUNC_LEAVE_API_NOINIT(ret_value)
-} /* end H5VLobject_specific_vararg() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL__object_optional

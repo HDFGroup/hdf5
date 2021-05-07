@@ -201,8 +201,8 @@ static herr_t H5VL_pass_through_object_copy(void *src_obj, const H5VL_loc_params
 static herr_t H5VL_pass_through_object_get(void *obj, const H5VL_loc_params_t *loc_params,
                                            H5VL_object_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                                H5VL_object_specific_t specific_type, hid_t dxpl_id,
-                                                void **req, va_list arguments);
+                                                H5VL_object_specific_args_t *args, hid_t dxpl_id,
+                                                void **req);
 static herr_t H5VL_pass_through_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
                                                 H5VL_object_optional_t opt_type, hid_t dxpl_id, void **req,
                                                 va_list arguments);
@@ -2473,8 +2473,7 @@ H5VL_pass_through_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5V
  */
 static herr_t
 H5VL_pass_through_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                  H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req,
-                                  va_list arguments)
+                                  H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     hid_t                under_vol_id;
@@ -2489,8 +2488,7 @@ H5VL_pass_through_object_specific(void *obj, const H5VL_loc_params_t *loc_params
      */
     under_vol_id = o->under_vol_id;
 
-    ret_value = H5VLobject_specific(o->under_object, loc_params, o->under_vol_id, specific_type, dxpl_id, req,
-                                    arguments);
+    ret_value = H5VLobject_specific(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)

@@ -132,8 +132,7 @@ H5_DLL herr_t H5VL__native_object_copy(void *src_obj, const H5VL_loc_params_t *l
 H5_DLL herr_t H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params,
                                       H5VL_object_get_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                           H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req,
-                                           va_list arguments);
+                                           H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
                                            H5VL_object_optional_t opt_type, hid_t dxpl_id, void **req,
                                            va_list arguments);

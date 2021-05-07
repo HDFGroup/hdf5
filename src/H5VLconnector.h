@@ -712,6 +712,51 @@ typedef enum H5VL_object_specific_t {
     H5VL_OBJECT_REFRESH           /* H5{D|G|O|T}refresh                */
 } H5VL_object_specific_t;
 
+/* Parameters for object 'visit' operation */
+typedef struct H5VL_object_visit_args_t {
+    H5_index_t idx_type;
+    H5_iter_order_t order;
+    H5O_iterate2_t op;
+    void *op_data;
+    unsigned fields;
+} H5VL_object_visit_args_t;
+
+/* Parameters for object 'specific' operations */
+typedef struct H5VL_object_specific_args_t {
+    H5VL_object_specific_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_OBJECT_CHANGE_REF_COUNT */
+        struct {
+            int delta;  /* Amount to modify object's refcount */
+        } change_rc;
+
+        /* H5VL_OBJECT_EXISTS */
+        struct {
+            hbool_t exists;     /* Whether object exists */
+        } exists;
+
+        /* H5VL_OBJECT_LOOKUP */
+        struct {
+            H5O_token_t *token_ptr;     /* Pointer to token for lookup (OUT) */
+        } lookup;
+
+        /* H5VL_OBJECT_VISIT */
+        H5VL_object_visit_args_t visit;
+
+        /* H5VL_OBJECT_FLUSH */
+        struct {
+            hid_t obj_id; /* Object ID */
+        } flush;
+
+        /* H5VL_OBJECT_REFRESH */
+        struct {
+            hid_t obj_id; /* Object ID */
+        } refresh;
+    } args;
+} H5VL_object_specific_args_t;
+
 /* Typedef for VOL connector object optional VOL operations */
 typedef int H5VL_object_optional_t;
 
@@ -873,8 +918,8 @@ typedef struct H5VL_object_class_t {
                    hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_args_t *args, hid_t dxpl_id,
                   void **req);
-    herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_t specific_type,
-                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_args_t *args,
+                       hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_optional_t opt_type,
                        hid_t dxpl_id, void **req, va_list arguments);
 } H5VL_object_class_t;

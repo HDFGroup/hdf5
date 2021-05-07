@@ -53,12 +53,6 @@ typedef struct {
     H5G_loc_t *loc; /* Group location to set */
 } H5G_loc_fnd_t;
 
-/* User data for checking if an object exists */
-typedef struct {
-    /* upward */
-    htri_t exists; /* Whether the object exists */
-} H5G_loc_exists_t;
-
 /* User data for looking up an object in a group by index */
 typedef struct {
     /* downward */
@@ -616,23 +610,25 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
                    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata /*in,out*/,
                    H5G_own_loc_t *own_loc /*out*/)
 {
-    H5G_loc_exists_t *udata = (H5G_loc_exists_t *)_udata; /* User data passed in */
+    hbool_t *exists = (hbool_t *)_udata; /* User data passed in */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_STATIC
 
     /* Check if the name in this group resolved to a valid object */
     if (obj_loc == NULL)
         if (lnk)
-            udata->exists = FALSE;
+            *exists = FALSE;
         else
-            udata->exists = FAIL;
+            HGOTO_ERROR(H5E_SYM, H5E_INTERNAL, FAIL, "no object or link info?")
     else
-        udata->exists = TRUE;
+        *exists = TRUE;
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
+done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__loc_exists_cb() */
 
@@ -649,27 +645,21 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5G_loc_exists(const H5G_loc_t *loc, const char *name)
+herr_t
+H5G_loc_exists(const H5G_loc_t *loc, const char *name, hbool_t *exists)
 {
-    H5G_loc_exists_t udata;            /* User data for traversal callback */
-    htri_t           ret_value = FAIL; /* Return value */
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
     HDassert(loc);
     HDassert(name && *name);
-
-    /* Set up user data for locating object */
-    udata.exists = FALSE;
+    HDassert(exists);
 
     /* Traverse group hierarchy to locate object */
-    if (H5G_traverse(loc, name, H5G_TARGET_EXISTS, H5G__loc_exists_cb, &udata) < 0)
+    if (H5G_traverse(loc, name, H5G_TARGET_EXISTS, H5G__loc_exists_cb, exists) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't check if object exists")
-
-    /* Set return value */
-    ret_value = udata.exists;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

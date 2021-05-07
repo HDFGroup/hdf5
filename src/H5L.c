@@ -4134,7 +4134,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
         (H5L_TYPE_EXTERNAL == src_lnk->type && cpy_info->expand_ext_link)) {
         H5G_loc_t  lnk_grp_loc;  /* Group location holding link */
         H5G_name_t lnk_grp_path; /* Path for link */
-        htri_t     tar_exists;   /* Whether the target object exists */
+        hbool_t     tar_exists = FALSE;   /* Whether the target object exists */
 
         /* Set up group location for link */
         H5G_name_reset(&lnk_grp_path);
@@ -4142,7 +4142,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
         lnk_grp_loc.oloc = (H5O_loc_t *)src_oloc; /* Casting away const OK -QAK */
 
         /* Check if the target object exists */
-        if ((tar_exists = H5G_loc_exists(&lnk_grp_loc, src_lnk->name)) < 0)
+        if (H5G_loc_exists(&lnk_grp_loc, src_lnk->name, &tar_exists) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to check if target object exists")
 
         if (tar_exists) {

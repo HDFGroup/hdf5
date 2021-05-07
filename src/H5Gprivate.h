@@ -273,7 +273,7 @@ H5_DLL herr_t  H5G_loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_
 H5_DLL herr_t  H5G_loc_find(const H5G_loc_t *loc, const char *name, H5G_loc_t *obj_loc /*out*/);
 H5_DLL herr_t  H5G_loc_find_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
                                    H5_iter_order_t order, hsize_t n, H5G_loc_t *obj_loc /*out*/);
-H5_DLL htri_t  H5G_loc_exists(const H5G_loc_t *loc, const char *name);
+H5_DLL herr_t  H5G_loc_exists(const H5G_loc_t *loc, const char *name, hbool_t *exists);
 H5_DLL herr_t  H5G_loc_info(const H5G_loc_t *loc, const char *name, H5O_info2_t *oinfo /*out*/,
                             unsigned fields);
 H5_DLL herr_t  H5G_loc_native_info(const H5G_loc_t *loc, const char *name, H5O_native_info_t *oinfo /*out*/,
