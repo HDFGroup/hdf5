@@ -35,8 +35,7 @@
 #define MICROSECOND 1000000.0
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes, t)                                                                                 \
-    ((fabs(t) < 0.0000000001) ? 0.0 : ((((double)bytes) / (double)ONE_MB) / (t)))
+#define MB_PER_SEC(bytes, t) ((fabs(t) < 0.0000000001) ? 0.0 : ((((double)bytes) / (double)ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE 1
