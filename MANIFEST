@@ -1131,6 +1131,7 @@
 ./src/Makefile.am
 ./src/hdf5.h
 ./src/libhdf5.settings.in
+./src/uthash.h
 
 ./test/AtomicWriterReader.txt
 ./test/H5srcdir.h
