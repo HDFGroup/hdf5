@@ -334,7 +334,6 @@ H5_DLL hid_t H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t d
  */
 H5_DLL hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
 
-
 /**
  * --------------------------------------------------------------------------
  *\ingroup H5D

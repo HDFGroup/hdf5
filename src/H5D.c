@@ -596,7 +596,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_offset() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Dscatter
  *
