@@ -10297,7 +10297,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_combine_hyperslab(H5S_t *old_space, H5S_seloper_t op, const hsize_t start[], const hsize_t *stride,
+H5S_combine_hyperslab(const H5S_t *old_space, H5S_seloper_t op, const hsize_t start[], const hsize_t *stride,
                       const hsize_t count[], const hsize_t *block, H5S_t **new_space)
 {
     unsigned u;                   /* Local index variable */

@@ -44,6 +44,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5S__close_cb(void *space, void **request);
 static htri_t H5S__is_simple(const H5S_t *sdim);
 
 /*****************************/
@@ -81,22 +82,43 @@ H5FL_ARR_DEFINE(hsize_t, H5S_MAX_RANK);
 
 /* Dataspace ID class */
 static const H5I_class_t H5I_DATASPACE_CLS[1] = {{
-    H5I_DATASPACE,        /* ID class value */
-    0,                    /* Class flags */
-    2,                    /* # of reserved IDs for class */
-    (H5I_free_t)H5S_close /* Callback routine for closing objects of this class */
+    H5I_DATASPACE,            /* ID class value */
+    0,                        /* Class flags */
+    2,                        /* # of reserved IDs for class */
+    (H5I_free_t)H5S__close_cb /* Callback routine for closing objects of this class */
 }};
 
 /* Dataspace selection iterator ID class */
 static const H5I_class_t H5I_SPACE_SEL_ITER_CLS[1] = {{
-    H5I_SPACE_SEL_ITER,            /* ID class value */
-    0,                             /* Class flags */
-    0,                             /* # of reserved IDs for class */
-    (H5I_free_t)H5S_sel_iter_close /* Callback routine for closing objects of this class */
+    H5I_SPACE_SEL_ITER,                /* ID class value */
+    0,                                 /* Class flags */
+    0,                                 /* # of reserved IDs for class */
+    (H5I_free_t)H5S__sel_iter_close_cb /* Callback routine for closing objects of this class */
 }};
 
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5S_top_package_initialize_s = FALSE;
+
+/*-------------------------------------------------------------------------
+ * Function: H5S_init
+ *
+ * Purpose:  Initialize the interface from some other layer.
+ *
+ * Return:   Success:    non-negative
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_init(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_init() */
 
 /*--------------------------------------------------------------------------
 NAME
@@ -221,6 +243,37 @@ H5S_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5S_term_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5S__close_cb
+ *
+ * Purpose:     Called when the ref count reaches zero on a dataspace's ID
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Wednesday, April 8, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5S__close_cb(void *_space, void H5_ATTR_UNUSED **request)
+{
+    H5S_t *space     = (H5S_t *)_space; /* The dataspace to close */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(space);
+
+    /* Close the dataspace object */
+    if (H5S_close(space) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CLOSEERROR, FAIL, "unable to close dataspace");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S__close_cb() */
 
 /*--------------------------------------------------------------------------
  NAME

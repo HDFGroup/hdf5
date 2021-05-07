@@ -201,6 +201,7 @@ struct H5O_loc_t;
 typedef struct H5S_t H5S_t;
 
 /* Operations on dataspaces */
+H5_DLL herr_t H5S_init(void);
 H5_DLL H5S_t *     H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max);
 H5_DLL herr_t      H5S_close(H5S_t *ds);
 H5_DLL H5S_class_t H5S_get_simple_extent_type(const H5S_t *ds);
@@ -275,7 +276,7 @@ H5_DLL herr_t H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_ele
 /* Operations on hyperslab selections */
 H5_DLL herr_t  H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[],
                                     const hsize_t *stride, const hsize_t count[], const hsize_t *block);
-H5_DLL herr_t  H5S_combine_hyperslab(H5S_t *old_space, H5S_seloper_t op, const hsize_t start[],
+H5_DLL herr_t  H5S_combine_hyperslab(const H5S_t *old_space, H5S_seloper_t op, const hsize_t start[],
                                      const hsize_t *stride, const hsize_t count[], const hsize_t *block,
                                      H5S_t **new_space);
 H5_DLL herr_t  H5S_hyper_add_span_element(H5S_t *space, unsigned rank, const hsize_t *coords);
