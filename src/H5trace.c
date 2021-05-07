@@ -3903,14 +3903,14 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         if (returning) {
             if (current_depth > 1) {
                 --current_depth;
-                return (double)0.0F;
+                return 0.0;
             }
         }
         else {
             if (current_depth > 0) {
                 /* Do not update last_call_depth */
                 current_depth++;
-                return (double)0.0F;
+                return 0.0;
             }
         }
     }
@@ -3997,5 +3997,5 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     if (H5_debug_g.ttimes)
         return function_times.elapsed;
     else
-        return (double)0.0F;
+        return 0.0;
 } /* end H5_trace() */

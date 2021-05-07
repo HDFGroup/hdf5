@@ -768,7 +768,7 @@ H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double
 
     /* Check arguments.  Note that we allow negative values - they are
      * considered to "unset" the property. */
-    if (rdcc_w0 > (double)1.0f)
+    if (rdcc_w0 > 1.0)
         HGOTO_ERROR(
             H5E_ARGS, H5E_BADVALUE, FAIL,
             "raw data cache w0 value must be between 0.0 and 1.0 inclusive, or H5D_CHUNK_CACHE_W0_DEFAULT");
