@@ -276,7 +276,7 @@ H5_DLL herr_t H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout,
                                 H5VL_request_status_t *status);
 H5_DLL herr_t H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void *ctx);
 H5_DLL herr_t H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status);
-H5_DLL herr_t H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t specific_type, ...);
+H5_DLL herr_t H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_args_t *args);
 H5_DLL herr_t H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_request_optional_t opt_type, ...);
 H5_DLL herr_t H5VL_request_free(const H5VL_object_t *vol_obj);
 

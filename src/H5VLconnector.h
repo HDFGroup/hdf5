@@ -734,7 +734,7 @@ typedef struct H5VL_object_specific_args_t {
 
         /* H5VL_OBJECT_EXISTS */
         struct {
-            hbool_t exists;     /* Whether object exists */
+            hbool_t exists;     /* Whether object exists (OUT) */
         } exists;
 
         /* H5VL_OBJECT_LOOKUP */
@@ -778,6 +778,25 @@ typedef enum H5VL_request_specific_t {
     H5VL_REQUEST_GET_ERR_STACK, /* Retrieve error stack for failed operation */
     H5VL_REQUEST_GET_EXEC_TIME  /* Retrieve execution time for operation */
 } H5VL_request_specific_t;
+
+/* Parameters for request 'specific' operations */
+typedef struct H5VL_request_specific_args_t {
+    H5VL_request_specific_t op_type; /* Operation to perform */
+
+    /* Parameters for each operation */
+    union {
+        /* H5VL_REQUEST_GET_ERR_STACK */
+        struct {
+            hid_t err_stack_id;     /* Error stack ID for operation (OUT) */
+        } get_err_stack;
+
+        /* H5VL_REQUEST_GET_EXEC_TIME */
+        struct {
+            uint64_t exec_ts;       /* Timestamp for start of task execution (OUT) */
+            uint64_t exec_time;     /* Duration of task execution (in ns) (OUT) */
+        } get_exec_time;
+    } args;
+} H5VL_request_specific_args_t;
 
 /* Typedef and values for native VOL connector request optional VOL operations */
 typedef int H5VL_request_optional_t;
@@ -950,7 +969,7 @@ typedef struct H5VL_request_class_t {
     herr_t (*wait)(void *req, uint64_t timeout, H5VL_request_status_t *status);
     herr_t (*notify)(void *req, H5VL_request_notify_t cb, void *ctx);
     herr_t (*cancel)(void *req, H5VL_request_status_t *status);
-    herr_t (*specific)(void *req, H5VL_request_specific_t specific_type, va_list arguments);
+    herr_t (*specific)(void *req, H5VL_request_specific_args_t *args);
     herr_t (*optional)(void *req, H5VL_request_optional_t opt_type, va_list arguments);
     herr_t (*free)(void *req);
 } H5VL_request_class_t;

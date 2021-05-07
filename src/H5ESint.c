@@ -479,6 +479,7 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
 static herr_t
 H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
 {
+    H5VL_request_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     hid_t  err_stack_id = H5I_INVALID_HID; /* Error stack for failed operation */
     herr_t ret_value    = SUCCEED;         /* Return value */
 
@@ -501,11 +502,18 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
                 /* Translate status */
                 op_status = H5ES_STATUS_SUCCEED;
 
+                /* Set up VOL callback arguments */
+                vol_cb_args.op_type           = H5VL_REQUEST_GET_EXEC_TIME;
+                vol_cb_args.args.get_exec_time.exec_ts = UINT64_MAX;
+                vol_cb_args.args.get_exec_time.exec_time = UINT64_MAX;
+
                 /* Retrieve the execution time info */
-                if (H5VL_request_specific(ev->request, H5VL_REQUEST_GET_EXEC_TIME, &ev->op_info.op_exec_ts,
-                                          &ev->op_info.op_exec_time) < 0)
-                    HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL,
-                                "unable to retrieve execution time info for operation")
+                if (H5VL_request_specific(ev->request, &vol_cb_args) < 0)
+                    HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "unable to retrieve execution time info for operation")
+
+                /* Set values */
+                ev->op_info.op_exec_ts = vol_cb_args.args.get_exec_time.exec_ts;
+                ev->op_info.op_exec_time = vol_cb_args.args.get_exec_time.exec_time;
             }
             else
                 /* Translate status */
@@ -522,9 +530,16 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
     else if (H5VL_REQUEST_STATUS_FAIL == ev_status) {
         /* Invoke the event set's 'complete' callback, if present */
         if (es->comp_func) {
+            /* Set up VOL callback arguments */
+            vol_cb_args.op_type           = H5VL_REQUEST_GET_ERR_STACK;
+            vol_cb_args.args.get_err_stack.err_stack_id = H5I_INVALID_HID;
+
             /* Retrieve the error stack for the operation */
-            if (H5VL_request_specific(ev->request, H5VL_REQUEST_GET_ERR_STACK, &err_stack_id) < 0)
+            if (H5VL_request_specific(ev->request, &vol_cb_args) < 0)
                 HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "unable to retrieve error stack for operation")
+
+            /* Set values */
+            err_stack_id = vol_cb_args.args.get_err_stack.err_stack_id;
 
             if ((es->comp_func)(&ev->op_info, H5ES_STATUS_FAIL, err_stack_id, es->comp_ctx) < 0)
                 HGOTO_ERROR(H5E_EVENTSET, H5E_CALLBACK, FAIL, "'complete' callback for event set failed")
@@ -791,6 +806,7 @@ done:
 static int
 H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
 {
+    H5VL_request_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5ES_gei_ctx_t *ctx       = (H5ES_gei_ctx_t *)_ctx; /* Callback context */
     int             ret_value = H5_ITER_CONT;           /* Return value */
 
@@ -819,9 +835,16 @@ H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
     ctx->curr_err_info->op_exec_ts   = ev->op_info.op_exec_ts;
     ctx->curr_err_info->op_exec_time = ev->op_info.op_exec_time;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_REQUEST_GET_ERR_STACK;
+    vol_cb_args.args.get_err_stack.err_stack_id = H5I_INVALID_HID;
+
     /* Get error stack for event */
-    if (H5VL_request_specific(ev->request, H5VL_REQUEST_GET_ERR_STACK, &ctx->curr_err_info->err_stack_id) < 0)
+    if (H5VL_request_specific(ev->request, &vol_cb_args) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, H5_ITER_ERROR, "unable to retrieve error stack for operation")
+
+    /* Set value */
+    ctx->curr_err_info->err_stack_id = vol_cb_args.args.get_err_stack.err_stack_id;
 
     /* Remove event from event set's failed list */
     H5ES__list_remove(&ctx->es->failed, ev);

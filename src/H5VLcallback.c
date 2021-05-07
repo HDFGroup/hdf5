@@ -173,8 +173,7 @@ static herr_t H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t ti
                                  H5VL_request_status_t *status);
 static herr_t H5VL__request_notify(void *req, const H5VL_class_t *cls, H5VL_request_notify_t cb, void *ctx);
 static herr_t H5VL__request_cancel(void *req, const H5VL_class_t *cls, H5VL_request_status_t *status);
-static herr_t H5VL__request_specific(void *req, const H5VL_class_t *cls,
-                                     H5VL_request_specific_t specific_type, va_list arguments);
+static herr_t H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific_args_t *args);
 static herr_t H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_request_optional_t opt_type,
                                      va_list arguments);
 static herr_t H5VL__request_free(void *req, const H5VL_class_t *cls);
@@ -5659,6 +5658,7 @@ H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6195,6 +6195,7 @@ H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_i
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6296,6 +6297,7 @@ H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -7109,8 +7111,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific_t specific_type,
-                       va_list arguments)
+H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific_args_t *args)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -7125,7 +7126,7 @@ H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'async specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->request_cls.specific)(req, specific_type, arguments) < 0)
+    if ((cls->request_cls.specific)(req, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
 
 done:
@@ -7143,10 +7144,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t specific_type, ...)
+H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_args_t *args)
 {
-    va_list arguments;             /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;   /* Whether the va_list has been started */
     herr_t  ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -7155,16 +7154,10 @@ H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t spec
     HDassert(vol_obj);
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, specific_type);
-    arg_started = TRUE;
-    if (H5VL__request_specific(vol_obj->data, vol_obj->connector->cls, specific_type, arguments) < 0)
+    if (H5VL__request_specific(vol_obj->data, vol_obj->connector->cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_specific() */
 
@@ -7179,66 +7172,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_t specific_type, va_list arguments)
+H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_args_t *args)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiVrx", req, connector_id, specific_type, arguments);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__request_specific(req, cls, specific_type, arguments) < 0)
+    if (H5VL__request_specific(req, cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLrequest_specific() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLrequest_specific_vararg
- *
- * Purpose:     Performs a connector-specific operation on an asynchronous request
- *
- * Note:        Same as H5VLrequest_specific, but uses varargs instead of a va_list
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLrequest_specific_vararg(void *req, hid_t connector_id, H5VL_request_specific_t specific_type, ...)
-{
-    H5VL_class_t *cls;                   /* VOL connector's class struct */
-    va_list       arguments;             /* Argument list passed from the API call */
-    hbool_t       arg_started = FALSE;   /* Whether the va_list has been started */
-    herr_t        ret_value   = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API_NOINIT
-    H5TRACE3("e", "*xiVr", req, connector_id, specific_type);
-
-    /* Get class pointer */
-    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-    /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, specific_type);
-    arg_started = TRUE;
-    if (H5VL__request_specific(req, cls, specific_type, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
-
-done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
-    FUNC_LEAVE_API_NOINIT(ret_value)
-} /* end H5VLrequest_specific_vararg() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__request_optional
