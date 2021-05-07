@@ -92,6 +92,7 @@ static herr_t H5D__vlen_get_buf_size_cb(void *elem, hid_t type_id, unsigned ndim
                                         void *op_data);
 static herr_t H5D__vlen_get_buf_size_gen_cb(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
                                             void *op_data);
+static herr_t H5D__check_filters(H5D_t *dataset);
 
 /*********************/
 /* Package Variables */
@@ -1271,18 +1272,24 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
 
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if (new_dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
-        H5O_layout_t *layout; /* Dataset's layout information */
-        H5O_pline_t * pline;  /* Dataset's I/O pipeline information */
-        H5O_fill_t *  fill;   /* Dataset's fill value info */
-        H5O_efl_t *   efl;    /* Dataset's external file list info */
+        H5O_layout_t *layout;                 /* Dataset's layout information */
+        H5O_pline_t * pline;                  /* Dataset's I/O pipeline information */
+        H5O_fill_t *  fill;                   /* Dataset's fill value info */
+        H5O_efl_t *   efl;                    /* Dataset's external file list info */
+        htri_t        ignore_filters = FALSE; /* Ignore optional filters or not */
 
-        /* Check if the filters in the DCPL can be applied to this dataset */
-        if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
+        if ((ignore_filters = H5Z_ignore_filters(new_dset->shared->dcpl_id, dt, space)) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "H5Z_has_optional_filter() failed")
 
-        /* Make the "set local" filter callbacks for this dataset */
-        if (H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
+        if (FALSE == ignore_filters) {
+            /* Check if the filters in the DCPL can be applied to this dataset */
+            if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
+
+            /* Make the "set local" filter callbacks for this dataset */
+            if (H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
+        } /* ignore_filters */
 
         /* Get new dataset's property list object */
         if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(new_dset->shared->dcpl_id)))
@@ -1306,9 +1313,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve external file list")
         efl_copied = TRUE;
 
-        /* Check that chunked layout is used if filters are enabled */
-        if (pline->nused > 0 && H5D_CHUNKED != layout->type)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
+        if (FALSE == ignore_filters) {
+            /* Check that chunked layout is used if filters are enabled */
+            if (pline->nused > 0 && H5D_CHUNKED != layout->type)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
+        }
 
         /* Check if the alloc_time is the default and error out */
         if (fill->alloc_time == H5D_ALLOC_TIME_DEFAULT)
@@ -2947,13 +2956,13 @@ done:
  * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D__check_filters(H5D_t *dataset)
 {
     H5O_fill_t *fill;                /* Dataset's fill value */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(dataset);

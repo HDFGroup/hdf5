@@ -4952,7 +4952,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     int              blocks, leftover, block_len; /* converted to int for MPI */
     MPI_Aint *       chunk_disp_array = NULL;
     int *            block_lens       = NULL;
-    MPI_Datatype     mem_type, file_type;
+    MPI_Datatype     mem_type = MPI_BYTE, file_type = MPI_BYTE;
     H5FD_mpio_xfer_t prev_xfer_mode;         /* Previous data xfer mode */
     hbool_t          have_xfer_mode = FALSE; /* Whether the previous xffer mode has been retrieved */
     hbool_t          need_addr_sort = FALSE;
@@ -4988,58 +4988,63 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     H5_CHECKED_ASSIGN(leftover, int, leftover_blocks, size_t);
     H5_CHECKED_ASSIGN(block_len, int, chunk_size, size_t);
 
-    /* Allocate buffers */
-    /* (MSC - should not need block_lens if MPI_type_create_hindexed_block is working) */
-    if (NULL == (block_lens = (int *)H5MM_malloc((size_t)(blocks + 1) * sizeof(int))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk lengths buffer")
-    if (NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
+    /* Check if we have any chunks to write on this rank */
+    if (num_blocks > 0 || (leftover && leftover > mpi_rank)) {
+        /* Allocate buffers */
+        /* (MSC - should not need block_lens if MPI_type_create_hindexed_block is working) */
+        if (NULL == (block_lens = (int *)H5MM_malloc((size_t)(blocks + 1) * sizeof(int))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk lengths buffer")
+        if (NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
 
-    for (i = 0; i < blocks; i++) {
-        /* store the chunk address as an MPI_Aint */
-        chunk_disp_array[i] = (MPI_Aint)(chunk_info->addr[i + mpi_rank * blocks]);
+        for (i = 0; i < blocks; i++) {
+            /* store the chunk address as an MPI_Aint */
+            chunk_disp_array[i] = (MPI_Aint)(chunk_info->addr[i + (mpi_rank * blocks)]);
 
-        /* MSC - should not need this if MPI_type_create_hindexed_block is working */
-        block_lens[i] = block_len;
+            /* MSC - should not need this if MPI_type_create_hindexed_block is working */
+            block_lens[i] = block_len;
 
-        /* make sure that the addresses in the datatype are
-           monotonically non decreasing */
-        if (i && (chunk_disp_array[i] < chunk_disp_array[i - 1]))
-            need_addr_sort = TRUE;
-    } /* end for */
+            /* Make sure that the addresses in the datatype are
+             * monotonically non-decreasing
+             */
+            if (i && (chunk_disp_array[i] < chunk_disp_array[i - 1]))
+                need_addr_sort = TRUE;
+        } /* end for */
 
-    /* calculate if there are any leftover blocks after evenly
-       distributing. If there are, then round robin the distribution
-       to processes 0 -> leftover. */
-    if (leftover && leftover > mpi_rank) {
-        chunk_disp_array[blocks] = (MPI_Aint)chunk_info->addr[blocks * mpi_size + mpi_rank];
-        if (blocks && (chunk_disp_array[blocks] < chunk_disp_array[blocks - 1]))
-            need_addr_sort = TRUE;
-        block_lens[blocks] = block_len;
-        blocks++;
-    }
+        /* Calculate if there are any leftover blocks after evenly
+         * distributing. If there are, then round-robin the distribution
+         * to processes 0 -> leftover.
+         */
+        if (leftover && leftover > mpi_rank) {
+            chunk_disp_array[blocks] = (MPI_Aint)chunk_info->addr[(blocks * mpi_size) + mpi_rank];
+            if (blocks && (chunk_disp_array[blocks] < chunk_disp_array[blocks - 1]))
+                need_addr_sort = TRUE;
+            block_lens[blocks] = block_len;
+            blocks++;
+        }
 
-    /*
-     * Ensure that the blocks are sorted in monotonically non-decreasing
-     * order of offset in the file.
-     */
-    if (need_addr_sort)
-        HDqsort(chunk_disp_array, blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
+        /* Ensure that the blocks are sorted in monotonically non-decreasing
+         * order of offset in the file.
+         */
+        if (need_addr_sort)
+            HDqsort(chunk_disp_array, blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
 
-    /* MSC - should use this if MPI_type_create_hindexed block is working:
-     * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE, &file_type);
-     */
-    mpi_code = MPI_Type_create_hindexed(blocks, block_lens, chunk_disp_array, MPI_BYTE, &file_type);
-    if (mpi_code != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+        /* MSC - should use this if MPI_type_create_hindexed block is working:
+         * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE,
+         * &file_type);
+         */
+        mpi_code = MPI_Type_create_hindexed(blocks, block_lens, chunk_disp_array, MPI_BYTE, &file_type);
+        if (mpi_code != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
-    mpi_code = MPI_Type_create_hvector(blocks, block_len, 0, MPI_BYTE, &mem_type);
-    if (mpi_code != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&mem_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+        mpi_code = MPI_Type_create_hvector(blocks, block_len, 0, MPI_BYTE, &mem_type);
+        if (mpi_code != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&mem_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+    } /* end if */
 
     /* Set MPI-IO VFD properties */
 
@@ -5072,10 +5077,12 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set transfer mode")
 
     /* free things */
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    if (MPI_BYTE != file_type)
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    if (MPI_BYTE != mem_type)
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
     H5MM_xfree(chunk_disp_array);
     H5MM_xfree(block_lens);
 
@@ -6574,10 +6581,11 @@ H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         } /* end if */
 
         /* Print information about this chunk */
-        HDfprintf(udata->stream, "        0x%08x %8Zu %10a [", chunk_rec->filter_mask, chunk_rec->nbytes,
-                  chunk_rec->chunk_addr);
+        HDfprintf(udata->stream, "        0x%08x %8" PRIu32 " %10" PRIuHADDR " [", chunk_rec->filter_mask,
+                  chunk_rec->nbytes, chunk_rec->chunk_addr);
         for (u = 0; u < udata->ndims; u++)
-            HDfprintf(udata->stream, "%s%Hu", (u ? ", " : ""), (chunk_rec->scaled[u] * udata->chunk_dim[u]));
+            HDfprintf(udata->stream, "%s%" PRIuHSIZE, (u ? ", " : ""),
+                      (chunk_rec->scaled[u] * udata->chunk_dim[u]));
         HDfputs("]\n", udata->stream);
     } /* end if */
 
