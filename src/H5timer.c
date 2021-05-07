@@ -42,9 +42,9 @@
 #define H5TIMER_TIME_STRING_LEN 1536
 
 /* Conversion factors */
-#define H5_SEC_PER_DAY  (double)(24.0F * 60.0F * 60.0F)
-#define H5_SEC_PER_HOUR (double)(60.0F * 60.0F)
-#define H5_SEC_PER_MIN  (double)(60.0F)
+#define H5_SEC_PER_DAY  (24.0 * 60.0 * 60.0)
+#define H5_SEC_PER_HOUR (60.0 * 60.0)
+#define H5_SEC_PER_MIN  (60.0)
 
 /******************/
 /* Local Typedefs */
@@ -100,13 +100,13 @@ H5_bandwidth(char *buf /*out*/, double nbytes, double nseconds)
 {
     double bw;
 
-    if (nseconds <= (double)0.0F)
+    if (nseconds <= 0.0)
         HDstrcpy(buf, "       NaN");
     else {
         bw = nbytes / nseconds;
-        if (H5_DBL_ABS_EQUAL(bw, (double)0.0F))
+        if (H5_DBL_ABS_EQUAL(bw, 0.0))
             HDstrcpy(buf, "0.000  B/s");
-        else if (bw < (double)1.0F)
+        else if (bw < 1.0)
             HDsprintf(buf, "%10.4e", bw);
         else if (bw < (double)H5_KB) {
             HDsprintf(buf, "%05.4f", bw);
@@ -224,7 +224,7 @@ H5_now_usec(void)
 double
 H5_get_time(void)
 {
-    double ret_value = (double)0.0f;
+    double ret_value = 0.0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -233,14 +233,14 @@ H5_get_time(void)
         struct timespec ts;
 
         HDclock_gettime(CLOCK_MONOTONIC, &ts);
-        ret_value = (double)ts.tv_sec + ((double)ts.tv_nsec / (double)1000000000.0f);
+        ret_value = (double)ts.tv_sec + ((double)ts.tv_nsec / 1000000000.0);
     }
 #elif defined(H5_HAVE_GETTIMEOFDAY)
     {
         struct timeval now_tv;
 
         HDgettimeofday(&now_tv, NULL);
-        ret_value = (double)now_tv.tv_sec + ((double)now_tv.tv_usec / (double)1000000.0f);
+        ret_value = (double)now_tv.tv_sec + ((double)now_tv.tv_usec / 1000000.0);
     }
 #else
     ret_value = (double)HDtime(NULL);
@@ -289,8 +289,8 @@ H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
 
         if (HDgetrusage(RUSAGE_SELF, &res) < 0)
             return -1;
-        times->system = (double)res.ru_stime.tv_sec + ((double)res.ru_stime.tv_usec / (double)1.0E6F);
-        times->user   = (double)res.ru_utime.tv_sec + ((double)res.ru_utime.tv_usec / (double)1.0E6F);
+        times->system = (double)res.ru_stime.tv_sec + ((double)res.ru_stime.tv_usec / 1.0E6);
+        times->user   = (double)res.ru_utime.tv_sec + ((double)res.ru_utime.tv_usec / 1.0E6);
     }
 #else
     /* No suitable way to get system/user times */
@@ -589,7 +589,7 @@ H5_timer_get_time_string(double seconds)
     double remainder_sec = 0.0;
 
     /* Extract larger time units from count of seconds */
-    if (seconds > (double)60.0F) {
+    if (seconds > 60.0) {
         /* Set initial # of seconds */
         remainder_sec = seconds;
 
@@ -617,19 +617,19 @@ H5_timer_get_time_string(double seconds)
      * time unit.  Perhaps this could be passed as an integer.
      * (name? round_up_size? ?)
      */
-    if (seconds < (double)0.0F)
+    if (seconds < 0.0)
         HDsprintf(s, "N/A");
-    else if (H5_DBL_ABS_EQUAL((double)0.0F, seconds))
+    else if (H5_DBL_ABS_EQUAL(0.0, seconds))
         HDsprintf(s, "0.0 s");
-    else if (seconds < (double)1.0E-6F)
+    else if (seconds < 1.0E-6)
         /* t < 1 us, Print time in ns */
-        HDsprintf(s, "%.f ns", seconds * (double)1.0E9F);
-    else if (seconds < (double)1.0E-3F)
+        HDsprintf(s, "%.f ns", seconds * 1.0E9);
+    else if (seconds < 1.0E-3)
         /* t < 1 ms, Print time in us */
-        HDsprintf(s, "%.1f us", seconds * (double)1.0E6F);
-    else if (seconds < (double)1.0F)
+        HDsprintf(s, "%.1f us", seconds * 1.0E6);
+    else if (seconds < 1.0)
         /* t < 1 s, Print time in ms */
-        HDsprintf(s, "%.1f ms", seconds * (double)1.0E3F);
+        HDsprintf(s, "%.1f ms", seconds * 1.0E3);
     else if (seconds < H5_SEC_PER_MIN)
         /* t < 1 m, Print time in s */
         HDsprintf(s, "%.2f s", seconds);

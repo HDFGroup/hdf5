@@ -3232,7 +3232,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 int expo_diff = check_expo[0] - check_expo[1];
                 int valid_bits =
                     (int)((dst_ebias + dst_msize) + (size_t)MIN(check_expo[0], check_expo[1])) - 1;
-                double epsilon = 1.0F;
+                double epsilon = 1.0;
 
                 /* Re-scale the mantissas based on any exponent difference */
                 if (expo_diff != 0)
