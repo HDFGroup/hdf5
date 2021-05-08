@@ -9529,14 +9529,14 @@ H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned H5_ATTR_UNUSED ndim, const 
     HDassert(dt);
 
     if (dt->shared->type == H5T_REFERENCE) {
-        if (H5T_ref_reclaim(elem, dt) < 0)
+        if (H5T__ref_reclaim(elem, dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim ref elements")
     }
     else {
         HDassert(op_data);
 
         /* Allow vlen reclaim to recurse into that routine */
-        if (H5T_vlen_reclaim(elem, dt, (H5T_vlen_alloc_info_t *)op_data) < 0)
+        if (H5T__vlen_reclaim(elem, dt, (H5T_vlen_alloc_info_t *)op_data) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim vlen elements")
     }
 

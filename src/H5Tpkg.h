@@ -858,6 +858,7 @@ H5_DLL void     H5T__bit_neg(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
 H5_DLL H5T_t *H5T__vlen_create(const H5T_t *base);
+H5_DLL herr_t H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info);
 H5_DLL htri_t H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Array functions */
@@ -866,6 +867,7 @@ H5_DLL int    H5T__get_array_ndims(const H5T_t *dt);
 H5_DLL int    H5T__get_array_dims(const H5T_t *dt, hsize_t dims[]);
 
 /* Reference functions */
+H5_DLL herr_t H5T__ref_reclaim(void *elem, const H5T_t *dt);
 H5_DLL htri_t H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Compound functions */

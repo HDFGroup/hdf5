@@ -24,7 +24,7 @@ typedef struct H5T_t H5T_t;
 #include "H5Tpublic.h"
 
 /* Other public headers needed by this file */
-#include "H5MMpublic.h" /* Memory management                    */
+#include "H5MMpublic.h" /* Memory management                        */
 
 /* Private headers needed by this file */
 #include "H5private.h"   /* Generic Functions                        */
@@ -135,8 +135,6 @@ H5_DLL herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t 
                           size_t bkg_stride, void *buf, void *bkg);
 H5_DLL herr_t H5T_reclaim(hid_t type_id, struct H5S_t *space, void *buf);
 H5_DLL herr_t H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned ndim, const hsize_t *point, void *op_data);
-H5_DLL herr_t H5T_ref_reclaim(void *elem, const H5T_t *dt);
-H5_DLL herr_t H5T_vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info);
 H5_DLL herr_t H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt);
 H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
