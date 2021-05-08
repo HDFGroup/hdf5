@@ -104,7 +104,7 @@ H5VL__native_blob_get(void *obj, const void *blob_id, void *buf, size_t size, vo
     H5F_t *        f  = (H5F_t *)obj;             /* Retrieve file pointer */
     const uint8_t *id = (const uint8_t *)blob_id; /* Pointer to the disk blob ID */
     H5HG_t         hobjid;                        /* Global heap ID for sequence */
-    size_t         hobj_size;                     /* Global heap object size returned from H5HG_read() */
+    size_t         hobj_size = 0;                 /* Global heap object size returned from H5HG_read() */
     herr_t         ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_PACKAGE

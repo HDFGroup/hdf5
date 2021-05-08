@@ -409,6 +409,14 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t 
             break;
         }
 
+        /* H5Fwait */
+        case H5VL_FILE_WAIT: {
+            /* The native VOL connector doesn't support asynchronous
+             *      operations, so this is a no-op.
+             */
+            break;
+        }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
     } /* end switch */

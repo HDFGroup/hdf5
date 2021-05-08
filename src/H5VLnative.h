@@ -33,11 +33,17 @@
 #define H5VL_NATIVE_VERSION 0
 
 /* Values for VOL connector attribute optional VOL operations */
+/* NOTE: If new values are added here, the H5VL__native_introspect_opt_query
+ *      routine must be updated.
+ */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #define H5VL_NATIVE_ATTR_ITERATE_OLD 0 /* H5Aiterate (deprecated routine) */
 #endif                                 /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Values for native VOL connector dataset optional VOL operations */
+/* NOTE: If new values are added here, the H5VL__native_introspect_opt_query
+ *      routine must be updated.
+ */
 #define H5VL_NATIVE_DATASET_FORMAT_CONVERT          0 /* H5Dformat_convert (internal) */
 #define H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE    1 /* H5Dget_chunk_index_type      */
 #define H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE  2 /* H5Dget_chunk_storage_size    */
@@ -50,6 +56,9 @@
 #define H5VL_NATIVE_DATASET_GET_OFFSET              9 /* H5Dget_offset                */
 
 /* Values for native VOL connector file optional VOL operations */
+/* NOTE: If new values are added here, the H5VL__native_introspect_opt_query
+ *      routine must be updated.
+ */
 #define H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE            0  /* H5Fclear_elink_file_cache            */
 #define H5VL_NATIVE_FILE_GET_FILE_IMAGE               1  /* H5Fget_file_image                    */
 #define H5VL_NATIVE_FILE_GET_FREE_SECTIONS            2  /* H5Fget_free_sections                 */
@@ -84,12 +93,18 @@
 #define H5VL_NATIVE_FILE_VFD_SWMR_END_TICK            31
 
 /* Values for native VOL connector group optional VOL operations */
+/* NOTE: If new values are added here, the H5VL__native_introspect_opt_query
+ *      routine must be updated.
+ */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #define H5VL_NATIVE_GROUP_ITERATE_OLD 0 /* HG5Giterate (deprecated routine) */
 #define H5VL_NATIVE_GROUP_GET_OBJINFO 1 /* HG5Gget_objinfo (deprecated routine) */
 #endif                                  /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Values for native VOL connector object optional VOL operations */
+/* NOTE: If new values are added here, the H5VL__native_introspect_opt_query
+ *      routine must be updated.
+ */
 #define H5VL_NATIVE_OBJECT_GET_COMMENT              0 /* H5G|H5Oget_comment, H5Oget_comment_by_name   */
 #define H5VL_NATIVE_OBJECT_SET_COMMENT              1 /* H5G|H5Oset_comment, H5Oset_comment_by_name   */
 #define H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES      2 /* H5Odisable_mdc_flushes                       */
@@ -126,7 +141,13 @@ extern "C" {
 #endif
 
 /* Token <--> address converters */
+/**
+ * \ingroup H5VLNAT
+ */
 H5_DLL herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token);
+/**
+ * \ingroup H5VLNAT
+ */
 H5_DLL herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr);
 
 /* Not really public but must be included here */

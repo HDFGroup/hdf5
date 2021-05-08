@@ -2315,23 +2315,24 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
     /* Sanity check */
     HDassert(obj);
 
-    /* If the datatype is already VOL-managed, the datatype's vol_obj
-     * field will get clobbered later, so disallow this.
-     */
-    if (type == H5I_DATATYPE)
-        if (TRUE == H5T_already_vol_managed((const H5T_t *)obj))
-            HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "can't wrap an uncommitted datatype")
-
-    /* Wrap the object with VOL connector info */
-    if (NULL == (new_obj = H5VL__wrap_obj(obj, type)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, H5I_INVALID_HID, "can't wrap library object")
-
     /* Retrieve the VOL object wrapping context */
     if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
     if (NULL == vol_wrap_ctx || NULL == vol_wrap_ctx->connector)
         HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, H5I_INVALID_HID,
                     "VOL object wrap context or its connector is NULL???")
+
+    /* If the datatype is already VOL-managed, the datatype's vol_obj
+     * field will get clobbered later, so disallow this.
+     */
+    if (type == H5I_DATATYPE)
+        if (vol_wrap_ctx->connector->id == H5VL_NATIVE)
+            if (TRUE == H5T_already_vol_managed((const H5T_t *)obj))
+                HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "can't wrap an uncommitted datatype")
+
+    /* Wrap the object with VOL connector info */
+    if (NULL == (new_obj = H5VL__wrap_obj(obj, type)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, H5I_INVALID_HID, "can't wrap library object")
 
     /* Get an ID for the object */
     if ((ret_value = H5VL_register_using_vol_id(type, new_obj, vol_wrap_ctx->connector->id, app_ref)) < 0)
