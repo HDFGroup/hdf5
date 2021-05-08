@@ -352,7 +352,7 @@ H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
  *
  * \since 1.12.0
  */
-H5_DLL herr_t  H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, hbool_t *supported);
+H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, hbool_t *supported);
 
 #ifdef __cplusplus
 }
