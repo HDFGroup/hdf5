@@ -2936,7 +2936,7 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
     HDmemset(buf, 0, sizeof(buf));
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].a = i;
-        buf[i].d = (double)1.0F / (double)(i + 1);
+        buf[i].d = 1.0 / (double)(i + 1);
     } /* end for */
 
     /* Initialize the filenames */
