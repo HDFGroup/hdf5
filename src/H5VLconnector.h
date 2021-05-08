@@ -461,35 +461,36 @@ typedef struct H5VL_token_class_t {
 //! <!-- [H5VL_class_t_snip] -->
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
-    unsigned           version;          /* VOL connector class struct version #     */
-    H5VL_class_value_t value;            /* Value to identify connector              */
-    const char *       name;             /* Connector name (MUST be unique!)         */
-    unsigned           cap_flags;        /* Capability flags for connector           */
-    herr_t (*initialize)(hid_t vipl_id); /* Connector initialization callback        */
-    herr_t (*terminate)(void);           /* Connector termination callback           */
+    unsigned           version;          /**< VOL connector class struct version #     */
+    H5VL_class_value_t value;            /**< Value to identify connector              */
+    const char *       name;             /**< Connector name (MUST be unique!)         */
+    unsigned           conn_version;     /**< Version # of connector                   */
+    unsigned           cap_flags;        /**< Capability flags for connector           */
+    herr_t (*initialize)(hid_t vipl_id); /**< Connector initialization callback        */
+    herr_t (*terminate)(void);           /**< Connector termination callback           */
 
     /* VOL framework */
-    H5VL_info_class_t info_cls; /* VOL info fields & callbacks  */
-    H5VL_wrap_class_t wrap_cls; /* VOL object wrap / retrieval callbacks */
+    H5VL_info_class_t info_cls; /**< VOL info fields & callbacks  */
+    H5VL_wrap_class_t wrap_cls; /**< VOL object wrap / retrieval callbacks */
 
     /* Data Model */
-    H5VL_attr_class_t     attr_cls;     /* Attribute (H5A*) class callbacks */
-    H5VL_dataset_class_t  dataset_cls;  /* Dataset (H5D*) class callbacks   */
-    H5VL_datatype_class_t datatype_cls; /* Datatype (H5T*) class callbacks  */
-    H5VL_file_class_t     file_cls;     /* File (H5F*) class callbacks      */
-    H5VL_group_class_t    group_cls;    /* Group (H5G*) class callbacks     */
-    H5VL_link_class_t     link_cls;     /* Link (H5L*) class callbacks      */
-    H5VL_object_class_t   object_cls;   /* Object (H5O*) class callbacks    */
+    H5VL_attr_class_t     attr_cls;     /**< Attribute (H5A*) class callbacks */
+    H5VL_dataset_class_t  dataset_cls;  /**< Dataset (H5D*) class callbacks   */
+    H5VL_datatype_class_t datatype_cls; /**< Datatype (H5T*) class callbacks  */
+    H5VL_file_class_t     file_cls;     /**< File (H5F*) class callbacks      */
+    H5VL_group_class_t    group_cls;    /**< Group (H5G*) class callbacks     */
+    H5VL_link_class_t     link_cls;     /**< Link (H5L*) class callbacks      */
+    H5VL_object_class_t   object_cls;   /**< Object (H5O*) class callbacks    */
 
     /* Infrastructure / Services */
-    H5VL_introspect_class_t introspect_cls; /* Container/connector introspection class callbacks */
-    H5VL_request_class_t    request_cls;    /* Asynchronous request class callbacks */
-    H5VL_blob_class_t       blob_cls;       /* 'Blob' class callbacks */
-    H5VL_token_class_t      token_cls;      /* VOL connector object token class callbacks */
+    H5VL_introspect_class_t introspect_cls; /**< Container/connector introspection class callbacks */
+    H5VL_request_class_t    request_cls;    /**< Asynchronous request class callbacks */
+    H5VL_blob_class_t       blob_cls;       /**< 'Blob' class callbacks */
+    H5VL_token_class_t      token_cls;      /**< VOL connector object token class callbacks */
 
     /* Catch-all */
     herr_t (*optional)(void *obj, int op_type, hid_t dxpl_id, void **req,
-                       va_list arguments); /* Optional callback */
+                       va_list arguments); /**< Optional callback */
 } H5VL_class_t;
 //! <!-- [H5VL_class_t_snip] -->
 
@@ -506,10 +507,53 @@ extern "C" {
 #endif
 
 /* Helper routines for VOL connector authors */
+/**
+ * \ingroup H5VLDEV
+ * \brief Registers a new VOL connector
+ *
+ * \param[in] cls A pointer to the plugin structure to register
+ * \vipl_id
+ * \return \hid_t{VOL connector}
+ *
+ * \details H5VLregister_connector() registers a new VOL connector as a member
+ *          of the virtual object layer class. This VOL connector identifier is
+ *          good until the library is closed or the connector is unregistered.
+ *
+ *          \p vipl_id is either #H5P_DEFAULT or the identifier of a VOL
+ *          initialization property list of class #H5P_VOL_INITIALIZE created
+ *          with H5Pcreate(). When created, this property list contains no
+ *          library properties. If a VOL connector author decides that
+ *          initialization-specific data are needed, they can be added to the
+ *          empty list and retrieved by the connector in the VOL connector's
+ *          initialize callback. Use of the VOL initialization property list is
+ *          uncommon, as most VOL-specific properties are added to the file
+ *          access property list via the connector's API calls which set the
+ *          VOL connector for the file open/create. For more information, see
+ *          the \ref_vol_doc.
+ *
+ *          H5VL_class_t is defined in H5VLconnector.h in the source code. It
+ *          contains class information for each VOL connector:
+ *          \snippet this H5VL_class_t_snip
+ *
+ * \since 1.12.0
+ *
+ */
 H5_DLL hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);
+/**
+ * \ingroup H5VLDEV
+ */
 H5_DLL void *H5VLobject(hid_t obj_id);
+/**
+ * \ingroup H5VLDEV
+ */
 H5_DLL hid_t H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id);
+/**
+ * \ingroup H5VLDEV
+ */
 H5_DLL hid_t H5VLpeek_connector_id_by_name(const char *name);
+/**
+ * \ingroup H5VLDEV
+ */
 H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 
 #ifdef __cplusplus
