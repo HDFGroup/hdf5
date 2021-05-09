@@ -32,6 +32,8 @@
 #include "testhdf5.h"
 #include "vfd_swmr_common.h"
 
+#ifndef H5_HAVE_WIN32_API
+
 #define READER_WAIT_TICKS   4
 #define MAX_COMPACT_SIZE    65520   /* max obj header message size 65536) - other layout message fields (16) */
 #define MAX_COMPACT_ELMS    (MAX_COMPACT_SIZE/sizeof(unsigned int))
@@ -73,8 +75,8 @@ typedef struct {
     , .compact_write = false                    \
     , .compact_elmts = MAX_COMPACT_ELMS         \
     , .contig = false                           \
-    , .rows = 256                               \
-    , .cols = 512                               \
+    , .rows = 10                                \
+    , .cols = 5                                 \
     , .swrites = 0                              \
     , .rwrites = 0                              \
     , .lwrites = 0                              \
@@ -227,12 +229,17 @@ state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
     int ch;
-    char tfile[PATH_MAX];
+    char *tfile;
     char *end;
 
     *s = ALL_HID_INITIALIZER;
-    esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
-    esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
+
+    if(H5_basename(argv[0], &tfile) < 0) {
+        printf("H5_basename failed\n");
+        TEST_ERROR;
+    }
+
+    esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
 
     while ((ch = getopt(argc, argv, "pte:gkm:n:s:r:l:w:bqSNu:c:")) != -1) {
         switch (ch) {
@@ -279,7 +286,7 @@ state_init(state_t *s, int argc, char **argv)
         case 'u':   /* ticks for raeder to wait before verification */
         case 'c':   /* communication interval */
             errno = 0;
-            tmp = strtoul(optarg, &end, 0);
+            tmp = HDstrtoul(optarg, &end, 0);
             if (end == optarg || *end != '\0') {
                 printf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
                 TEST_ERROR;
@@ -399,7 +406,6 @@ create_dsets(const state_t *s, dsets_state_t *ds)
     /* Dataset with compact layout, 1d, named datatype */
     if(s->compact) {
         hsize_t dims[1];
-        hid_t sid;
 
         if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
             printf("H5Pcreate failed\n");
@@ -434,8 +440,6 @@ create_dsets(const state_t *s, dsets_state_t *ds)
     /* Dataset with contiguous layout, 2d, named datatype */
     if(s->contig) {
         hsize_t dims[2];
-        hid_t sid;
-        unsigned i;
 
         dims[0] = s->rows;
         dims[1] = s->cols;
@@ -474,8 +478,6 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         hsize_t dims[2];
         hsize_t max_dims[2];
         hsize_t chunk_dims[2];
-        hid_t sid;
-        unsigned i;
 
         dims[0] = s->rows;
         dims[1] = s->cols;
@@ -658,7 +660,6 @@ open_dsets(const state_t *s, dsets_state_t *ds)
     }
 
     if(s->contig) {
-        hsize_t dims[2];
 
         if(!open_dset_real(s, &ds->contig_did, &ds->contig_sid, DSET_CONTIG_NAME)) {
             printf("open_dset_real() for contiguous dataset failed\n");
@@ -667,7 +668,6 @@ open_dsets(const state_t *s, dsets_state_t *ds)
     }
 
     if(s->chunked) {
-        hsize_t dims[2];
 
         if(!open_dset_real(s, &ds->single_did, &ds->single_sid, DSET_SINGLE_NAME)) {
             printf("open_dset_real() for chunked dataset: single index failed\n");
@@ -709,7 +709,6 @@ error:
 static bool
 open_dset_real(const state_t *s, hid_t *did, hid_t *sid, const char *name)
 {
-    hid_t dcpl = badhid;
     hsize_t dims[2];
 
     if ((*did = H5Dopen2(s->file, name, H5P_DEFAULT)) < 0) {
@@ -835,15 +834,11 @@ error:
 static bool 
 dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
 {
-    int nerrors = 0;
-    bool ret = false;
-    hsize_t dims[2];
     hsize_t start[2];
     hsize_t stride[2];
     hsize_t count[2];
     hsize_t block[2];
     hid_t mem_sid;
-    unsigned kk, i;
     unsigned int *wbuf = NULL;
 
     /* Set up selection, dataspace and data buffer according to the specified action */
@@ -1057,17 +1052,11 @@ error:
 static bool 
 verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
 {
-    int nerrors = 0;
-    bool ret = false;
-    hsize_t dims[2];
     hsize_t start[2];
     hsize_t stride[2];
     hsize_t count[2];
     hsize_t block[2];
     hid_t mem_sid;
-    unsigned mm;
-    unsigned kk, i;
-    unsigned int *dd;
     unsigned int *vbuf = NULL;
 
     /* Set up selection, dataspace and data buffer according to the specified action */
@@ -1181,7 +1170,7 @@ error:
 static bool
 verify_read_dset_compact(const state_t *s, const dsets_state_t *ds)
 {
-    unsigned int *vbuf, *rbuf;
+    unsigned int *rbuf;
     unsigned i;
 
     if((rbuf = HDmalloc(s->compact_elmts * sizeof(unsigned int))) == NULL) {
@@ -1448,13 +1437,13 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    personality = strstr(s.progname, "vfd_swmr_dsetops_");
+    personality = HDstrstr(s.progname, "vfd_swmr_dsetops_");
 
     if (personality != NULL &&
-        strcmp(personality, "vfd_swmr_dsetops_writer") == 0)
+        HDstrcmp(personality, "vfd_swmr_dsetops_writer") == 0)
         writer = true;
     else if (personality != NULL &&
-             strcmp(personality, "vfd_swmr_dsetops_reader") == 0)
+             HDstrcmp(personality, "vfd_swmr_dsetops_reader") == 0)
         writer = false;
     else {
         printf("unknown personality, expected vfd_swmr_dsetops_{reader,writer}\n");
@@ -1547,7 +1536,7 @@ main(int argc, char **argv)
             for (step = 0; (step < s.rwrites && step < (s.rows*s.cols)); step++) {
                 dbgf(2, "Random writes %u to dataset\n", step);
 
-                newstep = HDrandom() % (s.rows*s.cols);
+                newstep = (unsigned int)HDrandom() % (s.rows*s.cols);
                 printf("Random step is %u\n", newstep);
                 result = dsets_action(RANDOM_WRITE, &s, &ds, newstep);
 
@@ -1642,7 +1631,7 @@ main(int argc, char **argv)
             for (step = 0; (step < s.rwrites && step < (s.rows*s.cols)); step++) {
                 dbgf(2, "Verify random writes %u to dataset\n", step);
 
-                newstep = HDrandom() % (s.rows*s.cols);
+                newstep = (unsigned int)HDrandom() % (s.rows*s.cols);
                 printf("Random step is %u\n", newstep);
 
                 if(s.use_np && !np_confirm_verify_notify(np.fd_writer_to_reader, step, &s, &np)) {
@@ -1688,7 +1677,6 @@ main(int argc, char **argv)
 
         /* Start verifying raw data modifications for contiguous and/or chunked datasets */
         if((s.contig || s.chunked) && s.wwrites) {
-            unsigned k;
 
             for (step = 0; (step < s.wwrites && step < (s.rows*s.cols)); step++) {
                 dbgf(2, "Verify raw data modification %u to dataset\n", step);
@@ -1758,3 +1746,14 @@ error:
 
     return EXIT_FAILURE;
 } /* main */
+
+#else /* H5_HAVE_WIN32_API */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_WIN32_API */
