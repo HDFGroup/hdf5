@@ -148,7 +148,7 @@ H5HL__prfx_dest(H5HL_prfx_t *prfx)
 
         /* Unlink heap from prefix */
         prfx->heap = NULL;
-    } /* end if */
+    }
 
 done:
     /* Free prefix memory */

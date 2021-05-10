@@ -95,13 +95,13 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
                 if (marker[freelist->offset + i])
                     overlap++;
                 marker[freelist->offset + i] = 1;
-            } /* end for */
+            }
             if (overlap)
                 HDfprintf(stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS ONE!\n");
             else
                 amount_free += freelist->size;
-        } /* end else */
-    }     /* end for */
+        }
+    }    
 
     if (h->dblk_size)
         HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of heap used:",

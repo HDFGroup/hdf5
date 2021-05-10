@@ -211,7 +211,7 @@ H5HL__dest(H5HL_t *heap)
         heap->freelist = fl->next;
         if (NULL != (fl = H5FL_FREE(H5HL_free_t, fl)))
             HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap free list");
-    } /* end while */
+    }
 
     if (NULL != (heap = H5FL_FREE(H5HL_t, heap)))
         HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap");
