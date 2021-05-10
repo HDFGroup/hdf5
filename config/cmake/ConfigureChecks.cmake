@@ -31,13 +31,13 @@ MARK_AS_ADVANCED (HDF5_STRICT_FORMAT_CHECKS)
 #-----------------------------------------------------------------------------
 # Option for --enable-threadsafe
 #-----------------------------------------------------------------------------
-# Recursive thread-safety writer locks are not supported on Windows (yet)
+# Recursive RW locks are not supported on Windows (yet)
 if (NOT WINDOWS)
-  option (HDF5_USE_RECURSIVE_WRITER_LOCKS "Whether to use recursive thread-safety writer locks" OFF)
-  if (HDF5_USE_RECURSIVE_WRITER_LOCKS)
-    set (${HDF_PREFIX}_USE_RECURSIVE_WRITER_LOCKS 1)
+  option (HDF5_USE_RECURSIVE_RW_LOCKS "Whether to use recursive RW locks for thread-safety" OFF)
+  if (HDF5_USE_RECURSIVE_RW_LOCKS)
+    set (${HDF_PREFIX}_USE_RECURSIVE_RW_LOCKS 1)
   endif ()
-  MARK_AS_ADVANCED (HDF5_USE_RECURSIVE_WRITER_LOCKS)
+  MARK_AS_ADVANCED (HDF5_USE_RECURSIVE_RW_LOCKS)
 endif ()
 
 # ----------------------------------------------------------------------

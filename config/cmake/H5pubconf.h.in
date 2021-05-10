@@ -744,8 +744,8 @@
 /* Define if the library will use file locking */
 #cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@
 
-/* Define if the library will use recursive thread-safety writer locks */
-#cmakedefine H5_USE_RECURSIVE_WRITER_LOCKS @H5_USE_RECURSIVE_WRITER_LOCKS@
+/* Define if the library will use recursive RW locks for thread safety */
+#cmakedefine H5_USE_RECURSIVE_RW_LOCKS @H5_USE_RECURSIVE_RW_LOCKS@
 
 /* Define if a memory checking tool will be used on the library, to cause
    library to be very picky about memory operations and also disable the

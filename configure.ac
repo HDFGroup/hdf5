@@ -1950,41 +1950,41 @@ if test "X$THREADSAFE" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Should HDF5 use our fully-recursive RW lock implementation?
+## Should the thread-safety feature use a recursive RW lock?
 ##
-## POSIX RW locks do not allow recursive write locks, which would be
-## beneficial in some HDF5 use cases (in callbacks, custom VOL or VFD
-## connectors).
+## NOTE: Most RW locks do not allow recursive write locks, which would be
+##       beneficial in some HDF5 use cases (in callbacks, custom VOL or VFD
+##       connectors) so we use a custom RW lock scheme.
 ##
 ## Reqires a thread-safe library and Pthreads.
-AC_SUBST([RECURSIVE_WRITER_LOCKS])
+AC_SUBST([RECURSIVE_RW_LOCKS])
 
-## Default is to use POSIX RW locks
-RECURSIVE_WRITER_LOCKS=no
+## Default is to not use recursive RW locks
+RECURSIVE_RW_LOCKS=no
 
-AC_MSG_CHECKING([whether to use recursive thread-safety writer locks])
-AC_ARG_ENABLE([recursive-writer-locks],
-              [AS_HELP_STRING([--enable-recursive-writer-locks],
-                              [Enable recursive thread-safety writer locks. Requires a thread-safe library and Pthreads.
+AC_MSG_CHECKING([whether to use recursive RW locks for thread safety])
+AC_ARG_ENABLE([recursive-rw-locks],
+              [AS_HELP_STRING([--enable-recursive-rw-locks],
+                              [Enable recursive RW locks for thread safety. Requires a thread-safe library and Pthreads.
                               [default=no]])],
-              [RECURSIVE_WRITER_LOCKS=$enableval])
+              [RECURSIVE_RW_LOCKS=$enableval])
 
-case "X-$RECURSIVE_WRITER_LOCKS" in
+case "X-$RECURSIVE_RW_LOCKS" in
   X-|X-no)
     AC_MSG_RESULT([no])
     ;;
   X-yes)
     if test "X-$THREADSAFE" = "X-yes" -a "X-$HAVE_PTHREAD" = "X-yes" ; then
       AC_MSG_RESULT([yes])
-      AC_DEFINE([USE_RECURSIVE_WRITER_LOCKS], [1], [Define if the library will use recursive thread-safety writer locks])
+      AC_DEFINE([USE_RECURSIVE_RW_LOCKS], [1], [Define if the library will use recursive RW locks for thread safety])
     else
       AC_MSG_RESULT([error])
-      AC_MSG_ERROR([recursive thread-safety writer locks require a thread-safe library and Pthreads])
+      AC_MSG_ERROR([recursive RW locks require a thread-safe library and Pthreads])
     fi
     ;;
   *)
     AC_MSG_RESULT([error])
-    AC_MSG_ERROR([\'$enableval\' is not a valid recursive thread-safety writer lock value])
+    AC_MSG_ERROR([\'$enableval\' is not a valid recursive RW lock value])
     ;;
 esac
 
