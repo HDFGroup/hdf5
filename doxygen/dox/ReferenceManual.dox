@@ -1,27 +1,39 @@
 /** \page RM Reference Manual
 
+
+<table>
+<tr><th>Modules</th><th>See also</th></tr>
+<tr valign="top">
+<td>
 The functions provided by the HDF5 C-API are grouped into the following
 \Emph{modules}:
 
-\li \ref H5A "Attributes" — Management of HDF5 attributes (\ref H5A)
-\li \ref H5D "Datasets" — Management of HDF5 datasets (\ref H5D)
-\li \ref H5S "Dataspaces" — Management of HDF5 dataspaces which describe the shape of datasets and attributes (\ref H5S)
-\li \ref H5T "Datatypes" — Management of datatypes which describe elements of datasets and attributes (\ref H5T)
-\li \ref H5E "Error Handling" — Functions for handling HDF5 errors (\ref H5E)
-\li \ref H5ES "Event Sets" — Functions for handling HDF5 event sets (\ref H5ES)
-\li \ref H5F "Files" — Management of HDF5 files (\ref H5F)
-\li \ref H5Z "Filters" — Configuration of filters that process data during I/O operation (\ref H5Z)
-\li \ref H5G "Groups" — Management of groups in HDF5 files (\ref H5G)
-\li \ref H5I "Identifiers" — Management of object identifiers and object names (\ref H5I)
-\li \ref H5 "Library" — General purpose library functions (\ref H5)
-\li \ref H5L "Links" — Management of links in HDF5 groups (\ref H5L)
-\li \ref H5M "Maps" — Management of HDF5 maps (\ref H5M)
-\li \ref H5O "Objects" — Management of objects in HDF5 files (\ref H5O)
-\li \ref H5PL "Plugins" — Programmatic control over dynamically loaded plugins (\ref H5PL)
-\li \ref H5P "Property Lists" — Management of property lists to control HDF5 library behavior (\ref H5P)
-\li \ref H5R "References" — Management of references to specific objects and data regions in an HDF5 file (\ref H5R)
-\li \ref H5VL "Virtual Object Layer" — Management of the Virtual Object Layer (\ref H5VL)
+<table>
+<tr><td style="border: none;">
+\li \ref H5A "Attributes (H5A)"
+\li \ref H5D "Datasets (H5D)"
+\li \ref H5S "Dataspaces (H5S)"
+\li \ref H5T "Datatypes (H5T)"
+\li \ref H5E "Error Handling (H5E)"
+\li \ref H5ES "Event Sets (H5ES)"
+\li \ref H5F "Files (H5F)"
+\li \ref H5Z "Filters (H5Z)"
+\li \ref H5G "Groups (H5G)"
+</td><td style="border: none;">
+\li \ref H5I "Identifiers (H5I)"
+\li \ref H5 "Library General (H5)"
+\li \ref H5L "Links (H5L)"
+\li \ref H5M "Maps (H5M)"
+\li \ref H5O "Objects (H5O)"
+\li \ref H5P "Property Lists (H5P)"
+\li \ref H5PL "Dynamically-loaded Plugins (H5PL)"
+\li \ref H5R "References (H5R)"
+\li \ref H5VL "Virtual Object Layer (H5VL)"
+</td></tr>
+</table>
 
+</td>
+<td>
 \par Asynchronous Functions
      A subset of functions has \ref ASYNC "asynchronous variants".
 
@@ -31,13 +43,22 @@ The functions provided by the HDF5 C-API are grouped into the following
 \par Deprecated Functions and Types
      A list of deprecated functions and types can be found
      <a href="./deprecated.html">here</a>.
+</td>
+</tr>
+</table>
+
+\par You can help to improve the Reference Manual!
+     See the \ref RMT for general guidance.\n
+     We treat documentation like code: Fork the
+     <a href="https://github.com/HDFGroup/hdf5">HDF5 repo</a>, make changes, and create a
+     <a href="https://github.com/HDFGroup/hdf5/pulls">pull request</a>!
+
+\cpp_c_api_note
 
 \par Etiquette
      Here are a few simple rules to follow:
      \li \Bold{Handle discipline:} If you acquire a handle (by creation or copy), \Emph{you own it!} (..., i.e., you have to close it.)
      \li \Bold{Dynamic memory allocation:} ...
      \li \Bold{Use of locations:} Identifier + name combo
-
-\cpp_c_api_note
 
 */
