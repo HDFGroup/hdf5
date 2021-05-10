@@ -508,27 +508,33 @@ END_FUNC(STATIC) /* end H5HL__dirty() */
  *
  * Purpose:     Inserts a new item into the heap.
  *
- * Return:      Success:    Offset of new item within heap.
- *              Failure:    UFAIL
+ * Return:      Success:    SUCCEED
+ *                          Offset set to location of new item within heap
+ *
+ *              Failure:    FAIL
+ *                          Offset set to SIZE_MAX
  *
  * Programmer:  Robb Matzke
  *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, ERR, size_t, UFAIL, UFAIL,
-           H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf))
+BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL,
+           H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *offset_out))
 
     H5HL_free_t *fl = NULL, *last_fl = NULL;
-    size_t       offset = 0;
     size_t       need_size;
+    size_t       offset = 0;
     hbool_t      found;
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(f);
     HDassert(heap);
     HDassert(buf_size > 0);
     HDassert(buf);
+    HDassert(offset_out);
+
+    *offset_out = SIZE_MAX;
 
     /* Mark heap as dirty in cache */
     /* (A bit early in the process, but it's difficult to determine in the
@@ -539,20 +545,18 @@ BEGIN_FUNC(PRIV, ERR, size_t, UFAIL, UFAIL,
     if (FAIL == H5HL__dirty(heap))
         H5E_THROW(H5E_CANTMARKDIRTY, "unable to mark heap as dirty");
 
-    /*
-     * In order to keep the free list descriptors aligned on word boundaries,
+    /* In order to keep the free list descriptors aligned on word boundaries,
      * whatever that might mean, we round the size up to the next multiple of
      * a word.
      */
     need_size = H5HL_ALIGN(buf_size);
 
-    /*
-     * Look for a free slot large enough for this object and which would
+    /* Look for a free slot large enough for this object and which would
      * leave zero or at least H5G_SIZEOF_FREE bytes left over.
      */
     for (fl = heap->freelist, found = FALSE; fl; fl = fl->next) {
         if (fl->size > need_size && fl->size - need_size >= H5HL_SIZEOF_FREE(f)) {
-            /* a big enough free block was found */
+            /* A big enough free block was found */
             offset = fl->offset;
             fl->offset += need_size;
             fl->size -= need_size;
@@ -562,20 +566,19 @@ BEGIN_FUNC(PRIV, ERR, size_t, UFAIL, UFAIL,
             break;
         }
         else if (fl->size == need_size) {
-            /* free block of exact size found */
+            /* Free block of exact size found */
             offset = fl->offset;
             fl     = H5HL__remove_free(heap, fl);
             found  = TRUE;
             break;
         }
         else if (!last_fl || last_fl->offset < fl->offset) {
-            /* track free space that's closest to end of heap */
+            /* Track free space that's closest to end of heap */
             last_fl = fl;
         }
     } /* end for */
 
-    /*
-     * If no free chunk was large enough, then allocate more space and
+    /* If no free chunk was large enough, then allocate more space and
      * add it to the free list.	 If the heap ends with a free chunk, we
      * can extend that free chunk.  Otherwise we'll have to make another
      * free chunk.  If the heap must expand, we double its size.
@@ -587,7 +590,8 @@ BEGIN_FUNC(PRIV, ERR, size_t, UFAIL, UFAIL,
         htri_t was_extended;  /* Whether the local heap's data segment on disk was extended */
 
         /* At least double the heap's size, making certain there's enough room
-         * for the new object */
+         * for the new object
+         */
         need_more = MAX(need_size, heap->dblk_size);
 
         /* If there is no last free block or it's not at the end of the heap,
@@ -657,8 +661,7 @@ BEGIN_FUNC(PRIV, ERR, size_t, UFAIL, UFAIL,
             }
         } /* end if */
         else {
-            /*
-             * Create a new free list element large enough that we can
+            /* Create a new free list element large enough that we can
              * take some space out of it right away.
              */
             offset = old_dblk_size;
@@ -700,11 +703,10 @@ BEGIN_FUNC(PRIV, ERR, size_t, UFAIL, UFAIL,
     /* Copy the data into the heap */
     H5MM_memcpy(heap->dblk_image + offset, buf, buf_size);
 
-    /* Set return value */
-    ret_value = offset;
+    *offset_out = offset;
 
     CATCH
-    /* No special processing on errors */
+    /* No special processing on exit */
 
 END_FUNC(PRIV) /* H5HL_insert() */
 
