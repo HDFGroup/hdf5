@@ -480,25 +480,12 @@ for $file (@ARGV) {
     # Make a copy of the original data
     my $original = $Source;
 
-    # Check which style of function declaration is used in this file
-    if ( $Source =~ /BEGIN_FUNC/ ) {
-        # Make modifications
-        $Source =~ s/\n(BEGIN_FUNC.*?\n)                      #begin
-                        ([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)  #type
-                        (.*?\n)                               #aftertype
-                         (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
-                         \s*\((.*?)\)\s*                      #args
-                         (\))                                 #close
-                         (\n.*?\nEND_FUNC\([^\n]*)            #body
-                         /rewrite_func($file,$1,$2,$4,$5,$6,$7,$8)/segx;
-    } else {
-        # Make modifications
-        $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
-                         (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
-                         \s*\((.*?)\)\s*                      #args
-                         (\{.*?\n\}[^\n]*)                    #body
-                         /rewrite_func($file,"",$1,"\n",$3,$4,"\n",$5)/segx;
-    }
+    # Make modifications
+    $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
+                     (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
+                     \s*\((.*?)\)\s*                      #args
+                     (\{.*?\n\}[^\n]*)                    #body
+                     /rewrite_func($file,"",$1,"\n",$3,$4,"\n",$5)/segx;
 
 # If the source changed then print out the new version
     if ($original ne $Source) {
