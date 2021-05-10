@@ -182,8 +182,10 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
                 case H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS:
                 case H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG:
                 case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG:
+#ifdef H5_HAVE_PARALLEL
                 case H5VL_NATIVE_FILE_GET_MPI_ATOMICITY:
                 case H5VL_NATIVE_FILE_SET_MPI_ATOMICITY:
+#endif /* H5_HAVE_PARALLEL */
                 case H5VL_NATIVE_FILE_POST_OPEN:
                     break;
 

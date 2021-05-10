@@ -985,11 +985,6 @@ H5_DLL herr_t H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid);
 H5_DLL herr_t H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_driver,
                                           hbool_t start_swmr);
 
-/* Cache corking functions */
-H5_DLL herr_t H5O_disable_mdc_flushes(H5O_loc_t *oloc);
-H5_DLL herr_t H5O_enable_mdc_flushes(H5O_loc_t *oloc);
-H5_DLL herr_t H5O_are_mdc_flushes_disabled(H5O_loc_t *oloc, hbool_t *are_disabled);
-
 /* Object copying routines */
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
                                   H5O_copy_t *cpy_info, hbool_t inc_depth, H5O_type_t *obj_type,

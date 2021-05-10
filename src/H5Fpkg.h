@@ -408,7 +408,7 @@ H5_DLL herr_t H5F__post_open(H5F_t *f);
 H5_DLL H5F_t * H5F__reopen(H5F_t *f);
 H5_DLL herr_t  H5F__flush(H5F_t *f);
 H5_DLL htri_t  H5F__is_hdf5(const char *name, hid_t fapl_id);
-H5_DLL ssize_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
+H5_DLL herr_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len, size_t *image_len);
 H5_DLL herr_t  H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
 H5_DLL herr_t  H5F__format_convert(H5F_t *f);
 H5_DLL herr_t  H5F__start_swmr_write(H5F_t *f);
@@ -447,6 +447,12 @@ H5_DLL herr_t H5F__accum_reset(H5F_shared_t *f_sh, hbool_t flush);
 H5_DLL herr_t H5F__sfile_add(H5F_shared_t *shared);
 H5_DLL H5F_shared_t *H5F__sfile_search(H5FD_t *lf);
 H5_DLL herr_t        H5F__sfile_remove(H5F_shared_t *shared);
+
+/* Parallel I/O (i.e. MPI) related routines */
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t   H5F__get_mpi_atomicity(const H5F_t *file, hbool_t *flag);
+H5_DLL herr_t   H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag);
+#endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F__efc_create(unsigned max_nfiles);

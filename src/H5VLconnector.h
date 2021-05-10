@@ -93,6 +93,12 @@ typedef struct H5VL_loc_params_t {
     } loc_data;
 } H5VL_loc_params_t;
 
+/* Struct for all 'optional' callbacks */
+typedef struct H5VL_optional_args_t {
+    int op_type;        /* Operation to perform */
+    void *args;         /* Pointer to operation's argument struct */
+} H5VL_optional_args_t;
+
 /* Values for attribute 'get' operations */
 typedef enum H5VL_attr_get_t {
     H5VL_ATTR_GET_ACPL,         /* creation property list              */
@@ -645,9 +651,7 @@ typedef struct H5VL_link_specific_args_t {
     /* Parameters for each operation */
     union {
         /* H5VL_LINK_DELETE */
-        struct {
-            int unused;         /* Unused field, to quiet compiler */
-        } del;
+            /* No args */
 
         /* H5VL_LINK_EXISTS */
         struct {
@@ -816,9 +820,7 @@ typedef struct H5VL_blob_specific_args_t {
     /* Parameters for each operation */
     union {
         /* H5VL_BLOB_DELETE */
-        struct {
-            int unused;         /* Unused field, to quiet compiler */
-        } del;
+            /* No args */
 
         /* H5VL_BLOB_ISNULL */
         struct {
@@ -826,9 +828,7 @@ typedef struct H5VL_blob_specific_args_t {
         } is_null;
 
         /* H5VL_BLOB_SETNULL */
-        struct {
-            int unused;         /* Unused field, to quiet compiler */
-        } setnull;
+            /* No args */
     } args;
 } H5VL_blob_specific_args_t;
 
@@ -872,8 +872,7 @@ typedef struct H5VL_attr_class_t {
     herr_t (*get)(void *obj, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_attr_specific_args_t *args,
                        hid_t dxpl_id, void **req);
-    herr_t (*optional)(void *obj, H5VL_attr_optional_t opt_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*close)(void *attr, hid_t dxpl_id, void **req);
 } H5VL_attr_class_t;
 
@@ -889,8 +888,7 @@ typedef struct H5VL_dataset_class_t {
                     const void *buf, void **req);
     herr_t (*get)(void *obj, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_dataset_specific_args_t *args, hid_t dxpl_id, void **req);
-    herr_t (*optional)(void *obj, H5VL_dataset_optional_t opt_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*close)(void *dset, hid_t dxpl_id, void **req);
 } H5VL_dataset_class_t;
 
@@ -902,8 +900,7 @@ typedef struct H5VL_datatype_class_t {
                   hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req);
-    herr_t (*optional)(void *obj, H5VL_datatype_optional_t opt_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*close)(void *dt, hid_t dxpl_id, void **req);
 } H5VL_datatype_class_t;
 
@@ -914,8 +911,7 @@ typedef struct H5VL_file_class_t {
     void *(*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req);
-    herr_t (*optional)(void *obj, H5VL_file_optional_t opt_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*close)(void *file, hid_t dxpl_id, void **req);
 } H5VL_file_class_t;
 
@@ -927,8 +923,7 @@ typedef struct H5VL_group_class_t {
                   hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req);
-    herr_t (*optional)(void *obj, H5VL_group_optional_t opt_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*close)(void *grp, hid_t dxpl_id, void **req);
 } H5VL_group_class_t;
 
@@ -946,8 +941,8 @@ typedef struct H5VL_link_class_t {
                   void **req);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_args_t *args,
                        hid_t dxpl_id, void **req);
-    herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_optional_t opt_type,
-                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
+                       hid_t dxpl_id, void **req);
 } H5VL_link_class_t;
 
 /* H5O routines */
@@ -961,8 +956,8 @@ typedef struct H5VL_object_class_t {
                   void **req);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_args_t *args,
                        hid_t dxpl_id, void **req);
-    herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_optional_t opt_type,
-                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
+                       hid_t dxpl_id, void **req);
 } H5VL_object_class_t;
 
 /* Asynchronous request 'notify' callback */
@@ -992,7 +987,7 @@ typedef struct H5VL_request_class_t {
     herr_t (*notify)(void *req, H5VL_request_notify_t cb, void *ctx);
     herr_t (*cancel)(void *req, H5VL_request_status_t *status);
     herr_t (*specific)(void *req, H5VL_request_specific_args_t *args);
-    herr_t (*optional)(void *req, H5VL_request_optional_t opt_type, va_list arguments);
+    herr_t (*optional)(void *req, H5VL_optional_args_t *args);
     herr_t (*free)(void *req);
 } H5VL_request_class_t;
 
@@ -1001,7 +996,7 @@ typedef struct H5VL_blob_class_t {
     herr_t (*put)(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
     herr_t (*get)(void *obj, const void *blob_id, void *buf, size_t size, void *ctx);
     herr_t (*specific)(void *obj, void *blob_id, H5VL_blob_specific_args_t *args);
-    herr_t (*optional)(void *obj, void *blob_id, H5VL_blob_optional_t opt_type, va_list arguments);
+    herr_t (*optional)(void *obj, void *blob_id, H5VL_optional_args_t *args);
 } H5VL_blob_class_t;
 
 /* Object token routines */
@@ -1046,8 +1041,7 @@ typedef struct H5VL_class_t {
     H5VL_token_class_t      token_cls;      /**< VOL connector object token class callbacks */
 
     /* Catch-all */
-    herr_t (*optional)(void *obj, int op_type, hid_t dxpl_id, void **req,
-                       va_list arguments); /**< Optional callback */
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req); /**< Optional callback */
 } H5VL_class_t;
 //! <!-- [H5VL_class_t_snip] -->
 
@@ -1118,26 +1112,21 @@ H5_DLL herr_t H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_
 H5_DLL herr_t H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val);
 H5_DLL herr_t H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name);
 H5_DLL herr_t H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                   hid_t attr_id, H5VL_attr_optional_t opt_type, hid_t dxpl_id, hid_t es_id,
-                                   ...);
+                                   hid_t attr_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                      hid_t dset_id, H5VL_dataset_optional_t opt_type, hid_t dxpl_id,
-                                      hid_t es_id, ...);
+                                      hid_t dset_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLdatatype_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                       hid_t type_id, H5VL_datatype_optional_t opt_type, hid_t dxpl_id,
-                                       hid_t es_id, ...);
+                                       hid_t type_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                   hid_t file_id, H5VL_file_optional_t opt_type, hid_t dxpl_id, hid_t es_id,
-                                   ...);
+                                   hid_t file_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                    hid_t group_id, H5VL_group_optional_t opt_type, hid_t dxpl_id,
-                                    hid_t es_id, ...);
+                                    hid_t group_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                    hid_t loc_id, const char *name, hid_t lapl_id,
-                                   H5VL_link_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...);
+                                   H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                      hid_t loc_id, const char *name, hid_t lapl_id,
-                                     H5VL_object_optional_t opt_type, hid_t dxpl_id, hid_t es_id, ...);
+                                     H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 
 /* API Wrappers for "optional_op" routines */
 /* (Must be defined _after_ the function prototype) */

@@ -1026,7 +1026,7 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
+H5_DLL herr_t H5Fset_mdc_config(hid_t file_id, const H5AC_cache_config_t *config_ptr);
 /**
  * \ingroup MDC
  *

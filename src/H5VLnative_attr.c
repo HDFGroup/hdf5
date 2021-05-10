@@ -532,24 +532,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, H5VL_attr_optional_t opt_type,
-                           hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req,
-                           va_list H5_ATTR_DEPRECATED_USED arguments)
+H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, H5VL_optional_args_t *args,
+                           hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (opt_type) {
+    switch (args->op_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         case H5VL_NATIVE_ATTR_ITERATE_OLD: {
-            hid_t           loc_id   = HDva_arg(arguments, hid_t);
-            unsigned *      attr_num = HDva_arg(arguments, unsigned *);
-            H5A_operator1_t op       = HDva_arg(arguments, H5A_operator1_t);
-            void *          op_data  = HDva_arg(arguments, void *);
+            H5VL_native_attr_iterate_old_t *iter_args = &((H5VL_native_attr_optional_args_t *)(args->args))->iterate_old;
 
             /* Call the actual iteration routine */
-            if ((ret_value = H5A__iterate_old(loc_id, attr_num, op, op_data)) < 0)
+            if ((ret_value = H5A__iterate_old(iter_args->loc_id, iter_args->attr_num, iter_args->op, iter_args->op_data)) < 0)
                 HERROR(H5E_VOL, H5E_BADITER, "error iterating over attributes");
 
             break;

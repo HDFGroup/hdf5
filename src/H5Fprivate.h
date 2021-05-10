@@ -963,8 +963,6 @@ H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int      H5F_shared_mpi_get_size(const H5F_shared_t *f_sh);
 H5_DLL int      H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t   H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
-H5_DLL herr_t   H5F_get_mpi_atomicity(H5F_t *file, hbool_t *flag);
-H5_DLL herr_t   H5F_set_mpi_atomicity(H5F_t *file, hbool_t flag);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */

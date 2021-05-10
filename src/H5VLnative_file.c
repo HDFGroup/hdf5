@@ -383,85 +383,76 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t H5_ATTR_UNUSED dxpl_id,
-                           void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                           void H5_ATTR_UNUSED **req)
 {
-    H5F_t *f         = NULL;    /* File */
+    H5F_t *f         = (H5F_t *)obj;    /* File */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    f = (H5F_t *)obj;
-    switch (optional_type) {
+    switch (args->op_type) {
         /* H5Fget_filesize */
         case H5VL_NATIVE_FILE_GET_SIZE: {
             haddr_t  max_eof_eoa; /* Maximum of the EOA & EOF */
             haddr_t  base_addr;   /* Base address for the file */
-            hsize_t *size = HDva_arg(arguments, hsize_t *);
 
-            /* Go get the actual file size */
+            /* Get the actual file size & base address */
             if (H5F__get_max_eof_eoa(f, &max_eof_eoa) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file can't get max eof/eoa ")
-
             base_addr = H5FD_get_base_addr(f->shared->lf);
 
-            if (size)
-                *size = (hsize_t)(max_eof_eoa +
-                                  base_addr); /* Convert relative base address for file to absolute address */
+            /* Convert relative base address for file to absolute address */
+            ((H5VL_native_file_optional_args_t *)(args->args))->get_size.size =  (hsize_t)(max_eof_eoa + base_addr);
 
             break;
         }
 
         /* H5Fget_file_image */
         case H5VL_NATIVE_FILE_GET_FILE_IMAGE: {
-            void *   buf_ptr = HDva_arg(arguments, void *);
-            ssize_t *ret     = HDva_arg(arguments, ssize_t *);
-            size_t   buf_len = HDva_arg(arguments, size_t);
+            H5VL_native_file_get_file_image_t *gfi_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_file_image;
 
-            /* Do the actual work */
-            if ((*ret = H5F__get_file_image(f, buf_ptr, buf_len)) < 0)
+            /* Get file image */
+            if (H5F__get_file_image(f, gfi_args->buf, gfi_args->buf_size, &gfi_args->image_len) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "get file image failed")
+
             break;
         }
 
         /* H5Fget_freespace */
         case H5VL_NATIVE_FILE_GET_FREE_SPACE: {
-            hsize_t   tot_space; /* Amount of free space in the file */
-            hssize_t *ret = HDva_arg(arguments, hssize_t *);
+            H5VL_native_file_get_freespace_t *gfs_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_freespace;
 
-            /* Go get the actual amount of free space in the file */
-            if (H5MF_get_freespace(f, &tot_space, NULL) < 0)
+            /* Get the actual amount of free space in the file */
+            if (H5MF_get_freespace(f, &gfs_args->size, NULL) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
-            *ret = (hssize_t)tot_space;
+
             break;
         }
 
         /* H5Fget_free_sections */
         case H5VL_NATIVE_FILE_GET_FREE_SECTIONS: {
-            H5F_sect_info_t *sect_info = HDva_arg(arguments, H5F_sect_info_t *);
-            ssize_t *        ret       = HDva_arg(arguments, ssize_t *);
-            H5F_mem_t        type      = (H5F_mem_t)HDva_arg(arguments, int); /* enum work-around */
-            size_t           nsects    = HDva_arg(arguments, size_t);
+            H5VL_native_file_get_free_sections_t *gfs_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_free_sections;
 
             /* Go get the free-space section information in the file */
-            if ((*ret = H5MF_get_free_sections(f, type, nsects, sect_info)) < 0)
+            if (H5MF_get_free_sections(f, gfs_args->type, gfs_args->nsects, gfs_args->sect_info, &gfs_args->sect_count) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
+
             break;
         }
 
         /* H5Fget_info1/2 */
         case H5VL_NATIVE_FILE_GET_INFO: {
-            H5I_type_t   type  = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
-            H5F_info2_t *finfo = HDva_arg(arguments, H5F_info2_t *);
+            H5VL_native_file_get_info_t *gfi_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_info;
 
             /* Get the file struct. This call is careful to not return the file pointer
              * for the top file in a mount hierarchy.
              */
-            if (H5VL_native_get_file_struct(obj, type, &f) < 0)
+            if (H5VL_native_get_file_struct(obj, gfi_args->type, &f) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get a file struct")
 
             /* Get the file info */
-            if (H5F__get_info(f, finfo) < 0)
+            if (H5F__get_info(f, gfi_args->finfo) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve file info")
 
             break;
@@ -469,50 +460,41 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
 
         /* H5Fget_mdc_config */
         case H5VL_NATIVE_FILE_GET_MDC_CONF: {
-            H5AC_cache_config_t *config_ptr = HDva_arg(arguments, H5AC_cache_config_t *);
+            /* Get the metadata cache configuration */
+            if (H5AC_get_cache_auto_resize_config(f->shared->cache, ((H5VL_native_file_optional_args_t *)(args->args))->get_mdc_config.config) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get metadata cache configuration")
 
-            /* Go get the resize configuration */
-            if (H5AC_get_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_auto_resize_config() failed.")
             break;
         }
 
         /* H5Fget_mdc_hit_rate */
         case H5VL_NATIVE_FILE_GET_MDC_HR: {
-            double *hit_rate_ptr = HDva_arg(arguments, double *);
+            /* Get the current hit rate */
+            if (H5AC_get_cache_hit_rate(f->shared->cache, &((H5VL_native_file_optional_args_t *)(args->args))->get_mdc_hit_rate.hit_rate) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get metadata cache hit rate")
 
-            /* Go get the current hit rate */
-            if (H5AC_get_cache_hit_rate(f->shared->cache, hit_rate_ptr) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_hit_rate() failed.")
             break;
         }
 
         /* H5Fget_mdc_size */
         case H5VL_NATIVE_FILE_GET_MDC_SIZE: {
-            size_t * max_size_ptr        = HDva_arg(arguments, size_t *);
-            size_t * min_clean_size_ptr  = HDva_arg(arguments, size_t *);
-            size_t * cur_size_ptr        = HDva_arg(arguments, size_t *);
-            int *    cur_num_entries_ptr = HDva_arg(arguments, int *);
-            uint32_t cur_num_entries;
+            H5VL_native_file_get_mdc_size_t *gms_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_mdc_size;
 
-            /* Go get the size data */
-            if (H5AC_get_cache_size(f->shared->cache, max_size_ptr, min_clean_size_ptr, cur_size_ptr,
-                                    &cur_num_entries) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_size() failed.")
+            /* Get the size data */
+            if (H5AC_get_cache_size(f->shared->cache, &gms_args->max_size, &gms_args->min_clean_size, &gms_args->cur_size, &gms_args->cur_num_entries) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get metadata cache size")
 
-            if (cur_num_entries_ptr != NULL)
-                *cur_num_entries_ptr = (int)cur_num_entries;
             break;
         }
 
         /* H5Fget_vfd_handle */
         case H5VL_NATIVE_FILE_GET_VFD_HANDLE: {
-            void **file_handle = HDva_arg(arguments, void **);
-            hid_t  fapl_id     = HDva_arg(arguments, hid_t);
+            H5VL_native_file_get_vfd_handle_t *gvh_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_vfd_handle;
 
             /* Retrieve the VFD handle for the file */
-            if (H5F_get_vfd_handle(f, fapl_id, file_handle) < 0)
+            if (H5F_get_vfd_handle(f, gvh_args->fapl_id, &gvh_args->file_handle) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
+
             break;
         }
 
@@ -522,6 +504,7 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
             if (f->shared->efc)
                 if (H5F__efc_release(f->shared->efc) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+
             break;
         }
 
@@ -529,26 +512,24 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
         case H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE: {
             /* Reset the hit rate statistic */
             if (H5AC_reset_cache_hit_rate_stats(f->shared->cache) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't reset cache hit rate")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't reset cache hit rate")
+
             break;
         }
 
         /* H5Fset_mdc_config */
         case H5VL_NATIVE_FILE_SET_MDC_CONFIG: {
-            H5AC_cache_config_t *config_ptr = HDva_arg(arguments, H5AC_cache_config_t *);
+            /* Set the metadata cache configuration  */
+            if (H5AC_set_cache_auto_resize_config(f->shared->cache, ((H5VL_native_file_optional_args_t *)(args->args))->set_mdc_config.config) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set metadata cache configuration")
 
-            /* set the resize configuration  */
-            if (H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed")
             break;
         }
 
         /* H5Fget_metadata_read_retry_info */
         case H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO: {
-            H5F_retry_info_t *info = HDva_arg(arguments, H5F_retry_info_t *);
-
-            if (H5F_get_metadata_read_retry_info(f, info) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't get metadata read retry info")
+            if (H5F_get_metadata_read_retry_info(f, ((H5VL_native_file_optional_args_t *)(args->args))->get_metadata_read_retry_info.info) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get metadata read retry info")
 
             break;
         }
@@ -556,7 +537,7 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
         /* H5Fstart_swmr_write */
         case H5VL_NATIVE_FILE_START_SWMR_WRITE: {
             if (H5F__start_swmr_write(f) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't start SWMR write")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't start SWMR write")
 
             break;
         }
@@ -581,11 +562,10 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
 
         /* H5Fget_mdc_logging_status */
         case H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS: {
-            hbool_t *is_enabled           = HDva_arg(arguments, hbool_t *);
-            hbool_t *is_currently_logging = HDva_arg(arguments, hbool_t *);
+            H5VL_native_file_get_mdc_logging_status_t *gmls_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_mdc_logging_status;
 
             /* Call mdc logging function */
-            if (H5C_get_logging_status(f->shared->cache, is_enabled, is_currently_logging) < 0)
+            if (H5C_get_logging_status(f->shared->cache, &gmls_args->is_enabled, &gmls_args->is_currently_logging) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to get logging status")
 
             break;
@@ -615,18 +595,14 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
 
         /* H5Fget_page_buffering_stats */
         case H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS: {
-            unsigned *accesses  = HDva_arg(arguments, unsigned *);
-            unsigned *hits      = HDva_arg(arguments, unsigned *);
-            unsigned *misses    = HDva_arg(arguments, unsigned *);
-            unsigned *evictions = HDva_arg(arguments, unsigned *);
-            unsigned *bypasses  = HDva_arg(arguments, unsigned *);
+            H5VL_native_file_get_page_buffering_stats_t *gpbs_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_page_buffering_stats;
 
             /* Sanity check */
             if (NULL == f->shared->page_buf)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
 
             /* Get the statistics */
-            if (H5PB_get_stats(f->shared->page_buf, accesses, hits, misses, evictions, bypasses) < 0)
+            if (H5PB_get_stats(f->shared->page_buf, gpbs_args->accesses, gpbs_args->hits, gpbs_args->misses, gpbs_args->evictions, gpbs_args->bypasses) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stats for page buffering")
 
             break;
@@ -634,11 +610,10 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
 
         /* H5Fget_mdc_image_info */
         case H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO: {
-            haddr_t *image_addr = HDva_arg(arguments, haddr_t *);
-            hsize_t *image_len  = HDva_arg(arguments, hsize_t *);
+            H5VL_native_file_get_mdc_image_info_t *gmii_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_mdc_image_info;
 
             /* Go get the address and size of the cache image */
-            if (H5AC_get_mdc_image_info(f->shared->cache, image_addr, image_len) < 0)
+            if (H5AC_get_mdc_image_info(f->shared->cache, &gmii_args->addr, &gmii_args->len) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
 
             break;
@@ -646,11 +621,7 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
 
         /* H5Fget_eoa */
         case H5VL_NATIVE_FILE_GET_EOA: {
-            haddr_t *eoa = HDva_arg(arguments, haddr_t *);
             haddr_t  rel_eoa; /* Relative address of EOA */
-
-            /* Sanity check */
-            HDassert(eoa);
 
             /* This routine will work only for drivers with this feature enabled.*/
             /* We might introduce a new feature flag in the future */
@@ -664,14 +635,13 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
 
             /* Set return value */
             /* (Note compensating for base address subtraction in internal routine) */
-            *eoa = rel_eoa + H5F_get_base_addr(f);
+            ((H5VL_native_file_optional_args_t *)(args->args))->get_eoa.eoa = rel_eoa + H5F_get_base_addr(f);
 
             break;
         }
 
         /* H5Fincrement_filesize */
         case H5VL_NATIVE_FILE_INCR_FILESIZE: {
-            hsize_t increment = HDva_arg(arguments, hsize_t);
             haddr_t max_eof_eoa; /* Maximum of the relative EOA & EOF */
 
             /* This public routine will work only for drivers with this feature enabled.*/
@@ -685,7 +655,7 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file can't get max eof/eoa ")
 
             /* Set EOA to the maximum value + increment */
-            if (H5F__set_eoa(f, H5FD_MEM_DEFAULT, max_eof_eoa + increment) < 0)
+            if (H5F__set_eoa(f, H5FD_MEM_DEFAULT, max_eof_eoa + ((H5VL_native_file_optional_args_t *)(args->args))->increment_filesize.increment) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_eoa request failed")
 
             break;
@@ -693,11 +663,10 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
 
         /* H5Fset_latest_format, H5Fset_libver_bounds */
         case H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS: {
-            H5F_libver_t low  = (H5F_libver_t)HDva_arg(arguments, int); /* enum work-around */
-            H5F_libver_t high = (H5F_libver_t)HDva_arg(arguments, int); /* enum work-around */
+            H5VL_native_file_set_libver_bounds_t *slb_args = &((H5VL_native_file_optional_args_t *)(args->args))->set_libver_bounds;
 
             /* Call internal set_libver_bounds function */
-            if (H5F__set_libver_bounds(f, low, high) < 0)
+            if (H5F__set_libver_bounds(f, slb_args->low, slb_args->high) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set low/high bounds")
 
             break;
@@ -705,34 +674,33 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
 
         /* H5Fget_dset_no_attrs_hint */
         case H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG: {
-            hbool_t *minimize = HDva_arg(arguments, hbool_t *);
-            *minimize         = H5F_GET_MIN_DSET_OHDR(f);
+            ((H5VL_native_file_optional_args_t *)(args->args))->get_min_dset_ohdr_flag.minimize = H5F_GET_MIN_DSET_OHDR(f);
+
             break;
         }
 
         /* H5Fset_dset_no_attrs_hint */
         case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG: {
-            int minimize = HDva_arg(arguments, int);
-            if (H5F_set_min_dset_ohdr(f, (hbool_t)minimize) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL,
-                            "cannot set file's dataset object header minimization flag")
+            if (H5F_set_min_dset_ohdr(f, ((H5VL_native_file_optional_args_t *)(args->args))->set_min_dset_ohdr_flag.minimize) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set file's dataset object header minimization flag")
+
             break;
         }
 
 #ifdef H5_HAVE_PARALLEL
         /* H5Fget_mpi_atomicity */
         case H5VL_NATIVE_FILE_GET_MPI_ATOMICITY: {
-            hbool_t *flag = (hbool_t *)HDva_arg(arguments, hbool_t *);
-            if (H5F_get_mpi_atomicity(f, flag) < 0)
+            if (H5F__get_mpi_atomicity(f, &((H5VL_native_file_optional_args_t *)(args->args))->get_mpi_atomicity.flag) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "cannot get MPI atomicity");
+
             break;
         }
 
         /* H5Fset_mpi_atomicity */
         case H5VL_NATIVE_FILE_SET_MPI_ATOMICITY: {
-            hbool_t flag = (hbool_t)HDva_arg(arguments, int);
-            if (H5F_set_mpi_atomicity(f, flag) < 0)
+            if (H5F__set_mpi_atomicity(f, ((H5VL_native_file_optional_args_t *)(args->args))->set_mpi_atomicity.flag) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set MPI atomicity");
+
             break;
         }
 #endif /* H5_HAVE_PARALLEL */
@@ -740,7 +708,7 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
         /* Finalize H5Fopen */
         case H5VL_NATIVE_FILE_POST_OPEN: {
             /* Call package routine */
-            if (H5F__post_open((H5F_t *)obj) < 0)
+            if (H5F__post_open(f) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't finish opening file")
             break;
         }
@@ -791,7 +759,7 @@ H5VL__native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
             HGOTO_ERROR(H5E_ID, H5E_CANTGET, FAIL, "can't get ID ref count")
         if (nref == 1)
             if (H5F__flush(f) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
     /* Close the file */

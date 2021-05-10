@@ -588,11 +588,17 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
     supported = 0;
     if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'post open' operation")
-    if (supported & H5VL_OPT_QUERY_SUPPORTED)
-        if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT,
-                               H5_REQUEST_NULL) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5I_INVALID_HID,
-                        "unable to make file 'post open' callback")
+    if (supported & H5VL_OPT_QUERY_SUPPORTED) {
+        H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
+
+        /* Set up VOL callback arguments */
+        vol_cb_args.op_type           = H5VL_NATIVE_FILE_POST_OPEN;
+        vol_cb_args.args = NULL;
+
+        /* Make the 'post open' callback */
+        if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file 'post open' callback")
+    } /* end if */
 
     /* Attach loc_id to reference */
     if (H5R__set_loc_id((H5R_ref_priv_t *)ref, ret_value, FALSE, TRUE) < 0)

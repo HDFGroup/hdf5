@@ -97,7 +97,7 @@ typedef struct {
     size_t bufsize; /* Size of object comment buffer */
 
     /* upward */
-    ssize_t comment_size; /* Actual size of object comment */
+    size_t comment_size; /* Actual size of object comment */
 } H5G_loc_gc_t;
 
 /********************/
@@ -1014,7 +1014,7 @@ H5G__loc_get_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     else {
         if (udata->comment && udata->bufsize)
             HDstrncpy(udata->comment, comment.s, udata->bufsize);
-        udata->comment_size = (ssize_t)HDstrlen(comment.s);
+        udata->comment_size = HDstrlen(comment.s);
         H5O_msg_reset(H5O_NAME_ID, &comment);
     }
 
@@ -1033,22 +1033,19 @@ done:
  * Purpose:	Retrieve the information for an object from a group location
  *              and path to that object
  *
- * Return:	Success:	Number of bytes in the comment excluding the
- *				null terminator.  Zero if the object has no
- *				comment.
- *
- *		Failure:	Negative
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		Thursday, August 30, 2007
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
-H5G_loc_get_comment(const H5G_loc_t *loc, const char *name, char *comment /*out*/, size_t bufsize)
+herr_t
+H5G_loc_get_comment(const H5G_loc_t *loc, const char *name, char *comment /*out*/, size_t bufsize,
+    size_t *comment_len)
 {
     H5G_loc_gc_t udata;          /* User data for traversal callback */
-    ssize_t      ret_value = -1; /* Return value */
+    herr_t        ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1059,14 +1056,14 @@ H5G_loc_get_comment(const H5G_loc_t *loc, const char *name, char *comment /*out*
     /* Set up user data for locating object */
     udata.comment      = comment;
     udata.bufsize      = bufsize;
-    udata.comment_size = (-1);
+    udata.comment_size = 0;
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_get_comment_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
 
-    /* Set the return value */
-    ret_value = udata.comment_size;
+    /* Set value to return */
+    *comment_len = udata.comment_size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

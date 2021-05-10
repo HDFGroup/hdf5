@@ -649,7 +649,7 @@ H5_DLL herr_t H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5
 H5_DLL herr_t H5D__chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5O_layout_t *layout, hsize_t *btree_size);
 H5_DLL herr_t H5D__chunk_dump_index(H5D_t *dset, FILE *stream);
 H5_DLL herr_t H5D__chunk_delete(H5F_t *f, H5O_t *oh, H5O_storage_t *store);
-H5_DLL herr_t H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_copy);
+H5_DLL herr_t H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_copy);
 H5_DLL herr_t H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset,
                                       uint32_t data_size, const void *buf);
 H5_DLL herr_t H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf);

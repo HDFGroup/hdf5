@@ -3626,6 +3626,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG");
                                     break;
 
+#ifdef H5_HAVE_PARALLEL
                                 case H5VL_NATIVE_FILE_GET_MPI_ATOMICITY:
                                     H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_MPI_ATOMICITY");
                                     break;
@@ -3633,6 +3634,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                 case H5VL_NATIVE_FILE_SET_MPI_ATOMICITY:
                                     H5RS_acat(rs, "H5VL_NATIVE_FILE_SET_MPI_ATOMICITY");
                                     break;
+#endif /* H5_HAVE_PARALLEL */
 
                                 case H5VL_NATIVE_FILE_POST_OPEN:
                                     H5RS_acat(rs, "H5VL_NATIVE_FILE_POST_OPEN");

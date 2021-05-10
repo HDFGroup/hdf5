@@ -279,8 +279,8 @@ H5_DLL herr_t  H5G_loc_info(const H5G_loc_t *loc, const char *name, H5O_info2_t 
 H5_DLL herr_t  H5G_loc_native_info(const H5G_loc_t *loc, const char *name, H5O_native_info_t *oinfo /*out*/,
                                    unsigned fields);
 H5_DLL herr_t  H5G_loc_set_comment(const H5G_loc_t *loc, const char *name, const char *comment);
-H5_DLL ssize_t H5G_loc_get_comment(const H5G_loc_t *loc, const char *name, char *comment /*out*/,
-                                   size_t bufsize);
+H5_DLL herr_t H5G_loc_get_comment(const H5G_loc_t *loc, const char *name, char *comment /*out*/,
+                                   size_t bufsize, size_t *comment_len);
 H5_DLL herr_t  H5G_loc_reset(H5G_loc_t *loc);
 H5_DLL herr_t  H5G_loc_free(H5G_loc_t *loc);
 

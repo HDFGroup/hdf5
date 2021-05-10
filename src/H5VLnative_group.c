@@ -312,50 +312,48 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_group_optional(void H5_ATTR_UNUSED *obj, H5VL_group_optional_t optional_type,
-                            hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req,
-                            va_list H5_ATTR_DEPRECATED_USED arguments)
+H5VL__native_group_optional(void H5_ATTR_UNUSED *obj, H5VL_optional_args_t *args,
+                            hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (optional_type) {
+    switch (args->op_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         /* H5Giterate (deprecated) */
         case H5VL_NATIVE_GROUP_ITERATE_OLD: {
-            const H5VL_loc_params_t * loc_params = HDva_arg(arguments, const H5VL_loc_params_t *);
-            hsize_t                   idx        = HDva_arg(arguments, hsize_t);
-            hsize_t *                 last_obj   = HDva_arg(arguments, hsize_t *);
-            const H5G_link_iterate_t *lnk_op     = HDva_arg(arguments, const H5G_link_iterate_t *);
-            void *                    op_data    = HDva_arg(arguments, void *);
+            H5VL_native_group_iterate_old_t *iter_args = &((H5VL_native_group_optional_args_t *)(args->args))->iterate_old;
+            H5G_link_iterate_t lnk_op;    /* Link operator                    */
             H5G_loc_t                 grp_loc;
 
             /* Get the location struct for the object */
-            if (H5G_loc_real(obj, loc_params->obj_type, &grp_loc) < 0)
+            if (H5G_loc_real(obj, iter_args->loc_params.obj_type, &grp_loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
+            /* Set up link iteration callback struct */
+            lnk_op.op_type = H5G_LINK_OP_OLD;
+            lnk_op.op_func.op_old = iter_args->op;
+
             /* Call the actual iteration routine */
-            if ((ret_value = H5G_iterate(&grp_loc, loc_params->loc_data.loc_by_name.name, H5_INDEX_NAME,
-                                         H5_ITER_INC, idx, last_obj, lnk_op, op_data)) < 0)
-                HERROR(H5E_VOL, H5E_BADITER, "error iterating over group's links");
+            if ((ret_value = H5G_iterate(&grp_loc, iter_args->loc_params.loc_data.loc_by_name.name, H5_INDEX_NAME,
+                                         H5_ITER_INC, iter_args->idx, &iter_args->last_obj, &lnk_op, iter_args->op_data)) < 0)
+                HERROR(H5E_SYM, H5E_BADITER, "error iterating over group's links");
 
             break;
         }
 
         /* H5Gget_objinfo (deprecated) */
         case H5VL_NATIVE_GROUP_GET_OBJINFO: {
-            const H5VL_loc_params_t *loc_params  = HDva_arg(arguments, const H5VL_loc_params_t *);
-            hbool_t                  follow_link = (hbool_t)HDva_arg(arguments, unsigned);
-            H5G_stat_t *             statbuf     = HDva_arg(arguments, H5G_stat_t *);
+            H5VL_native_group_get_objinfo_t *goi_args = &((H5VL_native_group_optional_args_t *)(args->args))->get_objinfo;
             H5G_loc_t                grp_loc;
 
             /* Get the location struct for the object */
-            if (H5G_loc_real(obj, loc_params->obj_type, &grp_loc) < 0)
+            if (H5G_loc_real(obj, goi_args->loc_params.obj_type, &grp_loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
             /* Call the actual group objinfo routine */
-            if (H5G__get_objinfo(&grp_loc, loc_params->loc_data.loc_by_name.name, follow_link, statbuf) < 0)
+            if (H5G__get_objinfo(&grp_loc, goi_args->loc_params.loc_data.loc_by_name.name, goi_args->follow_link, goi_args->statbuf) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "cannot stat object")
 
             break;
