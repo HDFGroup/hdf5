@@ -615,7 +615,7 @@ typedef struct rct_obj_t {
  * master list of objects.
  */
 static herr_t
-rct_free_cb(void *_obj, void H5_ATTR_UNUSED **_ctx)
+rct_free_cb(void *_obj)
 {
     rct_obj_t *obj = (rct_obj_t *)_obj;
     long       remove_nth;
