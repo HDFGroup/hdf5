@@ -12,14 +12,14 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	This file contains the framework for ensuring that the global
- *		library lock is held when an API routine is called.  This
- *              framework works in concert with the FUNC_ENTER_API / FUNC_LEAVE_API
- *		macros defined in H5private.h.
+ * Purpose: This file contains the framework for ensuring that the global
+ *          library lock is held when an API routine is called.  This
+ *          framework works in concert with the FUNC_ENTER_API / FUNC_LEAVE_API
+ *          macros defined in H5private.h.
  *
- * Note:	Because this threadsafety framework operates outside the library,
- *		it does not use the error stack and only uses the "namecheck only"
- *              FUNC_ENTER_* / FUNC_LEAVE_* macros.
+ * Note:    Because this threadsafety framework operates outside the library,
+ *          it does not use the error stack and only uses the "namecheck only"
+ *          FUNC_ENTER_* / FUNC_LEAVE_* macros.
  */
 
 /****************/
@@ -65,9 +65,9 @@ static void H5TS__key_destructor(void *key_val);
 /* Global variable definitions */
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_once_t H5TS_first_init_g;
-#else  /* H5_HAVE_WIN_THREADS */
+#else
 H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
-#endif /* H5_HAVE_WIN_THREADS */
+#endif
 
 /* Thread-local keys, used by other interfaces */
 H5TS_key_t H5TS_errstk_key_g; /* Error stack */
@@ -291,16 +291,12 @@ H5TS_pthread_first_thread_init(void)
 
     /* initialize global API mutex lock */
 #ifdef H5_USE_RECURSIVE_WRITER_LOCKS
-
-    H5TS_pt_rec_rw_lock_init(&H5_g.init_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
-
-#else /* H5_USE_RECURSIVE_WRITER_LOCKS */
-
+    H5TS_rw_lock_init(&H5_g.init_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
+#else
     pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
     pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
     H5_g.init_lock.lock_count = 0;
-
-#endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
+#endif
 
     /* Initialize integer thread identifiers. */
     H5TS_tid_init();
@@ -311,7 +307,7 @@ H5TS_pthread_first_thread_init(void)
 #ifdef H5_HAVE_CODESTACK
     /* initialize key for thread-specific function stacks */
     pthread_key_create(&H5TS_funcstk_key_g, H5TS__key_destructor);
-#endif /* H5_HAVE_CODESTACK */
+#endif
 
     /* initialize key for thread-specific API contexts */
     pthread_key_create(&H5TS_apictx_key_g, H5TS__key_destructor);
@@ -348,7 +344,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 
 #ifdef H5_HAVE_WIN_THREADS
     EnterCriticalSection(&mutex->CriticalSection);
-#else  /* H5_HAVE_WIN_THREADS */
+#else
     /* Acquire the library lock */
     ret_value = pthread_mutex_lock(&mutex->atomic_lock);
     if (ret_value)
@@ -370,7 +366,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 
     /* Release the library lock */
     ret_value = pthread_mutex_unlock(&mutex->atomic_lock);
-#endif /* H5_HAVE_WIN_THREADS */
+#endif
 
     return ret_value;
 } /* end H5TS_mutex_lock() */
@@ -403,7 +399,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 #ifdef H5_HAVE_WIN_THREADS
     /* Releases ownership of the specified critical section object. */
     LeaveCriticalSection(&mutex->CriticalSection);
-#else  /* H5_HAVE_WIN_THREADS */
+#else
 
     /* Decrement the lock count for this thread */
     ret_value = pthread_mutex_lock(&mutex->atomic_lock);
@@ -421,7 +417,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
         err = pthread_cond_signal(&mutex->cond_var);
         if (err != 0)
             ret_value = err;
-    } /* end if */
+    }
 #endif /* H5_HAVE_WIN_THREADS */
 
     return ret_value;
@@ -456,7 +452,7 @@ H5TS_cancel_count_inc(void)
 {
 #ifndef H5_HAVE_WIN_THREADS
     H5TS_cancel_t *cancel_counter;
-#endif /* H5_HAVE_WIN_THREADS */
+#endif
     herr_t ret_value = SUCCEED;
 
 #ifdef H5_HAVE_WIN_THREADS
@@ -478,15 +474,15 @@ H5TS_cancel_count_inc(void)
         if (NULL == cancel_counter) {
             HERROR(H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
             return FAIL;
-        } /* end if */
+        }
 
         /* Set the thread's cancellation counter with the new object */
         ret_value = pthread_setspecific(H5TS_cancel_key_s, (void *)cancel_counter);
         if (ret_value) {
             HDfree(cancel_counter);
             return FAIL;
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
     /* Check if thread entering library */
     if (cancel_counter->cancel_count == 0)
@@ -578,7 +574,7 @@ H5TS_win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
 #ifdef H5_HAVE_CODESTACK
     if (TLS_OUT_OF_INDEXES == (H5TS_funcstk_key_g = TlsAlloc()))
         ret_value = FALSE;
-#endif /* H5_HAVE_CODESTACK */
+#endif
 
     if (TLS_OUT_OF_INDEXES == (H5TS_apictx_key_g = TlsAlloc()))
         ret_value = FALSE;
@@ -740,14 +736,14 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 #ifdef H5_USE_RECURSIVE_WRITER_LOCKS
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_alloc_pt_rec_entry_count
+ *    H5TS_alloc_rec_entry_count
  *
  * RETURNS
  *    Pointer to allocated and initialized instance of
- *    H5TS_pt_rec_entry_count_t, or NULL on failure.
+ *    H5TS_rec_entry_count, or NULL on failure.
  *
  * DESCRIPTION
- *    Allocate and initalize an instance of H5TS_pt_rec_entry_count_t.
+ *    Allocate and initalize an instance of H5TS_rec_entry_count.
  *
  * PROGRAMMER: John Mainzer
  *             August 28, 2020
@@ -755,12 +751,12 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
  *--------------------------------------------------------------------------
  */
 
-H5TS_pt_rec_entry_count_t *
-H5TS_alloc_pt_rec_entry_count(hbool_t write_lock)
+H5TS_rec_entry_count *
+H5TS_alloc_rec_entry_count(hbool_t write_lock)
 {
-    H5TS_pt_rec_entry_count_t *ret_value = NULL;
+    H5TS_rec_entry_count *ret_value = NULL;
 
-    ret_value = (H5TS_pt_rec_entry_count_t *)HDmalloc(sizeof(H5TS_pt_rec_entry_count_t));
+    ret_value = (H5TS_rec_entry_count *)HDmalloc(sizeof(H5TS_rec_entry_count));
 
     if (ret_value) {
 
@@ -769,19 +765,19 @@ H5TS_alloc_pt_rec_entry_count(hbool_t write_lock)
         ret_value->rec_lock_count = 1;
     }
 
-    return (ret_value);
+    return ret_value;
 
-} /* H5TS_alloc_pt_rec_entry_count() */
+} /* H5TS_alloc_rec_entry_count() */
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_free_pt_rec_entry_count
+ *    H5TS_free_rec_entry_count
  *
  * RETURNS
  *    void.
  *
  * DESCRIPTION
- *    Free the supplied instance of H5TS_pt_rec_entry_count_t.
+ *    Free the supplied instance of H5TS_rec_entry_count.
  *
  * PROGRAMMER: John Mainzer
  *             August 28, 2020
@@ -790,11 +786,11 @@ H5TS_alloc_pt_rec_entry_count(hbool_t write_lock)
  */
 
 void
-H5TS_free_pt_rec_entry_count(void *target_ptr)
+H5TS_free_rec_entry_count(void *target_ptr)
 {
-    H5TS_pt_rec_entry_count_t *count_ptr;
+    H5TS_rec_entry_count *count_ptr;
 
-    count_ptr = (H5TS_pt_rec_entry_count_t *)target_ptr;
+    count_ptr = (H5TS_rec_entry_count *)target_ptr;
 
     HDassert(count_ptr);
     HDassert(count_ptr->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);
@@ -805,17 +801,17 @@ H5TS_free_pt_rec_entry_count(void *target_ptr)
 
     return;
 
-} /* H5TS_free_pt_rec_entry_count() */
+} /* H5TS_free_rec_entry_count() */
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_pt_rec_rw_lock_init
+ *    H5TS_rw_lock_init
  *
  * RETURNS
  *    0 on success and non-zero on error.
  *
  * DESCRIPTION
- *    Initialize the supplied instance of H5TS_pt_rec_rw_lock_t.
+ *    Initialize the supplied instance of H5TS_rw_lock_t.
  *
  * PROGRAMMER: John Mainzer
  *             August 28, 2020
@@ -824,7 +820,7 @@ H5TS_free_pt_rec_entry_count(void *target_ptr)
  */
 
 herr_t
-H5TS_pt_rec_rw_lock_init(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, int policy)
+H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock_ptr, int policy)
 {
     herr_t ret_value = SUCCEED;
 
@@ -862,7 +858,7 @@ H5TS_pt_rec_rw_lock_init(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, int policy)
 
     if (ret_value == SUCCEED) { /* initialize the key */
 
-        if (pthread_key_create(&(rw_lock_ptr->rec_entry_count_key), H5TS_free_pt_rec_entry_count) != 0) {
+        if (pthread_key_create(&(rw_lock_ptr->rec_entry_count_key), H5TS_free_rec_entry_count) != 0) {
 
             ret_value = FAIL;
         }
@@ -870,7 +866,7 @@ H5TS_pt_rec_rw_lock_init(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, int policy)
 
     if (ret_value == SUCCEED) { /* initialized scalar fields */
 
-        rw_lock_ptr->magic                                = H5TS_PT_REC_RW_LOCK_MAGIC;
+        rw_lock_ptr->magic                                = H5TS_RW_LOCK_MAGIC;
         rw_lock_ptr->policy                               = policy;
         rw_lock_ptr->waiting_readers_count                = 0;
         rw_lock_ptr->waiting_writers_count                = 0;
@@ -894,21 +890,21 @@ H5TS_pt_rec_rw_lock_init(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, int policy)
         rw_lock_ptr->stats.max_write_locks_pending        = 0;
     }
 
-    return (ret_value);
+    return ret_value;
 
-} /* H5TS_pt_rec_rw_lock_init() */
+} /* H5TS_rw_lock_init() */
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_pt_rec_rw_lock_takedown
+ *    H5TS_rw_lock_takedown
  *
  * RETURNS
  *    0 on success and non-zero on error.
  *
  * DESCRIPTION
- *    Takedown an instance of H5TS_pt_rec_rw_lock_t.  All mutex, condition
+ *    Takedown an instance of H5TS_rw_lock_t.  All mutex, condition
  *    variables, and keys are destroyed, and magic is set to an invalid
- *    value.  However, the instance of H5TS_pt_rec_rw_lock_t is not
+ *    value.  However, the instance of H5TS_rw_lock_t is not
  *    freed.
  *
  * PROGRAMMER: John Mainzer
@@ -918,11 +914,11 @@ H5TS_pt_rec_rw_lock_init(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, int policy)
  */
 
 herr_t
-H5TS_pt_rec_rw_lock_takedown(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
+H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock_ptr)
 {
     herr_t ret_value = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_PT_REC_RW_LOCK_MAGIC)) {
+    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC)) {
 
         ret_value = FAIL;
     }
@@ -944,13 +940,13 @@ H5TS_pt_rec_rw_lock_takedown(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
         }
     }
 
-    return (ret_value);
+    return ret_value;
 
-} /* H5TS_pt_rec_rw_lock_takedown() */
+} /* H5TS_rw_lock_takedown() */
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_pt_rec_rw_rdlock
+ *    H5TS_rw_rdlock
  *
  * RETURNS
  *    0 on success and non-zero on error.
@@ -966,14 +962,14 @@ H5TS_pt_rec_rw_lock_takedown(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
  */
 
 herr_t
-H5TS_pt_rec_rw_rdlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
+H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock_ptr)
 {
-    hbool_t                    have_mutex = FALSE;
-    int                        result;
-    H5TS_pt_rec_entry_count_t *count_ptr;
-    herr_t                     ret_value = SUCCEED;
+    hbool_t               have_mutex = FALSE;
+    int                   result;
+    H5TS_rec_entry_count *count_ptr;
+    herr_t                ret_value = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_PT_REC_RW_LOCK_MAGIC)) {
+    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC)) {
 
         ret_value = FAIL;
     }
@@ -996,7 +992,7 @@ H5TS_pt_rec_rw_rdlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
      */
     if (ret_value == SUCCEED) {
 
-        count_ptr = (H5TS_pt_rec_entry_count_t *)pthread_getspecific(rw_lock_ptr->rec_entry_count_key);
+        count_ptr = (H5TS_rec_entry_count *)pthread_getspecific(rw_lock_ptr->rec_entry_count_key);
 
         if (count_ptr) { /* this is a recursive lock */
 
@@ -1045,7 +1041,7 @@ H5TS_pt_rec_rw_rdlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
                     break;
             }
 
-            if ((ret_value == SUCCEED) && (NULL == (count_ptr = H5TS_alloc_pt_rec_entry_count(FALSE)))) {
+            if ((ret_value == SUCCEED) && (NULL == (count_ptr = H5TS_alloc_rec_entry_count(FALSE)))) {
 
                 ret_value = FAIL;
             }
@@ -1072,13 +1068,13 @@ H5TS_pt_rec_rw_rdlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
         pthread_mutex_unlock(&(rw_lock_ptr->mutex));
     }
 
-    return (ret_value);
+    return ret_value;
 
-} /* H5TS_pt_rec_rw_rdlock() */
+} /* H5TS_rw_rdlock() */
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_pt_rec_rw_wrlock
+ *    H5TS_rw_wrlock
  *
  * RETURNS
  *    0 on success and non-zero on error.
@@ -1094,14 +1090,14 @@ H5TS_pt_rec_rw_rdlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
  */
 
 herr_t
-H5TS_pt_rec_rw_wrlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
+H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock_ptr)
 {
-    hbool_t                    have_mutex = FALSE;
-    int                        result;
-    H5TS_pt_rec_entry_count_t *count_ptr;
-    herr_t                     ret_value = SUCCEED;
+    hbool_t               have_mutex = FALSE;
+    int                   result;
+    H5TS_rec_entry_count *count_ptr;
+    herr_t                ret_value = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_PT_REC_RW_LOCK_MAGIC)) {
+    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC)) {
 
         ret_value = FAIL;
     }
@@ -1124,7 +1120,7 @@ H5TS_pt_rec_rw_wrlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
      */
     if (ret_value == SUCCEED) {
 
-        count_ptr = (H5TS_pt_rec_entry_count_t *)pthread_getspecific(rw_lock_ptr->rec_entry_count_key);
+        count_ptr = (H5TS_rec_entry_count *)pthread_getspecific(rw_lock_ptr->rec_entry_count_key);
 
         if (count_ptr) { /* this is a recursive lock */
 
@@ -1173,7 +1169,7 @@ H5TS_pt_rec_rw_wrlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
                     break;
             }
 
-            if ((ret_value == SUCCEED) && (NULL == (count_ptr = H5TS_alloc_pt_rec_entry_count(TRUE)))) {
+            if ((ret_value == SUCCEED) && (NULL == (count_ptr = H5TS_alloc_rec_entry_count(TRUE)))) {
 
                 ret_value = FAIL;
             }
@@ -1200,13 +1196,13 @@ H5TS_pt_rec_rw_wrlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
         pthread_mutex_unlock(&(rw_lock_ptr->mutex));
     }
 
-    return (ret_value);
+    return ret_value;
 
-} /* H5TS_pt_rec_rw_wrlock() */
+} /* H5TS_rw_wrlock() */
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_pt_rec_rw_unlock
+ *    H5TS_rw_unlock
  *
  * RETURNS
  *    0 on success and non-zero on error.
@@ -1222,14 +1218,14 @@ H5TS_pt_rec_rw_wrlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
  */
 
 herr_t
-H5TS_pt_rec_rw_unlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
+H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock_ptr)
 {
-    hbool_t                    have_mutex        = FALSE;
-    hbool_t                    discard_rec_count = FALSE;
-    H5TS_pt_rec_entry_count_t *count_ptr;
-    herr_t                     ret_value = SUCCEED;
+    hbool_t               have_mutex        = FALSE;
+    hbool_t               discard_rec_count = FALSE;
+    H5TS_rec_entry_count *count_ptr;
+    herr_t                ret_value = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_PT_REC_RW_LOCK_MAGIC)) {
+    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC)) {
 
         ret_value = FAIL;
     }
@@ -1252,7 +1248,7 @@ H5TS_pt_rec_rw_unlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
      */
     if (ret_value == SUCCEED) {
 
-        count_ptr = (H5TS_pt_rec_entry_count_t *)pthread_getspecific(rw_lock_ptr->rec_entry_count_key);
+        count_ptr = (H5TS_rec_entry_count *)pthread_getspecific(rw_lock_ptr->rec_entry_count_key);
 
         HDassert(count_ptr);
         HDassert(count_ptr->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);
@@ -1377,7 +1373,7 @@ H5TS_pt_rec_rw_unlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
             ret_value = FAIL;
         }
 
-        H5TS_free_pt_rec_entry_count((void *)count_ptr);
+        H5TS_free_rec_entry_count((void *)count_ptr);
         count_ptr = NULL;
     }
 
@@ -1386,13 +1382,13 @@ H5TS_pt_rec_rw_unlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
         pthread_mutex_unlock(&(rw_lock_ptr->mutex));
     }
 
-    return (ret_value);
+    return ret_value;
 
-} /* H5TS_pt_rec_rw_unlock() */
+} /* H5TS_rw_unlock() */
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_pt_rec_rw_lock_get_stats
+ *    H5TS_rw_lock_get_stats
  *
  * RETURNS
  *    0 on success and non-zero on error.
@@ -1409,12 +1405,12 @@ H5TS_pt_rec_rw_unlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
  */
 
 herr_t
-H5TS_pt_rec_rw_lock_get_stats(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, H5TS_pt_rec_rw_lock_stats_t *stats_ptr)
+H5TS_rw_lock_get_stats(H5TS_rw_lock_t *rw_lock_ptr, H5TS_rw_lock_stats_t *stats_ptr)
 {
     hbool_t have_mutex = FALSE;
     herr_t  ret_value  = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_PT_REC_RW_LOCK_MAGIC) || (stats_ptr == NULL)) {
+    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC) || (stats_ptr == NULL)) {
 
         ret_value = FAIL;
     }
@@ -1442,13 +1438,13 @@ H5TS_pt_rec_rw_lock_get_stats(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, H5TS_pt_rec_rw
         pthread_mutex_unlock(&(rw_lock_ptr->mutex));
     }
 
-    return (ret_value);
+    return ret_value;
 
-} /* H5TS_pt_rec_rw_lock_get_stats() */
+} /* H5TS_rw_lock_get_stats() */
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_pt_rec_rw_lock_reset_stats
+ *    H5TS_rw_lock_reset_stats
  *
  * RETURNS
  *    0 on success and non-zero on error.
@@ -1465,29 +1461,29 @@ H5TS_pt_rec_rw_lock_get_stats(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, H5TS_pt_rec_rw
  */
 
 herr_t
-H5TS_pt_rec_rw_lock_reset_stats(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
+H5TS_rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock_ptr)
 {
     hbool_t have_mutex = FALSE;
-    /* update this initializer if you modify H5TS_pt_rec_rw_lock_stats_t */
-    static const H5TS_pt_rec_rw_lock_stats_t reset_stats = {/* read_locks_granted             = */ 0,
-                                                            /* read_locks_released            = */ 0,
-                                                            /* real_read_locks_granted        = */ 0,
-                                                            /* real_read_locks_released       = */ 0,
-                                                            /* max_read_locks                 = */ 0,
-                                                            /* max_read_lock_recursion_depth  = */ 0,
-                                                            /* read_locks_delayed             = */ 0,
-                                                            /* max_read_locks_pending         = */ 0,
-                                                            /* write_locks_granted            = */ 0,
-                                                            /* write_locks_released           = */ 0,
-                                                            /* real_write_locks_granted       = */ 0,
-                                                            /* real_write_locks_released      = */ 0,
-                                                            /* max_write_locks                = */ 0,
-                                                            /* max_write_lock_recursion_depth = */ 0,
-                                                            /* write_locks_delayed            = */ 0,
-                                                            /* max_write_locks_pending        = */ 0};
-    herr_t                                   ret_value   = SUCCEED;
+    /* update this initializer if you modify H5TS_rw_lock_stats_t */
+    static const H5TS_rw_lock_stats_t reset_stats = {/* read_locks_granted             = */ 0,
+                                                     /* read_locks_released            = */ 0,
+                                                     /* real_read_locks_granted        = */ 0,
+                                                     /* real_read_locks_released       = */ 0,
+                                                     /* max_read_locks                 = */ 0,
+                                                     /* max_read_lock_recursion_depth  = */ 0,
+                                                     /* read_locks_delayed             = */ 0,
+                                                     /* max_read_locks_pending         = */ 0,
+                                                     /* write_locks_granted            = */ 0,
+                                                     /* write_locks_released           = */ 0,
+                                                     /* real_write_locks_granted       = */ 0,
+                                                     /* real_write_locks_released      = */ 0,
+                                                     /* max_write_locks                = */ 0,
+                                                     /* max_write_lock_recursion_depth = */ 0,
+                                                     /* write_locks_delayed            = */ 0,
+                                                     /* max_write_locks_pending        = */ 0};
+    herr_t                            ret_value   = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_PT_REC_RW_LOCK_MAGIC)) {
+    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC)) {
 
         ret_value = FAIL;
     }
@@ -1515,13 +1511,13 @@ H5TS_pt_rec_rw_lock_reset_stats(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
         pthread_mutex_unlock(&(rw_lock_ptr->mutex));
     }
 
-    return (ret_value);
+    return ret_value;
 
-} /* H5TS_pt_rec_rw_lock_reset_stats() */
+} /* H5TS_rw_lock_reset_stats() */
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_pt_rec_rw_lock_print_stats
+ *    H5TS_rw_lock_print_stats
  *
  * RETURNS
  *    0 on success and non-zero on error.
@@ -1530,7 +1526,7 @@ H5TS_pt_rec_rw_lock_reset_stats(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
  *    Print the supplied pthresds recursive R/W lock statistics to
  *    standard out.
  *
- *    UPDATE THIS FUNCTION IF YOU MODIFY H5TS_pt_rec_rw_lock_stats_t.
+ *    UPDATE THIS FUNCTION IF YOU MODIFY H5TS_rw_lock_stats_t.
  *
  * PROGRAMMER: John Mainzer
  *             August 28, 2020
@@ -1539,7 +1535,7 @@ H5TS_pt_rec_rw_lock_reset_stats(H5TS_pt_rec_rw_lock_t *rw_lock_ptr)
  */
 
 herr_t
-H5TS_pt_rec_rw_lock_print_stats(const char *header_str, H5TS_pt_rec_rw_lock_stats_t *stats_ptr)
+H5TS_rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats_ptr)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1584,9 +1580,9 @@ H5TS_pt_rec_rw_lock_print_stats(const char *header_str, H5TS_pt_rec_rw_lock_stat
                   (long long int)(stats_ptr->max_write_locks_pending));
     }
 
-    return (ret_value);
+    return ret_value;
 
-} /* H5TS_pt_rec_rw_lock_print_stats() */
+} /* H5TS_rw_lock_print_stats() */
 #endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
 
 #endif /* H5_HAVE_THREADSAFE */

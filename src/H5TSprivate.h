@@ -90,7 +90,7 @@ H5_DLL herr_t        H5TS_win32_thread_exit(void);
 #define REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK(rw, count_ptr)                  \
 do {                                                                          \
     HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_PT_REC_RW_LOCK_MAGIC);                       \
+    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                       \
     HDassert(count_ptr);                                                      \
     HDassert((count_ptr)->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);     \
     HDassert((count_ptr)->rec_lock_count >= 1);                               \
@@ -120,7 +120,7 @@ do {                                                                          \
 #define REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK_DELAY(rw, waiting_count)        \
 do {                                                                          \
     HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_PT_REC_RW_LOCK_MAGIC);                       \
+    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                       \
     HDassert((waiting_count) > 0);                                            \
                                                                               \
     (rw)->stats.read_locks_delayed++;                                         \
@@ -135,7 +135,7 @@ do {                                                                          \
 #define REC_RW_LOCK_STATS__UPDATE_FOR_RD_UNLOCK(rw, count_ptr)                \
 do {                                                                          \
     HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_PT_REC_RW_LOCK_MAGIC);                       \
+    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                       \
     HDassert(count_ptr);                                                      \
     HDassert((count_ptr)->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);     \
     HDassert((count_ptr)->rec_lock_count >= 0);                               \
@@ -154,7 +154,7 @@ do {                                                                          \
 #define REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK(rw, count_ptr)                  \
 do {                                                                          \
     HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_PT_REC_RW_LOCK_MAGIC);                       \
+    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                       \
     HDassert(count_ptr);                                                      \
     HDassert((count_ptr)->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);     \
     HDassert((count_ptr)->rec_lock_count >= 1);                               \
@@ -184,7 +184,7 @@ do {                                                                          \
 #define REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK_DELAY(rw, waiting_count)        \
 do {                                                                          \
     HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_PT_REC_RW_LOCK_MAGIC);                       \
+    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                       \
     HDassert((waiting_count) > 0);                                            \
                                                                               \
     (rw)->stats.write_locks_delayed++;                                        \
@@ -199,7 +199,7 @@ do {                                                                          \
 #define REC_RW_LOCK_STATS__UPDATE_FOR_WR_UNLOCK(rw, count_ptr)                \
 do {                                                                          \
     HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_PT_REC_RW_LOCK_MAGIC);                       \
+    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                       \
     HDassert(count_ptr);                                                      \
     HDassert((count_ptr)->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);     \
     HDassert((count_ptr)->rec_lock_count >= 0);                               \
@@ -238,17 +238,17 @@ typedef pthread_once_t  H5TS_once_t;
 
 /******************************************************************************
  *
- * Structure H5TS_pt_rec_rw_lock_stats_t
+ * Structure H5TS_rw_lock_stats_t
  *
  * Catchall structure for statistics on the recursive p-threads based
- * recursive R/W lock (see declaration of H5TS_pt_rec_rw_lock_t below).
+ * recursive R/W lock (see declaration of H5TS_rw_lock_t below).
  *
  * Since the mutex must be held when reading a consistent set of statistics
  * from the recursibe R/W lock, it simplifies matters to bundle them into
  * a single structure.  This structure exists for that purpose.
  *
  * If you modify this structure, be sure to make equivalent changes to
- * the reset_stats initializer in H5TS_pt_rec_rw_lock_reset_stats().
+ * the reset_stats initializer in H5TS_rw_lock_reset_stats().
  *
  * Individual fields are discussed below.
  *
@@ -313,7 +313,7 @@ typedef pthread_once_t  H5TS_once_t;
  *
  ******************************************************************************/
 
-typedef struct H5TS_pt_rec_rw_lock_stats_t {
+typedef struct H5TS_rw_lock_stats_t {
 
     int64_t read_locks_granted;
     int64_t read_locks_released;
@@ -332,11 +332,11 @@ typedef struct H5TS_pt_rec_rw_lock_stats_t {
     int64_t write_locks_delayed;
     int64_t max_write_locks_pending;
 
-} H5TS_pt_rec_rw_lock_stats_t;
+} H5TS_rw_lock_stats_t;
 
 /******************************************************************************
  *
- * Structure H5TS_pt_rec_rw_lock_t
+ * Structure H5TS_rw_lock_t
  *
  * A read / write lock, is a lock that allows either an arbitrary number
  * of readers, or a single writer into a critical region.  A recurssive
@@ -360,8 +360,8 @@ typedef struct H5TS_pt_rec_rw_lock_stats_t {
  *                                           JRM  -- 8/28/20
  *
  * magic:       Unsigned 32 bit integer field used for sanity checking.  This
- *              fields must always be set to H5TS_PT_REC_RW_LOCK_MAGIC.
- *              If this structure is allocated dynamically, rememver to set
+ *              fields must always be set to H5TS_RW_LOCK_MAGIC.
+ *              If this structure is allocated dynamically, remember to set
  *              it to some invalid value before discarding the structure.
  *
  * policy       Integer containing a code indicating the precidence policy
@@ -409,7 +409,7 @@ typedef struct H5TS_pt_rec_rw_lock_stats_t {
  *              a thread specific lock type and recursive entry count
  *              for all threads holding a lock.
  *
- * stats:       Instance of H5TS_pt_rec_rw_lock_stats_t used to track
+ * stats:       Instance of H5TS_rw_lock_stats_t used to track
  *              statistics on the recursive R/W lock.  See the declaration
  *              of the structure for discussion of its fields.
  *
@@ -420,33 +420,33 @@ typedef struct H5TS_pt_rec_rw_lock_stats_t {
  *
  ******************************************************************************/
 
-#define H5TS_PT_REC_RW_LOCK_MAGIC 0XABCD
+#define H5TS_RW_LOCK_MAGIC 0XABCD
 
 #define H5TS__RW_LOCK_POLICY__FAVOR_WRITERS 0
 
-typedef struct H5TS_pt_rec_rw_lock_t {
+typedef struct H5TS_rw_lock_t {
 
-    uint32_t                           magic;
-    int32_t                            policy;
-    pthread_mutex_t                    mutex;
-    pthread_cond_t                     readers_cv;
-    pthread_cond_t                     writers_cv;
-    int32_t                            waiting_readers_count;
-    int32_t                            waiting_writers_count;
-    int32_t                            active_readers;
-    int32_t                            active_writers;
-    pthread_key_t                      rec_entry_count_key;
-    int32_t                            writer_rec_entry_count;
-    struct H5TS_pt_rec_rw_lock_stats_t stats;
+    uint32_t                    magic;
+    int32_t                     policy;
+    pthread_mutex_t             mutex;
+    pthread_cond_t              readers_cv;
+    pthread_cond_t              writers_cv;
+    int32_t                     waiting_readers_count;
+    int32_t                     waiting_writers_count;
+    int32_t                     active_readers;
+    int32_t                     active_writers;
+    pthread_key_t               rec_entry_count_key;
+    int32_t                     writer_rec_entry_count;
+    struct H5TS_rw_lock_stats_t stats;
 
-} H5TS_pt_rec_rw_lock_t;
+} H5TS_rw_lock_t;
 
 /******************************************************************************
  *
- * Structure H5TS_pt_rec_entry_count_t
+ * Structure H5TS_rec_entry_count
  *
  * Strucure associated with the reader_rec_entry_count_key defined in
- * H5TS_pt_rec_rw_lock_t.
+ * H5TS_rw_lock_t.
  *
  * The primary purpose of this structure is to maintain a count of recursive
  * locks so that the lock can be dropped when the count drops to zero.
@@ -473,13 +473,13 @@ typedef struct H5TS_pt_rec_rw_lock_t {
 
 #define H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC 0XABBA
 
-typedef struct H5TS_pt_rec_entry_count_t {
+typedef struct H5TS_rec_entry_count {
 
     uint32_t magic;
     hbool_t  write_lock;
     int64_t  rec_lock_count;
 
-} H5TS_pt_rec_entry_count_t;
+} H5TS_rec_entry_count;
 
 #endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
 
@@ -525,17 +525,16 @@ H5_DLL H5TS_thread_t H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr
 
 /* Fully recursive R/W lock related function declarations */
 #ifdef H5_USE_RECURSIVE_WRITER_LOCKS
-H5_DLL H5TS_pt_rec_entry_count_t *H5TS_alloc_pt_rec_entry_count(hbool_t write_lock);
-H5_DLL void                       H5TS_free_pt_rec_entry_count(void *target_ptr);
-H5_DLL herr_t                     H5TS_pt_rec_rw_lock_init(H5TS_pt_rec_rw_lock_t *rw_lock_ptr, int policy);
-H5_DLL herr_t                     H5TS_pt_rec_rw_lock_takedown(H5TS_pt_rec_rw_lock_t *rw_lock_ptr);
-H5_DLL herr_t                     H5TS_pt_rec_rw_rdlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr);
-H5_DLL herr_t                     H5TS_pt_rec_rw_wrlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr);
-H5_DLL herr_t                     H5TS_pt_rec_rw_unlock(H5TS_pt_rec_rw_lock_t *rw_lock_ptr);
-H5_DLL herr_t                     H5TS_pt_rec_rw_lock_get_stats(H5TS_pt_rec_rw_lock_t *      rw_lock_ptr,
-                                                                H5TS_pt_rec_rw_lock_stats_t *stats_ptr);
-H5_DLL herr_t                     H5TS_pt_rec_rw_lock_reset_stats(H5TS_pt_rec_rw_lock_t *rw_lock_ptr);
-H5_DLL herr_t H5TS_pt_rec_rw_lock_print_stats(const char *header_str, H5TS_pt_rec_rw_lock_stats_t *stats_ptr);
+H5_DLL H5TS_rec_entry_count *H5TS_alloc_rec_entry_count(hbool_t write_lock);
+H5_DLL void                  H5TS_free_rec_entry_count(void *target_ptr);
+H5_DLL herr_t                H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock_ptr, int policy);
+H5_DLL herr_t                H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock_ptr);
+H5_DLL herr_t                H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock_ptr);
+H5_DLL herr_t                H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock_ptr);
+H5_DLL herr_t                H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock_ptr);
+H5_DLL herr_t H5TS_rw_lock_get_stats(H5TS_rw_lock_t *rw_lock_ptr, H5TS_rw_lock_stats_t *stats_ptr);
+H5_DLL herr_t H5TS_rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock_ptr);
+H5_DLL herr_t H5TS_rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats_ptr);
 #endif
 
 #else /* H5_HAVE_THREADSAFE */
