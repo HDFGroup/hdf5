@@ -935,8 +935,7 @@ H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock)
          */
         rw_lock->magic = 0;
 
-        if ((H5TS_mutex_destroy(&(rw_lock->mutex)) < 0) ||
-            (H5TS_cond_destroy(&(rw_lock->readers_cv)) < 0) ||
+        if ((H5TS_mutex_destroy(&(rw_lock->mutex)) < 0) || (H5TS_cond_destroy(&(rw_lock->readers_cv)) < 0) ||
             (H5TS_cond_destroy(&(rw_lock->writers_cv)) < 0)) {
             ret_value = FAIL;
         }
