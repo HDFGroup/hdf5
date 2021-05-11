@@ -106,12 +106,13 @@ H5FL_ARR_EXTERN(hsize_t);
 --------------------------------------------------------------------------*/
 static void *
 H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                    unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                    unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5S_extent_t *sdim = NULL; /* New extent dimensionality structure */
-    unsigned      flags, version;
-    unsigned      i;                /* Local counting variable */
-    void *        ret_value = NULL; /* Return value */
+    H5S_extent_t  *sdim      = NULL;           /* New extent dimensionality structure */
+    unsigned       flags, version;
+    unsigned       i;                          /* Local counting variable */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void *         ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -161,6 +162,14 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
 
     /* Decode dimension sizes */
     if (sdim->rank > 0) {
+        /* Ensure that rank doesn't cause reading passed buffer's end,
+           due to possible data corruption */
+        uint8_t sizeof_size = H5F_SIZEOF_SIZE(f);
+        if (p + (sizeof_size*sdim->rank -1) > p_end)
+        {
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "rank might cause reading passed buffer's end")
+        }
+
         if (NULL == (sdim->size = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -170,6 +179,11 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
         if (flags & H5S_VALID_MAX) {
             if (NULL == (sdim->max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+            /* Ensure that rank doesn't cause reading passed buffer's end */
+            if (p + (sizeof_size*sdim->rank -1) > p_end)
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "rank might cause reading passed buffer's end")
+
             for (i = 0; i < sdim->rank; i++)
                 H5F_DECODE_LENGTH(f, p, sdim->max[i]);
         } /* end if */
