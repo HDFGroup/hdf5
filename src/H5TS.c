@@ -31,7 +31,6 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
-#include "H5MMprivate.h" /* Memory management                        */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -734,6 +733,7 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 } /* H5TS_create_thread */
 
 #ifdef H5_USE_RECURSIVE_WRITER_LOCKS
+
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_alloc_rec_entry_count
@@ -786,18 +786,18 @@ H5TS_alloc_rec_entry_count(hbool_t write_lock)
  */
 
 void
-H5TS_free_rec_entry_count(void *target_ptr)
+H5TS_free_rec_entry_count(void *target)
 {
-    H5TS_rec_entry_count *count_ptr;
+    H5TS_rec_entry_count *count;
 
-    count_ptr = (H5TS_rec_entry_count *)target_ptr;
+    count = (H5TS_rec_entry_count *)target;
 
-    HDassert(count_ptr);
-    HDassert(count_ptr->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);
+    HDassert(count);
+    HDassert(count->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);
 
-    count_ptr->magic = 0;
+    count->magic = 0;
 
-    HDfree(count_ptr);
+    HDfree(count);
 
     return;
 
@@ -820,21 +820,21 @@ H5TS_free_rec_entry_count(void *target_ptr)
  */
 
 herr_t
-H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock_ptr, int policy)
+H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock, int policy)
 {
     herr_t ret_value = SUCCEED;
 
-    /* santity checks -- until other policies are implemented,
+    /* sanity checks -- until other policies are implemented,
      * policy must equal H5TS__RW_LOCK_POLICY__FAVOR_WRITERS.
      */
-    if ((rw_lock_ptr == NULL) || (policy != H5TS__RW_LOCK_POLICY__FAVOR_WRITERS)) {
+    if ((rw_lock == NULL) || (policy != H5TS__RW_LOCK_POLICY__FAVOR_WRITERS)) {
 
         ret_value = FAIL;
     }
 
     if (ret_value == SUCCEED) { /* initialized the mutex */
 
-        if (pthread_mutex_init(&(rw_lock_ptr->mutex), NULL) != 0) {
+        if (pthread_mutex_init(&(rw_lock->mutex), NULL) != 0) {
 
             ret_value = FAIL;
         }
@@ -842,7 +842,7 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock_ptr, int policy)
 
     if (ret_value == SUCCEED) { /* initialize the waiting readers cv */
 
-        if (pthread_cond_init(&(rw_lock_ptr->readers_cv), NULL) != 0) {
+        if (pthread_cond_init(&(rw_lock->readers_cv), NULL) != 0) {
 
             ret_value = FAIL;
         }
@@ -850,7 +850,7 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock_ptr, int policy)
 
     if (ret_value == SUCCEED) { /* initialize the waiting writers cv */
 
-        if (pthread_cond_init(&(rw_lock_ptr->writers_cv), NULL) != 0) {
+        if (pthread_cond_init(&(rw_lock->writers_cv), NULL) != 0) {
 
             ret_value = FAIL;
         }
@@ -858,7 +858,7 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock_ptr, int policy)
 
     if (ret_value == SUCCEED) { /* initialize the key */
 
-        if (pthread_key_create(&(rw_lock_ptr->rec_entry_count_key), H5TS_free_rec_entry_count) != 0) {
+        if (pthread_key_create(&(rw_lock->rec_entry_count_key), H5TS_free_rec_entry_count) != 0) {
 
             ret_value = FAIL;
         }
@@ -866,28 +866,28 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock_ptr, int policy)
 
     if (ret_value == SUCCEED) { /* initialized scalar fields */
 
-        rw_lock_ptr->magic                                = H5TS_RW_LOCK_MAGIC;
-        rw_lock_ptr->policy                               = policy;
-        rw_lock_ptr->waiting_readers_count                = 0;
-        rw_lock_ptr->waiting_writers_count                = 0;
-        rw_lock_ptr->active_readers                       = 0;
-        rw_lock_ptr->active_writers                       = 0;
-        rw_lock_ptr->stats.read_locks_granted             = 0;
-        rw_lock_ptr->stats.read_locks_released            = 0;
-        rw_lock_ptr->stats.real_read_locks_granted        = 0;
-        rw_lock_ptr->stats.real_read_locks_released       = 0;
-        rw_lock_ptr->stats.max_read_locks                 = 0;
-        rw_lock_ptr->stats.max_read_lock_recursion_depth  = 0;
-        rw_lock_ptr->stats.read_locks_delayed             = 0;
-        rw_lock_ptr->stats.max_read_locks_pending         = 0;
-        rw_lock_ptr->stats.write_locks_granted            = 0;
-        rw_lock_ptr->stats.write_locks_released           = 0;
-        rw_lock_ptr->stats.real_write_locks_granted       = 0;
-        rw_lock_ptr->stats.real_write_locks_released      = 0;
-        rw_lock_ptr->stats.max_write_locks                = 0;
-        rw_lock_ptr->stats.max_write_lock_recursion_depth = 0;
-        rw_lock_ptr->stats.write_locks_delayed            = 0;
-        rw_lock_ptr->stats.max_write_locks_pending        = 0;
+        rw_lock->magic                                = H5TS_RW_LOCK_MAGIC;
+        rw_lock->policy                               = policy;
+        rw_lock->waiting_readers_count                = 0;
+        rw_lock->waiting_writers_count                = 0;
+        rw_lock->active_readers                       = 0;
+        rw_lock->active_writers                       = 0;
+        rw_lock->stats.read_locks_granted             = 0;
+        rw_lock->stats.read_locks_released            = 0;
+        rw_lock->stats.real_read_locks_granted        = 0;
+        rw_lock->stats.real_read_locks_released       = 0;
+        rw_lock->stats.max_read_locks                 = 0;
+        rw_lock->stats.max_read_lock_recursion_depth  = 0;
+        rw_lock->stats.read_locks_delayed             = 0;
+        rw_lock->stats.max_read_locks_pending         = 0;
+        rw_lock->stats.write_locks_granted            = 0;
+        rw_lock->stats.write_locks_released           = 0;
+        rw_lock->stats.real_write_locks_granted       = 0;
+        rw_lock->stats.real_write_locks_released      = 0;
+        rw_lock->stats.max_write_locks                = 0;
+        rw_lock->stats.max_write_lock_recursion_depth = 0;
+        rw_lock->stats.write_locks_delayed            = 0;
+        rw_lock->stats.max_write_locks_pending        = 0;
     }
 
     return ret_value;
@@ -914,11 +914,11 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock_ptr, int policy)
  */
 
 herr_t
-H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock_ptr)
+H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock)
 {
     herr_t ret_value = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC)) {
+    if ((rw_lock == NULL) || (rw_lock->magic != H5TS_RW_LOCK_MAGIC)) {
 
         ret_value = FAIL;
     }
@@ -929,12 +929,12 @@ H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock_ptr)
          * destroy routines.  Call them all, even if one fails along
          * the way.
          */
-        rw_lock_ptr->magic = 0;
+        rw_lock->magic = 0;
 
-        if ((pthread_mutex_destroy(&(rw_lock_ptr->mutex)) < 0) ||
-            (pthread_cond_destroy(&(rw_lock_ptr->readers_cv)) < 0) ||
-            (pthread_cond_destroy(&(rw_lock_ptr->writers_cv)) < 0) ||
-            (pthread_key_delete(rw_lock_ptr->rec_entry_count_key) < 0)) {
+        if ((pthread_mutex_destroy(&(rw_lock->mutex)) < 0) ||
+            (pthread_cond_destroy(&(rw_lock->readers_cv)) < 0) ||
+            (pthread_cond_destroy(&(rw_lock->writers_cv)) < 0) ||
+            (pthread_key_delete(rw_lock->rec_entry_count_key) < 0)) {
 
             ret_value = FAIL;
         }
@@ -962,14 +962,14 @@ H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock_ptr)
  */
 
 herr_t
-H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock_ptr)
+H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock)
 {
     hbool_t               have_mutex = FALSE;
     int                   result;
-    H5TS_rec_entry_count *count_ptr;
+    H5TS_rec_entry_count *count;
     herr_t                ret_value = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC)) {
+    if ((rw_lock == NULL) || (rw_lock->magic != H5TS_RW_LOCK_MAGIC)) {
 
         ret_value = FAIL;
     }
@@ -977,7 +977,7 @@ H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock_ptr)
     /* obtain the mutex */
     if (ret_value == SUCCEED) {
 
-        if (pthread_mutex_lock(&(rw_lock_ptr->mutex)) != 0) {
+        if (pthread_mutex_lock(&(rw_lock->mutex)) != 0) {
 
             ret_value = FAIL;
         }
@@ -992,41 +992,40 @@ H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock_ptr)
      */
     if (ret_value == SUCCEED) {
 
-        count_ptr = (H5TS_rec_entry_count *)pthread_getspecific(rw_lock_ptr->rec_entry_count_key);
+        count = (H5TS_rec_entry_count *)pthread_getspecific(rw_lock->rec_entry_count_key);
 
-        if (count_ptr) { /* this is a recursive lock */
+        if (count) { /* this is a recursive lock */
 
-            if ((count_ptr->write_lock) || (rw_lock_ptr->active_readers == 0) ||
-                (rw_lock_ptr->active_writers != 0)) {
+            if ((count->write_lock) || (rw_lock->active_readers == 0) || (rw_lock->active_writers != 0)) {
 
                 ret_value = FAIL;
             }
             else {
 
-                count_ptr->rec_lock_count++;
+                count->rec_lock_count++;
 
-                REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK(rw_lock_ptr, count_ptr);
+                REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK(rw_lock, count);
             }
         }
         else { /* this is an initial read lock request */
 
-            switch (rw_lock_ptr->policy) {
+            switch (rw_lock->policy) {
 
                 case H5TS__RW_LOCK_POLICY__FAVOR_WRITERS:
-                    if ((rw_lock_ptr->active_writers != 0) || (rw_lock_ptr->waiting_writers_count != 0)) {
+                    if ((rw_lock->active_writers != 0) || (rw_lock->waiting_writers_count != 0)) {
 
-                        int delayed = rw_lock_ptr->waiting_readers_count + 1;
+                        int delayed = rw_lock->waiting_readers_count + 1;
 
-                        REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK_DELAY(rw_lock_ptr, delayed);
+                        REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK_DELAY(rw_lock, delayed);
                     }
 
-                    while ((rw_lock_ptr->active_writers != 0) || (rw_lock_ptr->waiting_writers_count != 0)) {
+                    while ((rw_lock->active_writers != 0) || (rw_lock->waiting_writers_count != 0)) {
 
-                        rw_lock_ptr->waiting_readers_count++;
+                        rw_lock->waiting_readers_count++;
 
-                        result = pthread_cond_wait(&(rw_lock_ptr->readers_cv), &(rw_lock_ptr->mutex));
+                        result = pthread_cond_wait(&(rw_lock->readers_cv), &(rw_lock->mutex));
 
-                        rw_lock_ptr->waiting_readers_count--;
+                        rw_lock->waiting_readers_count--;
 
                         if (result != 0) {
 
@@ -1041,31 +1040,31 @@ H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock_ptr)
                     break;
             }
 
-            if ((ret_value == SUCCEED) && (NULL == (count_ptr = H5TS_alloc_rec_entry_count(FALSE)))) {
+            if ((ret_value == SUCCEED) && (NULL == (count = H5TS_alloc_rec_entry_count(FALSE)))) {
 
                 ret_value = FAIL;
             }
 
             if ((ret_value == SUCCEED) &&
-                (pthread_setspecific(rw_lock_ptr->rec_entry_count_key, (void *)count_ptr) != 0)) {
+                (pthread_setspecific(rw_lock->rec_entry_count_key, (void *)count) != 0)) {
 
                 ret_value = FAIL;
             }
 
             if (ret_value == SUCCEED) {
 
-                rw_lock_ptr->active_readers++;
+                rw_lock->active_readers++;
 
-                HDassert(count_ptr->rec_lock_count == 1);
+                HDassert(count->rec_lock_count == 1);
 
-                REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK(rw_lock_ptr, count_ptr);
+                REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK(rw_lock, count);
             }
         }
     }
 
     if (have_mutex) {
 
-        pthread_mutex_unlock(&(rw_lock_ptr->mutex));
+        pthread_mutex_unlock(&(rw_lock->mutex));
     }
 
     return ret_value;
@@ -1090,14 +1089,14 @@ H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock_ptr)
  */
 
 herr_t
-H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock_ptr)
+H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock)
 {
     hbool_t               have_mutex = FALSE;
     int                   result;
-    H5TS_rec_entry_count *count_ptr;
+    H5TS_rec_entry_count *count;
     herr_t                ret_value = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC)) {
+    if ((rw_lock == NULL) || (rw_lock->magic != H5TS_RW_LOCK_MAGIC)) {
 
         ret_value = FAIL;
     }
@@ -1105,7 +1104,7 @@ H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock_ptr)
     /* obtain the mutex */
     if (ret_value == SUCCEED) {
 
-        if (pthread_mutex_lock(&(rw_lock_ptr->mutex)) != 0) {
+        if (pthread_mutex_lock(&(rw_lock->mutex)) != 0) {
 
             ret_value = FAIL;
         }
@@ -1120,41 +1119,40 @@ H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock_ptr)
      */
     if (ret_value == SUCCEED) {
 
-        count_ptr = (H5TS_rec_entry_count *)pthread_getspecific(rw_lock_ptr->rec_entry_count_key);
+        count = (H5TS_rec_entry_count *)pthread_getspecific(rw_lock->rec_entry_count_key);
 
-        if (count_ptr) { /* this is a recursive lock */
+        if (count) { /* this is a recursive lock */
 
-            if ((!(count_ptr->write_lock)) || (rw_lock_ptr->active_readers != 0) ||
-                (rw_lock_ptr->active_writers != 1)) {
+            if ((!(count->write_lock)) || (rw_lock->active_readers != 0) || (rw_lock->active_writers != 1)) {
 
                 ret_value = FAIL;
             }
             else {
 
-                count_ptr->rec_lock_count++;
+                count->rec_lock_count++;
 
-                REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK(rw_lock_ptr, count_ptr);
+                REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK(rw_lock, count);
             }
         }
         else { /* this is an initial write lock request */
 
-            switch (rw_lock_ptr->policy) {
+            switch (rw_lock->policy) {
 
                 case H5TS__RW_LOCK_POLICY__FAVOR_WRITERS:
-                    if ((rw_lock_ptr->active_readers > 0) || (rw_lock_ptr->active_writers > 0)) {
+                    if ((rw_lock->active_readers > 0) || (rw_lock->active_writers > 0)) {
 
-                        int delayed = rw_lock_ptr->waiting_writers_count + 1;
+                        int delayed = rw_lock->waiting_writers_count + 1;
 
-                        REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK_DELAY(rw_lock_ptr, delayed);
+                        REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK_DELAY(rw_lock, delayed);
                     }
 
-                    while ((rw_lock_ptr->active_readers > 0) || (rw_lock_ptr->active_writers > 0)) {
+                    while ((rw_lock->active_readers > 0) || (rw_lock->active_writers > 0)) {
 
-                        rw_lock_ptr->waiting_writers_count++;
+                        rw_lock->waiting_writers_count++;
 
-                        result = pthread_cond_wait(&(rw_lock_ptr->writers_cv), &(rw_lock_ptr->mutex));
+                        result = pthread_cond_wait(&(rw_lock->writers_cv), &(rw_lock->mutex));
 
-                        rw_lock_ptr->waiting_writers_count--;
+                        rw_lock->waiting_writers_count--;
 
                         if (result != 0) {
 
@@ -1169,31 +1167,31 @@ H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock_ptr)
                     break;
             }
 
-            if ((ret_value == SUCCEED) && (NULL == (count_ptr = H5TS_alloc_rec_entry_count(TRUE)))) {
+            if ((ret_value == SUCCEED) && (NULL == (count = H5TS_alloc_rec_entry_count(TRUE)))) {
 
                 ret_value = FAIL;
             }
 
             if ((ret_value == SUCCEED) &&
-                (pthread_setspecific(rw_lock_ptr->rec_entry_count_key, (void *)count_ptr) != 0)) {
+                (pthread_setspecific(rw_lock->rec_entry_count_key, (void *)count) != 0)) {
 
                 ret_value = FAIL;
             }
 
             if (ret_value == SUCCEED) {
 
-                rw_lock_ptr->active_writers++;
+                rw_lock->active_writers++;
 
-                HDassert(count_ptr->rec_lock_count == 1);
+                HDassert(count->rec_lock_count == 1);
 
-                REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK(rw_lock_ptr, count_ptr);
+                REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK(rw_lock, count);
             }
         }
     }
 
     if (have_mutex) {
 
-        pthread_mutex_unlock(&(rw_lock_ptr->mutex));
+        pthread_mutex_unlock(&(rw_lock->mutex));
     }
 
     return ret_value;
@@ -1218,14 +1216,14 @@ H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock_ptr)
  */
 
 herr_t
-H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock_ptr)
+H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock)
 {
     hbool_t               have_mutex        = FALSE;
     hbool_t               discard_rec_count = FALSE;
-    H5TS_rec_entry_count *count_ptr;
+    H5TS_rec_entry_count *count;
     herr_t                ret_value = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC)) {
+    if ((rw_lock == NULL) || (rw_lock->magic != H5TS_RW_LOCK_MAGIC)) {
 
         ret_value = FAIL;
     }
@@ -1233,7 +1231,7 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock_ptr)
     /* obtain the mutex */
     if (ret_value == SUCCEED) {
 
-        if (pthread_mutex_lock(&(rw_lock_ptr->mutex)) != 0) {
+        if (pthread_mutex_lock(&(rw_lock->mutex)) != 0) {
 
             ret_value = FAIL;
         }
@@ -1248,39 +1246,39 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock_ptr)
      */
     if (ret_value == SUCCEED) {
 
-        count_ptr = (H5TS_rec_entry_count *)pthread_getspecific(rw_lock_ptr->rec_entry_count_key);
+        count = (H5TS_rec_entry_count *)pthread_getspecific(rw_lock->rec_entry_count_key);
 
-        HDassert(count_ptr);
-        HDassert(count_ptr->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);
-        HDassert(count_ptr->rec_lock_count > 0);
+        HDassert(count);
+        HDassert(count->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);
+        HDassert(count->rec_lock_count > 0);
 
-        if (NULL == count_ptr) {
-
-            ret_value = FAIL;
-        }
-        else if (count_ptr->magic != H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC) {
+        if (NULL == count) {
 
             ret_value = FAIL;
         }
-        else if (count_ptr->rec_lock_count <= 0) { /* corrupt count? */
+        else if (count->magic != H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC) {
 
             ret_value = FAIL;
         }
-        else if (count_ptr->write_lock) { /* drop a write lock */
+        else if (count->rec_lock_count <= 0) { /* corrupt count? */
 
-            HDassert((rw_lock_ptr->active_readers == 0) && (rw_lock_ptr->active_writers == 1));
+            ret_value = FAIL;
+        }
+        else if (count->write_lock) { /* drop a write lock */
 
-            if ((rw_lock_ptr->active_readers != 0) || (rw_lock_ptr->active_writers != 1)) {
+            HDassert((rw_lock->active_readers == 0) && (rw_lock->active_writers == 1));
+
+            if ((rw_lock->active_readers != 0) || (rw_lock->active_writers != 1)) {
 
                 ret_value = FAIL;
             }
             else {
 
-                count_ptr->rec_lock_count--;
+                count->rec_lock_count--;
 
-                HDassert(count_ptr->rec_lock_count >= 0);
+                HDassert(count->rec_lock_count >= 0);
 
-                if (count_ptr->rec_lock_count == 0) {
+                if (count->rec_lock_count == 0) {
 
                     /* make note that we must discard the
                      * recursive entry counter so it will not
@@ -1289,29 +1287,29 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock_ptr)
                     discard_rec_count = TRUE;
 
                     /* drop the write lock -- will signal later if needed */
-                    rw_lock_ptr->active_writers--;
+                    rw_lock->active_writers--;
 
-                    HDassert(rw_lock_ptr->active_writers == 0);
+                    HDassert(rw_lock->active_writers == 0);
                 }
             }
 
-            REC_RW_LOCK_STATS__UPDATE_FOR_WR_UNLOCK(rw_lock_ptr, count_ptr);
+            REC_RW_LOCK_STATS__UPDATE_FOR_WR_UNLOCK(rw_lock, count);
         }
         else { /* drop a read lock */
 
-            HDassert((rw_lock_ptr->active_readers > 0) && (rw_lock_ptr->active_writers == 0));
+            HDassert((rw_lock->active_readers > 0) && (rw_lock->active_writers == 0));
 
-            if ((rw_lock_ptr->active_readers <= 0) || (rw_lock_ptr->active_writers != 0)) {
+            if ((rw_lock->active_readers <= 0) || (rw_lock->active_writers != 0)) {
 
                 ret_value = FAIL;
             }
             else {
 
-                count_ptr->rec_lock_count--;
+                count->rec_lock_count--;
 
-                HDassert(count_ptr->rec_lock_count >= 0);
+                HDassert(count->rec_lock_count >= 0);
 
-                if (count_ptr->rec_lock_count == 0) {
+                if (count->rec_lock_count == 0) {
 
                     /* make note that we must discard the
                      * recursive entry counter so it will not
@@ -1320,32 +1318,31 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock_ptr)
                     discard_rec_count = TRUE;
 
                     /* drop the read lock -- will signal later if needed */
-                    rw_lock_ptr->active_readers--;
+                    rw_lock->active_readers--;
                 }
             }
 
-            REC_RW_LOCK_STATS__UPDATE_FOR_RD_UNLOCK(rw_lock_ptr, count_ptr);
+            REC_RW_LOCK_STATS__UPDATE_FOR_RD_UNLOCK(rw_lock, count);
         }
 
-        if ((ret_value == SUCCEED) && (rw_lock_ptr->active_readers == 0) &&
-            (rw_lock_ptr->active_writers == 0)) {
+        if ((ret_value == SUCCEED) && (rw_lock->active_readers == 0) && (rw_lock->active_writers == 0)) {
 
             /* no locks held -- signal condition variables if required */
 
-            switch (rw_lock_ptr->policy) {
+            switch (rw_lock->policy) {
 
                 case H5TS__RW_LOCK_POLICY__FAVOR_WRITERS:
 
-                    if (rw_lock_ptr->waiting_writers_count > 0) {
+                    if (rw_lock->waiting_writers_count > 0) {
 
-                        if (pthread_cond_signal(&(rw_lock_ptr->writers_cv)) != 0) {
+                        if (pthread_cond_signal(&(rw_lock->writers_cv)) != 0) {
 
                             ret_value = FAIL;
                         }
                     }
-                    else if (rw_lock_ptr->waiting_readers_count > 0) {
+                    else if (rw_lock->waiting_readers_count > 0) {
 
-                        if (pthread_cond_broadcast(&(rw_lock_ptr->readers_cv)) != 0) {
+                        if (pthread_cond_broadcast(&(rw_lock->readers_cv)) != 0) {
 
                             ret_value = FAIL;
                         }
@@ -1366,20 +1363,20 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock_ptr)
      */
     if (discard_rec_count) {
 
-        HDassert(count_ptr);
+        HDassert(count);
 
-        if (pthread_setspecific(rw_lock_ptr->rec_entry_count_key, (void *)NULL) != 0) {
+        if (pthread_setspecific(rw_lock->rec_entry_count_key, (void *)NULL) != 0) {
 
             ret_value = FAIL;
         }
 
-        H5TS_free_rec_entry_count((void *)count_ptr);
-        count_ptr = NULL;
+        H5TS_free_rec_entry_count((void *)count);
+        count = NULL;
     }
 
     if (have_mutex) {
 
-        pthread_mutex_unlock(&(rw_lock_ptr->mutex));
+        pthread_mutex_unlock(&(rw_lock->mutex));
     }
 
     return ret_value;
@@ -1405,12 +1402,12 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock_ptr)
  */
 
 herr_t
-H5TS_rw_lock_get_stats(H5TS_rw_lock_t *rw_lock_ptr, H5TS_rw_lock_stats_t *stats_ptr)
+H5TS_rw_lock_get_stats(H5TS_rw_lock_t *rw_lock, H5TS_rw_lock_stats_t *stats)
 {
     hbool_t have_mutex = FALSE;
     herr_t  ret_value  = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC) || (stats_ptr == NULL)) {
+    if ((rw_lock == NULL) || (rw_lock->magic != H5TS_RW_LOCK_MAGIC) || (stats == NULL)) {
 
         ret_value = FAIL;
     }
@@ -1418,7 +1415,7 @@ H5TS_rw_lock_get_stats(H5TS_rw_lock_t *rw_lock_ptr, H5TS_rw_lock_stats_t *stats_
     /* obtain the mutex */
     if (ret_value == SUCCEED) {
 
-        if (pthread_mutex_lock(&(rw_lock_ptr->mutex)) != 0) {
+        if (pthread_mutex_lock(&(rw_lock->mutex)) != 0) {
 
             ret_value = FAIL;
         }
@@ -1430,12 +1427,12 @@ H5TS_rw_lock_get_stats(H5TS_rw_lock_t *rw_lock_ptr, H5TS_rw_lock_stats_t *stats_
 
     if (ret_value == SUCCEED) {
 
-        *stats_ptr = rw_lock_ptr->stats;
+        *stats = rw_lock->stats;
     }
 
     if (have_mutex) {
 
-        pthread_mutex_unlock(&(rw_lock_ptr->mutex));
+        pthread_mutex_unlock(&(rw_lock->mutex));
     }
 
     return ret_value;
@@ -1461,7 +1458,7 @@ H5TS_rw_lock_get_stats(H5TS_rw_lock_t *rw_lock_ptr, H5TS_rw_lock_stats_t *stats_
  */
 
 herr_t
-H5TS_rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock_ptr)
+H5TS_rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock)
 {
     hbool_t have_mutex = FALSE;
     /* update this initializer if you modify H5TS_rw_lock_stats_t */
@@ -1483,7 +1480,7 @@ H5TS_rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock_ptr)
                                                      /* max_write_locks_pending        = */ 0};
     herr_t                            ret_value   = SUCCEED;
 
-    if ((rw_lock_ptr == NULL) || (rw_lock_ptr->magic != H5TS_RW_LOCK_MAGIC)) {
+    if ((rw_lock == NULL) || (rw_lock->magic != H5TS_RW_LOCK_MAGIC)) {
 
         ret_value = FAIL;
     }
@@ -1491,7 +1488,7 @@ H5TS_rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock_ptr)
     /* obtain the mutex */
     if (ret_value == SUCCEED) {
 
-        if (pthread_mutex_lock(&(rw_lock_ptr->mutex)) != 0) {
+        if (pthread_mutex_lock(&(rw_lock->mutex)) != 0) {
 
             ret_value = FAIL;
         }
@@ -1503,12 +1500,12 @@ H5TS_rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock_ptr)
 
     if (ret_value == SUCCEED) {
 
-        rw_lock_ptr->stats = reset_stats;
+        rw_lock->stats = reset_stats;
     }
 
     if (have_mutex) {
 
-        pthread_mutex_unlock(&(rw_lock_ptr->mutex));
+        pthread_mutex_unlock(&(rw_lock->mutex));
     }
 
     return ret_value;
@@ -1535,11 +1532,11 @@ H5TS_rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock_ptr)
  */
 
 herr_t
-H5TS_rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats_ptr)
+H5TS_rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats)
 {
     herr_t ret_value = SUCCEED;
 
-    if ((header_str == NULL) || (stats_ptr == NULL)) {
+    if ((header_str == NULL) || (stats == NULL)) {
 
         ret_value = FAIL;
     }
@@ -1547,37 +1544,37 @@ H5TS_rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats_ptr
 
         HDfprintf(stdout, "\n\n%s\n\n", header_str);
         HDfprintf(stdout, "  read_locks_granted             = %lld\n",
-                  (long long int)(stats_ptr->read_locks_granted));
+                  (long long int)(stats->read_locks_granted));
         HDfprintf(stdout, "  read_locks_released            = %lld\n",
-                  (long long int)(stats_ptr->read_locks_released));
+                  (long long int)(stats->read_locks_released));
         HDfprintf(stdout, "  real_read_locks_granted        = %lld\n",
-                  (long long int)(stats_ptr->real_read_locks_granted));
+                  (long long int)(stats->real_read_locks_granted));
         HDfprintf(stdout, "  real_read_locks_released       = %lld\n",
-                  (long long int)(stats_ptr->real_read_locks_released));
+                  (long long int)(stats->real_read_locks_released));
         HDfprintf(stdout, "  max_read_locks                 = %lld\n",
-                  (long long int)(stats_ptr->max_read_locks));
+                  (long long int)(stats->max_read_locks));
         HDfprintf(stdout, "  max_read_lock_recursion_depth  = %lld\n",
-                  (long long int)(stats_ptr->max_read_lock_recursion_depth));
+                  (long long int)(stats->max_read_lock_recursion_depth));
         HDfprintf(stdout, "  read_locks_delayed             = %lld\n",
-                  (long long int)(stats_ptr->read_locks_delayed));
+                  (long long int)(stats->read_locks_delayed));
         HDfprintf(stdout, "  max_read_locks_pending         = %lld\n",
-                  (long long int)(stats_ptr->max_read_locks_pending));
+                  (long long int)(stats->max_read_locks_pending));
         HDfprintf(stdout, "  write_locks_granted            = %lld\n",
-                  (long long int)(stats_ptr->write_locks_granted));
+                  (long long int)(stats->write_locks_granted));
         HDfprintf(stdout, "  write_locks_released           = %lld\n",
-                  (long long int)(stats_ptr->write_locks_released));
+                  (long long int)(stats->write_locks_released));
         HDfprintf(stdout, "  real_write_locks_granted       = %lld\n",
-                  (long long int)(stats_ptr->real_write_locks_granted));
+                  (long long int)(stats->real_write_locks_granted));
         HDfprintf(stdout, "  real_write_locks_released      = %lld\n",
-                  (long long int)(stats_ptr->real_write_locks_released));
+                  (long long int)(stats->real_write_locks_released));
         HDfprintf(stdout, "  max_write_locks                = %lld\n",
-                  (long long int)(stats_ptr->max_write_locks));
+                  (long long int)(stats->max_write_locks));
         HDfprintf(stdout, "  max_write_lock_recursion_depth = %lld\n",
-                  (long long int)(stats_ptr->max_write_lock_recursion_depth));
+                  (long long int)(stats->max_write_lock_recursion_depth));
         HDfprintf(stdout, "  write_locks_delayed            = %lld\n",
-                  (long long int)(stats_ptr->write_locks_delayed));
+                  (long long int)(stats->write_locks_delayed));
         HDfprintf(stdout, "  max_write_locks_pending        = %lld\n\n",
-                  (long long int)(stats_ptr->max_write_locks_pending));
+                  (long long int)(stats->max_write_locks_pending));
     }
 
     return ret_value;

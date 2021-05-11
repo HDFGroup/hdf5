@@ -58,7 +58,7 @@
  *
  * The fields of the structure are discussed below:
  *
- * rw_lock_ptr: Pointer to the recursive R/W under test.
+ * rw_lock: Pointer to the recursive R/W under test.
  *
  * id:          ID assigned to the target thread.  Used primarily for
  *              sanity checking.
@@ -93,7 +93,7 @@
 typedef struct rec_rw_lock_test_udata_t {
 
     /* thread control fields */
-    H5TS_rw_lock_t *rw_lock_ptr;
+    H5TS_rw_lock_t *rw_lock;
     int32_t         id;
     int32_t         target_rd_lock_cycles;
     int32_t         target_wr_lock_cycles;
@@ -458,7 +458,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
     int32_t                          rd_locks_remaining;
     int32_t                          wr_locks_remaining;
     herr_t                           result;
-    H5TS_rw_lock_t *                 rw_lock_ptr;
+    H5TS_rw_lock_t *                 rw_lock;
     struct rec_rw_lock_test_udata_t *udata;
 
     HDassert(_udata);
@@ -468,7 +468,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
     rd_locks_remaining = udata->target_rd_lock_cycles;
     wr_locks_remaining = udata->target_wr_lock_cycles;
     max_rec_lock_depth = udata->max_recursive_lock_depth;
-    rw_lock_ptr        = udata->rw_lock_ptr;
+    rw_lock            = udata->rw_lock;
 
     while ((rd_locks_remaining > 0) || (wr_locks_remaining > 0)) {
 
@@ -494,7 +494,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
 
         if (read) {
 
-            result = H5TS_rw_rdlock(rw_lock_ptr);
+            result = H5TS_rw_rdlock(rw_lock);
             CHECK_I(result, "H5TS_rw_rdlock -- 1");
 
             udata->read_locks_granted++;
@@ -506,7 +506,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
 
                 if ((rec_lock_depth >= max_rec_lock_depth) || ((HDrand() % 2) == 0)) {
 
-                    result = H5TS_rw_unlock(rw_lock_ptr);
+                    result = H5TS_rw_unlock(rw_lock);
                     CHECK_I(result, "H5TS_rw_unlock -- 1");
 
                     rec_lock_depth--;
@@ -514,7 +514,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
                 }
                 else {
 
-                    result = H5TS_rw_rdlock(rw_lock_ptr);
+                    result = H5TS_rw_rdlock(rw_lock);
                     CHECK_I(result, "H5TS_rw_rdlock -- 2");
 
                     rec_lock_depth++;
@@ -526,7 +526,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
         }
         else {
 
-            result = H5TS_rw_wrlock(rw_lock_ptr);
+            result = H5TS_rw_wrlock(rw_lock);
             CHECK_I(result, "H5TS_rw_wrlock -- 1");
 
             udata->write_locks_granted++;
@@ -538,7 +538,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
 
                 if ((rec_lock_depth >= max_rec_lock_depth) || ((HDrand() % 2) == 0)) {
 
-                    result = H5TS_rw_unlock(rw_lock_ptr);
+                    result = H5TS_rw_unlock(rw_lock);
                     CHECK_I(result, "H5TS_rw_unlock -- 2");
 
                     rec_lock_depth--;
@@ -546,7 +546,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
                 }
                 else {
 
-                    result = H5TS_rw_wrlock(rw_lock_ptr);
+                    result = H5TS_rw_wrlock(rw_lock);
                     CHECK_I(result, "H5TS_rw_wrlock -- 2");
 
                     rec_lock_depth++;
@@ -675,7 +675,7 @@ tts_rec_rw_lock_smoke_check_2(void)
     /* 2) Setup the user data to be passed to each reader test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
 
-        udata[i].rw_lock_ptr               = &rec_rw_lock;
+        udata[i].rw_lock                   = &rec_rw_lock;
         udata[i].id                        = i;
         udata[i].target_rd_lock_cycles     = lock_cycles;
         udata[i].target_wr_lock_cycles     = 0;
@@ -922,7 +922,7 @@ tts_rec_rw_lock_smoke_check_3(void)
     /* 2) Setup the user data to be passed to each writer test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
 
-        udata[i].rw_lock_ptr               = &rec_rw_lock;
+        udata[i].rw_lock                   = &rec_rw_lock;
         udata[i].id                        = i;
         udata[i].target_rd_lock_cycles     = 0;
         udata[i].target_wr_lock_cycles     = lock_cycles;
@@ -1168,7 +1168,7 @@ tts_rec_rw_lock_smoke_check_4(void)
     /* 2) Setup the user data to be passed to each writer test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
 
-        udata[i].rw_lock_ptr               = &rec_rw_lock;
+        udata[i].rw_lock                   = &rec_rw_lock;
         udata[i].id                        = i;
         udata[i].target_rd_lock_cycles     = lock_cycles;
         udata[i].target_wr_lock_cycles     = lock_cycles;
