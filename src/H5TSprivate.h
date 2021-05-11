@@ -61,8 +61,14 @@ typedef CONDITION_VARIABLE H5TS_cond_t;
 #define H5TS_attr_destroy(attr)                 0
 #define H5TS_wait_for_thread(thread)            WaitForSingleObject(thread, INFINITE)
 #define H5TS_mutex_init(mutex)                  InitializeCriticalSection(mutex)
+#define H5TS_mutex_destroy(mutex)               pthread_mutex_destroy(mutex)
 #define H5TS_mutex_lock_simple(mutex)           EnterCriticalSection(mutex)
 #define H5TS_mutex_unlock_simple(mutex)         LeaveCriticalSection(mutex)
+#define H5TS_cond_init(cond)                    InitializeConditionVariable(cond)
+#define H5TS_cond_destroy(cond)                 0
+#define H5TS_cond_wait(cond, mutex)             SleepConditionVariableCS(cond, mutex, INFINITE)
+#define H5TS_cond_signal(cond)                  WakeConditionVariable(cond)
+#define H5TS_cond_broadcast(cond)               WakeAllConditionVariable(cond)
 
 /* Functions called from DllMain */
 H5_DLL BOOL CALLBACK H5TS_win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex);
