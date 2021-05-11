@@ -415,8 +415,8 @@ tts_rec_rw_lock_smoke_check_1(void)
     /* clang-format on */
 
     /* 25) Shut down the recursive R/W lock. */
-    result = H5TS_rw_lock_takedown(&rec_rw_lock);
-    CHECK_I(result, "H5TS_rw_lock_takedown");
+    result = H5TS_rw_lock_destroy(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_destroy");
 
     return;
 
@@ -789,8 +789,8 @@ tts_rec_rw_lock_smoke_check_2(void)
     }
 
     /* 7) Shut down the recursive R/W lock. */
-    result = H5TS_rw_lock_takedown(&rec_rw_lock);
-    CHECK_I(result, "H5TS_rw_lock_takedown");
+    result = H5TS_rw_lock_destroy(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_destroy");
 
     /* discard the udata if it exists */
     if (udata) {
@@ -1035,8 +1035,8 @@ tts_rec_rw_lock_smoke_check_3(void)
     }
 
     /* 7) Shut down the recursive R/W lock. */
-    result = H5TS_rw_lock_takedown(&rec_rw_lock);
-    CHECK_I(result, "H5TS_rw_lock_takedown");
+    result = H5TS_rw_lock_destroy(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_destroy");
 
     /* discard the udata if it exists */
     if (udata) {
@@ -1285,8 +1285,8 @@ tts_rec_rw_lock_smoke_check_4(void)
     }
 
     /* 7) Shut down the recursive R/W lock. */
-    result = H5TS_rw_lock_takedown(&rec_rw_lock);
-    CHECK_I(result, "H5TS_rw_lock_takedown");
+    result = H5TS_rw_lock_destroy(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_destroy");
 
     /* discard the udata if it exists */
     if (udata) {

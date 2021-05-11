@@ -542,7 +542,7 @@ H5_DLL H5TS_thread_t H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr
 H5_DLL H5TS_rec_entry_count *H5TS_alloc_rec_entry_count(hbool_t write_lock);
 H5_DLL void                  H5TS_free_rec_entry_count(void *target);
 H5_DLL herr_t                H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock, int policy);
-H5_DLL herr_t                H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock);
+H5_DLL herr_t                H5TS_rw_lock_destroy(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t                H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t                H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t                H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock);

@@ -901,7 +901,7 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock, int policy)
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5TS_rw_lock_takedown
+ *    H5TS_rw_lock_destroy
  *
  * RETURNS
  *    0 on success and non-zero on error.
@@ -918,7 +918,7 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock, int policy)
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock)
+H5TS_rw_lock_destroy(H5TS_rw_lock_t *rw_lock)
 {
     herr_t ret_value = SUCCEED;
 
@@ -928,7 +928,7 @@ H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock)
     }
     else {
 
-        /* we are commited to the takedown at this point.  Set magic
+        /* we are commited to the destroy at this point.  Set magic
          * to an invalid value, and call the appropriate pthread
          * destroy routines.  Call them all, even if one fails along
          * the way.
@@ -952,7 +952,7 @@ H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock)
 
     return ret_value;
 
-} /* H5TS_rw_lock_takedown() */
+} /* H5TS_rw_lock_destroy() */
 
 /*--------------------------------------------------------------------------
  * NAME
