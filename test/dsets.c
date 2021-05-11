@@ -9526,8 +9526,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
                         npoints = (hsize_t)snpoints;
 
                         /* Compute the "down" dimension values */
-                        if (H5VM_array_down(ndims, dim, down) < 0)
-                            FAIL_STACK_ERROR
+                        H5VM_array_down(ndims, dim, down);
 
                         /* Create chunked dataset */
                         if ((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl,
@@ -9709,8 +9708,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
                         H5VM_swizzle_coords(hsize_t, swizzled_dim, unlim_dim);
 
                         /* Compute the "down" dimension values */
-                        if (H5VM_array_down(ndims, swizzled_dim, down) < 0)
-                            FAIL_STACK_ERROR
+                        H5VM_array_down(ndims, swizzled_dim, down);
 
                         /* Read elements */
                         for (u = 0; u < npoints; u++) {
