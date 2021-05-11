@@ -836,7 +836,7 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock, int policy)
     if (ret_value == SUCCEED) {
 
         /* Initialize the waiting readers cv */
-        if (pthread_cond_init(&(rw_lock->readers_cv), NULL) != 0) {
+        if (H5TS_cond_init(&(rw_lock->readers_cv)) != 0) {
 
             ret_value = FAIL;
         }
@@ -845,7 +845,7 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock, int policy)
     if (ret_value == SUCCEED) {
 
         /* Initialize the waiting writers cv */
-        if (pthread_cond_init(&(rw_lock->writers_cv), NULL) != 0) {
+        if (H5TS_cond_init(&(rw_lock->writers_cv)) != 0) {
 
             ret_value = FAIL;
         }
@@ -935,9 +935,9 @@ H5TS_rw_lock_takedown(H5TS_rw_lock_t *rw_lock)
          */
         rw_lock->magic = 0;
 
-        if ((pthread_mutex_destroy(&(rw_lock->mutex)) < 0) ||
-            (pthread_cond_destroy(&(rw_lock->readers_cv)) < 0) ||
-            (pthread_cond_destroy(&(rw_lock->writers_cv)) < 0)) {
+        if ((H5TS_mutex_destroy(&(rw_lock->mutex)) < 0) ||
+            (H5TS_cond_destroy(&(rw_lock->readers_cv)) < 0) ||
+            (H5TS_cond_destroy(&(rw_lock->writers_cv)) < 0)) {
             ret_value = FAIL;
         }
 
@@ -1343,14 +1343,14 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock)
 
                     if (rw_lock->waiting_writers_count > 0) {
 
-                        if (pthread_cond_signal(&(rw_lock->writers_cv)) != 0) {
+                        if (H5TS_cond_signal(&(rw_lock->writers_cv)) != 0) {
 
                             ret_value = FAIL;
                         }
                     }
                     else if (rw_lock->waiting_readers_count > 0) {
 
-                        if (pthread_cond_broadcast(&(rw_lock->readers_cv)) != 0) {
+                        if (H5TS_cond_broadcast(&(rw_lock->readers_cv)) != 0) {
 
                             ret_value = FAIL;
                         }

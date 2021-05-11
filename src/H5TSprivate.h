@@ -498,8 +498,14 @@ typedef struct H5TS_rec_entry_count {
 #define H5TS_attr_destroy(attr)                 pthread_attr_destroy(attr)
 #define H5TS_wait_for_thread(thread)            pthread_join(thread, NULL)
 #define H5TS_mutex_init(mutex)                  pthread_mutex_init(mutex, NULL)
+#define H5TS_mutex_destroy(mutex)               pthread_mutex_destroy(mutex)
 #define H5TS_mutex_lock_simple(mutex)           pthread_mutex_lock(mutex)
 #define H5TS_mutex_unlock_simple(mutex)         pthread_mutex_unlock(mutex)
+#define H5TS_cond_init(cond)                    pthread_cond_init(cond, NULL)
+#define H5TS_cond_destroy(cond)                 pthread_cond_destroy(cond)
+#define H5TS_cond_wait(cond)                    pthread_cond_wait(cond)
+#define H5TS_cond_signal(cond)                  pthread_cond_signal(cond)
+#define H5TS_cond_broadcast(cond)               pthread_cond_broadcast(cond)
 
 /* Pthread-only routines */
 H5_DLL uint64_t H5TS_thread_id(void);
