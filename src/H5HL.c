@@ -534,8 +534,6 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL,
     HDassert(buf);
     HDassert(offset_out);
 
-    *offset_out = SIZE_MAX;
-
     /* Mark heap as dirty in cache */
     /* (A bit early in the process, but it's difficult to determine in the
      *  code below where to mark the heap as dirty, especially in error cases,
