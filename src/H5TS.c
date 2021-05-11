@@ -29,8 +29,8 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                        */
-#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5private.h"  /* Generic Functions                        */
+#include "H5Eprivate.h" /* Error handling                           */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -73,7 +73,7 @@ H5TS_key_t H5TS_errstk_key_g; /* Error stack */
 #ifdef H5_HAVE_CODESTACK
 H5TS_key_t H5TS_funcstk_key_g; /* Function stack */
 #endif
-H5TS_key_t H5TS_apictx_key_g;  /* API context */
+H5TS_key_t H5TS_apictx_key_g; /* API context */
 
 /*******************/
 /* Local Variables */
