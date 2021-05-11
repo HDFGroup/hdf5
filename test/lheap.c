@@ -102,7 +102,7 @@ main(void)
         if (j > 4)
             buf[j] = '\0';
 
-        if (UFAIL == (obj[i] = H5HL_insert(f, heap, HDstrlen(buf) + 1, buf))) {
+        if (H5HL_insert(f, heap, HDstrlen(buf) + 1, buf, &obj[i]) < 0) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
