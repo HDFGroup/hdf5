@@ -488,7 +488,7 @@ typedef struct H5TS_rec_entry_count {
 /* Scope Definitions */
 #define H5TS_SCOPE_SYSTEM                       PTHREAD_SCOPE_SYSTEM
 #define H5TS_SCOPE_PROCESS                      PTHREAD_SCOPE_PROCESS
-#define H5TS_CALL_CONV                          /* unused - Windows only */
+#define H5TS_CALL_CONV                          /* Unused - Windows only */
 
 /* Portability function aliases */
 #define H5TS_get_thread_local_value(key)        pthread_getspecific(key)
