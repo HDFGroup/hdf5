@@ -1318,9 +1318,6 @@ H5_DLL herr_t H5Sset_extent_none(hid_t space_id);
  * \details H5Sset_extent_simple() sets or resets the size of an existing
  *          dataspace.
  *
- *          \p rank is the dimensionality, or number of dimensions, of the
- *          dataspace.
- *
  *          \p dims is an array of size \p rank which contains the new size
  *          of each dimension in the dataspace. \p max is an array of size
  *          \p rank which contains the maximum size of each dimension in
@@ -1328,10 +1325,6 @@ H5_DLL herr_t H5Sset_extent_none(hid_t space_id);
  *
  *          Any previous extent is removed from the dataspace, the dataspace
  *          type is set to #H5S_SIMPLE, and the extent is set as specified.
- *
- *          Note that a dataset must be chunked if \p dims does not equal
- *          \p max.
- *
  *
  * \version 1.4.0 Fortran subroutine was introduced.
  * \since 1.0.0

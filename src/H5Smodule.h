@@ -31,7 +31,7 @@
 
 /**\defgroup H5S H5S
  *
- * Use the functions in this module to manage HDF5 dataspaces and selections.
+ * Use the functions in this module to manage HDF5 dataspaces \Emph{and} selections.
  *
  * HDF5 dataspaces describe the \Emph{shape} of datasets in memory or in HDF5
  * files. Dataspaces can be empty (#H5S_NULL), a singleton (#H5S_SCALAR), or
@@ -45,19 +45,18 @@
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">
  *   <td>
- *   Create a dataspace and checkerboard selection
+ *   \snippet H5S_examples.c create
  *   </td>
  *   <td>
- *   Retrieve information about the dataspace and selection
+ *   \snippet H5S_examples.c read
  *   </td>
  * <tr><th>Update</th><th>Delete</th></tr>
  * <tr valign="top">
  *   <td>
- *   Update the selection
+ *   \snippet H5S_examples.c update
  *   </td>
  *   <td>
- *   H5Sselect_none()
- *   H5Sset_extent_none()
+ *   \snippet H5S_examples.c delete
  *   </td>
  * </tr>
  * </table>

@@ -17,8 +17,8 @@ A \Emph{typical} RM entry is a minimal RM entry that in addition has elements
 
 A \Bold{great} RM entry is a typical RM entry plus everything else.
 
-The current RM is a mixed bag. Hold your nose and apply the
-<a href="https://www.oreilly.com/library/view/97-things-every/9780596809515/ch08.html">Scout Rule</a>!
+The current RM is a mixed bag. Take what's there with a pinch of salt and apply
+the <a href="https://www.oreilly.com/library/view/97-things-every/9780596809515/ch08.html">Scout Rule</a>!
 
 \par RM entry elements
 
@@ -51,12 +51,12 @@ The current RM is a mixed bag. Hold your nose and apply the
 5. Invariants
    - A set of invariants.
    \verbatim
-   * \invariant What will remain true while the function is executing.
+   * \invariant The mouse pointer will always be visible.
    \endverbatim
 6. Postconditions
-   - What will be true upon successful function return
+   - What will be true when the function returns.
    \verbatim
-   * \post Describe postconditions for an entity. Can be repreated.
+   * \post On error, the output parameters will be unmodified.
    \endverbatim
 7. Deprecation note
    - If a function was deprecated, list the version in which the function was

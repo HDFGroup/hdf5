@@ -1,5 +1,10 @@
 /** \page RM Reference Manual
 
+\par You can help to improve this Reference Manual!
+     We treat documentation like code: Fork the
+     <a href="https://github.com/HDFGroup/hdf5">HDF5 repo</a>, make changes, and create a
+     <a href="https://github.com/HDFGroup/hdf5/pulls">pull request</a>!\n
+     See the \ref RMT for general guidance.
 
 <table>
 <tr><th>Modules</th><th>See also</th></tr>
@@ -46,12 +51,6 @@ The functions provided by the HDF5 C-API are grouped into the following
 </td>
 </tr>
 </table>
-
-\par You can help to improve the Reference Manual!
-     See the \ref RMT for general guidance.\n
-     We treat documentation like code: Fork the
-     <a href="https://github.com/HDFGroup/hdf5">HDF5 repo</a>, make changes, and create a
-     <a href="https://github.com/HDFGroup/hdf5/pulls">pull request</a>!
 
 \cpp_c_api_note
 

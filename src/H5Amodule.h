@@ -41,8 +41,8 @@
  * contains user metadata about the object that it is attached to.
  *
  * Attributes look similar to HDF5 datasets in that they have a datatype and
- * dataspace. However, they do not support partial I/O operations and cannot be
- * compressed or extended.
+ * dataspace. Unlike datasets, the HDF5 library does not support partial I/O
+ * operations for attributes and they cannot be compressed or extended.
  *
  * <table>
  * <tr><th>Create</th><th>Read</th></tr>
