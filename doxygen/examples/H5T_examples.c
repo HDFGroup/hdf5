@@ -20,7 +20,7 @@ main(void)
             goto fail_file;
         }
         // create a compound datatype with room for real and imaginary parts
-        if ((dtype = H5Tcreate(H5T_COMPOUND, 2*sizeof(double))) == H5I_INVALID_HID) {
+        if ((dtype = H5Tcreate(H5T_COMPOUND, 2 * sizeof(double))) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_dtype;
         }
@@ -57,14 +57,13 @@ fail_file:;
             goto fail_dtype;
         }
 
-        switch(H5Tget_class(dtype))
-        { // this time we are only interested in compounds
-        case H5T_COMPOUND:
-            printf("Record size: %lu bytes\n", H5Tget_size(dtype));
-            printf("Record has %d field(s).\n", H5Tget_nmembers(dtype));
-            break;
-        default:
-            break;
+        switch (H5Tget_class(dtype)) { // this time we are only interested in compounds
+            case H5T_COMPOUND:
+                printf("Record size: %lu bytes\n", H5Tget_size(dtype));
+                printf("Record has %d field(s).\n", H5Tget_nmembers(dtype));
+                break;
+            default:
+                break;
         }
 
         H5Tclose(dtype);
