@@ -257,6 +257,7 @@
 ./doxygen/examples/H5Pget_metadata_read_attempts.3.c
 ./doxygen/examples/H5Pget_object_flush_cb.c
 ./doxygen/examples/H5S_examples.c
+./doxygen/examples/H5T_examples.c
 ./doxygen/examples/ImageSpec.html
 ./doxygen/examples/PaletteExample1.gif
 ./doxygen/examples/Palettes.fm.anc.gif
