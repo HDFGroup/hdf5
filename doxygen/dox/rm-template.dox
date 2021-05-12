@@ -24,9 +24,9 @@ the <a href="https://www.oreilly.com/library/view/97-things-every/9780596809515/
 
 1. Module indication
    - Indicate the HDF5 module in which the function will appear.
-      \verbatim
-      * \ingroup H5XYZ
-      \endverbatim
+     \verbatim
+     * \ingroup H5XYZ
+     \endverbatim
 2. Synopsis
    - A phrase or sentence that summarizes the function's purpose
      \verbatim
@@ -50,14 +50,14 @@ the <a href="https://www.oreilly.com/library/view/97-things-every/9780596809515/
      \endverbatim
 5. Invariants
    - A set of invariants.
-   \verbatim
-   * \invariant The mouse pointer will always be visible.
-   \endverbatim
+     \verbatim
+     * \invariant The mouse pointer will always be visible.
+     \endverbatim
 6. Postconditions
    - What will be true when the function returns.
-   \verbatim
-   * \post On error, the output parameters will be unmodified.
-   \endverbatim
+     \verbatim
+     * \post On error, the output parameters will be unmodified.
+     \endverbatim
 7. Deprecation note
    - If a function was deprecated, list the version in which the function was
      deprecated (below), why it was deprecated, and which function(s) succeed it.
