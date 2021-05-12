@@ -23,65 +23,65 @@
 #include "H5Spkg.h"      /* Dataspaces				*/
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void * H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
+static herr_t H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg);
+static void *H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static void * H5O_attr_copy(const void *_mesg, void *_dest);
-static size_t H5O_attr_size(const H5F_t *f, const void *_mesg);
+static void *H5O__attr_copy(const void *_mesg, void *_dest);
+static size_t H5O__attr_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O__attr_free(void *mesg);
-static herr_t H5O_attr_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
-                                     const H5O_copy_t *cpy_info, void *udata);
+static herr_t H5O__attr_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+                                      const H5O_copy_t *cpy_info, void *udata);
 static void * H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
                                   H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
                                        void *mesg_dst, H5O_copy_t *cpy_info);
-static herr_t H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx);
-static herr_t H5O_attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx);
+static herr_t H5O__attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx);
+static herr_t H5O__attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx);
 static herr_t H5O__attr_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
 /* Set up & include shared message "interface" info */
 #define H5O_SHARED_TYPE                H5O_MSG_ATTR
-#define H5O_SHARED_DECODE              H5O_attr_shared_decode
-#define H5O_SHARED_DECODE_REAL         H5O_attr_decode
-#define H5O_SHARED_ENCODE              H5O_attr_shared_encode
-#define H5O_SHARED_ENCODE_REAL         H5O_attr_encode
-#define H5O_SHARED_SIZE                H5O_attr_shared_size
-#define H5O_SHARED_SIZE_REAL           H5O_attr_size
+#define H5O_SHARED_DECODE              H5O__attr_shared_decode
+#define H5O_SHARED_DECODE_REAL         H5O__attr_decode
+#define H5O_SHARED_ENCODE              H5O__attr_shared_encode
+#define H5O_SHARED_ENCODE_REAL         H5O__attr_encode
+#define H5O_SHARED_SIZE                H5O__attr_shared_size
+#define H5O_SHARED_SIZE_REAL           H5O__attr_size
 #define H5O_SHARED_DELETE              H5O__attr_shared_delete
 #define H5O_SHARED_DELETE_REAL         H5O__attr_delete
 #define H5O_SHARED_LINK                H5O__attr_shared_link
 #define H5O_SHARED_LINK_REAL           H5O__attr_link
 #define H5O_SHARED_COPY_FILE           H5O__attr_shared_copy_file
 #define H5O_SHARED_COPY_FILE_REAL      H5O__attr_copy_file
-#define H5O_SHARED_POST_COPY_FILE      H5O_attr_shared_post_copy_file
+#define H5O_SHARED_POST_COPY_FILE      H5O__attr_shared_post_copy_file
 #define H5O_SHARED_POST_COPY_FILE_REAL H5O__attr_post_copy_file
 #undef H5O_SHARED_POST_COPY_FILE_UPD
-#define H5O_SHARED_DEBUG      H5O_attr_shared_debug
+#define H5O_SHARED_DEBUG      H5O__attr_shared_debug
 #define H5O_SHARED_DEBUG_REAL H5O__attr_debug
 #include "H5Oshared.h" /* Shared Object Header Message Callbacks */
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
-    H5O_ATTR_ID,                    /* message id number                */
-    "attribute",                    /* message name for debugging       */
-    sizeof(H5A_t),                  /* native message size              */
-    H5O_SHARE_IS_SHARABLE,          /* messages are sharable?           */
-    H5O_attr_shared_decode,         /* decode message                   */
-    H5O_attr_shared_encode,         /* encode message                   */
-    H5O_attr_copy,                  /* copy the native value            */
-    H5O_attr_shared_size,           /* size of raw message              */
-    H5O__attr_reset,                /* reset method                     */
-    H5O__attr_free,                 /* free method                      */
-    H5O__attr_shared_delete,        /* file delete method               */
-    H5O__attr_shared_link,          /* link method                      */
-    NULL,                           /* set share method                 */
-    NULL,                           /* can share method                 */
-    H5O_attr_pre_copy_file,         /* pre copy native value to file    */
-    H5O__attr_shared_copy_file,     /* copy native value to file        */
-    H5O_attr_shared_post_copy_file, /* post copy native value to file   */
-    H5O_attr_get_crt_index,         /* get creation index               */
-    H5O_attr_set_crt_index,         /* set creation index               */
-    H5O_attr_shared_debug           /* debug the message                */
+    H5O_ATTR_ID,                     /* message id number                */
+    "attribute",                     /* message name for debugging       */
+    sizeof(H5A_t),                   /* native message size              */
+    H5O_SHARE_IS_SHARABLE,           /* messages are sharable?           */
+    H5O__attr_shared_decode,         /* decode message                   */
+    H5O__attr_shared_encode,         /* encode message                   */
+    H5O__attr_copy,                  /* copy the native value            */
+    H5O__attr_shared_size,           /* size of raw message              */
+    H5O__attr_reset,                 /* reset method                     */
+    H5O__attr_free,                  /* free method                      */
+    H5O__attr_shared_delete,         /* file delete method               */
+    H5O__attr_shared_link,           /* link method                      */
+    NULL,                            /* set share method                 */
+    NULL,                            /* can share method                 */
+    H5O__attr_pre_copy_file,         /* pre copy native value to file    */
+    H5O__attr_shared_copy_file,      /* copy native value to file        */
+    H5O__attr_shared_post_copy_file, /* post copy native value to file   */
+    H5O__attr_get_crt_index,         /* get creation index               */
+    H5O__attr_set_crt_index,         /* set creation index               */
+    H5O__attr_shared_debug           /* debug the message                */
 }};
 
 /* Flags for attribute flag encoding */
@@ -97,14 +97,17 @@ H5FL_EXTERN(H5S_extent_t);
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_attr_decode
+    H5O__attr_decode
  PURPOSE
     Decode a attribute message and return a pointer to a memory struct
         with the decoded information
  USAGE
-    void *H5O_attr_decode(f, mesg_flags, p)
-        H5F_t *f;               IN: pointer to the HDF5 file struct
-        unsigned mesg_flags;    IN: Message flags to influence decoding
+    void *H5O__attr_decode(f, mesg_flags, p)
+        H5F_t    *f;            IN: pointer to the HDF5 file struct
+        H5O_t    *open_oh;      IN: pointer to the object header
+        unsigned mesg_flags;    IN: message flags to influence decoding
+        unsigned *ioflags;      IN/OUT: flags for decoding
+        size_t   p_size;        IN: size of buffer *p
         const uint8_t *p;       IN: the raw information buffer
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
@@ -114,8 +117,8 @@ H5FL_EXTERN(H5S_extent_t);
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, unsigned *ioflags,
-                size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, unsigned *ioflags,
+                 size_t p_size, const uint8_t *p)
 {
     H5A_t *       attr = NULL;
     H5S_extent_t *extent;           /*extent dimensionality information  */
@@ -126,7 +129,7 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, un
     unsigned      flags     = 0;    /* Attribute flags */
     H5A_t *       ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -264,15 +267,15 @@ done:
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_attr_decode() */
+} /* end H5O__attr_decode() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_attr_encode
+    H5O__attr_encode
  PURPOSE
     Encode a simple attribute message
  USAGE
-    herr_t H5O_attr_encode(f, p, mesg)
+    herr_t H5O__attr_encode(f, p, mesg)
         H5F_t *f;         IN: pointer to the HDF5 file struct
         const uint8 *p;         IN: the raw information buffer
         const void *mesg;       IN: Pointer to the simple datatype struct
@@ -283,7 +286,7 @@ done:
     message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
+H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 {
     const H5A_t *attr = (const H5A_t *)mesg;
     size_t       name_len;        /* Attribute name length */
@@ -292,7 +295,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     unsigned     flags     = 0;   /* Attribute flags */
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -372,15 +375,15 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5O_attr_encode() */
+} /* end H5O__attr_encode() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_attr_copy
+    H5O__attr_copy
  PURPOSE
     Copies a message from MESG to DEST, allocating DEST if necessary.
  USAGE
-    void *H5O_attr_copy(mesg, dest)
+    void *H5O__attr_copy(mesg, dest)
         const void *mesg;       IN: Pointer to the source attribute struct
         const void *dest;       IN: Pointer to the destination attribute struct
  RETURNS
@@ -390,11 +393,11 @@ done:
     allocating the destination structure if necessary.
 --------------------------------------------------------------------------*/
 static void *
-H5O_attr_copy(const void *_src, void *_dst)
+H5O__attr_copy(const void *_src, void *_dst)
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(_src);
@@ -405,15 +408,15 @@ H5O_attr_copy(const void *_src, void *_dst)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_attr_copy() */
+} /* end H5O__attr_copy() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_attr_size
+    H5O__attr_size
  PURPOSE
     Return the raw message size in bytes
  USAGE
-    size_t H5O_attr_size(f, mesg)
+    size_t H5O__attr_size(f, mesg)
         H5F_t *f;         IN: pointer to the HDF5 file struct
         const void *mesg;     IN: Pointer to the source attribute struct
  RETURNS
@@ -424,13 +427,13 @@ done:
     portion of the message).  It doesn't take into account alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
+H5O__attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
 {
     const H5A_t *attr = (const H5A_t *)_mesg;
     size_t       name_len;
     size_t       ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(attr);
 
@@ -465,7 +468,7 @@ H5O_attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
         HDassert(0 && "Bad attribute version");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_attr_size() */
+} /* end H5O__attr_size() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__attr_reset
@@ -594,7 +597,7 @@ done:
 } /* end H5O__attr_link() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_attr_pre_copy_file
+ * Function:    H5O__attr_pre_copy_file
  *
  * Purpose:     Perform any necessary actions before copying message between
  *              files for attribute messages.
@@ -607,13 +610,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src, hbool_t *deleted,
-                       const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
+H5O__attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src, hbool_t *deleted,
+                        const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     const H5A_t *attr_src  = (const H5A_t *)native_src; /* Source attribute */
     herr_t       ret_value = SUCCEED;                   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(deleted);
@@ -634,7 +637,7 @@ H5O_attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src, h
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_attr_pre_copy_file() */
+} /* end H5O__attr_pre_copy_file() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__attr_copy_file
@@ -710,7 +713,7 @@ done:
 } /* H5O__attr_post_copy_file() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_attr_get_crt_index
+ * Function:    H5O__attr_get_crt_index
  *
  * Purpose:     Get creation index from the message
  *
@@ -722,11 +725,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
+H5O__attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
 {
     const H5A_t *attr = (const H5A_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(attr);
     HDassert(crt_idx);
@@ -735,10 +738,10 @@ H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
     *crt_idx = attr->shared->crt_idx;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_attr_get_crt_index() */
+} /* end H5O__attr_get_crt_index() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_attr_set_crt_index
+ * Function:    H5O__attr_set_crt_index
  *
  * Purpose:     Set creation index from the message
  *
@@ -750,11 +753,11 @@ H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx)
+H5O__attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx)
 {
     H5A_t *attr = (H5A_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(attr);
 
@@ -762,7 +765,7 @@ H5O_attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx)
     attr->shared->crt_idx = crt_idx;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_attr_set_crt_index() */
+} /* end H5O__attr_set_crt_index() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -833,8 +836,9 @@ H5O__attr_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidt
             break;
     } /* end switch */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Character Set of Name:", s);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth, "Object opened:", mesg->obj_opened);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object:", mesg->oloc.addr);
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Object opened:", mesg->obj_opened ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Object:", mesg->oloc.addr);
 
     /* Check for attribute creation order index on the attribute */
     if (mesg->shared->crt_idx != H5O_MAX_CRT_ORDER_IDX)

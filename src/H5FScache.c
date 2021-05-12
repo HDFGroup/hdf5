@@ -15,7 +15,7 @@
  *
  * Created:     H5FScache.c
  *              May  2 2006
- *              Quincey Koziol <koziol@hdfgroup.org>
+ *              Quincey Koziol
  *
  * Purpose:     Implement file free space metadata cache methods.
  *
@@ -151,7 +151,6 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -221,7 +220,6 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		August 18 2013
  *
  *-------------------------------------------------------------------------
@@ -252,7 +250,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     fspace->addr = udata->addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -335,7 +333,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -785,7 +782,6 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@lbl.gov
  *              January 3, 2017
  *
  *-------------------------------------------------------------------------
@@ -848,7 +844,6 @@ done:
  *              Failure:        FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  2 2006
  *
  *-------------------------------------------------------------------------
@@ -995,7 +990,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     H5_CHECKED_ASSIGN(old_sect_size, size_t, fspace->sect_size, hsize_t);
 
     /* Magic number */
-    if (HDmemcmp(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1119,7 +1114,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  *
  * Created:	H5Pdeprec.c
  *		October 11 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5P interface.  These
  *              functions are here for compatibility purposes and may be
@@ -459,7 +459,7 @@ H5Pget_version(hid_t plist_id, unsigned *super /*out*/, unsigned *freelist /*out
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get values */
     if (super)
@@ -606,7 +606,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold)
+H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy /*out*/, hsize_t *threshold /*out*/)
 {
     H5F_fspace_strategy_t new_strategy;        /* File space strategy type */
     hbool_t               new_persist;         /* Persisting free-space or not */
@@ -614,7 +614,7 @@ H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *thre
     herr_t                ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Ft*h", plist_id, strategy, threshold);
+    H5TRACE3("e", "ixx", plist_id, strategy, threshold);
 
     /* Get current file space info */
     if (H5Pget_file_space_strategy(plist_id, &new_strategy, &new_persist, &new_threshold) < 0)

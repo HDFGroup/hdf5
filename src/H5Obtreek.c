@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+/* Programmer:  Quincey Koziol
  *              Thursday, March  1, 2007
  *
  * Purpose:	A message holding non-default v1 B-tree 'K' value
@@ -25,11 +25,11 @@
 #include "H5Opkg.h"      /* Object headers			*/
 #include "H5MMprivate.h" /* Memory management			*/
 
-static void * H5O_btreek_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
-                                size_t p_size, const uint8_t *p);
-static herr_t H5O_btreek_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_btreek_copy(const void *_mesg, void *_dest);
-static size_t H5O_btreek_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static void * H5O__btreek_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
+                                 size_t p_size, const uint8_t *p);
+static herr_t H5O__btreek_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void * H5O__btreek_copy(const void *_mesg, void *_dest);
+static size_t H5O__btreek_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__btreek_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
 /* This message derives from H5O message class */
@@ -37,11 +37,11 @@ const H5O_msg_class_t H5O_MSG_BTREEK[1] = {{
     H5O_BTREEK_ID,          /*message id number                     */
     "v1 B-tree 'K' values", /*message name for debugging            */
     sizeof(H5O_btreek_t),   /*native message size                   */
-    0,                      /* messages are sharable?       */
-    H5O_btreek_decode,      /*decode message                        */
-    H5O_btreek_encode,      /*encode message                        */
-    H5O_btreek_copy,        /*copy the native value                 */
-    H5O_btreek_size,        /*raw message size			*/
+    0,                      /* messages are sharable?               */
+    H5O__btreek_decode,     /*decode message                        */
+    H5O__btreek_encode,     /*encode message                        */
+    H5O__btreek_copy,       /*copy the native value                 */
+    H5O__btreek_size,       /*raw message size			*/
     NULL,                   /*free internal memory			*/
     NULL,                   /* free method				*/
     NULL,                   /* file delete method			*/
@@ -60,7 +60,7 @@ const H5O_msg_class_t H5O_MSG_BTREEK[1] = {{
 #define H5O_BTREEK_VERSION 0
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_btreek_decode
+ * Function:	H5O__btreek_decode
  *
  * Purpose:	Decode a shared message table message and return a pointer
  *              to a newly allocated H5O_btreek_t struct.
@@ -74,13 +74,13 @@ const H5O_msg_class_t H5O_MSG_BTREEK[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_btreek_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                  unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__btreek_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
+                   unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_btreek_t *mesg;             /* Native message */
     void *        ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -104,10 +104,10 @@ H5O_btreek_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_btreek_decode() */
+} /* end H5O__btreek_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_btreek_encode
+ * Function:	H5O__btreek_encode
  *
  * Purpose:	Encode a v1 B-tree 'K' value message.
  *
@@ -119,12 +119,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_btreek_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                  const void *_mesg)
+H5O__btreek_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
+                   const void *_mesg)
 {
     const H5O_btreek_t *mesg = (const H5O_btreek_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -138,10 +138,10 @@ H5O_btreek_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
     UINT16ENCODE(p, mesg->sym_leaf_k);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_btreek_encode() */
+} /* end H5O__btreek_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_btreek_copy
+ * Function:	H5O__btreek_copy
  *
  * Purpose:	Copies a message from _MESG to _DEST, allocating _DEST if
  *		necessary.
@@ -155,13 +155,13 @@ H5O_btreek_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_btreek_copy(const void *_mesg, void *_dest)
+H5O__btreek_copy(const void *_mesg, void *_dest)
 {
     const H5O_btreek_t *mesg      = (const H5O_btreek_t *)_mesg;
     H5O_btreek_t *      dest      = (H5O_btreek_t *)_dest;
     void *              ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(mesg);
@@ -178,10 +178,10 @@ H5O_btreek_copy(const void *_mesg, void *_dest)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_btreek_copy() */
+} /* end H5O__btreek_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_btreek_size
+ * Function:	H5O__btreek_size
  *
  * Purpose:	Returns the size of the raw message in bytes not counting the
  *		message type or size fields, but only the data fields.
@@ -195,12 +195,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_btreek_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
-                const void H5_ATTR_UNUSED *_mesg)
+H5O__btreek_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
+                 const void H5_ATTR_UNUSED *_mesg)
 {
-    size_t ret_value;
+    size_t ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -211,7 +211,7 @@ H5O_btreek_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
                 2;  /* Symbol table node leaf 'K' value */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_btreek_size() */
+} /* end H5O__btreek_size() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5O__btreek_debug

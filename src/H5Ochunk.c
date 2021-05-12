@@ -415,9 +415,9 @@ H5O__chunk_dest(H5O_chunk_proxy_t *chk_proxy)
     if (chk_proxy->oh && H5O__dec_rc(chk_proxy->oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "can't decrement reference count on object header")
 
+done:
     /* Release the chunk proxy object */
     chk_proxy = H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__chunk_dest() */

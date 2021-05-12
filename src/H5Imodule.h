@@ -26,7 +26,7 @@
  */
 #define H5I_MODULE
 #define H5_MY_PKG      H5I
-#define H5_MY_PKG_ERR  H5E_ATOM
+#define H5_MY_PKG_ERR  H5E_ID
 #define H5_MY_PKG_INIT NO
 
 /**\defgroup H5I H5I

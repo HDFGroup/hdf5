@@ -148,6 +148,7 @@ static herr_t  H5FD__core_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__core_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__core_unlock(H5FD_t *_file);
+static herr_t  H5FD__core_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_core_g = {
     "core",                   /* name                 */
@@ -181,6 +182,7 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD__core_truncate,      /* truncate             */
     H5FD__core_lock,          /* lock                 */
     H5FD__core_unlock,        /* unlock               */
+    H5FD__core_delete,        /* del                  */
     NULL,                     /* dedup                */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
@@ -523,7 +525,7 @@ H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID")
     if (H5FD_CORE != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
     if (NULL == (old_fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
@@ -558,18 +560,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled, size_t *page_size)
+H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled /*out*/, size_t *page_size /*out*/)
 {
     H5P_genplist_t *        plist;               /* Property list pointer */
     const H5FD_core_fapl_t *fa;                  /* Core VFD info */
     herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*b*z", plist_id, is_enabled, page_size);
+    H5TRACE3("e", "ixx", plist_id, is_enabled, page_size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID")
     if (H5FD_CORE != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
     if (NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
@@ -1131,23 +1133,24 @@ H5FD__core_query(const H5FD_t *_file, unsigned long *flags /* out */)
 
     FUNC_ENTER_STATIC_NOERR
 
+    /* clang-format off */
     /* Set the VFL feature flags that this driver supports */
-    if (flags) {
+    if(flags) {
         *flags = 0;
-        *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
-        *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
-        *flags |= H5FD_FEAT_DATA_SIEVE; /* OK to perform data sieving for faster raw data reads & writes    */
-        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations          */
-        *flags |= H5FD_FEAT_ALLOW_FILE_IMAGE;    /* OK to use file image feature with this VFD             */
-        *flags |= H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS; /* OK to use file image callbacks with this VFD */
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA;             /* OK to aggregate metadata allocations                             */
+        *flags |= H5FD_FEAT_ACCUMULATE_METADATA;            /* OK to accumulate metadata for faster writes                      */
+        *flags |= H5FD_FEAT_DATA_SIEVE;                     /* OK to perform data sieving for faster raw data reads & writes    */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;            /* OK to aggregate "small" raw data allocations                     */
+        *flags |= H5FD_FEAT_ALLOW_FILE_IMAGE;               /* OK to use file image feature with this VFD                       */
+        *flags |= H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS;   /* OK to use file image callbacks with this VFD                     */
 
         /* These feature flags are only applicable if the backing store is enabled */
-        if (file && file->fd >= 0 && file->backing_store) {
-            *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE; /* get_handle callback returns a POSIX file descriptor */
-            *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the
-                                                           default VFD      */
+        if(file && file->fd >= 0 && file->backing_store) {
+            *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE;        /* get_handle callback returns a POSIX file descriptor              */
+            *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE;     /* VFD creates a file which can be opened with the default VFD      */
         }
     } /* end if */
+    /* clang-format on */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__core_query() */
@@ -1525,7 +1528,7 @@ done:
  *              If we are not closing, we realloc the buffer to size equal
  *              to the smallest multiple of the allocation increment that
  *              equals or exceeds the eoa and set the eof accordingly.
- *              Note that we no longer truncate	the backing store to the
+ *              Note that we no longer truncate    the backing store to the
  *              new eof if applicable.
  *                                                                  -- JRM
  *
@@ -1708,3 +1711,36 @@ H5FD__core_unlock(H5FD_t *_file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__core_unlock() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__core_delete
+ *
+ * Purpose:     Delete a file
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__core_delete(const char *filename, hid_t fapl_id)
+{
+    const H5FD_core_fapl_t *fa = NULL;
+    H5P_genplist_t *        plist;               /* Property list pointer */
+    herr_t                  ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    HDassert(filename);
+
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    if (NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
+
+    if (fa->backing_store)
+        if (HDremove(filename) < 0)
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__core_delete() */

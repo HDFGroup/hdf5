@@ -926,7 +926,7 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
 
     /* Locate the type conversion function and dataspace conversion
      * functions, and set up the element numbering information. If a data
-     * type conversion is necessary then register datatype atoms. Data type
+     * type conversion is necessary then register datatype IDs. Data type
      * conversion is necessary if the user has set the `need_bkg' to a high
      * enough value in xfer_parms since turning off datatype conversion also
      * turns off background preservation.

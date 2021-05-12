@@ -935,7 +935,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                 H5_FAILED();
                 HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                 HDfprintf(stdout,
-                          "    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
+                          "    Elmt={%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE
+                          "}, read: %u, "
                           "Fill value: %u\n",
                           hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4], val_rd,
                           fillval);
@@ -952,7 +953,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                 H5_FAILED();
                 HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                 HDfprintf(stdout,
-                          "    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %f, %d, %f, %c"
+                          "    Elmt={%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE
+                          "}, read: %f, %d, %f, %c"
                           "Fill value: %f, %d, %f, %c\n",
                           hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4],
                           (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z, (double)fill_c.a, fill_c.x, fill_c.y,
@@ -994,7 +996,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                     H5_FAILED();
                     HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                     HDfprintf(stdout,
-                              "    Elmt={%Hu, %Hu, %Hu, %Hu, %Hu}, read: %u, "
+                              "    Elmt={%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+                              ", %" PRIuHSIZE "}, read: %u, "
                               "Fill value: %u\n",
                               hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4], buf[u],
                               fillval);
@@ -1020,7 +1023,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                     H5_FAILED();
                     HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                     HDfprintf(stdout,
-                              "    Elmt={%Hu, %Hu, %Hu, %Hu, %Hu}, read: %f, %d, %f, %c"
+                              "    Elmt={%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+                              ", %" PRIuHSIZE "}, read: %f, %d, %f, %c"
                               "Fill value: %f, %d, %f, %c\n",
                               hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4],
                               (double)buf_c[u].a, buf_c[u].x, buf_c[u].y, buf_c[u].z, (double)fill_c.a,
@@ -1445,7 +1449,8 @@ test_extend_verify_integer(unsigned lineno, const hsize_t *offset, const void *_
     if (*test_val != *compare_val) {
         HDfprintf(stdout, "%u: Value read was not expected.\n", lineno);
         HDfprintf(stdout,
-                  "    Elmt = {%Hu, %Hu, %Hu, %Hu, %Hu}, read: %d, "
+                  "    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+                  "}, read: %d, "
                   "expected: %d\n",
                   offset[0], offset[1], offset[2], offset[3], offset[4], *test_val, *compare_val);
         goto error;
@@ -1536,7 +1541,8 @@ test_extend_verify_cmpd_vl(unsigned lineno, const hsize_t *offset, const void *_
         HDstrcmp(test_val->b, compare_val->b) != 0 || (test_val->y != compare_val->y)) {
         HDfprintf(stdout, "%u: Value read was not expected.\n", lineno);
         HDfprintf(stdout,
-                  "    Elmt = {%Hu, %Hu, %Hu, %Hu, %Hu}, read: {%d, '%s', '%s', %d} "
+                  "    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+                  "}, read: {%d, '%s', '%s', %d} "
                   "expected: {%d, '%s', '%s', %d}\n",
                   offset[0], offset[1], offset[2], offset[3], offset[4], test_val->x, test_val->a,
                   test_val->b, test_val->y, compare_val->x, compare_val->a, compare_val->b, compare_val->y);

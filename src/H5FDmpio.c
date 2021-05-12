@@ -86,6 +86,7 @@ static herr_t   H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, 
                                  const void *buf);
 static herr_t   H5FD__mpio_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t   H5FD__mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t   H5FD__mpio_delete(const char *filename, hid_t fapl_id);
 static int      H5FD__mpio_mpi_rank(const H5FD_t *_file);
 static int      H5FD__mpio_mpi_size(const H5FD_t *_file);
 static MPI_Comm H5FD__mpio_communicator(const H5FD_t *_file);
@@ -94,43 +95,44 @@ static MPI_Comm H5FD__mpio_communicator(const H5FD_t *_file);
 static const H5FD_class_mpi_t H5FD_mpio_g = {
     {
         /* Start of superclass information */
-        "mpio",                /*name			*/
-        HADDR_MAX,             /*maxaddr		*/
-        H5F_CLOSE_SEMI,        /*fc_degree		*/
-        H5FD__mpio_term,       /*terminate             */
-        NULL,                  /*sb_size		*/
-        NULL,                  /*sb_encode		*/
-        NULL,                  /*sb_decode		*/
-        0,                     /*fapl_size		*/
-        NULL,                  /*fapl_get		*/
-        NULL,                  /*fapl_copy		*/
-        NULL,                  /*fapl_free		*/
-        0,                     /*dxpl_size		*/
-        NULL,                  /*dxpl_copy		*/
-        NULL,                  /*dxpl_free		*/
-        H5FD__mpio_open,       /*open			*/
-        H5FD__mpio_close,      /*close			*/
-        NULL,                  /*cmp			*/
-        H5FD__mpio_query,      /*query			*/
-        NULL,                  /*get_type_map		*/
-        NULL,                  /*alloc			*/
-        NULL,                  /*free			*/
-        H5FD__mpio_get_eoa,    /*get_eoa		*/
-        H5FD__mpio_set_eoa,    /*set_eoa		*/
-        H5FD__mpio_get_eof,    /*get_eof		*/
-        H5FD__mpio_get_handle, /*get_handle            */
-        H5FD__mpio_read,       /*read			*/
-        H5FD__mpio_write,      /*write			*/
-        H5FD__mpio_flush,      /*flush			*/
-        H5FD__mpio_truncate,   /*truncate		*/
-        NULL,                  /*lock                  */
-        NULL,                  /*unlock                */
-        NULL,                  /* dedup                */
-        H5FD_FLMAP_DICHOTOMY   /*fl_map                */
+        "mpio",                /* name                  */
+        HADDR_MAX,             /* maxaddr               */
+        H5F_CLOSE_SEMI,        /* fc_degree             */
+        H5FD__mpio_term,       /* terminate             */
+        NULL,                  /* sb_size               */
+        NULL,                  /* sb_encode             */
+        NULL,                  /* sb_decode             */
+        0,                     /* fapl_size             */
+        NULL,                  /* fapl_get              */
+        NULL,                  /* fapl_copy             */
+        NULL,                  /* fapl_free             */
+        0,                     /* dxpl_size             */
+        NULL,                  /* dxpl_copy             */
+        NULL,                  /* dxpl_free             */
+        H5FD__mpio_open,       /* open                  */
+        H5FD__mpio_close,      /* close                 */
+        NULL,                  /* cmp                   */
+        H5FD__mpio_query,      /* query                 */
+        NULL,                  /* get_type_map          */
+        NULL,                  /* alloc                 */
+        NULL,                  /* free                  */
+        H5FD__mpio_get_eoa,    /* get_eoa               */
+        H5FD__mpio_set_eoa,    /* set_eoa               */
+        H5FD__mpio_get_eof,    /* get_eof               */
+        H5FD__mpio_get_handle, /* get_handle            */
+        H5FD__mpio_read,       /* read                  */
+        H5FD__mpio_write,      /* write                 */
+        H5FD__mpio_flush,      /* flush                 */
+        H5FD__mpio_truncate,   /* truncate              */
+        NULL,                  /* lock                  */
+        NULL,                  /* unlock                */
+        H5FD__mpio_delete,     /* del                   */
+        NULL,                  /* dedup                 */
+        H5FD_FLMAP_DICHOTOMY   /* fl_map                */
     },                         /* End of superclass information */
-    H5FD__mpio_mpi_rank,       /*get_rank              */
-    H5FD__mpio_mpi_size,       /*get_size              */
-    H5FD__mpio_communicator    /*get_comm              */
+    H5FD__mpio_mpi_rank,       /* get_rank              */
+    H5FD__mpio_mpi_size,       /* get_size              */
+    H5FD__mpio_communicator    /* get_comm              */
 };
 
 #ifdef H5FDmpio_DEBUG
@@ -1745,6 +1747,60 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mpio_truncate() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__mpio_delete
+ *
+ * Purpose:     Delete a file
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__mpio_delete(const char *filename, hid_t fapl_id)
+{
+    H5P_genplist_t *plist; /* Property list pointer */
+    MPI_Comm        comm     = MPI_COMM_NULL;
+    MPI_Info        info     = MPI_INFO_NULL;
+    int             mpi_rank = INT_MAX;
+    int             mpi_code;            /* MPI return code */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    HDassert(filename);
+
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    HDassert(H5FD_MPIO == H5P_peek_driver(plist));
+
+    /* Get the MPI communicator and info from the fapl */
+    if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI info object")
+    if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI communicator")
+
+    /* Get the MPI rank of this process */
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code)
+
+    /* Set up a barrier */
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+
+    /* Delete the file */
+    if (mpi_rank == 0)
+        if (MPI_SUCCESS != (mpi_code = MPI_File_delete(filename, info)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_delete failed", mpi_code)
+
+    /* Set up a barrier (don't want processes to run ahead of the delete) */
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__mpio_delete() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_mpi_rank

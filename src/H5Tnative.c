@@ -18,13 +18,13 @@
 
 #include "H5Tmodule.h" /* This source code file is part of the H5T module */
 
-#include "H5private.h"   /* Generic Functions			*/
+#include "H5private.h"   /* Generic Functions            */
 #include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5Pprivate.h"  /* Property lists			*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Tpkg.h"      /* Datatypes				*/
+#include "H5Eprivate.h"  /* Error handling              */
+#include "H5Iprivate.h"  /* IDs                      */
+#include "H5Pprivate.h"  /* Property lists            */
+#include "H5MMprivate.h" /* Memory management            */
+#include "H5Tpkg.h"      /* Datatypes                */
 
 /* Static local functions */
 static H5T_t *H5T__get_native_type(H5T_t *dt, H5T_direction_t direction, size_t *struct_align, size_t *offset,
@@ -338,7 +338,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
         break;
 
         case H5T_ENUM: {
-            H5T_path_t *tpath; /* Type conversion info	*/
+            H5T_path_t *tpath; /* Type conversion info    */
             hid_t       super_type_id, nat_super_type_id;
 
             /* Don't need to do anything special for alignment, offset since the ENUM type usually is integer.
@@ -922,18 +922,18 @@ done:
 H5_GCC_DIAG_ON("duplicated-branches")
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__cmp_offset
+ * Function:    H5T__cmp_offset
  *
- * Purpose:	This function is only for convenience.  It computes the
+ * Purpose:    This function is only for convenience.  It computes the
  *              compound type size, offset of the member being considered
  *              and the alignment for the whole compound type.
  *
- * Return:	Success:        Non-negative value.
+ * Return:    Success:        Non-negative value.
  *
- *		Failure:        Negative value.
+ *            Failure:        Negative value.
  *
- * Programmer:	Raymond Lu
- *		December  10, 2002
+ * Programmer:    Raymond Lu
+ *        December  10, 2002
  *
  *-------------------------------------------------------------------------
  */

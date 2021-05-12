@@ -262,10 +262,23 @@ done:
  *  exception.
  */
 jboolean
-h5outOfMemory(JNIEnv *env, const char *functName)
+h5outOfMemory(JNIEnv *env, const char *message)
 {
-    return H5JNIErrorClass(env, functName, "java/lang/OutOfMemoryError");
+    return H5JNIErrorClass(env, message, "java/lang/OutOfMemoryError");
 } /* end h5outOfMemory() */
+
+/*
+ *  Create and throw an 'AssertionError'
+ *
+ *  Note:  This routine never returns from the 'throw',
+ *  and the Java native method immediately raises the
+ *  exception.
+ */
+jboolean
+h5assertion(JNIEnv *env, const char *message)
+{
+    return H5JNIErrorClass(env, message, "java/lang/AssertionError");
+} /* end h5assertion() */
 
 /*
  *  A fatal error in a JNI call
@@ -276,9 +289,9 @@ h5outOfMemory(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5JNIFatalError(JNIEnv *env, const char *functName)
+h5JNIFatalError(JNIEnv *env, const char *message)
 {
-    return H5JNIErrorClass(env, functName, "java/lang/InternalError");
+    return H5JNIErrorClass(env, message, "java/lang/InternalError");
 } /* end h5JNIFatalError() */
 
 /*
@@ -290,9 +303,9 @@ h5JNIFatalError(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5nullArgument(JNIEnv *env, const char *functName)
+h5nullArgument(JNIEnv *env, const char *message)
 {
-    return H5JNIErrorClass(env, functName, "java/lang/NullPointerException");
+    return H5JNIErrorClass(env, message, "java/lang/NullPointerException");
 } /* end h5nullArgument() */
 
 /*
@@ -304,9 +317,9 @@ h5nullArgument(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5badArgument(JNIEnv *env, const char *functName)
+h5badArgument(JNIEnv *env, const char *message)
 {
-    return H5JNIErrorClass(env, functName, "java/lang/IllegalArgumentException");
+    return H5JNIErrorClass(env, message, "java/lang/IllegalArgumentException");
 } /* end h5badArgument() */
 
 /*
@@ -318,9 +331,9 @@ h5badArgument(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5unimplemented(JNIEnv *env, const char *functName)
+h5unimplemented(JNIEnv *env, const char *message)
 {
-    return H5JNIErrorClass(env, functName, "java/lang/UnsupportedOperationException");
+    return H5JNIErrorClass(env, message, "java/lang/UnsupportedOperationException");
 } /* end h5unimplemented() */
 
 /*  h5raiseException().  This routine is called to generate
@@ -442,8 +455,8 @@ defineHDF5LibraryException(hid_t maj_num)
         return "hdf/hdf5lib/exceptions/HDF5LowLevelIOException";
     else if (H5E_FUNC == err_num)
         return "hdf/hdf5lib/exceptions/HDF5FunctionEntryExitException";
-    else if (H5E_ATOM == err_num)
-        return "hdf/hdf5lib/exceptions/HDF5AtomException";
+    else if (H5E_ID == err_num)
+        return "hdf/hdf5lib/exceptions/HDF5IdException";
     else if (H5E_CACHE == err_num)
         return "hdf/hdf5lib/exceptions/HDF5MetaDataCacheException";
     else if (H5E_BTREE == err_num)

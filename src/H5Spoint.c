@@ -238,7 +238,7 @@ H5S__point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 } /* end H5S__point_iter_coords() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5S_point_iter_block
+ * Function:    H5S__point_iter_block
  *
  * Purpose:     Retrieve the current block of iterator for current
  *              selection
@@ -842,6 +842,10 @@ H5S__copy_pnt_list(const H5S_pnt_list_t *src, unsigned rank)
     /* Copy the selection bounds */
     H5MM_memcpy(dst->high_bounds, src->high_bounds, (rank * sizeof(hsize_t)));
     H5MM_memcpy(dst->low_bounds, src->low_bounds, (rank * sizeof(hsize_t)));
+
+    /* Clear cached iteration point */
+    dst->last_idx     = 0;
+    dst->last_idx_pnt = NULL;
 
     /* Set return value */
     ret_value = dst;
@@ -1511,8 +1515,9 @@ done:
 static herr_t
 H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint, hsize_t numpoints, hsize_t *buf)
 {
-    H5S_pnt_node_t *node; /* Point node */
-    unsigned        rank; /* Dataspace rank */
+    const hsize_t   endpoint = startpoint + numpoints; /* Index of last point in iteration */
+    H5S_pnt_node_t *node;                              /* Point node */
+    unsigned        rank;                              /* Dataspace rank */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1522,14 +1527,20 @@ H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint, hsize_t n
     /* Get the dataspace extent rank */
     rank = space->extent.rank;
 
-    /* Get the head of the point list */
-    node = space->select.sel_info.pnt_lst->head;
+    /* Check for cached point at the correct index */
+    if (space->select.sel_info.pnt_lst->last_idx_pnt &&
+        startpoint == space->select.sel_info.pnt_lst->last_idx)
+        node = space->select.sel_info.pnt_lst->last_idx_pnt;
+    else {
+        /* Get the head of the point list */
+        node = space->select.sel_info.pnt_lst->head;
 
-    /* Iterate to the first point to return */
-    while (node != NULL && startpoint > 0) {
-        startpoint--;
-        node = node->next;
-    } /* end while */
+        /* Iterate to the first point to return */
+        while (node != NULL && startpoint > 0) {
+            startpoint--;
+            node = node->next;
+        } /* end while */
+    }     /* end else */
 
     /* Iterate through the node, copying each point's information */
     while (node != NULL && numpoints > 0) {
@@ -1538,6 +1549,10 @@ H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint, hsize_t n
         numpoints--;
         node = node->next;
     } /* end while */
+
+    /* Cached next point in iteration */
+    space->select.sel_info.pnt_lst->last_idx     = endpoint;
+    space->select.sel_info.pnt_lst->last_idx_pnt = node;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__get_select_elem_pointlist() */
@@ -1572,13 +1587,14 @@ H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint, hsize_t n
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoints, hsize_t buf[/*numpoints*/])
+H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoints,
+                             hsize_t buf[/*numpoints*/] /*out*/)
 {
     H5S_t *space;     /* Dataspace to modify selection of */
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihh*[a2]h", spaceid, startpoint, numpoints, buf);
+    H5TRACE4("e", "ihhx", spaceid, startpoint, numpoints, buf);
 
     /* Check args */
     if (NULL == buf)
@@ -2200,7 +2216,7 @@ done:
 } /* end H5S__point_project_scalar() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5S_point_project_simple
+ * Function:    H5S__point_project_simple
  *
  * Purpose:     Projects a point selection onto/into a simple dataspace
  *              of a different rank
@@ -2329,6 +2345,10 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
                 base_space->select.sel_info.pnt_lst->high_bounds[u - rank_diff];
         } /* end for */
     }     /* end else */
+
+    /* Clear cached iteration point */
+    new_space->select.sel_info.pnt_lst->last_idx     = 0;
+    new_space->select.sel_info.pnt_lst->last_idx_pnt = NULL;
 
     /* Number of elements selected will be the same */
     new_space->select.num_elem = base_space->select.num_elem;

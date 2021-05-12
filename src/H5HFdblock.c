@@ -15,7 +15,7 @@
  *
  * Created:		H5HFdblock.c
  *			Apr 10 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Direct block routines for fractal heaps.
  *
@@ -77,7 +77,6 @@ H5FL_DEFINE(H5HF_direct_t);
  * Return:	Pointer to new direct block on success, NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
@@ -110,7 +109,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
 
     /* Share common heap information */
     dblock->hdr = hdr;
-    if (H5HF_hdr_incr(hdr) < 0)
+    if (H5HF__hdr_incr(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared heap header")
 
     /* Set info for direct block */
@@ -156,7 +155,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     /* Attach to parent indirect block, if there is one */
     dblock->parent = par_iblock;
     if (dblock->parent) {
-        if (H5HF_man_iblock_attach(dblock->parent, par_entry, dblock_addr) < 0)
+        if (H5HF__man_iblock_attach(dblock->parent, par_entry, dblock_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't attach direct block to parent indirect block")
         dblock->fd_parent = par_iblock;
     } /* end if */
@@ -165,8 +164,8 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     dblock->par_entry = par_entry;
 
     /* Create a new 'single' section for the free space in the block */
-    if (NULL == (sec_node = H5HF_sect_single_new((dblock->block_off + H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr)),
-                                                 free_space, dblock->parent, dblock->par_entry)))
+    if (NULL == (sec_node = H5HF__sect_single_new((dblock->block_off + H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr)),
+                                                  free_space, dblock->parent, dblock->par_entry)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create section for new direct block's free space")
 
     /* Check what to do with section node */
@@ -184,7 +183,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add fractal heap direct block to cache")
 
     /* Increase the allocated heap size */
-    if (H5HF_hdr_inc_alloc(hdr, dblock->size) < 0)
+    if (H5HF__hdr_inc_alloc(hdr, dblock->size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't increase allocated heap size")
 
     /* Set the address of of direct block, if requested */
@@ -194,7 +193,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
 done:
     if (ret_value < 0)
         if (dblock)
-            if (H5HF_man_dblock_dest(dblock) < 0)
+            if (H5HF__man_dblock_dest(dblock) < 0)
                 HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap direct block")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -212,7 +211,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 17 2006
  *
  *-------------------------------------------------------------------------
@@ -264,7 +262,7 @@ H5HF__man_dblock_destroy(H5HF_hdr_t *hdr, H5HF_direct_t *dblock, haddr_t dblock_
         HDassert(hdr->man_dtable.cparam.start_block_size == dblock->size);
 
         /* Sanity check block iterator */
-        HDassert(!H5HF_man_iter_ready(&hdr->next_block));
+        HDassert(!H5HF__man_iter_ready(&hdr->next_block));
 
         /* Reset header information back to "empty heap" state */
         if (H5HF__hdr_empty(hdr) < 0)
@@ -325,7 +323,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 13 2006
  *
  *-------------------------------------------------------------------------
@@ -373,8 +370,8 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
         } /* end if */
 
         /* Extend heap to cover new direct block */
-        if (H5HF_hdr_adjust_heap(hdr, (hsize_t)hdr->man_dtable.cparam.start_block_size,
-                                 (hssize_t)hdr->man_dtable.row_tot_dblock_free[0]) < 0)
+        if (H5HF__hdr_adjust_heap(hdr, (hsize_t)hdr->man_dtable.cparam.start_block_size,
+                                  (hssize_t)hdr->man_dtable.row_tot_dblock_free[0]) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block")
     } /* end if */
     /* Root entry already exists, allocate direct block from root indirect block */
@@ -390,7 +387,7 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUPDATE, FAIL, "unable to update block iterator")
 
         /* Retrieve information about current iterator position */
-        if (H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
+        if (H5HF__man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location")
         HDassert(next_row < iblock->nrows);
         H5_CHECKED_ASSIGN(next_size, size_t, hdr->man_dtable.row_block_size[next_row], hsize_t);
@@ -399,13 +396,13 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
         if (min_dblock_size > next_size) {
             HDfprintf(
                 stderr,
-                "%s: Skipping direct block sizes not supported, min_dblock_size = %Zu, next_size = %Zu\n",
+                "%s: Skipping direct block sizes not supported, min_dblock_size = %zu, next_size = %zu\n",
                 FUNC, min_dblock_size, next_size);
             HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "skipping direct block sizes not supported yet")
         } /* end if */
 
         /* Advance "next block" iterator to next direct block entry */
-        if (H5HF_hdr_inc_iter(hdr, (hsize_t)next_size, 1) < 0)
+        if (H5HF__hdr_inc_iter(hdr, (hsize_t)next_size, 1) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment 'next block' iterator")
 
         /* Create new direct block at current location*/
@@ -426,7 +423,6 @@ done:
  * Return:	Pointer to direct block on success, NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
@@ -508,7 +504,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  8 2006
  *
  *-------------------------------------------------------------------------
@@ -538,7 +533,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
     HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Look up row & column for object */
-    if (H5HF_dtable_lookup(&hdr->man_dtable, obj_off, &row, &col) < 0)
+    if (H5HF__dtable_lookup(&hdr->man_dtable, obj_off, &row, &col) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object")
 
     /* Set initial indirect block info */
@@ -589,7 +584,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
         did_protect = new_did_protect;
 
         /* Look up row & column in new indirect block for object */
-        if (H5HF_dtable_lookup(&hdr->man_dtable, (obj_off - iblock->block_off), &row, &col) < 0)
+        if (H5HF__dtable_lookup(&hdr->man_dtable, (obj_off - iblock->block_off), &row, &col) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object")
         HDassert(row < iblock->nrows); /* child must be smaller than parent */
     }                                  /* end while */
@@ -617,7 +612,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug  7 2006
  *
  *-------------------------------------------------------------------------
@@ -674,24 +668,23 @@ done:
 } /* end H5HF__man_dblock_delete() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_dblock_dest
+ * Function:	H5HF__man_dblock_dest
  *
  * Purpose:	Destroys a fractal heap direct block in memory.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_dblock_dest(H5HF_direct_t *dblock)
+H5HF__man_dblock_dest(H5HF_direct_t *dblock)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -700,7 +693,7 @@ H5HF_man_dblock_dest(H5HF_direct_t *dblock)
 
     /* Decrement reference count on shared fractal heap info */
     HDassert(dblock->hdr != NULL);
-    if (H5HF_hdr_decr(dblock->hdr) < 0)
+    if (H5HF__hdr_decr(dblock->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
     if (dblock->parent)
         if (H5HF__iblock_decr(dblock->parent) < 0)
@@ -715,4 +708,4 @@ H5HF_man_dblock_dest(H5HF_direct_t *dblock)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_dblock_dest() */
+} /* end H5HF__man_dblock_dest() */

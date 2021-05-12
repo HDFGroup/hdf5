@@ -1467,7 +1467,8 @@ serve_read_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n", world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, FUNC,
+                          target_addr);
             }
         }
         else if (data[target_index].len != mssg_ptr->len) {
@@ -1475,7 +1476,7 @@ serve_read_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: data[i].len = %Zu != mssg->len = %d.\n", world_mpi_rank, FUNC,
+                HDfprintf(stdout, "%d:%s: data[i].len = %zu != mssg->len = %d.\n", world_mpi_rank, FUNC,
                           data[target_index].len, mssg_ptr->len);
             }
         }
@@ -1484,7 +1485,9 @@ serve_read_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: proc %d read invalid entry. idx/base_addr = %d/%a.\n",
+                HDfprintf(stdout,
+                          "%d:%s: proc %d read invalid entry. "
+                          "idx/base_addr = %d/%" PRIuHADDR ".\n",
                           world_mpi_rank, FUNC, mssg_ptr->src, target_index, data[target_index].base_addr);
             }
         }
@@ -1653,7 +1656,8 @@ serve_write_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n", world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, FUNC,
+                          target_addr);
             }
         }
         else if (data[target_index].len != mssg_ptr->len) {
@@ -1919,7 +1923,8 @@ serve_entry_writes_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n", world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, FUNC,
+                          target_addr);
             }
         }
         else {
@@ -2007,7 +2012,8 @@ serve_entry_reads_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n", world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, FUNC,
+                          target_addr);
             }
         }
         else {
@@ -2488,10 +2494,10 @@ datum_notify(H5C_notify_action_t action, void *thing)
                 HDfprintf(stdout,
                 "%d:%s: mssg.base_addr != entry_ptr->base_addr.\n",
                 world_mpi_rank, FUNC);
-                HDfprintf(stdout, "%d:%s: mssg.base_addr = %a.\n",
+                HDfprintf(stdout, "%d:%s: mssg.base_addr = %" PRIuHADDR ".\n",
                     world_mpi_rank, FUNC, mssg.base_addr);
                 HDfprintf(stdout,
-                                  "%d:%s: entry_ptr->base_addr = %a.\n",
+                    "%d:%s: entry_ptr->base_addr = %" PRIuHADDR ".\n",
                     world_mpi_rank, FUNC,
                                    entry_ptr->base_addr);
                     }
@@ -2501,7 +2507,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
                 HDfprintf(stdout,
                                   "%d:%s: mssg.len != entry_ptr->len.\n",
                     world_mpi_rank, FUNC);
-                HDfprintf(stdout, "%d:%s: mssg.len = %a.\n",
+                HDfprintf(stdout, "%d:%s: mssg.len = %" PRIuHADDR ".\n",
                     world_mpi_rank, FUNC, mssg.len);
                     }
 
@@ -4296,8 +4302,8 @@ verify_entry_reads(haddr_t addr, int expected_entry_reads)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: rep/exp entry 0x%llx reads mismatch (%ld/%ld).\n", world_mpi_rank,
-                          FUNC, (long long)addr, reported_entry_reads, expected_entry_reads);
+                HDfprintf(stdout, "%d:%s: rep/exp entry 0x%" PRIxHADDR " reads mismatch (%d/%d).\n",
+                          world_mpi_rank, FUNC, addr, reported_entry_reads, expected_entry_reads);
             }
         }
     }

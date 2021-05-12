@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, September 25, 1998
  *
  * Purpose:    Test unlinking operations.
@@ -516,7 +516,7 @@ check_new_move(hid_t fapl)
     /* Check soft links */
     if (H5Lget_val(file, "group2/soft", linkval, sizeof(linkval), H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    if (HDstrcmp(linkval, "/group1/group_move"))
+    if (HDstrcmp(linkval, "/group1/group_move") != 0)
         FAIL_PUTS_ERROR("    Soft link test failed. Wrong link value")
 
     /* Cleanup */
@@ -581,7 +581,7 @@ test_filespace(hid_t fapl)
     size_t rdcc_nbytes;
     double rdcc_w0;
 
-    puts("Testing file space gets reused:");
+    HDputs("Testing file space gets reused:");
 
     /* Open file */
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);

@@ -53,9 +53,6 @@ static void verify_data_sets(hid_t file_id, int min_dset, int max_dset);
 
 /* local test function declarations */
 
-static hbool_t  parse_flags(int argc, char *argv[], hbool_t *setup_ptr, hbool_t *ici_ptr, int *file_idx_ptr,
-                            int *mpi_size_ptr, hbool_t display);
-static void     usage(void);
 static unsigned construct_test_file(int test_file_index);
 static void     par_create_dataset(int dset_num, hid_t file_id, int mpi_rank, int mpi_size);
 static void     par_delete_dataset(int dset_num, hid_t file_id, int mpi_rank);
@@ -1742,13 +1739,6 @@ par_delete_dataset(int dset_num, hid_t file_id, int mpi_rank)
 
 } /* par_delete_dataset() */
 
-/* This test uses many POSIX things that are not available on
- * Windows. We're using a check for fork(2) here as a proxy for
- * all POSIX/Unix/Linux things until this test can be made
- * more platform-independent.
- */
-#ifdef H5_HAVE_FORK
-
 /*-------------------------------------------------------------------------
  * Function:    par_insert_cache_image()
  *
@@ -1780,63 +1770,14 @@ par_delete_dataset(int dset_num, hid_t file_id, int mpi_rank)
 static void
 par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size)
 {
-    hbool_t show_progress = FALSE;
-
     if (pass) {
 
         if (mpi_rank == 0) { /* insert cache image in supplied test file */
 
-            char  file_name_idx_str[32];
-            char  mpi_size_str[32];
-            int   child_status;
-            pid_t child_pid;
-
-            HDsprintf(file_name_idx_str, "%d", file_name_idx);
-            HDsprintf(mpi_size_str, "%d", mpi_size);
-
-            child_pid = fork();
-
-            if (child_pid == 0) { /* this is the child process */
-
-                /* fun and games to shutup the compiler */
-                char  param0[32]   = "t_cache_image";
-                char  param1[32]   = "ici";
-                char *child_argv[] = {param0, param1, file_name_idx_str, mpi_size_str, NULL};
-
-                /* we may need to play with the path here */
-                if (execv("t_cache_image", child_argv) == -1) {
-
-                    HDfprintf(stdout, "execl() of ici process failed. errno = %d(%s)\n", errno,
-                              strerror(errno));
-                    HDexit(1);
-                }
-            }
-            else if (child_pid != -1) {
-                /* this is the parent process -- wait until child is done */
-                if (-1 == waitpid(child_pid, &child_status, WUNTRACED)) {
-
-                    HDfprintf(stdout, "can't wait on ici process.\n");
-                    pass = FALSE;
-                }
-                else if (!WIFEXITED(child_status)) {
-
-                    HDfprintf(stdout, "ici process hasn't exitied.\n");
-                    pass = FALSE;
-                }
-                else if (WEXITSTATUS(child_status) != 0) {
-
-                    HDfprintf(stdout, "ici process reports failure.\n");
-                    pass = FALSE;
-                }
-                else if (show_progress) {
-
-                    HDfprintf(stdout, "cache image insertion complete.\n");
-                }
-            }
-            else { /* fork failed */
-
-                HDfprintf(stdout, "can't create process to insert cache image.\n");
-                pass = FALSE;
+            if (!serial_insert_cache_image(file_name_idx, mpi_size)) {
+                HDfprintf(stderr, "\n\nCache image insertion failed.\n");
+                HDfprintf(stderr, "  failure mssg = \"%s\"\n", failure_mssg);
+                HDexit(EXIT_FAILURE);
             }
         }
     }
@@ -1852,15 +1793,6 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size)
     return;
 
 } /* par_insert_cache_image() */
-#else /* H5_HAVE_FORK */
-
-static void
-par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size)
-{
-    return;
-} /* par_insert_cache_image() */
-
-#endif /* H5_HAVE_FORK */
 
 /*-------------------------------------------------------------------------
  * Function:    par_verify_dataset()
@@ -2461,158 +2393,6 @@ serial_verify_dataset(int dset_num, hid_t file_id, int mpi_size)
 } /* serial_verify_dataset() */
 
 /*-------------------------------------------------------------------------
- * Function:    parse_flags
- *
- * Purpose:     Parse the flags passed to this program, and load the
- *              values into the supplied field.
- *
- * Return:      Success:        1
- *              Failure:        0
- *
- * Programmer:  J Mainzer
- *              4/28/11
- *
- *-------------------------------------------------------------------------
- */
-static hbool_t
-parse_flags(int argc, char *argv[], hbool_t *setup_ptr, hbool_t *ici_ptr, int *file_idx_ptr,
-            int *mpi_size_ptr, hbool_t display)
-{
-    const char *fcn_name = "parse_flags()";
-    const char *(ops[])  = {"setup", "ici"};
-    int success          = TRUE;
-
-    HDassert(setup_ptr);
-    HDassert(*setup_ptr == FALSE);
-    HDassert(ici_ptr);
-    HDassert(*ici_ptr == FALSE);
-    HDassert(file_idx_ptr);
-    HDassert(mpi_size_ptr);
-
-    if (setup_ptr == NULL) {
-
-        success = FALSE;
-        HDfprintf(stdout, "%s: bad arg(s) on entry.\n", fcn_name);
-    }
-
-    if ((success) && ((argc != 1) && (argc != 2) && (argc != 4))) {
-
-        success = FALSE;
-        usage();
-    }
-
-    if ((success) && (argc >= 2)) {
-
-        if (strcmp(argv[1], ops[0]) == 0) {
-
-            if (argc != 2) {
-
-                success = FALSE;
-                usage();
-            }
-            else {
-
-                *setup_ptr = TRUE;
-            }
-        }
-        else if (strcmp(argv[1], ops[1]) == 0) {
-
-            if (argc != 4) {
-
-                success = FALSE;
-                usage();
-            }
-            else {
-
-                *ici_ptr      = TRUE;
-                *file_idx_ptr = atoi(argv[2]);
-                *mpi_size_ptr = atoi(argv[3]);
-            }
-        }
-    }
-
-    if ((success) && (display)) {
-
-        if (*setup_ptr)
-
-            HDfprintf(stdout, "t_cache_image setup\n");
-
-        else if (*ici_ptr)
-
-            HDfprintf(stdout, "t_cache_image ici %d %d\n", *file_idx_ptr, *mpi_size_ptr);
-
-        else
-
-            HDfprintf(stdout, "t_cache_image\n");
-    }
-
-    return (success);
-
-} /* parse_flags() */
-
-/*-------------------------------------------------------------------------
- * Function:    usage
- *
- * Purpose:     Display a brief message describing the purpose and use
- *              of the program.
- *
- * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/28/11
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-usage(void)
-{
-    const char *s[] = {
-        "\n",
-        "t_cache_image:\n",
-        "\n",
-        "Run the parallel cache image tests.  \n"
-        "\n"
-        "In general, this program is run via MPI.  However, at present, files\n"
-        "with cache images can only be constructed by serial processes.\n",
-        "\n",
-        "To square this circle, one process in the parallel computation \n"
-        "forks a serial version of the test program to handle this detail.\n",
-        "The \"setup\" parameter indicates that t_cache_image is being \n",
-        "invokde for this purpose.\n",
-        "\n",
-        "Similarly, only a serial process can add a cache image to an\n",
-        "existing file.\n",
-        "\n",
-        "Here again, one process forks a serial version of the test program\n",
-        "with the \"ici\" parameter.\n"
-        "\n",
-        "usage: t_cache_image [setup|ici m n]\n",
-        "\n",
-        "where:\n",
-        "\n",
-        "       setup parameter forces creation of test file\n",
-        "\n",
-        "       ici parameter forces insertion of a cache image into the \n",
-        "       m   th test file, created by a parallel computation with .\n",
-        "       n   processes\n",
-        "\n",
-        "Returns 0 on success, 1 on failure.\n",
-        "\n",
-        NULL,
-    };
-    int i = 0;
-
-    while (s[i] != NULL) {
-        HDfprintf(stdout, "%s", s[i]);
-        i++;
-    }
-
-    return;
-} /* usage() */
-
-/*-------------------------------------------------------------------------
  * Function:    verify_data_sets()
  *
  * Purpose:     If pass is TRUE on entry, verify that the data sets in the
@@ -3116,8 +2896,9 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
 
             H5_FAILED();
 
-            if (show_progress)
-                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", failure_mssg);
+            if (show_progress) {
+                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
+            }
         }
     }
 
@@ -3400,8 +3181,9 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
 
             H5_FAILED();
 
-            if (show_progress)
-                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", failure_mssg);
+            if (show_progress) {
+                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
+            }
         }
     }
 
@@ -3811,13 +3593,6 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
 
 } /* smoke_check_1() */
 
-/* This test uses many POSIX things that are not available on
- * Windows. We're using a check for fork(2) here as a proxy for
- * all POSIX/Unix/Linux things until this test can be made
- * more platform-independent.
- */
-#ifdef H5_HAVE_FORK
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -3847,64 +3622,11 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
 int
 main(int argc, char **argv)
 {
-    hbool_t  setup = FALSE;
-    hbool_t  ici   = FALSE;
     unsigned nerrs = 0;
     MPI_Comm comm  = MPI_COMM_WORLD;
     MPI_Info info  = MPI_INFO_NULL;
-    int      file_idx;
-    int      i;
     int      mpi_size;
     int      mpi_rank;
-
-    if (!parse_flags(argc, argv, &setup, &ici, &file_idx, &mpi_size, FALSE))
-        exit(1); /* exit now if unable to parse flags */
-
-    if (setup) { /* construct test files and exit */
-
-        H5open();
-        HDfprintf(stdout, "Constructing test files: \n");
-        HDfflush(stdout);
-
-        i = 0;
-        while ((FILENAMES[i] != NULL) && (i < TEST_FILES_TO_CONSTRUCT)) {
-
-            HDfprintf(stdout, "   writing %s ... ", FILENAMES[i]);
-            HDfflush(stdout);
-            construct_test_file(i);
-
-            if (pass) {
-
-                HDprintf("done.\n");
-                HDfflush(stdout);
-            }
-            else {
-
-                HDprintf("failed.\n");
-                HDexit(1);
-            }
-            i++;
-        }
-
-        HDfprintf(stdout, "Test file construction complete.\n");
-        HDexit(0);
-    }
-    else if (ici) {
-
-        if (serial_insert_cache_image(file_idx, mpi_size)) {
-
-            HDexit(0);
-        }
-        else {
-
-            HDfprintf(stderr, "\n\nCache image insertion failed.\n");
-            HDfprintf(stderr, "  failure mssg = \"%s\"\n", failure_mssg);
-            HDexit(1);
-        }
-    }
-
-    HDassert(!setup);
-    HDassert(!ici);
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -3915,9 +3637,8 @@ main(int argc, char **argv)
      * hang in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
-    if (H5dont_atexit() < 0) {
+    if (H5dont_atexit() < 0)
         HDprintf("%d:Failed to turn off atexit processing. Continue.\n", mpi_rank);
-    };
 
     H5open();
 
@@ -3929,71 +3650,45 @@ main(int argc, char **argv)
     }
 
     if (mpi_size < 2) {
-
-        if (mpi_rank == 0) {
-
+        if (mpi_rank == 0)
             HDprintf("    Need at least 2 processes.  Exiting.\n");
-        }
         goto finish;
     }
 
     if (mpi_rank == 0) { /* create test files */
+        int i;
 
-        int   child_status;
-        pid_t child_pid;
+        HDfprintf(stdout, "Constructing test files: \n");
+        HDfflush(stdout);
 
-        child_pid = fork();
+        i = 0;
+        while ((FILENAMES[i] != NULL) && (i < TEST_FILES_TO_CONSTRUCT)) {
+            HDfprintf(stdout, "   writing %s ... ", FILENAMES[i]);
+            HDfflush(stdout);
+            construct_test_file(i);
 
-        if (child_pid == 0) { /* this is the child process */
-
-            /* fun and games to shutup the compiler */
-            char  param0[32]   = "t_cache_image";
-            char  param1[32]   = "setup";
-            char *child_argv[] = {param0, param1, NULL};
-
-            /* we may need to play with the path here */
-            if (execv("t_cache_image", child_argv) == -1) {
-
-                HDfprintf(stdout, "execl() of setup process failed. errno = %d(%s)\n", errno,
-                          strerror(errno));
-                HDexit(1);
-            }
-        }
-        else if (child_pid != -1) {
-            /* this is the parent process -- wait until child is done */
-            if (-1 == waitpid(child_pid, &child_status, WUNTRACED)) {
-
-                HDfprintf(stdout, "can't wait on setup process.\n");
-            }
-            else if (!WIFEXITED(child_status)) {
-
-                HDfprintf(stdout, "setup process hasn't exitied.\n");
-            }
-            else if (WEXITSTATUS(child_status) != 0) {
-
-                HDfprintf(stdout, "setup process reports failure.\n");
+            if (pass) {
+                HDprintf("done.\n");
+                HDfflush(stdout);
             }
             else {
-
-                HDfprintf(stdout, "testfile construction complete -- proceeding with tests.\n");
+                HDprintf("failed.\n");
+                HDexit(EXIT_FAILURE);
             }
+            i++;
         }
-        else { /* fork failed */
-
-            HDfprintf(stdout, "can't create process to construct test file.\n");
-        }
+        HDfprintf(stdout, "Test file construction complete.\n");
     }
 
     /* can't start test until test files exist */
     MPI_Barrier(MPI_COMM_WORLD);
 
     nerrs += verify_cache_image_RO(0, H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY, mpi_rank);
-#if 1
     nerrs += verify_cache_image_RO(1, H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED, mpi_rank);
     nerrs += verify_cache_image_RW(0, H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY, mpi_rank);
     nerrs += verify_cache_image_RW(1, H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED, mpi_rank);
     nerrs += smoke_check_1(comm, info, mpi_rank, mpi_size);
-#endif
+
 finish:
 
     /* make sure all processes are finished before final report, cleanup
@@ -4002,18 +3697,13 @@ finish:
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (mpi_rank == 0) { /* only process 0 reports */
-        HDsleep(10);
         HDprintf("===================================\n");
-        if (nerrs > 0) {
+        if (nerrs > 0)
             HDprintf("***metadata cache image tests detected %d failures***\n", nerrs);
-        }
-        else {
+        else
             HDprintf("metadata cache image tests finished with no failures\n");
-        }
         HDprintf("===================================\n");
     }
-
-    /* takedown_derived_types(); */
 
     /* close HDF5 library */
     H5close();
@@ -4025,13 +3715,3 @@ finish:
     return (nerrs > 0);
 
 } /* main() */
-#else /* H5_HAVE_FORK */
-
-int
-main(void)
-{
-    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
-    return EXIT_SUCCESS;
-} /* end main() */
-
-#endif /* H5_HAVE_FORK */

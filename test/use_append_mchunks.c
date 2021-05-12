@@ -53,11 +53,9 @@
 #include "h5test.h"
 
 /* This test uses many POSIX things that are not available on
- * Windows. We're using a check for fork(2) here as a proxy for
- * all POSIX/Unix/Linux things until this test can be made
- * more platform-independent.
+ * Windows.
  */
-#ifdef H5_HAVE_FORK
+#ifdef H5_HAVE_UNISTD_H
 
 #include "use.h"
 
@@ -165,12 +163,12 @@ main(int argc, char *argv[])
     /* Fork process */
     /* ============ */
     if (UC_opts.launch == UC_READWRITE) {
-        if ((childpid = fork()) < 0) {
-            perror("fork");
+        if ((childpid = HDfork()) < 0) {
+            HDperror("fork");
             Hgoto_error(1);
         }
     }
-    mypid = getpid();
+    mypid = HDgetpid();
 
     /* ============= */
     /* launch reader */
@@ -239,8 +237,8 @@ main(int argc, char *argv[])
     /* If readwrite, collect exit code of child process */
     /* ================================================ */
     if (UC_opts.launch == UC_READWRITE) {
-        if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
-            perror("waitpid");
+        if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0) {
+            HDperror("waitpid");
             Hgoto_error(1);
         }
 
@@ -267,7 +265,7 @@ done:
     return (ret_value);
 } /* end main() */
 
-#else /* H5_HAVE_FORK */
+#else /* H5_HAVE_UNISTD_H */
 
 int
 main(void)
@@ -276,4 +274,4 @@ main(void)
     return EXIT_SUCCESS;
 } /* end main() */
 
-#endif /* H5_HAVE_FORK */
+#endif /* H5_HAVE_UNISTD_H */

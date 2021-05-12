@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -28,10 +27,10 @@ public class H5_CreateAttribute {
     private static String DATASETATTRIBUTE = "Units";
 
     private static void CreateDatasetAttribute() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long attribute_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims1 = { DIM_X, DIM_Y };
         long[] dims = { 2 };
         int[] attr_data = { 100, 200 };

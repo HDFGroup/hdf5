@@ -573,6 +573,123 @@ error:
 } /* end test_copy() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_append
+ *
+ * Purpose:     Test appending one error stack to another
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_append(void)
+{
+    const char *err_func = "test_append";      /* Function name for pushing error */
+    const char *err_msg1 = "Error message #1"; /* Error message #1 for pushing error */
+    const char *err_msg2 = "Error message #2"; /* Error message #2 for pushing error */
+    ssize_t     err_num;                       /* Number of errors on stack */
+    hid_t       estack_id1 = -1;               /* Error stack ID */
+    hid_t       estack_id2 = -1;               /* Error stack ID */
+    herr_t      ret;                           /* Generic return value */
+
+    /* Push an error */
+    if (H5Epush(H5E_DEFAULT, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
+                err_msg1) < 0)
+        TEST_ERROR;
+
+    /* Copy error stack, which clears the original */
+    if ((estack_id1 = H5Eget_current_stack()) < 0)
+        TEST_ERROR
+
+    /* Check the number of errors on stack #1 */
+    err_num = H5Eget_num(estack_id1);
+    if (err_num != 1)
+        TEST_ERROR
+
+    /* Create another stack, from scratch */
+    if ((estack_id2 = H5Ecreate_stack()) < 0)
+        TEST_ERROR
+
+    /* Check the number of errors on stack #2 */
+    err_num = H5Eget_num(estack_id2);
+    if (err_num != 0)
+        TEST_ERROR
+
+    /* Push an error on stack #2 */
+    if (H5Epush(estack_id2, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_CREATE, "%s",
+                err_msg2) < 0)
+        TEST_ERROR;
+
+    /* Check the number of errors on stack #2 */
+    err_num = H5Eget_num(estack_id2);
+    if (err_num != 1)
+        TEST_ERROR
+
+    /* Try to append bad error stack IDs */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(H5E_DEFAULT, H5E_DEFAULT, FALSE);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(estack_id1, H5E_DEFAULT, FALSE);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(H5E_DEFAULT, estack_id2, FALSE);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR
+
+    /* Append error stack #2 to error stack #1, without closing stack #2 */
+    if (H5Eappend_stack(estack_id1, estack_id2, FALSE) < 0)
+        TEST_ERROR
+
+    /* Check the number of errors on stack #1 */
+    err_num = H5Eget_num(estack_id1);
+    if (err_num != 2)
+        TEST_ERROR
+
+    /* Check the number of errors on stack #2 */
+    err_num = H5Eget_num(estack_id2);
+    if (err_num != 1)
+        TEST_ERROR
+
+    /* Append error stack #2 to error stack #1, and close stack #2 */
+    if (H5Eappend_stack(estack_id1, estack_id2, TRUE) < 0)
+        TEST_ERROR
+
+    /* Try to close error stack #2.  Should fail because H5Eappend_stack
+     * should have already closed it.
+     */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(estack_id2);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR
+
+    /* Check the number of errors on stack #1 */
+    err_num = H5Eget_num(estack_id1);
+    if (err_num != 3)
+        TEST_ERROR
+
+    return 0;
+
+error:
+    return -1;
+} /* end test_append() */
+
+/*-------------------------------------------------------------------------
  * Function:    close_error
  *
  * Purpose:     Closes error information.
@@ -745,6 +862,10 @@ main(void)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Test appending error stacks */
+    if (test_append() < 0)
         TEST_ERROR;
 
     /* Close error information */

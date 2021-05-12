@@ -578,8 +578,9 @@ MpioTest2G(MPI_Comm comm)
     MPI_Comm_rank(comm, &mpi_rank);
 
     if (mpi_rank == 0) {
-        HDprintf("Using %d process on dataset shape [%llu, %llu, %llu]\n", mpi_size, shape[0], shape[1],
-                 shape[2]);
+        HDprintf("Using %d process on dataset shape "
+                 "[%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "]\n",
+                 mpi_size, shape[0], shape[1], shape[2]);
     }
 
     /*
@@ -606,7 +607,7 @@ MpioTest2G(MPI_Comm comm)
         tot_size_bytes *= shape[i];
     }
     if (mpi_rank == 0) {
-        HDprintf("Dataset of %llu bytes\n", tot_size_bytes);
+        HDprintf("Dataset of %zu bytes\n", tot_size_bytes);
     }
     filespace = H5Screate_simple(3, shape, NULL);
     VRFY((filespace >= 0), "H5Screate_simple succeeded");
@@ -681,7 +682,7 @@ MpioTest2G(MPI_Comm comm)
     H5Fclose(file_id);
 
     free(data);
-    HDprintf("Proc %d - MpioTest2G test succeeded\n", mpi_rank, data_size_bytes);
+    HDprintf("Proc %d - MpioTest2G test succeeded\n", mpi_rank);
 
     if (mpi_rank == 0)
         HDremove(FILENAME[1]);
@@ -3861,9 +3862,7 @@ actual_io_mode_tests(void)
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
-#define DSET_NOCOLCAUSE "nocolcause"
-#define NELM            2
-#define FILE_EXTERNAL   "nocolcause_extern.data"
+#define FILE_EXTERNAL "nocolcause_extern.data"
 static void
 test_no_collective_cause_mode(int selection_mode)
 {
@@ -4422,9 +4421,9 @@ no_collective_cause_tests(void)
     test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
     test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
 #ifdef LATER /* fletcher32 */
-             /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and
-              * H5Dwrite is ready for mpio + filter feature.
-              */
+    /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and
+     * H5Dwrite is ready for mpio + filter feature.
+     */
     /* test_no_collective_cause_mode (TEST_FILTERS); */
     test_no_collective_cause_mode_filter(TEST_FILTERS_READ);
 #endif /* LATER */

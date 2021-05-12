@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  James Laird <jlaird@hdfgroup.org>
+ * Programmer:  James Laird
  *              Tuesday, June 6, 2006
  *
  *  This program creates HDF5 files with user-defined links.  These files

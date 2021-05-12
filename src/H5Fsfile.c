@@ -135,14 +135,28 @@ done:
 H5F_shared_t *
 H5F__sfile_search(H5FD_t *lf)
 {
-    H5F_sfile_node_t *curr;
+    H5F_sfile_node_t *curr;             /* Current shared file node */
+    H5F_shared_t *    ret_value = NULL; /* Return value */
 
-    for (curr = H5F_sfile_head_g; curr != NULL; curr = curr->next) {
-        if (curr->shared->lf == lf)
-            return curr->shared;
-    }
-    return NULL;
-}
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    HDassert(lf);
+
+    /* Iterate through low-level files for matching low-level file info */
+    curr = H5F_sfile_head_g;
+    while (curr) {
+        /* Check for match */
+        if (0 == H5FD_cmp(curr->shared->lf, lf))
+            HGOTO_DONE(curr->shared)
+
+        /* Advance to next shared file node */
+        curr = curr->next;
+    } /* end while */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__sfile_search() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F__sfile_remove

@@ -19,9 +19,6 @@
 include $(top_srcdir)/config/commence.am
 include $(top_srcdir)/config/lt_vers.am
 
-# include Doxygen rules (requires autoconf-archive >2016-03-20)
-@DX_RULES@
-
 # How to build H5detect for number format detection.
 # Use -g to force no optimization since many compilers (e.g., Intel) takes
 # a long time to compile it with any optimization on.  H5detect is used
@@ -79,7 +76,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
         H5HG.c H5HGcache.c H5HGdbg.c H5HGquery.c H5HGtrap.c \
         H5HL.c H5HLcache.c H5HLdbg.c H5HLint.c H5HLprfx.c H5HLdblk.c \
         H5HP.c \
-        H5I.c H5Itest.c \
+        H5I.c H5Idbg.c H5Iint.c H5Itest.c \
         H5L.c H5Ldeprec.c H5Lexternal.c \
         H5M.c \
         H5MF.c H5MFaggr.c H5MFdbg.c H5MFsection.c \
@@ -104,7 +101,6 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
         H5Sselect.c H5Stest.c \
         H5SL.c \
         H5SM.c H5SMbtree2.c H5SMcache.c H5SMmessage.c H5SMtest.c \
-        H5ST.c \
         H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcompound.c H5Tconv.c \
         H5Tcset.c H5Tdbg.c H5Tdeprec.c H5Tenum.c H5Tfields.c H5Tfixed.c \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \

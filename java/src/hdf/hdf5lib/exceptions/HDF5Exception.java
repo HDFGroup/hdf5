@@ -31,6 +31,9 @@ package hdf.hdf5lib.exceptions;
  *
  */
 public class HDF5Exception extends RuntimeException {
+    /**
+     *  the specified detail message of this exception
+     */
     protected String detailMessage;
 
     /**

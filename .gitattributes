@@ -365,6 +365,7 @@ m4/ax_check_rqrd_class.m4 -text
 m4/ax_java_check_class.m4 -text
 m4/ax_java_options.m4 -text
 m4/ax_jni_include_dir.m4 -text
+m4/ax_prog_doxygen.m4 -text
 m4/ax_prog_jar.m4 -text
 m4/ax_prog_java.m4 -text
 m4/ax_prog_java_cc.m4 -text
@@ -784,6 +785,7 @@ tools/testfiles/tints4dimsStride2.ddl -text
 tools/testfiles/tintsattrs.h5 -text svneol=unset#application/x-hdf
 tools/testfiles/tlarge_objname.h5 -text
 tools/testfiles/tldouble.h5 -text
+tools/testfiles/tldouble_scalar.h5 -text
 tools/testfiles/tlonglinks.h5 -text
 tools/testfiles/tloop.h5 -text
 tools/testfiles/tloop2.h5 -text

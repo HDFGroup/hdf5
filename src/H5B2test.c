@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Thursday, February  3, 2005
  *
  * Purpose:	v2 B-tree testing functions.
@@ -305,7 +305,7 @@ H5B2__test_debug(FILE *stream, int indent, int fwidth, const void *record, const
 
     HDassert(record);
 
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Record:", *(const hsize_t *)record);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Record:", *(const hsize_t *)record);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__test_debug() */
@@ -435,7 +435,7 @@ H5B2__test2_debug(FILE *stream, int indent, int fwidth, const void *record, cons
 
     HDassert(record);
 
-    HDfprintf(stream, "%*s%-*s (%Hu, %Hu)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s (%" PRIuHSIZE ", %" PRIuHSIZE ")\n", indent, "", fwidth,
               "Record:", ((const H5B2_test_rec_t *)record)->key, ((const H5B2_test_rec_t *)record)->val);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

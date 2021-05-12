@@ -66,406 +66,35 @@
 /* Track whether tzset routine was called */
 static hbool_t H5_ntzset = FALSE;
 
-/*-------------------------------------------------------------------------
- * Function:  HDfprintf
- *
- * Purpose:  Prints the optional arguments under the control of the format
- *    string FMT to the stream STREAM.  This function takes the
- *    same format as fprintf(3c) with a few added features:
- *
- *    The conversion modifier `H' refers to the size of an
- *    `hsize_t' or `hssize_t' type.  For instance, "0x%018Hx"
- *    prints an `hsize_t' value as a hex number right justified and
- *    zero filled in an 18-character field.
- *
- *    The conversion 'a' refers to an haddr_t type.
- *
- *    The conversion 't' refers to an htri_t type.
- *
- *    The conversion 'k' refers to an H5O_token_t type.
- *
- * Return:  Success:  Number of characters printed
- *
- *    Failure:  -1
- *
- * Programmer:  Robb Matzke
- *              Thursday, April  9, 1998
- *
- *-------------------------------------------------------------------------
+#ifndef H5_HAVE_VASPRINTF
+/* HDvasprintf provides vasprintf-like function on targets where it is
+ * unavailable.
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the fprintf() calls with
- *      format_templ in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_DIAG_OFF("format-nonliteral")
 int
-HDfprintf(FILE *stream, const char *fmt, ...)
+HDvasprintf(char **bufp, const char *fmt, va_list _ap)
 {
-    int         n = 0, nout = 0;
-    int         fwidth, prec;
-    int         zerofill;
-    int         leftjust;
-    int         plussign;
-    int         ldspace;
-    int         prefix;
-    char        modifier[8];
-    int         conv;
-    char *      rest, format_templ[128];
-    int         len;
-    const char *s;
-    va_list     ap;
+    char * buf;   /* buffer to receive formatted string */
+    size_t bufsz; /* size of buffer to allocate */
 
-    HDassert(stream);
-    HDassert(fmt);
+    for (bufsz = 32; (buf = HDmalloc(bufsz)) != NULL;) {
+        int     ret;
+        va_list ap;
 
-    HDva_start(ap, fmt);
-    while (*fmt) {
-        fwidth = prec = 0;
-        zerofill      = 0;
-        leftjust      = 0;
-        plussign      = 0;
-        prefix        = 0;
-        ldspace       = 0;
-        modifier[0]   = '\0';
-
-        if ('%' == fmt[0] && '%' == fmt[1]) {
-            HDputc('%', stream);
-            fmt += 2;
-            nout++;
+        HDva_copy(ap, _ap);
+        ret = HDvsnprintf(buf, bufsz, fmt, ap);
+        va_end(ap);
+        if (ret >= 0 && (size_t)ret < bufsz) {
+            *bufp = buf;
+            return ret;
         }
-        else if ('%' == fmt[0]) {
-            s = fmt + 1;
-
-            /* Flags */
-            while (HDstrchr("-+ #", *s)) {
-                switch (*s) {
-                    case '-':
-                        leftjust = 1;
-                        break;
-
-                    case '+':
-                        plussign = 1;
-                        break;
-
-                    case ' ':
-                        ldspace = 1;
-                        break;
-
-                    case '#':
-                        prefix = 1;
-                        break;
-
-                    default:
-                        HDassert(0 && "Unknown format flag");
-                } /* end switch */ /*lint !e744 Switch statement doesn't _need_ default */
-                s++;
-            } /* end while */
-
-            /* Field width */
-            if (HDisdigit(*s)) {
-                zerofill = ('0' == *s);
-                fwidth   = (int)HDstrtol(s, &rest, 10);
-                s        = rest;
-            } /* end if */
-            else if ('*' == *s) {
-                fwidth = HDva_arg(ap, int);
-                if (fwidth < 0) {
-                    leftjust = 1;
-                    fwidth   = -fwidth;
-                }
-                s++;
-            }
-
-            /* Precision */
-            if ('.' == *s) {
-                s++;
-                if (HDisdigit(*s)) {
-                    prec = (int)HDstrtol(s, &rest, 10);
-                    s    = rest;
-                }
-                else if ('*' == *s) {
-                    prec = HDva_arg(ap, int);
-                    s++;
-                }
-                if (prec < 1)
-                    prec = 1;
-            }
-
-            /* Extra type modifiers */
-            if (HDstrchr("zZHhlqLI", *s)) {
-                switch (*s) {
-                    /*lint --e{506} Don't issue warnings about constant value booleans */
-                    /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true */
-                    case 'H':
-                        if (sizeof(hsize_t) < sizeof(long))
-                            modifier[0] = '\0';
-                        else if (sizeof(hsize_t) == sizeof(long)) {
-                            HDstrncpy(modifier, "l", sizeof(modifier));
-                            modifier[sizeof(modifier) - 1] = '\0';
-                        } /* end if */
-                        else {
-                            HDstrncpy(modifier, H5_PRINTF_LL_WIDTH, sizeof(modifier));
-                            modifier[sizeof(modifier) - 1] = '\0';
-                        } /* end else */
-                        break;
-
-                    case 'Z':
-                    case 'z':
-                        if (sizeof(size_t) < sizeof(long))
-                            modifier[0] = '\0';
-                        else if (sizeof(size_t) == sizeof(long)) {
-                            HDstrncpy(modifier, "l", sizeof(modifier));
-                            modifier[sizeof(modifier) - 1] = '\0';
-                        } /* end if */
-                        else {
-                            HDstrncpy(modifier, H5_PRINTF_LL_WIDTH, sizeof(modifier));
-                            modifier[sizeof(modifier) - 1] = '\0';
-                        } /* end else */
-                        break;
-
-                    default:
-                        /* Handle 'I64' modifier for Microsoft's "__int64" type */
-                        if (*s == 'I' && *(s + 1) == '6' && *(s + 2) == '4') {
-                            modifier[0] = *s;
-                            modifier[1] = *(s + 1);
-                            modifier[2] = *(s + 2);
-                            modifier[3] = '\0';
-                            s += 2; /* Increment over 'I6', the '4' is taken care of below */
-                        }           /* end if */
-                        else {
-                            /* Handle 'll' for long long types */
-                            if (*s == 'l' && *(s + 1) == 'l') {
-                                modifier[0] = *s;
-                                modifier[1] = *s;
-                                modifier[2] = '\0';
-                                s++; /* Increment over first 'l', second is taken care of below */
-                            }        /* end if */
-                            else {
-                                modifier[0] = *s;
-                                modifier[1] = '\0';
-                            } /* end else */
-                        }     /* end else */
-                        break;
-                }
-                s++;
-            }
-
-            /* Conversion */
-            conv = *s++;
-
-            /* Create the format template */
-            len = 0;
-            len += HDsnprintf(format_templ, (sizeof(format_templ) - (size_t)(len + 1)), "%%%s%s%s%s%s",
-                              (leftjust ? "-" : ""), (plussign ? "+" : ""), (ldspace ? " " : ""),
-                              (prefix ? "#" : ""), (zerofill ? "0" : ""));
-            if (fwidth > 0)
-                len +=
-                    HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%d", fwidth);
-            if (prec > 0)
-                len +=
-                    HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), ".%d", prec);
-            if (*modifier)
-                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%s",
-                                  modifier);
-            HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%c", conv);
-
-            /* Conversion */
-            switch (conv) {
-                case 'd':
-                case 'i':
-                    if (!HDstrcmp(modifier, "h")) {
-                        short x = (short)HDva_arg(ap, int);
-                        n       = fprintf(stream, format_templ, x);
-                    }
-                    else if (!*modifier) {
-                        int x = HDva_arg(ap, int);
-                        n     = fprintf(stream, format_templ, x);
-                    }
-                    else if (!HDstrcmp(modifier, "l")) {
-                        long x = HDva_arg(ap, long);
-                        n      = fprintf(stream, format_templ, x);
-                    }
-                    else {
-                        int64_t x = HDva_arg(ap, int64_t);
-                        n         = fprintf(stream, format_templ, x);
-                    }
-                    break;
-
-                case 'o':
-                case 'u':
-                case 'x':
-                case 'X':
-                    if (!HDstrcmp(modifier, "h")) {
-                        unsigned short x = (unsigned short)HDva_arg(ap, unsigned int);
-                        n                = fprintf(stream, format_templ, x);
-                    }
-                    else if (!*modifier) {
-                        unsigned int x = HDva_arg(ap, unsigned int);
-                        n              = fprintf(stream, format_templ, x);
-                    }
-                    else if (!HDstrcmp(modifier, "l")) {
-                        unsigned long x = HDva_arg(ap, unsigned long);
-                        n               = fprintf(stream, format_templ, x);
-                    }
-                    else {
-                        uint64_t x = HDva_arg(ap, uint64_t);
-                        n          = fprintf(stream, format_templ, x);
-                    }
-                    break;
-
-                case 'f':
-                case 'e':
-                case 'E':
-                case 'g':
-                case 'G':
-                    if (!HDstrcmp(modifier, "h")) {
-                        float x = (float)HDva_arg(ap, double);
-                        n       = fprintf(stream, format_templ, (double)x);
-                    }
-                    else if (!*modifier || !HDstrcmp(modifier, "l")) {
-                        double x = HDva_arg(ap, double);
-                        n        = fprintf(stream, format_templ, x);
-                    }
-                    else {
-                        /*
-                         * Some compilers complain when `long double' and
-                         * `double' are the same thing.
-                         */
-#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-                        long double x = HDva_arg(ap, long double);
-                        n             = fprintf(stream, format_templ, x);
-#else
-                        double x = HDva_arg(ap, double);
-                        n        = fprintf(stream, format_templ, x);
-#endif
-                    }
-                    break;
-
-                case 'a': {
-                    haddr_t x = HDva_arg(ap, haddr_t);
-
-                    if (H5F_addr_defined(x)) {
-                        len = 0;
-                        len += HDsnprintf(format_templ, (sizeof(format_templ) - (size_t)(len + 1)),
-                                          "%%%s%s%s%s%s", (leftjust ? "-" : ""), (plussign ? "+" : ""),
-                                          (ldspace ? " " : ""), (prefix ? "#" : ""), (zerofill ? "0" : ""));
-                        if (fwidth > 0)
-                            len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)),
-                                              "%d", fwidth);
-
-                        /*lint --e{506} Don't issue warnings about constant value booleans */
-                        /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true
-                         */
-                        if (sizeof(x) == H5_SIZEOF_INT) {
-                            HDstrncat(format_templ, "u", (sizeof(format_templ) - (size_t)(len + 1)));
-                            len++;
-                        } /* end if */
-                        else if (sizeof(x) == H5_SIZEOF_LONG) {
-                            HDstrncat(format_templ, "lu", (sizeof(format_templ) - (size_t)(len + 1)));
-                            len++;
-                        } /* end if */
-                        else if (sizeof(x) == H5_SIZEOF_LONG_LONG) {
-                            HDstrncat(format_templ, H5_PRINTF_LL_WIDTH,
-                                      (sizeof(format_templ) - (size_t)(len + 1)));
-                            len += (int)sizeof(H5_PRINTF_LL_WIDTH);
-                            HDstrncat(format_templ, "u", (sizeof(format_templ) - (size_t)(len + 1)));
-                            len++;
-                        }
-                        n = fprintf(stream, format_templ, x);
-                    }
-                    else {
-                        len = 0;
-                        HDstrncpy(format_templ, "%", (sizeof(format_templ) - (size_t)(len + 1)));
-                        len++;
-                        if (leftjust) {
-                            HDstrncat(format_templ, "-", (sizeof(format_templ) - (size_t)(len + 1)));
-                            len++;
-                        } /* end if */
-                        if (fwidth)
-                            len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)),
-                                              "%d", fwidth);
-                        HDstrncat(format_templ, "s", (sizeof(format_templ) - (size_t)(len + 1)));
-                        n = fprintf(stream, format_templ, "UNDEF");
-                    }
-                } break;
-
-                case 'c': {
-                    char x = (char)HDva_arg(ap, int);
-                    n      = fprintf(stream, format_templ, x);
-                } break;
-
-                case 's':
-                case 'p': {
-                    char *x = HDva_arg(ap, char *);
-                    n       = fprintf(stream, format_templ, x);
-                } break;
-
-                case 'n':
-                    format_templ[HDstrlen(format_templ) - 1] = 'u';
-                    n                                        = fprintf(stream, format_templ, nout);
-                    break;
-
-                case 't': {
-                    htri_t tri_var = HDva_arg(ap, htri_t);
-
-                    if (tri_var > 0)
-                        n = fprintf(stream, "TRUE");
-                    else if (!tri_var)
-                        n = fprintf(stream, "FALSE");
-                    else
-                        n = fprintf(stream, "FAIL(%d)", (int)tri_var);
-                } break;
-
-                case 'T': /* Elapsed time, in seconds */
-                {
-                    double seconds     = HDva_arg(ap, double);
-                    char * time_string = H5_timer_get_time_string(seconds);
-
-                    if (time_string) {
-                        n = fprintf(stream, format_templ, time_string);
-                        HDfree(time_string);
-                    } /* end if */
-                    else
-                        n = fprintf(stream, format_templ, "(error)");
-                } break;
-
-                case 'k': {
-                    H5O_token_t token = HDva_arg(ap, H5O_token_t);
-
-                    /* Print the raw token. */
-                    n = fprintf(
-                        stream,
-                        "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
-                        (unsigned char)token.__data[15], (unsigned char)token.__data[14],
-                        (unsigned char)token.__data[13], (unsigned char)token.__data[12],
-                        (unsigned char)token.__data[11], (unsigned char)token.__data[10],
-                        (unsigned char)token.__data[9], (unsigned char)token.__data[8],
-                        (unsigned char)token.__data[7], (unsigned char)token.__data[6],
-                        (unsigned char)token.__data[5], (unsigned char)token.__data[4],
-                        (unsigned char)token.__data[3], (unsigned char)token.__data[2],
-                        (unsigned char)token.__data[1], (unsigned char)token.__data[0]);
-                } break;
-
-                default:
-                    HDfputs(format_templ, stream);
-                    n = (int)HDstrlen(format_templ);
-                    break;
-            }
-            nout += n;
-            fmt = s;
-        }
-        else {
-            HDputc(*fmt, stream);
-            fmt++;
-            nout++;
-        }
+        HDfree(buf);
+        if (ret < 0)
+            return ret;
+        bufsz = (size_t)ret + 1;
     }
-    HDva_end(ap);
-    return nout;
-} /* end HDfprintf() */
-H5_GCC_DIAG_ON("format-nonliteral")
+    return -1;
+}
+#endif /* H5_HAVE_VASPRINTF */
 
 /*-------------------------------------------------------------------------
  * Function:  HDstrtoll
@@ -1466,7 +1095,7 @@ done:
 static size_t
 H5__find_last_file_separator(const char *path, size_t len, hbool_t *no_separator)
 {
-    size_t i;
+    size_t i = len;
 
     FUNC_ENTER_STATIC_NOERR
 

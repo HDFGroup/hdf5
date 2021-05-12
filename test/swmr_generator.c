@@ -119,37 +119,9 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
     if (!HDstrcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
-#ifdef QAK
-    /* Increase the initial size of the metadata cache */
-    {
-        H5AC_cache_config_t mdc_config;
-
-        mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-        H5Pget_mdc_config(fapl, &mdc_config);
-        HDfprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-        HDfprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
-        mdc_config.set_initial_size = 1;
-        mdc_config.initial_size     = 16 * 1024 * 1024;
-        /* mdc_config.epoch_length = 5000; */
-        H5Pset_mdc_config(fapl, &mdc_config);
-    }
-#endif /* QAK */
-
-#ifdef QAK
-    H5Pset_small_data_block_size(fapl, (hsize_t)(50 * CHUNK_SIZE * DTYPE_SIZE));
-#endif /* QAK */
-
-#ifdef QAK
-    H5Pset_fapl_log(fapl, "append.log", H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
-#endif /* QAK */
-
     /* Create file creation property list */
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         return -1;
-
-#ifdef QAK
-    H5Pset_link_phase_change(fcpl, 0, 0);
-#endif /* QAK */
 
     /* Emit informational message */
     if (verbose)
@@ -314,7 +286,7 @@ main(int argc, const char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if (HDstrcmp(index_type, "ea") && HDstrcmp(index_type, "b2"))
+                        if (HDstrcmp(index_type, "ea") != 0 && HDstrcmp(index_type, "b2") != 0)
                             usage();
                         u += 2;
                         break;

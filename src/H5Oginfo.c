@@ -15,7 +15,7 @@
  *
  * Created:             H5Oginfo.c
  *                      Aug 23 2005
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             Group Information messages.
  *
@@ -30,11 +30,11 @@
 #include "H5Opkg.h"      /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_ginfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
-                              const uint8_t *p);
-static herr_t H5O_ginfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_ginfo_copy(const void *_mesg, void *_dest);
-static size_t H5O_ginfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static void * H5O__ginfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
+                                size_t p_size, const uint8_t *p);
+static herr_t H5O__ginfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void * H5O__ginfo_copy(const void *_mesg, void *_dest);
+static size_t H5O__ginfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__ginfo_free(void *_mesg);
 static herr_t H5O__ginfo_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -44,10 +44,10 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
     "ginfo",             /*message name for debugging    */
     sizeof(H5O_ginfo_t), /*native message size           */
     0,                   /* messages are sharable?       */
-    H5O_ginfo_decode,    /*decode message                */
-    H5O_ginfo_encode,    /*encode message                */
-    H5O_ginfo_copy,      /*copy the native value         */
-    H5O_ginfo_size,      /*size of symbol table entry    */
+    H5O__ginfo_decode,   /*decode message                */
+    H5O__ginfo_encode,   /*encode message                */
+    H5O__ginfo_copy,     /*copy the native value         */
+    H5O__ginfo_size,     /*size of symbol table entry    */
     NULL,                /*default reset method          */
     H5O__ginfo_free,     /* free method			*/
     NULL,                /* file delete method		*/
@@ -74,7 +74,7 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
 H5FL_DEFINE_STATIC(H5O_ginfo_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_ginfo_decode
+ * Function:    H5O__ginfo_decode
  *
  * Purpose:     Decode a message and return a pointer to
  *              a newly allocated one.
@@ -84,20 +84,19 @@ H5FL_DEFINE_STATIC(H5O_ginfo_t);
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                 unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
+                  unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_ginfo_t * ginfo = NULL;     /* Pointer to group information message */
     unsigned char flags;            /* Flags for encoding group info */
     void *        ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(p);
@@ -146,29 +145,28 @@ done:
             ginfo = H5FL_FREE(H5O_ginfo_t, ginfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_ginfo_decode() */
+} /* end H5O__ginfo_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_ginfo_encode
+ * Function:    H5O__ginfo_encode
  *
  * Purpose:     Encodes a message.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                 const void *_mesg)
+H5O__ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
+                  const void *_mesg)
 {
     const H5O_ginfo_t *ginfo = (const H5O_ginfo_t *)_mesg;
     unsigned char      flags = 0; /* Flags for encoding group info */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(p);
@@ -195,10 +193,10 @@ H5O_ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_ginfo_encode() */
+} /* end H5O__ginfo_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_ginfo_copy
+ * Function:    H5O__ginfo_copy
  *
  * Purpose:     Copies a message from _MESG to _DEST, allocating _DEST if
  *              necessary.
@@ -208,19 +206,18 @@ H5O_ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_ginfo_copy(const void *_mesg, void *_dest)
+H5O__ginfo_copy(const void *_mesg, void *_dest)
 {
     const H5O_ginfo_t *ginfo     = (const H5O_ginfo_t *)_mesg;
     H5O_ginfo_t *      dest      = (H5O_ginfo_t *)_dest;
     void *             ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(ginfo);
@@ -235,10 +232,10 @@ H5O_ginfo_copy(const void *_mesg, void *_dest)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_ginfo_copy() */
+} /* end H5O__ginfo_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_ginfo_size
+ * Function:    H5O__ginfo_size
  *
  * Purpose:     Returns the size of the raw message in bytes not counting
  *              the message type or size fields, but only the data fields.
@@ -249,18 +246,17 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_ginfo_t *ginfo     = (const H5O_ginfo_t *)_mesg;
     size_t             ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Set return value */
     ret_value = 1 +                                             /* Version */
@@ -275,7 +271,7 @@ H5O_ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
                                              : 0);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_ginfo_size() */
+} /* end H5O__ginfo_size() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5O__ginfo_free
@@ -292,7 +288,7 @@ H5O_ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
 static herr_t
 H5O__ginfo_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(mesg);
 
@@ -309,7 +305,6 @@ H5O__ginfo_free(void *mesg)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------

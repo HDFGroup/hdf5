@@ -250,11 +250,12 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
 #endif /* NDEBUG */
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    H5C_dump_cache_skip_list
  *
  * Purpose:     Debugging routine that prints a summary of the contents of
- *		the skip list used by the metadata cache metadata cache to
- *		maintain an address sorted list of dirty entries.
+ *              the skip list used by the metadata cache metadata cache to
+ *              maintain an address sorted list of dirty entries.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -283,41 +284,58 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
     HDfprintf(stdout, "	slist size = %zu.\n", cache_ptr->slist_size);
 
     if (cache_ptr->slist_len > 0) {
+
         /* If we get this far, all entries in the cache are listed in the
          * skip list -- scan the skip list generating the desired output.
          */
         HDfprintf(stdout, "Num:    Addr:               Len: Prot/Pind: Dirty: Type:\n");
 
-        i        = 0;
+        i = 0;
+
         node_ptr = H5SL_first(cache_ptr->slist_ptr);
-        if (node_ptr != NULL)
+
+        if (node_ptr != NULL) {
+
             entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-        else
+        }
+        else {
+
             entry_ptr = NULL;
+        }
 
         while (entry_ptr != NULL) {
+
             HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
-            HDfprintf(stdout, "%s%d       0x%016" PRIxHADDR "  %4zu    %d/%d       %d    %s\n",
-                      cache_ptr->prefix, i, entry_ptr->addr, entry_ptr->size, (int)(entry_ptr->is_protected),
-                      (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty), entry_ptr->type->name);
+            HDfprintf(stdout, "%s%d       0x%016llx  %4lld    %d/%d       %d    %s\n", cache_ptr->prefix, i,
+                      (long long)(entry_ptr->addr), (long long)(entry_ptr->size),
+                      (int)(entry_ptr->is_protected), (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty),
+                      entry_ptr->type->name);
 
-            HDfprintf(stdout, "		node_ptr = %p, item = %p\n", node_ptr, H5SL_item(node_ptr));
+            HDfprintf(stdout, "		node_ptr = %p, item = %p\n", (void *)node_ptr, H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
+
             node_ptr = H5SL_next(node_ptr);
-            if (node_ptr != NULL)
+
+            if (node_ptr != NULL) {
+
                 entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-            else
+            }
+            else {
+
                 entry_ptr = NULL;
+            }
 
             i++;
+
         } /* end while */
     }     /* end if */
 
     HDfprintf(stdout, "\n\n");
 
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5C_dump_cache_skip_list() */
 #endif /* NDEBUG */
 
@@ -392,13 +410,14 @@ H5C_dump_coll_write_list(H5C_t *cache_ptr, char *calling_fcn)
 
             node_ptr = H5SL_next(node_ptr);
 
-            if (node_ptr != NULL)
+            if (node_ptr != NULL) {
 
                 entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-
-            else
+            }
+            else {
 
                 entry_ptr = NULL;
+            }
 
             i++;
 
@@ -686,8 +705,8 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
               (long long)(cache_ptr->slist_scan_restarts), (long long)(cache_ptr->LRU_scan_restarts),
               (long long)(cache_ptr->index_scan_restarts));
 
-    HDfprintf(stdout, "%s  cache image creations/reads/loads/size = %d / %d /%d / %Hu\n", cache_ptr->prefix,
-              cache_ptr->images_created, cache_ptr->images_read, cache_ptr->images_loaded,
+    HDfprintf(stdout, "%s  cache image creations/reads/loads/size = %d / %d /%d / %" PRIuHSIZE "\n",
+              cache_ptr->prefix, cache_ptr->images_created, cache_ptr->images_read, cache_ptr->images_loaded,
               cache_ptr->last_image_size);
 
     HDfprintf(stdout, "%s  prefetches / dirty prefetches      = %lld / %lld\n", cache_ptr->prefix,
