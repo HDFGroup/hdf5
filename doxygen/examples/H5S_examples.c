@@ -16,7 +16,7 @@ main(void)
         hid_t dspace;
 
         // create a 2D chess board shape (8x8)
-        if ((dspace = H5Screate_simple(2, (hsize_t[]){8,8}, NULL)) == H5I_INVALID_HID) {
+        if ((dspace = H5Screate_simple(2, (hsize_t[]){8, 8}, NULL)) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_dspace;
         }
@@ -40,25 +40,24 @@ fail_dspace:;
         // ...
         // parse the resulting selection
 
-        switch (H5Sget_select_type(dspace))
-        {
-        case H5S_SEL_HYPERSLABS:
-            // we are dealing with a hyperslab selection
-            // determine the regularity and block structure
-            break;
-        case H5S_SEL_POINTS:
-            // we are dealing with a point selection
-            // for example, retrieve the point list
-            break;
-        case H5S_SEL_ALL:
-            // all dataset elements are selected
-            break;
-        case H5S_SEL_NONE:
-            // the selection is empty
-            break;
-        default:
-            ret_val = EXIT_FAILURE;
-            break;
+        switch (H5Sget_select_type(dspace)) {
+            case H5S_SEL_HYPERSLABS:
+                // we are dealing with a hyperslab selection
+                // determine the regularity and block structure
+                break;
+            case H5S_SEL_POINTS:
+                // we are dealing with a point selection
+                // for example, retrieve the point list
+                break;
+            case H5S_SEL_ALL:
+                // all dataset elements are selected
+                break;
+            case H5S_SEL_NONE:
+                // the selection is empty
+                break;
+            default:
+                ret_val = EXIT_FAILURE;
+                break;
         }
 
         if (dspace != H5S_ALL)
@@ -74,28 +73,22 @@ fail_dspace:;
         hid_t dspace;
 
         // create a 2D chess board shape (8x8)
-        if ((dspace = H5Screate_simple(2, (hsize_t[]){8,8}, NULL)) == H5I_INVALID_HID) {
+        if ((dspace = H5Screate_simple(2, (hsize_t[]){8, 8}, NULL)) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_dspace;
         }
         // select all black fields: do this w/ a hyperslab union in two steps
 
         // select the black fields on even rows
-        if (H5Sselect_hyperslab(dspace, H5S_SELECT_SET,
-                                (hsize_t[]){0, 0},
-                                (hsize_t[]){2, 2},
-                                (hsize_t[]){4, 4},
-                                NULL) < 0) {
+        if (H5Sselect_hyperslab(dspace, H5S_SELECT_SET, (hsize_t[]){0, 0}, (hsize_t[]){2, 2},
+                                (hsize_t[]){4, 4}, NULL) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_select;
         }
         // select the black fields on odd rows
         // notice the H5S_SELECT_OR operator
-        if (H5Sselect_hyperslab(dspace, H5S_SELECT_OR,
-                                (hsize_t[]){1, 1},
-                                (hsize_t[]){2, 2},
-                                (hsize_t[]){4, 4},
-                                NULL) < 0) {
+        if (H5Sselect_hyperslab(dspace, H5S_SELECT_OR, (hsize_t[]){1, 1}, (hsize_t[]){2, 2},
+                                (hsize_t[]){4, 4}, NULL) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_select;
         }
