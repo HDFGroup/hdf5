@@ -53,7 +53,7 @@ fail_fcpl:;
     //! <!-- [read] -->
     {
         __label__ fail_fapl, fail_file;
-        hid_t fapl, file;
+        hid_t   fapl, file;
         hsize_t size;
 
         if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) == H5I_INVALID_HID) {
@@ -213,7 +213,7 @@ fail_file:;
 
     //! <!-- [delete] -->
     {
-#if H5_VERSION_GE(1,12,0)
+#if H5_VERSION_GE(1, 12, 0)
 
         // this function is only available in HDF5 1.12.x
         if (H5Fdelete("f1.h5", H5P_DEFAULT) < 0) {
