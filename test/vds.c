@@ -323,7 +323,10 @@ vds_check_mapping(hid_t dcpl, size_t i, hid_t vspace, hid_t srcspace, const char
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Sclose(space_out); }
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(space_out);
+    }
     H5E_END_TRY
 
     return -1;
@@ -999,7 +1002,10 @@ test_api(test_api_config_t config, hid_t fapl, H5F_libver_t low)
         TEST_ERROR
 
     /* Attempt to add virtual layout mapping */
-    H5E_BEGIN_TRY { ret = H5Pset_virtual(dcpl, vspace[0], src_file[0], src_dset[0], srcspace[0]); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_virtual(dcpl, vspace[0], src_file[0], src_dset[0], srcspace[0]);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -3549,7 +3555,10 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     count[1] = 9;
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
         TEST_ERROR_SUPPRESSED
-    H5E_BEGIN_TRY { ret = H5Dwrite(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR_SUPPRESSED

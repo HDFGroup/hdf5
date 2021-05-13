@@ -129,13 +129,8 @@ test_error(hid_t file)
         TEST_ERROR;
     if (old_data != NULL)
         TEST_ERROR;
-#ifdef H5_USE_16_API
-    if (old_func != (H5E_auto_t)H5Eprint)
-        TEST_ERROR;
-#else  /* H5_USE_16_API */
     if (old_func != (H5E_auto2_t)H5Eprint2)
         TEST_ERROR;
-#endif /* H5_USE_16_API */
 
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
         TEST_ERROR;
@@ -200,7 +195,7 @@ init_error(void)
 
     if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size) + 1)
         TEST_ERROR;
-    if (HDstrcmp(ERR_CLS_NAME, cls_name))
+    if (HDstrcmp(ERR_CLS_NAME, cls_name) != 0)
         TEST_ERROR;
 
     if ((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR, ERR_MAJ_TEST_MSG)) < 0)
@@ -225,7 +220,7 @@ init_error(void)
         TEST_ERROR;
     if (msg_type != H5E_MINOR)
         TEST_ERROR;
-    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG))
+    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG) != 0)
         TEST_ERROR;
 
     /* Register another class for later testing. */
@@ -563,7 +558,10 @@ test_copy(void)
     /* Try to close error stack copy.  Should fail because
      * the current H5Eset_current_stack closes the stack to be set.
      */
-    H5E_BEGIN_TRY { ret = H5Eclose_stack(estack_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(estack_id);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR

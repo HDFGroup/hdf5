@@ -121,7 +121,10 @@ check_data_i(const char *dsetname, hid_t fid)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Dclose(did); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+    }
     H5E_END_TRY;
     return 1;
 } /* end check_data_i() */
@@ -192,7 +195,10 @@ check_data_f(const char *dsetname, hid_t fid)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Dclose(did); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+    }
     H5E_END_TRY;
     return 1;
 } /* end check_data_f() */
@@ -321,7 +327,10 @@ check_file(char *filename)
     return nerrors;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
     return nerrors;
 } /* end check_file() */

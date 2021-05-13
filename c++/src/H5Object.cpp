@@ -72,7 +72,9 @@ userVisitOpWrpr(H5_ATTR_UNUSED hid_t obj_id, const char *attr_name, const H5O_in
 // Function:    H5Object default constructor (protected)
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Object::H5Object() : H5Location() {}
+H5Object::H5Object() : H5Location()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    f_Attribute_setId - friend
@@ -477,7 +479,7 @@ H5Object::getObjName(char *obj_name, size_t buf_size) const
 H5std_string
 H5Object::getObjName() const
 {
-    H5std_string obj_name(""); // object name to return
+    H5std_string obj_name; // object name to return
 
     // Preliminary call to get the size of the object name
     ssize_t name_size = H5Iget_name(getId(), NULL, static_cast<size_t>(0));
@@ -556,7 +558,9 @@ H5Object::getObjName(H5std_string &obj_name, size_t len) const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Object::~H5Object() {}
+H5Object::~H5Object()
+{
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // namespace H5

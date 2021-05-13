@@ -1683,7 +1683,7 @@ execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_o
     HDassert(cache_ptr != NULL);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(entry_ptr != NULL);
-    HDassert(entry_ptr = entry_ptr->self);
+    HDassert(entry_ptr == entry_ptr->self);
     HDassert(entry_ptr->header.addr == entry_ptr->addr);
     HDassert((entry_ptr->flush_op_self_resize_in_progress) || (entry_ptr->header.size == entry_ptr->size));
     HDassert(op_ptr != NULL);
@@ -2243,7 +2243,7 @@ resize_entry(H5F_t *file_ptr, int32_t type, int32_t idx, size_t new_size, hbool_
                     }
                     else {
 
-                        HDassert(entry_ptr->size = (entry_ptr->header).size);
+                        HDassert(entry_ptr->size == (entry_ptr->header).size);
                     }
                 }
             }
@@ -2757,7 +2757,6 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
 
     if (pass) {
         H5C_t *cache_ptr;
-        herr_t result = 0;
 
         HDassert(file_ptr);
 

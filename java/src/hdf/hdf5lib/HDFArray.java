@@ -827,12 +827,10 @@ class ArrayDescriptor {
         else if (NT == 'S') {
             NTsize = 2;
         }
-        else if ((NT == 'I')
-                || (NT == 'F')) {
+        else if ((NT == 'I') || (NT == 'F')) {
             NTsize = 4;
         }
-        else if ((NT == 'J')
-                || (NT == 'D')) {
+        else if ((NT == 'J') || (NT == 'D')) {
             NTsize = 8;
         }
         else if (css.startsWith("Ljava.lang.Byte")) {
@@ -925,8 +923,8 @@ class ArrayDescriptor {
         System.out.println("Type: " + theType);
         System.out.println("Class: " + theClass);
         System.out.println("NT: " + NT + " NTsize: " + NTsize);
-        System.out
-                .println("Array has " + dims + " dimensions (" + totalSize + " bytes, " + totalElements + " elements)");
+        System.out.println("Array has " + dims + " dimensions (" + totalSize
+                + " bytes, " + totalElements + " elements)");
         int i;
         for (i = 0; i <= dims; i++) {
             Class tc = objs[i].getClass();

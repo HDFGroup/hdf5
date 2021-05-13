@@ -16,11 +16,7 @@
    tfilter.cpp - HDF5 C++ testing various filters and their combination.
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 

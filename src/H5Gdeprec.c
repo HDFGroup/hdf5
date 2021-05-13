@@ -141,10 +141,10 @@ H5G_map_obj_type(H5O_type_t obj_type)
  *		specified NAME.  The group is opened for write access
  *		and it's object ID is returned.
  *
- *		The optional SIZE_HINT specifies how much file space to
- *		reserve to store the names that will appear in this
- *		group. If a non-positive value is supplied for the SIZE_HINT
- *		then a default size is chosen.
+ *		The SIZE_HINT parameter specifies how much file space to reserve
+ *		to store the names that will appear in this group. This number
+ *		must be less than or equal to UINT32_MAX. If zero is supplied
+ *		for the SIZE_HINT then a default size is chosen.
  *
  * Note:	Deprecated in favor of H5Gcreate2
  *
@@ -174,6 +174,8 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     /* Check arguments */
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name given")
+    if (size_hint > UINT32_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "size_hint cannot be larger than UINT32_MAX")
 
     /* Check if we need to create a non-standard GCPL */
     if (size_hint > 0) {
@@ -1087,7 +1089,10 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
 
         /* Get information about link to the object. If this fails, e.g.
          * because the object is ".", just treat the object as a hard link. */
-        H5E_BEGIN_TRY { ret = H5L_get_info(loc, name, &linfo); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5L_get_info(loc, name, &linfo);
+        }
         H5E_END_TRY;
 
         if (ret >= 0 && linfo.type != H5L_TYPE_HARD) {
