@@ -84,7 +84,7 @@
 #define H5TS_mutex_destroy(mutex)               pthread_mutex_destroy(mutex)
 #define H5TS_cond_init(cond)                    pthread_cond_init(cond, NULL)
 #define H5TS_cond_destroy(cond)                 pthread_cond_destroy(cond)
-#define H5TS_cond_wait(cond)                    pthread_cond_wait(cond)
+#define H5TS_cond_wait(cond, mutex)             pthread_cond_wait(cond, mutex)
 #define H5TS_cond_signal(cond)                  pthread_cond_signal(cond)
 #define H5TS_cond_broadcast(cond)               pthread_cond_broadcast(cond)
 

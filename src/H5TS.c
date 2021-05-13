@@ -418,7 +418,7 @@ H5TS_pthread_first_thread_init(void)
 
     /* initialize global API mutex lock */
 #ifdef H5_USE_RECURSIVE_WRITER_LOCKS
-    H5TS_rw_lock_init(&H5_g.init_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
+    H5TS_rw_lock_init(&H5_g.init_rw_lock, H5TS_RW_LOCK_POLICY_FAVOR_WRITERS);
 #else
     pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
     pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
@@ -532,7 +532,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
      * wake another thread.
      */
     if (mutex->lock_count == 0)
-        if (pthread_cond_signal(&mutex->cond_var); != 0)
+        if (pthread_cond_signal(&mutex->cond_var) != 0)
             ret_value = FAIL;
 #endif /* H5_HAVE_WIN_THREADS */
 
@@ -831,7 +831,7 @@ H5TS_rw_lock_destroy(H5TS_rw_lock_t *rw_lock)
          */
         rw_lock->magic = 0;
 
-        if ((H5TS_mutex_destroy(&(rw_lock->mutex)) < 0)
+        if (H5TS_mutex_destroy(&(rw_lock->mutex)) < 0)
             ret_value = FAIL;
 
         if (H5TS_cond_destroy(&(rw_lock->readers_cv)) < 0)
