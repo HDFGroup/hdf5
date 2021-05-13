@@ -184,7 +184,7 @@ tts_rec_rw_lock_smoke_check_1(void)
     struct H5TS_rw_lock_t       rec_rw_lock;
 
     /* 1) Initialize an instance of the recursive R/W lock. */
-    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
+    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS_RW_LOCK_POLICY_FAVOR_WRITERS);
     CHECK_I(result, "H5TS_rw_lock_init");
 
     /* 2) Obtain a read lock. */
@@ -669,7 +669,7 @@ tts_rec_rw_lock_smoke_check_2(void)
     }
 
     /* 1) Initialize an instance of the recursive R/W lock. */
-    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
+    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS_RW_LOCK_POLICY_FAVOR_WRITERS);
     CHECK_I(result, "H5TS_rw_lock_init");
 
     /* 2) Setup the user data to be passed to each reader test thread. */
@@ -916,7 +916,7 @@ tts_rec_rw_lock_smoke_check_3(void)
     }
 
     /* 1) Initialize an instance of the recursive R/W lock. */
-    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
+    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS_RW_LOCK_POLICY_FAVOR_WRITERS);
     CHECK_I(result, "H5TS_rw_lock_init");
 
     /* 2) Setup the user data to be passed to each writer test thread. */
@@ -1162,7 +1162,7 @@ tts_rec_rw_lock_smoke_check_4(void)
     }
 
     /* 1) Initialize an instance of the recursive R/W lock. */
-    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
+    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS_RW_LOCK_POLICY_FAVOR_WRITERS);
     CHECK_I(result, "H5TS_rw_lock_init");
 
     /* 2) Setup the user data to be passed to each writer test thread. */

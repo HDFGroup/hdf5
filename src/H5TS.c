@@ -18,8 +18,7 @@
  *          macros defined in H5private.h.
  *
  * Note:    Because this threadsafety framework operates outside the library,
- *          it does not use the error stack and only uses the "namecheck only"
- *          FUNC_ENTER_* / FUNC_LEAVE_* macros.
+ *          it does not use the error stack.
  */
 
 /****************/
@@ -48,10 +47,28 @@ typedef struct H5TS_cancel_struct {
     unsigned int cancel_count;
 } H5TS_cancel_t;
 
+#ifndef H5_HAVE_WIN_THREADS
+/* An H5TS_tid_t is a record of a thread identifier that is
+ * available for reuse.
+ */
+struct _tid;
+typedef struct _tid H5TS_tid_t;
+
+struct _tid {
+    H5TS_tid_t *next;
+    uint64_t    id;
+};
+#endif
+
+
 /********************/
 /* Local Prototypes */
 /********************/
 static void H5TS__key_destructor(void *key_val);
+#ifndef H5_HAVE_WIN_THREADS
+static void H5TS_tid_destructor(void *_v);
+static void H5TS_tid_init(void);
+#endif
 
 /*********************/
 /* Package Variables */
@@ -69,11 +86,17 @@ H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 #endif
 
 /* Thread-local keys, used by other interfaces */
-H5TS_key_t H5TS_errstk_key_g; /* Error stack */
+
+/* Error stack */
+H5TS_key_t H5TS_errstk_key_g;
+
+/* Function stack */
 #ifdef H5_HAVE_CODESTACK
-H5TS_key_t H5TS_funcstk_key_g; /* Function stack */
+H5TS_key_t H5TS_funcstk_key_g;
 #endif
-H5TS_key_t H5TS_apictx_key_g; /* API context */
+
+/* API context */
+H5TS_key_t H5TS_apictx_key_g;
 
 /*******************/
 /* Local Variables */
@@ -83,17 +106,6 @@ H5TS_key_t H5TS_apictx_key_g; /* API context */
 static H5TS_key_t H5TS_cancel_key_s; /* Thread cancellation state */
 
 #ifndef H5_HAVE_WIN_THREADS
-
-/* An H5TS_tid_t is a record of a thread identifier that is
- * available for reuse.
- */
-struct _tid;
-typedef struct _tid H5TS_tid_t;
-
-struct _tid {
-    H5TS_tid_t *next;
-    uint64_t    id;
-};
 
 /* Pointer to first free thread ID record or NULL. */
 static H5TS_tid_t *H5TS_tid_next_free = NULL;
@@ -105,26 +117,20 @@ static pthread_mutex_t H5TS_tid_mtx;
 /* Key for thread-local storage of the thread ID. */
 static H5TS_key_t H5TS_tid_key;
 
-#endif /* H5_HAVE_WIN_THREADS */
+#endif
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS__key_destructor
+ * Function:    H5TS__key_destructor
  *
- * USAGE
- *    H5TS__key_destructor()
- *
- * RETURNS
- *   None
- *
- * DESCRIPTION
+ * Returns:     void
+ * 
+ * Description:
  *   Frees the memory for a key.  Called by each thread as it exits.
  *   Currently all the thread-specific information for all keys are simple
  *   structures allocated with malloc, so we can free them all uniformly.
  *
- * PROGRAMMER: Quincey Koziol
- *             February 7, 2003
- *
+ * Programmer:  Quincey Koziol
+ *              February 7, 2003
  *--------------------------------------------------------------------------
  */
 static void
@@ -138,17 +144,12 @@ H5TS__key_destructor(void *key_val)
 #ifndef H5_HAVE_WIN_THREADS
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_tid_destructor
+ * Function:    H5TS_tid_destructor
  *
- * USAGE
- *    H5TS_tid_destructor()
+ * Returns:     void
  *
- * RETURNS
- *
- * DESCRIPTION
+ * Description:
  *   When a thread shuts down, put its ID record on the free list.
- *
  *--------------------------------------------------------------------------
  */
 static void
@@ -167,17 +168,12 @@ H5TS_tid_destructor(void *_v)
 }
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_tid_init
+ * Function:    H5TS_tid_init
  *
- * USAGE
- *    H5TS_tid_init()
- *
- * RETURNS
- *
- * DESCRIPTION
- *   Initialize for integer thread identifiers.
- *
+ * Returns:     void
+ * 
+ * Description:
+ *   Initialization for integer thread identifiers.
  *--------------------------------------------------------------------------
  */
 static void
@@ -187,17 +183,154 @@ H5TS_tid_init(void)
     pthread_key_create(&H5TS_tid_key, H5TS_tid_destructor);
 }
 
+#endif
+
+#ifdef H5_HAVE_WIN_THREADS
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_thread_id
+ * Function:    H5TS_win32_process_enter
  *
- * USAGE
- *    uint64_t id = H5TS_thread_id()
+ * Returns:     TRUE on success, FALSE on failure
  *
- * RETURNS
- *   Return an integer identifier, ID, for the current thread.
+ * Description:
+ *    Per-process setup on Windows when using Win32 threads.
  *
- * DESCRIPTION
+ *--------------------------------------------------------------------------
+ */
+H5_DLL BOOL CALLBACK
+H5TS_win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
+{
+    BOOL ret_value = TRUE;
+
+    /* initialize global API mutex lock */
+    InitializeCriticalSection(&H5_g.init_lock.CriticalSection);
+
+    /* Set up thread local storage */
+    if (TLS_OUT_OF_INDEXES == (H5TS_errstk_key_g = TlsAlloc()))
+        ret_value = FALSE;
+
+#ifdef H5_HAVE_CODESTACK
+    if (TLS_OUT_OF_INDEXES == (H5TS_funcstk_key_g = TlsAlloc()))
+        ret_value = FALSE;
+#endif
+
+    if (TLS_OUT_OF_INDEXES == (H5TS_apictx_key_g = TlsAlloc()))
+        ret_value = FALSE;
+
+    return ret_value;
+} /* H5TS_win32_process_enter() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_win32_thread_enter
+ *
+ * Returns:     SUCCEED/FAIL
+ *
+ * Description:
+ *    Per-thread setup on Windows when using Win32 threads.
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_win32_thread_enter(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    /* Currently a placeholder function.  TLS setup is performed
+     * elsewhere in the library.
+     *
+     * WARNING: Do NOT use C standard library functions here.
+     * CRT functions are not allowed in DllMain, which is where this code
+     * is used.
+     */
+
+    return ret_value;
+} /* H5TS_win32_thread_enter() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_win32_process_exit
+ *
+ * Returns:     void
+ *
+ * Description:
+ *    Per-process cleanup on Windows when using Win32 threads.
+ *
+ *--------------------------------------------------------------------------
+ */
+void
+H5TS_win32_process_exit(void)
+{
+
+    /* Windows uses a different thread local storage mechanism which does
+     * not support auto-freeing like pthreads' keys.
+     *
+     * This function is currently registered via atexit() and is called
+     * AFTER H5_term_library().
+     */
+
+    /* Clean up critical section resources (can't fail) */
+    DeleteCriticalSection(&H5_g.init_lock.CriticalSection);
+
+    /* Clean up per-process thread local storage */
+    TlsFree(H5TS_errstk_key_g);
+#ifdef H5_HAVE_CODESTACK
+    TlsFree(H5TS_funcstk_key_g);
+#endif
+    TlsFree(H5TS_apictx_key_g);
+
+    return;
+} /* end H5TS_win32_process_exit() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_win32_thread_exit
+ *
+ * Returns:     SUCCEED/FAIL
+ *
+ * Description:
+ *    Per-thread cleanup on Windows when using Win32 threads.
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_win32_thread_exit(void)
+{
+    LPVOID lpvData;
+    herr_t ret_value = SUCCEED;
+
+    /* Windows uses a different thread local storage mechanism which does
+     * not support auto-freeing like pthreads' keys.
+     *
+     * WARNING: Do NOT use C standard library functions here.
+     * CRT functions are not allowed in DllMain, which is where this code
+     * is used.
+     */
+
+    /* Clean up per-thread thread local storage */
+    lpvData = TlsGetValue(H5TS_errstk_key_g);
+    if (lpvData)
+        LocalFree((HLOCAL)lpvData);
+
+#ifdef H5_HAVE_CODESTACK
+    lpvData = TlsGetValue(H5TS_funcstk_key_g);
+    if (lpvData)
+        LocalFree((HLOCAL)lpvData);
+#endif
+
+    lpvData = TlsGetValue(H5TS_apictx_key_g);
+    if (lpvData)
+        LocalFree((HLOCAL)lpvData);
+
+    return ret_value;
+} /* end H5TS_win32_thread_exit() */
+
+#endif /* H5_HAVE_WIN_THREADS */
+
+#ifndef H5_HAVE_WIN_THREADS
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_thread_id
+ *
+ * Returns:     An integer identifier for the current thread
+ *
+ * Description:
  *   The ID satisfies the following properties:
  *
  *   1 1 <= ID <= UINT64_MAX
@@ -258,20 +391,16 @@ H5TS_thread_id(void)
 }
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_pthread_first_thread_init
+ * Function:    H5TS_pthread_first_thread_init
  *
- * USAGE
- *    H5TS_pthread_first_thread_init()
+ * Returns:     void
  *
- * RETURNS
- *
- * DESCRIPTION
+ * Description:
  *   Initialization of global API lock, keys for per-thread error stacks and
  *   cancallability information. Called by the first thread that enters the
  *   library.
  *
- * PROGRAMMER: Chee Wai LEE
+ * Programmer: Chee Wai LEE
  *             May 2, 2000
  *
  *--------------------------------------------------------------------------
@@ -315,24 +444,22 @@ H5TS_pthread_first_thread_init(void)
     pthread_key_create(&H5TS_cancel_key_s, H5TS__key_destructor);
 
 } /* end H5TS_pthread_first_thread_init() */
+
 #endif /* H5_HAVE_WIN_THREADS */
 
+
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_mutex_lock
+ * Function:    H5TS_mutex_lock
  *
- * USAGE
- *    H5TS_mutex_lock(&mutex_var)
  *
- * RETURNS
- *    0 on success and non-zero on error.
+ * Returns:     SUCCEED/FAIL
  *
- * DESCRIPTION
+ * Description:
  *    Recursive lock semantics for HDF5 (locking) -
  *    Multiple acquisition of a lock by a thread is permitted with a
  *    corresponding unlock operation required.
  *
- * PROGRAMMER: Chee Wai LEE
+ * Programmer: Chee Wai LEE
  *             May 2, 2000
  *
  *--------------------------------------------------------------------------
@@ -340,15 +467,14 @@ H5TS_pthread_first_thread_init(void)
 herr_t
 H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
 #ifdef H5_HAVE_WIN_THREADS
     EnterCriticalSection(&mutex->CriticalSection);
 #else
     /* Acquire the library lock */
-    ret_value = pthread_mutex_lock(&mutex->atomic_lock);
-    if (ret_value)
-        return ret_value;
+    if (pthread_mutex_lock(&mutex->atomic_lock) != 0)
+        return FAIL;
 
     /* Check if this thread already owns the lock */
     if (mutex->lock_count && pthread_equal(pthread_self(), mutex->owner_thread))
@@ -365,28 +491,24 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
     } /* end else */
 
     /* Release the library lock */
-    ret_value = pthread_mutex_unlock(&mutex->atomic_lock);
+    if (pthread_mutex_unlock(&mutex->atomic_lock) != 0)
+        ret_value = FAIL;
 #endif
 
     return ret_value;
 } /* end H5TS_mutex_lock() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_mutex_unlock
+ * Function:    H5TS_mutex_unlock
  *
- * USAGE
- *    H5TS_mutex_unlock(&mutex_var)
+ * Returns:     SUCCEED/FAIL
  *
- * RETURNS
- *    0 on success and non-zero on error.
- *
- * DESCRIPTION
+ * Description:
  *    Recursive lock semantics for HDF5 (unlocking) -
  *    Multiple acquisition of a lock by a thread is permitted with a
  *    corresponding unlock operation required.
  *
- * PROGRAMMER: Chee Wai LEE
+ * Programmer: Chee Wai LEE
  *             May 2, 2000
  *
  *--------------------------------------------------------------------------
@@ -394,7 +516,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 herr_t
 H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 {
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
 #ifdef H5_HAVE_WIN_THREADS
     /* Releases ownership of the specified critical section object. */
@@ -402,47 +524,39 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 #else
 
     /* Decrement the lock count for this thread */
-    ret_value = pthread_mutex_lock(&mutex->atomic_lock);
-    if (ret_value)
-        return ret_value;
+    if (pthread_mutex_lock(&mutex->atomic_lock) !=0)
+        return FAIL;
     mutex->lock_count--;
-    ret_value = pthread_mutex_unlock(&mutex->atomic_lock);
+    if (pthread_mutex_unlock(&mutex->atomic_lock) != 0)
+        ret_value = FAIL;
 
     /* If the lock count drops to zero, signal the condition variable, to
      * wake another thread.
      */
-    if (mutex->lock_count == 0) {
-        int err;
-
-        err = pthread_cond_signal(&mutex->cond_var);
-        if (err != 0)
-            ret_value = err;
-    }
+    if (mutex->lock_count == 0)
+        if (pthread_cond_signal(&mutex->cond_var); != 0)
+            ret_value = FAIL;
 #endif /* H5_HAVE_WIN_THREADS */
 
     return ret_value;
 } /* H5TS_mutex_unlock */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_cancel_count_inc
+ * Function:    H5TS_cancel_count_inc
  *
- * USAGE
- *    H5TS_cancel_count_inc()
+ * Returns:     SUCCEED/FAIL
  *
- * RETURNS
- *    0 on success non-zero error code on error.
- *
- * DESCRIPTION
+ * Description:
  *    Creates a cancellation counter for a thread if it is the first time
  *    the thread is entering the library.
  *
  *    if counter value is zero, then set cancelability type of the thread
  *    to PTHREAD_CANCEL_DISABLE as thread is entering the library and store
  *    the previous cancelability type into cancellation counter.
+ *
  *    Increase the counter value by 1.
  *
- * PROGRAMMER: Chee Wai LEE
+ * Programmer: Chee Wai LEE
  *            May 2, 2000
  *
  *--------------------------------------------------------------------------
@@ -474,8 +588,7 @@ H5TS_cancel_count_inc(void)
         }
 
         /* Set the thread's cancellation counter with the new object */
-        ret_value = pthread_setspecific(H5TS_cancel_key_s, (void *)cancel_counter);
-        if (ret_value) {
+        if (pthread_setspecific(H5TS_cancel_key_s, (void *)cancel_counter) !=0) {
             HDfree(cancel_counter);
             return FAIL;
         }
@@ -484,7 +597,8 @@ H5TS_cancel_count_inc(void)
     /* Check if thread entering library */
     if (cancel_counter->cancel_count == 0)
         /* Set cancellation state to 'disable', and remember previous state */
-        ret_value = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel_counter->previous_state);
+        if (pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel_counter->previous_state) != 0)
+            ret_value = FAIL;
 
     /* Increment # of times the library API was re-entered, to avoid resetting
      * previous cancellation state until the final API routine is returning.
@@ -496,23 +610,18 @@ H5TS_cancel_count_inc(void)
 } /* end H5TS_cancel_count_inc() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_cancel_count_dec
+ * Function:    H5TS_cancel_count_dec
  *
- * USAGE
- *    H5TS_cancel_count_dec()
+ * Returns:     SUCCEED/FAIL
  *
- * RETURNS
- *    0 on success and a non-zero error code on error.
- *
- * DESCRIPTION
+ * Description:
  *    If counter value is one, then set cancelability type of the thread
  *    to the previous cancelability type stored in the cancellation counter.
  *    (the thread is leaving the library).
  *
  *    Decrement the counter value by 1.
  *
- * PROGRAMMER: Chee Wai LEE
+ * Programmer: Chee Wai LEE
  *             May 2, 2000
  *
  *--------------------------------------------------------------------------
@@ -531,7 +640,8 @@ H5TS_cancel_count_dec(void)
     /* Check for leaving last API routine */
     if (cancel_counter->cancel_count == 1)
         /* Reset to previous thread cancellation state, if last API */
-        ret_value = pthread_setcancelstate(cancel_counter->previous_state, NULL);
+        if (pthread_setcancelstate(cancel_counter->previous_state, NULL) != 0)
+            ret_value = FAIL;
 
     /* Decrement cancellation counter */
     --cancel_counter->cancel_count;
@@ -540,208 +650,20 @@ H5TS_cancel_count_dec(void)
     return ret_value;
 } /* end H5TS_cancel_count_dec() */
 
-#ifdef H5_HAVE_WIN_THREADS
-/*--------------------------------------------------------------------------
- * NAME
- *    H5TS_win32_process_enter
- *
- * RETURNS
- *    SUCCEED/FAIL
- *
- * DESCRIPTION
- *    Per-process setup on Windows when using Win32 threads.
- *
- *--------------------------------------------------------------------------
- */
-H5_DLL BOOL CALLBACK
-H5TS_win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
-{
-    BOOL ret_value = TRUE;
-
-    /* Initialize the critical section (can't fail) */
-    InitializeCriticalSection(&H5_g.init_lock.CriticalSection);
-
-    /* Set up thread local storage */
-    if (TLS_OUT_OF_INDEXES == (H5TS_errstk_key_g = TlsAlloc()))
-        ret_value = FALSE;
-
-#ifdef H5_HAVE_CODESTACK
-    if (TLS_OUT_OF_INDEXES == (H5TS_funcstk_key_g = TlsAlloc()))
-        ret_value = FALSE;
-#endif
-
-    if (TLS_OUT_OF_INDEXES == (H5TS_apictx_key_g = TlsAlloc()))
-        ret_value = FALSE;
-
-    return ret_value;
-} /* H5TS_win32_process_enter() */
-
-/*--------------------------------------------------------------------------
- * NAME
- *    H5TS_win32_thread_enter
- *
- * RETURNS
- *    SUCCEED/FAIL
- *
- * DESCRIPTION
- *    Per-thread setup on Windows when using Win32 threads.
- *
- *--------------------------------------------------------------------------
- */
-herr_t
-H5TS_win32_thread_enter(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    /* Currently a placeholder function.  TLS setup is performed
-     * elsewhere in the library.
-     *
-     * WARNING: Do NOT use C standard library functions here.
-     * CRT functions are not allowed in DllMain, which is where this code
-     * is used.
-     */
-
-    return ret_value;
-} /* H5TS_win32_thread_enter() */
-
-/*--------------------------------------------------------------------------
- * NAME
- *    H5TS_win32_process_exit
- *
- * RETURNS
- *    SUCCEED/FAIL
- *
- * DESCRIPTION
- *    Per-process cleanup on Windows when using Win32 threads.
- *
- *--------------------------------------------------------------------------
- */
-void
-H5TS_win32_process_exit(void)
-{
-
-    /* Windows uses a different thread local storage mechanism which does
-     * not support auto-freeing like pthreads' keys.
-     *
-     * This function is currently registered via atexit() and is called
-     * AFTER H5_term_library().
-     */
-
-    /* Clean up critical section resources (can't fail) */
-    DeleteCriticalSection(&H5_g.init_lock.CriticalSection);
-
-    /* Clean up per-process thread local storage */
-    TlsFree(H5TS_errstk_key_g);
-#ifdef H5_HAVE_CODESTACK
-    TlsFree(H5TS_funcstk_key_g);
-#endif /* H5_HAVE_CODESTACK */
-    TlsFree(H5TS_apictx_key_g);
-
-    return;
-} /* H5TS_win32_process_exit() */
-
-/*--------------------------------------------------------------------------
- * NAME
- *    H5TS_win32_thread_exit
- *
- * RETURNS
- *    SUCCEED/FAIL
- *
- * DESCRIPTION
- *    Per-thread cleanup on Windows when using Win32 threads.
- *
- *--------------------------------------------------------------------------
- */
-herr_t
-H5TS_win32_thread_exit(void)
-{
-    LPVOID lpvData;
-    herr_t ret_value = SUCCEED;
-
-    /* Windows uses a different thread local storage mechanism which does
-     * not support auto-freeing like pthreads' keys.
-     *
-     * WARNING: Do NOT use C standard library functions here.
-     * CRT functions are not allowed in DllMain, which is where this code
-     * is used.
-     */
-
-    /* Clean up per-thread thread local storage */
-    lpvData = TlsGetValue(H5TS_errstk_key_g);
-    if (lpvData)
-        LocalFree((HLOCAL)lpvData);
-
-#ifdef H5_HAVE_CODESTACK
-    lpvData = TlsGetValue(H5TS_funcstk_key_g);
-    if (lpvData)
-        LocalFree((HLOCAL)lpvData);
-#endif /* H5_HAVE_CODESTACK */
-
-    lpvData = TlsGetValue(H5TS_apictx_key_g);
-    if (lpvData)
-        LocalFree((HLOCAL)lpvData);
-
-    return ret_value;
-} /* H5TS_win32_thread_exit() */
-#endif /* H5_HAVE_WIN_THREADS */
-
-/*--------------------------------------------------------------------------
- * NAME
- *    H5TS_create_thread
- *
- * RETURNS
- *    Thread identifier.
- *
- * DESCRIPTION
- *    Spawn off a new thread calling function 'func' with input 'udata'.
- *
- * PROGRAMMER: Mike McGreevy
- *             August 31, 2010
- *
- *--------------------------------------------------------------------------
- */
-H5TS_thread_t
-H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
-{
-    H5TS_thread_t ret_value;
-
-#ifdef H5_HAVE_WIN_THREADS
-    /* When calling C runtime functions, you should use _beginthread or
-     * _beginthreadex instead of CreateThread.  Threads created with
-     * CreateThread risk being killed in low-memory situations. Since we
-     * only create threads in our test code, this is unlikely to be an issue
-     * and we'll use the easier-to-deal-with CreateThread for now.
-     *
-     * NOTE: _beginthread() auto-recycles its handle when execution completes
-     *       so you can't wait on it, making it unsuitable for the existing
-     *       test code.
-     */
-    ret_value = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, udata, 0, NULL);
-
-#else /* H5_HAVE_WIN_THREADS */
-
-    pthread_create(&ret_value, attr, (void *(*)(void *))func, udata);
-
-#endif /* H5_HAVE_WIN_THREADS */
-
-    return ret_value;
-} /* H5TS_create_thread */
-
 #ifdef H5_USE_RECURSIVE_WRITER_LOCKS
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_alloc_rec_entry_count
+ * Function:    H5TS_alloc_rec_entry_count
  *
- * RETURNS
+ * Returns:
  *    Pointer to allocated and initialized instance of
  *    H5TS_rec_entry_count, or NULL on failure.
  *
- * DESCRIPTION
+ * Description:
  *    Allocate and initalize an instance of H5TS_rec_entry_count.
  *
- * PROGRAMMER: John Mainzer
- *             August 28, 2020
+ * Programmer:  John Mainzer
+ *              August 28, 2020
  *
  *--------------------------------------------------------------------------
  */
@@ -754,27 +676,25 @@ H5TS_alloc_rec_entry_count(hbool_t write_lock)
 
     if (ret_value) {
 
-        ret_value->magic          = H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC;
+        ret_value->magic          = H5TS_RW_ENTRY_COUNT_MAGIC;
         ret_value->write_lock     = write_lock;
         ret_value->rec_lock_count = 1;
     }
 
     return ret_value;
 
-} /* H5TS_alloc_rec_entry_count() */
+} /* end H5TS_alloc_rec_entry_count() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_free_rec_entry_count
+ * Function:    H5TS_free_rec_entry_count
  *
- * RETURNS
- *    void.
+ * Returns:     void
  *
- * DESCRIPTION
- *    Free the supplied instance of H5TS_rec_entry_count.
+ * Description:
+ *    Frees the supplied instance of H5TS_rec_entry_count.
  *
- * PROGRAMMER: John Mainzer
- *             August 28, 2020
+ * Programmer:  John Mainzer
+ *              August 28, 2020
  *
  *--------------------------------------------------------------------------
  */
@@ -786,7 +706,7 @@ H5TS_free_rec_entry_count(void *target)
     count = (H5TS_rec_entry_count *)target;
 
     HDassert(count);
-    HDassert(count->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);
+    HDassert(count->magic == H5TS_RW_ENTRY_COUNT_MAGIC);
 
     count->magic = 0;
 
@@ -794,20 +714,18 @@ H5TS_free_rec_entry_count(void *target)
 
     return;
 
-} /* H5TS_free_rec_entry_count() */
+} /* end H5TS_free_rec_entry_count() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_rw_lock_init
+ * Function:    H5TS_rw_lock_init
  *
- * RETURNS
- *    0 on success and non-zero on error.
+ * Returns:     SUCCEED/FAIL
  *
- * DESCRIPTION
+ * Description:
  *    Initialize the supplied instance of H5TS_rw_lock_t.
  *
- * PROGRAMMER: John Mainzer
- *             August 28, 2020
+ * Programmer:  John Mainzer
+ *              August 28, 2020
  *
  *--------------------------------------------------------------------------
  */
@@ -817,55 +735,37 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock, int policy)
     herr_t ret_value = SUCCEED;
 
     /* Sanity checks -- until other policies are implemented,
-     * policy must equal H5TS__RW_LOCK_POLICY__FAVOR_WRITERS.
+     * policy must equal H5TS_RW_LOCK_POLICY_FAVOR_WRITERS.
      */
-    if ((rw_lock == NULL) || (policy != H5TS__RW_LOCK_POLICY__FAVOR_WRITERS)) {
+    if ((rw_lock == NULL) || (policy != H5TS_RW_LOCK_POLICY_FAVOR_WRITERS)) {
 
         ret_value = FAIL;
     }
 
-    if (ret_value == SUCCEED) {
+    /* NOTE: Win32 thread init functions tend to have a return type of void while
+    *        Pthreads return an int. We've gone with the lowest common denominator
+    *        here, but we're going to have to better abstract this in the future.
+    */
 
-        /* Initialize the mutex */
-        if (H5TS_mutex_init(&(rw_lock->mutex)) != 0) {
-
+    /* Initialize the mutex */
+    if (ret_value == SUCCEED)
+        if (H5TS_mutex_init(&(rw_lock->mutex)) != 0)
             ret_value = FAIL;
-        }
-    }
 
-    if (ret_value == SUCCEED) {
-
-        /* Initialize the waiting readers cv */
-        if (H5TS_cond_init(&(rw_lock->readers_cv)) != 0) {
-
+    /* Initialize the waiting readers cv */
+    if (ret_value == SUCCEED)
+        if (H5TS_cond_init(&(rw_lock->readers_cv)) != 0)
             ret_value = FAIL;
-        }
-    }
 
-    if (ret_value == SUCCEED) {
-
-        /* Initialize the waiting writers cv */
-        if (H5TS_cond_init(&(rw_lock->writers_cv)) != 0) {
-
+    /* Initialize the waiting writers cv */
+    if (ret_value == SUCCEED)
+        if (H5TS_cond_init(&(rw_lock->writers_cv)) != 0)
             ret_value = FAIL;
-        }
-    }
 
-    if (ret_value == SUCCEED) {
-
-        /* Initialize the counts key */
-#ifdef H5_HAVE_WIN_THREADS
-        if (TLS_OUT_OF_INDEXES == (rw_lock->rec_entry_count_key = TlsAlloc())) {
-
+    /* Initialize the counts key */
+    if (ret_value == SUCCEED)
+        if (pthread_key_create(&(rw_lock->rec_entry_count_key), H5TS_free_rec_entry_count) != 0)
             ret_value = FAIL;
-        }
-#else
-        if (pthread_key_create(&(rw_lock->rec_entry_count_key), H5TS_free_rec_entry_count) != 0) {
-
-            ret_value = FAIL;
-        }
-#endif
-    }
 
     if (ret_value == SUCCEED) {
 
@@ -897,23 +797,21 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock, int policy)
 
     return ret_value;
 
-} /* H5TS_rw_lock_init() */
+} /* end H5TS_rw_lock_init() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_rw_lock_destroy
+ * Function:    H5TS_rw_lock_destroy
  *
- * RETURNS
- *    0 on success and non-zero on error.
+ * Returns:     SUCCEED/FAIL
  *
- * DESCRIPTION
- *    Takedown an instance of H5TS_rw_lock_t.  All mutex, condition
+ * Description:
+ *    Take down an instance of H5TS_rw_lock_t.  All mutex, condition
  *    variables, and keys are destroyed, and magic is set to an invalid
  *    value.  However, the instance of H5TS_rw_lock_t is not
  *    freed.
  *
- * PROGRAMMER: John Mainzer
- *             August 28, 2020
+ * Programmer:  John Mainzer
+ *              August 28, 2020
  *
  *--------------------------------------------------------------------------
  */
@@ -935,38 +833,34 @@ H5TS_rw_lock_destroy(H5TS_rw_lock_t *rw_lock)
          */
         rw_lock->magic = 0;
 
-        if ((H5TS_mutex_destroy(&(rw_lock->mutex)) < 0) || (H5TS_cond_destroy(&(rw_lock->readers_cv)) < 0) ||
-            (H5TS_cond_destroy(&(rw_lock->writers_cv)) < 0)) {
+        if ((H5TS_mutex_destroy(&(rw_lock->mutex)) < 0)
             ret_value = FAIL;
-        }
 
-        /* Destroy the entry count key */
-#ifdef H5_HAVE_WIN_THREADS
-        if (TlsFree(rw_lock->rec_entry_count_key) == 0)
+        if (H5TS_cond_destroy(&(rw_lock->readers_cv)) < 0)
             ret_value = FAIL;
-#else
+
+        if (H5TS_cond_destroy(&(rw_lock->writers_cv)) < 0)
+            ret_value = FAIL;
+
         if (pthread_key_delete(rw_lock->rec_entry_count_key) < 0)
             ret_value = FAIL;
-#endif
     }
 
     return ret_value;
 
-} /* H5TS_rw_lock_destroy() */
+} /* end H5TS_rw_lock_destroy() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_rw_rdlock
+ * Function:    H5TS_rw_rdlock
  *
- * RETURNS
- *    0 on success and non-zero on error.
+ * Returns:     SUCCEED/FAIL
  *
- * DESCRIPTION
+ * Description:
  *    Attempt to obtain a read lock on the associated recursive read / write
  *    lock.
  *
- * PROGRAMMER: John Mainzer
- *             August 28, 2020
+ * Programmer:  John Mainzer
+ *              August 28, 2020
  *
  *--------------------------------------------------------------------------
  */
@@ -985,15 +879,10 @@ H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock)
 
     /* obtain the mutex */
     if (ret_value == SUCCEED) {
-
-        if (H5TS_mutex_lock_simple(&(rw_lock->mutex)) != 0) {
-
+        if (H5TS_mutex_lock_simple(&(rw_lock->mutex)) != 0)
             ret_value = FAIL;
-        }
-        else {
-
+        else
             have_mutex = TRUE;
-        }
     }
 
     /* If there is no specific data for this thread, this is an
@@ -1013,26 +902,26 @@ H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock)
 
                 count->rec_lock_count++;
 
-                REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK(rw_lock, count);
+                RW_LOCK_STATS_UPDATE_RD_LOCK(rw_lock, count);
             }
         }
         else { /* this is an initial read lock request */
 
             switch (rw_lock->policy) {
 
-                case H5TS__RW_LOCK_POLICY__FAVOR_WRITERS:
+                case H5TS_RW_LOCK_POLICY_FAVOR_WRITERS:
                     if ((rw_lock->active_writers != 0) || (rw_lock->waiting_writers_count != 0)) {
 
                         int delayed = rw_lock->waiting_readers_count + 1;
 
-                        REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK_DELAY(rw_lock, delayed);
+                        RW_LOCK_STATS_UPDATE_RD_LOCK_DELAY(rw_lock, delayed);
                     }
 
                     while ((rw_lock->active_writers != 0) || (rw_lock->waiting_writers_count != 0)) {
 
                         rw_lock->waiting_readers_count++;
 
-                        result = pthread_cond_wait(&(rw_lock->readers_cv), &(rw_lock->mutex));
+                        result = H5TS_cond_wait(&(rw_lock->readers_cv), &(rw_lock->mutex));
 
                         rw_lock->waiting_readers_count--;
 
@@ -1066,7 +955,7 @@ H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock)
 
                 HDassert(count->rec_lock_count == 1);
 
-                REC_RW_LOCK_STATS__UPDATE_FOR_RD_LOCK(rw_lock, count);
+                RW_LOCK_STATS_UPDATE_RD_LOCK(rw_lock, count);
             }
         }
     }
@@ -1078,21 +967,19 @@ H5TS_rw_rdlock(H5TS_rw_lock_t *rw_lock)
 
     return ret_value;
 
-} /* H5TS_rw_rdlock() */
+} /* end H5TS_rw_rdlock() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_rw_wrlock
+ * Function:    H5TS_rw_wrlock
  *
- * RETURNS
- *    0 on success and non-zero on error.
+ * Returns:     SUCCEED/FAIL
  *
- * DESCRIPTION
+ * Description:
  *    Attempt to obtain a write lock on the associated recursive read / write
  *    lock.
  *
- * PROGRAMMER: John Mainzer
- *             August 28, 2020
+ * Programmer:  John Mainzer
+ *              August 28, 2020
  *
  *--------------------------------------------------------------------------
  */
@@ -1109,17 +996,12 @@ H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock)
         ret_value = FAIL;
     }
 
-    /* obtain the mutex */
+    /* Obtain the mutex */
     if (ret_value == SUCCEED) {
-
-        if (H5TS_mutex_lock_simple(&(rw_lock->mutex)) != 0) {
-
+        if (H5TS_mutex_lock_simple(&(rw_lock->mutex)) != 0)
             ret_value = FAIL;
-        }
-        else {
-
+        else
             have_mutex = TRUE;
-        }
     }
 
     /* If there is no specific data for this thread, this is an
@@ -1139,26 +1021,26 @@ H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock)
 
                 count->rec_lock_count++;
 
-                REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK(rw_lock, count);
+                RW_LOCK_STATS_UPDATE_WR_LOCK(rw_lock, count);
             }
         }
         else { /* this is an initial write lock request */
 
             switch (rw_lock->policy) {
 
-                case H5TS__RW_LOCK_POLICY__FAVOR_WRITERS:
+                case H5TS_RW_LOCK_POLICY_FAVOR_WRITERS:
                     if ((rw_lock->active_readers > 0) || (rw_lock->active_writers > 0)) {
 
                         int delayed = rw_lock->waiting_writers_count + 1;
 
-                        REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK_DELAY(rw_lock, delayed);
+                        RW_LOCK_STATS_UPDATE_WR_LOCK_DELAY(rw_lock, delayed);
                     }
 
                     while ((rw_lock->active_readers > 0) || (rw_lock->active_writers > 0)) {
 
                         rw_lock->waiting_writers_count++;
 
-                        result = pthread_cond_wait(&(rw_lock->writers_cv), &(rw_lock->mutex));
+                        result = H5TS_cond_wait(&(rw_lock->writers_cv), &(rw_lock->mutex));
 
                         rw_lock->waiting_writers_count--;
 
@@ -1192,7 +1074,7 @@ H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock)
 
                 HDassert(count->rec_lock_count == 1);
 
-                REC_RW_LOCK_STATS__UPDATE_FOR_WR_LOCK(rw_lock, count);
+                RW_LOCK_STATS_UPDATE_WR_LOCK(rw_lock, count);
             }
         }
     }
@@ -1204,21 +1086,19 @@ H5TS_rw_wrlock(H5TS_rw_lock_t *rw_lock)
 
     return ret_value;
 
-} /* H5TS_rw_wrlock() */
+} /* end H5TS_rw_wrlock() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_rw_unlock
+ * Function:    H5TS_rw_unlock
  *
- * RETURNS
- *    0 on success and non-zero on error.
+ * Returns:     SUCCEED/FAIL
  *
- * DESCRIPTION
+ * Description:
  *    Attempt to unlock either a read or a write lock on the supplied
  *    recursive read / write lock.
  *
- * PROGRAMMER: John Mainzer
- *             August 28, 2020
+ * Programmer:  John Mainzer
+ *              August 28, 2020
  *
  *--------------------------------------------------------------------------
  */
@@ -1237,15 +1117,10 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock)
 
     /* obtain the mutex */
     if (ret_value == SUCCEED) {
-
-        if (H5TS_mutex_lock_simple(&(rw_lock->mutex)) != 0) {
-
+        if (H5TS_mutex_lock_simple(&(rw_lock->mutex)) != 0)
             ret_value = FAIL;
-        }
-        else {
-
+        else
             have_mutex = TRUE;
-        }
     }
 
     /* If there is no specific data for this thread, no lock was held,
@@ -1256,14 +1131,14 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock)
         count = (H5TS_rec_entry_count *)H5TS_get_thread_local_value(rw_lock->rec_entry_count_key);
 
         HDassert(count);
-        HDassert(count->magic == H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC);
+        HDassert(count->magic == H5TS_RW_ENTRY_COUNT_MAGIC);
         HDassert(count->rec_lock_count > 0);
 
         if (NULL == count) {
 
             ret_value = FAIL;
         }
-        else if (count->magic != H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC) {
+        else if (count->magic != H5TS_RW_ENTRY_COUNT_MAGIC) {
 
             ret_value = FAIL;
         }
@@ -1300,7 +1175,7 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock)
                 }
             }
 
-            REC_RW_LOCK_STATS__UPDATE_FOR_WR_UNLOCK(rw_lock, count);
+            RW_LOCK_STATS_UPDATE_WR_UNLOCK(rw_lock, count);
         }
         else { /* drop a read lock */
 
@@ -1329,7 +1204,7 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock)
                 }
             }
 
-            REC_RW_LOCK_STATS__UPDATE_FOR_RD_UNLOCK(rw_lock, count);
+            RW_LOCK_STATS_UPDATE_RD_UNLOCK(rw_lock, count);
         }
 
         if ((ret_value == SUCCEED) && (rw_lock->active_readers == 0) && (rw_lock->active_writers == 0)) {
@@ -1338,24 +1213,25 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock)
 
             switch (rw_lock->policy) {
 
-                case H5TS__RW_LOCK_POLICY__FAVOR_WRITERS:
-
+                case H5TS_RW_LOCK_POLICY_FAVOR_WRITERS:
+#ifdef H5_HAVE_WIN_THREADS
+                    if (rw_lock->waiting_writers_count > 0)
+                        H5TS_cond_signal(&(rw_lock->writers_cv));
+                    else if (rw_lock->waiting_readers_count > 0)
+                        H5TS_cond_broadcast(&(rw_lock->readers_cv));
+#else
                     if (rw_lock->waiting_writers_count > 0) {
 
-                        if (H5TS_cond_signal(&(rw_lock->writers_cv)) != 0) {
-
+                        if (H5TS_cond_signal(&(rw_lock->writers_cv)) != 0)
                             ret_value = FAIL;
-                        }
                     }
                     else if (rw_lock->waiting_readers_count > 0) {
 
-                        if (H5TS_cond_broadcast(&(rw_lock->readers_cv)) != 0) {
-
+                        if (H5TS_cond_broadcast(&(rw_lock->readers_cv)) != 0)
                             ret_value = FAIL;
-                        }
                     }
+#endif
                     break;
-
                 default:
                     ret_value = FAIL;
                     break;
@@ -1388,22 +1264,20 @@ H5TS_rw_unlock(H5TS_rw_lock_t *rw_lock)
 
     return ret_value;
 
-} /* H5TS_rw_unlock() */
+} /* end H5TS_rw_unlock() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_rw_lock_get_stats
+ * Function:    H5TS_rw_lock_get_stats
  *
- * RETURNS
- *    0 on success and non-zero on error.
+ * Returns:     SUCCEED/FAIL
  *
- * DESCRIPTION
+ * Description:
  *    Obtain a copy of the current statistics on the supplied
  *    recursive read / write lock.  Note that to obtain a consistent
  *    set of statistics, the function must obtain the lock mutex.
  *
- * PROGRAMMER: John Mainzer
- *             August 28, 2020
+ * Programmer:  John Mainzer
+ *              August 28, 2020
  *
  *--------------------------------------------------------------------------
  */
@@ -1420,15 +1294,10 @@ H5TS_rw_lock_get_stats(H5TS_rw_lock_t *rw_lock, H5TS_rw_lock_stats_t *stats)
 
     /* obtain the mutex */
     if (ret_value == SUCCEED) {
-
-        if (H5TS_mutex_lock_simple(&(rw_lock->mutex)) != 0) {
-
+        if (H5TS_mutex_lock_simple(&(rw_lock->mutex)) != 0)
             ret_value = FAIL;
-        }
-        else {
-
+        else
             have_mutex = TRUE;
-        }
     }
 
     if (ret_value == SUCCEED) {
@@ -1443,22 +1312,20 @@ H5TS_rw_lock_get_stats(H5TS_rw_lock_t *rw_lock, H5TS_rw_lock_stats_t *stats)
 
     return ret_value;
 
-} /* H5TS_rw_lock_get_stats() */
+} /* end H5TS_rw_lock_get_stats() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_rw_lock_reset_stats
+ * Function:    H5TS_rw_lock_reset_stats
  *
- * RETURNS
- *    0 on success and non-zero on error.
+ * Returns:     SUCCEED/FAIL
  *
- * DESCRIPTION
+ * Description:
  *    Reset the statistics for the supplied recursive read / write lock.
  *    Note that to reset the statistics consistently, the function must
  *    obtain the lock mutex.
  *
- * PROGRAMMER: John Mainzer
- *             August 28, 2020
+ * Programmer:  John Mainzer
+ *              August 28, 2020
  *
  *--------------------------------------------------------------------------
  */
@@ -1492,15 +1359,10 @@ H5TS_rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock)
 
     /* obtain the mutex */
     if (ret_value == SUCCEED) {
-
-        if (H5TS_mutex_lock_simple(&(rw_lock->mutex)) != 0) {
-
+        if (H5TS_mutex_lock_simple(&(rw_lock->mutex)) != 0)
             ret_value = FAIL;
-        }
-        else {
-
+        else
             have_mutex = TRUE;
-        }
     }
 
     if (ret_value == SUCCEED) {
@@ -1515,23 +1377,21 @@ H5TS_rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock)
 
     return ret_value;
 
-} /* H5TS_rw_lock_reset_stats() */
+} /* end H5TS_rw_lock_reset_stats() */
 
 /*--------------------------------------------------------------------------
- * NAME
- *    H5TS_rw_lock_print_stats
+ * Function:    H5TS_rw_lock_print_stats
  *
- * RETURNS
- *    0 on success and non-zero on error.
+ * Returns:     SUCCEED/FAIL
  *
- * DESCRIPTION
+ * Description:
  *    Print the supplied pthresds recursive R/W lock statistics to
  *    standard out.
  *
  *    UPDATE THIS FUNCTION IF YOU MODIFY H5TS_rw_lock_stats_t.
  *
- * PROGRAMMER: John Mainzer
- *             August 28, 2020
+ * Programmer:  John Mainzer
+ *              August 28, 2020
  *
  *--------------------------------------------------------------------------
  */
@@ -1583,7 +1443,50 @@ H5TS_rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats)
 
     return ret_value;
 
-} /* H5TS_rw_lock_print_stats() */
+} /* end H5TS_rw_lock_print_stats() */
+
 #endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
+
+/*--------------------------------------------------------------------------
+ * NAME
+ *    H5TS_create_thread
+ *
+ * RETURNS
+ *    Thread identifier.
+ *
+ * DESCRIPTION
+ *    Spawn off a new thread calling function 'func' with input 'udata'.
+ *
+ * PROGRAMMER: Mike McGreevy
+ *             August 31, 2010
+ *
+ *--------------------------------------------------------------------------
+ */
+H5TS_thread_t
+H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
+{
+    H5TS_thread_t ret_value;
+
+#ifdef H5_HAVE_WIN_THREADS
+    /* When calling C runtime functions, you should use _beginthread or
+     * _beginthreadex instead of CreateThread.  Threads created with
+     * CreateThread risk being killed in low-memory situations. Since we
+     * only create threads in our test code, this is unlikely to be an issue
+     * and we'll use the easier-to-deal-with CreateThread for now.
+     *
+     * NOTE: _beginthread() auto-recycles its handle when execution completes
+     *       so you can't wait on it, making it unsuitable for the existing
+     *       test code.
+     */
+    ret_value = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, udata, 0, NULL);
+
+#else /* H5_HAVE_WIN_THREADS */
+
+    pthread_create(&ret_value, attr, (void *(*)(void *))func, udata);
+
+#endif /* H5_HAVE_WIN_THREADS */
+
+    return ret_value;
+} /* end H5TS_create_thread() */
 
 #endif /* H5_HAVE_THREADSAFE */
