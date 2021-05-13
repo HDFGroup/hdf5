@@ -27,7 +27,9 @@
 
 /**
  * \defgroup H5R H5R
- * \brief Reference Interface
+ *
+ * \todo Describe the reference life cycle.
+ *
  * \details The HDF5 Reference Interface, H5R, provides a mechanism for managing
  *          HDF5 referenced objects.
  */

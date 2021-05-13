@@ -27,8 +27,9 @@
 #define H5_MY_PKG_INIT YES
 
 /**\defgroup H5 H5
- * \brief General Library Functions
- * \todo Describe concisely what the functions in this module are about.
+ *
+ * \todo Describe the library life cycle.
+ *
  */
 
 #endif /* H5module_H */

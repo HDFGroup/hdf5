@@ -29,8 +29,9 @@
 #define H5_MY_PKG_ERR  H5E_SYM
 #define H5_MY_PKG_INIT YES
 
-/**
- * \defgroup H5G H5G
+/** \defgroup H5G H5G
+ *
+ * \todo Add the group life cycle.
  *
  * \details \Bold{Groups in HDF5:} A group associates names with objects and
  *          provides a mechanism for mapping a name to an object. Since all

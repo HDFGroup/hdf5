@@ -28,8 +28,9 @@
 #define H5_MY_PKG_INIT YES
 
 /**\defgroup H5PL H5PL
- * \brief Plugins
- * \todo Describe what programmatically controlling dynamically loaded plugins (H5PL) is all about
+ *
+ * \todo Describe the plugin life cycle.
+ *
  */
 
 #endif /* H5PLmodule_H */

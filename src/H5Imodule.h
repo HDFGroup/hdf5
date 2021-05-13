@@ -30,8 +30,9 @@
 #define H5_MY_PKG_INIT NO
 
 /**\defgroup H5I H5I
- * \brief Identifier Interface
- * \todo Describe concisely what the functions in this module are about.
+ *
+ * \todo Add the identifier life cycle.
+ *
  */
 
 #endif /* H5Imodule_H */

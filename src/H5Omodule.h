@@ -30,9 +30,8 @@
 #define H5_MY_PKG_INIT YES
 
 /**\defgroup H5O H5O
- * \brief Object Interface
  *
- * \todo Describe concisely what the functions in this module are about.
+ * \todo Describe the object life cycle.
  *
  */
 #endif /* H5Omodule_H */

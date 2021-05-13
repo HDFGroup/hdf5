@@ -30,7 +30,8 @@
 #define H5_MY_PKG_INIT YES
 
 /**\defgroup H5P H5P
- * \brief Property List Interface
+ *
+ * \todo Describe the property list life cycle.
  *
  * \details The HDF5 Property List Interface provides a mechanism to take
  *          advantage of more powerful or unusual features in HDF5.
@@ -42,8 +43,6 @@
  *          layout property of a dataset is contiguous by default. For better
  *          performance, the layout can be modified to be chunked or chunked
  *          and compressed.
- *
- * \todo Describe concisely what the functions in this module are about.
  *
  * \defgroup GPLO General Property List Operations
  * \ingroup H5P
