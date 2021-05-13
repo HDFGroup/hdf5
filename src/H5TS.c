@@ -60,7 +60,6 @@ struct _tid {
 };
 #endif
 
-
 /********************/
 /* Local Prototypes */
 /********************/
@@ -123,7 +122,7 @@ static H5TS_key_t H5TS_tid_key;
  * Function:    H5TS__key_destructor
  *
  * Returns:     void
- * 
+ *
  * Description:
  *   Frees the memory for a key.  Called by each thread as it exits.
  *   Currently all the thread-specific information for all keys are simple
@@ -171,7 +170,7 @@ H5TS_tid_destructor(void *_v)
  * Function:    H5TS_tid_init
  *
  * Returns:     void
- * 
+ *
  * Description:
  *   Initialization for integer thread identifiers.
  *--------------------------------------------------------------------------
@@ -447,7 +446,6 @@ H5TS_pthread_first_thread_init(void)
 
 #endif /* H5_HAVE_WIN_THREADS */
 
-
 /*--------------------------------------------------------------------------
  * Function:    H5TS_mutex_lock
  *
@@ -524,7 +522,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 #else
 
     /* Decrement the lock count for this thread */
-    if (pthread_mutex_lock(&mutex->atomic_lock) !=0)
+    if (pthread_mutex_lock(&mutex->atomic_lock) != 0)
         return FAIL;
     mutex->lock_count--;
     if (pthread_mutex_unlock(&mutex->atomic_lock) != 0)
@@ -588,7 +586,7 @@ H5TS_cancel_count_inc(void)
         }
 
         /* Set the thread's cancellation counter with the new object */
-        if (pthread_setspecific(H5TS_cancel_key_s, (void *)cancel_counter) !=0) {
+        if (pthread_setspecific(H5TS_cancel_key_s, (void *)cancel_counter) != 0) {
             HDfree(cancel_counter);
             return FAIL;
         }
@@ -743,9 +741,9 @@ H5TS_rw_lock_init(H5TS_rw_lock_t *rw_lock, int policy)
     }
 
     /* NOTE: Win32 thread init functions tend to have a return type of void while
-    *        Pthreads return an int. We've gone with the lowest common denominator
-    *        here, but we're going to have to better abstract this in the future.
-    */
+     *        Pthreads return an int. We've gone with the lowest common denominator
+     *        here, but we're going to have to better abstract this in the future.
+     */
 
     /* Initialize the mutex */
     if (ret_value == SUCCEED)

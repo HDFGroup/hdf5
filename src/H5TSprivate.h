@@ -27,7 +27,7 @@
 /* Public headers needed by this file */
 #ifdef LATER
 #include "H5TSpublic.h" /* Public API prototypes */
-#endif /* LATER */
+#endif                  /* LATER */
 
 /**************************/
 /* Library Private Macros */
@@ -42,7 +42,7 @@
 #define H5TS_SCOPE_PROCESS 0
 
 /* Calling convention (Windows only) */
-#define H5TS_CALL_CONV     WINAPI
+#define H5TS_CALL_CONV WINAPI
 
 /* Portability function aliases */
 #define H5TS_get_thread_local_value(key)        TlsGetValue(key)
@@ -61,11 +61,11 @@
 #else
 
 /* Scope Definitions (Pthreads only) */
-#define H5TS_SCOPE_SYSTEM  PTHREAD_SCOPE_SYSTEM
-#define H5TS_SCOPE_PROCESS PTHREAD_SCOPE_PROCESS
+#define H5TS_SCOPE_SYSTEM                       PTHREAD_SCOPE_SYSTEM
+#define H5TS_SCOPE_PROCESS                      PTHREAD_SCOPE_PROCESS
 
 /* Calling convention (Windows only) */
-#define H5TS_CALL_CONV     /* N/A */
+#define H5TS_CALL_CONV                          /* N/A */
 
 /* Portability function aliases */
 #define H5TS_get_thread_local_value(key)        pthread_getspecific(key)
@@ -89,8 +89,6 @@
 #define H5TS_cond_broadcast(cond)               pthread_cond_broadcast(cond)
 
 #endif /* H5_HAVE_WIN_THREADS */
-
-
 
 /******************************************************************************
  * Macros to maintain statistics on the Pthreads recursive R/W lock.
@@ -527,7 +525,6 @@ typedef struct H5TS_rec_entry_count {
 
 #endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
 
-
 /*****************************/
 /* Library-private Variables */
 /*****************************/
@@ -538,7 +535,7 @@ typedef struct H5TS_rec_entry_count {
 extern H5TS_once_t H5TS_first_init_g;
 
 /* Error stacks */
-extern H5TS_key_t  H5TS_errstk_key_g;
+extern H5TS_key_t H5TS_errstk_key_g;
 
 /* Function stacks */
 #ifdef H5_HAVE_CODESTACK
@@ -547,7 +544,6 @@ extern H5TS_key_t H5TS_funcstk_key_g;
 
 /* API contexts */
 extern H5TS_key_t H5TS_apictx_key_g;
-
 
 /***************************************/
 /* Library-private Function Prototypes */
