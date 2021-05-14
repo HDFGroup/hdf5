@@ -105,135 +105,8 @@
 #define H5TS_RW_ENTRY_COUNT_MAGIC 0XABBA
 
 /* Flag for favoring writers */
+/* THIS SHOULD BE AN ENUM */
 #define H5TS_RW_LOCK_POLICY_FAVOR_WRITERS 0
-
-/* clang-format off */
-#define RW_LOCK_STATS_UPDATE_RD_LOCK(rw, count)                               \
-do {                                                                          \
-    HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                              \
-    HDassert(count);                                                          \
-    HDassert((count)->magic == H5TS_RW_ENTRY_COUNT_MAGIC);                    \
-    HDassert((count)->rec_lock_count >= 1);                                   \
-    HDassert(!(count)->write_lock);                                           \
-                                                                              \
-    (rw)->stats.read_locks_granted++;                                         \
-                                                                              \
-    if ( (count)->rec_lock_count == 1) {                                      \
-                                                                              \
-        (rw)->stats.real_read_locks_granted++;                                \
-                                                                              \
-        if ( (rw)->active_readers > (rw)->stats.max_read_locks ) {            \
-                                                                              \
-            (rw)->stats.max_read_locks = (rw)->active_readers;                \
-        }                                                                     \
-    }                                                                         \
-                                                                              \
-    if ( (count)->rec_lock_count >                                            \
-         (rw)->stats.max_read_lock_recursion_depth ) {                        \
-                                                                              \
-        (rw)->stats.max_read_lock_recursion_depth =                           \
-            (count)->rec_lock_count;                                          \
-    }                                                                         \
-} while ( FALSE ) /* end RW_LOCK_STATS_UPDATE_RD_LOCK */
-
-
-#define RW_LOCK_STATS_UPDATE_RD_LOCK_DELAY(rw, waiting_count)                 \
-do {                                                                          \
-    HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                              \
-    HDassert((waiting_count) > 0);                                            \
-                                                                              \
-    (rw)->stats.read_locks_delayed++;                                         \
-                                                                              \
-    if ( (rw)->stats.max_read_locks_pending < (waiting_count) ) {             \
-                                                                              \
-        (rw)->stats.max_read_locks_pending = (waiting_count);                 \
-    }                                                                         \
-} while ( FALSE ) /* RW_LOCK_STATS_UPDATE_RD_LOCK_DELAY */
-
-
-#define RW_LOCK_STATS_UPDATE_RD_UNLOCK(rw, count)                             \
-do {                                                                          \
-    HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                              \
-    HDassert(count);                                                          \
-    HDassert((count)->magic == H5TS_RW_ENTRY_COUNT_MAGIC);                    \
-    HDassert((count)->rec_lock_count >= 0);                                   \
-    HDassert(!(count)->write_lock);                                           \
-                                                                              \
-    (rw)->stats.read_locks_released++;                                        \
-                                                                              \
-    if ( count->rec_lock_count == 0) {                                        \
-                                                                              \
-        (rw)->stats.real_read_locks_released++;                               \
-    }                                                                         \
-} while ( FALSE ) /* end RW_LOCK_STATS_UPDATE_RD_UNLOCK */
-
-
-
-#define RW_LOCK_STATS_UPDATE_WR_LOCK(rw, count)                               \
-do {                                                                          \
-    HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                              \
-    HDassert(count);                                                          \
-    HDassert((count)->magic == H5TS_RW_ENTRY_COUNT_MAGIC);                    \
-    HDassert((count)->rec_lock_count >= 1);                                   \
-    HDassert((count)->write_lock);                                            \
-                                                                              \
-    (rw)->stats.write_locks_granted++;                                        \
-                                                                              \
-    if ( (count)->rec_lock_count == 1) {                                      \
-                                                                              \
-        (rw)->stats.real_write_locks_granted++;                               \
-                                                                              \
-        if ( (rw)->active_writers > (rw)->stats.max_write_locks ) {           \
-                                                                              \
-            (rw)->stats.max_write_locks = (rw)->active_writers;               \
-        }                                                                     \
-    }                                                                         \
-                                                                              \
-    if ( (count)->rec_lock_count >                                            \
-         (rw)->stats.max_write_lock_recursion_depth ) {                       \
-                                                                              \
-        (rw)->stats.max_write_lock_recursion_depth =                          \
-            (count)->rec_lock_count;                                          \
-    }                                                                         \
-} while ( FALSE ) /* end RW_LOCK_STATS_UPDATE_WR_LOCK */
-
-
-#define RW_LOCK_STATS_UPDATE_WR_LOCK_DELAY(rw, waiting_count)                 \
-do {                                                                          \
-    HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                              \
-    HDassert((waiting_count) > 0);                                            \
-                                                                              \
-    (rw)->stats.write_locks_delayed++;                                        \
-                                                                              \
-    if ( (rw)->stats.max_write_locks_pending < (waiting_count) ) {            \
-                                                                              \
-        (rw)->stats.max_write_locks_pending = (waiting_count);                \
-    }                                                                         \
-} while ( FALSE ) /* RW_LOCK_STATS_UPDATE_WR_LOCK_DELAY */
-
-
-#define RW_LOCK_STATS_UPDATE_WR_UNLOCK(rw, count)                             \
-do {                                                                          \
-    HDassert(rw);                                                             \
-    HDassert((rw)->magic == H5TS_RW_LOCK_MAGIC);                              \
-    HDassert(count);                                                          \
-    HDassert((count)->magic == H5TS_RW_ENTRY_COUNT_MAGIC);                    \
-    HDassert((count)->rec_lock_count >= 0);                                   \
-    HDassert((count)->write_lock);                                            \
-                                                                              \
-    (rw)->stats.write_locks_released++;                                       \
-                                                                              \
-    if ( (count)->rec_lock_count == 0) {                                      \
-                                                                              \
-        (rw)->stats.real_write_locks_released++;                              \
-    }                                                                         \
-} while ( FALSE ) /* end RW_LOCK_STATS_UPDATE_WR_UNLOCK */
-/* clang-format on */
 
 #endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
 
@@ -544,6 +417,128 @@ extern H5TS_key_t H5TS_funcstk_key_g;
 
 /* API contexts */
 extern H5TS_key_t H5TS_apictx_key_g;
+
+/***********************************/
+/* Private static inline functions */
+/***********************************/
+
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
+
+static inline void
+H5TS_update_stats_rd_lock(H5TS_rw_lock_t *rw_lock, H5TS_rec_entry_count *count)
+{
+    HDassert(rw_lock);
+    HDassert(rw_lock->magic == H5TS_RW_LOCK_MAGIC);
+    HDassert(count);
+    HDassert(count->magic == H5TS_RW_ENTRY_COUNT_MAGIC);
+    HDassert(count->rec_lock_count >= 1);
+    HDassert(!count->write_lock);
+
+    rw_lock->stats.read_locks_granted++;
+
+    if (count->rec_lock_count == 1) {
+
+        rw_lock->stats.real_read_locks_granted++;
+
+        if (rw_lock->active_readers > rw_lock->stats.max_read_locks)
+            rw_lock->stats.max_read_locks = rw_lock->active_readers;
+    }
+
+    if (count->rec_lock_count > rw_lock->stats.max_read_lock_recursion_depth)
+        rw_lock->stats.max_read_lock_recursion_depth = count->rec_lock_count;
+
+} /* end H5TS_update_stats_rd_lock() */
+
+static inline void
+H5TS_update_stats_rd_lock_delay(H5TS_rw_lock_t *rw_lock, int waiting_count)
+{
+    HDassert(rw_lock);
+    HDassert(rw_lock->magic == H5TS_RW_LOCK_MAGIC);
+    HDassert((waiting_count) > 0);
+
+    rw_lock->stats.read_locks_delayed++;
+
+    if (rw_lock->stats.max_read_locks_pending < waiting_count)
+        rw_lock->stats.max_read_locks_pending = (waiting_count);
+
+} /* end H5TS_update_stats_rd_lock_delay() */
+
+static inline void
+H5TS_update_stats_rd_unlock(H5TS_rw_lock_t *rw_lock, H5TS_rec_entry_count *count)
+{
+    HDassert(rw_lock);
+    HDassert(rw_lock->magic == H5TS_RW_LOCK_MAGIC);
+    HDassert(count);
+    HDassert(count->magic == H5TS_RW_ENTRY_COUNT_MAGIC);
+    HDassert(count->rec_lock_count >= 0);
+    HDassert(!count->write_lock);
+
+    rw_lock->stats.read_locks_released++;
+
+    if(count->rec_lock_count == 0)
+        rw_lock->stats.real_read_locks_released++;
+
+} /* end H5TS_update_stats_rd_unlock() */
+
+
+static inline void
+H5TS_update_stats_wr_lock(H5TS_rw_lock_t *rw_lock, H5TS_rec_entry_count *count)
+{
+    HDassert(rw_lock);
+    HDassert(rw_lock->magic == H5TS_RW_LOCK_MAGIC);
+    HDassert(count);
+    HDassert(count->magic == H5TS_RW_ENTRY_COUNT_MAGIC);
+    HDassert(count->rec_lock_count >= 1);
+    HDassert(count->write_lock);
+
+    rw_lock->stats.write_locks_granted++;
+
+    if (count->rec_lock_count == 1) {
+
+        rw_lock->stats.real_write_locks_granted++;
+
+        if (rw_lock->active_writers > rw_lock->stats.max_write_locks)
+            rw_lock->stats.max_write_locks = rw_lock->active_writers;
+    }
+
+    if (count->rec_lock_count > rw_lock->stats.max_write_lock_recursion_depth)
+        rw_lock->stats.max_write_lock_recursion_depth = count->rec_lock_count;
+
+} /* end H5TS_update_stats_wr_lock() */
+
+
+static inline void
+H5TS_update_stats_wr_lock_delay(H5TS_rw_lock_t *rw_lock, int waiting_count)
+{
+    HDassert(rw_lock);
+    HDassert(rw_lock->magic == H5TS_RW_LOCK_MAGIC);
+    HDassert(waiting_count > 0);
+
+    rw_lock->stats.write_locks_delayed++;
+
+    if (rw_lock->stats.max_write_locks_pending < waiting_count)
+        rw_lock->stats.max_write_locks_pending = waiting_count;
+
+} /* end H5TS_update_stats_wr_lock_delay() */
+
+
+static inline void
+H5TS_update_stats_wr_unlock(H5TS_rw_lock_t *rw_lock, H5TS_rec_entry_count *count)
+{
+    HDassert(rw_lock);
+    HDassert(rw_lock->magic == H5TS_RW_LOCK_MAGIC);
+    HDassert(count);
+    HDassert(count->magic == H5TS_RW_ENTRY_COUNT_MAGIC);
+    HDassert(count->rec_lock_count >= 0);
+    HDassert(count->write_lock);
+
+    rw_lock->stats.write_locks_released++;
+
+    if (count->rec_lock_count == 0)
+        rw_lock->stats.real_write_locks_released++;
+
+} /* end H5TS_update_stats_wr_unlock() */
+#endif
 
 /***************************************/
 /* Library-private Function Prototypes */

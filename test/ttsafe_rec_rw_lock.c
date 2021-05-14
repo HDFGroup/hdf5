@@ -636,15 +636,14 @@ tts_rec_rw_lock_smoke_check_2(void)
                                             /* max_write_locks_pending        = */ 0};
     struct H5TS_rw_lock_t rec_rw_lock;
 
-    /* allocate the udata on the heap to shut up the compiler. */
-    udata =
-        (struct rec_rw_lock_test_udata_t *)malloc(sizeof(struct rec_rw_lock_test_udata_t) * MAX_NUM_THREADS);
+    /* Allocate the udata */
+    udata = HDmalloc(sizeof(*udata) * MAX_NUM_THREADS);
 
     if (udata == NULL) {
 
         TestErrPrintf("thread udata allocation failed.\n");
 
-        /* we can't do anything without the udata, so just return */
+        /* We can't do anything without the udata, so just return */
         return;
     }
 
@@ -883,15 +882,14 @@ tts_rec_rw_lock_smoke_check_3(void)
                                             /* max_write_locks_pending        = */ 0};
     struct H5TS_rw_lock_t rec_rw_lock;
 
-    /* allocate the udata on the heap to shut up the compiler. */
-    udata =
-        (struct rec_rw_lock_test_udata_t *)malloc(sizeof(struct rec_rw_lock_test_udata_t) * MAX_NUM_THREADS);
+    /* Allocate the udata */
+    udata = HDmalloc(sizeof(*udata) * MAX_NUM_THREADS);
 
     if (udata == NULL) {
 
         TestErrPrintf("thread udata allocation failed.\n");
 
-        /* we can't do anything without the udata, so just return */
+        /* We can't do anything without the udata, so just return */
         return;
     }
 
@@ -1130,15 +1128,14 @@ tts_rec_rw_lock_smoke_check_4(void)
                                             /* max_write_locks_pending        = */ 0};
     struct H5TS_rw_lock_t rec_rw_lock;
 
-    /* allocate the udata on the heap to shut up the compiler. */
-    udata =
-        (struct rec_rw_lock_test_udata_t *)malloc(sizeof(struct rec_rw_lock_test_udata_t) * MAX_NUM_THREADS);
+    /* Allocate the udata */
+    udata = HDmalloc(sizeof(*udata) * MAX_NUM_THREADS);
 
     if (udata == NULL) {
 
         TestErrPrintf("thread udata allocation failed.\n");
 
-        /* we can't do anything without the udata, so just return */
+        /* We can't do anything without the udata, so just return */
         return;
     }
 
