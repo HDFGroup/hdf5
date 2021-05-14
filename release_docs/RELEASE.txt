@@ -68,6 +68,8 @@ New Features
 
         Autotools:  --enable-recursive-rw-locks [default=no]
 
+        This feature only works with Pthreads. Win32 threads are not supported.
+
       (DER - 2021/05/10)
 
     - CMake no longer builds the C++ library by default
