@@ -262,7 +262,7 @@ typedef struct H5TS_rw_lock_stats_t {
  * A read / write lock, is a lock that allows either an arbitrary number
  * of readers, or a single writer into a critical region.  A recurssive
  * lock is one that allows a thread that already has a lock (be it read or
- * write) to successfully request the lock again, only droping the lock
+ * write) to successfully request the lock again, only dropping the lock
  * when the number of un-lock calls equals the number of lock calls.
  *
  * Note that we can't use the Pthreads or Win32 R/W locks, as while they
@@ -375,14 +375,14 @@ typedef struct H5TS_rw_lock_t {
  *                                           JRM  -- 8/28/20
  *
  * magic:       Unsigned 32 bit integer field used for sanity checking.  This
- *              fields must always be set to
- *              H5TS_PT_REC_RW_REC_ENTRY_COUNT_MAGIC, and should be set to
- *              some invalid value just before the structure is freed.
+ *              field must always be set to H5TS_RW_ENTRY_COUNT_MAGIC, and
+ *              should be set to some invalid value just before the structure
+ *              is freed.
  *
  * write_lock:  Boolean field that is set to TRUE if the count is for a write
  *              lock, and to FALSE if it is for a read lock.
  *
- * rec_lock_count: Count of ehe number of recursive lock calls, less
+ * rec_lock_count: Count of the number of recursive lock calls, less
  *              the number of recursive unlock calls.  The lock in question
  *              is dropped when the count drops to zero.
  *
