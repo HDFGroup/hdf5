@@ -19,9 +19,6 @@
 include $(top_srcdir)/config/commence.am
 include $(top_srcdir)/config/lt_vers.am
 
-# include Doxygen rules (requires autoconf-archive >2016-03-20)
-@DX_RULES@
-
 # How to build H5detect for number format detection.
 # Use -g to force no optimization since many compilers (e.g., Intel) takes
 # a long time to compile it with any optimization on.  H5detect is used
@@ -101,7 +98,6 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
         H5Sselect.c H5Stest.c \
         H5SL.c \
         H5SM.c H5SMbtree2.c H5SMcache.c H5SMmessage.c H5SMtest.c \
-        H5ST.c \
         H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcompound.c H5Tconv.c \
         H5Tcset.c H5Tdbg.c H5Tdeprec.c H5Tenum.c H5Tfields.c H5Tfixed.c \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
@@ -197,11 +193,6 @@ $(top_srcdir)/src/H5version.h: $(top_srcdir)/src/H5vers.txt
 # Assignment overflow macro generation
 $(top_srcdir)/src/H5overflow.h: $(top_srcdir)/src/H5overflow.txt
 	perl $(top_srcdir)/bin/make_overflow $?
-
-# doxygen support
-if BUILD_DOXYGEN_CONDITIONAL
-doxygen: doxygen-doc
-endif
 
 # Add TRACE macros to library source files.  This is done via the trace script
 # in the hdf5/bin directory.  If the file contains HDF5 API macros, a "clean"

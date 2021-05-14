@@ -190,23 +190,6 @@
 
 #endif /*H5_HAVE_WIN32_API*/
 
-/* Various ways that inline functions can be declared */
-#if defined(H5_HAVE___INLINE__)
-/* GNU (alternative form) */
-#define H5_INLINE __inline__
-#elif defined(H5_HAVE___INLINE)
-/* Visual Studio */
-#define H5_INLINE __inline
-#elif defined(H5_HAVE_INLINE)
-/* GNU, C++
- * Use "inline" as a last resort on the off-chance that there will
- * be C++ problems.
- */
-#define H5_INLINE inline
-#else
-#define H5_INLINE
-#endif /* inline choices */
-
 #ifndef F_OK
 #define F_OK 00
 #define W_OK 02
@@ -1450,6 +1433,9 @@ H5_DLL void HDsrand(unsigned int seed);
 #ifndef HDstrcspn
 #define HDstrcspn(X, Y) strcspn(X, Y)
 #endif /* HDstrcspn */
+#ifndef HDstrdup
+#define HDstrdup(S) strdup(S)
+#endif /* HDstrdup */
 #ifndef HDstrerror
 #define HDstrerror(N) strerror(N)
 #endif /* HDstrerror */
@@ -1637,18 +1623,6 @@ H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
 #endif /* HDwrite */
-
-/*
- * And now for a couple non-Posix functions...  Watch out for systems that
- * define these in terms of macros.
- */
-#if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *                   strdup(const char *s);
-#endif
-
-#ifndef HDstrdup
-#define HDstrdup(S) strdup(S)
-#endif /* HDstrdup */
 
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */
@@ -2003,10 +1977,10 @@ extern char H5_lib_vers_info_g[];
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {
 #ifdef H5_USE_RECURSIVE_WRITER_LOCKS
-    H5TS_pt_rec_rw_lock_t init_rw_lock;
-#else                     /* H5_USE_RECURSIVE_WRITER_LOCKS */
+    H5TS_rw_lock_t init_rw_lock; /* API entrance RW lock */
+#else
     H5TS_mutex_t init_lock; /* API entrance mutex */
-#endif                    /* H5_USE_RECURSIVE_WRITER_LOCKS */
+#endif
     hbool_t H5_libinit_g; /* Has the library been initialized? */
     hbool_t H5_libterm_g; /* Is the library being shutdown? */
 } H5_api_t;
@@ -2024,21 +1998,16 @@ typedef struct H5_api_struct {
 
 /* Macros for threadsafe HDF-5 Phase I locks */
 #ifdef H5_USE_RECURSIVE_WRITER_LOCKS
-
-#define H5_API_LOCK   H5TS_pt_rec_rw_wrlock(&H5_g.init_rw_lock);
-#define H5_API_UNLOCK H5TS_pt_rec_rw_unlock(&H5_g.init_rw_lock);
-
-#else /* H5_USE_RECURSIVE_WRITER_LOCKS */
-
+#define H5_API_LOCK   H5TS_rw_wrlock(&H5_g.init_rw_lock);
+#define H5_API_UNLOCK H5TS_rw_unlock(&H5_g.init_rw_lock);
+#else
 #define H5_API_LOCK   H5TS_mutex_lock(&H5_g.init_lock);
 #define H5_API_UNLOCK H5TS_mutex_unlock(&H5_g.init_lock);
-
-#endif /* H5_USE_RECURSIVE_WRITER_LOCKS */
+#endif
 
 /* Macros for thread cancellation-safe mechanism */
 #define H5_API_UNSET_CANCEL H5TS_cancel_count_inc();
-
-#define H5_API_SET_CANCEL H5TS_cancel_count_dec();
+#define H5_API_SET_CANCEL   H5TS_cancel_count_dec();
 
 extern H5_api_t H5_g;
 

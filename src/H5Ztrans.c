@@ -90,8 +90,7 @@ static void       H5Z__do_op(H5Z_node *tree);
 static hbool_t    H5Z__op_is_numbs(H5Z_node *_tree);
 static hbool_t    H5Z__op_is_numbs2(H5Z_node *_tree);
 static hid_t      H5Z__xform_find_type(const H5T_t *type);
-static herr_t     H5Z__xform_eval_full(H5Z_node *tree, const size_t array_size, const hid_t array_type,
-                                       H5Z_result *res);
+static herr_t     H5Z__xform_eval_full(H5Z_node *tree, size_t array_size, hid_t array_type, H5Z_result *res);
 static void       H5Z__xform_destroy_parse_tree(H5Z_node *tree);
 static void *     H5Z__xform_parse(const char *expression, H5Z_datval_ptrs *dat_val_pointers);
 static void *     H5Z__xform_copy_tree(H5Z_node *tree, H5Z_datval_ptrs *dat_val_pointers,
@@ -1539,10 +1538,20 @@ H5Z_xform_create(const char *expr)
                     "unable to allocate memory for data transform expression")
 
     /* Find the number of times "x" is used in this equation, and allocate room for storing that many points
+     * A more sophisticated check is needed to support scientific notation.
      */
-    for (i = 0; i < HDstrlen(expr); i++)
-        if (HDisalpha(expr[i]))
+    for (i = 0; i < HDstrlen(expr); i++) {
+        if (HDisalpha(expr[i])) {
+            if ((i > 0) && (i < (HDstrlen(expr) - 1))) {
+                if (((expr[i] == 'E') || (expr[i] == 'e')) &&
+                    (HDisdigit(expr[i - 1]) || (expr[i - 1] == '.')) &&
+                    (HDisdigit(expr[i + 1]) || (expr[i + 1] == '-') || (expr[i + 1] == '+')))
+                    continue;
+            }
+
             count++;
+        }
+    }
 
     /* When there are no "x"'s in the equation (ie, simple transform case),
      * we don't need to allocate any space since no array will have to be

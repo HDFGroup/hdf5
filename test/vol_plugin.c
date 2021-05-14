@@ -71,7 +71,10 @@ test_registration_by_value(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5VLunregister_connector(vol_id); }
+    H5E_BEGIN_TRY
+    {
+        H5VLunregister_connector(vol_id);
+    }
     H5E_END_TRY;
     return FAIL;
 
@@ -125,7 +128,10 @@ test_registration_by_name(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5VLunregister_connector(vol_id); }
+    H5E_BEGIN_TRY
+    {
+        H5VLunregister_connector(vol_id);
+    }
     H5E_END_TRY;
     return FAIL;
 

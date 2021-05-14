@@ -1,10 +1,10 @@
 /**
  * \ingroup H5O
- * \def H5Oget_info_by_name()
+ * \def H5Oget_info_by_name
  *
  * #H5Oget_info_by_name is a macro that is mapped to:
- * \li H5Oget_info_by_name3()
- * \li H5Oget_info_by_name1()
+ * \li #H5Oget_info_by_name3
+ * \li #H5Oget_info_by_name1
  *
  * \details Such macros are provided to facilitate application
  *          compatibility. Their use and mappings are fully described in
@@ -12,9 +12,9 @@
  *          document closely.
  *
  *          In HDF5 versions 1.12 and after, #H5Oget_info_by_name is mapped to
- *          \ref H5Oget_info_by_name3().  In version 1.10 #H5Oget_info_by_name is
- *          identical to \ref H5Oget_info_by_name1().
- *
+ *          #H5Oget_info_by_name3.  In version 1.10 #H5Oget_info_by_name is 
+ *          identical to #H5Oget_info_by_name1. 
+ * 
  *          Specific compile-time compatibility flags and the resulting
  *          mappings are as follows:
  *
@@ -23,77 +23,36 @@
  *  <tr>
  *      <th>Compatibility setting</th>
  *      <th>H5Oget_info_by_name</th>
- * </tr>
- *  <tr>
- *      <td>No compatibility flag</td>
- *      <td>\ref H5Oget_info_by_name3() for 1.12 and above</td>
  *  </tr>
  *  <tr>
-        <td></td>
- *      <td>\ref H5Oget_info_by_name1() for 1.8 or 1.10</td>
+ *      <td>No compatibility flag \n &nbsp;</td>
+ *      <td>#H5Oget_info_by_name3 for 1.12 and above \n
+ *          #H5Oget_info_by_name1 for 1.8 or 1.10</td>
  *  </tr>
  *  <tr>
  *      <td>Emulate Release 1.12</td>
- *      <td>\ref H5Oget_info_by_name3()</td>
+ *      <td>#H5Oget_info_by_name3</td>
  *  </tr>
  *  <tr>
  *      <td>Emulate Release 1.10 or 1.8 interface</td>
- *      <td>\ref H5Oget_info_by_name1()</td>
+ *      <td>#H5Oget_info_by_name1</td>
  *  </tr>
  * </table>
  *
- * \todo    Fix reference to the document; exchange 1.8.8 and 1.8.0
+ * \version 1.12.0 The macro #H5Oget_info_by_name and function 
+ *                 #H5Oget_info_by_name3 were added and 
+ *                 #H5Oget_info_by_name1 was deprecated.
+ * \version 1.10.5 The macro #H5Oget_info_by_name was removed.  The functions 
+ *                 #H5Oget_info_by_name and #H5Oget_info_by_name1 are 
+ *                 identical in this release.  This change was added to restore 
+ *                 the broken API compatibility introduced in HDF5-1.10.3.
+ * \version 1.10.3 The function #H5Oget_info_by_name was renamed 
+ *                 to #H5Oget_info_by_name1.  The macro #H5Oget_info_by_name 
+ *                 and the function #H5Oget_info_by_name2 were introduced 
+ *                 in this release.
+ * \version 1.8.8 Fortran 2003 subroutine and \c h5o_info_t derived 
+ *                type introduced in this release.</td>
  *
- * \par Version
- * <table>
- * <tr>
- *      <th>Release</th>
- *      <th>Change</th>
- * </tr>
- *  <tr>
- *      <td>1.12.0</td>
- *      <td>The macro #H5Oget_info_by_name and function \ref H5Oget_info_by_name3() were added
- *          and \ref H5Oget_info_by_name1() was deprecated.</td>
- *  </tr>
- *  <tr>
- *      <td>1.10.5</td>
- *      <td>The macro #H5Oget_info_by_name was removed.</td>
- *  </tr>
- *  <tr>
- *      <td></td>
- *      <td>The functions \ref H5Oget_info_by_name() and
- *          H5Oget_info_by_name1() are identical in this release.</td>
- *  </tr>
- *  <tr>
- *      <td></td>
- *      <td>This change was added to restore the broken API compatibility
- *          introduced in HDF5-1.10.3.</td>
- *  </tr>
- *  <tr>
- *      <td>1.10.3</td>
- *      <td>The function \ref H5Oget_info_by_name() was renamed
- *          to \ref H5Oget_info_by_name1.</td>
- *  </tr>
- *  <tr>
- *      <td></td>
- *      <td>The macro #H5Oget_info_by_name was renamed to
- *          \ref H5Oget_info_by_name1().</td>
- *  </tr>
- *  <tr>
- *      <td></td>
- *      <td>The macro #H5Oget_info_by_name and the function \ref H5Oget_info_by_name2()
- *          were introduced in this release.</td>
- *  </tr>
- *  <tr>
- *      <td>1.8.8</td>
- *      <td>Fortran 2003 subroutine and \ref H5O_info_t derived
- *          type introduced in this release.</td>
- *  </tr>
- *  <tr>
- *      <td>1.8.0</td>
- *      <td>C function introduced in this release.</td>
- *  </tr>
- * </table>
- *
+ * \since 1.8.0
  *
  */

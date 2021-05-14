@@ -300,7 +300,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Iregister
  *
- * Purpose:     Public interface to H5I_register.
+ * Purpose:     Register an object.
  *
  * Return:      Success:    New object ID
  *              Failure:    H5I_INVALID_HID

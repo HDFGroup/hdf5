@@ -1,0 +1,23 @@
+/** \page FMT3 HDF5 File Format Specification Version 3.0
+
+\htmlinclude H5.format.html
+
+*/
+
+/** \page FMT2 HDF5 File Format Specification Version 2.0
+
+\htmlinclude H5.format.2.0.html
+
+*/
+
+/** \page FMT11 HDF5 File Format Specification Version 1.1
+
+\htmlinclude H5.format.1.1.html
+
+*/
+
+/** \page FMT1 HDF5 File Format Specification Version 1.0
+
+\htmlinclude H5.format.1.0.html
+
+*/

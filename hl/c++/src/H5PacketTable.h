@@ -33,7 +33,10 @@ class H5_HLCPPDLL PacketTable {
     /* Null constructor
      * Sets table_id to "invalid"
      */
-    PacketTable() { table_id = H5I_BADID; }
+    PacketTable()
+    {
+        table_id = H5I_INVALID_HID;
+    }
 
     /* "Open" Constructor
      * Opens an existing packet table, which can contain either fixed-length or
@@ -163,7 +166,9 @@ class H5_HLCPPDLL FL_PacketTable : virtual public PacketTable {
     /* Destructor
      * Cleans up the packet table
      */
-    virtual ~FL_PacketTable() {}
+    virtual ~FL_PacketTable()
+    {
+    }
 
     /* AppendPacket
      * Adds a single packet to the packet table.  Takes a pointer

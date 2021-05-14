@@ -907,7 +907,10 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
     return file_id;
 
 out:
-    H5E_BEGIN_TRY { H5Pclose(fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+    }
     H5E_END_TRY;
     return -1;
 } /* end H5LTopen_file_image() */
@@ -1308,6 +1311,10 @@ find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
     /* check the arguments */
     if (name == NULL)
         return ret;
+
+    /* Shut the compiler up */
+    (void)loc_id;
+    (void)linfo;
 
     /* Define a positive value for return value if the dataset was found. This will
      * cause the iterator to immediately return that positive value,
@@ -1846,6 +1853,10 @@ find_attr(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5
     /* check the arguments */
     if (name == NULL)
         return H5_ITER_CONT;
+
+    /* Shut compiler up */
+    (void)loc_id;
+    (void)ainfo;
 
     /* Define a positive value for return value if the attribute was found. This will
      * cause the iterator to immediately return that positive value,

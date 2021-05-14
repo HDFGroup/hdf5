@@ -58,7 +58,7 @@
  *
  * The fields of the structure are discussed below:
  *
- * rw_lock_ptr: Pointer to the recursive R/W under test.
+ * rw_lock: Pointer to the recursive R/W under test.
  *
  * id:          ID assigned to the target thread.  Used primarily for
  *              sanity checking.
@@ -84,7 +84,7 @@
  *
  * The remaining fields are used for statistics collection.  They are
  * thread specific versions of the fields of the same name in
- * H5TS_pt_rec_rw_lock_stats_t.  See the header comment for that
+ * H5TS_rw_lock_stats_t.  See the header comment for that
  * structure (in H5TSprivate.h) for further details.
  *
  *                                         JRM -- 9/3/20
@@ -93,11 +93,11 @@
 typedef struct rec_rw_lock_test_udata_t {
 
     /* thread control fields */
-    H5TS_pt_rec_rw_lock_t *rw_lock_ptr;
-    int32_t                id;
-    int32_t                target_rd_lock_cycles;
-    int32_t                target_wr_lock_cycles;
-    int32_t                max_recursive_lock_depth;
+    H5TS_rw_lock_t *rw_lock;
+    int32_t         id;
+    int32_t         target_rd_lock_cycles;
+    int32_t         target_wr_lock_cycles;
+    int32_t         max_recursive_lock_depth;
 
     /* thread stats fields */
     int64_t read_locks_granted;
@@ -179,28 +179,28 @@ void *tts_rw_lock_smoke_check_test_thread(void *_udata);
 void
 tts_rec_rw_lock_smoke_check_1(void)
 {
-    herr_t                             result;
-    struct H5TS_pt_rec_rw_lock_stats_t stats;
-    struct H5TS_pt_rec_rw_lock_t       rec_rw_lock;
+    herr_t                      result;
+    struct H5TS_rw_lock_stats_t stats;
+    struct H5TS_rw_lock_t       rec_rw_lock;
 
     /* 1) Initialize an instance of the recursive R/W lock. */
-    result = H5TS_pt_rec_rw_lock_init(&rec_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_init");
+    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS_RW_LOCK_POLICY_FAVOR_WRITERS);
+    CHECK_I(result, "H5TS_rw_lock_init");
 
     /* 2) Obtain a read lock. */
-    result = H5TS_pt_rec_rw_rdlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_rdlock -- 1");
+    result = H5TS_rw_rdlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_rdlock -- 1");
 
     /* 3) Drop the read lock. */
-    result = H5TS_pt_rec_rw_unlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_unlock -- 1");
+    result = H5TS_rw_unlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_unlock -- 1");
 
     /* 4) Verify the expected stats, and then reset them. */
-    result = H5TS_pt_rec_rw_lock_get_stats(&rec_rw_lock, &stats);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_get_stat -- 1");
+    result = H5TS_rw_lock_get_stats(&rec_rw_lock, &stats);
+    CHECK_I(result, "H5TS_rw_lock_get_stats -- 1");
 
-    result = H5TS_pt_rec_rw_lock_reset_stats(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_reset_stats -- 1");
+    result = H5TS_rw_lock_reset_stats(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_reset_stats -- 1");
 
     /* clang-format makes this conditional unreadable, so turn it off. */
     /* clang-format off */
@@ -222,32 +222,32 @@ tts_rec_rw_lock_smoke_check_1(void)
          ( stats.max_write_locks_pending        != 0 ) ) {
 
         TestErrPrintf("Unexpected recursive R/W lock stats -- 1");
-        H5TS_pt_rec_rw_lock_print_stats("Actual stats", &stats);
+        H5TS_rw_lock_print_stats("Actual stats", &stats);
     }
     /* clang-format on */
 
     /* 5) Obtain a read lock. */
-    result = H5TS_pt_rec_rw_rdlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_rdlock -- 2");
+    result = H5TS_rw_rdlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_rdlock -- 2");
 
     /* 6) Obtain the read lock a second time. */
-    result = H5TS_pt_rec_rw_rdlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_rdlock -- 3");
+    result = H5TS_rw_rdlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_rdlock -- 3");
 
     /* 7) Drop the read lock. */
-    result = H5TS_pt_rec_rw_unlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_unlock -- 2");
+    result = H5TS_rw_unlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_unlock -- 2");
 
     /* 8) Drop the read lock a second time. */
-    result = H5TS_pt_rec_rw_unlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_unlock -- 3");
+    result = H5TS_rw_unlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_unlock -- 3");
 
     /* 9) Verify the exptected stats, and then reset them. */
-    result = H5TS_pt_rec_rw_lock_get_stats(&rec_rw_lock, &stats);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_get_stat -- 2");
+    result = H5TS_rw_lock_get_stats(&rec_rw_lock, &stats);
+    CHECK_I(result, "H5TS_rw_lock_get_stats -- 2");
 
-    result = H5TS_pt_rec_rw_lock_reset_stats(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_reset_stats -- 2");
+    result = H5TS_rw_lock_reset_stats(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_reset_stats -- 2");
 
     /* clang-format makes this conditional unreadable, so turn it off. */
     /* clang-format off */
@@ -269,24 +269,24 @@ tts_rec_rw_lock_smoke_check_1(void)
          ( stats.max_write_locks_pending        != 0 ) ) {
 
         TestErrPrintf("Unexpected recursive R/W lock stats -- 2");
-        H5TS_pt_rec_rw_lock_print_stats("Actual stats", &stats);
+        H5TS_rw_lock_print_stats("Actual stats", &stats);
     }
     /* clang-format on */
 
     /* 10) Obtain a write lock. */
-    result = H5TS_pt_rec_rw_wrlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_wrlock -- 1");
+    result = H5TS_rw_wrlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_wrlock -- 1");
 
     /* 11) Drop the write lock. */
-    result = H5TS_pt_rec_rw_unlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_unlock -- 4");
+    result = H5TS_rw_unlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_unlock -- 4");
 
     /* 12) Verify the expected stats, and then reset them. */
-    result = H5TS_pt_rec_rw_lock_get_stats(&rec_rw_lock, &stats);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_get_stat -- 3");
+    result = H5TS_rw_lock_get_stats(&rec_rw_lock, &stats);
+    CHECK_I(result, "H5TS_rw_lock_get_stats -- 3");
 
-    result = H5TS_pt_rec_rw_lock_reset_stats(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_reset_stats -- 3");
+    result = H5TS_rw_lock_reset_stats(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_reset_stats -- 3");
 
     /* clang-format makes this conditional unreadable, so turn it off. */
     /* clang-format off */
@@ -308,32 +308,32 @@ tts_rec_rw_lock_smoke_check_1(void)
          ( stats.max_write_locks_pending        != 0 ) ) {
 
         TestErrPrintf("Unexpected recursive R/W lock stats -- 3");
-        H5TS_pt_rec_rw_lock_print_stats("Actual stats", &stats);
+        H5TS_rw_lock_print_stats("Actual stats", &stats);
     }
     /* clang-format on */
 
     /* 13) Obtain a write lock. */
-    result = H5TS_pt_rec_rw_wrlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_wrlock -- 2");
+    result = H5TS_rw_wrlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_wrlock -- 2");
 
     /* 14) Obtain the write lock a second time. */
-    result = H5TS_pt_rec_rw_wrlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_wrlock -- 3");
+    result = H5TS_rw_wrlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_wrlock -- 3");
 
     /* 15) Drop the write lock. */
-    result = H5TS_pt_rec_rw_unlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_unlock -- 5");
+    result = H5TS_rw_unlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_unlock -- 5");
 
     /* 16) Drop the write lock a second time. */
-    result = H5TS_pt_rec_rw_unlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_unlock -- 6");
+    result = H5TS_rw_unlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_unlock -- 6");
 
     /* 17) Verify the expected stats, and then reset them. */
-    result = H5TS_pt_rec_rw_lock_get_stats(&rec_rw_lock, &stats);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_get_stat -- 4");
+    result = H5TS_rw_lock_get_stats(&rec_rw_lock, &stats);
+    CHECK_I(result, "H5TS_rw_lock_get_stats -- 4");
 
-    result = H5TS_pt_rec_rw_lock_reset_stats(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_reset_stats -- 4");
+    result = H5TS_rw_lock_reset_stats(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_reset_stats -- 4");
 
     /* clang-format makes this conditional unreadable, so turn it off. */
     /* clang-format off */
@@ -355,40 +355,40 @@ tts_rec_rw_lock_smoke_check_1(void)
          ( stats.max_write_locks_pending        != 0 ) ) {
 
         TestErrPrintf("Unexpected recursive R/W lock stats -- 4");
-        H5TS_pt_rec_rw_lock_print_stats("Actual stats", &stats);
+        H5TS_rw_lock_print_stats("Actual stats", &stats);
     }
     /* clang-format on */
 
     /* 18) Obtain a write lock. */
-    result = H5TS_pt_rec_rw_wrlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_wrlock -- 4");
+    result = H5TS_rw_wrlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_wrlock -- 4");
 
     /* 19) Attempt to obtain a read lock -- should fail. */
-    result = H5TS_pt_rec_rw_rdlock(&rec_rw_lock);
-    VERIFY(result, FAIL, "H5TS_pt_rec_rw_rdlock -- 4");
+    result = H5TS_rw_rdlock(&rec_rw_lock);
+    VERIFY(result, FAIL, "H5TS_rw_rdlock -- 4");
 
     /* 20) Drop the write lock. */
-    result = H5TS_pt_rec_rw_unlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_unlock -- 6");
+    result = H5TS_rw_unlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_unlock -- 6");
 
     /* 21) Obtain a read lock. */
-    result = H5TS_pt_rec_rw_rdlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_rdlock -- 5");
+    result = H5TS_rw_rdlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_rdlock -- 5");
 
     /* 22) Attempt to obtain a write lock -- should fail. */
-    result = H5TS_pt_rec_rw_wrlock(&rec_rw_lock);
-    VERIFY(result, FAIL, "H5TS_pt_rec_rw_wrlock -- 5");
+    result = H5TS_rw_wrlock(&rec_rw_lock);
+    VERIFY(result, FAIL, "H5TS_rw_wrlock -- 5");
 
     /* 23) Drop the read lock. */
-    result = H5TS_pt_rec_rw_unlock(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_unlock -- 6");
+    result = H5TS_rw_unlock(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_unlock -- 6");
 
     /* 24) Verify the expected stats, and then reset them. */
-    result = H5TS_pt_rec_rw_lock_get_stats(&rec_rw_lock, &stats);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_get_stat -- 5");
+    result = H5TS_rw_lock_get_stats(&rec_rw_lock, &stats);
+    CHECK_I(result, "H5TS_rw_lock_get_stats -- 5");
 
-    result = H5TS_pt_rec_rw_lock_reset_stats(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_reset_stats -- 5");
+    result = H5TS_rw_lock_reset_stats(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_reset_stats -- 5");
 
     /* clang-format makes this conditional unreadable, so turn it off. */
     /* clang-format off */
@@ -410,13 +410,13 @@ tts_rec_rw_lock_smoke_check_1(void)
          ( stats.max_write_locks_pending        != 0 ) ) {
 
         TestErrPrintf("Unexpected recursive R/W lock stats -- 5");
-        H5TS_pt_rec_rw_lock_print_stats("Actual stats", &stats);
+        H5TS_rw_lock_print_stats("Actual stats", &stats);
     }
     /* clang-format on */
 
     /* 25) Shut down the recursive R/W lock. */
-    result = H5TS_pt_rec_rw_lock_takedown(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_takedown");
+    result = H5TS_rw_lock_destroy(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_destroy");
 
     return;
 
@@ -458,7 +458,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
     int32_t                          rd_locks_remaining;
     int32_t                          wr_locks_remaining;
     herr_t                           result;
-    H5TS_pt_rec_rw_lock_t *          rw_lock_ptr;
+    H5TS_rw_lock_t *                 rw_lock;
     struct rec_rw_lock_test_udata_t *udata;
 
     HDassert(_udata);
@@ -468,7 +468,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
     rd_locks_remaining = udata->target_rd_lock_cycles;
     wr_locks_remaining = udata->target_wr_lock_cycles;
     max_rec_lock_depth = udata->max_recursive_lock_depth;
-    rw_lock_ptr        = udata->rw_lock_ptr;
+    rw_lock            = udata->rw_lock;
 
     while ((rd_locks_remaining > 0) || (wr_locks_remaining > 0)) {
 
@@ -494,8 +494,8 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
 
         if (read) {
 
-            result = H5TS_pt_rec_rw_rdlock(rw_lock_ptr);
-            CHECK_I(result, "H5TS_pt_rec_rw_rdlock -- 1");
+            result = H5TS_rw_rdlock(rw_lock);
+            CHECK_I(result, "H5TS_rw_rdlock -- 1");
 
             udata->read_locks_granted++;
             udata->real_read_locks_granted++;
@@ -506,16 +506,16 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
 
                 if ((rec_lock_depth >= max_rec_lock_depth) || ((HDrand() % 2) == 0)) {
 
-                    result = H5TS_pt_rec_rw_unlock(rw_lock_ptr);
-                    CHECK_I(result, "H5TS_pt_rec_rw_unlock -- 1");
+                    result = H5TS_rw_unlock(rw_lock);
+                    CHECK_I(result, "H5TS_rw_unlock -- 1");
 
                     rec_lock_depth--;
                     udata->read_locks_released++;
                 }
                 else {
 
-                    result = H5TS_pt_rec_rw_rdlock(rw_lock_ptr);
-                    CHECK_I(result, "H5TS_pt_rec_rw_rdlock -- 2");
+                    result = H5TS_rw_rdlock(rw_lock);
+                    CHECK_I(result, "H5TS_rw_rdlock -- 2");
 
                     rec_lock_depth++;
                     udata->read_locks_granted++;
@@ -526,8 +526,8 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
         }
         else {
 
-            result = H5TS_pt_rec_rw_wrlock(rw_lock_ptr);
-            CHECK_I(result, "H5TS_pt_rec_rw_wrlock -- 1");
+            result = H5TS_rw_wrlock(rw_lock);
+            CHECK_I(result, "H5TS_rw_wrlock -- 1");
 
             udata->write_locks_granted++;
             udata->real_write_locks_granted++;
@@ -538,16 +538,16 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
 
                 if ((rec_lock_depth >= max_rec_lock_depth) || ((HDrand() % 2) == 0)) {
 
-                    result = H5TS_pt_rec_rw_unlock(rw_lock_ptr);
-                    CHECK_I(result, "H5TS_pt_rec_rw_unlock -- 2");
+                    result = H5TS_rw_unlock(rw_lock);
+                    CHECK_I(result, "H5TS_rw_unlock -- 2");
 
                     rec_lock_depth--;
                     udata->write_locks_released++;
                 }
                 else {
 
-                    result = H5TS_pt_rec_rw_wrlock(rw_lock_ptr);
-                    CHECK_I(result, "H5TS_pt_rec_rw_wrlock -- 2");
+                    result = H5TS_rw_wrlock(rw_lock);
+                    CHECK_I(result, "H5TS_rw_wrlock -- 2");
 
                     rec_lock_depth++;
                     udata->write_locks_granted++;
@@ -558,7 +558,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
         }
     }
 
-    return (NULL);
+    return NULL;
 
 } /* end tts_rw_lock_smoke_check_test_thread() */
 
@@ -603,48 +603,47 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
 void
 tts_rec_rw_lock_smoke_check_2(void)
 {
-    hbool_t                            verbose = FALSE;
-    herr_t                             result;
-    int                                express_test;
-    int                                i;
-    int                                num_threads                 = MAX_NUM_THREADS;
-    int                                lock_cycles                 = MAX_LOCK_CYCLES;
-    int32_t                            total_target_rd_lock_cycles = 0;
-    int32_t                            total_target_wr_lock_cycles = 0;
-    H5TS_thread_t                      threads[MAX_NUM_THREADS];
-    struct rec_rw_lock_test_udata_t *  udata = NULL;
-    struct H5TS_pt_rec_rw_lock_stats_t stats;
-    struct H5TS_pt_rec_rw_lock_stats_t expected = {/* Initialize all fields to zero -- we will construct
-                                                    * the expected stats from the thread udata after
-                                                    * completion.
-                                                    */
-                                                   /* read_locks_granted             = */ 0,
-                                                   /* read_locks_released            = */ 0,
-                                                   /* real_read_locks_granted        = */ 0,
-                                                   /* real_read_locks_released       = */ 0,
-                                                   /* max_read_locks                 = */ 0,
-                                                   /* max_read_lock_recursion_depth  = */ 0,
-                                                   /* read_locks_delayed             = */ 0,
-                                                   /* max_read_locks_pending         = */ 0,
-                                                   /* write_locks_granted            = */ 0,
-                                                   /* write_locks_released           = */ 0,
-                                                   /* real_write_locks_granted       = */ 0,
-                                                   /* real_write_locks_released      = */ 0,
-                                                   /* max_write_locks                = */ 0,
-                                                   /* max_write_lock_recursion_depth = */ 0,
-                                                   /* write_locks_delayed            = */ 0,
-                                                   /* max_write_locks_pending        = */ 0};
-    struct H5TS_pt_rec_rw_lock_t rec_rw_lock;
+    hbool_t                          verbose = FALSE;
+    herr_t                           result;
+    int                              express_test;
+    int                              i;
+    int                              num_threads                 = MAX_NUM_THREADS;
+    int                              lock_cycles                 = MAX_LOCK_CYCLES;
+    int32_t                          total_target_rd_lock_cycles = 0;
+    int32_t                          total_target_wr_lock_cycles = 0;
+    H5TS_thread_t                    threads[MAX_NUM_THREADS];
+    struct rec_rw_lock_test_udata_t *udata = NULL;
+    struct H5TS_rw_lock_stats_t      stats;
+    struct H5TS_rw_lock_stats_t      expected = {/* Initialize all fields to zero -- we will construct
+                                             * the expected stats from the thread udata after
+                                             * completion.
+                                             */
+                                            /* read_locks_granted             = */ 0,
+                                            /* read_locks_released            = */ 0,
+                                            /* real_read_locks_granted        = */ 0,
+                                            /* real_read_locks_released       = */ 0,
+                                            /* max_read_locks                 = */ 0,
+                                            /* max_read_lock_recursion_depth  = */ 0,
+                                            /* read_locks_delayed             = */ 0,
+                                            /* max_read_locks_pending         = */ 0,
+                                            /* write_locks_granted            = */ 0,
+                                            /* write_locks_released           = */ 0,
+                                            /* real_write_locks_granted       = */ 0,
+                                            /* real_write_locks_released      = */ 0,
+                                            /* max_write_locks                = */ 0,
+                                            /* max_write_lock_recursion_depth = */ 0,
+                                            /* write_locks_delayed            = */ 0,
+                                            /* max_write_locks_pending        = */ 0};
+    struct H5TS_rw_lock_t rec_rw_lock;
 
-    /* allocate the udata on the heap to shut up the compiler. */
-    udata =
-        (struct rec_rw_lock_test_udata_t *)malloc(sizeof(struct rec_rw_lock_test_udata_t) * MAX_NUM_THREADS);
+    /* Allocate the udata */
+    udata = HDmalloc(sizeof(*udata) * MAX_NUM_THREADS);
 
     if (udata == NULL) {
 
         TestErrPrintf("thread udata allocation failed.\n");
 
-        /* we can't do anything without the udata, so just return */
+        /* We can't do anything without the udata, so just return */
         return;
     }
 
@@ -669,13 +668,13 @@ tts_rec_rw_lock_smoke_check_2(void)
     }
 
     /* 1) Initialize an instance of the recursive R/W lock. */
-    result = H5TS_pt_rec_rw_lock_init(&rec_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_init");
+    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS_RW_LOCK_POLICY_FAVOR_WRITERS);
+    CHECK_I(result, "H5TS_rw_lock_init");
 
     /* 2) Setup the user data to be passed to each reader test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
 
-        udata[i].rw_lock_ptr               = &rec_rw_lock;
+        udata[i].rw_lock                   = &rec_rw_lock;
         udata[i].id                        = i;
         udata[i].target_rd_lock_cycles     = lock_cycles;
         udata[i].target_wr_lock_cycles     = 0;
@@ -753,8 +752,8 @@ tts_rec_rw_lock_smoke_check_2(void)
      *     with the data gathered above.
      */
 
-    result = H5TS_pt_rec_rw_lock_get_stats(&rec_rw_lock, &stats);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_get_stats -- 1");
+    result = H5TS_rw_lock_get_stats(&rec_rw_lock, &stats);
+    CHECK_I(result, "H5TS_rw_lock_get_stats -- 1");
 
     /* turn off clang-format for readability */
     /* clang-format off */
@@ -778,19 +777,19 @@ tts_rec_rw_lock_smoke_check_2(void)
         (stats.max_write_locks_pending         != expected.max_write_locks_pending)) {
 
         TestErrPrintf("Unexpected recursive R/W lock stats -- 1");
-        H5TS_pt_rec_rw_lock_print_stats("Actual stats", &stats);
-        H5TS_pt_rec_rw_lock_print_stats("Expected stats", &expected);
+        H5TS_rw_lock_print_stats("Actual stats", &stats);
+        H5TS_rw_lock_print_stats("Expected stats", &expected);
     }
     /* clang-format on */
 
     if (verbose) {
 
-        H5TS_pt_rec_rw_lock_print_stats("mob of readers stats", &stats);
+        H5TS_rw_lock_print_stats("mob of readers stats", &stats);
     }
 
     /* 7) Shut down the recursive R/W lock. */
-    result = H5TS_pt_rec_rw_lock_takedown(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_takedown");
+    result = H5TS_rw_lock_destroy(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_destroy");
 
     /* discard the udata if it exists */
     if (udata) {
@@ -850,48 +849,47 @@ cleanup_rec_rw_lock_smoke_check_2(void)
 void
 tts_rec_rw_lock_smoke_check_3(void)
 {
-    hbool_t                            verbose = FALSE;
-    herr_t                             result;
-    int                                i;
-    int                                express_test;
-    int                                num_threads                 = MAX_NUM_THREADS;
-    int                                lock_cycles                 = MAX_LOCK_CYCLES;
-    int32_t                            total_target_rd_lock_cycles = 0;
-    int32_t                            total_target_wr_lock_cycles = 0;
-    H5TS_thread_t                      threads[MAX_NUM_THREADS];
-    struct rec_rw_lock_test_udata_t *  udata = NULL;
-    struct H5TS_pt_rec_rw_lock_stats_t stats;
-    struct H5TS_pt_rec_rw_lock_stats_t expected = {/* Initialize all fields to zero -- we will construct
-                                                    * the expected stats from the thread udata after
-                                                    * completion.
-                                                    */
-                                                   /* read_locks_granted             = */ 0,
-                                                   /* read_locks_released            = */ 0,
-                                                   /* real_read_locks_granted        = */ 0,
-                                                   /* real_read_locks_released       = */ 0,
-                                                   /* max_read_locks                 = */ 0,
-                                                   /* max_read_lock_recursion_depth  = */ 0,
-                                                   /* read_locks_delayed             = */ 0,
-                                                   /* max_read_locks_pending         = */ 0,
-                                                   /* write_locks_granted            = */ 0,
-                                                   /* write_locks_released           = */ 0,
-                                                   /* real_write_locks_granted       = */ 0,
-                                                   /* real_write_locks_released      = */ 0,
-                                                   /* max_write_locks                = */ 0,
-                                                   /* max_write_lock_recursion_depth = */ 0,
-                                                   /* write_locks_delayed            = */ 0,
-                                                   /* max_write_locks_pending        = */ 0};
-    struct H5TS_pt_rec_rw_lock_t rec_rw_lock;
+    hbool_t                          verbose = FALSE;
+    herr_t                           result;
+    int                              i;
+    int                              express_test;
+    int                              num_threads                 = MAX_NUM_THREADS;
+    int                              lock_cycles                 = MAX_LOCK_CYCLES;
+    int32_t                          total_target_rd_lock_cycles = 0;
+    int32_t                          total_target_wr_lock_cycles = 0;
+    H5TS_thread_t                    threads[MAX_NUM_THREADS];
+    struct rec_rw_lock_test_udata_t *udata = NULL;
+    struct H5TS_rw_lock_stats_t      stats;
+    struct H5TS_rw_lock_stats_t      expected = {/* Initialize all fields to zero -- we will construct
+                                             * the expected stats from the thread udata after
+                                             * completion.
+                                             */
+                                            /* read_locks_granted             = */ 0,
+                                            /* read_locks_released            = */ 0,
+                                            /* real_read_locks_granted        = */ 0,
+                                            /* real_read_locks_released       = */ 0,
+                                            /* max_read_locks                 = */ 0,
+                                            /* max_read_lock_recursion_depth  = */ 0,
+                                            /* read_locks_delayed             = */ 0,
+                                            /* max_read_locks_pending         = */ 0,
+                                            /* write_locks_granted            = */ 0,
+                                            /* write_locks_released           = */ 0,
+                                            /* real_write_locks_granted       = */ 0,
+                                            /* real_write_locks_released      = */ 0,
+                                            /* max_write_locks                = */ 0,
+                                            /* max_write_lock_recursion_depth = */ 0,
+                                            /* write_locks_delayed            = */ 0,
+                                            /* max_write_locks_pending        = */ 0};
+    struct H5TS_rw_lock_t rec_rw_lock;
 
-    /* allocate the udata on the heap to shut up the compiler. */
-    udata =
-        (struct rec_rw_lock_test_udata_t *)malloc(sizeof(struct rec_rw_lock_test_udata_t) * MAX_NUM_THREADS);
+    /* Allocate the udata */
+    udata = HDmalloc(sizeof(*udata) * MAX_NUM_THREADS);
 
     if (udata == NULL) {
 
         TestErrPrintf("thread udata allocation failed.\n");
 
-        /* we can't do anything without the udata, so just return */
+        /* We can't do anything without the udata, so just return */
         return;
     }
 
@@ -916,13 +914,13 @@ tts_rec_rw_lock_smoke_check_3(void)
     }
 
     /* 1) Initialize an instance of the recursive R/W lock. */
-    result = H5TS_pt_rec_rw_lock_init(&rec_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_init");
+    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS_RW_LOCK_POLICY_FAVOR_WRITERS);
+    CHECK_I(result, "H5TS_rw_lock_init");
 
     /* 2) Setup the user data to be passed to each writer test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
 
-        udata[i].rw_lock_ptr               = &rec_rw_lock;
+        udata[i].rw_lock                   = &rec_rw_lock;
         udata[i].id                        = i;
         udata[i].target_rd_lock_cycles     = 0;
         udata[i].target_wr_lock_cycles     = lock_cycles;
@@ -1000,8 +998,8 @@ tts_rec_rw_lock_smoke_check_3(void)
     /* 6) Obtain the stats from the recursive R/W lock, and compare
      *     with the data gathered above.
      */
-    result = H5TS_pt_rec_rw_lock_get_stats(&rec_rw_lock, &stats);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_get_stats -- 1");
+    result = H5TS_rw_lock_get_stats(&rec_rw_lock, &stats);
+    CHECK_I(result, "H5TS_rw_lock_get_stats -- 1");
 
     /* turn off clang-format for readability */
     /* clang-format off */
@@ -1024,19 +1022,19 @@ tts_rec_rw_lock_smoke_check_3(void)
         (stats.max_write_locks_pending         > expected.max_write_locks_pending)) {
 
         TestErrPrintf("Unexpected recursive R/W lock stats -- 1");
-        H5TS_pt_rec_rw_lock_print_stats("Actual stats", &stats);
-        H5TS_pt_rec_rw_lock_print_stats("Expected stats", &expected);
+        H5TS_rw_lock_print_stats("Actual stats", &stats);
+        H5TS_rw_lock_print_stats("Expected stats", &expected);
     }
     /* clang-format on */
 
     if (verbose) {
 
-        H5TS_pt_rec_rw_lock_print_stats("Actual stats", &stats);
+        H5TS_rw_lock_print_stats("Actual stats", &stats);
     }
 
     /* 7) Shut down the recursive R/W lock. */
-    result = H5TS_pt_rec_rw_lock_takedown(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_takedown");
+    result = H5TS_rw_lock_destroy(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_destroy");
 
     /* discard the udata if it exists */
     if (udata) {
@@ -1097,48 +1095,47 @@ cleanup_rec_rw_lock_smoke_check_3(void)
 void
 tts_rec_rw_lock_smoke_check_4(void)
 {
-    hbool_t                            verbose = FALSE;
-    herr_t                             result;
-    int                                i;
-    int                                express_test;
-    int                                num_threads                 = MAX_NUM_THREADS;
-    int                                lock_cycles                 = MAX_LOCK_CYCLES;
-    int32_t                            total_target_rd_lock_cycles = 0;
-    int32_t                            total_target_wr_lock_cycles = 0;
-    H5TS_thread_t                      threads[MAX_NUM_THREADS];
-    struct rec_rw_lock_test_udata_t *  udata = NULL;
-    struct H5TS_pt_rec_rw_lock_stats_t stats;
-    struct H5TS_pt_rec_rw_lock_stats_t expected = {/* Initialize all fields to zero -- we will construct
-                                                    * the expected stats from the thread udata after
-                                                    * completion.
-                                                    */
-                                                   /* read_locks_granted             = */ 0,
-                                                   /* read_locks_released            = */ 0,
-                                                   /* real_read_locks_granted        = */ 0,
-                                                   /* real_read_locks_released       = */ 0,
-                                                   /* max_read_locks                 = */ 0,
-                                                   /* max_read_lock_recursion_depth  = */ 0,
-                                                   /* read_locks_delayed             = */ 0,
-                                                   /* max_read_locks_pending         = */ 0,
-                                                   /* write_locks_granted            = */ 0,
-                                                   /* write_locks_released           = */ 0,
-                                                   /* real_write_locks_granted       = */ 0,
-                                                   /* real_write_locks_released      = */ 0,
-                                                   /* max_write_locks                = */ 0,
-                                                   /* max_write_lock_recursion_depth = */ 0,
-                                                   /* write_locks_delayed            = */ 0,
-                                                   /* max_write_locks_pending        = */ 0};
-    struct H5TS_pt_rec_rw_lock_t rec_rw_lock;
+    hbool_t                          verbose = FALSE;
+    herr_t                           result;
+    int                              i;
+    int                              express_test;
+    int                              num_threads                 = MAX_NUM_THREADS;
+    int                              lock_cycles                 = MAX_LOCK_CYCLES;
+    int32_t                          total_target_rd_lock_cycles = 0;
+    int32_t                          total_target_wr_lock_cycles = 0;
+    H5TS_thread_t                    threads[MAX_NUM_THREADS];
+    struct rec_rw_lock_test_udata_t *udata = NULL;
+    struct H5TS_rw_lock_stats_t      stats;
+    struct H5TS_rw_lock_stats_t      expected = {/* Initialize all fields to zero -- we will construct
+                                             * the expected stats from the thread udata after
+                                             * completion.
+                                             */
+                                            /* read_locks_granted             = */ 0,
+                                            /* read_locks_released            = */ 0,
+                                            /* real_read_locks_granted        = */ 0,
+                                            /* real_read_locks_released       = */ 0,
+                                            /* max_read_locks                 = */ 0,
+                                            /* max_read_lock_recursion_depth  = */ 0,
+                                            /* read_locks_delayed             = */ 0,
+                                            /* max_read_locks_pending         = */ 0,
+                                            /* write_locks_granted            = */ 0,
+                                            /* write_locks_released           = */ 0,
+                                            /* real_write_locks_granted       = */ 0,
+                                            /* real_write_locks_released      = */ 0,
+                                            /* max_write_locks                = */ 0,
+                                            /* max_write_lock_recursion_depth = */ 0,
+                                            /* write_locks_delayed            = */ 0,
+                                            /* max_write_locks_pending        = */ 0};
+    struct H5TS_rw_lock_t rec_rw_lock;
 
-    /* allocate the udata on the heap to shut up the compiler. */
-    udata =
-        (struct rec_rw_lock_test_udata_t *)malloc(sizeof(struct rec_rw_lock_test_udata_t) * MAX_NUM_THREADS);
+    /* Allocate the udata */
+    udata = HDmalloc(sizeof(*udata) * MAX_NUM_THREADS);
 
     if (udata == NULL) {
 
         TestErrPrintf("thread udata allocation failed.\n");
 
-        /* we can't do anything without the udata, so just return */
+        /* We can't do anything without the udata, so just return */
         return;
     }
 
@@ -1162,13 +1159,13 @@ tts_rec_rw_lock_smoke_check_4(void)
     }
 
     /* 1) Initialize an instance of the recursive R/W lock. */
-    result = H5TS_pt_rec_rw_lock_init(&rec_rw_lock, H5TS__RW_LOCK_POLICY__FAVOR_WRITERS);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_init");
+    result = H5TS_rw_lock_init(&rec_rw_lock, H5TS_RW_LOCK_POLICY_FAVOR_WRITERS);
+    CHECK_I(result, "H5TS_rw_lock_init");
 
     /* 2) Setup the user data to be passed to each writer test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
 
-        udata[i].rw_lock_ptr               = &rec_rw_lock;
+        udata[i].rw_lock                   = &rec_rw_lock;
         udata[i].id                        = i;
         udata[i].target_rd_lock_cycles     = lock_cycles;
         udata[i].target_wr_lock_cycles     = lock_cycles;
@@ -1249,8 +1246,8 @@ tts_rec_rw_lock_smoke_check_4(void)
     /* 6) Obtain the stats from the recursive R/W lock, and compare
      *     with the data gathered above.
      */
-    result = H5TS_pt_rec_rw_lock_get_stats(&rec_rw_lock, &stats);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_get_stats -- 1");
+    result = H5TS_rw_lock_get_stats(&rec_rw_lock, &stats);
+    CHECK_I(result, "H5TS_rw_lock_get_stats -- 1");
 
     /* turn off clang-format for readability */
     /* clang-format off */
@@ -1274,19 +1271,19 @@ tts_rec_rw_lock_smoke_check_4(void)
         (stats.max_write_locks_pending         > expected.max_write_locks_pending)) {
 
         TestErrPrintf("Unexpected recursive R/W lock stats -- 1");
-        H5TS_pt_rec_rw_lock_print_stats("Actual stats", &stats);
-        H5TS_pt_rec_rw_lock_print_stats("Expected stats", &expected);
+        H5TS_rw_lock_print_stats("Actual stats", &stats);
+        H5TS_rw_lock_print_stats("Expected stats", &expected);
     }
     /* clang-format on */
 
     if (verbose) {
 
-        H5TS_pt_rec_rw_lock_print_stats("Actual stats", &stats);
+        H5TS_rw_lock_print_stats("Actual stats", &stats);
     }
 
     /* 7) Shut down the recursive R/W lock. */
-    result = H5TS_pt_rec_rw_lock_takedown(&rec_rw_lock);
-    CHECK_I(result, "H5TS_pt_rec_rw_lock_takedown");
+    result = H5TS_rw_lock_destroy(&rec_rw_lock);
+    CHECK_I(result, "H5TS_rw_lock_destroy");
 
     /* discard the udata if it exists */
     if (udata) {

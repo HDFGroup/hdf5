@@ -65,7 +65,10 @@ rsrv_heap(void)
      * should throw an error.
      */
     for (i = 0; i < 200; i++) {
-        H5E_BEGIN_TRY { dataspace_id = H5Screate_simple(1, dims, dims); }
+        H5E_BEGIN_TRY
+        {
+            dataspace_id = H5Screate_simple(1, dims, dims);
+        }
         H5E_END_TRY
 
         HDsprintf(dset_name, "Dset %d", i);
@@ -80,7 +83,10 @@ rsrv_heap(void)
         if (dataset_id < 0)
             break;
 
-        H5E_BEGIN_TRY { H5Dwrite(dataset_id, H5T_NATIVE_INT, dataspace_id, dataspace_id, H5P_DEFAULT, &i); }
+        H5E_BEGIN_TRY
+        {
+            H5Dwrite(dataset_id, H5T_NATIVE_INT, dataspace_id, dataspace_id, H5P_DEFAULT, &i);
+        }
         H5E_END_TRY
 
         if (H5Dclose(dataset_id) < 0)
@@ -120,7 +126,7 @@ rsrv_heap(void)
     /* If we can read a dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
      */
-    if (dataset_id == H5I_BADID)
+    if (dataset_id == H5I_INVALID_HID)
         TEST_ERROR;
 
     if (H5Dclose(dataset_id) < 0)
@@ -262,7 +268,7 @@ rsrv_ohdr(void)
     /* If we can read the dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
      */
-    if (dataset_id == H5I_BADID)
+    if (dataset_id == H5I_INVALID_HID)
         TEST_ERROR;
 
     if (H5Dclose(dataset_id) < 0)
@@ -426,7 +432,7 @@ rsrv_vlen(void)
     /* If we can read the dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
      */
-    if (dataset_id == H5I_BADID)
+    if (dataset_id == H5I_INVALID_HID)
         TEST_ERROR;
 
     if (H5Dclose(dataset_id) < 0)

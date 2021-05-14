@@ -888,8 +888,7 @@ if (ENABLE_EXTENDED_TESTS)
 
 #-- Adding test for flushrefresh
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")
-  find_package (Perl)
-  if (PERL_FOUND)
+  if (H5_PERL_FOUND)
     add_test (
         NAME H5TEST-testflushrefresh-clear-objects
         COMMAND ${CMAKE_COMMAND} -E remove flushrefresh.h5
@@ -915,9 +914,9 @@ if (ENABLE_EXTENDED_TESTS)
         ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh_test"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh_test
     )
+  else ()
+    message (STATUS "Cannot execute TEST flushrefresh - perl not found")
   endif ()
-else ()
-  message (STATUS "Cannot execute TEST flushrefresh - perl not found")
 endif ()
 
 ##############################################################################

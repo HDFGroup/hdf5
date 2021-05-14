@@ -52,6 +52,7 @@ noinst_JAVA = \
     TestH5T.java \
     TestH5Dparams.java \
     TestH5D.java \
+    TestH5Drw.java \
     TestH5Dplist.java \
     TestH5Lparams.java \
     TestH5Lbasic.java \
@@ -66,6 +67,7 @@ noinst_JAVA = \
     TestH5Pvirtual.java \
     TestH5Plist.java \
     TestH5A.java \
+    TestH5Arw.java \
     TestH5Oparams.java \
     TestH5Obasic.java \
     TestH5Ocreate.java \

@@ -327,7 +327,10 @@ main(void)
     HD_exit(EXIT_SUCCESS);
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
     H5E_END_TRY;
 
     HDexit(EXIT_FAILURE);

@@ -61,11 +61,9 @@
 #include "h5test.h"
 
 /* This test uses many POSIX things that are not available on
- * Windows. We're using a check for fork(2) here as a proxy for
- * all POSIX/Unix/Linux things until this test can be made
- * more platform-independent.
+ * Windows.
  */
-#ifdef H5_HAVE_FORK
+#ifdef H5_HAVE_UNISTD_H
 
 #define DATAFILE "twriteorder.dat"
 /* #define READERS_MAX      10 */ /* max number of readers */
@@ -468,7 +466,7 @@ done:
     return ret_value;
 }
 
-#else /* H5_HAVE_FORK */
+#else /* H5_HAVE_UNISTD_H */
 
 int
 main(void)
@@ -477,4 +475,4 @@ main(void)
     return EXIT_SUCCESS;
 } /* end main() */
 
-#endif /* H5_HAVE_FORK */
+#endif /* H5_HAVE_UNISTD_H */

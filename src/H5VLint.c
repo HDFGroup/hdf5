@@ -1219,6 +1219,27 @@ H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_
 
     FUNC_ENTER_PACKAGE
 
+    /* Check arguments */
+    if (!cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
+                    "VOL connector class pointer cannot be NULL")
+    if (H5VL_VERSION != cls->version)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL connector has incompatible version")
+    if (!cls->name)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+                    "VOL connector class name cannot be the NULL pointer")
+    if (0 == HDstrlen(cls->name))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+                    "VOL connector class name cannot be the empty string")
+    if (cls->info_cls.copy && !cls->info_cls.free)
+        HGOTO_ERROR(
+            H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+            "VOL connector must provide free callback for VOL info objects when a copy callback is provided")
+    if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+                    "VOL connector must provide free callback for object wrapping contexts when a get "
+                    "callback is provided")
+
     /* Set up op data for iteration */
     op_data.kind     = H5VL_GET_CONNECTOR_BY_NAME;
     op_data.u.name   = cls->name;
