@@ -475,11 +475,10 @@ H5TS_update_stats_rd_unlock(H5TS_rw_lock_t *rw_lock, H5TS_rec_entry_count *count
 
     rw_lock->stats.read_locks_released++;
 
-    if(count->rec_lock_count == 0)
+    if (count->rec_lock_count == 0)
         rw_lock->stats.real_read_locks_released++;
 
 } /* end H5TS_update_stats_rd_unlock() */
-
 
 static inline void
 H5TS_update_stats_wr_lock(H5TS_rw_lock_t *rw_lock, H5TS_rec_entry_count *count)
@@ -506,7 +505,6 @@ H5TS_update_stats_wr_lock(H5TS_rw_lock_t *rw_lock, H5TS_rec_entry_count *count)
 
 } /* end H5TS_update_stats_wr_lock() */
 
-
 static inline void
 H5TS_update_stats_wr_lock_delay(H5TS_rw_lock_t *rw_lock, int waiting_count)
 {
@@ -520,7 +518,6 @@ H5TS_update_stats_wr_lock_delay(H5TS_rw_lock_t *rw_lock, int waiting_count)
         rw_lock->stats.max_write_locks_pending = waiting_count;
 
 } /* end H5TS_update_stats_wr_lock_delay() */
-
 
 static inline void
 H5TS_update_stats_wr_unlock(H5TS_rw_lock_t *rw_lock, H5TS_rec_entry_count *count)

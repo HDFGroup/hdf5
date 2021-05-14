@@ -1405,36 +1405,26 @@ H5TS_rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats)
     else {
 
         HDfprintf(stdout, "\n\n%s\n\n", header_str);
-        HDfprintf(stdout, "  read_locks_granted             = %" PRId64 "\n",
-                  stats->read_locks_granted);
-        HDfprintf(stdout, "  read_locks_released            = %" PRId64 "\n",
-                  stats->read_locks_released);
-        HDfprintf(stdout, "  real_read_locks_granted        = %" PRId64 "\n",
-                  stats->real_read_locks_granted);
+        HDfprintf(stdout, "  read_locks_granted             = %" PRId64 "\n", stats->read_locks_granted);
+        HDfprintf(stdout, "  read_locks_released            = %" PRId64 "\n", stats->read_locks_released);
+        HDfprintf(stdout, "  real_read_locks_granted        = %" PRId64 "\n", stats->real_read_locks_granted);
         HDfprintf(stdout, "  real_read_locks_released       = %" PRId64 "\n",
                   stats->real_read_locks_released);
-        HDfprintf(stdout, "  max_read_locks                 = %" PRId64 "\n",
-                  stats->max_read_locks);
+        HDfprintf(stdout, "  max_read_locks                 = %" PRId64 "\n", stats->max_read_locks);
         HDfprintf(stdout, "  max_read_lock_recursion_depth  = %" PRId64 "\n",
                   stats->max_read_lock_recursion_depth);
-        HDfprintf(stdout, "  read_locks_delayed             = %" PRId64 "\n",
-                  stats->read_locks_delayed);
-        HDfprintf(stdout, "  max_read_locks_pending         = %" PRId64 "\n",
-                  stats->max_read_locks_pending);
-        HDfprintf(stdout, "  write_locks_granted            = %" PRId64 "\n",
-                  stats->write_locks_granted);
-        HDfprintf(stdout, "  write_locks_released           = %" PRId64 "\n",
-                  stats->write_locks_released);
+        HDfprintf(stdout, "  read_locks_delayed             = %" PRId64 "\n", stats->read_locks_delayed);
+        HDfprintf(stdout, "  max_read_locks_pending         = %" PRId64 "\n", stats->max_read_locks_pending);
+        HDfprintf(stdout, "  write_locks_granted            = %" PRId64 "\n", stats->write_locks_granted);
+        HDfprintf(stdout, "  write_locks_released           = %" PRId64 "\n", stats->write_locks_released);
         HDfprintf(stdout, "  real_write_locks_granted       = %" PRId64 "\n",
                   stats->real_write_locks_granted);
         HDfprintf(stdout, "  real_write_locks_released      = %" PRId64 "\n",
                   stats->real_write_locks_released);
-        HDfprintf(stdout, "  max_write_locks                = %" PRId64 "\n",
-                  stats->max_write_locks);
+        HDfprintf(stdout, "  max_write_locks                = %" PRId64 "\n", stats->max_write_locks);
         HDfprintf(stdout, "  max_write_lock_recursion_depth = %" PRId64 "\n",
                   stats->max_write_lock_recursion_depth);
-        HDfprintf(stdout, "  write_locks_delayed            = %" PRId64 "\n",
-                  stats->write_locks_delayed);
+        HDfprintf(stdout, "  write_locks_delayed            = %" PRId64 "\n", stats->write_locks_delayed);
         HDfprintf(stdout, "  max_write_locks_pending        = %" PRId64 "\n\n",
                   stats->max_write_locks_pending);
     }
