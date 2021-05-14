@@ -28,6 +28,18 @@ if (HDF5_STRICT_FORMAT_CHECKS)
 endif ()
 MARK_AS_ADVANCED (HDF5_STRICT_FORMAT_CHECKS)
 
+#-----------------------------------------------------------------------------
+# Option for --enable-threadsafe
+#-----------------------------------------------------------------------------
+# Recursive RW locks are not supported on Windows (yet)
+if (NOT WINDOWS)
+  option (HDF5_USE_RECURSIVE_RW_LOCKS "Whether to use recursive RW locks for thread-safety" OFF)
+  if (HDF5_USE_RECURSIVE_RW_LOCKS)
+    set (${HDF_PREFIX}_USE_RECURSIVE_RW_LOCKS 1)
+  endif ()
+  MARK_AS_ADVANCED (HDF5_USE_RECURSIVE_RW_LOCKS)
+endif ()
+
 # ----------------------------------------------------------------------
 # Decide whether the data accuracy has higher priority during data
 # conversions.  If not, some hard conversions will still be prefered even

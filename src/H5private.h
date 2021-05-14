@@ -1976,9 +1976,13 @@ extern char H5_lib_vers_info_g[];
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {
-    H5TS_mutex_t init_lock;    /* API entrance mutex */
-    hbool_t      H5_libinit_g; /* Has the library been initialized? */
-    hbool_t      H5_libterm_g; /* Is the library being shutdown? */
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
+    H5TS_rw_lock_t init_rw_lock; /* API entrance RW lock */
+#else
+    H5TS_mutex_t init_lock; /* API entrance mutex */
+#endif
+    hbool_t H5_libinit_g; /* Has the library been initialized? */
+    hbool_t H5_libterm_g; /* Is the library being shutdown? */
 } H5_api_t;
 
 /* Macros for accessing the global variables */
@@ -1993,13 +1997,17 @@ typedef struct H5_api_struct {
 #endif
 
 /* Macros for threadsafe HDF-5 Phase I locks */
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
+#define H5_API_LOCK   H5TS_rw_wrlock(&H5_g.init_rw_lock);
+#define H5_API_UNLOCK H5TS_rw_unlock(&H5_g.init_rw_lock);
+#else
 #define H5_API_LOCK   H5TS_mutex_lock(&H5_g.init_lock);
 #define H5_API_UNLOCK H5TS_mutex_unlock(&H5_g.init_lock);
+#endif
 
 /* Macros for thread cancellation-safe mechanism */
 #define H5_API_UNSET_CANCEL H5TS_cancel_count_inc();
-
-#define H5_API_SET_CANCEL H5TS_cancel_count_dec();
+#define H5_API_SET_CANCEL   H5TS_cancel_count_dec();
 
 extern H5_api_t H5_g;
 
