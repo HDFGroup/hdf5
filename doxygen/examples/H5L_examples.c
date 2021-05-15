@@ -13,20 +13,17 @@ main(void)
     //! <!-- [create] -->
     {
         // show how to create a link (class?)
-    }
-    //! <!-- [create] -->
+    } //! <!-- [create] -->
 
     //! <!-- [read] -->
     {
         // show how to retrieve information about a link
-    }
-    //! <!-- [read] -->
+    } //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
         // show how to move a link
-    }
-    //! <!-- [update] -->
+    } //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {

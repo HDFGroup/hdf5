@@ -13,20 +13,17 @@ main(void)
     //! <!-- [create] -->
     {
         // show how to register a filter (identity? or null?)
-    }
-    //! <!-- [create] -->
+    } //! <!-- [create] -->
 
     //! <!-- [read] -->
     {
         // show how to retrieve filter information
-    }
-    //! <!-- [read] -->
+    } //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
         // show how to update a filter (does that make sense?)
-    }
-    //! <!-- [update] -->
+    } //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {

@@ -13,20 +13,17 @@ main(void)
     //! <!-- [create] -->
     {
         // show how to create an object/region reference
-    }
-    //! <!-- [create] -->
+    } //! <!-- [create] -->
 
     //! <!-- [read] -->
     {
         // show how to query/de-reference a reference
-    }
-    //! <!-- [read] -->
+    } //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
         // show how to update a reference (?)
-    }
-    //! <!-- [update] -->
+    } //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {

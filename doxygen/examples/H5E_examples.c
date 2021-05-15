@@ -13,20 +13,17 @@ main(void)
     //! <!-- [create] -->
     {
         // show how to create an error stack
-    }
-    //! <!-- [create] -->
+    } //! <!-- [create] -->
 
     //! <!-- [read] -->
     {
         // show how to pop error messages off an error stack
-    }
-    //! <!-- [read] -->
+    } //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
         // show how to push error messages onto an error stack
-    }
-    //! <!-- [update] -->
+    } //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {
