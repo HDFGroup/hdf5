@@ -105,7 +105,7 @@ H5_DLL herr_t H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *_
                                  const hssize_t *dst_stride, void *_dst, const hssize_t *src_stride,
                                  const void *_src);
 H5_DLL herr_t H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count);
-H5_DLL herr_t H5VM_array_down(unsigned n, const hsize_t *total_size, hsize_t *down);
+H5_DLL void   H5VM_array_down(unsigned n, const hsize_t *total_size, hsize_t *down);
 H5_DLL hsize_t H5VM_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset);
 H5_DLL hsize_t H5VM_array_offset(unsigned n, const hsize_t *total_size, const hsize_t *offset);
 H5_DLL herr_t  H5VM_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down, hsize_t *coords);

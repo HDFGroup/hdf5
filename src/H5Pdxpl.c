@@ -1486,9 +1486,8 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right)
     H5TRACE4("e", "iddd", plist_id, left, middle, right);
 
     /* Check arguments */
-    if (left < (double)0.0f || left > (double)1.0f || middle < (double)0.0f || middle > (double)1.0f ||
-        right < (double)0.0f || right > (double)1.0f)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "split ratio must satisfy 0.0<=X<=1.0")
+    if (left < 0.0 || left > 1.0 || middle < 0.0 || middle > 1.0 || right < 0.0 || right > 1.0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "split ratio must satisfy 0.0 <= X <= 1.0")
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
