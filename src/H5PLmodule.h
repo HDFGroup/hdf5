@@ -29,7 +29,27 @@
 
 /**\defgroup H5PL H5PL
  *
- * \todo Describe the plugin life cycle.
+ * Use the functions in this module to manage HDF5 plugins.
+ *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5PL_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet H5PL_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5PL_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet H5PL_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
  *
  */
 

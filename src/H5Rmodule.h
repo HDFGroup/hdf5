@@ -28,10 +28,28 @@
 /**
  * \defgroup H5R H5R
  *
- * \todo Describe the reference life cycle.
+ * Use the functions in this module to manage HDF5 references.
  *
- * \details The HDF5 Reference Interface, H5R, provides a mechanism for managing
- *          HDF5 referenced objects.
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5R_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet H5R_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5R_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet H5R_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
  */
 
 #endif /* H5Rmodule_H */

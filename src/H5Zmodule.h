@@ -31,10 +31,27 @@
 
 /**\defgroup H5Z H5Z
  *
- * \todo Add the filter life cycle.
+ * Use the functions in this module to manage HDF5 filters.
  *
- * The functions in this module let you configure filters that process data
- * during I/O operation.
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5Z_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet H5Z_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5Z_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet H5Z_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
  *
  * HDF5 supports a filter pipeline that provides the capability for standard and
  * customized raw data processing during I/O operations.  HDF5 is distributed

@@ -28,7 +28,27 @@
 
 /**\defgroup H5 H5
  *
- * \todo Describe the library life cycle.
+ * Use the functions in this module to manage the HDF5 library's life cycle.
+ *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet H5_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet H5_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
  *
  */
 

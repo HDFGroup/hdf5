@@ -31,14 +31,35 @@
 
 /**\defgroup H5E H5E
  *
- * The Error interface provides error handling in the form of a stack.  The
- * \Code{FUNC_ENTER} macro clears the error stack whenever an interface function
- * is entered. When an error is detected, an entry is pushed onto the stack. As
- * the functions unwind, additional entries are pushed onto the stack. The API
- * function will return some indication that an error occurred and the
- * application can print the error stack.
+ * Use the functions in this module to manage HDF5 error stacks.
  *
- * Certain API functions in the \c H5E package, such as H5Eprint1(), do not
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5E_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet H5E_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5E_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet H5E_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
+ * The \Code{FUNC_ENTER} macro clears the error stack whenever an interface
+ * function is entered. When an error is detected, an entry is pushed onto the
+ * stack. As the functions unwind, additional entries are pushed onto the
+ * stack. The API function will return some indication that an error occurred
+ * and the application can print the error stack.
+ *
+ * Certain API functions in the \ref H5E package, such as H5Eprint1(), do not
  * clear the error stack. Otherwise, any function which does not have an
  * underscore immediately after the package name will clear the error stack. For
  * instance, H5Fopen() clears the error stack while \Code{H5F_open} does not.
@@ -51,8 +72,6 @@
  * added to the library yet, this package maintains a single error stack. The
  * error stack is statically allocated to reduce the complexity of handling
  * errors within the \c H5E package.
- *
- * \todo Add the error stack life cycle.
  *
  */
 

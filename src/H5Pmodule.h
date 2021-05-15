@@ -31,7 +31,27 @@
 
 /**\defgroup H5P H5P
  *
- * \todo Describe the property list life cycle.
+ * Use the functions in this module to manage HDF5 objects.
+ *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5P_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet H5P_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5P_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet H5P_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
  *
  * \details The HDF5 Property List Interface provides a mechanism to take
  *          advantage of more powerful or unusual features in HDF5.

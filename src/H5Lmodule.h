@@ -31,7 +31,27 @@
 
 /**\defgroup H5L H5L
  *
- * \todo Describe the link life cycle.
+ * Use the functions in this module to manage the HDF5 links.
+ *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5L_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet H5L_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5L_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet H5L_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
  *
  * \defgroup TRAV Link Traversal
  * \ingroup H5L
