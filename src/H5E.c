@@ -244,20 +244,6 @@ H5E_term_package(void)
         nstk = H5I_nmembers(H5I_ERROR_STACK);
 
         if ((ncls + nmsg + nstk) > 0) {
-            /* Clear the default error stack. Note that
-             * the following H5I_clear_type calls do not
-             * force the clears and will not be able to
-             * clear any error message IDs that are still
-             * in use by the default error stack unless we
-             * clear that stack manually.
-             *
-             * Error message IDs will typically still be
-             * in use by the default error stack when the
-             * application does H5E_BEGIN/END_TRY cleanup
-             * at the very end.
-             */
-            H5E_clear_stack(NULL);
-
             /* Clear any outstanding error stacks */
             if (nstk > 0)
                 (void)H5I_clear_type(H5I_ERROR_STACK, FALSE, FALSE);
@@ -1545,22 +1531,16 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
     H5E_auto_op_t op;                  /* Error stack function */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    /* Don't clear the error stack! :-) */
-    FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE3("e", "ixx", estack_id, func, client_data);
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*x**x", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
                                                        non-threaded case */
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
-    else {
-        /* Only clear the error stack if it's not the default stack */
-        H5E_clear_stack(NULL);
-
-        if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
-    } /* end else */
+    else if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Get the automatic error reporting information */
     if (H5E__get_auto(estack, &op, client_data) < 0)
@@ -1617,13 +1597,8 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
                                                        non-threaded case */
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
-    else {
-        /* Only clear the error stack if it's not the default stack */
-        H5E_clear_stack(NULL);
-
-        if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
-    } /* end else */
+    else if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Get the automatic error reporting information */
@@ -1670,8 +1645,7 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
     H5E_t *estack;              /* Error stack to operate on */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    /* Don't clear the error stack! :-) */
-    FUNC_ENTER_API_NOCLEAR(FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Iu", estack_id, is_stack);
 
     if (estack_id == H5E_DEFAULT) {
@@ -1679,13 +1653,8 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
                                                        non-threaded case */
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
-    else {
-        /* Only clear the error stack if it's not the default stack */
-        H5E_clear_stack(NULL);
-
-        if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
-    } /* end else */
+    else if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Check if the error stack reporting function is the "newer" stack type */
     if (is_stack)
