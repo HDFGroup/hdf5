@@ -1785,8 +1785,13 @@ AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xye
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Enable thread-safe version of library.  It requires Pthreads support
-## on POSIX systems.
+## Enable thread-safe version of library (requires Pthreads on POSIX
+## systems). We usually pick up the system Pthreads library, so --with-pthread
+## is only necessary if you are using a custom Pthreads library or if
+## your OS hides its implementation in an unusual location.
+##
+## On Windows, we use Win32 threads and no special configuration should be
+## required to use them.
 ##
 AC_SUBST([THREADSAFE])
 
@@ -1962,6 +1967,45 @@ if test "X$THREADSAFE" = "Xyes"; then
       AC_MSG_NOTICE([Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM).])
     fi
 fi
+
+## ----------------------------------------------------------------------
+## Should the thread-safety feature use a recursive RW lock?
+##
+## NOTE: Most RW locks do not allow recursive write locks, which would be
+##       beneficial in some HDF5 use cases (in callbacks, custom VOL or VFD
+##       connectors) so we use a custom RW lock scheme.
+##
+## Reqires a thread-safe library and Pthreads.
+AC_SUBST([RECURSIVE_RW_LOCKS])
+
+## Default is to not use recursive RW locks
+RECURSIVE_RW_LOCKS=no
+
+AC_MSG_CHECKING([whether to use recursive RW locks for thread safety])
+AC_ARG_ENABLE([recursive-rw-locks],
+              [AS_HELP_STRING([--enable-recursive-rw-locks],
+                              [Enable recursive RW locks for thread safety. Requires a thread-safe library and Pthreads.
+                              [default=no]])],
+              [RECURSIVE_RW_LOCKS=$enableval])
+
+case "X-$RECURSIVE_RW_LOCKS" in
+  X-|X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  X-yes)
+    if test "X-$THREADSAFE" = "X-yes" -a "X-$HAVE_PTHREAD" = "X-yes" ; then
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([USE_RECURSIVE_RW_LOCKS], [1], [Define if the library will use recursive RW locks for thread safety])
+    else
+      AC_MSG_RESULT([error])
+      AC_MSG_ERROR([recursive RW locks require a thread-safe library and Pthreads])
+    fi
+    ;;
+  *)
+    AC_MSG_RESULT([error])
+    AC_MSG_ERROR([\'$enableval\' is not a valid recursive RW lock value])
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
