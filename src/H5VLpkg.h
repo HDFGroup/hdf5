@@ -32,9 +32,6 @@
 /* Package Private Macros */
 /**************************/
 
-/* # of optional operations reserved for the native VOL connector */
-#define H5VL_RESERVED_NATIVE_OPTIONAL 1024
-
 /****************************/
 /* Package Private Typedefs */
 /****************************/

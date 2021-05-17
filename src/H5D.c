@@ -684,14 +684,11 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation /*out*/)
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                      = H5VL_DATASET_GET_SPACE_STATUS;
-    vol_cb_args.args.get_space_status.status = H5D_SPACE_STATUS_ERROR;
+    vol_cb_args.args.get_space_status.status = allocation;
 
     /* Get dataspace status */
     if (H5VL_dataset_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get space status")
-
-    /* Set return value */
-    *allocation = vol_cb_args.args.get_space_status.status;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -866,6 +863,7 @@ H5Dget_storage_size(hid_t dset_id)
 {
     H5VL_object_t *         vol_obj;       /* Object for loc_id */
     H5VL_dataset_get_args_t vol_cb_args;   /* Arguments to VOL callback */
+    hsize_t              storage_size = 0; /* Storage size of dataset */
     hsize_t                 ret_value = 0; /* Return value                 */
 
     FUNC_ENTER_API(0)
@@ -877,14 +875,14 @@ H5Dget_storage_size(hid_t dset_id)
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                            = H5VL_DATASET_GET_STORAGE_SIZE;
-    vol_cb_args.args.get_storage_size.storage_size = 0;
+    vol_cb_args.args.get_storage_size.storage_size = &storage_size;
 
     /* Get the storage size */
     if (H5VL_dataset_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "unable to get storage size")
 
     /* Set return value */
-    ret_value = vol_cb_args.args.get_storage_size.storage_size;
+    ret_value = storage_size;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -907,6 +905,7 @@ H5Dget_offset(hid_t dset_id)
     H5VL_object_t *vol_obj;                 /* Dataset for this operation   */
     H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;    /* Arguments for optional operation */
+    haddr_t dset_offset = HADDR_UNDEF; /* Dataset's offset */
     haddr_t        ret_value = HADDR_UNDEF; /* Return value                 */
 
     FUNC_ENTER_API(HADDR_UNDEF)
@@ -917,7 +916,7 @@ H5Dget_offset(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "invalid dataset identifier")
 
     /* Set up VOL callback arguments */
-    dset_opt_args.get_offset.offset = HADDR_UNDEF;
+    dset_opt_args.get_offset.offset = &dset_offset;
     vol_cb_args.op_type           = H5VL_NATIVE_DATASET_GET_OFFSET;
     vol_cb_args.args = &dset_opt_args;
 
@@ -926,7 +925,7 @@ H5Dget_offset(hid_t dset_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HADDR_UNDEF, "unable to get offset")
 
     /* Set return value */
-    ret_value = dset_opt_args.get_offset.offset;
+    ret_value = dset_offset;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1727,16 +1726,13 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *s
         /* Set up VOL callback arguments */
         dset_opt_args.get_vlen_buf_size.type_id = type_id;
         dset_opt_args.get_vlen_buf_size.space_id = space_id;
-        dset_opt_args.get_vlen_buf_size.size = 0;
+        dset_opt_args.get_vlen_buf_size.size = size;
         vol_cb_args.op_type           = H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE;
         vol_cb_args.args = &dset_opt_args;
 
         /* Make the 'get_vlen_buf_size' callback */
         if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get vlen buf size")
-
-        /* Set value to return */
-        *size = dset_opt_args.get_vlen_buf_size.size;
     } /* end if */
     else {
         /* Perform a generic operation that will work with all VOL connectors */
@@ -2016,16 +2012,13 @@ H5Dget_chunk_index_type(hid_t dset_id, H5D_chunk_index_t *idx_type /*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "idx_type parameter cannot be NULL")
 
     /* Set up VOL callback arguments */
-    dset_opt_args.get_chunk_idx_type.idx_type = H5D_CHUNK_IDX_NTYPES;
+    dset_opt_args.get_chunk_idx_type.idx_type = idx_type;
     vol_cb_args.op_type           = H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE;
     vol_cb_args.args = &dset_opt_args;
 
     /* Get the chunk indexing type */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk index type")
-
-    /* Set return value */
-    *idx_type = dset_opt_args.get_chunk_idx_type.idx_type;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2067,16 +2060,13 @@ H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_n
 
     /* Set up VOL callback arguments */
     dset_opt_args.get_chunk_storage_size.offset = offset;
-    dset_opt_args.get_chunk_storage_size.size = 0;
+    dset_opt_args.get_chunk_storage_size.size = chunk_nbytes;
     vol_cb_args.op_type           = H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE;
     vol_cb_args.args = &dset_opt_args;
 
     /* Get the dataset creation property list */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get storage size of chunk")
-
-    /* Set return value */
-    *chunk_nbytes = dset_opt_args.get_chunk_storage_size.size;
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2122,16 +2112,13 @@ H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks /*out*/)
 
     /* Set up VOL callback arguments */
     dset_opt_args.get_num_chunks.space_id = fspace_id;
-    dset_opt_args.get_num_chunks.nchunks = 0;
+    dset_opt_args.get_num_chunks.nchunks = nchunks;
     vol_cb_args.op_type           = H5VL_NATIVE_DATASET_GET_NUM_CHUNKS;
     vol_cb_args.args = &dset_opt_args;
 
     /* Get the number of written chunks */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of chunks")
-
-    /* Set return value */
-    *nchunks = dset_opt_args.get_num_chunks.nchunks;
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2166,6 +2153,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *of
     H5VL_object_t *vol_obj   = NULL; /* Dataset for this operation */
     H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;    /* Arguments for optional operation */
+    hsize_t nchunks = 0; /* Number of chunks */
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -2180,7 +2168,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *of
 
     /* Set up VOL callback arguments */
     dset_opt_args.get_num_chunks.space_id = fspace_id;
-    dset_opt_args.get_num_chunks.nchunks = 0;
+    dset_opt_args.get_num_chunks.nchunks = &nchunks;
     vol_cb_args.op_type           = H5VL_NATIVE_DATASET_GET_NUM_CHUNKS;
     vol_cb_args.args = &dset_opt_args;
 
@@ -2189,28 +2177,22 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *of
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of chunks")
 
     /* Check range for chunk index */
-    if (chk_index >= dset_opt_args.get_num_chunks.nchunks)
+    if (chk_index >= nchunks)
         HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk index is out of range")
 
     /* Set up VOL callback arguments */
     dset_opt_args.get_chunk_info_by_idx.space_id = fspace_id;
     dset_opt_args.get_chunk_info_by_idx.chk_index = chk_index;
     dset_opt_args.get_chunk_info_by_idx.offset = offset;
-    dset_opt_args.get_chunk_info_by_idx.filter_mask = 0;
-    dset_opt_args.get_chunk_info_by_idx.addr = HADDR_UNDEF;
-    dset_opt_args.get_chunk_info_by_idx.size = 0;
+    dset_opt_args.get_chunk_info_by_idx.filter_mask = filter_mask;
+    dset_opt_args.get_chunk_info_by_idx.addr = addr;
+    dset_opt_args.get_chunk_info_by_idx.size = size;
     vol_cb_args.op_type           = H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX;
     vol_cb_args.args = &dset_opt_args;
 
     /* Call private function to get the chunk info given the chunk's index */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info by index")
-
-    /* Set return values */
-    /* (offset array values are set in callback) */
-    *filter_mask = dset_opt_args.get_chunk_info_by_idx.filter_mask;
-    *addr = dset_opt_args.get_chunk_info_by_idx.addr;
-    *size = dset_opt_args.get_chunk_info_by_idx.size;
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2260,20 +2242,15 @@ H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filte
 
     /* Set up VOL callback arguments */
     dset_opt_args.get_chunk_info_by_coord.offset = offset;
-    dset_opt_args.get_chunk_info_by_coord.filter_mask = 0;
-    dset_opt_args.get_chunk_info_by_coord.addr = HADDR_UNDEF;
-    dset_opt_args.get_chunk_info_by_coord.size = 0;
+    dset_opt_args.get_chunk_info_by_coord.filter_mask = filter_mask;
+    dset_opt_args.get_chunk_info_by_coord.addr = addr;
+    dset_opt_args.get_chunk_info_by_coord.size = size;
     vol_cb_args.op_type           = H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD;
     vol_cb_args.args = &dset_opt_args;
 
     /* Call private function to get the chunk info given the chunk's index */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info by its logical coordinates")
-
-    /* Set return values */
-    *filter_mask = dset_opt_args.get_chunk_info_by_coord.filter_mask;
-    *addr = dset_opt_args.get_chunk_info_by_coord.addr;
-    *size = dset_opt_args.get_chunk_info_by_coord.size;
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -441,6 +441,7 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
         H5VL_file_get_args_t vol_cb_args;               /* Arguments to VOL callback */
         char *               file_name = NULL;          /* Actual file name */
         char                 file_name_buf_static[256]; /* File name */
+        size_t file_name_len = 0; /* Length of file name */
 
         /* Pass the correct encoding version for the selection depending on the
          * file libver bounds, this is later retrieved in H5S hyper encode */
@@ -468,20 +469,20 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
         vol_cb_args.args.get_name.type          = H5I_FILE;
         vol_cb_args.args.get_name.buf_size      = sizeof(file_name_buf_static);
         vol_cb_args.args.get_name.buf           = file_name_buf_static;
-        vol_cb_args.args.get_name.file_name_len = 0;
+        vol_cb_args.args.get_name.file_name_len = &file_name_len;
 
         /* Get file name */
         if (H5VL_file_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, NULL) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't get file name")
 
         /* Check if we need to allocate a buffer for the file name */
-        if (vol_cb_args.args.get_name.file_name_len >= sizeof(file_name_buf_static)) {
+        if (file_name_len >= sizeof(file_name_buf_static)) {
             /* Allocate file name buffer */
-            if (NULL == (file_name_buf_dyn = H5MM_malloc(vol_cb_args.args.get_name.file_name_len + 1)))
+            if (NULL == (file_name_buf_dyn = H5MM_malloc(file_name_len + 1)))
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, 0, "can't allocate space for file name")
 
             /* Update VOL callback arguments */
-            vol_cb_args.args.get_name.buf_size = vol_cb_args.args.get_name.file_name_len + 1;
+            vol_cb_args.args.get_name.buf_size = file_name_len + 1;
             vol_cb_args.args.get_name.buf      = file_name_buf_dyn;
 
             /* Get file name again */
@@ -583,26 +584,27 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf, s
     /* Get file name (if external reference) */
     if (flags) {
         H5VL_file_get_args_t vol_cb_args; /* Arguments to VOL callback */
+        size_t file_name_len = 0; /* Length of file name */
 
         /* Set up VOL callback arguments */
         vol_cb_args.op_type                     = H5VL_FILE_GET_NAME;
         vol_cb_args.args.get_name.type          = H5I_FILE;
         vol_cb_args.args.get_name.buf_size      = sizeof(file_name_buf_static);
         vol_cb_args.args.get_name.buf           = file_name_buf_static;
-        vol_cb_args.args.get_name.file_name_len = 0;
+        vol_cb_args.args.get_name.file_name_len = &file_name_len;
 
         /* Get file name */
         if (H5VL_file_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, NULL) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't get file name")
 
         /* Check if we need to allocate a buffer for the file name */
-        if (vol_cb_args.args.get_name.file_name_len >= sizeof(file_name_buf_static)) {
+        if (file_name_len >= sizeof(file_name_buf_static)) {
             /* Allocate file name buffer */
-            if (NULL == (file_name_buf_dyn = H5MM_malloc(vol_cb_args.args.get_name.file_name_len + 1)))
+            if (NULL == (file_name_buf_dyn = H5MM_malloc(file_name_len + 1)))
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, 0, "can't allocate space for file name")
 
             /* Update VOL callback arguments */
-            vol_cb_args.args.get_name.buf_size = vol_cb_args.args.get_name.file_name_len + 1;
+            vol_cb_args.args.get_name.buf_size = file_name_len + 1;
             vol_cb_args.args.get_name.buf      = file_name_buf_dyn;
 
             /* Get file name again */
@@ -780,14 +782,11 @@ H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t
 
         /* Set up VOL callback arguments */
         vol_cb_args.op_type           = H5VL_BLOB_ISNULL;
-        vol_cb_args.args.is_null.isnull = FALSE;
+        vol_cb_args.args.is_null.isnull = isnull;
 
         /* Check if blob ID is "nil" */
         if (H5VL_blob_specific(src_file, (void *)p, &vol_cb_args) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to check if a blob ID is 'nil'")
-
-        /* Set return value */
-        *isnull = vol_cb_args.args.is_null.isnull;
     }
 
 done:

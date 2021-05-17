@@ -186,7 +186,7 @@ test_refstr_cmp(void)
     H5RS_str_t *rs1; /* Ref-counted string created */
     H5RS_str_t *rs2; /* Ref-counted string created */
     int         cmp; /* Comparison value */
-    ssize_t     len; /* Length of string */
+    size_t      len; /* Length of string */
     herr_t      ret; /* Generic return value */
 
     /* Output message about test being performed */

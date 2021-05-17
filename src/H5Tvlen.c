@@ -864,14 +864,11 @@ H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull)
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type           = H5VL_BLOB_ISNULL;
-    vol_cb_args.args.is_null.isnull = FALSE;
+    vol_cb_args.args.is_null.isnull = isnull;
 
     /* Check if blob ID is "nil" */
     if (H5VL_blob_specific(file, vl, &vol_cb_args) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to check if a blob ID is 'nil'")
-
-    /* Set return value */
-    *isnull = vol_cb_args.args.is_null.isnull;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

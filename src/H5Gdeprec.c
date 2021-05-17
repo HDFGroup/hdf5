@@ -327,7 +327,6 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
     /* Create link */
     if (type == H5L_TYPE_HARD) {
         H5VL_object_t *   vol_obj; /* Object of loc_id */
-        H5VL_loc_params_t loc_params1;
         H5VL_loc_params_t new_loc_params;
         H5VL_object_t     tmp_vol_obj; /* Temporary object */
 
@@ -761,6 +760,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf /*out*/
     H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_native_object_optional_args_t obj_opt_args;    /* Arguments for optional operation */
     H5VL_loc_params_t loc_params;
+    size_t comment_len = 0; /* Length of comment */
     int               ret_value; /* Return value */
 
     FUNC_ENTER_API(-1)
@@ -788,7 +788,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf /*out*/
     /* Set up VOL callback arguments */
     obj_opt_args.get_comment.buf = buf;
     obj_opt_args.get_comment.buf_size = bufsize;
-    obj_opt_args.get_comment.comment_len = 0;
+    obj_opt_args.get_comment.comment_len = &comment_len;
     vol_cb_args.op_type           = H5VL_NATIVE_OBJECT_GET_COMMENT;
     vol_cb_args.args = &obj_opt_args;
 
@@ -797,7 +797,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf /*out*/
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, -1, "unable to get comment value")
 
     /* Set return value */
-    ret_value = (int)obj_opt_args.get_comment.comment_len;
+    ret_value = (int)comment_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -833,6 +833,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *o
     H5VL_object_t *    vol_obj; /* Object of loc_id */
     H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_native_group_optional_args_t grp_opt_args;    /* Arguments for optional operation */
+    hsize_t last_obj = 0;      /* Pointer to index value */
     herr_t             ret_value; /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
@@ -856,7 +857,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *o
     grp_opt_args.iterate_old.loc_params.loc_data.loc_by_name.lapl_id = H5P_LINK_ACCESS_DEFAULT;
     grp_opt_args.iterate_old.loc_params.obj_type                     = H5I_get_type(loc_id);
     grp_opt_args.iterate_old.idx = (hsize_t)(idx_p == NULL ? 0 : *idx_p);
-    grp_opt_args.iterate_old.last_obj = 0;
+    grp_opt_args.iterate_old.last_obj = &last_obj;
     grp_opt_args.iterate_old.op = op;
     grp_opt_args.iterate_old.op_data = op_data;
     vol_cb_args.op_type           = H5VL_NATIVE_GROUP_ITERATE_OLD;
@@ -866,9 +867,9 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *o
     if ((ret_value = H5VL_group_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HERROR(H5E_SYM, H5E_BADITER, "error iterating over group's links");
 
-    /* Set the index we stopped at */
+    /* Set value to return */
     if (idx_p)
-        *idx_p = (int)grp_opt_args.iterate_old.last_obj;
+        *idx_p = (int)last_obj;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1172,6 +1173,7 @@ H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name /*out*/, size_t size
     H5VL_object_t *   vol_obj; /* Object of loc_id */
     H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;
+    size_t name_len = 0; /* Length of object name */
     ssize_t           ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1198,14 +1200,14 @@ H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name /*out*/, size_t size
     vol_cb_args.op_type           = H5VL_LINK_GET_NAME;
     vol_cb_args.args.get_name.name_size      = size;
     vol_cb_args.args.get_name.name           = name;
-    vol_cb_args.args.get_name.name_len = 0;
+    vol_cb_args.args.get_name.name_len = &name_len;
 
     /* Call internal function */
     if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, (-1), "can't get object name")
 
     /* Set the return value */
-    ret_value = (ssize_t)vol_cb_args.args.get_name.name_len;
+    ret_value = (ssize_t)name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)

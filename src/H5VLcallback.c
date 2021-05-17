@@ -3519,6 +3519,7 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
     const H5VL_class_t *             cls = (const H5VL_class_t *)plugin_info;
     H5P_genplist_t *                 fapl_plist;
     H5P_genplist_t *                 fapl_plist_copy;
+    hbool_t is_accessible = FALSE; /* Whether file is accessible */
     herr_t                           status;
     hid_t                            connector_id = H5I_INVALID_HID;
     hid_t                            fapl_id      = H5I_INVALID_HID;
@@ -3555,7 +3556,7 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
     vol_cb_args.op_type                       = H5VL_FILE_IS_ACCESSIBLE;
     vol_cb_args.args.is_accessible.filename   = udata->filename;
     vol_cb_args.args.is_accessible.fapl_id    = fapl_id;
-    vol_cb_args.args.is_accessible.accessible = FALSE;
+    vol_cb_args.args.is_accessible.accessible = &is_accessible;
 
     /* Check if file is accessible with given VOL connector */
     H5E_BEGIN_TRY
@@ -3568,7 +3569,7 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
      * the FAPL with that VOL connector set on it. Errors are ignored here
      * as some VOL connectors may not support H5Fis_accessible.
      */
-    if (status == SUCCEED && vol_cb_args.args.is_accessible.accessible) {
+    if (status == SUCCEED && is_accessible) {
         /* Modify 'connector_prop' to point to the VOL connector that
          * was actually used to open the file, rather than the original
          * VOL connector that was requested.

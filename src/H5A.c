@@ -1254,6 +1254,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
 {
     H5VL_object_t *      vol_obj = NULL; /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;    /* Arguments to VOL callback */
+    size_t               attr_name_len = 0; /* Length of attribute name */
     ssize_t              ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
@@ -1271,14 +1272,14 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
     vol_cb_args.args.get_name.loc_params.obj_type = H5I_get_type(attr_id);
     vol_cb_args.args.get_name.buf_size            = buf_size;
     vol_cb_args.args.get_name.buf                 = buf;
-    vol_cb_args.args.get_name.attr_name_len       = 0;
+    vol_cb_args.args.get_name.attr_name_len       = &attr_name_len;
 
     /* Get the attribute name */
     if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, (-1), "unable to get attribute name")
 
     /* Set the return value */
-    ret_value = (ssize_t)vol_cb_args.args.get_name.attr_name_len;
+    ret_value = (ssize_t)attr_name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1307,6 +1308,7 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
 {
     H5VL_object_t *      vol_obj = NULL; /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;    /* Arguments to VOL callback */
+    size_t               attr_name_len = 0; /* Length of attribute name */
     ssize_t              ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1343,14 +1345,14 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     vol_cb_args.args.get_name.loc_params.obj_type                     = H5I_get_type(loc_id);
     vol_cb_args.args.get_name.buf_size                                = size;
     vol_cb_args.args.get_name.buf                                     = name;
-    vol_cb_args.args.get_name.attr_name_len                           = 0;
+    vol_cb_args.args.get_name.attr_name_len                           = &attr_name_len;
 
     /* Get the name */
     if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get name")
 
     /* Set the return value */
-    ret_value = (ssize_t)vol_cb_args.args.get_name.attr_name_len;
+    ret_value = (ssize_t)attr_name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1378,6 +1380,7 @@ H5Aget_storage_size(hid_t attr_id)
 {
     H5VL_object_t *      vol_obj = NULL; /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;    /* Arguments to VOL callback */
+    hsize_t              storage_size = 0; /* Storage size of attribute */
     hsize_t              ret_value;      /* Return value */
 
     FUNC_ENTER_API(0)
@@ -1389,14 +1392,14 @@ H5Aget_storage_size(hid_t attr_id)
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                         = H5VL_ATTR_GET_STORAGE_SIZE;
-    vol_cb_args.args.get_storage_size.data_size = 0;
+    vol_cb_args.args.get_storage_size.data_size = &storage_size;
 
     /* Get the storage size */
     if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, 0, "unable to get storage size")
 
     /* Set the return value */
-    ret_value = vol_cb_args.args.get_storage_size.data_size;
+    ret_value = storage_size;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2340,14 +2343,11 @@ H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type            = H5VL_ATTR_EXISTS;
     vol_cb_args.args.exists.name   = attr_name;
-    vol_cb_args.args.exists.exists = FALSE;
+    vol_cb_args.args.exists.exists = attr_exists;
 
     /* Check if the attribute exists */
     if (H5VL_attr_specific(vol_obj, loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
-
-    /* Set return value */
-    *attr_exists = vol_cb_args.args.exists.exists;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

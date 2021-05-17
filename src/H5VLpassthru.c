@@ -1734,6 +1734,10 @@ static herr_t
 H5VL_pass_through_file_specific(void *file, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o            = (H5VL_pass_through_t *)file;
+    H5VL_pass_through_t *new_o;
+    H5VL_file_specific_args_t my_args;
+    H5VL_file_specific_args_t *new_args;
+    H5VL_pass_through_info_t *info;
     hid_t                under_vol_id = -1;
     herr_t               ret_value;
 
@@ -1742,9 +1746,8 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_args_t *args, hid
 #endif
 
     if (args->op_type == H5VL_FILE_IS_ACCESSIBLE) {
-        H5VL_file_specific_args_t vol_cb_args;
-        H5VL_pass_through_info_t *info;
-        hid_t                     under_fapl_id;
+        /* Shallow copy the args */
+        memcpy(&my_args, args, sizeof(my_args));
 
         /* Get copy of our VOL info from FAPL */
         H5Pget_vol_info(args->args.is_accessible.fapl_id, (void **)&info);
@@ -1753,38 +1756,24 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_args_t *args, hid
         if (!info)
             return (-1);
 
-        /* Copy the FAPL */
-        under_fapl_id = H5Pcopy(args->args.is_accessible.fapl_id);
-
-        /* Set the VOL ID and info for the underlying FAPL */
-        H5Pset_vol(under_fapl_id, info->under_vol_id, info->under_vol_info);
-
-        /* Keep the correct underlying VOL ID for possible async request token */
+        /* Keep the correct underlying VOL ID for later */
         under_vol_id = info->under_vol_id;
 
-        /* Set up new VOL callback arguments */
-        vol_cb_args.op_type                       = H5VL_FILE_IS_ACCESSIBLE;
-        vol_cb_args.args.is_accessible.filename   = args->args.is_accessible.filename;
-        vol_cb_args.args.is_accessible.fapl_id    = under_fapl_id;
-        vol_cb_args.args.is_accessible.accessible = 0;
+        /* Copy the FAPL */
+        my_args.args.is_accessible.fapl_id = H5Pcopy(args->args.is_accessible.fapl_id);
 
-        /* Re-issue 'file specific' call */
-        ret_value = H5VLfile_specific(NULL, under_vol_id, &vol_cb_args, dxpl_id, req);
+        /* Set the VOL ID and info for the underlying FAPL */
+        H5Pset_vol(my_args.args.is_accessible.fapl_id, info->under_vol_id, info->under_vol_info);
 
-        /* Set 'out' value */
-        if (ret_value >= 0)
-            args->args.is_accessible.accessible = vol_cb_args.args.is_accessible.accessible;
+        /* Set argument pointer to new arguments */
+        new_args = &my_args;
 
-        /* Close underlying FAPL */
-        H5Pclose(under_fapl_id);
-
-        /* Release copy of our VOL info */
-        H5VL_pass_through_info_free(info);
+        /* Set object pointer for operation */
+        new_o = NULL;
     } /* end else-if */
     else if (args->op_type == H5VL_FILE_DELETE) {
-        H5VL_file_specific_args_t vol_cb_args;
-        H5VL_pass_through_info_t *info;
-        hid_t                     under_fapl_id;
+        /* Shallow copy the args */
+        memcpy(&my_args, args, sizeof(my_args));
 
         /* Get copy of our VOL info from FAPL */
         H5Pget_vol_info(args->args.del.fapl_id, (void **)&info);
@@ -1793,44 +1782,57 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_args_t *args, hid
         if (!info)
             return (-1);
 
-        /* Copy the FAPL */
-        under_fapl_id = H5Pcopy(args->args.del.fapl_id);
-
-        /* Set the VOL ID and info for the underlying FAPL */
-        H5Pset_vol(under_fapl_id, info->under_vol_id, info->under_vol_info);
-
-        /* Keep the correct underlying VOL ID for possible async request token */
+        /* Keep the correct underlying VOL ID for later */
         under_vol_id = info->under_vol_id;
 
-        /* Set up new VOL callback arguments */
-        vol_cb_args.op_type           = H5VL_FILE_DELETE;
-        vol_cb_args.args.del.filename = args->args.del.filename;
-        vol_cb_args.args.del.fapl_id  = under_fapl_id;
+        /* Copy the FAPL */
+        my_args.args.del.fapl_id = H5Pcopy(args->args.del.fapl_id);
 
-        /* Re-issue 'file specific' call */
-        ret_value = H5VLfile_specific(NULL, under_vol_id, &vol_cb_args, dxpl_id, req);
+        /* Set the VOL ID and info for the underlying FAPL */
+        H5Pset_vol(my_args.args.del.fapl_id, info->under_vol_id, info->under_vol_info);
 
-        /* Close underlying FAPL */
-        H5Pclose(under_fapl_id);
+        /* Set argument pointer to new arguments */
+        new_args = &my_args;
 
-        /* Release copy of our VOL info */
-        H5VL_pass_through_info_free(info);
+        /* Set object pointer for operation */
+        new_o = NULL;
     } /* end else-if */
     else {
-        /* Keep the correct underlying VOL ID for possible async request token */
+        /* Keep the correct underlying VOL ID for later */
         under_vol_id = o->under_vol_id;
 
-        ret_value = H5VLfile_specific(o->under_object, under_vol_id, args, dxpl_id, req);
+        /* Set argument pointer to current arguments */
+        new_args = args;
 
-        /* Wrap file struct pointer for 'reopen' operation, if we reopened one */
-        if (args->op_type == H5VL_FILE_REOPEN && ret_value >= 0)
-            if (args->args.reopen.file)
-                args->args.reopen.file = H5VL_pass_through_new_obj(args->args.reopen.file, under_vol_id);
+        /* Set object pointer for operation */
+        new_o = o->under_object;
     } /* end else */
+
+    ret_value = H5VLfile_specific(new_o, under_vol_id, new_args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
         *req = H5VL_pass_through_new_obj(*req, under_vol_id);
+
+    if (args->op_type == H5VL_FILE_IS_ACCESSIBLE) {
+        /* Close underlying FAPL */
+        H5Pclose(my_args.args.is_accessible.fapl_id);
+
+        /* Release copy of our VOL info */
+        H5VL_pass_through_info_free(info);
+    } /* end else-if */
+    else if (args->op_type == H5VL_FILE_DELETE) {
+        /* Close underlying FAPL */
+        H5Pclose(my_args.args.del.fapl_id);
+
+        /* Release copy of our VOL info */
+        H5VL_pass_through_info_free(info);
+    } /* end else-if */
+    else if (args->op_type == H5VL_FILE_REOPEN) {
+        /* Wrap file struct pointer for 'reopen' operation, if we reopened one */
+        if (ret_value >= 0 && *args->args.reopen.file)
+            *args->args.reopen.file = H5VL_pass_through_new_obj(*args->args.reopen.file, under_vol_id);
+    } /* end else */
 
     return ret_value;
 } /* end H5VL_pass_through_file_specific() */

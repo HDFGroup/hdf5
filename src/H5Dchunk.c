@@ -596,8 +596,6 @@ H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset, hsize_t *storage
     HDassert(offset);
     HDassert(storage_size);
 
-    *storage_size = 0;
-
     /* Allocate dataspace and initialize it if it hasn't been. */
     if (!(*layout->ops->is_space_alloc)(&layout->storage))
         HGOTO_DONE(SUCCEED)

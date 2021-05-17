@@ -1243,7 +1243,7 @@ H5T_construct_datatype(H5VL_object_t *vol_obj)
 {
     H5T_t *                  dt = NULL;        /* Datatype object from VOL connector */
     H5VL_datatype_get_args_t vol_cb_args;      /* Arguments to VOL callback */
-    size_t                   nalloc;           /* Size required to store serialized form of datatype */
+    size_t                   nalloc = 0;       /* Size required to store serialized form of datatype */
     void *                   buf       = NULL; /* Buffer to store serialized datatype */
     H5T_t *                  ret_value = NULL;
 
@@ -1251,14 +1251,13 @@ H5T_construct_datatype(H5VL_object_t *vol_obj)
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                   = H5VL_DATATYPE_GET_BINARY_SIZE;
-    vol_cb_args.args.get_binary_size.size = 0;
+    vol_cb_args.args.get_binary_size.size = &nalloc;
 
-    /* get required buf size for encoding the datatype */
+    /* Get required buf size for encoding the datatype */
     if (H5VL_datatype_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to get datatype serialized size")
-    nalloc = vol_cb_args.args.get_binary_size.size;
 
-    /* allocate buffer to store binary description of the datatype */
+    /* Allocate buffer to store binary description of the datatype */
     if (NULL == (buf = (void *)H5MM_calloc(nalloc)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
 
@@ -1271,11 +1270,12 @@ H5T_construct_datatype(H5VL_object_t *vol_obj)
     if (H5VL_datatype_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to get serialized datatype")
 
+    /* Construct datatype, from serialized form in buffer */
     if (NULL == (dt = H5T_decode(nalloc, buf)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "can't decode datatype")
-
     dt->vol_obj = vol_obj;
 
+    /* Set return value */
     ret_value = dt;
 
 done:

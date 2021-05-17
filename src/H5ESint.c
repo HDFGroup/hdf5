@@ -504,16 +504,12 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
 
                 /* Set up VOL callback arguments */
                 vol_cb_args.op_type           = H5VL_REQUEST_GET_EXEC_TIME;
-                vol_cb_args.args.get_exec_time.exec_ts = UINT64_MAX;
-                vol_cb_args.args.get_exec_time.exec_time = UINT64_MAX;
+                vol_cb_args.args.get_exec_time.exec_ts = &ev->op_info.op_exec_ts;
+                vol_cb_args.args.get_exec_time.exec_time = &ev->op_info.op_exec_time;
 
                 /* Retrieve the execution time info */
                 if (H5VL_request_specific(ev->request, &vol_cb_args) < 0)
                     HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "unable to retrieve execution time info for operation")
-
-                /* Set values */
-                ev->op_info.op_exec_ts = vol_cb_args.args.get_exec_time.exec_ts;
-                ev->op_info.op_exec_time = vol_cb_args.args.get_exec_time.exec_time;
             }
             else
                 /* Translate status */

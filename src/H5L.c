@@ -1423,9 +1423,6 @@ H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t la
     if (H5VL_link_specific(*vol_obj_ptr, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
 
-    /* Set return value */
-    *exists = vol_cb_args.args.exists.exists;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5L__exists_api_common() */
@@ -1780,6 +1777,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
     H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
+    size_t link_name_len = 0;   /* Length of the link name string */
     ssize_t           ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
@@ -1814,14 +1812,14 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     vol_cb_args.op_type           = H5VL_LINK_GET_NAME;
     vol_cb_args.args.get_name.name_size      = size;
     vol_cb_args.args.get_name.name           = name;
-    vol_cb_args.args.get_name.name_len = 0;
+    vol_cb_args.args.get_name.name_len = &link_name_len;
 
     /* Get the link information */
     if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, (-1), "unable to get link name")
 
     /* Set the return value */
-    ret_value = (ssize_t)vol_cb_args.args.get_name.name_len;
+    ret_value = (ssize_t)link_name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)

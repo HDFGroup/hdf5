@@ -1041,6 +1041,7 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
     H5VL_object_t *   vol_obj; /* Object of loc_id */
     H5VL_object_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
+    hbool_t obj_exists = FALSE;         /* Whether object exists */
     htri_t            ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1068,14 +1069,14 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type           = H5VL_OBJECT_EXISTS;
-    vol_cb_args.args.exists.exists = FALSE;
+    vol_cb_args.args.exists.exists = &obj_exists;
 
     /* Check if the object exists */
     if (H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
     /* Set return value */
-    ret_value = vol_cb_args.args.exists.exists;
+    ret_value = (htri_t)obj_exists;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1641,6 +1642,7 @@ H5Oget_comment(hid_t obj_id, char *comment /*out*/, size_t bufsize)
     H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_native_object_optional_args_t obj_opt_args;    /* Arguments for optional operation */
     H5VL_loc_params_t loc_params;
+    size_t comment_len = 0; /* Length of comment string */
     ssize_t           ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
@@ -1657,7 +1659,7 @@ H5Oget_comment(hid_t obj_id, char *comment /*out*/, size_t bufsize)
     /* Set up VOL callback arguments */
     obj_opt_args.get_comment.buf = comment;
     obj_opt_args.get_comment.buf_size = bufsize;
-    obj_opt_args.get_comment.comment_len = 0;
+    obj_opt_args.get_comment.comment_len = &comment_len;
     vol_cb_args.op_type           = H5VL_NATIVE_OBJECT_GET_COMMENT;
     vol_cb_args.args = &obj_opt_args;
 
@@ -1666,7 +1668,7 @@ H5Oget_comment(hid_t obj_id, char *comment /*out*/, size_t bufsize)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, (-1), "can't get comment for object")
 
     /* Set return value */
-    ret_value = (ssize_t)obj_opt_args.get_comment.comment_len;
+    ret_value = (ssize_t)comment_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1695,6 +1697,7 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment /*out*/, si
     H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_native_object_optional_args_t obj_opt_args;    /* Arguments for optional operation */
     H5VL_loc_params_t loc_params;
+    size_t comment_len = 0; /* Length of comment string */
     ssize_t           ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
@@ -1721,7 +1724,7 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment /*out*/, si
     /* Set up VOL callback arguments */
     obj_opt_args.get_comment.buf = comment;
     obj_opt_args.get_comment.buf_size = bufsize;
-    obj_opt_args.get_comment.comment_len = 0;
+    obj_opt_args.get_comment.comment_len = &comment_len;
     vol_cb_args.op_type           = H5VL_NATIVE_OBJECT_GET_COMMENT;
     vol_cb_args.args = &obj_opt_args;
 
@@ -1730,7 +1733,7 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment /*out*/, si
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, (-1), "can't get comment for object: '%s'", name)
 
     /* Set return value */
-    ret_value = (ssize_t)obj_opt_args.get_comment.comment_len;
+    ret_value = (ssize_t)comment_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2271,16 +2274,13 @@ H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
     loc_params.obj_type = H5I_get_type(object_id);
 
     /* Set up VOL callback arguments */
-    obj_opt_args.are_mdc_flushes_disabled.flag = FALSE;
+    obj_opt_args.are_mdc_flushes_disabled.flag = are_disabled;
     vol_cb_args.op_type           = H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED;
     vol_cb_args.args = &obj_opt_args;
 
     /* Get the cork status */
     if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve object's cork status");
-
-    /* Set value to return */
-    *are_disabled = obj_opt_args.are_mdc_flushes_disabled.flag;
 
 done:
     FUNC_LEAVE_API(ret_value)

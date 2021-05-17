@@ -287,7 +287,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t H5_ATTR_UNUSE
 
             if (H5VL_OBJECT_BY_SELF == get_name_args->loc_params.type) {
                 if (H5A__get_name((H5A_t *)obj, get_name_args->buf_size, get_name_args->buf,
-                                  &get_name_args->attr_name_len) < 0)
+                                  get_name_args->attr_name_len) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
             }
             else if (H5VL_OBJECT_BY_IDX == get_name_args->loc_params.type) {
@@ -306,13 +306,13 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t H5_ATTR_UNUSE
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
                 /* Get the length of the name */
-                get_name_args->attr_name_len = HDstrlen(attr->shared->name);
+                *get_name_args->attr_name_len = HDstrlen(attr->shared->name);
 
                 /* Copy the name into the user's buffer, if given */
                 if (get_name_args->buf) {
                     HDstrncpy(get_name_args->buf, attr->shared->name,
-                              MIN((get_name_args->attr_name_len + 1), get_name_args->buf_size));
-                    if (get_name_args->attr_name_len >= get_name_args->buf_size)
+                              MIN((*get_name_args->attr_name_len + 1), get_name_args->buf_size));
+                    if (*get_name_args->attr_name_len >= get_name_args->buf_size)
                         get_name_args->buf[get_name_args->buf_size - 1] = '\0';
                 } /* end if */
 
@@ -389,7 +389,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t H5_ATTR_UNUSE
             H5A_t *attr = (H5A_t *)obj;
 
             /* Set storage size */
-            args->args.get_storage_size.data_size = attr->shared->data_size;
+            *args->args.get_storage_size.data_size = attr->shared->data_size;
             break;
         }
 
@@ -461,13 +461,13 @@ H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
         case H5VL_ATTR_EXISTS: {
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
                 /* Check if the attribute exists */
-                if (H5O__attr_exists(loc.oloc, args->args.exists.name, &args->args.exists.exists) < 0)
+                if (H5O__attr_exists(loc.oloc, args->args.exists.name, args->args.exists.exists) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
             } /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) {
                 /* Check if the attribute exists */
                 if (H5A__exists_by_name(loc, loc_params->loc_data.loc_by_name.name, args->args.exists.name,
-                                        &args->args.exists.exists) < 0)
+                                        args->args.exists.exists) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
             } /* end else-if */
             else
@@ -535,6 +535,9 @@ herr_t
 H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, H5VL_optional_args_t *args,
                            hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    H5VL_native_attr_optional_args_t *opt_args = args->args; /* Pointer to native operation's arguments */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -542,7 +545,7 @@ H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, H5VL_optional_args_t *args,
     switch (args->op_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         case H5VL_NATIVE_ATTR_ITERATE_OLD: {
-            H5VL_native_attr_iterate_old_t *iter_args = &((H5VL_native_attr_optional_args_t *)(args->args))->iterate_old;
+            H5VL_native_attr_iterate_old_t *iter_args = &opt_args->iterate_old;
 
             /* Call the actual iteration routine */
             if ((ret_value = H5A__iterate_old(iter_args->loc_id, iter_args->attr_num, iter_args->op, iter_args->op_data)) < 0)

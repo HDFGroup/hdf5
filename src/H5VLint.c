@@ -1185,14 +1185,11 @@ H5VL_file_is_same(const H5VL_object_t *vol_obj1, const H5VL_object_t *vol_obj2, 
         /* Set up VOL callback arguments */
         vol_cb_args.op_type                 = H5VL_FILE_IS_EQUAL;
         vol_cb_args.args.is_equal.obj2      = obj2;
-        vol_cb_args.args.is_equal.same_file = FALSE;
+        vol_cb_args.args.is_equal.same_file = same_file;
 
         /* Make 'are files equal' callback */
         if (H5VL_file_specific(vol_obj1, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, NULL) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
-
-        /* Set return value */
-        *same_file = vol_cb_args.args.is_equal.same_file;
     } /* end else */
 
 done:

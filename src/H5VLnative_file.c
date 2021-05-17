@@ -196,18 +196,18 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
              * or H5F_ACC_RDONLY and any SWMR flags.
              */
             if (H5F_INTENT(f) & H5F_ACC_RDWR) {
-                args->args.get_intent.flags = H5F_ACC_RDWR;
+                *args->args.get_intent.flags = H5F_ACC_RDWR;
 
                 /* Check for SWMR write access on the file */
                 if (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-                    args->args.get_intent.flags |= H5F_ACC_SWMR_WRITE;
+                    *args->args.get_intent.flags |= H5F_ACC_SWMR_WRITE;
             } /* end if */
             else {
-                args->args.get_intent.flags = H5F_ACC_RDONLY;
+                *args->args.get_intent.flags = H5F_ACC_RDONLY;
 
                 /* Check for SWMR read access on the file */
                 if (H5F_INTENT(f) & H5F_ACC_SWMR_READ)
-                    args->args.get_intent.flags |= H5F_ACC_SWMR_READ;
+                    *args->args.get_intent.flags |= H5F_ACC_SWMR_READ;
             } /* end else */
 
             break;
@@ -215,7 +215,10 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
 
         /* H5Fget_fileno */
         case H5VL_FILE_GET_FILENO: {
-            H5F_GET_FILENO((H5F_t *)obj, args->args.get_fileno.fileno);
+            unsigned long fileno = 0;
+
+            H5F_GET_FILENO((H5F_t *)obj, fileno);
+            *args->args.get_fileno.fileno = fileno;
 
             break;
         }
@@ -227,12 +230,14 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
             if (H5VL_native_get_file_struct(obj, file_args->type, &f) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-            file_args->file_name_len = HDstrlen(H5F_OPEN_NAME(f));
+            /* Get length of file name */
+            *file_args->file_name_len = HDstrlen(H5F_OPEN_NAME(f));
 
+            /* Populate buffer with name, if given */
             if (file_args->buf) {
                 HDstrncpy(file_args->buf, H5F_OPEN_NAME(f),
-                          MIN(file_args->file_name_len + 1, file_args->buf_size));
-                if (file_args->file_name_len >= file_args->buf_size)
+                          MIN(*file_args->file_name_len + 1, file_args->buf_size));
+                if (*file_args->file_name_len >= file_args->buf_size)
                     file_args->buf[file_args->buf_size - 1] = '\0';
             } /* end if */
 
@@ -242,7 +247,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
         /* H5Fget_obj_count */
         case H5VL_FILE_GET_OBJ_COUNT: {
             if (H5F_get_obj_count((H5F_t *)obj, args->args.get_obj_count.types, TRUE,
-                                  &args->args.get_obj_count.count) < 0)
+                                  args->args.get_obj_count.count) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve object count")
 
             break;
@@ -253,7 +258,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
             H5VL_file_get_obj_ids_args_t *file_args = &args->args.get_obj_ids;
 
             if (H5F_get_obj_ids((H5F_t *)obj, file_args->types, file_args->max_objs, file_args->oid_list,
-                                TRUE, &file_args->count) < 0)
+                                TRUE, file_args->count) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve object IDs")
 
             break;
@@ -327,7 +332,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_
             new_file->id_exists = TRUE;
 
             /* Set 'out' value */
-            args->args.reopen.file = new_file;
+            *args->args.reopen.file = new_file;
 
             break;
         }
@@ -341,7 +346,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "error in HDF5 file check")
 
             /* Set 'out' value */
-            args->args.is_accessible.accessible = (hbool_t)result;
+            *args->args.is_accessible.accessible = (hbool_t)result;
 
             break;
         }
@@ -357,9 +362,9 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_
         /* Check if two files are the same */
         case H5VL_FILE_IS_EQUAL: {
             if (!obj || !args->args.is_equal.obj2)
-                args->args.is_equal.same_file = FALSE;
+                *args->args.is_equal.same_file = FALSE;
             else
-                args->args.is_equal.same_file =
+                *args->args.is_equal.same_file =
                     (((H5F_t *)obj)->shared == ((H5F_t *)args->args.is_equal.obj2)->shared);
 
             break;
@@ -387,6 +392,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
                            void H5_ATTR_UNUSED **req)
 {
     H5F_t *f         = (H5F_t *)obj;    /* File */
+    H5VL_native_file_optional_args_t *opt_args = args->args; /* Pointer to native operation's arguments */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -403,17 +409,17 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
             base_addr = H5FD_get_base_addr(f->shared->lf);
 
             /* Convert relative base address for file to absolute address */
-            ((H5VL_native_file_optional_args_t *)(args->args))->get_size.size =  (hsize_t)(max_eof_eoa + base_addr);
+            *opt_args->get_size.size =  (hsize_t)(max_eof_eoa + base_addr);
 
             break;
         }
 
         /* H5Fget_file_image */
         case H5VL_NATIVE_FILE_GET_FILE_IMAGE: {
-            H5VL_native_file_get_file_image_t *gfi_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_file_image;
+            H5VL_native_file_get_file_image_t *gfi_args = &opt_args->get_file_image;
 
             /* Get file image */
-            if (H5F__get_file_image(f, gfi_args->buf, gfi_args->buf_size, &gfi_args->image_len) < 0)
+            if (H5F__get_file_image(f, gfi_args->buf, gfi_args->buf_size, gfi_args->image_len) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "get file image failed")
 
             break;
@@ -421,10 +427,10 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_freespace */
         case H5VL_NATIVE_FILE_GET_FREE_SPACE: {
-            H5VL_native_file_get_freespace_t *gfs_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_freespace;
+            H5VL_native_file_get_freespace_t *gfs_args = &opt_args->get_freespace;
 
             /* Get the actual amount of free space in the file */
-            if (H5MF_get_freespace(f, &gfs_args->size, NULL) < 0)
+            if (H5MF_get_freespace(f, gfs_args->size, NULL) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
             break;
@@ -432,10 +438,10 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_free_sections */
         case H5VL_NATIVE_FILE_GET_FREE_SECTIONS: {
-            H5VL_native_file_get_free_sections_t *gfs_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_free_sections;
+            H5VL_native_file_get_free_sections_t *gfs_args = &opt_args->get_free_sections;
 
             /* Go get the free-space section information in the file */
-            if (H5MF_get_free_sections(f, gfs_args->type, gfs_args->nsects, gfs_args->sect_info, &gfs_args->sect_count) < 0)
+            if (H5MF_get_free_sections(f, gfs_args->type, gfs_args->nsects, gfs_args->sect_info, gfs_args->sect_count) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
             break;
@@ -443,7 +449,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_info1/2 */
         case H5VL_NATIVE_FILE_GET_INFO: {
-            H5VL_native_file_get_info_t *gfi_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_info;
+            H5VL_native_file_get_info_t *gfi_args = &opt_args->get_info;
 
             /* Get the file struct. This call is careful to not return the file pointer
              * for the top file in a mount hierarchy.
@@ -461,7 +467,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
         /* H5Fget_mdc_config */
         case H5VL_NATIVE_FILE_GET_MDC_CONF: {
             /* Get the metadata cache configuration */
-            if (H5AC_get_cache_auto_resize_config(f->shared->cache, ((H5VL_native_file_optional_args_t *)(args->args))->get_mdc_config.config) < 0)
+            if (H5AC_get_cache_auto_resize_config(f->shared->cache, opt_args->get_mdc_config.config) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get metadata cache configuration")
 
             break;
@@ -470,7 +476,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
         /* H5Fget_mdc_hit_rate */
         case H5VL_NATIVE_FILE_GET_MDC_HR: {
             /* Get the current hit rate */
-            if (H5AC_get_cache_hit_rate(f->shared->cache, &((H5VL_native_file_optional_args_t *)(args->args))->get_mdc_hit_rate.hit_rate) < 0)
+            if (H5AC_get_cache_hit_rate(f->shared->cache, opt_args->get_mdc_hit_rate.hit_rate) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get metadata cache hit rate")
 
             break;
@@ -478,10 +484,10 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_mdc_size */
         case H5VL_NATIVE_FILE_GET_MDC_SIZE: {
-            H5VL_native_file_get_mdc_size_t *gms_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_mdc_size;
+            H5VL_native_file_get_mdc_size_t *gms_args = &opt_args->get_mdc_size;
 
             /* Get the size data */
-            if (H5AC_get_cache_size(f->shared->cache, &gms_args->max_size, &gms_args->min_clean_size, &gms_args->cur_size, &gms_args->cur_num_entries) < 0)
+            if (H5AC_get_cache_size(f->shared->cache, gms_args->max_size, gms_args->min_clean_size, gms_args->cur_size, gms_args->cur_num_entries) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get metadata cache size")
 
             break;
@@ -489,10 +495,10 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_vfd_handle */
         case H5VL_NATIVE_FILE_GET_VFD_HANDLE: {
-            H5VL_native_file_get_vfd_handle_t *gvh_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_vfd_handle;
+            H5VL_native_file_get_vfd_handle_t *gvh_args = &opt_args->get_vfd_handle;
 
             /* Retrieve the VFD handle for the file */
-            if (H5F_get_vfd_handle(f, gvh_args->fapl_id, &gvh_args->file_handle) < 0)
+            if (H5F_get_vfd_handle(f, gvh_args->fapl_id, gvh_args->file_handle) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
 
             break;
@@ -520,7 +526,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
         /* H5Fset_mdc_config */
         case H5VL_NATIVE_FILE_SET_MDC_CONFIG: {
             /* Set the metadata cache configuration  */
-            if (H5AC_set_cache_auto_resize_config(f->shared->cache, ((H5VL_native_file_optional_args_t *)(args->args))->set_mdc_config.config) < 0)
+            if (H5AC_set_cache_auto_resize_config(f->shared->cache, opt_args->set_mdc_config.config) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set metadata cache configuration")
 
             break;
@@ -528,7 +534,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_metadata_read_retry_info */
         case H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO: {
-            if (H5F_get_metadata_read_retry_info(f, ((H5VL_native_file_optional_args_t *)(args->args))->get_metadata_read_retry_info.info) < 0)
+            if (H5F_get_metadata_read_retry_info(f, opt_args->get_metadata_read_retry_info.info) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get metadata read retry info")
 
             break;
@@ -562,10 +568,10 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_mdc_logging_status */
         case H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS: {
-            H5VL_native_file_get_mdc_logging_status_t *gmls_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_mdc_logging_status;
+            H5VL_native_file_get_mdc_logging_status_t *gmls_args = &opt_args->get_mdc_logging_status;
 
             /* Call mdc logging function */
-            if (H5C_get_logging_status(f->shared->cache, &gmls_args->is_enabled, &gmls_args->is_currently_logging) < 0)
+            if (H5C_get_logging_status(f->shared->cache, gmls_args->is_enabled, gmls_args->is_currently_logging) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to get logging status")
 
             break;
@@ -595,7 +601,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_page_buffering_stats */
         case H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS: {
-            H5VL_native_file_get_page_buffering_stats_t *gpbs_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_page_buffering_stats;
+            H5VL_native_file_get_page_buffering_stats_t *gpbs_args = &opt_args->get_page_buffering_stats;
 
             /* Sanity check */
             if (NULL == f->shared->page_buf)
@@ -610,10 +616,10 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_mdc_image_info */
         case H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO: {
-            H5VL_native_file_get_mdc_image_info_t *gmii_args = &((H5VL_native_file_optional_args_t *)(args->args))->get_mdc_image_info;
+            H5VL_native_file_get_mdc_image_info_t *gmii_args = &opt_args->get_mdc_image_info;
 
             /* Go get the address and size of the cache image */
-            if (H5AC_get_mdc_image_info(f->shared->cache, &gmii_args->addr, &gmii_args->len) < 0)
+            if (H5AC_get_mdc_image_info(f->shared->cache, gmii_args->addr, gmii_args->len) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
 
             break;
@@ -635,7 +641,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
             /* Set return value */
             /* (Note compensating for base address subtraction in internal routine) */
-            ((H5VL_native_file_optional_args_t *)(args->args))->get_eoa.eoa = rel_eoa + H5F_get_base_addr(f);
+            *opt_args->get_eoa.eoa = rel_eoa + H5F_get_base_addr(f);
 
             break;
         }
@@ -655,7 +661,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file can't get max eof/eoa ")
 
             /* Set EOA to the maximum value + increment */
-            if (H5F__set_eoa(f, H5FD_MEM_DEFAULT, max_eof_eoa + ((H5VL_native_file_optional_args_t *)(args->args))->increment_filesize.increment) < 0)
+            if (H5F__set_eoa(f, H5FD_MEM_DEFAULT, max_eof_eoa + opt_args->increment_filesize.increment) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_eoa request failed")
 
             break;
@@ -663,7 +669,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fset_latest_format, H5Fset_libver_bounds */
         case H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS: {
-            H5VL_native_file_set_libver_bounds_t *slb_args = &((H5VL_native_file_optional_args_t *)(args->args))->set_libver_bounds;
+            H5VL_native_file_set_libver_bounds_t *slb_args = &opt_args->set_libver_bounds;
 
             /* Call internal set_libver_bounds function */
             if (H5F__set_libver_bounds(f, slb_args->low, slb_args->high) < 0)
@@ -674,14 +680,14 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_dset_no_attrs_hint */
         case H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG: {
-            ((H5VL_native_file_optional_args_t *)(args->args))->get_min_dset_ohdr_flag.minimize = H5F_GET_MIN_DSET_OHDR(f);
+            *opt_args->get_min_dset_ohdr_flag.minimize = H5F_GET_MIN_DSET_OHDR(f);
 
             break;
         }
 
         /* H5Fset_dset_no_attrs_hint */
         case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG: {
-            if (H5F_set_min_dset_ohdr(f, ((H5VL_native_file_optional_args_t *)(args->args))->set_min_dset_ohdr_flag.minimize) < 0)
+            if (H5F_set_min_dset_ohdr(f, opt_args->set_min_dset_ohdr_flag.minimize) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set file's dataset object header minimization flag")
 
             break;
@@ -690,7 +696,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 #ifdef H5_HAVE_PARALLEL
         /* H5Fget_mpi_atomicity */
         case H5VL_NATIVE_FILE_GET_MPI_ATOMICITY: {
-            if (H5F__get_mpi_atomicity(f, &((H5VL_native_file_optional_args_t *)(args->args))->get_mpi_atomicity.flag) < 0)
+            if (H5F__get_mpi_atomicity(f, opt_args->get_mpi_atomicity.flag) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "cannot get MPI atomicity");
 
             break;
@@ -698,7 +704,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fset_mpi_atomicity */
         case H5VL_NATIVE_FILE_SET_MPI_ATOMICITY: {
-            if (H5F__set_mpi_atomicity(f, ((H5VL_native_file_optional_args_t *)(args->args))->set_mpi_atomicity.flag) < 0)
+            if (H5F__set_mpi_atomicity(f, opt_args->set_mpi_atomicity.flag) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set MPI atomicity");
 
             break;

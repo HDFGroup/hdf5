@@ -1008,15 +1008,11 @@ H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type /*out*/
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type           = H5VL_OBJECT_GET_TYPE;
-    vol_cb_args.args.get_type.obj_type = H5O_TYPE_UNKNOWN;
+    vol_cb_args.args.get_type.obj_type = obj_type;
 
     /* Retrieve object's type */
     if (H5VL_object_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve object type")
-
-    /* Set return value */
-    if(obj_type)
-        *obj_type = vol_cb_args.args.get_type.obj_type;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1058,6 +1054,7 @@ H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
     else {
         H5VL_object_t *      vol_obj;     /* Object of loc_id */
         H5VL_file_get_args_t vol_cb_args; /* Arguments to VOL callback */
+        size_t file_name_len = 0; /* Length of file name */
 
         /* Retrieve VOL file object */
         if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
@@ -1068,14 +1065,14 @@ H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
         vol_cb_args.args.get_name.type          = H5I_FILE;
         vol_cb_args.args.get_name.buf_size      = size;
         vol_cb_args.args.get_name.buf           = buf;
-        vol_cb_args.args.get_name.file_name_len = 0;
+        vol_cb_args.args.get_name.file_name_len = &file_name_len;
 
         /* Get file name */
         if (H5VL_file_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "unable to get file name")
 
         /* Set return value */
-        ret_value = (ssize_t)vol_cb_args.args.get_name.file_name_len;
+        ret_value = (ssize_t)file_name_len;
     }
 
 done:
@@ -1100,6 +1097,7 @@ H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf /*out*/, size_t siz
     H5VL_object_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t loc_params;      /* Location parameters */
     H5O_token_t       obj_token = {0}; /* Object token */
+    size_t obj_name_len = 0;    /* Length of object's name */
     ssize_t           ret_value = 0;   /* Return value */
 
     FUNC_ENTER_API((-1))
@@ -1115,11 +1113,10 @@ H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf /*out*/, size_t siz
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a property list")
 
     /* Retrieve loc_id from reference */
-    if (H5I_INVALID_HID == (loc_id = H5R__get_loc_id((const H5R_ref_priv_t *)ref_ptr))) {
+    if (H5I_INVALID_HID == (loc_id = H5R__get_loc_id((const H5R_ref_priv_t *)ref_ptr)))
         /* Attempt to re-open file and pass rapl_id as a fapl_id */
         if ((loc_id = H5R__reopen_file((H5R_ref_priv_t *)ref_ptr, rapl_id)) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENFILE, (-1), "cannot re-open referenced file")
-    }
 
     /* Get object token */
     if (H5R__get_obj_token((const H5R_ref_priv_t *)ref_ptr, &obj_token, NULL) < 0)
@@ -1138,14 +1135,14 @@ H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf /*out*/, size_t siz
     vol_cb_args.op_type           = H5VL_OBJECT_GET_NAME;
     vol_cb_args.args.get_name.buf_size = size;
     vol_cb_args.args.get_name.buf      = buf;
-    vol_cb_args.args.get_name.name_len = 0;
+    vol_cb_args.args.get_name.name_len = &obj_name_len;
 
     /* Retrieve object's name */
     if (H5VL_object_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "can't retrieve object name")
 
     /* Set return value */
-    ret_value = (ssize_t)vol_cb_args.args.get_name.name_len;
+    ret_value = (ssize_t)obj_name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)

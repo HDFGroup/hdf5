@@ -169,7 +169,7 @@ typedef struct {
     size_t name_size; /* Size of name buffer to fill       */
 
     /* upward */
-    ssize_t name_len; /* Full length of name               */
+    size_t name_len; /* Full length of name               */
 } H5G_bt2_ud_gnbi_t;
 
 /*
@@ -185,7 +185,7 @@ typedef struct {
     size_t name_size; /* Size of name buffer to fill       */
 
     /* upward */
-    ssize_t name_len; /* Full length of name               */
+    size_t name_len; /* Full length of name               */
 } H5G_fh_ud_gnbi_t;
 
 /*
@@ -1046,12 +1046,12 @@ H5G__dense_get_name_by_idx_fh_cb(const void *obj, size_t obj_len, void *_udata)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Get the length of the name */
-    udata->name_len = (ssize_t)HDstrlen(lnk->name);
+    udata->name_len = HDstrlen(lnk->name);
 
     /* Copy the name into the user's buffer, if given */
     if (udata->name) {
-        HDstrncpy(udata->name, lnk->name, MIN((size_t)(udata->name_len + 1), udata->name_size));
-        if ((size_t)udata->name_len >= udata->name_size)
+        HDstrncpy(udata->name, lnk->name, MIN((udata->name_len + 1), udata->name_size));
+        if (udata->name_len >= udata->name_size)
             udata->name[udata->name_size - 1] = '\0';
     } /* end if */
 

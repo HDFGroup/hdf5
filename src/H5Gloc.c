@@ -629,7 +629,7 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
     *own_loc = H5G_OWN_NONE;
 
 done:
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__loc_exists_cb() */
 
 /*-------------------------------------------------------------------------
@@ -1063,7 +1063,8 @@ H5G_loc_get_comment(const H5G_loc_t *loc, const char *name, char *comment /*out*
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
 
     /* Set value to return */
-    *comment_len = udata.comment_size;
+    if (comment_len)
+        *comment_len = udata.comment_size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

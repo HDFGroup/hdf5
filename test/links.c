@@ -16688,7 +16688,12 @@ obj_exists(hid_t fapl, hbool_t new_format)
 
     /* Hard links */
     /* Verify that H5Oexists_by_name() returns false for non-existent link in root group */
-    if (0 != (status = H5Oexists_by_name(fid, "foo", H5P_DEFAULT)))
+    H5E_BEGIN_TRY
+    {
+        status = H5Oexists_by_name(fid, "foo", H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
         TEST_ERROR
 
     /* Create a group, as a destination for testing */
@@ -16702,7 +16707,12 @@ obj_exists(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that H5Oexists_by_name() returns false for non-existent object in non-root group */
-    if (0 != (status = H5Oexists_by_name(fid, "group/foo", H5P_DEFAULT)))
+    H5E_BEGIN_TRY
+    {
+        status = H5Oexists_by_name(fid, "group/foo", H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
         TEST_ERROR
 
     /* Soft links */

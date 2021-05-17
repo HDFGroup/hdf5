@@ -97,19 +97,19 @@ typedef struct H5VL_native_dataset_chunk_write_t {
 typedef struct H5VL_native_dataset_get_vlen_buf_size_t {
     hid_t   type_id;
     hid_t   space_id;
-    hsize_t size;               /* Size of variable-length data buffer (OUT) */
+    hsize_t *size;               /* Size of variable-length data buffer (OUT) */
 } H5VL_native_dataset_get_vlen_buf_size_t;
 
 /* Parameters for native connector's dataset 'get chunk storage size' operation */
 typedef struct H5VL_native_dataset_get_chunk_storage_size_t {
     const hsize_t *offset;          /* Offset of chunk */
-    hsize_t size;                   /* Size of chunk (OUT) */
+    hsize_t *size;                  /* Size of chunk (OUT) */
 } H5VL_native_dataset_get_chunk_storage_size_t;
 
 /* Parameters for native connector's dataset 'get num chunks' operation */
 typedef struct H5VL_native_dataset_get_num_chunks_t {
     hid_t   space_id;           /* Space selection */
-    hsize_t nchunks;            /* # of chunk for space selection (OUT) */
+    hsize_t *nchunks;            /* # of chunk for space selection (OUT) */
 } H5VL_native_dataset_get_num_chunks_t;
 
 /* Parameters for native connector's dataset 'get chunk info by idx' operation */
@@ -117,17 +117,17 @@ typedef struct H5VL_native_dataset_get_chunk_info_by_idx_t {
     hid_t   space_id;           /* Space selection */
     hsize_t chk_index;          /* Chunk index within space */
     hsize_t *offset;            /* Chunk coordinates (OUT) */
-    unsigned filter_mask;       /* Filter mask for chunk (OUT) */
-    haddr_t addr;               /* Address of chunk in file (OUT) */
-    hsize_t size;               /* Size of chunk in file (OUT) */
+    unsigned *filter_mask;       /* Filter mask for chunk (OUT) */
+    haddr_t *addr;               /* Address of chunk in file (OUT) */
+    hsize_t *size;               /* Size of chunk in file (OUT) */
 } H5VL_native_dataset_get_chunk_info_by_idx_t;
 
 /* Parameters for native connector's dataset 'get chunk info by coord' operation */
 typedef struct H5VL_native_dataset_get_chunk_info_by_coord_t {
     const hsize_t *offset;      /* Chunk coordinates */
-    unsigned filter_mask;       /* Filter mask for chunk (OUT) */
-    haddr_t addr;               /* Address of chunk in file (OUT) */
-    hsize_t size;               /* Size of chunk in file (OUT) */
+    unsigned *filter_mask;       /* Filter mask for chunk (OUT) */
+    haddr_t *addr;               /* Address of chunk in file (OUT) */
+    hsize_t *size;               /* Size of chunk in file (OUT) */
 } H5VL_native_dataset_get_chunk_info_by_coord_t;
 
 /* Parameters for native connector's dataset 'optional' operations */
@@ -137,7 +137,7 @@ typedef union H5VL_native_dataset_optional_args_t {
 
     /* H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE */
     struct {
-        H5D_chunk_index_t idx_type;     /* Type of chunk index (OUT) */
+        H5D_chunk_index_t *idx_type;     /* Type of chunk index (OUT) */
     } get_chunk_idx_type;
 
     /* H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE */
@@ -163,7 +163,7 @@ typedef union H5VL_native_dataset_optional_args_t {
 
     /* H5VL_NATIVE_DATASET_GET_OFFSET */
     struct {
-        haddr_t offset;         /* Contiguous dataset's offset in the file (OUT) */
+        haddr_t *offset;         /* Contiguous dataset's offset in the file (OUT) */
     } get_offset;
 } H5VL_native_dataset_optional_args_t;
 
@@ -210,21 +210,21 @@ typedef union H5VL_native_dataset_optional_args_t {
 typedef struct H5VL_native_file_get_file_image_t {
     size_t buf_size;            /* Size of file image buffer */
     void *buf;                  /* Buffer for file image (OUT) */
-    size_t image_len;           /* Size of file image (OUT) */
+    size_t *image_len;           /* Size of file image (OUT) */
 } H5VL_native_file_get_file_image_t;
-
-/* Parameters for native connector's file 'get freespace' operation */
-typedef struct H5VL_native_file_get_freespace_t {
-    hsize_t size;         /* Size of free space (OUT) */
-} H5VL_native_file_get_freespace_t;
 
 /* Parameters for native connector's file 'get free sections' operation */
 typedef struct H5VL_native_file_get_free_sections_t {
     H5F_mem_t type;             /* Type of file memory to query */
     H5F_sect_info_t *sect_info; /* Array of sections (OUT) */
     size_t nsects;              /* Size of section array */
-    size_t sect_count;          /* Actual # of sections of type (OUT) */
+    size_t *sect_count;          /* Actual # of sections of type (OUT) */
 } H5VL_native_file_get_free_sections_t;
+
+/* Parameters for native connector's file 'get freespace' operation */
+typedef struct H5VL_native_file_get_freespace_t {
+    hsize_t *size;         /* Size of free space (OUT) */
+} H5VL_native_file_get_freespace_t;
 
 /* Parameters for native connector's file 'get info' operation */
 typedef struct H5VL_native_file_get_info_t {
@@ -234,22 +234,22 @@ typedef struct H5VL_native_file_get_info_t {
 
 /* Parameters for native connector's file 'get metadata cache size' operation */
 typedef struct H5VL_native_file_get_mdc_size_t {
-    size_t max_size;            /* Maximum amount of cached data (OUT) */
-    size_t min_clean_size;      /* Minimum amount of cached data to keep clean (OUT) */
-    size_t cur_size;            /* Current amount of cached data (OUT) */
-    uint32_t cur_num_entries;   /* Current # of cached entries (OUT) */
+    size_t *max_size;            /* Maximum amount of cached data (OUT) */
+    size_t *min_clean_size;      /* Minimum amount of cached data to keep clean (OUT) */
+    size_t *cur_size;            /* Current amount of cached data (OUT) */
+    uint32_t *cur_num_entries;   /* Current # of cached entries (OUT) */
 } H5VL_native_file_get_mdc_size_t;
 
 /* Parameters for native connector's file 'get VFD handle' operation */
 typedef struct H5VL_native_file_get_vfd_handle_t {
     hid_t fapl_id;
-    void *file_handle;          /* File handle from VFD (OUT) */
+    void **file_handle;          /* File handle from VFD (OUT) */
 } H5VL_native_file_get_vfd_handle_t;
 
 /* Parameters for native connector's file 'get MDC logging status' operation */
 typedef struct H5VL_native_file_get_mdc_logging_status_t {
-    hbool_t is_enabled;                 /* Whether logging is enabled (OUT) */
-    hbool_t is_currently_logging;       /* Whether currently logging (OUT) */
+    hbool_t *is_enabled;                 /* Whether logging is enabled (OUT) */
+    hbool_t *is_currently_logging;       /* Whether currently logging (OUT) */
 } H5VL_native_file_get_mdc_logging_status_t;
 
 /* Parameters for native connector's file 'get page buffering stats' operation */
@@ -263,8 +263,8 @@ typedef struct H5VL_native_file_get_page_buffering_stats_t {
 
 /* Parameters for native connector's file 'get MDC image info' operation */
 typedef struct H5VL_native_file_get_mdc_image_info_t {
-    haddr_t addr;               /* Address of image (OUT) */
-    hsize_t len;               /* Length of image (OUT) */
+    haddr_t *addr;               /* Address of image (OUT) */
+    hsize_t *len;               /* Length of image (OUT) */
 } H5VL_native_file_get_mdc_image_info_t;
 
 /* Parameters for native connector's file 'set libver bounds' operation */
@@ -297,7 +297,7 @@ typedef union H5VL_native_file_optional_args_t {
 
     /* H5VL_NATIVE_FILE_GET_MDC_HR */
     struct {
-        double hit_rate;         /* Metadata cache hit rate (OUT) */
+        double *hit_rate;         /* Metadata cache hit rate (OUT) */
     } get_mdc_hit_rate;
 
     /* H5VL_NATIVE_FILE_GET_MDC_SIZE */
@@ -305,7 +305,7 @@ typedef union H5VL_native_file_optional_args_t {
 
     /* H5VL_NATIVE_FILE_GET_SIZE */
     struct {
-        hsize_t size;         /* Size of file (OUT) */
+        hsize_t *size;         /* Size of file (OUT) */
     } get_size;
 
     /* H5VL_NATIVE_FILE_GET_VFD_HANDLE */
@@ -350,7 +350,7 @@ typedef union H5VL_native_file_optional_args_t {
 
     /* H5VL_NATIVE_FILE_GET_EOA */
     struct {
-        haddr_t eoa;         /* End of allocated file address space (OUT) */
+        haddr_t *eoa;         /* End of allocated file address space (OUT) */
     } get_eoa;
 
     /* H5VL_NATIVE_FILE_INCR_FILESIZE */
@@ -363,7 +363,7 @@ typedef union H5VL_native_file_optional_args_t {
 
     /* H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG */
     struct {
-        hbool_t minimize;   /* Flag whether dataset object headers are minimal (OUT) */
+        hbool_t *minimize;   /* Flag whether dataset object headers are minimal (OUT) */
     } get_min_dset_ohdr_flag;
 
     /* H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG */
@@ -374,7 +374,7 @@ typedef union H5VL_native_file_optional_args_t {
 #ifdef H5_HAVE_PARALLEL
     /* H5VL_NATIVE_FILE_GET_MPI_ATOMICITY */
     struct {
-        hbool_t flag;   /* Flag whether MPI atomicity is set for files (OUT) */
+        hbool_t *flag;   /* Flag whether MPI atomicity is set for files (OUT) */
     } get_mpi_atomicity;
 
     /* H5VL_NATIVE_FILE_SET_MPI_ATOMICITY */
@@ -404,7 +404,7 @@ typedef union H5VL_native_file_optional_args_t {
 typedef struct H5VL_native_group_iterate_old_t {
     H5VL_loc_params_t loc_params; /* Location parameters for iteration */
     hsize_t            idx;       /* Index of link to begin iteration at */
-    hsize_t            last_obj;  /* Index of last link looked at (OUT) */
+    hsize_t            *last_obj;  /* Index of last link looked at (OUT) */
     H5G_iterate_t      op;     /* Group (link) operator callback */
     void *          op_data;    /* Context to pass to iterator callback */
 } H5VL_native_group_iterate_old_t;
@@ -444,7 +444,7 @@ typedef union H5VL_native_group_optional_args_t {
 typedef struct H5VL_native_object_get_comment_t {
     size_t buf_size;            /* Size of comment buffer */
     void *buf;                  /* Buffer for comment (OUT) */
-    size_t comment_len;         /* Actual size of comment (OUT) */
+    size_t *comment_len;         /* Actual size of comment (OUT) */
 } H5VL_native_object_get_comment_t;
 
 /* Parameters for object 'get native info' operation */
@@ -460,7 +460,7 @@ typedef union H5VL_native_object_optional_args_t {
 
     /* H5VL_NATIVE_OBJECT_SET_COMMENT */
     struct {
-        const char *comment;    /* Comment string to set for the object */
+        const char *comment;    /* Comment string to set for the object (IN) */
     } set_comment;
 
     /* H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES */
@@ -471,7 +471,7 @@ typedef union H5VL_native_object_optional_args_t {
 
     /* H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED */
     struct {
-        hbool_t flag;   /* Flag whether metadata cache flushes are disabled for this object (OUT) */
+        hbool_t *flag;   /* Flag whether metadata cache flushes are disabled for this object (OUT) */
     } are_mdc_flushes_disabled;
 
     /* H5VL_NATIVE_OBJECT_GET_NATIVE_INFO */

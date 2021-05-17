@@ -327,17 +327,13 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
     /* Set up VOL callback arguments */
-    file_opt_args.get_mpi_atomicity.flag = FALSE;
+    file_opt_args.get_mpi_atomicity.flag = flag;
     vol_cb_args.op_type           = H5VL_NATIVE_FILE_GET_MPI_ATOMICITY;
     vol_cb_args.args = &file_opt_args;
 
     /* Get atomicity value */
     if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get MPI atomicity");
-
-    /* Set value to return */
-    if (flag)
-        *flag = file_opt_args.get_mpi_atomicity.flag;
 
 done:
     FUNC_LEAVE_API(ret_value);

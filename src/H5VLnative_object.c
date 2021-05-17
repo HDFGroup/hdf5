@@ -185,7 +185,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
         /* Object file */
         case H5VL_OBJECT_GET_FILE: {
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
-                args->args.get_file.file = (void *)loc.oloc->file;
+                *args->args.get_file.file = (void *)loc.oloc->file;
 
                 /* TODO we currently need to set id_exists to TRUE because
                  * the upper layer will create an ID from the returned
@@ -203,7 +203,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
         case H5VL_OBJECT_GET_NAME: {
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
                 /* Retrieve object's name */
-                if (H5G_get_name(&loc, args->args.get_name.buf, args->args.get_name.buf_size, &args->args.get_name.name_len, NULL) < 0)
+                if (H5G_get_name(&loc, args->args.get_name.buf, args->args.get_name.buf_size, args->args.get_name.name_len, NULL) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve object name")
             } /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_TOKEN) {
@@ -220,7 +220,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                                 "can't deserialize object token into address")
 
                 /* Retrieve object's name */
-                if (H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, args->args.get_name.buf, args->args.get_name.buf_size, &args->args.get_name.name_len) < 0)
+                if (H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, args->args.get_name.buf, args->args.get_name.buf_size, args->args.get_name.name_len) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't determine object name")
             } /* end else-if */
             else
@@ -247,7 +247,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
 
                 /* Get the # of links for object, and its type */
                 /* (To check to make certain that this object hasn't been deleted) */
-                if (H5O_get_rc_and_type(&obj_oloc, &rc, &args->args.get_type.obj_type) < 0 || 0 == rc)
+                if (H5O_get_rc_and_type(&obj_oloc, &rc, args->args.get_type.obj_type) < 0 || 0 == rc)
                     HGOTO_ERROR(H5E_REFERENCE, H5E_LINKCOUNT, FAIL, "dereferencing deleted object")
             }
             else
@@ -342,7 +342,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
         case H5VL_OBJECT_EXISTS: {
             if (loc_params->type == H5VL_OBJECT_BY_NAME) {
                 /* Check if the object exists */
-                if (H5G_loc_exists(&loc, loc_params->loc_data.loc_by_name.name, &args->args.exists.exists) < 0)
+                if (H5G_loc_exists(&loc, loc_params->loc_data.loc_by_name.name, args->args.exists.exists) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists",
                                 loc_params->loc_data.loc_by_name.name)
             } /* end if */
@@ -441,6 +441,7 @@ H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
                              void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t loc;                 /* Location of group */
+    H5VL_native_object_optional_args_t *opt_args = args->args; /* Pointer to native operation's arguments */
     herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -451,15 +452,15 @@ H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
     switch (args->op_type) {
         /* H5Oget_comment / H5Oget_comment_by_name */
         case H5VL_NATIVE_OBJECT_GET_COMMENT: {
-            H5VL_native_object_get_comment_t *gc_args = &((H5VL_native_object_optional_args_t *)(args->args))->get_comment;
+            H5VL_native_object_get_comment_t *gc_args = &opt_args->get_comment;
 
             /* Retrieve the object's comment */
             if (loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Oget_comment */
-                if (H5G_loc_get_comment(&loc, ".", gc_args->buf, gc_args->buf_size, &gc_args->comment_len) < 0)
+                if (H5G_loc_get_comment(&loc, ".", gc_args->buf, gc_args->buf_size, gc_args->comment_len) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object")
             }                                                   /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Oget_comment_by_name */
-                if (H5G_loc_get_comment(&loc, loc_params->loc_data.loc_by_name.name, gc_args->buf, gc_args->buf_size, &gc_args->comment_len) < 0)
+                if (H5G_loc_get_comment(&loc, loc_params->loc_data.loc_by_name.name, gc_args->buf, gc_args->buf_size, gc_args->comment_len) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object")
             } /* end else-if */
             else
@@ -471,11 +472,11 @@ H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
         /* H5Oset_comment */
         case H5VL_NATIVE_OBJECT_SET_COMMENT: {
             if (loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Oset_comment */
-                if (H5G_loc_set_comment(&loc, ".", ((H5VL_native_object_optional_args_t *)(args->args))->set_comment.comment) < 0)
+                if (H5G_loc_set_comment(&loc, ".", opt_args->set_comment.comment) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
             }                                                   /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Oset_comment_by_name */
-                if (H5G_loc_set_comment(&loc, loc_params->loc_data.loc_by_name.name, ((H5VL_native_object_optional_args_t *)(args->args))->set_comment.comment) < 0)
+                if (H5G_loc_set_comment(&loc, loc_params->loc_data.loc_by_name.name, opt_args->set_comment.comment) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
             } /* end else-if */
             else
@@ -502,7 +503,7 @@ H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
 
         /* H5Oare_mdc_flushes_disabled */
         case H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED: {
-            if (H5O__are_mdc_flushes_disabled(loc.oloc, &((H5VL_native_object_optional_args_t *)(args->args))->are_mdc_flushes_disabled.flag) < 0)
+            if (H5O__are_mdc_flushes_disabled(loc.oloc, opt_args->are_mdc_flushes_disabled.flag) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine metadata cache cork status");
 
             break;
@@ -510,7 +511,7 @@ H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
 
         /* H5Oget_native_info(_name|_by_idx) */
         case H5VL_NATIVE_OBJECT_GET_NATIVE_INFO: {
-            H5VL_native_object_get_native_info_t *gni_args = &((H5VL_native_object_optional_args_t *)(args->args))->get_native_info;
+            H5VL_native_object_get_native_info_t *gni_args = &opt_args->get_native_info;
 
             /* Use the original H5Oget_info code to get the data */
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {

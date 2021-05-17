@@ -538,7 +538,7 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, h
     herr_t ret_value = SUCCEED; /* Return value */
 
     if (H5VL_DATATYPE_GET_BINARY_SIZE == args->op_type) {
-        if (H5Tencode(H5T_NATIVE_INT, NULL, &args->args.get_binary_size.size) < 0)
+        if (H5Tencode(H5T_NATIVE_INT, NULL, args->args.get_binary_size.size) < 0)
             ret_value = FAIL;
     } /* end if */
     else if (H5VL_DATATYPE_GET_BINARY == args->op_type) {

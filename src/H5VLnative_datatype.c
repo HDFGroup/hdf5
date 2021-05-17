@@ -186,7 +186,7 @@ H5VL__native_datatype_get(void *obj, H5VL_datatype_get_args_t *args, hid_t H5_AT
     switch (args->op_type) {
         /* H5T_construct_datatype (library private routine) */
         case H5VL_DATATYPE_GET_BINARY_SIZE: {
-            if (H5T_encode(dt, NULL, &args->args.get_binary_size.size) < 0)
+            if (H5T_encode(dt, NULL, args->args.get_binary_size.size) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't determine serialized length of datatype")
 
             break;

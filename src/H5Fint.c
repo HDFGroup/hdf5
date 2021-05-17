@@ -3915,12 +3915,11 @@ H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type           = H5VL_OBJECT_GET_FILE;
-    vol_cb_args.args.get_file.file = NULL;
+    vol_cb_args.args.get_file.file = &vol_obj_file;
 
     /* Retrieve VOL file from object */
     if (H5VL_object_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file from object")
-    vol_obj_file = vol_cb_args.args.get_file.file;
 
     /* Check if the file's ID already exists */
     if (H5I_find_id(vol_obj_file, H5I_FILE, &file_id) < 0)
