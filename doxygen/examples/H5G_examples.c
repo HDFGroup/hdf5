@@ -15,8 +15,8 @@ main(void)
     {
         __label__ fail_group, fail_prop, fail_lcpl, fail_file;
         hid_t file, lcpl, group;
-        char fname[] = "g1.h5";
-        char path[] = "/αυτή/είναι/μια/νέα/ομάδα";
+        char  fname[] = "g1.h5";
+        char  path[]  = "/αυτή/είναι/μια/νέα/ομάδα";
 
         if ((file = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
@@ -55,9 +55,9 @@ fail_file:;
     //! <!-- [read] -->
     {
         __label__ fail_file;
-        char fname[] = "g1.h5";
-        char path[] = "/αυτή/είναι";
-        hid_t file;
+        char       fname[] = "g1.h5";
+        char       path[]  = "/αυτή/είναι";
+        hid_t      file;
         H5G_info_t info;
 
         if ((file = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT)) == H5I_INVALID_HID) {
@@ -71,20 +71,19 @@ fail_file:;
         }
 
         printf("Link count: %llu\n", info.nlinks);
-        switch(info.storage_type)
-        {
-        case H5G_STORAGE_TYPE_COMPACT:
-            printf("Compact storage\n");
-            break;
-        case H5G_STORAGE_TYPE_DENSE:
-            printf("Compact storage\n");
-            break;
-        case H5G_STORAGE_TYPE_SYMBOL_TABLE:
-            printf("Symbol table\n");
-            break;
-        default:
-            printf("UFO\n");
-            break;
+        switch (info.storage_type) {
+            case H5G_STORAGE_TYPE_COMPACT:
+                printf("Compact storage\n");
+                break;
+            case H5G_STORAGE_TYPE_DENSE:
+                printf("Compact storage\n");
+                break;
+            case H5G_STORAGE_TYPE_SYMBOL_TABLE:
+                printf("Symbol table\n");
+                break;
+            default:
+                printf("UFO\n");
+                break;
         }
 
 fail_info:
@@ -97,8 +96,8 @@ fail_file:;
     {
         __label__ fail_group, fail_prop, fail_lcpl, fail_file;
         hid_t file, lcpl, group;
-        char fname[] = "g1.h5";
-        char path[] = "/αυτή/είναι/μια/άλλη/νέα/ομάδα";
+        char  fname[] = "g1.h5";
+        char  path[]  = "/αυτή/είναι/μια/άλλη/νέα/ομάδα";
 
         if ((file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT)) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
@@ -142,10 +141,10 @@ fail_file:;
     //! <!-- [delete] -->
     {
         __label__ fail_info, fail_object, fail_file;
-        hid_t file, obj;
-        char fname[] = "g1.h5";
-        char path[] = "/αυτή/είναι/μια/άλλη/νέα/ομάδα";
-        char delete_path[] = "/αυτή/είναι/μια";
+        hid_t      file, obj;
+        char       fname[]       = "g1.h5";
+        char       path[]        = "/αυτή/είναι/μια/άλλη/νέα/ομάδα";
+        char       delete_path[] = "/αυτή/είναι/μια";
         H5O_info_t info;
 
         if ((file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT)) == H5I_INVALID_HID) {
