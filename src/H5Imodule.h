@@ -34,6 +34,14 @@
  * Use the functions in this module to manage HDF5 identifiers and identifier
  * types.
  *
+ * HDF5 identifiers are usually created as a "side-effect" of creating HDF5
+ * entities such as groups, datasets, attributes, or property lists.
+ * Developers may find it convenient to define their own identifier types
+ * for application objects of interest.
+ *
+ * Notice that identifiers (of type \ref hid_t) are run-time auxiliaries and
+ * not persisted in the file.
+ *
  * <table>
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">

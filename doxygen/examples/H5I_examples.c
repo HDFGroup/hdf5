@@ -12,23 +12,27 @@ main(void)
 
     //! <!-- [create] -->
     {
-        // show how to register a new ID type (integers) and how
-        // to create an identifier for an integer
-    } //! <!-- [create] -->
+        // show how to register a new ID type and how
+        // to create an identifier for an associated item
+    }
+    //! <!-- [create] -->
 
     //! <!-- [read] -->
     {
         // show how to retrieve information about an identifier
-    } //! <!-- [read] -->
+        // or iterate over identifiers of a given type
+    }
+    //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
-        // show how to update an identifier (bump the reference count?)
-    } //! <!-- [update] -->
+        // show how to update an identifier (e.g., bump the reference)
+    }
+    //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {
-        // show how to unregister an ID type
+        // show how to remove and ID from its type or unregister an ID type
     }
     //! <!-- [delete] -->
 
