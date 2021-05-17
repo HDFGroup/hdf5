@@ -141,7 +141,7 @@ H5_DLL herr_t  H5FD_read_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type
                                    void *bufs[] /* out */);
 H5_DLL herr_t  H5FD_write_selection(H5FD_t *file, uint32_t count, H5FD_mem_t type, H5S_t *mem_spaces[],
                                     H5S_t *file_spaces[], haddr_t offsets[], size_t element_sizes[],
-                                    const void *bufs[] /* out */);
+                                    const void *bufs[]);
 H5_DLL herr_t  H5FD_flush(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_truncate(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_lock(H5FD_t *file, hbool_t rw);

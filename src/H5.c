@@ -83,6 +83,8 @@ hbool_t H5_libinit_g = FALSE; /* Library hasn't been initialized */
 hbool_t H5_libterm_g = FALSE; /* Library isn't being shutdown */
 #endif
 
+hbool_t H5_use_selection_io_g = FALSE;
+
 #ifdef H5_HAVE_MPE
 hbool_t H5_MPEinit_g = FALSE; /* MPE Library hasn't been initialized */
 #endif

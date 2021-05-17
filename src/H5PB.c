@@ -1306,6 +1306,73 @@ done:
 } /* end H5PB_write() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5PB_enabled
+ *
+ * Purpose:     Check if the page buffer may be enabled for the specified
+ *              file and data access type.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type)
+{
+    H5PB_t *page_buf;          /* Page buffering info for this file */
+    hbool_t bypass_pb = FALSE; /* Whether to bypass page buffering */
+    htri_t  ret_value;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f_sh);
+
+    /* Get pointer to page buffer info for this file */
+    page_buf = f_sh->page_buf;
+
+#ifdef H5_HAVE_PARALLEL
+    if (H5F_SHARED_HAS_FEATURE(f_sh, H5FD_FEAT_HAS_MPI)) {
+#if 1
+        bypass_pb = TRUE;
+#else
+        /* MSC - why this stopped working ? */
+        int mpi_size;
+
+        if ((mpi_size = H5F_shared_mpi_get_size(f_sh)) < 0)
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size")
+        if (1 != mpi_size)
+            bypass_pb = TRUE;
+#endif
+    } /* end if */
+#endif
+
+    /* If page buffering is disabled, or the I/O size is larger than that of a
+     * single page, or if this is a parallel raw data access, bypass page
+     * buffering.
+     */
+    if (NULL == page_buf || (bypass_pb && H5FD_MEM_DRAW == type)) {
+        /* Update statistics, since wherever this function is called, if it
+         * returns FALSE, the calling function performs I/O avoiding the page
+         * buffer layer */
+        if (page_buf) {
+            HDassert(type == H5FD_MEM_DRAW);
+            page_buf->bypasses[1]++;
+        } /* end if */
+
+        /* Page buffer is disabled, at least for this data access type */
+        ret_value = FALSE;
+    } /* end if */
+    else
+        /* Page buffer may be enabled */
+        ret_value = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PB_enabled() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5PB__insert_entry()
  *
  * Purpose:     This function was created without documentation.
