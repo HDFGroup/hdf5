@@ -823,7 +823,18 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
-    - Fixed CVE-2018-17435
+    - Fixed CVE-2018-14460
+
+        The tool h5repack produced a segfault when the rank in dataspace
+        message was corrupted, causing invalid read while decoding the
+        dimension sizes.
+
+        The problem was fixed by ensuring that decoding the dimension sizes
+        and max values will not go beyong the end of the buffer.
+
+        (BMR - 2021/05/12, HDFFV-11223)
+
+    - Fixed CVE-2018-11206
 
         The tool h5dump produced a segfault when the size of a fill value
         message was corrupted and caused a buffer overflow.

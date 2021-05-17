@@ -84,7 +84,7 @@
     (0x0020u) /**< Restrict search to objects opened through current file ID                                 \
                    (as opposed to objects opened through any file ID accessing this file) */
 
-#define H5F_FAMILY_DEFAULT (hsize_t)0
+#define H5F_FAMILY_DEFAULT 0 /* (hsize_t) */
 
 #ifdef H5_HAVE_PARALLEL
 /**
@@ -108,7 +108,7 @@ typedef enum H5F_scope_t {
 /**
  * Unlimited file size for H5Pset_external()
  */
-#define H5F_UNLIMITED ((hsize_t)(-1L))
+#define H5F_UNLIMITED HSIZE_UNDEF
 
 /**
  * How does file close behave?

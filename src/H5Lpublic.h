@@ -39,12 +39,12 @@
  *
  * The maximum length of a link's name is encoded in a 32-bit unsigned integer.
  */
-#define H5L_MAX_LINK_NAME_LEN ((uint32_t)(-1)) /* (4GB - 1) */
+#define H5L_MAX_LINK_NAME_LEN UINT32_MAX
 
 /**
  * \brief Macro to indicate operation occurs on same location
  */
-#define H5L_SAME_LOC (hid_t)0
+#define H5L_SAME_LOC 0 /* (hid_t) */
 
 #ifdef __cplusplus
 extern "C" {

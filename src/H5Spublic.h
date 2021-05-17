@@ -22,8 +22,8 @@
 #include "H5Ipublic.h"
 
 /* Define atomic datatypes */
-#define H5S_ALL       (hid_t)0
-#define H5S_BLOCK     (hid_t)1
+#define H5S_ALL       0 /* (hid_t) */
+#define H5S_BLOCK     1 /* (hid_t) */
 #define H5S_UNLIMITED HSIZE_UNDEF
 
 /* Define user-level maximum number of dimensions */

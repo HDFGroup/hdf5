@@ -28,9 +28,9 @@
 /*****************/
 
 /* Macros used to "unset" chunk cache configuration parameters */
-#define H5D_CHUNK_CACHE_NSLOTS_DEFAULT ((size_t)-1)
-#define H5D_CHUNK_CACHE_NBYTES_DEFAULT ((size_t)-1)
-#define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0f)
+#define H5D_CHUNK_CACHE_NSLOTS_DEFAULT SIZE_MAX
+#define H5D_CHUNK_CACHE_NBYTES_DEFAULT SIZE_MAX
+#define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0)
 
 /* Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts() */
 #define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS (0x0002u)
@@ -46,11 +46,11 @@
 typedef enum H5D_layout_t {
     H5D_LAYOUT_ERROR = -1,
 
-    H5D_COMPACT    = 0, /**< raw data is very small		     */
-    H5D_CONTIGUOUS = 1, /**< the default				     */
-    H5D_CHUNKED    = 2, /**< slow and fancy			     */
-    H5D_VIRTUAL    = 3, /**< actual data is stored in other datasets     */
-    H5D_NLAYOUTS   = 4  /**< this one must be last!		     */
+    H5D_COMPACT    = 0, /**< raw data is very small */
+    H5D_CONTIGUOUS = 1, /**< the default */
+    H5D_CHUNKED    = 2, /**< slow and fancy */
+    H5D_VIRTUAL    = 3, /**< actual data is stored in other datasets */
+    H5D_NLAYOUTS   = 4  /**< this one must be last! */
 } H5D_layout_t;
 //! <!-- [H5D_layout_t_snip] -->
 
