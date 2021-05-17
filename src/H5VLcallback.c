@@ -6831,6 +6831,42 @@ done:
 } /* end H5VLrequest_optional() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VLrequest_optional_op
+ *
+ * Purpose:     Performs an optional connector-specific operation on a request
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_optional_args_t *args)
+{
+    H5VL_class_t *cls;                 /* VOL connector's class struct */
+    herr_t            ret_value       = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == req)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request")
+    if (NULL == args)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid arguments")
+
+    /* Get class pointer */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__request_optional(req, cls, args) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute request optional callback")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLrequest_optional_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL__request_free
  *
  * Purpose:     Frees an asynchronous request through the VOL

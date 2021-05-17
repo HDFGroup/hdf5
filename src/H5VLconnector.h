@@ -1130,6 +1130,7 @@ H5_DLL herr_t H5VLlink_optional_op(const char *app_file, const char *app_func, u
 H5_DLL herr_t H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                      hid_t loc_id, const char *name, hid_t lapl_id,
                                      H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
+H5_DLL herr_t H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_optional_args_t *args);
 
 /* API Wrappers for "optional_op" routines */
 /* (Must be defined _after_ the function prototype) */
