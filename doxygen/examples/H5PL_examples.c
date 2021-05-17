@@ -24,7 +24,7 @@ main(void)
             ret_val = EXIT_FAILURE;
         }
 
-    fail_set:;
+fail_set:;
     }
     //! <!-- [create] -->
 
@@ -32,7 +32,7 @@ main(void)
     {
         __label__ fail_read;
         unsigned size, mask;
-        char buf[255];
+        char     buf[255];
 
         // retrieve the number of entries in the plugin path list
         if (H5PLsize(&size) < 0) {
@@ -46,10 +46,8 @@ main(void)
             ret_val = EXIT_FAILURE;
             goto fail_read;
         }
-        printf("Filter plugins %s be loaded.\n",
-               (mask&H5PL_FILTER_PLUGIN) == 1 ? "can" : "can't");
-        printf("VOL plugins %s be loaded.\n",
-               (mask&H5PL_VOL_PLUGIN) == 2 ? "can" : "can't");
+        printf("Filter plugins %s be loaded.\n", (mask & H5PL_FILTER_PLUGIN) == 1 ? "can" : "can't");
+        printf("VOL plugins %s be loaded.\n", (mask & H5PL_VOL_PLUGIN) == 2 ? "can" : "can't");
 
         // print the paths in the plugin path list
         for (unsigned i = 0; i < size; ++i) {
@@ -60,7 +58,7 @@ main(void)
             printf("%s\n", buf);
         }
 
-    fail_read:;
+fail_read:;
     } //! <!-- [read] -->
 
     //! <!-- [update] -->
@@ -83,14 +81,14 @@ main(void)
         }
 
         // clean out the list of plugin paths
-        for (int i = size-1; i >= 0; --i) {
+        for (int i = size - 1; i >= 0; --i) {
             if (H5PLremove(i) < 0) {
                 ret_val = EXIT_FAILURE;
                 break;
             }
         }
 
-    fail_delete:;
+fail_delete:;
     }
     //! <!-- [delete] -->
 
