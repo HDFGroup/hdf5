@@ -37,18 +37,13 @@
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">
  *   <td>
+ *   \snippet H5Z_examples.c can_apply
+ *   \snippet H5Z_examples.c set_local
+ *   \snippet H5Z_examples.c filter
  *   \snippet H5Z_examples.c create
  *   </td>
  *   <td>
  *   \snippet H5Z_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet H5Z_examples.c update
- *   </td>
- *   <td>
- *   \snippet H5Z_examples.c delete
  *   </td>
  * </tr>
  * </table>
