@@ -17,14 +17,14 @@ main(void)
         hid_t cls, major, minor;
 
         // register a new error class for this "application"
-        if((cls = H5Eregister_class("Custom error class", "H5E_examples", "0.1")) == H5I_INVALID_HID) {
+        if ((cls = H5Eregister_class("Custom error class", "H5E_examples", "0.1")) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_class;
         }
 
         // create custom major and minor error codes
         if ((major = H5Ecreate_msg(cls, H5E_MAJOR, "Okay, Houston, we've had a problem here")) ==
-                        H5I_INVALID_HID) {
+            H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_major;
         }
@@ -34,10 +34,10 @@ main(void)
         }
 
         // push a custom error message onto the default stack
-        if (H5Epush2(H5E_DEFAULT, __FILE__, __FUNCTION__, __LINE__, cls, major, minor, "Hello, Error!\n") < 0) {
+        if (H5Epush2(H5E_DEFAULT, __FILE__, __FUNCTION__, __LINE__, cls, major, minor, "Hello, Error!\n") <
+            0) {
             ret_val = EXIT_FAILURE;
             goto fail_push;
-
         }
 
         // print the default error stack
@@ -66,10 +66,9 @@ fail_class:;
             ret_val = EXIT_FAILURE;
             goto fail_count;
         }
-        else
-            if (H5Eprint(H5E_DEFAULT, stderr) < 0) {
-                ret_val = EXIT_FAILURE;
-            }
+        else if (H5Eprint(H5E_DEFAULT, stderr) < 0) {
+            ret_val = EXIT_FAILURE;
+        }
 
 fail_count:;
     }
@@ -79,7 +78,7 @@ fail_count:;
     {
         // pop 10 error messages off the default error stack
         // popping off non-existent messages is OK, but might be confusing
-        if(H5Epop(H5E_DEFAULT, 10) < 0)
+        if (H5Epop(H5E_DEFAULT, 10) < 0)
             ret_val = EXIT_FAILURE;
     }
     //! <!-- [update] -->
@@ -92,7 +91,7 @@ fail_count:;
     }
     //! <!-- [delete] -->
 
-    assert (ret_val == EXIT_SUCCESS);
+    assert(ret_val == EXIT_SUCCESS);
 
     return ret_val;
 }
