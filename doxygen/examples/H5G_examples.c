@@ -50,7 +50,8 @@ fail_prop:
 fail_lcpl:
         H5Fclose(file);
 fail_file:;
-    } //! <!-- [create] -->
+    }
+    //! <!-- [create] -->
 
     //! <!-- [read] -->
     {

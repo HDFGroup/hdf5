@@ -29,7 +29,8 @@
 
 /**\defgroup H5PL H5PL
  *
- * Use the functions in this module to manage HDF5 plugins.
+ * Use the functions in this module to manage the loading behavior of HDF5
+ * plugins.
  *
  * <table>
  * <tr><th>Create</th><th>Read</th></tr>
@@ -50,6 +51,10 @@
  *   </td>
  * </tr>
  * </table>
+ *
+ * \attention The loading behavior of HDF5 plugins can be controlled via the
+ *            functions described below and certain environment variables, such
+ *            as \c HDF5_PLUGIN_PRELOAD  and \c HDF5_PLUGIN_PATH.
  *
  */
 
