@@ -1860,17 +1860,7 @@ test_register_opt_operation(void)
         FAIL_PUTS_ERROR("'op_val' changed during failed operation?");
     H5E_BEGIN_TRY
     {
-        ret = H5VLregister_opt_operation(H5VL_SUBCLS_REQUEST, "fail4", &op_val);
-    }
-    H5E_END_TRY;
-    if (FAIL != ret)
-        FAIL_PUTS_ERROR(
-            "should not be able to register an optional operation for the 'REQUEST' VOL subclass");
-    if ((-1) != op_val)
-        FAIL_PUTS_ERROR("'op_val' changed during failed operation?");
-    H5E_BEGIN_TRY
-    {
-        ret = H5VLregister_opt_operation(H5VL_SUBCLS_BLOB, "fail5", &op_val);
+        ret = H5VLregister_opt_operation(H5VL_SUBCLS_BLOB, "fail4", &op_val);
     }
     H5E_END_TRY;
     if (FAIL != ret)
@@ -1879,7 +1869,7 @@ test_register_opt_operation(void)
         FAIL_PUTS_ERROR("'op_val' changed during failed operation?");
     H5E_BEGIN_TRY
     {
-        ret = H5VLregister_opt_operation(H5VL_SUBCLS_TOKEN, "fail6", &op_val);
+        ret = H5VLregister_opt_operation(H5VL_SUBCLS_TOKEN, "fail5", &op_val);
     }
     H5E_END_TRY;
     if (FAIL != ret)
@@ -1890,7 +1880,7 @@ test_register_opt_operation(void)
     /* Test registering valid optional VOL subclass operation with NULL op_val ptr*/
     H5E_BEGIN_TRY
     {
-        ret = H5VLregister_opt_operation(H5VL_SUBCLS_FILE, "fail7", NULL);
+        ret = H5VLregister_opt_operation(H5VL_SUBCLS_FILE, "fail6", NULL);
     }
     H5E_END_TRY;
     if (FAIL != ret)
@@ -1913,6 +1903,10 @@ test_register_opt_operation(void)
     H5E_END_TRY;
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to unregister a non-existent optional operation");
+
+    /* Optional operations on requests are supported (but difficult to test further) */
+    if (H5VLregister_opt_operation(H5VL_SUBCLS_REQUEST, "req_op", &op_val) < 0)
+        TEST_ERROR;
 
     /* Register & test calling optional operations for each valid VOL subclass */
     /* (Table-driven, with test_params array) */
