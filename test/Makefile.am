@@ -176,7 +176,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     zero_chunk.h5 chunk_single.h5 swmr_non_latest.h5 \
     earray_hdr_fd.h5 farray_hdr_fd.h5 bt2_hdr_fd.h5 \
     storage_size.h5 dls_01_strings.h5 power2up.h5 version_bounds.h5 \
-    alloc_0sized.h5 h5s_block.h5 \
+    alloc_0sized.h5 h5s_block.h5 h5s_plist.h5 \
     extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \

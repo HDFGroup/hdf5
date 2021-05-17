@@ -411,6 +411,7 @@ set (test_CLEANFILES
     mirror_wo/*
     event_set_*.h5
     h5s_block.h5
+    h5s_plist.h5
 )
 
 # Remove any output file left over from previous test run
