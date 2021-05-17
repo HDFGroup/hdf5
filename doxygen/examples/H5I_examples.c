@@ -14,21 +14,18 @@ main(void)
     {
         // show how to register a new ID type and how
         // to create an identifier for an associated item
-    }
-    //! <!-- [create] -->
+    } //! <!-- [create] -->
 
     //! <!-- [read] -->
     {
         // show how to retrieve information about an identifier
         // or iterate over identifiers of a given type
-    }
-    //! <!-- [read] -->
+    } //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
         // show how to update an identifier (e.g., bump the reference)
-    }
-    //! <!-- [update] -->
+    } //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {
