@@ -14,22 +14,19 @@ main(void)
     {
         // show how to create a link to an object
         // show how to copy an object
-    }
-    //! <!-- [create] -->
+    } //! <!-- [create] -->
 
     //! <!-- [read] -->
     {
         // show how to retrieve information about an object
         // show how to visit objects
-    }
-    //! <!-- [read] -->
+    } //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
         // show how to refresh all buffers associated with an object
         // show how to increment an object's reference count(?)
-    }
-    //! <!-- [update] -->
+    } //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {

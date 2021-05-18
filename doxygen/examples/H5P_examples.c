@@ -13,22 +13,19 @@ main(void)
     //! <!-- [create] -->
     {
         // show how to create a property list and a property list class
-    }
-    //! <!-- [create] -->
+    } //! <!-- [create] -->
 
     //! <!-- [read] -->
     {
         // show how to retrieve properties from a property list
         // show how to iterate over the properties in a property list
         // and a property class
-    }
-    //! <!-- [read] -->
+    } //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
         // show how to add properties to a property list
-    }
-    //! <!-- [update] -->
+    } //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {
