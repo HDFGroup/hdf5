@@ -26,6 +26,11 @@
 /*****************/
 /* Public Macros */
 /*****************/
+/* If SIZE_MAX is not defined (e.g., CentOS 5), define it. */
+#ifndef SIZE_MAX
+#define SIZE_MAX ((size_t)-1)
+#endif
+
 
 /* Macros used to "unset" chunk cache configuration parameters */
 #define H5D_CHUNK_CACHE_NSLOTS_DEFAULT SIZE_MAX
