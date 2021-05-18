@@ -25,7 +25,7 @@
 /*****************/
 
 /* Default value for "no event set" / synchronous execution */
-#define H5ES_NONE (hid_t)0
+#define H5ES_NONE 0 /* (hid_t) */
 
 /* Special "wait" timeout values */
 #define H5ES_WAIT_FOREVER (UINT64_MAX) /* Wait until all operations complete */

@@ -24,7 +24,7 @@
 #include "H5Ipublic.h"
 
 /* Value for the default error stack */
-#define H5E_DEFAULT (hid_t)0
+#define H5E_DEFAULT 0 /* (hid_t) */
 
 /**
  * Different kinds of error information
