@@ -775,8 +775,8 @@ DSetCreatPropList::setVirtual(const DataSpace &vspace, const char *src_fname, co
 // Programmer   Binh-Minh Ribler - Mar, 2017
 //--------------------------------------------------------------------------
 void
-DSetCreatPropList::setVirtual(const DataSpace &vspace, const H5std_string &src_fname,
-                              const H5std_string &src_dsname, const DataSpace &sspace) const
+DSetCreatPropList::setVirtual(const DataSpace &vspace, const H5std_string src_fname,
+                              const H5std_string src_dsname, const DataSpace &sspace) const
 {
     setVirtual(vspace, src_fname.c_str(), src_dsname.c_str(), sspace);
 }
