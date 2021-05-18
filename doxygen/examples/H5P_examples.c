@@ -12,22 +12,28 @@ main(void)
 
     //! <!-- [create] -->
     {
-        // show how to create a property list
-    } //! <!-- [create] -->
+        // show how to create a property list and a property list class
+    }
+    //! <!-- [create] -->
 
     //! <!-- [read] -->
     {
-        // show how to retrieve properties in a property list
-    } //! <!-- [read] -->
+        // show how to retrieve properties from a property list
+        // show how to iterate over the properties in a property list
+        // and a property class
+    }
+    //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
         // show how to add properties to a property list
-    } //! <!-- [update] -->
+    }
+    //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {
-        // show how to delete a property list
+        // show how to delete a property from a property list
+        // show how to unregister a property list class
     }
     //! <!-- [delete] -->
 

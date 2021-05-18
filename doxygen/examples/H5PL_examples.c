@@ -59,7 +59,8 @@ fail_set:;
         }
 
 fail_read:;
-    } //! <!-- [read] -->
+    }
+    //! <!-- [read] -->
 
     //! <!-- [update] -->
     {

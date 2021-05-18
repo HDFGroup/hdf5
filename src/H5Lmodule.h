@@ -31,7 +31,7 @@
 
 /**\defgroup H5L H5L
  *
- * Use the functions in this module to manage the HDF5 links.
+ * Use the functions in this module to manage HDF5 links and link types.
  *
  * <table>
  * <tr><th>Create</th><th>Read</th></tr>
@@ -40,6 +40,7 @@
  *   \snippet H5L_examples.c create
  *   </td>
  *   <td>
+ *   \snippet H5L_examples.c iter_cb
  *   \snippet H5L_examples.c read
  *   </td>
  * <tr><th>Update</th><th>Delete</th></tr>

@@ -31,7 +31,8 @@
 
 /**\defgroup H5P H5P
  *
- * Use the functions in this module to manage HDF5 objects.
+ * Use the functions in this module to manage HDF5 property lists and property
+ * list classes.
  *
  * <table>
  * <tr><th>Create</th><th>Read</th></tr>
@@ -53,16 +54,15 @@
  * </tr>
  * </table>
  *
- * \details The HDF5 Property List Interface provides a mechanism to take
- *          advantage of more powerful or unusual features in HDF5.
+ * The HDF5 Property List Interface provides a mechanism to take advantage of
+ * more powerful or unusual features in HDF5.
  *
- *          HDF5 objects have properties or characteristics associated with
- *          them, and there are default properties that handle the most
- *          common needs. These default properties can be modified using the
- *          HDF5 Property List Interface. For example, the data storage
- *          layout property of a dataset is contiguous by default. For better
- *          performance, the layout can be modified to be chunked or chunked
- *          and compressed.
+ * HDF5 objects have properties or characteristics associated with them, and
+ * there are default properties that handle the most common needs. These default
+ * properties can be modified using the HDF5 Property List Interface. For
+ * example, the data storage layout property of a dataset is contiguous by
+ * default. For better performance, the layout can be modified to be chunked or
+ * chunked and compressed.
  *
  * \defgroup GPLO General Property List Operations
  * \ingroup H5P

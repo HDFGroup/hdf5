@@ -12,22 +12,28 @@ main(void)
 
     //! <!-- [create] -->
     {
-        // show how to create an object (by copy)
-    } //! <!-- [create] -->
+        // show how to create a link to an object
+        // show how to copy an object
+    }
+    //! <!-- [create] -->
 
     //! <!-- [read] -->
     {
         // show how to retrieve information about an object
-    } //! <!-- [read] -->
+        // show how to visit objects
+    }
+    //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
+        // show how to refresh all buffers associated with an object
         // show how to increment an object's reference count(?)
-    } //! <!-- [update] -->
+    }
+    //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {
-        // show how to decrement an object's reference count to 0 (?)
+        // show how to decrement an object's reference count
     }
     //! <!-- [delete] -->
 
