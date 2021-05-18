@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.12.1-4], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.12.1-5], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -387,14 +387,14 @@ AC_ARG_ENABLE([build-mode],
                                (i.e.: a 'clean slate' configuration).
                                All these settings can be overridden by using
                                specific configure flags.
-                               [default=debug]
+                               [default=production]
                                ])],
               [BUILD_MODE=$enableval])
 
 ## Set the default
 ## Depends on branch, set via script at branch creation time
 if test "X-$BUILD_MODE" = X- ; then
-    BUILD_MODE=debug
+    BUILD_MODE=production
 fi
 
 ## Allow this variable to be substituted in
