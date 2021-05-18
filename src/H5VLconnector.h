@@ -458,7 +458,7 @@ typedef struct H5VL_token_class_t {
  * \ingroup H5VLDEV
  * Class information for each VOL connector
  */
-//! [H5VL_class_t_snip]
+//! <!-- [H5VL_class_t_snip] -->
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
     unsigned           version;          /**< VOL connector class struct version #     */
@@ -492,7 +492,7 @@ typedef struct H5VL_class_t {
     herr_t (*optional)(void *obj, int op_type, hid_t dxpl_id, void **req,
                        va_list arguments); /**< Optional callback */
 } H5VL_class_t;
-//! [H5VL_class_t_snip]
+//! <!-- [H5VL_class_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -529,15 +529,14 @@ extern "C" {
  *          uncommon, as most VOL-specific properties are added to the file
  *          access property list via the connector's API calls which set the
  *          VOL connector for the file open/create. For more information, see
- *          the VOL documentation.
+ *          the \ref_vol_doc.
  *
  *          H5VL_class_t is defined in H5VLconnector.h in the source code. It
  *          contains class information for each VOL connector:
  *          \snippet this H5VL_class_t_snip
  *
- * \todo Fix the reference to VOL documentation.
- *
  * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);
 /**

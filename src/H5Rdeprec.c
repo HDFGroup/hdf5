@@ -449,7 +449,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         size_t buf_size = H5R_DSET_REG_REF_BUF_SIZE;
 
         /* Retrieve space */
-        if (space_id == H5I_BADID)
+        if (space_id == H5I_INVALID_HID)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "reference region dataspace id must be valid")
         if (NULL == (space = (struct H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")

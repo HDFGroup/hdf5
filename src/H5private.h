@@ -363,7 +363,6 @@
  */
 #define SUCCEED 0
 #define FAIL    (-1)
-#define UFAIL   (unsigned)(-1)
 
 /* The HDF5 library uses the symbol `ERR` frequently.  So do
  * header files for libraries such as curses(3), terminfo(3), etc.
@@ -1484,6 +1483,9 @@ H5_DLL void HDsrand(unsigned int seed);
 #ifndef HDstrcspn
 #define HDstrcspn(X, Y) strcspn(X, Y)
 #endif /* HDstrcspn */
+#ifndef HDstrdup
+#define HDstrdup(S) strdup(S)
+#endif /* HDstrdup */
 #ifndef HDstrerror
 #define HDstrerror(N) strerror(N)
 #endif /* HDstrerror */
@@ -1671,18 +1673,6 @@ H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
 #endif /* HDwrite */
-
-/*
- * And now for a couple non-Posix functions...  Watch out for systems that
- * define these in terms of macros.
- */
-#if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *                   strdup(const char *s);
-#endif
-
-#ifndef HDstrdup
-#define HDstrdup(S) strdup(S)
-#endif /* HDstrdup */
 
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */

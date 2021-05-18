@@ -29,8 +29,13 @@
 #include "H5public.h"
 
 /* These typedefs are currently used for VL datatype allocation/freeing */
+//! <!-- [H5MM_allocate_t_snip] -->
 typedef void *(*H5MM_allocate_t)(size_t size, void *alloc_info);
+//! <!-- [H5MM_allocate_t_snip] -->
+
+//! <!-- [H5MM_free_t_snip] -->
 typedef void (*H5MM_free_t)(void *mem, void *free_info);
+//! <!-- [H5MM_free_t_snip] -->
 
 #ifdef __cplusplus
 extern "C" {

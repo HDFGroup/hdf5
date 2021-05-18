@@ -230,16 +230,18 @@ typedef enum H5Z_EDC_t {
  * Return values for filter callback function
  */
 typedef enum H5Z_cb_return_t {
-    H5Z_CB_ERROR = -1,
-    H5Z_CB_FAIL  = 0, /**< I/O should fail if filter fails. */
-    H5Z_CB_CONT  = 1, /**< I/O continues if filter fails.   */
-    H5Z_CB_NO    = 2
+    H5Z_CB_ERROR = -1, /**< error value */
+    H5Z_CB_FAIL  = 0,  /**< I/O should fail if filter fails. */
+    H5Z_CB_CONT  = 1,  /**< I/O continues if filter fails.   */
+    H5Z_CB_NO    = 2   /**< sentinel */
 } H5Z_cb_return_t;
 
+//! <!-- [H5Z_filter_func_t_snip] -->
 /**
  *  Filter callback function definition
  */
 typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf, size_t buf_size, void *op_data);
+//! <!-- [H5Z_filter_func_t_snip] -->
 
 /**
  * Structure for filter callback property
@@ -254,58 +256,93 @@ extern "C" {
 #endif
 
 /**
- * \details Before a dataset gets created, the \c can_apply callbacks for any
- *          filters used in the dataset creation property list are called with
- *          the dataset's dataset creation property list, the dataset's
- *          datatype and a dataspace describing a chunk (for chunked dataset
- *          storage).
+ * \brief This callback determines if a filter can be applied to the dataset
+ *        with the characteristics provided
  *
- *          The \c can_apply callback must determine if the combination of the
- *          dataset creation property list setting, the datatype and the
- *          dataspace represent a valid combination to apply this filter to.
- *          For example, some cases of invalid combinations may involve the
- *          filter not operating correctly on certain datatypes (or certain
- *          datatype sizes), or certain sizes of the chunk dataspace.
+ * \dcpl_id
+ * \type_id
+ * \space_id
  *
- *          The \c can_apply callback can be the NULL pointer, in which case,
- *          the library will assume that it can apply to any combination of
- *          dataset creation property list values, datatypes and dataspaces.
+ * \return \htri_t
  *
- *          The \c can_apply callback returns positive a valid combination,
- *          zero for an invalid combination and negative for an error.
+ * \details Before a dataset gets created, the \ref H5Z_can_apply_func_t
+ *          callbacks for any filters used in the dataset creation property list
+ *          are called with the dataset's dataset creation property list, the
+ *          dataset's datatype and a dataspace describing a chunk (for chunked
+ *          dataset storage).
+ *
+ *          The \ref H5Z_can_apply_func_t callback must determine if the
+ *          combination of the dataset creation property list setting, the
+ *          datatype and the dataspace represent a valid combination to apply
+ *          this filter to.  For example, some cases of invalid combinations may
+ *          involve the filter not operating correctly on certain datatypes (or
+ *          certain datatype sizes), or certain sizes of the chunk dataspace.
+ *
+ *          The \ref H5Z_can_apply_func_t callback can be the NULL pointer, in
+ *          which case, the library will assume that it can apply to any
+ *          combination of dataset creation property list values, datatypes and
+ *          dataspaces.
+ *
+ *          The \ref H5Z_can_apply_func_t callback returns positive a valid
+ *          combination, zero for an invalid combination and negative for an
+ *          error.
  */
-//! [H5Z_can_apply_func_t_snip]
+//! <!-- [H5Z_can_apply_func_t_snip] -->
 typedef htri_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-//! [H5Z_can_apply_func_t_snip]
+//! <!-- [H5Z_can_apply_func_t_snip] -->
 /**
- * \details After the "can_apply" callbacks are checked for new datasets, the
- *          \c set_local callbacks for any filters used in the dataset creation
- *          property list are called. These callbacks receive the dataset's
- *          private copy of the dataset creation property list passed in to
- *          H5Dcreate() (i.e. not the actual property list passed in to
- *          H5Dcreate()) and the datatype ID passed in to H5Dcreate() (which is
- *          not copied and should not be modified) and a dataspace describing
- *          the chunk (for chunked dataset storage) (which should also not be
- *          modified).
+ * \brief The filter operation callback function, defining a filter's operation
+ *        on data
  *
- *          The \c set_local callback must set any parameters that are specific
- *          to this dataset, based on the combination of the dataset creation
- *          property list values, the datatype and the dataspace. For example,
- *          some filters perform different actions based on different datatypes
- *          (or datatype sizes) or different number of dimensions or dataspace
- *          sizes.
+ * \dcpl_id
+ * \type_id
+ * \space_id
  *
- *          The \c set_local callback can be the NULL pointer, in which case,
- *          the library will assume that there are no dataset-specific settings
- *          for this filter.
+ * \return \herr_t
  *
- *          The \c set_local callback must return non-negative on success and
- *          negative for an error.
+ * \details After the \ref H5Z_can_apply_func_t callbacks are checked for new
+ *          datasets, the \ref H5Z_set_local_func_t callbacks for any filters
+ *          used in the dataset creation property list are called. These
+ *          callbacks receive the dataset's private copy of the dataset creation
+ *          property list passed in to H5Dcreate() (i.e. not the actual property
+ *          list passed in to H5Dcreate()) and the datatype ID passed in to
+ *          H5Dcreate() (which is not copied and should not be modified) and a
+ *          dataspace describing the chunk (for chunked dataset storage) (which
+ *          should also not be modified).
+ *
+ *          The \ref H5Z_set_local_func_t callback must set any parameters that
+ *          are specific to this dataset, based on the combination of the
+ *          dataset creation property list values, the datatype and the
+ *          dataspace. For example, some filters perform different actions based
+ *          on different datatypes (or datatype sizes) or different number of
+ *          dimensions or dataspace sizes.
+ *
+ *          The \ref H5Z_set_local_func_t callback can be the NULL pointer, in
+ *          which case, the library will assume that there are no
+ *          dataset-specific settings for this filter.
+ *
+ *          The \ref H5Z_set_local_func_t callback must return non-negative on
+ *          success and negative for an error.
  */
-//! [H5Z_set_local_func_t_snip]
+//! <!-- [H5Z_set_local_func_t_snip] -->
 typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-//! [H5Z_set_local_func_t_snip]
+//! <!-- [H5Z_set_local_func_t_snip] -->
+
 /**
+ * \brief The filter operation callback function, defining a filter's operation
+ *        on data
+ *
+ * \param[in] flags Bit vector specifying certain general properties of the filter
+ * \param[in] cd_nelmts Number of elements in \p cd_values
+ * \param[in] cd_values Auxiliary data for the filter
+ * \param[in] nbytes The number of valid bytes in \p buf to be filtered
+ * \param[in,out] buf_size The size of \p buf
+ * \param[in,out] buf The filter buffer
+ *
+ * \return Returns the number of valid bytes of data contained in \p buf. In the
+ *         case of failure, the return value is 0 (zero) and all pointer
+ *         arguments are left unchanged.
+ *
  * \details A filter gets definition flags and invocation flags (defined
  *          above), the client data array and size defined when the filter was
  *          added to the pipeline, the size in bytes of the data on which to
@@ -321,15 +358,15 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  *          output buffer. If an error occurs then the function should return
  *          zero and leave all pointer arguments unchanged.
  */
-//! [H5Z_func_t_snip]
+//! <!-- [H5Z_func_t_snip] -->
 typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
                              size_t nbytes, size_t *buf_size, void **buf);
-//! [H5Z_func_t_snip]
+//! <!-- [H5Z_func_t_snip] -->
 /**
  * The filter table maps filter identification numbers to structs that
  * contain a pointers to the filter function and timing statistics.
  */
-//! [H5Z_class2_t_snip]
+//! <!-- [H5Z_class2_t_snip] -->
 typedef struct H5Z_class2_t {
     int                  version;         /**< Version number of the H5Z_class_t struct     */
     H5Z_filter_t         id;              /**< Filter ID number                             */
@@ -340,7 +377,7 @@ typedef struct H5Z_class2_t {
     H5Z_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
     H5Z_func_t           filter;          /**< The actual filter function                   */
 } H5Z_class2_t;
-//! [H5Z_class2_t_snip]
+//! <!-- [H5Z_class2_t_snip] -->
 
 /**
  * \ingroup H5Z
@@ -635,7 +672,7 @@ H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_confi
  * The filter table maps filter identification numbers to structs that
  * contain a pointers to the filter function and timing statistics.
  */
-//! [H5Z_class1_t_snip]
+//! <!-- [H5Z_class1_t_snip] -->
 typedef struct H5Z_class1_t {
     H5Z_filter_t         id;        /**< Filter ID number			     */
     const char *         name;      /**< Comment for debugging		     */
@@ -643,7 +680,7 @@ typedef struct H5Z_class1_t {
     H5Z_set_local_func_t set_local; /**< The "set local" callback for a filter */
     H5Z_func_t           filter;    /**< The actual filter function		     */
 } H5Z_class1_t;
-//! [H5Z_class1_t_snip]
+//! <!-- [H5Z_class1_t_snip] -->
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

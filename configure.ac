@@ -95,12 +95,12 @@ AC_CONFIG_COMMANDS([pubconf], [
   sed 's/#define /#define H5_/' <src/H5config.h |\
     sed 's/#undef /#undef H5_/' >pubconf
   if test ! -f src/H5pubconf.h; then
-    /bin/mv -f pubconf src/H5pubconf.h
+    mv -f pubconf src/H5pubconf.h
   elif (diff pubconf src/H5pubconf.h >/dev/null); then
     rm -f pubconf
     echo "src/H5pubconf.h is unchanged"
   else
-    /bin/mv -f pubconf src/H5pubconf.h
+    mv -f pubconf src/H5pubconf.h
   fi
   echo "Post process src/libhdf5.settings"
   sed '/^#/d' < src/libhdf5.settings > libhdf5.settings.TMP
@@ -1116,18 +1116,37 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   AC_SUBST([DOXYGEN_OPTIMIZE_OUTPUT_FOR_C])
   AC_SUBST([DOXYGEN_MACRO_EXPANSION])
   AC_SUBST([DOXYGEN_OUTPUT_DIRECTORY])
+  AC_SUBST([DOXYGEN_EXAMPLES_DIRECTORY])
+  AC_SUBST([DOXYGEN_LAYOUT_FILE])
+  AC_SUBST([DOXYGEN_HTML_HEADER])
+  AC_SUBST([DOXYGEN_HTML_FOOTER])
+  AC_SUBST([DOXYGEN_HTML_EXTRA_STYLESHEET])
+  AC_SUBST([DOXYGEN_HTML_EXTRA_FILES])
+  AC_SUBST([DOXYGEN_SERVER_BASED_SEARCH])
+  AC_SUBST([DOXYGEN_EXTERNAL_SEARCH])
+  AC_SUBST([DOXYGEN_SEARCHENGINE_URL])
 
+# SRCDIR Environment variables used inside doxygen macro for the source location:
   DOXYGEN_PACKAGE=${PACKAGE_NAME}
   DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
   DOXYGEN_INCLUDE_ALIASES='$(SRCDIR)/doxygen/aliases'
   DOXYGEN_PROJECT_LOGO='$(SRCDIR)/doxygen/img/HDFG-logo.png'
-  DOXYGEN_PROJECT_BRIEF="C-API Reference"
+  DOXYGEN_PROJECT_BRIEF=
   DOXYGEN_INPUT_DIRECTORY='$(SRCDIR) $(SRCDIR)/doxygen/dox'
   DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
   DOXYGEN_MACRO_EXPANSION=YES
   DOXYGEN_OUTPUT_DIRECTORY=hdf5lib_docs
+  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/examples $(SRCDIR)/src $(SRCDIR)/examples $(SRCDIR)/test'
+  DOXYGEN_LAYOUT_FILE='$(SRCDIR)/doxygen/hdf5doxy_layout.xml'
+  DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
+  DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
+  DOXYGEN_HTML_EXTRA_STYLESHEET='$(SRCDIR)/doxygen/hdf5doxy.css'
+  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js $(SRCDIR)/doxygen/img/ftv2node.png $(SRCDIR)/doxygen/img/ftv2pnode.png'
+  DOXYGEN_SERVER_BASED_SEARCH=NO
+  DOXYGEN_EXTERNAL_SEARCH=NO
+  DOXYGEN_SEARCHENGINE_URL=
 
-  DX_INIT_DOXYGEN([HDF5], [../doxygen/Doxyfile], [hdf5lib_docs])
+  DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
 
 else
   AC_MSG_RESULT([no])
@@ -2054,7 +2073,6 @@ AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
 AC_CHECK_FUNCS([strtoll strtoull])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
-AC_CHECK_FUNCS([roundf lroundf llroundf round lround llround])
 
 ## ----------------------------------------------------------------------
 ## Check compiler characteristics

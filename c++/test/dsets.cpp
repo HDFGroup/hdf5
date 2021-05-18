@@ -159,8 +159,7 @@ test_create(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
+        delete dataset;
         return -1;
     }
     // catch all other exceptions
@@ -168,8 +167,7 @@ test_create(H5File &file)
         issue_fail_msg("test_create", __LINE__, __FILE__);
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
+        delete dataset;
         return -1;
     }
 } // test_create
@@ -249,8 +247,7 @@ test_simple_io(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (tconv_buf)
-            delete[] tconv_buf;
+        delete[] tconv_buf;
         return -1;
     }
 } // test_simple_io
@@ -692,10 +689,8 @@ test_compression(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
-        if (tconv_buf)
-            delete[] tconv_buf;
+        delete dataset;
+        delete[] tconv_buf;
         return -1;
     }
 } // test_compression
@@ -885,8 +880,7 @@ test_multiopen(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (space != NULL)
-            delete space;
+        delete space;
         return -1;
     }
 } // test_multiopen
@@ -964,8 +958,7 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "bitfield_1: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
+            delete dset;
             return -1;
         }
 
@@ -996,8 +989,7 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "bitfield_2: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
+            delete dset;
             throw E; // propagate the exception
         }
 
@@ -1031,10 +1023,8 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "opaque_1: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
-            if (optype != NULL)
-                delete optype;
+            delete dset;
+            delete optype;
             throw E; // propagate the exception
         }
 
@@ -1067,10 +1057,8 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "opaque_2: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
-            if (optype != NULL)
-                delete optype;
+            delete dset;
+            delete optype;
             throw E; // propagate the exception
         }
 
@@ -1169,7 +1157,7 @@ test_chunk_cache(const FileAccPropList &fapl)
         // Verify that chunk cache parameters are the same
         int    mdc_nelmts = 0;
         size_t nslots_1 = 0, nslots_4 = 0, nbytes_1 = 0, nbytes_4 = 0;
-        double w0_1 = 0.0F, w0_4 = 0.0F;
+        double w0_1 = 0.0, w0_4 = 0.0;
         fapl_def.getCache(mdc_nelmts, nslots_1, nbytes_1, w0_1);
         dapl.getChunkCache(nslots_4, nbytes_4, w0_4);
         verify_val(nslots_1, nslots_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
@@ -1187,7 +1175,7 @@ test_chunk_cache(const FileAccPropList &fapl)
         // Set new rdcc settings on fapl local
         size_t nslots_2 = nslots_1 * 2;
         size_t nbytes_2 = nbytes_1 * 2;
-        double w0_2     = w0_1 / (double)2.0F;
+        double w0_2     = w0_1 / 2.0;
         fapl_local.getCache(mdc_nelmts, nslots_2, nbytes_2, w0_2);
 
         // Create a new file using default fcpl and the passed-in fapl

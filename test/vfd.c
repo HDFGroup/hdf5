@@ -340,7 +340,7 @@ test_core(void)
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
-    /* Retrieve the access property list... */
+    /* Retrieve the access property list */
     if ((fapl_id_out = H5Fget_access_plist(fid)) < 0)
         TEST_ERROR;
 
@@ -552,6 +552,38 @@ test_core(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
     h5_delete_test_file(FILENAME[1], fapl_id);
+
+    /************************************************************************
+     * Check that delete behavior works correctly
+     ************************************************************************/
+
+    /* Create and close a file */
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR;
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Try to delete the file with the backing store off (shouldn't delete anything) */
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, FALSE) < 0)
+        TEST_ERROR;
+    if (H5Fdelete(filename, fapl_id) < 0)
+        TEST_ERROR;
+    if (-1 == HDaccess(filename, F_OK))
+        FAIL_PUTS_ERROR("file deleted when backing store set to FALSE");
+
+    /* Try to delete the file with the backing store on (should work) */
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR;
+    if (H5Fdelete(filename, fapl_id) < 0)
+        TEST_ERROR;
+    if (0 == HDaccess(filename, F_OK))
+        FAIL_PUTS_ERROR("file not deleted when backing store set to TRUE");
+
+    /************************************************************************
+     * Clean up
+     ************************************************************************/
 
     /* Close the fapl */
     if (H5Pclose(fapl_id) < 0)
@@ -1835,12 +1867,23 @@ test_log(void)
     hsize_t       file_size = 0;
     unsigned int  flags     = H5FD_LOG_ALL;
     size_t        buf_size  = 4 * KB;
+    herr_t        ret       = SUCCEED;
 
     TESTING("LOG file driver");
 
-    /* Set property list and file name for log driver. */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
+
+    /* Make sure calling with an invalid fapl doesn't crash */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_fapl_log(H5I_INVALID_HID, LOG_FILENAME, 0, 0);
+    }
+    H5E_END_TRY;
+    if (SUCCEED == ret)
+        TEST_ERROR;
+
+    /* Set property list and file name for log driver. */
     if (H5Pset_fapl_log(fapl, LOG_FILENAME, flags, buf_size) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);

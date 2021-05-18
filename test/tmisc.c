@@ -2521,17 +2521,17 @@ test_misc13(void)
 static void
 test_misc14(void)
 {
-    hid_t  file_id;       /* File ID */
-    hid_t  fapl;          /* File access property list ID */
-    hid_t  DataSpace;     /* Dataspace ID */
-    hid_t  Dataset1;      /* Dataset ID #1 */
-    hid_t  Dataset2;      /* Dataset ID #2 */
-    hid_t  Dataset3;      /* Dataset ID #3 */
-    double data1 = 5.0F;  /* Data to write for dataset #1 */
-    double data2 = 10.0F; /* Data to write for dataset #2 */
-    double data3 = 15.0F; /* Data to write for dataset #3 */
-    double rdata;         /* Data read in */
-    herr_t ret;           /* Generic return value */
+    hid_t  file_id;      /* File ID */
+    hid_t  fapl;         /* File access property list ID */
+    hid_t  DataSpace;    /* Dataspace ID */
+    hid_t  Dataset1;     /* Dataset ID #1 */
+    hid_t  Dataset2;     /* Dataset ID #2 */
+    hid_t  Dataset3;     /* Dataset ID #3 */
+    double data1 = 5.0;  /* Data to write for dataset #1 */
+    double data2 = 10.0; /* Data to write for dataset #2 */
+    double data3 = 15.0; /* Data to write for dataset #3 */
+    double rdata;        /* Data read in */
+    herr_t ret;          /* Generic return value */
 
     /* Test creating two datasets and deleting the second */
 
@@ -3613,7 +3613,7 @@ test_misc19(void)
 
     /* Get a VOL class to register */
     vol_cls = h5_get_dummy_vol_class();
-    CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
+    CHECK_PTR(vol_cls, "h5_get_dummy_vol_class");
 
     /* Register a VOL connector */
     volid = H5VLregister_connector(vol_cls, H5P_DEFAULT);
@@ -4088,9 +4088,31 @@ test_misc23(void)
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gcreate1");
 
+    /* Make sure that size_hint values that can't fit into a 32-bit
+     * unsigned integer are rejected. Only necessary on systems where
+     * size_t is a 64-bit type.
+     */
+    if (SIZE_MAX > UINT32_MAX) {
+        H5E_BEGIN_TRY
+        {
+            tmp_id = H5Gcreate1(file_id, "/size_hint_too_large", SIZE_MAX);
+        }
+        H5E_END_TRY;
+        VERIFY(tmp_id, FAIL, "H5Gcreate1");
+    }
+
+    /* Make sure the largest size_hint value works */
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gcreate1(file_id, "/largest_size_hint", UINT32_MAX);
+    }
+    H5E_END_TRY;
+    CHECK(tmp_id, FAIL, "H5Gcreate1");
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
     tmp_id = H5Gcreate1(file_id, "/A/grp", (size_t)0);
     CHECK(tmp_id, FAIL, "H5Gcreate1");
-
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
@@ -4103,7 +4125,6 @@ test_misc23(void)
 
     tmp_id = H5Dcreate1(file_id, "/A/dset", type_id, space_id, create_id);
     CHECK(tmp_id, FAIL, "H5Dcreate1");
-
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

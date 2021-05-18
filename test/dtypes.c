@@ -1485,7 +1485,7 @@ test_compound_8(void)
     struct s2 {
         char c;
         s1   d;
-    } s2;
+    };
     hid_t   tid1, tid1_copy, tid2, tid2_copy, tid3, arr_tid;
     size_t  tsize;
     hsize_t dims[1] = {ARRAY_DIM};
@@ -2284,9 +2284,9 @@ test_compound_11(void)
 
     /* Initialize buffer */
     for (u = 0; u < NTESTELEM; u++) {
-        ((big_t *)buf)[u].d1 = (double)u * (double)1.5f;
-        ((big_t *)buf)[u].d2 = (double)u * (double)2.5f;
-        ((big_t *)buf)[u].d3 = (double)u * (double)3.5f;
+        ((big_t *)buf)[u].d1 = (double)u * 1.5;
+        ((big_t *)buf)[u].d2 = (double)u * 2.5;
+        ((big_t *)buf)[u].d3 = (double)u * 3.5;
         ((big_t *)buf)[u].i1 = (int)(u * 3);
         ((big_t *)buf)[u].i2 = (int)(u * 5);
         ((big_t *)buf)[u].s1 = (char *)HDmalloc((size_t)32);
