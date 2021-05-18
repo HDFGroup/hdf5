@@ -31,7 +31,6 @@
 #define SIZE_MAX ((size_t)-1)
 #endif
 
-
 /* Macros used to "unset" chunk cache configuration parameters */
 #define H5D_CHUNK_CACHE_NSLOTS_DEFAULT SIZE_MAX
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT SIZE_MAX
