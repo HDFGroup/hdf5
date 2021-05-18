@@ -760,55 +760,22 @@ Supported Platforms
                                      Version 17.0.0.098 Build 20160721
                                   MPICH 3.1.4
 
-    Linux-3.10.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
-    862.14.4.1chaos.ch6.ppc64le   clang/3.9,8.0
-    #1 SMP ppc64le GNU/Linux      gcc/7.3
-    (ray)                         xl/2016,2019
-
-    Linux 3.10.0-                 openmpi/3.1,4.0 with cmake>3.10 and
-    957.12.2.1chaos.ch6.x86_64    clang 5.0
-    #1 SMP x86_64 GNU/Linux       gcc/7.3,8.2
-    (serrano)                     intel/17.0,18.0/19.0
-
-    Linux 3.10.0-                 openmpi/3.1/4.0 with cmake>3.10 and
-    1062.1.1.1chaos.ch6.x86_64    clang/3.9,5.0,8.0
-    #1 SMP x86_64 GNU/Linux       gcc/7.3,8.1,8.2
-    (chama,quartz)                intel/16.0,18.0,19.0
-
-    Linux 4.4.180-94.100-default  cray-mpich/7.7.6 with PrgEnv-*/6.0.5, cmake>3.10 and
-    #1 SMP x86_64 GNU/Linux       gcc/7.2.0,8.2.0
-    (mutrino)                     intel/17.0,18.0
-
-    Linux 4.14.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
-    49.18.1.bl6.ppc64le           clang/6.0,8.0
-    #1 SMP ppc64le GNU/Linux      gcc/7.3
-    (lassen)                      xl/2019
-
-    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
-    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
-                                  Sun C++ 5.12 SunOS_sparc
-
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ MSMPI 10.1 (cmake)
 
-    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
-    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
-    (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
-
-    Mac OS X El Capitan 10.11.6   Apple clang/clang++ version 7.3.0 from Xcode 7.3
-    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
-    (osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
-
-    Mac OS High Sierra 10.13.6    Apple LLVM version 10.0.0 (clang/clang++-1000.10.44.4)
+    MacOS High Sierra 10.13.6     Apple LLVM version 10.0.0 (clang-1000.10.44.4)
     64-bit                        gfortran GNU Fortran (GCC) 6.3.0
     (bear)                        Intel icc/icpc/ifort version 19.0.4
 
-    Mac OS Mojave 10.14.6         Apple LLVM version 10.0.1 (clang/clang++-1001.0.46.4)
+    MacOS Mojave 10.14.6          Apple LLVM version 10.0.1 (clang-1001.0.46.4)
     64-bit                        gfortran GNU Fortran (GCC) 6.3.0
     (bobcat)                      Intel icc/icpc/ifort version 19.0.4
 
+    MacOS Big Sur 11.2            Apple clang version 12.0.5 (clang-1205.0.22.9)
+                                  gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
+                                  Intel icc/icpc (ICC) 2021.1 Beta 20201112
 
 Tested Configuration Features Summary
 =====================================
@@ -829,10 +796,9 @@ Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
-Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
-Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     ?
-Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     ?
-Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     ?
+MacOS High Sierra 10.13.6 64-bit        n        y/y    n        y    y     y
+MacOS Mojave 10.14.6 64-bit             n        y/y    n        y    y     y
+MacOS Big Sur 11.2 64-bit               n        y/y    n        y    y     y
 CentOS 6.7 Linux 2.6.18 x86_64 GNU      n        y/y    n        y    y     y
 CentOS 6.7 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
 CentOS 6.7 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
@@ -847,10 +813,9 @@ Solaris2.11 32-bit                         y       y         y         y
 Solaris2.11 64-bit                         y       y         y         y
 Windows 10                                 y       y         y         y
 Windows 10 x64                             y       y         y         y
-Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y
-Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
-Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
-Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
+MacOS High Sierra 10.13.6 64-bit           y       n         y         y
+MacOS Mojave 10.14.6 64-bit                y       n         y         y
+MacOS Big Sur 11.2 64-bit                  y       n         y         y
 CentOS 6.7 Linux 2.6.18 x86_64 GNU         y       y         y         y
 CentOS 6.7 Linux 2.6.18 x86_64 Intel       y       y         y         n
 CentOS 6.7 Linux 2.6.32 x86_64 PGI         y       y         y         n
@@ -868,14 +833,11 @@ The following platforms are not supported but have been tested for this release.
 
     Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (mayll/platypus)                 Version 4.4.7 20120313
+    (platypus)                 Version 4.4.7 20120313
                                      Version 4.9.3, 5.3.0, 6.2.0
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
-                                      Version 17.10-0
-                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
-                                  compilers:
-                                     Version 17.0.4.196 Build 20170411
+                                      Version 19.10-0
                                   MPICH 3.1.4 compiled with GCC 4.9.3
 
     Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
@@ -891,6 +853,33 @@ The following platforms are not supported but have been tested for this release.
                                      Version 18.4, 19.4
                                   MPICH 3.3
                                   OpenMPI 2.1.5, 3.1.3, 4.0.0
+
+    Linux 3.10.0-327.10.1.el7     MPICH 3.1.4 compiled with GCC 4.9.3
+    #1 SMP x86_64 GNU/Linux
+    (moohan)
+
+    Linux-3.10.0-1127.0.0.1chaos  openmpi-4.0.0
+    #1 SMP x86_64 GNU/Linux           clang/3.9.0, 8.0.1
+    (quartz)                          gcc/7.3.0, 8.1.0
+                                      intel/16.0.4
+
+    Linux-4.14.0-115.10.1.1       spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux          clang/coral-2018.08.08
+    (lassen)                          gcc/7.3.1
+                                      xl/2019.02.07
+
+    Linux-4.12.14-150.52-default  cray-mpich/7.7.10
+    #1 SMP x86_64 GNU/Linux           gcc/7.3.0, 8.2.0
+    (cori)                            intel/19.0.3
+
+    Linux-4.4.180-94.107-default  cray-mpich/7.7.6
+    # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
+    (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
+
+    Linux-3.10.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
+    862.14.4.1chaos.ch6.ppc64le   clang/3.9,8.0
+    #1 SMP ppc64le GNU/Linux      gcc/7.3
+    (ray)                         xl/2016,2019
 
     Fedora33 5.10.10-200.fc33.x86_64
     #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
@@ -909,9 +898,18 @@ The following platforms are not supported but have been tested for this release.
                                      clang version 7.0.1 (tags/RELEASE_701/final 349238)
                                      (cmake and autotools)
 
+    Mac OS X El Capitan 10.11.6   Apple clang/clang++ version 7.3.0 from Xcode 7.3
+    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
+
 
 Known Problems
 ==============
+    The t_bigio test fails on several HPC platforms, generally by timeout with 
+    OpenMPI 4.0.0 or with this error from spectrum-mpi: 
+        *** on communicator MPI_COMM_WORLD
+        *** MPI_ERR_COUNT: invalid count argument
+
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
