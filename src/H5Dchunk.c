@@ -7538,7 +7538,13 @@ done:
 static int
 H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 {
+    int ret_value = 0;
+
+    FUNC_ENTER_STATIC_NOERR
+
     const H5D_chunk_iter_cb_data_t * data = (H5D_chunk_iter_cb_data_t *) udata;
 
-    return (data->cb)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr, chunk_rec->nbytes, data->op_data);
+    ret_value = (data->cb)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr, chunk_rec->nbytes, data->op_data);
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_iter_cb */
