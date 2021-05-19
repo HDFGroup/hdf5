@@ -220,7 +220,7 @@ state_init(state_t *s, int argc, char **argv)
 
     *s = ALL_HID_INITIALIZER;
 
-    if(H5_basename(argv[0], &tfile) < 0) {
+    if (H5_basename(argv[0], &tfile) < 0) {
         printf("H5_basename failed\n");
         TEST_ERROR;
     }
@@ -427,7 +427,7 @@ create_dsets(const state_t *s, dsets_state_t *ds)
 
     /* Dataset with contiguous layout, 2d, named datatype */
     if (s->contig) {
-        hsize_t  dims[2];
+        hsize_t dims[2];
 
         dims[0] = s->rows;
         dims[1] = s->cols;
@@ -463,9 +463,9 @@ create_dsets(const state_t *s, dsets_state_t *ds)
 
     /* Dataset with chunked layout, 2d, named datatype */
     if (s->chunked) {
-        hsize_t  dims[2];
-        hsize_t  max_dims[2];
-        hsize_t  chunk_dims[2];
+        hsize_t dims[2];
+        hsize_t max_dims[2];
+        hsize_t chunk_dims[2];
 
         dims[0] = s->rows;
         dims[1] = s->cols;
