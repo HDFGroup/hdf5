@@ -1326,9 +1326,6 @@ test_operator(H5File &file)
         // Try operator= to make another dataset
         DataSet copied_dataset = another_dataset;
 
-        hid_t copied_dataset_id  = copied_dataset.getId();
-        hid_t another_dataset_id = another_dataset.getId();
-
         H5std_string copied_dataset_name  = copied_dataset.getObjName();
         H5std_string another_dataset_name = another_dataset.getObjName();
 
