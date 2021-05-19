@@ -24,9 +24,6 @@
  *      -- Regular hyperslab writes
  *      -- Raw data modifications
  */
-#include <err.h>
-#include <libgen.h>
-#include <unistd.h> /* getopt(3) */
 
 #include "hdf5.h"
 #include "testhdf5.h"
@@ -135,6 +132,8 @@ static bool open_dset_real(const state_t *s, hid_t *did, hid_t *sid, const char 
 static bool close_dsets(const dsets_state_t *ds);
 static bool close_dset_real(hid_t did, hid_t sid);
 
+static bool write_dset_contig_chunked(state_t *s, dsets_state_t *ds, 
+    H5F_vfd_swmr_config_t *config, np_state_t *np);
 static bool dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned step);
 static bool dset_setup(unsigned action, unsigned which, const state_t *s, hsize_t *start, hsize_t *stride,
                        hsize_t *count, hsize_t *block, hid_t *mem_sid, unsigned int **buf);
@@ -142,6 +141,8 @@ static bool write_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsiz
                        hsize_t *count, hsize_t *block, unsigned int *buf);
 static bool write_dset_compact(const state_t *s, const dsets_state_t *ds);
 
+static bool verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, 
+    H5F_vfd_swmr_config_t *config, np_state_t *np);
 static bool verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
 static bool verify_read_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *start,
                              hsize_t *stride, hsize_t *count, hsize_t *block, unsigned int *vbuf);
@@ -817,6 +818,95 @@ error:
  */
 
 /*
+ * Perform writes for contiguous and chunked datasets:
+ *  --SEQ_WRITE: sequential writes
+ *  --RANDOM_WRITE: random writes
+ *  --HYPER_WRITE: hyperslab writes
+ *  --MODIFY_DATA: raw data modifications
+ */
+static bool
+write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
+{
+    unsigned              step;
+    bool                  result;
+    
+    HDassert(s->contig || s->chunked);
+
+    /* Perform sequential writes for contiguous and/or chunked datasets */
+    if (s->swrites) {
+
+        for (step = 0; (step < s->swrites && step < (s->rows * s->cols)); step++) {
+            dbgf(2, "Sequential writes %u to dataset\n", step);
+
+            result = dsets_action(SEQ_WRITE, s, ds, step);
+
+            if (s->use_np && !np_writer(result, step, s, np, config)) {
+                printf("np_writer() for sequential writes failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    /* Perform random writes for contiguous and/or chunked datasets */
+    if (s->rwrites) {
+        unsigned newstep;
+
+        /* Set up random seed which will be the same for both writer and reader */
+        HDsrandom(RANDOM_SEED);
+
+        for (step = 0; (step < s->rwrites && step < (s->rows * s->cols)); step++) {
+            dbgf(2, "Random writes %u to dataset\n", step);
+
+            newstep = (unsigned int)HDrandom() % (s->rows * s->cols);
+            printf("Random step is %u\n", newstep);
+            result = dsets_action(RANDOM_WRITE, s, ds, newstep);
+
+            if (s->use_np && !np_writer(result, step, s, np, config)) {
+                printf("np_writer() for random writes failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    /* Perform hyperslab writes for contiguous and/or chunked datasets */
+    if (s->lwrites) {
+        unsigned k;
+
+        for (step = 0, k = 0; (step < s->lwrites && k < (s->rows * s->cols)); step++, k += s->cols) {
+            dbgf(2, "Hyperslab writes %u to dataset\n", step);
+
+            result = dsets_action(HYPER_WRITE, s, ds, k);
+
+            if (s->use_np && !np_writer(result, step, s, np, config)) {
+                printf("np_writer() for hyperslab writes failed\n");
+                TEST_ERROR;
+            }
+        }
+   }
+
+   /* Perform raw data modifications for contiguous and/or chunked datasets */
+    if (s->wwrites) {
+
+        for (step = 0; (step < s->wwrites && step < (s->rows * s->cols)); step++) {
+            dbgf(2, "Modify raw data %u to dataset\n", step);
+
+            result = dsets_action(MODIFY_DATA, s, ds, step);
+
+            if (s->use_np && !np_writer(result, step, s, np, config)) {
+                printf("np_writer() for modify raw data failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    return true;
+
+error:
+    return false;
+
+} /* write_dset_contig_chunked() */
+
+/*
  * Perform the "action" for each of the datasets specified on the command line:
  *      SEQ_WRITE: perform `which` sequential write
  *      RANDOM_WRITE: perform `which` random write
@@ -1036,6 +1126,128 @@ error:
 /*
  * Reader
  */
+
+/*
+ * Verify writes for contiguous and chunked datasets:
+ *  --SEQ_WRITE: sequential writes
+ *  --RANDOM_WRITE: random writes
+ *  --HYPER_WRITE: hyperslab writes
+ *  --MODIFY_DATA: raw data modifications
+ */
+static bool
+verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
+{
+    unsigned              step;
+    bool                  result;
+    
+    HDassert(s->contig || s->chunked);
+
+    /* Start verifying sequential writes for contiguous and/or chunked datasets */
+    if (s->swrites) {
+
+        for (step = 0; (step < s->swrites && step < (s->rows * s->cols)); step++) {
+            dbgf(2, "Verify sequential writes %u to dataset\n", step);
+
+            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                TEST_ERROR;
+            }
+
+            /* Wait for a few ticks for the update to happen */
+            decisleep(config->tick_len * s->update_interval);
+
+            result = verify_dsets_action(SEQ_WRITE, s, ds, step);
+
+            if (s->use_np && !np_reader(result, step, s, np)) {
+                printf("np_reader() for verifying addition failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    /* Start verifying random writes for contiguous and/or chunked datasets */
+    if (s->rwrites) {
+        unsigned newstep;
+
+        /* Set up random seed which will be the same for both writer and reader */
+        HDsrandom(RANDOM_SEED);
+
+        for (step = 0; (step < s->rwrites && step < (s->rows * s->cols)); step++) {
+            dbgf(2, "Verify random writes %u to dataset\n", step);
+
+            newstep = (unsigned int)HDrandom() % (s->rows * s->cols);
+            printf("Random step is %u\n", newstep);
+
+            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                TEST_ERROR;
+            }
+
+            /* Wait for a few ticks for the update to happen */
+            decisleep(config->tick_len * s->update_interval);
+
+            result = verify_dsets_action(RANDOM_WRITE, s, ds, newstep);
+
+            if (s->use_np && !np_reader(result, step, s, np)) {
+                printf("np_reader() for verifying addition failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    /* Start verifying hyperslab writes for contiguous and/or chunked datasets */
+    if (s->lwrites) {
+        unsigned k;
+
+        for (step = 0, k = 0; (step < s->lwrites && k < (s->rows * s->cols)); step++, k += s->cols) {
+            dbgf(2, "Verify hyperslab writes %u to dataset\n", step);
+
+            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                TEST_ERROR;
+            }
+
+            /* Wait for a few ticks for the update to happen */
+            decisleep(config->tick_len * s->update_interval);
+
+            result = verify_dsets_action(HYPER_WRITE, s, ds, k);
+
+            if (s->use_np && !np_reader(result, step, s, np)) {
+                printf("np_reader() for verifying addition failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    /* Start verifying raw data modifications for contiguous and/or chunked datasets */
+    if (s->wwrites) {
+
+        for (step = 0; (step < s->wwrites && step < (s->rows * s->cols)); step++) {
+            dbgf(2, "Verify raw data modification %u to dataset\n", step);
+
+            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                TEST_ERROR;
+            }
+
+            /* Wait for a few ticks for the update to happen */
+            decisleep(config->tick_len * s->update_interval);
+
+            result = verify_dsets_action(MODIFY_DATA, s, ds, step);
+
+            if (s->use_np && !np_reader(result, step, s, np)) {
+                printf("np_reader() for verifying addition failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    return true;
+
+error:
+    return false;
+
+} /* verify_write_dset_contig_chunked() */
 
 /*
  * Verify the data read from each of the datasets specified on the command line
@@ -1429,6 +1641,8 @@ error:
     return false;
 } /* np_confirm_verify_notify() */
 
+
+
 /*
  * Main
  */
@@ -1522,71 +1736,14 @@ main(int argc, char **argv)
             }
         }
 
-        /* Perform sequential writes for contiguous and/or chunked datasets */
-        if ((s.contig || s.chunked) && s.swrites) {
-
-            for (step = 0; (step < s.swrites && step < (s.rows * s.cols)); step++) {
-                dbgf(2, "Sequential writes %u to dataset\n", step);
-
-                result = dsets_action(SEQ_WRITE, &s, &ds, step);
-
-                if (s.use_np && !np_writer(result, step, &s, &np, &config)) {
-                    printf("np_writer() for sequential writes failed\n");
-                    TEST_ERROR;
-                }
+        if (s.contig || s.chunked) {
+            /* Perform writes for contiguous and/or chunked datasets */
+            if(!write_dset_contig_chunked(&s, &ds, &config, &np)) {
+                printf("write_dset_contig_chunked() failed\n");
+                TEST_ERROR;
             }
         }
 
-        /* Perform random writes for contiguous and/or chunked datasets */
-        if ((s.contig || s.chunked) && s.rwrites) {
-            unsigned newstep;
-
-            /* Set up random seed which will be the same for both writer and reader */
-            HDsrandom(RANDOM_SEED);
-
-            for (step = 0; (step < s.rwrites && step < (s.rows * s.cols)); step++) {
-                dbgf(2, "Random writes %u to dataset\n", step);
-
-                newstep = (unsigned int)HDrandom() % (s.rows * s.cols);
-                printf("Random step is %u\n", newstep);
-                result = dsets_action(RANDOM_WRITE, &s, &ds, newstep);
-
-                if (s.use_np && !np_writer(result, step, &s, &np, &config)) {
-                    printf("np_writer() for random writes failed\n");
-                    TEST_ERROR;
-                }
-            }
-        }
-
-        /* Perform hyperslab writes for contiguous and/or chunked datasets */
-        if ((s.contig || s.chunked) && s.lwrites) {
-            unsigned k;
-            for (step = 0, k = 0; (step < s.lwrites && k < (s.rows * s.cols)); step++, k += s.cols) {
-                dbgf(2, "Hyperslab writes %u to dataset\n", step);
-
-                result = dsets_action(HYPER_WRITE, &s, &ds, k);
-
-                if (s.use_np && !np_writer(result, step, &s, &np, &config)) {
-                    printf("np_writer() for hyperslab writes failed\n");
-                    TEST_ERROR;
-                }
-            }
-        }
-
-        /* Perform raw data modifications for contiguous and/or chunked datasets */
-        if ((s.contig || s.chunked) && s.wwrites) {
-
-            for (step = 0; (step < s.wwrites && step < (s.rows * s.cols)); step++) {
-                dbgf(2, "Modify raw data %u to dataset\n", step);
-
-                result = dsets_action(MODIFY_DATA, &s, &ds, step);
-
-                if (s.use_np && !np_writer(result, step, &s, &np, &config)) {
-                    printf("np_writer() for modify raw data failed\n");
-                    TEST_ERROR;
-                }
-            }
-        }
     }
     else {
 
@@ -1609,102 +1766,12 @@ main(int argc, char **argv)
             }
         }
 
-        /* Start verifying sequential writes for contiguous and/or chunked datasets */
-        if ((s.contig || s.chunked) && s.swrites) {
-
-            for (step = 0; (step < s.swrites && step < (s.rows * s.cols)); step++) {
-                dbgf(2, "Verify sequential writes %u to dataset\n", step);
-
-                if (s.use_np && !np_confirm_verify_notify(np.fd_writer_to_reader, step, &s, &np)) {
-                    printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                    TEST_ERROR;
-                }
-                /* Wait for a few ticks for the update to happen */
-                decisleep(config.tick_len * s.update_interval);
-
-                result = verify_dsets_action(SEQ_WRITE, &s, &ds, step);
-
-                if (s.use_np && !np_reader(result, step, &s, &np)) {
-                    printf("np_reader() for verifying addition failed\n");
-                    TEST_ERROR;
-                }
-            }
-        }
-
-        /* Start verifying random writes for contiguous and/or chunked datasets */
-        if ((s.contig || s.chunked) && s.rwrites) {
-            unsigned newstep;
-
-            /* Set up random seed which will be the same for both writer and reader */
-            HDsrandom(RANDOM_SEED);
-
-            for (step = 0; (step < s.rwrites && step < (s.rows * s.cols)); step++) {
-                dbgf(2, "Verify random writes %u to dataset\n", step);
-
-                newstep = (unsigned int)HDrandom() % (s.rows * s.cols);
-                printf("Random step is %u\n", newstep);
-
-                if (s.use_np && !np_confirm_verify_notify(np.fd_writer_to_reader, step, &s, &np)) {
-                    printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                    TEST_ERROR;
-                }
-
-                /* Wait for a few ticks for the update to happen */
-                decisleep(config.tick_len * s.update_interval);
-
-                result = verify_dsets_action(RANDOM_WRITE, &s, &ds, newstep);
-
-                if (s.use_np && !np_reader(result, step, &s, &np)) {
-                    printf("np_reader() for verifying addition failed\n");
-                    TEST_ERROR;
-                }
-            }
-        }
-
-        /* Start verifying hyperslab writes for contiguous and/or chunked datasets */
-        if ((s.contig || s.chunked) && s.lwrites) {
-            unsigned k;
-
-            for (step = 0, k = 0; (step < s.lwrites && k < (s.rows * s.cols)); step++, k += s.cols) {
-                dbgf(2, "Verify hyperslab writes %u to dataset\n", step);
-
-                if (s.use_np && !np_confirm_verify_notify(np.fd_writer_to_reader, step, &s, &np)) {
-                    printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                    TEST_ERROR;
-                }
-
-                /* Wait for a few ticks for the update to happen */
-                decisleep(config.tick_len * s.update_interval);
-
-                result = verify_dsets_action(HYPER_WRITE, &s, &ds, k);
-
-                if (s.use_np && !np_reader(result, step, &s, &np)) {
-                    printf("np_reader() for verifying addition failed\n");
-                    TEST_ERROR;
-                }
-            }
-        }
-
-        /* Start verifying raw data modifications for contiguous and/or chunked datasets */
-        if ((s.contig || s.chunked) && s.wwrites) {
-
-            for (step = 0; (step < s.wwrites && step < (s.rows * s.cols)); step++) {
-                dbgf(2, "Verify raw data modification %u to dataset\n", step);
-
-                if (s.use_np && !np_confirm_verify_notify(np.fd_writer_to_reader, step, &s, &np)) {
-                    printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                    TEST_ERROR;
-                }
-
-                /* Wait for a few ticks for the update to happen */
-                decisleep(config.tick_len * s.update_interval);
-
-                result = verify_dsets_action(MODIFY_DATA, &s, &ds, step);
-
-                if (s.use_np && !np_reader(result, step, &s, &np)) {
-                    printf("np_reader() for verifying addition failed\n");
-                    TEST_ERROR;
-                }
+        if (s.contig || s.chunked) {
+    
+            /* Verify writes for contiguous and/or chunked datasets */
+            if(!verify_write_dset_contig_chunked(&s, &ds, &config, &np)) {
+                printf("verify_write_dset_contig_chunked() failed\n");
+                TEST_ERROR;
             }
         }
     }
