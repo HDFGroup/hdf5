@@ -132,8 +132,8 @@ static bool open_dset_real(const state_t *s, hid_t *did, hid_t *sid, const char 
 static bool close_dsets(const dsets_state_t *ds);
 static bool close_dset_real(hid_t did, hid_t sid);
 
-static bool write_dset_contig_chunked(state_t *s, dsets_state_t *ds, 
-    H5F_vfd_swmr_config_t *config, np_state_t *np);
+static bool write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
+                                      np_state_t *np);
 static bool dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned step);
 static bool dset_setup(unsigned action, unsigned which, const state_t *s, hsize_t *start, hsize_t *stride,
                        hsize_t *count, hsize_t *block, hid_t *mem_sid, unsigned int **buf);
@@ -141,8 +141,8 @@ static bool write_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsiz
                        hsize_t *count, hsize_t *block, unsigned int *buf);
 static bool write_dset_compact(const state_t *s, const dsets_state_t *ds);
 
-static bool verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, 
-    H5F_vfd_swmr_config_t *config, np_state_t *np);
+static bool verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
+                                             np_state_t *np);
 static bool verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
 static bool verify_read_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *start,
                              hsize_t *stride, hsize_t *count, hsize_t *block, unsigned int *vbuf);
@@ -827,9 +827,9 @@ error:
 static bool
 write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
 {
-    unsigned              step;
-    bool                  result;
-    
+    unsigned step;
+    bool     result;
+
     HDassert(s->contig || s->chunked);
 
     /* Perform sequential writes for contiguous and/or chunked datasets */
@@ -882,9 +882,9 @@ write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *
                 TEST_ERROR;
             }
         }
-   }
+    }
 
-   /* Perform raw data modifications for contiguous and/or chunked datasets */
+    /* Perform raw data modifications for contiguous and/or chunked datasets */
     if (s->wwrites) {
 
         for (step = 0; (step < s->wwrites && step < (s->rows * s->cols)); step++) {
@@ -1137,9 +1137,9 @@ error:
 static bool
 verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
 {
-    unsigned              step;
-    bool                  result;
-    
+    unsigned step;
+    bool     result;
+
     HDassert(s->contig || s->chunked);
 
     /* Start verifying sequential writes for contiguous and/or chunked datasets */
@@ -1641,8 +1641,6 @@ error:
     return false;
 } /* np_confirm_verify_notify() */
 
-
-
 /*
  * Main
  */
@@ -1738,12 +1736,11 @@ main(int argc, char **argv)
 
         if (s.contig || s.chunked) {
             /* Perform writes for contiguous and/or chunked datasets */
-            if(!write_dset_contig_chunked(&s, &ds, &config, &np)) {
+            if (!write_dset_contig_chunked(&s, &ds, &config, &np)) {
                 printf("write_dset_contig_chunked() failed\n");
                 TEST_ERROR;
             }
         }
-
     }
     else {
 
@@ -1767,9 +1764,9 @@ main(int argc, char **argv)
         }
 
         if (s.contig || s.chunked) {
-    
+
             /* Verify writes for contiguous and/or chunked datasets */
-            if(!verify_write_dset_contig_chunked(&s, &ds, &config, &np)) {
+            if (!verify_write_dset_contig_chunked(&s, &ds, &config, &np)) {
                 printf("verify_write_dset_contig_chunked() failed\n");
                 TEST_ERROR;
             }
