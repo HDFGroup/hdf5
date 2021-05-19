@@ -105,6 +105,15 @@ usage(const char *progname)
         "                                       deleted\n"
         "              `modify-vstr`          - A VL string attribute added then \n"
         "                                       modified \n"
+        "              `add-ohr-block`        - An attribute is added and this forces\n"
+	    "                                       the creation of object header\n"
+        "                                       continuation block \n"
+        "              `del-ohr-block`        - An attribute is added and this forces\n"
+	    "                                       the creation of object header\n"
+        "                                       continuation block and then this \n"
+        "                                       attribute is deleted so the \n"
+        "                                       object header continuation block is \n"
+        "                                       removed. \n"
         "-O grp_op_pattern:  `grp_op_pattern' for different group operation tests\n"
         "              The value of `grp_op_pattern` is one of the following:\n"
         "              `grp-creation`         - A group is created.\n"
@@ -247,6 +256,10 @@ state_init(state_t *s, int argc, char **argv)
                     s->at_pattern = 'r';
                 else if (HDstrcmp(optarg, "modify-vstr") == 0)
                     s->at_pattern = 'm';
+                else if (HDstrcmp(optarg, "add-ohr-block") == 0)
+                    s->at_pattern = 'a';
+                else if (HDstrcmp(optarg, "del-ohr-block") == 0)
+                    s->at_pattern = 'R';
                 else {
                     H5_FAILED();
                     AT();
@@ -470,6 +483,63 @@ np_send_error(state_t *s, bool writer)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    check_ohr_num_chunk
+ *
+ * Purpose:     Check if the number of object header chunks is as expected.
+ *
+ * Parameters:  hid_t oid
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              bool one_chunk_ohr
+ *              flag to indicate if the object header chunk is 1 or greater
+ *              1: true
+ *              greater than 1: false 
+ *
+ * Return:      Success:    true 
+ *              Failure:    false
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static bool
+check_ohr_num_chunk(hid_t g, bool one_chunk_ohr)
+{
+
+    H5O_native_info_t ninfo;
+
+    /* Get the object information */
+    if (H5Oget_native_info(g, &ninfo, H5O_NATIVE_INFO_HDR) < 0) {
+        H5_FAILED()
+        AT();
+        printf("H5Oget_native_info failed\n");
+        goto error;
+    }
+
+    if(true == one_chunk_ohr) {
+        if (ninfo.hdr.nchunks != 1) {
+            H5_FAILED();
+            AT();
+            printf("Object header should have only one chunk,but it is not.\n");
+            goto error;
+        }
+    }
+    else {
+        if (ninfo.hdr.nchunks <= 1) {
+            H5_FAILED();
+            AT();
+            printf("Object header should have more than one chunk,but it is not.\n");
+            goto error;
+        }
+    }
+
+    return true;
+
+error:
+    return false;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    add_attr
  *
  * Purpose:     Add attributes to a group.
@@ -554,6 +624,18 @@ add_attr(state_t *s, hid_t oid, unsigned int which, unsigned num_attrs, const ch
             goto error;
         }
 
+        /* If coming to an "object header continuation block" test,
+         * we need to check if this test behaves as expected. */
+        if(s->at_pattern == 'a' || s->at_pattern == 'R') {
+            if (false == check_ohr_num_chunk(oid,false)) {
+                H5_FAILED();
+                AT();
+                printf("An object header continuation block should be created. \n");
+                printf("But it is not.\n");
+                goto error;
+            }
+        }
+
         /* Writer sends a message to reader: an attribute is successfully generated.
            then wait for the reader to verify and send an acknowledgement message back.*/
         if (s->use_named_pipes && s->attr_test == true) {
@@ -618,7 +700,8 @@ error2:
  *              Failure:    false
  *
  * Note:        This function is used for the "dense" storage test.
- *              It is also used by the group-only test.
+ *              It is also used by the group-only, "add-ohr-block"
+ *              and "del-ohr-block" tests.
  *-------------------------------------------------------------------------
  */
 
@@ -776,8 +859,9 @@ error2:
  *              bool is_dense
  *              if the deleted attribute is for checking the dense storage
  *
- *              bool is_vl
- *              if the deleted attribute is a VL string
+ *              bool is_vl_or_ohrc
+ *              if the deleted attribute is a VL string or for object header   
+ *              continuation check test
  *
  *              unsigned int which
  *              The number of iterations for group creation, use to generate
@@ -795,7 +879,7 @@ error2:
  */
 
 static bool
-del_one_attr(state_t *s, hid_t obj_id, bool is_dense, bool is_vl, unsigned int which)
+del_one_attr(state_t *s, hid_t obj_id, bool is_dense, bool is_vl_or_ohrc, unsigned int which)
 {
 
     char attrname[VS_ATTR_NAME_LEN];
@@ -806,7 +890,8 @@ del_one_attr(state_t *s, hid_t obj_id, bool is_dense, bool is_vl, unsigned int w
     /*attribute name template used for general attribute deletion operation */
     const char *aname_format = "attr-%u-%u";
 
-    /*attribute name template used for VL string attribute deletion operation */
+    /*attribute name template used for VL string attribute deletion 
+     * or object header continuation check operations */
     const char *aname_format_vl = "attr-%u";
 
     dbgf(2, "writer: coming to delete the attribute.\n");
@@ -814,7 +899,7 @@ del_one_attr(state_t *s, hid_t obj_id, bool is_dense, bool is_vl, unsigned int w
     /* Construct the attribute name */
     if (is_dense == true)
         HDsprintf(attrname, aname_format_d, which, 0);
-    else if (is_vl == true)
+    else if (is_vl_or_ohrc == true)
         HDsprintf(attrname, aname_format_vl, which, 0);
     else
         HDsprintf(attrname, aname_format, which, 0);
@@ -827,6 +912,16 @@ del_one_attr(state_t *s, hid_t obj_id, bool is_dense, bool is_vl, unsigned int w
         goto error;
     }
 
+    /* If coming to an "object header continuation block" test,
+     * we need to check if this test behaves as expected. */
+    if (s->at_pattern == 'R') {
+        if (false == check_ohr_num_chunk(obj_id,true)) {
+            H5_FAILED();
+            AT();
+            printf("The object header chunk should not continue. \n");
+            goto error;
+        }
+    }
     /* Writer sends a message to reader: an attribute is successfully generated.
        then wait for the reader to verify and send an acknowledgement message back. */
     if (s->use_named_pipes && s->attr_test == true) {
@@ -1580,7 +1675,7 @@ add_del_attrs_compact_dense_compact(state_t *s, hid_t g, hid_t gcpl, unsigned in
  * Return:      Success:    true
  *              Failure:    false
  *
- * Note:        This function is used for the "modify" storage test.
+ * Note:        This function is used for the "modify" test.
  *-------------------------------------------------------------------------
  */
 
@@ -1596,6 +1691,45 @@ add_modify_default_group_attr(state_t *s, hid_t g, unsigned int which)
     return ret_value;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    del_ohr_block_attr
+ *
+ * Purpose:     Add an attribute to force creation of object header
+ *              continuation block and remove this attribute to delete
+ *              the object header continuation block
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate
+ *              newly created group and attribute names.
+ *              The group name is "group-which" and the attribute name
+ *              is "attr-which".
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This function is used for the 
+ *              "deletion of object header continuation block" test.
+ *-------------------------------------------------------------------------
+ */
+
+static bool
+del_ohr_block_attr(state_t *s, hid_t g, unsigned int which)
+{
+
+    bool        ret_value    = false;
+    ret_value                = add_default_group_attr(s, g, which);
+    if (ret_value == true)
+        ret_value = del_one_attr(s, g, false,true, which);
+    return ret_value;
+}
 /*-------------------------------------------------------------------------
  * Function:    add_group_attribute
  *
@@ -1659,6 +1793,10 @@ add_group_attribute(state_t *s, hid_t g, hid_t gcpl, unsigned int which)
         case 'm':
             ret_value = add_modify_vlstr_attr(s, g, which);
             break;
+        case 'R':
+            ret_value = del_ohr_block_attr(s, g, which);
+            break;
+        case 'a':
         case 'd':
         case ' ':
         default:
@@ -1694,6 +1832,7 @@ write_group(state_t *s, unsigned int which)
 {
     char       name[sizeof("/group-9999999999")];
     hid_t      g      = H5I_INVALID_HID;
+    hid_t      dummy_d= H5I_INVALID_HID;
     hid_t      gcpl   = H5I_INVALID_HID;
     bool       result = true;
     H5G_info_t group_info;
@@ -1736,6 +1875,15 @@ write_group(state_t *s, unsigned int which)
         goto error;
     }
 
+    /* We need to create a dummy dataset for the object header contiuation block test. */
+    if(s->at_pattern == 'a' || s->at_pattern == 'R') {
+        if((dummy_d = H5Dcreate2(g, "Dataset", H5T_NATIVE_INT, s->one_by_one_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <0){ 
+            H5_FAILED();
+            AT();
+            printf("H5Dcreate2 failed\n");
+            goto error;
+        }
+    }
     if (H5Gget_info(g, &group_info) < 0) {
         H5_FAILED();
         AT();
@@ -1761,6 +1909,19 @@ write_group(state_t *s, unsigned int which)
         }
         dbgf(2, "Writer: group is created with the new-style.\n");
     }
+
+    /* If coming to an "object header continuation block" test,
+     * we need to check if this test behaves as expected. */
+    if(s->at_pattern == 'a' || s->at_pattern == 'R') {
+        if (false == check_ohr_num_chunk(g,true)) {
+            H5_FAILED();
+            AT();
+            printf("An object header continuation block should NOT be created. \n");
+            printf("But it is created.\n");
+            goto error;
+        }
+    }
+
     /* If an attribute test is turned on and named pipes are used,
      * the writer should send and receive messages after the group creation.
      * This will distinguish an attribute operation error from an
@@ -1778,11 +1939,20 @@ write_group(state_t *s, unsigned int which)
             goto error2;
         }
     }
+    
 
     /* Then carry out the attribute operation. */
     if (s->asteps != 0 && which % s->asteps == 0)
         result = add_group_attribute(s, g, gcpl, which);
 
+    if(s->at_pattern == 'a' || s->at_pattern == 'R') {
+        if (H5Dclose(dummy_d) < 0) {
+            H5_FAILED();
+            AT();
+            printf("H5Dclose failed\n");
+            goto error;
+        }
+    }
     if (H5Gclose(g) < 0) {
         H5_FAILED();
         AT();
@@ -1808,6 +1978,8 @@ error2:
 
     H5E_BEGIN_TRY
     {
+        if (s->at_pattern == 'a' || s->at_pattern == 'R')
+            H5Dclose(dummy_d);
         H5Gclose(g);
         if (!s->old_style_grp)
             H5Pclose(gcpl);
@@ -1871,6 +2043,7 @@ check_attr_storage_type(hid_t g, bool is_compact)
 error:
     return false;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    vrfy_attr
@@ -1984,6 +2157,19 @@ vrfy_attr(state_t *s, hid_t g, unsigned int which, const char *aname, unsigned i
         dbgf(2, "reader: finish checking the storage type: %d\n", s->np_notify);
     }
 
+    /* If coming to an "object header continuation block" test,
+     * we need to check if this test behaves as expected. */
+    if(s->at_pattern == 'a' || s->at_pattern == 'R') {
+        if (false == check_ohr_num_chunk(g,false)) {
+            H5_FAILED();
+            AT();
+            printf("An object header continuation block should be created. \n");
+            printf("But it is not.\n");
+            printf("Verification of 'object header continuation block test' failed.\n");
+            goto error;
+        }
+    }
+
     /* If the read value is expected, send back an OK message to the writer. */
     if (s->use_named_pipes && s->attr_test == true) {
         if (np_rd_send(s) == false)
@@ -2028,7 +2214,8 @@ error2:
  *              Failure:    false
  *
  * Note:        This function is used for the "dense" storage test.
- *              It is also used by the group-only test.
+ *              It is also used by the group-only, "add-ohr-block"
+ *              and "del-ohr-block" tests.
  *-------------------------------------------------------------------------
  */
 
@@ -2408,6 +2595,19 @@ verify_del_one_attr(state_t *s, hid_t g, const char *aname, bool check_storage, 
             goto error;
         }
         dbgf(2, "reader: finish checking the storage type: %d\n", s->np_notify);
+    }
+
+    /* If coming to an "object header continuation block" test,
+     * we need to check if this test behaves as expected. */
+    if(s->at_pattern == 'R') {
+        if (false == check_ohr_num_chunk(g,true)) {
+            H5_FAILED();
+            AT();
+            printf("An object header continuation block should be removed. \n");
+            printf("But it is NOT.\n");
+            printf("Verification of an 'object header continuation block test' failed.\n");
+            goto error;
+        }
     }
 
     /* Reader sends an OK message back to the reader */
@@ -2793,6 +2993,47 @@ verify_del_attrs_compact_dense_compact(state_t *s, hid_t g, unsigned max_c, unsi
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    verify_del_ohr_block_attr
+ *
+ * Purpose:     Verify that an attribute is added to force creation of 
+ *              object header continuation block and remove this attribute 
+ *              to delete the object header continuation block
+ 
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters
+ *
+ *              hid_t g
+ *              HDF5 object ID (in this file: means group ID)
+ *
+ *              unsigned int which
+ *              The number of iterations for group creation, use to generate
+ *              group and attribute names.
+ *
+ *
+ * Return:      Success:    true
+ *              Failure:    false
+ *
+ * Note:        This is called by the verify_group() function.
+ *-------------------------------------------------------------------------
+ */
+
+static bool
+verify_del_ohr_block_attr(state_t *s, hid_t g, unsigned int which) {
+
+    bool        ret_value    = false;
+    char        attrname[VS_ATTR_NAME_LEN];
+    const char *aname_format = "attr-%u";
+
+    ret_value                = verify_default_group_attr(s, g, which);
+    if (ret_value == true) {
+        HDsprintf(attrname, aname_format, which);
+        ret_value = verify_del_one_attr(s, g, attrname, false,true);
+    }
+    return ret_value;
+
+}
+/*-------------------------------------------------------------------------
  * Function:    verify_group_attribute
  *
  * Purpose:     Check the attribute test pattern and then call the
@@ -2867,6 +3108,8 @@ verify_group_attribute(state_t *s, hid_t g, unsigned int which)
         case 'M':
         case 'm':
         case 'r':
+        case 'a':
+        case 'R':
         case ' ':
         default:
             break;
@@ -2901,6 +3144,10 @@ verify_group_attribute(state_t *s, hid_t g, unsigned int which)
         case 'm':
             ret = verify_modify_vlstr_attr(s, g, which);
             break;
+        case 'R':
+            ret = verify_del_ohr_block_attr(s, g, which);
+            break;
+        case 'a':
         case 'd':
         case ' ':
         default:
@@ -3005,6 +3252,19 @@ verify_group(state_t *s, unsigned int which)
             goto error;
         }
         dbgf(2, "Reader: verify that the group is created with the new-style.\n");
+    }
+
+    /* If coming to an "object header continuation block" test,
+     * we need to check if this test behaves as expected. */
+    if(s->at_pattern == 'a' || s->at_pattern == 'R') {
+        if (false == check_ohr_num_chunk(g,true)) {
+            H5_FAILED();
+            AT();
+            printf("An object header continuation block should NOT be created. \n");
+            printf("But it is created.\n");
+            printf("Verification of an 'object header continuation block test' failed.\n");
+            goto error;
+        }
     }
 
     /* Reader sends an OK message back to the writer */

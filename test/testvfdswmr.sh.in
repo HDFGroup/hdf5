@@ -732,12 +732,15 @@ grp_attr_list=(
                 "add-vstr"
                 "remove-vstr"
                 "modify-vstr"
+                "add-ohr-block"
+                "del-ohr-block"
                )
 grp_sub_attr_list=(
                 "dense-del-to-compact"
                 "modify"
                 "remove-vstr"
                 "modify-vstr"
+                "del-ohr-block"
                )
 
 grp_short_sub_attr_list=(
@@ -745,6 +748,7 @@ grp_short_sub_attr_list=(
                 "modify"
                 "remove-vstr"
                 "modify-vstr"
+                "del-ohr-block"
                )
 
 if [[ "$HDF5TestExpress" -eq 1 ]] ; then       #Setting for standard run
@@ -805,11 +809,14 @@ os_grp_attr_list=(
                 "add-vstr"
                 "remove-vstr"
                 "modify-vstr"
-               )
+                "add-ohr-block"
+                "del-ohr-block"
+ )
 os_grp_sub_attr_list=(
                 "modify"
                 "remove-vstr"
                 "modify-vstr"
+                "del-ohr-block"
                )
 if [[ "$HDF5TestExpress" -gt 0 ]] ; then       #Setting for standard run
     os_grp_attr_list=("${os_grp_sub_attr_list[@]}")
