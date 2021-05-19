@@ -85,6 +85,7 @@ static H5E_t *    H5E__get_current_stack(void);
 static herr_t     H5E__set_current_stack(H5E_t *estack);
 static herr_t     H5E__close_stack(H5E_t *err_stack, void **request);
 static ssize_t    H5E__get_num(const H5E_t *err_stack);
+static herr_t     H5E__print2(hid_t err_stack, FILE *stream);
 static herr_t     H5E__append_stack(H5E_t *dst_estack, const H5E_t *src_stack);
 
 /*********************/
@@ -312,10 +313,10 @@ H5E__set_default_auto(H5E_t *stk)
 #endif /* H5_USE_16_API_DEFAULT */
 
     stk->auto_op.func1 = stk->auto_op.func1_default = (H5E_auto1_t)H5Eprint1;
-    stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5Eprint2;
+    stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5E__print2;
     stk->auto_op.is_default                         = TRUE;
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
-    stk->auto_op.func2 = (H5E_auto2_t)H5Eprint2;
+    stk->auto_op.func2 = (H5E_auto2_t)H5E__print2;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     stk->auto_data = NULL;
@@ -1433,12 +1434,36 @@ done:
 herr_t
 H5Eprint2(hid_t err_stack, FILE *stream)
 {
-    H5E_t *estack;              /* Error stack to operate on */
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
     /*NO TRACE*/
+
+    /* Print error stack */
+    if ((ret_value = H5E__print2(err_stack, stream)) < 0)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Eprint2() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E__print2
+ *
+ * Purpose:     Internal helper routine for H5Eprint2.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5E__print2(hid_t err_stack, FILE *stream)
+{
+    H5E_t *estack;              /* Error stack to operate on */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
 
     /* Need to check for errors */
     if (err_stack == H5E_DEFAULT) {
@@ -1459,8 +1484,8 @@ H5Eprint2(hid_t err_stack, FILE *stream)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack")
 
 done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Eprint2() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E__print2() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Ewalk2
