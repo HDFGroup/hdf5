@@ -1483,39 +1483,45 @@ error:
 } /* test_chunk_info_version2_btrees() */
 
 typedef struct chunk_iter_info_t {
-    hsize_t offset[2];
+    hsize_t  offset[2];
     uint32_t filter_mask;
-    haddr_t addr;
+    haddr_t  addr;
     uint32_t nbytes;
 } chunk_iter_info_t;
 
-static
-int iter_cb(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes, void *op_data) {
-    chunk_iter_info_t ** chunk_info = (chunk_iter_info_t **) op_data;
+static int
+iter_cb(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes, void *op_data)
+{
+    chunk_iter_info_t **chunk_info = (chunk_iter_info_t **)op_data;
 
-    (*chunk_info)->offset[0] = offset[0];
-    (*chunk_info)->offset[1] = offset[1];
+    (*chunk_info)->offset[0]   = offset[0];
+    (*chunk_info)->offset[1]   = offset[1];
     (*chunk_info)->filter_mask = filter_mask;
-    (*chunk_info)->addr = addr;
-    (*chunk_info)->nbytes = nbytes;
+    (*chunk_info)->addr        = addr;
+    (*chunk_info)->nbytes      = nbytes;
 
-    /* printf("offset: [%lld, %lld], addr: %ld, size: %d, filter mask: %d\n", offset[0], offset[1], addr, nbytes, filter_mask); */
+    /* printf("offset: [%lld, %lld], addr: %ld, size: %d, filter mask: %d\n", offset[0], offset[1], addr,
+     * nbytes, filter_mask); */
 
     *chunk_info += 1;
 
     return H5_ITER_CONT;
 }
 
-static
-int iter_cb_stop(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED filter_mask, haddr_t H5_ATTR_UNUSED addr, uint32_t H5_ATTR_UNUSED nbytes, void *op_data) {
-    chunk_iter_info_t ** chunk_info = (chunk_iter_info_t **) op_data;
+static int
+iter_cb_stop(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED filter_mask,
+             haddr_t H5_ATTR_UNUSED addr, uint32_t H5_ATTR_UNUSED nbytes, void *op_data)
+{
+    chunk_iter_info_t **chunk_info = (chunk_iter_info_t **)op_data;
     *chunk_info += 1;
     return H5_ITER_STOP;
 }
 
-static
-int iter_cb_fail(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED filter_mask, haddr_t H5_ATTR_UNUSED addr, uint32_t H5_ATTR_UNUSED nbytes, void *op_data) {
-    chunk_iter_info_t ** chunk_info = (chunk_iter_info_t **) op_data;
+static int
+iter_cb_fail(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED filter_mask,
+             haddr_t H5_ATTR_UNUSED addr, uint32_t H5_ATTR_UNUSED nbytes, void *op_data)
+{
+    chunk_iter_info_t **chunk_info = (chunk_iter_info_t **)op_data;
     *chunk_info += 1;
     return H5_ITER_ERROR;
 }
@@ -1540,26 +1546,26 @@ int iter_cb_fail(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED f
 static herr_t
 test_basic_query(hid_t fapl)
 {
-    char     filename[FILENAME_BUF_SIZE];          /* File name */
-    hid_t    basicfile     = H5I_INVALID_HID;      /* File ID */
-    hid_t    dspace        = H5I_INVALID_HID;      /* Dataspace ID */
-    hid_t    dset          = H5I_INVALID_HID;      /* Dataset ID */
-    hid_t    cparms        = H5I_INVALID_HID;      /* Creation plist */
-    hsize_t  dims[2]       = {NX, NY};             /* Dataset dimensions */
-    hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
-    int      direct_buf[CHUNK_NX][CHUNK_NY];       /* Data in chunks */
-    unsigned flt_msk      = 0;                     /* Filter mask */
-    unsigned read_flt_msk = 0;                     /* Filter mask after direct read */
-    hsize_t  offset[2];                            /* Offset coordinates of a chunk */
-    hsize_t  out_offset[2] = {0, 0};               /* Buffer to get offset coordinates */
-    hsize_t  size          = 0;                    /* Size of an allocated/written chunk */
-    hsize_t  nchunks       = 0;                    /* Number of chunks */
-    haddr_t  addr          = 0;                    /* Address of an allocated/written chunk */
-    hsize_t  chk_index     = 0;                    /* Index of a chunk */
-    hsize_t  ii, jj;                               /* Array indices */
-    chunk_iter_info_t chunk_infos[2]; /* chunk infos filled up by iterator */
-    chunk_iter_info_t * cptr;   /* pointer to array of chunks */
-    herr_t   ret;                                  /* Temporary returned value for verifying failure */
+    char               filename[FILENAME_BUF_SIZE];          /* File name */
+    hid_t              basicfile     = H5I_INVALID_HID;      /* File ID */
+    hid_t              dspace        = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t              dset          = H5I_INVALID_HID;      /* Dataset ID */
+    hid_t              cparms        = H5I_INVALID_HID;      /* Creation plist */
+    hsize_t            dims[2]       = {NX, NY};             /* Dataset dimensions */
+    hsize_t            chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
+    int                direct_buf[CHUNK_NX][CHUNK_NY];       /* Data in chunks */
+    unsigned           flt_msk      = 0;                     /* Filter mask */
+    unsigned           read_flt_msk = 0;                     /* Filter mask after direct read */
+    hsize_t            offset[2];                            /* Offset coordinates of a chunk */
+    hsize_t            out_offset[2] = {0, 0};               /* Buffer to get offset coordinates */
+    hsize_t            size          = 0;                    /* Size of an allocated/written chunk */
+    hsize_t            nchunks       = 0;                    /* Number of chunks */
+    haddr_t            addr          = 0;                    /* Address of an allocated/written chunk */
+    hsize_t            chk_index     = 0;                    /* Index of a chunk */
+    hsize_t            ii, jj;                               /* Array indices */
+    chunk_iter_info_t  chunk_infos[2];                       /* chunk infos filled up by iterator */
+    chunk_iter_info_t *cptr;                                 /* pointer to array of chunks */
+    herr_t             ret; /* Temporary returned value for verifying failure */
 
     TESTING("basic operations");
 
@@ -1669,7 +1675,8 @@ test_basic_query(hid_t fapl)
 
     /* iterate over all chunks */
     cptr = &(chunk_infos[0]);
-    if(H5Dchunk_iter(dset, &iter_cb, &cptr) < 0) TEST_ERROR;
+    if (H5Dchunk_iter(dset, &iter_cb, &cptr) < 0)
+        TEST_ERROR;
 
     VERIFY(cptr, &(chunk_infos[2]), "Iterator did not iterate all chunks");
     VERIFY(chunk_infos[0].offset[0], 0, "Offset mismatch");
@@ -1682,15 +1689,19 @@ test_basic_query(hid_t fapl)
 
     /* iterate and stop after one iteration */
     cptr = &(chunk_infos[0]);
-    if (H5Dchunk_iter(dset, &iter_cb_stop, &cptr) < 0) TEST_ERROR;
+    if (H5Dchunk_iter(dset, &iter_cb_stop, &cptr) < 0)
+        TEST_ERROR;
     VERIFY(cptr, &(chunk_infos[1]), "Verification of halted iterator failed\n");
 
     /* iterate and fail after one iteration */
     cptr = &(chunk_infos[0]);
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Dchunk_iter(dset, &iter_cb_fail, &cptr);
-    } H5E_END_TRY;
-    if (ret >= 0) TEST_ERROR;
+    }
+    H5E_END_TRY;
+    if (ret >= 0)
+        TEST_ERROR;
     VERIFY(cptr, &(chunk_infos[1]), "Verification of halted iterator failed\n");
 
     /* Release resourse */

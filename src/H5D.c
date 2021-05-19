@@ -2189,18 +2189,19 @@ done:
 herr_t
 H5Dchunk_iter(hid_t dset_id, H5D_chunk_iter_op_t cb, void *op_data)
 {
-    H5VL_object_t  *vol_obj = NULL;     /* Dataset for this operation */
-    herr_t          ret_value = SUCCEED;
+    H5VL_object_t *vol_obj   = NULL; /* Dataset for this operation */
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ix*x", dset_id, cb, op_data);
 
     /* Check arguments */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* Call private function to get the chunk info given the chunk's index */
-    if(H5VL_dataset_specific(vol_obj, H5VL_DATASET_CHUNK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, cb, op_data) < 0)
+    if (H5VL_dataset_specific(vol_obj, H5VL_DATASET_CHUNK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, cb,
+                              op_data) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't iterate over chunks")
 
 done:

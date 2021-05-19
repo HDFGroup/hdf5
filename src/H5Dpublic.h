@@ -165,7 +165,8 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
  * Define the operator function pointer for H5Dchunk_iter()
  */
 //! <!-- [H5D_chunk_iter_op_t_snip] -->
-typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes, void *op_data);
+typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes,
+                                   void *op_data);
 
 /********************/
 /* Public Variables */
