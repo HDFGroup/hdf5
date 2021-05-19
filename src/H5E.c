@@ -1547,7 +1547,7 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE3("e", "ixx", estack_id, func, client_data);
+    H5TRACE3("e", "i*x**x", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
