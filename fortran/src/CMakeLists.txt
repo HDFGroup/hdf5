@@ -136,21 +136,25 @@ set (f90CStub_C_HDRS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
 )
 
-set (f90CStub_CGEN_HDRS
-    # generated files
-    ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
-)
-add_custom_target (H5gen_i ALL
-    DEPENDS H5match_types ${f90CStub_CGEN_HDRS}
-)
+if (NOT ONLY_SHARED_LIBS)
+  set (f90CStub_CGEN_HDRS
+      # generated files
+      ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
+  )
+  add_custom_target (H5gen_i ALL
+      DEPENDS H5match_types ${f90CStub_CGEN_HDRS}
+  )
+endif ()
 
-set (f90CStub_CGEN_SHHDRS
-    # generated files
-    ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
-)
-add_custom_target (H5gen_iSH ALL
-    DEPENDS H5match_types ${f90CStub_CGEN_SHHDRS}
-)
+if (BUILD_SHARED_LIBS)
+  set (f90CStub_CGEN_SHHDRS
+      # generated files
+      ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
+  )
+  add_custom_target (H5gen_iSH ALL
+      DEPENDS H5match_types ${f90CStub_CGEN_SHHDRS}
+  )
+endif ()
 
 if (NOT ONLY_SHARED_LIBS)
   add_library (${HDF5_F90_C_LIB_TARGET} STATIC ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS} ${f90CStub_CGEN_HDRS})
