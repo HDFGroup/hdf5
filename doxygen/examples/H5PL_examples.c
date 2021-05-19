@@ -19,7 +19,7 @@ main(void)
             goto fail_set;
         }
 
-        // ensure that "/tmp" is a the front of the search path list
+        // ensure that "/tmp" is at the front of the search path list
         if (H5PLprepend("/tmp") < 0) {
             ret_val = EXIT_FAILURE;
         }
