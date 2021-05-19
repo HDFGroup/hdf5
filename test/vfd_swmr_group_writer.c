@@ -63,73 +63,74 @@ typedef struct {
 static void
 usage(const char *progname)
 {
-    fprintf(stderr, "usage: %s [-S] [-G] [-a steps] [-b] [-c] [-n iterations]\n"
-                "    [-N] [-q] [-u numb_ticks] [-A at_pattern] [-O grp_op_pattern]\n"
-        "\n"
-        "-S:             do not use VFD SWMR\n"
-        "-G:             old-style type of group\n"
-        "-a steps:       `steps` between adding attributes\n"
-        "-b:             write data in big-endian byte order\n"
-        "-c steps:       `steps` between communication between the writer and reader\n"
-        "-n ngroups:     the number of groups\n"
-        "-N:             do not use named pipes, \n"
-        "                mainly for running the writer and reader seperately\n"
-        "-u numb_ticks:  `numb_ticks` for the reader to wait before verification\n"
-        "-A at_pattern:  `at_pattern' for different attribute tests\n"
-        "              The value of `at_pattern` is one of the following:\n"
-        "              `compact`              - Attributes added in compact storage\n"
-        "              `dense`                - An attribute added in dense storage\n"
-        "              `compact-del`          - Attributes added and then one\n"
-        "                                       attribute deleted, in compact \n"
-        "              `dense-del`            - Attributes added until the storage\n"
-        "                                       is dense then an attribute deleted\n"
-        "                                       the storge still in dense\n"
-        "              `compact-add-to-dense` - Attributes added first in compact\n"
-        "                                       then in dense storage\n"
-        "              `dense-del-to-compact` - Attributes added until the storage\n" 
-        "                                       is dense, then several attributes \n"
-        "                                       deleted, the storage changed to\n"
-        "                                       compact\n"
-        "              `modify`               - An attribute added then modified\n"
-        "              `add-vstr`             - A VL string attribute added\n"
-        "              `remove-vstr`          - A VL string attribute added then\n"
-        "                                       deleted\n"
-        "              `modify-vstr`          - A VL string attribute added then \n"
-        "                                       modified \n"
-        "              `add-ohr-block`        - An attribute is added and this forces\n"
-	    "                                       the creation of object header\n"
-        "                                       continuation block \n"
-        "              `del-ohr-block`        - An attribute is added and this forces\n"
-	    "                                       the creation of object header\n"
-        "                                       continuation block and then this \n"
-        "                                       attribute is deleted so the \n"
-        "                                       object header continuation block is \n"
-        "                                       removed. \n"
-        "-O grp_op_pattern:  `grp_op_pattern' for different group operation tests\n"
-        "              The value of `grp_op_pattern` is one of the following:\n"
-        "              `grp-creation`         - A group is created.\n"
-        "              `grp-deletion`         - An existing group is deleted.\n"
-        "              `grp-move`             - A group is moved to become \n"
-        "                                       another group. \n"
-        "              `grp-ins-links`        - Links are inserted, including\n"
-        "                                       both hard and soft links. \n"
-        "              `grp-del-links`        - Links are deleted, including\n"
-        "                                       both hard ans soft links. \n"
-        "              `grp-compact-t-dense`  - Links are inserted to the group.\n" 
-        "                                       The link storage of this group \n"
-        "                                       changed from compact to dense. \n"
-        "                                       The links include both hard and\n"
-        "                                       soft links.                    \n"
-        "              `grp-dense-t-compact`  - Links are inserted to the group\n"
-        "                                       The link storage of this group \n"
-        "                                       changed from compact to dense. \n"
-        "                                       Then several links are deleted.\n"
-        "                                       The link storage changed from  \n"
-        "                                       dense to compact again.        \n"
-        "                                       The links include both hard and\n"
-        "                                       soft links.                    \n"
-        "-q:             silence printouts, few messages\n"
-        "\n",
+    fprintf(stderr,
+            "usage: %s [-S] [-G] [-a steps] [-b] [-c] [-n iterations]\n"
+            "    [-N] [-q] [-u numb_ticks] [-A at_pattern] [-O grp_op_pattern]\n"
+            "\n"
+            "-S:             do not use VFD SWMR\n"
+            "-G:             old-style type of group\n"
+            "-a steps:       `steps` between adding attributes\n"
+            "-b:             write data in big-endian byte order\n"
+            "-c steps:       `steps` between communication between the writer and reader\n"
+            "-n ngroups:     the number of groups\n"
+            "-N:             do not use named pipes, \n"
+            "                mainly for running the writer and reader seperately\n"
+            "-u numb_ticks:  `numb_ticks` for the reader to wait before verification\n"
+            "-A at_pattern:  `at_pattern' for different attribute tests\n"
+            "              The value of `at_pattern` is one of the following:\n"
+            "              `compact`              - Attributes added in compact storage\n"
+            "              `dense`                - An attribute added in dense storage\n"
+            "              `compact-del`          - Attributes added and then one\n"
+            "                                       attribute deleted, in compact \n"
+            "              `dense-del`            - Attributes added until the storage\n"
+            "                                       is dense then an attribute deleted\n"
+            "                                       the storge still in dense\n"
+            "              `compact-add-to-dense` - Attributes added first in compact\n"
+            "                                       then in dense storage\n"
+            "              `dense-del-to-compact` - Attributes added until the storage\n"
+            "                                       is dense, then several attributes \n"
+            "                                       deleted, the storage changed to\n"
+            "                                       compact\n"
+            "              `modify`               - An attribute added then modified\n"
+            "              `add-vstr`             - A VL string attribute added\n"
+            "              `remove-vstr`          - A VL string attribute added then\n"
+            "                                       deleted\n"
+            "              `modify-vstr`          - A VL string attribute added then \n"
+            "                                       modified \n"
+            "              `add-ohr-block`        - An attribute is added and this forces\n"
+            "                                       the creation of object header\n"
+            "                                       continuation block \n"
+            "              `del-ohr-block`        - An attribute is added and this forces\n"
+            "                                       the creation of object header\n"
+            "                                       continuation block and then this \n"
+            "                                       attribute is deleted so the \n"
+            "                                       object header continuation block is \n"
+            "                                       removed. \n"
+            "-O grp_op_pattern:  `grp_op_pattern' for different group operation tests\n"
+            "              The value of `grp_op_pattern` is one of the following:\n"
+            "              `grp-creation`         - A group is created.\n"
+            "              `grp-deletion`         - An existing group is deleted.\n"
+            "              `grp-move`             - A group is moved to become \n"
+            "                                       another group. \n"
+            "              `grp-ins-links`        - Links are inserted, including\n"
+            "                                       both hard and soft links. \n"
+            "              `grp-del-links`        - Links are deleted, including\n"
+            "                                       both hard ans soft links. \n"
+            "              `grp-compact-t-dense`  - Links are inserted to the group.\n"
+            "                                       The link storage of this group \n"
+            "                                       changed from compact to dense. \n"
+            "                                       The links include both hard and\n"
+            "                                       soft links.                    \n"
+            "              `grp-dense-t-compact`  - Links are inserted to the group\n"
+            "                                       The link storage of this group \n"
+            "                                       changed from compact to dense. \n"
+            "                                       Then several links are deleted.\n"
+            "                                       The link storage changed from  \n"
+            "                                       dense to compact again.        \n"
+            "                                       The links include both hard and\n"
+            "                                       soft links.                    \n"
+            "-q:             silence printouts, few messages\n"
+            "\n",
             progname);
     exit(EXIT_FAILURE);
 }
@@ -488,9 +489,9 @@ np_send_error(state_t *s, bool writer)
  *              bool one_chunk_ohr
  *              flag to indicate if the object header chunk is 1 or greater
  *              1: true
- *              greater than 1: false 
+ *              greater than 1: false
  *
- * Return:      Success:    true 
+ * Return:      Success:    true
  *              Failure:    false
  *
  *-------------------------------------------------------------------------
@@ -510,7 +511,7 @@ check_ohr_num_chunk(hid_t g, bool one_chunk_ohr)
         goto error;
     }
 
-    if(true == one_chunk_ohr) {
+    if (true == one_chunk_ohr) {
         if (ninfo.hdr.nchunks != 1) {
             H5_FAILED();
             AT();
@@ -532,7 +533,6 @@ check_ohr_num_chunk(hid_t g, bool one_chunk_ohr)
 error:
     return false;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    add_attr
@@ -621,8 +621,8 @@ add_attr(state_t *s, hid_t oid, unsigned int which, unsigned num_attrs, const ch
 
         /* If coming to an "object header continuation block" test,
          * we need to check if this test behaves as expected. */
-        if(s->at_pattern == 'a' || s->at_pattern == 'R') {
-            if (false == check_ohr_num_chunk(oid,false)) {
+        if (s->at_pattern == 'a' || s->at_pattern == 'R') {
+            if (false == check_ohr_num_chunk(oid, false)) {
                 H5_FAILED();
                 AT();
                 printf("An object header continuation block should be created. \n");
@@ -855,7 +855,7 @@ error2:
  *              if the deleted attribute is for checking the dense storage
  *
  *              bool is_vl_or_ohrc
- *              if the deleted attribute is a VL string or for object header   
+ *              if the deleted attribute is a VL string or for object header
  *              continuation check test
  *
  *              unsigned int which
@@ -885,7 +885,7 @@ del_one_attr(state_t *s, hid_t obj_id, bool is_dense, bool is_vl_or_ohrc, unsign
     /*attribute name template used for general attribute deletion operation */
     const char *aname_format = "attr-%u-%u";
 
-    /*attribute name template used for VL string attribute deletion 
+    /*attribute name template used for VL string attribute deletion
      * or object header continuation check operations */
     const char *aname_format_vl = "attr-%u";
 
@@ -910,7 +910,7 @@ del_one_attr(state_t *s, hid_t obj_id, bool is_dense, bool is_vl_or_ohrc, unsign
     /* If coming to an "object header continuation block" test,
      * we need to check if this test behaves as expected. */
     if (s->at_pattern == 'R') {
-        if (false == check_ohr_num_chunk(obj_id,true)) {
+        if (false == check_ohr_num_chunk(obj_id, true)) {
             H5_FAILED();
             AT();
             printf("The object header chunk should not continue. \n");
@@ -1710,7 +1710,7 @@ add_modify_default_group_attr(state_t *s, hid_t g, unsigned int which)
  * Return:      Success:    true
  *              Failure:    false
  *
- * Note:        This function is used for the 
+ * Note:        This function is used for the
  *              "deletion of object header continuation block" test.
  *-------------------------------------------------------------------------
  */
@@ -1719,10 +1719,10 @@ static bool
 del_ohr_block_attr(state_t *s, hid_t g, unsigned int which)
 {
 
-    bool        ret_value    = false;
-    ret_value                = add_default_group_attr(s, g, which);
+    bool ret_value = false;
+    ret_value      = add_default_group_attr(s, g, which);
     if (ret_value == true)
-        ret_value = del_one_attr(s, g, false,true, which);
+        ret_value = del_one_attr(s, g, false, true, which);
     return ret_value;
 }
 /*-------------------------------------------------------------------------
@@ -1826,10 +1826,10 @@ static bool
 write_group(state_t *s, unsigned int which)
 {
     char       name[sizeof("/group-9999999999")];
-    hid_t      g      = H5I_INVALID_HID;
-    hid_t      dummy_d= H5I_INVALID_HID;
-    hid_t      gcpl   = H5I_INVALID_HID;
-    bool       result = true;
+    hid_t      g       = H5I_INVALID_HID;
+    hid_t      dummy_d = H5I_INVALID_HID;
+    hid_t      gcpl    = H5I_INVALID_HID;
+    bool       result  = true;
     H5G_info_t group_info;
 
     if (which >= s->nsteps) {
@@ -1871,8 +1871,9 @@ write_group(state_t *s, unsigned int which)
     }
 
     /* We need to create a dummy dataset for the object header contiuation block test. */
-    if(s->at_pattern == 'a' || s->at_pattern == 'R') {
-        if((dummy_d = H5Dcreate2(g, "Dataset", H5T_NATIVE_INT, s->one_by_one_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <0){ 
+    if (s->at_pattern == 'a' || s->at_pattern == 'R') {
+        if ((dummy_d = H5Dcreate2(g, "Dataset", H5T_NATIVE_INT, s->one_by_one_sid, H5P_DEFAULT, H5P_DEFAULT,
+                                  H5P_DEFAULT)) < 0) {
             H5_FAILED();
             AT();
             printf("H5Dcreate2 failed\n");
@@ -1907,8 +1908,8 @@ write_group(state_t *s, unsigned int which)
 
     /* If coming to an "object header continuation block" test,
      * we need to check if this test behaves as expected. */
-    if(s->at_pattern == 'a' || s->at_pattern == 'R') {
-        if (false == check_ohr_num_chunk(g,true)) {
+    if (s->at_pattern == 'a' || s->at_pattern == 'R') {
+        if (false == check_ohr_num_chunk(g, true)) {
             H5_FAILED();
             AT();
             printf("An object header continuation block should NOT be created. \n");
@@ -1934,13 +1935,12 @@ write_group(state_t *s, unsigned int which)
             goto error2;
         }
     }
-    
 
     /* Then carry out the attribute operation. */
     if (s->asteps != 0 && which % s->asteps == 0)
         result = add_group_attribute(s, g, gcpl, which);
 
-    if(s->at_pattern == 'a' || s->at_pattern == 'R') {
+    if (s->at_pattern == 'a' || s->at_pattern == 'R') {
         if (H5Dclose(dummy_d) < 0) {
             H5_FAILED();
             AT();
@@ -2038,7 +2038,6 @@ check_attr_storage_type(hid_t g, bool is_compact)
 error:
     return false;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    vrfy_attr
@@ -2156,8 +2155,8 @@ vrfy_attr(state_t *s, hid_t g, unsigned int which, const char *aname, unsigned i
 
     /* If coming to an "object header continuation block" test,
      * we need to check if this test behaves as expected. */
-    if(s->at_pattern == 'a' || s->at_pattern == 'R') {
-        if (false == check_ohr_num_chunk(g,false)) {
+    if (s->at_pattern == 'a' || s->at_pattern == 'R') {
+        if (false == check_ohr_num_chunk(g, false)) {
             H5_FAILED();
             AT();
             printf("An object header continuation block should be created. \n");
@@ -2598,8 +2597,8 @@ verify_del_one_attr(state_t *s, hid_t g, const char *aname, bool check_storage, 
 
     /* If coming to an "object header continuation block" test,
      * we need to check if this test behaves as expected. */
-    if(s->at_pattern == 'R') {
-        if (false == check_ohr_num_chunk(g,true)) {
+    if (s->at_pattern == 'R') {
+        if (false == check_ohr_num_chunk(g, true)) {
             H5_FAILED();
             AT();
             printf("An object header continuation block should be removed. \n");
@@ -2993,10 +2992,10 @@ verify_del_attrs_compact_dense_compact(state_t *s, hid_t g, unsigned max_c, unsi
 /*-------------------------------------------------------------------------
  * Function:    verify_del_ohr_block_attr
  *
- * Purpose:     Verify that an attribute is added to force creation of 
- *              object header continuation block and remove this attribute 
+ * Purpose:     Verify that an attribute is added to force creation of
+ *              object header continuation block and remove this attribute
  *              to delete the object header continuation block
- 
+
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
  *              and some VFD SWMR configuration parameters
@@ -3017,19 +3016,19 @@ verify_del_attrs_compact_dense_compact(state_t *s, hid_t g, unsigned max_c, unsi
  */
 
 static bool
-verify_del_ohr_block_attr(state_t *s, hid_t g, unsigned int which) {
+verify_del_ohr_block_attr(state_t *s, hid_t g, unsigned int which)
+{
 
-    bool        ret_value    = false;
+    bool        ret_value = false;
     char        attrname[VS_ATTR_NAME_LEN];
     const char *aname_format = "attr-%u";
 
-    ret_value                = verify_default_group_attr(s, g, which);
+    ret_value = verify_default_group_attr(s, g, which);
     if (ret_value == true) {
         HDsprintf(attrname, aname_format, which);
-        ret_value = verify_del_one_attr(s, g, attrname, false,true);
+        ret_value = verify_del_one_attr(s, g, attrname, false, true);
     }
     return ret_value;
-
 }
 /*-------------------------------------------------------------------------
  * Function:    verify_group_attribute
@@ -3254,8 +3253,8 @@ verify_group(state_t *s, unsigned int which)
 
     /* If coming to an "object header continuation block" test,
      * we need to check if this test behaves as expected. */
-    if(s->at_pattern == 'a' || s->at_pattern == 'R') {
-        if (false == check_ohr_num_chunk(g,true)) {
+    if (s->at_pattern == 'a' || s->at_pattern == 'R') {
+        if (false == check_ohr_num_chunk(g, true)) {
             H5_FAILED();
             AT();
             printf("An object header continuation block should NOT be created. \n");
