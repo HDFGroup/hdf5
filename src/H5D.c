@@ -2255,3 +2255,84 @@ H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filte
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_chunk_info_by_coord() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dchunk_iter
+ *
+ * Purpose:     Iterates over all chunks in dataset with given callback and user data.
+ *
+ * Parameters:
+ *              hid_t dset_id;          IN: Chunked dataset ID
+ *              hid_t dxpl_id;          IN: Dataset transfer property list ID
+ *              H5D_chunk_iter_op_t cb  IN: User callback function, called for every chunk.
+ *              void *op_data           IN/OUT: Optional user data passed on to user callback.
+ *
+ * Callback information:
+ *      H5D_chunk_iter_op_t is defined as:
+ *
+ *        typedef int (*H5D_chunk_iter_op_t)(
+ *            const hsize_t *offset,
+ *            uint32_t filter_mask,
+ *            haddr_t addr,
+ *            uint32_t nbytes,
+ *            void *op_data);
+ *
+ *      H5D_chunk_iter_op_t parameters:
+ *          hsize_t *offset;        IN/OUT: Array of starting logical coordinates of chunk.
+ *          uint32_t filter_mask;   IN: Filter mask of chunk.
+ *          haddr_t addr;           IN: Offset in file of chunk data.
+ *          uint32_t nbytes;        IN: Size in number of bytes of chunk data in file.
+ *          void *op_data;          IN/OUT: Pointer to any user-defined data
+ *                                  associated with the operation.
+ *
+ *      The return values from an operator are:
+ *          Zero (H5_ITER_CONT) causes the iterator to continue, returning zero when all
+ *              elements have been processed.
+ *          Positive (H5_ITER_STOP) causes the iterator to immediately return that positive
+ *              value, indicating short-circuit success.
+ *          Negative (H5_ITER_ERROR) causes the iterator to immediately return that value,
+ *              indicating failure.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Gaute Hope
+ *              August 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t op, void *op_data)
+{
+    H5VL_object_t *vol_obj   = NULL; /* Dataset for this operation */
+    H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
+    H5VL_native_dataset_optional_args_t dset_opt_args;    /* Arguments for optional operation */
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ix*x", dset_id, op, op_data);
+
+    /* Check arguments */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    if (NULL == op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid callback to chunk iteration")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID")
+
+    /* Set up VOL callback arguments */
+    dset_opt_args.chunk_iter.op = op;
+    dset_opt_args.chunk_iter.op_data = op_data;
+    vol_cb_args.op_type           = H5VL_NATIVE_DATASET_CHUNK_ITER;
+    vol_cb_args.args = &dset_opt_args;
+
+    /* Iterate over the chunks */
+    if ((ret_value = H5VL_dataset_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL)) < 0)
+        HERROR(H5E_BADITER, H5E_BADITER, "error iterating over dataset chunks");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dchunk_iter() */

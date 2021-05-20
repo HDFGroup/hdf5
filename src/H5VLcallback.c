@@ -1658,6 +1658,7 @@ H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1694,6 +1695,7 @@ H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_li
     herr_t         ret_value   = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIui*!ii", app_file, app_func, app_line, attr_id, args, dxpl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1708,7 +1710,7 @@ H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_li
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVsii", app_file, app_func, app_line, attr_id, args, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIui*!ii", app_file, app_func, app_line, attr_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -2502,6 +2504,7 @@ H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, 
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2537,6 +2540,7 @@ H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app
     herr_t         ret_value   = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIui*!ii", app_file, app_func, app_line, dset_id, args, dxpl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -2551,7 +2555,7 @@ H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVtii", app_file, app_func, app_line, dset_id, args, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIui*!ii", app_file, app_func, app_line, dset_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -3199,6 +3203,7 @@ H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args,
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3235,6 +3240,7 @@ H5VLdatatype_optional_op(const char *app_file, const char *app_func, unsigned ap
     herr_t         ret_value   = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIui*!ii", app_file, app_func, app_line, type_id, args, dxpl_id, es_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -3252,7 +3258,7 @@ H5VLdatatype_optional_op(const char *app_file, const char *app_func, unsigned ap
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVuii", app_file, app_func, app_line, type_id, args, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIui*!ii", app_file, app_func, app_line, type_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -4021,6 +4027,7 @@ H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4056,6 +4063,7 @@ H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_li
     herr_t         ret_value   = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIui*!ii", app_file, app_func, app_line, file_id, args, dxpl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -4069,7 +4077,7 @@ H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_li
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVvii", app_file, app_func, app_line, file_id, args, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIui*!ii", app_file, app_func, app_line, file_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -4664,6 +4672,7 @@ H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hi
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4700,6 +4709,7 @@ H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_l
     herr_t         ret_value   = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIui*!ii", app_file, app_func, app_line, group_id, args, dxpl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -4714,7 +4724,7 @@ H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_l
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIuiVwii", app_file, app_func, app_line, group_id, args, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(FUNC, "*s*sIui*!ii", app_file, app_func, app_line, group_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -5436,6 +5446,7 @@ H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5474,6 +5485,7 @@ H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_li
     herr_t            ret_value       = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id);
 
     /* Check arguments */
     /* name is verified in H5VL_setup_name_args() */
@@ -5498,7 +5510,7 @@ H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(FUNC, "*s*sIui*siVxii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(FUNC, "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -6010,6 +6022,7 @@ H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6048,6 +6061,7 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
     herr_t            ret_value       = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id);
 
     /* Check arguments */
     /* name is verified in H5VL_setup_name_args() */
@@ -6073,7 +6087,7 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(FUNC, "*s*sIui*siVyii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(FUNC, "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -6726,6 +6740,7 @@ H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_args_t
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE3("e", "*xi*!", req, connector_id, args);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -6817,6 +6832,7 @@ H5VLrequest_optional(void *req, hid_t connector_id, H5VL_optional_args_t *args)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE3("e", "*xi*!", req, connector_id, args);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -6847,6 +6863,7 @@ H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_optional_args_t *arg
     herr_t            ret_value       = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "*xi*!", req, connector_id, args);
 
     /* Check arguments */
     if (NULL == req)
@@ -7232,6 +7249,7 @@ H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specif
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE4("e", "*xi*x*!", obj, connector_id, blob_id, args);
 
     /* Get class pointer */
     if (NULL == obj)
@@ -7328,6 +7346,7 @@ H5VLblob_optional(void *obj, hid_t connector_id, void *blob_id, H5VL_optional_ar
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE4("e", "*xi*x*!", obj, connector_id, blob_id, args);
 
     /* Get class pointer */
     if (NULL == obj)
@@ -7762,6 +7781,7 @@ H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dx
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)

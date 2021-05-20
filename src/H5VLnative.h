@@ -64,16 +64,17 @@ typedef union H5VL_native_attr_optional_args_t {
 /* NOTE: If new values are added here, the H5VL__native_introspect_opt_query
  *      routine must be updated.
  */
-#define H5VL_NATIVE_DATASET_FORMAT_CONVERT          0 /* H5Dformat_convert (internal) */
-#define H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE    1 /* H5Dget_chunk_index_type      */
-#define H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE  2 /* H5Dget_chunk_storage_size    */
-#define H5VL_NATIVE_DATASET_GET_NUM_CHUNKS          3 /* H5Dget_num_chunks            */
-#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX   4 /* H5Dget_chunk_info            */
-#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD 5 /* H5Dget_chunk_info_by_coord   */
-#define H5VL_NATIVE_DATASET_CHUNK_READ              6 /* H5Dchunk_read                */
-#define H5VL_NATIVE_DATASET_CHUNK_WRITE             7 /* H5Dchunk_write               */
-#define H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE       8 /* H5Dvlen_get_buf_size         */
-#define H5VL_NATIVE_DATASET_GET_OFFSET              9 /* H5Dget_offset                */
+#define H5VL_NATIVE_DATASET_FORMAT_CONVERT          0  /* H5Dformat_convert (internal) */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE    1  /* H5Dget_chunk_index_type      */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE  2  /* H5Dget_chunk_storage_size    */
+#define H5VL_NATIVE_DATASET_GET_NUM_CHUNKS          3  /* H5Dget_num_chunks            */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX   4  /* H5Dget_chunk_info            */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD 5  /* H5Dget_chunk_info_by_coord   */
+#define H5VL_NATIVE_DATASET_CHUNK_READ              6  /* H5Dchunk_read                */
+#define H5VL_NATIVE_DATASET_CHUNK_WRITE             7  /* H5Dchunk_write               */
+#define H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE       8  /* H5Dvlen_get_buf_size         */
+#define H5VL_NATIVE_DATASET_GET_OFFSET              9  /* H5Dget_offset                */
+#define H5VL_NATIVE_DATASET_CHUNK_ITER              10 /* H5Dget_offset                */
 /* NOTE: If values over 1023 are added, the H5VL_RESERVED_NATIVE_OPTIONAL macro
  *      must be updated.
  */
@@ -165,6 +166,13 @@ typedef union H5VL_native_dataset_optional_args_t {
     struct {
         haddr_t *offset;         /* Contiguous dataset's offset in the file (OUT) */
     } get_offset;
+
+    /* H5VL_NATIVE_DATASET_CHUNK_ITER */
+    struct {
+        H5D_chunk_iter_op_t op; /* Chunk iteration callback */
+        void *op_data;          /* Context to pass to iteration callback */
+    } chunk_iter;
+
 } H5VL_native_dataset_optional_args_t;
 
 /* Values for native VOL connector file optional VOL operations */

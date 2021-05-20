@@ -700,6 +700,22 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             break;
         }
 
+        /* H5Dchunk_iter */
+        case H5VL_NATIVE_DATASET_CHUNK_ITER: {
+            /* Sanity check */
+            HDassert(dset->shared);
+
+            /* Make sure the dataset is chunked */
+            if (H5D_CHUNKED != dset->shared->layout.type)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+
+            /* Call private function */
+            if ((ret_value = H5D__chunk_iter(dset, opt_args->chunk_iter.op, opt_args->chunk_iter.op_data)) < 0)
+                HERROR(H5E_DATASET, H5E_BADITER, "chunk iteration failed");
+
+            break;
+        }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
     } /* end switch */
