@@ -81,7 +81,9 @@ typedef enum H5VL_dataset_get_t {
 typedef enum H5VL_dataset_specific_t {
     H5VL_DATASET_SET_EXTENT, /* H5Dset_extent                       */
     H5VL_DATASET_FLUSH,      /* H5Dflush                            */
-    H5VL_DATASET_REFRESH     /* H5Drefresh                          */
+    H5VL_DATASET_REFRESH,    /* H5Drefresh                          */
+    H5VL_DATASET_WAIT,       /* H5Dwait                             */
+    H5VL_DATASET_CHUNK_ITER  /* H5Dchunk_iter                       */
 } H5VL_dataset_specific_t;
 
 /* Typedef for VOL connector dataset optional VOL operations */

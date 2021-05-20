@@ -309,6 +309,21 @@ New Features
 
     Library:
     --------
+    - H5Dchunk_iter() added for iterating over chunks
+
+      This method iterates over all chunks in a dataset, calling a user-supplied
+      callback with the chunk information and optional user supplied data.
+
+      The iterator is stopped when ITER_STOP is returned by the user-supplied
+      callback or the iterator is exhausted.
+
+      Existing methods to get chunk_info perform an iteration each time, so
+      whereas getting many or all chunks with existing methods caused SUM(i) 
+      for i = 0 -> N operations for N chunks, using this iterator for this 
+      use case will get N chunks with N operations.
+
+      (2021/05/19)
+
     - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
 
       The size_hint value is ultimately stored in a uint32_t struct field,
@@ -732,7 +747,12 @@ Bug Fixes since HDF5-1.12.0 release
 
     C++ APIs
     --------
-    -
+    - Added DataSet::operator=
+
+        Some compilers complain if the copy constructor is given explicitly
+        but the assignment operator is implicitly set to default.
+
+        (2021/05/19)
 
 
     Testing
