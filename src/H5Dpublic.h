@@ -651,6 +651,8 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  *              Negative (H5_ITER_ERROR) causes the iterator to immediately return that value,
  *                  indicating failure.
  *
+ * \since 1.12.1
+ *
  */
 H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, H5D_chunk_iter_op_t cb, void *op_data);
 
