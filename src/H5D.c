@@ -2142,3 +2142,68 @@ H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filte
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_chunk_info_by_coord() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dchunk_iter
+ *
+ * Purpose:     Iterates over all chunks in dataset with given callback and user data.
+ *
+ * Parameters:
+ *              hid_t dset_id;          IN: Chunked dataset ID
+ *              H5D_chunk_iter_op_t cb  IN: User callback function, called for every chunk.
+ *              void *op_data           IN/OUT: Optional user data passed on to user callback.
+ *
+ * Callback information:
+ *      H5D_chunk_iter_op_t is defined as:
+ *
+ *        typedef int (*H5D_chunk_iter_op_t)(
+ *            const hsize_t *offset,
+ *            uint32_t filter_mask,
+ *            haddr_t addr,
+ *            uint32_t nbytes,
+ *            void *op_data);
+ *
+ *      H5D_chunk_iter_op_t parameters:
+ *          hsize_t *offset;        IN/OUT: Array of starting logical coordinates of chunk.
+ *          uint32_t filter_mask;   IN: Filter mask of chunk.
+ *          haddr_t addr;           IN: Offset in file of chunk data.
+ *          uint32_t nbytes;        IN: Size in number of bytes of chunk data in file.
+ *          void *op_data;          IN/OUT: Pointer to any user-defined data
+ *                                  associated with the operation.
+ *
+ *      The return values from an operator are:
+ *          Zero (H5_ITER_CONT) causes the iterator to continue, returning zero when all
+ *              elements have been processed.
+ *          Positive (H5_ITER_STOP) causes the iterator to immediately return that positive
+ *              value, indicating short-circuit success.
+ *          Negative (H5_ITER_ERROR) causes the iterator to immediately return that value,
+ *              indicating failure.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Gaute Hope
+ *              August 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dchunk_iter(hid_t dset_id, H5D_chunk_iter_op_t cb, void *op_data)
+{
+    H5VL_object_t *vol_obj   = NULL; /* Dataset for this operation */
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ix*x", dset_id, cb, op_data);
+
+    /* Check arguments */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
+    /* Call private function to get the chunk info given the chunk's index */
+    if (H5VL_dataset_specific(vol_obj, H5VL_DATASET_CHUNK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, cb,
+                              op_data) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't iterate over chunks")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dchunk_iter() */
