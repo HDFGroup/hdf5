@@ -920,6 +920,10 @@ The following platforms are not supported but have been tested for this release.
 Known Problems
 ==============
 
+    "make check-passthough-vol" will fail running testflushrefresh.sh, with
+    3 Errors/Segmentation faults.  These will not occur when running "make
+    check".  See https://github.com/HDFGroup/hdf5/issues/673 for details.
+
     The t_bigio test fails on several HPC platforms, generally by timeout with 
     OpenMPI 4.0.0 or with this error from spectrum-mpi: 
         *** on communicator MPI_COMM_WORLD
