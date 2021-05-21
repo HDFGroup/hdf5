@@ -449,7 +449,7 @@ error:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  *
- * Note:        Note that the dataspace argument in these new functions are
+ * Note:        Note that the dataspace argument in these new functions is
  *              currently not used.  The functionality involved the dataspace
  *              will be implemented in the next version.
  *
@@ -486,10 +486,10 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     hsize_t  offset[2]    = {0, 0};                       /* Offset coordinates of a chunk */
 #ifdef H5_HAVE_FILTER_DEFLATE
     const Bytef *z_src = (const Bytef *)(direct_buf);
-    Bytef *      z_dst; /*destination buffer */
+    Bytef *      z_dst; /* Destination buffer */
     uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(CHK_SIZE);
     uLong        z_src_nbytes = (uLong)CHK_SIZE;
-#endif                             /* end H5_HAVE_FILTER_DEFLATE */
+#endif
     void *  inbuf      = NULL;     /* Pointer to new buffer */
     hsize_t chunk_size = CHK_SIZE; /* Size of a chunk, can be compressed or not */
     hsize_t ii, jj;                /* Array indices */
@@ -544,13 +544,14 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     /* Allocate input (compressed) buffer */
     inbuf = HDmalloc(z_dst_nbytes);
 
-    /* Set chunk size to the compressed chunk size and the chunk point
-       to the compressed data chunk */
-    chunk_size = (hsize_t)z_dst_nbytes;
+    /* zlib-friendly alias for the input buffer */
     z_dst      = (Bytef *)inbuf;
 
     /* Perform compression from the source to the destination buffer */
     ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+
+    /* Set the chunk size to the compressed chunk size */
+    chunk_size = (hsize_t)z_dst_nbytes;
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
