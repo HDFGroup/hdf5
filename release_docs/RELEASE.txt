@@ -93,7 +93,7 @@ New Features
 
       (2021/03/22)
 
-    - Add CMake variable HDF5_LIB_INFIX
+    - Added CMake variable HDF5_LIB_INFIX
 
       This infix is added to all library names after 'hdf5'.
       e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
@@ -206,7 +206,7 @@ New Features
 
     - CMake option to use MSVC naming conventions with MinGW
 
-      HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
+      HDF5_MSVC_NAMING_CONVENTION option enables use of MSVC naming conventions
       when using a MinGW toolchain
 
       (2020/10/30)
@@ -309,21 +309,6 @@ New Features
 
     Library:
     --------
-    - H5Dchunk_iter() added for iterating over chunks
-
-      This method iterates over all chunks in a dataset, calling a user-supplied
-      callback with the chunk information and optional user supplied data.
-
-      The iterator is stopped when ITER_STOP is returned by the user-supplied
-      callback or the iterator is exhausted.
-
-      Existing methods to get chunk_info perform an iteration each time, so
-      whereas getting many or all chunks with existing methods caused SUM(i) 
-      for i = 0 -> N operations for N chunks, using this iterator for this 
-      use case will get N chunks with N operations.
-
-      (2021/05/19)
-
     - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
 
       The size_hint value is ultimately stored in a uint32_t struct field,
