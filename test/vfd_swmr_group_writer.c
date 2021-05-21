@@ -588,7 +588,7 @@ add_attr(state_t *s, hid_t oid, unsigned int which, unsigned num_attrs, const ch
             if (np_wr_send_receive(s) == false) {
                 H5_FAILED();
                 AT();
-                dbgf(2,"writer: write attr - verification failed.\n");
+                dbgf(2, "writer: write attr - verification failed.\n");
                 /* Note: This is (mostly) because the verification failure message
                  *       from the reader. So don't send the error message back to
                  *       the reader. Just stop the test. */
@@ -2020,7 +2020,7 @@ vrfy_attr(state_t *s, hid_t g, unsigned int which, const char *aname, unsigned i
 
     /* If the read value is expected, send back an OK message to the writer. */
     if (s->use_named_pipes && s->attr_test == true) {
-        if (np_rd_send(s) == false){
+        if (np_rd_send(s) == false) {
             printf("named pipe reader send message error\n");
             TEST_ERROR;
         }
