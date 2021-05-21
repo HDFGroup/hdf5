@@ -91,8 +91,7 @@ fail_avail:;
     //! <!-- [update] -->
     {
         // experts only!
-    }
-    //! <!-- [update] -->
+    } //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {
