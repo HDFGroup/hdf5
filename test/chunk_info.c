@@ -545,7 +545,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     inbuf = HDmalloc(z_dst_nbytes);
 
     /* zlib-friendly alias for the input buffer */
-    z_dst      = (Bytef *)inbuf;
+    z_dst = (Bytef *)inbuf;
 
     /* Perform compression from the source to the destination buffer */
     ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
