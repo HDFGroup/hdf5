@@ -33,18 +33,34 @@
  *
  * Use the functions in this module to manage HDF5 filters.
  *
+ * User-defined filters are created by registering a filter descriptor of
+ * type #H5Z_class_t with the library.
+ *
+ * Available filters can be read or examined at runtime.
+ *
+ * It is conceivable that filters are stateful and that that state be
+ * updated at runtime.
+ *
+ * Filters are deleted by unregistering.
+ *
  * <table>
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5Z_examples.c can_apply
- *   \snippet H5Z_examples.c set_local
  *   \snippet H5Z_examples.c filter
  *   \snippet H5Z_examples.c create
  *   </td>
  *   <td>
  *   \snippet H5Z_examples.c read
  *   </td>
+ * </tr>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5Z_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet H5Z_examples.c delete
  * </tr>
  * </table>
  *

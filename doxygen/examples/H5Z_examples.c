@@ -6,28 +6,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//! <!-- [can_apply] -->
-htri_t
-can_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id)
-{
-    return 1;
-}
-//! <!-- [can_apply] -->
-
-//! <!-- [set_local] -->
-herr_t
-set_local(hid_t dcpl_id, hid_t type_id, hid_t space_id)
-{
-    return 0;
-}
-//! <!-- [set_local] -->
-
 //! <!-- [filter] -->
 size_t
 filter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes, size_t *buf_size,
        void **buf)
 {
     buf_size = 0;
+
+    if (flags & H5Z_FLAG_REVERSE) {
+        // read data, e.g., decompress data
+        // ...
+    }
+    else {
+        // write data, e.g., compress data
+        // ...
+    }
+
     return nbytes;
 }
 //! <!-- [filter] -->
@@ -46,8 +40,8 @@ main(void)
         cls.encoder_present = 1;
         cls.decoder_present = 1;
         cls.name            = "Identity filter";
-        cls.can_apply       = &can_apply;
-        cls.set_local       = &set_local;
+        cls.can_apply       = NULL;
+        cls.set_local       = NULL;
         cls.filter          = &filter;
 
         // register the filter
@@ -59,10 +53,8 @@ main(void)
         // do something with filter
         // ...
 
-        // unregister the filter
-        if (H5Zunregister(cls.id) < 0) {
-            ret_val = EXIT_FAILURE;
-        }
+        // unregister the filter if no longer required
+        // ...
 
 fail_register:;
     }
@@ -98,12 +90,16 @@ fail_avail:;
 
     //! <!-- [update] -->
     {
-        // show how to update a filter (does that make sense?)
-    } //! <!-- [update] -->
+        // experts only!
+    }
+    //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {
-        // show how to unregister a filter
+        // unregister the identity filter
+        if (H5Zunregister(256) < 0) {
+            ret_val = EXIT_FAILURE;
+        }
     }
     //! <!-- [delete] -->
 
