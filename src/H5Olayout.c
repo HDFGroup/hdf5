@@ -732,14 +732,15 @@ H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
 
         case H5D_CONTIGUOUS:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Contiguous");
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                       "Data address:", mesg->storage.u.contig.addr);
-            HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Data Size:", mesg->storage.u.contig.size);
+            HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+                      "Data Size:", mesg->storage.u.contig.size);
             break;
 
         case H5D_COMPACT:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Compact");
-            HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
                       "Data Size:", mesg->storage.u.compact.size);
             break;
 

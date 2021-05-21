@@ -734,7 +734,7 @@ BUILD_STATIC_EXECS "Build Static Executables"  OFF
 BUILD_TESTING      "Build HDF5 Unit Testing"   ON
 
 ---------------- HDF5 Build Options ---------------------
-HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library"         ON
+HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library"         OFF
 HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples"    ON
 HDF5_BUILD_FORTRAN  "Build FORTRAN support"          OFF
 HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  ON

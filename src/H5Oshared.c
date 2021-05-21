@@ -696,7 +696,8 @@ H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth)
 
         case H5O_SHARE_TYPE_COMMITTED:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Obj Hdr");
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object address:", mesg->u.loc.oh_addr);
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                      "Object address:", mesg->u.loc.oh_addr);
             break;
 
         case H5O_SHARE_TYPE_SOHM:

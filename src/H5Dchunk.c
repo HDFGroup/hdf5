@@ -5334,10 +5334,10 @@ H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         } /* end if */
 
         /* Print information about this chunk */
-        HDfprintf(udata->stream, "        0x%08x %8Zu %10a [", chunk_rec->filter_mask, chunk_rec->nbytes,
-                  chunk_rec->chunk_addr);
+        HDfprintf(udata->stream, "        0x%08x %8" PRIu32 " %10" PRIuHADDR " [", chunk_rec->filter_mask,
+                  chunk_rec->nbytes, chunk_rec->chunk_addr);
         for (u = 0; u < udata->ndims; u++)
-            HDfprintf(udata->stream, "%s%Hd", (u ? ", " : ""), chunk_rec->offset[u]);
+            HDfprintf(udata->stream, "%s%" PRIuHSIZE, (u ? ", " : ""), chunk_rec->offset[u]);
         HDfputs("]\n", udata->stream);
     } /* end if */
 

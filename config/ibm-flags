@@ -53,6 +53,7 @@ if test "XL" = "$cc_vendor"; then
 
     # Turn off shared lib option.  It causes some test suite to fail.
     enable_shared="${enable_shared:-no}"
+    
     # Make sure this is applied to other API compile options such as C++.
     AM_CFLAGS="$AM_CFLAGS"
 

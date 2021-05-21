@@ -827,20 +827,21 @@ H5O_link_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
                                  : (lnk->type >= H5L_TYPE_UD_MIN ? "User-defined" : "Unknown")))));
 
     if (lnk->corder_valid)
-        HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Creation Order:", lnk->corder);
+        HDfprintf(stream, "%*s%-*s %" PRId64 "\n", indent, "", fwidth, "Creation Order:", lnk->corder);
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Link Name Character Set:",
               (lnk->cset == H5T_CSET_ASCII ? "ASCII" : (lnk->cset == H5T_CSET_UTF8 ? "UTF-8" : "Unknown")));
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Link Name:", lnk->name);
+    HDfprintf(stream, "%*s%-*s '%s'\n", indent, "", fwidth, "Link Name:", lnk->name);
 
     /* Display link-specific information */
     switch (lnk->type) {
         case H5L_TYPE_HARD:
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object address:", lnk->u.hard.addr);
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                      "Object address:", lnk->u.hard.addr);
             break;
 
         case H5L_TYPE_SOFT:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Link Value:", lnk->u.soft.name);
+            HDfprintf(stream, "%*s%-*s '%s'\n", indent, "", fwidth, "Link Value:", lnk->u.soft.name);
             break;
 
         case H5L_TYPE_ERROR:
@@ -853,11 +854,11 @@ H5O_link_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
                         (const char *)lnk->u.ud.udata + (HDstrlen((const char *)lnk->u.ud.udata) + 1);
 
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                              "External File Name:", lnk->u.ud.udata);
+                              "External File Name:", (const char *)lnk->u.ud.udata);
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "External Object Name:", objname);
                 } /* end if */
                 else {
-                    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+                    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
                               "User-Defined Link Size:", lnk->u.ud.size);
                 } /* end else */
             }     /* end if */

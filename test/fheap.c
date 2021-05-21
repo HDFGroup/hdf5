@@ -260,43 +260,45 @@ check_stats(const H5HF_t *fh, const fheap_heap_state_t *state)
     if (H5HF_stat_info(fh, &heap_stats) < 0)
         FAIL_STACK_ERROR
     if (heap_stats.man_nobjs != state->man_nobjs) {
-        HDfprintf(stdout, "heap_stats.man_nobjs = %Hu, state->man_nobjs = %Zu\n", heap_stats.man_nobjs,
-                  state->man_nobjs);
+        HDfprintf(stdout, "heap_stats.man_nobjs = %" PRIuHSIZE ", state->man_nobjs = %zu\n",
+                  heap_stats.man_nobjs, state->man_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_size != state->man_size) {
-        HDfprintf(stdout, "heap_stats.man_size = %Hu, state->man_size = %Hu\n", heap_stats.man_size,
-                  state->man_size);
+        HDfprintf(stdout, "heap_stats.man_size = %" PRIuHSIZE ", state->man_size = %" PRIuHSIZE "\n",
+                  heap_stats.man_size, state->man_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_alloc_size != state->man_alloc_size) {
-        HDfprintf(stdout, "heap_stats.man_alloc_size = %Hu, state->man_alloc_size = %Hu\n",
+        HDfprintf(stdout,
+                  "heap_stats.man_alloc_size = %" PRIuHSIZE ", state->man_alloc_size = %" PRIuHSIZE "\n",
                   heap_stats.man_alloc_size, state->man_alloc_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_free_space != state->man_free_space) {
-        HDfprintf(stdout, "heap_stats.man_free_space = %Hu, state->man_free_space = %Hu\n",
+        HDfprintf(stdout,
+                  "heap_stats.man_free_space = %" PRIuHSIZE ", state->man_free_space = %" PRIuHSIZE "\n",
                   heap_stats.man_free_space, state->man_free_space);
         TEST_ERROR
     } /* end if */
     if (heap_stats.huge_nobjs != state->huge_nobjs) {
-        HDfprintf(stdout, "heap_stats.huge_nobjs = %Hu, state->huge_nobjs = %Zu\n", heap_stats.huge_nobjs,
-                  state->huge_nobjs);
+        HDfprintf(stdout, "heap_stats.huge_nobjs = %" PRIuHSIZE ", state->huge_nobjs = %zu\n",
+                  heap_stats.huge_nobjs, state->huge_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.huge_size != state->huge_size) {
-        HDfprintf(stdout, "heap_stats.huge_size = %Hu, state->huge_size = %Hu\n", heap_stats.huge_size,
-                  state->huge_size);
+        HDfprintf(stdout, "heap_stats.huge_size = %" PRIuHSIZE ", state->huge_size = %" PRIuHSIZE "\n",
+                  heap_stats.huge_size, state->huge_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.tiny_nobjs != state->tiny_nobjs) {
-        HDfprintf(stdout, "heap_stats.tiny_nobjs = %Hu, state->tiny_nobjs = %Zu\n", heap_stats.tiny_nobjs,
-                  state->tiny_nobjs);
+        HDfprintf(stdout, "heap_stats.tiny_nobjs = %" PRIuHSIZE ", state->tiny_nobjs = %zu\n",
+                  heap_stats.tiny_nobjs, state->tiny_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.tiny_size != state->tiny_size) {
-        HDfprintf(stdout, "heap_stats.tiny_size = %Hu, state->tiny_size = %Hu\n", heap_stats.tiny_size,
-                  state->tiny_size);
+        HDfprintf(stdout, "heap_stats.tiny_size = %" PRIuHSIZE ", state->tiny_size = %" PRIuHSIZE "\n",
+                  heap_stats.tiny_size, state->tiny_size);
         TEST_ERROR
     } /* end if */
 

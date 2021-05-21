@@ -705,7 +705,7 @@ H5D__btree_debug_key(FILE *stream, int indent, int fwidth, const void *_key, con
     HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "Filter mask:", key->filter_mask);
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
     for (u = 0; u < udata->ndims; u++)
-        HDfprintf(stream, "%s%Hd", u ? ", " : "", key->offset[u]);
+        HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", key->offset[u]);
     HDfputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1315,7 +1315,7 @@ H5D__btree_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
     HDassert(storage);
     HDassert(stream);
 
-    HDfprintf(stream, "    Address: %a\n", storage->idx_addr);
+    HDfprintf(stream, "    Address: %" PRIuHADDR "\n", storage->idx_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__btree_idx_dump() */

@@ -169,7 +169,7 @@ ref_path_table_lookup(const char *thepath)
     if ((thepath == NULL) || (HDstrlen(thepath) == 0))
         return HADDR_UNDEF;
     /* Allow lookups on the root group, even though it doesn't have any link info */
-    if (HDstrcmp(thepath, "/")) {
+    if (HDstrcmp(thepath, "/") != 0) {
         H5L_info_t li;
 
         /* Check for external link first, so we don't return the OID of an object in another file */
