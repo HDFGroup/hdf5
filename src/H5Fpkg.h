@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5F package!"
 #endif
 
-#ifndef _H5Fpkg_H
-#define _H5Fpkg_H
+#ifndef H5Fpkg_H
+#define H5Fpkg_H
 
 /* Get package's private header */
 #include "H5Fprivate.h"
@@ -405,7 +405,6 @@ H5_DLLVAR htri_t use_locks_env_g;
 /* General routines */
 H5_DLL herr_t H5F__post_open(H5F_t *f);
 H5_DLL H5F_t * H5F__reopen(H5F_t *f);
-H5_DLL herr_t  H5F__dest(H5F_t *f, hbool_t flush);
 H5_DLL herr_t  H5F__flush(H5F_t *f);
 H5_DLL htri_t  H5F__is_hdf5(const char *name, hid_t fapl_id);
 H5_DLL ssize_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
@@ -481,4 +480,4 @@ H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */
 
-#endif /* _H5Fpkg_H */
+#endif /* H5Fpkg_H */

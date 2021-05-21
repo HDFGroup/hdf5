@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -711,10 +711,8 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize
     } /* end for */
 
     /* Get the "down" sizes for each dimension */
-    if (H5VM_array_down(ndims, layout->chunks, layout->down_chunks) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
-    if (H5VM_array_down(ndims, layout->max_chunks, layout->max_down_chunks) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
+    H5VM_array_down(ndims, layout->chunks, layout->down_chunks);
+    H5VM_array_down(ndims, layout->max_chunks, layout->max_down_chunks);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2429,7 +2427,7 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_
 #ifdef H5_HAVE_PARALLEL
         } /* end else */
 #endif    /* H5_HAVE_PARALLEL */
-    } /* end else */
+    }     /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3151,9 +3149,9 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 herr_t
 H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata)
 {
-    H5D_rdcc_ent_t *     ent = NULL; /* Cache entry */
-    H5O_storage_chunk_t *sc  = &(dset->shared->layout.storage.u.chunk);
-    unsigned             idx;                 /* Index of chunk in cache, if present */
+    H5D_rdcc_ent_t *     ent       = NULL; /* Cache entry */
+    H5O_storage_chunk_t *sc        = &(dset->shared->layout.storage.u.chunk);
+    unsigned             idx       = 0;       /* Index of chunk in cache, if present */
     hbool_t              found     = FALSE;   /* In cache? */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -4258,7 +4256,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[])
+H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const hsize_t old_dim[])
 {
     const H5D_t *          dset = io_info->dset;                           /* the dataset pointer */
     H5D_chk_idx_info_t     idx_info;                                       /* Chunked index info */
@@ -4427,7 +4425,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
             /* Check for the chunk expanding too much to encode in a 32-bit value */
             if (orig_chunk_size > ((size_t)0xffffffff))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
-#endif /* H5_SIZEOF_SIZE_T > 4 */
+#endif    /* H5_SIZEOF_SIZE_T > 4 */
         } /* end if */
     }     /* end if */
 
@@ -4629,7 +4627,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
 #ifdef H5_HAVE_PARALLEL
                 } /* end else */
 #endif            /* H5_HAVE_PARALLEL */
-            } /* end if */
+            }     /* end if */
 
             /* Insert the chunk record into the index */
             if (need_insert && ops->insert)

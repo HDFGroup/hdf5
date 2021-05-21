@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -543,7 +543,7 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
         amount_free = 0;
 
     HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of available space for data used:",
-              ((double)100.0f * (double)((dblock->size - blk_prefix_size) - amount_free) /
+              (100.0 * (double)((dblock->size - blk_prefix_size) - amount_free) /
                (double)(dblock->size - blk_prefix_size)));
 
     /*
@@ -690,10 +690,10 @@ herr_t
 H5HF_iblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, haddr_t hdr_addr,
                   unsigned nrows)
 {
-    H5HF_hdr_t *     hdr    = NULL;       /* Fractal heap header info */
-    H5HF_indirect_t *iblock = NULL;       /* Fractal heap direct block info */
-    hbool_t          did_protect;         /* Whether we protected the indirect block or not */
-    herr_t           ret_value = SUCCEED; /* Return value */
+    H5HF_hdr_t *     hdr         = NULL;    /* Fractal heap header info */
+    H5HF_indirect_t *iblock      = NULL;    /* Fractal heap direct block info */
+    hbool_t          did_protect = FALSE;   /* Whether we protected the indirect block or not */
+    herr_t           ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

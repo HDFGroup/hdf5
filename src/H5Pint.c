@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -5012,9 +5012,9 @@ done:
 herr_t
 H5P_close(void *_plist)
 {
-    H5P_genclass_t *tclass;              /* Temporary class pointer */
+    H5P_genclass_t *tclass; /* Temporary class pointer */
     H5P_genplist_t *plist = (H5P_genplist_t *)_plist;
-    H5SL_t *        seen = NULL;         /* Skip list to hold names of properties already seen */
+    H5SL_t *        seen  = NULL;        /* Skip list to hold names of properties already seen */
     size_t          nseen;               /* Number of items 'seen' */
     hbool_t         has_parent_class;    /* Flag to indicate that this property list's class has a parent */
     size_t          ndel;                /* Number of items deleted */

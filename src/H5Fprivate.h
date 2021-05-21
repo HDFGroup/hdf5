@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
  * This file contains macros & information for file access
  */
 
-#ifndef _H5Fprivate_H
-#define _H5Fprivate_H
+#ifndef H5Fprivate_H
+#define H5Fprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5F_t H5F_t;
@@ -31,7 +31,7 @@ typedef struct H5F_t H5F_t;
 #include "H5MMprivate.h" /* Memory management            */
 #ifdef H5_HAVE_PARALLEL
 #include "H5Pprivate.h"  /* Property lists               */
-#endif /* H5_HAVE_PARALLEL */
+#endif                   /* H5_HAVE_PARALLEL */
 #include "H5VMprivate.h" /* Vectors and arrays           */
 #include "H5VLprivate.h" /* Virtual Object Layer         */
 
@@ -590,10 +590,10 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME                                                                      \
     "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) \
                           */
-#define H5F_ACS_NULL_FSM_ADDR_NAME "null_fsm_addr"       /* Nullify addresses of free-space managers */
-                                                         /* Private property used only by h5clear */
-#define H5F_ACS_SKIP_EOF_CHECK_NAME "skip_eof_check"     /* Skip EOF check */
-                                                         /* Private property used only by h5clear */
+#define H5F_ACS_NULL_FSM_ADDR_NAME "null_fsm_addr" /* Nullify addresses of free-space managers */
+/* Private property used only by h5clear */
+#define H5F_ACS_SKIP_EOF_CHECK_NAME "skip_eof_check" /* Skip EOF check */
+/* Private property used only by h5clear */
 #define H5F_ACS_USE_MDC_LOGGING_NAME  "use_mdc_logging"  /* Whether to use metadata cache logging */
 #define H5F_ACS_MDC_LOG_LOCATION_NAME "mdc_log_location" /* Name of metadata cache log location */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME                                                                 \
@@ -618,7 +618,7 @@ typedef struct H5F_t H5F_t;
 #ifdef H5_HAVE_PARALLEL
 #define H5F_ACS_MPI_PARAMS_COMM_NAME "mpi_params_comm" /* the MPI communicator */
 #define H5F_ACS_MPI_PARAMS_INFO_NAME "mpi_params_info" /* the MPI info struct */
-#endif /* H5_HAVE_PARALLEL */
+#endif                                                 /* H5_HAVE_PARALLEL */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME "local" /* Whether absolute symlinks local to file. */
@@ -648,14 +648,15 @@ typedef struct H5F_t H5F_t;
 
 /* B-tree internal 'K' values */
 #define HDF5_BTREE_SNODE_IK_DEF 16
-#define HDF5_BTREE_CHUNK_IK_DEF 32       /* Note! this value is assumed                                       \
-                                            to be 32 for version 0                                           \
-                                            of the superblock and                                            \
-                                            if it is changed, the code                                       \
-                                            must compensate. -QAK                                            \
-                                         */
+#define HDF5_BTREE_CHUNK_IK_DEF                                                                              \
+    32                                  /* Note! this value is assumed                                       \
+                                           to be 32 for version 0                                            \
+                                           of the superblock and                                             \
+                                           if it is changed, the code                                        \
+                                           must compensate. -QAK                                             \
+                                        */
 #define HDF5_BTREE_IK_MAX_ENTRIES 65536 /* 2^16 - 2 bytes for storing entries (children) */
-                                        /* See format specification on version 1 B-trees */
+/* See format specification on version 1 B-trees */
 
 /* Default file space handling strategy */
 #define H5F_FILE_SPACE_STRATEGY_DEF H5F_FSPACE_STRATEGY_FSM_AGGR
@@ -954,7 +955,6 @@ H5_DLL herr_t H5F_eoa_dirty(H5F_t *f);
 
 /* Parallel I/O (i.e. MPI) related routines */
 #ifdef H5_HAVE_PARALLEL
-H5_DLL herr_t   H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle);
 H5_DLL int      H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int      H5F_shared_mpi_get_size(const H5F_shared_t *f_sh);
@@ -981,4 +981,4 @@ H5_DLL herr_t H5F_cwfs_remove_heap(H5F_shared_t *shared, struct H5HG_heap_t *hea
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth);
 
-#endif /* _H5Fprivate_H */
+#endif /* H5Fprivate_H */

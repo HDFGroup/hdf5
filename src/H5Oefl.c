@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -466,7 +466,7 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
         HGOTO_ERROR(H5E_EFL, H5E_PROTECT, NULL, "unable to protect EFL file name heap")
 
     /* Insert "empty" name first */
-    if (UFAIL == (name_offset = H5HL_insert(file_dst, heap, (size_t)1, "")))
+    if (H5HL_insert(file_dst, heap, (size_t)1, "", &name_offset) < 0)
         HGOTO_ERROR(H5E_EFL, H5E_CANTINSERT, NULL, "can't insert file name into heap")
     HDassert(0 == name_offset);
 
@@ -483,10 +483,10 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
     /* copy the name from the source */
     for (idx = 0; idx < efl_src->nused; idx++) {
         efl_dst->slot[idx].name = H5MM_xstrdup(efl_src->slot[idx].name);
-        if (UFAIL == (efl_dst->slot[idx].name_offset = H5HL_insert(
-                          file_dst, heap, HDstrlen(efl_dst->slot[idx].name) + 1, efl_dst->slot[idx].name)))
+        if (H5HL_insert(file_dst, heap, HDstrlen(efl_dst->slot[idx].name) + 1, efl_dst->slot[idx].name,
+                        &(efl_dst->slot[idx].name_offset)) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_CANTINSERT, NULL, "can't insert file name into heap")
-    } /* end for */
+    }
 
     /* Set return value */
     ret_value = efl_dst;

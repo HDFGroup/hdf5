@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -225,16 +225,15 @@ typedef enum {
 } ShapeSameTestMethods;
 
 /* Shared global variables */
-extern int         dim0, dim1;           /*Dataset dimensions */
-extern int         chunkdim0, chunkdim1; /*Chunk dimensions */
-extern int         nerrors;              /*errors count */
-extern H5E_auto2_t old_func;             /* previous error handler */
-extern void *      old_client_data;      /*previous error handler arg.*/
-extern int         facc_type;            /*Test file access type */
-extern int         dxfer_coll_type;
+extern int dim0, dim1;           /*Dataset dimensions */
+extern int chunkdim0, chunkdim1; /*Chunk dimensions */
+extern int nerrors;              /*errors count */
+extern int facc_type;            /*Test file access type */
+extern int dxfer_coll_type;
 
 /* Test program prototypes */
 void test_plist_ed(void);
+void external_links(void);
 void zero_dim_dset(void);
 void test_file_properties(void);
 void multiple_dset_write(void);

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -96,19 +96,31 @@
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 #define H5D_DEF_STORAGE_COMPACT                                                                              \
     {                                                                                                        \
-        H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }                                             \
+        H5D_COMPACT,                                                                                         \
+        {                                                                                                    \
+            .compact = H5D_DEF_STORAGE_COMPACT_INIT                                                          \
+        }                                                                                                    \
     }
 #define H5D_DEF_STORAGE_CONTIG                                                                               \
     {                                                                                                        \
-        H5D_CONTIGUOUS, { .contig = H5D_DEF_STORAGE_CONTIG_INIT }                                            \
+        H5D_CONTIGUOUS,                                                                                      \
+        {                                                                                                    \
+            .contig = H5D_DEF_STORAGE_CONTIG_INIT                                                            \
+        }                                                                                                    \
     }
 #define H5D_DEF_STORAGE_CHUNK                                                                                \
     {                                                                                                        \
-        H5D_CHUNKED, { .chunk = H5D_DEF_STORAGE_CHUNK_INIT }                                                 \
+        H5D_CHUNKED,                                                                                         \
+        {                                                                                                    \
+            .chunk = H5D_DEF_STORAGE_CHUNK_INIT                                                              \
+        }                                                                                                    \
     }
 #define H5D_DEF_STORAGE_VIRTUAL                                                                              \
     {                                                                                                        \
-        H5D_VIRTUAL, { .virt = H5D_DEF_STORAGE_VIRTUAL_INIT }                                                \
+        H5D_VIRTUAL,                                                                                         \
+        {                                                                                                    \
+            .virt = H5D_DEF_STORAGE_VIRTUAL_INIT                                                             \
+        }                                                                                                    \
     }
 #define H5D_DEF_LAYOUT_COMPACT                                                                               \
     {                                                                                                        \
@@ -313,7 +325,7 @@ static const H5O_layout_t H5D_def_layout_compact_g = H5D_DEF_LAYOUT_COMPACT;
 static const H5O_layout_t H5D_def_layout_contig_g  = H5D_DEF_LAYOUT_CONTIG;
 static const H5O_layout_t H5D_def_layout_chunk_g   = H5D_DEF_LAYOUT_CHUNK;
 static const H5O_layout_t H5D_def_layout_virtual_g = H5D_DEF_LAYOUT_VIRTUAL;
-#else /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
+#else  /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 static H5O_layout_t H5D_def_layout_compact_g   = H5D_DEF_LAYOUT_COMPACT;
 static H5O_layout_t H5D_def_layout_contig_g    = H5D_DEF_LAYOUT_CONTIG;
 static H5O_layout_t H5D_def_layout_chunk_g     = H5D_DEF_LAYOUT_CHUNK;
@@ -2215,7 +2227,7 @@ herr_t
 H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char *src_dset_name,
                hid_t src_space_id)
 {
-    H5P_genplist_t *           plist;                      /* Property list pointer */
+    H5P_genplist_t *           plist = NULL;               /* Property list pointer */
     H5O_layout_t               virtual_layout;             /* Layout information for setting virtual info */
     H5S_t *                    vspace;                     /* Virtual dataset space selection */
     H5S_t *                    src_space;                  /* Source dataset space selection */

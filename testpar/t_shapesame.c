@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -578,7 +578,7 @@ hs_dr_pio_test__takedown(struct hs_dr_pio_test_vars_t *tv_ptr)
 {
 #if HS_DR_PIO_TEST__TAKEDOWN__DEBUG
     const char *fcnName = "hs_dr_pio_test__takedown()";
-#endif /* HS_DR_PIO_TEST__TAKEDOWN__DEBUG */
+#endif               /* HS_DR_PIO_TEST__TAKEDOWN__DEBUG */
     int    mpi_rank; /* needed by the VRFY macro */
     herr_t ret;      /* Generic return value */
 

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -995,10 +995,10 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
         default:
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else /* NDEBUG */
+#else  /* NDEBUG */
             HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+    }  /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1284,7 +1284,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
     unsigned       chunkno;              /* Current chunk's index */
 #ifndef NDEBUG
     unsigned nullcnt; /* Count of null messages (for sanity checking gaps in chunks) */
-#endif /* NDEBUG */
+#endif                /* NDEBUG */
     hbool_t mesgs_modified =
         FALSE; /* Whether any messages were modified when the object header was deserialized */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1335,7 +1335,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
     /* Check for magic # on chunks > 0 in later versions of the format */
     else if (chunkno > 0 && oh->version > H5O_VERSION_1) {
         /* Magic number */
-        if (HDmemcmp(chunk_image, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+        if (HDmemcmp(chunk_image, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "wrong object header chunk signature")
         chunk_image += H5_SIZEOF_MAGIC;
     } /* end if */

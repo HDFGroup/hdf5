@@ -5,13 +5,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SIO_PERF_H__
-#define SIO_PERF_H__
+#ifndef SIO_PERF_H
+#define SIO_PERF_H
 
 #ifndef STANDALONE
 #include "io_timer.h"
@@ -101,4 +101,4 @@ extern void do_sio(parameters param, results *res);
 }
 #endif /* __cplusplus */
 
-#endif /* PIO_PERF_H__ */
+#endif /* SIO_PERF_H */

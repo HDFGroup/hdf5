@@ -3,7 +3,6 @@
 # circumstances, so ask the compiler to treat them as errors:
 #
 -Werror=bad-function-cast
--Werror=declaration-after-statement
 -Werror=implicit-function-declaration
 -Werror=missing-declarations
 -Werror=missing-prototypes

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef _H5private_H
-#define _H5private_H
+#ifndef H5private_H
+#define H5private_H
 
 #include "H5public.h" /* Include Public Definitions    */
 
@@ -190,23 +190,6 @@
 
 #endif /*H5_HAVE_WIN32_API*/
 
-/* Various ways that inline functions can be declared */
-#if defined(H5_HAVE___INLINE__)
-/* GNU (alternative form) */
-#define H5_INLINE __inline__
-#elif defined(H5_HAVE___INLINE)
-/* Visual Studio */
-#define H5_INLINE __inline
-#elif defined(H5_HAVE_INLINE)
-/* GNU, C++
- * Use "inline" as a last resort on the off-chance that there will
- * be C++ problems.
- */
-#define H5_INLINE inline
-#else
-#define H5_INLINE
-#endif /* inline choices */
-
 #ifndef F_OK
 #define F_OK 00
 #define W_OK 02
@@ -306,19 +289,6 @@
  * gcc warnings (it has to use the public API and can't include this
  * file). Be sure to update that file if the #ifdefs change here.
  */
-#ifdef __cplusplus
-#define H5_ATTR_FORMAT(X, Y, Z) /*void*/
-#define H5_ATTR_UNUSED          /*void*/
-#define H5_ATTR_DEPRECATED_USED /*void*/
-#define H5_ATTR_NDEBUG_UNUSED   /*void*/
-#define H5_ATTR_DEBUG_API_USED  /*void*/
-#define H5_ATTR_PARALLEL_UNUSED /*void*/
-#define H5_ATTR_PARALLEL_USED   /*void*/
-#define H5_ATTR_NORETURN        /*void*/
-#define H5_ATTR_CONST           /*void*/
-#define H5_ATTR_PURE            /*void*/
-#define H5_ATTR_FALLTHROUGH     /*void*/
-#else                           /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
 #define H5_ATTR_UNUSED          __attribute__((unused))
@@ -365,7 +335,6 @@
 #define H5_ATTR_PURE            /*void*/
 #define H5_ATTR_FALLTHROUGH     /*void*/
 #endif
-#endif /* __cplusplus */
 
 /*
  * Networking headers used by the mirror VFD and related tests and utilities.
@@ -394,7 +363,6 @@
  */
 #define SUCCEED 0
 #define FAIL    (-1)
-#define UFAIL   (unsigned)(-1)
 
 /* The HDF5 library uses the symbol `ERR` frequently.  So do
  * header files for libraries such as curses(3), terminfo(3), etc.
@@ -480,11 +448,11 @@ typedef unsigned char uint8_t;
 
 #if H5_SIZEOF_INT16_T >= 2
 #elif H5_SIZEOF_SHORT >= 2
-typedef short int16_t;
+typedef short          int16_t;
 #undef H5_SIZEOF_INT16_T
 #define H5_SIZEOF_INT16_T H5_SIZEOF_SHORT
 #elif H5_SIZEOF_INT >= 2
-typedef int int16_t;
+typedef int      int16_t;
 #undef H5_SIZEOF_INT16_T
 #define H5_SIZEOF_INT16_T H5_SIZEOF_INT
 #else
@@ -506,11 +474,11 @@ typedef unsigned uint16_t;
 
 #if H5_SIZEOF_INT32_T >= 4
 #elif H5_SIZEOF_SHORT >= 4
-typedef short int32_t;
+typedef short          int32_t;
 #undef H5_SIZEOF_INT32_T
 #define H5_SIZEOF_INT32_T H5_SIZEOF_SHORT
 #elif H5_SIZEOF_INT >= 4
-typedef int int32_t;
+typedef int      int32_t;
 #undef H5_SIZEOF_INT32_T
 #define H5_SIZEOF_INT32_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 4
@@ -682,18 +650,13 @@ typedef struct {
 #endif /* HDabs */
 #ifndef HDaccept
 #define HDaccept(A, B, C) accept((A), (B), (C)) /* mirror VFD */
-#endif /* HDaccept */
+#endif                                          /* HDaccept */
 #ifndef HDaccess
 #define HDaccess(F, M) access(F, M)
 #endif /* HDaccess */
 #ifndef HDacos
 #define HDacos(X) acos(X)
 #endif /* HDacos */
-#ifndef HDvasprintf
-#ifdef H5_HAVE_VASPRINTF
-#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
-#endif /* H5_HAVE_VASPRINTF */
-#endif /* HDvasprintf */
 #ifndef HDalarm
 #ifdef H5_HAVE_ALARM
 #define HDalarm(N) alarm(N)
@@ -709,7 +672,7 @@ typedef struct {
 #endif /* HDasin */
 #ifndef HDasprintf
 #define HDasprintf asprintf /*varargs*/
-#endif /* HDasprintf */
+#endif                      /* HDasprintf */
 #ifndef HDassert
 #define HDassert(X) assert(X)
 #endif /* HDassert */
@@ -736,7 +699,7 @@ typedef struct {
 #endif /* HDatol */
 #ifndef HDbind
 #define HDbind(A, B, C) bind((A), (B), (C)) /* mirror VFD */
-#endif /* HDbind */
+#endif                                      /* HDbind */
 #ifndef HDbsearch
 #define HDbsearch(K, B, N, Z, F) bsearch(K, B, N, Z, F)
 #endif /* HDbsearch */
@@ -784,7 +747,7 @@ typedef struct {
 #endif /* HDclosedir */
 #ifndef HDconnect
 #define HDconnect(A, B, C) connect((A), (B), (C)) /* mirror VFD */
-#endif /* HDconnect */
+#endif                                            /* HDconnect */
 #ifndef HDcos
 #define HDcos(X) cos(X)
 #endif /* HDcos */
@@ -1033,7 +996,7 @@ typedef off_t       h5_stat_size_t;
 #endif /* HDgetgroups */
 #ifndef HDgethostbyaddr
 #define HDgethostbyaddr(A, B, C) gethostbyaddr((A), (B), (C)) /* mirror VFD */
-#endif /* HDgethostbyaddr */
+#endif                                                        /* HDgethostbyaddr */
 #ifndef HDgethostname
 #define HDgethostname(N, L) gethostname(N, L)
 #endif /* HDgethostname */
@@ -1075,55 +1038,55 @@ typedef off_t       h5_stat_size_t;
 #endif /* HDgmtime */
 #ifndef HDhtonl
 #define HDhtonl(X) htonl((X)) /* mirror VFD */
-#endif /* HDhtonl */
+#endif                        /* HDhtonl */
 #ifndef HDhtons
 #define HDhtons(X) htons((X)) /* mirror VFD */
-#endif /* HDhtons */
+#endif                        /* HDhtons */
 #ifndef HDinet_addr
 #define HDinet_addr(C) inet_addr((C)) /* mirror VFD */
-#endif /* HDinet_addr */
+#endif                                /* HDinet_addr */
 #ifndef HDinet_ntoa
 #define HDinet_ntoa(C) inet_ntoa((C)) /* mirror VFD */
-#endif /* HDinet_ntoa */
+#endif                                /* HDinet_ntoa */
 #ifndef HDisalnum
 #define HDisalnum(C) isalnum((int)(C)) /*cast for solaris warning*/
-#endif /* HDisalnum */
+#endif                                 /* HDisalnum */
 #ifndef HDisalpha
 #define HDisalpha(C) isalpha((int)(C)) /*cast for solaris warning*/
-#endif /* HDisalpha */
+#endif                                 /* HDisalpha */
 #ifndef HDisatty
 #define HDisatty(F) isatty(F)
 #endif /* HDisatty */
 #ifndef HDiscntrl
 #define HDiscntrl(C) iscntrl((int)(C)) /*cast for solaris warning*/
-#endif /* HDiscntrl */
+#endif                                 /* HDiscntrl */
 #ifndef HDisdigit
 #define HDisdigit(C) isdigit((int)(C)) /*cast for solaris warning*/
-#endif /* HDisdigit */
+#endif                                 /* HDisdigit */
 #ifndef HDisgraph
 #define HDisgraph(C) isgraph((int)(C)) /*cast for solaris warning*/
-#endif /* HDisgraph */
+#endif                                 /* HDisgraph */
 #ifndef HDislower
 #define HDislower(C) islower((int)(C)) /*cast for solaris warning*/
-#endif /* HDislower */
+#endif                                 /* HDislower */
 #ifndef HDisnan
 #define HDisnan(X) isnan(X)
 #endif /* HDisnan */
 #ifndef HDisprint
 #define HDisprint(C) isprint((int)(C)) /*cast for solaris warning*/
-#endif /* HDisprint */
+#endif                                 /* HDisprint */
 #ifndef HDispunct
 #define HDispunct(C) ispunct((int)(C)) /*cast for solaris warning*/
-#endif /* HDispunct */
+#endif                                 /* HDispunct */
 #ifndef HDisspace
 #define HDisspace(C) isspace((int)(C)) /*cast for solaris warning*/
-#endif /* HDisspace */
+#endif                                 /* HDisspace */
 #ifndef HDisupper
 #define HDisupper(C) isupper((int)(C)) /*cast for solaris warning*/
-#endif /* HDisupper */
+#endif                                 /* HDisupper */
 #ifndef HDisxdigit
 #define HDisxdigit(C) isxdigit((int)(C)) /*cast for solaris warning*/
-#endif /* HDisxdigit */
+#endif                                   /* HDisxdigit */
 #ifndef HDkill
 #define HDkill(P, S) kill(P, S)
 #endif /* HDkill */
@@ -1141,7 +1104,7 @@ typedef off_t       h5_stat_size_t;
 #endif /* HDlink */
 #ifndef HDlisten
 #define HDlisten(A, B) listen((A), (B)) /* mirror VFD */
-#endif /* HDlisten */
+#endif                                  /* HDlisten */
 #ifndef HDllround
 #define HDllround(V) llround(V)
 #endif /* HDround */
@@ -1225,10 +1188,10 @@ typedef off_t       h5_stat_size_t;
 #endif /* HDnanosleep */
 #ifndef HDntohl
 #define HDntohl(A) ntohl((A)) /* mirror VFD */
-#endif /* HDntohl */
+#endif                        /* HDntohl */
 #ifndef HDntohs
 #define HDntohs(A) ntohs((A)) /* mirror VFD */
-#endif /* HDntohs */
+#endif                        /* HDntohs */
 #ifndef HDopen
 #define HDopen(F, ...) open(F, __VA_ARGS__)
 #endif /* HDopen */
@@ -1300,7 +1263,7 @@ H5_DLL void HDsrand(unsigned int seed);
 #ifndef HDsrandom
 #define HDsrandom(S) srandom(S)
 #endif /* HDsrandom */
-#else /* H5_HAVE_RANDOM */
+#else  /* H5_HAVE_RANDOM */
 #ifndef HDrand
 #define HDrand() rand()
 #endif /* HDrand */
@@ -1378,7 +1341,7 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif /* HDsetsid */
 #ifndef HDsetsockopt
 #define HDsetsockopt(A, B, C, D, E) setsockopt((A), (B), (C), (D), (E)) /* mirror VFD */
-#endif /* HDsetsockopt */
+#endif                                                                  /* HDsetsockopt */
 #ifndef HDsetuid
 #define HDsetuid(U) setuid(U)
 #endif /* HDsetuid */
@@ -1387,7 +1350,7 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif /* HDsetvbuf */
 #ifndef HDshutdown
 #define HDshutdown(A, B) shutdown((A), (B)) /* mirror VFD */
-#endif /* HDshutdown */
+#endif                                      /* HDshutdown */
 #ifndef HDsigaction
 #define HDsigaction(S, A, O) sigaction((S), (A), (O))
 #endif /* HDsigaction */
@@ -1435,13 +1398,13 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif /* HDsleep */
 #ifndef HDsnprintf
 #define HDsnprintf snprintf /*varargs*/
-#endif /* HDsnprintf */
+#endif                      /* HDsnprintf */
 #ifndef HDsocket
 #define HDsocket(A, B, C) socket((A), (B), (C)) /* mirror VFD */
-#endif /* HDsocket */
+#endif                                          /* HDsocket */
 #ifndef HDsprintf
 #define HDsprintf sprintf /*varargs*/
-#endif /* HDsprintf */
+#endif                    /* HDsprintf */
 #ifndef HDsqrt
 #define HDsqrt(X) sqrt(X)
 #endif /* HDsqrt */
@@ -1469,6 +1432,9 @@ H5_DLL void HDsrand(unsigned int seed);
 #ifndef HDstrcspn
 #define HDstrcspn(X, Y) strcspn(X, Y)
 #endif /* HDstrcspn */
+#ifndef HDstrdup
+#define HDstrdup(S) strdup(S)
+#endif /* HDstrdup */
 #ifndef HDstrerror
 #define HDstrerror(N) strerror(N)
 #endif /* HDstrerror */
@@ -1610,6 +1576,13 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDutime
 #define HDutime(S, T) utime(S, T)
 #endif /* HDutime */
+#ifndef HDvasprintf
+#ifdef H5_HAVE_VASPRINTF
+#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
+#else
+H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+#endif /* H5_HAVE_VASPRINTF */
+#endif /* HDvasprintf */
 #ifndef HDva_arg
 #define HDva_arg(A, T) va_arg(A, T)
 #endif /* HDva_arg */
@@ -1649,18 +1622,6 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
 #endif /* HDwrite */
-
-/*
- * And now for a couple non-Posix functions...  Watch out for systems that
- * define these in terms of macros.
- */
-#if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *strdup(const char *s);
-#endif
-
-#ifndef HDstrdup
-#define HDstrdup(S) strdup(S)
-#endif /* HDstrdup */
 
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */
@@ -1941,7 +1902,7 @@ extern char H5libhdf5_settings[]; /* embedded library information */
 #define H5TRACE11(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)      /*void*/
 #define H5TRACE12(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) /*void*/
 #define H5TRACE_RETURN(V)                                                 /*void*/
-#endif /* H5_DEBUG_API */
+#endif                                                                    /* H5_DEBUG_API */
 
 H5_DLL double H5_trace(const double *calltime, const char *func, const char *type, ...);
 
@@ -2014,9 +1975,13 @@ extern char H5_lib_vers_info_g[];
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {
-    H5TS_mutex_t init_lock;    /* API entrance mutex */
-    hbool_t      H5_libinit_g; /* Has the library been initialized? */
-    hbool_t      H5_libterm_g; /* Is the library being shutdown? */
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
+    H5TS_rw_lock_t init_rw_lock; /* API entrance RW lock */
+#else
+    H5TS_mutex_t init_lock; /* API entrance mutex */
+#endif
+    hbool_t H5_libinit_g; /* Has the library been initialized? */
+    hbool_t H5_libterm_g; /* Is the library being shutdown? */
 } H5_api_t;
 
 /* Macros for accessing the global variables */
@@ -2031,13 +1996,17 @@ typedef struct H5_api_struct {
 #endif
 
 /* Macros for threadsafe HDF-5 Phase I locks */
+#ifdef H5_USE_RECURSIVE_WRITER_LOCKS
+#define H5_API_LOCK   H5TS_rw_wrlock(&H5_g.init_rw_lock);
+#define H5_API_UNLOCK H5TS_rw_unlock(&H5_g.init_rw_lock);
+#else
 #define H5_API_LOCK   H5TS_mutex_lock(&H5_g.init_lock);
 #define H5_API_UNLOCK H5TS_mutex_unlock(&H5_g.init_lock);
+#endif
 
 /* Macros for thread cancellation-safe mechanism */
 #define H5_API_UNSET_CANCEL H5TS_cancel_count_inc();
-
-#define H5_API_SET_CANCEL H5TS_cancel_count_dec();
+#define H5_API_SET_CANCEL   H5TS_cancel_count_dec();
 
 extern H5_api_t H5_g;
 
@@ -2071,10 +2040,10 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 
 #define H5_PUSH_FUNC H5CS_push(FUNC);
 #define H5_POP_FUNC  H5CS_pop();
-#else /* H5_HAVE_CODESTACK */
+#else                /* H5_HAVE_CODESTACK */
 #define H5_PUSH_FUNC /* void */
 #define H5_POP_FUNC  /* void */
-#endif /* H5_HAVE_CODESTACK */
+#endif               /* H5_HAVE_CODESTACK */
 
 #ifdef H5_HAVE_MPE
 extern hbool_t H5_MPEinit_g; /* Has the MPE Library been initialized? */
@@ -2127,7 +2096,7 @@ H5_DLL herr_t H5CX_pop(void);
             func_check = TRUE;                                                                               \
         } /* end if */                                                                                       \
     }     /* end scope */
-#else /* NDEBUG */
+#else     /* NDEBUG */
 #define FUNC_ENTER_CHECK_NAME(asrt)
 #endif /* NDEBUG */
 
@@ -2845,4 +2814,4 @@ H5_DLL herr_t  H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_b
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *marker,
                              size_t buf_offset, size_t buf_size);
 
-#endif /* _H5private_H */
+#endif /* H5private_H */

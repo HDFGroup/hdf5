@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -384,11 +384,8 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
     /* Reset the new entry */
     H5G__ent_reset(ent);
 
-    /*
-     * Add the new name to the heap.
-     */
-    name_offset = H5HL_insert(f, heap, HDstrlen(name) + 1, name);
-    if (0 == name_offset || UFAIL == name_offset)
+    /* Add the new name to the heap */
+    if (H5HL_insert(f, heap, HDstrlen(name) + 1, name, &name_offset) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert symbol name into heap")
     ent->name_off = name_offset;
 
@@ -421,7 +418,7 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
                     HDassert(!stab_exists);
                 } /* end else */
 #endif            /* NDEBUG */
-            } /* end if */
+            }     /* end if */
             else if (obj_type == H5O_TYPE_UNKNOWN) {
                 /* Try to retrieve symbol table information for caching */
                 H5O_loc_t  targ_oloc;   /* Location of link target */
@@ -476,14 +473,12 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
             size_t lnk_offset; /* Offset to sym-link value	*/
 
             /* Insert link value into local heap */
-            if (UFAIL ==
-                (lnk_offset = H5HL_insert(f, heap, HDstrlen(lnk->u.soft.name) + 1, lnk->u.soft.name)))
+            if (H5HL_insert(f, heap, HDstrlen(lnk->u.soft.name) + 1, lnk->u.soft.name, &lnk_offset) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap")
 
             ent->type                    = H5G_CACHED_SLINK;
             ent->cache.slink.lval_offset = lnk_offset;
-        } /* end case */
-        break;
+        } break;
 
         case H5L_TYPE_ERROR:
         case H5L_TYPE_EXTERNAL:

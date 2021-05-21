@@ -5,16 +5,16 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5VLprivate_H
-#define _H5VLprivate_H
+#ifndef H5VLprivate_H
+#define H5VLprivate_H
 
 /* Include package's public header */
-#include "H5VLpublic.h"         /* Generic Functions                    */
+#include "H5VLpublic.h" /* Generic Functions                    */
 
 /* Private headers needed by this file */
 
@@ -37,6 +37,7 @@ typedef struct H5VL_t {
 typedef struct H5VL_object_t {
     void *  data;      /* Pointer to connector-managed data for this object    */
     H5VL_t *connector; /* Pointer to VOL connector struct                      */
+    size_t  rc;        /* Reference count                                      */
 } H5VL_object_t;
 
 /* Internal structure to hold the connector ID & info for FAPLs */
@@ -86,7 +87,9 @@ H5_DLL void *H5VL_object_data(const H5VL_object_t *vol_obj);
 H5_DLL void *H5VL_object_unwrap(const H5VL_object_t *vol_obj);
 H5_DLL void *H5VL_object_verify(hid_t id, H5I_type_t obj_type);
 H5_DLL H5VL_object_t *H5VL_vol_object(hid_t id);
+H5_DLL H5VL_object_t *H5VL_create_object(void *object, H5VL_t *vol_connector);
 H5_DLL H5VL_object_t *H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id);
+H5_DLL hsize_t        H5VL_object_inc_rc(H5VL_object_t *obj);
 H5_DLL herr_t         H5VL_free_object(H5VL_object_t *obj);
 H5_DLL herr_t         H5VL_object_is_native(const H5VL_object_t *obj, hbool_t *is_native);
 H5_DLL herr_t         H5VL_file_is_same(const H5VL_object_t *vol_obj1, const H5VL_object_t *vol_obj2,
@@ -178,7 +181,7 @@ H5_DLL herr_t H5VL_datatype_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, v
 /* File functions */
 H5_DLL void * H5VL_file_create(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
                                hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
-H5_DLL void * H5VL_file_open(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
+H5_DLL void * H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
                              hid_t fapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req,
                             ...);
@@ -268,4 +271,4 @@ H5_DLL herr_t H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_t
 /* Generic functions */
 H5_DLL herr_t H5VL_optional(const H5VL_object_t *vol_obj, int op_type, hid_t dxpl_id, void **req, ...);
 
-#endif /* _H5VLprivate_H */
+#endif /* H5VLprivate_H */

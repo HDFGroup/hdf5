@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -161,7 +161,7 @@ H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, H5HL_cache_prfx_ud_t *
     HDassert(udata);
 
     /* Check magic number */
-    if (HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad local heap signature")
     image += H5_SIZEOF_MAGIC;
 

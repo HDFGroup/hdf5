@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -102,25 +102,25 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_LAYOUT,   /*0x0008 Data Layout                     */
 #ifdef H5O_ENABLE_BOGUS
     H5O_MSG_BOGUS_VALID, /*0x0009 "Bogus valid" (for testing)     */
-#else /* H5O_ENABLE_BOGUS */
+#else                    /* H5O_ENABLE_BOGUS */
     NULL, /*0x0009 "Bogus valid" (for testing)     */
-#endif /* H5O_ENABLE_BOGUS */
-    H5O_MSG_GINFO,     /*0x000A Group information               */
-    H5O_MSG_PLINE,     /*0x000B Data storage -- filter pipeline */
-    H5O_MSG_ATTR,      /*0x000C Attribute                       */
-    H5O_MSG_NAME,      /*0x000D Object name                     */
-    H5O_MSG_MTIME,     /*0x000E Object modification date and time */
-    H5O_MSG_SHMESG,    /*0x000F File-wide shared message table  */
-    H5O_MSG_CONT,      /*0x0010 Object header continuation      */
-    H5O_MSG_STAB,      /*0x0011 Symbol table                    */
-    H5O_MSG_MTIME_NEW, /*0x0012 New Object modification date and time */
-    H5O_MSG_BTREEK,    /*0x0013 Non-default v1 B-tree 'K' values */
-    H5O_MSG_DRVINFO,   /*0x0014 Driver info settings            */
-    H5O_MSG_AINFO,     /*0x0015 Attribute information           */
-    H5O_MSG_REFCOUNT,  /*0x0016 Object's ref. count             */
-    H5O_MSG_FSINFO,    /*0x0017 Free-space manager info         */
-    H5O_MSG_MDCI,      /*0x0018 Metadata cache image            */
-    H5O_MSG_UNKNOWN    /*0x0019 Placeholder for unknown message */
+#endif                   /* H5O_ENABLE_BOGUS */
+    H5O_MSG_GINFO,       /*0x000A Group information               */
+    H5O_MSG_PLINE,       /*0x000B Data storage -- filter pipeline */
+    H5O_MSG_ATTR,        /*0x000C Attribute                       */
+    H5O_MSG_NAME,        /*0x000D Object name                     */
+    H5O_MSG_MTIME,       /*0x000E Object modification date and time */
+    H5O_MSG_SHMESG,      /*0x000F File-wide shared message table  */
+    H5O_MSG_CONT,        /*0x0010 Object header continuation      */
+    H5O_MSG_STAB,        /*0x0011 Symbol table                    */
+    H5O_MSG_MTIME_NEW,   /*0x0012 New Object modification date and time */
+    H5O_MSG_BTREEK,      /*0x0013 Non-default v1 B-tree 'K' values */
+    H5O_MSG_DRVINFO,     /*0x0014 Driver info settings            */
+    H5O_MSG_AINFO,       /*0x0015 Attribute information           */
+    H5O_MSG_REFCOUNT,    /*0x0016 Object's ref. count             */
+    H5O_MSG_FSINFO,      /*0x0017 Free-space manager info         */
+    H5O_MSG_MDCI,        /*0x0018 Metadata cache image            */
+    H5O_MSG_UNKNOWN      /*0x0019 Placeholder for unknown message */
 };
 
 /* Format version bounds for object header */
@@ -448,12 +448,16 @@ H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t init
 #if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
         if (size_hint > 4294967295UL)
             oh->flags |= H5O_HDR_CHUNK0_8;
-        else
-#endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
-            if (size_hint > 65535)
+        else if (size_hint > 65535)
             oh->flags |= H5O_HDR_CHUNK0_4;
         else if (size_hint > 255)
             oh->flags |= H5O_HDR_CHUNK0_2;
+#else
+        if (size_hint > 65535)
+            oh->flags |= H5O_HDR_CHUNK0_4;
+        else if (size_hint > 255)
+            oh->flags |= H5O_HDR_CHUNK0_2;
+#endif
     }
     else {
         /* Reset unused time fields */
@@ -1075,7 +1079,7 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
             H5O_chunk_proxy_t *chk_proxy; /* Proxy for chunk, to bring it into memory */
 #ifndef NDEBUG
             size_t chkcnt = oh->nchunks; /* Count of chunks (for sanity checking) */
-#endif /* NDEBUG */
+#endif                                   /* NDEBUG */
 
             /* Bring the chunk into the cache */
             /* (which adds to the object header) */
@@ -1123,7 +1127,7 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
             (oh->nmesgs + udata.common.merged_null_msgs) != udata.v1_pfx_nmesgs)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - incorrect # of messages")
 #endif /* H5_STRICT_FORMAT_CHECKS */
-    } /* end if */
+    }  /* end if */
 
 #ifdef H5O_DEBUG
     H5O__assert(oh);

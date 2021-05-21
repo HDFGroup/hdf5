@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -35,7 +35,9 @@ namespace H5 {
 // Purpose      Default constructor: creates a stub atomic datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AtomType::AtomType() : DataType() {}
+AtomType::AtomType() : DataType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    AtomType overloaded constructor [protected]
@@ -44,14 +46,18 @@ AtomType::AtomType() : DataType() {}
 // Exception    H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AtomType::AtomType(const hid_t existing_id) : DataType(existing_id) {}
+AtomType::AtomType(const hid_t existing_id) : DataType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    AtomType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AtomType::AtomType(const AtomType &original) : DataType(original) {}
+AtomType::AtomType(const AtomType &original) : DataType(original)
+{
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
@@ -290,7 +296,9 @@ AtomType::setPad(H5T_pad_t lsb, H5T_pad_t msb) const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AtomType::~AtomType() {}
+AtomType::~AtomType()
+{
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // namespace H5

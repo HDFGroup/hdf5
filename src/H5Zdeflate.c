@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -48,7 +48,7 @@ const H5Z_class2_t H5Z_DEFLATE[1] = {{
     H5Z__filter_deflate, /* The actual filter function	*/
 }};
 
-#define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * (double)1.001f) + 12)
+#define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * 1.001) + 12)
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z__filter_deflate

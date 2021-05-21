@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
  * This file contains public declarations for authoring VOL connectors.
  */
 
-#ifndef _H5VLconnector_H
-#define _H5VLconnector_H
+#ifndef H5VLconnector_H
+#define H5VLconnector_H
 
 /* Public headers needed by this file */
 #include "H5public.h"   /* Generic Functions                    */
@@ -442,7 +442,7 @@ typedef struct H5VL_token_class_t {
  * \ingroup H5VLDEV
  * Class information for each VOL connector
  */
-//! [H5VL_class_t_snip]
+//! <!-- [H5VL_class_t_snip] -->
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
     unsigned           version;          /**< VOL connector class struct version #     */
@@ -475,7 +475,7 @@ typedef struct H5VL_class_t {
     herr_t (*optional)(void *obj, int op_type, hid_t dxpl_id, void **req,
                        va_list arguments); /**< Optional callback */
 } H5VL_class_t;
-//! [H5VL_class_t_snip]
+//! <!-- [H5VL_class_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -512,15 +512,14 @@ extern "C" {
  *          uncommon, as most VOL-specific properties are added to the file
  *          access property list via the connector's API calls which set the
  *          VOL connector for the file open/create. For more information, see
- *          the VOL documentation.
+ *          the \ref_vol_doc.
  *
  *          H5VL_class_t is defined in H5VLconnector.h in the source code. It
  *          contains class information for each VOL connector:
  *          \snippet this H5VL_class_t_snip
  *
- * \todo Fix the reference to VOL documentation.
- *
  * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);
 /**
@@ -544,4 +543,4 @@ H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 }
 #endif
 
-#endif /* _H5VLconnector_H */
+#endif /* H5VLconnector_H */

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -52,13 +51,13 @@ public class TestH5Pvirtual {
     private static final int fill_value = -1;
     long[] H5dims = { DIM_Y };
     long[] VDSH5dims = { VDSDIM_X, VDSDIM_Y };
-    long H5fid = -1;
-    long H5dsid = -1;
-    long H5dssid = -1;
-    long H5dvsid = -1;
-    long H5did = -1;
-    long H5dcplid = -1;
-    long H5dapl_id = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid = HDF5Constants.H5I_INVALID_HID;
+    long H5dssid = HDF5Constants.H5I_INVALID_HID;
+    long H5dvsid = HDF5Constants.H5I_INVALID_HID;
+    long H5did = HDF5Constants.H5I_INVALID_HID;
+    long H5dcplid = HDF5Constants.H5I_INVALID_HID;
+    long H5dapl_id = HDF5Constants.H5I_INVALID_HID;
 
     private final void _deleteFile(String filename) {
         File file = new File(filename);
@@ -69,8 +68,8 @@ public class TestH5Pvirtual {
     }
 
     private final long _createDataset(long fid, long dsid, String name, long dcpl, long dapl) {
-        long did = -1;
-        long space_id = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
+        long space_id = HDF5Constants.H5I_INVALID_HID;
         long[] start = {0, 0};
         long[] stride = null;
         long[] count = {1, 1};
@@ -100,9 +99,9 @@ public class TestH5Pvirtual {
         int[] dset_data = new int[DIM_Y];
         // Create source files and datasets
         for (int i=0; i < 3; i++) {
-            long space_id = -1;
-            long dset_id = -1;
-            long file_id = -1;
+            long space_id = HDF5Constants.H5I_INVALID_HID;
+            long dset_id = HDF5Constants.H5I_INVALID_HID;
+            long file_id = HDF5Constants.H5I_INVALID_HID;
             for (int j = 0; j < DIM_Y; j++) dset_data[j] = i+1;
 
             try {
@@ -265,7 +264,7 @@ public class TestH5Pvirtual {
 
     @Test
     public void testH5Pget_selection_source_dataset() throws Throwable {
-        long src_space = -1;
+        long src_space = HDF5Constants.H5I_INVALID_HID;
         long src_selection = -1;
 
         H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);

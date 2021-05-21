@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,8 +18,8 @@
  *		H5P package.  Including this header means that the source file
  *		is part of the H5P package.
  */
-#ifndef _H5Pmodule_H
-#define _H5Pmodule_H
+#ifndef H5Pmodule_H
+#define H5Pmodule_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
@@ -44,7 +44,6 @@
  *          and compressed.
  *
  * \todo Describe concisely what the functions in this module are about.
- * \todo Clicking on "more" after "Property List Interface" at the top does not work
  *
  * \defgroup GPLO General Property List Operations
  * \ingroup H5P
@@ -70,6 +69,10 @@
  * \ingroup H5P
  * \defgroup OCPPL Object Copy Properties
  * \ingroup H5P
+ * \defgroup GACPL General Access Properties
+ * \ingroup H5P
+ * \defgroup MAPL Map Access Properties
+ * \ingroup H5P
  */
 
-#endif /* _H5Pmodule_H */
+#endif /* H5Pmodule_H */

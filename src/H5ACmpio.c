@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -760,7 +760,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
             aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
             aux_ptr->unprotect_dirty_bytes_updates += 1;
-#endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
+#endif    /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
         } /* end if */
 
         /* the entry is dirty.  If it exists on the cleaned entries list,
@@ -776,7 +776,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
         aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
         aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-    } /* end else */
+    }  /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1090,7 +1090,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
             aux_ptr->move_dirty_bytes += entry_size;
             aux_ptr->move_dirty_bytes_updates += 1;
-#endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
+#endif    /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
         } /* end else */
 
         /* insert / reinsert the entry in the dirty slist */
@@ -1104,7 +1104,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
         aux_ptr->move_dirty_bytes += entry_size;
         aux_ptr->move_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-    } /* end else-if */
+    }  /* end else-if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1272,7 +1272,7 @@ H5AC__propagate_and_apply_candidate_list(H5F_t *f)
         if (aux_ptr->write_done)
             (aux_ptr->write_done)();
 
-        /* to prevent "messages from the past" we must synchronize all
+        /* To prevent "messages from the past" we must synchronize all
          * processes again before we go on.
          */
         if (MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
@@ -1515,7 +1515,7 @@ H5AC__receive_and_apply_clean_list(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't receive clean list")
 
     if (num_entries > 0)
-        /* mark the indicated entries as clean */
+        /* Mark the indicated entries as clean */
         if (H5C_mark_entries_as_clean(f, num_entries, haddr_buf_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't mark entries clean.")
 
@@ -1901,28 +1901,22 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
 
         /* Check for error on the write operation */
         if (result < 0)
-
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
 
         /* this code exists primarily for the test bed -- it allows us to
          * enforce POSIX semantics on the server that pretends to be a
          * file system in our parallel tests.
          */
-        if (aux_ptr->write_done) {
-
+        if (aux_ptr->write_done)
             (aux_ptr->write_done)();
-        }
     } /* end if */
 
     /* Propagate cleaned entries to other ranks. */
     if (H5AC__propagate_flushed_and_still_clean_entries_list(f) < 0)
-
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate clean entries list.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC__rsp__p0_only__flush() */
 
 /*-------------------------------------------------------------------------

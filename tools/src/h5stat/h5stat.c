@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1609,7 +1609,7 @@ print_storage_summary(const iter_t *iter)
 {
     hsize_t total_meta = 0;
     hsize_t unaccount  = 0;
-    double  percent    = 0.0f;
+    double  percent    = 0.0;
 
     HDfprintf(stdout, "File space management strategy: %s\n", FS_STRATEGY_NAME[iter->fs_strategy]);
     HDfprintf(stdout, "File space page size: %" PRIuHSIZE " bytes\n", iter->fsp_size);
@@ -1624,7 +1624,7 @@ print_storage_summary(const iter_t *iter)
     HDfprintf(stdout, "  File metadata: %" PRIuHSIZE " bytes\n", total_meta);
     HDfprintf(stdout, "  Raw data: %" PRIuHSIZE " bytes\n", iter->dset_storage_size);
 
-    percent = ((double)iter->free_space / (double)iter->filesize) * (double)100.0f;
+    percent = ((double)iter->free_space / (double)iter->filesize) * 100.0;
     HDfprintf(stdout, "  Amount/Percent of tracked free space: %" PRIuHSIZE " bytes/%3.1f%%\n",
               iter->free_space, percent);
 

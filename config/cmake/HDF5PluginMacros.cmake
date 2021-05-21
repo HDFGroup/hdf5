@@ -3,114 +3,76 @@
 #-------------------------------------------------------------------------------
 macro (EXTERNAL_PLUGIN_LIBRARY compress_type)
   if (${compress_type} MATCHES "GIT")
-    EXTERNALPROJECT_ADD (PLUGIN
+    FetchContent_Declare (PLUGIN
         GIT_REPOSITORY ${PLUGIN_URL}
         GIT_TAG ${PLUGIN_BRANCH}
-        LIST_SEPARATOR |
-        INSTALL_COMMAND ""
-        CMAKE_ARGS
-            -DUSE_SHARED_LIBS:BOOL=ON
-            -DBUILD_SHARED_LIBS:BOOL=ON
-            -DH5PL_ALLOW_EXTERNAL_SUPPORT:STRING=${HDF5_ALLOW_EXTERNAL_SUPPORT}
-            -DBUILD_TESTING:STRING=OFF
-            -DBUILD_EXAMPLES:STRING=OFF
-            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-            -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-            -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
-            -DCMAKE_PDB_OUTPUT_DIRECTORY:PATH=${CMAKE_PDB_OUTPUT_DIRECTORY}
-            -DDISABLE_PLUGIN_ENCODER:BOOL=OFF
-            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-            -DCMAKE_TOOLCHAIN_FILE:STRING=${CMAKE_TOOLCHAIN_FILE}
-            # the hdf5 settings
-            -DHDF5_PACKAGE_NAME:STRING=hdf5
-            -DHDF5_HDF5_HEADER:STRING=h5pubconf.h
-            -DHDF5_LINK_LIBS:STRING=$<TARGET_LINKER_FILE:${HDF5_LIBSH_TARGET}>
-            -DHDF5_INCLUDE_DIR:PATH=${HDF5_SRC_DIR}|${HDF5_SRC_BINARY_DIR}
-            -DPL_PACKAGE_NAME:STRING=${PLUGIN_PACKAGE_NAME}
-            -DH5PL_CPACK_ENABLE:BOOL=ON
-            -DHDF5_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}
-            -DTGZPATH:PATH=${TGZPATH}
-            # the filters
-            -DBSHUF_TGZ_NAME:STRING=${BSHUF_TGZ_NAME}
-            -DBSHUF_PACKAGE_NAME:STRING=${BSHUF_PACKAGE_NAME}
-            -DBLOSC_TGZ_NAME:STRING=${BLOSC_TGZ_NAME}
-            -DBLOSC_PACKAGE_NAME:STRING=${BLOSC_PACKAGE_NAME}
-            -DZLIB_TGZ_NAME:STRING=${ZLIB_TGZ_NAME}
-            -DZLIB_PACKAGE_NAME:STRING=${ZLIB_PACKAGE_NAME}
-            -DBZ2_TGZ_NAME:STRING=${BZ2_TGZ_NAME}
-            -DBZ2_PACKAGE_NAME:STRING=${BZ2_PACKAGE_NAME}
-            #-DFPZIP_TGZ_NAME:STRING=${FPZIP_TGZ_NAME}
-            #-DFPZIP_PACKAGE_NAME:STRING=${FPZIP_PACKAGE_NAME}
-            -DJPEG_TGZ_NAME:STRING=${JPEG_TGZ_NAME}
-            -DJPEG_PACKAGE_NAME:STRING=${JPEG_PACKAGE_NAME}
-            -DLZ4_TGZ_NAME:STRING=${LZ4_TGZ_NAME}
-            -DLZ4_PACKAGE_NAME:STRING=${LZ4_PACKAGE_NAME}
-            -DLZF_TGZ_NAME:STRING=${LZF_TGZ_NAME}
-            -DLZF_PACKAGE_NAME:STRING=${LZF_PACKAGE_NAME}
-            -DSZF_TGZ_NAME:STRING=${SZF_TGZ_NAME}
-            -DSZF_PACKAGE_NAME:STRING=${SZF_PACKAGE_NAME}
-            -DZFP_TGZ_NAME:STRING=${ZFP_TGZ_NAME}
-            -DZFP_PACKAGE_NAME:STRING=${ZFP_PACKAGE_NAME}
     )
   elseif (${compress_type} MATCHES "TGZ")
-    EXTERNALPROJECT_ADD (PLUGIN
+    FetchContent_Declare (PLUGIN
         URL ${PLUGIN_URL}
-        URL_MD5 ""
-        LIST_SEPARATOR |
-        INSTALL_COMMAND ""
-        CMAKE_ARGS
-            -DUSE_SHARED_LIBS:BOOL=ON
-            -DBUILD_SHARED_LIBS:BOOL=ON
-            -DH5PL_ALLOW_EXTERNAL_SUPPORT:STRING=${HDF5_ALLOW_EXTERNAL_SUPPORT}
-            -DBUILD_TESTING:STRING=OFF
-            -DBUILD_EXAMPLES:STRING=OFF
-            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-            -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-            -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
-            -DCMAKE_PDB_OUTPUT_DIRECTORY:PATH=${CMAKE_PDB_OUTPUT_DIRECTORY}
-            -DDISABLE_PLUGIN_ENCODER:BOOL=OFF
-            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-            -DCMAKE_TOOLCHAIN_FILE:STRING=${CMAKE_TOOLCHAIN_FILE}
-            # the hdf5 settings
-            -DHDF5_PACKAGE_NAME:STRING=hdf5
-            -DHDF5_HDF5_HEADER:STRING=h5pubconf.h
-            -DHDF5_LINK_LIBS:STRING=$<TARGET_LINKER_FILE:${HDF5_LIBSH_TARGET}>
-            -DHDF5_INCLUDE_DIR:PATH=${HDF5_SRC_DIR}|${HDF5_SRC_BINARY_DIR}
-            -DPL_PACKAGE_NAME:STRING=${PLUGIN_PACKAGE_NAME}
-            -DH5PL_CPACK_ENABLE:BOOL=ON
-            -DHDF5_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}
-            -DTGZPATH:PATH=${TGZPATH}
-            # the filters
-            -DBSHUF_TGZ_NAME:STRING=${BSHUF_TGZ_NAME}
-            -DBSHUF_PACKAGE_NAME:STRING=${BSHUF_PACKAGE_NAME}
-            -DBLOSC_TGZ_NAME:STRING=${BLOSC_TGZ_NAME}
-            -DBLOSC_PACKAGE_NAME:STRING=${BLOSC_PACKAGE_NAME}
-            -DZLIB_TGZ_NAME:STRING=${ZLIB_TGZ_NAME}
-            -DZLIB_PACKAGE_NAME:STRING=${ZLIB_PACKAGE_NAME}
-            -DBZ2_TGZ_NAME:STRING=${BZ2_TGZ_NAME}
-            -DBZ2_PACKAGE_NAME:STRING=${BZ2_PACKAGE_NAME}
-            #-DFPZIP_TGZ_NAME:STRING=${FPZIP_TGZ_NAME}
-            #-DFPZIP_PACKAGE_NAME:STRING=${FPZIP_PACKAGE_NAME}
-            -DJPEG_TGZ_NAME:STRING=${JPEG_TGZ_NAME}
-            -DJPEG_PACKAGE_NAME:STRING=${JPEG_PACKAGE_NAME}
-            -DLZ4_TGZ_NAME:STRING=${LZ4_TGZ_NAME}
-            -DLZ4_PACKAGE_NAME:STRING=${LZ4_PACKAGE_NAME}
-            -DLZF_TGZ_NAME:STRING=${LZF_TGZ_NAME}
-            -DLZF_PACKAGE_NAME:STRING=${LZF_PACKAGE_NAME}
-            -DSZF_TGZ_NAME:STRING=${SZF_TGZ_NAME}
-            -DSZF_PACKAGE_NAME:STRING=${SZF_PACKAGE_NAME}
-            -DZFP_TGZ_NAME:STRING=${ZFP_TGZ_NAME}
-            -DZFP_PACKAGE_NAME:STRING=${ZFP_PACKAGE_NAME}
+        URL_HASH ""
     )
   endif ()
-  externalproject_get_property (PLUGIN BINARY_DIR SOURCE_DIR)
-  set (PLUGIN_BINARY_DIR "${BINARY_DIR}")
-
-#  include (${BINARY_DIR}/PLUGIN-targets.cmake)
+  FetchContent_GetProperties(PLUGIN)
+  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+    message (VERBOSE "HDF5_INCLUDE_DIR=${HDF5_INCLUDE_DIR}")
+  endif ()
+  if(NOT PLUGIN_POPULATED)
+    FetchContent_Populate(PLUGIN)
+    include (${HDF_RESOURCES_DIR}/HDF5PluginCache.cmake)
+    set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+    add_subdirectory(${plugin_SOURCE_DIR} ${plugin_BINARY_DIR})
+    if (ENABLE_BLOSC)
+      add_dependencies (h5blosc ${HDF5_LIBSH_TARGET})
+      add_dependencies (h5ex_d_blosc ${HDF5_LIBSH_TARGET})
+      target_include_directories (h5ex_d_blosc PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}")
+    endif ()
+    if (ENABLE_BSHUF)
+      add_dependencies (h5bshuf ${HDF5_LIBSH_TARGET})
+      add_dependencies (h5ex_d_bshuf ${HDF5_LIBSH_TARGET})
+      target_include_directories (h5ex_d_bshuf PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}")
+    endif ()
+    if (ENABLE_BZIP2)
+      add_dependencies (h5bz2 ${HDF5_LIBSH_TARGET})
+      add_dependencies (h5ex_d_bzip2 ${HDF5_LIBSH_TARGET})
+      target_include_directories (h5ex_d_bzip2 PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}")
+    endif ()
+    if (ENABLE_JPEG)
+      add_dependencies (h5jpeg ${HDF5_LIBSH_TARGET})
+      add_dependencies (h5ex_d_jpeg ${HDF5_LIBSH_TARGET})
+      target_include_directories (h5ex_d_jpeg PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}")
+    endif ()
+    if (ENABLE_LZ4)
+      add_dependencies (h5lz4 ${HDF5_LIBSH_TARGET})
+      add_dependencies (h5ex_d_lz4 ${HDF5_LIBSH_TARGET})
+      target_include_directories (h5ex_d_lz4 PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}")
+    endif ()
+    if (ENABLE_LZF)
+      add_dependencies (h5lzf ${HDF5_LIBSH_TARGET})
+      add_dependencies (h5ex_d_lzf ${HDF5_LIBSH_TARGET})
+      target_include_directories (h5ex_d_lzf PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}")
+    endif ()
+    if (ENABLE_MAFISC)
+      add_dependencies (h5mafisc ${HDF5_LIBSH_TARGET})
+      add_dependencies (h5ex_d_mafisc ${HDF5_LIBSH_TARGET})
+      target_include_directories (h5ex_d_mafisc PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}")
+    endif ()
+    if (ENABLE_SZF)
+      add_dependencies (h5szf ${HDF5_LIBSH_TARGET})
+      add_dependencies (h5ex_d_sz ${HDF5_LIBSH_TARGET})
+      target_include_directories (h5ex_d_sz PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}")
+    endif ()
+    if (ENABLE_ZFP)
+      add_dependencies (h5zfp ${HDF5_LIBSH_TARGET})
+      add_dependencies (h5ex_d_zfp ${HDF5_LIBSH_TARGET})
+      target_include_directories (h5ex_d_zfp PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR}")
+    endif ()
+  endif ()
+  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+    message (VERBOSE "HDF5_INCLUDE_DIR=${HDF5_INCLUDE_DIR}")
+  endif ()
+  set (PLUGIN_BINARY_DIR "${plugin_BINARY_DIR}")
+  set (PLUGIN_SOURCE_DIR "${plugin_SOURCE_DIR}")
   set (PLUGIN_LIBRARY "PLUGIN")
   set (PLUGIN_FOUND 1)
 endmacro ()
@@ -129,7 +91,7 @@ macro (FILTER_OPTION plname)
       elseif (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
         if (NOT TGZPATH)
           set (TGZPATH ${H5PL_SOURCE_DIR})
-       endif ()
+        endif ()
         set (HDF_${plname}_URL ${TGZPATH}/${HDF_${plname}_TGZ_NAME})
       endif ()
     endif ()

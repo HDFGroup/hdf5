@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -142,7 +142,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
             /* failure, such as bad format */
             return NULL;
 
-        if ((size_t)nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s")))) {
+        if ((size_t)nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s") != 0))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
@@ -287,7 +287,7 @@ h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, h
 {
     size_t i = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     H5TOOLS_DEBUG("elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
     h5tools_str_reset(str);
@@ -306,7 +306,7 @@ h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, h
         h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)elmtno);
     H5TOOLS_DEBUG("str=%s", str->s);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     /* Add prefix and suffix to the index */
     return h5tools_str_fmt(str, (size_t)0, OPT(info->idx_fmt, "%s: "));
@@ -323,11 +323,11 @@ h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, h
  */
 char *
 h5tools_str_region_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, hsize_t elmtno,
-                          hsize_t *ptdata, h5tools_context_t *ctx)
+                          const hsize_t *ptdata, h5tools_context_t *ctx)
 {
     size_t i = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     H5TOOLS_DEBUG("elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
     h5tools_str_reset(str);
@@ -347,7 +347,7 @@ h5tools_str_region_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *
         h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)0);
     H5TOOLS_DEBUG("str=%s", str->s);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     /* Add prefix and suffix to the index */
     return h5tools_str_fmt(str, (size_t)0, OPT(info->idx_fmt, "%s: "));
@@ -439,7 +439,10 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
     /*
      * This function fails if the rspace does not have blocks.
      */
-    H5E_BEGIN_TRY { snblocks = H5Sget_select_hyper_nblocks(rspace); }
+    H5E_BEGIN_TRY
+    {
+        snblocks = H5Sget_select_hyper_nblocks(rspace);
+    }
     H5E_END_TRY;
 
     /* Print block information */
@@ -496,7 +499,10 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
     /*
      * This function fails if the rspace does not have points.
      */
-    H5E_BEGIN_TRY { snpoints = H5Sget_select_elem_npoints(rspace); }
+    H5E_BEGIN_TRY
+    {
+        snpoints = H5Sget_select_elem_npoints(rspace);
+    }
     H5E_END_TRY;
 
     /* Print point information */
@@ -651,7 +657,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     H5T_class_t    type_class;
     char *         ret_value = NULL;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
         HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH);
@@ -705,8 +711,17 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     long double templdouble;
 
                     HDmemcpy(&templdouble, vp, sizeof(long double));
-                    h5tools_str_append(str, OPT(info->fmt_double, "%Lf"), templdouble);
+                    h5tools_str_append(str, "%Lg", templdouble);
 #endif
+                }
+                else {
+                    size_t i;
+
+                    for (i = 0; i < nsize; i++) {
+                        if (i)
+                            h5tools_str_append(str, ":");
+                        h5tools_str_append(str, OPT(info->fmt_raw, "%02x"), ucp_vp[i]);
+                    }
                 }
                 break;
 
@@ -932,7 +947,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
                     }
                 } /* end if (sizeof(long long) == nsize) */
-#endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
+#endif            /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
                 break;
 
             case H5T_COMPOUND:
@@ -1268,7 +1283,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         for (x = 0; x < ctx->indent_level + 1; x++)
                             h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
                     } /* end if */
-#endif /* LATER */
+#endif                /* LATER */
 
                     ctx->indent_level++;
 
@@ -1324,7 +1339,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
 {
     ssize_t buf_size;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     h5tools_str_append(str, " \"");
     buf_size = H5Rget_file_name(ref_vp, NULL, 0);
@@ -1366,7 +1381,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
     }
     h5tools_str_append(str, "\"");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------

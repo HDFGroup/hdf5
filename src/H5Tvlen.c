@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -245,7 +245,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
+H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 {
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
     htri_t                ret_value = FALSE; /* Indicate success, but no location change */
@@ -282,6 +282,13 @@ H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 else
                     HDassert(0 && "Invalid VL type");
 
+                /* Release owned file */
+                if (dt->shared->owned_vol_obj) {
+                    if (H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
+                    dt->shared->owned_vol_obj = NULL;
+                } /* end if */
+
                 /* Reset file pointer (since this VL is in memory) */
                 dt->shared->u.vlen.file = NULL;
                 break;
@@ -307,6 +314,10 @@ H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
                 /* Set file ID (since this VL is on disk) */
                 dt->shared->u.vlen.file = file;
+
+                /* dt now owns a reference to file */
+                if (H5T_own_vol_obj(dt, file) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't give ownership of VOL object")
                 break;
 
             case H5T_LOC_BADLOC:
@@ -626,7 +637,7 @@ H5T__vlen_mem_str_getptr(void *_vl)
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     char *s = *(char **)_vl; /* Pointer to the user's string information */
 #else
-    char *s = NULL; /* Pointer to the user's string information */
+    char *      s = NULL; /* Pointer to the user's string information */
 #endif
 
     FUNC_ENTER_STATIC_NOERR
@@ -717,7 +728,7 @@ H5T__vlen_mem_str_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     char *s = *(char **)_vl; /* Pointer to the user's string information */
 #else
-    char *s; /* Pointer to the user's string information */
+    char *s;        /* Pointer to the user's string information */
 #endif
 
     FUNC_ENTER_STATIC_NOERR

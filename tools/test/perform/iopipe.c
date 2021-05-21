@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -64,11 +64,11 @@ print_stats(const char *prefix,
 #ifdef H5_HAVE_GETRUSAGE
     double u_time, s_time;
 
-    u_time = ((double)(r_stop->ru_utime.tv_sec) + (double)(r_stop->ru_utime.tv_usec) / (double)1000000.0F) -
-             ((double)(r_start->ru_utime.tv_sec) + (double)(r_start->ru_utime.tv_usec) / (double)1000000.0F);
+    u_time = ((double)(r_stop->ru_utime.tv_sec) + (double)(r_stop->ru_utime.tv_usec) / 1000000.0) -
+             ((double)(r_start->ru_utime.tv_sec) + (double)(r_start->ru_utime.tv_usec) / 1000000.0);
 
-    s_time = ((double)(r_stop->ru_stime.tv_sec) + (double)(r_stop->ru_stime.tv_usec) / (double)1000000.0F) -
-             ((double)(r_start->ru_stime.tv_sec) + (double)(r_start->ru_stime.tv_usec) / (double)1000000.0F);
+    s_time = ((double)(r_stop->ru_stime.tv_sec) + (double)(r_stop->ru_stime.tv_usec) / 1000000.0) -
+             ((double)(r_start->ru_stime.tv_sec) + (double)(r_start->ru_stime.tv_usec) / 1000000.0);
 #endif
     e_time = t_stop - t_start;
     H5_bandwidth(bw, (double)nbytes, e_time);
@@ -149,8 +149,7 @@ main(void)
      * Win32 version 5.0 compiler.
      * 1998-11-06 ptl
      */
-    HDprintf("I/O request size is %1.1fMB\n",
-             (double)(hssize_t)(size[0] * size[1]) / (double)1024.0F * (double)1024);
+    HDprintf("I/O request size is %1.1fMB\n", (double)(hssize_t)(size[0] * size[1]) / 1024.0 * 1024.0);
 
     /* Open the files */
     file = H5Fcreate(HDF5_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

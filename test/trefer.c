@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -566,7 +566,7 @@ test_reference_vlen_obj(void)
     hsize_t    vl_dims[] = {1};
     hid_t      dapl_id; /* Dataset access property list     */
     H5R_ref_t *wbuf,    /* buffer to write to disk          */
-        *rbuf;          /* buffer read from disk            */
+        *rbuf = NULL;   /* buffer read from disk            */
     unsigned * ibuf, *obuf;
     unsigned   i, j;     /* Counters                         */
     H5O_type_t obj_type; /* Object type                      */
@@ -578,7 +578,6 @@ test_reference_vlen_obj(void)
 
     /* Allocate write & read buffers */
     wbuf = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    rbuf = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
     ibuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
     obuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
 
@@ -832,10 +831,8 @@ test_reference_cmpnd_obj(void)
     hsize_t    dims1[]      = {SPACE1_DIM1};
     hsize_t    cmpnd_dims[] = {1};
     hid_t      dapl_id; /* Dataset access property list     */
-    H5R_ref_t *wbuf,    /* buffer to write to disk          */
-        *rbuf;          /* buffer read from disk            */
     unsigned * ibuf, *obuf;
-    unsigned   i, j;     /* Counters                         */
+    unsigned   i;        /* Counter                          */
     H5O_type_t obj_type; /* Object type                      */
     herr_t     ret;      /* Generic return value             */
     s2_t       cmpnd_wbuf, cmpnd_rbuf;
@@ -844,8 +841,6 @@ test_reference_cmpnd_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions within compound type\n"));
 
     /* Allocate write & read buffers */
-    wbuf = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    rbuf = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
     ibuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
     obuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
 
@@ -946,39 +941,38 @@ test_reference_cmpnd_obj(void)
     dataset = H5Dcreate2(fid1, "Dataset3", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
+    /* Reset buffer for writing */
+    HDmemset(&cmpnd_wbuf, 0, sizeof(cmpnd_wbuf));
+
     /* Create reference to dataset */
-    ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
+    ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, &cmpnd_wbuf.ref0);
     CHECK(ret, FAIL, "H5Rcreate_object");
-    ret = H5Rget_obj_type3(&wbuf[0], H5P_DEFAULT, &obj_type);
+    ret = H5Rget_obj_type3(&cmpnd_wbuf.ref0, H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
 
     /* Create reference to dataset */
-    ret = H5Rcreate_object(fid1, "/Group1/Dataset2", H5P_DEFAULT, &wbuf[1]);
+    ret = H5Rcreate_object(fid1, "/Group1/Dataset2", H5P_DEFAULT, &cmpnd_wbuf.ref1);
     CHECK(ret, FAIL, "H5Rcreate_object");
-    ret = H5Rget_obj_type3(&wbuf[1], H5P_DEFAULT, &obj_type);
+    ret = H5Rget_obj_type3(&cmpnd_wbuf.ref1, H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
 
     /* Create reference to group */
-    ret = H5Rcreate_object(fid1, "/Group1", H5P_DEFAULT, &wbuf[2]);
+    ret = H5Rcreate_object(fid1, "/Group1", H5P_DEFAULT, &cmpnd_wbuf.ref2);
     CHECK(ret, FAIL, "H5Rcreate_object");
-    ret = H5Rget_obj_type3(&wbuf[2], H5P_DEFAULT, &obj_type);
+    ret = H5Rget_obj_type3(&cmpnd_wbuf.ref2, H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_GROUP, "H5Rget_obj_type3");
 
     /* Create reference to named datatype */
-    ret = H5Rcreate_object(fid1, "/Group1/Datatype1", H5P_DEFAULT, &wbuf[3]);
+    ret = H5Rcreate_object(fid1, "/Group1/Datatype1", H5P_DEFAULT, &cmpnd_wbuf.ref3);
     CHECK(ret, FAIL, "H5Rcreate_object");
-    ret = H5Rget_obj_type3(&wbuf[3], H5P_DEFAULT, &obj_type);
+    ret = H5Rget_obj_type3(&cmpnd_wbuf.ref3, H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_NAMED_DATATYPE, "H5Rget_obj_type3");
 
     /* Store dimensions */
-    cmpnd_wbuf.ref0    = wbuf[0];
-    cmpnd_wbuf.ref1    = wbuf[1];
-    cmpnd_wbuf.ref2    = wbuf[2];
-    cmpnd_wbuf.ref3    = wbuf[3];
     cmpnd_wbuf.dim_idx = SPACE1_DIM1;
 
     /* Write selection to disk */
@@ -1017,17 +1011,13 @@ test_reference_cmpnd_obj(void)
     CHECK(ret, FAIL, "H5Dread");
 
     VERIFY(cmpnd_rbuf.dim_idx, SPACE1_DIM1, "H5Dread");
-    rbuf[0] = cmpnd_rbuf.ref0;
-    rbuf[1] = cmpnd_rbuf.ref1;
-    rbuf[2] = cmpnd_rbuf.ref2;
-    rbuf[3] = cmpnd_rbuf.ref3;
 
     /* Close datatype */
     ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Open dataset object */
-    dset2 = H5Ropen_object(&rbuf[0], H5P_DEFAULT, dapl_id);
+    dset2 = H5Ropen_object(&cmpnd_rbuf.ref0, H5P_DEFAULT, dapl_id);
     CHECK(dset2, H5I_INVALID_HID, "H5Ropen_object");
 
     /* Check information in referenced dataset */
@@ -1049,7 +1039,7 @@ test_reference_cmpnd_obj(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Open group object.  GAPL isn't supported yet.  But it's harmless to pass in */
-    group = H5Ropen_object(&rbuf[2], H5P_DEFAULT, H5P_DEFAULT);
+    group = H5Ropen_object(&cmpnd_rbuf.ref2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, H5I_INVALID_HID, "H5Ropen_object");
 
     /* Close group */
@@ -1057,7 +1047,7 @@ test_reference_cmpnd_obj(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Open datatype object. TAPL isn't supported yet.  But it's harmless to pass in */
-    tid1 = H5Ropen_object(&rbuf[3], H5P_DEFAULT, H5P_DEFAULT);
+    tid1 = H5Ropen_object(&cmpnd_rbuf.ref3, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(tid1, H5I_INVALID_HID, "H5Ropen_object");
 
     /* Verify correct datatype */
@@ -1088,18 +1078,25 @@ test_reference_cmpnd_obj(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Destroy references */
-    for (j = 0; j < SPACE1_DIM1; j++) {
-        ret = H5Rdestroy(&wbuf[j]);
-        CHECK(ret, FAIL, "H5Rdestroy");
-    }
-    for (j = 0; j < SPACE1_DIM1; j++) {
-        ret = H5Rdestroy(&rbuf[j]);
-        CHECK(ret, FAIL, "H5Rdestroy");
-    }
+    ret = H5Rdestroy(&cmpnd_wbuf.ref0);
+    CHECK(ret, FAIL, "H5Rdestroy");
+    ret = H5Rdestroy(&cmpnd_wbuf.ref1);
+    CHECK(ret, FAIL, "H5Rdestroy");
+    ret = H5Rdestroy(&cmpnd_wbuf.ref2);
+    CHECK(ret, FAIL, "H5Rdestroy");
+    ret = H5Rdestroy(&cmpnd_wbuf.ref3);
+    CHECK(ret, FAIL, "H5Rdestroy");
+
+    ret = H5Rdestroy(&cmpnd_rbuf.ref0);
+    CHECK(ret, FAIL, "H5Rdestroy");
+    ret = H5Rdestroy(&cmpnd_rbuf.ref1);
+    CHECK(ret, FAIL, "H5Rdestroy");
+    ret = H5Rdestroy(&cmpnd_rbuf.ref2);
+    CHECK(ret, FAIL, "H5Rdestroy");
+    ret = H5Rdestroy(&cmpnd_rbuf.ref3);
+    CHECK(ret, FAIL, "H5Rdestroy");
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
     HDfree(ibuf);
     HDfree(obuf);
 } /* test_reference_cmpnd_obj() */
@@ -1361,7 +1358,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         /*
          * Dereference an undefined reference (should fail)
          */
-        H5E_BEGIN_TRY { dset2 = H5Ropen_object(&rdata_NA[0], H5P_DEFAULT, H5P_DEFAULT); }
+        H5E_BEGIN_TRY
+        {
+            dset2 = H5Ropen_object(&rdata_NA[0], H5P_DEFAULT, H5P_DEFAULT);
+        }
         H5E_END_TRY;
         VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object");
 
@@ -1371,7 +1371,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
 
         /* This close should fail since H5Ropen_object never created
          * the id of the referenced object. */
-        H5E_BEGIN_TRY { ret = H5Dclose(dset2); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Dclose(dset2);
+        }
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Dclose");
 
@@ -1523,7 +1526,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
 
         /* Attempting to retrieve type of object using non-valid refs */
         for (j = 0; j < 3; j++) {
-            H5E_BEGIN_TRY { ret = H5Rget_obj_type3(&nvrbuf[j], H5P_DEFAULT, &obj_type); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5Rget_obj_type3(&nvrbuf[j], H5P_DEFAULT, &obj_type);
+            }
             H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Rget_obj_type3");
         } /* end for */

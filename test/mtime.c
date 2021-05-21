@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -120,7 +120,7 @@ main(void)
         HDputs("    cannot be queried on this system.  See H5O_mtime_decode().");
         return 0;
     }
-    else if (HDfabs(HDdifftime(now, oi1.ctime)) > (double)60.0F) {
+    else if (HDfabs(HDdifftime(now, oi1.ctime)) > 60.0) {
         H5_FAILED();
         tm = HDlocaltime(&(oi1.ctime));
         HDstrftime((char *)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);

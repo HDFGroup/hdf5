@@ -1,5 +1,6 @@
 name: clang-format Check
-on: [workflow_dispatch, push, pull_request]
+on:
+  pull_request:
 jobs:
   formatting-check:
     name: Formatting Check
@@ -8,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run clang-format style check for C programs.
-      uses: DoozyX/clang-format-lint-action@v0.10
+      uses: DoozyX/clang-format-lint-action@v0.11
       with:
         source: '.'
         extensions: 'c,h,cpp,hpp'

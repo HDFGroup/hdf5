@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -52,17 +52,19 @@ static herr_t H5Z__set_parms_array(const H5T_t *type, unsigned *cd_values_index,
 static herr_t H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned cd_values[],
                                       hbool_t *need_not_compress);
 
-static void H5Z__nbit_next_byte(size_t *j, size_t *buf_len);
-static void H5Z__nbit_decompress_one_byte(unsigned char *data, size_t data_offset, unsigned k,
+static void   H5Z__nbit_next_byte(size_t *j, size_t *buf_len);
+static void   H5Z__nbit_decompress_one_byte(unsigned char *data, size_t data_offset, unsigned k,
+                                            unsigned begin_i, unsigned end_i, const unsigned char *buffer,
+                                            size_t *j, size_t *buf_len, const parms_atomic *p,
+                                            size_t datatype_len);
+static void   H5Z__nbit_compress_one_byte(const unsigned char *data, size_t data_offset, unsigned k,
                                           unsigned begin_i, unsigned end_i, unsigned char *buffer, size_t *j,
                                           size_t *buf_len, const parms_atomic *p, size_t datatype_len);
-static void H5Z__nbit_compress_one_byte(unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
-                                        unsigned end_i, unsigned char *buffer, size_t *j, size_t *buf_len,
-                                        const parms_atomic *p, size_t datatype_len);
-static void H5Z__nbit_decompress_one_nooptype(unsigned char *data, size_t data_offset, unsigned char *buffer,
-                                              size_t *j, size_t *buf_len, unsigned size);
-static void H5Z__nbit_decompress_one_atomic(unsigned char *data, size_t data_offset, unsigned char *buffer,
-                                            size_t *j, size_t *buf_len, const parms_atomic *p);
+static void   H5Z__nbit_decompress_one_nooptype(unsigned char *data, size_t data_offset,
+                                                const unsigned char *buffer, size_t *j, size_t *buf_len,
+                                                unsigned size);
+static void   H5Z__nbit_decompress_one_atomic(unsigned char *data, size_t data_offset, unsigned char *buffer,
+                                              size_t *j, size_t *buf_len, const parms_atomic *p);
 static herr_t H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned char *buffer,
                                              size_t *j, size_t *buf_len, const unsigned parms[],
                                              unsigned *parms_index);
@@ -71,8 +73,8 @@ static herr_t H5Z__nbit_decompress_one_compound(unsigned char *data, size_t data
                                                 const unsigned parms[], unsigned *parms_index);
 static herr_t H5Z__nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
                                    const unsigned parms[]);
-static void   H5Z__nbit_compress_one_nooptype(unsigned char *data, size_t data_offset, unsigned char *buffer,
-                                              size_t *j, size_t *buf_len, unsigned size);
+static void   H5Z__nbit_compress_one_nooptype(const unsigned char *data, size_t data_offset,
+                                              unsigned char *buffer, size_t *j, size_t *buf_len, unsigned size);
 static void   H5Z__nbit_compress_one_array(unsigned char *data, size_t data_offset, unsigned char *buffer,
                                            size_t *j, size_t *buf_len, const unsigned parms[],
                                            unsigned *parms_index);
@@ -1026,7 +1028,7 @@ H5Z__nbit_next_byte(size_t *j, size_t *buf_len)
 
 static void
 H5Z__nbit_decompress_one_byte(unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
-                              unsigned end_i, unsigned char *buffer, size_t *j, size_t *buf_len,
+                              unsigned end_i, const unsigned char *buffer, size_t *j, size_t *buf_len,
                               const parms_atomic *p, size_t datatype_len)
 {
     size_t        dat_len; /* dat_len is the number of bits to be copied in each data byte */
@@ -1075,8 +1077,8 @@ H5Z__nbit_decompress_one_byte(unsigned char *data, size_t data_offset, unsigned 
 }
 
 static void
-H5Z__nbit_decompress_one_nooptype(unsigned char *data, size_t data_offset, unsigned char *buffer, size_t *j,
-                                  size_t *buf_len, unsigned size)
+H5Z__nbit_decompress_one_nooptype(unsigned char *data, size_t data_offset, const unsigned char *buffer,
+                                  size_t *j, size_t *buf_len, unsigned size)
 {
     unsigned      i;       /* index */
     size_t        dat_len; /* dat_len is the number of bits to be copied in each data byte */
@@ -1341,7 +1343,7 @@ done:
 }
 
 static void
-H5Z__nbit_compress_one_byte(unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
+H5Z__nbit_compress_one_byte(const unsigned char *data, size_t data_offset, unsigned k, unsigned begin_i,
                             unsigned end_i, unsigned char *buffer, size_t *j, size_t *buf_len,
                             const parms_atomic *p, size_t datatype_len)
 {
@@ -1383,8 +1385,8 @@ H5Z__nbit_compress_one_byte(unsigned char *data, size_t data_offset, unsigned k,
 }
 
 static void
-H5Z__nbit_compress_one_nooptype(unsigned char *data, size_t data_offset, unsigned char *buffer, size_t *j,
-                                size_t *buf_len, unsigned size)
+H5Z__nbit_compress_one_nooptype(const unsigned char *data, size_t data_offset, unsigned char *buffer,
+                                size_t *j, size_t *buf_len, unsigned size)
 {
     unsigned      i;       /* index */
     size_t        dat_len; /* dat_len is the number of bits to be copied in each data byte */

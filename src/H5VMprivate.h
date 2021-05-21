@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -105,7 +105,7 @@ H5_DLL herr_t H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *_
                                  const hssize_t *dst_stride, void *_dst, const hssize_t *src_stride,
                                  const void *_src);
 H5_DLL herr_t H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count);
-H5_DLL herr_t H5VM_array_down(unsigned n, const hsize_t *total_size, hsize_t *down);
+H5_DLL void   H5VM_array_down(unsigned n, const hsize_t *total_size, hsize_t *down);
 H5_DLL hsize_t H5VM_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset);
 H5_DLL hsize_t H5VM_array_offset(unsigned n, const hsize_t *total_size, const hsize_t *offset);
 H5_DLL herr_t  H5VM_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down, hsize_t *coords);
@@ -143,7 +143,7 @@ H5_DLL ssize_t H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_s
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE hsize_t H5_ATTR_UNUSED
+static inline hsize_t H5_ATTR_UNUSED
 H5VM_vector_reduce_product(unsigned n, const hsize_t *v)
 {
     hsize_t ret_value = 1;
@@ -179,7 +179,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE htri_t H5_ATTR_UNUSED
+static inline htri_t H5_ATTR_UNUSED
 H5VM_vector_zerop_u(int n, const hsize_t *v)
 {
     htri_t ret_value = TRUE; /* Return value */
@@ -216,7 +216,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE htri_t H5_ATTR_UNUSED
+static inline htri_t H5_ATTR_UNUSED
 H5VM_vector_zerop_s(int n, const hssize_t *v)
 {
     htri_t ret_value = TRUE; /* Return value */
@@ -255,7 +255,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE int H5_ATTR_UNUSED
+static inline int H5_ATTR_UNUSED
 H5VM_vector_cmp_u(unsigned n, const hsize_t *v1, const hsize_t *v2)
 {
     int ret_value = 0; /* Return value */
@@ -303,7 +303,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE int H5_ATTR_UNUSED
+static inline int H5_ATTR_UNUSED
 H5VM_vector_cmp_s(unsigned n, const hssize_t *v1, const hssize_t *v2)
 {
     int ret_value = 0; /* Return value */
@@ -346,7 +346,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE void H5_ATTR_UNUSED
+static inline void H5_ATTR_UNUSED
 H5VM_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
 {
     while (n--)
@@ -390,7 +390,7 @@ static const unsigned char LogTable256[] = {
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE unsigned H5_ATTR_UNUSED
+static inline unsigned H5_ATTR_UNUSED
 H5VM_log2_gen(uint64_t n)
 {
     unsigned              r;          /* r will be log2(n) */
@@ -439,7 +439,7 @@ static const unsigned MultiplyDeBruijnBitPosition[32] = {0,  1,  28, 2,  29, 14,
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE H5_ATTR_PURE unsigned
+static inline H5_ATTR_PURE unsigned
 H5VM_log2_of2(uint32_t n)
 {
 #ifndef NDEBUG
@@ -463,7 +463,7 @@ H5VM_log2_of2(uint32_t n)
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE H5_ATTR_CONST hsize_t
+static inline H5_ATTR_CONST hsize_t
 H5VM_power2up(hsize_t n)
 {
     hsize_t ret_value = 1; /* Return value */
@@ -495,7 +495,7 @@ H5VM_power2up(hsize_t n)
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE unsigned H5_ATTR_UNUSED
+static inline unsigned H5_ATTR_UNUSED
 H5VM_limit_enc_size(uint64_t limit)
 {
     return (H5VM_log2_gen(limit) / 8) + 1;
@@ -527,7 +527,7 @@ static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE hbool_t H5_ATTR_UNUSED
+static inline hbool_t H5_ATTR_UNUSED
 H5VM_bit_get(const unsigned char *buf, size_t offset)
 {
     /* Test the appropriate bit in the buffer */
@@ -557,7 +557,7 @@ H5VM_bit_get(const unsigned char *buf, size_t offset)
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE void H5_ATTR_UNUSED
+static inline void H5_ATTR_UNUSED
 H5VM_bit_set(unsigned char *buf, size_t offset, hbool_t val)
 {
     /* Set/reset the appropriate bit in the buffer */

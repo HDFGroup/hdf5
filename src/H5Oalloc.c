@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1234,10 +1234,10 @@ H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
                 /* Keep first one found */
                 if (found_null < 0)
                     found_null = (ssize_t)idx;
-                else
-                    /* Check for better fit */
-                    if (oh->mesg[idx].raw_size < oh->mesg[found_null].raw_size)
+                /* Check for better fit */
+                else if (oh->mesg[idx].raw_size < oh->mesg[found_null].raw_size) {
                     found_null = (ssize_t)idx;
+                }
                 else {
                     /* If they are the same size, choose the one in the earliest chunk */
                     if (oh->mesg[idx].raw_size == oh->mesg[found_null].raw_size) {
@@ -2005,8 +2005,8 @@ H5O__merge_null(H5F_t *f, H5O_t *oh)
                 for (v = 0, curr_msg2 = &oh->mesg[0]; v < oh->nmesgs; v++, curr_msg2++) {
                     if (u != v && H5O_NULL_ID == curr_msg2->type->id &&
                         curr_msg->chunkno == curr_msg2->chunkno) {
-                        ssize_t adj_raw;      /* Amount to adjust raw message pointer */
-                        size_t  adj_raw_size; /* Amount to adjust raw message size */
+                        ssize_t adj_raw      = 0; /* Amount to adjust raw message pointer */
+                        size_t  adj_raw_size = 0; /* Amount to adjust raw message size */
 
                         /* Check for second message after first message */
                         if ((curr_msg->raw + curr_msg->raw_size) ==

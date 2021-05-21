@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -395,8 +395,8 @@ done:
  * Purpose:     Store virtual dataset layout information, for new dataset
  *
  * Note:        We assume here that the contents of the heap block cannot
- *		change!  If this ever stops being the case we must change
- *		this code to allow overwrites of the heap block.  -NAF
+ *        change!  If this ever stops being the case we must change
+ *        this code to allow overwrites of the heap block.  -NAF
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
@@ -895,7 +895,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
     HDassert(source_dset->dset_name);
 
     /* Check if we need to open the source file */
-    if (HDstrcmp(source_dset->file_name, ".")) {
+    if (HDstrcmp(source_dset->file_name, ".") != 0) {
         unsigned intent; /* File access permissions */
 
         /* Get the virtual dataset's file open flags ("intent") */
@@ -2237,9 +2237,37 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
         storage->printf_gap = (hsize_t)0;
 
     /* Retrieve VDS file FAPL to layout */
-    if (storage->source_fapl <= 0)
+    if (storage->source_fapl <= 0) {
+        H5P_genplist_t *   source_fapl  = NULL;           /* Source file FAPL */
+        H5F_close_degree_t close_degree = H5F_CLOSE_WEAK; /* Close degree for source files */
+
         if ((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fapl")
+
+        /* Get property list pointer */
+        if (NULL == (source_fapl = (H5P_genplist_t *)H5I_object(storage->source_fapl)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
+
+        /* Source files must always be opened with H5F_CLOSE_WEAK close degree */
+        if (H5P_set(source_fapl, H5F_ACS_CLOSE_DEGREE_NAME, &close_degree) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
+    } /* end if */
+#ifndef NDEBUG
+    else {
+        H5P_genplist_t *   source_fapl = NULL; /* Source file FAPL */
+        H5F_close_degree_t close_degree;       /* Close degree for source files */
+
+        /* Get property list pointer */
+        if (NULL == (source_fapl = (H5P_genplist_t *)H5I_object(storage->source_fapl)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
+
+        /* Verify H5F_CLOSE_WEAK close degree is set */
+        if (H5P_get(source_fapl, H5F_ACS_CLOSE_DEGREE_NAME, &close_degree) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file close degree")
+
+        HDassert(close_degree == H5F_CLOSE_WEAK);
+    }  /* end else */
+#endif /* NDEBUG */
 
     /* Copy DAPL to layout */
     if (storage->source_dapl <= 0)
@@ -2271,7 +2299,7 @@ done:
 hbool_t
 H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 {
-    hbool_t ret_value; /* Return value */
+    hbool_t ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2355,7 +2383,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage, cons
     hssize_t select_nelmts;              /* Number of elements in selection */
     hsize_t  bounds_start[H5S_MAX_RANK]; /* Selection bounds start */
     hsize_t  bounds_end[H5S_MAX_RANK];   /* Selection bounds end */
-    int      rank;
+    int      rank        = 0;
     hbool_t  bounds_init = FALSE; /* Whether bounds_start, bounds_end, and rank are valid */
     size_t   i, j, k;             /* Local index variables */
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -2821,8 +2849,8 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
                 HDassert((tot_nelmts + (hsize_t)select_nelmts) >= nelmts);
             } /* end block */
 #endif        /* NDEBUG */
-        } /* end if */
-    }     /* end if */
+        }     /* end if */
+    }         /* end if */
 
 done:
     /* Cleanup I/O operation */

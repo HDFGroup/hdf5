@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5HLprivate_H
-#define _H5HLprivate_H
+#ifndef H5HLprivate_H
+#define H5HLprivate_H
 
 /* Private headers needed by this file. */
 #include "H5private.h"   /* Generic Functions                */
@@ -57,7 +57,7 @@ H5_DLL herr_t H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr /*out*/);
 H5_DLL herr_t H5HL_delete(H5F_t *f, haddr_t addr);
 H5_DLL herr_t H5HL_get_size(H5F_t *f, haddr_t addr, size_t *size);
 H5_DLL herr_t H5HL_heapsize(H5F_t *f, haddr_t addr, hsize_t *heap_size);
-H5_DLL size_t H5HL_insert(H5F_t *f, H5HL_t *heap, size_t size, const void *buf);
+H5_DLL herr_t H5HL_insert(H5F_t *f, H5HL_t *heap, size_t size, const void *buf, size_t *offset);
 H5_DLL void * H5HL_offset_into(const H5HL_t *heap, size_t offset);
 H5_DLL H5HL_t *H5HL_protect(H5F_t *f, haddr_t addr, unsigned flags);
 H5_DLL herr_t  H5HL_remove(H5F_t *f, H5HL_t *heap, size_t offset, size_t size);

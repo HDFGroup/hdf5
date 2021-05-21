@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -55,7 +55,7 @@ char prop3_def[10] = "Ten chars"; /* Property 3 default value */
 #define PROP3_DEF_VALUE (&prop3_def)
 
 #define PROP4_NAME "Property 4"
-double prop4_def = 1.41F; /* Property 4 default value */
+double prop4_def = 1.41; /* Property 4 default value */
 #define PROP4_SIZE      sizeof(prop4_def)
 #define PROP4_DEF_VALUE (&prop4_def)
 

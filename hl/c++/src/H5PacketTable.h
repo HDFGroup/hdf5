@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,7 +33,10 @@ class H5_HLCPPDLL PacketTable {
     /* Null constructor
      * Sets table_id to "invalid"
      */
-    PacketTable() { table_id = H5I_BADID; }
+    PacketTable()
+    {
+        table_id = H5I_INVALID_HID;
+    }
 
     /* "Open" Constructor
      * Opens an existing packet table, which can contain either fixed-length or
@@ -163,7 +166,9 @@ class H5_HLCPPDLL FL_PacketTable : virtual public PacketTable {
     /* Destructor
      * Cleans up the packet table
      */
-    virtual ~FL_PacketTable(){};
+    virtual ~FL_PacketTable()
+    {
+    }
 
     /* AppendPacket
      * Adds a single packet to the packet table.  Takes a pointer

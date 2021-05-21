@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -43,20 +43,20 @@ static void H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size, unsigned dst_n
 #endif /* LATER */
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM__stride_optimize1
+ * Function:    H5VM__stride_optimize1
  *
- * Purpose:	Given a stride vector which references elements of the
- *		specified size, optimize the dimensionality, the stride
- *		vector, and the element size to minimize the dimensionality
- *		and the number of memory accesses.
+ * Purpose:     Given a stride vector which references elements of the
+ *              specified size, optimize the dimensionality, the stride
+ *              vector, and the element size to minimize the dimensionality
+ *              and the number of memory accesses.
  *
- *		All arguments are passed by reference and their values may be
- *		modified by this function.
+ *              All arguments are passed by reference and their values may be
+ *              modified by this function.
  *
- * Return:	None
+ * Return:      void
  *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:  Robb Matzke
+ *              Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -66,15 +66,12 @@ H5VM__stride_optimize1(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, c
 {
     FUNC_ENTER_STATIC_NOERR
 
-    /*
-     * This has to be true because if we optimize the dimensionality down to
+    /* This has to be true because if we optimize the dimensionality down to
      * zero we still must make one reference.
      */
     HDassert(1 == H5VM_vector_reduce_product(0, NULL));
 
-    /*
-     * Combine adjacent memory accesses
-     */
+    /* Combine adjacent memory accesses */
     while (*np && stride1[*np - 1] > 0 && (hsize_t)(stride1[*np - 1]) == *elmt_size) {
         *elmt_size *= size[*np - 1];
         if (--*np)
@@ -85,20 +82,20 @@ H5VM__stride_optimize1(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, c
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM__stride_optimize2
+ * Function:    H5VM__stride_optimize2
  *
- * Purpose:	Given two stride vectors which reference elements of the
- *		specified size, optimize the dimensionality, the stride
- *		vectors, and the element size to minimize the dimensionality
- *		and the number of memory accesses.
+ * Purpose:     Given two stride vectors which reference elements of the
+ *              specified size, optimize the dimensionality, the stride
+ *              vectors, and the element size to minimize the dimensionality
+ *              and the number of memory accesses.
  *
- *		All arguments are passed by reference and their values may be
- *		modified by this function.
+ *              All arguments are passed by reference and their values may be
+ *              modified by this function.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:  Robb Matzke
+ *              Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -108,16 +105,13 @@ H5VM__stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, c
 {
     FUNC_ENTER_STATIC_NOERR
 
-    /*
-     * This has to be true because if we optimize the dimensionality down to
+    /* This has to be true because if we optimize the dimensionality down to
      * zero we still must make one reference.
      */
     HDassert(1 == H5VM_vector_reduce_product(0, NULL));
     HDassert(*elmt_size > 0);
 
-    /*
-     * Combine adjacent memory accesses
-     */
+    /* Combine adjacent memory accesses */
 
     /* Unroll loop for common cases */
     switch (*np) {
@@ -206,29 +200,26 @@ H5VM__stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, c
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM_hyper_stride
+ * Function:    H5VM_hyper_stride
  *
- * Purpose:	Given a description of a hyperslab, this function returns
- *		(through STRIDE[]) the byte strides appropriate for accessing
- *		all bytes of the hyperslab and the byte offset where the
- *		striding will begin.  The SIZE can be passed to the various
- *		stride functions.
+ * Purpose:     Given a description of a hyperslab, this function returns
+ *              (through STRIDE[]) the byte strides appropriate for accessing
+ *              all bytes of the hyperslab and the byte offset where the
+ *              striding will begin.  The SIZE can be passed to the various
+ *              stride functions.
  *
- *		The dimensionality of the whole array, the hyperslab, and the
- *		returned stride array is N.  The whole array dimensions are
- *		TOTAL_SIZE and the hyperslab is at offset OFFSET and has
- *		dimensions SIZE.
+ *              The dimensionality of the whole array, the hyperslab, and the
+ *              returned stride array is N.  The whole array dimensions are
+ *              TOTAL_SIZE and the hyperslab is at offset OFFSET and has
+ *              dimensions SIZE.
  *
- *		The stride and starting point returned will cause the
- *		hyperslab elements to be referenced in C order.
+ *              The stride and starting point returned will cause the
+ *              hyperslab elements to be referenced in C order.
  *
- * Return:	Success:	Byte offset from beginning of array to start
- *				of striding.
+ * Return:      Byte offset from beginning of array to start of striding.
  *
- *		Failure:	abort() -- should never fail
- *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:  Robb Matzke
+ *              Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -308,23 +299,22 @@ H5VM_hyper_stride(unsigned n, const hsize_t *size, const hsize_t *total_size, co
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM_hyper_eq
+ * Function:    H5VM_hyper_eq
  *
- * Purpose:	Determines whether two hyperslabs are equal.  This function
- *		assumes that both hyperslabs are relative to the same array,
- *		for if not, they could not possibly be equal.
+ * Purpose:     Determines whether two hyperslabs are equal.  This function
+ *              assumes that both hyperslabs are relative to the same array,
+ *              for if not, they could not possibly be equal.
  *
- * Return:	Success:	TRUE if the hyperslabs are equal (that is,
- *				both refer to exactly the same elements of an
- *				array)
+ * Return:      TRUE if the hyperslabs are equal (that is,
+ *              both refer to exactly the same elements of an
+ *              array)
  *
- *				FALSE otherwise.
+ *              FALSE otherwise
  *
- *		Failure:	TRUE the rank is zero or if both hyperslabs
- *				are of zero size.
+ *              Never returns FAIL
  *
- * Programmer:	Robb Matzke
- *		Friday, October 17, 1997
+ * Programmer:  Robb Matzke
+ *              Friday, October 17, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -360,19 +350,19 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VM_hyper_fill
  *
- * Purpose:	Similar to memset() except it operates on hyperslabs...
+ * Purpose:     Similar to memset() except it operates on hyperslabs...
  *
- *		Fills a hyperslab of array BUF with some value VAL.  BUF
- *		is treated like a C-order array with N dimensions where the
- *		size of each dimension is TOTAL_SIZE[].	 The hyperslab which
- *		will be filled with VAL begins at byte offset OFFSET[] from
- *		the minimum corner of BUF and continues for SIZE[] bytes in
- *		each dimension.
+ *              Fills a hyperslab of array BUF with some value VAL.  BUF
+ *              is treated like a C-order array with N dimensions where the
+ *              size of each dimension is TOTAL_SIZE[].	 The hyperslab which
+ *              will be filled with VAL begins at byte offset OFFSET[] from
+ *              the minimum corner of BUF and continues for SIZE[] bytes in
+ *              each dimension.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Friday, October 10, 1997
+ * Programmer:  Robb Matzke
+ *              Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -418,31 +408,31 @@ H5VM_hyper_fill(unsigned n, const hsize_t *_size, const hsize_t *total_size, con
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM_hyper_copy
+ * Function:    H5VM_hyper_copy
  *
- * Purpose:	Copies a hyperslab from the source to the destination.
+ * Purpose:     Copies a hyperslab from the source to the destination.
  *
- *		A hyperslab is a logically contiguous region of
- *		multi-dimensional size SIZE of an array whose dimensionality
- *		is N and whose total size is DST_TOTAL_SIZE or SRC_TOTAL_SIZE.
- *		The minimum corner of the hyperslab begins at a
- *		multi-dimensional offset from the minimum corner of the DST
- *		(destination) or SRC (source) array.  The sizes and offsets
- *		are assumed to be in C order, that is, the first size/offset
- *		varies the slowest while the last varies the fastest in the
- *		mapping from N-dimensional space to linear space.  This
- *		function assumes that the array elements are single bytes (if
- *		your array has multi-byte elements then add an additional
- *		dimension whose size is that of your element).
+ *              A hyperslab is a logically contiguous region of
+ *              multi-dimensional size SIZE of an array whose dimensionality
+ *              is N and whose total size is DST_TOTAL_SIZE or SRC_TOTAL_SIZE.
+ *              The minimum corner of the hyperslab begins at a
+ *              multi-dimensional offset from the minimum corner of the DST
+ *              (destination) or SRC (source) array.  The sizes and offsets
+ *              are assumed to be in C order, that is, the first size/offset
+ *              varies the slowest while the last varies the fastest in the
+ *              mapping from N-dimensional space to linear space.  This
+ *              function assumes that the array elements are single bytes (if
+ *              your array has multi-byte elements then add an additional
+ *              dimension whose size is that of your element).
  *
- *		The SRC and DST array may be the same array, but the results
- *		are undefined if the source hyperslab overlaps the
- *		destination hyperslab.
+ *              The SRC and DST array may be the same array, but the results
+ *              are undefined if the source hyperslab overlaps the
+ *              destination hyperslab.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Friday, October 10, 1997
+ * Programmer:  Robb Matzke
+ *              Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -486,7 +476,7 @@ H5VM_hyper_copy(unsigned n, const hsize_t *_size, const hsize_t *dst_size, const
 #ifdef NO_INLINED_CODE
     dst_start = H5VM_hyper_stride(n, size, dst_size, dst_offset, dst_stride);
     src_start = H5VM_hyper_stride(n, size, src_size, src_offset, src_stride);
-#else /* NO_INLINED_CODE */
+#else  /* NO_INLINED_CODE */
     /* in-line version of two calls to H5VM_hyper_stride() */
     {
         hsize_t dst_acc; /*accumulator				*/
@@ -592,13 +582,13 @@ H5VM_hyper_copy(unsigned n, const hsize_t *_size, const hsize_t *dst_size, const
 /*-------------------------------------------------------------------------
  * Function:	H5VM_stride_fill
  *
- * Purpose:	Fills all bytes of a hyperslab with the same value using
- *		memset().
+ * Purpose:     Fills all bytes of a hyperslab with the same value using
+ *              memset().
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:  Robb Matzke
+ *              Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -643,19 +633,19 @@ H5VM_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
 /*-------------------------------------------------------------------------
  * Function:	H5VM_stride_copy
  *
- * Purpose:	Uses DST_STRIDE and SRC_STRIDE to advance through the arrays
- *		DST and SRC while copying bytes from SRC to DST.  This
- *		function minimizes the number of calls to memcpy() by
- *		combining various strides, but it will never touch memory
- *		outside the hyperslab defined by the strides.
+ * Purpose:     Uses DST_STRIDE and SRC_STRIDE to advance through the arrays
+ *              DST and SRC while copying bytes from SRC to DST.  This
+ *              function minimizes the number of calls to memcpy() by
+ *              combining various strides, but it will never touch memory
+ *              outside the hyperslab defined by the strides.
  *
- * Note:	If the src_stride is all zero and elmt_size is one, then it's
- *		probably more efficient to use H5VM_stride_fill() instead.
+ * Note:        If the src_stride is all zero and elmt_size is one, then it's
+ *              probably more efficient to use H5VM_stride_fill() instead.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:  Robb Matzke
+ *              Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -709,19 +699,19 @@ H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
 /*-------------------------------------------------------------------------
  * Function:	H5VM_stride_copy_s
  *
- * Purpose:	Uses DST_STRIDE and SRC_STRIDE to advance through the arrays
- *		DST and SRC while copying bytes from SRC to DST.  This
- *		function minimizes the number of calls to memcpy() by
- *		combining various strides, but it will never touch memory
- *		outside the hyperslab defined by the strides.
+ * Purpose:     Uses DST_STRIDE and SRC_STRIDE to advance through the arrays
+ *              DST and SRC while copying bytes from SRC to DST.  This
+ *              function minimizes the number of calls to memcpy() by
+ *              combining various strides, but it will never touch memory
+ *              outside the hyperslab defined by the strides.
  *
- * Note:	If the src_stride is all zero and elmt_size is one, then it's
- *		probably more efficient to use H5VM_stride_fill() instead.
+ * Note:        If the src_stride is all zero and elmt_size is one, then it's
+ *              probably more efficient to use H5VM_stride_fill() instead.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:  Robb Matzke
+ *              Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -775,17 +765,17 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size, const hss
 #ifdef LATER
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM__stride_copy2
+ * Function:    H5VM__stride_copy2
  *
- * Purpose:	Similar to H5VM_stride_copy() except the source and
- *		destination each have their own dimensionality and size and
- *		we copy exactly NELMTS elements each of size ELMT_SIZE.	 The
- *		size counters wrap if NELMTS is more than a size counter.
+ * Purpose:     Similar to H5VM_stride_copy() except the source and
+ *              destination each have their own dimensionality and size and
+ *              we copy exactly NELMTS elements each of size ELMT_SIZE.	 The
+ *              size counters wrap if NELMTS is more than a size counter.
  *
- * Return:	None
+ * Return:      void
  *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:  Robb Matzke
+ *              Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -843,16 +833,16 @@ H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size, unsigned dst_n, const hsiz
 #endif /* LATER */
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM_array_fill
+ * Function:    H5VM_array_fill
  *
- * Purpose:	Fills all bytes of an array with the same value using
- *		memset(). Increases amount copied by power of two until the
- *		halfway point is crossed, then copies the rest in one swoop.
+ * Purpose:     Fills all bytes of an array with the same value using
+ *              memset(). Increases amount copied by power of two until the
+ *              halfway point is crossed, then copies the rest in one swoop.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, June 18, 1998
+ * Programmer:  Quincey Koziol
+ *              Thursday, June 18, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -895,25 +885,25 @@ H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count)
 } /* H5VM_array_fill() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM_array_down
+ * Function:    H5VM_array_down
  *
- * Purpose:	Given a set of dimension sizes, calculate the size of each
+ * Purpose:     Given a set of dimension sizes, calculate the size of each
  *              "down" slice.  This is the size of the dimensions for all the
  *              dimensions below the current one, which is used for indexing
  *              offsets in this dimension.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	    void
  *
- * Programmer:	Quincey Koziol
- *		Monday, April 28, 2003
+ * Programmer:  Quincey Koziol
+ *              Monday, April 28, 2003
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+void
 H5VM_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
 {
-    hsize_t acc; /*accumulator			*/
-    int     i;   /*counter			*/
+    hsize_t acc; /* Accumulator */
+    int     i;   /* Counter */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -921,31 +911,31 @@ H5VM_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
     HDassert(total_size);
     HDassert(down);
 
-    /* Build the sizes of each dimension in the array */
-    /* (From fastest to slowest) */
+    /* Build the sizes of each dimension in the array
+     * (From fastest to slowest)
+     */
     for (i = (int)(n - 1), acc = 1; i >= 0; i--) {
         down[i] = acc;
         acc *= total_size[i];
-    } /* end for */
+    }
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VM_array_down() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VM_array_offset_pre
  *
- * Purpose:	Given a coordinate description of a location in an array, this
- *      function returns the byte offset of the coordinate.
+ * Purpose:     Given a coordinate description of a location in an array, this
+ *              function returns the byte offset of the coordinate.
  *
- *		The dimensionality of the whole array, and the offset is N.
+ *		        The dimensionality of the whole array, and the offset is N.
  *              The whole array dimensions are TOTAL_SIZE and the coordinate
  *              is at offset OFFSET.
  *
- * Return:	Success: Byte offset from beginning of array to element offset
- *		Failure: abort() -- should never fail
+ * Return:      Byte offset from beginning of array to element offset
  *
  * Programmer:	Quincey Koziol
- *		Tuesday, June 22, 1999
+ *		        Tuesday, June 22, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -971,18 +961,17 @@ H5VM_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
 /*-------------------------------------------------------------------------
  * Function:	H5VM_array_offset
  *
- * Purpose:	Given a coordinate description of a location in an array, this
- *      function returns the byte offset of the coordinate.
+ * Purpose:     Given a coordinate description of a location in an array,
+ *              this function returns the byte offset of the coordinate.
  *
- *		The dimensionality of the whole array, and the offset is N.
+ *              The dimensionality of the whole array, and the offset is N.
  *              The whole array dimensions are TOTAL_SIZE and the coordinate
  *              is at offset OFFSET.
  *
- * Return:	Success: Byte offset from beginning of array to element offset
- *		Failure: abort() -- should never fail
+ * Return:      Byte offset from beginning of array to element offset
  *
  * Programmer:	Quincey Koziol
- *		Tuesday, June 22, 1999
+ *              Tuesday, June 22, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -992,38 +981,36 @@ H5VM_array_offset(unsigned n, const hsize_t *total_size, const hsize_t *offset)
     hsize_t acc_arr[H5VM_HYPER_NDIMS]; /* Accumulated size of down dimensions */
     hsize_t ret_value;                 /* Return value */
 
-    FUNC_ENTER_NOAPI((HDabort(), 0)) /*lint !e527 Don't worry about unreachable statement */
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(n <= H5VM_HYPER_NDIMS);
     HDassert(total_size);
     HDassert(offset);
 
     /* Build the sizes of each dimension in the array */
-    if (H5VM_array_down(n, total_size, acc_arr) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, UFAIL, "can't compute down sizes")
+    H5VM_array_down(n, total_size, acc_arr);
 
     /* Set return value */
     ret_value = H5VM_array_offset_pre(n, acc_arr, offset);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VM_array_offset() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VM_array_calc_pre
  *
- * Purpose:	Given a linear offset in an array, the dimensions of that
+ * Purpose:     Given a linear offset in an array, the dimensions of that
  *              array and the pre-computed 'down' (accumulator) sizes, this
  *              function computes the coordinates of that offset in the array.
  *
- *		The dimensionality of the whole array, and the coordinates is N.
+ *              The dimensionality of the whole array, and the coordinates is N.
  *              The array dimensions are TOTAL_SIZE and the coordinates
  *              are returned in COORD.  The linear offset is in OFFSET.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, July 16, 2009
+ * Programmer:  Quincey Koziol
+ *              Thursday, July 16, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1050,18 +1037,18 @@ H5VM_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down, hsize_t *co
 /*-------------------------------------------------------------------------
  * Function:	H5VM_array_calc
  *
- * Purpose:	Given a linear offset in an array and the dimensions of that
+ * Purpose:     Given a linear offset in an array and the dimensions of that
  *              array, this function computes the coordinates of that offset
  *              in the array.
  *
- *		The dimensionality of the whole array, and the coordinates is N.
+ *              The dimensionality of the whole array, and the coordinates is N.
  *              The array dimensions are TOTAL_SIZE and the coordinates
  *              are returned in COORD.  The linear offset is in OFFSET.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, April 16, 2003
+ * Programmer:  Quincey Koziol
+ *              Wednesday, April 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1079,8 +1066,7 @@ H5VM_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hsize_t *
     HDassert(coords);
 
     /* Build the sizes of each dimension in the array */
-    if (H5VM_array_down(n, total_size, idx) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute down sizes")
+    H5VM_array_down(n, total_size, idx);
 
     /* Compute the coordinates from the offset */
     if (H5VM_array_calc_pre(offset, n, idx, coords) < 0)
@@ -1093,7 +1079,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VM_chunk_index
  *
- * Purpose:	Given a coordinate offset (COORD), the size of each chunk
+ * Purpose:     Given a coordinate offset (COORD), the size of each chunk
  *              (CHUNK), the number of chunks in each dimension (NCHUNKS)
  *              and the number of dimensions of all of these (NDIMS), calculate
  *              a "chunk index" for the chunk that the coordinate offset is
@@ -1123,10 +1109,10 @@ done:
  *              The chunk index is placed in the CHUNK_IDX location for return
  *              from this function
  *
- * Return:	Chunk index on success (can't fail)
+ * Return:      Chunk index on success (can't fail)
  *
- * Programmer:	Quincey Koziol
- *		Monday, April 21, 2003
+ * Programmer:  Quincey Koziol
+ *              Monday, April 21, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1151,14 +1137,14 @@ H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk, co
 } /* end H5VM_chunk_index() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM_chunk_scaled
+ * Function:    H5VM_chunk_scaled
  *
- * Purpose:	Compute the scaled coordinates for a chunk offset
+ * Purpose:     Compute the scaled coordinates for a chunk offset
  *
- * Return:	<none>
+ * Return:      void
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, November 19, 2014
+ * Programmer:  Quincey Koziol
+ *              Wednesday, November 19, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1186,7 +1172,7 @@ H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *chunk, h
 /*-------------------------------------------------------------------------
  * Function:	H5VM_chunk_index_scaled
  *
- * Purpose:	Given a coordinate offset (COORD), the size of each chunk
+ * Purpose:     Given a coordinate offset (COORD), the size of each chunk
  *              (CHUNK), the number of chunks in each dimension (NCHUNKS)
  *              and the number of dimensions of all of these (NDIMS), calculate
  *              a "chunk index" for the chunk that the coordinate offset is
@@ -1216,13 +1202,13 @@ H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *chunk, h
  *              The chunk index is placed in the CHUNK_IDX location for return
  *              from this function
  *
- * Note:	This routine is identical to H5VM_chunk_index(), except for
- *		caching the scaled information.  Make changes in both places.
+ * Note:        This routine is identical to H5VM_chunk_index(), except for
+ *              caching the scaled information.  Make changes in both places.
  *
- * Return:	Chunk index on success (can't fail)
+ * Return:      Chunk index on success (can't fail)
  *
- * Programmer:	Vailin Choi
- *		Monday, February 9, 2015
+ * Programmer:  Vailin Choi
+ *              Monday, February 9, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1257,22 +1243,22 @@ H5VM_chunk_index_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *ch
 /*-------------------------------------------------------------------------
  * Function:	H5VM_opvv
  *
- * Purpose:	Perform an operation on a source & destination sequences
- *		of offset/length pairs.  Each set of sequnces has an array
- *		of lengths, an array of offsets, the maximum number of
- *		sequences and the current sequence to start at in the sequence.
+ * Purpose:     Perform an operation on a source & destination sequences
+ *              of offset/length pairs.  Each set of sequnces has an array
+ *              of lengths, an array of offsets, the maximum number of
+ *              sequences and the current sequence to start at in the sequence.
  *
  *              There may be different numbers of bytes in the source and
  *              destination sequences, the operation stops when either the
  *              source or destination sequence runs out of information.
  *
- * Note:	The algorithm in this routine is [basically] the same as for
- *		H5VM_memcpyvv().  Changes should be made to both!
+ * Note:        The algorithm in this routine is [basically] the same as for
+ *              H5VM_memcpyvv().  Changes should be made to both!
  *
- * Return:	Non-negative # of bytes operated on, on success/Negative on failure
+ * Return:      Non-negative # of bytes operated on, on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, September 30, 2010
+ * Programmer:  Quincey Koziol
+ *              Thursday, September 30, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1460,7 +1446,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VM_memcpyvv
  *
- * Purpose:	Given source and destination buffers in memory (SRC & DST)
+ * Purpose:     Given source and destination buffers in memory (SRC & DST)
  *              copy sequences of from the source buffer into the destination
  *              buffer.  Each set of sequences has an array of lengths, an
  *              array of offsets, the maximum number of sequences and the
@@ -1470,13 +1456,13 @@ done:
  *              destination sequences, data copying stops when either the
  *              source or destination buffer runs out of sequence information.
  *
- * Note:	The algorithm in this routine is [basically] the same as for
- *		H5VM_opvv().  Changes should be made to both!
+ * Note:        The algorithm in this routine is [basically] the same as for
+ *              H5VM_opvv().  Changes should be made to both!
  *
- * Return:	Non-negative # of bytes copied on success/Negative on failure
+ * Return:      Non-negative # of bytes copied on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Friday, May 2, 2003
+ * Programmer:  Quincey Koziol
+ *              Friday, May 2, 2003
  *
  *-------------------------------------------------------------------------
  */

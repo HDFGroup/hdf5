@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -16,11 +16,7 @@
    tfilter.cpp - HDF5 C++ testing various filters and their combination.
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -49,20 +45,18 @@ static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl,
 /* Temporary filter IDs used for testing */
 const int H5Z_FILTER_BOGUS = 305;
 
-#if 0 // H5_ATTR_UNUSED variables caused warning, so duplicated below with NULL instead
-static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
-#endif
-static size_t filter_bogus(size_t nbytes);
+static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
+                           size_t *buf_size, void **buf);
+
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_BOGUS[1] = {{
-    H5Z_CLASS_T_VERS,         /* H5Z_class_t version */
-    H5Z_FILTER_BOGUS,         /* Filter id number             */
-    1, 1,                     /* Encoding and decoding enabled */
-    "bogus",                  /* Filter name for debugging    */
-    NULL,                     /* The "can apply" callback     */
-    NULL,                     /* The "set local" callback     */
-    (H5Z_func_t)filter_bogus, /* The actual filter function   */
+    H5Z_CLASS_T_VERS, /* H5Z_class_t version */
+    H5Z_FILTER_BOGUS, /* Filter id number             */
+    1, 1,             /* Encoding and decoding enabled */
+    "bogus",          /* Filter name for debugging    */
+    NULL,             /* The "can apply" callback     */
+    NULL,             /* The "set local" callback     */
+    filter_bogus,     /* The actual filter function   */
 }};
 
 /*-------------------------------------------------------------------------
@@ -79,13 +73,15 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *-------------------------------------------------------------------------
  */
 static size_t
-#if 0 // H5_ATTR_UNUSED variables caused warning, so duplicated below with NULL instead
-filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-      const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
-      size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
-#endif
-filter_bogus(size_t nbytes)
+filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
+             size_t *buf_size, void **buf)
 {
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+
     return nbytes;
 }
 
@@ -222,7 +218,7 @@ test_szip_filter(H5File &file1)
         SKIPPED();
     }
 
-#else /* H5_HAVE_FILTER_SZIP */
+#else  /* H5_HAVE_FILTER_SZIP */
     SUBTEST("szip filter");
     SKIPPED();
     H5std_string fname = file1.getFileName();

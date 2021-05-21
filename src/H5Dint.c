@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -2001,7 +2001,7 @@ H5D_close(H5D_t *dataset)
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif /* NDEBUG */
+#endif                     /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Destroy any cached layout information for the dataset */
@@ -2165,7 +2165,7 @@ H5D_mult_refresh_close(hid_t dset_id)
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif /* NDEBUG */
+#endif                     /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Destroy any cached layout information for the dataset */
@@ -2375,7 +2375,7 @@ H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc, hb
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif /* NDEBUG */
+#endif                     /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Check if we need to initialize the space */
@@ -2497,7 +2497,7 @@ H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t 
             HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif /* NDEBUG */
+#endif                 /* NDEBUG */
     } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
 done:

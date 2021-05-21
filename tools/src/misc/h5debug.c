@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -67,7 +67,6 @@
  * Return:  Non-NULL on success/NULL on failure
  *
  * Programmer:  Quincey Koziol
- *    koziol@hdfgroup.org
  *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -149,7 +148,6 @@ get_H5B2_class(const uint8_t *sig)
  * Return:  Non-NULL on success/NULL on failure
  *
  * Programmer:  Quincey Koziol
- *    koziol@hdfgroup.org
  *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -191,7 +189,6 @@ get_H5EA_class(const uint8_t *sig)
  * Return:  Non-NULL on success/NULL on failure
  *
  * Programmer:  Quincey Koziol
- *    koziol@hdfgroup.org
  *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -249,8 +246,8 @@ main(int argc, char *argv[])
     haddr_t        extra[10];
     uint8_t        sig[H5F_SIGNATURE_LEN];
     size_t         u;
-    H5E_auto2_t    func;
-    void *         edata;
+    H5E_auto2_t    func           = NULL;
+    void *         edata          = NULL;
     hbool_t        api_ctx_pushed = FALSE; /* Whether API context pushed */
     herr_t         status         = SUCCEED;
     int            exit_value     = 0;
@@ -629,7 +626,7 @@ main(int argc, char *argv[])
          * Debug shared message master table.
          */
 
-        status = H5SM_table_debug(f, addr, stdout, 0, VCOL, (unsigned)UFAIL, (unsigned)UFAIL);
+        status = H5SM_table_debug(f, addr, stdout, 0, VCOL, UINT_MAX, UINT_MAX);
     }
     else if (!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*

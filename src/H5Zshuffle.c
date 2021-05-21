@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -123,7 +123,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
     size_t         i;             /* Local index variables */
 #ifdef NO_DUFFS_DEVICE
     size_t j;             /* Local index variable */
-#endif /* NO_DUFFS_DEVICE */
+#endif                    /* NO_DUFFS_DEVICE */
     size_t leftover;      /* Extra bytes at end of buffer */
     size_t ret_value = 0; /* Return value */
 
@@ -165,7 +165,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 
                     j--;
                 } /* end for */
-#else /* NO_DUFFS_DEVICE */
+#else             /* NO_DUFFS_DEVICE */
                 {
                     size_t duffs_index; /* Counting index for Duff's device */
 
@@ -208,7 +208,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
                             } while (--duffs_index > 0);
                     } /* end switch */
                 }
-#endif /* NO_DUFFS_DEVICE */
+#endif            /* NO_DUFFS_DEVICE */
 #undef DUFF_GUTS
             } /* end for */
 
@@ -236,7 +236,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 
                     j--;
                 } /* end for */
-#else /* NO_DUFFS_DEVICE */
+#else             /* NO_DUFFS_DEVICE */
                 {
                     size_t duffs_index; /* Counting index for Duff's device */
 
@@ -279,7 +279,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
                             } while (--duffs_index > 0);
                     } /* end switch */
                 }
-#endif /* NO_DUFFS_DEVICE */
+#endif            /* NO_DUFFS_DEVICE */
 #undef DUFF_GUTS
             } /* end for */
 

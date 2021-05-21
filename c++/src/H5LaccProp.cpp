@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -86,7 +86,9 @@ const LinkAccPropList &LinkAccPropList::DEFAULT = *getConstant();
 ///\brief       Creates a file access property list
 // Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------
-LinkAccPropList::LinkAccPropList() : PropList(H5P_LINK_ACCESS) {}
+LinkAccPropList::LinkAccPropList() : PropList(H5P_LINK_ACCESS)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    LinkAccPropList copy constructor
@@ -94,7 +96,9 @@ LinkAccPropList::LinkAccPropList() : PropList(H5P_LINK_ACCESS) {}
 ///\param       original - IN: LinkAccPropList instance to copy
 // Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------
-LinkAccPropList::LinkAccPropList(const LinkAccPropList &original) : PropList(original) {}
+LinkAccPropList::LinkAccPropList(const LinkAccPropList &original) : PropList(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    LinkAccPropList overloaded constructor
@@ -102,7 +106,9 @@ LinkAccPropList::LinkAccPropList(const LinkAccPropList &original) : PropList(ori
 ///             existing one.
 // Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------
-LinkAccPropList::LinkAccPropList(const hid_t plist_id) : PropList(plist_id) {}
+LinkAccPropList::LinkAccPropList(const hid_t plist_id) : PropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    LinkAccPropList::setNumLinks
@@ -148,6 +154,8 @@ LinkAccPropList::getNumLinks() const
 ///\brief       Noop destructor
 // Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------
-LinkAccPropList::~LinkAccPropList() {}
+LinkAccPropList::~LinkAccPropList()
+{
+}
 
 } // namespace H5

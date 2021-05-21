@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,7 +37,9 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub compound datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType::CompType() : DataType() {}
+CompType::CompType() : DataType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    CompType copy constructor
@@ -45,7 +47,9 @@ CompType::CompType() : DataType() {}
 ///\param       original - IN: Original CompType instance
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType::CompType(const CompType &original) : DataType(original) {}
+CompType::CompType(const CompType &original) : DataType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    CompType overloaded constructor
@@ -53,7 +57,9 @@ CompType::CompType(const CompType &original) : DataType(original) {}
 ///\param       existing_id - IN: Id of an existing compound datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType::CompType(const hid_t existing_id) : DataType(existing_id) {}
+CompType::CompType(const hid_t existing_id) : DataType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    CompType overloaded constructor
@@ -65,7 +71,9 @@ CompType::CompType(const hid_t existing_id) : DataType(existing_id) {}
 //              the compound datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType::CompType(size_t size) : DataType(H5T_COMPOUND, size) {}
+CompType::CompType(size_t size) : DataType(H5T_COMPOUND, size)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    CompType overloaded constructor
@@ -549,6 +557,8 @@ CompType::setSize(size_t size) const
 ///\brief       Properly terminates access to this compound datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType::~CompType() {}
+CompType::~CompType()
+{
+}
 
 } // namespace H5

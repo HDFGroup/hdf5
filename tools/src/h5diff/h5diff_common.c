@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,7 +25,7 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *        s_opts   = "hVrv:qn:d:p:NcelxE:A:S";
+static const char *        s_opts   = "hVrv*qn:d:p:NcelxE:A:S";
 static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"version", no_arg, 'V'},
                                        {"report", no_arg, 'r'},
@@ -76,7 +76,6 @@ check_options(diff_opt_t *opts)
     }
 }
 
-#if TRILABS_227
 /*-------------------------------------------------------------------------
  * Function:    parse_hsize_list
  *
@@ -139,7 +138,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
         }
     d->data = p_list;
     d->len  = size_count;
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -188,11 +187,10 @@ parse_subset_params(const char *dset)
 
         parse_hsize_list(brace, &s->block);
     }
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return s;
 }
-#endif
 
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
@@ -210,7 +208,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
     struct exclude_path_list *exclude_head, *exclude_prev, *exclude_node;
     struct exclude_path_list *exclude_attr_head, *exclude_attr_prev, *exclude_attr_node;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /* process the command-line */
     HDmemset(opts, 0, sizeof(diff_opt_t));
 
@@ -253,33 +251,27 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
 
             case 'v':
                 opts->mode_verbose = 1;
-                /* This for loop is for handling style like
-                 * -v, -v1, --verbose, --verbose=1.
-                 */
                 for (i = 1; i < argc; i++) {
                     /*
-                     * short opt
+                     * special check for short opt
                      */
-                    if (!strcmp(argv[i], "-v")) { /* no arg */
-                        opt_ind--;
+                    if (!strcmp(argv[i], "-v")) {
+                        if (opt_arg != NULL)
+                            opt_ind--;
                         opts->mode_verbose_level = 0;
                         break;
                     }
                     else if (!strncmp(argv[i], "-v", (size_t)2)) {
+                        if (opt_arg != NULL)
+                            opt_ind--;
                         opts->mode_verbose_level = atoi(&argv[i][2]);
                         break;
                     }
-
-                    /*
-                     * long opt
-                     */
-                    if (!strcmp(argv[i], "--verbose")) { /* no arg */
-                        opts->mode_verbose_level = 0;
-                        break;
-                    }
-                    else if (!strncmp(argv[i], "--verbose", (size_t)9) && argv[i][9] == '=') {
-                        opts->mode_verbose_level = atoi(&argv[i][10]);
-                        break;
+                    else {
+                        if (opt_arg != NULL)
+                            opts->mode_verbose_level = HDatoi(opt_arg);
+                        else
+                            opts->mode_verbose_level = 0;
                     }
                 }
                 break;
@@ -383,7 +375,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 opts->percent = HDatof(opt_arg);
 
                 /* -p 0 is the same as default */
-                if (H5_DBL_ABS_EQUAL(opts->percent, (double)0.0F))
+                if (H5_DBL_ABS_EQUAL(opts->percent, 0.0))
                     opts->percent_bool = 0;
                 break;
 
@@ -486,13 +478,11 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
      * TRILABS_227 is complete except for an issue with printing indices
      * the following calls will enable subsetting
      */
-#if TRILABS_227
     opts->sset[0] = parse_subset_params(*objname1);
 
     opts->sset[1] = parse_subset_params(*objname2);
-#endif
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -828,19 +818,27 @@ usage(void)
     /*
      * TRILABS_227 is complete except for an issue with printing indices
      * the following will be needed for subsetting
+     */
     PRINTVALSTREAM(rawoutstream, " Subsetting options:\n");
-    PRINTVALSTREAM(rawoutstream, "  Subsetting is available by using the fcompact form of subsetting, as
-    follows:\n"); PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]\n");
-    PRINTVALSTREAM(rawoutstream, "  It is not required to use all parameters, but until the last parameter
-    value used,\n"); PRINTVALSTREAM(rawoutstream, "  all of the semicolons (;) are required, even when a
-    parameter value is not specified. Example:\n"); PRINTVALSTREAM(rawoutstream, "    obj1
-    /foo/mydataset[START;;COUNT;BLOCK]\n"); PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START]\n");
-    PRINTVALSTREAM(rawoutstream, "  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1
-    in\n"); PRINTVALSTREAM(rawoutstream, "  each dimension. START is optional and will default to 0 in each
-    dimension.\n"); PRINTVALSTREAM(rawoutstream, "  Each of START, STRIDE, COUNT, and BLOCK must be a
-    comma-separated list of integers with\n"); PRINTVALSTREAM(rawoutstream, "  one integer for each dimension
-    of the dataset.\n"); PRINTVALSTREAM(rawoutstream, "\n");
-   */
+    PRINTVALSTREAM(rawoutstream,
+                   "  Subsetting is available by using the fcompact form of subsetting, as follows:\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  It is not required to use all parameters, but until the last parameter value used,\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "  all of the semicolons (;) are required, even when a parameter value is not specified. Example:\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;;COUNT;BLOCK]\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START]\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  each dimension. START is optional and will default to 0 in each dimension.\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "  Each of START, STRIDE, COUNT, and BLOCK must be a comma-separated list of integers with\n");
+    PRINTVALSTREAM(rawoutstream, "  one integer for each dimension of the dataset.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Exit code:\n");
     PRINTVALSTREAM(rawoutstream, "  0 if no differences, 1 if differences found, 2 if error\n");
     PRINTVALSTREAM(rawoutstream, "\n");

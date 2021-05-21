@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1041,12 +1041,13 @@ H5R__decode(const unsigned char *buf, size_t *nbytes, H5R_ref_priv_t *ref)
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity checks */
     HDassert(buf);
     HDassert(nbytes);
     HDassert(ref);
-    buf_size = *nbytes;
 
     /* Don't decode if buffer size isn't big enough */
+    buf_size = *nbytes;
     if (buf_size < H5R_ENCODE_HEADER_SIZE)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
 
@@ -1107,6 +1108,7 @@ H5R__decode(const unsigned char *buf, size_t *nbytes, H5R_ref_priv_t *ref)
     H5R_LOG_DEBUG("Decoded reference, filename=%s, obj_addr=%s, encode size=%u", ref->info.obj.filename,
                   H5R__print_token(ref->info.obj.token), ref->encode_size);
 
+    /* Set output info */
     *nbytes = decode_size;
 
 done:

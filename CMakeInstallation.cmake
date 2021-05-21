@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -107,10 +107,6 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     VERSION ${HDF5_PACKAGE_VERSION}
     COMPATIBILITY SameMinorVersion
   )
-  #configure_file (
-  #    ${HDF_RESOURCES_DIR}/hdf5-config-version.cmake.in
-  #    ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake @ONLY
-  #)
   install (
       FILES ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake
       DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/hdf5
@@ -205,7 +201,6 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   if (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
     set (release_files
         ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_CMake.txt
-        ${HDF5_SOURCE_DIR}/release_docs/COPYING
         ${HDF5_SOURCE_DIR}/release_docs/RELEASE.txt
     )
     if (WIN32)
@@ -249,19 +244,6 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   endif ()
 endif ()
 
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  if (CMAKE_HOST_UNIX)
-    set (CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
-      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-  else ()
-    GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
-    set (CMAKE_INSTALL_PREFIX
-      "${CMAKE_GENERIC_PROGRAM_FILES}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
-      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-    set (CMAKE_GENERIC_PROGRAM_FILES)
-  endif ()
-endif ()
-
 #-----------------------------------------------------------------------------
 # Set the cpack variables
 #-----------------------------------------------------------------------------
@@ -276,9 +258,9 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   set (CPACK_PACKAGE_VERSION_MAJOR "${HDF5_PACKAGE_VERSION_MAJOR}")
   set (CPACK_PACKAGE_VERSION_MINOR "${HDF5_PACKAGE_VERSION_MINOR}")
   set (CPACK_PACKAGE_VERSION_PATCH "")
+  set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
   if (EXISTS "${HDF5_SOURCE_DIR}/release_docs")
     set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/RELEASE.txt")
-    set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
     set (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/RELEASE.txt")
   endif ()
   set (CPACK_PACKAGE_RELOCATABLE TRUE)

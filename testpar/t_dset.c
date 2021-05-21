@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1627,9 +1627,6 @@ extend_writeInd(void)
     VRFY((mem_dataspace >= 0), "");
 
     /* Try write to dataset2 beyond its current dim sizes.  Should fail. */
-    /* Temporary turn off auto error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &old_func, &old_client_data);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space(dataset2);
@@ -1638,11 +1635,13 @@ extend_writeInd(void)
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* write data independently.  Should fail. */
-    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace, H5P_DEFAULT, data_array1);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace, H5P_DEFAULT, data_array1);
+    }
+    H5E_END_TRY
     VRFY((ret < 0), "H5Dwrite failed as expected");
 
-    /* restore auto error reporting */
-    H5Eset_auto2(H5E_DEFAULT, old_func, old_client_data);
     H5Sclose(file_dataspace);
 
     /* Extend dataset2 and try again.  Should succeed. */
@@ -1911,20 +1910,19 @@ extend_readInd(void)
     VRFY((dataset2 >= 0), "");
 
     /* Try extend dataset1 which is open RDONLY.  Should fail. */
-    /* first turn off auto error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &old_func, &old_client_data);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     file_dataspace = H5Dget_space(dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sget_simple_extent_dims(file_dataspace, dims, NULL);
     VRFY((ret > 0), "H5Sget_simple_extent_dims succeeded");
     dims[0]++;
-    ret = H5Dset_extent(dataset1, dims);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dset_extent(dataset1, dims);
+    }
+    H5E_END_TRY
     VRFY((ret < 0), "H5Dset_extent failed as expected");
 
-    /* restore auto error reporting */
-    H5Eset_auto2(H5E_DEFAULT, old_func, old_client_data);
     H5Sclose(file_dataspace);
 
     /* Read dataset1 using BYROW pattern */
@@ -2209,9 +2207,6 @@ extend_writeAll(void)
     }
 
     /* Try write to dataset2 beyond its current dim sizes.  Should fail. */
-    /* Temporary turn off auto error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &old_func, &old_client_data);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space(dataset2);
@@ -2220,11 +2215,13 @@ extend_writeAll(void)
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* write data independently.  Should fail. */
-    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace, xfer_plist, data_array1);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace, xfer_plist, data_array1);
+    }
+    H5E_END_TRY
     VRFY((ret < 0), "H5Dwrite failed as expected");
 
-    /* restore auto error reporting */
-    H5Eset_auto2(H5E_DEFAULT, old_func, old_client_data);
     H5Sclose(file_dataspace);
 
     /* Extend dataset2 and try again.  Should succeed. */
@@ -2331,20 +2328,19 @@ extend_readAll(void)
     VRFY((dataset2 >= 0), "");
 
     /* Try extend dataset1 which is open RDONLY.  Should fail. */
-    /* first turn off auto error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &old_func, &old_client_data);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     file_dataspace = H5Dget_space(dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sget_simple_extent_dims(file_dataspace, dims, NULL);
     VRFY((ret > 0), "H5Sget_simple_extent_dims succeeded");
     dims[0]++;
-    ret = H5Dset_extent(dataset1, dims);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dset_extent(dataset1, dims);
+    }
+    H5E_END_TRY
     VRFY((ret < 0), "H5Dset_extent failed as expected");
 
-    /* restore auto error reporting */
-    H5Eset_auto2(H5E_DEFAULT, old_func, old_client_data);
     H5Sclose(file_dataspace);
 
     /* Read dataset1 using BYROW pattern */
@@ -3321,14 +3317,23 @@ test_actual_io_mode(int selection_mode)
 
     /* Release some resources */
     ret = H5Sclose(sid);
+    VRFY((ret >= 0), "H5Sclose succeeded");
     ret = H5Pclose(fapl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
     ret = H5Pclose(dcpl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
     ret = H5Pclose(dxpl_write);
+    VRFY((ret >= 0), "H5Pclose succeeded");
     ret = H5Pclose(dxpl_read);
+    VRFY((ret >= 0), "H5Pclose succeeded");
     ret = H5Dclose(dataset);
+    VRFY((ret >= 0), "H5Dclose succeeded");
     ret = H5Sclose(mem_space);
+    VRFY((ret >= 0), "H5Sclose succeeded");
     ret = H5Sclose(file_space);
+    VRFY((ret >= 0), "H5Sclose succeeded");
     ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
     HDfree(buffer);
     return;
 }
@@ -3344,9 +3349,7 @@ void
 actual_io_mode_tests(void)
 {
     int mpi_size = -1;
-    int mpi_rank = -1;
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_rank);
 
     test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
 
@@ -4112,13 +4115,15 @@ dataset_atomicity(void)
     if (MAINPROCESS) {
         fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
         VRFY((fid >= 0), "H5Fopen succeeed");
-    }
 
-    /* should fail */
-    ret = H5Fset_mpi_atomicity(fid, TRUE);
-    VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
+        /* should fail */
+        H5E_BEGIN_TRY
+        {
+            ret = H5Fset_mpi_atomicity(fid, TRUE);
+        }
+        H5E_END_TRY
+        VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
 
-    if (MAINPROCESS) {
         ret = H5Fclose(fid);
         VRFY((ret >= 0), "H5Fclose succeeded");
     }

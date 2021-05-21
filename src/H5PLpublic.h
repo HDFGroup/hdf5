@@ -5,7 +5,7 @@
  * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
  * This file contains public declarations for the H5PL module.
  */
 
-#ifndef _H5PLpublic_H
-#define _H5PLpublic_H
+#ifndef H5PLpublic_H
+#define H5PLpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h" /* Generic Functions                    */
@@ -28,8 +28,7 @@
  */
 #define H5PL_NO_PLUGIN "::"
 
-//! [H5PL_type_t_snip]
-
+//! <!-- [H5PL_type_t_snip] -->
 /**
  * Plugin type (bit-position) used by the plugin library
  */
@@ -39,8 +38,7 @@ typedef enum H5PL_type_t {
     H5PL_TYPE_VOL    = 1,  /**< VOL driver           */
     H5PL_TYPE_NONE   = 2   /**< Sentinel: This must be last!   */
 } H5PL_type_t;
-
-//! [H5PL_type_t_snip]
+//! <!-- [H5PL_type_t_snip] -->
 
 /* Common dynamic plugin type flags used by the set/get_loading_state functions */
 #define H5PL_FILTER_PLUGIN 0x0001
@@ -99,8 +97,8 @@ H5_DLL herr_t H5PLset_loading_state(unsigned int plugin_control_mask);
  *                                 disabled.\n
  *                                 A plugin bit set to 1 (one) indicates that that the dynamic plugin type is
  *                                 enabled.\n
- *                                 If the value of \p plugin_control_mask is negative, all dynamic plugin types
- *                                 are enabled.\n
+ *                                 If the value of \p plugin_control_mask is negative, all dynamic plugin
+ *                                 types are enabled.\n
  *                                 If the value of \p plugin_control_mask is 0 (zero), all dynamic plugins
  *                                 are disabled.
  * \return \herr_t
@@ -226,4 +224,4 @@ H5_DLL herr_t H5PLsize(unsigned int *num_paths /*out*/);
 }
 #endif
 
-#endif /* _H5PLpublic_H */
+#endif /* H5PLpublic_H */

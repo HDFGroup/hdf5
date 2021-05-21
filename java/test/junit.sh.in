@@ -1,13 +1,12 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -46,6 +45,8 @@ HDFLIB_HOME="$top_srcdir/java/lib"
 BLDDIR="."
 BLDLIBDIR="$BLDDIR/testlibs"
 HDFTEST_HOME="$top_srcdir/java/test"
+TOOLS_TESTFILES="$top_srcdir/tools/testfiles"
+
 JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
 TESTJARFILE=jar@PACKAGE_TARNAME@test.jar
 test -d $BLDLIBDIR || mkdir -p $BLDLIBDIR
@@ -89,10 +90,12 @@ $HDFTEST_HOME/testfiles/JUnit-TestH5T.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Dparams.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5D.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Dplist.txt
+$HDFTEST_HOME/testfiles/JUnit-TestH5Drw.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Lparams.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Lbasic.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Lcreate.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5R.txt
+$HDFTEST_HOME/testfiles/JUnit-TestH5Rref.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5P.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5PData.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Pfapl.txt
@@ -101,6 +104,7 @@ $HDFTEST_HOME/testfiles/JUnit-TestH5Pfaplhdfs.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Pvirtual.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Plist.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5A.txt
+$HDFTEST_HOME/testfiles/JUnit-TestH5Arw.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Oparams.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Obasic.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Ocreate.txt
@@ -146,7 +150,7 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             fi
         fi
     done
-    if [ "$IS_DARWIN" = "yes" ]; then 
+    if [ "$IS_DARWIN" = "yes" ]; then
        (cd testlibs; \
          install_name_tool -add_rpath @loader_path libhdf5_java.dylib; \
          exist_path=` otool -l libhdf5_java.dylib | grep libhdf5 | grep -v java | awk '{print $2}'`; \
@@ -248,6 +252,12 @@ COPY_DATAFILES_TO_BLDDIR()
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateL2.hdf
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateO1.hdf
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateO2.hdf
+    $CP -f $TOOLS_TESTFILES/trefer_reg.h5 $BLDDIR/trefer_reg.h5
+    $CP -f $TOOLS_TESTFILES/trefer_attr.h5 $BLDDIR/trefer_attr.h5
+    $CP -f $TOOLS_TESTFILES/tdatareg.h5 $BLDDIR/tdatareg.h5
+    $CP -f $TOOLS_TESTFILES/tattrreg.h5 $BLDDIR/tattrreg.h5
+    $CP -f $TOOLS_TESTFILES/tintsattrs.h5 $BLDDIR/tintsattrs.h5
+    $CP -f $TOOLS_TESTFILES/tfloatsattrs.h5 $BLDDIR/tfloatsattrs.h5
 }
 
 CLEAN_DATAFILES_AND_BLDDIR()
@@ -663,6 +673,27 @@ else
     test yes = "$verbose" && $DIFF JUnit-TestH5D.txt JUnit-TestH5D.out |sed 's/^/    /'
 fi
 
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Drw"
+TESTING JUnit-TestH5Drw
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Drw > JUnit-TestH5Drw.ext)
+
+# Extract file name, line number, version and thread IDs because they may be different
+sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    -e 's/line [0-9]*/line (number)/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
+    -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+    -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+    JUnit-TestH5Drw.ext > JUnit-TestH5Drw.out
+
+if diff JUnit-TestH5Drw.out JUnit-TestH5Drw.txt > /dev/null; then
+    echo "  PASSED      JUnit-TestH5Drw"
+else
+    echo "**FAILED**    JUnit-TestH5Drw"
+    echo "    Expected result differs from actual result"
+    nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Drw.txt JUnit-TestH5Drw.out |sed 's/^/    /'
+fi
+
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Dplist"
 TESTING JUnit-TestH5Dplist
 ($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Dplist > JUnit-TestH5Dplist.ext)
@@ -766,6 +797,27 @@ else
     echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
     test yes = "$verbose" && $DIFF JUnit-TestH5R.txt JUnit-TestH5R.out |sed 's/^/    /'
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Rref"
+TESTING JUnit-TestH5Rref
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Rref > JUnit-TestH5Rref.ext)
+
+# Extract file name, line number, version and thread IDs because they may be different
+sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    -e 's/line [0-9]*/line (number)/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
+    -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+    -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+    JUnit-TestH5Rref.ext > JUnit-TestH5Rref.out
+
+if diff JUnit-TestH5Rref.out JUnit-TestH5Rref.txt > /dev/null; then
+    echo "  PASSED      JUnit-TestH5Rref"
+else
+    echo "**FAILED**    JUnit-TestH5Rref"
+    echo "    Expected result differs from actual result"
+    nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Rref.txt JUnit-TestH5Rref.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5P"
@@ -892,6 +944,27 @@ else
     echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
     test yes = "$verbose" && $DIFF JUnit-TestH5A.txt JUnit-TestH5A.out |sed 's/^/    /'
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Arw"
+TESTING JUnit-TestH5Arw
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Arw > JUnit-TestH5Arw.ext)
+
+# Extract file name, line number, version and thread IDs because they may be different
+sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    -e 's/line [0-9]*/line (number)/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
+    -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+    -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+    JUnit-TestH5Arw.ext > JUnit-TestH5Arw.out
+
+if diff JUnit-TestH5Arw.out JUnit-TestH5Arw.txt > /dev/null; then
+    echo "  PASSED      JUnit-TestH5Arw"
+else
+    echo "**FAILED**    JUnit-TestH5Arw"
+    echo "    Expected result differs from actual result"
+    nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Arw.txt JUnit-TestH5Arw.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Oparams"

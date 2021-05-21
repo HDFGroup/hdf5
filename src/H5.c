@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -101,12 +101,12 @@ DESCRIPTION
 herr_t
 H5__init_package(void)
 {
-    herr_t          ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Run the library initialization routine, if it hasn't already ran */
-    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {                                                                \
+    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {
         if (H5_init_library() < 0)
             HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "unable to initialize library")
     } /* end if */
@@ -137,7 +137,7 @@ H5_init_library(void)
     /* Set the 'library initialized' flag as early as possible, to avoid
      * possible re-entrancy.
      */
-    H5_INIT_GLOBAL = TRUE;                                                                               \
+    H5_INIT_GLOBAL = TRUE;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -757,9 +757,6 @@ H5__debug_mask(const char *s)
             s++;
         } /* end if-else */
     }     /* end while */
-
-    return;
-
 } /* end H5__debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL
@@ -923,7 +920,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             HDstrncat(lib_str, "-", (size_t)1);
             HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
         } /* end if */
-        if (HDstrcmp(lib_str, H5_lib_vers_info_g)) {
+        if (HDstrcmp(lib_str, H5_lib_vers_info_g) != 0) {
             HDfputs("Warning!  Library version information error.\n"
                     "The HDF5 library version information are not "
                     "consistent in its source code.\nThis is NOT a fatal error "

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5T package!"
 #endif
 
-#ifndef _H5Tpkg_H
-#define _H5Tpkg_H
+#ifndef H5Tpkg_H
+#define H5Tpkg_H
 
 /*
  * Define this to enable debugging.
@@ -338,7 +338,8 @@ typedef struct H5T_shared_t {
     H5T_class_t type;     /*which class of type is this?		     */
     size_t      size;     /*total size of an instance of this type     */
     unsigned    version;  /* Version of object header message to encode this object with */
-    hbool_t     force_conv; /* Set if this type always needs to be converted and H5T__conv_noop cannot be called */
+    hbool_t
+                   force_conv; /* Set if this type always needs to be converted and H5T__conv_noop cannot be called */
     struct H5T_t * parent;        /*parent type for derived datatypes	     */
     H5VL_object_t *owned_vol_obj; /* Vol object owned by this type (free on close) */
     union {
@@ -851,7 +852,8 @@ H5_DLL herr_t   H5T__bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, 
 H5_DLL void     H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value);
 H5_DLL uint64_t H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size);
 H5_DLL void     H5T__bit_set_d(uint8_t *buf, size_t offset, size_t size, uint64_t val);
-H5_DLL ssize_t  H5T__bit_find(uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction, hbool_t value);
+H5_DLL ssize_t  H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
+                              hbool_t value);
 H5_DLL hbool_t  H5T__bit_inc(uint8_t *buf, size_t start, size_t size);
 H5_DLL hbool_t  H5T__bit_dec(uint8_t *buf, size_t start, size_t size);
 H5_DLL void     H5T__bit_neg(uint8_t *buf, size_t start, size_t size);
@@ -859,7 +861,7 @@ H5_DLL void     H5T__bit_neg(uint8_t *buf, size_t start, size_t size);
 /* VL functions */
 H5_DLL H5T_t *H5T__vlen_create(const H5T_t *base);
 H5_DLL herr_t H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info);
-H5_DLL htri_t H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
+H5_DLL htri_t H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Array functions */
 H5_DLL H5T_t *H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */]);
@@ -868,7 +870,7 @@ H5_DLL int    H5T__get_array_dims(const H5T_t *dt, hsize_t dims[]);
 
 /* Reference functions */
 H5_DLL herr_t H5T__ref_reclaim(void *elem, const H5T_t *dt);
-H5_DLL htri_t H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
+H5_DLL htri_t H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Compound functions */
 H5_DLL herr_t H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member);
@@ -889,4 +891,4 @@ H5_DLL herr_t H5T__sort_name(const H5T_t *dt, int *map);
 /* Debugging functions */
 H5_DLL herr_t H5T__print_stats(H5T_path_t *path, int *nprint /*in,out*/);
 
-#endif /* _H5Tpkg_H */
+#endif /* H5Tpkg_H */

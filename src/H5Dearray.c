@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1160,9 +1160,7 @@ done:
 static herr_t
 H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(layout);
@@ -1182,8 +1180,7 @@ H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
         H5VM_swizzle_coords(hsize_t, swizzled_chunks, layout->u.earray.unlim_dim);
 
         /* Get the swizzled "down" sizes for each dimension */
-        if (H5VM_array_down((layout->ndims - 1), swizzled_chunks, layout->u.earray.swizzled_down_chunks) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute swizzled 'down' chunk size value")
+        H5VM_array_down((layout->ndims - 1), swizzled_chunks, layout->u.earray.swizzled_down_chunks);
 
         /* Get the swizzled max number of chunks in each dimension */
         H5MM_memcpy(swizzled_max_chunks, layout->max_chunks,
@@ -1191,13 +1188,10 @@ H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
         H5VM_swizzle_coords(hsize_t, swizzled_max_chunks, layout->u.earray.unlim_dim);
 
         /* Get the swizzled max "down" sizes for each dimension */
-        if (H5VM_array_down((layout->ndims - 1), swizzled_max_chunks,
-                            layout->u.earray.swizzled_max_down_chunks) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute swizzled 'down' chunk size value")
-    } /* end if */
+        H5VM_array_down((layout->ndims - 1), swizzled_max_chunks, layout->u.earray.swizzled_max_down_chunks);
+    }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__earray_idx_resize() */
 
 /*-------------------------------------------------------------------------

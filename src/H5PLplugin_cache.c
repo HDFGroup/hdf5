@@ -5,7 +5,7 @@
  * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -264,12 +264,12 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
     /* Loop over all the plugins, looking for one that matches */
     for (u = 0; u < H5PL_num_plugins_g; u++) {
 
-        /* If the plugin type (filter, etc.) and ID match, query the plugin for its info */
+        /* If the plugin type (filter, VOL connector, etc.) and ID match, query the plugin for its info */
         if ((search_params->type == (H5PL_cache_g[u]).type) &&
             (search_params->key->id == (H5PL_cache_g[u]).key.id)) {
 
             H5PL_get_plugin_info_t get_plugin_info_function;
-            const H5Z_class2_t *   filter_info;
+            const void *           info;
 
             /* Get the "get plugin info" function from the plugin. */
             if (NULL == (get_plugin_info_function = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(
@@ -277,12 +277,12 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info")
 
             /* Call the "get plugin info" function */
-            if (NULL == (filter_info = (const H5Z_class2_t *)(*get_plugin_info_function)()))
+            if (NULL == (info = (*get_plugin_info_function)()))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
 
             /* Set output parameters */
             *found       = TRUE;
-            *plugin_info = filter_info;
+            *plugin_info = info;
 
             /* No need to continue processing */
             break;

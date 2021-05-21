@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
@@ -144,6 +144,15 @@ if test "X-g++" = "X-$cxx_vendor"; then
         DEBUG_CXXFLAGS="-ftrapv -fno-common"
     fi
 
+    ########################
+    # Enhanced Diagnostics #
+    ########################
+
+    if test $cxx_vers_major -ge 10; then
+        NO_DIAGS_CXXFLAGS="-fdiagnostics-urls=never -fno-diagnostics-color"
+    fi
+    DIAGS_CXXFLAGS=
+
     ###########
     # Symbols #
     ###########
@@ -184,10 +193,11 @@ if test "X-g++" = "X-$cxx_vendor"; then
     if test $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 8 -o $cxx_vers_major -ge 5; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-general)"
         H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments cxx-error-general)"
+        H5_NECXXFLAGS="$H5_NECXXFLAGS $(load_gnu_arguments cxx-noerror-general)"
 
-    ######################
-    # Developer warnings #
-    ######################
+        ######################
+        # Developer warnings #
+        ######################
 
         NO_DEVELOPER_WARNING_CXXFLAGS=$(load_gnu_arguments no-developer-general)
         DEVELOPER_WARNING_CXXFLAGS=$(load_gnu_arguments developer-general)
@@ -209,7 +219,7 @@ if test "X-g++" = "X-$cxx_vendor"; then
 
     # gcc >= 4.8
     if test $cxx_vers_major -ge 5 -o $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 8; then
-        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.8)"
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-4.8)"
         DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.8)"
         NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.8)"
     fi
@@ -224,6 +234,7 @@ if test "X-g++" = "X-$cxx_vendor"; then
     if test $cxx_vers_major -ge 5; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-5)"
         H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments cxx-error-5)"
+        H5_NECXXFLAGS="$H5_NECXXFLAGS $(load_gnu_arguments cxx-noerror-5)"
     fi
 
     # gcc >= 6
@@ -241,6 +252,7 @@ if test "X-g++" = "X-$cxx_vendor"; then
     if test $cxx_vers_major -ge 8; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 8)"
         #H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-8)"
+        #H5_NECXXFLAGS="$H5_NECXXFLAGS $(load_gnu_arguments noerror-8)"
         DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-8)"
         NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-8)"
     fi

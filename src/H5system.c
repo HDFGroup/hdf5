@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -66,7 +66,7 @@
 /* Track whether tzset routine was called */
 static hbool_t H5_ntzset = FALSE;
 
-#ifndef HDvasprintf
+#ifndef H5_HAVE_VASPRINTF
 /* HDvasprintf provides vasprintf-like function on targets where it is
  * unavailable.
  */
@@ -94,7 +94,7 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
     }
     return -1;
 }
-#endif
+#endif /* H5_HAVE_VASPRINTF */
 
 /*-------------------------------------------------------------------------
  * Function:  HDstrtoll
@@ -347,7 +347,7 @@ H5_make_time(struct tm *tm)
      * VS 2015 is removed, with _get_timezone replacing it.
      */
     long timezone = 0;
-#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+#endif                    /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
     time_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -573,38 +573,12 @@ Wgetlogin(void)
 {
 
 #ifdef H5_HAVE_WINSOCK2_H
-    long bufferCount = WloginBuffer_count;
-    if (GetUserName(Wlogin_buffer, &bufferCount) == 0)
+    DWORD bufferCount = WloginBuffer_count;
+    if (GetUserName(Wlogin_buffer, &bufferCount) != 0)
         return (Wlogin_buffer);
     else
 #endif /* H5_HAVE_WINSOCK2_H */
         return NULL;
-}
-
-int
-c99_snprintf(char *str, size_t size, const char *format, ...)
-{
-    int     count;
-    va_list ap;
-
-    HDva_start(ap, format);
-    count = c99_vsnprintf(str, size, format, ap);
-    HDva_end(ap);
-
-    return count;
-}
-
-int
-c99_vsnprintf(char *str, size_t size, const char *format, va_list ap)
-{
-    int count = -1;
-
-    if (size != 0)
-        count = _vsnprintf_s(str, size, _TRUNCATE, format, ap);
-    if (count == -1)
-        count = _vscprintf(format, ap);
-
-    return count;
 }
 
 /*-------------------------------------------------------------------------
@@ -618,110 +592,45 @@ c99_vsnprintf(char *str, size_t size, const char *format, va_list ap)
  *-------------------------------------------------------------------------
  */
 int
-Wflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation)
+Wflock(int fd, int operation)
 {
 
-/* This is a no-op while we implement a Win32 VFD */
-#if 0
-int
-Wflock(int fd, int operation) {
-
-    HANDLE          hFile;
-    DWORD           dwFlags = LOCKFILE_FAIL_IMMEDIATELY;
-    DWORD           dwReserved = 0;
-                    /* MAXDWORD for entire file */
-    DWORD           nNumberOfBytesToLockLow = MAXDWORD;
-    DWORD           nNumberOfBytesToLockHigh = MAXDWORD;
-                    /* Must initialize OVERLAPPED struct */
-    OVERLAPPED      overlapped = {0};
+    HANDLE hFile;
+    DWORD  dwFlags    = LOCKFILE_FAIL_IMMEDIATELY;
+    DWORD  dwReserved = 0;
+    /* MAXDWORD locks the entire file */
+    DWORD nNumberOfBytesToLockLow  = MAXDWORD;
+    DWORD nNumberOfBytesToLockHigh = MAXDWORD;
+    /* Must initialize OVERLAPPED struct */
+    OVERLAPPED overlapped = {0};
 
     /* Get Windows HANDLE */
-    hFile = _get_osfhandle(fd);
+    if (INVALID_HANDLE_VALUE == (hFile = (HANDLE)_get_osfhandle(fd)))
+        return -1;
 
     /* Convert to Windows flags */
-    if(operation & LOCK_EX)
+    if (operation & LOCK_EX)
         dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
 
     /* Lock or unlock */
-    if(operation & LOCK_UN)
-        if(0 == UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow,
-                            nNumberOfBytesToLockHigh, &overlapped))
+    if (operation & LOCK_UN) {
+        if (0 ==
+            UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh, &overlapped)) {
+            /* Attempting to unlock an already unlocked file will fail and this can happen
+             * in H5Fstart_swmr_write(). For now, just ignore the "error" (error code: 0x9e / 158).
+             */
+            if (GetLastError() != 158)
+                return -1;
+        }
+    }
+    else {
+        if (0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh,
+                            &overlapped))
             return -1;
-    else
-        if(0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow,
-                            nNumberOfBytesToLockHigh, &overlapped))
-            return -1;
-#endif /* 0 */
+    }
+
     return 0;
 } /* end Wflock() */
-
-/*--------------------------------------------------------------------------
- * Function:    Wnanosleep
- *
- * Purpose:     Sleep for a given # of nanoseconds (Windows version)
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2016
- *--------------------------------------------------------------------------
- */
-int
-Wnanosleep(const struct timespec *req, struct timespec *rem)
-{
-    /* XXX: Currently just a placeholder */
-    return 0;
-
-} /* end Wnanosleep() */
-
-/*-------------------------------------------------------------------------
- * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
- *
- * Purpose:     Wrapper function for round functions for use with VS2012
- *              and earlier.
- *
- * Return:      The rounded value that was passed in.
- *
- * Programmer:  Dana Robinson
- *              December 2016
- *
- *-------------------------------------------------------------------------
- */
-long long
-Wllround(double arg)
-{
-    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long long
-Wllroundf(float arg)
-{
-    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-long
-Wlround(double arg)
-{
-    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long
-Wlroundf(float arg)
-{
-    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-double
-Wround(double arg)
-{
-    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
-}
-
-float
-Wroundf(float arg)
-{
-    return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
 
 /*-------------------------------------------------------------------------
  * Function:     H5_get_utf16_str
@@ -737,7 +646,7 @@ Wroundf(float arg)
  *
  *-------------------------------------------------------------------------
  */
-const wchar_t *
+wchar_t *
 H5_get_utf16_str(const char *s)
 {
     int      nwchars = -1;   /* Length of the UTF-16 buffer */
@@ -833,7 +742,7 @@ int
 Wremove_utf8(const char *path)
 {
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
-    int      ret;
+    int      ret   = -1;
 
     /* Convert the input UTF-8 path to UTF-16 */
     if (NULL == (wpath = H5_get_utf16_str(path)))
@@ -986,7 +895,7 @@ done:
 herr_t
 H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
 {
-    size_t path1_len;           /* length of path1 */
+    size_t path1_len = 0;       /* length of path1 */
     size_t path2_len;           /* length of path2 */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1052,6 +961,9 @@ done:
  *
  * Purpose:     Sleep for a given # of nanoseconds
  *
+ *              Note that commodity hardware is probably going to have a
+ *              resolution of milliseconds, not nanoseconds.
+ *
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
@@ -1061,15 +973,26 @@ done:
 void
 H5_nanosleep(uint64_t nanosec)
 {
-    struct timespec sleeptime; /* Struct to hold time to sleep */
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Set up time to sleep */
-    sleeptime.tv_sec  = 0;
-    sleeptime.tv_nsec = (long)nanosec;
+#ifdef H5_HAVE_WIN32_API
 
-    HDnanosleep(&sleeptime, NULL);
+    /* On Windows, Sleep() is in milliseconds. Passing 0 to Sleep()
+     * causes the thread to relinquish the rest of its time slice.
+     */
+    Sleep(nanosec / (1000 * 1000));
+
+#else
+    {
+        struct timespec sleeptime; /* Struct to hold time to sleep */
+
+        /* Set up time to sleep */
+        sleeptime.tv_sec  = 0;
+        sleeptime.tv_nsec = (long)nanosec;
+
+        HDnanosleep(&sleeptime, NULL);
+    }
+#endif
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5_nanosleep() */

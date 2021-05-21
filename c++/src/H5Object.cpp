@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -42,8 +42,11 @@ namespace H5 {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // userAttrOpWrpr interfaces between the user's function and the
 // C library function H5Aiterate2
-extern "C" herr_t
-userAttrOpWrpr(hid_t loc_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)
+extern "C" {
+
+static herr_t
+userAttrOpWrpr(H5_ATTR_UNUSED hid_t loc_id, const char *attr_name, H5_ATTR_UNUSED const H5A_info_t *ainfo,
+               void *op_data)
 {
     H5std_string       s_attr_name = H5std_string(attr_name);
     UserData4Aiterate *myData      = reinterpret_cast<UserData4Aiterate *>(op_data);
@@ -53,8 +56,9 @@ userAttrOpWrpr(hid_t loc_id, const char *attr_name, const H5A_info_t *ainfo, voi
 
 // userVisitOpWrpr interfaces between the user's function and the
 // C library function H5Ovisit3
-extern "C" herr_t
-userVisitOpWrpr(hid_t obj_id, const char *attr_name, const H5O_info2_t *obj_info, void *op_data)
+static herr_t
+userVisitOpWrpr(H5_ATTR_UNUSED hid_t obj_id, const char *attr_name, const H5O_info2_t *obj_info,
+                void *op_data)
 {
     H5std_string    s_attr_name = H5std_string(attr_name);
     UserData4Visit *myData      = reinterpret_cast<UserData4Visit *>(op_data);
@@ -62,11 +66,15 @@ userVisitOpWrpr(hid_t obj_id, const char *attr_name, const H5O_info2_t *obj_info
     return status;
 }
 
+} // extern "C"
+
 //--------------------------------------------------------------------------
 // Function:    H5Object default constructor (protected)
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Object::H5Object() : H5Location() {}
+H5Object::H5Object() : H5Location()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    f_Attribute_setId - friend
@@ -471,7 +479,7 @@ H5Object::getObjName(char *obj_name, size_t buf_size) const
 H5std_string
 H5Object::getObjName() const
 {
-    H5std_string obj_name(""); // object name to return
+    H5std_string obj_name; // object name to return
 
     // Preliminary call to get the size of the object name
     ssize_t name_size = H5Iget_name(getId(), NULL, static_cast<size_t>(0));
@@ -550,7 +558,9 @@ H5Object::getObjName(H5std_string &obj_name, size_t len) const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Object::~H5Object() {}
+H5Object::~H5Object()
+{
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // namespace H5

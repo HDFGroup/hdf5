@@ -234,7 +234,6 @@ set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/tskiplist.c
     ${HDF5_TEST_SOURCE_DIR}/tsohm.c
     ${HDF5_TEST_SOURCE_DIR}/ttime.c
-    ${HDF5_TEST_SOURCE_DIR}/ttst.c
     ${HDF5_TEST_SOURCE_DIR}/tunicode.c
     ${HDF5_TEST_SOURCE_DIR}/tvltypes.c
     ${HDF5_TEST_SOURCE_DIR}/tvlstr.c
@@ -258,6 +257,7 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_attr_vlen.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_rec_rw_lock.c
 )
 
 set (H5_TESTS
@@ -332,6 +332,7 @@ set (H5_TESTS
     thread_id # special link
     vol
     timer
+    cmpd_dtransform
 )
 
 macro (ADD_H5_EXE file)

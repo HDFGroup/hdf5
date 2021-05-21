@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
  * Programmer:  Bill Wendling
  *              Monday, 19. February 2001
  */
-#ifndef H5TOOLS_STR_H__
-#define H5TOOLS_STR_H__
+#ifndef H5TOOLS_STR_H
+#define H5TOOLS_STR_H
 
 typedef struct h5tools_str_t {
     char * s;      /*allocate string       */
@@ -36,7 +36,7 @@ H5TOOLS_DLL char * h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t 
  * new functions needed to display region reference data
  */
 H5TOOLS_DLL char *h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info, hsize_t elmtno,
-                                            hsize_t *ptdata, h5tools_context_t *ctx);
+                                            const hsize_t *ptdata, h5tools_context_t *ctx);
 H5TOOLS_DLL void  h5tools_str_dump_space_slabs(h5tools_str_t *, hid_t, const h5tool_format_t *,
                                                h5tools_context_t *ctx);
 H5TOOLS_DLL void  h5tools_str_dump_space_blocks(h5tools_str_t *, hid_t, const h5tool_format_t *);
@@ -46,4 +46,4 @@ H5TOOLS_DLL char *h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *
                                      hid_t type, void *vp, h5tools_context_t *ctx);
 H5TOOLS_DLL char *h5tools_str_replace(const char *string, const char *substr, const char *replacement);
 
-#endif /* H5TOOLS_STR_H__ */
+#endif /* H5TOOLS_STR_H */

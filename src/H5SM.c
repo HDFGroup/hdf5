@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1092,7 +1092,7 @@ H5SM_try_share(H5F_t *f, H5O_t *open_oh, unsigned defer_flags, unsigned type_id,
     if (defer_flags & H5SM_WAS_DEFERRED)
 #ifndef NDEBUG
         deferred_type = ((H5O_shared_t *)mesg)->type;
-#else /* NDEBUG */
+#else  /* NDEBUG */
         if ((((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_HERE) &&
             (((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_SOHM))
             HGOTO_DONE(FALSE);
@@ -1262,16 +1262,16 @@ static herr_t
 H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t defer, unsigned type_id,
                  void *mesg, unsigned *cache_flags_ptr)
 {
-    H5SM_list_t *        list = NULL;          /* List index */
-    H5SM_mesg_key_t      key;                  /* Key used to search the index */
-    H5SM_list_cache_ud_t cache_udata;          /* User-data for metadata cache callback */
-    H5O_shared_t         shared;               /* Shared H5O message */
-    hbool_t              found = FALSE;        /* Was the message in the index? */
-    H5HF_t *             fheap = NULL;         /* Fractal heap handle */
-    H5B2_t *             bt2   = NULL;         /* v2 B-tree handle for index */
-    size_t               buf_size;             /* Size of the encoded message */
-    void *               encoding_buf = NULL;  /* Buffer for encoded message */
-    size_t               empty_pos    = UFAIL; /* Empty entry in list */
+    H5SM_list_t *        list = NULL;             /* List index */
+    H5SM_mesg_key_t      key;                     /* Key used to search the index */
+    H5SM_list_cache_ud_t cache_udata;             /* User-data for metadata cache callback */
+    H5O_shared_t         shared;                  /* Shared H5O message */
+    hbool_t              found = FALSE;           /* Was the message in the index? */
+    H5HF_t *             fheap = NULL;            /* Fractal heap handle */
+    H5B2_t *             bt2   = NULL;            /* v2 B-tree handle for index */
+    size_t               buf_size;                /* Size of the encoded message */
+    void *               encoding_buf = NULL;     /* Buffer for encoded message */
+    size_t               empty_pos    = SIZE_MAX; /* Empty entry in list */
     herr_t               ret_value    = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -1325,11 +1325,11 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
             HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to search for message in list")
 
         if (defer) {
-            if (list_pos != UFAIL)
+            if (list_pos != SIZE_MAX)
                 found = TRUE;
         } /* end if */
         else {
-            if (list_pos != UFAIL) {
+            if (list_pos != SIZE_MAX) {
                 /* If the message was previously shared in an object header, share
                  * it in the heap now.
                  */
@@ -1411,7 +1411,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
         if (defer)
             HDmemset(&shared.u, 0, sizeof(shared.u));
 #endif /* H5_USING_MEMCHECKER */
-    } /* end if */
+    }  /* end if */
     else {
         htri_t share_in_ohdr; /* Whether the new message can be shared in another object's header */
 
@@ -1484,13 +1484,13 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
             /* Insert the new message into the SOHM index */
             if (header->index_type == H5SM_LIST) {
                 /* Index is a list.  Find an empty spot if we haven't already */
-                if (empty_pos == UFAIL) {
+                if (empty_pos == SIZE_MAX) {
                     size_t pos;
 
                     if (H5SM__find_in_list(list, NULL, &empty_pos, &pos) < 0)
                         HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to search for message in list")
 
-                    if (pos == UFAIL || empty_pos == UFAIL)
+                    if (pos == SIZE_MAX || empty_pos == SIZE_MAX)
                         HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to find empty entry in list")
                 }
                 /* Insert message into list */
@@ -1650,9 +1650,14 @@ done:
  *
  *              If EMPTY_POS is NULL, don't store anything in it.
  *
- * Return:      Message's position in the list on success
- *              UFAIL if message couldn't be found
- *              empty_pos set to position of empty message or UFAIL.
+ * Return:      Success:    SUCCEED
+ *                          pos = position (if found)
+ *                          pos = SIZE_MAX (if not found)
+ *                          empty_pos = indeterminate (if found)
+ *                          empty_pos = 1st empty position (if not found)
+ *
+ *              Failure:    FAIL
+ *                          pos & empty_pos indeterminate
  *
  * Programmer:  James Laird
  *              Tuesday, May 2, 2006
@@ -1673,7 +1678,7 @@ H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *
 
     /* Initialize empty_pos to an invalid value */
     if (empty_pos)
-        *empty_pos = UFAIL;
+        *empty_pos = SIZE_MAX;
 
     /* Find the first (only) message equal to the key passed in.
      * Also record the first empty position we find.
@@ -1696,11 +1701,11 @@ H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *
 
             /* Found earlier position possible, don't check any more */
             empty_pos = NULL;
-        } /* end if */
-    }     /* end for */
+        }
+    }
 
     /* If we reached this point, we didn't find the message */
-    *pos = UFAIL;
+    *pos = SIZE_MAX;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1842,7 +1847,7 @@ H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, c
         /* Find the message in the list */
         if (H5SM__find_in_list(list, &key, NULL, &list_pos) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to search for message in list")
-        if (list_pos == UFAIL)
+        if (list_pos == SIZE_MAX)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
 
         if (list->messages[list_pos].location == H5SM_IN_HEAP)
@@ -2224,7 +2229,7 @@ H5SM_get_refcount(H5F_t *f, unsigned type_id, const H5O_shared_t *sh_mesg, hsize
         /* Find the message in the list */
         if (H5SM__find_in_list(list, &key, NULL, &list_pos) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to search for message in list")
-        if (list_pos == UFAIL)
+        if (list_pos == SIZE_MAX)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
 
         /* Copy the message */
@@ -2521,7 +2526,7 @@ H5SM__list_free(H5SM_list_t *list)
  *
  * Purpose:     Print debugging information for the master table.
  *
- *              If table_vers and num_indexes are not UFAIL, they are used
+ *              If table_vers and num_indexes are not UINT_MAX, they are used
  *              instead of the values in the superblock.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -2548,14 +2553,14 @@ H5SM_table_debug(H5F_t *f, haddr_t table_addr, FILE *stream, int indent, int fwi
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    /* If table_vers and num_indexes are UFAIL, replace them with values from
+    /* If table_vers and num_indexes are UINT_MAX, replace them with values from
      * userblock
      */
-    if (table_vers == UFAIL)
+    if (table_vers == UINT_MAX)
         table_vers = H5F_SOHM_VERS(f);
     else if (table_vers != H5F_SOHM_VERS(f))
         HDfprintf(stream, "*** SOHM TABLE VERSION DOESN'T MATCH VERSION IN SUPERBLOCK!\n");
-    if (num_indexes == UFAIL)
+    if (num_indexes == UINT_MAX)
         num_indexes = H5F_SOHM_NINDEXES(f);
     else if (num_indexes != H5F_SOHM_NINDEXES(f))
         HDfprintf(stream, "*** NUMBER OF SOHM INDEXES DOESN'T MATCH VALUE IN SUPERBLOCK!\n");

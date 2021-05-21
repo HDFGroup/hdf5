@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -126,7 +126,7 @@ typedef struct H5FD_mirror_t {
     } while (0)
 #else
 #define LOG_XMIT_BYTES(label, buf, len) /* no-op */
-#endif /* MIRROR_DEBUG_XMIT_BYTE */
+#endif                                  /* MIRROR_DEBUG_XMIT_BYTE */
 
 #if MIRROR_DEBUG_OP_CALLS
 #define LOG_OP_CALL(name)                                                                                    \
@@ -136,7 +136,7 @@ typedef struct H5FD_mirror_t {
     } while (0)
 #else
 #define LOG_OP_CALL(name) /* no-op */
-#endif /* MIRROR_DEBUG_OP_CALLS */
+#endif                    /* MIRROR_DEBUG_OP_CALLS */
 
 /* Prototypes */
 static herr_t  H5FD__mirror_term(void);

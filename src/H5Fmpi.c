@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -68,35 +68,6 @@
 /*******************/
 
 #ifdef H5_HAVE_PARALLEL
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_get_mpi_handle
- *
- * Purpose:     Retrieves MPI File handle.
- *
- * Return:      Success:        The size (positive)
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle)
-{
-    herr_t ret_value = SUCCEED;
-    hid_t  fapl_id   = H5I_INVALID_HID;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    HDassert(f && f->shared);
-
-    /* Dispatch to driver */
-    if ((ret_value = H5FD_get_vfd_handle(f->shared->lf, fapl_id, (void **)f_handle)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_mpi_handle() */
-
 /*-------------------------------------------------------------------------
  * Function:    H5F_mpi_get_rank
  *

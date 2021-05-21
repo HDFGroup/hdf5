@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -440,7 +440,10 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         /* Set invalid element size */
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.raw_elmt_size = 0;
-        H5E_BEGIN_TRY { fa = H5FA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            fa = H5FA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (fa) {
             /* Close opened fixed array */
@@ -454,7 +457,10 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         /* Set invalid max. # of elements bits */
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = 0;
-        H5E_BEGIN_TRY { fa = H5FA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            fa = H5FA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (fa) {
             /* Close opened fixed array */
@@ -468,7 +474,10 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         /* Set invalid max. # of elements */
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.nelmts = 0;
-        H5E_BEGIN_TRY { fa = H5FA_create(f, &test_cparam, NULL); }
+        H5E_BEGIN_TRY
+        {
+            fa = H5FA_create(f, &test_cparam, NULL);
+        }
         H5E_END_TRY;
         if (fa) {
             /* Close opened fixed array */
@@ -481,7 +490,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
 
         PASSED();
     }
-#else /* NDEBUG */
+#else  /* NDEBUG */
     SKIPPED();
     HDputs("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
@@ -885,7 +894,10 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     fa2 = NULL;
 
     /* Try re-opening the array again (should fail, as array will be deleted) */
-    H5E_BEGIN_TRY { fa2 = H5FA_open(f, fa_addr, NULL); }
+    H5E_BEGIN_TRY
+    {
+        fa2 = H5FA_open(f, fa_addr, NULL);
+    }
     H5E_END_TRY;
     if (fa2) {
         /* Close opened array */
@@ -905,7 +917,10 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         TEST_ERROR
 
     /* Try re-opening the array again (should fail, as array is now deleted) */
-    H5E_BEGIN_TRY { fa = H5FA_open(f, fa_addr, NULL); }
+    H5E_BEGIN_TRY
+    {
+        fa = H5FA_open(f, fa_addr, NULL);
+    }
     H5E_END_TRY;
     if (fa) {
         /* Close opened array */
@@ -1783,7 +1798,10 @@ main(void)
 error:
     HDputs("*** TESTS FAILED ***");
 
-    H5E_BEGIN_TRY { H5Pclose(fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+    }
     H5E_END_TRY;
 
     if (api_ctx_pushed)

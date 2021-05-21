@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -4220,7 +4220,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     herr_t      ret;
 #ifdef LATER /* fletcher32 */
     H5Z_filter_t filter_info;
-#endif /* LATER */
+#endif       /* LATER */
     char message[256];
 
     /* Set up MPI parameters */
@@ -4248,7 +4248,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
 
             ret = H5Pset_fletcher32(dcpl);
             VRFY((ret >= 0),"set filter (flecher32) succeeded");
-#endif /* LATER */
+#endif       /* LATER */
     }
     else  {
         VRFY(0, "Unexpected mode, only test for TEST_FILTERS_READ.");
@@ -4290,7 +4290,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     test_name = "Broken Collective I/O - Filter is required";
     no_collective_cause_local_expected = H5D_MPIO_FILTERS;
     no_collective_cause_global_expected = H5D_MPIO_FILTERS;
-#endif /* LATER */
+#endif       /* LATER */
 
     /* Get the file dataspace */
     file_space = H5Dget_space(dataset);

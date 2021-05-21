@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -377,7 +377,7 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     file->nFileIndexHigh       = fileinfo.nFileIndexHigh;
     file->nFileIndexLow        = fileinfo.nFileIndexLow;
     file->dwVolumeSerialNumber = fileinfo.dwVolumeSerialNumber;
-#else /* H5_HAVE_WIN32_API */
+#else  /* H5_HAVE_WIN32_API */
     file->device = sb.st_dev;
     file->inode  = sb.st_ino;
 #endif /* H5_HAVE_WIN32_API */
@@ -507,7 +507,7 @@ H5FD__sec2_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         HGOTO_DONE(-1)
     if (f1->device > f2->device)
         HGOTO_DONE(1)
-#else /* H5_DEV_T_IS_SCALAR */
+#else  /* H5_DEV_T_IS_SCALAR */
     /* If dev_t isn't a scalar value on this system, just use memcmp to
      * determine if the values are the same or not.  The actual return value
      * shouldn't really matter...
@@ -742,7 +742,7 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             if (bytes_read > 0)
                 offset += bytes_read;
 #else
-            bytes_read = HDread(file->fd, buf, bytes_in);
+            bytes_read  = HDread(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
         } while (-1 == bytes_read && EINTR == errno);
 
@@ -945,7 +945,7 @@ H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
         bError = SetEndOfFile(file->hFile);
         if (0 == bError)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
-#else /* H5_HAVE_WIN32_API */
+#else  /* H5_HAVE_WIN32_API */
         if (-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* H5_HAVE_WIN32_API */

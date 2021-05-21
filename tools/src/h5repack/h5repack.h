@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef H5REPACK_H__
-#define H5REPACK_H__
+#ifndef H5REPACK_H
+#define H5REPACK_H
 
 #include "H5private.h"
 #include "hdf5.h"
@@ -195,13 +195,13 @@ void init_packobject(pack_info_t *obj);
  *-------------------------------------------------------------------------
  */
 
-int apply_filters(const char *name,    /* object name from traverse list */
-                  int         rank,    /* rank of dataset */
-                  hsize_t *   dims,    /* dimensions of dataset */
-                  size_t      msize,   /* size of type */
-                  hid_t       dcpl_id, /* dataset creation property list */
-                  pack_opt_t *options, /* repack options */
-                  int *       has_filter);    /* (OUT) object NAME has a filter */
+int apply_filters(const char *   name,    /* object name from traverse list */
+                  int            rank,    /* rank of dataset */
+                  const hsize_t *dims,    /* dimensions of dataset */
+                  size_t         msize,   /* size of type */
+                  hid_t          dcpl_id, /* dataset creation property list */
+                  pack_opt_t *   options, /* repack options */
+                  int *          has_filter);       /* (OUT) object NAME has a filter */
 
 /*-------------------------------------------------------------------------
  * options table
@@ -224,4 +224,4 @@ obj_list_t *parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
 obj_list_t *parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about object */
                          pack_opt_t *options);
 
-#endif /* H5REPACK_H__ */
+#endif /* H5REPACK_H */

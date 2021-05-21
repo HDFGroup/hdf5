@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -88,7 +88,7 @@ typedef struct H5FD_core_t {
     DWORD dwVolumeSerialNumber;
 
     HANDLE hFile; /* Native windows file handle */
-#endif /* H5_HAVE_WIN32_API */
+#endif                                        /* H5_HAVE_WIN32_API */
     hbool_t                     dirty;        /* changes not saved?       */
     H5FD_file_image_callbacks_t fi_callbacks; /* file image callbacks     */
     H5SL_t *                    dirty_list;   /* dirty parts of the file  */
@@ -831,11 +831,11 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         file->nFileIndexHigh       = fileinfo.nFileIndexHigh;
         file->nFileIndexLow        = fileinfo.nFileIndexLow;
         file->dwVolumeSerialNumber = fileinfo.dwVolumeSerialNumber;
-#else /* H5_HAVE_WIN32_API */
+#else  /* H5_HAVE_WIN32_API */
         file->device = sb.st_dev;
         file->inode  = sb.st_ino;
 #endif /* H5_HAVE_WIN32_API */
-    } /* end if */
+    }  /* end if */
 
     /* If an existing file is opened, load the whole file into memory. */
     if (!(H5F_ACC_CREAT & flags)) {
@@ -1071,7 +1071,7 @@ H5FD__core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
             HGOTO_DONE(-1)
         if (f1->device > f2->device)
             HGOTO_DONE(1)
-#else /* H5_DEV_T_IS_SCALAR */
+#else  /* H5_DEV_T_IS_SCALAR */
         /* If dev_t isn't a scalar value on this system, just use memcmp to
          * determine if the values are the same or not.  The actual return value
          * shouldn't really matter...
@@ -1088,7 +1088,7 @@ H5FD__core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
             HGOTO_DONE(1)
 
 #endif /*H5_HAVE_WIN32_API*/
-    } /* end if */
+    }  /* end if */
     else {
         if (NULL == f1->name && NULL == f2->name) {
             if (f1 < f2)
@@ -1335,7 +1335,7 @@ H5FD__core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         temp_nbytes = file->eof - addr;
         H5_CHECK_OVERFLOW(temp_nbytes, hsize_t, size_t);
         nbytes = MIN(size, (size_t)temp_nbytes);
-#else /* NDEBUG */
+#else  /* NDEBUG */
         nbytes = MIN(size, (size_t)(file->eof - addr));
 #endif /* NDEBUG */
 
@@ -1607,7 +1607,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
                 bError = SetEndOfFile(file->hFile);
                 if (0 == bError)
                     HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
-#else /* H5_HAVE_WIN32_API */
+#else  /* H5_HAVE_WIN32_API */
                 if (-1 == HDftruncate(file->fd, (HDoff_t)new_eof))
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* H5_HAVE_WIN32_API */

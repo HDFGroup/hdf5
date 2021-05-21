@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -517,7 +517,6 @@ test_misc2_write_attribute(void)
 
     HDfree(string_att1);
     HDfree(string_att2);
-    return;
 }
 
 static void
@@ -563,8 +562,6 @@ test_misc2_read_attribute(const char *filename, const char *att_name)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 /****************************************************************
 **
@@ -1256,7 +1253,7 @@ test_misc8(void)
 #ifdef VERIFY_DATA
     int *rdata;                 /* Data to read */
     int *tdata2;                /* Temporary pointer to data to read */
-#endif /* VERIFY_DATA */
+#endif                          /* VERIFY_DATA */
     unsigned u, v;              /* Local index variables */
     int      mdc_nelmts;        /* Metadata number of elements */
     size_t   rdcc_nelmts;       /* Raw data number of elements */
@@ -1578,7 +1575,7 @@ test_misc8(void)
     if (storage_size >= (MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
-#else /* Compression is not configured */
+#else  /* Compression is not configured */
     if (storage_size != (MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
@@ -1612,7 +1609,7 @@ test_misc8(void)
     if (storage_size >= (MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
-#else /* Compression is not configured */
+#else  /* Compression is not configured */
     if (storage_size != (MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
@@ -1677,7 +1674,7 @@ test_misc8(void)
     if (storage_size >= (4 * MISC8_CHUNK_DIM0 * MISC8_CHUNK_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
-#else /* Compression is not configured */
+#else  /* Compression is not configured */
     if (storage_size != (4 * MISC8_CHUNK_DIM0 * MISC8_CHUNK_DIM1 * H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n", __LINE__,
                       (unsigned)storage_size);
@@ -1897,7 +1894,10 @@ test_misc11(void)
     CHECK(ret, FAIL, "H5Pset_sizes");
 
     /* This should fail as (32770*2) will exceed ^16 - 2 bytes for storing btree entries */
-    H5E_BEGIN_TRY { ret = H5Pset_sym_k(fcpl, 32770, 0); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_sym_k(fcpl, 32770, 0);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_sym_k");
 
@@ -1905,7 +1905,10 @@ test_misc11(void)
     CHECK(ret, FAIL, "H5Pset_sym_k");
 
     /* This should fail as (32770*2) will exceed ^16 - 2 bytes for storing btree entries */
-    H5E_BEGIN_TRY { ret = H5Pset_istore_k(fcpl, 32770); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_istore_k(fcpl, 32770);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_istore_k");
 
@@ -2086,11 +2089,11 @@ test_misc12(void)
     CHECK(ret, FAIL, "H5Dread");
 
     for (i = 0; i < MISC12_SPACE1_DIM1; i++)
-        if (HDstrcmp(wdata[i], rdata[i]))
+        if (HDstrcmp(wdata[i], rdata[i]) != 0)
             TestErrPrintf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n", __LINE__, i, wdata[i], i,
                           rdata[i]);
     for (; i < (MISC12_SPACE1_DIM1 + MISC12_APPEND_SIZE); i++)
-        if (HDstrcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]))
+        if (HDstrcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]) != 0)
             TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n", __LINE__, i - MISC12_SPACE1_DIM1,
                           wdata1[i - MISC12_SPACE1_DIM1], i, rdata[i]);
 
@@ -2518,17 +2521,17 @@ test_misc13(void)
 static void
 test_misc14(void)
 {
-    hid_t  file_id;       /* File ID */
-    hid_t  fapl;          /* File access property list ID */
-    hid_t  DataSpace;     /* Dataspace ID */
-    hid_t  Dataset1;      /* Dataset ID #1 */
-    hid_t  Dataset2;      /* Dataset ID #2 */
-    hid_t  Dataset3;      /* Dataset ID #3 */
-    double data1 = 5.0F;  /* Data to write for dataset #1 */
-    double data2 = 10.0F; /* Data to write for dataset #2 */
-    double data3 = 15.0F; /* Data to write for dataset #3 */
-    double rdata;         /* Data read in */
-    herr_t ret;           /* Generic return value */
+    hid_t  file_id;      /* File ID */
+    hid_t  fapl;         /* File access property list ID */
+    hid_t  DataSpace;    /* Dataspace ID */
+    hid_t  Dataset1;     /* Dataset ID #1 */
+    hid_t  Dataset2;     /* Dataset ID #2 */
+    hid_t  Dataset3;     /* Dataset ID #3 */
+    double data1 = 5.0;  /* Data to write for dataset #1 */
+    double data2 = 10.0; /* Data to write for dataset #2 */
+    double data3 = 15.0; /* Data to write for dataset #3 */
+    double rdata;        /* Data read in */
+    herr_t ret;          /* Generic return value */
 
     /* Test creating two datasets and deleting the second */
 
@@ -2963,7 +2966,7 @@ test_misc18(void)
     hid_t aid;        /* Attribute ID */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     H5O_info1_t old_oinfo;           /* (deprecated) information about object */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif                               /* H5_NO_DEPRECATED_SYMBOLS */
     H5O_info2_t       oinfo;         /* Data model information about object */
     H5O_native_info_t ninfo;         /* Native file format information about object */
     char              attr_name[32]; /* Attribute name buffer */
@@ -3163,7 +3166,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the file again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fclose(fid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Fclose");
 
@@ -3194,7 +3200,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the property list again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Pclose(plid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pclose(plid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pclose");
 
@@ -3225,7 +3234,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the property class again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Pclose_class(pcid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pclose_class(pcid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pclose_class");
 
@@ -3256,7 +3268,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the datatype again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Tclose(tid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tclose(tid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Tclose");
 
@@ -3287,7 +3302,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the dataspace again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Sclose(sid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sclose(sid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sclose");
 
@@ -3326,7 +3344,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the dataset again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Dclose(did); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dclose(did);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dclose");
 
@@ -3377,7 +3398,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the attribute again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Aclose(aid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aclose(aid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aclose");
 
@@ -3424,7 +3448,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the group again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Gclose(gid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Gclose(gid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Gclose");
 
@@ -3459,7 +3486,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the error class again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Eunregister_class(ecid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eunregister_class(ecid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Eunregister_class");
 
@@ -3494,7 +3524,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the error message again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Eclose_msg(emid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_msg(emid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Eclose_msg");
 
@@ -3529,7 +3562,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try closing the error stack again (should fail) */
-    H5E_BEGIN_TRY { ret = H5Eclose_stack(esid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(esid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Eclose_stack");
 
@@ -3564,7 +3600,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try unregistering the VFD again (should fail) */
-    H5E_BEGIN_TRY { ret = H5FDunregister(vfdid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5FDunregister(vfdid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5FDunregister");
 
@@ -3574,7 +3613,7 @@ test_misc19(void)
 
     /* Get a VOL class to register */
     vol_cls = h5_get_dummy_vol_class();
-    CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
+    CHECK_PTR(vol_cls, "h5_get_dummy_vol_class");
 
     /* Register a VOL connector */
     volid = H5VLregister_connector(vol_cls, H5P_DEFAULT);
@@ -3601,7 +3640,10 @@ test_misc19(void)
     VERIFY(rc, 0, "H5Idec_ref");
 
     /* Try unregistering the VOL connector again (should fail) */
-    H5E_BEGIN_TRY { ret = H5VLunregister_connector(volid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5VLunregister_connector(volid);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5VLunregister_connector");
 
@@ -4039,23 +4081,50 @@ test_misc23(void)
      * test the old APIs
      **********************************************************************/
 
-    H5E_BEGIN_TRY { tmp_id = H5Gcreate1(file_id, "/A/B00a/grp", (size_t)0); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gcreate1(file_id, "/A/B00a/grp", (size_t)0);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gcreate1");
 
-    tmp_id = H5Gcreate1(file_id, "/A/grp", (size_t)0);
-    CHECK(tmp_id, FAIL, "H5Gcreate1");
+    /* Make sure that size_hint values that can't fit into a 32-bit
+     * unsigned integer are rejected. Only necessary on systems where
+     * size_t is a 64-bit type.
+     */
+    if (SIZE_MAX > UINT32_MAX) {
+        H5E_BEGIN_TRY
+        {
+            tmp_id = H5Gcreate1(file_id, "/size_hint_too_large", SIZE_MAX);
+        }
+        H5E_END_TRY;
+        VERIFY(tmp_id, FAIL, "H5Gcreate1");
+    }
 
+    /* Make sure the largest size_hint value works */
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gcreate1(file_id, "/largest_size_hint", UINT32_MAX);
+    }
+    H5E_END_TRY;
+    CHECK(tmp_id, FAIL, "H5Gcreate1");
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dcreate1(file_id, "/A/B00c/dset", type_id, space_id, create_id); }
+    tmp_id = H5Gcreate1(file_id, "/A/grp", (size_t)0);
+    CHECK(tmp_id, FAIL, "H5Gcreate1");
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dcreate1(file_id, "/A/B00c/dset", type_id, space_id, create_id);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dcreate1");
 
     tmp_id = H5Dcreate1(file_id, "/A/dset", type_id, space_id, create_id);
     CHECK(tmp_id, FAIL, "H5Dcreate1");
-
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -4382,51 +4451,87 @@ test_misc24(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Attempt to open each kind of object with wrong API, including using soft links */
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
@@ -4435,19 +4540,31 @@ test_misc24(void)
     group_id = H5Gopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
     CHECK(group_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
@@ -4458,19 +4575,31 @@ test_misc24(void)
     dset_id = H5Dopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
     CHECK(dset_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Topen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Topen2");
 
@@ -4481,19 +4610,31 @@ test_misc24(void)
     type_id = H5Topen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Topen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
-    H5E_BEGIN_TRY { tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen2");
 
@@ -5079,10 +5220,13 @@ test_misc27(void)
 
 #ifdef H5_STRICT_FORMAT_CHECKS
     /* Open group with incorrect # of object header messages (should fail) */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, MISC27_GROUP, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, MISC27_GROUP, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(gid, FAIL, "H5Gopen2");
-#else /* H5_STRICT_FORMAT_CHECKS */
+#else  /* H5_STRICT_FORMAT_CHECKS */
     /* Open group with incorrect # of object header messages */
     gid = H5Gopen2(fid, MISC27_GROUP, H5P_DEFAULT);
     CHECK(gid, FAIL, "H5Gopen2");
@@ -5399,7 +5543,7 @@ test_misc31(void)
     hid_t  group_id; /* Group id */
     hid_t  dtype_id; /* Datatype id */
     herr_t ret;      /* Generic return value */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif               /* H5_NO_DEPRECATED_SYMBOLS */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Deprecated routines initialize after H5close()\n"));
@@ -5474,7 +5618,7 @@ test_misc31(void)
     ret = H5Tclose(dtype_id);
     CHECK(ret, FAIL, "H5Tclose");
 
-#else /* H5_NO_DEPRECATED_SYMBOLS */
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
     /* Output message about test being skipped */
     MESSAGE(5, (" ...Skipped"));
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -5523,7 +5667,7 @@ test_misc32(void)
     CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
     buffer = H5allocate_memory(0, TRUE);
     CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
-#endif /* NDEBUG */
+#endif                                           /* NDEBUG */
 
     /* RESIZE */
 
@@ -5542,7 +5686,7 @@ test_misc32(void)
 #ifdef NDEBUG
     resized = H5resize_memory(NULL, 0);
     CHECK_PTR_NULL(resized, "H5resize_memory"); /*BAD*/
-#endif /* NDEBUG */
+#endif                                          /* NDEBUG */
 
 } /* end test_misc32() */
 
@@ -5572,17 +5716,26 @@ test_misc33(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Case (1) */
-    H5E_BEGIN_TRY { ret = H5Oget_info_by_name3(fid, "/soft_two", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oget_info_by_name3(fid, "/soft_two", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oget_info_by_name3");
 
     /* Case (2) */
-    H5E_BEGIN_TRY { ret = H5Oget_info_by_name3(fid, "/dsetA", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oget_info_by_name3(fid, "/dsetA", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oget_info_by_name3");
 
     /* Case (3) */
-    H5E_BEGIN_TRY { ret = H5Oget_info_by_name3(fid, "/soft_one", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oget_info_by_name3(fid, "/soft_one", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oget_info_by_name3");
 
@@ -5700,7 +5853,7 @@ test_misc35(void)
     CHECK(arr_size_start, 0, "H5get_free_list_sizes");
     CHECK(blk_size_start, 0, "H5get_free_list_sizes");
     CHECK(fac_size_start, 0, "H5get_free_list_sizes");
-#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
     /* All the values should be == 0 */
     VERIFY(reg_size_start, 0, "H5get_free_list_sizes");
     VERIFY(arr_size_start, 0, "H5get_free_list_sizes");
@@ -5739,7 +5892,7 @@ test_misc35(void)
     CHECK(alloc_stats.total_alloc_blocks_count, 0, "H5get_alloc_stats");
     CHECK(alloc_stats.curr_alloc_blocks_count, 0, "H5get_alloc_stats");
     CHECK(alloc_stats.peak_alloc_blocks_count, 0, "H5get_alloc_stats");
-#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
     /* All the values should be == 0 */
     VERIFY(alloc_stats.total_alloc_bytes, 0, "H5get_alloc_stats");
     VERIFY(alloc_stats.curr_alloc_bytes, 0, "H5get_alloc_stats");
@@ -5787,7 +5940,7 @@ test_misc(void)
     test_misc21();  /* Test that "late" allocation time is treated the same as "incremental", for chunked
                        datasets w/a filters */
     test_misc22();  /* check szip bits per pixel */
-#endif /* H5_HAVE_FILTER_SZIP */
+#endif              /* H5_HAVE_FILTER_SZIP */
     test_misc23();  /* Test intermediate group creation */
     test_misc24();  /* Test inappropriate API opens of objects */
     test_misc25a(); /* Exercise null object header message merge bug */

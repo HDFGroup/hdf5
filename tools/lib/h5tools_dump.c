@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -329,7 +329,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, h5tools_cont
  * Purpose: Print some values from an attribute referenced by object reference.
  *
  * Description:
- *      This is a special case subfunction to dump aa attribute references.
+ *      This is a special case subfunction to dump an attribute reference.
  *
  * Return:
  *      The function returns False if the last dimension has been reached, otherwise True
@@ -448,6 +448,9 @@ done:
     if (H5Tclose(atype) < 0)
         H5TOOLS_ERROR(dimension_break, "H5Tclose failed");
 
+    if (H5Sclose(region_space) < 0)
+        H5TOOLS_ERROR(dimension_break, "H5Sclose failed");
+
     ctx->indent_level--;
     ctx->need_prefix = TRUE;
 
@@ -462,7 +465,7 @@ done:
 
     CATCH
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -519,7 +522,7 @@ h5tools_print_region_data_blocks(hid_t region_id, FILE *stream, const h5tool_for
 
     HDmemset(&ctx, 0, sizeof(ctx));
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     if ((type_size = H5Tget_size(type_id)) == 0)
         H5TOOLS_THROW(FAIL, "H5Tget_size failed");
@@ -639,7 +642,7 @@ done:
     if (H5Sclose(sid1) < 0)
         H5TOOLS_ERROR(FAIL, "H5Sclose failed");
     CATCH
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return ret_value;
 }
@@ -693,7 +696,7 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id, FILE *strea
     HDassert(ctx);
     HDassert(buffer);
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     outputformat           = *info;
     outputformat.idx_fmt   = "";
     outputformat.idx_n_fmt = "";
@@ -862,7 +865,7 @@ done:
 
     CATCH
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return ret_value;
 }
@@ -912,7 +915,7 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id, FILE *stre
     HDassert(ptdata);
     HDassert(ndims > 0);
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     /* Allocate space for the dimension array */
@@ -998,7 +1001,7 @@ done:
     if (H5Sclose(mem_space) < 0)
         H5TOOLS_ERROR((-1), "H5Sclose failed");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return ret_value;
 }
@@ -1050,7 +1053,7 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id, FILE *strea
     HDassert(ctx);
     HDassert(buffer);
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     outputformat           = *info;
     outputformat.idx_fmt   = "";
     outputformat.idx_n_fmt = "";
@@ -1214,7 +1217,7 @@ done:
     H5_LEAVE(dimension_break)
     CATCH
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return ret_value;
 }
@@ -1254,12 +1257,12 @@ done:
 static herr_t
 h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t dset,
                             hid_t p_type, hid_t f_space, hsize_t hyperslab_count,
-                            hsize_t *    temp_start,  /* start inside offset count loop */
-                            hsize_t *    temp_count,  /* count inside offset count loop  */
-                            hsize_t *    temp_block,  /* block size used in loop  */
-                            hsize_t *    temp_stride, /* stride size used in loop  */
-                            hsize_t *    total_size,  /* total size of dataset */
-                            unsigned int row_dim)     /* index of row_counter dimension */
+                            hsize_t *      temp_start,  /* start inside offset count loop */
+                            hsize_t *      temp_count,  /* count inside offset count loop  */
+                            hsize_t *      temp_block,  /* block size used in loop  */
+                            hsize_t *      temp_stride, /* stride size used in loop  */
+                            const hsize_t *total_size,  /* total size of dataset */
+                            unsigned int   row_dim)       /* index of row_counter dimension */
 {
     size_t         i;                          /* counters  */
     size_t         j;                          /* counters  */
@@ -1281,7 +1284,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     unsigned int vl_data   = 0; /* contains VL datatypes */
     herr_t       ret_value = SUCCEED;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     if ((size_t)ctx->ndims > NELMTS(sm_size))
         H5TOOLS_THROW(FAIL, "ndims and sm_size comparision failed");
 
@@ -1395,7 +1398,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     if (sm_buf)
         HDfree(sm_buf);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -1580,7 +1583,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_co
     hbool_t past_catch = FALSE;
     herr_t  ret_value  = SUCCEED;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     if ((f_space = H5Dget_space(dset)) < 0)
         H5TOOLS_THROW(FAIL, "H5Dget_space failed");
 
@@ -1604,7 +1607,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_co
     if (f_space >= 0 && H5Sclose(f_space) < 0)
         H5TOOLS_THROW(FAIL, "H5Sclose failed");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -1657,7 +1660,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
     unsigned int vl_data   = 0; /* contains VL datatypes */
     int          ret_value = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     if (H5I_INVALID_HID == (f_space = H5Dget_space(dset)))
         H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
 
@@ -1792,7 +1795,7 @@ done:
     if (f_space >= 0 && H5Sclose(f_space) < 0)
         H5TOOLS_ERROR((-1), "H5Sclose failed");
     CATCH
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -1823,7 +1826,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, h5tools_conte
     /* VL data special information */
     unsigned int vl_data = 0; /* contains VL datatypes */
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     if (H5I_INVALID_HID == (f_space = H5Aget_space(attr_id)))
         H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
 
@@ -1882,7 +1885,7 @@ done:
     if (f_space >= 0 && H5Sclose(f_space) < 0)
         H5TOOLS_ERROR((-1), "H5Sclose failed");
     CATCH
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -1914,7 +1917,7 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     h5tool_format_t info_dflt;
     int             ret_value = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /* Use default values */
     if (!stream)
         stream = rawoutstream;
@@ -1966,7 +1969,7 @@ done:
     if (f_space > 0)
         H5Sclose(f_space);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -1990,7 +1993,7 @@ h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, h5tools_context_t *c
     h5tool_format_t info_dflt;
     int             ret_value = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /* Use default values */
     if (!stream)
         stream = rawoutstream;
@@ -2036,7 +2039,7 @@ done:
     if (f_space > 0)
         H5Sclose(f_space);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -2079,7 +2082,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
     const char *order_s    = NULL; /* byte order string */
     int         ret_value  = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     if ((type_class = H5Tget_class(type)) < 0)
         H5TOOLS_THROW((-1), "H5Tget_class failed");
     if (object_search && H5Tcommitted(type) > 0) {
@@ -2194,9 +2197,10 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                 else
                     sign_s = " unknown-sign";
 
-                /* print size, order, and sign  */
-                h5tools_str_append(buffer, "%lu-bit%s%s integer", (unsigned long)(8 * H5Tget_size(type)),
-                                   order_s, sign_s);
+                /* print size, order, sign, and precision */
+                h5tools_str_append(buffer, "%lu-bit%s%s integer %lu-bit precision",
+                                   (unsigned long)(8 * H5Tget_size(type)), order_s, sign_s,
+                                   H5Tget_precision(type));
             }
             break;
 
@@ -2217,12 +2221,8 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                 h5tools_str_append(buffer, "H5T_NATIVE_FLOAT");
             else if (H5Tequal(type, H5T_NATIVE_DOUBLE) == TRUE)
                 h5tools_str_append(buffer, "H5T_NATIVE_DOUBLE");
-#if H5_SIZEOF_LONG_DOUBLE != 0
-            else if (H5Tequal(type, H5T_NATIVE_LDOUBLE) == TRUE)
-                h5tools_str_append(buffer, "H5T_NATIVE_LDOUBLE");
-#endif
             else {
-
+                /* print what the library knows */
                 /* byte order */
                 if (H5Tget_size(type) > 1) {
                     order = H5Tget_order(type);
@@ -2238,9 +2238,9 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                 else
                     order_s = "";
 
-                /* print size and byte order */
-                h5tools_str_append(buffer, "%lu-bit%s floating-point", (unsigned long)(8 * H5Tget_size(type)),
-                                   order_s);
+                /* print size. byte order, and precision */
+                h5tools_str_append(buffer, "%lu-bit%s floating-point %lu-bit precision",
+                                   (unsigned long)(8 * H5Tget_size(type)), order_s, H5Tget_precision(type));
             }
             break;
 
@@ -2641,7 +2641,7 @@ found_string_type:
     }
 
     CATCH
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -2667,7 +2667,7 @@ h5tools_print_dataspace(h5tools_str_t *buffer, hid_t space)
     int         i;
     int         ret_value = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     if ((ndims = H5Sget_simple_extent_dims(space, size, maxsize)) < 0)
         H5TOOLS_THROW((-1), "H5Sget_simple_extent_dims failed");
 
@@ -2721,7 +2721,7 @@ h5tools_print_dataspace(h5tools_str_t *buffer, hid_t space)
     } /* end switch */
 
     CATCH
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -2756,7 +2756,7 @@ h5tools_print_enum(FILE *stream, h5tools_str_t *buffer, const h5tool_format_t *i
     hbool_t        past_catch = FALSE;
     int            ret_value  = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     if (info->line_ncols > 0)
         ncols = info->line_ncols;
 
@@ -2868,7 +2868,7 @@ h5tools_print_enum(FILE *stream, h5tools_str_t *buffer, const h5tool_format_t *i
     if (0 == nmembs)
         h5tools_str_append(buffer, "\n<empty>");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -4069,7 +4069,7 @@ h5tools_dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_contex
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t datactx;      /* print context  */
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     datactx = *ctx; /* print context  */
     /* Assume entire data space to be printed */
@@ -4276,7 +4276,7 @@ h5tools_dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_contex
 
     h5tools_str_close(&buffer);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -4493,5 +4493,5 @@ done:
     }
 
     h5tools_str_close(&buffer);
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }

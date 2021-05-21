@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Lpublic_H
-#define _H5Lpublic_H
+#ifndef H5Lpublic_H
+#define H5Lpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"  /* Generic Functions            */
@@ -92,7 +92,7 @@ typedef enum {
 /**
  * \brief Information struct for links
  */
-//! [H5L_info2_t_snip]
+//! <!-- [H5L_info2_t_snip] -->
 typedef struct {
     H5L_type_t type;         /**< Type of link                   */
     hbool_t    corder_valid; /**< Indicate if creation order is valid */
@@ -103,7 +103,7 @@ typedef struct {
         size_t      val_size; /**< Size of a soft link or user-defined link value */
     } u;
 } H5L_info2_t;
-//! [H5L_info2_t_snip]
+//! <!-- [H5L_info2_t_snip] -->
 
 /* The H5L_class_t struct can be used to override the behavior of a
  * "user-defined" link class. Users should populate the struct with callback
@@ -150,7 +150,7 @@ typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata, 
  * "user-defined" link class. Users should populate the struct with callback
  * functions defined elsewhere.
  */
-//! [H5L_class_t_snip]
+//! <!-- [H5L_class_t_snip] -->
 typedef struct {
     int                 version;     /**< Version number of this struct       */
     H5L_type_t          id;          /**< Link type ID                        */
@@ -162,16 +162,16 @@ typedef struct {
     H5L_delete_func_t   del_func;    /**< Callback for link deletion          */
     H5L_query_func_t    query_func;  /**< Callback for queries                */
 } H5L_class_t;
-//! [H5L_class_t_snip]
+//! <!-- [H5L_class_t_snip] -->
 
 /**
  * \brief Prototype for H5Literate2(), H5Literate_by_name2() operator
  *
  * The H5O_token_t version is used in the VOL layer and future public API calls.
  */
-//! [H5L_iterate2_t_snip]
+//! <!-- [H5L_iterate2_t_snip] -->
 typedef herr_t (*H5L_iterate2_t)(hid_t group, const char *name, const H5L_info2_t *info, void *op_data);
-//! [H5L_iterate2_t_snip]
+//! <!-- [H5L_iterate2_t_snip] -->
 
 /**
  * \brief Callback for external link traversal
@@ -200,8 +200,6 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name, const char 
  * \lapl_id
  *
  * \return \herr_t
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lmove() moves a link within an HDF5 file. The original link,
  *          \p src_name, is removed from \p src_loc and the new link,
@@ -321,8 +319,6 @@ H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc, const 
  *
  * \return \herr_t
  *
- * \todo We need to get the location ID story straight!
- *
  * \details H5Lcreate_hard() creates a new hard link to a pre-existing object
  *          in an HDF5 file.
  *
@@ -369,8 +365,6 @@ H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name, hid_t dst_loc,
  * \lapl_id
  *
  * \return \herr_t
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lcreate_soft() creates a new soft link to an object in an HDF5
  *          file.
@@ -434,8 +428,6 @@ H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const c
  *
  * \return \herr_t
  *
- * \todo We need to get the location ID story straight!
- *
  * \details H5Ldelete() removes the link specified by \p name from the location
  *          \p loc_id.
  *
@@ -476,8 +468,6 @@ H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
  *
  * \return \herr_t
  *
- * \todo We need to get the location ID story straight!
- *
  * \details H5Ldelete_by_idx() removes the \Emph{n}-th link in a group
  *          according to the specified order, \p order, in the specified index,
  *          \p index.
@@ -504,8 +494,6 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t 
  * \lapl_id
  *
  * \return \herr_t
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lget_val() returns tha value of link \p name. For smbolic links,
  *          this is the path to which the link points, including the null
@@ -564,8 +552,6 @@ H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size
  *
  * \return \herr_t
  *
- * \todo We need to get the location ID story straight!
- *
  * \details H5Lget_val_by_idx() retrieves the value of the \Emph{n}-th link in
  *          a group, according to the specified order, \p order, within an
  *          index, \p index.
@@ -618,8 +604,6 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  * \lapl_id
  *
  * \return \herr_t
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lexists() allows an application to determine whether the link \p
  *          name exists in the location specified by \p loc_id. The link may be
@@ -707,8 +691,6 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
  * \lapl_id
  *
  * \return \herr_t
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lget_info2() returns information about the specified link through
  *          the \p linfo argument.
@@ -816,8 +798,6 @@ H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo, h
  * \since 1.12.0
  *
  * \see H5Lget_info2()
- *
- * \todo Document H5Lget_info_by_idx()
  *
  */
 H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
@@ -1604,8 +1584,10 @@ H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hi
 
 /* Typedefs */
 
-/* Information struct for link (for H5Lget_info1/H5Lget_info_by_idx1) */
-//! [H5L_info1_t_snip]
+//! <!-- [H5L_info1_t_snip] -->
+/**
+ * Information struct for link (for H5Lget_info1() and H5Lget_info_by_idx1())
+ */
 typedef struct {
     H5L_type_t type;         /**< Type of link                   */
     hbool_t    corder_valid; /**< Indicate if creation order is valid */
@@ -1616,7 +1598,7 @@ typedef struct {
         size_t  val_size; /**< Size of a soft link or UD link value */
     } u;
 } H5L_info1_t;
-//! [H5L_info1_t_snip]
+//! <!-- [H5L_info1_t_snip] -->
 
 /** Callback during link traversal */
 typedef hid_t (*H5L_traverse_0_func_t)(const char *link_name, hid_t cur_group, const void *lnkdata,
@@ -1636,9 +1618,9 @@ typedef struct {
 } H5L_class_0_t;
 
 /** Prototype for H5Literate1() / H5Literate_by_name1() operator */
-//! [H5L_iterate1_t_snip]
+//! <!-- [H5L_iterate1_t_snip] -->
 typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_t *info, void *op_data);
-//! [H5L_iterate1_t_snip]
+//! <!-- [H5L_iterate1_t_snip] -->
 
 /* Function prototypes */
 /**
@@ -1655,8 +1637,6 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
  *
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Lget_info2() or the macro H5Lget_info().
- *
- * \todo We need to get the location ID story straight!
  *
  * \details H5Lget_info1() returns information about the specified link through
  *          the \p linfo argument.
@@ -2114,4 +2094,4 @@ H5_DLL herr_t H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Lpublic_H */
+#endif /* H5Lpublic_H */

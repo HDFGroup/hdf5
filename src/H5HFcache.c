@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -209,7 +209,7 @@ H5HF__hdr_prefix_decode(H5HF_hdr_t *hdr, const uint8_t **image_ref)
     HDassert(image);
 
     /* Magic number */
-    if (HDmemcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "wrong fractal heap header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -992,7 +992,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     HDassert(iblock->size == len);
 
     /* Magic number */
-    if (HDmemcmp(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "wrong fractal heap indirect block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1304,7 +1304,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
 #ifndef NDEBUG
     unsigned nchildren = 0;       /* Track # of children */
     size_t   max_child = 0;       /* Track max. child entry used */
-#endif /* NDEBUG */
+#endif                            /* NDEBUG */
     uint32_t metadata_chksum;     /* Computed metadata checksum value */
     size_t   u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -1378,7 +1378,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
                 max_child = u;
         } /* end if */
 #endif    /* NDEBUG */
-    } /* end for */
+    }     /* end for */
 
     /* Compute checksum */
     metadata_chksum = H5_checksum_metadata((uint8_t *)_image, (size_t)(image - (uint8_t *)_image), 0);
@@ -1831,7 +1831,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     image = dblock->blk;
 
     /* Magic number */
-    if (HDmemcmp(image, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "wrong fractal heap direct block signature")
     image += H5_SIZEOF_MAGIC;
 

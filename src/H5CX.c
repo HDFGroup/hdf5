@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -213,7 +213,7 @@ typedef struct H5CX_t {
     MPI_Datatype ftype;              /* MPI datatype for file, when using collective I/O */
     hbool_t      mpi_file_flushing;  /* Whether an MPI-opened file is being flushed */
     hbool_t      rank0_bcast;        /* Whether a dataset meets read-with-rank0-and-bcast requirements */
-#endif /* H5_HAVE_PARALLEL */
+#endif                               /* H5_HAVE_PARALLEL */
 
     /* Cached DXPL properties */
     size_t    max_temp_buf;            /* Maximum temporary buffer size */
@@ -241,8 +241,8 @@ typedef struct H5CX_t {
     hbool_t  mpio_chunk_opt_num_valid;   /* Whether collective chunk threshold is valid */
     unsigned mpio_chunk_opt_ratio;       /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
     hbool_t  mpio_chunk_opt_ratio_valid; /* Whether collective chunk ratio is valid */
-#endif /* H5_HAVE_PARALLEL */
-    H5Z_EDC_t             err_detect;           /* Error detection info (H5D_XFER_EDC_NAME) */
+#endif                                   /* H5_HAVE_PARALLEL */
+    H5Z_EDC_t             err_detect;    /* Error detection info (H5D_XFER_EDC_NAME) */
     hbool_t               err_detect_valid;     /* Whether error detection info is valid */
     H5Z_cb_t              filter_cb;            /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
     hbool_t               filter_cb_valid;      /* Whether filter callback function is valid */
@@ -298,8 +298,8 @@ typedef struct H5CX_t {
                                                      (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
     hbool_t
         mpio_coll_rank0_bcast_set; /* Whether instrumented "collective chunk multi ratio ind" value is set */
-#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
-#endif /* H5_HAVE_PARALLEL */
+#endif                             /* H5_HAVE_INSTRUMENTED_LIBRARY */
+#endif                             /* H5_HAVE_PARALLEL */
 
     /* Cached LCPL properties */
     H5T_cset_t encoding;                 /* Link name character encoding */
@@ -373,7 +373,7 @@ typedef struct H5CX_dxpl_cache_t {
              mpio_chunk_opt_mode;         /* Collective chunk option (H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME) */
     unsigned mpio_chunk_opt_num;          /* Collective chunk thrreshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
     unsigned mpio_chunk_opt_ratio;        /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
-#endif /* H5_HAVE_PARALLEL */
+#endif                                    /* H5_HAVE_PARALLEL */
     H5Z_EDC_t             err_detect;     /* Error detection info (H5D_XFER_EDC_NAME) */
     H5Z_cb_t              filter_cb;      /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
     H5Z_data_xform_t *    data_transform; /* Data transform info (H5D_XFER_XFORM_NAME) */
@@ -437,7 +437,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 
 #ifndef H5_HAVE_THREADSAFE
 static H5CX_node_t *H5CX_head_g = NULL; /* Pointer to head of context stack */
-#endif /* H5_HAVE_THREADSAFE */
+#endif                                  /* H5_HAVE_THREADSAFE */
 
 /* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
 static H5CX_dxpl_cache_t H5CX_def_dxpl_cache;
@@ -1381,8 +1381,8 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
             if (H5P_USER_TRUE == md_coll_read)
                 is_collective = TRUE;
         } /* end if */
-#endif /* H5_HAVE_PARALLEL */
-    } /* end else */
+#endif    /* H5_HAVE_PARALLEL */
+    }     /* end else */
 
 #ifdef H5_HAVE_PARALLEL
     /* Check for collective operation */
@@ -1408,7 +1408,7 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
                 MPI_Barrier(mpi_comm);
         } /* end if */
     }     /* end if */
-#endif /* H5_HAVE_PARALLEL */
+#endif    /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1469,7 +1469,7 @@ H5CX_set_loc(hid_t
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-#else /* H5_HAVE_PARALLEL */
+#else  /* H5_HAVE_PARALLEL */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(SUCCEED)

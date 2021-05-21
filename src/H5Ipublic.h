@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
  * This file contains function prototypes for each exported function in
  * the H5I module.
  */
-#ifndef _H5Ipublic_H
-#define _H5Ipublic_H
+#ifndef H5Ipublic_H
+#define H5Ipublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -32,6 +32,7 @@
  *           test/tmisc.c to verify that the H5I{inc|dec|get}_ref() routines
  *           work correctly with it. \endinternal
  */
+//! <!-- [H5I_type_t_snip] -->
 typedef enum H5I_type_t {
     H5I_UNINIT = (-2),  /**< uninitialized type                        */
     H5I_BADID  = (-1),  /**< invalid Type                              */
@@ -52,8 +53,11 @@ typedef enum H5I_type_t {
     H5I_SPACE_SEL_ITER, /**< type ID for dataspace selection iterator  */
     H5I_NTYPES          /**< number of library types, MUST BE LAST!    */
 } H5I_type_t;
+//! <!-- [H5I_type_t_snip] -->
 
-/* Type of IDs to return to users */
+/**
+ * Type of IDs to return to users
+ */
 typedef int64_t hid_t;
 
 #define PRIdHID PRId64
@@ -83,16 +87,16 @@ typedef herr_t (*H5I_free_t)(void *);
 /**
  * The type of a function to compare objects & keys
  */
-//! [H5I_search_func_t_snip]
+//! <!-- [H5I_search_func_t_snip] -->
 typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);
-//! [H5I_search_func_t_snip]
+//! <!-- [H5I_search_func_t_snip] -->
 
 /**
  * The type of H5Iiterate() callback functions
  */
-//! [H5I_iterate_func_t_snip]
+//! <!-- [H5I_iterate_func_t_snip] -->
 typedef herr_t (*H5I_iterate_func_t)(hid_t id, void *udata);
-//! [H5I_iterate_func_t_snip]
+//! <!-- [H5I_iterate_func_t_snip] -->
 
 #ifdef __cplusplus
 extern "C" {
@@ -110,7 +114,7 @@ extern "C" {
  *
  * \return \hid_t{object}
  *
- * \details H5Iregister() allocates and returns a new ID for an object.
+ * \details H5Iregister() creates and returns a new ID for an object.
  *
  * \details The \p type parameter is the identifier for the ID type to which
  *          this new ID will belong. This identifier must have been created by
@@ -128,13 +132,13 @@ H5_DLL hid_t H5Iregister(H5I_type_t type, const void *object);
  * \brief Returns the object referenced by an ID
  *
  * \param[in] id ID to be dereferenced
- * \param[in] id_type The identifier type
+ * \param[in] type The identifier type
 
  *
  * \return Pointer to the object referenced by \p id on success, NULL on failure.
  *
  * \details H5Iobject_verify() returns a pointer to the memory referenced by id
- *          after verifying that \p id is of type \p id_type. This function is
+ *          after verifying that \p id is of type \p type. This function is
  *          analogous to dereferencing a pointer in C with type checking.
  *
  * \note H5Iobject_verify() does not change the ID it is called on in any way
@@ -151,17 +155,17 @@ H5_DLL void *H5Iobject_verify(hid_t id, H5I_type_t type);
  * \brief Removes an ID from its type
  *
  * \param[in] id The ID to be removed from its type
- * \param[in] id_type The identifier type
+ * \param[in] type The identifier type
 
  *
  * \return Returns a pointer to the memory referred to by \p id on success,
  *         NULL on failure.
  *
- * \details H5Iremove_verify() first ensures that \p id belongs to \p id_type.
+ * \details H5Iremove_verify() first ensures that \p id belongs to \p type.
  *          If so, it removes \p id from its type and returns the pointer
  *          to the memory it referred to. This pointer is the same pointer that
  *          was placed in storage by H5Iregister(). If id does not belong to
- *          \p id_type, then NULL is returned.
+ *          \p type, then NULL is returned.
  *
  *          The \p id parameter is the ID which is to be removed from its type.
  *
@@ -660,4 +664,4 @@ H5_DLL htri_t H5Iis_valid(hid_t id);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5Ipublic_H */
+#endif /* H5Ipublic_H */

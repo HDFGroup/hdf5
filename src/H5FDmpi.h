@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -34,10 +34,12 @@
 */
 
 #define H5D_MULTI_CHUNK_IO_COL_THRESHOLD 60
-/* Type of I/O for data transfer properties */
+/**
+ * Type of I/O for data transfer properties
+ */
 typedef enum H5FD_mpio_xfer_t {
-    H5FD_MPIO_INDEPENDENT = 0, /*zero is the default*/
-    H5FD_MPIO_COLLECTIVE
+    H5FD_MPIO_INDEPENDENT = 0, /**< Use independent I/O access */
+    H5FD_MPIO_COLLECTIVE       /**< Use collective I/O access */
 } H5FD_mpio_xfer_t;
 
 /* Type of chunked dataset I/O */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -84,7 +84,7 @@ static int skip_overflow_tests_g = 0;
  * be allowed to continue (cf. Posix signals) so in order to recover from a
  * SIGFPE we run tests that might generate one in a child process.
  */
-#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
+#ifdef H5_HAVE_UNISTD_H
 #define HANDLE_SIGFPE
 #endif
 
@@ -397,8 +397,8 @@ static int without_hardware_g = 0;
 void           some_dummy_func(float x);
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int     my_isnan(dtype_t type, void *val);
-static int     my_isinf(int endian, unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos,
-                        size_t esize);
+static int my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos,
+                    size_t esize);
 
 /*-------------------------------------------------------------------------
  * Function:    fpe_handler
@@ -556,7 +556,7 @@ some_dummy_func(float x)
 static void
 generates_sigfpe(void)
 {
-#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
+#ifdef H5_HAVE_UNISTD_H
     pid_t          pid;
     int            status;
     size_t         i, j;
@@ -592,12 +592,12 @@ generates_sigfpe(void)
         /* delete the core dump file that SIGFPE may have created */
         HDunlink("core");
     }
-#else
-    HDputs("Cannot determine if floating-point overflows generate a SIGFPE;");
-    HDputs("assuming yes.");
+#else  /* H5_HAVE_UNISTD_H */
+    HDputs("Cannot determine if floating-point overflows generate a SIGFPE");
+    HDputs("due to a lack of fork(2) - assuming yes.");
     HDputs("Overflow cases will not be tested.");
     skip_overflow_tests_g = TRUE;
-#endif
+#endif /* H5_HAVE_UNISTD_H */
 }
 
 /*-------------------------------------------------------------------------
@@ -864,7 +864,10 @@ test_particular_fp_integer(void)
 
 error:
     HDfflush(stdout);
-    H5E_BEGIN_TRY { H5Pclose(dxpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
     H5E_END_TRY;
     if (buf1)
         HDfree(buf1);
@@ -2853,7 +2856,8 @@ my_isnan(dtype_t type, void *val)
  *-------------------------------------------------------------------------
  */
 static int
-my_isinf(int endian, unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos, size_t esize)
+my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos,
+         size_t esize)
 {
     unsigned char *bits;
     int            retval = 0;
@@ -3318,7 +3322,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 int expo_diff = check_expo[0] - check_expo[1];
                 int valid_bits =
                     (int)((dst_ebias + dst_msize) + (size_t)MIN(check_expo[0], check_expo[1])) - 1;
-                double epsilon = 1.0F;
+                double epsilon = 1.0;
 
                 /* Re-scale the mantissas based on any exponent difference */
                 if (expo_diff != 0)
@@ -5165,7 +5169,7 @@ run_int_fp_conv(const char *name)
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
 #if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
-#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
+#else  /* H5_LLONG_TO_LDOUBLE_CORRECT */
     {
         char str[256]; /*hello string        */
 
@@ -5177,7 +5181,7 @@ run_int_fp_conv(const char *name)
 #endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
 #if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
-#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
+#else  /* H5_LLONG_TO_LDOUBLE_CORRECT */
     {
         char str[256]; /*hello string        */
 

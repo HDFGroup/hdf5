@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
  * This file contains public declarations for the H5VL (VOL) module.
  */
 
-#ifndef _H5VLpublic_H
-#define _H5VLpublic_H
+#ifndef H5VLpublic_H
+#define H5VLpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"  /* Generic Functions                    */
@@ -74,9 +74,9 @@
  *          connectors. Subsequent values should be obtained from the HDF5
  *          development team at mailto:help@hdfgroup.org.
  */
-//! [H5VL_class_value_t_snip]
+//! <!-- [H5VL_class_value_t_snip] -->
 typedef int H5VL_class_value_t;
-//! [H5VL_class_value_t_snip]
+//! <!-- [H5VL_class_value_t_snip] -->
 
 /**
  * \ingroup H5VLDEF
@@ -84,19 +84,19 @@ typedef int H5VL_class_value_t;
  *          (Used for various queries, etc)
  */
 typedef enum H5VL_subclass_t {
-    H5VL_SUBCLS_NONE,                  /**< Operations outside of a subclass */
-    H5VL_SUBCLS_INFO,                  /**< 'Info' subclass */
-    H5VL_SUBCLS_WRAP,                  /**< 'Wrap' subclass */
-    H5VL_SUBCLS_ATTR,                  /**< 'Attribute' subclass */
-    H5VL_SUBCLS_DATASET,               /**< 'Dataset' subclass */
-    H5VL_SUBCLS_DATATYPE,              /**< 'Named datatype' subclass */
-    H5VL_SUBCLS_FILE,                  /**< 'File' subclass */
-    H5VL_SUBCLS_GROUP,                 /**< 'Group' subclass */
-    H5VL_SUBCLS_LINK,                  /**< 'Link' subclass */
-    H5VL_SUBCLS_OBJECT,                /**< 'Object' subclass */
-    H5VL_SUBCLS_REQUEST,               /**< 'Request' subclass */
-    H5VL_SUBCLS_BLOB,                  /**< 'Blob' subclass */
-    H5VL_SUBCLS_TOKEN                  /**< 'Token' subclass */
+    H5VL_SUBCLS_NONE,     /**< Operations outside of a subclass */
+    H5VL_SUBCLS_INFO,     /**< 'Info' subclass */
+    H5VL_SUBCLS_WRAP,     /**< 'Wrap' subclass */
+    H5VL_SUBCLS_ATTR,     /**< 'Attribute' subclass */
+    H5VL_SUBCLS_DATASET,  /**< 'Dataset' subclass */
+    H5VL_SUBCLS_DATATYPE, /**< 'Named datatype' subclass */
+    H5VL_SUBCLS_FILE,     /**< 'File' subclass */
+    H5VL_SUBCLS_GROUP,    /**< 'Group' subclass */
+    H5VL_SUBCLS_LINK,     /**< 'Link' subclass */
+    H5VL_SUBCLS_OBJECT,   /**< 'Object' subclass */
+    H5VL_SUBCLS_REQUEST,  /**< 'Request' subclass */
+    H5VL_SUBCLS_BLOB,     /**< 'Blob' subclass */
+    H5VL_SUBCLS_TOKEN     /**< 'Token' subclass */
 } H5VL_subclass_t;
 
 /********************/
@@ -134,11 +134,10 @@ extern "C" {
  *          uncommon, as most VOL-specific properties are added to the file
  *          access property list via the connector's API calls which set the
  *          VOL connector for the file open/create. For more information, see
- *          the VOL documentation.
- *
- * \todo Fix the reference to VOL documentation.
+ *          \ref_vol_doc.
  *
  * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vipl_id);
 /**
@@ -173,11 +172,10 @@ H5_DLL hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vi
  *          uncommon, as most VOL-specific properties are added to the file
  *          access property list via the connector's API calls which set the
  *          VOL connector for the file open/create. For more information, see
- *          the VOL documentation.
- *
- * \todo Fix the reference to VOL documentation.
+ *          the \ref_vol_doc.
  *
  * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5VLregister_connector_by_value(H5VL_class_value_t connector_value, hid_t vipl_id);
 /**
@@ -346,4 +344,4 @@ H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_t
 #include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
 #include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
 
-#endif /* _H5VLpublic_H */
+#endif /* H5VLpublic_H */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -39,7 +39,10 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high, hbool_t s
     if (H5Pset_libver_bounds(fapl, low, high) < 0)
         TEST_ERROR
 
-    H5E_BEGIN_TRY { ret = H5Pencode2(orig_pl, NULL, &temp_size, fapl); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pencode2(orig_pl, NULL, &temp_size, fapl);
+    }
     H5E_END_TRY;
 
     if (support_virtual && high < H5F_LIBVER_V110)
@@ -138,11 +141,11 @@ main(void)
     hid_t        vspace        = -1;         /* Virtual dset dataspaces */
     hsize_t      dims[1]       = {3};        /* Data space current size */
     hsize_t      chunk_size[2] = {16384, 4}; /* chunk size */
-    double       fill          = 2.7f;       /* Fill value */
+    double       fill          = 2.7;        /* Fill value */
     hsize_t      max_size[1];                /* data space maximum size */
     size_t       nslots = 521 * 2;
     size_t       nbytes = 1048576 * 10;
-    double       w0     = 0.5f;
+    double       w0     = 0.5;
     unsigned     max_compact;
     unsigned     min_dense;
     const char * c_to_f = "x+32";
@@ -156,26 +159,26 @@ main(void)
                                            TRUE,
                                            FALSE,
                                            (2 * 2048 * 1024),
-                                           0.3f,
+                                           0.3,
                                            (64 * 1024 * 1024),
                                            (4 * 1024 * 1024),
                                            60000,
                                            H5C_incr__threshold,
-                                           0.8f,
-                                           3.0f,
+                                           0.8,
+                                           3.0,
                                            TRUE,
                                            (8 * 1024 * 1024),
                                            H5C_flash_incr__add_space,
-                                           2.0f,
-                                           0.25f,
+                                           2.0,
+                                           0.25,
                                            H5C_decr__age_out_with_threshold,
-                                           0.997f,
-                                           0.8f,
+                                           0.997,
+                                           0.8,
                                            TRUE,
                                            (3 * 1024 * 1024),
                                            3,
                                            FALSE,
-                                           0.2f,
+                                           0.2,
                                            (256 * 2048),
                                            H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
 

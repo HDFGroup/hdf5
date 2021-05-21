@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -102,7 +102,7 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL,
 
     if (h->dblk_size)
         HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of heap used:",
-                  ((double)100.0f * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
+                  (100.0 * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
 
     /* Print the data in a VMS-style octal dump */
     H5_buffer_dump(stream, indent, h->dblk_image, marker, (size_t)0, h->dblk_size);

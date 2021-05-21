@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -81,7 +81,7 @@ static herr_t H5MF__sect_large_shrink(H5FS_section_info_t **_sect, void *udata);
 /*********************/
 
 /* Class info for "simple" free space sections */
-H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1] = {{
+const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1] = {{
     /* Class variables */
     H5MF_FSPACE_SECT_SIMPLE,                 /* Section type                 */
     0,                                       /* Extra serialized size        */
@@ -107,7 +107,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1] = {{
 }};
 
 /* Class info for "small" free space sections */
-H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1] = {{
+const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1] = {{
     /* Class variables */
     H5MF_FSPACE_SECT_SMALL,                  /* Section type                 */
     0,                                       /* Extra serialized size        */
@@ -133,7 +133,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1] = {{
 }};
 
 /* Class info for "large" free space sections */
-H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1] = {{
+const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1] = {{
     /* Class variables */
     H5MF_FSPACE_SECT_LARGE,                  /* Section type                 */
     0,                                       /* Extra serialized size        */
@@ -648,7 +648,7 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
 #ifdef H5MF_ALLOC_DEBUG_MORE
         HDfprintf(stderr, "%s: section is dropped\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-    } /* end if */
+    }  /* end if */
     /* Adjust the section if it is not at page end but its size + prem is at page end */
     else if (prem <= H5F_PGEND_META_THRES(udata->f)) {
         (*sect)->sect_info.size += prem;
@@ -656,7 +656,7 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
         HDfprintf(stderr, "%s: section is adjusted {%a, %Hu}\n", FUNC, (*sect)->sect_info.addr,
                   (*sect)->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-    } /* end if */
+    }  /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

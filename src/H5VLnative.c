@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,23 +19,23 @@
 /* Module Setup */
 /****************/
 
-#define H5VL_FRIEND      /* Suppress error about including H5VLpkg   */
+#define H5VL_FRIEND /* Suppress error about including H5VLpkg   */
 
 /***********/
 /* Headers */
 /***********/
 
-#include "H5private.h"   /* Generic Functions                        */
-#include "H5Aprivate.h"  /* Attributes                               */
-#include "H5Dprivate.h"  /* Datasets                                 */
-#include "H5Eprivate.h"  /* Error handling                           */
-#include "H5Fprivate.h"  /* Files                                    */
-#include "H5Gprivate.h"  /* Groups                                   */
-#include "H5Iprivate.h"  /* IDs                                      */
-#include "H5Oprivate.h"  /* Object headers                           */
-#include "H5Pprivate.h"  /* Property lists                           */
-#include "H5Tprivate.h"  /* Datatypes                                */
-#include "H5VLpkg.h"     /* Virtual Object Layer                     */
+#include "H5private.h"  /* Generic Functions                        */
+#include "H5Aprivate.h" /* Attributes                               */
+#include "H5Dprivate.h" /* Datasets                                 */
+#include "H5Eprivate.h" /* Error handling                           */
+#include "H5Fprivate.h" /* Files                                    */
+#include "H5Gprivate.h" /* Groups                                   */
+#include "H5Iprivate.h" /* IDs                                      */
+#include "H5Oprivate.h" /* Object headers                           */
+#include "H5Pprivate.h" /* Property lists                           */
+#include "H5Tprivate.h" /* Datatypes                                */
+#include "H5VLpkg.h"    /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
@@ -47,12 +47,12 @@ static herr_t H5VL__native_term(void);
 
 /* Native VOL connector class struct */
 static const H5VL_class_t H5VL_native_cls_g = {
-    H5VL_VERSION,        /* VOL class struct version */
-    H5VL_NATIVE_VALUE,   /* value        */
-    H5VL_NATIVE_NAME,    /* name         */
-    0,                   /* capability flags */
-    NULL,                /* initialize   */
-    H5VL__native_term,   /* terminate    */
+    H5VL_VERSION,      /* VOL class struct version */
+    H5VL_NATIVE_VALUE, /* value        */
+    H5VL_NATIVE_NAME,  /* name         */
+    0,                 /* capability flags */
+    NULL,              /* initialize   */
+    H5VL__native_term, /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* info size    */

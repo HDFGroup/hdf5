@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -566,7 +566,8 @@ test_fapl_config_validation(void)
             JSVERIFY(config.stream_buffer_size, fa_fetch.stream_buffer_size, "streambuffer size mismatch")
             JSVERIFY_STR(config.namenode_name, fa_fetch.namenode_name, "node name mismatch")
             JSVERIFY_STR(config.user_name, fa_fetch.user_name, "user name mismatch")
-            JSVERIFY_STR(config.kerberos_ticket_cache, fa_fetch.kerberos_ticket_cache, "kerberos ticket cache mismatch")
+            JSVERIFY_STR(config.kerberos_ticket_cache, fa_fetch.kerberos_ticket_cache,
+                         "kerberos ticket cache mismatch")
         }
 
         /*-----------------------------
@@ -587,7 +588,10 @@ error:
      ***********/
 
     if (fapl_id < 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     return 1;
@@ -670,7 +674,10 @@ test_hdfs_fapl(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        (void)H5Pclose(fapl_id);
+    }
     H5E_END_TRY;
 
     return 1;
@@ -855,7 +862,10 @@ test_vfd_open(void)
         HDfprintf(stderr, "testing: %s\n", T.message);
 #endif /* HDFS_TEST_DEBUG */
 
-        H5E_BEGIN_TRY { fd = H5FDopen(T.url, T.flags, fapl_id, T.maxaddr); }
+        H5E_BEGIN_TRY
+        {
+            fd = H5FDopen(T.url, T.flags, fapl_id, T.maxaddr);
+        }
         H5E_END_TRY;
         if (NULL != fd) {
             if (TRUE == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
@@ -1036,7 +1046,10 @@ error:
         (void)H5FDclose(fd_shakespeare);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1133,7 +1146,10 @@ error:
         (void)H5FDclose(file_shakespeare);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1337,7 +1353,10 @@ error:
         (void)H5FDclose(file_raven);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1458,7 +1477,10 @@ error:
      ***********/
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (file != NULL) {
@@ -1601,7 +1623,10 @@ error:
 #endif /* HDFS_TEST_DEBUG */
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (file > 0) {

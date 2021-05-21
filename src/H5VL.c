@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -86,28 +86,6 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "*xi", cls, vipl_id);
-
-    /* Check arguments */
-    if (!cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "VOL connector class pointer cannot be NULL")
-    if (H5VL_VERSION != cls->version)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector has incompatible version")
-    if (!cls->name)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector class name cannot be the NULL pointer")
-    if (0 == HDstrlen(cls->name))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector class name cannot be the empty string")
-    if (cls->info_cls.copy && !cls->info_cls.free)
-        HGOTO_ERROR(
-            H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-            "VOL connector must provide free callback for VOL info objects when a copy callback is provided")
-    if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector must provide free callback for object wrapping contexts when a get "
-                    "callback is provided")
 
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
@@ -704,8 +682,10 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     if (NULL == (dtype = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
 
-    /* Create VOL object for file */
-    if (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id)))
+    /* Create VOL object for file if necessary (force_conv will be TRUE if and
+     * only if file needs to be passed to H5T_set_loc) */
+    if (H5T_GET_FORCE_CONV(dtype) &&
+        (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id))))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object")
 
     /* Copy the datatype */
@@ -722,10 +702,12 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     if (H5T_set_loc(file_type, file_vol_obj, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't set datatype location")
 
-    /* file_type now owns file_vol_obj */
-    if (H5T_own_vol_obj(file_type, file_vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't give ownership of VOL object")
-    file_vol_obj = NULL;
+    /* Release our reference to file_type */
+    if (file_vol_obj) {
+        if (H5VL_free_object(file_vol_obj) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object")
+        file_vol_obj = NULL;
+    } /* end if */
 
     /* Set return value */
     ret_value = file_type_id;

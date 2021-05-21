@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,8 +23,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5ACprivate_H
-#define _H5ACprivate_H
+#ifndef H5ACprivate_H
+#define H5ACprivate_H
 
 #include "H5ACpublic.h" /*public prototypes            */
 
@@ -458,4 +458,4 @@ H5_DLL hbool_t H5AC_get_serialization_in_progress(H5F_t *f);
 H5_DLL hbool_t H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring);
 #endif /* NDEBUG */ /* end debugging functions */
 
-#endif /* !_H5ACprivate_H */
+#endif /* H5ACprivate_H */

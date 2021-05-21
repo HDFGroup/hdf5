@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -250,7 +250,7 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "allocation failed for B-tree header")
 
     /* Magic number */
-    if (HDmemcmp(image, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -486,9 +486,9 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
             default:
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else /* NDEBUG */
+#else     /* NDEBUG */
                 HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
+#endif    /* NDEBUG */
         } /* end switch */
     }     /* end if */
     else
@@ -648,7 +648,7 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     internal->shadow_epoch = udata->hdr->shadow_epoch;
 
     /* Magic number */
-    if (HDmemcmp(image, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree internal node signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -904,9 +904,9 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
             default:
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else /* NDEBUG */
+#else     /* NDEBUG */
                 HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
+#endif    /* NDEBUG */
         } /* end switch */
     }     /* end if */
     else
@@ -1064,7 +1064,7 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void
     leaf->shadow_epoch = udata->hdr->shadow_epoch;
 
     /* Magic number */
-    if (HDmemcmp(image, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree leaf node signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1283,9 +1283,9 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
             default:
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else /* NDEBUG */
+#else     /* NDEBUG */
                 HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
+#endif    /* NDEBUG */
         } /* end switch */
     }     /* end if */
     else
