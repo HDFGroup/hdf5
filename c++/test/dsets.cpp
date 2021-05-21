@@ -42,6 +42,8 @@ const H5std_string DSET_SIMPLE_IO_NAME("simple_io");
 const H5std_string DSET_TCONV_NAME("tconv");
 const H5std_string DSET_COMPRESS_NAME("compressed");
 const H5std_string DSET_BOGUS_NAME("bogus");
+const H5std_string DSET_OPERATOR("testing operator=");
+const H5std_string DSET_OPERATOR_PATH("/testing operator=");
 
 /* Temporary filter IDs used for testing */
 const int H5Z_FILTER_BOGUS = 305;
@@ -58,9 +60,6 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned 
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Friday, January 5, 2001
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -182,9 +181,6 @@ test_create(H5File &file)
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Friday, January 5, 2001
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -260,9 +256,6 @@ test_simple_io(H5File &file)
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Thursday, March 22, 2012
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -322,9 +315,6 @@ test_datasize(FileAccPropList &fapl)
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Friday, January 5, 2001
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -432,9 +422,6 @@ filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Friday, January 5, 2001
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -703,10 +690,6 @@ test_compression(H5File &file)
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, April 22, 2016
- *
  *-------------------------------------------------------------------------
  */
 const H5std_string DSET_NBIT_NAME("nbit_dataset");
@@ -818,9 +801,6 @@ test_nbit_compression(H5File &file)
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Saturday, February 17, 2001
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -893,9 +873,6 @@ test_multiopen(H5File &file)
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              February 17, 2001
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1246,10 +1223,6 @@ test_chunk_cache(const FileAccPropList &fapl)
  *
  * Return       Success:        0
  *              Failure:        number of errors
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, March 10, 2017
- *
  *-------------------------------------------------------------------------
  */
 const int RANK = 2;
@@ -1316,6 +1289,60 @@ test_virtual()
 } // test_virtual
 
 /*-------------------------------------------------------------------------
+ * Function:    test_operator
+ *
+ * Purpose      Tests DataSet::operator=
+ *
+ * Return       Success: 0
+ *
+ *              Failure: -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_operator(H5File &file)
+{
+    SUBTEST("DataSet::operator=");
+
+    try {
+        // Create a data space
+        hsize_t dims[2];
+        dims[0] = 256;
+        dims[1] = 512;
+        DataSpace space(2, dims, NULL);
+
+        // Create a dataset using the default dataset creation properties.
+        // We're not sure what they are, so we won't check.
+        DataSet dataset = file.createDataSet(DSET_OPERATOR, PredType::NATIVE_DOUBLE, space);
+
+        // Add a comment to the dataset
+        file.setComment(DSET_OPERATOR, "Dataset using operator=");
+
+        // Close the dataset
+        dataset.close();
+
+        // Re-open the dataset
+        DataSet another_dataset(file.openDataSet(DSET_OPERATOR));
+
+        // Try operator= to make another dataset
+        DataSet copied_dataset = another_dataset;
+
+        H5std_string copied_dataset_name  = copied_dataset.getObjName();
+        H5std_string another_dataset_name = another_dataset.getObjName();
+
+        PASSED();
+        return 0;
+    } // try block
+
+    // catch all other exceptions
+    catch (Exception &E) {
+        issue_fail_msg("test_operator", __LINE__, __FILE__);
+
+        // clean up and return with failure
+        return -1;
+    }
+} // test_operator
+
+/*-------------------------------------------------------------------------
  * Function:    test_dset
  *
  * Purpose      Tests the dataset interface (H5D)
@@ -1323,9 +1350,6 @@ test_virtual()
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Friday, January 5, 2001
  *
  * Modifications:
  *        Nov 12, 01:
@@ -1364,6 +1388,7 @@ test_dset()
         nerrors += test_multiopen(file) < 0 ? 1 : 0;
         nerrors += test_types(file) < 0 ? 1 : 0;
         nerrors += test_virtual() < 0 ? 1 : 0;
+        nerrors += test_operator(file) < 0 ? 1 : 0;
         nerrors += test_chunk_cache(fapl) < 0 ? 1 : 0;
 
         // Close group "emit diagnostics".

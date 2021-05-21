@@ -353,6 +353,24 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type, 
             break;
         }
 
+        case H5VL_DATASET_CHUNK_ITER: { /* H5Dchunk_iter */
+            H5D_chunk_iter_op_t cb      = HDva_arg(arguments, H5D_chunk_iter_op_t);
+            void *              op_data = HDva_arg(arguments, void *);
+
+            HDassert(dset->shared);
+
+            /* Make sure the dataset is chunked */
+            if (H5D_CHUNKED != dset->shared->layout.type) {
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+            }
+
+            /* Call private function */
+            if (H5D__chunk_iter(dset, cb, op_data) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't iterate over chunks")
+
+            break;
+        }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
     } /* end switch */
