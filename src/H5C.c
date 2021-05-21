@@ -19,13 +19,7 @@
  *
  * Purpose:     Functions in this file implement a generic cache for
  *              things which exist on disk, and which may be
- *	 	unambiguously referenced by their disk addresses.
- *
- *              The code in this module was initially written in
- *		support of a complete re-write of the metadata cache
- *		in H5AC.c  However, other uses for the cache code
- *		suggested themselves, and thus this file was created
- *		in an attempt to support re-use.
+ *              unambiguously referenced by their disk addresses.
  *
  *		For a detailed overview of the cache, please see the
  *		header comment for H5C_t in H5Cpkg.h.
@@ -494,13 +488,13 @@ done:
  *
  * Purpose:     Print results of a automatic cache resize.
  *
- *		This function should only be used where HDprintf() behaves
- *		well -- i.e. not on Windows.
+ *        This function should only be used where HDprintf() behaves
+ *        well -- i.e. not on Windows.
  *
  * Return:      void
  *
  * Programmer:  John Mainzer
- *		10/27/04
+ *        10/27/04
  *
  *-------------------------------------------------------------------------
  */
@@ -531,19 +525,18 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
                       cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
 
-            HDfprintf(stdout, "%s	cache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n",
-                      cache_ptr->prefix, old_max_cache_size, old_min_clean_size, new_max_cache_size,
-                      new_min_clean_size);
+            HDfprintf(stdout, "%scache size increased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
+                      old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
         case flash_increase:
             HDassert(old_max_cache_size < new_max_cache_size);
 
-            HDfprintf(stdout, "%sflash cache resize(%d) -- size threshold = %Zu.\n", cache_ptr->prefix,
+            HDfprintf(stdout, "%sflash cache resize(%d) -- size threshold = %zu.\n", cache_ptr->prefix,
                       (int)((cache_ptr->resize_ctl).flash_incr_mode),
                       cache_ptr->flash_size_increase_threshold);
 
-            HDfprintf(stdout, "%s cache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n", cache_ptr->prefix,
+            HDfprintf(stdout, "%s cache size increased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
                       old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
@@ -584,21 +577,20 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
                               cache_ptr->prefix, hit_rate);
             }
 
-            HDfprintf(stdout, "%s	cache size decreased from (%Zu/%Zu) to (%Zu/%Zu).\n",
-                      cache_ptr->prefix, old_max_cache_size, old_min_clean_size, new_max_cache_size,
-                      new_min_clean_size);
+            HDfprintf(stdout, "%s    cache size decreased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
+                      old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
         case at_max_size:
             HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
                       cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
-            HDfprintf(stdout, "%s	cache already at maximum size so no change.\n", cache_ptr->prefix);
+            HDfprintf(stdout, "%s    cache already at maximum size so no change.\n", cache_ptr->prefix);
             break;
 
         case at_min_size:
             HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) -- can't decrease.\n", cache_ptr->prefix,
                       hit_rate);
-            HDfprintf(stdout, "%s	cache already at minimum size.\n", cache_ptr->prefix);
+            HDfprintf(stdout, "%s    cache already at minimum size.\n", cache_ptr->prefix);
             break;
 
         case increase_disabled:
@@ -616,16 +608,13 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
 
             HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
                       cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
-            HDfprintf(stdout, "%s	cache not full so no increase in size.\n", cache_ptr->prefix);
+            HDfprintf(stdout, "%s    cache not full so no increase in size.\n", cache_ptr->prefix);
             break;
 
         default:
             HDfprintf(stdout, "%sAuto cache resize -- unknown status code.\n", cache_ptr->prefix);
             break;
     }
-
-    return;
-
 } /* H5C_def_auto_resize_rpt_fcn() */
 
 /*-------------------------------------------------------------------------
@@ -807,9 +796,12 @@ H5C_dest(H5F_t *f)
 
 #ifndef NDEBUG
 #if H5C_DO_SANITY_CHECKS
-    if (cache_ptr->get_entry_ptr_from_addr_counter > 0)
-        HDfprintf(stdout, "*** %ld calls to H5C_get_entry_ptr_from_add(). ***\n",
+
+    if (cache_ptr->get_entry_ptr_from_addr_counter > 0) {
+
+        HDfprintf(stdout, "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
                   cache_ptr->get_entry_ptr_from_addr_counter);
+    }
 #endif /* H5C_DO_SANITY_CHECKS */
 
     cache_ptr->magic = 0;
@@ -1308,47 +1300,47 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_flush_cache
  *
- * Purpose:	Flush (and possibly destroy) the entries contained in the
- *		specified cache.
+ * Purpose:    Flush (and possibly destroy) the entries contained in the
+ *        specified cache.
  *
- *		If the cache contains protected entries, the function will
- *		fail, as protected entries cannot be flushed.  However
- *		all unprotected entries should be flushed before the
- *		function returns failure.
+ *        If the cache contains protected entries, the function will
+ *        fail, as protected entries cannot be flushed.  However
+ *        all unprotected entries should be flushed before the
+ *        function returns failure.
  *
  * Return:      Non-negative on success/Negative on failure or if there was
- *		a request to flush all items and something was protected.
+ *        a request to flush all items and something was protected.
  *
  * Programmer:  John Mainzer
- *		6/2/04
+ *        6/2/04
  *
- * Changes:	Modified function to test for slist chamges in
- *		pre_serialize and serialize callbacks, and re-start
- *		scans through the slist when such changes occur.
+ * Changes:    Modified function to test for slist chamges in
+ *        pre_serialize and serialize callbacks, and re-start
+ *        scans through the slist when such changes occur.
  *
- *		This has been a potential problem for some time,
- *		and there has been code in this function to deal
- *		with elements of this issue.  However the shift
- *		to the V3 cache in combination with the activities
- *		of some of the cache clients (in particular the
- *		free space manager and the fractal heap) have
- *		made this re-work necessary.
+ *        This has been a potential problem for some time,
+ *        and there has been code in this function to deal
+ *        with elements of this issue.  However the shift
+ *        to the V3 cache in combination with the activities
+ *        of some of the cache clients (in particular the
+ *        free space manager and the fractal heap) have
+ *        made this re-work necessary.
  *
- *						JRM -- 12/13/14
+ *                        JRM -- 12/13/14
  *
- *		Modified function to support rings.  Basic idea is that
- *		every entry in the cache is assigned to a ring.  Entries
- *		in the outermost ring are flushed first, followed by
- *		those in the next outermost ring, and so on until the
- *		innermost ring is flushed.  See header comment on
- *		H5C_ring_t in H5Cprivate.h for a more detailed
- *		discussion.
+ *        Modified function to support rings.  Basic idea is that
+ *        every entry in the cache is assigned to a ring.  Entries
+ *        in the outermost ring are flushed first, followed by
+ *        those in the next outermost ring, and so on until the
+ *        innermost ring is flushed.  See header comment on
+ *        H5C_ring_t in H5Cprivate.h for a more detailed
+ *        discussion.
  *
- *						JRM -- 8/30/15
+ *                        JRM -- 8/30/15
  *
- *		Modified function to call the free space manager
- *		settling functions.
- *						JRM -- 6/9/16
+ *        Modified function to call the free space manager
+ *        settling functions.
+ *                        JRM -- 6/9/16
  *
  *-------------------------------------------------------------------------
  */
@@ -1474,24 +1466,24 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_flush_to_min_clean
  *
- * Purpose:	Flush dirty entries until the caches min clean size is
- *		attained.
+ * Purpose:    Flush dirty entries until the caches min clean size is
+ *        attained.
  *
- *		This function is used in the implementation of the
- *		metadata cache in PHDF5.  To avoid "messages from the
- *		future", the cache on process 0 can't be allowed to
- *		flush entries until the other processes have reached
- *		the same point in the calculation.  If this constraint
- *		is not met, it is possible that the other processes will
- *		read metadata generated at a future point in the
- *		computation.
+ *        This function is used in the implementation of the
+ *        metadata cache in PHDF5.  To avoid "messages from the
+ *        future", the cache on process 0 can't be allowed to
+ *        flush entries until the other processes have reached
+ *        the same point in the calculation.  If this constraint
+ *        is not met, it is possible that the other processes will
+ *        read metadata generated at a future point in the
+ *        computation.
  *
  *
  * Return:      Non-negative on success/Negative on failure or if
- *		write is not permitted.
+ *        write is not permitted.
  *
  * Programmer:  John Mainzer
- *		9/16/05
+ *        9/16/05
  *
  *-------------------------------------------------------------------------
  */
@@ -1536,12 +1528,12 @@ done:
  *              exist on disk yet, but it must have an address and disk
  *              space reserved.
  *
- *		Observe that this function cannot occasion a read.
+ *        Observe that this function cannot occasion a read.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  John Mainzer
- *		6/2/04
+ *        6/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1553,8 +1545,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     hbool_t     insert_pinned;
     hbool_t     flush_last;
 #ifdef H5_HAVE_PARALLEL
-    hbool_t coll_access = FALSE; /* whether access to the cache */
-                                 /* entry is done collectively  */
+    hbool_t coll_access = FALSE; /* whether access to the cache entry is done collectively */
 #endif                           /* H5_HAVE_PARALLEL */
     hbool_t            set_flush_marker;
     hbool_t            write_permitted = TRUE;
@@ -2520,16 +2511,16 @@ done:
  * Function:    H5C_protect
  *
  * Purpose:     If the target entry is not in the cache, load it.  If
- *		necessary, attempt to evict one or more entries to keep
- *		the cache within its maximum size.
+ *        necessary, attempt to evict one or more entries to keep
+ *        the cache within its maximum size.
  *
- *		Mark the target entry as protected, and return its address
- *		to the caller.  The caller must call H5C_unprotect() when
- *		finished with the entry.
+ *        Mark the target entry as protected, and return its address
+ *        to the caller.  The caller must call H5C_unprotect() when
+ *        finished with the entry.
  *
- *		While it is protected, the entry may not be either evicted
- *		or flushed -- nor may it be accessed by another call to
- *		H5C_protect.  Any attempt to do so will result in a failure.
+ *        While it is protected, the entry may not be either evicted
+ *        or flushed -- nor may it be accessed by another call to
+ *        H5C_protect.  Any attempt to do so will result in a failure.
  *
  * Return:      Success:        Ptr to the desired entry
  *              Failure:        NULL
@@ -2987,19 +2978,19 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_set_cache_auto_resize_config
  *
- * Purpose:	Set the cache automatic resize configuration to the
- *		provided values if they are in range, and fail if they
- *		are not.
+ * Purpose:    Set the cache automatic resize configuration to the
+ *        provided values if they are in range, and fail if they
+ *        are not.
  *
- *		If the new configuration enables automatic cache resizing,
- *		coerce the cache max size and min clean size into agreement
- *		with the new policy and re-set the full cache hit rate
- *		stats.
+ *        If the new configuration enables automatic cache resizing,
+ *        coerce the cache max size and min clean size into agreement
+ *        with the new policy and re-set the full cache hit rate
+ *        stats.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
  * Programmer:  John Mainzer
- *		10/8/04
+ *        10/8/04
  *
  *-------------------------------------------------------------------------
  */
@@ -3122,7 +3113,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
 
     /* since new_min_clean_size is of type size_t, we have
      *
-     * 	( 0 <= new_min_clean_size )
+     *     ( 0 <= new_min_clean_size )
      *
      * by definition.
      */
@@ -3310,20 +3301,20 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_unprotect
  *
- * Purpose:	Undo an H5C_protect() call -- specifically, mark the
- *		entry as unprotected, remove it from the protected list,
- *		and give it back to the replacement policy.
+ * Purpose:    Undo an H5C_protect() call -- specifically, mark the
+ *        entry as unprotected, remove it from the protected list,
+ *        and give it back to the replacement policy.
  *
- *		The TYPE and ADDR arguments must be the same as those in
- *		the corresponding call to H5C_protect() and the THING
- *		argument must be the value returned by that call to
- *		H5C_protect().
+ *        The TYPE and ADDR arguments must be the same as those in
+ *        the corresponding call to H5C_protect() and the THING
+ *        argument must be the value returned by that call to
+ *        H5C_protect().
  *
  * Return:      Non-negative on success/Negative on failure
  *
- *		If the deleted flag is TRUE, simply remove the target entry
- *		from the cache, clear it, and free it without writing it to
- *		disk.
+ *        If the deleted flag is TRUE, simply remove the target entry
+ *        from the cache, clear it, and free it without writing it to
+ *        disk.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -3396,11 +3387,13 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
      * drops to zero.
      */
     if (entry_ptr->ro_ref_count > 1) {
+
         /* Sanity check */
         HDassert(entry_ptr->is_protected);
         HDassert(entry_ptr->is_read_only);
 
         if (dirtied)
+
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Read only entry modified??")
 
         /* Reduce the RO ref count */
@@ -3408,26 +3401,35 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
 
         /* Pin or unpin the entry as requested. */
         if (pin_entry) {
+
             /* Pin the entry from a client */
             if (H5C__pin_entry_from_client(cache_ptr, entry_ptr) < 0)
+
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Can't pin entry by client")
         }
         else if (unpin_entry) {
+
             /* Unpin the entry from a client */
             if (H5C__unpin_entry_from_client(cache_ptr, entry_ptr, FALSE) < 0)
+
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Can't unpin entry by client")
+
         } /* end if */
     }
     else {
+
         if (entry_ptr->is_read_only) {
+
             /* Sanity check */
             HDassert(entry_ptr->ro_ref_count == 1);
 
             if (dirtied)
+
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Read only entry modified??")
 
             entry_ptr->is_read_only = FALSE;
             entry_ptr->ro_ref_count = 0;
+
         } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
@@ -3457,6 +3459,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
 #endif    /* H5_HAVE_PARALLEL */
 
         if (!entry_ptr->is_protected)
+
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Entry already unprotected??")
 
         /* Mark the entry as dirty if appropriate */
@@ -3464,15 +3467,18 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
 
         if (dirtied)
             if (entry_ptr->image_up_to_date) {
+
                 entry_ptr->image_up_to_date = FALSE;
                 if (entry_ptr->flush_dep_nparents > 0)
                     if (H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
+
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
                                     "Can't propagate serialization status to fd parents")
             } /* end if */
 
         /* Check for newly dirtied entry */
         if (was_clean && entry_ptr->is_dirty) {
+
             /* Update index for newly dirtied entry */
             H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr)
 
@@ -3487,6 +3493,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
              * if appropriate */
             if (entry_ptr->flush_dep_nparents > 0)
                 if (H5C__mark_flush_dep_dirty(entry_ptr) < 0)
+
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Can't propagate flush dep dirty flag")
         } /* end if */
         /* Check for newly clean entry */
@@ -3503,18 +3510,23 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
              * if appropriate */
             if (entry_ptr->flush_dep_nparents > 0)
                 if (H5C__mark_flush_dep_clean(entry_ptr) < 0)
+
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Can't propagate flush dep dirty flag")
         } /* end else-if */
 
         /* Pin or unpin the entry as requested. */
         if (pin_entry) {
+
             /* Pin the entry from a client */
             if (H5C__pin_entry_from_client(cache_ptr, entry_ptr) < 0)
+
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Can't pin entry by client")
         }
         else if (unpin_entry) {
+
             /* Unpin the entry from a client */
             if (H5C__unpin_entry_from_client(cache_ptr, entry_ptr, FALSE) < 0)
+
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Can't unpin entry by client")
         } /* end if */
 
@@ -3529,6 +3541,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
          * and then add it to the skip list if it isn't there already.
          */
         if (entry_ptr->is_dirty) {
+
             entry_ptr->flush_marker |= set_flush_marker;
             if (!entry_ptr->in_slist)
                 H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)

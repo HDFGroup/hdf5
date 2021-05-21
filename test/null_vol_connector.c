@@ -26,9 +26,10 @@
 
 /* The VOL class struct */
 static const H5VL_class_t null_vol_g = {
-    0,                        /* version          */
+    H5VL_VERSION,             /* VOL class struct version */
     NULL_VOL_CONNECTOR_VALUE, /* value            */
     NULL_VOL_CONNECTOR_NAME,  /* name             */
+    0,                        /* connector version */
     0,                        /* capability flags */
     NULL,                     /* initialize       */
     NULL,                     /* terminate        */

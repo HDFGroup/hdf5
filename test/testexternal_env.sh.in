@@ -34,9 +34,9 @@ ENVCMD="env HDF5_EXTFILE_PREFIX=\${ORIGIN}"    # The environment variable & valu
 $ENVCMD $RUNSERIAL $TEST_BIN
 exitcode=$?
 if [ $exitcode -eq 0 ]; then
-        echo "Test prefix for HDF5_EXTFILE_PREFIX PASSED"
-    else
- 	nerrors="`expr $nerrors + 1`"
-	echo "***Error encountered for HDF5_EXTFILE_PREFIX test***"
+    echo "Test prefix for HDF5_EXTFILE_PREFIX PASSED"
+else
+    nerrors="`expr $nerrors + 1`"
+    echo "***Error encountered for HDF5_EXTFILE_PREFIX test***"
 fi
 exit $nerrors

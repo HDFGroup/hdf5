@@ -137,6 +137,11 @@ struct H5S_pnt_list_t {
 
     H5S_pnt_node_t *head; /* Pointer to head of point list */
     H5S_pnt_node_t *tail; /* Pointer to tail of point list */
+
+    hsize_t last_idx; /* Index of the point after the last returned from H5S__get_select_elem_pointlist() */
+    H5S_pnt_node_t *last_idx_pnt; /* Point after the last returned from H5S__get_select_elem_pointlist().
+                                   * If we ever add a way to remove points or add points in the middle of
+                                   * the pointlist we will need to invalidate these fields. */
 };
 
 /* Information about hyperslab spans */
@@ -403,6 +408,9 @@ H5_DLL herr_t   H5S__modify_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space
 H5_DLL herr_t   H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                                                 const H5S_t *src_intersect_space, H5S_t *proj_space,
                                                 hbool_t share_space);
+
+/* Operations on selection iterators */
+H5_DLL herr_t H5S__sel_iter_close_cb(H5S_sel_iter_t *_sel_iter, void **request);
 
 /* Testing functions */
 #ifdef H5S_TESTING

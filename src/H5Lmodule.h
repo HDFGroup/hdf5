@@ -35,6 +35,8 @@
  *
  * \defgroup TRAV Link Traversal
  * \ingroup H5L
+ * \defgroup H5LA Advanced Link Functions
+ * \ingroup H5L
  */
 
 #endif /* H5Lmodule_H */

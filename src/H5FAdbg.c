@@ -111,19 +111,20 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
 
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Header size:", hdr->size);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Header size:", hdr->size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Raw Element Size:", (unsigned)hdr->cparam.raw_elmt_size);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
               "Native Element Size (on this platform):", hdr->cparam.cls->nat_elmt_size);
 
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Max. # of elements in data block page:",
               (unsigned)((size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits));
 
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Number of elements in Fixed Array:", hdr->stats.nelmts);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Fixed Array Data Block Address:", hdr->dblk_addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+              "Fixed Array Data Block Address:", hdr->dblk_addr);
 
     CATCH
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
@@ -185,12 +186,12 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
 
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Address of Data Block:", dblock->addr);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Data Block size:", dblock->size);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of Data Block:", dblock->addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Data Block size:", dblock->size);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Number of elements in Data Block:", hdr->cparam.nelmts);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Number of pages in Data Block:", dblock->npages);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Number of pages in Data Block:", dblock->npages);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
               "Number of elements per Data Block page:", dblock->dblk_page_nelmts);
 
     if (dblock->npages) {         /* paging */
@@ -207,7 +208,7 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
         /* Read and print each page's elements in the data block */
         for (page_idx = 0; page_idx < dblock->npages; page_idx++) {
             if (!H5VM_bit_get(dblock->dblk_page_init, page_idx)) {
-                HDfprintf(stream, "%*s%-*s %Hu %s\n", indent, "", fwidth, "Page %Zu:", page_idx, "empty");
+                HDfprintf(stream, "%*s%-*s %zu %s\n", indent, "", fwidth, "Page %zu:", page_idx, "empty");
 
             }                                  /* end if */
             else {                             /* get the page */
@@ -225,7 +226,7 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
                               "unable to protect fixed array data block page, address = %llu",
                               (unsigned long long)dblk_page_addr)
 
-                HDfprintf(stream, "%*sElements in page %Zu:\n", indent, "", page_idx);
+                HDfprintf(stream, "%*sElements in page %zu:\n", indent, "", page_idx);
                 for (u = 0; u < dblk_page_nelmts; u++) {
                     /* Call the class's 'debug' callback */
                     if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,

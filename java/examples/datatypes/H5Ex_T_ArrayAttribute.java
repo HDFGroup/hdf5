@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -35,12 +34,12 @@ public class H5Ex_T_ArrayAttribute {
     private static final int NDIMS = 2;
 
     private static void CreateDataset() {
-        long file_id = -1;
-        long filetype_id = -1;
-        long memtype_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long attribute_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         long[] adims = { ADIM0, ADIM1 };
         int[][][] dset_data = new int[DIM0][ADIM0][ADIM1];
@@ -84,7 +83,7 @@ public class H5Ex_T_ArrayAttribute {
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, dataspace_id,
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 H5.H5Sclose(dataspace_id);
-                dataspace_id = -1;
+                dataspace_id = HDF5Constants.H5I_INVALID_HID;
             }
         }
         catch (Exception e) {
@@ -175,11 +174,11 @@ public class H5Ex_T_ArrayAttribute {
     }
 
     private static void ReadDataset() {
-        long file_id = -1;
-        long filetype_id = -1;
-        long memtype_id = -1;
-        long dataset_id = -1;
-        long attribute_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         long[] adims = { ADIM0, ADIM1 };
         int[][][] dset_data;

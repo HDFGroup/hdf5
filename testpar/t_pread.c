@@ -35,7 +35,7 @@ const char *FILENAMES[NFILENAME + 1] = {"reloc_t_pread_data_file", "reloc_t_prea
 
 #define LIMIT_NPROC 6
 
-hbool_t            pass             = true;
+hbool_t            pass             = TRUE;
 static const char *random_hdf5_text = "Now is the time for all first-time-users of HDF5 to read their \
 manual or go thru the tutorials!\n\
 While you\'re at it, now is also the time to read up on MPI-IO.";
@@ -112,7 +112,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
     float       nextValue;
     float *     data_slice = NULL;
 
-    pass = true;
+    pass = TRUE;
 
     HDassert(comm != MPI_COMM_NULL);
 
@@ -256,14 +256,14 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
     if (pass) {
         if ((dset_id = H5Dcreate2(file_id, "dataset0", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Dcreate2() failed.\n";
         }
     }
 
     if (pass) {
         if ((H5Dwrite(dset_id, H5T_NATIVE_FLOAT, memspace, filespace, dxpl_id, data_slice)) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Dwrite() failed.\n";
         }
     }
@@ -273,14 +273,14 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
 
     if (pass) {
         if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Pcreate() failed.\n";
         }
     }
 
     if (pass) {
         if ((H5Pset_chunk(dcpl_id, 1, chunk)) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Pset_chunk() failed.\n";
         }
     }
@@ -289,27 +289,27 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
 
         if ((dset_id_ch = H5Dcreate2(file_id, "dataset0_chunked", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT,
                                      dcpl_id, H5P_DEFAULT)) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Dcreate2() failed.\n";
         }
     }
 
     if (pass) {
         if ((H5Dwrite(dset_id_ch, H5T_NATIVE_FLOAT, memspace, filespace, dxpl_id, data_slice)) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Dwrite() failed.\n";
         }
     }
     if (pass || (dcpl_id != -1)) {
         if (H5Pclose(dcpl_id) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Pclose(dcpl_id) failed.\n";
         }
     }
 
     if (pass || (dset_id_ch != -1)) {
         if (H5Dclose(dset_id_ch) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Dclose(dset_id_ch) failed.\n";
         }
     }
@@ -317,49 +317,49 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
     /* close file, etc. */
     if (pass || (dset_id != -1)) {
         if (H5Dclose(dset_id) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Dclose(dset_id) failed.\n";
         }
     }
 
     if (pass || (memspace != -1)) {
         if (H5Sclose(memspace) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Sclose(memspace) failed.\n";
         }
     }
 
     if (pass || (filespace != -1)) {
         if (H5Sclose(filespace) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Sclose(filespace) failed.\n";
         }
     }
 
     if (pass || (file_id != -1)) {
         if (H5Fclose(file_id) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Fclose(file_id) failed.\n";
         }
     }
 
     if (pass || (dxpl_id != -1)) {
         if (H5Pclose(dxpl_id) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Pclose(dxpl_id) failed.\n";
         }
     }
 
     if (pass || (fapl_id != -1)) {
         if (H5Pclose(fapl_id) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Pclose(fapl_id) failed.\n";
         }
     }
 
     if (pass || (fctmpl != -1)) {
         if (H5Pclose(fctmpl) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Pclose(fctmpl) failed.\n";
         }
     }
@@ -661,14 +661,14 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
     if (pass || (memspace != -1)) {
         if (H5Sclose(memspace) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Sclose(memspace) failed.\n";
         }
     }
 
     if (pass || (filespace != -1)) {
         if (H5Sclose(filespace) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Sclose(filespace) failed.\n";
         }
     }
@@ -859,7 +859,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
         if (pass || (filespace != -1)) {
             if (H5Sclose(filespace) < 0) {
-                pass         = false;
+                pass         = FALSE;
                 failure_mssg = "H5Sclose(filespace) failed.\n";
             }
         }
@@ -956,7 +956,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
         if (pass || (memspace != -1)) {
             if (H5Sclose(memspace) < 0) {
-                pass         = false;
+                pass         = FALSE;
                 failure_mssg = "H5Sclose(memspace) failed.\n";
             }
         }
@@ -969,7 +969,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
         if (pass || (dxpl_id != -1)) {
             if (H5Pclose(dxpl_id) < 0) {
-                pass         = false;
+                pass         = FALSE;
                 failure_mssg = "H5Pclose(dxpl_id) failed.\n";
             }
         }
@@ -978,28 +978,28 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
     /* close file, etc. */
     if (pass || (dset_id != -1)) {
         if (H5Dclose(dset_id) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Dclose(dset_id) failed.\n";
         }
     }
 
     if (pass || (dset_id_ch != -1)) {
         if (H5Dclose(dset_id_ch) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Dclose(dset_id_ch) failed.\n";
         }
     }
 
     if (pass || (file_id != -1)) {
         if (H5Fclose(file_id) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Fclose(file_id) failed.\n";
         }
     }
 
     if (pass || (fapl_id != -1)) {
         if (H5Pclose(fapl_id) < 0) {
-            pass         = false;
+            pass         = FALSE;
             failure_mssg = "H5Pclose(fapl_id) failed.\n";
         }
     }

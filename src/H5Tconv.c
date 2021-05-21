@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Module Info:	Datatype conversions for the H5T interface.
+ * Module Info:    Datatype conversions for the H5T interface.
  */
 
 /****************/
@@ -24,15 +24,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
+#include "H5private.h"   /* Generic Functions            */
 #include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Dprivate.h"  /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5Dprivate.h"  /* Datasets                */
+#include "H5Eprivate.h"  /* Error handling              */
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Pprivate.h"  /* Property lists			*/
-#include "H5Tpkg.h"      /* Datatypes				*/
+#include "H5Iprivate.h"  /* IDs                      */
+#include "H5MMprivate.h" /* Memory management            */
+#include "H5Pprivate.h"  /* Property lists            */
+#include "H5Tpkg.h"      /* Datatypes                */
 
 /****************/
 /* Local Macros */
@@ -54,57 +54,57 @@
  * source value has a magnitude that cannot be represented by the destination
  * type.
  *
- * Suffix	Description
- * ------	-----------
- * sS:		Signed integers to signed integers where the destination is
- *		at least as wide as the source.	 This case cannot generate
- *		overflows.
+ * Suffix    Description
+ * ------    -----------
+ * sS:        Signed integers to signed integers where the destination is
+ *        at least as wide as the source.     This case cannot generate
+ *        overflows.
  *
- * sU:		Signed integers to unsigned integers where the destination is
- *		at least as wide as the source.	 This case experiences
- *		overflows when the source value is negative.
+ * sU:        Signed integers to unsigned integers where the destination is
+ *        at least as wide as the source.     This case experiences
+ *        overflows when the source value is negative.
  *
- * uS:		Unsigned integers to signed integers where the destination is
- *		at least as wide as the source.	 This case can experience
- *		overflows when the source and destination are the same size.
+ * uS:        Unsigned integers to signed integers where the destination is
+ *        at least as wide as the source.     This case can experience
+ *        overflows when the source and destination are the same size.
  *
- * uU:		Unsigned integers to unsigned integers where the destination
- *		is at least as wide as the source.  Overflows are not
- *		possible in this case.
+ * uU:        Unsigned integers to unsigned integers where the destination
+ *        is at least as wide as the source.  Overflows are not
+ *        possible in this case.
  *
- * Ss:		Signed integers to signed integers where the source is at
- *		least as large as the destination.  Overflows can occur when
- *		the destination is narrower than the source.
+ * Ss:        Signed integers to signed integers where the source is at
+ *        least as large as the destination.  Overflows can occur when
+ *        the destination is narrower than the source.
  *
- * Su:		Signed integers to unsigned integers where the source is at
- *		least as large as the destination.  Overflows occur when the
- *		source value is negative and can also occur if the
- *		destination is narrower than the source.
+ * Su:        Signed integers to unsigned integers where the source is at
+ *        least as large as the destination.  Overflows occur when the
+ *        source value is negative and can also occur if the
+ *        destination is narrower than the source.
  *
- * Us:		Unsigned integers to signed integers where the source is at
- *		least as large as the destination.  Overflows can occur for
- *		all sizes.
+ * Us:        Unsigned integers to signed integers where the source is at
+ *        least as large as the destination.  Overflows can occur for
+ *        all sizes.
  *
- * Uu:		Unsigned integers to unsigned integers where the source is at
- *		least as large as the destination. Overflows can occur if the
- *		destination is narrower than the source.
+ * Uu:        Unsigned integers to unsigned integers where the source is at
+ *        least as large as the destination. Overflows can occur if the
+ *        destination is narrower than the source.
  *
- * su:		Conversion from signed integers to unsigned integers where
- *		the source and destination are the same size. Overflow occurs
- *		when the source value is negative.
+ * su:        Conversion from signed integers to unsigned integers where
+ *        the source and destination are the same size. Overflow occurs
+ *        when the source value is negative.
  *
- * us:		Conversion from unsigned integers to signed integers where
- *		the source and destination are the same size.  Overflow
- *		occurs when the source magnitude is too large for the
- *		destination.
+ * us:        Conversion from unsigned integers to signed integers where
+ *        the source and destination are the same size.  Overflow
+ *        occurs when the source magnitude is too large for the
+ *        destination.
  *
- * fF:		Floating-point values to floating-point values where the
- *              destination is at least as wide as the source.	 This case
+ * fF:        Floating-point values to floating-point values where the
+ *              destination is at least as wide as the source.     This case
  *              cannot generate overflows.
  *
- * Ff:		Floating-point values to floating-point values the source is at
- *		least as large as the destination.  Overflows can occur when
- *		the destination is narrower than the source.
+ * Ff:        Floating-point values to floating-point values the source is at
+ *        least as large as the destination.  Overflows can occur when
+ *        the destination is narrower than the source.
  *
  * xF:          Integers to float-point(float or double) values where the destination
  *              is at least as wide as the source.  This case cannot generate
@@ -116,29 +116,29 @@
  *
  * The macros take a subset of these arguments in the order listed here:
  *
- * CDATA:	A pointer to the H5T_cdata_t structure that was passed to the
- *		conversion function.
+ * CDATA:    A pointer to the H5T_cdata_t structure that was passed to the
+ *           conversion function.
  *
- * STYPE:	The hid_t value for the source datatype.
+ * STYPE:    The hid_t value for the source datatype.
  *
- * DTYPE:	The hid_t value for the destination datatype.
+ * DTYPE:    The hid_t value for the destination datatype.
  *
- * BUF:		A pointer to the conversion buffer.
+ * BUF:      A pointer to the conversion buffer.
  *
- * NELMTS:	The number of values to be converted.
+ * NELMTS:   The number of values to be converted.
  *
- * ST:		The C name for source datatype (e.g., int)
+ * ST:       The C name for source datatype (e.g., int)
  *
- * DT:		The C name for the destination datatype (e.g., signed char)
+ * DT:       The C name for the destination datatype (e.g., signed char)
  *
- * D_MIN:	The minimum possible destination value.	 For unsigned
- *		destination types this should be zero.	For signed
- *		destination types it's a negative value with a magnitude that
- *		is usually one greater than D_MAX.  Source values which are
- *		smaller than D_MIN generate overflows.
+ * D_MIN:    The minimum possible destination value.     For unsigned
+ *        destination types this should be zero.    For signed
+ *        destination types it's a negative value with a magnitude that
+ *        is usually one greater than D_MAX.  Source values which are
+ *        smaller than D_MIN generate overflows.
  *
- * D_MAX:	The maximum possible destination value. Source values which
- *		are larger than D_MAX generate overflows.
+ * D_MAX:    The maximum possible destination value. Source values which
+ *        are larger than D_MAX generate overflows.
  *
  * The macros are implemented with a generic programming technique, similar
  * to templates in C++.  The macro which defines the "core" part of the
@@ -153,18 +153,18 @@
  *
  * The generic "core" macros are: (others are specific to particular conversion)
  *
- * Suffix	Description
- * ------	-----------
- * xX:		Generic Conversion where the destination is at least as
+ * Suffix    Description
+ * ------    -----------
+ * xX:        Generic Conversion where the destination is at least as
  *              wide as the source.  This case cannot generate overflows.
  *
- * Xx:		Generic signed conversion where the source is at least as large
+ * Xx:        Generic signed conversion where the source is at least as large
  *              as the destination.  Overflows can occur when the destination is
  *              narrower than the source.
  *
- * Ux:		Generic conversion for the `Us', `Uu' & `us' cases
- *		Overflow occurs when the source magnitude is too large for the
- *		destination.
+ * Ux:        Generic conversion for the `Us', `Uu' & `us' cases
+ *        Overflow occurs when the source magnitude is too large for the
+ *        destination.
  *
  */
 #define H5T_CONV_xX_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                           \
@@ -983,14 +983,12 @@ done:                                                                           
 #define CI_PRINT_STATS(STYPE, DTYPE)                                                                         \
     {                                                                                                        \
         if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->s_aligned) {                                       \
-            HDfprintf(H5DEBUG(T), "      %Hu src elements aligned on %lu-byte boundaries\n",                 \
-                      ((H5T_conv_hw_t *)cdata->priv)->s_aligned,                                             \
-                      (unsigned long)H5T_NATIVE_##STYPE##_ALIGN_g);                                          \
+            HDfprintf(H5DEBUG(T), "      %zu src elements aligned on %zu-byte boundaries\n",                 \
+                      ((H5T_conv_hw_t *)cdata->priv)->s_aligned, H5T_NATIVE_##STYPE##_ALIGN_g);              \
         }                                                                                                    \
         if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->d_aligned) {                                       \
-            HDfprintf(H5DEBUG(T), "      %Hu dst elements aligned on %lu-byte boundaries\n",                 \
-                      ((H5T_conv_hw_t *)cdata->priv)->d_aligned,                                             \
-                      (unsigned long)H5T_NATIVE_##DTYPE##_ALIGN_g);                                          \
+            HDfprintf(H5DEBUG(T), "      %zu dst elements aligned on %zu-byte boundaries\n",                 \
+                      ((H5T_conv_hw_t *)cdata->priv)->d_aligned, H5T_NATIVE_##DTYPE##_ALIGN_g);              \
         }                                                                                                    \
     }
 
@@ -1041,8 +1039,8 @@ done:                                                                           
 /* Conversion data for H5T__conv_struct() */
 typedef struct H5T_conv_struct_t {
     int *             src2dst;     /*mapping from src to dst member num */
-    hid_t *           src_memb_id; /*source member type ID's	     */
-    hid_t *           dst_memb_id; /*destination member type ID's	     */
+    hid_t *           src_memb_id; /*source member type ID's         */
+    hid_t *           dst_memb_id; /*destination member type ID's         */
     H5T_path_t **     memb_path;   /*conversion path for each member    */
     H5T_subset_info_t subset_info; /*info related to compound subsets   */
     unsigned          src_nmembs;  /*needed by free function            */
@@ -1050,9 +1048,9 @@ typedef struct H5T_conv_struct_t {
 
 /* Conversion data for H5T__conv_enum() */
 typedef struct H5T_enum_struct_t {
-    int      base;    /*lowest `in' value		     */
-    unsigned length;  /*num elements in arrays	     */
-    int *    src2dst; /*map from src to dst index	     */
+    int      base;    /*lowest `in' value             */
+    unsigned length;  /*num elements in arrays         */
+    int *    src2dst; /*map from src to dst index         */
 } H5T_enum_struct_t;
 
 /* Conversion data for the hardware conversion functions */
@@ -9312,7 +9310,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 }
 
                 /* Check if the exponent is too big */
-                expo_max = (hsize_t)(HDpow((double)2.0f, (double)dst.u.f.esize) - 1);
+                expo_max = (hsize_t)(HDpow(2.0, (double)dst.u.f.esize) - 1);
 
                 if (expo > expo_max) {    /*overflows*/
                     if (cb_struct.func) { /*user's exception handler.  Reverse back source order*/
@@ -9531,14 +9529,14 @@ H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned H5_ATTR_UNUSED ndim, const 
     HDassert(dt);
 
     if (dt->shared->type == H5T_REFERENCE) {
-        if (H5T_ref_reclaim(elem, dt) < 0)
+        if (H5T__ref_reclaim(elem, dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim ref elements")
     }
     else {
         HDassert(op_data);
 
         /* Allow vlen reclaim to recurse into that routine */
-        if (H5T_vlen_reclaim(elem, dt, (H5T_vlen_alloc_info_t *)op_data) < 0)
+        if (H5T__vlen_reclaim(elem, dt, (H5T_vlen_alloc_info_t *)op_data) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim vlen elements")
     }
 

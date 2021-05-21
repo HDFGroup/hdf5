@@ -1509,9 +1509,6 @@ H5B2_delete(H5F_t *f, haddr_t addr, void *ctx_udata, H5B2_remove_t op, void *op_
     HDassert(H5F_addr_defined(addr));
 
     /* Lock the v2 B-tree header into memory */
-#ifdef QAK
-    HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
-#endif /* QAK */
     if (NULL == (hdr = H5B2__hdr_protect(f, addr, ctx_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
 

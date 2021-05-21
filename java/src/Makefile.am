@@ -69,7 +69,7 @@ hdf5_java_JAVA =  \
     ${pkgpath}/callbacks/H5P_prp_set_func_cb.java \
  	${pkgpath}/callbacks/H5P_iterate_cb.java \
 	${pkgpath}/callbacks/H5P_iterate_t.java \
-	${pkgpath}/exceptions/HDF5AtomException.java  \
+	${pkgpath}/exceptions/HDF5IdException.java  \
 	${pkgpath}/exceptions/HDF5AttributeException.java  \
 	${pkgpath}/exceptions/HDF5BtreeException.java  \
 	${pkgpath}/exceptions/HDF5DataFiltersException.java  \

@@ -329,7 +329,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, h5tools_cont
  * Purpose: Print some values from an attribute referenced by object reference.
  *
  * Description:
- *      This is a special case subfunction to dump aa attribute references.
+ *      This is a special case subfunction to dump an attribute reference.
  *
  * Return:
  *      The function returns False if the last dimension has been reached, otherwise True
@@ -447,6 +447,9 @@ done:
 
     if (H5Tclose(atype) < 0)
         H5TOOLS_ERROR(dimension_break, "H5Tclose failed");
+
+    if (H5Sclose(region_space) < 0)
+        H5TOOLS_ERROR(dimension_break, "H5Sclose failed");
 
     ctx->indent_level--;
     ctx->need_prefix = TRUE;
@@ -1254,12 +1257,12 @@ done:
 static herr_t
 h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t dset,
                             hid_t p_type, hid_t f_space, hsize_t hyperslab_count,
-                            hsize_t *    temp_start,  /* start inside offset count loop */
-                            hsize_t *    temp_count,  /* count inside offset count loop  */
-                            hsize_t *    temp_block,  /* block size used in loop  */
-                            hsize_t *    temp_stride, /* stride size used in loop  */
-                            hsize_t *    total_size,  /* total size of dataset */
-                            unsigned int row_dim)     /* index of row_counter dimension */
+                            hsize_t *      temp_start,  /* start inside offset count loop */
+                            hsize_t *      temp_count,  /* count inside offset count loop  */
+                            hsize_t *      temp_block,  /* block size used in loop  */
+                            hsize_t *      temp_stride, /* stride size used in loop  */
+                            const hsize_t *total_size,  /* total size of dataset */
+                            unsigned int   row_dim)       /* index of row_counter dimension */
 {
     size_t         i;                          /* counters  */
     size_t         j;                          /* counters  */
@@ -2222,7 +2225,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                 h5tools_str_append(buffer, "H5T_NATIVE_LDOUBLE");
 #endif
             else {
-
+                /* print what the library knows */
                 /* byte order */
                 if (H5Tget_size(type) > 1) {
                     order = H5Tget_order(type);

@@ -45,7 +45,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5T_set_order(H5T_t *dtype, H5T_order_t order);
+static herr_t H5T__set_order(H5T_t *dtype, H5T_order_t order);
 
 /*********************/
 /* Public Variables */
@@ -204,7 +204,7 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype is read-only")
 
     /* Call internal routine to set the order */
-    if (H5T_set_order(dt, order) < 0)
+    if (H5T__set_order(dt, order) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "can't set order")
 
 done:
@@ -212,7 +212,7 @@ done:
 } /* end H5Tset_order() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_set_order
+ * Function:	H5T__set_order
  *
  * Purpose:	Private function to set the byte order for a datatype.
  *
@@ -224,11 +224,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_set_order(H5T_t *dtype, H5T_order_t order)
+H5T__set_order(H5T_t *dtype, H5T_order_t order)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     if (H5T_ENUM == dtype->shared->type && dtype->shared->u.enumer.nmembs > 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "operation not allowed after enum members are defined")
@@ -262,11 +262,11 @@ H5T_set_order(H5T_t *dtype, H5T_order_t order)
 
             /* Loop through all fields of compound type, setting the order */
             for (i = 0; i < nmemb; i++)
-                if (H5T_set_order(dtype->shared->u.compnd.memb[i].type, order) < 0)
+                if (H5T__set_order(dtype->shared->u.compnd.memb[i].type, order) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set order for compound member")
         } /* end if */
     }     /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_set_order() */
+} /* end H5T__set_order() */

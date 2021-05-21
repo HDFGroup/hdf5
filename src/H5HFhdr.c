@@ -15,7 +15,7 @@
  *
  * Created:		H5HFhdr.c
  *			Apr 10 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Heap header routines for fractal heaps.
  *
@@ -85,25 +85,24 @@ H5FL_DEFINE_STATIC(H5HF_hdr_t);
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_alloc
+ * Function:	H5HF__hdr_alloc
  *
  * Purpose:	Allocate shared fractal heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
  */
 H5HF_hdr_t *
-H5HF_hdr_alloc(H5F_t *f)
+H5HF__hdr_alloc(H5F_t *f)
 {
     H5HF_hdr_t *hdr       = NULL; /* Shared fractal heap header */
     H5HF_hdr_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -124,7 +123,7 @@ H5HF_hdr_alloc(H5F_t *f)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_alloc() */
+} /* end H5HF__hdr_alloc() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF_hdr_free_space
@@ -135,13 +134,12 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_hdr_compute_free_space(H5HF_hdr_t *hdr, unsigned iblock_row)
+H5HF__hdr_compute_free_space(H5HF_hdr_t *hdr, unsigned iblock_row)
 {
     hsize_t  acc_heap_size;       /* Accumumated heap space */
     hsize_t  iblock_size;         /* Size of indirect block to calculate for */
@@ -150,7 +148,7 @@ H5HF_hdr_compute_free_space(H5HF_hdr_t *hdr, unsigned iblock_row)
     unsigned curr_row;            /* Current row in block */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /*
      * Check arguments.
@@ -177,27 +175,26 @@ H5HF_hdr_compute_free_space(H5HF_hdr_t *hdr, unsigned iblock_row)
     hdr->man_dtable.row_max_dblock_free[iblock_row] = max_dblock_free;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_compute_free_space() */
+} /* end H5HF__hdr_compute_free_space() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_finish_init_phase1
+ * Function:	H5HF__hdr_finish_init_phase1
  *
  * Purpose:	First phase to finish initializing info in shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 12 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr)
+H5HF__hdr_finish_init_phase1(H5HF_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -206,7 +203,7 @@ H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr)
 
     /* Compute/cache some values */
     hdr->heap_off_size = (uint8_t)H5HF_SIZEOF_OFFSET_BITS(hdr->man_dtable.cparam.max_index);
-    if (H5HF_dtable_init(&hdr->man_dtable) < 0)
+    if (H5HF__dtable_init(&hdr->man_dtable) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize doubling table info")
 
     /* Set the size of heap IDs */
@@ -215,28 +212,27 @@ H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_finish_init_phase1() */
+} /* end H5HF__hdr_finish_init_phase1() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_finish_init_phase2
+ * Function:	H5HF__hdr_finish_init_phase2
  *
  * Purpose:	Second phase to finish initializing info in shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 12 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr)
+H5HF__hdr_finish_init_phase2(H5HF_hdr_t *hdr)
 {
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -251,46 +247,45 @@ H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr)
             H5_CHECKED_ASSIGN(hdr->man_dtable.row_max_dblock_free[u], size_t,
                               hdr->man_dtable.row_tot_dblock_free[u], hsize_t);
         } /* end if */
-        else if (H5HF_hdr_compute_free_space(hdr, u) < 0)
+        else if (H5HF__hdr_compute_free_space(hdr, u) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL,
                         "can't initialize direct block free space for indirect block")
     } /* end for */
 
     /* Initialize the block iterator for searching for free space */
-    if (H5HF_man_iter_init(&hdr->next_block) < 0)
+    if (H5HF__man_iter_init(&hdr->next_block) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize space search block iterator")
 
     /* Initialize the information for tracking 'huge' objects */
-    if (H5HF_huge_init(hdr) < 0)
+    if (H5HF__huge_init(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize info for tracking huge objects")
 
     /* Initialize the information for tracking 'tiny' objects */
-    if (H5HF_tiny_init(hdr) < 0)
+    if (H5HF__tiny_init(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize info for tracking tiny objects")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_finish_init_phase2() */
+} /* end H5HF__hdr_finish_init_phase2() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_finish_init
+ * Function:	H5HF__hdr_finish_init
  *
  * Purpose:	Finish initializing info in shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
+H5HF__hdr_finish_init(H5HF_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -298,38 +293,37 @@ H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
     HDassert(hdr);
 
     /* First phase of header final initialization */
-    if (H5HF_hdr_finish_init_phase1(hdr) < 0)
+    if (H5HF__hdr_finish_init_phase1(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't finish phase #1 of header final initialization")
 
     /* Second phase of header final initialization */
-    if (H5HF_hdr_finish_init_phase2(hdr) < 0)
+    if (H5HF__hdr_finish_init_phase2(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't finish phase #2 of header final initialization")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_finish_init() */
+} /* end H5HF__hdr_finish_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_create
+ * Function:	H5HF__hdr_create
  *
  * Purpose:	Create new fractal heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
+H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 {
     H5HF_hdr_t *hdr = NULL;              /* The new fractal heap header information */
     size_t      dblock_overhead;         /* Direct block's overhead */
     haddr_t     ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -363,7 +357,7 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 #endif /* NDEBUG */
 
     /* Allocate & basic initialization for the shared header */
-    if (NULL == (hdr = H5HF_hdr_alloc(f)))
+    if (NULL == (hdr = H5HF__hdr_alloc(f)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "can't allocate space for shared heap info")
 
 #ifndef NDEBUG
@@ -387,7 +381,7 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 
     /* First phase of header final initialization */
     /* (doesn't need ID length set up) */
-    if (H5HF_hdr_finish_init_phase1(hdr) < 0)
+    if (H5HF__hdr_finish_init_phase1(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF,
                     "can't finish phase #1 of header final initialization")
 
@@ -475,7 +469,7 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 
     /* Second phase of header final initialization */
     /* (needs ID and filter lengths set up) */
-    if (H5HF_hdr_finish_init_phase2(hdr) < 0)
+    if (H5HF__hdr_finish_init_phase2(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF,
                     "can't finish phase #2 of header final initialization")
 
@@ -499,11 +493,11 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 
 done:
     if (!H5F_addr_defined(ret_value) && hdr)
-        if (H5HF_hdr_free(hdr) < 0)
+        if (H5HF__hdr_free(hdr) < 0)
             HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_create() */
+} /* end H5HF__hdr_create() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__hdr_protect
@@ -513,7 +507,6 @@ done:
  * Return:	Pointer to indirect block on success, NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		May  5 2010
  *
  *-------------------------------------------------------------------------
@@ -555,24 +548,23 @@ done:
 } /* end H5HF__hdr_protect() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_incr
+ * Function:	H5HF__hdr_incr
  *
  * Purpose:	Increment component reference count on shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_incr(H5HF_hdr_t *hdr)
+H5HF__hdr_incr(H5HF_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(hdr);
@@ -587,27 +579,26 @@ H5HF_hdr_incr(H5HF_hdr_t *hdr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_incr() */
+} /* end H5HF__hdr_incr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_decr
+ * Function:	H5HF__hdr_decr
  *
  * Purpose:	Decrement component reference count on shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_decr(H5HF_hdr_t *hdr)
+H5HF__hdr_decr(H5HF_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(hdr);
@@ -625,25 +616,24 @@ H5HF_hdr_decr(H5HF_hdr_t *hdr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_decr() */
+} /* end H5HF__hdr_decr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_fuse_incr
+ * Function:	H5HF__hdr_fuse_incr
  *
  * Purpose:	Increment file reference count on shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct  1 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_fuse_incr(H5HF_hdr_t *hdr)
+H5HF__hdr_fuse_incr(H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(hdr);
@@ -652,25 +642,24 @@ H5HF_hdr_fuse_incr(H5HF_hdr_t *hdr)
     hdr->file_rc++;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_hdr_fuse_incr() */
+} /* end H5HF__hdr_fuse_incr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_fuse_decr
+ * Function:	H5HF__hdr_fuse_decr
  *
  * Purpose:	Decrement file reference count on shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct  1 2006
  *
  *-------------------------------------------------------------------------
  */
 size_t
-H5HF_hdr_fuse_decr(H5HF_hdr_t *hdr)
+H5HF__hdr_fuse_decr(H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(hdr);
@@ -680,36 +669,34 @@ H5HF_hdr_fuse_decr(H5HF_hdr_t *hdr)
     hdr->file_rc--;
 
     FUNC_LEAVE_NOAPI(hdr->file_rc)
-} /* end H5HF_hdr_fuse_decr() */
+} /* end H5HF__hdr_fuse_decr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_dirty
+ * Function:	H5HF__hdr_dirty
  *
  * Purpose:	Mark heap header as dirty
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_dirty(H5HF_hdr_t *hdr)
+H5HF__hdr_dirty(H5HF_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(hdr);
 
     /* Resize pinned header in cache if I/O filter is present. */
-    if (hdr->filter_len > 0) {
+    if (hdr->filter_len > 0)
         if (H5AC_resize_entry(hdr, (size_t)hdr->heap_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize fractal heap header")
-    } /* end if */
 
     /* Mark header as dirty in cache */
     if (H5AC_mark_entry_dirty(hdr) < 0)
@@ -717,27 +704,26 @@ H5HF_hdr_dirty(H5HF_hdr_t *hdr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_dirty() */
+} /* end H5HF__hdr_dirty() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_adj_free
+ * Function:	H5HF__hdr_adj_free
  *
  * Purpose:	Adjust the free space for a heap
  *
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  9 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_adj_free(H5HF_hdr_t *hdr, ssize_t amt)
+H5HF__hdr_adj_free(H5HF_hdr_t *hdr, ssize_t amt)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -749,32 +735,31 @@ H5HF_hdr_adj_free(H5HF_hdr_t *hdr, ssize_t amt)
     hdr->total_man_free = (hsize_t)((hssize_t)hdr->total_man_free + amt);
 
     /* Mark heap header as modified */
-    if (H5HF_hdr_dirty(hdr) < 0)
+    if (H5HF__hdr_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_adj_free() */
+} /* end H5HF__hdr_adj_free() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_adjust_heap
+ * Function:	H5HF__hdr_adjust_heap
  *
  * Purpose:	Adjust heap space
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 10 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_adjust_heap(H5HF_hdr_t *hdr, hsize_t new_size, hssize_t extra_free)
+H5HF__hdr_adjust_heap(H5HF_hdr_t *hdr, hsize_t new_size, hssize_t extra_free)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -789,30 +774,29 @@ H5HF_hdr_adjust_heap(H5HF_hdr_t *hdr, hsize_t new_size, hssize_t extra_free)
     hdr->total_man_free = (hsize_t)((hssize_t)hdr->total_man_free + extra_free);
 
     /* Mark heap header as modified */
-    if (H5HF_hdr_dirty(hdr) < 0)
+    if (H5HF__hdr_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark header as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_adjust_heap() */
+} /* end H5HF__hdr_adjust_heap() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_inc_alloc
+ * Function:	H5HF__hdr_inc_alloc
  *
  * Purpose:	Increase allocated size of heap
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 23 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_inc_alloc(H5HF_hdr_t *hdr, size_t alloc_size)
+H5HF__hdr_inc_alloc(H5HF_hdr_t *hdr, size_t alloc_size)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -824,27 +808,26 @@ H5HF_hdr_inc_alloc(H5HF_hdr_t *hdr, size_t alloc_size)
     hdr->man_alloc_size += alloc_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_hdr_inc_alloc() */
+} /* end H5HF__hdr_inc_alloc() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_start_iter
+ * Function:	H5HF__hdr_start_iter
  *
  * Purpose:	Start "next block" iterator at an offset/entry in the heap
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 30 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_start_iter(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, hsize_t curr_off, unsigned curr_entry)
+H5HF__hdr_start_iter(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, hsize_t curr_off, unsigned curr_entry)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -853,7 +836,7 @@ H5HF_hdr_start_iter(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, hsize_t curr_off, 
     HDassert(iblock);
 
     /* Set up "next block" iterator at correct location */
-    if (H5HF_man_iter_start_entry(hdr, &hdr->next_block, iblock, curr_entry) < 0)
+    if (H5HF__man_iter_start_entry(hdr, &hdr->next_block, iblock, curr_entry) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize block iterator")
 
     /* Set the offset of the iterator in the heap */
@@ -861,27 +844,26 @@ H5HF_hdr_start_iter(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, hsize_t curr_off, 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_start_iter() */
+} /* end H5HF__hdr_start_iter() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_reset_iter
+ * Function:	H5HF__hdr_reset_iter
  *
  * Purpose:	Reset "next block" iterator
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off)
+H5HF__hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -889,7 +871,7 @@ H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off)
     HDassert(hdr);
 
     /* Reset "next block" iterator */
-    if (H5HF_man_iter_reset(&hdr->next_block) < 0)
+    if (H5HF__man_iter_reset(&hdr->next_block) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
 
     /* Set the offset of the iterator in the heap */
@@ -897,7 +879,7 @@ H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_reset_iter() */
+} /* end H5HF__hdr_reset_iter() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__hdr_skip_blocks
@@ -907,7 +889,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr  3 2006
  *
  *-------------------------------------------------------------------------
@@ -931,11 +912,11 @@ H5HF__hdr_skip_blocks(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, unsigned start_e
     /* Compute the span within the heap to skip */
     row       = start_entry / hdr->man_dtable.cparam.width;
     col       = start_entry % hdr->man_dtable.cparam.width;
-    sect_size = H5HF_dtable_span_size(&hdr->man_dtable, row, col, nentries);
+    sect_size = H5HF__dtable_span_size(&hdr->man_dtable, row, col, nentries);
     HDassert(sect_size > 0);
 
     /* Advance the new block iterator */
-    if (H5HF_hdr_inc_iter(hdr, sect_size, nentries) < 0)
+    if (H5HF__hdr_inc_iter(hdr, sect_size, nentries) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't increase allocated heap size")
 
     /* Add 'indirect' section for blocks skipped in this row */
@@ -958,7 +939,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 14 2006
  *
  *-------------------------------------------------------------------------
@@ -989,17 +969,17 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
         unsigned         min_dblock_row;         /* Minimum row for direct block size request */
 
         /* Compute min. row for direct block requested */
-        min_dblock_row = H5HF_dtable_size_to_row(&hdr->man_dtable, min_dblock_size);
+        min_dblock_row = H5HF__dtable_size_to_row(&hdr->man_dtable, min_dblock_size);
 
         /* Initialize block iterator, if necessary */
-        if (!H5HF_man_iter_ready(&hdr->next_block)) {
+        if (!H5HF__man_iter_ready(&hdr->next_block)) {
             /* Start iterator with previous offset of iterator */
             if (H5HF__man_iter_start_offset(hdr, &hdr->next_block, hdr->man_iter_off) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to set block iterator location")
         } /* end if */
 
         /* Get information about current iterator location */
-        if (H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
+        if (H5HF__man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location")
 
         /* Check for skipping over blocks in the current block */
@@ -1019,7 +999,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't add skipped blocks to heap's free space")
 
             /* Get information about new iterator location */
-            if (H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
+            if (H5HF__man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location")
         } /* end if */
 
@@ -1037,17 +1017,17 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
                 } /* end if */
                 else {
                     /* Move iterator up one level */
-                    if (H5HF_man_iter_up(&hdr->next_block) < 0)
+                    if (H5HF__man_iter_up(&hdr->next_block) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTNEXT, FAIL,
                                     "unable to advance current block iterator location")
 
                     /* Increment location of next block at this level */
-                    if (H5HF_man_iter_next(hdr, &hdr->next_block, 1) < 0)
+                    if (H5HF__man_iter_next(hdr, &hdr->next_block, 1) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't advance fractal heap block location")
                 } /* end else */
 
                 /* Get information about new iterator location */
-                if (H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
+                if (H5HF__man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
                                 "unable to retrieve current block iterator location")
 
@@ -1064,7 +1044,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
 
                 /* Compute # of rows in next child indirect block to use */
                 child_nrows =
-                    H5HF_dtable_size_to_rows(&hdr->man_dtable, hdr->man_dtable.row_block_size[next_row]);
+                    H5HF__dtable_size_to_rows(&hdr->man_dtable, hdr->man_dtable.row_block_size[next_row]);
 
                 /* Check for skipping over indirect blocks */
                 /* (that don't have direct blocks large enough to hold direct block size requested) */
@@ -1106,7 +1086,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
                                     "unable to protect fractal heap indirect block")
 
                     /* Move iterator down one level (pins indirect block) */
-                    if (H5HF_man_iter_down(&hdr->next_block, new_iblock) < 0)
+                    if (H5HF__man_iter_down(&hdr->next_block, new_iblock) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTNEXT, FAIL,
                                     "unable to advance current block iterator location")
 
@@ -1130,7 +1110,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
                 } /* end else */
 
                 /* Get information about new iterator location */
-                if (H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
+                if (H5HF__man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
                                 "unable to retrieve current block iterator location")
 
@@ -1145,24 +1125,23 @@ done:
 } /* end H5HF__hdr_update_iter() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_inc_iter
+ * Function:	H5HF__hdr_inc_iter
  *
  * Purpose:	Advance "next block" iterator
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 23 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_inc_iter(H5HF_hdr_t *hdr, hsize_t adv_size, unsigned nentries)
+H5HF__hdr_inc_iter(H5HF_hdr_t *hdr, hsize_t adv_size, unsigned nentries)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1172,7 +1151,7 @@ H5HF_hdr_inc_iter(H5HF_hdr_t *hdr, hsize_t adv_size, unsigned nentries)
 
     /* Advance the iterator for the current location within the indirect block */
     if (hdr->next_block.curr)
-        if (H5HF_man_iter_next(hdr, &hdr->next_block, nentries) < 0)
+        if (H5HF__man_iter_next(hdr, &hdr->next_block, nentries) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTNEXT, FAIL, "unable to advance current block iterator location")
 
     /* Increment the offset of the iterator in the heap */
@@ -1180,7 +1159,7 @@ H5HF_hdr_inc_iter(H5HF_hdr_t *hdr, hsize_t adv_size, unsigned nentries)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_inc_iter() */
+} /* end H5HF__hdr_inc_iter() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__hdr_reverse_iter
@@ -1191,7 +1170,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
@@ -1213,7 +1191,7 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
     HDassert(hdr);
 
     /* Initialize block iterator, if necessary */
-    if (!H5HF_man_iter_ready(&hdr->next_block))
+    if (!H5HF__man_iter_ready(&hdr->next_block))
         /* Start iterator with previous offset of iterator */
         if (H5HF__man_iter_start_offset(hdr, &hdr->next_block, hdr->man_iter_off) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to set block iterator location")
@@ -1221,7 +1199,7 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
     /* Walk backwards through heap, looking for direct block to place iterator after */
 
     /* Get information about current iterator location */
-    if (H5HF_man_iter_curr(&hdr->next_block, NULL, NULL, &curr_entry, &iblock) < 0)
+    if (H5HF__man_iter_curr(&hdr->next_block, NULL, NULL, &curr_entry, &iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator information")
 
     /* Move current iterator position backwards once */
@@ -1246,12 +1224,12 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
             /* Check for parent of current indirect block */
             if (iblock->parent) {
                 /* Move iterator to parent of current block */
-                if (H5HF_man_iter_up(&hdr->next_block) < 0)
+                if (H5HF__man_iter_up(&hdr->next_block) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTNEXT, FAIL,
                                 "unable to move current block iterator location up")
 
                 /* Get information about current iterator location */
-                if (H5HF_man_iter_curr(&hdr->next_block, NULL, NULL, &curr_entry, &iblock) < 0)
+                if (H5HF__man_iter_curr(&hdr->next_block, NULL, NULL, &curr_entry, &iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
                                 "unable to retrieve current block iterator information")
 
@@ -1266,7 +1244,7 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
                 hdr->man_iter_off = 0;
 
                 /* Reset 'next block' iterator */
-                if (H5HF_man_iter_reset(&hdr->next_block) < 0)
+                if (H5HF__man_iter_reset(&hdr->next_block) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
             } /* end else */
         }     /* end if */
@@ -1282,7 +1260,7 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
                 curr_entry++;
 
                 /* Set the current location of the iterator to next entry after the existing direct block */
-                if (H5HF_man_iter_set_entry(hdr, &hdr->next_block, curr_entry) < 0)
+                if (H5HF__man_iter_set_entry(hdr, &hdr->next_block, curr_entry) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "unable to set current block iterator location")
 
                 /* Update iterator offset */
@@ -1298,7 +1276,8 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
                 unsigned         child_nrows;  /* # of rows in child block */
 
                 /* Compute # of rows in next child indirect block to use */
-                child_nrows = H5HF_dtable_size_to_rows(&hdr->man_dtable, hdr->man_dtable.row_block_size[row]);
+                child_nrows =
+                    H5HF__dtable_size_to_rows(&hdr->man_dtable, hdr->man_dtable.row_block_size[row]);
 
                 /* Lock child indirect block */
                 if (NULL == (child_iblock = H5HF__man_iblock_protect(hdr, iblock->ents[curr_entry].addr,
@@ -1308,11 +1287,11 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
                                 "unable to protect fractal heap indirect block")
 
                 /* Set the current location of the iterator */
-                if (H5HF_man_iter_set_entry(hdr, &hdr->next_block, curr_entry) < 0)
+                if (H5HF__man_iter_set_entry(hdr, &hdr->next_block, curr_entry) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "unable to set current block iterator location")
 
                 /* Walk down into child indirect block (pins child block) */
-                if (H5HF_man_iter_down(&hdr->next_block, child_iblock) < 0)
+                if (H5HF__man_iter_down(&hdr->next_block, child_iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTNEXT, FAIL,
                                 "unable to advance current block iterator location")
 
@@ -1343,7 +1322,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 17 2006
  *
  *-------------------------------------------------------------------------
@@ -1359,10 +1337,9 @@ H5HF__hdr_empty(H5HF_hdr_t *hdr)
     HDassert(hdr);
 
     /* Reset block iterator, if necessary */
-    if (H5HF_man_iter_ready(&hdr->next_block)) {
-        if (H5HF_man_iter_reset(&hdr->next_block) < 0)
+    if (H5HF__man_iter_ready(&hdr->next_block))
+        if (H5HF__man_iter_reset(&hdr->next_block) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
-    } /* end if */
 
     /* Shrink managed heap size */
     hdr->man_size       = 0;
@@ -1379,7 +1356,7 @@ H5HF__hdr_empty(H5HF_hdr_t *hdr)
     hdr->total_man_free = 0;
 
     /* Mark heap header as modified */
-    if (H5HF_hdr_dirty(hdr) < 0)
+    if (H5HF__hdr_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark header as dirty")
 
 done:
@@ -1387,24 +1364,23 @@ done:
 } /* end H5HF__hdr_empty() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_free
+ * Function:	H5HF__hdr_free
  *
  * Purpose:	Free shared fractal heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 27 2009
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_free(H5HF_hdr_t *hdr)
+H5HF__hdr_free(H5HF_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1412,7 +1388,7 @@ H5HF_hdr_free(H5HF_hdr_t *hdr)
     HDassert(hdr);
 
     /* Free the block size lookup table for the doubling table */
-    if (H5HF_dtable_dest(&hdr->man_dtable) < 0)
+    if (H5HF__dtable_dest(&hdr->man_dtable) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap doubling table")
 
     /* Release any I/O pipeline filter information */
@@ -1425,7 +1401,7 @@ H5HF_hdr_free(H5HF_hdr_t *hdr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_free() */
+} /* end H5HF__hdr_free() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__hdr_delete
@@ -1435,7 +1411,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  5 2007
  *
  *-------------------------------------------------------------------------

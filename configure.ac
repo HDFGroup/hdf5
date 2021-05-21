@@ -1126,6 +1126,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   AC_SUBST([DOXYGEN_EXTERNAL_SEARCH])
   AC_SUBST([DOXYGEN_SEARCHENGINE_URL])
 
+# SRCDIR Environment variables used inside doxygen macro for the source location:
   DOXYGEN_PACKAGE=${PACKAGE_NAME}
   DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
   DOXYGEN_INCLUDE_ALIASES='$(SRCDIR)/doxygen/aliases'
@@ -1135,7 +1136,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
   DOXYGEN_MACRO_EXPANSION=YES
   DOXYGEN_OUTPUT_DIRECTORY=hdf5lib_docs
-  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/examples'
+  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/examples $(SRCDIR)/src $(SRCDIR)/examples $(SRCDIR)/test'
   DOXYGEN_LAYOUT_FILE='$(SRCDIR)/doxygen/hdf5doxy_layout.xml'
   DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
   DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
@@ -1145,7 +1146,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_EXTERNAL_SEARCH=NO
   DOXYGEN_SEARCHENGINE_URL=
 
-  DX_INIT_DOXYGEN([HDF5], [../doxygen/Doxyfile], [hdf5lib_docs])
+  DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
 
 else
   AC_MSG_RESULT([no])

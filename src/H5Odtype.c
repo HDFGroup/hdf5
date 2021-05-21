@@ -26,17 +26,17 @@
 #include "H5VMprivate.h" /* Vectors and arrays   */
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5O_dtype_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_dtype_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
-                              const uint8_t *p);
-static void *H5O_dtype_copy(const void *_mesg, void *_dest);
-static size_t H5O_dtype_size(const H5F_t *f, const void *_mesg);
+static herr_t H5O__dtype_encode(H5F_t *f, uint8_t *p, const void *mesg);
+static void * H5O__dtype_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
+                                size_t p_size, const uint8_t *p);
+static void * H5O__dtype_copy(const void *_mesg, void *_dest);
+static size_t H5O__dtype_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O__dtype_reset(void *_mesg);
 static herr_t H5O__dtype_free(void *_mesg);
-static herr_t H5O_dtype_set_share(void *_mesg, const H5O_shared_t *sh);
-static htri_t H5O_dtype_can_share(const void *_mesg);
-static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
-                                      const H5O_copy_t *cpy_info, void *_udata);
+static herr_t H5O__dtype_set_share(void *_mesg, const H5O_shared_t *sh);
+static htri_t H5O__dtype_can_share(const void *_mesg);
+static herr_t H5O__dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+                                       const H5O_copy_t *cpy_info, void *_udata);
 static void * H5O__dtype_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
                                    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
                                    void *udata);
@@ -46,22 +46,22 @@ static herr_t H5O__dtype_debug(H5F_t *f, const void *_mesg, FILE *stream, int in
 
 /* Set up & include shared message "interface" info */
 #define H5O_SHARED_TYPE        H5O_MSG_DTYPE
-#define H5O_SHARED_DECODE      H5O_dtype_shared_decode
-#define H5O_SHARED_DECODE_REAL H5O_dtype_decode
-#define H5O_SHARED_ENCODE      H5O_dtype_shared_encode
-#define H5O_SHARED_ENCODE_REAL H5O_dtype_encode
-#define H5O_SHARED_SIZE        H5O_dtype_shared_size
-#define H5O_SHARED_SIZE_REAL   H5O_dtype_size
+#define H5O_SHARED_DECODE      H5O__dtype_shared_decode
+#define H5O_SHARED_DECODE_REAL H5O__dtype_decode
+#define H5O_SHARED_ENCODE      H5O__dtype_shared_encode
+#define H5O_SHARED_ENCODE_REAL H5O__dtype_encode
+#define H5O_SHARED_SIZE        H5O__dtype_shared_size
+#define H5O_SHARED_SIZE_REAL   H5O__dtype_size
 #define H5O_SHARED_DELETE      H5O__dtype_shared_delete
 #undef H5O_SHARED_DELETE_REAL
 #define H5O_SHARED_LINK H5O__dtype_shared_link
 #undef H5O_SHARED_LINK_REAL
 #define H5O_SHARED_COPY_FILE      H5O__dtype_shared_copy_file
 #define H5O_SHARED_COPY_FILE_REAL H5O__dtype_copy_file
-#define H5O_SHARED_POST_COPY_FILE H5O_dtype_shared_post_copy_file
+#define H5O_SHARED_POST_COPY_FILE H5O__dtype_shared_post_copy_file
 #undef H5O_SHARED_POST_COPY_FILE_REAL
 #define H5O_SHARED_POST_COPY_FILE_UPD H5O__dtype_shared_post_copy_upd
-#define H5O_SHARED_DEBUG              H5O_dtype_shared_debug
+#define H5O_SHARED_DEBUG              H5O__dtype_shared_debug
 #define H5O_SHARED_DEBUG_REAL         H5O__dtype_debug
 #include "H5Oshared.h" /* Shared Object Header Message Callbacks */
 
@@ -90,26 +90,26 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     "datatype",                                /* message name for debugging	*/
     sizeof(H5T_t),                             /* native message size		*/
     H5O_SHARE_IS_SHARABLE | H5O_SHARE_IN_OHDR, /* messages are sharable?       */
-    H5O_dtype_shared_decode,                   /* decode message		*/
-    H5O_dtype_shared_encode,                   /* encode message		*/
-    H5O_dtype_copy,                            /* copy the native value	*/
-    H5O_dtype_shared_size,                     /* size of raw message		*/
+    H5O__dtype_shared_decode,                  /* decode message		*/
+    H5O__dtype_shared_encode,                  /* encode message		*/
+    H5O__dtype_copy,                           /* copy the native value	*/
+    H5O__dtype_shared_size,                    /* size of raw message		*/
     H5O__dtype_reset,                          /* reset method			*/
     H5O__dtype_free,                           /* free method			*/
     H5O__dtype_shared_delete,                  /* file delete method		*/
     H5O__dtype_shared_link,                    /* link method			*/
-    H5O_dtype_set_share,                       /* set share method		*/
-    H5O_dtype_can_share,                       /* can share method		*/
-    H5O_dtype_pre_copy_file,                   /* pre copy native value to file */
+    H5O__dtype_set_share,                      /* set share method		*/
+    H5O__dtype_can_share,                      /* can share method		*/
+    H5O__dtype_pre_copy_file,                  /* pre copy native value to file */
     H5O__dtype_shared_copy_file,               /* copy native value to file    */
-    H5O_dtype_shared_post_copy_file,           /* post copy native value to file */
+    H5O__dtype_shared_post_copy_file,          /* post copy native value to file */
     NULL,                                      /* get creation index		*/
     NULL,                                      /* set creation index		*/
-    H5O_dtype_shared_debug                     /* debug the message		*/
+    H5O__dtype_shared_debug                    /* debug the message		*/
 }};
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_decode_helper
+ * Function:	H5O__dtype_decode_helper
  *
  * Purpose:	Decodes a datatype
  *
@@ -124,14 +124,14 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t *dt)
+H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t *dt)
 {
     unsigned flags, version;
     unsigned i;
     size_t   z;
     htri_t   ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(pp && *pp);
@@ -327,7 +327,7 @@ H5O_dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t 
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                 /* Decode the field's datatype information */
-                if ((can_upgrade = H5O_dtype_decode_helper(ioflags, pp, temp_type)) < 0) {
+                if ((can_upgrade = H5O__dtype_decode_helper(ioflags, pp, temp_type)) < 0) {
                     for (j = 0; j <= i; j++)
                         H5MM_xfree(dt->shared->u.compnd.memb[j].name);
                     H5MM_xfree(dt->shared->u.compnd.memb);
@@ -469,7 +469,7 @@ H5O_dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t 
             dt->shared->u.enumer.nmembs = dt->shared->u.enumer.nalloc = flags & 0xffff;
             if (NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            if (H5O_dtype_decode_helper(ioflags, pp, dt->shared->parent) < 0)
+            if (H5O__dtype_decode_helper(ioflags, pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode parent datatype")
 
             /* Check if the parent of this enum has a version greater than the
@@ -512,7 +512,7 @@ H5O_dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t 
             /* Decode base type of VL information */
             if (NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            if (H5O_dtype_decode_helper(ioflags, pp, dt->shared->parent) < 0)
+            if (H5O__dtype_decode_helper(ioflags, pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type")
 
             /* Check if the parent of this vlen has a version greater than the
@@ -552,7 +552,7 @@ H5O_dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t 
             /* Decode base type of array */
             if (NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            if (H5O_dtype_decode_helper(ioflags, pp, dt->shared->parent) < 0)
+            if (H5O__dtype_decode_helper(ioflags, pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode array parent type")
 
             /* Check if the parent of this array has a version greater than the
@@ -577,19 +577,20 @@ H5O_dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t 
     } /* end switch */
 
 done:
-    if (ret_value < 0) {
+    if (ret_value < 0)
         if (dt != NULL) {
-            if (dt->shared != NULL)
+            if (dt->shared != NULL) {
+                HDassert(!dt->shared->owned_vol_obj);
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
+            } /* end if */
             dt = H5FL_FREE(H5T_t, dt);
         } /* end if */
-    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_decode_helper() */
+} /* end H5O__dtype_decode_helper() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_encode_helper
+ * Function:	H5O__dtype_encode_helper
  *
  * Purpose:	Encodes a datatype.
  *
@@ -605,7 +606,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
+H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 {
     unsigned flags = 0;
     uint8_t *hdr   = (uint8_t *)*pp;
@@ -613,7 +614,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     size_t   n, z;
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(pp && *pp);
@@ -978,7 +979,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 } /* end if */
 
                 /* Subtype */
-                if (H5O_dtype_encode_helper(pp, dt->shared->u.compnd.memb[i].type) < 0)
+                if (H5O__dtype_encode_helper(pp, dt->shared->u.compnd.memb[i].type) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode member type")
             } /* end for */
         } break;
@@ -999,7 +1000,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             flags = dt->shared->u.enumer.nmembs & 0xffff;
 
             /* Parent type */
-            if (H5O_dtype_encode_helper(pp, dt->shared->parent) < 0)
+            if (H5O__dtype_encode_helper(pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode parent datatype")
 
             /* Names, each a multiple of eight bytes */
@@ -1036,7 +1037,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             } /* end if */
 
             /* Encode base type of VL information */
-            if (H5O_dtype_encode_helper(pp, dt->shared->parent) < 0)
+            if (H5O__dtype_encode_helper(pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode VL parent type")
             break;
 
@@ -1074,7 +1075,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             } /* end if */
 
             /* Encode base type of array's information */
-            if (H5O_dtype_encode_helper(pp, dt->shared->parent) < 0)
+            if (H5O__dtype_encode_helper(pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode VL parent type")
             break;
 
@@ -1093,19 +1094,22 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_encode_helper() */
+} /* end H5O__dtype_encode_helper() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_dtype_decode
+    H5O__dtype_decode
  PURPOSE
     Decode a message and return a pointer to a memory struct
         with the decoded information
  USAGE
-    void *H5O_dtype_decode(f, mesg_flags, p)
-        H5F_t *f;		IN: pointer to the HDF5 file struct
+    void *H5O__dtype_decode(f, mesg_flags, p)
+        H5F_t    *f;            IN: pointer to the HDF5 file struct
+        H5O_t    *open_oh;      IN: pointer to the object header
         unsigned mesg_flags;    IN: Message flags to influence decoding
-        const uint8 *p;		IN: the raw information buffer
+        unsigned *ioflags;      IN/OUT: flags for decoding
+        size_t   p_size;        IN: size of buffer *p
+        const uint8_t *p;       IN: the raw information buffer
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
  DESCRIPTION
@@ -1114,13 +1118,13 @@ done:
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                 unsigned *ioflags /*in,out*/, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__dtype_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
+                  unsigned *ioflags /*in,out*/, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5T_t *dt        = NULL;
     void * ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(p);
@@ -1130,7 +1134,7 @@ H5O_dtype_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigne
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Perform actual decode of message */
-    if (H5O_dtype_decode_helper(ioflags, &p, dt) < 0)
+    if (H5O__dtype_decode_helper(ioflags, &p, dt) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode type")
 
     /* Set return value */
@@ -1138,15 +1142,15 @@ H5O_dtype_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigne
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_decode() */
+} /* end H5O__dtype_decode() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_dtype_encode
+    H5O__dtype_encode
  PURPOSE
     Encode a simple datatype message
  USAGE
-    herr_t H5O_dtype_encode(f, raw_size, p, mesg)
+    herr_t H5O__dtype_encode(f, raw_size, p, mesg)
         H5F_t *f;	  IN: pointer to the HDF5 file struct
         size_t raw_size;	IN: size of the raw information buffer
         const uint8 *p;		IN: the raw information buffer
@@ -1158,12 +1162,12 @@ done:
     message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_dtype_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *mesg)
+H5O__dtype_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *mesg)
 {
     const H5T_t *dt        = (const H5T_t *)mesg;
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -1171,20 +1175,20 @@ H5O_dtype_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *mesg)
     HDassert(dt);
 
     /* encode */
-    if (H5O_dtype_encode_helper(&p, dt) < 0)
+    if (H5O__dtype_encode_helper(&p, dt) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode type")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_encode() */
+} /* end H5O__dtype_encode() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_dtype_copy
+    H5O__dtype_copy
  PURPOSE
     Copies a message from MESG to DEST, allocating DEST if necessary.
  USAGE
-    void *H5O_dtype_copy(mesg, dest)
+    void *H5O__dtype_copy(mesg, dest)
         const void *mesg;	IN: Pointer to the source simple datatype
                                     struct
         const void *dest;	IN: Pointer to the destination simple
@@ -1196,13 +1200,13 @@ done:
     allocating the destination structure if necessary.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_copy(const void *_src, void *_dst)
+H5O__dtype_copy(const void *_src, void *_dst)
 {
     const H5T_t *src = (const H5T_t *)_src;
     H5T_t *      dst;
     void *       ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(src);
@@ -1223,15 +1227,15 @@ H5O_dtype_copy(const void *_src, void *_dst)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_copy() */
+} /* end H5O__dtype_copy() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_dtype_size
+    H5O__dtype_size
  PURPOSE
     Return the raw message size in bytes
  USAGE
-    void *H5O_dtype_size(f, mesg)
+    void *H5O__dtype_size(f, mesg)
         H5F_t *f;	  IN: pointer to the HDF5 file struct
         const void *mesg;     IN: Pointer to the source simple datatype struct
  RETURNS
@@ -1242,13 +1246,13 @@ done:
     portion of the message).  It doesn't take into account alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_dtype_size(const H5F_t *f, const void *_mesg)
+H5O__dtype_size(const H5F_t *f, const void *_mesg)
 {
     const H5T_t *dt = (const H5T_t *)_mesg;
     unsigned     u;             /* Local index variable */
     size_t       ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(f);
     HDassert(dt);
@@ -1311,12 +1315,12 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
                                  4 + /*permutation*/
                                  4 + /*reserved*/
                                  16; /*dimensions*/
-                ret_value += H5O_dtype_size(f, dt->shared->u.compnd.memb[u].type);
+                ret_value += H5O__dtype_size(f, dt->shared->u.compnd.memb[u].type);
             } /* end for */
         } break;
 
         case H5T_ENUM:
-            ret_value += H5O_dtype_size(f, dt->shared->parent);
+            ret_value += H5O__dtype_size(f, dt->shared->parent);
             for (u = 0; u < dt->shared->u.enumer.nmembs; u++) {
                 size_t name_len; /* Length of field's name */
 
@@ -1333,7 +1337,7 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
             break;
 
         case H5T_VLEN:
-            ret_value += H5O_dtype_size(f, dt->shared->parent);
+            ret_value += H5O__dtype_size(f, dt->shared->parent);
             break;
 
         case H5T_ARRAY:
@@ -1343,7 +1347,7 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
             ret_value += 4 * dt->shared->u.array.ndims; /* dimensions */
             if (dt->shared->version < H5O_DTYPE_VERSION_3)
                 ret_value += 4 * dt->shared->u.array.ndims; /* dimension permutations */
-            ret_value += H5O_dtype_size(f, dt->shared->parent);
+            ret_value += H5O__dtype_size(f, dt->shared->parent);
             break;
 
         case H5T_NO_CLASS:
@@ -1356,7 +1360,7 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
     } /* end switch */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_dtype_size() */
+} /* H5O__dtype_size() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5O__dtype_reset
@@ -1415,7 +1419,7 @@ done:
 } /* end H5O__dtype_free() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_set_share
+ * Function:	H5O__dtype_set_share
  *
  * Purpose:	Copies sharing information from SH into the message.
  *
@@ -1427,12 +1431,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_set_share(void *_mesg /*in,out*/, const H5O_shared_t *sh)
+H5O__dtype_set_share(void *_mesg /*in,out*/, const H5O_shared_t *sh)
 {
     H5T_t *dt        = (H5T_t *)_mesg;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(dt);
     HDassert(sh);
@@ -1463,10 +1467,10 @@ H5O_dtype_set_share(void *_mesg /*in,out*/, const H5O_shared_t *sh)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_set_share() */
+} /* end H5O__dtype_set_share() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_can_share
+ * Function:	H5O__dtype_can_share
  *
  * Purpose:	Determines if this datatype is allowed to be shared or
  *              not.  Immutable datatypes or datatypes that are already
@@ -1482,13 +1486,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_dtype_can_share(const void *_mesg)
+H5O__dtype_can_share(const void *_mesg)
 {
     const H5T_t *mesg = (const H5T_t *)_mesg;
     htri_t       tri_ret;
     htri_t       ret_value = TRUE;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(mesg);
 
@@ -1506,10 +1510,10 @@ H5O_dtype_can_share(const void *_mesg)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_can_share() */
+} /* end H5O__dtype_can_share() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_dtype_pre_copy_file
+ * Function:    H5O__dtype_pre_copy_file
  *
  * Purpose:     Perform any necessary actions before copying message between
  *              files
@@ -1524,14 +1528,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t H5_ATTR_UNUSED *deleted,
-                        const H5O_copy_t *cpy_info, void *_udata)
+H5O__dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t H5_ATTR_UNUSED *deleted,
+                         const H5O_copy_t *cpy_info, void *_udata)
 {
     const H5T_t *       dt_src    = (const H5T_t *)mesg_src;      /* Source datatype */
     H5D_copy_file_ud_t *udata     = (H5D_copy_file_ud_t *)_udata; /* Dataset copying user data */
     herr_t              ret_value = SUCCEED;                      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(file_src);
@@ -1563,7 +1567,7 @@ H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t H5_ATTR_U
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_pre_copy_file() */
+} /* end H5O__dtype_pre_copy_file() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__dtype_copy_file
@@ -1589,7 +1593,7 @@ H5O__dtype_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const H5O_msg_class_t *mesg
     FUNC_ENTER_STATIC
 
     /* Perform a normal copy of the object header message */
-    if (NULL == (dst_mesg = (H5T_t *)H5O_dtype_copy(native_src, NULL)))
+    if (NULL == (dst_mesg = (H5T_t *)H5O__dtype_copy(native_src, NULL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy")
 
     /* The datatype will be in the new file; set its location. */
@@ -1635,9 +1639,8 @@ H5O__dtype_shared_post_copy_upd(const H5O_loc_t H5_ATTR_UNUSED *src_oloc, const 
         dt_dst->oloc.file = dt_dst->sh_loc.file;
         dt_dst->oloc.addr = dt_dst->sh_loc.u.loc.oh_addr;
     } /* end if */
-    else {
+    else
         HDassert(!H5T_is_named(dt_dst));
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

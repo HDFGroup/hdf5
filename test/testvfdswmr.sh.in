@@ -83,8 +83,14 @@ MESSAGE_TIMEOUT=300                     # Message timeout length in secs
 ###############################################################################
 ## For attrdset test: definitions for fifo files to coordinate test runs
 ###############################################################################
-FIFO_WRITER_TO_READER=fifo_attrdset_writer_to_reader
-FIFO_READER_TO_WRITER=fifo_attrdset_reader_to_writer
+ATTRDSET_FIFO_WRITER_TO_READER=fifo_attrdset_writer_to_reader
+ATTRDSET_FIFO_READER_TO_WRITER=fifo_attrdset_reader_to_writer
+
+###############################################################################
+## For dsetops test: definitions for fifo files to coordinate test runs
+###############################################################################
+DSETOPS_FIFO_WRITER_TO_READER=fifo_dsetops_writer_to_reader
+DSETOPS_FIFO_READER_TO_WRITER=fifo_dsetops_reader_to_writer
 
 ###############################################################################
 ## short hands and function definitions
@@ -157,7 +163,7 @@ if [ $rc -ne 0 ] ; then
     exit 0
 fi
 
-all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo groups attrdset"
+all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo groups attrdset dsetops"
 all_tests="${all_tests} groups_attrs os_groups_attrs groups_ops os_groups_ops few_big many_small"
 tests=${all_tests}
 
@@ -201,6 +207,7 @@ mkdir vfd_swmr_test
 #fi
 
 cd vfd_swmr_test
+
 
 
 # Loop over index types
@@ -633,11 +640,11 @@ for options in "-p -g -a 10 -v -m -d 10 -c 3 -u 5" "-k -a 20 -v -m -d 5"; do
     fi
 
     # Clean up any existing fifo files from previous runs
-    if [ -e ./$FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
-        rm -f ./$FIFO_WRITER_TO_READER
+    if [ -e ./$ATTRDSET_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$ATTRDSET_FIFO_WRITER_TO_READER
     fi
-    if [ -e ./$FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
-        rm -f ./$FIFO_READER_TO_WRITER
+    if [ -e ./$ATTRDSET_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$ATTRDSET_FIFO_READER_TO_WRITER
     fi
 
     echo launch vfd_swmr_attrdset_writer attrdset, options $options
@@ -671,6 +678,54 @@ for options in "-p -g -a 10 -v -m -d 10 -c 3 -u 5" "-k -a 20 -v -m -d 5"; do
     # Clean up output files
     rm -f vfd_swmr_attrdset_writer.{out,rc}
     rm -f vfd_swmr_attrdset_reader.*.{out,rc}
+done
+
+# dsetops test
+for options in "-p -e 20 -t" "-g -m 5 -n 2 -s 10 -w 7" "-k -m 10 -n 5 -r 5 -l 10"; do
+	#
+	#
+	if [ ${do_dsetops:-no} = no ]; then
+		continue
+	fi
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$DSETOPS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$DSETOPS_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$DSETOPS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$DSETOPS_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_dsetops_writer dsetops, options $options
+	catch_out_err_and_rc vfd_swmr_dsetops_writer \
+	    ../vfd_swmr_dsetops_writer $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_dsetops_reader \
+	    ../vfd_swmr_dsetops_reader $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_dsetops_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_dsetops_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_dsetops_writer.{out,rc}
+	rm -f vfd_swmr_dsetops_reader.*.{out,rc}
 done
 
 #

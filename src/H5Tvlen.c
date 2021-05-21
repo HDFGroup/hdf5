@@ -160,7 +160,7 @@ H5Tvlen_create(hid_t base_id)
     if ((dt = H5T__vlen_create(base)) == NULL)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location")
 
-    /* Atomize the type */
+    /* Register the type */
     if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype")
 
@@ -1012,7 +1012,7 @@ done:
 } /* end H5T__vlen_disk_delete() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5T_vlen_reclaim
+ * Function:    H5T__vlen_reclaim
  *
  * Purpose: Internal recursive routine to free VL datatypes
  *
@@ -1024,7 +1024,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info)
+H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info)
 {
     unsigned    u;                   /* Local index variable */
     H5MM_free_t free_func;           /* Free function */
@@ -1133,7 +1133,7 @@ H5T_vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_vlen_reclaim() */
+} /* end H5T__vlen_reclaim() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_vlen_reclaim_elmt
@@ -1167,7 +1167,7 @@ H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
 
     /* Recurse on buffer to free dynamic fields */
-    if (H5T_vlen_reclaim(elem, dt, &vl_alloc_info) < 0)
+    if (H5T__vlen_reclaim(elem, dt, &vl_alloc_info) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim vlen elements")
 
 done:

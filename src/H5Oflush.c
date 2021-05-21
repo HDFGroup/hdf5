@@ -15,7 +15,7 @@
  *
  * Created:     H5Oflush.c
  *              Aug 19, 2010
- *              Mike McGreevy <mamcgree@hdfgroup.org>
+ *              Mike McGreevy
  *
  * Purpose:     Object flush/refresh routines.
  *
@@ -166,7 +166,7 @@ H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id)
 
     /* Flush metadata based on tag value of the object */
     if (H5F_flush_tagged_metadata(oloc->file, tag) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
 
     /* Check to invoke callback */
     if (H5F_object_flush_cb(oloc->file, obj_id) < 0)
@@ -410,32 +410,32 @@ H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc)
     /* Handle close for multiple dataset opens */
     if (H5I_get_type(oid) == H5I_DATASET)
         if (H5D_mult_refresh_close(oid) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to prepare refresh for dataset")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to prepare refresh for dataset")
 
     /* Retrieve tag for object */
     if (H5O__oh_tag(&oloc, &tag) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to get object header address")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to get object header address")
 
     /* Get cork status of the object with tag */
     if (H5AC_cork(oloc.file, tag, H5AC__GET_CORKED, &corked) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
+        HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
 
     /* Close the object */
     if (H5I_dec_ref(oid) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to close object")
 
     /* Flush metadata based on tag value of the object */
     if (H5F_flush_tagged_metadata(oloc.file, tag) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
 
     /* Evict the object's tagged metadata */
     if (H5F_evict_tagged_metadata(oloc.file, tag) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to evict metadata")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to evict metadata")
 
     /* Re-cork object with tag */
     if (corked)
         if (H5AC_cork(oloc.file, tag, H5AC__SET_CORK, &corked) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to cork the object")
+            HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to cork the object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

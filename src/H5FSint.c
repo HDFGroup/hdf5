@@ -15,7 +15,7 @@
  *
  * Created:     H5FSint.c
  *              Fall 2012
- *              Dana Robinson <derobins@hdfgroup.org>
+ *              Dana Robinson
  *
  * Purpose:     Internal routines for free space managers.
  *

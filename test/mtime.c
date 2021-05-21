@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, July 30, 1998
  *
  * Purpose:    Determines if the modification time message is working
@@ -147,7 +147,7 @@ main(void)
                 H5_FAILED();
                 /* If this fails, examine H5Omtime.c.  Modification time is very
                  * system dependent (e.g., on Windows DST must be hardcoded). */
-                puts("    Old modification time incorrect");
+                HDputs("    Old modification time incorrect");
                 goto error;
             }
             if (H5Fclose(file) < 0)

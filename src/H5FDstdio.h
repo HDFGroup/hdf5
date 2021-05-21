@@ -28,7 +28,21 @@
 extern "C" {
 #endif
 
-H5_DLL hid_t  H5FD_stdio_init(void);
+H5_DLL hid_t H5FD_stdio_init(void);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the standard I/O driver
+ *
+ * \fapl_id
+ * \returns \herr_t
+ *
+ * \details H5Pset_fapl_stdio() modifies the file access property list to use
+ *          the standard I/O driver, H5FDstdio().
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL herr_t H5Pset_fapl_stdio(hid_t fapl_id);
 
 #ifdef __cplusplus

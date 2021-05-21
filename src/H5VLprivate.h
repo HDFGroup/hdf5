@@ -114,6 +114,22 @@ H5_DLL hid_t  H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t conne
 H5_DLL herr_t H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_connector,
                                               hbool_t app_ref, hid_t existing_id);
 
+/* Object access functions */
+struct H5P_libclass_t;
+H5_DLL herr_t H5VL_setup_args(hid_t loc_id, H5I_type_t id_type, H5VL_object_t **vol_obj);
+H5_DLL herr_t H5VL_setup_loc_args(hid_t loc_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params);
+H5_DLL herr_t H5VL_setup_acc_args(hid_t loc_id, const struct H5P_libclass_t *libclass, hbool_t is_collective,
+                                  hid_t *acspl_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params);
+H5_DLL herr_t H5VL_setup_self_args(hid_t loc_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params);
+H5_DLL herr_t H5VL_setup_name_args(hid_t loc_id, const char *name, const struct H5P_libclass_t *libclass,
+                                   hbool_t is_collective, hid_t acspl_id, H5VL_object_t **vol_obj,
+                                   H5VL_loc_params_t *loc_params);
+H5_DLL herr_t H5VL_setup_idx_args(hid_t loc_id, const char *name, H5_index_t idx_type, H5_iter_order_t order,
+                                  hsize_t n, const struct H5P_libclass_t *libclass, hbool_t is_collective,
+                                  hid_t acspl_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params);
+H5_DLL herr_t H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_obj,
+                                    H5VL_loc_params_t *loc_params);
+
 /**********************************
  * VOL connector callback wrappers
  *********************************/

@@ -15,7 +15,7 @@
  *
  * Created:		H5HGcache.c
  *			Feb  5 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implement global heap metadata cache methods.
  *
@@ -123,7 +123,7 @@ H5HG__hdr_deserialize(H5HG_heap_t *heap, const uint8_t *image, const H5F_t *f)
     HDassert(f);
 
     /* Magic number */
-    if (HDmemcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad global heap collection signature")
     image += H5_SIZEOF_MAGIC;
 

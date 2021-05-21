@@ -15,7 +15,7 @@
  *
  * Created:             H5Defc.c
  *                      December 13, 2010
- *                      Neil Fortner <nfortne2@hdfgroup.org>
+ *                      Neil Fortner
  *
  * Purpose:             External file caching routines - implements a
  *                      cache of external files to minimize the number of

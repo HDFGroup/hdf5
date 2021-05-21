@@ -15,7 +15,7 @@
  *
  * Created:		H5B2dbg.c
  *			Feb  2 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Dump debugging information about a v2 B-tree.
  *
@@ -72,7 +72,6 @@
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
  *
  *-------------------------------------------------------------------------
@@ -120,10 +119,12 @@ H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
               "Dirty flag:", hdr->cache_info.is_dirty ? "True" : "False");
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Depth:", hdr->depth);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Number of records in tree:", hdr->root.all_nrec);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+              "Number of records in tree:", hdr->root.all_nrec);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Number of records in root node:", hdr->root.node_nrec);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Address of root node:", hdr->root.addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+              "Address of root node:", hdr->root.addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Split percent:", hdr->split_percent);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Merge percent:", hdr->merge_percent);
 
@@ -150,7 +151,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  4 2005
  *
  *-------------------------------------------------------------------------
@@ -217,8 +217,8 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     for (u = 0; u < internal->nrec; u++) {
         /* Print node pointer */
         HDsnprintf(temp_str, sizeof(temp_str), "Node pointer #%u: (all/node/addr)", u);
-        HDfprintf(stream, "%*s%-*s (%Hu/%u/%a)\n", indent + 3, "", MAX(0, fwidth - 3), temp_str,
-                  internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec,
+        HDfprintf(stream, "%*s%-*s (%" PRIuHSIZE "/%u/%" PRIuHADDR ")\n", indent + 3, "", MAX(0, fwidth - 3),
+                  temp_str, internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec,
                   internal->node_ptrs[u].addr);
 
         /* Print record */
@@ -231,8 +231,9 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
 
     /* Print final node pointer */
     HDsnprintf(temp_str, sizeof(temp_str), "Node pointer #%u: (all/node/addr)", u);
-    HDfprintf(stream, "%*s%-*s (%Hu/%u/%a)\n", indent + 3, "", MAX(0, fwidth - 3), temp_str,
-              internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec, internal->node_ptrs[u].addr);
+    HDfprintf(stream, "%*s%-*s (%" PRIuHSIZE "/%u/%" PRIuHADDR ")\n", indent + 3, "", MAX(0, fwidth - 3),
+              temp_str, internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec,
+              internal->node_ptrs[u].addr);
 
 done:
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
@@ -251,7 +252,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  7 2005
  *
  *-------------------------------------------------------------------------

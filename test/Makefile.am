@@ -50,6 +50,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     vfd_swmr_addrem_writer$(EXEEXT) vfd_swmr_sparse_reader$(EXEEXT) \
     vfd_swmr_sparse_writer$(EXEEXT) \
     vfd_swmr_bigset_reader$(EXEEXT) vfd_swmr_bigset_writer$(EXEEXT) \
+    vfd_swmr_dsetops_reader$(EXEEXT) vfd_swmr_dsetops_writer$(EXEEXT) \
     vfd_swmr_group_reader$(EXEEXT) vfd_swmr_group_writer$(EXEEXT) \
     vfd_swmr_vlstr_reader$(EXEEXT) vfd_swmr_vlstr_writer$(EXEEXT) \
     vfd_swmr_zoo_reader$(EXEEXT) vfd_swmr_zoo_writer$(EXEEXT) \
@@ -104,6 +105,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     vfd_swmr_remove_reader vfd_swmr_remove_writer vfd_swmr_addrem_writer \
     vfd_swmr_sparse_reader vfd_swmr_sparse_writer \
     vfd_swmr_bigset_reader vfd_swmr_bigset_writer \
+    vfd_swmr_dsetops_reader vfd_swmr_dsetops_writer \
     vfd_swmr_group_reader vfd_swmr_group_writer \
     vfd_swmr_vlstr_reader vfd_swmr_vlstr_writer \
     vfd_swmr_zoo_reader vfd_swmr_zoo_writer \
@@ -173,6 +175,7 @@ vfd_swmr_zoo_reader_SOURCES=vfd_swmr_zoo_writer.c genall5.c
 
 vfd_swmr_bigset_reader_SOURCES=vfd_swmr_bigset_writer.c
 vfd_swmr_group_reader_SOURCES=vfd_swmr_group_writer.c
+vfd_swmr_dsetops_reader_SOURCES=vfd_swmr_dsetops_writer.c
 
 vfd_swmr_attrdset_writer_SOURCES=vfd_swmr_attrdset_writer.c
 vfd_swmr_attrdset_reader_SOURCES=vfd_swmr_attrdset_writer.c
@@ -242,7 +245,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \
-    trefer.c trefer_deprec.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
+    trefer.c trefer_deprec.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c tunicode.c \
     tvlstr.c tvltypes.c
 
 # Sources for Use Cases
