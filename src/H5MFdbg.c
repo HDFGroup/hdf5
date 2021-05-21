@@ -106,8 +106,11 @@ H5MF_sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     /* Print generic section information */
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
               "Section type:", (sect->sect_info.type == H5MF_FSPACE_SECT_SIMPLE ? "simple" : "unknown"));
-    HDfprintf(udata->stream, "%*s%-*s %" PRIuHADDR \n", udata->indent, "", udata->fwidth,
-              "Section address:", sect->sect_info.addr);
+    HDfprintf(udata->stream,
+              "%*s%-*s %" PRIuHADDR \n ", udata->indent, "
+                                       ", udata->fwidth,
+                                       "Section address:",
+              sect->sect_info.addr);
     HDfprintf(udata->stream, "%*s%-*s %" PRIuHSIZE "\n", udata->indent, "", udata->fwidth,
               "Section size:", sect->sect_info.size);
     HDfprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
@@ -170,8 +173,8 @@ H5MF_sects_dump(H5F_t *f, hid_t dxpl_id, FILE *stream)
     /* Retrieve metadata aggregator info, if available */
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: ma_addr = %" PRIuHADDR ", ma_size = %" PRIuHSIZE ", end of ma = %" PRIuHADDR "\n", FUNC, ma_addr, ma_size,
-              (haddr_t)((ma_addr + ma_size) - 1));
+    HDfprintf(stderr, "%s: ma_addr = %" PRIuHADDR ", ma_size = %" PRIuHSIZE ", end of ma = %" PRIuHADDR "\n",
+              FUNC, ma_addr, ma_size, (haddr_t)((ma_addr + ma_size) - 1));
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* Retrieve 'small data' aggregator info, if available */

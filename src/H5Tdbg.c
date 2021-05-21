@@ -113,8 +113,8 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
 
         nbytes *= path->stats.nelmts;
         H5_bandwidth(bandwidth, (double)nbytes, path->stats.timer.etime);
-        HDfprintf(H5DEBUG(T), "   %-16s %10" PRIdHSIZE " %10d %8.2f %8.2f %8.2f %10s\n", path->name, path->stats.nelmts,
-                  path->stats.ncalls, path->stats.timer.utime, path->stats.timer.stime,
+        HDfprintf(H5DEBUG(T), "   %-16s %10" PRIdHSIZE " %10d %8.2f %8.2f %8.2f %10s\n", path->name,
+                  path->stats.nelmts, path->stats.ncalls, path->stats.timer.utime, path->stats.timer.stime,
                   path->stats.timer.etime, bandwidth);
     }
 #endif
