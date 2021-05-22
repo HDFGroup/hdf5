@@ -53,6 +53,7 @@ $Source = "";
                "H5D_scatter_func_t"         => "DS",
                "H5FD_mpio_xfer_t"           => "Dt",
                "H5D_vds_view_t"             => "Dv",
+               "H5D_chunk_iter_op_t"        => "x",
                "herr_t"                     => "e",
                "H5E_auto1_t"                => "Ea",
                "H5E_auto2_t"                => "EA",
