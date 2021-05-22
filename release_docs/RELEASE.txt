@@ -206,8 +206,8 @@ New Features
 
     - CMake option to use MSVC naming conventions with MinGW
 
-      HDF5_MSVC_NAMING_CONVENTION option enables use of MSVC naming conventions
-      when using a MinGW toolchain
+      HDF5_MSVC_NAMING_CONVENTION option enables the use of MSVC naming
+      conventions when using a MinGW toolchain
 
       (2020/10/30)
 
@@ -905,9 +905,10 @@ The following platforms are not supported but have been tested for this release.
 Known Problems
 ==============
 
-    "make check-passthough-vol" will fail running testflushrefresh.sh, with
-    3 Errors/Segmentation faults.  These will not occur when running "make
-    check".  See https://github.com/HDFGroup/hdf5/issues/673 for details.
+    testflushrefresh.sh will fail when run with "make check-passthough-vol"
+    on centos7, with 3 Errors/Segmentation faults.  These will not occur when
+    run with "make check".  See https://github.com/HDFGroup/hdf5/issues/673
+    for details.
 
     The t_bigio test fails on several HPC platforms, generally by timeout with 
     OpenMPI 4.0.0 or with this error from spectrum-mpi: 
