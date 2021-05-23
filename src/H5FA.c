@@ -714,7 +714,7 @@ H5FA_iterate(H5FA_t *fa, H5FA_operator_t op, void *udata)
 
         /* Invoke callback */
         if ((ret_value = (*op)(u, elmt, udata)) < 0)
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(ret_value)
     }
 
 done:
