@@ -1026,7 +1026,7 @@ H5EA_iterate(H5EA_t *ea, H5EA_operator_t op, void *udata)
 
         /* Make callback */
         if ((ret_value = (*op)(u, elmt, udata)) < 0)
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(ret_value)
     }
 
 done:

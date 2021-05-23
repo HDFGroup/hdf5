@@ -225,11 +225,10 @@ catch_except:;                                                                  
     past_catch = TRUE;
 
 /*
- * H5_LEAVE macro, used to facilitate control flow between a
- * BEGIN_FUNC() and an END_FUNC() within a function body.  The argument is
- * the return value.
- * The return value is assigned to a variable `ret_value' and control branches
- * to the `catch_except' label, if we're not already past it.
+ * H5_LEAVE macro, used to facilitate control flow in a function. The argument
+ * is the return value. The return value is assigned to a variable `ret_value'
+ * and control branches to the `catch_except' label, if we're not already past
+ * it.
  */
 #define H5_LEAVE(v)                                                                                          \
     {                                                                                                        \
