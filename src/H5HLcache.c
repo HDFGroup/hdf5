@@ -472,7 +472,7 @@ done:
             if (heap && FAIL == H5HL__dest(heap))
                 HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap");
         }
-    }    
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL__cache_prefix_deserialize() */

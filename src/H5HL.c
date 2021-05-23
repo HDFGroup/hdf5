@@ -259,7 +259,7 @@ H5HL__minimize_heap_space(H5F_t *f, H5HL_t *heap)
                         /* Eliminate the free block from the list */
                         last_fl = H5HL__remove_free(heap, last_fl);
                     }
-                }    
+                }
                 else {
                     /* Truncate the free block */
                     last_fl->size = H5HL_ALIGN(new_heap_size - last_fl->offset);
@@ -267,9 +267,9 @@ H5HL__minimize_heap_space(H5F_t *f, H5HL_t *heap)
                     HDassert(last_fl->size >= H5HL_SIZEOF_FREE(f));
                     HDassert(last_fl->size == H5HL_ALIGN(last_fl->size));
                 }
-            }    
-        }        
-    }            
+            }
+        }
+    }
 
     /* If the heap grew smaller than disk storage then move the
      * data segment of the heap to another contiguous block of disk
@@ -353,7 +353,7 @@ H5HL_protect(H5F_t *f, haddr_t addr, unsigned flags)
             /* Set the flag for pinning the data block when unprotecting it */
             dblk_cache_flags |= H5AC__PIN_ENTRY_FLAG;
         }
-    }    
+    }
 
     /* Increment # of times heap is protected */
     heap->prots++;
@@ -447,7 +447,7 @@ H5HL_unprotect(H5HL_t *heap)
             if (FAIL == H5AC_unpin_entry(heap->dblk))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin local heap data block");
         }
-    }    
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -655,7 +655,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
 
             /* Note new size */
             heap->dblk_size = new_dblk_size;
-        }     
+        }
         else { /* ...if we can't, allocate a new chunk & release the old */
             /* Reallocate data block in file */
             if (FAIL == H5HL__dblk_realloc(f, heap, new_dblk_size))

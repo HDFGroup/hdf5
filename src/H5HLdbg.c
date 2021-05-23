@@ -101,7 +101,7 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
             else
                 amount_free += freelist->size;
         }
-    }    
+    }
 
     if (h->dblk_size)
         HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of heap used:",
