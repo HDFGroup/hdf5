@@ -532,30 +532,34 @@ done:
  *
  * Purpose:     Inserts a new item into the heap.
  *
- * Return:      Success:    Offset of new item within heap.
- *              Failure:    UFAIL
+ * Return:      Success:    SUCCEED
+ *                          Offset set to location of new item within heap
+ *
+ *              Failure:    FAIL
+ *                          Offset set to SIZE_MAX
  *
  * Programmer:  Robb Matzke
  *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
  */
-size_t
-H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
+herr_t
+H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *offset_out)
 {
     H5HL_free_t *fl = NULL, *last_fl = NULL;
-    size_t       offset = 0;
     size_t       need_size;
+    size_t       offset = 0;
     hbool_t      found;
-    size_t       ret_value = UFAIL;
+    herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(UFAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(f);
     HDassert(heap);
     HDassert(buf_size > 0);
     HDassert(buf);
+    HDassert(offset_out);
 
     /* Mark heap as dirty in cache */
     /* (A bit early in the process, but it's difficult to determine in the
@@ -564,17 +568,15 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
      *  if an error occurs -QAK)
      */
     if (FAIL == H5HL__dirty(heap))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, UFAIL, "unable to mark heap as dirty");
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark heap as dirty");
 
-    /*
-     * In order to keep the free list descriptors aligned on word boundaries,
+    /* In order to keep the free list descriptors aligned on word boundaries,
      * whatever that might mean, we round the size up to the next multiple of
      * a word.
      */
     need_size = H5HL_ALIGN(buf_size);
 
-    /*
-     * Look for a free slot large enough for this object and which would
+    /* Look for a free slot large enough for this object and which would
      * leave zero or at least H5G_SIZEOF_FREE bytes left over.
      */
     for (fl = heap->freelist, found = FALSE; fl; fl = fl->next) {
@@ -601,8 +603,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
         }
     }
 
-    /*
-     * If no free chunk was large enough, then allocate more space and
+    /* If no free chunk was large enough, then allocate more space and
      * add it to the free list.	 If the heap ends with a free chunk, we
      * can extend that free chunk.  Otherwise we'll have to make another
      * free chunk.  If the heap must expand, we double its size.
@@ -614,7 +615,8 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
         htri_t was_extended;  /* Whether the local heap's data segment on disk was extended */
 
         /* At least double the heap's size, making certain there's enough room
-         * for the new object */
+         * for the new object
+         */
         need_more = MAX(need_size, heap->dblk_size);
 
         /* If there is no last free block or it's not at the end of the heap,
@@ -637,7 +639,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
         was_extended = H5MF_try_extend(f, H5FD_MEM_LHEAP, heap->dblk_addr, (hsize_t)(heap->dblk_size),
                                        (hsize_t)need_more);
         if (FAIL == was_extended)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, UFAIL, "error trying to extend heap");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "error trying to extend heap");
 
         /* Check if we extended the heap data block in file */
         if (was_extended == TRUE) {
@@ -645,12 +647,12 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
             if (heap->single_cache_obj) {
                 /* Resize prefix+data block */
                 if (FAIL == H5AC_resize_entry(heap->prfx, (size_t)(heap->prfx_size + new_dblk_size)))
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, UFAIL, "unable to resize heap prefix in cache");
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap prefix in cache");
             }
             else {
                 /* Resize 'standalone' data block */
                 if (FAIL == H5AC_resize_entry(heap->dblk, (size_t)new_dblk_size))
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, UFAIL, "unable to resize heap data block in cache");
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap data block in cache");
             }
 
             /* Note new size */
@@ -659,7 +661,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
         else { /* ...if we can't, allocate a new chunk & release the old */
             /* Reallocate data block in file */
             if (FAIL == H5HL__dblk_realloc(f, heap, new_dblk_size))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, UFAIL, "reallocating data block failed");
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "reallocating data block failed");
         }
 
         /* If the last free list in the heap is at the end of the heap, extend it */
@@ -684,14 +686,13 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
             }
         }
         else {
-            /*
-             * Create a new free list element large enough that we can
+            /* Create a new free list element large enough that we can
              * take some space out of it right away.
              */
             offset = old_dblk_size;
             if (need_more - need_size >= H5HL_SIZEOF_FREE(f)) {
                 if (NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, UFAIL, "memory allocation failed");
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed");
                 fl->offset = old_dblk_size + need_size;
                 fl->size   = need_more - need_size;
                 HDassert(fl->offset == H5HL_ALIGN(fl->offset));
@@ -717,7 +718,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
         }
 #endif
         if (NULL == (heap->dblk_image = H5FL_BLK_REALLOC(lheap_chunk, heap->dblk_image, heap->dblk_size)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, UFAIL, "memory allocation failed");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
         /* Clear new section so junk doesn't appear in the file */
         /* (Avoid clearing section which will be overwritten with newly inserted data) */
@@ -727,8 +728,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf)
     /* Copy the data into the heap */
     H5MM_memcpy(heap->dblk_image + offset, buf, buf_size);
 
-    /* Set return value */
-    ret_value = offset;
+    *offset_out = offset;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

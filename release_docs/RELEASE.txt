@@ -428,7 +428,7 @@ New Features
 
       The Doxygen documentation has been updated and passing values larger
       than UINT32_MAX for size_hint will now produce a normal HDF5 error.
-      
+
         (DER - 2021/04/29, HDFFV-11241)
 
 
@@ -456,7 +456,7 @@ New Features
       The string is now handled properly and the segfault no longer occurs.
 
         (DER - 2021/04/27, HDFFV-11239)
-      
+
     - HSYS_GOTO_ERROR now emits the results of GetLastError() on Windows
 
       HSYS_GOTO_ERROR is an internal macro that is used to produce error
@@ -823,7 +823,18 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
-    - Fixed CVE-2018-17435
+    - Fixed CVE-2018-14460
+
+        The tool h5repack produced a segfault when the rank in dataspace
+        message was corrupted, causing invalid read while decoding the
+        dimension sizes.
+
+        The problem was fixed by ensuring that decoding the dimension sizes
+        and max values will not go beyong the end of the buffer.
+
+        (BMR - 2021/05/12, HDFFV-11223)
+
+    - Fixed CVE-2018-11206
 
         The tool h5dump produced a segfault when the size of a fill value
         message was corrupted and caused a buffer overflow.
@@ -894,7 +905,7 @@ Bug Fixes since HDF5-1.12.0 release
         H5S_NO_CLASS is an internal class value that should not have been
         exposed via a public API call.
 
-        In debug builds of the library, this can cause assert() function to 
+        In debug builds of the library, this can cause assert() function to
         trip. In non-debug builds, it will produce normal library errors.
 
         The new library behavior is for H5Sset_extent_none() to convert
@@ -1146,7 +1157,12 @@ Bug Fixes since HDF5-1.12.0 release
 
     C++ APIs
     --------
-    -
+    - Added DataSet::operator=
+
+        Some compilers complain if the copy constructor is given explicitly
+        but the assignment operator is implicitly set to default.
+
+        (2021/05/19)
 
 
     Testing
@@ -1285,15 +1301,22 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP ppc64 GNU/Linux           IBM XL C/C++ for Linux, V13.1
     (ostrich)                        and IBM XL Fortran for Linux, V15.1
 
-    Fedora33 5.10.10-200.fc33.x86_64
-    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
-                                     GNU Fortran (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+    Fedora33 5.11.18-200.fc33.x86_64
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.3.1 20210422 (Red Hat 10.3.1-1)
+                                     GNU Fortran (GCC) 10.3.1 20210422 (Red Hat 10.3.1-1)
                                      clang version 11.0.0 (Fedora 11.0.0-2.fc33)
                                      (cmake and autotools)
 
-    Ubuntu20.10 5.8.0-41-generic-x86_64
-    #46-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+    Ubuntu20.04 5.8.0-53-generic-x86_64
+    #60~20.04-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 9.3.0-17ubuntu1
+                                     GNU Fortran (GCC) 9.3.0-17ubuntu1
+                                     clang version 10.0.0-4ubuntu1
+                                     (cmake and autotools)
+
+    Ubuntu20.10 5.8.0-53-generic-x86_64
+    #60-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
                                      GNU Fortran (GCC) 10.2.0-13ubuntu1
+                                     Ubuntu clang version 11.0.0-2
                                      (cmake and autotools)
 
     SUSE15sp2 5.3.18-22-default
