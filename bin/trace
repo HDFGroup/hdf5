@@ -283,8 +283,8 @@ my $file_api = 0;
 my $file_args = 0;
 my $total_api = 0;
 my $total_args = 0;
-sub rewrite_func ($$$$$$$$) {
-  my ($file, $begin, $type, $aftertype, $name, $args, $close, $body) = @_;
+sub rewrite_func ($$$$$) {
+  my ($file, $type, $name, $args, $body) = @_;
   my ($arg, $trace, $argtrace);
   my (@arg_name, @arg_str, @arg_type);
   local $_;
@@ -459,7 +459,7 @@ sub rewrite_func ($$$$$$$$) {
   }
 
  error:
-  return "\n$begin$type$aftertype$name($orig_args)$close$body";
+  return "\n$type\n$name($orig_args)\n$body";
 }
 
 ##############################################################################
@@ -486,7 +486,7 @@ for $file (@ARGV) {
                      (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
                      \s*\((.*?)\)\s*                      #args
                      (\{.*?\n\}[^\n]*)                    #body
-                     /rewrite_func($file,"",$1,"\n",$3,$4,"\n",$5)/segx;
+                     /rewrite_func($file,$1,$3,$4,$5)/segx;
 
 # If the source changed then print out the new version
     if ($original ne $Source) {
