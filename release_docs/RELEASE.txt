@@ -49,6 +49,22 @@ New Features
 
     Configuration:
     -------------
+    - CMake will now run the shell script tests in test/ by default
+
+      The test directory includes several shell script tests that previously
+      were not run by CMake. These are now run by default. TEST_SHELL_SCRIPTS
+      has been set to ON and SH_PROGRAM has been set to bash (some test
+      scripts use bash-isms). Platforms without bash (e.g., Windows) will
+      ignore the script tests.
+
+      (DER - 2021/05/23)
+
+    - Removed unused HDF5_ENABLE_HSIZET option from CMake
+
+      This has been unused for some time and has no effect.
+
+      (DER - 2021/05/23)
+
     - CMake no longer builds the C++ library by default
 
       HDF5_BUILD_CPP_LIB now defaults to OFF, which is in line with the
