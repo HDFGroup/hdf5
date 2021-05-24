@@ -83,10 +83,15 @@ typedef struct {
 /********************/
 
 static herr_t H5G__open_oid(H5G_t *grp);
+static herr_t H5G__visit_cb(const H5O_link_t *lnk, void *_udata);
+static herr_t H5G__close_cb(H5VL_object_t *grp_vol_obj);
 
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Declare a free list to manage the H5G_t struct */
 H5FL_DEFINE(H5G_t);
@@ -102,6 +107,182 @@ H5FL_DEFINE(H5_obj_t);
 /*******************/
 /* Local Variables */
 /*******************/
+
+/* Group ID class */
+static const H5I_class_t H5I_GROUP_CLS[1] = {{
+    H5I_GROUP,                /* ID class value */
+    0,                        /* Class flags */
+    0,                        /* # of reserved IDs for class */
+    (H5I_free_t)H5G__close_cb /* Callback routine for closing objects of this class */
+}};
+
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5G_top_package_initialize_s = FALSE;
+
+/*-------------------------------------------------------------------------
+ * Function: H5G_init
+ *
+ * Purpose:  Initialize the interface from some other layer.
+ *
+ * Return:   Success:    non-negative
+ *
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_init(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G__init_package
+ *
+ * Purpose:	Initializes the H5G interface.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Monday, January	 5, 1998
+ *
+ * Notes:       The group creation properties are registered in the property
+ *              list interface initialization routine (H5P_init_package)
+ *              so that the file creation property class can inherit from it
+ *              correctly. (Which allows the file creation property list to
+ *              control the group creation properties of the root group of
+ *              a file) QAK - 24/10/2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Initialize the ID group for the group IDs */
+    if (H5I_register_type(H5I_GROUP_CLS) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    /* Mark "top" of interface as initialized, too */
+    H5G_top_package_initialize_s = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__init_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_top_term_package
+ *
+ * Purpose:	Close the "top" of the interface, releasing IDs, etc.
+ *
+ * Return:	Success:	Positive if anything is done that might
+ *				affect other interfaces; zero otherwise.
+ * 		Failure:	Negative.
+ *
+ * Programmer:	Quincey Koziol
+ *		Sunday, September	13, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5G_top_term_package(void)
+{
+    int n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (H5G_top_package_initialize_s) {
+        if (H5I_nmembers(H5I_GROUP) > 0) {
+            (void)H5I_clear_type(H5I_GROUP, FALSE, FALSE);
+            n++; /*H5I*/
+        }        /* end if */
+
+        /* Mark closed */
+        if (0 == n)
+            H5G_top_package_initialize_s = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5G_top_term_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_term_package
+ *
+ * Purpose:	Terminates the H5G interface
+ *
+ * Note:	Finishes shutting down the interface, after
+ *		H5G_top_term_package() is called
+ *
+ * Return:	Success:	Positive if anything is done that might
+ *				affect other interfaces; zero otherwise.
+ * 		Failure:	Negative.
+ *
+ * Programmer:	Robb Matzke
+ *		Monday, January	 5, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5G_term_package(void)
+{
+    int n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_GROUP));
+        HDassert(FALSE == H5G_top_package_initialize_s);
+
+        /* Destroy the group object id group */
+        n += (H5I_dec_type_ref(H5I_GROUP) > 0);
+
+        /* Mark closed */
+        if (0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5G_term_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G__close_cb
+ *
+ * Purpose:     Called when the ref count reaches zero on the group's ID
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G__close_cb(H5VL_object_t *grp_vol_obj)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(grp_vol_obj);
+
+    /* Close the group */
+    if (H5VL_group_close(grp_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close group")
+
+    /* Free the VOL object */
+    if (H5VL_free_object(grp_vol_obj) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "unable to free VOL object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__close_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5G__create_named
@@ -695,7 +876,7 @@ H5G_unmount(H5G_t *grp)
 } /* end H5G_unmount() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_iterate_cb
+ * Function:	H5G__iterate_cb
  *
  * Purpose:     Callback function for iterating over links in a group
  *
@@ -708,12 +889,12 @@ H5G_unmount(H5G_t *grp)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_iterate_cb(const H5O_link_t *lnk, void *_udata)
+H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
 {
     H5G_iter_appcall_ud_t *udata     = (H5G_iter_appcall_ud_t *)_udata; /* User data for callback */
     herr_t                 ret_value = H5_ITER_ERROR;                   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(lnk);
@@ -744,7 +925,7 @@ H5G_iterate_cb(const H5O_link_t *lnk, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_iterate_cb() */
+} /* end H5G__iterate_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_iterate
@@ -791,7 +972,7 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter
 
     /* Call the real group iteration routine */
     if ((ret_value =
-             H5G__obj_iterate(&(grp->oloc), idx_type, order, skip, last_lnk, H5G_iterate_cb, &udata)) < 0)
+             H5G__obj_iterate(&(grp->oloc), idx_type, order, skip, last_lnk, H5G__iterate_cb, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "error iterating over links")
 
 done:
@@ -807,7 +988,7 @@ done:
 } /* end H5G_iterate() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_free_visit_visited
+ * Function:    H5G__free_visit_visited
  *
  * Purpose:     Free the key for an object visited during a group traversal
  *
@@ -819,17 +1000,17 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *operator_data /*in,out*/)
+H5G__free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *operator_data /*in,out*/)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     item = H5FL_FREE(H5_obj_t, item);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_free_visit_visited() */
+} /* end H5G__free_visit_visited() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_visit_cb
+ * Function:	H5G__visit_cb
  *
  * Purpose:     Callback function for recursively visiting links from a group
  *
@@ -842,7 +1023,7 @@ H5G_free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
+H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
 {
     H5G_iter_visit_ud_t *udata = (H5G_iter_visit_ud_t *)_udata; /* User data for callback */
     H5L_info2_t          info;                                  /* Link info */
@@ -855,7 +1036,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
     size_t len_needed;                          /* Length of path string needed */
     herr_t ret_value = H5_ITER_CONT;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(lnk);
@@ -971,7 +1152,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
 
                 /* Iterate over links in group */
                 ret_value = H5G__obj_iterate(&obj_oloc, idx_type, udata->order, (hsize_t)0, NULL,
-                                             H5G_visit_cb, udata);
+                                             H5G__visit_cb, udata);
 
                 /* Restore location */
                 udata->curr_loc = old_loc;
@@ -989,7 +1170,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_visit_cb() */
+} /* end H5G__visit_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_visit
@@ -1113,14 +1294,14 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_o
 
     /* Call the link iteration routine */
     if ((ret_value =
-             H5G__obj_iterate(&(grp->oloc), idx_type, order, (hsize_t)0, NULL, H5G_visit_cb, &udata)) < 0)
+             H5G__obj_iterate(&(grp->oloc), idx_type, order, (hsize_t)0, NULL, H5G__visit_cb, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't visit links")
 
 done:
     /* Release user data resources */
     H5MM_xfree(udata.path);
     if (udata.visited)
-        H5SL_destroy(udata.visited, H5G_free_visit_visited, NULL);
+        H5SL_destroy(udata.visited, H5G__free_visit_visited, NULL);
 
     /* Release the group opened */
     if (gid != H5I_INVALID_HID) {
