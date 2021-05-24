@@ -905,7 +905,7 @@ The following platforms are not supported but have been tested for this release.
 Known Problems
 ==============
 
-    testflushrefresh.sh will fail when run with "make check-passthough-vol"
+    testflushrefresh.sh will fail when run with "make check-passthrough-vol"
     on centos7, with 3 Errors/Segmentation faults.  These will not occur when
     run with "make check".  See https://github.com/HDFGroup/hdf5/issues/673
     for details.
