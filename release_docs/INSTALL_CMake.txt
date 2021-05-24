@@ -753,7 +753,6 @@ HDF5_ENABLE_DEBUG_APIS         "Turn on extra debug output in all packages"     
 HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"                         ON
 HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"                     OFF
 HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                          ON
-HDF5_ENABLE_HSIZET             "Enable datasets larger than memory"                           ON
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
 HDF5_ENABLE_PREADWRITE         "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" ON
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
@@ -795,6 +794,7 @@ HDF5_BUILD_DOC                 "Build documentation"                            
 HDF5_ENABLE_ANALYZER_TOOLS     "enable the use of Clang tools"                    OFF
 HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                      OFF
 HDF5_ENABLE_FORMATTERS         "format source files"                              OFF
+TEST_SHELL_SCRIPTS             "Enable shell script tests"                        ON
 
 ---------------- External Library Options ---------------------
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"

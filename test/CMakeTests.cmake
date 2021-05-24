@@ -872,7 +872,7 @@ if (BUILD_SHARED_LIBS)
 ##############################################################################
 endif ()
 
-option (TEST_SHELL_SCRIPTS "Enable shell script tests" OFF)
+option (TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
 if (TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()
