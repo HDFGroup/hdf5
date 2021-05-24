@@ -608,10 +608,9 @@ test_write_filtered_dataset_overlap(void)
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] =
-            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
-                         (i % dataset_dims[1]) +
-                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        correct_buf[i] = (C_DATATYPE)(
+            (dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
+            (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
 
     /* Create property list for collective dataset write */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -1068,10 +1067,9 @@ test_write_filtered_dataset_point_selection(void)
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] =
-            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
-                         (i % dataset_dims[1]) +
-                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        correct_buf[i] = (C_DATATYPE)(
+            (dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
+            (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
 
     /* Create property list for collective dataset write */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -1756,21 +1754,19 @@ test_write_3d_filtered_dataset_overlap(void)
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         /* Add the Column Index */
-        correct_buf[i] = (C_DATATYPE)((i % (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                     WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+        correct_buf[i] = (C_DATATYPE)(
+            (i % (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH * WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-                                      /* Add the Row Index */
-                                      + ((i % (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                        WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
-                                         (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                   WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+            /* Add the Row Index */
+            + ((i % (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                              WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
+               (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH * WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-                                      /* Add the amount that gets added when a rank moves down to its next
-                                         section vertically in the dataset */
-                                      + ((hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                   WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
-                                         (i / (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                        WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
+            /* Add the amount that gets added when a rank moves down to its next
+               section vertically in the dataset */
+            + ((hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH * WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
+               (i / (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                              WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
 
     /* Create property list for collective dataset write */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -3024,10 +3020,9 @@ test_read_filtered_dataset_overlap(void)
     VRFY((NULL != correct_buf), "HDcalloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] =
-            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
-                         (i % dataset_dims[1]) +
-                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        correct_buf[i] = (C_DATATYPE)(
+            (dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
+            (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -3609,10 +3604,9 @@ test_read_filtered_dataset_point_selection(void)
     VRFY((NULL != correct_buf), "HDcalloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] =
-            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
-                         (i % dataset_dims[1]) +
-                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        correct_buf[i] = (C_DATATYPE)(
+            (dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
+            (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4495,21 +4489,19 @@ test_read_3d_filtered_dataset_overlap(void)
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         /* Add the Column Index */
-        correct_buf[i] = (C_DATATYPE)((i % (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                     READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+        correct_buf[i] = (C_DATATYPE)(
+            (i % (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH * READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-                                      /* Add the Row Index */
-                                      + ((i % (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                        READ_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
-                                         (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                   READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+            /* Add the Row Index */
+            + ((i % (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                              READ_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
+               (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH * READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-                                      /* Add the amount that gets added when a rank moves down to its next
-                                         section vertically in the dataset */
-                                      + ((hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                   READ_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
-                                         (i / (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                        READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
+            /* Add the amount that gets added when a rank moves down to its next
+               section vertically in the dataset */
+            + ((hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH * READ_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
+               (i / (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                              READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
