@@ -25,23 +25,30 @@
 #define H5Lpublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions			*/
-#include "H5Ipublic.h" /* IDs			  		*/
-#include "H5Opublic.h" /* Object Headers			*/
-#include "H5Tpublic.h" /* Datatypes				*/
+#include "H5public.h"  /* Generic Functions            */
+#include "H5Ipublic.h" /* IDs                      */
+#include "H5Opublic.h" /* Object Headers            */
+#include "H5Tpublic.h" /* Datatypes                */
 
 /*****************/
 /* Public Macros */
 /*****************/
 
-/* Maximum length of a link's name */
-/* (encoded in a 32-bit unsigned integer) */
-#define H5L_MAX_LINK_NAME_LEN ((uint32_t)(-1)) /* (4GB - 1) */
+/**
+ * \brief Maximum length of a link's name
+ *
+ * The maximum length of a link's name is encoded in a 32-bit unsigned integer.
+ */
+#define H5L_MAX_LINK_NAME_LEN UINT32_MAX
 
-/* Macro to indicate operation occurs on same location */
-#define H5L_SAME_LOC (hid_t)0
+/**
+ * \brief Macro to indicate operation occurs on same location
+ */
+#define H5L_SAME_LOC 0 /* (hid_t) */
 
-/* Current version of the H5L_class_t struct */
+/**
+ * \brief Current version of the H5L_class_t struct
+ */
 #define H5L_LINK_CLASS_T_VERS 1
 
 #ifdef __cplusplus
