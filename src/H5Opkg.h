@@ -540,6 +540,9 @@ H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATASET[1];
 H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 
 /* Package-local function prototypes */
+H5_DLL void *H5O__open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type /*out*/);
+H5_DLL void *H5O__open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
+                              H5_iter_order_t order, hsize_t n, H5I_type_t *opened_type /*out*/);
 H5_DLL const H5O_obj_class_t *H5O__obj_class(const H5O_loc_t *loc);
 H5_DLL int                    H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted);
 H5_DLL herr_t H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,

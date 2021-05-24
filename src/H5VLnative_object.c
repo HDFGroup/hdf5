@@ -61,10 +61,10 @@ H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_typ
 
         case H5VL_OBJECT_BY_IDX: {
             /* Open the object */
-            if (NULL == (ret_value = H5O_open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name,
-                                                     loc_params->loc_data.loc_by_idx.idx_type,
-                                                     loc_params->loc_data.loc_by_idx.order,
-                                                     loc_params->loc_data.loc_by_idx.n, opened_type)))
+            if (NULL == (ret_value = H5O__open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name,
+                                                      loc_params->loc_data.loc_by_idx.idx_type,
+                                                      loc_params->loc_data.loc_by_idx.order,
+                                                      loc_params->loc_data.loc_by_idx.n, opened_type)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object by index")
             break;
         }
@@ -79,7 +79,7 @@ H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_typ
                             "can't deserialize object token into address")
 
             /* Open the object */
-            if (NULL == (ret_value = H5O_open_by_addr(&loc, addr, opened_type)))
+            if (NULL == (ret_value = H5O__open_by_addr(&loc, addr, opened_type)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object by address")
             break;
         }
@@ -121,7 +121,7 @@ H5VL__native_object_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, co
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Copy the object */
-    if ((ret_value = H5O_copy(&src_loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id)) < 0)
+    if ((ret_value = H5O__copy(&src_loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
