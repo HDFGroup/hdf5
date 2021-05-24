@@ -56,13 +56,15 @@ BIGSET_few_s=20                     # -s option: # of datasets (for few_big test
 BIGSET_many_s=500                   # -s option: # of datasets (for many_small test)
 GROUP_n=40                          # -n option: # of groups (for group test)
 GROUP_attr_n=1                      # -n option: # of groups (for group attribute test)
+GROUP_op_n=1                        # -n option: # of groups (for group attribute test)
 
 if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # Setting for exhaustive run
     BIGSET_n=50
     BIGSET_few_s=40
     BIGSET_many_s=1000
     GROUP_n=400
-    GROUP_attr_n=4
+    GROUP_attr_n=2
+    GROUP_op_n=2                       
 elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # Setting for quick run
     BIGSET_n=10
     BIGSET_few_s=10
@@ -162,7 +164,7 @@ if [ $rc -ne 0 ] ; then
 fi
 
 all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo groups attrdset dsetops"
-all_tests="${all_tests} groups_attrs os_groups_attrs few_big many_small"
+all_tests="${all_tests} groups_attrs os_groups_attrs groups_ops os_groups_ops few_big many_small"
 tests=${all_tests}
 
 if [ $# -gt 0 ]; then
@@ -785,12 +787,15 @@ grp_attr_list=(
                 "add-vstr"
                 "remove-vstr"
                 "modify-vstr"
+                "add-ohr-block"
+                "del-ohr-block"
                )
 grp_sub_attr_list=(
                 "dense-del-to-compact"
                 "modify"
                 "remove-vstr"
                 "modify-vstr"
+                "del-ohr-block"
                )
 
 grp_short_sub_attr_list=(
@@ -798,6 +803,7 @@ grp_short_sub_attr_list=(
                 "modify"
                 "remove-vstr"
                 "modify-vstr"
+                "del-ohr-block"
                )
 
 if [[ "$HDF5TestExpress" -eq 1 ]] ; then       #Setting for standard run
@@ -858,11 +864,14 @@ os_grp_attr_list=(
                 "add-vstr"
                 "remove-vstr"
                 "modify-vstr"
-               )
+                "add-ohr-block"
+                "del-ohr-block"
+ )
 os_grp_sub_attr_list=(
                 "modify"
                 "remove-vstr"
                 "modify-vstr"
+                "del-ohr-block"
                )
 if [[ "$HDF5TestExpress" -gt 0 ]] ; then       #Setting for standard run
     os_grp_attr_list=("${os_grp_sub_attr_list[@]}")
@@ -905,6 +914,121 @@ for options in ${os_grp_attr_list[*]}; do
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 done
 
+# The group operation test takes longer. 
+# So for the quick run, we
+# shorten the number of tests. 
+# The essential features are covered. 
+grp_op_list=(
+                "grp-creation"
+                "grp-deletion"
+                "grp-move"
+                "grp-ins-links"
+                "grp-del-links"
+                "grp-compact-t-dense"
+                "grp-dense-t-compact"
+               )
+grp_sub_op_list=(
+                "grp-move"
+                "grp-dense-t-compact"
+               )
+
+
+if [[ "$HDF5TestExpress" -gt 1 ]] ; then       #Setting for express run
+    grp_op_list=("${grp_sub_op_list[@]}")
+fi
+
+for options in ${grp_op_list[*]}; do
+	if [ ${do_groups_ops:-no} = no ]; then
+		continue
+	fi
+	echo launch vfd_swmr_group operations: $options
+	catch_out_err_and_rc vfd_swmr_group_writer \
+	    ../vfd_swmr_group_writer -q -c 1 -n $GROUP_op_n -O $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_group_reader -q -c 1 -n $GROUP_op_n -O $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_group_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_group_writer.{out,rc}
+	rm -f vfd_swmr_group_reader.*.{out,rc}
+done
+
+# Test the group operations for old-style
+os_grp_op_list=(
+                "grp-creation"
+                "grp-deletion"
+                "grp-move"
+                "grp-ins-links"
+                "grp-del-links"
+               )
+os_grp_sub_op_list=(
+                "grp-move"
+                "grp-ins-links"
+                "grp-del-links"
+               )
+
+
+if [[ "$HDF5TestExpress" -gt 1 ]] ; then       #Setting for express run
+    os_grp_op_list=("${os_grp_sub_op_list[@]}")
+fi
+
+for options in ${os_grp_op_list[*]}; do
+	if [ ${do_os_groups_ops:-no} = no ]; then
+		continue
+	fi
+	echo launch vfd_swmr_group operations with old-style group: $options
+	catch_out_err_and_rc vfd_swmr_group_writer \
+	    ../vfd_swmr_group_writer -q -G -c 1 -n $GROUP_op_n -O $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_group_reader -q -G -c 1 -n $GROUP_op_n -O $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_group_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_group_writer.{out,rc}
+	rm -f vfd_swmr_group_reader.*.{out,rc}
+done
 
 
 
