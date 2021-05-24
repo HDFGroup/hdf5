@@ -174,7 +174,7 @@ typedef enum H5VL_attr_specific_t {
 typedef struct H5VL_attr_iterate_args_t {
     H5_index_t      idx_type; /* Type of index to iterate over */
     H5_iter_order_t order;    /* Order of index iteration */
-    hsize_t *       idx;      /* Start/stop iteration index */
+    hsize_t *       idx;      /* Start/stop iteration index (IN/OUT) */
     H5A_operator2_t op;       /* Iteration callback function */
     void *          op_data;  /* Iteration callback context */
 } H5VL_attr_iterate_args_t;
