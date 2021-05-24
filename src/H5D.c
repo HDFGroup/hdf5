@@ -1247,13 +1247,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks)
+H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL; /* Dataset for this operation */
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*h", dset_id, fspace_id, nchunks);
+    H5TRACE3("e", "iix", dset_id, fspace_id, nchunks);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
