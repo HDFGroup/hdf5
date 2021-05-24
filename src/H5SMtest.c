@@ -91,7 +91,7 @@ H5SM__get_mesg_count_test(H5F_t *f, unsigned type_id, size_t *mesg_count)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
         /* Find the correct index for this message type */
-        if ((index_num = H5SM_get_index(table, type_id)) < 0)
+        if ((index_num = H5SM__get_index(table, type_id)) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index")
         header = &(table->indexes[index_num]);
 
