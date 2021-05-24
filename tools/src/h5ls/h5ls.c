@@ -1995,7 +1995,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                                    HSIZE_T_FORMAT " logical byte%s, " HSIZE_T_FORMAT " allocated byte%s",
                                    total, 1 == total ? "" : "s", used, 1 == used ? "" : "s");
                 if (used > 0) {
-                    utilization = ((double)total * (double)100.0f) / (double)used;
+                    utilization = ((double)total * 100.0) / (double)used;
                     h5tools_str_append(&buffer, ", %1.2f%% utilization", utilization);
                 }
         }

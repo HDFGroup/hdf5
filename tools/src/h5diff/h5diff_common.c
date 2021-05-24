@@ -381,7 +381,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 opts->percent = HDatof(opt_arg);
 
                 /* -p 0 is the same as default */
-                if (H5_DBL_ABS_EQUAL(opts->percent, (double)0.0F))
+                if (H5_DBL_ABS_EQUAL(opts->percent, 0.0))
                     opts->percent_bool = 0;
                 break;
 

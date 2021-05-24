@@ -2521,17 +2521,17 @@ test_misc13(void)
 static void
 test_misc14(void)
 {
-    hid_t  file_id;       /* File ID */
-    hid_t  fapl;          /* File access property list ID */
-    hid_t  DataSpace;     /* Dataspace ID */
-    hid_t  Dataset1;      /* Dataset ID #1 */
-    hid_t  Dataset2;      /* Dataset ID #2 */
-    hid_t  Dataset3;      /* Dataset ID #3 */
-    double data1 = 5.0F;  /* Data to write for dataset #1 */
-    double data2 = 10.0F; /* Data to write for dataset #2 */
-    double data3 = 15.0F; /* Data to write for dataset #3 */
-    double rdata;         /* Data read in */
-    herr_t ret;           /* Generic return value */
+    hid_t  file_id;      /* File ID */
+    hid_t  fapl;         /* File access property list ID */
+    hid_t  DataSpace;    /* Dataspace ID */
+    hid_t  Dataset1;     /* Dataset ID #1 */
+    hid_t  Dataset2;     /* Dataset ID #2 */
+    hid_t  Dataset3;     /* Dataset ID #3 */
+    double data1 = 5.0;  /* Data to write for dataset #1 */
+    double data2 = 10.0; /* Data to write for dataset #2 */
+    double data3 = 15.0; /* Data to write for dataset #3 */
+    double rdata;        /* Data read in */
+    herr_t ret;          /* Generic return value */
 
     /* Test creating two datasets and deleting the second */
 

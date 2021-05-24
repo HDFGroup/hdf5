@@ -102,7 +102,7 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL,
 
     if (h->dblk_size)
         HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of heap used:",
-                  ((double)100.0f * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
+                  (100.0 * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
 
     /* Print the data in a VMS-style octal dump */
     H5_buffer_dump(stream, indent, h->dblk_image, marker, (size_t)0, h->dblk_size);

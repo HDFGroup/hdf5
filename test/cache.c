@@ -26392,7 +26392,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
         }
-        else if (!H5_DBL_ABS_EQUAL(hit_rate, (double)0.0f)) { /* i.e. hit_rate != 0.0 */
+        else if (!H5_DBL_ABS_EQUAL(hit_rate, 0.0)) { /* i.e. hit_rate != 0.0 */
 
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate returned unexpected hit rate 1.\n";
@@ -26423,7 +26423,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
         }
-        else if (!H5_DBL_ABS_EQUAL(hit_rate, (double)0.0f)) { /* i.e. hit_rate != 0.0 */
+        else if (!H5_DBL_ABS_EQUAL(hit_rate, 0.0)) { /* i.e. hit_rate != 0.0 */
 
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate returned unexpected hit rate 2.\n";
@@ -26464,7 +26464,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
         }
-        else if (!H5_DBL_ABS_EQUAL(hit_rate, (double)0.5f)) { /* i.e. hit_rate != 0.5 */
+        else if (!H5_DBL_ABS_EQUAL(hit_rate, 0.5)) { /* i.e. hit_rate != 0.5 */
 
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate returned unexpected hit rate 3.\n";
@@ -26537,7 +26537,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
         }
-        else if (!H5_DBL_ABS_EQUAL(hit_rate, (double)0.5F)) { /* i.e. hit_rate != 0.5 */
+        else if (!H5_DBL_ABS_EQUAL(hit_rate, 0.5)) { /* i.e. hit_rate != 0.5 */
 
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate returned unexpected hit rate 4.\n";
