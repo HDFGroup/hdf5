@@ -277,7 +277,7 @@ gent_ub(const char *filename, size_t ub_size, size_t ub_fill)
         for (u = 0; u < ub_fill; u++)
             *bp++ = pattern[u % 10];
 
-        HDwrite(fd, buf, ub_size);
+        (void)HDwrite(fd, buf, ub_size);
 
         HDclose(fd);
     }
@@ -301,7 +301,7 @@ create_textfile(const char *name, size_t size)
     for (i = 0; i < size; i++)
         *bp++ = pattern[i % 10];
 
-    HDwrite(fd, buf, size);
+    (void)HDwrite(fd, buf, size);
 
     HDfree(buf);
 
@@ -329,7 +329,7 @@ create_binfile(char *name, off_t size)
     for (i = 0; i < size; i++)
         *bp++ = (char)i & 0xff;
 
-    HDwrite(fd, buf, size);
+    (void)HDwrite(fd, buf, size);
 
     HDclose(fd);
 }
