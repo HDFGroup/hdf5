@@ -488,7 +488,7 @@ H5VL_pass_through_init(hid_t vipl_id)
 #endif
 
     /* Shut compiler up about unused parameter */
-    vipl_id = vipl_id;
+    (void)vipl_id;
 
     return 0;
 } /* end H5VL_pass_through_init() */

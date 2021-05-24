@@ -87,25 +87,6 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "*#i", cls, vipl_id);
 
-    /* Check arguments */
-    if (!cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "VOL connector class pointer cannot be NULL")
-    if (!cls->name)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector class name cannot be the NULL pointer")
-    if (0 == HDstrlen(cls->name))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector class name cannot be the empty string")
-    if (cls->info_cls.copy && !cls->info_cls.free)
-        HGOTO_ERROR(
-            H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-            "VOL connector must provide free callback for VOL info objects when a copy callback is provided")
-    if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector must provide free callback for object wrapping contexts when a get "
-                    "callback is provided")
-
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
         vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
@@ -628,6 +609,7 @@ H5VLwrap_register(void *obj, H5I_type_t type)
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_VOL, H5E_BADRANGE, H5I_INVALID_HID, "invalid type number")
@@ -686,7 +668,7 @@ done:
 hid_t
 H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
 {
-    H5T_t *        dtype;               /* unatomized type         */
+    H5T_t *        dtype;               /* unregistered type       */
     H5T_t *        file_type    = NULL; /* copied file type        */
     hid_t          file_type_id = -1;   /* copied file type id     */
     H5VL_object_t *file_vol_obj = NULL; /* VOL object for file     */
@@ -757,13 +739,13 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLretrieve_lib_state(void **state)
+H5VLretrieve_lib_state(void **state /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "**x", state);
+    H5TRACE1("e", "x", state);
 
     /* Check args */
     if (NULL == state)
