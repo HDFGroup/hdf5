@@ -3793,8 +3793,7 @@ done:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                             "initial_size must be in the interval [min_size, max_size]")
 
-            if ((config_ptr->min_clean_fraction < 0.0) ||
-                (config_ptr->min_clean_fraction > 1.0))
+            if ((config_ptr->min_clean_fraction < 0.0) || (config_ptr->min_clean_fraction > 1.0))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                             "min_clean_fraction must be in the interval [0.0, 1.0]")
 
@@ -3810,8 +3809,7 @@ done:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid incr_mode")
 
             if (config_ptr->incr_mode == H5C_incr__threshold) {
-                if ((config_ptr->lower_hr_threshold < 0.0) ||
-                    (config_ptr->lower_hr_threshold > 1.0))
+                if ((config_ptr->lower_hr_threshold < 0.0) || (config_ptr->lower_hr_threshold > 1.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "lower_hr_threshold must be in the range [0.0, 1.0]")
 
@@ -3830,12 +3828,10 @@ done:
                     break;
 
                 case H5C_flash_incr__add_space:
-                    if ((config_ptr->flash_multiple < 0.1) ||
-                        (config_ptr->flash_multiple > 10.0))
+                    if ((config_ptr->flash_multiple < 0.1) || (config_ptr->flash_multiple > 10.0))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                     "flash_multiple must be in the range [0.1, 10.0]")
-                    if ((config_ptr->flash_threshold < 0.1) ||
-                        (config_ptr->flash_threshold > 1.0))
+                    if ((config_ptr->flash_threshold < 0.1) || (config_ptr->flash_threshold > 1.0))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                     "flash_threshold must be in the range [0.1, 1.0]")
                     break;
@@ -3875,8 +3871,8 @@ done:
                 if (config_ptr->epochs_before_eviction > H5C__MAX_EPOCH_MARKERS)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction too big")
 
-                if ((config_ptr->apply_empty_reserve) && ((config_ptr->empty_reserve > 1.0) ||
-                                                          (config_ptr->empty_reserve < 0.0)))
+                if ((config_ptr->apply_empty_reserve) &&
+                    ((config_ptr->empty_reserve > 1.0) || (config_ptr->empty_reserve < 0.0)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "empty_reserve must be in the interval [0.0, 1.0]")
 
@@ -3886,8 +3882,7 @@ done:
             } /* H5C_decr__age_out || H5C_decr__age_out_with_threshold */
 
             if (config_ptr->decr_mode == H5C_decr__age_out_with_threshold) {
-                if ((config_ptr->upper_hr_threshold > 1.0) ||
-                    (config_ptr->upper_hr_threshold < 0.0))
+                if ((config_ptr->upper_hr_threshold > 1.0) || (config_ptr->upper_hr_threshold < 0.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "upper_hr_threshold must be in the interval [0.0, 1.0]")
             } /* H5C_decr__age_out_with_threshold */
